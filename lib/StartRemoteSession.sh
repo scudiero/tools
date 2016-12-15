@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.5" # -- dscudiero -- 11/07/2016 @ 14:50:11.70
+version="2.0.6" # -- dscudiero -- 12/15/2016 @ 13:38:07.17
 #===================================================================================================
 # Start a remote session via ssh
 # StartRemoteSession userid@domain [command]
@@ -35,7 +35,7 @@ function StartRemoteSession {
 
 	[[ $(Contains "$remoteUserAtHost" '.') == false ]] && remoteUserAtHost="${remoteUserAtHost}.leepfrog.com"
 	[[ $(Contains ",$slowHosts," ",$remoteHost,") == true ]] && Msg2 $N "Target host has been found to be a bit slow, please be patient" && Msg2
-	$commmandPrefix ssh $remoteUserAtHost $remoteCommand
+	$commmandPrefix ssh $remoteUserAtHost $DISPATCHER $remoteCommand
 	return 0
 } ## StartRemoteSession
 export -f StartRemoteSession
