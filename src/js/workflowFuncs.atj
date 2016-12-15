@@ -7,7 +7,6 @@
 //"use strict";
 // Do only once
 if (typeof wfFunctionsLoaded == "undefined") {
-
 	//Get the CIM instance name
 	var wfCimInstance=tcfdata.pagename[0].replace(/^\/([^\/]*)\/.*/, "/$1/");
 	wfCimInstance=wfCimInstance.replace(/\//g, "");
@@ -21,6 +20,8 @@ if (typeof wfFunctionsLoaded == "undefined") {
 	var wfInDebugEnv=false;
 	var wfEnv="";
 	var wfEnvIsDev=false;
+	var wfInitialLoad=true;
+	// Debug environment, print info
 	if (typeof tcfdata.wfDebugEnvs != 'undefined') {
 		wfDebugEnvs=","+tcfdata.wfDebugEnvs[0]+",";
 		// What environment are we running in
@@ -112,4 +113,4 @@ wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 //==================================================================================================
 // END
 //==================================================================================================
-if (wfEnvIsDev) print_debug("... workflowFuncs.atj loaded >>>\n\n");
+if (wfEnvIsDev && !wfInitialLoad) print_debug("... workflowFuncs.atj loaded >>>\n\n"); wfInitialLoad=false;
