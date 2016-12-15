@@ -1,0 +1,260 @@
+
+//=================================================================================================
+//wfrules:<somePrefixTerm>Depts|function|Crosslisted|
+//wfrules:<somePrefixTerm>Schools|function|Crosslisted|
+//wfrules:<somePrefixTerm>Colleges|function|Crosslisted|
+//
+// Which organizational units to process
+//crosslistedOrgUnits:dept
+//crosslistedOrgUnits:school
+//crosslistedOrgUnits:college
+//
+//crosslistedDeptsSteps:Dept Courses Committee fyi optional
+//crosslistedDeptsSteps:Dept Courses Committee Chair fyi optional
+//crosslistedDeptsSteps:Dept Head optional
+//
+//=================================================================================================
+// Add cross listed course departments / colleges /schools to the workflow
+// Only uses data from the form
+// wfrule definition defines what data to be include in workflow:
+// 	if the lower(rule name) includes 'dept' then substitute the department value into step
+// 	if the lower(rule name) includes 'school' then substitute the school value into step
+// 	if the lower(rule name) includes 'college' then substitute the college value into step
+// for each crosslisted department.
+// returned data is sorted by code and duplicates are removed.
+// 
+// SETUP:  --- SEE 'SWITCHES/OPTIONS' BELOW
+// 	1) crosslistedData = the tcfdata variable that contains the crosslisted data from the form
+// 	2) crosslistedDataIsCourseNumber = true if what is contained above is a full course number (i.e. ENG 101)
+// 									   false if it is really a department code
+//  3) includeEcoSystemData = true to include related departments from the eco system (currently not implemented)
+//                            false to not include ecosystem data
+// 
+//=================================================================================================
+// 09/17/15 - dgs - initial codeing for wcupa & illinois
+// 10/30/15 - dgs - Updated to also include a crosslisted dept if the department was removed from 
+//                  the proposal.  See switches/options on how to activate
+// 11/03/15 - dgs - 1) If deartment code changes, add origional department to the crosslisted list
+//                  2) Refactor to group roles by department/school/college
+//                  3) Add more fields to config file to supprt #2 above
+//                  4) Do variable substitution on the step 
+//                  5) If step in the workflow has attributes (e.g. fyi) then use the step, otherwise
+//                     Use the step data in the config rile
+//                  6) If the call name ends in 'notify' the modify the steps to include 'fyiall' 
+//=================================================================================================
+wffuncs.Crosslisted = function(inval, wfrule, args) {
+	var myName=wfrule.attrname; var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+	if (haveDebug) { Debug('\n*** In '+ myName + " called as '" + wfrule.searchfor + "' ***"); }
+	if (haveDebug) { Dump('\tFull Step text',inval); }
+if (haveDebug) { Dump('\targs',args.toSource()); Dump('\tinval',inval); Dump('\twfrule',wfrule.toSource()); Dump('\targs',args.toSource()); }
+
+	// Determin mode (dept / college) based on the mapped name
+		var notifyMode=false;
+		var reqType=wfrule.searchfor.toLowerCase()
+		if (reqType.substr(reqType.length - 'notify'.length) == 'notify') {
+			notifyMode=true;
+		}
+		if (haveDebug) { Dump('\treqType',reqType); Dump('\tnotifyMode',notifyMode);}
+
+	//switches/options
+		var crosslistedData=tcfdata.crosslisted;
+		var crosslistedDataIsCourseNumber=true;
+		var includeEcoSystemData=false;
+		
+		var includedDeletedCrosslisted=false;
+		if (tcadata.crosslisted && tcadata.crosslisted.length > 0) {
+			var crosslistedTcaData=tcadata.crosslisted;
+			var includedDeletedCrosslisted=true;
+		}
+
+	//read in organizational units from the config file
+		var orgUnits = new Array();
+			if (tcfdata.crosslistedOrgUnits && tcfdata.crosslistedOrgUnits.length > 0) {
+				orgUnits=tcfdata.crosslistedOrgUnits;
+			} else {
+				orgUnits.push('dept');
+			}
+		if (haveDebug) Dump('\torgUnits',orgUnits.toSource())
+
+	//read in steps from the config file -- used if "step text" != "call name"
+		var deptsSteps, schoolsSteps, collegesSteps;
+		if (tcfdata.crosslistedDeptsSteps && tcfdata.crosslistedDeptsSteps.length > 0)
+			deptsSteps=tcfdata.crosslistedDeptsSteps
+		if (tcfdata.crosslistedSchoolsSteps && tcfdata.crosslistedSchoolsSteps.length > 0)
+			schoolsSteps=tcfdata.crosslistedSchoolsSteps
+		if (tcfdata.crosslistedCollegesSteps && tcfdata.crosslistedCollegesSteps.length > 0)
+			collegesSteps=tcfdata.crosslistedCollegesSteps
+		if (haveDebug) { Dump('\tdeptsSteps',deptsSteps); Dump('\tschoolsSteps',schoolsSteps); Dump('\tcollegesSteps',collegesSteps); }
+
+	//Try block encapsulated main function
+	try { 
+		// initial checks
+			if (args && args.context && args.context != "wfrule")
+				throw 'Failed rule type check';
+			if (!tcfdata.code || !tcfdata.code.length)
+				throw 'Failed code not null check';
+			if (!tcfdata.department || !tcfdata.department.length)
+				throw 'Failed department not null check';
+			if (!tcfdata.college || !tcfdata.college.length)
+				throw 'Failed college not null check';
+
+			var parentCode=tcfdata.code[0];
+			var parentDept=tcfdata.department[0].code;
+			var parentCollege=tcfdata.college[0].code;
+			if (haveDebug) { Dump('\tparentCode',parentCode); Dump('\tparentDept',parentDept); Dump('\tparentCollege',parentCollege); }
+
+			// If request type is school then lookup school code 
+			if (reqType.indexOf('school') > 0) {
+				// Lookup parent school
+				var parentSchool='';
+				sql='SELECT school FROM cimlookup WHERE department=? and college=?';
+				sqlParms=[parentDept,parentCollege];
+				rows=dbquery(tcfdata.dbname[0],sql,sqlParms);
+				if (rows.length >0 ) {
+					parentSchool=rows[0].school;
+				}
+				if (haveDebug) { Dump('\tparentschool',parentSchool); }
+			}
+
+		var refsArray = new Array();
+
+		//Check for any cross references data for this course in the crossref table (eco system)
+			if (includeEcoSystemData) {
+//TODO
+			}
+
+		// Check for crosslisted course data as listed on the form
+			if (crosslistedData && crosslistedData.length > 0) {
+				if (haveDebug) { Debug('\t' + crosslistedData.length + ' cross references listed on the form:');}
+				crosslistedData.forEach(function(refCode) {
+					if (haveDebug) { Dump('\t\tcrosslistedData from TCF',refCode.code); }				
+					if (crosslistedDataIsCourseNumber) { refCode = refCode.code.split(" ")[0]; Dump('\t\trefSubj',refCode); }
+					refsArray.push(refCode);					
+				});
+			} else {
+				// If we do not have any crosslisted data on the form, see if there is any in the tca data
+				if (includedDeletedCrosslisted == true) { // i.e. we have tcadata
+					crosslistedTcaData.forEach(function(refCode) {
+						if (haveDebug) { Dump('\t\tcrosslistedData from TCA',refCode.code); }				
+						if (crosslistedDataIsCourseNumber) { refCode = refCode.code.split(" ")[0]; Dump('\t\trefSubj',refCode); }
+						refsArray.push(refCode);						
+					});
+				}
+			}
+
+		// Do we have anything to do?
+			if (refsArray.length == 0) {
+				throw '\t *** No Cross referenced data found';
+			}
+
+		// Check to see if any crossreferenced courses have been removed, complare fcf data with tca data
+			if (includedDeletedCrosslisted == true) {
+				crosslistedTcaData.forEach(function(tcaData) {
+					foundInTcf=false
+					crosslistedData.forEach(function(tcfData) {
+						if (tcaData.code == tcfData.code) {
+							foundInTcf=true;
+							return
+						}
+					});
+					if ( foundInTcf == false ) {
+						refCode=tcaData.code;
+						if (crosslistedDataIsCourseNumber) { refCode = tcaData.code.split(" ")[0];}
+						if (haveDebug) {Debug("\t\tAdding deleted code to refsArray: " + refCode)}
+						refsArray.push(refCode);
+					}
+				});
+			}
+
+		// Look up the department, school, & college codes for the course code from the cimlookup table
+			var retArray=new Array(), depts=[], cols=[], schools=[];
+			refsArray.forEach(function(text) {
+				if (haveDebug) { Dump('\trefsArray element',text); }
+				var selectSchool=''
+				if (reqType.indexOf('school') > 0) { selectSchool=',school' }
+				var sql='SELECT department,college' + selectSchool + ' FROM cimlookup WHERE subject=? and department <> ?';
+				var sqlParms=[text,parentDept];
+				var resultSet=dbquery(tcfdata.dbname[0],sql,sqlParms);
+				if (resultSet.length > 0 ) {
+					resultSet.forEach(function(row) {
+						if (haveDebug) { Debug("\t\tFrom lookup: dept = '" + row.department + "', col = '" + row.college + "' school = '" + row.school + "'"); }
+						if (row.department) { depts.push(row.department); }
+						if (row.college) { cols.push(row.college); }
+						if (reqType.indexOf('school') > 0) {
+							if (row.school) {
+								schools.push(row.school); 
+							} else {
+								if (!row.college) {
+									var sql='SELECT school FROM cimlookup WHERE college=? and school <> ?';
+									var sqlParms=[row.college];
+									var resultSet=dbquery(tcfdata.dbname[0],sql,sqlParms);
+									if (resultSet.length > 0 ) {
+										Debug('\t\tSchool from lookup: ' + resultSet[0].school); 
+										school.push(resultSet[0].school)
+									}
+								}
+							}
+						}
+					});	//resultSet
+				} //resultSet 
+			}); //retArray
+
+
+		// Check to see if the department code has change, if yes then include the origional department in crosslisted
+			if (tcadata.department[0].code !=  parentDept) {
+				if (haveDebug) { Debug('\t *** Department code changed, adding origional:' + tcadata.department[0].code);}
+				depts.push(tcadata.department[0].code);
+			}
+
+		// Remove duplicates
+			if (haveDebug) { Debug("\t\tArray member counts before dupes removal: depts = " + depts.length + ", cols = " + cols.length + ", schools = " + schools.length); }
+			depts=RemoveDupes(depts,parentDept);
+			cols=RemoveDupes(cols,parentCollege);
+			schools=RemoveDupes(schools,parentSchool);
+			if (haveDebug) { Debug("\t\tArray member counts aftern dupes removal: depts = " + depts.length + ", cols = " + cols.length + ", schools = " + schools.length); }
+
+		// Generate output steps
+			if (EnvIs('dev')) retArray.push('*** START of ' + inval.toLowerCase().replace('optional','') + ' ***');
+			// Process Organizational units
+				var tokens = new Array(), searchStr;			
+				orgUnits.forEach(function(orgUnit) {
+					if (haveDebug) Debug("\tOutputing:" + orgUnit)
+					if (reqType.indexOf(orgUnit) >= 0 ) {
+						tokens.length=0;
+						if (orgUnit == 'dept') { tokens=depts; steps=deptsSteps; }
+						if (orgUnit == 'school') { tokens=schools; steps=schoolsSteps; }
+						if (orgUnit == 'college') { tokens=cols; steps=collegesSteps; orgUnit='Col'; }
+						searchStr=orgUnit.charAt(0).toUpperCase() + orgUnit.slice(1) + ' '
+						// Process steps
+							tokens.forEach(function(token) {
+								if (inval == wfrule.searchfor) {
+									steps.forEach(function(step) {
+										step=step.replace(searchStr,token + ' ');
+										if(notifyMode) {
+											if (step.indexOf(' fyi') < 0) {
+												step=step + ' fyiall';
+											} else if (step.indexOf(' fyi') >= 0) {
+												step=step.replace(' fyi',' fyiall');
+											} 
+										}
+										retArray.push(step.trim());
+										Dump('\t\tReturning step: ',retArray[retArray.length-1])
+									});	
+								} else {
+									retArray.push(inval.replace(wfrule.regex,token).trim())
+									Dump('\t\tReturning step: ',retArray[retArray.length-1])
+								}
+							});
+					}
+				});
+			if (EnvIs('dev')) retArray.push('*** END of ' + inval.toLowerCase().replace('optional','') + ' ***');
+
+		return retArray;
+	}
+
+	//Catch block for errors thrown in above try block
+	catch(err) { if (haveDebug) { Debug(err); } else { throw myName + ': ' + err } return false; }
+
+	// Should never get here
+	return false;
+} //Crosslisted

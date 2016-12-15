@@ -1,0 +1,118 @@
+#!/bin/bash
+# XO NOT AUTOVERSION
+#==================================================================================================
+version=1.0.33 # -- dscudiero -- 12/05/2016 @ 15:12:12.79
+#==================================================================================================
+# NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
+# of the caller.  Expects values to be set for client, env, siteDir
+#==================================================================================================
+# Configure Custom emails on a Courseleaf site
+#==================================================================================================
+currentScript=$(cut -d'.' -f1 <<< $(basename ${BASH_SOURCE[0]}))
+parentScript=$(cut -d'.' -f1 <<< $(basename ${BASH_SOURCE[1]}))
+originalArgStr="$*"
+scriptDescription="Install Custom Workflow Emails (wfemail)"
+
+#==================================================================================================
+# functions
+#==================================================================================================
+
+#==================================================================================================
+# Declare variables and constants
+#==================================================================================================
+tgtDir=$siteDir
+srcDir=$skeletonRoot/release
+feature=$currentScript
+
+#==================================================================================================
+# Main
+#==================================================================================================
+## Get the Courseleaf directory
+	courseleafDir=$(GetCourseleafPgm "$tgtDir" | cut -d' ' -f1)
+
+## Check to see if it is already there
+	local editFile="$tgtDir/web/$courseleafDir/index.tcf"
+	dump -1 tgtDir srcDir editFile
+	checkStr='|Workflow Emails|wfemail_messages'
+	local grepStr="$(ProtectedCall "grep \"$checkStr\" $editFile")"
+	if [[ $grepStr != '' ]]; then
+		if [[ $force == false ]]; then
+			unset ans;
+			Prompt 'ans' "Feature '$feature' is already installed, Do you wish to force install" "Yes,No" 'No'; ans="$(Lower ${ans:0:1})"
+			[[ $ans != 'y' ]] && Goodbye 'quiet'
+		else
+			Info "Feature '$feature' is already installed, force option active, refreshing"
+		fi
+	fi
+
+## Copy files
+	local fileSpecs="/email/sendnow.atj /web/admin/wfemail"
+	for fileSpec in $fileSpecs; do
+		if [[ -f ${srcDir}${fileSpec} ]]; then
+			cpOut=$(CopyFileWithCheck ${srcDir}${fileSpec} ${tgtDir}${fileSpec} 'backup')
+			if [[ $cpOut == true ]]; then
+				Msg2 "^Copied file: $fileSpec" && changesMade=true
+			elif [[ $cpOut != '' ]]; then
+				Msg2 "^File: $fileSpec not copied, files are identical" && changesMade=true
+			else
+				Terminate 0 1 "Could not copy file '$fileSpec':\n^$cpOut"
+			fi
+		elif [[ -d ${srcDir}${fileSpec} ]]; then
+			cwd=$(pwd)
+			cd ${srcDir}${fileSpec}
+			SetFileExpansion 'on'
+			dirFiles=($(find *))
+			SetFileExpansion
+			for dirFile in ${dirFiles[@]}; do
+				cpOut=$(CopyFileWithCheck $srcDir/$fileSpec/$dirFile $tgtDir/$fileSpec/$dirFile 'backup')
+				if [[ $cpOut == true ]]; then
+					Msg2 "^Copied file: $fileSpec/$dirFile" && changesMade=true
+				elif [[ $cpOut != '' ]]; then
+					Msg2 "^File: $fileSpec/$dirFile not copied, files are identical" && changesMade=true
+				else
+					Terminate 0 1 "Could not copy file '$fileSpec/$dirFile':\n^$cpOut"
+				fi
+			done
+			cd $cwd
+		else
+			Terminate 0 1 "FileSpec (${srcDir}${fileSpec}) is not a file nor a directory, cannot process"
+		fi
+	done
+
+## Edit localsteps/default.tcf, wfemail_prefix:custom
+	varName='wfemail_prefix'
+	varValue='custom'
+	editFile="$tgtDir/web/$courseleafDir/localsteps/default.tcf"
+	editMsg=$(EditTcfValue "$varName" "$varValue" "$editFile")
+	[[ $editMsg != true ]] && Terminate "Error editing file:\n^^'$editFile'\n^Editing tcf variable\n^^variable:'$varName'\n^^value: '$varValue'\n^Edit message:\n^^$editMsg"
+
+## Edit console file - insert workflow emails if not there
+	editFile="$tgtDir/web/$courseleafDir/index.tcf"
+	name='Workflow Emails'
+	changesMade=$(EditCourseleafConsole 'insert' "$editFile" "$name")
+	[[ $changesMade == true ]] && Msg2 "Modified: '$editFile'" || Terminate "Could not edit file '$file':\n\t$changesMade"
+
+## If changes made then rebuild the console page and log
+	if [[ $changesMade == true ]]; then
+		Msg2 "Rebuilding console..."
+		RunCoureleafCgi $tgtDir "-r /$courseleafDir/index.tcf"
+		Msg2
+		Note "You need to go and edit the control file '$tgtDir/admin/wfemail.tcf' to ensure that all the emails you wish to activate are defined."
+		unset changeLogRecs
+		changeLogRecs+=("Feature: $feature")
+		WriteChangelogEntry 'changeLogRecs' "$tgtDir/changelog.txt" "$parentScript"
+		Msg2
+		Pause "Feature '$currentScript': Installed, please press any key to continue"
+	else
+		Msg2
+		Pause "Feature '$currentScript': No changes were made"
+	fi
+
+#==================================================================================================
+## Done
+#==================================================================================================
+return  ## We are called as a subprocess, just return to our parent
+
+#==================================================================================================
+## Change Log
+#==================================================================================================

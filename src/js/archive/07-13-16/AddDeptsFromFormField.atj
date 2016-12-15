@@ -1,0 +1,49 @@
+//=================================================================================================
+// Add Affected Listed departments
+// 05-28-15 - dgs - Initial for colostate
+//=================================================================================================
+wffuncs.AddDeptsFromFormField = function(inval,wfrule,args){
+	var myName=wfrule.attrname; var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+	if (haveDebug) { Debug('\n*** In '+ myName + " called as '" + wfrule.searchfor + "' ***"); Debug("\tStep: '" + inval + "'")}
+	//if (haveDebug) { Dump('\targs',args.toSource()); Dump('\twfrule',wfrule.toSource()); Dump('\targs',args.toSource()); }
+
+	 //Try block encapsulated main function
+	 try { 
+	 	// initial checks
+	 	if (args && args.context && args.context != "wfrule")
+	 		throw "\t*** Failed rule type check";
+	 	if(!tcfdata.department || !tcfdata.department.length)
+	 		throw "\t*** Failed 'department' variable is not null check";
+	 	if(!tcfdata.affected_departments || !tcfdata.affected_departments.length)
+	 		throw "\t*** Failed 'affected_departments' variable is not null check";
+	
+	 // Values for subj & dept from the proposal
+	 var parentDept=tcfdata.department[0].code
+	 if (haveDebug) { Dump('\tparentDept',parentDept); }
+	
+	var addDepts=tcfdata.affected_departments;
+	//Loop through array using forEach
+	var retArray=new Array();
+	if (EnvIs('dev'))
+		retArray.push('*** START of ' + wfrule.searchfor.toUpperCase() + ' Output');
+
+	addDepts.forEach(function(dept) {
+		var addStep=inval.replace(wfrule.regex,dept.department_name)
+		Dump('\tadd step',addStep);
+		retArray.push(addStep);
+	});
+
+	if (EnvIs('dev'))
+		retArray.push('***END of ' + wfrule.searchfor.toUpperCase() + ' Output');
+	if (haveDebug) { Debug('\n*** '+ myName + ' done ***'); }
+	return retArray
+
+	} //Try block
+	
+	//Catch block for errors thrown in above try block
+	catch(err) { if (haveDebug) { Debug(err); } else { throw err } return false; }
+	
+	// Should never get here
+	return false;
+	
+}//AddDeptsFromFormField

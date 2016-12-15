@@ -1,0 +1,78 @@
+//wfrules:isUgrad|function|GradOrUndergrad|
+//wfrules:isGrad|function|GradOrUndergrad|
+//=================================================================================================
+// Check the course_number to determine academic level (Graduate vs Undergraduate).  
+// function looks at its rule name from the wfrule definition and expects the following to be true:
+// 		the wfrule name is of the form 'isXXXXX' where XXXXX is the name of the screen
+// 	e.g. 	wfrules:isUgrad|function|GradOrUndergrad|
+//			wfrules:isGrad|function|GradOrUndergrad|
+//	'ugrad' and 'grad' are assumed to be the screen names.
+// function then pulls the condition from the screen and evaluates that against course_number.	
+// 03/12/2015 - dgs - new -- bryant
+//=================================================================================================
+wffuncs.GradOrUndergrad = function(inval, wfrule, args) {
+	var myName=wfrule.attrname; var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+	if (haveDebug) { Debug('\n*** In '+ myName + ' ***');   Dump('\t inval',inval); Dump('\t wfrule.searchfor',wfrule.searchfor); Dump('\t args',args.toSource()); }
+
+	// Check environment, do we have enough data to run
+	if(args && args.context && args.context != "wfrule")
+		return false;
+	if (!tcfdata.course_number || !tcfdata.course_number.length)
+		return false;
+	var course_number=tcfdata.course_number
+	if (haveDebug) { Dump('\t course_number',course_number); }
+
+	// Find out what academic level we are running (graduate vs undergraduate, see above
+	var searchForScreen=wfrule.searchfor.replace('is','').toLowerCase();
+	if (haveDebug) { Dump('\t searchForScreen',searchForScreen); }
+
+	//Loop through screens lopoking for one that matches the rule that we want to run
+	var condition='';
+	for (var i=0,  tot=tcfdata.screens.length; i < tot; i++) {
+		screen = tcfdata.screens[i];
+		if (screen.name == searchForScreen) {
+			condition=screen.condition;
+			break;
+		}
+	}
+
+	// If we found the screen then parse the condition attribute of the screen to
+	// pull off the rule
+	var bool = false;
+	if (condition != '') {
+		if (haveDebug) { Dump('\t condition',condition); }
+		if (condition.indexOf("/") > 0) {
+			// is a regular expressioin
+			var notEqual = false;
+			if (condition.indexOf("!=") > 0)
+				notEqual = true; 
+			condition = condition.substring(condition.indexOf("/")+1,condition.length-1);
+			condition = condition.replace("%7C","|")
+			//if (haveDebug) { Dump('\t condition',condition); }
+			re = new RegExp(condition,"i");
+			if (notEqual) {
+				bool != re.test(course_number.toString())
+			} else {
+				bool = re.test(course_number.toString())	
+			}
+		} else {
+			// is a normal conditional
+			if ((condition.indexOf("!=") + condition.indexOf(">=") + condition.indexOf("<=") ) <= 0)
+				condition = condition.replace("=","==")
+			//if (haveDebug) { Dump('\t condition',condition); }
+			bool = eval(condition)
+		}
+		if (haveDebug) { Dump("\t Condition test was",bool); }
+	} else {
+		print_doc("<strong>&nbsp;&nbsp;&nbsp;<em>*Error*</strong></em> -- " + myName + " function could not resolve a screen definition for: '" + searchForScreen + "'<br>")
+		return false;
+	}
+
+	// If true we match the rule
+	if (bool) {
+		return [inval.replace(wfrule.regex,'')];
+	} else {
+		return false;
+	}
+}
+

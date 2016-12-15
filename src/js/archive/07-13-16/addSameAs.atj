@@ -1,0 +1,71 @@
+
+//=================================================================================================
+// Return additional steps for equiv courses
+//=================================================================================================
+// 04/12/2016 -- dgs -- As requested by client
+//=================================================================================================
+wffuncs.AddSameAs = function(inval, wfrule, args) {
+	var myName=wfrule.attrname; var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+	if (haveDebug) Debug('\n*** In '+ myName + " called as '" + wfrule.searchfor + ", Step: '" + inval +"' ***");
+	//if (haveDebug) { Dump('\tinval',inval); Dump('\twfrule',wfrule.toSource()); Dump('\targs',args.toSource()); }
+
+	var retArray=[];
+	//Try block encapsulated main function
+	 try {
+		// Initial Checks
+			if(args && args.context && args.context != "wfrule")
+		 		throw "\t*** Failed rule type check";
+			if(!tcfdata.code || !tcfdata.code.length)
+		 		throw "\t*** Failed tcfdata.code is not null check";
+			if(!tcfdata.department || !tcfdata.department.length)
+		 		throw "\t*** Failed tcfdata.department is not null check";
+			if(!tcfdata.college || !tcfdata.college.length)
+		 		throw "\t*** Failed tcfdata.college is not null check";
+
+	 	// Main
+			var reqType=wfrule.searchfor.toLowerCase();
+
+			// Get proposal data
+				var parentCode=tcfdata.code[0];
+				var parentSubj=tcfdata.subject[0].code;
+				var parentDept=tcfdata.department[0].code;
+				var parentCol=tcfdata.college[0].code;
+				if (haveDebug) { Dump('reqType',reqType); Dump('parentCode',parentCode); Dump('parentCol',parentCol); Dump('parentDept',parentDept); }
+
+			// Lookup the equiv course from coursref
+			var refSubj;
+			sqlStmt="SELECT DISTINCT path,dept FROM courseref WHERE code = ? AND dept <> ? AND dept <> '' and type = 'equiv'";
+			sqlParms=[parentCode,parentDept];
+			resultSet1=dbquery("courseref",sqlStmt,sqlParms);
+			resultSet1.forEach(function(courserefResult) {
+				if (haveDebug) { Debug('\t Equiv result = >' + courserefResult.toSource() + '<\n');
+				refSubj=courserefResult.dept;
+				if (haveDebug) { Dump('\t\t refSubj',refSubj); }
+				if (reqType.indexOf('depts') > 0) {
+					sqlStmt="SELECT DISTINCT department 'token' FROM cimlookup WHERE subject = ? AND department <> ? AND department <> ''";
+					sqlParms=[refSubj,parentDept];
+				} else {
+					sqlStmt="SELECT DISTINCT college as 'token' FROM cimlookup WHERE subject = ? AND college <> ? AND college <> ''";
+					sqlParms=[refSubj,parentCol];
+				}
+				//print_debug('\t\t sqlStmt = >' + sqlStmt + '<\n');
+				resultSet2=dbquery("cimcourses",sqlStmt,sqlParms);
+				resultSet2.forEach(function(cimlookupResult) {
+					if (haveDebug) { Dump('cimlookupResult',cimlookupResult.toSource()); }
+					retArray.push(inval.replace(wfrule.regex,cimlookupResult.token))
+				}); //resultSet2
+			}); //resultSet1
+
+		// return steps if found or false if none added
+		if (retArray.length > 0) {
+			if (haveDebug) { retArray.forEach(function(step) { print_debug('\t Returning step:  >' + step + '<\n'); }); }
+			return retArray;
+		} else { 
+			return false; 
+		}
+
+	} //Try block
+	//Catch block for errors thrown in above try block
+	catch(err) { print_debug(wfrule.attrname + ": " + err) ; return false; }
+	return false;  // Should never get here
+} //AddSameAs

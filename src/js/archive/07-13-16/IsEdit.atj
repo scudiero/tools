@@ -1,0 +1,68 @@
+
+//=================================================================================================
+wfrules:isNew|iffieldmatch|newrecord|value=true;
+wfrules:isEdit|function|IsEdit|
+wfrules:isDelete|iffieldmatch|deleterec|value=true;
+
+//=================================================================================================
+// Determin if request is edit mode
+// ??/??/2014 - dgs - New
+// 02/10/2015 - dgs - Add more debug messages
+//=================================================================================================
+wffuncs.IsEdit = function(inval, wfrule, args) {
+	var myName=wfrule.attrname; var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+	if (haveDebug) { Debug('\n*** In '+ myName + ' ***'); Dump('\tinval',inval); /* Dump('\twfrule',wfrule.toSource()); Dump('\targs',args.toSource()); */ }
+
+	if(args && args.context && args.context != "wfrule")
+		return false;
+	
+	if (tcfdata.newrecord && tcfdata.newrecord.length) {
+		if (haveDebug) { Dump('\ttcfdata.newrecord',tcfdata.newrecord); }
+		if (tcfdata.newrecord == 'true') {
+			if (haveDebug) { Debug('\t*** Proposal is in NEW mode'); }	
+			return false
+		}
+	}
+	if (tcfdata.deleterec && tcfdata.deleterec.length) {
+		if (haveDebug) { Dump('\ttcfdata.deleterec',tcfdata.deleterec); }
+		if (tcfdata.deleterec == 'true'){
+			if (haveDebug) { Debug('\t*** Proposal is in DELETE mode'); }	
+			return false
+		}
+	}
+
+	if (haveDebug) { Debug('\t*** Proposal is in EDIT mode'); }	
+	return [inval.replace(wfrule.ifregex,'')]
+}
+
+
+
+// Determin if request is edit mode
+// ??/??/2014 - dgs - New
+// 02/10/2015 - dgs - Add more debug messages
+//=================================================================================================
+wffuncs.IsEdit = function(inval, wfrule, args) {
+	 //Try block encapsulated main function
+	 try {
+		if(args && args.context && args.context != "wfrule")
+	 		throw "\t*** Failed rule type check";
+
+		var retVal='EDIT';
+		if (tcfdata.newrecord && tcfdata.newrecord.length) {
+			if (tcfdata.newrecord == 'true')
+				return false
+		}
+		if (tcfdata.deleterec && tcfdata.deleterec.length) {
+			if (tcfdata.deleterec == 'true')
+				return false
+		}
+
+		// its edit 
+		return [inval.replace(wfrule.ifregex,'')];
+		} //Try block
+
+	//Catch block for errors thrown in above try block
+	catch(err) { throw err ; return false }
+	// Should never get here
+	return false;
+} //wffuncs.IsEdit

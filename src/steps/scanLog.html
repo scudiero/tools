@@ -1,0 +1,73 @@
+%spidercode%
+//=================================================================================================
+// Write out a string to wizdebug
+// 06/24/2013 - dgs	- Initial coding
+//=================================================================================================
+
+//=================================================================================================
+//* Define Variables
+//=================================================================================================
+// Parse Args
+//# TODO -- should be read from passed args -- HOW ??
+outMode = 'both';
+var processName = 'CIM SIS Sync';
+var action = 'start';
+
+// Local Variables
+myName = 'scanLog';
+DEBUG=1;
+lines = [];
+var myDate = new Date();
+myDate = myDate.toLocaleString()
+// File and directory are relative to the courseleaf directory where we are running
+var courseleafDir = ""
+var cimSyncLogFile = "cimsync.log"
+fileData = [];
+
+//=================================================================================================
+// Functions
+//=================================================================================================
+// Open a file 
+	function openFile(filePath,file,mode){
+		var msgPrefix = myName + '.openFile: ';
+		var infile = fopen(filePath + file,mode);
+		debug(2,'Opening file: ' + filePath + file + ' for ' + mode + ' ('+ infile + ')');
+		if (infile <= 0) {
+			throw msgPrefix + ': Cannot open file: ' + filePath + file
+		} else {
+			return infile;
+		}
+	}
+
+// Read file into an array
+	function readFile(fileHandle){ 
+		var subName = 'readFile';
+		var inLine = '';
+		while(!feof(fileHandle)){
+			inLine = fgets(fileHandle);
+			debug(2,'inLine: "' + inLine + '"');
+			fileData.push(inLine);
+		}
+		return;
+	}
+
+// Print out a debug message
+	function debug(level,text){
+		if (level <= DEBUG) { print_stdout('Debug(' + level + ') ' + text + '\n') };
+	}
+
+//=================================================================================================
+//# Main
+//=================================================================================================
+var syncLogFH = openFile(courseleafDir,cimSyncLogFile,'r');
+//var outFile = openFile('','myData.txt','w');
+if (syncLogFH) {
+	readFile(syncLogFH);
+		fileData.forEach(function(inLine) {
+		debug(1,'inLine: "' + inLine + '"');
+	});	
+}
+
+
+  		
+%spidercode%

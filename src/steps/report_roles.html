@@ -1,0 +1,29 @@
+%spidercode%
+// roles report for APU, linked to from console
+
+var roles = load_tcf(tcfdata.progdir[0] + "/roles.tcf");
+if(roles.role && roles.role.length) {
+	for (var i = 0; i < roles.role.length; i++) {
+		var c = roles.role[i];
+		var id = c.name;
+		var mem = c.members.split(",");
+		var email = get_email(id);
+		if(roles.roledesc && typeof roles.roledesc[i] != "undefined")
+			var name = "<strong>" + roles.roledesc[i] + "</strong>";
+		else
+			var name =  "<strong>" + id + "</strong> " + email + " (" + mem.length + " member" + (mem.length > 1 ? "s" : "") + ")";
+		
+		print_doc(name + "<br />");
+		mem.forEach(function(m) {
+			var memname = getUser(m);			
+			print_doc("&nbsp;&nbsp;&nbsp;" + memname.name + " " + memname.email + "<br />");
+		});
+		print_doc("<br />");
+		//print_doc('roles[roles.length] = { key: "' + id + '", ' +
+		//	' id: "' + id + '", name: "' +  name + '", ' +
+		//	' email:  "' + email + '" };\n');
+	}
+}
+
+
+%spidercode%

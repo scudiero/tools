@@ -1,0 +1,69 @@
+
+// stub to add to default courseref generated RelatedDepts
+wffuncs.RelatedDepts = (function(inval, wfrule) {
+	var haveDebug=true;
+	var orig_relatedDepts = wffuncs.RelatedDepts;
+	return function locRelatedDepts(inval, wfrule) {
+		if(!tcfdata.code || !tcfdata.code.length)
+			return false;
+		if(!tcfdata.subject || !tcfdata.subject.length)
+			return false;
+		var newroles = [];
+
+		var fyiroles = orig_relatedDepts.apply(this, arguments);
+
+//===================================================================================================================
+//ADDED CODE
+		// START: Add any new steps from the crosslisted data field on the form
+			var debug=true
+			var addStep='Chair fyi optional'
+			
+			if (debug) print_debug('\n*** In Crosslisted section of RelatedDepts ***\n')
+			var parentDept=tcfdata.department[0].code;
+			var crosslistedRoles=[], depts=[], cols=[];
+			if(tcfdata.crosslisted && tcfdata.crosslisted.length > 0) {
+				tcfdata.crosslisted.forEach(function(crossListObj) {
+					if (debug) print_debug('\tcrosslisted Object:' + crossListObj.code + '\n')
+					// crosslisted data are course code4s, parse off subject code and lookup dept
+					// code from cimlookup
+					refCode=crossListObj.code.split(" ")[0]
+					if (debug) print_debug('\t\trefCode:' + refCode + '\n')
+					var sql='SELECT department,college FROM cimlookup WHERE subject=? and department <> ?';
+					var sqlParms=[refCode,parentDept];
+					var resultSet=dbquery(tcfdata.dbname[0],sql,sqlParms);
+					if (resultSet.length > 0 ) {
+						resultSet.forEach(function(row) {
+							if (debug) print_debug("\t\tFrom cimlookup: dept = '" + row.department + "', col = '" + row.college + "'\n")
+							if (row.department) { depts.push(row.department); }
+							if (row.college) { cols.push(row.college); }
+						});	//resultSet
+					} else {
+						if (debug) print_debug("\t\tNo results returned from sql query\n")
+					}
+				}); //tcfdata.crosslisted.forEach
+			} //tcfdata.crosslisted not null		
+
+			// add to the fyiroles array
+			var crossListedRoles=[]
+			depts.forEach(function(dept) {
+				crossListedRoles.push(dept + ' ' + addStep)
+			});
+			fyiroles=fyiroles.concat(crossListedRoles)
+//END ADDED CODE
+//===================================================================================================================
+
+		if(fyiroles && fyiroles.length) {
+			// strip out any duplicates that are already in there
+			for(var i=fyiroles.length-1; i >= 0; i--) {
+				for(var j=0; j < newroles.length; j++) {
+					if(fyiroles[i].replace(/ fyi(all)?\b/, "") == newroles[j]) {
+						fyiroles.splice(i, 1);
+					}
+				}
+			}
+			newroles = newroles.concat(fyiroles);
+		}
+		return newroles;
+	};
+})();
+

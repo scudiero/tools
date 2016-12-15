@@ -1,0 +1,386 @@
+%spidercode%
+//============================================================================================================
+//use this step to generate output to be pasted into Excel
+// 11/17/15 - dgs - Added ignoresteps
+// 08/09/16 - dgs - Added enumeration wfSubRules
+//============================================================================================================
+// Function wrapper
+(function getCimRoles() {
+
+var debug=false;
+//============================================================================================================
+//Variable Declares
+//============================================================================================================
+	var cims=[];
+	if (cims.length == 0)
+		cims=['courseadmin','programadmin'];
+	var env='';
+	var version="3.5";
+	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
+
+	var ignoreSteps = {
+		"initiator":true,
+		"relateddepts": true,
+		"crosslisteddepts": true,
+		"crosslistedschools": true,
+		"crosslistedcolleges": true
+	}
+
+//============================================================================================================
+//Headings
+//============================================================================================================
+	var header=[];;
+	header.push("Step Version:" + version);
+	header.push("");
+	header.push("Instructions -- Please read before completing, if you have questions please contact your Client Services Manager");
+	header.push("   1 - Please provide information for only those roles that will actually be active in the workflow.");
+	header.push("       If a role is not going to be used in the workflow then please DELETE the line from the spreadsheet.");
+	header.push("")
+	header.push("   2 - Role Members -- Userids should be seperated with commas, no blanks please.  If your institution uses user ID NUMBERS");
+	header.push("       (UINs) as your login id then please specify the UIN for this data, failure to do so will result in a");
+	header.push("       non-functional role.");
+	header.push("")
+	header.push("   3 - Email Override -- Note: This data field only applies to \'approver\' steps in the workflow, not \'fyi\' or \'fyiall\' steps.");
+	header.push("       - Leave to blank to notify only the first indvidual in the userid list.");
+	header.push("       - Set to \'all\' to notify all indviduals in the userid list.  Note if the role has an \'fyiall\' directive");
+	header.push("         then please do not specify all here.");
+	header.push("       - Set to \'none\' to send out no notifications.");
+	header.push("       - Othewise the specified address will be used for emails for this role.  you only need to specify if you want");
+	header.push("         Note: You should only need to specify if you want a different email than what would be normally used for the");
+	header.push("         users in the role.  Please do not specify if you are NOT overriding the normal user email addresses.");
+	header.push("")
+	header.push("Notes:");
+	header.push("   1) Data for college, department, and subject code values is pulled from the data provided in the CIM \'codes\' table.");
+  	header.push("   2) If any particular role is not going to be used (e.g. the department does not have a Chair),");
+   	header.push("      then please remove that line from this spreadsheet.");
+	header.push("   3) If there is preexisting member data for a role it is added in below as a startint point.");
+	header.push("   4) Order is alphabetic by step name before substitution.");
+	header.push("   5) Roles below are a composite of all roles from workflows in: " + cims + ".");
+	header.push("   6) Any user accounts listed in the roles are expected to be pre-provisioned and will not be created by the load script.");
+	header.push("")
+	header.push("Role Name\tRole Members (Comma seperated userids)\tEmail Override (Please see above)\tSubstitution variables/values (FYI only, not used by workflow)");
+
+//============================================================================================================
+//Roles that need special handeling -- uncomment and define as necessary
+	/*
+	var specialLabels = [];
+	specialLabels.push('School (\'School\') Roles:');
+	specialLabels.push('cimcourses');
+	specialLabels.push('SELECT distinct school FROM cimlookup where school is not null order by school');
+	specialLabels.push('');
+	specialLabels.push('');
+	specialLabels.push('');
+	specialLabels.push('');
+	specialLabels.push('');
+	specialLabels.push('');
+	*/
+
+
+//============================================================================================================
+//# Hello
+//============================================================================================================
+if (debug) {print_debug('\n*** In ' + myName + ' ***\n');}
+
+//============================================================================================================
+//# Setup
+//============================================================================================================
+// Build a roles hash table from the data in roles.tcf
+	var roles=[];
+	var roleTcfData=[];
+	var rolesHash={};
+	var roleRec=[];
+	var regex = new RegExp('^/courseleaf/roles.html$','i');
+	if (! regex.test(tcfdata.pagename[0])) {
+		if (debug) {print_doc('Loading Roles data from disk...\n'); }
+		var roleTcfData = load_tcf("/courseleaf/roles.tcf");
+		if (!roleTcfData) {
+			addwarning('Cannot load roles.tcf');
+			return false;
+		}
+		roles=roleTcfData.role;
+	} else {
+		roles=tcfdata.role
+	}
+	if (debug) {print_debug('\nFound ' + roles.length + ' roles in /courseleaf/roles.tcf.\n');}
+
+	//Build roles hash table
+	//roles.forEach(function(text) {
+	//	roleRec=[]; roleRec.push(text.members); roleRec.push(text.email);
+	//	rolesHash[text.name] = roleRec;
+	//});
+
+	roles.forEach(function(text) {
+		roleRec={}; roleRec.members=text.members; roleRec.email=text.email;
+		rolesHash[text.name] = roleRec;
+	});
+
+	if (debug) {
+		print_debug('\nrolesHash table:\n');
+		for (var key in rolesHash) {
+			print_debug('\trolesHash[' + key + '] = >' + rolesHash[key].toSource() + '<\n');
+		}
+	}
+
+// get SIS name
+var sisName='';
+var cimconfigData = load_tcf('/courseadmin/cimconfig.cfg');
+if (cimconfigData && cimconfigData.sisname) { sisName=cimconfigData.sisname[0] }
+if (debug) { Dump("sisName",sisName); }
+
+// Build a list of workflow steps from cims workflow.tcf files (see cims definition)
+	print_doc('\nEnvironment: ' + env + '\n');
+ 	var idx, str, steps=[], wfAttrs=[], tempArray=[], errorDetected=false, wfSubRulesHash=[];
+	cims.forEach(function(cim) {
+		var workflowTcfData = load_tcf('/' + cim + '/workflow.tcf');
+		if (workflowTcfData) {
+			if (debug) { print_debug('Processing cim: ' + cim + '\n'); }
+			print_doc('Processing cim: ' + cim + '\n');
+
+			//pull off list of wfrules attributes off from the localsteps data
+			str=workflowTcfData.localsteps[0].params.replace('attributes=','');
+			idx1=str.indexOf(";");
+			str=str.substr(0,idx1);
+			str.split(',').forEach(function(text) {
+				idx1=text.indexOf("[");
+				text=text.substr(0,idx1);
+				wfAttrs.push(text);
+			});//str.split
+
+			//pull off steps and add to master list
+			workflows=workflowTcfData.workflow;
+			workflows.forEach(function(text) {
+				tempArray=[];
+				print_doc('\tScanning: ' + text.name + '\n' );
+				tempArray = text.members.split(',');
+				tempArray.forEach(function(step) {
+					var tmpArray=step.split(" ");
+					if (! ignoreSteps[tmpArray[0].toLowerCase()] )
+						steps.push(step)
+				});//steps
+			});//workflows
+
+			//retrieve the substitution variables, and get values from database
+			var cimconfigTcfData = load_tcf('/' + cim + '/workflow.cfg');
+			if (!cimconfigTcfData.wfSubRule || !cimconfigTcfData.wfSubRule.length) {
+				cimconfigTcfData = load_tcf('/' + cim + '/cimconfig.cfg');
+			}
+			// Loop through wfSubRules data
+			if (cimconfigTcfData) {
+				print_doc('\tProcessing wfsubrules \n' );
+				if (cimconfigTcfData.wfSubRule) {
+					if (debug) { print_debug('cimconfigTcfData.wfSubRule >' + cimconfigTcfData.wfSubRule.toSource()  + '<\n') }
+					// wfSubRule:Col|SELECT code,name FROM codedesc WHERE setname="college" and rank >= 0 order by code  -or-
+					// wfSubRule:AcadLevel|['UG:Undergraduate','GR:Graduate','PR:Professional']
+					cimconfigTcfData.wfSubRule.forEach(function(text) {
+						Dump('\twfSubRule',text);
+						var idx1=text.indexOf("|");
+						var subRuleName=text.substr(0,idx1);
+						var subRuleText=text.substr(idx1+1);
+						Dump('\twfSubRule',text); Dump('\t\tsubRuleName',subRuleName); Dump('\t\tsubRuleText',subRuleText);
+
+						// If we have not already processed this rule then create a new hash table element for the rulename
+						if (wfSubRulesHash[subRuleName] == undefined) {
+							print_doc('\t\t' + subRuleName + '\n' );
+							// If rule is an enumeration then parse off and create an object array
+							var tmpHashArray=[];
+							if (subRuleText.substr(0,1) === "[" ) {
+								var tmpStr=subRuleText.substr(1,subRuleText.length-2);
+								var tmpArray=tmpStr.split(',');
+								tmpArray.forEach(function(token) {
+								var tmpObj={};
+								var idx2=token.indexOf(":");
+								if (idx2 > 0) {
+									tmpObj.code=token.substr(1,idx2-1);
+									tmpObj.name=token.substr(idx2+1,token.length-tmpObj.code.length-2);
+								} else {
+									tmpObj.code=token;
+									tmpObj.name=token;
+								}
+								tmpHashArray.push(tmpObj)
+								});
+								wfSubRulesHash[subRuleName]=tmpHashArray
+							// Otherwise assume rule is a sql query on the cimcodes table
+							} else {
+								wfSubRulesHash[subRuleName]=dbquery('cimcourses',text.substr(idx1+1));
+							}
+						}
+						Dump("\nwfSubRulesHash = >",wfSubRulesHash[subRuleName].toSource())
+					}); // wfSubRules
+				} else {
+					print_doc('\n\t* Warning * -- could not find any wfSubRules defined in ' + cim + ' cimconfig.cfg file.\n\tStopping\n\n');
+				}
+			} else {
+				Here(3);
+				print_doc('\n\t* Error * -- could not load /' + cim + '/cimconfig.cfg  or /workflow.cfg file.\n\tStopping\n\n');
+				errorDetected=true;
+			}
+		}
+	}); //cims
+
+	if (errorDetected) {
+		print_debug('\n*Error* --- Errors detected.\nStopping\n');
+		return false;
+	}
+
+	// pre-process wfAttrs array to remove duplicates and then reverse order to take care of 'fyi' vs 'fyiall')
+	wfAttrs.sort();
+	wfAttrs=RemoveDupes(wfAttrs);
+	wfAttrs.reverse();
+	if (debug) {print_debug('Found ' + wfAttrs.length + ' step attributes...\n'); }
+
+	// pre-process steps array to remove duplicates
+	steps.sort();
+	steps=RemoveDupes(steps,sisName);
+	// Remove the atrributes from the steps
+	for (var i=0,  tot=steps.length; i < tot; i++) {
+		wfAttrs.forEach(function(attr) {
+			steps[i]=steps[i].replace(attr,'');
+		});
+		steps[i]=steps[i].trim();
+	}
+
+	// Remove duplicates from the steps array
+	steps.sort();
+	steps=RemoveDupes(steps);
+	if (debug) {print_debug('Found ' + steps.length + ' steps...\n'); }
+
+	if (debug) {
+		print_debug('\nSteps before:\n');
+		steps.forEach(function(step) {
+			print_debug('\tstep >' + step + '<\n');
+		});//cols
+	}
+
+//============================================================================================================
+//# Main
+//============================================================================================================
+// Loop through the steps, substitute values and build initial output roles array
+var rolesOut=steps, expandedSteps=[], editString='';
+debug=false;
+
+// Loop through all the steps, substuting in values
+i=0; while (true) {
+	editString=rolesOut[i];
+	if (debug) { print_debug('editString 1 = >' + editString + '<\n'); }
+	if (editString != '') {
+		//Loop through substituted variable names
+		for (var key in wfSubRulesHash) {
+			subsFound=false;
+			re = new RegExp("\\b" + key + "\\b", "g");
+			if (debug) { print_debug("\tkey: '" + key + "'\tregex: '" + regex + "'\n") }
+			if (re.test(editString)) {
+				if (debug) { print_debug("\tSubstitute: '" + key + "' into '" + editString + "'\n"); }
+				subsFound=true;
+				rolesOut[i]='';
+				wfSubRulesHash[key].forEach(function(token) {
+					if (debug) { print_debug("\t\ttoken.code: " + token.code + ", token.name: " + token.name + "\n" ) }
+					if (typeof token.code === 'undefined') { var repString=token.name; } else { var repString=token.code; }
+					// Make the strign substitution
+					var str=editString.replace(re,repString);
+					if (debug) { print_debug("\teditString (" + key + ") = " + str + "\n") }
+
+					//If there are role members, then add to output string
+					if (rolesHash[str] != undefined ) {
+						if (debug) { print_debug('\t\t\trolesHash['+str+'] = >' + rolesHash[str].toSource() + '<\n'); }
+						str=str + '\t' + rolesHash[str].members.toString() + '\t' + rolesHash[str].email.toString() + '\t';
+					} else {
+						if (str.indexOf("\t") < 0 ) { str=str + '\t\t\t' }
+					}
+					//Add the substituted variable info
+					if (str.indexOf("(") < 0 ) {
+						rolesOut.push(str + '(' + key.toLowerCase() + ':' + repString + ')');
+					} else {
+						rolesOut.push(str + ' (' + key.toLowerCase() + ':' + repString + ')');
+					}
+				}); //wfSubRulesHash[key].forEach
+				break; //Stop processing wfSubRule -- only one at a time
+			} //(regex.test(editString))
+		} //(key in wfSubRulesHash)
+	} //(editString != '')
+	//subsFound=false;
+	i++; if (i >= rolesOut.length) break;
+} // while (true)
+
+//Write the putput to stdout
+// Header
+	print_doc('\n');
+	header.forEach(function(text) {
+		print_doc(text + '\n');
+	});
+// Roles
+	rolesOut=rolesOut.sort();
+	rolesOut.forEach(function(text) {
+		if (text != '') print_doc( text + '\n');
+	});
+
+return;
+
+//============================================================================================================
+// Subs
+//============================================================================================================
+//============================================================================================================
+// Function to remove duplicates from an array
+//===========================================================================================================+
+function RemoveDupes(arr,exclude) {
+    var noDupes=[];
+    exclude=' ' + exclude + ' ';
+    arr=arr.sort();
+    arr.forEach(function(value) {
+		//if (typeof(Dump) == "function") { var num=noDupes.indexOf(value); Dump('\t\tIn Remove Dupes, index of ' + value + ' in input array',num); }
+        if ( noDupes.indexOf(value) == -1 && exclude.indexOf(' '+value+' ') < 0 ) {
+            noDupes.push(value);
+        }
+    });
+    return noDupes;
+}
+
+
+function SpecialPrintRoles(labelArray) {
+	var labelArray;
+	var debug=false;
+	var addSep=true;
+	var label='', table='', selectClause='';
+	var tokens=[];
+	if (labelArray.length <= 0) { return }
+	if (debug) { for(var i=0; i < labelArray.length; i++) { print_stdout('labelArray[' + i + '] = ' + labelArray[i] + "\n"); } }
+
+	// Pull config data off the top of the array
+	sep=labelArray[0]; labelArray.shift();
+	table=labelArray[0]; labelArray.shift();
+	selectClause=labelArray[0]; labelArray.shift();
+	if (debug) { print_stdout('sep = >' + sep + '<\ntable = >' + table + '<\nselectClause = >' + selectClause + '<\n') }
+
+	// retrieve data from database & loop through values
+	var tokens = dbquery(table, selectClause);
+	if (debug) { for(var i=0; i < tokens.length; i++) { print_stdout('tokens[' + i + '] = ' + tokens[i].school + '\n'); } }
+
+	tokens.forEach(function(token) {
+		labelArray.forEach(function(text) {
+			if ( text != '' ) {
+				if (addSep) { print_stdout('** ' + sep + '\n'); addSep=false }
+				print_stdout(token.school + ' ' + text + '\n');
+			}
+		});
+	});
+
+	print_stdout('\n');
+	return;
+}
+
+
+function Dump(varName,varValue){
+	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
+	if (! debug) {return}
+	// Set variables if this is not a full call
+	text=varName + ' = >' + varValue + '<\n'
+	print_debug(text)
+}
+
+function Here(id) {
+	print_debug('Here ' + id + '\n');
+}
+
+//============================================================================================================
+//Close function wrapper
+})();
+%spidercode%

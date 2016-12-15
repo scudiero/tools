@@ -1,0 +1,609 @@
+
+//=========================================================================================================================
+//Loop through array using iterator
+for (var i=0,  tot=myArray.length; i < tot; i++) {
+  console.log(myArray[i]); 
+}
+
+//=========================================================================================================================
+//Loop through array using forEach
+tcfdata.campus.forEach(function(text) {
+	var str = text.code.toString(); 
+	print_debug('code = ' + str + '\n');
+});
+
+retArray.forEach(function(text) {
+	print_debug('retArray Val = ' + text + '\n');
+});
+
+
+
+//=================================================================================================
+// Check to make sure standard variables have values
+//=================================================================================================
+if(typeof CheckVarsFirstRun == "undefined") 
+	var CheckVarsFirstRun = true;
+wffuncs.CheckVars = function(inval, wfrule, args) {
+	var myName='CheckVars'; haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") { haveDebug=true; } 
+	if (haveDebug) {
+		Debug('\n*** In ' + myName + ' ***');
+	}
+	if (! CheckVarsFirstRun) return false;
+
+	// Check vars
+	CheckForVal('Campus',tcfdata.campus);
+	CheckForVal('Code',tcfdata.code);
+
+	// Always return false
+	CheckVarsFirstRun = false;
+	return false;
+}
+
+//=================================================================================================
+// Check to see if a variable has changed
+//=================================================================================================
+Changed = function(varName) {
+	var myName='Changed'; var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;;
+	if (varName == '') return false;
+	//Get a list of fields that have changed
+	var diffdata = {};
+	tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata});	
+	//Loop through changed variables looking for passed varname
+	if (Object.keys(diffdata).length > 0 ) {
+		for (var i in diffdata) {
+			if (i.toString() == varName) return true;
+		}
+	}
+	return false;
+}
+
+
+//=================================================================================================
+// Trigger for using 'Additiaonal Course Information Change Only' workflow -- cincinnatistate
+// 01-23-15	- dgs	- Initial coding 
+//================================================================================================= 
+wffuncs.AdditionalInformationChangeOnly = function(inval, wfrule, args) {
+	var myName='AdditionalInformationChangeOnly'; var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+	if (haveDebug) { 
+		Debug('\n*** In '+ myName + ' ***');
+		Debug('\tArguments:');
+		Dump('\t\tinval',inval); 
+		Dump('\t\twfrule.searchfor',wfrule.searchfor.toSource());
+		Dump('\t\twfrule.type',wfrule.type.toSource());
+		Dump('\t\twfrule.attrname',wfrule.attrname.toSource());
+		Dump('\t\twfrule.options',wfrule.options.toSource());
+		Dump('\t\targs',args.toSource()); 
+	}
+
+	//Set fields that are allowed to have changes and will 
+	var allowedChanged=['equate_course'];
+	//Set fields that are considered part of additional information, if only these fields have changed then the 
+	//'Additional Course Information Change Only' workflow will be triggered.
+	var additionalInformationFields=['supp_matls','outcomes','topics','eval_method','activities','keeper','addl_info','addl_attach']
+	
+	//Get a list of fields that have changed
+		var diffdata = {};
+		tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata});
+		if (!Object.keys(diffdata).length) {
+			if (haveDebug) { Debug('\tNo Changes found in form data','b'); }
+			return false;
+		}
+		//Loop through changed fields
+		if (haveDebug) { Debug('\tChanged fields:'); }
+		for (var i in diffdata) {
+			if (haveDebug) { Debug('\t\t' + i.toString()); }
+			//Loop through array using forEach
+			inAllowed=false;
+			allowedChanged.concat(additionalInformationFields).forEach(function(text) {
+				if ( i == text ) inAllowed=true; 
+			});
+			if (inAllowed == false) break;			
+		}
+		if (haveDebug) { Dump('\tinAllowed',inAllowed); }
+
+	if (inAllowed == true) 
+		return [inval.replace(wfrule.regex,'Additional Course Information Change Only').trim()]
+
+	return false;
+}
+
+
+//=================================================================================================
+// Select Workflow - PCC
+// 01-13-15	- dgs - Refactored
+//=================================================================================================
+wffuncs.CourseType = function(inval, wfrule, args) {
+	// setup
+	var myName='CourseType';
+	 var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+	if (haveDebug) { 
+		Debug('\n*** In '+ myName + ' ***');
+		Dump('\tinval',inval); Dump('\twfrule',wfrule.regex.toSource()); Dump('\targs',args.toSource()); 
+	}
+
+	// Check execution env
+		if(args && args.context && args.context != "wforder")
+			return false;
+
+	// NEW record ================================================================================
+		if(tcfdata.newrecord && tcfdata.newrecord.length) {
+			// EXPERIMENTAL		
+			if(tcfdata.experimental && tcfdata.experimental.length && tcfdata.experimental[0] == "Yes") {
+				if (haveDebug) Debug('\t**** Using Workflow: EXPERIMENTAL');
+				return [inval.replace(wfrule.regex, "EXPERIMENTAL")];
+			}
+			// Otherwise if new then use standard.
+			Debug('\tIs New');	
+			return false;
+		} 
+
+	// INACTIVATE record ================================================================================
+		if(tcfdata.deleterec && tcfdata.deleterec.length) {
+			if (haveDebug) Debug('\t**** Using Workflow: INACTIVATE');	
+			return [inval.replace(wfrule.regex, "INACTIVATE")];
+		}
+
+	// EDIT record ================================================================================
+		//Get a list of fields that have changed
+		var diffdata = {};
+		tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata});
+		if (!Object.keys(diffdata).length)
+			return false;
+
+		// The list of CCOG only fields is in the ccogOnlyField variable defined in the config file
+		if(tcfdata.ccogOnlyField || tcfdata.ccogOnlyField.length) {	
+			// build index string
+				var ccogOnlyIndexString=' ';
+				tcfdata.ccogOnlyField.forEach(function(text) {
+					ccogOnlyIndexString=ccogOnlyIndexString + text.toString() + ' ';
+				});
+			// Loop through changed fields to see if only ccogOnly fields have changed.
+			var ccogonly=true;
+			for (var i in diffdata) {
+				if (ccogOnlyIndexString.indexOf(' ' + i + ' ') < 0) ccogonly=false
+			}
+			if (ccogonly) {
+				if (haveDebug) Debug('\t**** Using Workflow: CCOG');
+				return [inval.replace(wfrule.regex, "CCOG")];
+			}
+		}
+
+		// The list of GRADECHANGE only fields is in the gradechangeOnlyField variable defined in the config file
+		if(tcfdata.gradechangeOnlyField || tcfdata.gradechangeOnlyField.length) {
+			// build index string
+				var gradechangeOnlyIndexString=' ';
+				tcfdata.gradechangeOnlyField.forEach(function(text) {
+					gradechangeOnlyIndexString=gradechangeOnlyIndexString + text.toString() + ' ';
+				});
+			// Loop through changed fields to see if only ccogOnly fields have changed.
+			var gradechangeonly=true;
+			for (var i in diffdata) {
+				if (gradechangeOnlyIndexString.indexOf(' ' + i + ' ') < 0) gradechangeonly=false
+			}
+			if (gradechangeonly) {
+				if (haveDebug) Debug('\t*** Using Workflow: GRADECHANGE');
+				return [inval.replace(wfrule.regex, "GRADECHANGE")];
+			}
+		}
+
+	return false;
+}
+
+//=================================================================================================
+// Add cross listed course departments and colleges to the workflow - illinois
+//=================================================================================================
+wffuncs.DeptReview = function(inval, wfrule, args) {
+	var debug='D'; var myName='DeptReview';
+	if (typeof(Dump) == "function" && typeof(Debug) == "function") { 
+		if (firstRun) { Debug(1,'* * * Under Construction, please try again later * * *','S'); firstRun=false}  
+		Debug(2,'',debug);  Debug(3,'*** In '+ myName + ' ***',debug);
+		Dump(3,'inval',inval,debug,myName); Dump(4,'wfrule',wfrule.toSource(),debug,myName); Dump(4,'args',args.toSource(),debug,myName); 
+	}
+
+	if (args && args.context && args.context == "wforder")
+		return false;
+
+	if (!tcfdata.crosslisted || !tcfdata.crosslisted.length)
+		return false;
+	if (!tcfdata.department || !tcfdata.department.length)
+		return false;
+	if (typeof(Dump) == "function") { Dump(2,'tcfdata.department.code',tcfdata.department[0].code); }
+
+	// Loop through crosslisted subject codes, lookup the department codes from cimlookup
+	var retArray=[], rows, sql, sqlParms=[], depts=[];
+	depts.push(tcfdata.department[0].code);
+	tcfdata.crosslisted.forEach(function(text) {
+		var subjCode=text.code.split(" ")[0];
+		if (typeof(Dump) == "function") { Dump(2,'subjCode',subjCode); }
+		sql='SELECT department FROM cimlookup WHERE subject=? ';
+		sqlParms=[subjCode];
+		rows=dbquery(tcfdata.dbname[0],sql,sqlParms);
+		if (rows.length >0 ) {
+			if (typeof(Dump) == "function") { Dump(2,'Dept from lookup',rows[0].department); }
+			depts.push(rows[0].department);
+		} else {
+			print_debug(myName +': *Warning* -- Zero results returned from sql query:\n');
+			print_debug(myName + ': sql = ' + sql + '\n'); 
+			print_debug(myName + ': sqlParms = ' + sqlParms + '\n'); 
+		}
+	});
+
+	depts=RemoveDupes(depts);
+	depts.forEach(function(text) { 	
+		if (typeof(Dump) == "function") { Dump(2,'Dept in output loop',text); }
+		retArray.push(inval.replace(wfrule.regex,text + ' Courses Committee optional'));
+		retArray.push(inval.replace(wfrule.regex,text + ' Head optional'));
+	});
+
+	return retArray;
+}
+
+
+//=========================================================================================================================
+// Function to remove duplicates from an array
+function RemoveDupes(arr) {
+    var nonDupes = [];
+    arr=arr.sort();
+    arr.forEach(function(value) {
+		if (typeof(Dump) == "function") { var num=nonDupes.indexOf(value); Dump(3,'In Remove Dupes, index of ' + value + ' in input array',num); } 	
+        if (nonDupes.indexOf(value) == -1) {
+            nonDupes.push(value);
+        }
+    });
+    return nonDupes;
+}
+
+
+//=================================================================================================
+// Add cross listed course departments and colleges to the workflow - uic
+//=================================================================================================
+wffuncs.CrossListedDepts = function(inval, wfrule, args) {
+	var myName='CrossListedDepts'; var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+	if (haveDebug) { 
+		Debug(2,'\n*** In '+ myName + ' ***');
+		Dump(2,'\tinval',inval); 
+		Dump(3,'\twfrule',wfrule.toSource()); 
+		Dump(3,'\targs',args.toSource()); 
+	}
+
+	// Check the env and required variables
+	if (args && args.context && args.context == "wforder")
+		return false;
+	if (!tcfdata.crosslisted || !tcfdata.crosslisted.length)
+		return false;
+	if (!tcfdata.department || !tcfdata.department.length)
+		return false;
+	if (!tcfdata.college || !tcfdata.college.length)
+		return false;
+
+	// Values for dept, college, and school from the proposal
+	var parentDept=tcfdata.department[0].code
+	var parentCollege=tcfdata.college[0].code
+	// Lookup parent school
+	var parentSchool='';
+	sql='SELECT school FROM cimlookup WHERE department=? and college=?';
+	sqlParms=[parentDept,parentCollege];
+	rows=dbquery(tcfdata.dbname[0],sql,sqlParms);
+	if (rows.length >0 ) {
+		parentSchool=rows[0].school;
+	}
+	if (haveDebug) { Dump(2,'\tparentDept',parentDept); Dump(2,'\tparentCollege',parentCollege); Dump(2,'\tparentschool',parentSchool); }
+
+	// Loop through crosslisted subject codes, lookup the department codes from cimlookup
+	var retArray=[], rows, sql, sqlParms=[], depts=[], cols=[], schools=[];
+	tcfdata.crosslisted.forEach(function(text) {
+		if (typeof(Dump) == "function") { Dump(2,'\tcrosslisted',text.toSource()); }		
+		var subjCode=text.subj.split(" ")[0];
+		if (typeof(Dump) == "function") { Dump(2,'\tsubjCode',subjCode); Dump(2,'\tparentDept',parentDept);}
+		sql='SELECT department,college,school FROM cimlookup WHERE subject=? and department <> ?';
+		sqlParms=[subjCode,parentDept];
+		resultSet=dbquery(tcfdata.dbname[0],sql,sqlParms);
+		if (haveDebug) { Dump(2,'\tresultSet.length',resultSet.length); }
+		if (rows.length > 0 ) {
+			resultSet.forEach(function(row) {
+				if (haveDebug) { Debug(2,'\t\tDept from lookup: ' + row.department); Debug(2,'\t\tCol from lookup: ' + row.college); Debug(2,'\t\tSchool from lookup: ' + row.school); }
+				depts.push(row.department);
+				cols.push(row.college);
+				schools.push(row.school);
+
+			});			
+		} else {
+			print_debug(myName +': *Warning* -- Zero results returned from sql query:\n');
+			print_debug(myName + ': sql = ' + sql + '\n');
+			print_debug(myName + ': sqlParms = ' + sqlParms + '\n');
+		}
+	});
+
+	depts=RemoveDupes(depts,parentDept);
+	cols=RemoveDupes(cols,parentCollege);
+	schools=RemoveDupes(schools,parentSchool);
+
+	depts.forEach(function(text) {
+		if (haveDebug){ Dump(2,'\tDept in output loop:',text); }
+		retArray.push(inval.replace(wfrule.regex,text + ' Chair'));
+	});
+	schools.forEach(function(text) {
+		if (haveDebug) { Dump(2,'\tSchool in output loop:',text); }
+		retArray.push(inval.replace(wfrule.regex,text + ' Dean'));
+	});
+	cols.forEach(function(text) {
+		if (haveDebug) { Dump(2,'\tCol in output loop:',text); }
+		retArray.push(inval.replace(wfrule.regex,text + ' Dean'));
+	});
+	return retArray;
+}
+
+
+//=================================================================================================
+// Determin Policy workflow  -- uwlax
+//=================================================================================================
+wffuncs.GetPolicy = function(inval, wfrule, args) {
+	var debug='D'; var myName='Policy';
+	if (typeof(Dump) == "function" && typeof(Debug) == "function") { 
+		if (firstRun) { Debug(1,'* * * Under Construction, please try again later * * *','S'); firstRun=false}  
+		Debug(2,'',debug);  Debug(3,'*** In '+ myName + ' ***',debug);
+		Dump(3,'inval',inval,debug,myName); Dump(4,'wfrule',wfrule.toSource(),debug,myName); Dump(4,'args',args.toSource(),debug,myName); 
+	}
+
+	var universityPolicyCols=['UP'];
+	var universityPolicyDepts=['UPDEPT'];
+	var universityPolicyLevels=['UG','GR']
+
+	var provostPolicyCols=['PVC'];
+	var provostPolicyDepts=['PVCDEPT'];
+	var provostPolicyLevels=['UG'];
+
+	var collegePolicyCols=['CLS','SAH','SAC','SOE','GRDSTUDIES'];
+	var collegePolicyDepts=['CLSCOLLEGE','SAHCOLLEGE','SACCOLLEGE','SOQ','GRDSTUDIES'];
+	var collegePolicyLevels=['UG','GR']
+
+	checkMatch = function(cols,depts,levels) {
+		myName='checkMatch';
+		if (typeof(Debug) == "function") { Debug(3,'\t***In '+ myName,debug); }
+		var foundCol=false, foundDept=false, foundLevel=false;
+		// Check for col
+		cols.forEach(function(token) {
+			if (tcfdata.college[0].code == token)
+				foundCol=true;
+		});	
+		// Check for dept
+		depts.forEach(function(token) {
+			if (tcfdata.department[0].code == token)
+				foundDept=true;
+		});	
+		// Check for level
+		levels.forEach(function(token) {
+			if (tcfdata.acad_level[0].code == token)
+				foundLevel=true;
+		});			
+	
+		return foundCol && foundDept && foundLevel;
+	}
+	
+	//=================================================================================================
+	// MAIN
+	//=================================================================================================
+	try { 
+		// initial checks
+		if(args && args.context && args.context == "wfrule")
+			throw 'X Failed wfrule check';
+		if (!tcfdata.program_type || !tcfdata.program_type.length)
+			throw 'X Failed program_type not null check';
+		if (tcfdata.program_type[0].code != 'policy' )
+			throw 'X Failed program_type not \'policy\'';
+		if (!tcfdata.college|| !tcfdata.college.length)
+			throw 'X var college is null';
+		if (!tcfdata.department|| !tcfdata.department.length)
+			throw 'X var department is null';
+		if (!tcfdata.acad_level|| !tcfdata.acad_level.length)
+			throw 'X var acad_level is null';
+
+		//Check to see if this is a polich
+		var isUniversity=false, isProvost=false, isCollege=false;
+		isUniversity = checkMatch(universityPolicyCols,universityPolicyDepts,universityPolicyLevels);
+		if (checkMatch(universityPolicyCols,universityPolicyDepts,universityPolicyLevels)) 
+			return [inval.replace(wfrule.regex,'University').trim()];
+
+		if (checkMatch(provostPolicyCols,provostPolicyDepts,provostPolicyLevels))
+			return [inval.replace(wfrule.regex,'Provost').trim()];
+
+		if (checkMatch(collegePolicyCols,collegePolicyDepts,collegePolicyLevels))
+			return [inval.replace(wfrule.regex,'College').trim()];
+
+		return [inval.replace(wfrule.regex,'Department').trim()];
+	}
+	catch(err) {
+		if (typeof(Debug) == "function") { 
+			Debug(1,'*** Aborting: ' + err,debug,myName); 
+		} else {
+			throw err;
+		}
+		return false;
+	}
+
+	// Should never get here
+	return false;
+}
+
+//=================================================================================================
+// Output the list of fields that have changed - towson
+//=================================================================================================
+wffuncs.PrereqenforcedOnly = function(inval, wfrule, args) {
+	var debug='D'; var myName='PrereqenforcedOnly';
+	if (typeof(Dump) == "function") { Debug(1,'* * * Under Construction, please try again later * * *','S'); }
+	if (typeof(Debug) == "function") { Debug(2,'',debug);  Debug(2,'*** In '+ myName + ' ***',debug); }
+	if (typeof(Dump) == "function") { Dump(4,'inval',inval,debug,myName); Dump(4,'wfrule',wfrule.toSource(),debug,myName); Dump(4,'args',args.toSource(),debug,myName); }
+
+	//  The list of fields that are allowed to have changed values when editing a proposal -- sent in cimconfig.cfg
+	if (!tcfdata.allowedPreReqOnlyChange || !tcfdata.allowedPreReqOnlyChange.length)
+		return false;
+	if (typeof(Debug) == "function") {
+		tcfdata.allowedPreReqOnlyChange.forEach(function(text) {
+			Dump(3,'allowedPreReqOnlyChange',text.toString(),debug,myName);
+		});
+	}
+
+	//Get a list of fields that have changed
+	var diffdata = {};
+	tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata});
+	if (typeof(Debug) == "function") { Dump(4,'diffdata',diffdata.toSource(),debug,myName); }
+
+	//Loop through changed fields and see if any field other than the allowed fields has changed
+	var foundChanged=false;
+	for (var i in diffdata) {
+		foundChanged=true;
+		if (typeof(Debug) == "function") { Debug(3,'Changed Field: ' + i.toString(),debug,myName); }
+		var Ok=false;
+		tcfdata.allowedPreReqOnlyChange.forEach(function(text) {
+			if (typeof(Debug) == "function") { Dump(3,'\tcheckstring',text.toString(),debug,myName); }
+			if (text.toString() == i)
+				Ok=true;
+		});
+		if (! Ok) {
+			if (typeof(Debug) == "function") { Debug(2,' *** Found NOT allowed field changed:' + i,debug,myName); }
+			return false
+		}
+	}
+
+	if (foundChanged) {
+		if (typeof(Debug) == "function") { Debug(2,' *** Only allowed fields have changed.',debug,myName); }
+		if(args && args.context && args.context == "wfrule")
+			return [inval.replace(wfrule.regex,'')];
+		else 
+			return [inval.replace(wfrule.regex,'Prereq')];
+	}
+	
+	return false;
+}
+
+//=================================================================================================
+// Compare tcf data to tcadata
+//=================================================================================================
+	if (tcfdata.rotation && tcfdata.rotation.length) {
+		if (tcadata.rotation && tcadata.rotation.length) {
+				if (tcfdata.rotation.length != tcadata.rotation.length)
+					return [inval.replace(wfrule.regex,'CourseRotationChange')];
+				tcfdata.rotation.sort();
+				tcadata.rotation.sort();
+				for (var i=0, tot=tcfdata.rotation.length; i < tot; i++) {
+					Dump(2,'tcfdata.rotation['+i+']',tcfdata.rotation[i].code.toString(),debug,myName)
+					Dump(2,'tcadata.rotation['+i+']',tcadata.rotation[i].code.toString(),debug,myName)
+				  	if (tcfdata.rotation[i].code.toString() != tcadata.rotation[i].code.toString())
+				  		return [inval.replace(wfrule.regex,'CourseRotationChange')];
+				}
+		}
+	}
+
+//=================================================================================================
+// Check to make sure standard variables have values
+//=================================================================================================
+if(typeof CheckVarsFirstRun == "undefined") 
+	var CheckVarsFirstRun = true;
+wffuncs.CheckVars = function(inval, wfrule, args) {
+	var debug='B'; var myName='WhatChanged';
+	if (typeof(Dump) == "function" && typeof(Debug) == "function") { 
+		Debug(1,'* * * Under Construction, please try again later * * *','S');
+		Debug(2,'',debug);  Debug(3,'*** In '+ myName + ' ***',debug);
+		Dump(3,'inval',inval,debug,myName); Dump(4,'wfrule',wfrule.toSource(),debug,myName); Dump(4,'args',args.toSource(),debug,myName); 
+	}
+	if (! CheckVarsFirstRun) return false;
+
+	// Check vars
+	CheckForVal(tcfdata.college,'School',CheckVarsFirstRun);
+	CheckForVal(tcfdata.department,'Department',CheckVarsFirstRun);
+	CheckForVal(tcfdata.subject,'Course Prefix',CheckVarsFirstRun);
+
+	CheckVarsFirstRun = false;
+	return false;
+}
+
+
+//=================================================================================================
+// Check if only course rotation (tcfdata.rotation) has changed -- dixie
+//=================================================================================================
+if(typeof ChangeTypeFirstRun == "undefined") 
+	var ChangeTypeFirstRun = true;
+wffuncs.ChangeType = function(inval, wfrule, args) {
+	var debug='D'; var myName='NoCourseRotationChanges';
+	if (typeof(Dump) == "function" && typeof(Debug) == "function") { 
+		Debug(1,'* * * Under Construction, please try again later * * *','S')  
+		Debug(2,'',debug);  Debug(3,'*** In '+ myName + ' ***',debug);
+		Dump(3,'inval',inval,debug,myName); Dump(4,'wfrule',wfrule.toSource(),debug,myName); Dump(4,'args',args.toSource(),debug,myName); 
+	}
+
+	if(args && args.context && args.context == "wfrule")
+		return false;
+
+	if (! CheckForVal(tcfdata.rotation,'Course Rotation',ChangeTypeFirstRun)) { ChangeTypeFirstRun=false; return false; }
+
+	//Get a list of fields that have changed
+	var diffdata = {};
+	tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata});
+	if (typeof(Debug) == "function") { Dump(4,'diffdata',diffdata.toSource(),debug,myName); }
+
+	for (var i in diffdata) {
+		if (typeof(Debug) == "function") { Debug(3,'Changed Field: ' + i.toString(),debug,myName); }
+		if (i.toString() != 'rotation') {
+			if (typeof(Debug) == "function") { Debug(2,' *** Found NOT allowed field changed:' + i,debug,myName); }
+			return false
+		}
+	}
+	return [inval.replace(wfrule.regex,'Course Rotation Only')];
+}
+
+//=================================================================================================
+// Determin the 'Dean of Academic Affairs' step should be included. - pcc
+//=================================================================================================
+wffuncs.AddDAA = function(inval, wfrule, args) {
+	var myName='AddDAA'; var debug='D'; var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+	if (haveDebug) { 
+		if (FirstRun) { Debug(1,'* * * Under Construction, please try again later * * *','S'); FirstRun=false}  
+		Debug(2,'',debug);  Debug(2,'*** In '+ myName + ' ***',debug);
+		Dump(3,'inval',inval,debug,myName); Dump(4,'wfrule',wfrule.toSource(),debug,myName); Dump(4,'args',args.toSource(),debug,myName); 
+	}
+
+	// Split of not wfrule or need values are not set or 'Will this course included embedded related instruction?' = 'No'
+	if(args && args.context && args.context != "wfrule")
+		return false;
+	if(!tcfdata.ccoghasrelatedinstruction || !tcfdata.ccoghasrelatedinstruction.length)
+		return false;
+	if(tcfdata.ccoghasrelatedinstruction == 'No')
+		return false;
+
+	// If new and 'Will this course included embedded related instruction?' = 'Yes'
+	if (tcfdata.newrecord && tcfdata.newrecord.length) {
+		if (tcfdata.newrecord == 'true' && tcfdata.ccoghasrelatedinstruction == 'Yes')
+			return [inval.replace(wfrule.regex,'')];
+	}
+
+	//Get a list of fields that have changed
+	var diffdata = {};
+	tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata});
+	if (!Object.keys(diffdata).length)
+		return false;
+
+	// The list of change detect fields is in the addDAAField variable defined in the config file
+	if(!tcfdata.addDAAField || !tcfdata.addDAAField.length)
+		return false;
+	if (haveDebug) {
+		tcfdata.addDAAField.forEach(function(text) {
+			Dump(4,'addDAAField',text.toString(),debug,myName);
+		});
+	}
+
+	// Loop through changed fields to see if any of the key fields have changed.
+	// If match found then null out keyword
+	var foundMatch=false
+	for (var i in diffdata) {
+		Debug(4,'\tChanged Field:' + i.toString(),debug,myName);
+		tcfdata.addDAAField.forEach(function(text) {
+			if (haveDebug) { Dump(4,'\t\tcheckstring',text.toString(),debug,myName); }
+			if (text.toString() == i)
+				foundMatch=true;
+		});
+		if (foundMatch)
+			return [inval.replace(wfrule.regex,'')];
+	}
+
+	return false;
+}

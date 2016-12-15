@@ -1,0 +1,134 @@
+//=================================================================================================
+// Override the Related function
+// 02/12/2016 - dgs - Initial coding (georgiasouthern)
+//=================================================================================================
+wffuncs.Related = function(inval, wfrule, args) {
+	var myName=wfrule.attrname; var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+	if (haveDebug) { Debug('\n*** In '+ myName + " called as '" + wfrule.searchfor + "' ***"); }
+	if (haveDebug) { Dump('\tFull Step text',inval); }
+
+	//Setup
+		var reqType=wfrule.searchfor.toLowerCase();
+		var retArray=[];
+
+	//Try block encapsulated main function
+	try {
+		// initial checks
+			InitialChecks['wfrule','code','department',formVar];
+
+		// Get proposal data
+			var parentCode=tcfdata.code[0];
+			var parentDept=tcfdata.department[0].code;
+			var parentCol=tcfdata.college_prog[0].code;
+			if (haveDebug) { Dump('\tparentCode',parentCode); Dump('\tparentDept',parentDept); Dump('\tparentCol',parentCol);}
+
+		//==================================================================================================
+		// Set the form variable data to use
+		//==================================================================================================
+			if (haveDebug) { Dump('\treqType',reqType); }
+			if (reqType.indexOf('col') >= 0) {
+				var formVar='colleges_affected';
+				var formVarAttr='colleges_affected_detail'
+				var parentToken=parentCol;
+			} else if (reqType.indexOf('dept') >= 0) {
+				var formVar='dept_affect';
+				var formVarAttr='dept_affect_detail';
+				var parentToken=parentDept;
+			}
+			if (haveDebug) { Debug('\tUsing Form Field:'); Dump('\t\tformVar',formVar); Dump('\t\tformVarAttr',formVarAttr);}
+		//==================================================================================================
+
+		var includeEcoSystemData=false;
+		if (tcfdata.RelatedIncludeEcoSystemData && tcfdata.RelatedIncludeEcoSystemData.length > 0) {
+			if (tcfdata.RelatedIncludeEcoSystemData[0]) includeEcoSystemData=true;
+			if (tcfdata.RelatedIncludeEcoSystemData[0].toLowerCase() === 'yes') includeEcoSystemData=true;
+
+
+
+			if (includeEcoSystemData) {
+				var ecoSystemType=[];
+				if (tcfdata.RelatedFromEcoSystemType && tcfdata.RelatedFromEcoSystemType.length > 0) {
+					ecoSystemType=tcfdata.RelatedFromEcoSystemType
+					var ecoSystemTypeStr='';
+					ecoSystemType.forEach(function(type) {
+						ecoSystemTypeStr=ecoSystemTypeStr + ",'" + type + "'";
+					});
+					ecoSystemTypeStr='(' + ecoSystemTypeStr.substring(1) + ')';
+				}
+				if (haveDebug) { Dump('\tecoSystemTypeStr',ecoSystemTypeStr); }
+			}
+		}
+		if (haveDebug) { Dump('\tincludeEcoSystemData',includeEcoSystemData); Debug(''); }
+
+		//==================================================================================================
+		// MAIN
+		//==================================================================================================
+		var tokens=[];
+		// Get associated data from the form field
+			var formData=[];
+			formData=eval('tcfdata.'+formVar);
+			formData.forEach(function(affected) {
+				var affectedCode=eval('affected.'+formVarAttr);
+				if (affectedCode === parentToken) return
+				tokens.push(affectedCode);
+			}) ;
+
+		// Get the data from the eco system,
+			if (includeEcoSystemData) {
+				var refsArray=[];
+				refsArray=GetEcoSystemData(parentCode,parentDept);
+				if (haveDebug) Debug('\tEco System Data:');
+				refsArray.forEach(function(ref) {
+					if (haveDebug) Dump('\t\tref',ref.toSource());
+					switch(ref.format) {
+						case 'dept':
+							if (reqType.indexOf('dept') >= 0) {
+								tokens.push(ref.data)
+							}
+							if (reqType.indexOf('col') >= 0) {
+								//lookup the college codes in the cim lookup table
+								var sqlStmt="SELECT distinct college as token FROM cimlookup WHERE department=? and college <> ?";
+								var sqlParms=[ref.data,parentToken];
+								var resultSet=dbquery("cimcourses",sqlStmt,sqlParms);
+								resultSet.forEach(function(result) { tokens.push(result.token) });
+							}
+						case 'subj':
+							if (reqType.indexOf('dept') >= 0) {
+								//lookup the dept codes in the cim lookup table
+								var sqlStmt="SELECT distinct department as token FROM cimlookup WHERE subject=? and department <> ?";
+								var sqlParms=[ref.data,parentToken];
+								var resultSet=dbquery("cimcourses",sqlStmt,sqlParms);
+								resultSet.forEach(function(result) { tokens.push(result.token) });
+							}
+							if (reqType.indexOf('col') >= 0) {
+								//lookup the college codes in the cim lookup table
+								var sqlStmt="SELECT distinct college as token FROM cimlookup WHERE subject=? and college <> ?";
+								var sqlParms=[ref.data,parentToken];
+								var resultSet=dbquery("cimcourses",sqlStmt,sqlParms);
+								resultSet.forEach(function(result) { tokens.push(result.token) });
+							}
+					} //switch
+				}); //refsArray
+			} //addEcoSystemData
+
+		//Sort and remove duplicates
+			tokens=RemoveDupes(tokens);
+
+		// Generate output array of steps
+		if (haveDebug) Debug('\tReturning Steps:');
+		var tmpStr='';
+		tokens.forEach(function(token) {
+			tmpStr=inval.replace(wfrule.regex,token);
+			if (haveDebug) Debug("\t\t" + tmpStr);
+			retArray.push(tmpStr)
+		});
+
+		return retArray;
+	} //try
+
+	//Catch block for errors thrown in above try block
+	catch(err) { if (haveDebug) { Debug(err); } else { throw myName + ': ' + err; } return false; }
+
+	// Should never get here
+	return false;
+}; //Related

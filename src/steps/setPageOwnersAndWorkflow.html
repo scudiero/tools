@@ -1,0 +1,150 @@
+%spidercode%
+//	Author: Nate Lawless
+//	Created: 2-6-13
+//	Updated: 4-5-13
+
+
+//==============================================================================
+//	HERE ARE THE CONFIGURATION OPTIONS
+//==============================================================================
+	var writefile = false;
+	var filePath = "/clienttransfers/catownersandworkflow/"
+	var ownerworkflow_file = "workflows.txt";
+	
+//==============================================================================
+// Funcions
+//==============================================================================
+
+	function openFile(filePath,file){
+		var infile = fopen(filePath + file);
+		//print_doc('Opening file: ' + file + ' ('+ infile + ') \n');
+		if (infile <= 0) {
+			return ("ERROR: Cannot open " + filePath + file + "<br />\n");
+		} else {
+			return infile;
+		}
+	}
+	
+	function objFile(file,feof){
+		//print_doc('\nbuilding objFile\n');
+		//print_doc('\nfile: ' + file +'\n" + params: ' + params.toSource() + '\n');
+		var counter = 1;
+		var header = [];
+		var filearr = [];
+		while(!feof(file)){
+			//print_doc('\ncounter: ' + counter + '\n');
+			var curr = fgets(file);
+			//print_doc('curr: "' + curr +'"\n');
+			if(counter++ == 1 && params.header){
+				header = curr.split(/\t/);
+				//print_doc('File Header:' + header + '\n\n');
+				for(var z=0;z<header.length;z++){
+					header[z] = header[z].replace(/[^a-zA-Z]/g,'').toLowerCase();
+				}
+				//print_doc('Edited Headers: ' + header + '\n');
+			} else {
+				if(curr.length && header.length){
+					curr = curr.split(/\t/);
+					var fileobj = {};
+					for(var a=0;a<curr.length;a++){
+						//print_doc('a: ' + a + ' curr[a]: ' + curr[a] +'\n');						
+						fileobj[header[a]] = curr[a];
+					}
+					filearr.push(fileobj);
+				}
+			}
+		}
+		//print_doc('filearr: ' + filearr + '\n');
+		return filearr;
+	}
+	
+	function buildRoleLookup(x){
+		if(x && x.length){
+			var lu = {};
+		} else {
+			return false;
+		}
+		for(var z=0;z<x.length;z++){
+			lu[x[z].rolename] = x[z].rolename;
+		}
+		return lu;
+	}
+	
+	function buildPageLookup(x){
+		//print_doc("Building Page Lookup\n" + typeof(x) + "\n");
+		if(x && x.length){
+			var lu = {};
+		} else {
+			//print_doc('building page lookup returning false\n');
+			return false;
+		}
+		for(var i=0;i<x.length;i++){
+			//print_doc(i+": " + x[i].toSource() + "\n");
+			//print_doc('page path: ' + x[i].pagepath+'\n');
+			lu[x[i].pagepath] = x[i];
+		}
+		//print_doc('building page lookup returning lu:\n'+lu.toSource()+'\n');
+		return lu;
+	}
+	
+	function trim(text) {
+	   return text.replace(/^\s+|\s+$/g, "");
+	}
+	
+	function cleanArray(arr){
+		var retarr = [];
+		for(var y=0;y<arr.length;y++){
+			retarr.push(trim(arr[y]));
+		}
+		return retarr;
+	}
+	
+	
+//==============================================================================
+// Main
+//==============================================================================
+	var ownerworkflows = openFile(filePath,ownerworkflow_file);
+	var warning = false;
+
+//==============================================================================
+// read in data from files	
+//==============================================================================
+if(typeof ownerworkflows != 'number'){
+	print_doc('* Error * Could not open owner & workflows file:' + ownerworkflow_file + '\n');
+	exit();
+} else {
+	//print_doc(ownerworkflows + ': opened');
+	var owOBJ = objFile(ownerworkflows,{header:true});
+}
+
+//==============================================================================
+// Load object arrays from file data.
+//==============================================================================	
+//print_doc("Loading Data\n");
+//print_doc("\tWorkflows\n");
+for(page in owOBJ){
+	owOBJ[page].pageworkflow = cleanArray(trim(owOBJ[page].pageworkflow.replace(/\"/g,'')).split(/\,/));
+	owOBJ[page].pageowners = cleanArray(trim(owOBJ[page].pageowner.replace(/\"/g,'')).split(/\,/));
+	//print_doc(owOBJ[page].pagepath+"|"+owOBJ[page].pagetitle+"|"+owOBJ[page].pageowner+"|"+owOBJ[page].pageworkflow+"\n");
+}
+
+//==============================================================================
+// Check for page data in the file array and update tcf data 
+//==============================================================================	
+pagelookup = buildPageLookup(owOBJ);
+var currpage = tcfdata.pagename[0].replace(/index\.html$/,'')
+if(pagelookup[currpage]){
+	print_doc("Working currpage: " +  pagelookup[currpage].pagetitle + "\n");
+	print_doc("URL: " + currpage + "\n");
+	print_doc("Workflow: " + pagelookup[currpage].pageworkflow + "\n");
+	print_doc("Owners: " + pagelookup[currpage].pageowners + "\n");
+	if(!warning && writefile){
+		attr_write("mustsignoff",pagelookup[currpage].pageworkflow,{savetcf:true});
+		attr_write("owner",pagelookup[currpage].pageowners,{savetcf:true});
+		print_doc('Page data updated\n');
+	}
+	print_doc('\n');
+}
+  		
+  		
+%spidercode%

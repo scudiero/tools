@@ -1,0 +1,228 @@
+#!/bin/bash
+#set -x
+minFrameworkVer=6; originalArgStr="$*";
+if [[ ${frameworkVersion:0:1} -lt $minFrameworkVer ]]; then
+	printf "\n*Error* -- This script requires a minimum framework version of '$minFrameworkVer.00', current version is '$frameworkVersion'\n*** Stopping ***\n\n"
+	trap - EXIT QUIT; exit -1
+fi
+
+#==================================================================================================
+## Scan request logs
+#==================================================================================================
+#==================================================================================================
+## Copyright ©2015 David Scudiero -- all rights reserved.
+## 10-27-14 -- 	dgs - Initial coding
+#==================================================================================================
+#==================================================================================================
+# Declare variables and constants, bring in includes file with subs
+#==================================================================================================
+myPath="${0%/*}"
+toolsPath=/steamboat/leepfrog/docs/tools
+if [[ $myPath != $TOOLSPATH ]]; then
+	noDbLog=1
+	nologs=1	
+fi
+useSubs=2
+setSemaphore=0;
+trapExceptions=0;
+if [[ -f  $myPath/dgsSubs$useSubs.sh ]]; then
+	. $myPath/dgsSubs$useSubs.sh
+elif [[ -f $HOME/tools/dgsSubs$useSubs.sh ]]; then
+	. $HOME/tools/dgsSubs$useSubs.sh
+else
+	. $TOOLSPATH/dgsSubs$useSubs.sh
+fi
+
+#==================================================================================================
+# Declare local variables and constants
+#==================================================================================================
+version=1.2
+verbose=0
+noDbLog=1
+verify=1
+unset client env stepName goBack
+
+#==================================================================================================
+## parse arguments
+#==================================================================================================
+set -f # Turn off glob
+originalArgStr=$*
+argArray=($originalArgStr)
+while [[ $i -lt ${#argArray[*]} ]]; do
+	argToken=$(Lower ${argArray[$i]})
+	#dump argToken
+	if [[ "${argToken:0:2}" = "-x" ]]; then 
+		DOIT='echo'
+	elif [[ "${argToken:0:6}" = "-testM" ]]; 
+		then testMode=1
+		printf "\* Warning * -- testMode is not supported at this time,  ignoring flag.\n"		
+	elif [[ "${argToken:0:4}" = "-nop" ]]; then 
+		verify=0
+	elif [[ "${argToken:0:2}" = "-v" ]]; then 
+		verbose=1
+	elif [[ "${argToken:0:4}" = "-deb" ]]; then 
+		DEBUG=${argToken:(-1):1}
+	elif [[ "${argToken:0:3}" = "-pa" ]]; then
+		(( i += 1 ))
+		argToken=$(Lower ${argArray[$i]})
+		pageFilter=$argToken
+	elif [[ "${argToken:0:2}" = "-s" ]]; then
+		(( i += 1 ))
+		argToken=$(Lower ${argArray[$i]})
+		stepName=$argToken
+	elif [[ "${argToken:0:2}" = "-g" ]]; then
+		(( i += 1 ))
+		argToken=$(Lower ${argArray[$i]})
+		goBack=$argToken
+		if [[ $goBack = '*' ]]; then goBack=9999; fi
+	elif [[ "${argToken:0:2}" = "-p" ]]; then
+		env='pvt'
+	elif [[ "${argToken:0:2}" = "-d" ]]; then
+		env='dev'
+	elif [[ "${argToken:0:2}" = "-t" ]]; then
+		env='test'
+	elif [[ "${argToken:0:2}" = "-n" ]]; then
+		env='next'
+	elif [[ "${argToken:0:2}" = "-c" ]]; then
+		env='curr'
+	elif [[ "${argToken:0:2}" = "-h" ]]; then
+			printf "\nSyntax:\n$myName [ flags ] [ params ] [ client ] \
+						\n\tflags: -Private -Dev -Test -Next -Curr -DEBugN -Xdoit -TESTMode -NOPrompt -Verbose -Help\
+						\n\tparms: -Stepname <stepname> -PAgefilter <pagefilter> -GoBack <archiveDepth>\
+	 					\n\t       (flags/parms may be specified using only the upper case charachters above, e.g. -P, -PA, etc) \
+						\n\tclient: clientAbbrev \
+						\n\n"
+						noDbLog=1; Goodbye -1
+	elif [[ "${argToken:0:1}" = "-" ]]; then
+	 		printf "\* Warning * -- Invalid flag ($argToken) specified on the invocation, ignoring flag.\n"
+	else 
+		if [[ $client = '' ]]; then
+			client=$argToken; 
+		elif [[ $env = '' ]]; then
+			env=$argToken; 
+		elif [[ $stepName = '' ]]; then
+			stepName=$argToken; 
+		fi
+	fi
+	(( i += 1 ))
+done
+if [[ $DEBUG -gt 0 ]]; then dump DOIT testMode verify verbose DEBUG client env stepName pageFilter goBack; fi
+set +f # Turn off glob
+
+#==================================================================================================
+## say hello
+#==================================================================================================
+Hello
+
+## Gather data from the user
+Prompt client 'What client do you wish to scan?'; client=$(Lower $client)
+Prompt env 'What environment do you wish to scan?' 'pvt dev test next curr'; env=$(Lower $env)
+if [[ "${env:0:1}" = 'p' ]]; then env=pvt; fi
+if [[ "${env:0:1}" = 'd' ]]; then env=dev; fi
+if [[ "${env:0:1}" = 't' ]]; then env=test; fi
+if [[ "${env:0:1}" = 'n' ]]; then env=next; fi
+if [[ "${env:0:1}" = 'c' ]]; then env=curr; fi
+
+#==================================================================================================
+## resolve client directories
+#==================================================================================================
+SetSiteDirs
+# Check for override environments
+if [[ $env = 'dev' &&  -d $pvtDir ]]; then 
+	Prompt yesno "Found a private dev site for this client ($pvtDir).\n\tDo you want to use that?" 'Yes No'; yesno=${yesno:0:1}; yesno=$(Lower $yesno) 
+	if [[ "$yesno" = 'y' ]]; then env='pvt'; fi
+fi
+if [[ $env = 'next' &&  -d $testDir ]]; then 
+	Prompt yesno "Found a TEST site for this client ($testDir).\n\tDo you want to use that?" 'Yes No'; yesno=${yesno:0:1}; yesno=$(Lower $yesno) 
+	if [[ "$yesno" = 'y' ]]; then env='test'; fi
+fi
+
+## Check to see if all dirs exist
+if [[ $env = 'pvt' && ! -d $pvtDir ]]; then printf "*Error* Env = $env and directory '$pvtDir' not found\nProcess stopping.\n"; Goodbye 2; fi
+if [[ $env = 'dev' && ! -d $devDir ]]; then printf "*Error* Env = $env and directory '$devDir' not found\nProcess stopping.\n"; Goodbye 2; fi
+if [[ $env = 'test' && ! -d $testDir ]]; then printf "*Error* Env = $env and directory '$testDir' not found\nProcess stopping.\n"; Goodbye 2; fi
+if [[ $env = 'next' && ! -d $nextDir ]]; then printf "*Error* Env = $env and directory '$nextDir' not found\nProcess stopping.\n"; Goodbye 2; fi
+if [[ "$env" = 'pvt' ]]; then srcDir=$pvtDir; fi
+if [[ "$env" = 'dev' ]]; then srcDir=$devDir; fi
+if [[ "$env" = 'test' ]]; then srcDir=$testDir; fi
+if [[ "$env" = 'next' ]]; then srcDir=$nextDir; fi
+
+## Check to see if the request log dirs exist
+if [[ ! -d $srcDir/requestlog ]]; then printf "*Error* RequestLog directory not found\nProcess stopping.\n"; Goodbye 2; fi
+if [[ ! -d $srcDir/requestlog-archive ]]; then printf "*Error* RequestLog directory not found\nProcess stopping.\n"; Goodbye 2; fi
+
+## Gather additional data from the user
+Prompt stepName 'What step name do you wish to filter on?'; stepName=$(Lower $stepName)
+Prompt pageFilter 'What page URL data do you wish to filter on?'; pageFilter=$(Lower $pageFilter)
+set -f # Turn off glob
+Prompt goBack 'How many archives back do you wish to look? (* for all)'; goBack=$(Lower $goBack)
+if [[ $goBack = '*' ]]; then goBack=9999; fi
+set +f # Turn on glob
+
+## Make sure the user really wants to do this
+if [[ "$verify" = "1" ]]; then
+	printf "\nYou are scanning $client\n\tsrcDir = $srcDir\n\tstepName = $stepName\n\tpageFilter = $pageFilter\n\tarchiveDepth = $goBack\n"
+	unset continue; Prompt continue "\nYes to continue" 'Yes No'; continue=$(Lower $continue); continue=${continue:0:1}
+	if [[ $continue != y ]]; then $myPath/$myName $originalArgStr;quiet=1;Goodbye; fi
+	printf "\n"
+fi
+
+
+if [[ $DEBUG = 1 ]]; then dump client env srcDir stepName pageFilter goBack; Quit; fi
+#==================================================================================================
+# Log Start
+#+=================================================================================================
+if test $noDbLog -eq 0; then
+	myLogRecordIdx=$(dbLogStart "$originalArgStr [testMode:$testMode, doit:$doit]")
+	if test "$DEBUG" -ge '2'; then dump myLogRecordIdx; fi
+fi 
+
+#==================================================================================================
+# Main loop
+#==================================================================================================
+printf "\n"
+printf "Scanning: $srcDir/requestlog...\n"
+cd $srcDir/requestlog
+tmpFile=/tmp/$userName.$myName.grepOut1.txt
+find -type f | xargs grep -l $stepName | xargs grep -l $pageFilter | sort -r > $tmpFile
+
+IFSold=$IFS; IFS='';
+while read line; do
+	timeStamp=$(echo $line | awk 'BEGIN {FS="-"}{printf "%s", $2}')
+	timeStamp=$(date -d @$timeStamp '+%m/%d/%Y %H:%M:%S')
+	printf "\t$timeStamp $line\n" 
+done < $tmpFile
+IFS=$IFSold
+
+## Scan archived logs -- untar the files to /tmp
+tgtDir=/tmp/$userName.$myName.requestlog
+if [[ -d $tgtDir ]]; then rm -rf $tgtDir; fi
+mkdir -p $tgtDir
+cd /$srcDir/requestlog-archive
+i=0
+for file in $(ls -t /$srcDir/requestlog-archive)
+do
+	(( i += 1 ))
+	printf "Scanning: $srcDir/requestlog-archive/$file...\n"
+	cd /$srcDir/requestlog-archive
+	## untar the files to /tmp
+	tar -xjf $file -C $tgtDir
+	## Scan
+	cd $tgtDir
+	find -type f | xargs grep -l $stepName | xargs grep -l $pageFilter | sort -r > $tmpFile
+	IFSold=$IFS; IFS='';
+	while read line; do
+		timeStamp=$(echo $line | awk 'BEGIN {FS="-"}{printf "%s", $2}')
+		timeStamp=$(date -d @$timeStamp '+%m/%d/%Y %H:%M:%S')
+		printf "\t$timeStamp $line\n" 
+	done < $tmpFile
+	IFS=$IFSold
+	rm -rf $tgtDir/*
+	if [[ $i -ge $goBack ]]; then break; fi
+done
+
+#==================================================================================================
+## Bye-bye
+#==================================================================================================
+Goodbye 0
+# 10-16-2015 -- dscudiero -- Update for framework 6 (1.2)

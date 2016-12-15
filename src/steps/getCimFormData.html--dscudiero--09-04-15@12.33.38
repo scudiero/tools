@@ -1,0 +1,216 @@
+%spidercode%
+//============================================================================================================
+//use this step to generate output to be pasted into Excel
+//============================================================================================================
+// Function wrapper
+(function parseCimForm() {
+
+var debug=false;
+//============================================================================================================
+//Variable Declares
+//============================================================================================================
+	var cims=[];
+	if (cims.length == 0) 
+		cims=['courseadmin','programadmin'];
+	var version="1.0";
+	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
+	var header="CIM\tField Code\tField Name\tField Type\tField Requiredness\tField SIS Mapping\tComments"
+
+	// Get time date
+	var dt = new Date();
+	//var utcDate = dt.toUTCString();
+	var timeDate = dt.toLocaleString();
+
+	var userName = getenv("LOGNAME");
+
+//============================================================================================================
+//# Hello
+//============================================================================================================
+if (debug) {
+	print_debug("\n*** In " + myName + " ***\n");
+	print_debug("Current page = >" + tcfdata.pagename[0] + "<\n");
+}
+
+//============================================================================================================
+// Main
+//============================================================================================================
+// process each cim
+var addHeader = true;
+cims.forEach(function(cim) {
+	var fields = {};
+	var dbformfieldsRecs = [];
+	var tcfviewRecs = [];
+	var cycleattrsRecs = [];
+
+	// Get data from primary config file
+		if (debug) {print_debug("\n\n*** Processing cim: " + cim + "\n");}
+		var cfgFile="/" + cim + "/cimconfig.cfg"
+		var configData = load_tcf(cfgFile);
+		if ( configData == false ) {
+			print_doc("*Error* -- load_tcf of " + cfgFile + " returned false, skipping\n")
+			print_debug("*Error* -- load_tcf of " + cfgFile + " returned false, skipping\n")
+		}
+
+		// Copy data to work arrays
+		configData.dbformfields.forEach(function(data) {
+			dbformfieldsRecs.push(data);
+		});
+		configData.tcfview.forEach(function(data) {
+			tcfviewRecs.push(data);
+		});
+		configData.cycleattrs.forEach(function(data) {
+			cycleattrsRecs.push(data);
+		});
+
+
+	// Check to see if there is a form builder config file, it there is then load it
+		cfgFile="/" + cim + "/cimconfig-fb.cfg"
+		var fileHandle = fopen(cfgFile)
+		if (typeof fileHandle == "number") {
+			if (debug) { print_debug("*** Loading: " + cfgFile + "\n") }
+			var fbConfigData = load_tcf(cfgFile);	
+			if ( fbConfigData == false ) {
+				print_doc("*Error* -- load_tcf of " + cfgFile + " returned false, skipping\n")
+				print_debug("*Error* -- load_tcf of " + cfgFile + " returned false, skipping\n")
+			}
+			// Copy data to work arrays
+			fbConfigData.dbformfields.forEach(function(data) {
+				dbformfieldsRecs.push(data);
+			});
+			fbConfigData.tcfview.forEach(function(data) {
+				tcfviewRecs.push(data);
+			});
+			fbConfigData.cycleattrs.forEach(function(data) {
+				cycleattrsRecs.push(data);
+			});
+		}
+
+	// process dbformfields records
+		if (dbformfieldsRecs && dbformfieldsRecs) {
+			if (debug) { print_debug("\n*** Processing " + cim + " dbformfields ***\n") }
+				dbformfieldsRecs.forEach(function(dbformfieldsRec) {
+				//dbformfields:crse_for_majors|radio|Is course intended primarily for majors?|falseval=No;skipsync=true;
+				if (debug) { print_debug("\tdbformfieldsRec = >" + dbformfieldsRec + "<\n") }
+				tokens=dbformfieldsRec.split('|')
+				if (debug) {
+					print_debug("\t\ttokens[0] = >" + tokens[0] + "<\n"); print_debug("\t\ttokens[1] = >" + tokens[1] + "<\n")
+					print_debug("\t\ttokens[2] = >" + tokens[2] + "<\n"); print_debug("\t\ttokens[3] = >" + tokens[3] + "<\n")
+				}
+				var requiredness=''
+				var comment=''
+				if (tokens[3] != '') {
+					var subFields=tokens[3].split(';')
+					subFields.forEach(function(subField) {
+						if (debug) {print_debug("\t\tsubField = >" + subField + "<\n");}
+						if ( subField.indexOf("requirednew=true") >= 0) {requiredness='New'}
+						if ( subField.indexOf("required=true") >= 0) {requiredness='Yes'}
+						if ( subField.indexOf("falseval=") >= 0) {
+							comment = comment + ', DefaultValue = ' + subField.split('=')[1]
+						}
+						if ( subField.indexOf("skipsync=") >= 0) {
+							comment = comment + ', SkipSync = ' + subField.split('=')[1]
+						}
+					});
+				}
+				// Create a field object in the hash table
+				if (comment != '') {comment = comment.substring(2)}
+				fields[tokens[0]] = {"cim":cim, "type":tokens[1], "name":tokens[2], "requiredness":requiredness, "sisMap":"", "comment":comment};
+			});
+		}
+
+	// process tcfview records
+		if (tcfviewRecs && tcfviewRecs) {
+			if (debug) { print_debug("\n*** Processing " + cim + " tcfview ***\n") }
+			tcfviewRecs.forEach(function(tcfviewRec) {
+				if (debug) { print_debug("\ttcfview = >" + tcfviewRec + "<\n") }
+				tokens=tcfviewRec.split('|')
+				if (debug) { print_debug("\t\ttokens[0] = >" + tokens[0] + "<\n"); print_debug("\t\ttokens[1] = >" + tokens[1] + "<\n") }
+
+				// Parse the record based on its type
+					switch(tokens[0]) {
+					    case 'mapfield':
+							tokens=tokens[1].split(':')
+							if (debug) { print_debug("\t\t\ttokens[0] = >" + tokens[0] + "<\n"); print_debug("\t\t\ttokens[1] = >" + tokens[1] + "<\n") }
+							// Parse of 'real' code if the string is dotted
+							tokens[1]=tokens[1].split('.')[0];
+							if (tokens[1] in fields) {
+								fields[tokens[1]].sisMap = tokens[0];							
+							}
+					        break;
+					    case 'basic':
+					    case 'multiline':
+					    	var sisMap = tokens[1];
+					    		print_debug('tokens[1] 1 = >' + tokens[1] + "<\n" )
+					    	// Parse off the token after the 'AS' to be the field name
+					    	if (tokens[1].indexOf(" AS ") >= 0) {
+						    	tokens=tokens[1].split(' AS ');
+						    	tokens=tokens[1].split(' ');
+								if (tokens[0] in fields) {			    	
+									fields[tokens[0]].sisMap = sisMap;
+								}
+							// 'AS' not found so assume SELECT xxsx FROM format 
+					    	} else {
+					    		print_debug('tokens[1] 2 = >' + tokens[1] + "<\n" )
+					    		tokens=tokens[1].split(' ');
+					    		print_debug('tokens = >' + tokens[1] + "<\n" )
+					    		if (tokens[1] in fields) {
+					    			fields[tokens[1]].sisMap = sisMap;
+					    		}
+					    	}
+					        break;
+					    case 'function':
+					    	//TODO: Not sure what to do here
+					        break;
+					}
+			});
+		}
+
+	// process cycleattrs records
+		if (cycleattrsRecs && cycleattrsRecs) {
+			if (debug) { print_debug("\n*** Processing " + cim + " cycleattrs ***\n") }
+			cycleattrsRecs.forEach(function(token) {
+				if (debug) { print_debug("\tcycleattrs = >" + token + "<\n") }
+				if (token in fields) {
+					if (debug) {print_debug("\t\tfields[" + token + "].comment 1 = >" + fields[token].comment + "<\n")}
+					if (fields[token].comment == '') {
+						fields[token].comment = 'ClearOnApproval: Yes' 
+					} else {
+						fields[token].comment = fields[token].comment + ', ClearOnApproval: Yes' 
+					}
+					if (debug) {print_debug("\t\tfields[" + token + "].comment 2 = >" + fields[token].comment + "<\n")}
+				}
+			});
+		}
+
+	//Write the putput for this cim to stdout
+		if (Object.keys(fields).length > 0) {
+			// Sort keys
+			keyArray=[]
+			for (var key in fields) { keyArray.push(key) }
+			keyArray.sort();
+			// Add header
+			if (addHeader) {
+				print_doc("\n" + myName + " (" + version + ")\t" + userName + "\t\t\t\t\t" + timeDate + "\n" )
+				print_doc("\n" + header + "\n");				
+			}
+			// Print fields
+			keyArray.forEach(function(key) {
+				if (debug) { print_debug(fields[key].cim + "\t" + key + "\t" + fields[key].name + "\t" + fields[key].type + "\t" + fields[key].requiredness + "\t" + fields[key].sisMap + "\n"); }
+				print_doc(fields[key].cim + "\t" + key + "\t" + fields[key].name + "\t" + fields[key].type + "\t" + 
+					      fields[key].requiredness + "\t" + fields[key].sisMap + "\t" + fields[key].comment + "\n");
+			});		
+			addHeader = false;
+		}
+
+});  //cims loop
+
+// Write out caveats
+	print_doc("\n\nNote: report only includes form fields defined in the cimconfig.cfg and cimconfig-fb.cfg files.\n")
+	print_doc("Additional fields may be brought into the form by custom functions, please check with your CIM form developer.\n")
+
+return;
+
+//============================================================================================================
+//Close function wrapper
+})();
+%spidercode%

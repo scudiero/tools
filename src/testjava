@@ -1,0 +1,65 @@
+#!/bin/bash
+#=========================================================================================================================================================================
+if [[ $1 == 'full' ]]; then
+	shift
+	myPath="$(dirname $0)"; myName="$(basename $0)";
+	warehouseDb='warehouse'
+	dbAcc='Read'; mySqlUser="leepfrog$dbAcc"; mySqlHost='duro'; mySqlPort=3306
+	[[ -r "$TOOLSPATH/src/.pw1" ]] && mySqlPw=$(cat "$TOOLSPATH/src/.pw1")
+	sqlHostIP=$(dig +short $mySqlHost.inside.leepfrog.com)
+	[[ $sqlHostIP == '' ]] && sqlHostIP=$(dig +short $mySqlHost.leepfrog.com)
+	mySqlConnectString="-h $sqlHostIP -port=$mySqlPort -u $mySqlUser -p$mySqlPw $warehouseDb"
+	. $HOME/tools/framework.sh
+	ParseArgsStd
+else
+	myName='testsh2'
+	tmpFile="/tmp/$LOGNAME.testsh2.$$"
+	function dump { echo "$1 = >${!1}<"; }
+	function quit { exit $1; }; function Quit { exit $1; };
+fi
+#=========================================================================================================================================================================
+#=========================================================================================================================================================================
+
+siteDir=$(dirname $(dirname $0))
+
+skeletonRoot="$TOOLSPATH/courseleafSkeletonShadow"
+siteDir=/mnt/sawmill/uark-test/test
+cim='courseadmin'
+backupRootDir="$siteDir/attic"
+
+tgtDir="/mnt/dev6/web/wku-dscudiero/web/courseadmin"
+cpyFile='/web/courseadmin/workflow.tcf'
+
+#=========================================================================================================================================================================
+echo;echo;
+#=========================================================================================================================================================================
+
+module=$1; shift
+
+jars=($(find $HOME/tools/jars  -mindepth 1 -maxdepth 1 -type f))
+unset jarString
+for jar in ${jars[@]}; do
+	jarString="$jarString:$jar"
+done
+jarString=".:${jarString:1}"
+classPathSave="$CLASSPATH"
+export CLASSPATH="$jarString"
+
+cwd="$(pwd)"
+cd $HOME/tools/java
+[[ -f ${module}.class ]] & rm -f ${module}.class
+javac ${module}.java
+
+set -f
+sqlStmt="select * from clients where recordStatus=\"A\""
+#sqlStmt="truncate semaphore"
+java $module $sqlStmt
+
+export CLASSPATH="$classPathSave"
+cd "$cwd"
+
+#=========================================================================================================================================================================
+echo;echo;
+[[ -f $tmpFile ]] && rm -f $tmpFile
+exit
+#=========================================================================================================================================================================

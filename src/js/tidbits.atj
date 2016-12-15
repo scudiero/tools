@@ -1,0 +1,126 @@
+
+============================================================================================================================================================================
+tcfview.onDataLoad = function(data, args) {
+	//preserve justification cycle attr
+	if(data.newphasetwo && data.newphasetwo.length && (!data.justification || !data.justification.length)
+			&& tcadata && tcadata.justification && tcadata.justification.length) {
+		data.justification = attr_write("justification", tcadata.justification, {savetcf: false});
+	}
+}
+
+============================================================================================================================================================================
+print_debug('\ninval =' + inval + '\nwfrule =' + wfrule.toSource() + '\nargs =' + args.toSource() + '\n'  );
+print_debug('args.context = ' + args.context.toString() + '\n');	
+
+============================================================================================================================================================================
+return [inval.replace(wfrule.regex,'')];
+return [inval.replace(wfrule.ifregex,'')];
+
+============================================================================================================================================================================
+//Loop through array using iterator
+for (var i=0,  tot=myArray.length; i < tot; i++) {
+  console.log(myArray[i]); 
+}
+
+============================================================================================================================================================================
+//Loop through array using forEach
+resultSet.forEach(function(text) { 
+	print_debug('text = ' + text.toSource() + '\n');
+});
+
+============================================================================================================================================================================
+//Regular Expression testing
+var regex = new RegExp('^[123]..$','i');
+if (regex.test(tcfdata.course_number)) {
+
+// Function to sort array of objects by dept field
+function compareDepts(a,b) {
+  if (a.dept < b.dept)
+     return -1;
+  if (a.dept > b.dept)
+    return 1;
+  return 0;
+}
+
+
+============================================================================================================================================================================
+// or'ED REGULAR EXPRESSIONS
+wfrules:useprog|iffieldmatch|department.code|value=/EDUC%7CIDPC%7CIDPE%7CIDPA%7CAE%7CAS/
+wfrules:usedept|iffieldmatch|department.code|value!=/EDUC%7CIDPC%7CIDPE%7CIDPA%7CAE%7CAS/
+
+wfrules:isminorchange|iffieldmatch|editprog_loi_select.groupname|value=/^LON.*/
+wfrules:ismajorchange|iffieldmatch|editprog_loi_select.groupname|value=/^LOI.*/
+
+
+============================================================================================================================================================================
+wfrules:displaytcfvalues|function|DisplayTCFValues|
+//Display proposal values of interest
+wffuncs.DisplayTCFValues = function(inval, wfrule, args) {
+	var subj=''; var dept=''; var col=''; var acadLevel=''; var courseNum;
+	if ( typeof tcfdata.subject != 'undefined' )
+		var subj=tcfdata.subject[0].code;
+	if ( typeof tcfdata.college != 'undefined' )
+		var col=tcfdata.college[0].code;
+	if ( typeof tcfdata.department != 'undefined' )	
+		var dept=tcfdata.department[0].code;		
+	if ( typeof tcfdata.acad_level != 'undefined' )
+		var acadLevel=tcfdata.acad_level[0].code;
+	if ( typeof tcfdata.course_number != 'undefined' )
+		var courseNum=tcfdata.course_number;
+
+	print_doc('&nbsp;&nbsp;<strong>TCF Data:</strong><ul>');
+	if (col != '') 			print_doc('<li> college = ' + col + '</li>');
+	if (dept != '') 		print_doc('<li> department = ' + dept + '</li>');
+	if (subj != '') 		print_doc('<li> subject = ' + subj + '</li>');
+	if (courseNum != '') 	print_doc('<li> courseNum = ' + courseNum + '</li>');		
+	if (acadLevel != '') 	print_doc('<li> acadLevel = ' + acadLevel + '</li>');
+	print_doc('</ul><hr>');
+
+	return false
+}
+
+============================================================================================================================================================================
+// Create an object, add element to object array
+var ref={};
+var refsArray=[];
+
+ref.data=data;
+ref.format='dept';
+
+refsArray.push(ref);
+
+if (haveDebug) {
+	Debug('\n\trefsArray from form fields:');
+	for (var key in refsArray) { Dump('\t\trefsArray[' + key + ']',refsArray[key].toSource()); }
+	Debug('');
+}
+
+============================================================================================================================================================================
+// Get current directory
+var wfPathbase=tcfdata.pagename[0].replace(/^\/([^\/]*)\/.*/, "/$1/");
+prtStr="=== Loading ..." + wfPathbase + "/custom-workflow.atj, proposal mode is " + wfProposalMode
+
+============================================================================================================================================================================
+// set changedFields to cycleattrs, loop through and push to avoid change cycleaddres since it is passed by reference
+var allowChangedFields=[];
+tcfdata.cycleattrs.forEach(function(field) { allowChangedFields.push(field) });  // jshint ignore:line
+allowChangedFields.push('<variableName>');
+
+if (CheckChanged(diffdata,allowChangedFields,'any',true)) {
+}
+
+============================================================================================================================================================================
+// process sql results
+	var sqlParms=[]
+	sqlParms.push(????);
+	sqlParms.push(????);
+	// Run Query 
+	var sql="SELECT DISTINCT path,dept FROM courseref WHERE code = ? AND dept <> ? AND dept <> ''" + pathClause;
+	var resultSet=dbquery("courseref", sqlStmt,sqlParms);
+	if(resultSet.length == 0) {
+		if (haveDebug) { Debug("\t *** No data returned from sql query: \n\t" +  sql); }
+		return false;
+	} else {
+		resultSet.forEach(function(result) {
+		});
+	}

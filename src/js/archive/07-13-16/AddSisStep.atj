@@ -1,0 +1,44 @@
+
+//Set include SIS step on (true) or off (false) -- only applys to DEV env.
+addSisDev:true
+
+wfrules:SISsync|function|AddSisStep|
+
+//=========================================================================================================================
+// Pull the sisName value in the config file and replace that in the workflow, include in workflow if 
+// not running on dev unless SISsyncDev variable is set to true
+// ??/??/2014 - dgs - New
+// 02/26/2015 - dgs - Refactored to move sisname = '' warning earlier, add sisname to other messages
+//=========================================================================================================================
+wffuncs.AddSisStep = function(inval, wfrule, args) {
+	// setup
+	var myName=wfrule.attrname; var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+	if (haveDebug) { Debug('\n*** In '+ myName + ' ***'); /* Dump('\tinval',inval); Dump('\twfrule',wfrule.toSource()); Dump('\targs',args.toSource()); */ }
+	// Check execution env
+	if(args && args.context && args.context != "wfrule")
+		return false;
+
+	// Get sisname from cimconfig.cfg
+	if (tcfdata.sisname == '') {
+		var spaceing='&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+		print_doc(spaceing + '<strong>*Error* -- Default SIS name not set in cimconfig.cfg file.<br>' + spaceing + 'Please contact your CourseLeaf Administrator </strong>')
+		return false;
+	}
+
+	// If running on dev and 'addSisDev' is no true then return, do not include sis sync step.
+	var host=getenv("HTTP_HOST")
+	if (host.indexOf('.dev') >= 0) {
+		if (typeof tcfdata.addSisDev == "undefined") {
+			Debug("\t* Warning * -- Not including SIS Sync step (" + tcfdata.sisname + "), DEV env & tcfdata.addSisDev undefined","B");
+			return false;
+		}
+		if (tcfdata.addSisDev != 'true') {
+			Debug("\t* Warning * -- Not including SIS Sync step (" + tcfdata.sisname + "), DEV env & tcfdata.addSisDev != true","B");
+			return false;
+		}
+	}
+
+	// Add SIS Sync Step
+	Debug('\tAdding SIS Sync step: ' + tcfdata.sisname.trim());
+	return tcfdata.sisname;
+}

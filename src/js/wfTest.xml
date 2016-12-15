@@ -1,0 +1,709 @@
+<!--
+==========================================================================
+Automated test patterns for workflow
+Please see xxxx
+DO NOT DELETE/MODIFY THIS FILE WITHOUT CONTACTING David Scudiero
+==========================================================================
+-->
+
+<?xml version="1.0" encoding="UTF-8"?>
+<wftest>
+	<instance name="courseadmin">
+		<!-- ------------------------------------------------------------- -->
+		<group name="ProposalState"
+			<test name="IsNew">
+				<setup>
+					<workflow name="standard">
+					<step>START</step>
+					<step>Is New isNew</step>
+					<step>Is Edit isEdit</step>
+					<step>Is Delete isDelete</step>
+					<step>END</step>
+					<tcfdata name="newrecord" value="true">
+				</setup>
+				<expect>
+					<workflow>standard</workflow>
+					<step>START</step>
+					<step>Is New</step>
+					<step>END</step>
+				</expect>
+			</test>
+			<test name="IsEdit">
+				<setup>
+					<workflow name="standard">
+					<step>START</step>
+					<step>Is New isNew</step>
+					<step>Is Edit isEdit</step>
+					<step>Is Delete isDelete</step>
+					<step>END</step>
+					<tcfdata name="newrecord" value="false">
+					<tcfdata name="deleterec" value="false">
+				</setup>
+				<expect>
+					<workflow>standard</workflow>
+					<step>START</step>
+					<step>Is Edit</step>
+					<step>END</step>
+				</expect>
+			</test>
+			<test name="IsDelete">
+				<setup>
+					<workflow name="standard">
+					<step>START</step>
+					<step>Is New isNew</step>
+					<step>Is Edit isEdit</step>
+					<step>Is Delete isDelete</step>
+					<step>END</step>
+					<tcfdata name="deleterec" value="true">
+				</setup>
+				<expect>
+					<workflow>standard</workflow>
+					<step>START</step>
+					<step>Is Delete</step>
+					<step>END</step>
+				</expect>
+			</test>
+		</group>
+
+		<!-- ------------------------------------------------------------- -->
+		<test name="ColSubstitution">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>College: Col</step>
+				<step>Department: Dept</step>
+				<step>Subject: Subj</step>
+				<step>END</step>
+				<tcfdata name="college" value="XXX">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>College: XXX</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="DeptSubstitution">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>College: Col</step>
+				<step>Department: Dept</step>
+				<step>Subject: Subj</step>
+				<step>END</step>
+				<tcfdata name="department" value="XXX">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>Department: XXX</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="SubjSubstitution">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>College: Col</step>
+				<step>Department: Dept</step>
+				<step>Subject: Subj</step>
+				<step>END</step>
+				<tcfdata name="subject" value="XXX">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>Subject: XXX</step>
+				<step>END</step>
+			</expect>
+		</test>
+
+		<!-- ------------------------------------------------------------- -->
+		<test name="Undergraduate">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Is Undergraduate] isUndergraduate</step>
+				<step>[Is Graduate] isGraduate</step>
+				<step>[Is Graduate Small] isGraduateSmall</step>
+				<step>[Is Doctorial] isDoctorial</step>
+				<step>END</step>
+				<tcfdata name="course_number" value="499">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>[Is Undergraduate]</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="NotUndergraduate">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Is Undergraduate] isUndergraduate</step>
+				<step>END</step>
+				<tcfdata name="course_number" value="500">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+
+		<!-- ------------------------------------------------------------- -->
+		<test name="Graduate">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Is Undergraduate] isUndergraduate</step>
+				<step>[Is Graduate] isGraduate</step>
+				<step>[Is Graduate Small] isGraduateSmall</step>
+				<step>[Is Doctorial] isDoctorial</step>
+				<step>END</step>
+				<tcfdata name="course_number" value="500">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>[Is Graduate]</step>
+				<step>[Is Graduate Small]</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="NotGraduate">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Is Graduate] isGraduate</step>
+				<step>END</step>
+				<tcfdata name="course_number" value="499">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+
+		<!-- ------------------------------------------------------------- -->
+		<test name="GraduateSmall">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Is Undergraduate] isUndergraduate</step>
+				<step>[Is Graduate] isGraduate</step>
+				<step>[Is Graduate Small] isGraduateSmall</step>
+				<step>[Is Doctorial] isDoctorial</step>
+				<step>END</step>
+				<tcfdata name="course_number" value="799">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>[Is Graduate]</step>
+				<step>[Is Graduate Small]</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="NotGraduateSmallLow">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Is Graduate Small] isGraduateSmall</step>
+				<step>END</step>
+				<tcfdata name="course_number" value="499">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="NotGraduateSmallHigh">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Is Graduate Small] isGraduateSmall</step>
+				<step>END</step>
+				<tcfdata name="course_number" value="800">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+
+		<!-- ------------------------------------------------------------- -->
+		<test name="Doctorial">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Is Undergraduate] isUndergraduate</step>
+				<step>[Is Graduate] isGraduate</step>
+				<step>[Is Graduate Small] isGraduateSmall</step>
+				<step>[Is Doctorial] isDoctorial</step>
+				<step>END</step>
+				<tcfdata name="course_number" value="800">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>[Is Graduate]</step>
+				<step>[Is Doctorial]</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="NotDoctorial">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Is Doctorial] isDoctorial</step>
+				<step>END</step>
+				<tcfdata name="course_number" value="799">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+
+		<!-- ------------------------------------------------------------- -->
+		<test name="GenEd">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Is GenEd] isGenEd</step>
+				<step>END</step>
+				<tcfdata name="course_cat_ug" value="MC">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>[Is GenEd]</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="NotGenEd">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Is GenEd] isGenEd</step>
+				<step>END</step>
+				<tcfdata name="course_cat_ug" value="FF">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+
+		<!-- ------------------------------------------------------------- -->
+		<test name="subjIn-GAME-FAVS-AMGT-MAN-CVPA-GAME">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Subject in GAME/FAVS/AMGT/MAN/CVPA] subjIn-GAME-FAVS-AMGT-MAN-CVPA</step>
+				<step>END</step>
+				<tcfdata name="subject" value="GAME">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>[Subject in GAME/FAVS/AMGT/MAN/CVPA]</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="subjIn-GAME-FAVS-AMGT-MAN-CVPA-FAVS">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Subject in GAME/FAVS/AMGT/MAN/CVPA] subjIn-GAME-FAVS-AMGT-MAN-CVPA</step>
+				<step>END</step>
+				<tcfdata name="subject" value="FAVS">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>[Subject in GAME/FAVS/AMGT/MAN/CVPA]</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="subjIn-GAME-FAVS-AMGT-MAN-CVPA-AMGT">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Subject in GAME/FAVS/AMGT/MAN/CVPA] subjIn-GAME-FAVS-AMGT-MAN-CVPA</step>
+				<step>END</step>
+				<tcfdata name="subject" value="AMGT">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>[Subject in GAME/FAVS/AMGT/MAN/CVPA]</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="subjIn-GAME-FAVS-AMGT-MAN-CVPA-MAN">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Subject in GAME/FAVS/AMGT/MAN/CVPA] subjIn-GAME-FAVS-AMGT-MAN-CVPA</step>
+				<step>END</step>
+				<tcfdata name="subject" value="MAN">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>[Subject in GAME/FAVS/AMGT/MAN/CVPA]</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="subjIn-GAME-FAVS-AMGT-MAN-CVPA-CVPA">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Subject in GAME/FAVS/AMGT/MAN/CVPA] subjIn-GAME-FAVS-AMGT-MAN-CVPA</step>
+				<step>END</step>
+				<tcfdata name="subject" value="CVPA">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>[Subject in GAME/FAVS/AMGT/MAN/CVPA]</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="NotsubjIn-GAME-FAVS-AMGT-MAN-CVPA">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Subject in GAME/FAVS/AMGT/MAN/CVPA] subjIn-GAME-FAVS-AMGT-MAN-CVPA</step>
+				<step>END</step>
+				<tcfdata name="subject" value="fred">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+
+		<!-- ------------------------------------------------------------- -->
+		<test name="subjNotIn-GAME-FAVS-AMGT-MAN-CVPA-GAME">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Subject Not in GAME/FAVS/AMGT/MAN/CVPA] subjNotIn-GAME-FAVS-AMGT-MAN-CVPA</step>
+				<step>END</step>
+				<tcfdata name="subject" value="GAME">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="subjNotIn-GAME-FAVS-AMGT-MAN-CVPA-FAVS">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Subject Not in GAME/FAVS/AMGT/MAN/CVPA] subjNotIn-GAME-FAVS-AMGT-MAN-CVPA</step>
+				<step>END</step>
+				<tcfdata name="subject" value="FAVS">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="subjNotIn-GAME-FAVS-AMGT-MAN-CVPA-AMGT">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Subject Not in GAME/FAVS/AMGT/MAN/CVPA] subjNotIn-GAME-FAVS-AMGT-MAN-CVPA</step>
+				<step>END</step>
+				<tcfdata name="subject" value="AMGT">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="subjNotIn-GAME-FAVS-AMGT-MAN-CVPA-MAN">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Subject Not in GAME/FAVS/AMGT/MAN/CVPA] subjNotIn-GAME-FAVS-AMGT-MAN-CVPA</step>
+				<step>END</step>
+				<tcfdata name="subject" value="MAN">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="subjNotIn-GAME-FAVS-AMGT-MAN-CVPA-CVPA">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Subject Not in GAME/FAVS/AMGT/MAN/CVPA] subjNotIn-GAME-FAVS-AMGT-MAN-CVPA</step>
+				<step>END</step>
+				<tcfdata name="subject" value="CVPA">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="subjIn-GAME-FAVS-AMGT-MAN-CVPA">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Subject Not in GAME/FAVS/AMGT/MAN/CVPA] subjNotIn-GAME-FAVS-AMGT-MAN-CVPA</step>
+				<step>END</step>
+				<tcfdata name="subject" value="fred">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>[Subject Not in GAME/FAVS/AMGT/MAN/CVPA]</step>
+				<step>END</step>
+			</expect>
+		</test>
+
+		<!-- ------------------------------------------------------------- -->
+		<test name="deptIn-CHEM-PHYS-CDS--CHEM">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Department in Set] deptIn-CHEM-PHYS-CDS</step>
+				<step>END</step>
+				<tcfdata name="department" value="CHEM">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>[Department in Set]</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="deptIn-CHEM-PHYS-CDS--PHYS">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Department in Set] deptIn-CHEM-PHYS-CDS</step>
+				<step>END</step>
+				<tcfdata name="department" value="PHYS">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>[Department in Set]</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="deptIn-CHEM-PHYS-CDS--CDS">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Department in Set] deptIn-CHEM-PHYS-CDS</step>
+				<step>END</step>
+				<tcfdata name="department" value="CDS">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>[Department in Set]</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="NOT--deptIn-CHEM-PHYS-CDS">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Department in Set] deptIn-CHEM-PHYS-CDS</step>
+				<step>END</step>
+				<tcfdata name="department" value="FRED">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+
+		<!-- ------------------------------------------------------------- -->
+		<test name="deptIsGSE">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Department is GSE] deptIsGSE</step>
+				<step>END</step>
+				<tcfdata name="department" value="GSE">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>[Department is GSE]</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="deptIsNotGSE">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Department is GSE] deptIsGSE</step>
+				<step>END</step>
+				<tcfdata name="department" value="FRED">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+
+		<!-- ------------------------------------------------------------- -->
+		<test name="subjIsHDFS">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Step Good] subjIsHDFS</step>
+				<step>END</step>
+				<tcfdata name="subject" value="HDFS">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>[Step Good]</step>
+				<step>END</step>
+			</expect>
+		</test>
+			<test name="NOTsubjIsHDFS">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Step Good] subjIsHDFS</step>
+				<step>END</step>
+				<tcfdata name="subject" value="Fred">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+
+		<!-- ------------------------------------------------------------- -->
+		</test>
+			<test name="workflowSelectCollege--AR">
+			<setup>
+				<workflow name="AR standard">
+				<step>START</step>
+				<step>END</step>
+				<tcfdata name="college" value="AR">
+			</setup>
+			<expect>
+				<workflow>AR standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+		</test>
+			<test name="workflowSelectCollege--HH">
+			<setup>
+				<workflow name="HH standard">
+				<step>START</step>
+				<step>END</step>
+				<tcfdata name="college" value="HH">
+			</setup>
+			<expect>
+				<workflow>HH standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+		</test>
+			<test name="workflowSelectCollege--standard">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>END</step>
+				<tcfdata name="college" value="XX">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+
+		<!-- ------------------------------------------------------------- -->
+		</test>
+			<test name="RelatedDepts">
+			<setup>
+				<workflow name="SC standard">
+				<step>START</step>
+				<step>RelatedAndEquivalentDepts Chair</step>
+				<step>END</step>
+				<tcfdata name="code" value="BIOL 203">
+				<tcfdata name="college" value="SC">
+				<tcfdata name="department" value="BIOL">
+				<tcfdata name="subject" value="BIOL">
+				<tcfdata name="equiv" value="ACCT 203">
+				<tcfdata name="equiv" value="ARTS 203">
+			</setup>
+			<expect>
+				<workflow>SC standard</workflow>
+				<step>START</step>
+				<step>BU Chair</step>
+				<step>AVT Chair</step>
+				<step>END</step>
+			</expect>
+		</test>
+
+		<!-- ------------------------------------------------------------- -->
+		<test name="HasChanges-Changed">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>Department has changes HasChanges</step>
+				<step>END</step>
+				<tcfdata name="department" value="AAA">
+				<tcadata name="department" value="BBB">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>Department has changes</step>
+				<step>END</step>
+			</expect>
+		</test>
+		<test name="HasChanges-NoChange">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>Department has changes HasChanges</step>
+				<step>END</step>
+				<tcfdata name="department" value="AAA">
+				<tcadata name="department" value="AAA">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+
+	</instance>
+
+<wftest>

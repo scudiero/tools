@@ -1,0 +1,36 @@
+%spidercode%
+//=================================================================================================
+// export roles data as a tabbed file.
+//================================================================================================= 
+var user = getenv("USER");
+if (user.length == 0 ) { user = '' } else {user = ' (' + user.toString() + ')' }
+var myDate = new Date();
+print_stdout(myDate.toLocaleString().toString() + user + '\n');
+
+print_stdout('Role Name\tMembers\tRole Email\n');	
+var roles = load_tcf(tcfdata.progdir[0] + "/roles.tcf");
+if (roles.role && roles.role.length) {
+	for (var i = 0; i < roles.role.length; i++) {
+		var c = roles.role[i];
+		var id = c.name;
+		var mem = c.members.split(",");
+		if (typeof roles.emai != "undefined") {
+			var email = roles.email;
+		} else { 
+			var email = '' 
+		}
+
+		var memString='';		
+		mem.forEach(function(m) {
+			var userName = getUser(m);
+			if (memString.length == 0 ) { 
+				memString = m.toString() + ' [' + userName.name + '(' + userName.email + ')]' 
+			} else {
+				memString = memString + ', ' + m.toString() + ' [' + userName.name + '(' + userName.email + ')]' 
+			}
+		});
+		print_stdout(id + '\t' + memString + '\t' + email + '\n');		
+	}
+}
+
+%spidercode%

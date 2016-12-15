@@ -1,0 +1,39 @@
+
+In workflow.tcf
+	localsteps:Workflow Management|groups|workflow|attributes=isundergraduate[Is Undergraduate],fyi[FYI Only],isgraduate[Is Graduate],fyiall[FYI All],optional[If Exists],extreview[External Review];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
+
+In cimconfig.cfg
+	wfrules:isundergraduate|function|IsUndergraduate|       
+	wfrules:isgraduate|function|IsGraduate|  
+
+In custom.atj
+	// Is graduate function, program type = PBC, CAS or Major(with Degree does not start with a 'B')  
+	wffuncs.IsGraduate = (function(inval, wfrule) {
+		//print_debug('\n\nIsGraduate \n');
+		//print_debug('\ninval = ' + inval + '\nwfrule =' + wfrule.toSource() + '\n');
+		//print_debug('\program_type = ' + tcfdata.program_type.toSource() + '\n');
+		//print_debug('\degreecode = ' + tcfdata.degreecode.toSource() + '\n');
+		
+		if (tcfdata.program_type[0].code == 'minor') 
+			return false;
+		if (tcfdata.program_type[0].code == 'major' && tcfdata.degreecode[0].code.toUpperCase().substring(0,1) == 'B') 
+			return false;
+			
+		return [inval.replace(/\Wisgraduate\b/, "")];
+	});
+	
+	// Is undergraduate function, program type = Minor or Major(with and Degree starts with a 'B'  
+		wffuncs.IsUndergraduate = (function(inval, wfrule) {
+		//print_debug('\n\nIsUndergraduate\n');
+		//print_debug('\ninval =' + inval + '\nwfrule =' + wfrule.toSource() + '\n');
+		//print_debug('\program_type = ' + tcfdata.program_type.toSource() + '\n');
+		//print_debug('\degreecode = ' + tcfdata.degreecode.toSource() + '\n');
+			
+		if (!tcfdata.program_type || !tcfdata.program_type.length)
+			return false;
+		else if (tcfdata.program_type[0].code == 'minor') 
+			return [inval.replace(/\Wisundergraduate\b/, "")];
+		else if (tcfdata.program_type[0].code == 'major' &&  tcfdata.degreecode[0].code.toUpperCase().substring(0,1) == 'B') 
+			return [inval.replace(/\Wisundergraduate\b/, "")]; 	
+		return false;
+	});

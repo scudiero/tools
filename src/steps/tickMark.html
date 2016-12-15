@@ -1,0 +1,53 @@
+%spidercode%
+//=================================================================================================
+// Write out a string to wizdebug
+// 06/24/2013 - dgs	- Initial coding
+//=================================================================================================
+
+//=================================================================================================
+//* Define Variables
+//=================================================================================================
+var myName = 'tickMark';
+var DEBUG=0;
+var lines = [];
+var myDate = new Date();
+
+// Get parameters out of the environment ??
+var user = getenv("USER");
+if (user.length == 0 ) { user = '' } else {user = ' (' + user.toString() + ')' }
+var outMode = getenv("tickMarkOutput");				if (outMode == '') { outMode = 'both' };
+var processName = getenv("tickMarkProcess");	if (processName == '') { processName = 'tickMark' };
+var action = getenv("tickMarkMode");					if (action == '') { action = 'start' };
+//print_stdout('outMode = ' + outMode + '\n');
+//print_stdout('processName = ' + processName + '\n');
+//print_stdout('action = ' + action + '\n');
+
+//=================================================================================================
+// Functions
+//=================================================================================================
+// Print out a debug message
+	function debug(level,text){
+		if (level >= DEBUG) { print_stdout('Debug(' + level + ') ' + text + '\n') };
+	}
+
+//=================================================================================================
+// Main
+//=================================================================================================
+//# Set output array
+if (action == 'start') { lines.push('\n'); action='Starting' };
+if (action == 'end') { action='Ending' };
+lines.push('==========================================================================================\n');
+lines.push('| ' + processName + ' ' + action + ' : ' + myDate.toLocaleString().toString() + '\t(' + myDate.getTime().toString() + ') + user +\n');
+lines.push('==========================================================================================\n');
+if (action == 'Ending') { lines.push('\n'); };
+
+//# Write out the output to the screen & wizdebug
+lines.forEach(function(line) {
+	if (outMode == 'stdout' || outMode == 'both') { print_stdout(line) };
+	if (outMode == 'debug' || outMode == 'both') { print_debug(line) };
+});
+
+//# TODO -- How to return data back to caller ??
+// return myDate.getTime().toString()
+  		
+%spidercode%

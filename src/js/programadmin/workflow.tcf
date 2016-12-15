@@ -1,0 +1,10 @@
+//======================================================================================================================
+// ??/??/16-- dgs -- initial
+// version:1.0.3 // -- dscudiero -- 11/16/2016 @  8:36:06.66
+//======================================================================================================================
+localsteps:Program Workflow Management|groups|workflow|attributes=isUndergraduate[Is Undergraduate],isGraduate[Is Graduate],isNew[New Program],isEdit[Program Change],isDelete[Program Delete],fyi[FYI Only],fyiall[FYI All],optional[If Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
+
+template:custom
+pageflags:autoapprove
+
+workflow:standard|START,College: Col,Department: Dept,Academic level: AcadLevel,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is New] isNew,[Is Edit/Change] isEdit,[Is Delete] isDelete,END

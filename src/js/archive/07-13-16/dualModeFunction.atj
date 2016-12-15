@@ -1,0 +1,102 @@
+//==================================================================================================
+// Select workflow
+// If called with a wforder rule, then return 'COE/SOCE standard' for COE/SCOE college programs unless
+// edit and the campus has been changed to add online, then return 'COE/SOCE Online added'.
+// if called with a wfrule rule, then allow step if edit and the campus has been changed to add online
+//==================================================================================================
+// 02-17-16 - dgs - Initial coding -- As per support request -- JWU
+// 02-19-16 - dgs - updated as per new req to use std if user entered additional campuses beyond 'ONL'
+//==================================================================================================
+wffuncs.WorkflowSelection = function(inval, wfrule, args) {
+	var myName=wfrule.attrname; var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+	if (haveDebug) Debug('\n*** In '+ myName + " called as '" + wfrule.searchfor + "' ***");
+	//if (haveDebug) { Dump('\tinval',inval); Dump('\twfrule',wfrule.toSource()); Dump('\targs',args.toSource()); }
+
+	var std='standard';
+	var onl='Online added';
+
+	//Try block encapsulated main function
+	 try {
+		// Initial Checks
+			if(!args || !args.context)
+		 		throw "\t*** Failed 'args.context' is not null check";
+			if(!tcfdata.college || !tcfdata.college.length)
+		 		throw "\t*** Failed 'tcfdata.college' is not null check";
+
+	 	var college = tcfdata.college[0].code;
+		if (haveDebug) Dump('\tmode',args.context)
+		if (haveDebug) Dump('\tcollege:',college)
+		// if college = COE/xx or SOCS/xx then set std appropriatly
+		if (haveDebug) { Debug("\t*** College is 'COE/'' or 'SOCE/'");}
+	 	if (college.substr(0,4) == 'COE/' || college.substr(0,5) == 'SOCE/')
+	 		std='COE/SOCE standard';
+
+		 // wrapper function, returns workflow name
+		function CalculateWorkflow() {
+
+				//Check profile mode, if not edit they just return std
+				if (! CheckProposalMode('EDIT')) return std;
+
+		 		// Get changed data
+		 		var diffdata = {};
+				tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata});
+
+				// see if any of the campus fields have changed, if not std
+				var primaryChanged=false;
+				var secondaryChange=false;
+				if (CheckChanged(diffdata,['prog_campus'],'any',true)) primaryChanged=true;
+				if (CheckChanged(diffdata,['prog_campus_addl'],'any',true)) secondaryChange=true;
+				if (haveDebug) {Dump('\tprimaryChanged',primaryChanged); Dump('\tsecondaryChange',secondaryChange)}
+
+				if (primaryChanged === false && secondaryChange === false) return std
+
+				// Check tcf and tca data to see if we have 'ONL'
+				// Check for any added or deleted campuses other than 'ONL'
+					var foundTcfONL=false;
+					if (tcfdata.prog_campus[0].code == 'ONL') foundTcfONL=true;
+					newSecCnt=0; delSecCnt=0;
+					tcfdata.prog_campus_addl.forEach(function(tcftoken) {
+						if (tcftoken.code == 'ONL') foundTcfONL=true
+						foundTca=false;
+						// loop through tcadata.prog_campus_add to see if the tcfdata value is there
+						tcadata.prog_campus_addl.forEach(function(tcatoken) { if (tcatoken.code === tcftoken.code) { foundTca=true; return; } });
+						if (foundTca != true) newSecCnt++
+					});
+
+					var foundTcaONL=false;
+					if (tcadata.prog_campus[0].code == 'ONL') foundTcaONL=true;
+					tcadata.prog_campus_addl.forEach(function(tcatoken) {
+						if (tcatoken.code == 'ONL') foundTcaONL=true
+						foundTcf=false;
+						// loop through tcadata.prog_campus_add to see if the tcfdata value is there
+						tcfdata.prog_campus_addl.forEach(function(tcftoken) { if (tcatoken.code === tcftoken.code) { foundTcf=true; return; } });
+						if (foundTcf != true) delSecCnt++
+					});
+
+					if (haveDebug) {Dump('\tfoundTcfONL',foundTcfONL); Dump('\tfoundTcaONL',foundTcaONL); Dump('\tnewSecCnt',newSecCnt); Dump('\tdelSecCnt',delSecCnt)}
+
+				// If we have more than 1 added/deleted sec campuses then std
+					if (newSecCnt >= 1 || delSecCnt >= 1) return std;
+
+				// Otherwise online
+					return onl;
+		} //CalculateWorkflow
+
+		// Return value depends on what rule type was used to bind to the function
+		var retVal=false
+		var result=CalculateWorkflow()
+		if (args.context === 'wforder') {
+			retVal=result;
+		} else if (result === 'Online added') {
+			retVal=[inval.replace(wfrule.ifregex,'')];
+		}
+
+		if(haveDebug) Debug("\t*** Called as '" + args.context + "' Returning: '" + retVal + "'")
+		return retVal
+	} //Try block
+
+	//Catch block for errors thrown in above try block
+	catch(err) { if (haveDebug) { Debug(err); } else { throw myName + ': ' + err } return false; }
+	// Should never get here
+	return false;
+} //WorkflowSelection

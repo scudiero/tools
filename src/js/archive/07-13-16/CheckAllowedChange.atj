@@ -1,0 +1,58 @@
+
+
+
+//=================================================================================================
+// Helper function to check changed fields against a list of fields to see if:
+// 	mode=only 	- Check that ALL of the changed fields are in the list e.g.
+// 		if (CheckChange(ignoreChangeFields,'only')) {}
+// 	mode=any	- Check to see that ANY of the change fields are in the list  e.g.
+// 		if (CheckChange(ignoreChangeFields,'any')) {}
+//    
+// returns true if only allowed fields have changed or no fields have changed, otherwise returns false;
+// 02/16/15	-- dgs -- New
+//=================================================================================================
+function CheckChange(checkFields,mode) {
+	if (typeof(Dump) == "function" && typeof(Debug) == "function") { var haveDebug=true; } else {var haveDebug=false; }
+	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
+	if (haveDebug) { Debug('\t*** In '+ myName + ' ***'); }
+	if (arguments.length < 2) {
+		print_debug('\t* Error * -- Invalid call to "' + myName +'", insufficinent arguments passed' );
+		return false;
+	}
+	mode=mode.toLowerCase();
+
+	if (haveDebug) {
+		Debug("\t\tCheckFields:",3);
+		checkFields.forEach(function(text) {
+			Debug("\t\t\t" + text.toString(),3);
+		});
+	}
+
+	//Get a list of fields that have changed, if no changed variables the return
+	var diffdata = {};
+	tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata});
+	if (diffdata.length <=0)
+		return true;
+	if (haveDebug){ Dump('\t\tdiffdata',diffdata.toSource(),4); }
+
+	//Loop through changed fields and see if any field other than the allowed fields has changed
+	for (var i in diffdata) {
+		if (haveDebug) { Debug('\t\tChanged Field: ' + i.toString()); }
+		var foundField=false;
+		checkFields.forEach(function(text) {
+			if (haveDebug) { Debug('\t\t\tCheck field: ' + text.toString(),3); }
+			if (text.toString() == i) {
+				foundAllowed=true;
+				if (mode != 'only') { return true } else { foundField=true }
+			}
+		});
+
+		if (foundField == false && mode == 'only') {
+			if (haveDebug) { Debug('\t\t*** Found NOT allowed field changed: ' + i); }
+			return false;		
+		}
+	}
+
+	if (haveDebug) { Debug('\t\t*** Only allowed fields have changed.'); }
+	return true;
+}

@@ -1,0 +1,10 @@
+//======================================================================================================
+// ??/??/16-- dgs -- initial
+// version:1.0.-1 // -- dscudiero -- 08/31/2016 @  9:34:34.28
+//======================================================================================================
+localsteps:Miscellaneous Workflow Management|groups|workflow|attributes=fyi[FYI Only],fyiall[FYI All],optional[If Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
+
+template:custom
+pageflags:autoapprove
+
+workflow:standard|

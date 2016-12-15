@@ -1,0 +1,145 @@
+<!--
+==========================================================================
+Automated test patterns for workflow
+Please see xxxx
+DO NOT DELETE/MODIFY THIS FILE WITHOUT CONTACTING David Scudiero
+==========================================================================
+-->
+
+<!-- This should be a comment -->
+
+<?xml version="1.0" encoding="UTF-8"?>
+<wftest>
+	<instance name="courseadmin">
+
+		<!-- ------------------------------------------------------------- -->
+		<test name="Undergraduate">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Is Undergraduate] isUndergraduate</step>
+				<step>[Is Graduate] isGraduate</step>
+				<step>[Is GenEd] isGenEd</step>
+				<step>END</step>
+				<tcfdata name="course_number" value="499">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>[Is Undergraduate]</step>
+				<step>END</step>
+			</expect>
+		</test>
+
+		<!-- ------------------------------------------------------------- -->
+		<test name="Graduate">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Is Undergraduate] isUndergraduate</step>
+				<step>[Is Graduate] isGraduate</step>
+				<step>[Is GenEd] isGenEd</step>
+				<step>END</step>
+				<tcfdata name="course_number" value="500">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>[Is Graduate]</step>
+				<step>END</step>
+			</expect>
+		</test>
+
+		<!-- ------------------------------------------------------------- -->
+		<test name="GenEd">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>[Is Undergraduate] isUndergraduate</step>
+				<step>[Is Graduate] isGraduate</step>
+				<step>[Is GenEd] isGenEd</step>
+				<step>END</step>
+				<tcfdata name="gened" value="Yes">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>[Is GenEd] isGenEd</step>
+				<step>END</step>
+			</expect>
+		</test>
+
+		<!-- ------------------------------------------------------------- -->
+		</test>
+			<test name="workflowSelectCollege--AR">
+			<setup>
+				<workflow name="AR standard">
+				<step>START</step>
+				<step>END</step>
+				<tcfdata name="college" value="AR">
+			</setup>
+			<expect>
+				<workflow>AR standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+		</test>
+			<test name="workflowSelectCollege--HH">
+			<setup>
+				<workflow name="HH standard">
+				<step>START</step>
+				<step>END</step>
+				<tcfdata name="college" value="HH">
+			</setup>
+			<expect>
+				<workflow>HH standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+		</test>
+			<test name="workflowSelectCollege--standard">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>END</step>
+				<tcfdata name="college" value="XX">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>END</step>
+			</expect>
+		</test>
+
+		<!-- ------------------------------------------------------------- -->
+		</test>
+			<test name="RelatedDepts">
+			<setup>
+				<workflow name="standard">
+				<step>START</step>
+				<step>RelatedAndEquivalentDepts Chair</step>
+				<step>END</step>
+				<tcfdata name="code" value="BIOL 203">
+				<tcfdata name="college" value="XX">
+				<tcfdata name="department" value="BIOL">
+				<tcfdata name="subject" value="BIOL">
+				<tcfdata name="equiv" value="ACCT 203">
+				<tcfdata name="equiv" value="ARTS 203">
+			</setup>
+			<expect>
+				<workflow>standard</workflow>
+				<step>START</step>
+				<step>BU Chair</step>
+				<step>AVT Chair</step>
+				<step>END</step>
+			</expect>
+		</test>
+
+
+
+
+	</instance>
+
+<wftest>

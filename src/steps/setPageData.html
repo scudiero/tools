@@ -1,0 +1,92 @@
+%spidercode%
+//============================================================================================================
+// ## Run the step on the page
+//	## Note: Use '&' as the delimiter between fields so the step can also work from the web
+//	export QUERY_STRING="owner=$owner&workflow=$workflow&skipNulls=$skipNulls"
+//	cd /mnt/dev6/web/dave-test/web/courseleaf
+//	./courseleaf.cgi $stepName <page> <arguments?
+//	-or-
+// http://<somesite>/courseleaf/courseleaf.cgi?page=<Page to update>&step=setPageData<arguments>
+//
+// arguments (web) = owner=<$owner>|workflow=<$workflow>|skipNulls=<$skipNulls>
+// e.g.
+// export QUERY_STRING="owner=$pageOwner|workflow=$pageWorkflow|skipNulls=$skipNull
+// cd /mnt/dev6/web/dave-test/web/courseleaf
+// ./courseleaf.cgi setPageData <page> owner=<$owner>|workflow=<$workflow>|skipNulls=<$skipNulls>
+//============================================================================================================
+
+// Function wrapperto make it easy to leave
+(function setPageData() {
+
+	//============================================================================================================
+	//Variable Declares
+	//============================================================================================================
+	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
+	var debug=false;
+	var version="1.2"
+	if (debug) print_debug('\n*** In ' + myName + ' ***\n');
+
+	//============================================================================================================
+	//Parse Arguments
+	//============================================================================================================
+		var currentPage = tcfdata.pagename[0];
+		if (debug) Dump('\tcurrentPage',currentPage);
+
+		var argStr=getenv("QUERY_STRING");
+		if (debug) Dump('\targStr',argStr);
+
+		if(argStr.indexOf("owner=") >= 0)
+			var newOwner = argStr.replace(/.*owner=([^\|]*)\|?.*$/i, "$1")
+		if (debug) Dump('\tnewOwner',newOwner);
+
+		if(argStr.indexOf("workflow=") >= 0)
+			var newWorkflow = argStr.replace(/.*workflow=([^\|]*)\|?.*$/i, "$1")
+		if (debug) Dump('\tnewWorkflow',newWorkflow);
+
+		if(argStr.indexOf("skipNulls=") >= 0)
+			var skipNulls = argStr.replace(/.*skipNulls=([^\|]*)\|?.*$/i, "$1")
+		if (debug) Dump('\tskipNulls',skipNulls);
+
+	//============================================================================================================
+	//# Main
+	//============================================================================================================
+		if (newOwner != '' || skipNulls == 'false') {
+			ownersArray=newOwner.split(',');
+			print_debug('\townersArray = ' + ownersArray.toSource() + '\n');
+			attr_write("owner",ownersArray, {savetcf: true});
+		}
+		if (newWorkflow != '' || skipNulls == 'false') {
+			workflowArray=newWorkflow.split(',');
+			print_debug('\tworkflowArray = ' + workflowArray.toSource() + '\n');
+			attr_write("mustsignoff",workflowArray, {savetcf: true});
+		}
+
+	return;
+
+
+	//============================================================================================================
+	// Subs
+	//============================================================================================================
+
+	//============================================================================================================
+	function Dump(varName,varValue){
+		var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
+		if (! debug) {return}
+		// Set variables if this is not a full call
+		if (arguments.length < 2) {
+			print_debug('* Error * -- Invalid call to "' + myName +'", insufficinent arguments passed' );
+			return;
+		}
+		text=varName + ' = >' + varValue + '<\n'
+		print_debug(text)
+	}
+
+	//============================================================================================================
+	function Here(id) {
+		print_debug('Here ' + id + '\n');
+	}
+
+//============================================================================================================
+//Close function wrapper
+})();
+%spidercode%

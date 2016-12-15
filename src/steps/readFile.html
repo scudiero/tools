@@ -1,0 +1,41 @@
+%spidercode%
+//============================================================================================================
+//use this step to generate output to be pasted into Excel
+//============================================================================================================
+// Function wrapper
+(function parseCimForm() {
+	var currentPage = tcfdata.pagename[0];
+    print_doc("*** HERE *** \n")
+
+//==============================================================================
+// Funcions
+//==============================================================================
+function openFile(file,options){
+	var fileHandle = fopen(file,options);
+	return fileHandle;
+}
+	
+//==============================================================================
+// Main
+//==============================================================================
+var filePath = "/tools/"
+var file = "/default.ini"
+var toolsDirFH = openFile(filePath+file);
+
+// Read directory
+if(typeof toolsDirFH != 'number'){
+	print_doc('*Error* -- Could not open file:' + filePath + file + '\n');
+	return
+} else {
+	print_doc("file "+ filePath + file + "opened successfully\n");
+	while(!feof(toolsDirFH)){
+		var line = fgets(toolsDirFH);
+		print_doc("line = >" + line + "<\n")
+	}
+}
+
+
+//============================================================================================================
+//Close function wrapper
+})();
+%spidercode%# 10-16-2015 -- dscudiero -- Update for framework 6

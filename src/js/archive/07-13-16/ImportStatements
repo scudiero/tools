@@ -1,0 +1,8 @@
+
+
+//=================================================================================================
+// Import workflow functions -- in ./courseadmin/workflowFunctions.atj
+// and workflow helper functions -- in ./courseadmin/workflowHelperFunctions.atj
+//=================================================================================================
+%import /courseadmin/workflowFunctions.atj:atj%
+%import /courseadmin/workflowHelperFunctions.atj:atj%

@@ -1,0 +1,30 @@
+#==================================================================================================
+## Set email address to deliver mail to
+MAILTO="dscudiero@leepfrog.com"
+#cronJob=/steamboat/leepfrog/docs/tools/src/cron/cronJob.sh
+cronJob=/home/dscudiero/tools/src/cron/cronJob.sh
+
+#==================================================================================================
+# Minute  Hour   		Day of month 	Month 				Day of Week 	Command
+# (0-59) (0-23)			(1-31)			(1-12 or Jan-Dec)	(0-6 or Sun-Sat)
+# ┌───────────── min (0 - 59)
+# │ 	┌────────────── hour (0 - 23)
+# │ 	│ 		┌─────────────── day of month (1 - 31)
+# │ 	│ 		│ 						┌──────────────── month (1 - 12)
+# │ 	│ 		│ 						│ 					┌─────────────── day of week (0 - 6) (0 to 6 are Sunday to
+# │ 	│ 		│ 						│ 					|				 Saturday, or use names)
+# │ 	│ 		│ 						│ 					|				┌─────────────── Command
+# | 	| 		| 						| 					|				|
+# V 	V		V						V					V				V
+#==================================================================================================
+#*/2		*		*						*					* 				$cronJob testCron
+  0		2-23	*						*					1-5 			$cronJob hourly
+  0		0		*						*					1-5 			$cronJob midnight
+  0		22		*						*					0 				$cronJob weekly
+# 0		0		1						*					*				$cronJob monthly
+# 0 	22 		1-7						* 					1 				$cronJob firstMonday
+# 0 	22 		23-27					*					1				$cronJob lastMonday
+  0 	0		30						6,9					* 				$cronJob quarterly
+  0 	0		31						3,12				* 				$cronJob quarterly
+# 0 	0		31						12					* 				$cronJob yearly
+#==================================================================================================

@@ -1,0 +1,182 @@
+%spidercode%
+//	Author: Nate Lawless
+//	Created: 1/24/13
+
+	function openFile(filePath,file){
+		var infile = fopen(filePath + file);
+		if (infile <= 0) {
+			return ("ERROR: Cannot open " + filePath + file + "<br />\n");
+		} else {
+			return infile;
+		}
+	}
+	
+	function printFile(file){
+		var counter = 1;
+		while(!feof(file)){
+	        var curr = fgets(file);
+	        //print_doc('('+ counter++ +') '+ curr+'\n');
+	    }	
+	}
+	
+	function objFile(file,params){
+		//print_doc('building objFile\n');
+		//print_doc('params: ' + params.toSource() + '\n');
+		var counter = 1;
+		var header = [];
+		var filearr = [];
+		while(!feof(file)){
+			var curr = fgets(file);
+			if(counter++ == 1 && params.header){
+				header = curr.split(/\,/);
+				//print_doc(header + '\n\n');
+			} else {
+				if(curr.length && header.length){
+					curr = curr.split(/\,/);
+					var fileobj = {};
+					for(var a=0;a<curr.length;a++){
+						fileobj[header[a]] = curr[a];
+					}
+					filearr.push(fileobj);
+				}
+			}
+		}
+		return filearr;
+	}
+	
+	function objFile2(file,params){
+		//print_doc('building objFile\n');
+		//print_doc('params: ' + params.toSource() + '\n');
+		var counter = 1;
+		var header = [];
+		var fileobj = {};
+		while(!feof(file)){
+			var curr = fgets(file);
+			if(counter++ == 1 && params.header){
+				header = curr.split(/\,/);
+				//print_doc(header + '\n\n');
+			} else {
+				if(curr.length && header.length){
+					curr = curr.split(/\,/);
+					for(var a=0;a<curr.length;a++){
+						fileobj[curr[0]] = curr;
+					}
+				}
+			}
+		}
+		return fileobj;
+	}
+
+	var filePath = "/docs/";
+	
+	var file = 'users.csv';
+	var usersCSV = openFile(filePath,file);
+	if(typeof usersCSV != 'number'){
+		//print_doc(usersCSV + '\n');
+	} else {
+		//print_doc(file + ': opened\n');
+		var usersOBJ = objFile2(usersCSV,{header:true});
+	}
+	var lookupobj = {};
+	var file = 'workflow.csv';
+	var workflowCSV = openFile(filePath,file);
+	if(typeof workflowCSV != 'number'){
+		//print_doc(workflowCSV + '\n');
+	} else {
+		//print_doc(file + ': opened\n');
+		var workflowOBJ = objFile(workflowCSV,{header:true});
+		for(var a=0;a<workflowOBJ.length;a++){
+			var curr = workflowOBJ[a];
+			//print_doc(workflowOBJ[a].toSource()+'\n');
+			var valstr = '';
+			if(curr.chair)
+				if(!usersOBJ[curr.chair]){
+					valstr += 'Invalid Chair ('+usersOBJ[curr.chair]+','+curr.chair+'),';
+				}
+			if(curr.coll_stusvc)
+				if(!usersOBJ[curr.coll_stusvc]){
+					valstr += 'Invalid Coll_StuSvc,';
+				}
+			if(curr.coll)
+				if(!usersOBJ[curr.coll]){
+					valstr += 'Invalid Coll,';
+				}
+			if(curr.grad)
+				if(!usersOBJ[curr.grad]){
+					valstr += 'Invalid Grad,';
+				}
+			if(curr.ous)
+				if(!usersOBJ[curr.ous]){
+					valstr += 'Invalid OUS,';
+				}
+			if(curr.owner)
+				if(!usersOBJ[curr.owner]){
+					valstr += 'Invalid Owner,';
+				}
+			var workflowstr = '';
+			if(curr.chair && curr.chair.length){
+				if(workflowstr.length){
+					workflowstr += ','+curr.chair;
+				} else {
+					workflowstr += curr.chair;
+				}
+			}
+			if(curr.coll_stusvc && curr.coll_stusvc.length){
+				if(workflowstr.length){
+					workflowstr += ','+curr.coll_stusvc;
+				} else {
+					workflowstr += curr.coll_stusvc;
+				}
+			}
+			if(curr.coll && curr.coll.length){
+				if(workflowstr.length){
+					workflowstr += ','+curr.coll;
+				} else {
+					workflowstr += curr.coll;
+				}
+			}
+			if(curr.grad && curr.grad.length){
+				if(workflowstr.length){
+					workflowstr += ','+curr.grad;
+				} else {
+					workflowstr += curr.grad;
+				}
+			}
+			if(curr.ous && curr.ous.length){
+				if(workflowstr.length){
+					workflowstr += ','+curr.ous;
+				} else {
+					workflowstr += curr.ous;
+				}
+			}
+			//print_doc(curr.page_path+': Workflow('+workflowstr+')  Owner('+curr.owner+')\n');
+			lookupobj[curr.page_path+'index.html'] = {
+				workflow: workflowstr.toUpperCase(),
+				owner: curr.owner.toUpperCase()
+			}
+		}
+	}
+	if(lookupobj && false){
+		//print_doc(lookupobj.toSource() + '\n');
+		print_doc('Page: ' + tcfdata.pagename[0]+ ' ');
+		if(lookupobj[tcfdata.pagename[0]])
+//			print_doc('I found my page\n');
+//			print_doc('Workflow: ' + lookupobj[tcfdata.pagename[0]].workflow + '\n');
+//			print_doc('Owners: ' + lookupobj[tcfdata.pagename[0]].owner + '\n');
+//			owner:test
+//			owner:test 2
+//			mustsignoff:testworkflow
+//			mustsignoff:testworkflow2
+			attr_write("mustsignoff",lookupobj[tcfdata.pagename[0]].workflow.split(/\,/),{savetcf:true});
+			attr_write("owner",lookupobj[tcfdata.pagename[0]].owner.split(/\,/),{savetcf:true});
+			print_doc('Page: ' + tcfdata.pagename[0] + ': ' + 'Updated\n');
+	} else {
+		print_doc('No lookupobj\n');
+	}
+	
+//	Workflow
+	// .Chair_Role,.Coll_StuSvc role,.Coll_role
+//	Owner
+	// .Owner_role
+	
+%spidercode%

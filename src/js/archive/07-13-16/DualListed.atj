@@ -1,0 +1,54 @@
+
+//=================================================================================================
+// Add Dual Listed departments
+// 05-28-15 - dgs - Initial for colostate
+//=================================================================================================
+wffuncs.DualListed  = function(inval,wfrule,args){
+	var myName=wfrule.attrname; var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+	if (haveDebug) { Debug("\n*** In " + myName + " (" + inval + ") ***"); /* Dump('\t inval',inval); Dump('\t wfrule',wfrule.toSource()); Dump('\t args',args.toSource()); */ }
+
+	// Check environment & necessary variables
+	if(args && args.context && args.context != "wfrule")
+		return false;
+	if(!tcfdata.crosslisted || !tcfdata.crosslisted.length)
+		return false;
+
+	// Values for subj & dept from the proposal
+	var parentSubj=tcfdata.subject[0].code
+	var parentDept=tcfdata.department[0].code
+	if (haveDebug) { Dump('\tparentSubj',parentSubj); Dump('\tparentDept',parentDept); }
+
+	//Loop through the crosslisted array.
+	var retArray=[], sql, sqlParms=[], depts=[], subj='';
+	tcfdata.crosslisted.forEach(function(text) {
+		if (typeof(Dump) == "function") { Dump(2,'\tcrosslisted',text.toSource()); }	
+		if (haveDebug) { Dump('\tcrosslisted element',text.toSource()); }
+		subj=text.code.split(" ")[0];
+		//Lookup department code	
+		sql='SELECT department FROM cimlookup WHERE subject=? and department <> ?';
+		sqlParms=[subj,parentDept];
+		resultSet=dbquery(tcfdata.dbname[0],sql,sqlParms);
+		if (haveDebug) { Dump('\tLookup Found',resultSet.length); }
+		if (resultSet.length == 0) {
+				print_debug("\t*Warning* -- Function:" + myName + " -- Page: " + tcfdata.pagename[0] + "\n");
+				print_debug("\t\tNo results looking up department code (key: " + tcfdata.key + ")\n");
+				print_debug("\t\tsqlStmt: " + sqlStmt + "\n\t\tsqlPars: " + sqlParms + "\n\t\t" + dbexec(tcfdata.dbname[0],"DBERRORMSG") + "\n");
+			return false;
+		}
+		resultSet.forEach(function(result) {
+			if (haveDebug) { Dump('\t\tDepartment for ' + subj,result.department); }
+			depts.push(result.department);
+		});
+	});
+	depts=RemoveDupes(depts,parentDept);
+
+	// loop through depts and add to return array
+	depts.forEach(function(dept) {
+		if (haveDebug) { Dump('\tReturn dept',dept); }
+		retArray.push(inval.replace(wfrule.regex,dept));
+	});
+
+	if(!retArray || !retArray.length)
+		return false;
+	return retArray;
+}

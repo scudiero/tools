@@ -1,0 +1,51 @@
+%spidercode%
+
+var pruneFound = 0;
+var curPage = tcfdata.pagename.join('');
+if (tcfdata.mapprune) {
+	for (var i=0;i<tcfdata.mapprune.length;i++) {
+		if (curPage.indexOf(tcfdata.mapprune[i]) == 0 && tcfdata.mapprune[i] != '/shared' ) {
+			pruneFound = 1;
+			break;
+		}
+	}
+}
+else {
+	pruneFound = 1;
+}
+
+if (!pruneFound) {
+	var pagePath = tcfdata.pagename[0].replace(/index\.html$/,'');
+	var ent = [];
+	var title="";
+	ent.push(pagePath);
+	if (tcfdata.title && tcfdata.title.length > 0) {
+		title=tcfdata.title.join(',');
+		title=title.replace(/[^\x20-\x7E]+/g, ' ');
+		ent.push(title);
+		ent.push('');
+	} else {
+		ent.push('');
+	}
+
+	// print_debug("title = >" + tcfdata.title.toSource() + "<\n")
+	// print_debug("pagePath = >" + tcfdata.pagePath.toSource() + "<\n")
+	// print_debug("owner = >" + tcfdata.owner.toSource() + "<\n")
+	// print_debug("mustsignoff = >" + tcfdata.mustsignoff.toSource() + "<\n")
+
+	if (tcfdata.owner && tcfdata.owner.length > 0) {
+		ent.push(tcfdata.owner.join(','))
+	} else {
+		ent.push('');
+	}
+
+	if (tcfdata.mustsignoff && tcfdata.mustsignoff.length > 0) {
+		ent.push(tcfdata.mustsignoff.join(','))
+	} else {
+		ent.push('');
+	}
+
+	print_doc(ent.join('\t') + '\n');
+	//print_debug(ent.join('\t') + '\n');
+}
+%spidercode%

@@ -1,0 +1,76 @@
+%spidercode%
+//============================================================================================================
+// http://davetest.dev6.leepfrog.com/courseleaf/courseleaf.cgi?page=/&step=davetest&parms=[cimcourses,a,b]&key=owner&value=a,b,c,d
+//============================================================================================================
+// Function wrapper
+(function davetest() {
+
+//============================================================================================================
+//Variable Declares
+//============================================================================================================
+var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
+var debug=true;
+var version="1.0"
+if (debug) print_debug('\n*** In ' + myName + ' ***\n');
+
+//============================================================================================================
+//Parse Arguments
+//============================================================================================================
+var argStr=getenv("QUERY_STRING");
+if (debug) Dump('\targStr',argStr);
+
+if(argStr.indexOf("owner=") >= 0)
+	var newOwner = argStr.replace(/.*owner=([^\&]*)\&?.*$/i, "$1")
+if (debug) Dump('\tnewOwner',newOwner);
+
+if(argStr.indexOf("workflow=") >= 0)
+	var newWorkflow = argStr.replace(/.*workflow=([^\&]*)\&?.*$/i, "$1")
+if (debug) Dump('\tnewWorkflow',newWorkflow);
+
+if(argStr.indexOf("skipNulls=") >= 0)
+	var skipNulls = argStr.replace(/.*skipNulls=([^\&]*)\&?.*$/i, "$1")
+if (debug) Dump('\tskipNulls',skipNulls);
+
+//============================================================================================================
+//# Main
+//============================================================================================================
+if (newOwner != '' || skipNulls == 'false') {
+	ownersArray=newOwner.split(',');
+	print_debug('\townersArray = ' + ownersArray.toSource() + '\n');
+	attr_write("owner",ownersArray, {savetcf: true});
+}
+if (newWorkflow != '' || skipNulls == 'false') {
+	workflowArray=newWorkflow.split(',');
+	print_debug('\tworkflowArray = ' + workflowArray.toSource() + '\n');
+	attr_write("mustsignoff",workflowArray, {savetcf: true});
+}
+
+return;
+
+
+//============================================================================================================
+// Subs
+//============================================================================================================
+
+//============================================================================================================
+function Dump(varName,varValue){
+	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
+	if (! debug) {return}
+	// Set variables if this is not a full call
+	if (arguments.length < 2) {
+		print_debug('* Error * -- Invalid call to "' + myName +'", insufficinent arguments passed' );
+		return;
+	}
+	text=varName + ' = >' + varValue + '<\n'
+	print_debug(text)
+}
+
+//============================================================================================================
+function Here(id) {
+	print_debug('Here ' + id + '\n');
+} 
+
+//============================================================================================================
+//Close function wrapper
+})();
+%spidercode%# 10-16-2015 -- dscudiero -- Update for framework 6

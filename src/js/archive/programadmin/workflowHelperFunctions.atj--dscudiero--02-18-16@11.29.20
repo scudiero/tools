@@ -1,0 +1,781 @@
+
+//==================================================================================================
+// Common wf functions and helper functions to support workflow
+//==================================================================================================
+if (typeof workflowHelperFunctionsLoaded == "undefined") {
+	var host=getenv("HTTP_HOST").toUpperCase() ;
+	if (host.indexOf('.DEV') > 0 || host.indexOf('-TEST.') > 0) {
+		var workflowHelperFunctionsLoaded=false;
+		print_debug("*** Loading /courseadmin/workflowHelperFunctions.atj ***\n");
+	}
+}
+
+
+//==================================================================================================
+//wfrules:isNew|iffieldmatch|newrecord|value=true;
+//wfrules:isEdit|function|IsEdit|
+//wfrules:isDelete|iffieldmatch|deleterec|value=true;
+//==================================================================================================
+// Determin if request is edit mode
+// ??/??/2014 - dgs - New
+// 02/10/2015 - dgs - Add more debug messages
+//==================================================================================================
+wffuncs.IsEdit = function(inval, wfrule, args) {
+	var myName=wfrule.attrname;
+	var haveDebug=false; var haveDump=false; if (typeof(Dump) == "function") haveDump=true; if (typeof(Debug) == "function") haveDebug=true;
+	if (haveDebug) Debug('\n*** In ' + myName + ' ***');
+	//if (haveDump)  { Dump('\tinval',inval); Dump('\twfrule',wfrule.toSource()); Dump('\targs',args.toSource()); }
+
+	 //Try block encapsulated main function
+	 try {
+		if(args && args.context && args.context == "wforder")
+	 		throw "\t*** Failed rule type check";
+
+		if ( GetProposalMode() == 'EDIT' )
+			return [inval.replace(wfrule.regex,'').trim()];
+
+		return false;
+		} //Try block
+
+	//Catch block for errors thrown in above try block
+	catch(err) { if (haveDebug) { Debug(err); } else { throw myName + ': ' + err; } return false; }
+	// Should never get here
+	return false;
+}; //wffuncs.IsEdit
+
+//==================================================================================================
+// Helper function to check changed fields against a list of fields to see if:
+// 	mode=only 	- Check that ALL of the changed fields are in the list e.g.
+// 		if (CheckChange(diffdata,ignoreChangeFields,'only')) {}
+// 	mode=any	- Check to see that ANY of the change fields are in the list  e.g.
+// 		if (CheckChange(diffdata,ignoreChangeFields,'any')) {}
+//
+// returns true if only allowed fields have changed or no fields have changed, otherwise returns false;
+//
+// gets diffdata passed in as parm
+// Get a list of fields that have changed
+// var diffdata = {};
+// tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata});
+//
+// 02/16/15	-- dgs -- New
+// 10/12/15 -- dgs -- simplified logic
+// 01/08/16 -- dgs -- Refactored logic
+//===================================================================================================
+function CheckChanged(diffdata,checkFields,mode) {
+	var myName='CheckChanged';
+	var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+	Debug('\n*** In ' + myName + ' ***');
+
+	 //Try block encapsulated main function
+	 try {
+			if (arguments.length < 2)
+	 		throw "\t*** Insufficinent arguments passed in";
+
+			mode=mode.toLowerCase();
+			if (haveDebug) { Dump("\tcheckFields",checkFields.toString()); Dump("\tmode",mode);}
+
+			if (!Object.keys(diffdata).length)
+				throw "\t\tNo fields have changed";
+
+			//Loop through changed fields and see if any field other than the allowed fields has changed
+			var nonCheckFieldChanged=false;
+			var onlyCheckFieldsChanged=false;
+			for (var i in diffdata) {
+				//Debug('\t\tChanged Field: >' + i.toString()+'<');
+
+				var checkFieldChanged=false;
+				checkFields.forEach(function(text) {
+					//Debug('\t\t\tCheck field: ' + text.toString()+'<');
+					if (text.toString() == i) {
+						checkFieldChanged=true;
+						onlyCheckFieldsChanged=true;
+						if (haveDebug) { Debug("\tCheckfield field '" + text.toString() + "' has changed"); }
+					}
+				});  // jshint ignore:line
+				if (checkFieldChanged === false) {
+					nonCheckFieldChanged=true;
+				}
+			}
+
+			if (haveDebug) { Dump('\tcheckFieldChanged',checkFieldChanged); Dump('\tnonCheckFieldChanged',nonCheckFieldChanged); Dump('\tonlyCheckFieldsChanged',onlyCheckFieldsChanged); }
+
+			if (onlyCheckFieldsChanged === true && nonCheckFieldChanged === false && mode == 'only') {
+				if (haveDebug) { Debug('\t*** Only checkfield fields have changed, return true'); }
+				return true;
+			}
+			if (checkFieldChanged === true && mode == 'any') {
+				if (haveDebug) { Debug('\t*** Found checkfield field changed: ' + i + ',return false'); } 
+				return true;
+			}
+
+			if (haveDebug) { Debug('\t*** No check fields found to have changed, return false'); }
+			return false;
+
+		} //Try block
+
+	//Catch block for errors thrown in above try block
+	catch(err) { if (haveDebug) { Debug(err); } else { throw myName + ': ' + err; } return false; }	// Should never get here
+	return false;
+} //CheckChanged
+
+//=================================================================================================
+// Add related departments/colleges/schools to the workflow,
+// returned data is sorted by code and duplicates are removed.
+//=================================================================================================
+// Variable definitions:
+//		form fields that contain 'related/crosslisted/associated/consultant' data.  formate is name|format
+// 		where formate is one item in the set {code,dept,subj}. RelatedVar may be repeated as necessary.
+// 		RelatedVar:<Form variable name 1><|format for var 1>
+//		e.g.
+// 		RelatedVar:crosslisted|code
+// 		RelatedVar:consultdept|dept
+//
+// Global switches/flags:
+//		Check to see if the primary Dept or Subject values have change, if yes include.  Default is 'No'
+// 		RelatedCheckChanged:<Yes/No>
+//		Incorporate the data from the eco system into the output, if yes include.  Default is 'No'
+// 		RelatedIncludeEcoSystemData:<Yes/No>
+//
+// Eco system data:
+//		If retrieving data from the eco system option you may define which references types to use.
+//		Field may be repeaded as necessary.
+//		RelatedFromEcoSystemType:<refType>
+//		e.g.
+//		RelatedFromEcoSystemType:equiv
+//
+// Rule definitions:
+// 		wfrule definition defines what data to be include in workflow:
+// 			if the lower(rule name) includes 'dept' then substitute the department value into step
+// 			if the lower(rule name) includes 'school' then substitute the school value into step
+// 			if the lower(rule name) includes 'college' then substitute the college value into step
+// 		for each returned token
+// 		wfrules:<somePrefixTerm>Depts|function|Crosslisted|
+// 		wfrules:<somePrefixTerm>Schools|function|Crosslisted|
+// 		wfrules:<somePrefixTerm>Colleges|function|Crosslisted|
+//		e.g.
+//		wfrules:RelatedDepts|function|Related|
+//		wfrules:RelatedCols|function|Related|
+//
+// Step definitinos one for each definition above:
+//		If defined , these will be the steps include in the workflow for each rule name type above.
+//		If not defined then the step data will be taken from the step usage in the workflow itself.
+//		e.g.
+//		RelatedDeptsSteps:Dept Courses Committee fyi optional
+// 		RelatedDeptsSteps:Dept Courses Committee Chair fyi optional
+// 		RelatedDeptsSteps:Dept Head optional
+// 		RelatedCollegeSteps:Col Curriculum Committee fyi optional
+// 		RelatedCollegeSteps:Col Curriculum Committee Chair fyi optional
+//		RelatedCollegeSteps:Col Dean optional
+//=================================================================================================
+
+wffuncs.Related = function(inval, wfrule, args) {
+	var version='4.0';
+	var myName=wfrule.attrname; var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+	if (haveDebug) { Debug('\n*** In '+ myName + " called as '" + wfrule.searchfor + "' ***"); Dump('\tFunction version',version); }
+	if (haveDebug) { Dump('\tFull Step text',inval); }
+	//if (haveDebug) { Dump('\targs',args.toSource()); Dump('\tinval',inval); Dump('\twfrule',wfrule.toSource()); Dump('\targs',args.toSource()); }
+
+	// Determin mode (dept / college) based on the mapped name
+		var notifyMode=false;
+		var hasSchool=false;
+		var reqType=wfrule.searchfor.toLowerCase();
+		if (reqType.substr(reqType.length - 'notify'.length) == 'notify') {
+			notifyMode=true;
+		}
+		if (haveDebug) { Dump('\treqType',reqType); Dump('\tnotifyMode',notifyMode);}
+
+	//Set switches from tcfdata in config file
+		var checkChanged=false;
+		if (tcfdata.RelatedCheckChanged && tcfdata.RelatedCheckChanged.length > 0)
+			checkChanged=tcfdata.RelatedCheckChanged[0].substr(0,1).toLowerCase();
+		if (haveDebug) { Dump('\tcheckChanged',checkChanged); }
+
+		var includeEcoSystemData=false;
+		if (tcfdata.RelatedIncludeEcoSystemData && tcfdata.RelatedIncludeEcoSystemData.length > 0) {
+			includeEcoSystemData=tcfdata.RelatedIncludeEcoSystemData[0].substr(0,1).toLowerCase();
+			if (includeEcoSystemData = 'y') {
+				includeEcoSystemData=true
+				var ecoSystemType=[];
+				if (tcfdata.RelatedFromEcoSystemType && tcfdata.RelatedFromEcoSystemType.length > 0) {
+					ecoSystemType=tcfdata.RelatedFromEcoSystemType
+					var ecoSystemTypeStr='';
+					ecoSystemType.forEach(function(type) {
+						ecoSystemTypeStr=ecoSystemTypeStr + ",'" + type + "'";
+					});
+					ecoSystemTypeStr='(' + ecoSystemTypeStr.substring(1) + ')';
+				}
+				if (haveDebug) { Dump('\tecoSystemTypeStr',ecoSystemTypeStr); }
+			}
+		}
+		if (haveDebug) { Dump('\tincludeEcoSystemData',includeEcoSystemData); Debug(''); }
+
+	//Set options from tcfdata in config file
+		var relatedVar=[];
+		if (tcfdata.RelatedVar && tcfdata.RelatedVar.length > 0)
+			relatedVar=tcfdata.RelatedVar
+		if (haveDebug) { Dump('\trelatedVar',relatedVar.toSource()); }
+
+	//Try block encapsulated main function
+	try {
+		// initial checks
+			if (args && args.context && args.context != "wfrule")
+				throw 'Failed rule type check';
+			if (!tcfdata.code || !tcfdata.code.length)
+				throw 'Failed code not null check';
+			if (!tcfdata.subject || !tcfdata.subject.length)
+				throw 'Failed subject not null check';
+			if (!tcfdata.department || !tcfdata.department.length)
+				throw 'Failed department not null check';
+			if (!tcfdata.college || !tcfdata.college.length)
+				throw 'Failed college not null check';
+
+		// Get proposal data
+			var parentCode=tcfdata.code[0];
+			var parentSubj=tcfdata.subject[0].code;
+			var parentDept=tcfdata.department[0].code;
+			var parentCol=tcfdata.college[0].code;
+			if (haveDebug) { Dump('\tparentCode',parentCode); Dump('\tparentSubj',parentSubj); Dump('\tparentDept',parentDept); Dump('\tparentCol',parentCol); }
+
+			// If request type is school then lookup school code
+			if (reqType.indexOf('school') > 0) {
+				hasSchool=true;
+				// Lookup parent school
+				var parentSchool='';
+				sql='SELECT school FROM cimlookup WHERE department=? and college=?';
+				sqlParms=[parentDept,parentCol];
+				rows=dbquery(tcfdata.dbname[0],sql,sqlParms);
+				if (rows.length >0 ) {
+					parentSchool=rows[0].school;
+				}
+				if (haveDebug) { Dump('\tparentschool',parentSchool); }
+			}
+
+		//==================================================================================================
+		// MAIN
+		//==================================================================================================
+		var ref={};
+		// loop through form data variables, pull data and set refs array
+			var refsArray=[];
+			var refsLookup={};
+			var formVar, formVarFormat;
+			relatedVar.forEach(function(formVar) {
+				var tmpArray=formVar.split('|');
+				formVar=tmpArray[0];
+				formVarFormat='c'
+				// Parse off formVar name and optional forVar format (i.e. formVarName|formVarFormat) 
+				if (tmpArray.length > 1) {
+					formVarFormat=tmpArray[1];
+					var tempStr=formVarFormat.toLowerCase().substr(0,1);
+					formVarFormat=tempStr
+				}
+				if (haveDebug) { Debug("\n\tProcessing form variable: '" + formVar + "'"); Debug("\t\tformat: '" + formVarFormat + "'...");}
+
+				var tcfData=[];
+				tcfData=eval('tcfdata.'+formVar); // jshint ignore:line
+				if (typeof(tcfData) === 'undefined') {
+					Debug('\t\t*** Variable ' + formVar + ' is not defined in the tcf file, skipping');
+					return;
+				}
+				if (haveDebug) { Dump('\t\ttcfData',tcfData.toSource()); }
+
+				var tcaData=[];
+				if (typeof eval('tcadata.'+formVar) != 'undefined' )
+					tcaData=eval('tcadata.'+formVar); // jshint ignore:line
+				if (haveDebug) { Dump('\t\ttcaData',tcaData.toSource()); }
+
+				// Make a has table of the related data
+				tcfData.forEach(function(data) {
+					ref={};
+					if (formVarFormat === 'c') { // format=code
+						var tempArray=data.code.split(' ');
+						ref.data=tempArray[0];
+						ref.format='subj';
+					} else if (formVarFormat === 'd') { // format=dept
+						ref.data=data.code;
+						ref.dept=data.code
+						ref.format='dept';
+					} else if (formVarFormat === 's') { // format=subj
+						ref.data=data.code;
+						ref.format='subj';
+					}
+					if (ref != {}) {
+						ref.source=formVar;
+						if (haveDebug) { Dump('\t\tref',ref.toSource()); }
+						refsArray.push(ref);
+					}
+					refsLookup[data.toSource()]=refsArray.length-1;
+				}); //tcfData
+				//if (haveDebug) { Dump('\t\trefsArray',refsArray.toSource());Dump('\t\trefsLookup',refsLookup.toSource()); }
+
+				// Scan the tca data and see if there are any elements not in the tcf data, i.e. it has been deleted
+				tcaData.forEach(function(b) {
+					if (refsLookup[b.toSource()] === undefined) {
+						if (haveDebug) {Debug("\t\tAdding deleted code to refsArray: " + b.toSource());}
+						refsArray.push(b);
+					}
+				}); //tcfData
+
+				// Check to see if the subject code has change, if yes then include the origional subject code in the refsArray
+					if (tcadata.subject && tcadata.subject.length > 0) {
+						if (tcadata.subject[0].code != parentSubj) {
+							if (haveDebug) { Debug('\tSubject code changed, adding origional (from tca): ' + tcadata.subject[0].code);}
+							refsArray.push({code:tcadata.subject[0].code});
+						}
+					}
+				// Check to see if the department code has change, if yes then include the origional subject code in the refsArray
+					if (tcadata.department && tcadata.department.length > 0) {
+						if (tcadata.department[0].code != parentDept) {
+							if (haveDebug) { Debug('\tDepartment code changed, adding origional (from tca): ' + tcadata.department[0].code);}
+							refsArray.push({department:tcadata.department[0].code});
+						}
+					}
+				//if (haveDebug) { Dump('\t\trefsArray',refsArray.toSource()); }
+			}); //relatedVar
+
+		var sqlStmt, sqlParms, resultSet=[];
+		//Check for any cross references data for this course in the crossref table (eco system)
+			if (includeEcoSystemData) {
+				if (haveDebug) { Debug("\n\tRetrieving data from the eco system...");}
+				// Get referenced dept data from courseref, parse path to find out type of reference and add to refsArray
+					sqlStmt="SELECT DISTINCT path,dept FROM courseref WHERE code = ? AND dept <> ? AND dept <> ''";
+					if (typeof(ecoSystemTypeStr) != 'undefined'  )
+						sqlStmt=sqlStmt + ' AND type IN ' + ecoSystemTypeStr
+					sqlParms=[parentCode,parentDept];
+					resultSet=dbquery("courseref", sqlStmt,sqlParms);
+					if (haveDebug) { Debug('\t\tCourseref query returned ' + resultSet.length + ' records.'); }
+					resultSet.forEach(function(result) {
+						//if (haveDebug) { Dump('\nresult',result.toSource()); }
+						ref={};
+						if (result.path.substr(0,1) === '/' || result.path.substr(0,12) === 'programcode:') { // i.e. a catalog or programadmin ref
+							if (result.dept != parentDept) {
+								ref.data=result.dept;
+								ref.dept=result.dept;
+								ref.format='dept';
+							}
+						} else { // i.e. a course ref
+							ref.data=result.dept;
+							ref.format='subj';
+						}
+						if (typeof ref.data != 'undefined') {
+							ref.source='eco:'+ result.path.substr(0,1);
+							refsArray.push(ref);
+							if (haveDebug) { Debug("\t\t\t" + ref.toSource());}
+						}
+					}); //resultSet
+			} //includeEcoSystemData
+
+			if (refsArray.length === 0) {
+				if (haveDebug) { Debug("\t*** Zero (0) items to add");}
+				return false;
+			}
+
+		// Look up the output tokens based on how we were called (Dept, Col, School)
+			//if (haveDebug) { Debug("\n\tRetrieving data from the eco system...");}
+			var outTokens=[], steps=[]
+
+			refsArray.forEach(function(ref) {
+				//if (haveDebug) { Dump('\t\tref',ref.toSource()); }
+				sqlStmt='';
+				if (reqType.indexOf('depts') > 0) {
+					searchStr='Dept';
+					if (tcfdata.CrosslistedDeptsSteps && tcfdata.CrosslistedDeptsSteps.length > 0)
+						steps=tcfdata.CrosslistedDeptsSteps;
+					if (ref.format === 'dept' ) {
+						outTokens.push(ref.dept);
+					} else if (ref.format === 'subj' ) {
+						sqlStmt="SELECT distinct department as token FROM cimlookup WHERE subject=? and department <> ?";
+						sqlParms=[ref.data,parentDept];
+					}
+
+				} else if (reqType.indexOf('colleges') > 0) {
+					searchStr='Col'
+					if (tcfdata.CrosslistedCollegesSteps && tcfdata.CrosslistedCollegesSteps.length > 0)
+						steps=tcfdata.CrosslistedCollegesSteps;
+					if (ref.format === 'dept' ) {
+						sqlStmt="SELECT distinct college as token FROM cimlookup WHERE department=?";
+					} else if (ref.format === 'subj' ) {
+						sqlStmt="SELECT distinct college as token FROM cimlookup WHERE subject=?";
+					}
+					sqlParms=[ref.data];
+				} else if (reqType.indexOf('schools') > 0) {
+					searchStr='School'
+					if (tcfdata.CrosslistedSchoolsSteps && tcfdata.CrosslistedSchoolsSteps.length > 0)
+						steps=tcfdata.CrosslistedSchoolsSteps;
+					if (ref.format === 'dept' ) {
+						sqlStmt="SELECT distinct school as token FROM cimlookup WHERE department=?";
+					} else if (ref.format === 'subj' ) {
+						sqlStmt="SELECT distinct school as token FROM cimlookup WHERE subject=?";
+					}
+					sqlParms=[ref.data];
+				}
+				if (sqlStmt != '') {
+					resultSet=dbquery("cimcourses",sqlStmt,sqlParms);
+					resultSet.forEach(function(result) {
+						//if (haveDebug) { Dump('\t\t\ttoken',result.token); }
+						outTokens.push(result.token);
+					});
+				}
+			}); //refsArray
+
+			outTokens=RemoveDupes(outTokens);
+			if (haveDebug) {
+				Debug('\n\tOutput tokens (' + searchStr + '):');for (var key in outTokens) { Dump('\t\toutTokens[' + key + ']',outTokens[key].toSource()); }('');
+				if (steps.length > 0)
+					Debug('\n\tSteps defined in config file:');for (var key in steps) { Dump('\t\tsteps[' + key + ']',steps[key].toSource()); }(''); 
+			}
+
+		// Output the steps
+			var retArray=[];
+			if (haveDebug) { Debug("\n\tReturn step data for " + outTokens.length + " " + searchStr + "(s)...");}
+			if (EnvIs('dev')) retArray.push('*** START of ' + inval.toLowerCase().replace('optional','') + ' ***');
+			outTokens.forEach(function(token) {
+				if (token === '') return;
+				if (inval == wfrule.searchfor) {
+					steps.forEach(function(step) {
+						step=step.replace(searchStr,token);
+						if(notifyMode) {
+							if (step.indexOf(' fyi') < 0) {
+								step=step + ' fyiall';
+							} else if (step.indexOf(' fyi') >= 0) {
+								step=step.replace(' fyi',' fyiall');
+							}
+						}
+						retArray.push(step.trim());
+						Dump('\t\tReturning step: ',retArray[retArray.length-1]);
+					});	//steps
+				} else {
+					retArray.push(inval.replace(wfrule.regex,token).trim());
+					Dump('\t\tStep: ',retArray[retArray.length-1]);
+				}
+			}); //outTokens
+			if (EnvIs('dev')) retArray.push('*** END of ' + inval.toLowerCase().replace('optional','') + ' ***');
+
+		return retArray;
+	} //try
+
+	//Catch block for errors thrown in above try block
+	catch(err) { if (haveDebug) { Debug(err); } else { throw myName + ': ' + err; } return false; }
+
+	// Should never get here
+	return false;
+}; //Related
+
+
+//==================================================================================================
+//==================================================================================================
+// Common utilities
+//==================================================================================================
+//==================================================================================================
+
+//==================================================================================================
+// Return the proposal mode
+// 09/10/2015 - dgs - New
+//==================================================================================================
+CheckProposalMode = function(checkMode) {
+	var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+
+	checkMode=checkMode.toUpperCase();
+ 	var mode = GetProposalMode();
+
+	if (mode == checkMode)
+		return true;
+
+	return false;
+
+}; //CheckProposalMode
+
+
+//==================================================================================================
+// Return the proposal mode
+// 02/26/2015 - dgs - New
+//==================================================================================================
+GetProposalMode = function() {
+	var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+	var retVal='EDIT';
+	if (tcfdata.newrecord && tcfdata.newrecord.length) {
+		if (tcfdata.newrecord == 'true')
+			retVal='NEW';
+	}
+	if (tcfdata.deleterec && tcfdata.deleterec.length) {
+		if (tcfdata.deleterec == 'true')
+			retVal='DELETE';
+	}
+
+	if (haveDebug) { Debug('\t*** Proposal mode: ' + retVal); }
+	return retVal;
+
+}; //GetProposalMode
+
+
+//==================================================================================================
+// Helper function to check changed fields against a list of fields to see if:
+// 	mode=only 	- Check that ALL of the changed fields are in the list e.g.
+// 		if (CheckChange(diffdata,ignoreChangeFields,'only')) {}
+// 	mode=any	- Check to see that ANY of the change fields are in the list  e.g.
+// 		if (CheckChange(diffdata,ignoreChangeFields,'any')) {}
+//
+// returns true if only allowed fields have changed or no fields have changed, otherwise returns false;
+//
+// gets diffdata passed in as parm
+// Get a list of fields that have changed
+// var diffdata = {};
+// tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata});
+//
+// 02/16/15	-- dgs -- New
+// 10/12/15 -- dgs -- simplified logic
+//===================================================================================================
+function CheckChanged(diffdata,checkFields,mode) {
+	var myName='CheckChanged';
+	var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+	Debug('\n*** In ' + myName + ' ***');
+
+	 //Try block encapsulated main function
+	 try {
+			if (arguments.length < 2)
+	 		throw "\t*** Insufficinent arguments passed in";
+
+			mode=mode.toLowerCase();
+			if (haveDebug) { Dump("\tcheckFields",checkFields.toString()); Dump("\tmode",mode);}
+
+			if (!Object.keys(diffdata).length)
+				throw "\t\tNo fields have changed";
+
+			var foundAllowed=false
+			//Loop through changed fields and see if any field other than the allowed fields has changed
+			for (var i in diffdata) {
+				//Debug('\t\tChanged Field: ' + i.toString());
+				var foundField=false;
+				checkFields.forEach(function(text) {
+					//Debug('\t\t\tCheck field: ' + text.toString(),3);
+					if (text.toString() == i) {
+						foundAllowed=true;
+						if (haveDebug) { Debug("\tField '" + text.toString() + "' has changed'"); }
+					}
+				});  // jshint ignore:line
+
+				if (foundField === false && mode == 'only') {
+					if (haveDebug) { Debug('\t*** Found NOT allowed field changed: ' + i + ',return false'); }
+					return false;
+				}
+			}
+
+			if (foundAllowed === true && mode == 'any') {
+				if (haveDebug) { Debug('\t*** Only allowed fields have changed, return true'); }
+				return true;
+			}
+
+			if (haveDebug) { Debug('\t*** No check fields found to have changed, return false'); }
+
+		} //Try block
+
+	//Catch block for errors thrown in above try block
+	catch(err) { if (haveDebug) { Debug(err); } else { throw myName + ': ' + err; } return false; }	// Should never get here
+	return false;
+} //CheckChanged
+
+
+//==================================================================================================
+// Check execution environment, passed one argument 'env' that can hav values 'dev' or 'test'
+// compares execution url (host) against arg and if there is a match then returns true, otherwise
+// returns false
+//==================================================================================================
+EnvIs = function(env) {
+	var host=getenv("HTTP_HOST").toUpperCase() ;
+	if (env.toUpperCase() == 'DEV' && host.indexOf('.DEV') > 0)
+			return true;
+	if (env.toUpperCase() == 'TEST' && host.indexOf('-TEST.') > 0)
+			return true;
+	if (env.toUpperCase() == 'NEXT' && host.indexOf('-NEXT.') > 0)
+			return true;
+	return false;
+}; //EnvIs
+GetEnv = function(env) {
+	var host=getenv("HTTP_HOST").toLowerCase() ;
+	if (host.indexOf('.dev') > 0) {
+			return 'dev';
+	} else if (host.indexOf('-test') > 0) {
+			return 'test';
+	} else if (host.indexOf('-next') > 0) {
+			return 'next';
+	}
+	return '*unknown*';
+} //EnvIs
+
+
+//Set include SIS step on (true) or off (false) -- only applys to DEV env.
+//addSisEnvs:test,next
+//wfrules:SISsync|function|AddSisStep|
+//=========================================================================================================================
+// Pull the sisName value in the config file and replace that in the workflow, include in workflow if
+// not running.  Only add sissync step if current env is in 'tcfdata.addSisEnvs'
+// ??/??/2014 - dgs - New
+// 02/26/2015 - dgs - Refactored to move sisname = '' warning earlier, add sisname to other messages
+// 01/25/2016 - dgs - Refactored check env in addSisEnvs
+//=========================================================================================================================
+wffuncs.AddSisStep = function(inval, wfrule, args) {
+	// setup
+	var myName=wfrule.attrname; var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+	if (haveDebug) { Debug('\n*** In '+ myName + ' ***'); /* Dump('\tinval',inval); Dump('\twfrule',wfrule.toSource()); Dump('\targs',args.toSource()); */ }
+	// Check execution env
+	if(args && args.context && args.context != "wfrule")
+		return false;
+
+	// Get sisname from cimconfig.cfg
+	if (tcfdata.sisname === '') {
+		var spaceing='&nbsp;&nbsp;&nbsp;&nbsp;';
+		print_doc(spaceing + '<strong>*Error* -- (' + myName + ') Default SIS name not set in cimconfig.cfg file.<br>' + spaceing + 'Please contact your CourseLeaf Administrator.</strong>');
+		Debug('\t *Error* -- Default SIS name not set in cimconfig.cfg file.');
+		return false;
+	}
+
+	if (typeof tcfdata.addSisEnvs == "undefined") {
+		Debug("\t*Warning* -- tcfdata.addSisEnvs undefined, adding sis sync step");
+		return tcfdata.sisname.toString().trim();
+	}
+
+	if (tcfdata.addSisEnvs[0].indexOf(GetEnv().toString()) < 0){
+		print_doc("&nbsp;&nbsp;&nbsp;<strong><em>*Warning*</strong> -- (" + myName + ") Not including SIS Sync step (" + tcfdata.sisname + ")");
+		print_doc("<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp" + 
+			"env = " + GetEnv().toString() + " and addSisEnvs = '" + tcfdata.addSisEnvs + "'" );
+		return false; 
+	}
+
+	// Add SIS Sync Step
+	Debug('\tAdding SIS Sync step: ' + tcfdata.sisname.toString().trim());
+	return tcfdata.sisname.toString().trim();
+
+}; //AddSisStep
+
+
+//==================================================================================================
+// Helper function to print a formatted debug message or dump a variable
+// Syntax: 	Debug(string [,mode])
+//			Dump(varName,varValue [,mode,callerName])
+//			mode in {'D','S','B'}  D=print_debug, S=print_doc, B=both
+//			if mode is numeric then it is the message Level
+//
+//==================================================================================================
+// 08/22/2014 -- dgs -- New
+// 10/31/2014 -- dgs -- tweaked the 'Under Construction' stuff
+// 12/10/2014 -- dgs -- Cleand up things a bit
+// 12/17/2014 -- dgs -- Removed meglevel,
+// 02/10/2015 -- dgs -- Added message level back.
+//==================================================================================================
+// Set Globals
+if (typeof DebugFirstRun == "undefined") var DebugFirstRun=true;
+
+function Debug(text,mode,level){
+	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
+
+	// Check to see if we should continue
+		if (typeof tcfdata.debugEnvs == "undefined") return
+		if (tcfdata.debugEnvs[0].indexOf(GetEnv().toString()) < 0) return 
+			
+	// Set variables if this is not a full call
+		if (arguments.length < 1) {
+		print_debug('* Error * -- Invalid call to "' + myName +'", insufficinent arguments passed' );
+			return;
+		}
+
+	// Set level and mode if necessary
+		if (mode === undefined) mode='D';
+		if (typeof mode == 'number') { mode='D'; level=mode; }
+		if (level === undefined) level=0;
+
+	// Check against debugLevel
+		if (tcfdata.debugLevel === undefined) tcfdata.debugLevel=2;
+		if (tcfdata.debugLevel < level) return;
+
+	// If first run and 'DEV' then print out header
+		if (DebugFirstRun && EnvIs('dev')) {
+			print_doc('&nbsp;&nbsp;&nbsp;<strong><em>*Warning*</strong> -- Running in development environment, workflow may be under construction</em><br>');
+			DebugFirstRun=false;
+		}
+
+	// Print message
+		mode=mode.toUpperCase();
+		if ( mode == 'D' || mode == 'B' )
+			print_debug(text + ' \n');
+		if ( mode == 'S' || mode == 'B' )
+			print_doc("&nbsp;&nbsp;&nbsp;" + text + ' <br>');
+	return;
+} //Debug
+
+function Dump(varName,varValue,mode,callerName){
+	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
+	// Set variables if this is not a full call
+	if (arguments.length < 2) {
+		print_debug('* Error * -- Invalid call to "' + myName +'", insufficinent arguments passed' );
+		return;
+	}
+	text=varName + ' = >' + varValue + '<';
+	Debug(text,mode,callerName);
+} //Dump
+
+function Here(id) {
+	print_debug('Here ' + id + '\n');
+} //Here
+
+//==============================================================================================
+// Helper function to check to see if a variable has a value, if not then print a message and return false
+// e.g. if (! CheckForVal(tcfdata.rotation,'Course Rotation',ChangeTypeFirstRun)) { ChangeTypeFirstRun=false; return false; }
+//==============================================================================================
+function CheckForVal(varName,varValue) {
+	//print_debug('\tvarName = ' + varName + ', varValue =' + varValue + ',varValue.length  = ' + varValue.length + '\n');
+	if (!varValue || !varValue.length) {
+		print_doc('&nbsp;&nbsp;<strong>*WARNING*</strong> -- Data Field&nbsp;&nbsp;<em>\'' + varName + '\'</em>&nbsp;&nbsp;does not have a value, workflow calculation incomplete.<br>');
+		return false;
+	}
+	return true;
+} //CheckForVal
+
+//==================================================================================================
+// Helper function to remove duplicates from an array
+//==================================================================================================
+function RemoveDupes(arr,exclude) {
+    var noDupes=[];
+    exclude=' ' + exclude + ' ';
+    arr=arr.sort();
+    arr.forEach(function(value) {
+		//if (typeof(Dump) == "function") { var num=noDupes.indexOf(value); Dump('\t\tIn Remove Dupes, index of ' + value + ' in input array',num); }
+        if ( noDupes.indexOf(value) == -1 && exclude.indexOf(' '+value+' ') < 0 ) {
+            noDupes.push(value);
+        }
+    });
+    return noDupes;
+} //RemoveDupes
+
+//==================================================================================================
+// Helper function to output the list of fields that have changed
+// runs as a wforder directive
+// 12/17/2014 -- dgs -- Updated for new Debug / Dump syntax
+// 01/12/2015 -- dgs -- Tewaked the output format to the screen
+// 02/10/2015 -- dgs -- Exit if not running in dev
+//==================================================================================================
+if(typeof WhatsChangedFirstRun == "undefined") var WhatsChangedFirstRun = true;
+wffuncs.WhatsChanged = function(inval, wfrule, args) {
+	if (!WhatsChangedFirstRun) return false;
+	var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
+	if (!haveDebug) return false;
+	if (!WhatsChangedFirstRun) return false;
+	var myName=wfrule.attrname;
+	Debug('\n*** In ' + myName + ' ***');
+
+	//Get a list of fields that have changed
+	var diffdata = {};
+	tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata});
+
+	if (!Object.keys(diffdata).length) {
+		Debug('\tNo Changes found in form data','b');
+	} else {
+		Debug('\t<strong><em>Changed Fields:</em></strong>','s');
+		Debug('\tChanged Fields:','d');
+		for (var i in diffdata) {
+			Debug('\t\t' + i.toString() + ' (' + eval('tcfdata.' + i + '.toSource()') + ')','d');  // jshint ignore:line
+			Debug('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp' + i.toString(),'s');
+		}
+	}
+
+	WhatsChangedFirstRun = false;
+	return false;
+}; //wffuncs.WhatsChanged

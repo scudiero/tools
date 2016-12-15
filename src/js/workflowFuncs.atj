@@ -1,0 +1,115 @@
+//=================================================================================================
+// version=1.0.53 // -- dscudiero -- 07/13/2016 @ 14:55:45.67
+//=================================================================================================
+// Workflow functions for courseadmin
+// Note: Expects the functions in workflowHelperFunctions.atj to have been imported (at bottom)
+//=================================================================================================
+//"use strict";
+// Do only once
+if (typeof wfFunctionsLoaded == "undefined") {
+
+	//Get the CIM instance name
+	var wfCimInstance=tcfdata.pagename[0].replace(/^\/([^\/]*)\/.*/, "/$1/");
+	wfCimInstance=wfCimInstance.replace(/\//g, "");
+
+	// If wfDebugLevel is set in the config file then set as global
+	var wfDebugLevel=0;
+	if (typeof tcfdata.wfDebugLevel != 'undefined')
+		wfDebugLevel=parseInt(tcfdata.wfDebugLevel[0]);
+
+	var wfDebugEnvs='';
+	var wfInDebugEnv=false;
+	var wfEnv="";
+	var wfEnvIsDev=false;
+	if (typeof tcfdata.wfDebugEnvs != 'undefined') {
+		wfDebugEnvs=","+tcfdata.wfDebugEnvs[0]+",";
+		// What environment are we running in
+		var host=getenv("HTTP_HOST").toLowerCase();
+		if (host.indexOf('.dev') > 0) { var wfEnv  ="dev"; wfEnvIsDev=true;
+		} else if (host.indexOf('-test') > 0) { var wfEnv = "test";
+		} else if (host.indexOf('-next') > 0) { var wfEnv = "next";
+		} else {wfEnv = "*unknown*"}
+		// If in a debug environment then print out stuff
+		if (wfDebugEnvs.indexOf(',' + wfEnv + ',') >= 0) {
+			wfInDebugEnv=true;
+			if (tcfdata.newrecord == 'true') { var wfProposalMode='NEW';
+			} else if (tcfdata.deleterec == 'true') { var wfProposalMode='DELETE';
+			} else { var wfProposalMode='EDIT'; }
+			var d = new Date();
+			var prtStr="\n" + Array(40).join("=") + " " + d.toString() + " " + Array(40).join("=") +
+						"\n<<< Loading workflowFuncs.atj, proposal mode is " + wfProposalMode + " ...";
+			print_debug(prtStr);
+		} //(host.indexOf(".dev") > 0)
+	} //(typeof tcfdata.wfDebugEnvs != 'undefined')
+
+	var wfFunctionsLoaded=false;
+} //(typeof wfFunctionsLoaded == "undefined")
+
+//==================================================================================================
+function wfDebug(text,mode) { return; } //wfDebug
+function wfDump(varList,delimiter){ return; } //wfDump
+//==================================================================================================
+// Check if proposal is in EDIT mode
+// 02/26/2015 - dgs - New
+// 11/02/2016 - dgs - Streamlined
+//==================================================================================================
+wffuncs.IsEdit = function(inval, wfrule) {
+	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
+		return false;
+	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
+		return false;
+
+	return [inval.replace(wfrule.ifregex,'')];
+}; //IsEdit
+
+//=================================================================================================
+// Import workflow helper functions (workflowLib.atj) -- imported from localsteps
+//=================================================================================================
+//wfLibName="/locallibs/workflowLib.atj"
+//%import %progdir%/locallibs/workflowLib.atj:atj;
+//=================================================================================================
+
+/*
+//=================================================================================================
+//
+//=================================================================================================
+// 03-??-16 - dgs - Initial coding -- ???
+//=================================================================================================
+wffuncs.xxxxxxxx = function(inval, wfrule, args) {
+	var myName=wfrule.attrname;
+	wfDebug("\n*** In "+ myName + " called as '" + wfrule.searchfor + "', Step: '" + inval +"' ***");
+
+	var retArray=[];
+	var reqType=wfrule.searchfor.toLowerCase();
+
+	//Try block encapsulated main function
+	 try {
+		// Initial Checks
+			InitialChecks(["wfrule","college","department"],args)
+		// Value Checks
+			if (tcfdata.college_prog[0].code != "DN")
+		 		throw "*** Failed college_prog.code is not 'DN' check";
+		 	if (tcfdata.acad_level[0].code != "GR")
+		 		throw "*** Failed tcfdata.acad_level is not 'GR' check";
+
+		} //Try block
+	catch(err) { print_debug('\t' + myName + ": " + err + "\n") ; return false; }
+
+		// Main
+
+
+		// Return results
+			if (haveDebug) { retArray.forEach(function(step) { Dump('\tReturning step/workflow: ',step) }); }
+			if (retArray.length > 0) {
+				return retArray
+			} else {
+				return false;
+			}
+
+} //xxxxxxxx
+*/
+
+//==================================================================================================
+// END
+//==================================================================================================
+if (wfEnvIsDev) print_debug("... workflowFuncs.atj loaded >>>\n\n");

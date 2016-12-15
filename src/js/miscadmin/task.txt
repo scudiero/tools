@@ -1,0 +1,8 @@
+
+The 'standard' miscadmin workflow configuration
+has been setup.
+Note that no workflow steps have been added to
+the workflow, the client will need to add workflow
+steps using Workflow Management tool on the
+console.
+Updates made in TEST.
