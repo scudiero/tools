@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.88 # -- dscudiero -- 12/14/2016 @ 11:33:11.73
+version=2.1.89 # -- dscudiero -- 12/15/2016 @ 13:28:55.42
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -26,7 +26,7 @@ scriptArgs="$*"
 #=======================================================================================================================
 # Synchronize the internal database shadow with master
 function SyncInternalDb {
-	Msg2 "\n*** $FUNCNAME -- Starting ***"
+	Msg2; Msg2 "*** $FUNCNAME -- Starting ***"
 	srcDir=$clientsTransactionalDb
 	tgtDir=$TOOLSPATH/internalContactsDbShadow
 	SetFileExpansion 'on'
@@ -42,7 +42,7 @@ function SyncInternalDb {
 #=======================================================================================================================
 # Synchronize the courseleaf cgi's  shadow with master
 function SyncCourseleafCgis {
-	Msg2 "\n*** $FUNCNAME -- Starting ***"
+	Msg2; Msg2 "*** $FUNCNAME -- Starting ***"
 	srcDir=/mnt/dev6/web/cgi
 	tgtDir=$cgisRoot
 	rsync -aq $srcDir/ $tgtDir 2>&1
@@ -55,7 +55,7 @@ function SyncCourseleafCgis {
 #=======================================================================================================================
 # Synchronize the skeleton shadow with master
 function SyncSkeleton {
-	Msg2 "\n*** $FUNCNAME -- Starting ***"
+	Msg2; Msg2 "*** $FUNCNAME -- Starting ***"
 	srcDir=/mnt/dev6/web/_skeleton
 	tgtDir=$skeletonRoot
 
@@ -81,7 +81,7 @@ function SyncSkeleton {
 #=======================================================================================================================
 # Check Monitored files for changes
 function CheckMonitorFiles {
-	Msg2 $V3 "*** $FUNCNAME -- Starting ***"
+	Msg2; Msg2 "*** $FUNCNAME -- Starting ***"
 
 	declare -A userNotifies
 	echo "set realname=\"File Monitor\"" > $tmpFile.2
@@ -128,13 +128,13 @@ function CheckMonitorFiles {
 			$DOIT mutt -F $tmpFile.2 -s "File Monitor Notice" -- $user@leepfrog.com < $tmpFile
 		done;
 
-	Msg2 $V3 "*** $FUNCNAME -- Completed ***"
+	Msg2 "*** $FUNCNAME -- Completed ***"
 	return 0
 } #CheckMonitorFiles
 
 #=======================================================================================================================
 function BuildToolsAuthTable() {
-	Msg2 "\n*** $FUNCNAME -- Starting ***"
+	Msg2; Msg2 "*** $FUNCNAME -- Starting ***"
 	## Build the toolsgroups table from the role data from the stage-internal site
 		pw=$(GetPW 'stage-internal')
 		[[ $pw == '' ]] && Msg2 "T Could not lookup password for 'stage-internal' in password file.\n"
