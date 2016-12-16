@@ -1,0 +1,16 @@
+#===================================================================================================
+/archive/
+/bin/
+/courseleafcgiShadow/
+/courseleafEscrowedSites/
+/courseleafGitRepoShadow/
+/courseleafSkeletonShadow/
+/cygwin64/
+/DBs/
+/internalContactsDbShadow/
+/Logs/
+/MySQL/
+/Python/
+.pw*
+*.pyc
+*.bak
