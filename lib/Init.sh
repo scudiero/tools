@@ -23,14 +23,14 @@ function Init {
 
 	local trueVars='noPreview noPublic'
 	local falseVars='getClient anyClient getProducts getCims getEnv getSrcEnv getTgtEnv getDirs checkEnvs'
-	falseVars="$falseVars allowMulti allowMultiProds allowMultiEnvs allowMultiCims noWarn"
+	falseVars="$falseVars allowMulti allowMultiProds allowMultiEnvs allowMultiCims checkProdEnv noWarn"
 	for var in $trueVars; do eval $var=true; done
 	for var in $falseVars; do eval $var=false; done
 
-	local token
+	local token checkProdEnv noWarn checkEnv
 	#printf "%s\n" "$@"
 	for token in $@; do
-		token=$(Lower $token)
+		token=$(Lower $token)h
 		dump -3 -t token
 		if [[ $token == 'courseleaf' || $token == 'all' ]]; then getClient=true; getEnv=true; getDirs=true; checkEnvs=true; fi
 		if [[ $token == 'getclient' || $token == 'getclients' ]]; then getClient=true; fi
@@ -50,6 +50,7 @@ function Init {
 		[[ $token == 'nopreview' ]] && noPreview=true
 		[[ $token == 'nopublic' ]] && noPublic=true
 		[[ $token == 'nocheck' ]] && noCheck=true
+		[[ $token == 'checkprodenv' ]] && checkProdEnv=true
 		[[ $token == 'nowarn' ]] && noWarn=true
 	done
 	dump -3 -t -t parseStr getClient getEnv getDirs checkEnvs getProducts getCims allCims noPreview noPublic
@@ -136,6 +137,7 @@ function Init {
 				clientEnvs="all $clientEnvs"
 			fi
 			Prompt "env$varSuffix" "What environment$varSuffix/site$varSuffix do you wish to use$promptModifer?" "$clientEnvs"; env=$(Lower $env)
+			[[ $checkProdEnv == true ]] && checkProdEnv=$env
 		fi
 		if [[ $getSrcEnv == true ]]; then
 			[[ $srcEnv == '' && $env != '' ]] && srcEnv="$env"
@@ -143,6 +145,7 @@ function Init {
 			clientEnvs="$clientEnvs skel"
 			Prompt srcEnv "What $(ColorK source) environment/site do you wish to use?" "$clientEnvs"; srcEnv=$(Lower $srcEnv)
 			clientEnvs="$clientEnvsSave"
+			[[ $checkProdEnv == true ]] && checkProdEnv=$srcEnv
 		fi
 		if [[ $getTgtEnv == true ]]; then
 			[[ $tgtEnv == '' && $env != '' && $srcEnv != $env ]] && tgtEnv="$env"
@@ -151,6 +154,7 @@ function Init {
 			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false ]] && clientEnvs="pvt,$clientEnvs"
 			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt'
 			Prompt tgtEnv "What $(ColorK target) environment/site do you wish to use?" "$clientEnvs" "$defaultEnv"; tgtEnv=$(Lower $tgtEnv)
+			[[ $checkProdEnv == true ]] && checkProdEnv=$tgtEnv
 		fi
 
 		if [[ $envs != '' ]]; then
@@ -180,11 +184,11 @@ function Init {
 			done
 		fi
 
-		if [[ $tgtEnv == 'next' || $tgtEnv == 'curr' ]]; then
+		if [[ $checkProdEnv != false ]] && [[ $checkProdEnv == 'next' || $checkProdEnv == 'curr' ]]; then
 		 	if [[ $noWarn != true ]]; then
 				verify=true
 				Msg2
-				Warning "You are asking to overlay the $(ColorW $(Upper $tgtEnv)) environment"
+				Warning "You are asking to overlay the $(ColorW $(Upper $checkProdEnv)) environment"
 				unset ans; Prompt ans "Are you sure" "Yes No";
 				ans=$(Lower ${ans:0:1})
 				[[ $ans != 'y' ]] && Goodbye -1
