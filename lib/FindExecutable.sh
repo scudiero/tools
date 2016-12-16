@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.0.91" # -- dscudiero -- 12/09/2016 @  9:48:37.59
+version="1.0.94" # -- dscudiero -- 12/16/2016 @ 15:22:57.52
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -26,18 +26,20 @@ function FindExecutable {
 	local searchMode=${1:-std}; shift
 	local srcTypes="$1"; shift
 	local srcLibs="$1"; shift
-	local searchDirs searchMode srcTypes typeDir typeExt srcLibs localMd5 prodMd5 prodFile ans found searchDir type lib callPgmAlias
+	local searchDirs searchMode srcTypes typeDir typeExt srcLibs localMd5 prodMd5 prodFile ans found searchDir type lib callPgmAlias useLocal
 	#===================================================================================================================
 
-		if [[ $srcTypes == '' || $srcTypes == 'search' || $srcLibs == '' ]]; then
-			sqlStmt="select scriptData1,scriptData2 from $scriptsTable where name =\"dispatcher\" "
-			RunSql $sqlStmt
-		 	resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString")
-			local dbSrcTypes="$(cut -d'|' -f1 <<< "$resultString")"
-			local dbSrcLibs="$(cut -d'|' -f2 <<< "$resultString")"
-		fi
-		[[ $srcTypes == '' || $srcTypes == 'search' ]] && srcTypes="$dbSrcTypes"
-		[[ $srcLibs == '' ]] && srcLibs="$dbSrcLibs"
+	useLocal=$USELOCAL
+
+	if [[ $srcTypes == '' || $srcTypes == 'search' || $srcLibs == '' ]]; then
+		sqlStmt="select scriptData1,scriptData2 from $scriptsTable where name =\"dispatcher\" "
+		RunSql $sqlStmt
+	 	resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString")
+		local dbSrcTypes="$(cut -d'|' -f1 <<< "$resultString")"
+		local dbSrcLibs="$(cut -d'|' -f2 <<< "$resultString")"
+	fi
+	[[ $srcTypes == '' || $srcTypes == 'search' ]] && srcTypes="$dbSrcTypes"
+	[[ $srcLibs == '' ]] && srcLibs="$dbSrcLibs"
 
 	## Search for the file scanning TOOLSSRC, TOOSSRCLIBS
 		searchDirs="$TOOLSPATH/src"
