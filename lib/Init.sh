@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.0.48 # -- dscudiero -- 12/14/2016 @  7:51:01.46
+version=2.0.50 # -- dscudiero -- 12/16/2016 @ 13:33:23.60
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -30,7 +30,7 @@ function Init {
 	local token checkProdEnv noWarn checkEnv
 	#printf "%s\n" "$@"
 	for token in $@; do
-		token=$(Lower $token)h
+		token=$(Lower $token)
 		dump -3 -t token
 		if [[ $token == 'courseleaf' || $token == 'all' ]]; then getClient=true; getEnv=true; getDirs=true; checkEnvs=true; fi
 		if [[ $token == 'getclient' || $token == 'getclients' ]]; then getClient=true; fi
