@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.0.42" # -- dscudiero -- 12/14/2016 @ 12:02:39.94
+version="2.0.45" # -- dscudiero -- 12/16/2016 @ 15:22:46.16
 #=======================================================================================================================
 # Generic resolve file and call
 # Call scriptName ["$scriptArgs"]
@@ -51,7 +51,6 @@ function Call {
 				#	searchTypes	- A comma separated list of Type:extension pairs.  e.g 'Bash:sh,Python:py,Java:class'
 				#	srcLibs		- A comma separated list of src subdirectories to search.  In the set {'cron','features','reports','patches'}
 				#===========================================================================================================================
-				useLocal=true;
 				FindExecutable "$scriptName" 'std'  "$useTypes" "$useLibs" ## Sets variable executeFile & executeAlias
 		else
 			executeFile="$scriptName"
