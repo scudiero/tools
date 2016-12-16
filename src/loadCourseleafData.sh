@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.11 # -- dscudiero -- 12/14/2016 @ 11:27:34.42
+version=3.8.14 # -- dscudiero -- 12/16/2016 @  8:33:25.03
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -608,7 +608,7 @@ scriptDescription="Load Courseleaf Data"
 						fi
 					done
 
-				## export the data to make it avaiable to the step, then run step to update page data
+				## export the data to make it available to the step, then run step to update page data
 					if [[ $informationOnlyMode == false ]]; then
 						if [[ $pageOwner != '' || $pageWorkflow != '' || $skipNulls == false ]]; then
 							export QUERY_STRING="owner=$pageOwner|workflow=$pageWorkflow|skipNulls=$skipNulls"
@@ -654,7 +654,7 @@ ParseArgsStd
 
 Hello
 displayGoodbyeSummaryMessages=true
-Init 'getClient getEnv getDirs checkEnvs'
+Init 'getClient getEnv getDirs checkEnvs checkProdEnv'
 dump -1 processUserData processRoleData processPageData informationOnlyMode ignoreMissingPages
 
 ## Information only mode
@@ -879,7 +879,8 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 		Msg2 "^Retrieved $numWorkflowDataFromSpreadsheet records from $workbookFile"
 		Msg2 "^Updated $numPagesUpdated pages" | tee -a $srcDir/changelog.txt
 		[[ $numMembersMappedToUIN -gt 0 ]] && Msg2 "^Mapped $numMembersMappedToUIN role members from UID to UIN" | tee -a $srcDir/changelog.txt
-		[[ $numPagesNotFound -gt 0 ]] && Msg2 "^$numPagesNotFound Pages not found" | tee -a $srcDir/changelog.txt
+		[[ $numPagesNotFound -gt 0 ]] && Msg2 "^$numPagesNotFound pages not found" | tee -a $srcDir/changelog.txt
+		[[ ${#membersErrors[@]} -gt 0 ]] && Msg2 "^${#membersErrors[@]} -gt 0 pages had errors in their owner/workflow data, see below for detailed information" | tee -a $srcDir/changelog.txt
 		## Member lookup errors
 
 		if [[ ${#membersErrors[@]} -gt 0 ]]; then
