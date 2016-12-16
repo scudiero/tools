@@ -1,10 +1,11 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.29 # -- dscudiero -- 12/14/2016 @ 11:53:50.46
+version=1.0.33 # -- dscudiero -- 12/16/2016 @ 10:23:56.31
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
+imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
+imports="$imports SelectMenuNew"
 Import "$imports"
 originalArgStr="$*"
 scriptDescription=""
@@ -81,7 +82,8 @@ unset origHost origDevShare origProdShare
 			[[ $origHost != '' && $origHost == $token ]] && continue
 			menuList+=("|${token}")
 		done
-		Msg2; Msg2 "Please specify the ordinal number of the new linux host:"
+		Msg2; Msg2 "Please specify the ordinal number of the new linux host."
+		Note "If the client's new host is not listed here then the site's data has already been updated."
 		SelectMenuNew 'menuList' 'newHost' '\nHost ordinal (or 'x' to quit) > '
 		[[ $newHost == '' ]] && Goodbye 'quickquit' || newHost=$(cut -d'|' -f1 <<< $newHost)
 	else
