@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.67 # -- dscudiero -- 12/06/2016 @  8:03:21.12
+version=2.0.68 # -- dscudiero -- 12/19/2016 @  9:55:14.80
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -30,6 +30,9 @@ originalArgStr="$*"
 
 #=======================================================================================================================
 ## Log the cronJob
+	[[ ! -d $TOOLSPATH/Logs/cronJobs/cronJobs]] && mkdir -p $TOOLSPATH/Logs/cronJobs/cronJobs
+	echo "$(date +%m-%d-%Y@%H.%M.%S) - Starting $callScriptName" >> $TOOLSPATH/Logs/cronJobs/cronJobs/cronJobs.log
+## Set the jobs the log file
 	[[ ! -d $TOOLSPATH/Logs/cronJobs/$callScriptName ]] && mkdir -p $TOOLSPATH/Logs/cronJobs/$callScriptName
 	logFile=$TOOLSPATH/Logs/cronJobs/$callScriptName/$hostName-$(date +%m-%d-%Y@%H.%M.%S).log
 
