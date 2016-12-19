@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.0.5" # -- dscudiero -- 11/29/2016 @ 12:23:00.50
+version="1.0.15" # -- dscudiero -- 12/19/2016 @ 11:37:42.88
 #===================================================================================================
 # Import need functions into the runtime environment
 #===================================================================================================
@@ -16,9 +16,8 @@ function Import {
 
 	## Search for the include file, load the first one
 	for includeName in $includeList; do
-		#echo "includeName = '$includeName'"
 		## Is the function already defined, if yes then skip
-		[[ $(type -t parseArgs-$myName) = function ]] && continue
+		[[ $(type -t $myName) = function ]] && continue
 		found=false
 		for searchDir in $searchDirs; do
 			[[ -r ${searchDir}/${includeName}.sh ]] && source ${searchDir}/${includeName}.sh && found=true && break
