@@ -134,10 +134,10 @@ workbooks=($(ProtectedCall "ls $qaTrackingRoot/$fileSpec 2> /dev/null"))
 SetFileExpansion
 
 for workbook in "${workbooks[@]}"; do
-	Msg2 $V1 "^Checking File: $workbook"
 	fileName=$(basename $workbook)
 	[[ ${fileName:0:1} == '~' ]] && continue
 	[[ $(Contains "$workbook" 'old') == true || $(Contains "$workbook" 'bak') == true ]] && continue
+	Msg2 $V1 "^Checking File: $workbook"
 	## Get the list of worksheets in the workbook
 		GetExcel "$workbook" 'GetSheets' > $tmpFile
 		sheets=$(tail -n 1 $tmpFile)
@@ -256,6 +256,17 @@ for workbook in "${workbooks[@]}"; do
 				cd $(dirname $workbook)
 				mv -f $workbook "$qaTrackingRoot/Archive/"
 				cd $cwd
+				## Get the key for the qastatus record
+					whereClause="clientCode=\"$clientCode\" and  product=\"$product\" and project=\"$project\" and instance=\"$instance\" and env=\"$env\" and jalotTaskNumber=\"$jalotTaskNumber\" "
+					sqlStmt="select idx from $qaStatusTable where $whereClause"
+					RunSql $sqlStmt
+					if [[ ${#resultSet[@]} -eq 0 ]]; then
+						Error "Could not retrieve record key in $warehouseDb.$qaStatusTable for:\n^$whereClause\nCould not set the record as deactivated"
+					else
+						qastatusKey=${resultSet[0]}
+						sqlStmt="update $qaStatusTable set recordStatus=\"D\" where idx=qastatusKey"
+						RunSql $sqlStmt
+					fi
 			fi
 		fi
 done # Workbooks
