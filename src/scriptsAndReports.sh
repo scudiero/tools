@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.10.202 # -- dscudiero -- 12/14/2016 @ 11:31:15.33
+version=3.10.203 # -- dscudiero -- 12/19/2016 @ 15:55:42.87
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -288,7 +288,7 @@ dump -1 -p client report emailAddrs myName ${myName}LastRunDate ${myName}LastRun
 		[[ $rc -eq 0 ]] && Msg2 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed succesfully" || \
 			Msg2 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed with errors (exit code = $rc) \
 			\nPlease record any Messages and contact the $itemType owner\n"
-		[[ $batchMode == false && $quiet == false && $verify == true ]] && Pause "Please press enter to go back to '${itemType}s'"
+		[[ $batchMode != true && $quiet != true && $verify == true ]] && Pause "Please press enter to go back to '${itemType}s'"
 		unset calledViaScripts
 	done
 
