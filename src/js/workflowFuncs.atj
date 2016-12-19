@@ -59,9 +59,26 @@ wffuncs.IsEdit = function(inval, wfrule) {
 		return false;
 	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
 		return false;
-
 	return [inval.replace(wfrule.ifregex,'')];
 }; //IsEdit
+//==================================================================================================
+// Check if proposal is Not Delete
+// 12/16/2016 - dgs - New
+//==================================================================================================
+wffuncs.IsNotDelete = function(inval, wfrule) {
+	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
+		return false;
+	return [inval.replace(wfrule.ifregex,'')];
+}; //IsNotEdit
+//==================================================================================================
+// Check if proposal is Not Delete
+// 12/16/2016 - dgs - New
+//==================================================================================================
+wffuncs.IsNotNew = function(inval, wfrule) {
+	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
+		return false;
+	return [inval.replace(wfrule.ifregex,'')];
+}; //IsNotEdit
 
 //=================================================================================================
 // Import workflow helper functions (workflowLib.atj) -- imported from localsteps
