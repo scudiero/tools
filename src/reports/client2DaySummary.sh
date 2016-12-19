@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.7 # -- dscudiero -- 12/06/2016 @ 10:48:19.32
+version=1.1.8 # -- dscudiero -- 12/19/2016 @  7:53:19.19
 #==================================================================================================
 Import DumpMap
 originalArgStr="$*"
@@ -141,7 +141,7 @@ clientsDir="/mnt/internal/site/stage/web/clients"
 		done
 		## Send email
 			 if [[ $emailAddrs != '' ]]; then
-			 	Msg2 | tee -a $outFile; Msg2 "Sending email(s) to: $emailAddrs" | tee -a $outFilee; Msg2 | tee -a $outFile
+			 	Msg2 | tee -a $outFile; Msg2 "Sending email(s) to: $emailAddrs" | tee -a $outFile; Msg2 | tee -a $outFile
 			 	for emailAddr in $(echo $emailAddrs | tr ',' ' '); do
 			 		mutt -a "$outFile" -s "$report report results: $(date +"%m-%d-%Y")" -- $emailAddr < $outFile
 			 	done
