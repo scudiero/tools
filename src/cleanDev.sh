@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.4.61 # -- dscudiero -- 12/16/2016 @ 15:21:53.78
+version=3.4.66 # -- dscudiero -- 12/16/2016 @ 16:01:51.67
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -101,8 +101,8 @@ scriptDescription="Cleanup private dev sites"
 	function ProcessRequest {
 		local type="$1"
 		local file="/mnt/$share/web/$2"
-		local client=$(cut -d'-' -f1 <<< $2)
-		dump -1 -p client requestType file
+		local processClient=$(cut -d'-' -f1 <<< $2)
+		dump -1 -p processClient requestType file
 
 		case "$requestType" in
 			m*)
@@ -136,7 +136,7 @@ scriptDescription="Cleanup private dev sites"
 # 					done
 # Quit
 				 	Msg2 "Saving workflow..."
-				 	Call saveWorkflow $client -p -all -suffix "beforeDelete-$fileSuffix" -nop -quiet
+				 	Call saveWorkflow $processClient -p -all -suffix "beforeDelete-$fileSuffix" -nop -quiet
 				fi
 				Msg2 "Removing '$file' offline..."
 				if [[ $DOIT == '' ]]; then
