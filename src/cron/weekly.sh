@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.16 # -- dscudiero -- 12/14/2016 @ 11:33:56.29
+version=2.1.17 # -- dscudiero -- 12/19/2016 @ 10:36:54.12
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -34,9 +34,6 @@ case "$hostName" in
 
 			Msg2 "\n Tools Usage Report..."
 			Call 'reports' "toolsUsage -email 'dscudiero@leepfrog.com,jlindeman@leepfrog.com' $scriptArgs"
-
-			# Msg2 "\n QAstatus..."
-			# Call 'reports' "qaStatus \'dscudiero@leepfrog.com,sjones@leepfrog.com\' $scriptArgs"
 
 			Msg2 "\n*** Reports -- Completed ***"
 
