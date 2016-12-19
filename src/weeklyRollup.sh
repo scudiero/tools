@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #===================================================================================================
-version=1.0.7 # -- dscudiero -- 12/14/2016 @ 11:31:50.59
+version=1.0.15 # -- dscudiero -- 12/19/2016 @ 10:30:38.53
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -104,7 +104,7 @@ ParseArgsStd
 	Msg2 "\n*** Rollup weekly Logs -- Starting ***"
 	cd $TOOLSPATH/Logs
 	[[ -d ./cronJobs ]] && rm -rf ./cronJobs
-	tar -cvzf "$(date '+%m-%d-%y').tar.gz" * --exclude '*.gz' #--remove-files
+	tar -cvzf "$(date '+%m-%d-%y').tar.gz" * --exclude '*.gz' --exclude "$myName*" --remove-files
 	find . -maxdepth 1 -mindepth 1 -type d -exec rm -rf {} \; > /dev/null 2>&1
 	find . -maxdepth 1 -mindepth 1 -type f -name '*.tar' -exec rm -rf {} \; > /dev/null 2>&1
 	Msg2 "\n*** Logs rollup -- Completed ***"
