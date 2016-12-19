@@ -1,6 +1,6 @@
 #!/bin/bash
 #=======================================================================================================================
-version=4.2.92 # -- dscudiero -- 12/14/2016 @ 11:16:02.96
+version=4.2.94 # -- dscudiero -- 12/19/2016 @  9:40:06.08
 #=======================================================================================================================
 TrapSigs 'on'
 Import FindExecutable GetDefaultsData ParseArgsStd ParseArgs Hello RunSql Msg2 Call Goodbye SetSiteDirs GetCims RunCoureleafCgi
@@ -153,6 +153,7 @@ Hello
 
 		## Insert the record
 			for env in $(tr ',' ' ' <<< "$courseleafDevEnvs $courseleafProdEnvs"); do
+				[[ $env == 'pvt' ]] && continue
 				eval envDir=\$${env}Dir
 				[[ $envDir == '' ]] && continue
 				if [[ -d $envDir/web ]]; then
@@ -161,11 +162,10 @@ Hello
 					(( forkCntr+=1 ))
 					(( siteCntr+=1 ))
 				fi
-				# if [[ $fork == true && $((forkCntr%$maxForkedProcesses)) -eq 0 ]]; then
-				# 	#[[ $batchMode != true ]] &&
-				# 	Msg2 "^Waiting on forked processes, processed $forkCntr of $processedSiteCntr ...\n"
-				# 	wait
-				# fi
+				if [[ $fork == true && $((forkCntr%$maxForkedProcesses)) -eq 0 ]]; then
+					[[ $batchMode != true ]] && Msg2 "^Waiting on forked processes, processed $forkCntr of $processedSiteCntr ...\n"
+					wait
+				fi
 			done
 			if [[ $fork == true ]]; then
 				[[ $batchMode != true ]] && Msg2 "^Waiting on forked processes, processed $forkCntr of $processedSiteCntr ...\n"
