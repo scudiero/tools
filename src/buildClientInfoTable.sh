@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.67 # -- dscudiero -- 12/14/2016 @ 11:18:26.32
+version=2.3.68 # -- dscudiero -- 12/19/2016 @  9:40:28.66
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -96,8 +96,7 @@ forkCntr=1;
 			(( forkCntr+=1 ))
 			## Wait for forked process to finish, only run maxForkedProcesses at a time
 			if [[ $((forkCntr%$maxForkedProcesses)) -eq 0 ]]; then
-				#[[ $batchMode != true ]] &&
-				Msg2 "^Waiting on forked processes, processed $forkCntr of $processedSiteCntr ...\n"
+				[[ $batchMode != true ]] && Msg2 "^Waiting on forked processes, processed $forkCntr of $processedSiteCntr ...\n"
 				wait
 			fi
 			[[ $fork != true && $(($clientCntr % processNotify)) -eq 0 ]] && Msg2 "\n^*** Processed $clientCntr out of $numClients\n"
