@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #==================================================================================================
-version=1.0.95 # -- dscudiero -- 12/14/2016 @ 11:27:11.42
+version=1.0.101 # -- dscudiero -- 12/19/2016 @ 12:11:11.08
 #==================================================================================================
 TrapSigs 'on'
 originalArgStr="$*"
@@ -10,7 +10,7 @@ scriptDescription=""
 #= Description +===================================================================================
 # NOT MEANT TO BE CALLED STAND ALONE
 #==================================================================================================
-checkParent="buildqastatustable.sh"; calledFrom="$(Lower "$(basename "${BASH_SOURCE[2]}")")"
+checkParent="buildqastatustable.sh"; calledFrom="$(Lower "$(basename "${BASH_SOURCE[3]}")")"
 [[ $(Lower $calledFrom) != $(Lower $checkParent)  ]] && Terminate "Sorry, this script can only be called from '$checkParent', \nCurrent call parent: '$calledFrom'"
 
 #==================================================================================================
@@ -47,19 +47,15 @@ for var in $falseVars; do eval $var=false; done
 #==================================================================================================
 # Standard argument parsing and initialization
 #==================================================================================================
-## Find the workbook reader script location
-readWorkbookScript='getXlsx'; useLocal=true
-FindExecutable "$readWorkbookScript" 'full' 'Python:py' ## Sets variable executeFile
-readWorkbookScriptFile="$executeFile"
 
 #===================================================================================================
 # Main
 #===================================================================================================
-workbook="$1"; shift
-worksheet="$1"; shift
+workbookFile="$1"; shift
+workSheet="$1"; shift
 
 ## Parse the workbook file name
-fileName=$(basename $workbook)
+fileName=$(basename $workbookFile)
 fileName=$(cut -d'.' -f1 <<< $fileName)
 clientCode=$(cut -d'-' -f1 <<< $fileName)
 product=$(cut -d'-' -f2 <<< $fileName)
@@ -67,7 +63,7 @@ instance=$(cut -d'-' -f3 <<< $fileName)
 project=$(cut -d'-' -f4 <<< $fileName)
 env=$(cut -d'-' -f5 <<< $fileName)
 jalotTaskNumber=$(cut -d'-' -f6 <<< $fileName)
-	dump -2 workbook -t clientCode product project instance env jalotTaskNumber
+	dump -2 workbookFile -t clientCode product project instance env jalotTaskNumber
 
 ## Get the key for the qastatus record
 	Verbose 1 "^^^Retrieving qaStatusKey for '$clientCode.$product.$project.$instance.$env.$jalotTaskNumber'..."
@@ -84,9 +80,10 @@ jalotTaskNumber=$(cut -d'-' -f6 <<< $fileName)
 	[[ ${resultSet[0]} -gt 0 ]] && Msg2 $WT2 "QaTestId '$qastatusKey' has already been processed, skipping file" && Goodbye 'Return' && return 1
 
 ## Read the Testing Detail Final data
-	Verbose 1 "^^^^Parsing '$worksheet' worksheet..."
-	(CallPyPgm "$readWorkbookScript" "$readWorkbookScriptFile" "$workbook" "$worksheet" '^') > $tmpFile
+	Verbose 1 "^^^^Parsing '$workSheet' worksheet..."
+	GetExcel "$workbookFile" "$workSheet" '^' > $tmpFile
 	grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
+	[[ $grepStr == '' ]] && grepStr=$(ProtectedCall "grep 'usage:' $tmpFile")
 	if [[ $grepStr != '' || $(tail -n 1 $tmpFile) == '-1' ]]; then
 		Error "Could not retrieve data from workbook, please see below"
 		tail -n 20 $tmpFile 2>&1 | xargs -I{} printf "\\t%s\\n" "{}"
