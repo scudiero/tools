@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.18" # -- dscudiero -- 12/14/2016 @  9:35:51.27
+version="2.0.19" # -- dscudiero -- 12/19/2016 @ 12:04:38.61
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -28,7 +28,7 @@ function Hello {
 
 	# local myPath=$(dirname $(readlink -f $0))
 	# [[ ${myPath:0:6} == '/home/' ]] && 	Msg2 "$(ColorW "*** Running from '$myPath'")"
-	[[ ${0:0:6} == '/home/' ]] && 	Msg2 "$(ColorW "*** Running from '$myPath'")"
+	[[ ${0:0:6} == '/home/' ]] && 	Msg2 "$(ColorW "*** Running from a local directory")"
 
 	[[ $testMode == true ]] && Msg2 "$(ColorW "*** Running in Testmode")"
 	[[ "$DOIT" != ''  ]] && Msg2 "$(ColorW "*** The 'Doit' flag is turned off, changes not committed")"
