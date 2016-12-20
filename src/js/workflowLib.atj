@@ -1,5 +1,5 @@
 //======================================================================================================================
-// version:1.6.84 // -- dscudiero -- 12/09/2016 @  9:08:32.36
+// version:1.6.87 // -- dscudiero -- 12/20/2016 @  9:44:01.37
 //======================================================================================================================
 // Common wf functions and helper functions to support workflow
 //======================================================================================================================
@@ -516,7 +516,10 @@ wffuncs.Related = function(inval, wfrule, args) {
 // Where:
 //		<lookupType>	- The type of data to lookup in the set {'collegeCode','departmentCode'}
 // 		<givenType>		- The type of data provided for the query in the set {'subjectCode','departmentCode'}
-// 		<givenData>		- The value for the given data
+// 		<givenData1>	- The value for the given data
+// 		<givenData2>	- The value to exclude from the join variable.  This is only used for the
+//							'lookup college given a subject', in that case it is the department value on the
+//							proposal
 // 		<exceptData>	- Values to exclude from the results
 //							(e.g. if looking up college, this would be the proposal college)
 //	optionally
@@ -534,8 +537,9 @@ wffuncs.Related = function(inval, wfrule, args) {
 //======================================================================================================================
 // 08/30/16 - dgs - Initial
 // 11/15/16	- dgs - Re-factored to allow the specification of the column names in the database
+// 12/20/16 - dgs - re-wrote the sql statement for looking up college give subject
 //======================================================================================================================
-function LookupCode(lookupType,givenType,givenData,exceptData,colColumnName,deptColumnName,subjColumnName) {
+function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colColumnName,deptColumnName,subjColumnName) {
 	var myName=arguments.callee.toString().match(/function ([^\(]+)/)[1]; var version="2.0.0"
 	wfDebug(2,"\n\t*** In "+ myName + " (" + version +") ***")
 
@@ -544,7 +548,7 @@ function LookupCode(lookupType,givenType,givenData,exceptData,colColumnName,dept
 	if (typeof subjColumnName === 'undefined') { subjColumnName="subject";}
 
 	wfDebug(2,"\t\tlookupType: " + lookupType + ", \tgivenType: " + givenType +
-		", \tgivenData: " + givenData + ", \texceptData: " + exceptData +
+		", \tgivenData1: " + givenData1 + ", \tgivenData2: " + givenData2 + ", \texceptData: " + exceptData +
 		"\n\t\tcolColumnName: " + colColumnName + ", \tdeptColumnName: " + deptColumnName +
 		", \tsubjColumnName: " + subjColumnName);
 
@@ -552,17 +556,21 @@ function LookupCode(lookupType,givenType,givenData,exceptData,colColumnName,dept
 	var sqlStmt='';
 
 	// MAIN
-	sqlParms=[givenData];
+	sqlParms=[givenData1];
 	if (typeof exceptData != 'undefined')
 		sqlParms.push(exceptData);
 
 	// Lookup college code
 		if (lookupType.toLowerCase().substr(0,1) === "c") { // lookup college code
 			if (givenType.toLowerCase().substr(0,1) === "s") { // give a subject code
-				sqlStmt="select distinct cl2." + colColumnName + " as token from cimlookup cl1 join cimlookup cl2 using (" +
-						deptColumnName + ") where cl1." + subjColumnName + " = ? and cl2." + colColumnName + " <> '' ";
-				if (typeof exceptData != 'undefined')
-					sqlStmt= sqlStmt + " and cl2." + colColumnName + "<> ?";
+				sqlParms.push(givenData2);
+				sqlStmt="select distinct " + colColumnName + " from cimlookup where " + deptColumnName + " in (select " + deptColumnName +
+						" from cimlookup where " + subjColumnName + "="?" and " + deptColumnName + " <> "?") and " + colColumnName + "<> ''";
+				if (typeof exceptData != 'undefined') {
+					sqlStmt= sqlStmt + " and " + colColumnName + "<> ?";
+					sqlParms.push(exceptData);
+				}
+				sqlStmt= sqlStmt + " order by " + colColumnName;
 
 			} else if (givenType.toLowerCase().substr(0,1) === "d") { // give a department code
 					sqlStmt="select distinct " + colColumnName + " as token from cimlookup where " + deptColumnName +
