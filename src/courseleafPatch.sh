@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=4.10.90 # -- dscudiero -- 12/14/2016 @ 11:23:50.23
+version=4.10.91 # -- dscudiero -- 12/20/2016 @ 15:41:49.00
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCoureleafCgi WriteChangelogEntry GetCims'
@@ -241,7 +241,7 @@ unset prodVersions
 if [[ $(Contains "$products" 'cat') == true ]]; then
 	verifyArgs+=("CAT version:$catRefreshVersion") && prodVersions="$prodVersions, CAT version:$catRefreshVersion"
 	verifyArgs+=("NAVMASTER version:master") && prodVersions="$prodVersions, NAVMASTER version:master"
-	verifyArgs+=("PDFGEN version:master") && prodVersions="$prodVersions, PDFTEN version:master"
+	verifyArgs+=("PDFGEN version:master") && prodVersions="$prodVersions, PDFGEN version:master"
 fi
 [[ $cimRefreshVersion != '' ]] && verifyArgs+=("CIM version:$cimRefreshVersion") && prodVersions="$prodVersions, CIM version:$catRefreshVersion"
 [[ $clssRefreshVersion != '' ]] && verifyArgs+=("CLSS version:$clssRefreshVersion") prodVersions="$prodVersions, CLSS version:$clssRefreshVersion"
