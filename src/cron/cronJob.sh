@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.72 # -- dscudiero -- 12/20/2016 @ 14:45:46.12
+version=2.0.73 # -- dscudiero -- 12/20/2016 @ 15:01:45.16
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -22,8 +22,8 @@ originalArgStr="$*"
 	dispatcher="$TOOLSPATH/src/dispatcher.sh"
 
 	if [[ -x $HOME/$toolsRepo/dispatcher.sh ]]; then
-		localmd5=$(md5sum "$HOME/$toolsRepo/src/dispatcher.sh" | cut -f1 -d" "))
-		prodmd5=$(md5sum "$TOOLSPATH/src/dispatcher.sh" | cut -f1 -d" "))
+		localmd5=$(md5sum "$HOME/$toolsRepo/src/dispatcher.sh" | cut -f1 -d" ")
+		prodmd5=$(md5sum "$TOOLSPATH/src/dispatcher.sh" | cut -f1 -d" ")
 		[[ $localmd5 != $prodmd5 ]] && dispatcher="$HOME/$toolsRepo/src/dispatcher.sh"
 	fi
 	export TOOLSLIBPATH="$TOOLSPATH/lib"
