@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #===================================================================================================
-version=1.0.15 # -- dscudiero -- 12/19/2016 @ 10:30:38.53
+version=1.0.23 # -- dscudiero -- 12/20/2016 @ 12:24:40.81
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -62,15 +62,15 @@ ParseArgsStd
 	for pLogRec in ${pLogRecs[@]}; do
 		pName=$(cut -d'|' -f1 <<< $pLogRec)
 		pCount=$(cut -d'|' -f2 <<< $pLogRec)
-		dump -t pName pCount
+		dump -1 -t pName pCount
 		## Get the current count from the script record in the scripts table
 			sql="select usageCount from scripts where name=\"$pName\""
 			RunSql 'mySql' $sql
 			usageCount=${resultSet[0]}
-			dump -t usageCount
+			dump -1 -t usageCount
 		## Update usage count
 			let newCount=$usageCount+$pCount
-			dump -t newCount
+			dump -1 -t newCount
 			sql="update $scriptsTable set usageCount=$newCount where name=\"$pName\""
 			RunSql 'mySql' $sql
 	done
@@ -103,8 +103,8 @@ ParseArgsStd
 ## Roll up the weeks log files
 	Msg2 "\n*** Rollup weekly Logs -- Starting ***"
 	cd $TOOLSPATH/Logs
-	[[ -d ./cronJobs ]] && rm -rf ./cronJobs
-	tar -cvzf "$(date '+%m-%d-%y').tar.gz" * --exclude '*.gz' --exclude "$myName*" --remove-files
+	[[ -d ./cronJobs ]] && ProtectedCall "rm -rf ./cronJobs"
+	tar -cvzf "$(date '+%m-%d-%y').tar.gz" * --exclude '*.gz' --exclude "$myName*" #-remove-files
 	find . -maxdepth 1 -mindepth 1 -type d -exec rm -rf {} \; > /dev/null 2>&1
 	find . -maxdepth 1 -mindepth 1 -type f -name '*.tar' -exec rm -rf {} \; > /dev/null 2>&1
 	Msg2 "\n*** Logs rollup -- Completed ***"
