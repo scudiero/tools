@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.0.94" # -- dscudiero -- 12/16/2016 @ 15:22:57.52
+version="1.0.98" # -- dscudiero -- 12/20/2016 @ 14:59:42.53
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -124,7 +124,7 @@ function FindExecutable {
 					unset ans
 					if [[ $useLocal != true && $batchMode != true ]]; then
 						Msg2 $N "\aFound a copy of '$callPgmName' in a local directory: '$(dirname $executeFile)'"
-						[[ $batchMode != true ]] && Prompt ans 'Do you want to use the dev/local copy ?' 'Yes No' 'Yes' '2'; ans=$(Lower ${ans:0:1}) || ans='y'
+						[[ $batchMode != true ]] && Prompt ans 'Do you want to use the dev/local copy ?' 'Yes No' 'Yes' '3'; ans=$(Lower ${ans:0:1}) || ans='y'
 					else
 						ans='y'
 					fi
