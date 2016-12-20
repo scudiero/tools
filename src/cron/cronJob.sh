@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.73 # -- dscudiero -- 12/20/2016 @ 15:01:45.16
+version=2.0.74 # -- dscudiero -- 12/20/2016 @ 16:39:54.39
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -17,6 +17,7 @@ originalArgStr="$*"
 	toolsRepo='tools'
 	UsePythonVer='3'
 	notifyAddrs='dscudiero@leepfrog.com'
+	hostName=$(cut -d'.' -f1 <<< $(hostname))
 
 	export TOOLSPATH=/steamboat/leepfrog/docs/toolsNew
 	dispatcher="$TOOLSPATH/src/dispatcher.sh"
