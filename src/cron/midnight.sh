@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.142 # -- dscudiero -- 12/15/2016 @  7:12:40.94
+version=1.21.143 # -- dscudiero -- 12/20/2016 @ 12:28:48.09
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -298,6 +298,9 @@ dump runClientListReport
 				Call 'reports' "qaStatus -email "dscudiero@leepfrog.com,$froggerQa" $scriptArgs"
 				## Build a list of clients and contact info for Shelia
 				[[ $runClientListReport == true ]] && Call 'reports' "clientList -quiet -email 'dscudiero@leepfrog.com,sfrickson@leepfrog.com' $scriptArgs"
+
+			## Performance test
+				perfTest
 
 			;;
 	*) ## build5 and build7
