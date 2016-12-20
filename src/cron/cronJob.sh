@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.70 # -- dscudiero -- 12/20/2016 @ 10:38:50.83
+version=2.0.71 # -- dscudiero -- 12/20/2016 @ 14:19:45.75
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -16,13 +16,18 @@ originalArgStr="$*"
 # Set defaults
 	toolsRepo='tools'
 	UsePythonVer='3'
-	dispatcher=$HOME/$toolsRepo/dispatcher.sh
 	notifyAddrs='dscudiero@leepfrog.com'
 
-	export TOOLSPATH=/steamboat/leepfrog/docs/tools
-	export TOOLSLIBPATH="$HOME/$toolsRepo/lib:$TOOLSPATH/lib"
-	export TOOLSSRCPATH="$HOME/$toolsRepo/src:$TOOLSPATH/src"
-	#export PATH="$localTools/bin:$PATH"
+	export TOOLSPATH=/steamboat/leepfrog/docs/toolsNew
+	dispatcher="$TOOLSPATH/src/dispatcher.sh"
+
+	if [[ -x $HOME/$toolsRepo/dispatcher.sh ]]; then
+		localmd5=$(md5sum "$HOME/$toolsRepo/src/dispatcher.sh" | cut -f1 -d" "))
+		prodmd5=$(md5sum "$TOOLSPATH/src/dispatcher.sh" | cut -f1 -d" "))
+		[[ $localmd5 != $prodmd5 ]] && dispatcher="$HOME/$toolsRepo/src/dispatcher.sh"
+	fi
+	[[ -r $HOME/$toolsRepo/lib ]] && export TOOLSLIBPATH="$HOME/$toolsRepo/lib:$TOOLSPATH/lib" || export TOOLSLIBPATH="$TOOLSPATH/lib"
+	[[ -r $HOME/$toolsRepo/lib ]] && export TOOLSSRCPATH="$HOME/$toolsRepo/src:$TOOLSPATH/lib" || export TOOLSSRCPATH="$TOOLSPATH/src"
 
 #=======================================================================================================================
 ## Initialize the runtime env
