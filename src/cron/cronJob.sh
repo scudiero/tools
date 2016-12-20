@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.71 # -- dscudiero -- 12/20/2016 @ 14:19:45.75
+version=2.0.72 # -- dscudiero -- 12/20/2016 @ 14:45:46.12
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -26,8 +26,10 @@ originalArgStr="$*"
 		prodmd5=$(md5sum "$TOOLSPATH/src/dispatcher.sh" | cut -f1 -d" "))
 		[[ $localmd5 != $prodmd5 ]] && dispatcher="$HOME/$toolsRepo/src/dispatcher.sh"
 	fi
-	[[ -r $HOME/$toolsRepo/lib ]] && export TOOLSLIBPATH="$HOME/$toolsRepo/lib:$TOOLSPATH/lib" || export TOOLSLIBPATH="$TOOLSPATH/lib"
-	[[ -r $HOME/$toolsRepo/lib ]] && export TOOLSSRCPATH="$HOME/$toolsRepo/src:$TOOLSPATH/lib" || export TOOLSSRCPATH="$TOOLSPATH/src"
+	export TOOLSLIBPATH="$TOOLSPATH/lib"
+	[[ -d $HOME/$toolsRepo/lib ]] && export TOOLSLIBPATH="$HOME/$toolsRepo/lib:$TOOLSLIBPATH"
+	export TOOLSSRCPATH="$TOOLSPATH/src"
+	[[ -d $HOME/$toolsRepo/src ]] && export TOOLSSRCPATH="$HOME/$toolsRepo/src:$TOOLSSRCPATH"
 
 #=======================================================================================================================
 ## Initialize the runtime env
