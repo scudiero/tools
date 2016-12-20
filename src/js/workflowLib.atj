@@ -1,5 +1,5 @@
 //======================================================================================================================
-// version:1.6.87 // -- dscudiero -- 12/20/2016 @  9:44:01.37
+// version:1.6.88 // -- dscudiero -- 12/20/2016 @ 10:28:47.80
 //======================================================================================================================
 // Common wf functions and helper functions to support workflow
 //======================================================================================================================
@@ -528,9 +528,11 @@ wffuncs.Related = function(inval, wfrule, args) {
 //		<subjColumnName>	- The column name for 'subject' in the database, default is 'subject'
 //
 //	e.g.
-// LookupCode('colCode','deptCode','AHL','AS')
-//		returns the college code for department 'AHL' unless the college code is 'AS'
-// LookupCode('colCode','deptCode','AHL','AS','prog_coll')
+// LookupCode('colCode','subjectCode','AHL',,'AS')
+//		returns the college code(s) for subject 'AHL' unless the college code is 'AS'
+// LookupCode('colCode','subjectCode','AHL','2015','AS')
+//		returns the college code(s) for subject 'AHL', factor out department '2015' from the query, unless the college code is 'AS'
+// LookupCode('colCode','deptCode','AHL',,'AS','prog_coll')
 //		returns the college code for department 'AHL' unless the college code is 'AS'
 //		uses 'prog_coll' as the lookup column for college data
 //
