@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.1.76" # -- dscudiero -- 12/14/2016 @ 14:23:18.24
+version="1.1.77" # -- dscudiero -- 12/20/2016 @ 12:51:28.79
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -18,7 +18,7 @@ export DISPATCHER="$0"
 #==================================================================================================
 function GD {
 	[[ $DEBUG != true ]] && return 0
-	[[ $stdout == '' ]] && stdout=/dev/tty
+	[[ -z $stdout ]] && stdout=/dev/tty
 	[[ $* == 'clear' ]] && echo > $stdout && return 0
 	$* >> $stdout
 	return 0
@@ -74,7 +74,7 @@ GD='GD echo'
 ## Initial Checks
 	sTime=$(date "+%s")
 	[[ "$0" = "-bash" ]] && callPgmName=bashShell || callPgmName=$(basename "$0")
-	[[ $(getent group leepfrog | grep ','$userName) == '' ]] && \
+	[[ -z $(getent group leepfrog | grep ','$userName) ]] && \
 		echo "*Error* -- User '$checkName' is not a member or the 'leepfrog' unix group, please contact the Unix Admin team" && exit -1
 
 	trueDir="$(dirname "$(readlink -f "$0")")"
@@ -128,7 +128,7 @@ $GD "Time (s) to parse arguments: $(( $(date "+%s") - $sTime ))s"
 ## Look for the Initialization and Import function in the library path
 	sTime=$(date "+%s")
 	unset initFile importFile;
-	[[ $TOOLSLIBPATH == '' ]] && searchDirs="$TOOLSPATH/lib" || searchDirs="$( tr ':' ' ' <<< $TOOLSLIBPATH)"
+	[[ -z $TOOLSLIBPATH ]] && searchDirs="$TOOLSPATH/lib" || searchDirs="$( tr ':' ' ' <<< $TOOLSLIBPATH)"
 	for searchDir in $searchDirs; do
 		[[ -r ${searchDir}/InitializeRuntime.sh ]] && initFile="${searchDir}/InitializeRuntime.sh"
 		[[ -r ${searchDir}/Import.sh ]] && importFile="${searchDir}/Import.sh" && source $importFile
@@ -138,7 +138,7 @@ $GD "Time (s) to parse arguments: $(( $(date "+%s") - $sTime ))s"
 
 ## Initialize the runtime environment
 	$GD "initFile = '$initFile'"
-	[[ $initFile == '' ]] && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
+	[[ -n $initFile ]] && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
 
 ## Set mysql connection information
 	[[ $useDevDb == true ]] && warehouseDb='warehouseDev' || warehouseDb='warehouse'
@@ -150,10 +150,10 @@ $GD "Time (s) to parse arguments: $(( $(date "+%s") - $sTime ))s"
 	if [[ $mySqlPw != '' ]]; then
 		unset sqlHostIP mySqlConnectString
 		sqlHostIP=$(dig +short $mySqlHost.inside.leepfrog.com)
-		[[ $sqlHostIP == '' ]] && sqlHostIP=$(dig +short $mySqlHost.leepfrog.com)
-		[[ $sqlHostIP != '' ]] && mySqlConnectString="-h $sqlHostIP -port=$mySqlPort -u $mySqlUser -p$mySqlPw $warehouseDb"
+		[[ -z $sqlHostIP ]] && sqlHostIP=$(dig +short $mySqlHost.leepfrog.com)
+		[[ -n $sqlHostIP ]] && mySqlConnectString="-h $sqlHostIP -port=$mySqlPort -u $mySqlUser -p$mySqlPw $warehouseDb"
 	fi
-	[[ $mySqlConnectString == '' ]] && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
+	[[ -z $mySqlConnectString ]] && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
 	$GD "Time (s) to find initFile: $(( $(date "+%s") - $sTime ))s"
 
 
@@ -220,7 +220,7 @@ $GD "Time (s) to parse arguments: $(( $(date "+%s") - $sTime ))s"
 		[[ $semaphoreProcessing == true && $(Lower $setSemaphore) == 'yes' ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
 
 	## Resolve the executable file
-		[[ $executeFile == '' ]] && FindExecutable "$callPgmName"  ## Sets variable executeFile
+		[[ -z $executeFile ]] && FindExecutable "$callPgmName"  ## Sets variable executeFile
 		$GD -e "\n=== Resolved execution file: '$executeFile' ==========================================================="
 
 	## Do we have a viable script
