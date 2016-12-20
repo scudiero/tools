@@ -1,5 +1,5 @@
 //======================================================================================================================
-// version:1.6.88 // -- dscudiero -- 12/20/2016 @ 10:28:47.80
+// version:1.6.89 // -- dscudiero -- 12/20/2016 @ 15:30:39.44
 //======================================================================================================================
 // Common wf functions and helper functions to support workflow
 //======================================================================================================================
@@ -461,10 +461,10 @@ wffuncs.Related = function(inval, wfrule, args) {
 		if (outTokens.length > 0 ) {
 			wfDebug("\n\tReturn step data for " + searchStr + "(s)...");
 			// if debug envronent then add starting line in the workflow
-			if (wfInDebugEnv) retArray.push("*** Start of  ' " + inval.toLowerCase().replace('optional','') + " ' output ***");
+			if (wfEnvIsDev) retArray.push("*** Start of  ' " + inval.toLowerCase().replace('optional','') + " ' output ***");
 		} else {
 			wfDebug("\t*** No additional data found to add ***")
-			if (wfInDebugEnv) return ["*** No additional 'related' data found for ' " + inval.toLowerCase().replace('optional','') + " ' ***"];
+			if (wfEnvIsDev) return ["*** No additional 'related' data found for ' " + inval.toLowerCase().replace('optional','') + " ' ***"];
 			return false;
 		}
 
@@ -503,7 +503,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 			}
 		}); //outTokens
 		// if debug envronent then add ending line in the workflow
-		if (wfInDebugEnv) retArray.push("*** End of  ' " + inval.toLowerCase().replace('optional','') + " ' output ***");
+		if (wfEnvIsDev) retArray.push("*** End of  ' " + inval.toLowerCase().replace('optional','') + " ' output ***");
 
 	return retArray;
 
