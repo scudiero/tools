@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.10.203 # -- dscudiero -- 12/19/2016 @ 15:55:42.87
+version=3.10.210 # -- dscudiero -- 12/20/2016 @  9:01:48.26
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -89,7 +89,36 @@ function BuildMenuList {
 function ExecScript {
 	local name=$1; shift
 	local scriptArgs="$1"
-	Call "$name" 'bash:sh' "$scriptArgs"
+	local field fieldVal
+
+	## Lookup detailed script info from db
+		local fields="exec,lib,scriptArgs"
+		local sqlStmt="select $fields from $scriptsTable where lower(name) =\"$(Lower $name)\" "
+		RunSql 'mysql' $sqlStmt
+		[[ ${#resultSet[0]} -eq 0 ]] && Msg2 $T "Could not lookup script name ('$name') in the $mySqlDb.$scriptsTable"
+		resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString" )
+		local fieldCntr=1
+		for field in $(tr ',' ' ' <<< $fields); do
+			eval local $field; eval unset $field
+			fieldVal=$(cut -d'|' -f$fieldCntr <<< "$resultString")
+			[[ $fieldVal == 'NULL' ]] && fieldVal=''
+			eval $field=\"$fieldVal\"
+			((fieldCntr += 1))
+		done
+
+	if [[ $scriptArgs == '<prompt>' ]]; then
+		unset scriptArgs;
+		if [[ $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true  && $quiet != true ]]; then
+			Msg2 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
+			Prompt scriptArgs "^$(ColorI "If you do not know what to enter here just press [ENTER] or '-h' for more info)")" '*optional*' '' 4;
+		fi
+	fi
+	if [[ $exec != '' ]]; then
+		name=$(cut -d' ' -f1 <<< "$exec")
+		scriptArgs="$(cut -d' ' -f2- <<< "$exec") $scriptArgs"
+	fi
+
+	Call "$name" 'bash:sh' "$lib" "$scriptArgs"
 	return $?
 } #ExecScript
 
@@ -117,6 +146,14 @@ function ExecReport {
 			eval $field=\"$(cut -d'|' -f$fieldCntr <<< "$resultString")\"
 			((fieldCntr += 1))
 		done
+
+		if [[ $scriptArgs == '<prompt>' ]]; then
+			unset scriptArgs;
+			if [[ $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true  && $quiet != true ]]; then
+				Msg2 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
+				Prompt scriptArgs "^$(ColorI "If you do not know what to enter here just press [ENTER] or '-h' for more info)")" '*optional*' '' 3;
+			fi
+		fi
 
 	## Run report
 		## Report record defines a query
@@ -168,7 +205,7 @@ askedDisplayWidthQuestion=false
 
 mode=$(echo $1 | tr '[:upper:]' '[:lower:]')
 [[ $mode == 'reports' || $mode == 'scripts' ]] && shift && originalArgStr="$*"
-[[ $mode == '' ]] && mode='reports'
+[[ $mode == '' ]] && mode='scripts'
 [[ $mode != 'scripts' && $mode != 'reports' ]] && Terminate "Invalid mode ($mode) specified on call"
 
 ## Check to see if the first argument is a report name
@@ -272,11 +309,6 @@ dump -1 -p client report emailAddrs myName ${myName}LastRunDate ${myName}LastRun
 			loop=false
 		fi
 		[[ $itemName == 'REFRESHLIST' ]] && continue
-		unset scriptArgs;
-		if [[ $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true  && $quiet != true ]]; then
-			Msg2 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
-			Prompt scriptArgs "^$(ColorI "If you do not know what to enter here just press [ENTER] or '-h' for more info)")" '*optional*' '' 3;
-		fi
 
 		## call function to 'execute' the request
 		$trapErrexitOff
