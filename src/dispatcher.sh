@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.1.81" # -- dscudiero -- 12/20/2016 @ 13:40:00.17
+version="1.1.86" # -- dscudiero -- 12/20/2016 @ 14:49:33.06
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -12,6 +12,8 @@ version="1.1.81" # -- dscudiero -- 12/20/2016 @ 13:40:00.17
 dispatcherArgs="$*"
 myName='dispatcher'
 export DISPATCHER="$0"
+TOOLSPATH='/steamboat/leepfrog/docs/tools'
+[[ -d '/steamboat/leepfrog/docs/toolsNew' ]] && TOOLSPATH='/steamboat/leepfrog/docs/toolsNew'
 
 #==================================================================================================
 # Global debug routine
@@ -57,7 +59,6 @@ function CleanUp {
 #==================================================================================================
 # Initialize local variables
 #==================================================================================================
-TOOLSPATH='/steamboat/leepfrog/docs/tools'
 unset executeFile
 [[ "${BASH_SOURCE[0]}" != "${0}" ]] && calledViaSource=true || calledViaSource=false
 sTime=$(date "+%s")
