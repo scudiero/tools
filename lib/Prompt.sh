@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.64" # -- dscudiero -- 12/13/2016 @ 15:04:48.03
+version="2.0.66" # -- dscudiero -- 12/20/2016 @ 10:17:56.61
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -58,7 +58,7 @@ function Prompt {
 				ProtectedCall "read $readTimeOutOpt response";
 				if [[ $rc -ne 0 ]]; then
 					echo
-					Msg2 $NT1 "Read timed out, using default value: '$defaultVal'"
+					Note 0 1 "Read timed out, using default value for '$promptVar': '$defaultVal'"
 					eval $promptVar=\"$defaultVal\"
 					return 0
 				fi
@@ -66,7 +66,7 @@ function Prompt {
 			[[ $(Lower ${response}) == 'x' ]] && Goodbye 'x'
 			if [[ $response == '' && $defaultVal != '' ]]; then
 				eval $promptVar=\"$defaultVal\"
-				[[ $defaultValueUseNotes == true ]] && Msg2 $NT1 "Using default value of '$defaultVal' for '$promptVar'"
+				[[ $defaultValueUseNotes == true ]] && Note 0 1 "Using default value of '$defaultVal' for '$promptVar'"
 				return 0
 			fi
 			[[ $response != '' && $validateList == '*any*' ]] && eval $promptVar=\"$response\" && return 0
@@ -77,9 +77,9 @@ function Prompt {
 		dump -2 -l response
 
 		if [[ "$promptVar" == 'client' && $response == '?' ]]; then
-			Msg2 "IT Gathering data..."
+			Info 0 1 "Gathering data..."
 			SelectClient 'response'
-			[[ $secondaryMessagesOnly != true && $defaultValueUseNotes == true ]] && Msg2 && Msg2 $NT1 "Using selected value of '$selectResp' for 'client'"
+			[[ $secondaryMessagesOnly != true && $defaultValueUseNotes == true ]] && Msg2 && Note 0 1 "Using selected value of '$selectResp' for 'client'"
 			eval $promptVar=\"$response\"
 			loop=false
 
@@ -115,7 +115,7 @@ function Prompt {
 					done
 				fi
 				eval $promptVar=\"$response\"
-				[[ $hadValue == true && $secondaryMessagesOnly != true && $defaultValueUseNotes == true ]] && Msg2 $NT1 "Using specified value of '$response' for '$promptVar'"
+				[[ $hadValue == true && $secondaryMessagesOnly != true && $defaultValueUseNotes == true ]] && Note 0 1 "Using specified value of '$response' for '$promptVar'"
 				loop=false
 			fi
 		fi #[[  "$promptVar" == 'client' && $response == '?' ]]
