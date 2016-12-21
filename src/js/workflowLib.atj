@@ -567,7 +567,7 @@ function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colCol
 			if (givenType.toLowerCase().substr(0,1) === "s") { // give a subject code
 				sqlParms.push(givenData2);
 				sqlStmt="select distinct " + colColumnName + " from cimlookup where " + deptColumnName + " in (select " + deptColumnName +
-						" from cimlookup where " + subjColumnName + "="?" and " + deptColumnName + " <> "?") and " + colColumnName + "<> ''";
+						" from cimlookup where " + subjColumnName + "=? and " + deptColumnName + " <> ? and " + colColumnName + "<> ''";
 				if (typeof exceptData != 'undefined') {
 					sqlStmt= sqlStmt + " and " + colColumnName + "<> ?";
 					sqlParms.push(exceptData);
