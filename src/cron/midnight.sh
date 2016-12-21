@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.143 # -- dscudiero -- 12/20/2016 @ 12:28:48.09
+version=1.21.144 # -- dscudiero -- 12/21/2016 @ 13:59:23.10
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -292,6 +292,15 @@ dump runClientListReport
 
 			## Sync GIT Shadow
 				Call 'syncCourseleafGitRepos' "$scriptArgs"
+
+			## Create a clone of the warehouse db
+				Msg2 "Creating $warehouseDev database..."
+				tmpConnectString=$(sed "s/Read/Admin/" <<< ${mySqlConnectString% *})
+				mysqldump $tmpConnectString $warehouseProd > /tmp/warehouse.sql;
+				mysql $tmpConnectString -e "drop database if exists $warehouseDev"
+				mysqladmin $tmpConnectString create $warehouseDev
+				mysql $tmpConnectString $warehouseDev < /tmp/warehouse.sql
+				[[ -f /tmp/warehouse.sql ]] && rm -f /tmp/warehouse.sql
 
 			## Reports
 				froggerQa='sjones@leepfrog.com,mbruening@leepfrog.com,jlindeman@leepfrog.com'
