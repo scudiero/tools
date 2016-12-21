@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.74 # -- dscudiero -- 12/20/2016 @ 16:39:54.39
+version=2.0.75 # -- dscudiero -- 12/21/2016 @  7:28:56.23
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -31,6 +31,12 @@ originalArgStr="$*"
 	[[ -d $HOME/$toolsRepo/lib ]] && export TOOLSLIBPATH="$HOME/$toolsRepo/lib:$TOOLSLIBPATH"
 	export TOOLSSRCPATH="$TOOLSPATH/src"
 	[[ -d $HOME/$toolsRepo/src ]] && export TOOLSSRCPATH="$HOME/$toolsRepo/src:$TOOLSSRCPATH"
+echo
+echo "PATH= '$PATH'"; echo
+echo "TOOLSPATH= '$TOOLSPATH'"; echo
+echo "TOOLSLIBPATH= '$TOOLSLIBPATH'"; echo
+echo "TOOLSSRCPATH= '$TOOLSSRCPATH'"; echo
+echo
 
 #=======================================================================================================================
 ## Initialize the runtime env
