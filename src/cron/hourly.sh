@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.89 # -- dscudiero -- 12/15/2016 @ 13:28:55.42
+version=2.1.90 # -- dscudiero -- 12/21/2016 @ 16:40:14.59
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -39,6 +39,7 @@ function SyncInternalDb {
 	Msg2 "*** $FUNCNAME -- Completed ***"
 	return 0
 }
+
 #=======================================================================================================================
 # Synchronize the courseleaf cgi's  shadow with master
 function SyncCourseleafCgis {
@@ -52,6 +53,7 @@ function SyncCourseleafCgis {
 	Msg2 "*** $FUNCNAME -- Completed ***"
 	return 0
 }
+
 #=======================================================================================================================
 # Synchronize the skeleton shadow with master
 function SyncSkeleton {
@@ -77,7 +79,8 @@ function SyncSkeleton {
 		cwd=$(pwd); cd $tgtDir; chgrp -R leepfrog *; chgrp leepfrog .*; cd "$cwd"
 		Msg2 "*** $FUNCNAME -- Completed ***"
 	return 0
-}
+} #SyncSkeleton
+
 #=======================================================================================================================
 # Check Monitored files for changes
 function CheckMonitorFiles {
@@ -181,7 +184,7 @@ case "$hostName" in
 			BuildToolsAuthTable
 			SyncCourseleafCgis
 			SyncSkeleton
-			[[ $(date "+%H") = 12 ]] && Call 'syncCourseleafGitRepos' 'master'
+			[[ $(date "+%H") -eq 12 ]] && Call 'syncCourseleafGitRepos' 'master'
 			;;
 	build5)
 			#CheckMonitorFiles -- commented out since build5 does not support 'declare -A'
