@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=4.10.91 # -- dscudiero -- 12/20/2016 @ 15:41:49.00
+version=4.10.92 # -- dscudiero -- 12/21/2016 @  8:26:56.39
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCoureleafCgi WriteChangelogEntry GetCims'
@@ -117,10 +117,6 @@ scriptHelpDesc="This script can be used to refresh the couseleaf directories wil
 
 GetDefaultsData $myName
 ParseArgsStd
-
-dump originalArgStr client
-Quit
-
 
 refreshVersion=$(Lower $refreshVersion)
 displayGoodbyeSummaryMessages=true
