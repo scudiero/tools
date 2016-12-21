@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.15 # -- dscudiero -- 12/21/2016 @ 16:18:54.08
+version=3.8.16 # -- dscudiero -- 12/21/2016 @ 16:24:06.54
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -880,7 +880,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 		Msg2 "^Updated $numPagesUpdated pages" | tee -a $srcDir/changelog.txt
 		[[ $numMembersMappedToUIN -gt 0 ]] && Msg2 "^Mapped $numMembersMappedToUIN role members from UID to UIN" | tee -a $srcDir/changelog.txt
 		[[ $numPagesNotFound -gt 0 ]] && Msg2 "^$numPagesNotFound pages not found" | tee -a $srcDir/changelog.txt
-		[[ ${#membersErrors[@]} -gt 0 ]] && Msg2 "^${#membersErrors[@]} pages had errors in their owner/workflow data, see below for detailed information" | tee -a $srcDir/changelog.txt
+		[[ ${#membersErrors[@]} -gt 0 ]] && Msg2 "^Pages had errors in their owner/workflow data, see below for detailed information" | tee -a $srcDir/changelog.txt
 		## Member lookup errors
 
 		if [[ ${#membersErrors[@]} -gt 0 ]]; then
