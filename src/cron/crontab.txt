@@ -1,8 +1,7 @@
 #==================================================================================================
 ## Set email address to deliver mail to
 MAILTO="dscudiero@leepfrog.com"
-#cronJob=/steamboat/leepfrog/docs/tools/src/cron/cronJob.sh
-cronJob=/home/dscudiero/tools/src/cron/cronJob.sh
+cronJob=/steamboat/leepfrog/docs/tools/src/cron/cronJob.sh
 
 #==================================================================================================
 # Minute  Hour   		Day of month 	Month 				Day of Week 	Command
