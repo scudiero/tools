@@ -1,10 +1,11 @@
 #!/bin/bash
 ##O NOT AUTOVERSION
 #==================================================================================================
-version=1.0.17 # -- dscudiero -- 12/14/2016 @ 12:44:34.90
+version=1.0.22 # -- dscudiero -- 12/21/2016 @ 14:00:58.73
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
+imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
+imports="$imports SetupInterpreterExecutionEnv"
 Import "$imports"
 originalArgStr="$*"
 scriptDescription=""
@@ -145,12 +146,14 @@ Hello
 mySqlUser='dscudiero';
 mySqlPw='m1chaels-';
 
-Msg2; Msg2 "Exporting databases..."
-## Dump the production data warehouse database
-	mysqldump -h $sqlHostIP -u $mySqlUser -p$mySqlPw $warehouseProd > /tmp/warehouse.sql;
-## Dump the production contacts database
-	sqlStmt=".dump";
-	sqlite3 "$contactsSqliteFile" "$sqlStmt" > /tmp/contacts.sql;
+if [[ -z $client || $(Contains "$client" 'Db') == true ]]; then
+	Msg2; Msg2 "Exporting databases..."
+	## Dump the production data warehouse database
+		mysqldump -h $sqlHostIP -u $mySqlUser -p$mySqlPw $warehouseProd > /tmp/warehouse.sql;
+	## Dump the production contacts database
+		sqlStmt=".dump";
+		sqlite3 "$contactsSqliteFile" "$sqlStmt" > /tmp/contacts.sql;
+fi
 
 ## Backup data
 	Msg2; Msg2 "Backing up directories/files/dbs to External resource...";
@@ -158,6 +161,7 @@ Msg2; Msg2 "Exporting databases..."
 		forkCntr=1
 		fields="name,location,tarFileName,filesToTar,tarOptions,type"
 		sqlStmt="Select $fields from $backupRulesTable where active=\"Yes\""
+		[[ -n $client ]] && sqlStmt="$sqlStmt and lower(name) = \"$client\""
 		RunSql 'mysql' "$sqlStmt"
 		for result in "${resultSet[@]}"; do
 		 	resultString=$result; resultString=$(echo "$resultString" | tr "\t" "|" )
@@ -181,12 +185,6 @@ Msg2; Msg2 "Exporting databases..."
 
 	[[ $fork == true ]] && echo "...Waiting on forked tasks..." && wait
 	Msg2 "^...done"
-
-## Create a clone of the warehouse db
-	Msg2; Msg2 "Createing $warehouseDev database..."
-	mysql -h $sqlHostIP -u $mySqlUser -p$mySqlPw $mySqlDb -e "drop database if exists $warehouseDev"
-	mysqladmin -h $sqlHostIP -u $mySqlUser -p$mySqlPw create $warehouseDev
-	mysql -h $sqlHostIP -u $mySqlUser -p$mySqlPw $warehouseDev < /tmp/warehouse.sql
 
 ## Cleanup
 	[[ -f /tmp/warehouse.sql ]] && rm -f /tmp/warehouse.sql
