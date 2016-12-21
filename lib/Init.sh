@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.0.50 # -- dscudiero -- 12/16/2016 @ 13:33:23.60
+version=2.0.51 # -- dscudiero -- 12/21/2016 @ 15:59:25.73
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -184,7 +184,7 @@ function Init {
 			done
 		fi
 
-		if [[ $checkProdEnv != false ]] && [[ $checkProdEnv == 'next' || $checkProdEnv == 'curr' ]]; then
+		if [[ $checkProdEnv != false && $informationOnlyMode != true ]] && [[ $checkProdEnv == 'next' || $checkProdEnv == 'curr' ]]; then
 		 	if [[ $noWarn != true ]]; then
 				verify=true
 				Msg2
