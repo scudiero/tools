@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.78 # -- dscudiero -- 12/21/2016 @  9:15:05.87
+version=2.0.79 # -- dscudiero -- 12/21/2016 @ 10:55:10.28
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -33,12 +33,12 @@ originalArgStr="$*"
 	[[ -d $HOME/$toolsRepo/lib ]] && export TOOLSLIBPATH="$HOME/$toolsRepo/lib:$TOOLSLIBPATH"
 	export TOOLSSRCPATH="$TOOLSPATH/src"
 	[[ -d $HOME/$toolsRepo/src ]] && export TOOLSSRCPATH="$HOME/$toolsRepo/src:$TOOLSSRCPATH"
-echo
-echo "PATH= '$PATH'"; echo
-echo "TOOLSPATH= '$TOOLSPATH'"; echo
-echo "TOOLSLIBPATH= '$TOOLSLIBPATH'"; echo
-echo "TOOLSSRCPATH= '$TOOLSSRCPATH'"; echo
-echo
+	# echo
+	# echo "PATH= '$PATH'"; echo
+	# echo "TOOLSPATH= '$TOOLSPATH'"; echo
+	# echo "TOOLSLIBPATH= '$TOOLSLIBPATH'"; echo
+	# echo "TOOLSSRCPATH= '$TOOLSSRCPATH'"; echo
+	# echo
 
 #=======================================================================================================================
 ## Initialize the runtime env
@@ -47,10 +47,10 @@ echo
 #=======================================================================================================================
 ## Log the cronJob
 	[[ ! -d $TOOLSPATH/Logs/cronJobs ]] && mkdir -p $TOOLSPATH/Logs/cronJobs
-	echo "$hostName - $(date +%m-%d-%Y @ %H.%M.%S) -- Starting $callScriptName" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
+	echo "$hostName - $(date +'%m-%d-%Y @ %H.%M.%S') -- Starting $callScriptName" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 ## Set the jobs the log file
 	[[ ! -d $TOOLSPATH/Logs/cronJobs/$callScriptName ]] && mkdir -p $TOOLSPATH/Logs/cronJobs/$callScriptName
-	logFile=$TOOLSPATH/Logs/cronJobs/$callScriptName/$hostName-$(date +%m-%d-%Y @ %H.%M.%S).log
+	logFile="$TOOLSPATH/Logs/cronJobs/$callScriptName/$hostName-$(date +'%m-%d-%Y @ %H.%M.%S').log"
 
 #=======================================================================================================================
 ## Run the executable
