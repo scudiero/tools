@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.76 # -- dscudiero -- 12/21/2016 @  8:39:12.38
+version=2.0.77 # -- dscudiero -- 12/21/2016 @  9:11:30.60
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -19,7 +19,9 @@ originalArgStr="$*"
 	notifyAddrs='dscudiero@leepfrog.com'
 	hostName=$(cut -d'.' -f1 <<< $(hostname))
 
-	export TOOLSPATH=/steamboat/leepfrog/docs/toolsNew
+	export TOOLSPATH='/steamboat/leepfrog/docs/tools'
+	[[ -d '/steamboat/leepfrog/docs/toolsNew' ]] && export TOOLSPATH='/steamboat/leepfrog/docs/toolsNew'
+
 	dispatcher="$TOOLSPATH/src/dispatcher.sh"
 
 	if [[ -x $HOME/$toolsRepo/dispatcher.sh ]]; then
