@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.80 # -- dscudiero -- 12/21/2016 @ 11:10:35.03
+version=2.0.81 # -- dscudiero -- 12/21/2016 @ 11:19:43.09
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -55,23 +55,23 @@ originalArgStr="$*"
 #=======================================================================================================================
 ## Run the executable
 	useLocal=true
-	Call "$callScriptName" 'std' 'cron:sh' "$callScriptArgs" > $logFile 2>&1
+	Call "$callScriptName" 'std' 'cron:sh' "$callScriptArgs" > "$logFile" 2>&1
 
 #=======================================================================================================================
 ## Post process the logFile
 	## Turn off error traps
 	set +eE ; trap - ERR
 	## If logFile is empty then just remove it, otherwise scan for errors
-	if [[ -f $logFile ]]; then
-		if [[ $(cut -d' ' -f1 <<< $(wc -l $logFile)) -eq 0 ]]; then
-			rm -f $logFile
+	if [[ -f "$logFile" ]]; then
+		if [[ $(cut -d' ' -f1 <<< $(wc -l "$logFile")) -eq 0 ]]; then
+			rm -f "$logFile"
 		else
 			tmpFile1="/tmp/$callScriptName.$$.dat"
 			tmpFile2="$tmpFile1.msg"
 			for token in error invalid warning; do
-				\grep -i "$token" $logFile > $tmpFile1; rc=$?
+				\grep -i "$token" "$logFile" > $tmpFile1; rc=$?
 				if [[ $rc -eq 0 ]]; then
-					echo -e "\nFound error token '$token' in the logfile \n\t$logFile\nfor $callScriptName\n" > $tmpFile2
+					echo -e "\nFound error token '$token' in the logfile \n\t"$logFile"\nfor $callScriptName\n" > $tmpFile2
 					while read -r line; do
 						[[ ${line:0:1} == '*' ]] && echo >> $tmpFile2
 						echo -e "\t$line" >> $tmpFile2 ;
