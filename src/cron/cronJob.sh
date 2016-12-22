@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.83 # -- dscudiero -- 12/21/2016 @ 11:36:35.79
+version=2.0.84 # -- dscudiero -- 12/22/2016 @  8:03:29.06
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -22,12 +22,11 @@ originalArgStr="$*"
 	export TOOLSPATH='/steamboat/leepfrog/docs/tools'
 	[[ -d '/steamboat/leepfrog/docs/toolsNew' ]] && export TOOLSPATH='/steamboat/leepfrog/docs/toolsNew'
 
-	dispatcher="$TOOLSPATH/src/dispatcher.sh"
-
+	dispatcher="$TOOLSPATH/dispatcher.sh"
 	if [[ -x $HOME/$toolsRepo/dispatcher.sh ]]; then
-		localmd5=$(md5sum "$HOME/$toolsRepo/src/dispatcher.sh" | cut -f1 -d" ")
-		prodmd5=$(md5sum "$TOOLSPATH/src/dispatcher.sh" | cut -f1 -d" ")
-		[[ $localmd5 != $prodmd5 ]] && dispatcher="$HOME/$toolsRepo/src/dispatcher.sh"
+		localmd5=$(md5sum "$HOME/$toolsRepo/dispatcher.sh" | cut -f1 -d" ")
+		prodmd5=$(md5sum "$TOOLSPATH/dispatcher.sh" | cut -f1 -d" ")
+		[[ $localmd5 != $prodmd5 ]] && dispatcher="$HOME/$toolsRepo/dispatcher.sh"
 	fi
 	export TOOLSLIBPATH="$TOOLSPATH/lib"
 	[[ -d $HOME/$toolsRepo/lib ]] && export TOOLSLIBPATH="$HOME/$toolsRepo/lib:$TOOLSLIBPATH"
