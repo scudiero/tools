@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.1.100" # -- dscudiero -- 12/22/2016 @  8:01:08.39
+version="1.1.101" # -- dscudiero -- 12/22/2016 @  8:04:33.89
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -27,6 +27,7 @@ function GD {
 }
 export -f GD
 function prtStatus {
+	return 0
 	local str="$1"
 	#local strLen=${#str}
 	#local pad
@@ -287,3 +288,4 @@ prtStatus "Time (s) to parse arguments"
 ## Tue Nov 22 07:55:05 CST 2016 - dscudiero - Initial Load
 ## Thu Dec 22 06:57:50 CST 2016 - dscudiero - Move dispatcher outside of the src folder
 ## Thu Dec 22 08:03:41 CST 2016 - dscudiero - General syncing of dev to prod
+## Thu Dec 22 08:04:37 CST 2016 - dscudiero - General syncing of dev to prod
