@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.1.86" # -- dscudiero -- 12/20/2016 @ 14:49:33.06
+version="1.1.100" # -- dscudiero -- 12/22/2016 @  8:01:08.39
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -26,6 +26,14 @@ function GD {
 	return 0
 }
 export -f GD
+function prtStatus {
+	local str="$1"
+	#local strLen=${#str}
+	#local pad
+	#let pad=$screenWidth-${#str}; let pad=$pad-5;
+	>&2 echo -n -e " ${str}: $(( $(date "+%s") - $sTime ))s" # $(head -c $pad < /dev/zero | tr '\0' ' ')\r"
+	return 0
+}
 
 #==================================================================================================
 # Process the exit from the sourced script
@@ -64,6 +72,7 @@ unset executeFile
 sTime=$(date "+%s")
 GD='GD echo'
 #GD='echo'
+[[ $TERM == 'xterm' ]] && screenWidth=$(stty size </dev/tty | cut -d' ' -f2) || screenWidth=80
 
 # Who are we
 [[ $(which logname 2>&1) != '' ]] && userName=$(logname 2>&1) || userName=$LOGNAME
@@ -120,7 +129,8 @@ GD='GD echo'
 	[[ ${callPgmName:0:4} == 'test' ]] && noLog=true && noLognDb=true && useLocal=true
 	[[ $useLocal == true ]] && export USELOCAL=true
 
-$GD "Time (s) to parse arguments: $(( $(date "+%s") - $sTime ))s"
+#$GD "Time (s) to parse arguments: $(( $(date "+%s") - $sTime ))s"
+prtStatus "Time (s) to parse arguments"
 
 #==================================================================================================
 # MAIN
@@ -156,6 +166,7 @@ $GD "Time (s) to parse arguments: $(( $(date "+%s") - $sTime ))s"
 	fi
 	[[ -z $mySqlConnectString ]] && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
 	$GD "Time (s) to find initFile: $(( $(date "+%s") - $sTime ))s"
+	prtStatus "Time (s) to find initFile"
 
 ## Import thins we need to continue
 	[[ $myVerbose == true ]] && echo -e "($(( $(date "+%s") - $sTime ))s)" && echo -ne "\tResolving dependencies..."
@@ -172,6 +183,8 @@ $GD "Time (s) to parse arguments: $(( $(date "+%s") - $sTime ))s"
 	sTime=$(date "+%s")
 	source $initFile
 	$GD "Time (s) to run initFile: $(( $(date "+%s") - $sTime ))s"
+	prtStatus "Time (s) to run initFile"
+
 
 ## If sourced then just return
 	[[ $calledViaSource == true ]] && return 0
@@ -227,6 +240,7 @@ $GD "Time (s) to parse arguments: $(( $(date "+%s") - $sTime ))s"
 		[[ ! -r $executeFile ]] && Msg2 && Terminate "callPgm.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"
 
 	$GD "Time (s) to find scriptFile: $(( $(date "+%s") - $sTime ))s"
+	prtStatus "Time (s) to find scriptFile"
 
 ## Call the script
 	## Initialize the log file
@@ -254,12 +268,13 @@ $GD "Time (s) to parse arguments: $(( $(date "+%s") - $sTime ))s"
 	## Log Start in process log database
 		[[ $noLogInDb != true ]] && myLogRecordIdx=$(dbLog 'Start' "$callPgmName" "$inArgs")
 
-	$GD "Time (s) to initialize logFile: $(( $(date "+%s") - $sTime ))s"
+	prtStatus "Time (s) to initialize logFile"
 
 	## Call program function
 		[[ $myVerbose == true ]] && echo -e "($(( $(date "+%s") - $sTime ))s)" && echo -e "\tCalling script: '$callPgmName'..."
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		$GD -e "\nCall $executeFile $scriptArgs\n"
+		echo
 		Call "$executeFile" $scriptArgs
 		rc="$?"
 
@@ -271,3 +286,4 @@ $GD "Time (s) to parse arguments: $(( $(date "+%s") - $sTime ))s"
 #===================================================================================================
 ## Tue Nov 22 07:55:05 CST 2016 - dscudiero - Initial Load
 ## Thu Dec 22 06:57:50 CST 2016 - dscudiero - Move dispatcher outside of the src folder
+## Thu Dec 22 08:03:41 CST 2016 - dscudiero - General syncing of dev to prod
