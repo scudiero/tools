@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.1.101" # -- dscudiero -- 12/22/2016 @  8:04:33.89
+version="1.2.2" # -- dscudiero -- 12/22/2016 @  9:20:41.54
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -26,13 +26,11 @@ function GD {
 	return 0
 }
 export -f GD
+
 function prtStatus {
-	return 0
-	local str="$1"
-	#local strLen=${#str}
-	#local pad
-	#let pad=$screenWidth-${#str}; let pad=$pad-5;
-	>&2 echo -n -e " ${str}: $(( $(date "+%s") - $sTime ))s" # $(head -c $pad < /dev/zero | tr '\0' ' ')\r"
+	[[ $batchMode == true ]] && return 0
+	statusLine="${statusLine}${1} $(( $(date "+%s") - $sTime ))s"
+	>&3 echo -n -e "${statusLine}\r"
 	return 0
 }
 
@@ -62,6 +60,7 @@ function CleanUp {
 		SetFileExpansion
 
 	GD echo -e "\n=== Dispatcher.Cleanup Completed' =================================================================="
+	exec 3>&-
 	exit $rc
 } #CleanUp
 
@@ -71,9 +70,10 @@ function CleanUp {
 unset executeFile
 [[ "${BASH_SOURCE[0]}" != "${0}" ]] && calledViaSource=true || calledViaSource=false
 sTime=$(date "+%s")
-GD='GD echo'
-#GD='echo'
-[[ $TERM == 'xterm' ]] && screenWidth=$(stty size </dev/tty | cut -d' ' -f2) || screenWidth=80
+GD='GD echo'; #GD='echo'
+statusLine='\tTools dispatcher: '
+## Initialize file descriptor 3 to be stdout unless redirected by caller
+	if { ! >&3; } 2> /dev/null; then exec 3<> /dev/tty ; fi
 
 # Who are we
 [[ $(which logname 2>&1) != '' ]] && userName=$(logname 2>&1) || userName=$LOGNAME
@@ -86,11 +86,11 @@ GD='GD echo'
 	sTime=$(date "+%s")
 	[[ "$0" = "-bash" ]] && callPgmName=bashShell || callPgmName=$(basename "$0")
 	[[ -z $(getent group leepfrog | grep ','$userName) ]] && \
-		echo "*Error* -- User '$checkName' is not a member or the 'leepfrog' unix group, please contact the Unix Admin team" && exit -1
+		echo "*Error* -- User '$userName' is not a member or the 'leepfrog' unix group, please contact the Unix Admin team" && exit -1
 
 	trueDir="$(dirname "$(readlink -f "$0")")"
-	$GD "==== Starting $trueDir/dispatcher callPgmName: '$callPgmName' ====";
-	[[ -f $(dirname $trueDir)/offline ]] && printf "\n\e[0;31m >>> Sorry, support tools are temporarially offline, please try again later <<<\n \n\e[m\a"
+	$GD "==== Starting $trueDir/dispatcher callPgmName: '$callPgmName' -- $(date) ====";
+	[[ -f $(dirname $trueDir)/offline ]] && printf "\n\e[0;31m >>> Sorry, support tools are temporarily off-line, please try again later <<<\n \n\e[m\a"
 	[[ -f $(dirname $trueDir)/offline && $userName != $ME ]] && exit
 	$GD -e "trueDir = '$trueDir'\nTOOLSPATH = '$TOOLSPATH'"
 
@@ -116,8 +116,7 @@ GD='GD echo'
 	scriptArgs=${scriptArgs:1} ## Strip off leading blank
 
 ## Hello
-[[ $myVerbose == true ]] && echo "dispatcher..."
-[[ $batchMode != true && $(hostname) == 'build7.leepfrog.com' ]] && echo -e "\tNote: (dispatcher) The current host has been found to be a bit slow, patience you must have my young padawan"
+[[ $batchMode != true && $(hostname) == 'build7.leepfrog.com' ]] && echo -e "\tNote: (dispatcher) The current host has been found to be a bit slow, patience you must have my young padawan" >&3
 
 ## If called as ourselves, then the first token is the script name to call
 	if [[ $callPgmName == 'dispatcher.sh' ]]; then
@@ -130,13 +129,11 @@ GD='GD echo'
 	[[ ${callPgmName:0:4} == 'test' ]] && noLog=true && noLognDb=true && useLocal=true
 	[[ $useLocal == true ]] && export USELOCAL=true
 
-#$GD "Time (s) to parse arguments: $(( $(date "+%s") - $sTime ))s"
-prtStatus "Time (s) to parse arguments"
+prtStatus "parse args"
 
 #==================================================================================================
 # MAIN
 #==================================================================================================
-[[ $myVerbose == true ]] && echo -ne "\tResolving execution environment..."
 ## Look for the Initialization and Import function in the library path
 	sTime=$(date "+%s")
 	unset initFile importFile;
@@ -149,7 +146,7 @@ prtStatus "Time (s) to parse arguments"
 	#echo "initFile = '$initFile'" ; echo "importFile = '$importFile'"
 
 ## Initialize the runtime environment
-	$GD "initFile = '$initFile'"
+	$GD "-e \ninitFile = '$initFile'"
 	[[ -z $initFile ]] && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
 
 ## Set mysql connection information
@@ -165,12 +162,10 @@ prtStatus "Time (s) to parse arguments"
 		[[ -z $sqlHostIP ]] && sqlHostIP=$(dig +short $mySqlHost.leepfrog.com)
 		[[ -n $sqlHostIP ]] && mySqlConnectString="-h $sqlHostIP -port=$mySqlPort -u $mySqlUser -p$mySqlPw $warehouseDb"
 	fi
-	[[ -z $mySqlConnectString ]] && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
-	$GD "Time (s) to find initFile: $(( $(date "+%s") - $sTime ))s"
-	prtStatus "Time (s) to find initFile"
+	[[ -z $mySqlConnectString ]] && echo && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
+	prtStatus ", find initFile"
 
 ## Import thins we need to continue
-	[[ $myVerbose == true ]] && echo -e "($(( $(date "+%s") - $sTime ))s)" && echo -ne "\tResolving dependencies..."
 	sTime=$(date "+%s")
 	includes='Colors Msg2 Dump Here Quit Contains Lower Upper TitleCase Trim IsNumeric PushSettings PopSettings'
 	includes="$includes MkTmpFile Pause ProtectedCall SetFileExpansion PadChar PrintBanner Alert"
@@ -178,13 +173,12 @@ prtStatus "Time (s) to parse arguments"
 	includes="$includes GetDefaultsData Call StartRemoteSession FindExecutable CheckRun CheckAuth CheckSemaphore Call"
 	Import "$includes"
 	#Import FindExecutable CheckRun CheckAuth CheckSemaphore Call
+	prtStatus ", imports"
 
 ## Source the init script
-	[[ $myVerbose == true ]] && echo -e "($(( $(date "+%s") - $sTime ))s)" && echo -ne "\tInitializing execution environment..."
 	sTime=$(date "+%s")
 	source $initFile
-	$GD "Time (s) to run initFile: $(( $(date "+%s") - $sTime ))s"
-	prtStatus "Time (s) to run initFile"
+	prtStatus ", run initFile"
 
 
 ## If sourced then just return
@@ -197,7 +191,6 @@ prtStatus "Time (s) to parse arguments"
 		callPgmName=$(basename $executeFile)
 		callPgmName=$(cut -d'.' -f1 <<< $callPgmName)
 	else
-		[[ $myVerbose == true ]] && echo -e "($(( $(date "+%s") - $sTime ))s)" && echo -ne "\tResolving script..."
 		sTime=$(date "+%s")
 		## Get load data for this script from the scripts table
 			unset realCallName lib setSemaphore waitOn
@@ -216,18 +209,18 @@ prtStatus "Time (s) to parse arguments"
 				fi
 			fi
 	fi ## [[ ${callPgmName:0:1} == '\' ]]
-		$GD -e "\trealCallName: '$realCallName'\n\tcallPgmName: '$callPgmName'\n\lib: '$lib'\n\tsetSemaphore: '$setSemaphore'\n:\waitOn '$waitOn'"
+	$GD -e "\n\trealCallName: '$realCallName'\n\tcallPgmName: '$callPgmName'\n\lib: '$lib'\n\tsetSemaphore: '$setSemaphore'\n:\waitOn '$waitOn'"
 
 	## Check to make sure we can run and are authorized
 		$GD -e "\tChecking Can we run ..."
 		checkMsg=$(CheckRun $callPgmName)
 		if [[ $checkMsg != true ]]; then
-			[[ $userName != 'dscudiero' ]] && Msg2 && Msg2 && Terminate "$checkMsg"
-			[[ $callPgmName != 'testsh' ]] && Msg2 && Msg2 "$(ColorW "*** $checkMsg ***")"
+			[[ $userName != 'dscudiero' ]] && echo && echo && Terminate "$checkMsg"
+			[[ $callPgmName != 'testsh' ]] && echo && echo "$(ColorW "*** $checkMsg ***")"
 		fi
 		$GD -e "\tChecking Auth..."
 		checkMsg=$(CheckAuth $callPgmName)
-		[[ $checkMsg != true ]] && Msg2 && Msg2 && Terminate "$checkMsg"
+		[[ $checkMsg != true ]] && echo && echo && Terminate "$checkMsg"
 
 	## Check semaphore
 		$GD -e "\tChecking Semaphore..."
@@ -238,15 +231,13 @@ prtStatus "Time (s) to parse arguments"
 		$GD -e "\n=== Resolved execution file: '$executeFile' ==========================================================="
 
 	## Do we have a viable script
-		[[ ! -r $executeFile ]] && Msg2 && Terminate "callPgm.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"
+		[[ ! -r $executeFile ]] && echo && echo && Terminate "callPgm.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"
 
-	$GD "Time (s) to find scriptFile: $(( $(date "+%s") - $sTime ))s"
-	prtStatus "Time (s) to find scriptFile"
+	prtStatus ", find scriptFile"
 
 ## Call the script
 	## Initialize the log file
-		$GD -e "\tInitializing logFile..."
-		[[ $myVerbose == true ]] && echo -e "($(( $(date "+%s") - $sTime ))s)" && echo -ne  "\tInitializing logs..."
+		$GD -e "\n\tInitializing logFile..."
 		sTime=$(date "+%s")
 		logFile=/dev/null
 		if [[ $noLog != true ]]; then
@@ -269,13 +260,12 @@ prtStatus "Time (s) to parse arguments"
 	## Log Start in process log database
 		[[ $noLogInDb != true ]] && myLogRecordIdx=$(dbLog 'Start' "$callPgmName" "$inArgs")
 
-	prtStatus "Time (s) to initialize logFile"
+	prtStatus ", initialize logFile"
+	echo
 
 	## Call program function
-		[[ $myVerbose == true ]] && echo -e "($(( $(date "+%s") - $sTime ))s)" && echo -e "\tCalling script: '$callPgmName'..."
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		$GD -e "\nCall $executeFile $scriptArgs\n"
-		echo
 		Call "$executeFile" $scriptArgs
 		rc="$?"
 
@@ -289,3 +279,4 @@ prtStatus "Time (s) to parse arguments"
 ## Thu Dec 22 06:57:50 CST 2016 - dscudiero - Move dispatcher outside of the src folder
 ## Thu Dec 22 08:03:41 CST 2016 - dscudiero - General syncing of dev to prod
 ## Thu Dec 22 08:04:37 CST 2016 - dscudiero - General syncing of dev to prod
+## Thu Dec 22 09:26:52 CST 2016 - dscudiero - Add status messaging
