@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.2" # -- dscudiero -- 12/22/2016 @  9:20:41.54
+version="1.2.3" # -- dscudiero -- 12/22/2016 @  9:49:40.08
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -11,9 +11,9 @@ version="1.2.2" # -- dscudiero -- 12/22/2016 @  9:20:41.54
 
 dispatcherArgs="$*"
 myName='dispatcher'
-export DISPATCHER="$0"
 TOOLSPATH='/steamboat/leepfrog/docs/tools'
 [[ -d '/steamboat/leepfrog/docs/toolsNew' ]] && TOOLSPATH='/steamboat/leepfrog/docs/toolsNew'
+export DISPATCHER="$TOOLSPATH/dispatcher.sh"
 
 #==================================================================================================
 # Global debug routine
@@ -280,3 +280,4 @@ prtStatus "parse args"
 ## Thu Dec 22 08:03:41 CST 2016 - dscudiero - General syncing of dev to prod
 ## Thu Dec 22 08:04:37 CST 2016 - dscudiero - General syncing of dev to prod
 ## Thu Dec 22 09:26:52 CST 2016 - dscudiero - Add status messaging
+## Thu Dec 22 09:54:05 CST 2016 - dscudiero - Assign DISPATCHER based on current value of TOOLSPATH
