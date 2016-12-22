@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.3" # -- dscudiero -- 12/22/2016 @  9:49:40.08
+version="1.2.4" # -- dscudiero -- 12/22/2016 @ 10:05:22.23
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -73,7 +73,11 @@ sTime=$(date "+%s")
 GD='GD echo'; #GD='echo'
 statusLine='\tTools dispatcher: '
 ## Initialize file descriptor 3 to be stdout unless redirected by caller
-	if { ! >&3; } 2> /dev/null; then exec 3<> /dev/tty ; fi
+	if [[ -t 0 ]]; then # Im running interactive
+		if { ! >&3; } 2> /dev/null; then exec 3<> /dev/tty ; fi
+	else # Running as a cron job
+		exec 3<> /dev/null
+	fi
 
 # Who are we
 [[ $(which logname 2>&1) != '' ]] && userName=$(logname 2>&1) || userName=$LOGNAME
@@ -281,3 +285,4 @@ prtStatus "parse args"
 ## Thu Dec 22 08:04:37 CST 2016 - dscudiero - General syncing of dev to prod
 ## Thu Dec 22 09:26:52 CST 2016 - dscudiero - Add status messaging
 ## Thu Dec 22 09:54:05 CST 2016 - dscudiero - Assign DISPATCHER based on current value of TOOLSPATH
+## Thu Dec 22 10:05:50 CST 2016 - dscudiero - Only do the status logging if running interacive
