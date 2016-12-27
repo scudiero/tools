@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.6" # -- dscudiero -- 12/27/2016 @  9:27:59.52
+version="1.2.7" # -- dscudiero -- 12/27/2016 @  9:38:01.44
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -267,10 +267,14 @@ prtStatus "parse args"
 	prtStatus ", initialize logFile"
 
 	## Call program function
+		sTime=$(date "+%s")
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		$GD -e "\nCall $executeFile $scriptArgs\n"
 		prtStatus ", calling script $callPgmName" ; echo
-		Call "$executeFile" $scriptArgs
+		#Call "$executeFile" $scriptArgs
+		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
+		myPath="$(dirname $executeFile)"
+		(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile; rc=$?
 		rc="$?"
 
 ## Should never get here but just in case
@@ -287,3 +291,4 @@ prtStatus "parse args"
 ## Thu Dec 22 09:54:05 CST 2016 - dscudiero - Assign DISPATCHER based on current value of TOOLSPATH
 ## Thu Dec 22 10:05:50 CST 2016 - dscudiero - Only do the status logging if running interacive
 ## Tue Dec 27 09:28:42 CST 2016 - dscudiero - Add Help to the pre-loaded functions
+## Tue Dec 27 09:39:33 CST 2016 - dscudiero - Do not use Call to call the program, just source the file
