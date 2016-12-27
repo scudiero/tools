@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.144 # -- dscudiero -- 12/21/2016 @ 13:59:23.10
+version=1.21.145 # -- dscudiero -- 12/27/2016 @ 16:22:18.70
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -309,8 +309,14 @@ dump runClientListReport
 				[[ $runClientListReport == true ]] && Call 'reports' "clientList -quiet -email 'dscudiero@leepfrog.com,sfrickson@leepfrog.com' $scriptArgs"
 
 			## Performance test
-				perfTest
-
+				perfTest.sh
+				pwFile=$HOME/.pw2
+				pwRec=$(grep "^build7" $pwFile)
+				read -ra tokens <<< "$pwRec"
+				remoteUser=${tokens[1]}
+				remotePw=${tokens[2]}
+				remoteHost=${tokens[3]}
+				sshpass -p $remotePw ssh $remoteUser@$remoteHost perfTest.sh >/dev/null 2>&1
 			;;
 	*) ## build5 and build7
 			sleep 30 ## Wait for process to start on mojave
