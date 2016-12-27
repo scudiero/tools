@@ -1,9 +1,10 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.89 # -- dscudiero -- 12/14/2016 @ 11:17:12.27
+version=1.1.90 # -- dscudiero -- 12/27/2016 @ 12:17:09.78
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
+imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
+imports="$imports GetOutputFile"
 Import "$imports"
 originalArgStr="$*"
 scriptDescription="Build workflow spreadsheet from workflow file"
