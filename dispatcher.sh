@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.10" # -- dscudiero -- 12/27/2016 @ 12:17:28.46
+version="1.2.11" # -- dscudiero -- 12/27/2016 @ 12:19:07.89
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -71,7 +71,7 @@ unset executeFile
 [[ "${BASH_SOURCE[0]}" != "${0}" ]] && calledViaSource=true || calledViaSource=false
 sTime=$(date "+%s")
 GD='GD echo'; #GD='echo'
-statusLine='\tTools dispatcher: '
+statusLine='\tDispatcher: '
 ## Initialize file descriptor 3 to be stdout unless redirected by caller
 	if [[ -t 0 ]]; then # Im running interactive
 		if { ! >&3; } 2> /dev/null; then exec 3<> /dev/tty ; fi
@@ -291,3 +291,4 @@ prtStatus "parse args"
 ## Tue Dec 27 09:39:33 CST 2016 - dscudiero - Do not use Call to call the program, just source the file
 ## Tue Dec 27 09:53:16 CST 2016 - dscudiero - Tweak messaging
 ## Tue Dec 27 12:17:50 CST 2016 - dscudiero - Remove message about calling program
+## Tue Dec 27 13:54:32 CST 2016 - dscudiero - Tweak messages
