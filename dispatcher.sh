@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.8" # -- dscudiero -- 12/27/2016 @  9:52:52.76
+version="1.2.10" # -- dscudiero -- 12/27/2016 @ 12:17:28.46
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -267,11 +267,8 @@ prtStatus "parse args"
 	prtStatus ", initialize logFile"
 
 	## Call program function
-		sTime=$(date "+%s")
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		$GD -e "\nCall $executeFile $scriptArgs\n"
-		prtStatus ", calling '$callPgmName'" ; echo
-		#Call "$executeFile" $scriptArgs
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
 		(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile; rc=$?
@@ -293,3 +290,4 @@ prtStatus "parse args"
 ## Tue Dec 27 09:28:42 CST 2016 - dscudiero - Add Help to the pre-loaded functions
 ## Tue Dec 27 09:39:33 CST 2016 - dscudiero - Do not use Call to call the program, just source the file
 ## Tue Dec 27 09:53:16 CST 2016 - dscudiero - Tweak messaging
+## Tue Dec 27 12:17:50 CST 2016 - dscudiero - Remove message about calling program
