@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.4" # -- dscudiero -- 12/22/2016 @ 10:05:22.23
+version="1.2.6" # -- dscudiero -- 12/27/2016 @  9:27:59.52
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -173,7 +173,7 @@ prtStatus "parse args"
 	sTime=$(date "+%s")
 	includes='Colors Msg2 Dump Here Quit Contains Lower Upper TitleCase Trim IsNumeric PushSettings PopSettings'
 	includes="$includes MkTmpFile Pause ProtectedCall SetFileExpansion PadChar PrintBanner Alert"
-	includes="$includes TrapSigs SignalHandeler RunSql DbLog GetCallStack DisplayNews"
+	includes="$includes TrapSigs SignalHandeler RunSql DbLog GetCallStack DisplayNews Help"
 	includes="$includes GetDefaultsData Call StartRemoteSession FindExecutable CheckRun CheckAuth CheckSemaphore Call"
 	Import "$includes"
 	#Import FindExecutable CheckRun CheckAuth CheckSemaphore Call
@@ -265,11 +265,11 @@ prtStatus "parse args"
 		[[ $noLogInDb != true ]] && myLogRecordIdx=$(dbLog 'Start' "$callPgmName" "$inArgs")
 
 	prtStatus ", initialize logFile"
-	echo
 
 	## Call program function
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		$GD -e "\nCall $executeFile $scriptArgs\n"
+		prtStatus ", calling script $callPgmName" ; echo
 		Call "$executeFile" $scriptArgs
 		rc="$?"
 
@@ -286,3 +286,4 @@ prtStatus "parse args"
 ## Thu Dec 22 09:26:52 CST 2016 - dscudiero - Add status messaging
 ## Thu Dec 22 09:54:05 CST 2016 - dscudiero - Assign DISPATCHER based on current value of TOOLSPATH
 ## Thu Dec 22 10:05:50 CST 2016 - dscudiero - Only do the status logging if running interacive
+## Tue Dec 27 09:28:42 CST 2016 - dscudiero - Add Help to the pre-loaded functions
