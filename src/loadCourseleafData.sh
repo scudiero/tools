@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.16 # -- dscudiero -- 12/21/2016 @ 16:24:06.54
+version=3.8.21 # -- dscudiero -- 12/27/2016 @ 11:02:08.38
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -25,9 +25,9 @@ scriptDescription="Load Courseleaf Data"
 	# parse script specific arguments
 	#==============================================================================================
 	function parseArgs-loadCourseleafData  {
-		argList+=(-informationOnly,2,switch,informationOnlyMode,,script,'Only analyze data and print error messages, do not change any client data.')
 		argList+=(-workbookFile,1,option,workbookFile,,script,'The fully qualified spreadsheet file name')
 		argList+=(-skipNulls,2,switch,skipNulls,,script,'If a data field is null then do not write out that data to the page')
+		argList+=(-uinMap,3,switch,uinMap,,script,'Map role data UIDs to UINs even if the uses UIN flag is not set on the client record')
 		argList+=(-noUinMap,3,switch,noUinMap,,script,'Do not map role data UIDs to UINs')
 		argList+=(-users,1,switch,processUserData,,script,'Load user data')
 		argList+=(-role,1,switch,processRoleData,,script,'Load role data')
@@ -237,9 +237,7 @@ scriptDescription="Load Courseleaf Data"
 		local memberData="$*"
 		[[ $useUINs != true ]] && echo "$memberData" && return
 
-		local memberDataNew
-		local member
-		local members
+		local memberDataNew member members
 
 		IFSsave=$IFS; IFS=',' read -a members <<< "$memberData"; IFS=$IFSsave
 		for member in "${members[@]}"; do
@@ -563,12 +561,13 @@ scriptDescription="Load Courseleaf Data"
 				pageWorkflow="$(echo ${workflowDataFromSpreadsheet[$key]} | cut -d'|' -f3)"
 
 				## Check to see if the pageWorkflow data is a real defined workflow
-					foundNamedWorkflow=false
-					if [[ $pageWorkflow != '' && ${workflowsFromFile["$pageWorkflow"]} == true ]]; then
-						foundNamedWorkflow=true
-					else
-						pageWorkflow=$(CleanString $pageWorkflow)
-					fi
+					# foundNamedWorkflow=false
+					# if [[ $pageWorkflow != '' && ${workflowsFromFile["$pageWorkflow"]} == true ]]; then
+					# 	foundNamedWorkflow=true
+					# else
+					# 	pageWorkflow=$(CleanString $pageWorkflow)
+					# fi
+
 
 				## Edit role data if useUINs is on
 					if [[ $useUINs == true ]]; then
@@ -595,9 +594,11 @@ scriptDescription="Load Courseleaf Data"
 					IFSsave=$IFS; IFS=',' read -a members <<< "$checkMembers"; IFS=$IFSsave
 					for member in "${members[@]}"; do
 						[[ $member == '' ]] && continue
+						[[ $(Contains "$member" ' fyi') == true ]] && member="${member%% fyi*}"
 						foundMember=false
 						[[ ${usersFromDb["$member"]+abc} ]] && foundMember=true && continue
 						[[ ${rolesOut["$member"]+abc} ]] && foundMember=true && continue
+						[[ ${workflowsFromFile["$member"]+abc} ]] && foundMember=true && continue
 						if [[ $foundMember == false ]]; then
 							errorInMemberLookup=true
 							if [[ ${membersErrors["$member"]+abc} ]]; then
@@ -627,7 +628,7 @@ scriptDescription="Load Courseleaf Data"
 # Declare local variables and constants
 #==================================================================================================
 step='setPageData'
-falseVars='processUserData processRoleData processPageData processedUserData processedRoleData processedWorkflowData noUinMap useUINs informationOnlyMode'
+falseVars='processUserData processRoleData processPageData processedUserData processedRoleData processedWorkflowData noUinMap uinMap useUINs informationOnlyMode'
 for var in $falseVars; do eval $var=false; done
 
 declare -A usersFromSpreadsheet
@@ -658,16 +659,20 @@ Init 'getClient getEnv getDirs checkEnvs checkProdEnv'
 dump -1 processUserData processRoleData processPageData informationOnlyMode ignoreMissingPages
 
 ## Information only mode
- 	[[ $informationOnlyMode == true ]] && WarningMsg "'informationOnlyMode' flag is set, no data will be modified."
+ 	#[[ $informationOnlyMode == true ]] && WarningMsg "'informationOnlyMode' flag is set, no data will be modified."
 
 ## Find out if this client uses UINs
 	if [[ $noUinMap == false ]]; then
-		sqlStmt="select usesUINs from $clientInfoTable where name=\"$client\""
+		if [[ $uinMap == true ]]; then
+			usesUINs=true
+		else
+			sqlStmt="select usesUINs from $clientInfoTable where name=\"$client\""
 			RunSql 'mysql' $sqlStmt
 			if [[ ${#resultSet[@]} -ne 0 ]]; then
 				result="${resultSet[0]}"
 				[[ $result == 'Y' ]] && useUINs=true && Msg2
 			fi
+		fi
 	fi
 
 ## Get workflow file
