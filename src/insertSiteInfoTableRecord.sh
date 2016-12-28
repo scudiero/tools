@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.83 # -- dscudiero -- 12/14/2016 @ 11:27:02.89
+version=1.1.84 # -- dscudiero -- 12/28/2016 @ 11:14:53.96
 #==================================================================================================
 TrapSigs 'on'
 Import ParseCourseleafFile
@@ -198,6 +198,17 @@ dump -2 -n -t siteDir share shareType client env clientId
 	[[ $courseleafCgiVer != 'NULL' ]] && courseleafCgiVer=\""$courseleafCgiVer"\"
 	dump -2 -t courseleafCgiVer
 
+## Get the reportsVer
+	reportsVer=NULL
+	checkFile=$siteDir/web/courseleaf/localsteps/reports.js
+	if [[ -r "$checkFile" ]]; then
+		reportsVer="$(ProtectedCall "grep -s -m 1 'version:' $checkFile")"
+		reportsVer=${reportsVer##*: }
+	fi
+	[[ $reportsVer != 'NULL' ]] && reportsVer=\""$reportsVer"\"
+	dump -2 -t reportsVer
+
+
 ## Get the edition variable
 	catEdition=NULL
 	grepFile=$siteDir/web/courseleaf/localsteps/default.tcf
@@ -286,8 +297,8 @@ dump -2 -n -t siteDir share shareType client env clientId
 	fi
 
 ## Create the sites table record
-	setStr="clver=$clVer,cimver=$cimVer,clssVer=$clssVer,courseleafCgiVer=$courseleafCgiVer,CIMs=$cimStr"
-	setStr="$setStr,url=$url,internalUrl=$internalUrl,archives=$archives,googleType=$googleType"
+	setStr="clver=$clVer,cimver=$cimVer,clssVer=$clssVer,courseleafCgiVer=$courseleafCgiVer,reportsVer=$reportsVer"
+	setStr="$setStr,CIMs=$cimStr,url=$url,internalUrl=$internalUrl,archives=$archives,googleType=$googleType"
 	setStr="$setStr,CATedition=$catEdition,publishing=$publishTarget,degreeWorks=$degreeWorks"
 	sqlStmt="update $siteInfoTable set $setStr where siteId=\"$siteId\""
 	dump -2 -n -t sqlStmt
