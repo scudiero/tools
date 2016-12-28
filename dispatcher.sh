@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.11" # -- dscudiero -- 12/27/2016 @ 12:19:07.89
+version="1.2.13" # -- dscudiero -- 12/28/2016 @ 15:20:42.93
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -58,6 +58,10 @@ function CleanUp {
 		SetFileExpansion 'on'
 		rm -rf /tmp/$userName.$callPgmName.* > /dev/null 2>&1
 		SetFileExpansion
+
+	## Cleanup PATH and CLASSPATH
+		[[ $savePath != '' ]] && export PATH="$savePath"
+		[[ $saveClasspath != '' ]] && export CLASSPATH="$saveClasspath"
 
 	GD echo -e "\n=== Dispatcher.Cleanup Completed' =================================================================="
 	exec 3>&-
@@ -266,6 +270,19 @@ prtStatus "parse args"
 
 	prtStatus ", initialize logFile"
 
+	## Set the CLASSPATH
+		sTime=$(date "+%s")
+		saveClasspath="$CLASSPATH"
+		searchDirs="$TOOLSPATH/src"
+		[[ $TOOLSSRCPATH != '' ]] && searchDirs="$( tr ':' ' ' <<< $TOOLSSRCPATH)"
+		unset CLASSPATH
+		for searchDir in $searchDirs; do
+			for jar in $(find $searchDir/java -mindepth 1 -maxdepth 1 -type f -name \*.jar); do
+				[[ $CLASSPATH == '' ]] && CLASSPATH="$jar" || CLASSPATH="$CLASSPATH:$jar"
+			done
+		done
+		export CLASSPATH="$CLASSPATH"
+
 	## Call program function
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		$GD -e "\nCall $executeFile $scriptArgs\n"
@@ -292,3 +309,4 @@ prtStatus "parse args"
 ## Tue Dec 27 09:53:16 CST 2016 - dscudiero - Tweak messaging
 ## Tue Dec 27 12:17:50 CST 2016 - dscudiero - Remove message about calling program
 ## Tue Dec 27 13:54:32 CST 2016 - dscudiero - Tweak messages
+## Wed Dec 28 15:21:02 CST 2016 - dscudiero - Added setting of CLASSPATH
