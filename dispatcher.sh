@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.13" # -- dscudiero -- 12/28/2016 @ 15:20:42.93
+version="1.2.14" # -- dscudiero -- 12/28/2016 @ 15:30:43.05
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -16,8 +16,15 @@ TOOLSPATH='/steamboat/leepfrog/docs/tools'
 export DISPATCHER="$TOOLSPATH/dispatcher.sh"
 
 #==================================================================================================
-# Global debug routine
+# Globals
 #==================================================================================================
+function RunMySql {
+	SetFileExpansion 'off'
+	java runMySql $*
+	SetFileExpansion
+	return 0
+}
+export -f RunMySql
 function GD {
 	[[ $DEBUG != true ]] && return 0
 	[[ -z $stdout ]] && stdout=/dev/tty
@@ -310,3 +317,4 @@ prtStatus "parse args"
 ## Tue Dec 27 12:17:50 CST 2016 - dscudiero - Remove message about calling program
 ## Tue Dec 27 13:54:32 CST 2016 - dscudiero - Tweak messages
 ## Wed Dec 28 15:21:02 CST 2016 - dscudiero - Added setting of CLASSPATH
+## Wed Dec 28 15:31:05 CST 2016 - dscudiero - Added global function RunMySql
