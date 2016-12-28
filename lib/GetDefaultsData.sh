@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.12" # -- dscudiero -- 12/08/2016 @  8:22:04.29
+version="2.0.13" # -- dscudiero -- 12/28/2016 @ 11:21:57.38
 #===================================================================================================
 # Get default variable values from the defaults database
 #===================================================================================================
@@ -19,7 +19,7 @@ function GetDefaultsData {
 			# echo "Loading global defaults"
 			Msg2 $V3 "$FUNCNAME: Loading common values..."
 			dbFields="name,value"
-			whereClause="(os=\"$osName\" or os is null) and (host=\"$hostName\" or host is null)"
+			whereClause="(os=\"$osName\" or os is null) and (host=\"$hostName\" or host is null) and status=\"A\""
 			sqlStmt="select $dbFields from defaults where $whereClause order by name,host"
 			RunSql 'mysql' $sqlStmt
 			if [[ ${#resultSet[@]} -eq 0 ]]; then
