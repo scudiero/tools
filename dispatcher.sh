@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.14" # -- dscudiero -- 12/28/2016 @ 15:30:43.05
+version="1.2.15" # -- dscudiero -- 12/28/2016 @ 15:57:26.17
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -16,30 +16,38 @@ TOOLSPATH='/steamboat/leepfrog/docs/tools'
 export DISPATCHER="$TOOLSPATH/dispatcher.sh"
 
 #==================================================================================================
-# Globals
+# Global Functions
 #==================================================================================================
-function RunMySql {
-	SetFileExpansion 'off'
-	java runMySql $*
-	SetFileExpansion
-	return 0
-}
-export -f RunMySql
-function GD {
-	[[ $DEBUG != true ]] && return 0
-	[[ -z $stdout ]] && stdout=/dev/tty
-	[[ $* == 'clear' ]] && echo > $stdout && return 0
-	$* >> $stdout
-	return 0
-}
-export -f GD
+	function RunMySql {
+		local prev resultStr
+		prev=$(set -o | grep noglob | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2)
+		set -f
+		unset resultStr resultSet
+		resultStr=$(java runMySql $*)
+		[[ $resultStr != '' ]] && IFS=$'\n' read -rd '' -a resultSet <<<"$resultStr"
+		[[ $prev == 'on' ]] && set +f
+		return 0
+	}
+	export -f RunMySql
 
-function prtStatus {
-	[[ $batchMode == true ]] && return 0
-	statusLine="${statusLine}${1} $(( $(date "+%s") - $sTime ))s"
-	>&3 echo -n -e "${statusLine}\r"
-	return 0
-}
+	function GD {
+		[[ $DEBUG != true ]] && return 0
+		[[ -z $stdout ]] && stdout=/dev/tty
+		[[ $* == 'clear' ]] && echo > $stdout && return 0
+		$* >> $stdout
+		return 0
+	}
+	export -f GD
+
+#==================================================================================================
+# Local Functions
+#==================================================================================================
+	function prtStatus {
+		[[ $batchMode == true ]] && return 0
+		statusLine="${statusLine}${1} $(( $(date "+%s") - $sTime ))s"
+		>&3 echo -n -e "${statusLine}\r"
+		return 0
+	}
 
 #==================================================================================================
 # Process the exit from the sourced script
@@ -195,7 +203,6 @@ prtStatus "parse args"
 	source $initFile
 	prtStatus ", run initFile"
 
-
 ## If sourced then just return
 	[[ $calledViaSource == true ]] && return 0
 
@@ -318,3 +325,4 @@ prtStatus "parse args"
 ## Tue Dec 27 13:54:32 CST 2016 - dscudiero - Tweak messages
 ## Wed Dec 28 15:21:02 CST 2016 - dscudiero - Added setting of CLASSPATH
 ## Wed Dec 28 15:31:05 CST 2016 - dscudiero - Added global function RunMySql
+## Wed Dec 28 15:58:14 CST 2016 - dscudiero - Update RunMySql function to write out to resultSet array
