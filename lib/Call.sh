@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.0.45" # -- dscudiero -- 12/16/2016 @ 15:22:46.16
+version="2.0.56" # -- dscudiero -- 12/28/2016 @ 15:24:19.13
 #=======================================================================================================================
 # Generic resolve file and call
 # Call scriptName ["$scriptArgs"]
@@ -35,10 +35,14 @@ function Call {
 					useTypes="$token1"
 				fi
 
-			## Is the token in the set 'cron,reports,features,patches', if so then it is a lib specification
+			## Is the token in the set 'cron,reports,features,patches,java', if so then it is a lib specification
+				sqlStmt="select scriptData2 from $scriptsTable where name =\"dispatcher\" "
+				RunSql $sqlStmt
+		 		resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString")
+				local dbSrcLibs="${resultSet[0]}"
 				local useLibs=''
 				token1=$(cut -d ' ' -f1 <<< $scriptArgs)
-				if [[ $(Contains ',cron,reports,features,patches,' ",$token1," ) == true ]]; then
+				if [[ $(Contains ",$dbSrcLibs," ",$token1," ) == true ]]; then
 					shift; scriptArgs="$*"
 					useLibs="$token1"
 				fi
@@ -52,6 +56,7 @@ function Call {
 				#	srcLibs		- A comma separated list of src subdirectories to search.  In the set {'cron','features','reports','patches'}
 				#===========================================================================================================================
 				FindExecutable "$scriptName" 'std'  "$useTypes" "$useLibs" ## Sets variable executeFile & executeAlias
+				#dump executeFile executeAlias
 		else
 			executeFile="$scriptName"
 			unset executeAlias
@@ -72,6 +77,9 @@ function Call {
 					cmdStr="$PYDIR/bin/python -u $executeFile $scriptArgs" #$addArgs"
 					;;
 				java)
+					setFileExpansion 'off'
+					cmdStr="java $scriptName $scriptArgs"
+					setFileExpansion
 					;;
 				*)
 					cmdStr="source $executeFile $scriptArgs"
@@ -83,7 +91,8 @@ function Call {
 			myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 			myPath="$(dirname $executeFile)"
 			($cmdStr) 2>&1 | tee -a $logFile; rc=$?
-			myName="$myNameSave" ; myPath="$myPathSave" ; export PATH="$savePath"
+			myName="$myNameSave" ; myPath="$myPathSave" ;
+			export PATH="$savePath"
 
 	return $rc
 } #Call
@@ -92,3 +101,4 @@ export -f Call
 #=======================================================================================================================
 # Check-in Log
 #=======================================================================================================================
+## Wed Dec 28 15:46:17 CST 2016 - dscudiero - Pull the valid library types from the database
