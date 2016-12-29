@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.58" # -- dscudiero -- 12/07/2016 @ 10:27:44.72
+version="2.0.59" # -- dscudiero -- 12/28/2016 @ 16:04:13.34
 #===================================================================================================
 # Initialize the tools runtime environment
 #===================================================================================================
@@ -90,6 +90,7 @@ tabStr="$(PadChar ' ' 5)"
 	# Msg " Default Color $(ColorE "This is ColorE") Default Color"
 	# Msg " Default Color $(ColorT "This is ColorT") Default Color"
 	# Msg " Default Color $(ColorV "This is ColorV") Default Color"
+
 ## Set forking limit
 	maxForkedProcesses=$maxForkedProcessesPrime
 	[[ $scriptData3 != '' && $(IsNumeric $scriptData3) == true ]] && maxForkedProcesses=$scriptData3
@@ -98,10 +99,23 @@ tabStr="$(PadChar ' ' 5)"
 	[[ $hour -ge 20 && $maxForkedProcessesAfterHours -gt $maxForkedProcesses ]] && maxForkedProcesses=$maxForkedProcessesAfterHours
 	[[ $maxForkedProcesses == '' ]] && maxForkedProcesses=3
 
-export FRAMEWORKLOADED=true
+## Set the CLASSPATH
+	sTime=$(date "+%s")
+	saveClasspath="$CLASSPATH"
+	searchDirs="$TOOLSPATH/src"
+	[[ $TOOLSSRCPATH != '' ]] && searchDirs="$( tr ':' ' ' <<< $TOOLSSRCPATH)"
+	unset CLASSPATH
+	for searchDir in $searchDirs; do
+		for jar in $(find $searchDir/java -mindepth 1 -maxdepth 1 -type f -name \*.jar); do
+			[[ $CLASSPATH == '' ]] && CLASSPATH="$jar" || CLASSPATH="$CLASSPATH:$jar"
+		done
+	done
+	export CLASSPATH="$CLASSPATH"
 
+export FRAMEWORKLOADED=true
 GD echo -e "\n=== Stopping InitializeRuntime ========================================================================"
 
 #===================================================================================================
 ## Check-in log
 #===================================================================================================
+## Thu Dec 29 07:04:46 CST 2016 - dscudiero - Removed the CLASSPATH setting code
