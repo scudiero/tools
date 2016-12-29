@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.25" # -- dscudiero -- 12/29/2016 @ 13:57:52.14
+version="1.2.26" # -- dscudiero -- 12/29/2016 @ 15:50:58.60
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -21,6 +21,8 @@ export DISPATCHER="$TOOLSPATH/dispatcher.sh"
 	#==============================================================================================
 	function RunMySql {
 		local sqlStmt="$*" ; [[ ${sqlStmt:${#sqlStmt}:1} != ';' ]] && sqlStmt="$sqlStmt;"
+		local stmtType=$(tr '[:lower:]' '[:upper:]' <<< "${sqlStmt%% *}")
+		[[ -n $DOIT && $stmtType != 'SELECT' ]] && echo "sqlStmt = >$sqlStmt<" && return 0
 		local prev=$(set -o | grep noglob | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2)
 		local resultStr msg tmpStr
 		local dbType='mysql'
@@ -53,6 +55,8 @@ export DISPATCHER="$TOOLSPATH/dispatcher.sh"
 	function RunSqlite {
 		local dbFile="$1" && shift
 		local sqlStmt="$*" ; [[ ${sqlStmt:${#sqlStmt}:1} != ';' ]] && sqlStmt="$sqlStmt;"
+		local stmtType=$(tr '[:lower:]' '[:upper:]' <<< "${sqlStmt%% *}")
+		[[ -n $DOIT && $stmtType != 'SELECT' ]] && echo "sqlStmt = >$sqlStmt<" && return 0
 		local prev=$(set -o | grep noglob | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2)
 		local resultStr msg tmpStr
 		local dbType='sqlite3'
@@ -371,3 +375,4 @@ prtStatus "parse args"
 ## Wed Dec 28 15:58:14 CST 2016 - dscudiero - Update RunMySql function to write out to resultSet array
 ## Thu Dec 29 08:07:14 CST 2016 - dscudiero - Switch to use java RunMySql
 ## Thu Dec 29 10:14:36 CST 2016 - dscudiero - Add RunSqlite function
+## Thu Dec 29 15:57:02 CST 2016 - dscudiero - Added quick return in RunMySql and RunSqlite if DOIT is off
