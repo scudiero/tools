@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.22" # -- dscudiero -- 12/29/2016 @  8:05:24.66
+version="1.2.24" # -- dscudiero -- 12/29/2016 @ 10:13:27.75
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -18,18 +18,74 @@ export DISPATCHER="$TOOLSPATH/dispatcher.sh"
 #==================================================================================================
 # Global Functions
 #==================================================================================================
+	#==============================================================================================
 	function RunMySql {
-		local prev resultStr
-		prev=$(set -o | grep noglob | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2)
-		set -f
-		unset resultStr resultSet
-		resultStr=$(java runMySql $*)
-		[[ $resultStr != '' ]] && IFS=$'\n' read -rd '' -a resultSet <<<"$resultStr"
-		[[ $prev == 'on' ]] && set +f
+		local sqlStmt="$*" ; [[ ${sqlStmt:${#sqlStmt}:1} != ';' ]] && sqlStmt="$sqlStmt;"
+		local prev=$(set -o | grep noglob | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2)
+		local resultStr msg tmpStr
+		local dbType='mysql'
+
+		## Run the query
+			set -f
+			resultStr=$(java runMySql $sqlStmt)
+			tmpStr="${resultStr%% *}"
+			if [[ $(tr '[:lower:]' '[:upper:]' <<< "${tmpStr:0:5}") == 'ERROR' ]]; then
+				msg="$FUNCNAME: Error reported from $dbType:\n\tFile: $dbFile\n\tSql: $sqlStmt\n\t$resultStr"
+				if [[ $(type -t 'Terminate') == function ]]; then
+					Terminate "$(ColorK "$myName").$msg"
+				else
+					echo "*Fatal Error* -- $msg"
+					exit -1
+				fi
+			fi
+			[[ $prev == 'on' ]] && set +f
+
+		## Write output to an array
+			unset resultSet
+			[[ $resultStr != '' ]] && IFS=$'\n' read -rd '' -a resultSet <<<"$resultStr"
+			[[ $prev == 'on' ]] && set +f
+
 		return 0
-	}
+	} #RunMySql
 	export -f RunMySql
 
+	#==================================================================================================
+	function RunSqlite {
+		local dbFile="$1" && shift
+		local sqlStmt="$*" ; [[ ${sqlStmt:${#sqlStmt}:1} != ';' ]] && sqlStmt="$sqlStmt;"
+		local prev=$(set -o | grep noglob | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2)
+		local resultStr msg tmpStr
+		local dbType='sqlite3'
+
+		## Run the query
+			set -f
+			unset resultSet
+			resultStr=$(sqlite3 $dbFile "$sqlStmt" 2>&1 | tr "\t" '|')
+			tmpStr="${resultStr%% *}"
+			if [[ $(tr '[:lower:]' '[:upper:]' <<< "${tmpStr:0:5}") == 'ERROR' ]]; then
+				msg="$FUNCNAME: Error reported from $dbType:\n\tFile: $dbFile\n\tSql: $sqlStmt\n\t$resultStr"
+				if [[ $(type -t 'Terminate') == function ]]; then
+					Terminate "$(ColorK "$myName").$msg"
+				else
+					echo "*Fatal Error* -- $msg"
+					exit -1
+				fi
+			fi
+			[[ $prev == 'on' ]] && set +f
+
+		## Write output to an array
+			unset resultSet
+			[[ $resultStr != '' ]] && IFS=$'\n' read -rd '' -a resultSet <<<"$resultStr"
+			[[ $prev == 'on' ]] && set +f
+
+		return 0
+
+
+		return 0
+	} ##RunSqlite
+	export -f RunSqlite
+
+	#==================================================================================================
 	function GD {
 		[[ $DEBUG != true ]] && return 0
 		[[ -z $stdout ]] && stdout=/dev/tty
@@ -532,20 +588,7 @@ prtStatus "parse args"
 		## Get load data for this script from the scripts table
 			unset realCallName lib setSemaphore waitOn
 			sqlStmt="select exec,lib,setSemaphore,waitOn from $scriptsTable where name =\"$callPgmName\" "
-RunSql $sqlStmt
-resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString")
-dump resultString
-unset resultString
-
-
 			RunMySql $sqlStmt
-
-resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString")
-dump resultString
-unset resultString
-
-Pause
-
 			if [[ ${#resultSet[0]} -gt 0 ]]; then
 			 	resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString")
 				realCallName="$(cut -d'|' -f1 <<< "$resultString")"
@@ -642,3 +685,4 @@ Pause
 ## Wed Dec 28 15:31:05 CST 2016 - dscudiero - Added global function RunMySql
 ## Wed Dec 28 15:58:14 CST 2016 - dscudiero - Update RunMySql function to write out to resultSet array
 ## Thu Dec 29 08:07:14 CST 2016 - dscudiero - Switch to use java RunMySql
+## Thu Dec 29 10:14:36 CST 2016 - dscudiero - Add RunSqlite function
