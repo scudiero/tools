@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.86 # -- dscudiero -- 12/28/2016 @ 10:38:07.61
+version=2.0.87 # -- dscudiero -- 12/29/2016 @  8:17:11.92
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -18,6 +18,8 @@ originalArgStr="$*"
 	UsePythonVer='3'
 	notifyAddrs='dscudiero@leepfrog.com'
 	hostName=$(cut -d'.' -f1 <<< $(hostname))
+
+	[[ $HOME/bin ]] && export PATH="$HOME/bin:$PATH"
 
 	export TOOLSPATH='/steamboat/leepfrog/docs/tools'
 	[[ -d '/steamboat/leepfrog/docs/toolsNew' ]] && export TOOLSPATH='/steamboat/leepfrog/docs/toolsNew'
@@ -89,4 +91,4 @@ originalArgStr="$*"
 	fi
 
 #=======================================================================================================================
-exit 0
+exit 0## Thu Dec 29 08:18:05 CST 2016 - dscudiero - General syncing of dev to prod
