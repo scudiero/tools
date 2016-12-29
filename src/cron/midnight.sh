@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.145 # -- dscudiero -- 12/27/2016 @ 16:22:18.70
+version=1.21.147 # -- dscudiero -- 12/29/2016 @ 10:18:32.11
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -53,8 +53,8 @@ function CheckClientCount {
 
 	## Get number of clients in transactional
 	SetFileExpansion 'off'
-	sql="select count(*) from clients where is_active=\"Y\""
-	RunSql 'sqlite' "$contactsSqliteFile" $sql
+	sqlStmt="select count(*) from clients where is_active=\"Y\""
+	RunSqlite "$contactsSqliteFile" $sqlStmt
 	if [[ ${#resultSet[@]} -le 0 ]]; then
 		Msg2 $T "Could not retrieve clients data from '$contactsSqliteFile'"
 	else
@@ -62,8 +62,8 @@ function CheckClientCount {
 	fi
 dump tCount
 	## Get number of clients in warehouse
-	sql="select count(*) from $clientInfoTable where recordstatus=\"A\""
-	RunSql 'mysql' $sql
+	sqlStmt="select count(*) from $clientInfoTable where recordstatus=\"A\""
+	RunMySql $sqlStmt
 	if [[ ${#resultSet[@]} -le 0 ]]; then
 		Msg2 $T "Could not retrieve clients count data from '$warehouseDb.$clientInfoTable'"
 	else
@@ -71,8 +71,8 @@ dump tCount
 	fi
 dump wCount
 	## Get number of clients on the ignore list
-	sql="select ignoreList from $scriptsTable where name=\"buildClientInfoTable\""
-	RunSql 'mysql' $sql
+	sqlStmt="select ignoreList from $scriptsTable where name=\"buildClientInfoTable\""
+	RunMySql $sqlStmt
 	if [[ ${#resultSet[@]} -le 0 ]]; then
 		Msg2 $T "Could not retrieve clients count data from '$warehouseDb.$clientInfoTable'"
 	else
@@ -94,10 +94,10 @@ dump numIgnore tcount
 function BuildEmployeeTable {
 	Msg2 $V3 "*** $FUNCNAME -- Starting ***"
 	sqlStmt="truncate $employeeTable"
-	RunSql 'mySql' $sqlStmt
+	RunMySql $sqlStmt
 	### Get the list of columns in the transactional employees table
 	sqlStmt="pragma table_info(employees)"
-	RunSql 'sqlite' "$contactsSqliteFile" $sqlStmt
+	RunSqlite "$contactsSqliteFile" $sqlStmt
 	unset transactionalFields transactionalColumns
 	for resultRec in "${resultSet[@]}"; do
 		transactionalColumns="$transactionalColumns,$(cut -d'|' -f2 <<< $resultRec)"
@@ -106,17 +106,9 @@ function BuildEmployeeTable {
 	transactionalColumns=${transactionalColumns:1}
 	transactionalFields=${transactionalFields:1}
 
-	### Get the list of columns in the warehouse employee table
-	#sqlStmt="select column_name from information_schema.columns where table_schema=\"$warehouseDb\" and table_name=\"$employeeTable\";"
-	#RunSql 'mysql' $sqlStmt
-	#for resultRec in "${resultSet[@]}"; do
-	#	warehouseFields="$transactionalFields,$resultRec"
-	#done
-	#warehouseFields=${warehouseFields:1}
-
 	### Get the transactonal values, loop through them and  write out the warehouse record
 	sqlStmt="select $transactionalColumns from employees where db_isactive = \"Y\" order  by db_employeekey"
-	RunSql 'sqlite' "$contactsSqliteFile" $sqlStmt
+	RunSql "$contactsSqliteFile" $sqlStmt
 	for resultRec in "${resultSet[@]}"; do
 		fieldCntr=1; unset valuesString
 		for field in $(tr ',' ' ' <<< $transactionalFields); do
@@ -129,7 +121,7 @@ function BuildEmployeeTable {
 		done
 		valuesString=${valuesString:1}
 		sqlStmt="insert into $employeeTable values($valuesString)"
-		RunSql 'mySql' $sqlStmt
+		RunMySql $sqlStmt
 	done
 
 	Msg2 $V3 "*** $FUNCNAME -- Completed ***"
@@ -141,17 +133,30 @@ function BuildCourseleafDataTable {
 	Msg2 $V3 "*** $FUNCNAME -- Starting ***"
 
 	## Clean out the existing data
-	sql="truncate $courseleafDataTable"
-	RunSql 'MySql' $sql
+	sqlStmt="truncate $courseleafDataTable"
+	RunMySql $sqlStmt
 
 	## Get Courseleaf component versions
 		components=($(find $gitRepoShadow -maxdepth 1 -mindepth 1 -type d -printf "%f "))
 		for component in "${components[@]}"; do
 			dirs=($(ls -c $gitRepoShadow/$component | ProtectedCall "grep -v master"))
 			[[ ${#dirs[@]} -gt 0 ]] && latest=${dirs[0]} || latest='master'
-			sql="insert into $courseleafDataTable values(NULL,\"$component\",NULL,\"$latest\",NOW(),\"$userName\")"
-			RunSql 'MySql' $sql
+			sqlStmt="insert into $courseleafDataTable values(NULL,\"$component\",NULL,\"$latest\",NOW(),\"$userName\")"
+			RunMySql $sqlStmt
 		done
+
+	## Get Courseleaf Reports versions
+		cwd=$(pwd)
+		cd "$courseleafReportsRoot"
+		SetFileExpansion 'on';
+		local reportsVersions=$(ls -d -t * 2> /dev/null | cut -d $'\n' -f1);
+		cd $courseleafReportsRoot/$reportsVersions
+		reportsVersions=$(ls -d -t * 2> /dev/null | cut -d $'\n' -f1);
+		reportsVersions=$(cut -d'.' -f1-3 <<< $reportsVersions)
+		SetFileExpansion
+		sqlStmt="insert into $courseleafDataTable values(NULL,\"reports\",NULL,\"$reportsVersions\",NOW(),\"$userName\")"
+		[[ -n $reportsVersions ]] && RunMySql $sqlStmt
+		cd "$cwd"
 
 	## Get Courseleaf cgi versions
 		cwd=$(pwd)
@@ -159,14 +164,14 @@ function BuildCourseleafDataTable {
 		for rhelDir in $(ls | grep '^rhel[0-9]$'); do
 			dirs=($(ls -c ./$rhelDir | ProtectedCall "grep -v prev_ver"))
 			[[ ${#dirs[@]} -gt 0 ]] && latest=${dirs[0]} || latest='master'
-			sql="insert into $courseleafDataTable values(NULL,\"courseleaf.cgi\",\"$rhelDir\",\"$latest\",NOW(),\"$userName\")"
-			RunSql 'MySql' $sql
+			sqlStmt="insert into $courseleafDataTable values(NULL,\"courseleaf.cgi\",\"$rhelDir\",\"$latest\",NOW(),\"$userName\")"
+			RunMySql $sqlStmt
 		done
 
 	## Rebuild the page
 		cwd=$(pwd)
 		cd /mnt/internal/site/stage/web/pagewiz
-		./pagewiz.cgi -r /support/courseleafData
+		$DOIT ./pagewiz.cgi -r /support/courseleafData
 		cd $cwd
 
 	Msg2 $V3 "*** $FUNCNAME -- Completed ***"
@@ -192,9 +197,9 @@ case "$hostName" in
 	mojave)
 			## Set a semaphore
 				sqlStmt="truncate $semaphoreInfoTable"
-				RunSql 'mysql' $sqlStmt
+				RunMySql $sqlStmt
 				sqlStmt="insert into $semaphoreInfoTable values(NULL,\"$myName\",NULL,NULL,NULL)"
-				RunSql 'mySql' $sqlStmt
+				RunMySql $sqlStmt
 
 				## Compare number of clients in the warehouse vs the transactional if more in transactional then runClientListReport=true
 					runClientListReport=$(CheckClientCount)
@@ -209,18 +214,18 @@ dump runClientListReport
 
 				## Truncate the tables
 					sqlStmt="truncate $clientInfoTable"
-					RunSql 'mysql' $sqlStmt
+					RunMySql $sqlStmt
 					sqlStmt="truncate $siteInfoTable"
-					RunSql 'mysql' $sqlStmt
+					RunMySql $sqlStmt
 					sqlStmt="truncate $siteAdminsTable"
-					RunSql 'mysql' $sqlStmt
+					RunMySql $sqlStmt
 
 				## Build the clientInfoTable
 					Call 'buildClientInfoTable' "$scriptArgs"
 
 			## Clear a semaphore
 				sqlStmt="delete from $semaphoreInfoTable where processName=\"$myName\""
-				RunSql 'mySql' $sqlStmt
+				RunMySql $sqlStmt
 
 			## Build siteinfotabe and siteadmins table
 				Call 'buildSiteInfoTable' "$scriptArgs"
@@ -323,7 +328,7 @@ dump runClientListReport
 			## Check semaphore, wait for truncate to be done on mojave
 				sqlStmt="select count(*) from $semaphoreInfoTable where processName=\"$myName\""
 				while true; do
-					RunSql 'mySql' $sqlStmt
+					RunMySql $sqlStmt
 					[[ ${resultSet[@]} -eq 0 ]] && break
 					sleep 30
 				done
@@ -345,3 +350,12 @@ return 0
 #=======================================================================================================================
 # Change Log
 #=======================================================================================================================
+## Thu Dec 29 12:00:02 CST 2016 - dscudiero - General syncing of dev to prod
+## Thu Dec 29 14:44:17 CST 2016 - dscudiero - Switch to use RunMySql
+## Thu Dec 29 15:26:23 CST 2016 - dscudiero - tsting
+## Thu Dec 29 15:34:20 CST 2016 - dscudiero - sdfdfsdf
+## Thu Dec 29 15:34:49 CST 2016 - dscudiero - x
+## Thu Dec 29 15:35:00 CST 2016 - dscudiero - sddf
+## Thu Dec 29 15:47:17 CST 2016 - dscudiero - testing
+## Thu Dec 29 15:48:03 CST 2016 - dscudiero - eweerer
+## Thu Dec 29 15:57:42 CST 2016 - dscudiero - Switch to use RunMySql
