@@ -1,6 +1,6 @@
 #!/bin/bash
 #=======================================================================================================================
-version=4.2.94 # -- dscudiero -- 12/19/2016 @  9:40:06.08
+version=4.2.95 # -- dscudiero -- 12/29/2016 @  8:22:55.37
 #=======================================================================================================================
 TrapSigs 'on'
 Import FindExecutable GetDefaultsData ParseArgsStd ParseArgs Hello RunSql Msg2 Call Goodbye SetSiteDirs GetCims RunCoureleafCgi
@@ -157,7 +157,6 @@ Hello
 				eval envDir=\$${env}Dir
 				[[ $envDir == '' ]] && continue
 				if [[ -d $envDir/web ]]; then
-					Msg2 "^$env ($envDir)"
 					eval "Call "$workerScriptFile" "$envDir"  $clientId $forkStr"
 					(( forkCntr+=1 ))
 					(( siteCntr+=1 ))
@@ -238,3 +237,4 @@ Hello
 ## Tue Aug  9 07:20:04 CDT 2016 - dscudiero - Fix problem where table is truncated if a single client is specified
 ## Mon Aug 22 08:59:10 CDT 2016 - dscudiero - Switch to use mutt for email
 ## Tue Oct 11 07:59:27 CDT 2016 - dscudiero - Tweak messaging
+## Thu Dec 29 14:03:14 CST 2016 - dscudiero - switch to use RunMySql
