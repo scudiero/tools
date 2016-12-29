@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.84 # -- dscudiero -- 12/28/2016 @ 11:14:53.96
+version=1.1.85 # -- dscudiero -- 12/29/2016 @  8:22:51.92
 #==================================================================================================
 TrapSigs 'on'
 Import ParseCourseleafFile
@@ -49,6 +49,7 @@ dump -2 -n -t siteDir share shareType client env clientId
 # Main
 #===================================================================================================
 [[ $DOIT != '' || $informationOnlyMode == true ]] && echo
+Msg2 "^$env ($siteDir)"
 
 ## Insert the initial record to get the siteId set
 	fields="siteId,name,clientId,env,host,share,redhatVer,createdOn,createdBy"
@@ -340,3 +341,4 @@ return 0
 ## Thu Oct  6 16:39:54 CDT 2016 - dscudiero - Set dbAcc level to Update for db writes
 ## Thu Oct  6 16:59:20 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Fri Oct  7 08:00:28 CDT 2016 - dscudiero - Take out the dbAcc switching logic, moved to framework RunSql
+## Thu Dec 29 15:58:23 CST 2016 - dscudiero - Switch to use RunMySql
