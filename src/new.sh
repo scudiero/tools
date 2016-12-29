@@ -1,6 +1,6 @@
 #!/bin/bash
 #===================================================================================================
-version=1.2.18 # -- dscudiero -- 12/14/2016 @ 11:28:12.96
+version=1.2.19 # -- dscudiero -- 12/29/2016 @ 16:44:24.69
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -232,7 +232,7 @@ function NewDefault {
 	Prompt 'host' "Please enter which Hosts's the value applies to" 'build5,build7,mojave,any' 'any' ; host=$(Lower $host)
 	[[ $host == any ]] && host=NULL || host="\"$host\""
 
-	sqlStmt="insert into defaults values(NULL,$name,$value,$os,$host,NOW(),\"$userName\",NULL,NULL)"
+	sqlStmt="insert into defaults values(NULL,$name,$value,$os,$host,\"A\",NOW(),\"$userName\",NULL,NULL)"
 	RunSql 'mysql' $sqlStmt
 }
 
@@ -392,3 +392,4 @@ Msg2; Msg2 "$objType object created"
 ## Wed Oct 12 10:00:51 CDT 2016 - dscudiero - Updated to create new script link in the users local bin directory
 ## Wed Oct 12 12:33:41 CDT 2016 - dscudiero - Refactor new script
 ## Fri Oct 21 13:43:48 CDT 2016 - dscudiero - Added libs data for scripts
+## Thu Dec 29 16:50:57 CST 2016 - dscudiero - Updated creating a default to add the status column
