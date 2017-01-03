@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.26" # -- dscudiero -- 12/29/2016 @ 15:50:58.60
+version="1.2.27" # -- dscudiero -- 01/03/2017 @ 10:26:27.58
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -103,7 +103,7 @@ export DISPATCHER="$TOOLSPATH/dispatcher.sh"
 # Local Functions
 #==================================================================================================
 	function prtStatus {
-		[[ $batchMode == true ]] && return 0
+		[[ $batchMode == true || $quiet == true ]] && return 0
 		statusLine="${statusLine}${1} $(( $(date "+%s") - $sTime ))s"
 		>&3 echo -n -e "${statusLine}\r"
 		return 0
@@ -178,7 +178,7 @@ statusLine="\tDispatcher ($version): "
 	$GD -e "trueDir = '$trueDir'\nTOOLSPATH = '$TOOLSPATH'"
 
 ## Parse off my arguments
-	unset scriptArgs myVerbose useLocal semaphoreProcessing noLog noLogInDb batchMode useDevDb myVerbose
+	unset scriptArgs myVerbose useLocal semaphoreProcessing noLog noLogInDb batchMode useDevDb myVerbose quiet
 	[[ $USELOCAL == true ]] && $useLocal=true
 	while [[ $@ != '' ]]; do
 		if [[ ${1:0:2} == '--' ]]; then
@@ -191,6 +191,7 @@ statusLine="\tDispatcher ($version): "
 			[[ $myArg == 'nologindb' ]] && noLognDb=true
 			[[ $myArg == 'batchmode' ]] && batchMode=true && myQuiet=true
 			[[ $myArg == 'devdb' || $myArg == 'usedevdb' ]] && useDevDb=true
+			[[ $myArg == 'quiet' ]] && quiet=true
 		else
 		 	scriptArgs="$scriptArgs $1"
 		fi
@@ -345,6 +346,7 @@ prtStatus "parse args"
 	prtStatus ", initialize logFile"
 
 	## Call program function
+		[[ $batchMode != true && $quiet != true ]] && echo
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		$GD -e "\nCall $executeFile $scriptArgs\n"
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
@@ -378,3 +380,4 @@ prtStatus "parse args"
 ## Thu Dec 29 15:57:02 CST 2016 - dscudiero - Added quick return in RunMySql and RunSqlite if DOIT is off
 ## Tue Jan  3 07:34:27 CST 2017 - dscudiero - Add DumpArray to imports list
 ## Tue Jan  3 07:42:45 CST 2017 - dscudiero - add version to the status message
+## Tue Jan  3 10:27:03 CST 2017 - dscudiero - add Quiet option to disable status messaging
