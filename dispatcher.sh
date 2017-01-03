@@ -150,7 +150,7 @@ unset executeFile
 [[ "${BASH_SOURCE[0]}" != "${0}" ]] && calledViaSource=true || calledViaSource=false
 sTime=$(date "+%s")
 GD='GD echo'; #GD='echo'
-statusLine='\tDispatcher: '
+statusLine="\tDispatcher ($version): "
 ## Initialize file descriptor 3 to be stdout unless redirected by caller
 	if [[ -t 0 ]]; then # Im running interactive
 		if { ! >&3; } 2> /dev/null; then exec 3<> /dev/tty ; fi
@@ -377,3 +377,4 @@ prtStatus "parse args"
 ## Thu Dec 29 10:14:36 CST 2016 - dscudiero - Add RunSqlite function
 ## Thu Dec 29 15:57:02 CST 2016 - dscudiero - Added quick return in RunMySql and RunSqlite if DOIT is off
 ## Tue Jan  3 07:34:27 CST 2017 - dscudiero - Add DumpArray to imports list
+## Tue Jan  3 07:42:45 CST 2017 - dscudiero - add version to the status message
