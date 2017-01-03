@@ -250,7 +250,7 @@ prtStatus "parse args"
 
 ## Import thins we need to continue
 	sTime=$(date "+%s")
-	includes='Colors Msg2 Dump Here Quit Contains Lower Upper TitleCase Trim IsNumeric PushSettings PopSettings'
+	includes='Colors Msg2 Dump DumpArray Here Quit Contains Lower Upper TitleCase Trim IsNumeric PushSettings PopSettings'
 	includes="$includes MkTmpFile Pause ProtectedCall SetFileExpansion PadChar PrintBanner Alert"
 	includes="$includes TrapSigs SignalHandeler RunSql DbLog GetCallStack DisplayNews Help"
 	includes="$includes GetDefaultsData Call StartRemoteSession FindExecutable CheckRun CheckAuth CheckSemaphore Call"
@@ -376,3 +376,4 @@ prtStatus "parse args"
 ## Thu Dec 29 08:07:14 CST 2016 - dscudiero - Switch to use java RunMySql
 ## Thu Dec 29 10:14:36 CST 2016 - dscudiero - Add RunSqlite function
 ## Thu Dec 29 15:57:02 CST 2016 - dscudiero - Added quick return in RunMySql and RunSqlite if DOIT is off
+## Tue Jan  3 07:34:27 CST 2017 - dscudiero - Add DumpArray to imports list
