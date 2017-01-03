@@ -153,7 +153,7 @@ Msg2 "^$env ($siteDir)"
 	GetCims $siteDir
 	unset allCims
 	[[ $cimStr != '' ]] && cimStr=\"$(tr -d ' ' <<< $cimStr)\" || cimStr=NULL
-	[[ $verbose == true && $verboseLevel -gt 2 ]] && DumpArray 'cims' ${cims[@]}
+	dump -2 -t cimStr
 
 ## Get the cimVer
 	clverFile=$siteDir/web/courseleaf/cim/clver.txt
@@ -342,3 +342,4 @@ return 0
 ## Thu Oct  6 16:59:20 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Fri Oct  7 08:00:28 CDT 2016 - dscudiero - Take out the dbAcc switching logic, moved to framework RunSql
 ## Thu Dec 29 15:58:23 CST 2016 - dscudiero - Switch to use RunMySql
+## Tue Jan  3 07:43:05 CST 2017 - dscudiero - remove debug statement
