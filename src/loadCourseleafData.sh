@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.21 # -- dscudiero -- 12/27/2016 @ 11:02:08.38
+version=3.8.24 # -- dscudiero -- 01/03/2017 @ 12:27:37.76
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -506,10 +506,10 @@ scriptDescription="Load Courseleaf Data"
 			## Read/Parse the data rows into hash table
 			numPagesNotFound=0
 			while read line; do
-				[[ $line == '' ]] && continue
+				[[ -z $line ]] && continue
 				key=$(echo $line | cut -d '|' -f $pathCol)
 				dump -1 line -t key
-				[[ $key == '' ]] && WarningMsg 0 1 "Work Sheet record:\n^^$line\n\tDoes not contain any path/url data, skipping" && continue
+				[[ -z $key ]] && WarningMsg 0 1 "Work Sheet record:\n^^$line\n\tDoes not contain any path/url data, skipping" && continue
 				if [[ $key != '/' && ! -d $(dirname $srcDir/web/$key) ]]; then
 					[[ $ignoreMissingPages != true ]] && WarningMsg 0 1 "Page: '$key' Not found"
 					((numPagesNotFound += 1))
@@ -526,7 +526,6 @@ scriptDescription="Load Courseleaf Data"
 					workflowDataFromSpreadsheet["$key"]="$value"
 				fi
 			done < <(tail -n "+$startReadingAt" $tmpFile)
-
 			numWorkflowDataFromSpreadsheet=${#workflowDataFromSpreadsheet[@]}
 			Msg2 "^Retrieved $numWorkflowDataFromSpreadsheet records from the '$workbookSheet' sheet"
 			if [[ $verboseLevel -ge 1 ]]; then Msg2 "\tworkflowDataFromSpreadsheet:"; for i in "${!workflowDataFromSpreadsheet[@]}"; do printf "\t\t[$i] = >${workflowDataFromSpreadsheet[$i]}<\n"; done; fi
@@ -549,7 +548,6 @@ scriptDescription="Load Courseleaf Data"
 			## Copy step file to localsteps
 				cp -fP $srcStepFile $stepFile
 				chmod ug+w $stepFile
-
 			## Update the page data in courseleaf
 			numPagesUpdated=0
 			numMembersMappedToUIN=0
@@ -947,3 +945,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## Tue Oct 11 07:28:26 CDT 2016 - dscudiero - Fix message
 ## Tue Oct 11 07:56:05 CDT 2016 - dscudiero - Regress last change
 ## Mon Oct 17 16:17:26 CDT 2016 - dscudiero - Move the skipnull code into the script from the step
+## Tue Jan  3 13:44:34 CST 2017 - dscudiero - sync
