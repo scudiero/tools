@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.0.59" # -- dscudiero -- 01/03/2017 @ 15:18:21.70
+version="2.0.60" # -- dscudiero -- 01/03/2017 @ 16:11:50.19
 #=======================================================================================================================
 # Generic resolve file and call
 # Call scriptName ["$scriptArgs"]
@@ -97,7 +97,8 @@ function Call {
 			local myNameSave="$myName"; local myPathSave="$myPath"
 			myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 			myPath="$(dirname $executeFile)"
-			[[ $utility == true ]] && ($cmdStr) 2>&1 || ($cmdStr) 2>&1 | tee -a $logFile
+			#[[ $utility == true ]] && ($cmdStr) 2>&1 || ($cmdStr) 2>&1 | tee -a $logFile
+			($cmdStr) 2>&1
 			myName="$myNameSave" ; myPath="$myPathSave" ;
 			export PATH="$savePath"
 
@@ -111,3 +112,4 @@ export -f Call
 ## Wed Dec 28 15:46:17 CST 2016 - dscudiero - Pull the valid library types from the database
 ## Tue Jan  3 11:56:53 CST 2017 - dscudiero - Ad 'utility' option to not tee results of call to stdout
 ## Tue Jan  3 15:21:33 CST 2017 - dscudiero - Removed extra execution of cmdstr
+## Tue Jan  3 16:34:10 CST 2017 - dscudiero - remove io redirection from the actual call
