@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.27" # -- dscudiero -- 01/03/2017 @ 10:26:27.58
+version="1.2.28" # -- dscudiero -- 01/03/2017 @ 12:31:47.15
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -103,7 +103,7 @@ export DISPATCHER="$TOOLSPATH/dispatcher.sh"
 # Local Functions
 #==================================================================================================
 	function prtStatus {
-		[[ $batchMode == true || $quiet == true ]] && return 0
+		[[ $batchMode == true || $myQuiet == true ]] && return 0
 		statusLine="${statusLine}${1} $(( $(date "+%s") - $sTime ))s"
 		>&3 echo -n -e "${statusLine}\r"
 		return 0
@@ -178,7 +178,7 @@ statusLine="\tDispatcher ($version): "
 	$GD -e "trueDir = '$trueDir'\nTOOLSPATH = '$TOOLSPATH'"
 
 ## Parse off my arguments
-	unset scriptArgs myVerbose useLocal semaphoreProcessing noLog noLogInDb batchMode useDevDb myVerbose quiet
+	unset scriptArgs myVerbose useLocal semaphoreProcessing noLog noLogInDb batchMode useDevDb myVerbose myQuiet
 	[[ $USELOCAL == true ]] && $useLocal=true
 	while [[ $@ != '' ]]; do
 		if [[ ${1:0:2} == '--' ]]; then
@@ -191,7 +191,7 @@ statusLine="\tDispatcher ($version): "
 			[[ $myArg == 'nologindb' ]] && noLognDb=true
 			[[ $myArg == 'batchmode' ]] && batchMode=true && myQuiet=true
 			[[ $myArg == 'devdb' || $myArg == 'usedevdb' ]] && useDevDb=true
-			[[ $myArg == 'quiet' ]] && quiet=true
+			[[ $myArg == 'quiet' ]] && myQuiet=true
 		else
 		 	scriptArgs="$scriptArgs $1"
 		fi
@@ -346,7 +346,7 @@ prtStatus "parse args"
 	prtStatus ", initialize logFile"
 
 	## Call program function
-		[[ $batchMode != true && $quiet != true ]] && echo
+		[[ $batchMode != true && $myQuiet != true ]] && echo
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		$GD -e "\nCall $executeFile $scriptArgs\n"
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
@@ -381,3 +381,4 @@ prtStatus "parse args"
 ## Tue Jan  3 07:34:27 CST 2017 - dscudiero - Add DumpArray to imports list
 ## Tue Jan  3 07:42:45 CST 2017 - dscudiero - add version to the status message
 ## Tue Jan  3 10:27:03 CST 2017 - dscudiero - add Quiet option to disable status messaging
+## Tue Jan  3 12:32:29 CST 2017 - dscudiero - use myQuiet for my variable name
