@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.147 # -- dscudiero -- 12/29/2016 @ 10:18:32.11
+version=1.21.148 # -- dscudiero -- 01/03/2017 @  7:22:29.79
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -108,7 +108,7 @@ function BuildEmployeeTable {
 
 	### Get the transactonal values, loop through them and  write out the warehouse record
 	sqlStmt="select $transactionalColumns from employees where db_isactive = \"Y\" order  by db_employeekey"
-	RunSql "$contactsSqliteFile" $sqlStmt
+	RunSqlite "$contactsSqliteFile" $sqlStmt
 	for resultRec in "${resultSet[@]}"; do
 		fieldCntr=1; unset valuesString
 		for field in $(tr ',' ' ' <<< $transactionalFields); do
@@ -359,3 +359,4 @@ return 0
 ## Thu Dec 29 15:47:17 CST 2016 - dscudiero - testing
 ## Thu Dec 29 15:48:03 CST 2016 - dscudiero - eweerer
 ## Thu Dec 29 15:57:42 CST 2016 - dscudiero - Switch to use RunMySql
+## Tue Jan  3 07:24:32 CST 2017 - dscudiero - fix problem createing employee table
