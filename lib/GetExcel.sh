@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.0.57" # -- dscudiero -- 12/19/2016 @ 11:47:41.42
+version="2.0.58" # -- dscudiero -- 01/03/2017 @ 11:14:23.00
 #=======================================================================================================================
 # Retrieve data from a Excel xlsx spreadsheet
 # Usage: GetExcel <workBook> <workSheet>
@@ -16,7 +16,8 @@ function GetExcel {
 		local delimiter=${1-|}
 		local tmpFile=$(mkTmpFile)
 
-		Call 'getXlsx' 'std' 'python:py' "$workBook" "$workSheet" "$delimiter" > $tmpFile 2>&1;
+		Call 'getXlsx' 'utility' 'std' 'python:py' "$workBook" "$workSheet" "$delimiter" > $tmpFile 2>&1;
+
 		local grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
 		[[ $grepStr == '' ]] && grepStr=$(ProtectedCall "grep '*Error*' $tmpFile")
 		if [[ $grepStr != '' || $(tail -n 1 $tmpFile) == '-1' ]]; then
@@ -40,3 +41,4 @@ export -f GetExcel
 #=======================================================================================================================
 # Check-in Log
 #=======================================================================================================================
+## Tue Jan  3 11:57:15 CST 2017 - dscudiero - Add 'utility' to call of getXlsx
