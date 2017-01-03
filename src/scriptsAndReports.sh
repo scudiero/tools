@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.10.210 # -- dscudiero -- 12/20/2016 @  9:01:48.26
+version=3.11.0 # -- dscudiero -- 01/03/2017 @ 16:39:33.87
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -117,7 +117,6 @@ function ExecScript {
 		name=$(cut -d' ' -f1 <<< "$exec")
 		scriptArgs="$(cut -d' ' -f2- <<< "$exec") $scriptArgs"
 	fi
-
 	Call "$name" 'bash:sh' "$lib" "$scriptArgs"
 	return $?
 } #ExecScript
@@ -261,11 +260,11 @@ dump -1 -p client report emailAddrs myName ${myName}LastRunDate ${myName}LastRun
 #==================================================================================================
 ## Main
 #==================================================================================================
-## Check to see the user has a 'scripts' alias setup of they have TOOLSPATH/bin in their path,
-## if not then add one to their .bashrc file
+## Check to see the user has access to the 'scripts' program, if not then add one to their .bashrc file
 	if [[ $batchMode != true ]]; then
-		grepStr=$(ProtectedCall "which scripts 2> /dev/null")
-		if [[ $grepStr == '' ]]; then
+		{ ( which scripts ); } &> $tmpFile;
+		read line < $tmpFile
+		if [[ $(Contains "$line" 'which: no') == true ]]; then
 			Msg2
 			Msg2 "Do you wish to add an alias to the scripts command to your .bashrc file?"
 			Msg2 "This will allow you to access the scripts command in the future by simply entering 'scripts' on the Linux command line."
@@ -389,3 +388,4 @@ Goodbye 0
 ## Fri Oct 14 11:39:22 CDT 2016 - dscudiero - Refactored script calls
 ## Wed Oct 19 10:25:34 CDT 2016 - dscudiero - Make sure toolspath/bin is in the path before calling the script
 ## Wed Oct 19 10:32:39 CDT 2016 - dscudiero - Only add TOOLSPATH to the path if it is not already there
+## Tue Jan  3 16:40:07 CST 2017 - dscudiero - update comments
