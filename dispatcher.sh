@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.29" # -- dscudiero -- 01/03/2017 @ 16:25:26.26
+version="1.2.29" # -- dscudiero -- 01/03/2017 @ 16:28:53.63
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -103,7 +103,6 @@ export DISPATCHER="$TOOLSPATH/dispatcher.sh"
 # Local Functions
 #==================================================================================================
 	function prtStatus {
-return 0
 		[[ $batchMode == true || $myQuiet == true ]] && return 0
 		statusLine="${statusLine}${1} $(( $(date "+%s") - $sTime ))s"
 		>&3 echo -n -e "${statusLine}\r"
@@ -153,11 +152,11 @@ sTime=$(date "+%s")
 GD='GD echo'; #GD='echo'
 statusLine="\tDispatcher ($version): "
 ## Initialize file descriptor 3 to be stdout unless redirected by caller
-	# if [[ -t 0 ]]; then # Im running interactive
-	# 	if { ! >&3; } 2> /dev/null; then exec 3<> /dev/tty ; fi
-	# else # Running as a cron job
-	# 	exec 3<> /dev/null
-	# fi
+	if [[ -t 0 ]]; then # Im running interactive
+		if { ! >&3; } 2> /dev/null; then exec 3<> /dev/tty ; fi
+	else # Running as a cron job
+		exec 3<> /dev/null
+	fi
 
 # Who is the logged in user
 [[ $(which logname 2>&1) != '' ]] && userName=$(logname 2>&1) || userName=$LOGNAME
@@ -383,4 +382,4 @@ prtStatus "parse args"
 ## Tue Jan  3 07:42:45 CST 2017 - dscudiero - add version to the status message
 ## Tue Jan  3 10:27:03 CST 2017 - dscudiero - add Quiet option to disable status messaging
 ## Tue Jan  3 12:32:29 CST 2017 - dscudiero - use myQuiet for my variable name
-## Tue Jan  3 16:26:02 CST 2017 - dscudiero - Temporarialy remove status messaging
+## Tue Jan  3 16:29:41 CST 2017 - dscudiero - add status messaging back in
