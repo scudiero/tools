@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.148 # -- dscudiero -- 01/03/2017 @  7:22:29.79
+version=1.21.154 # -- dscudiero -- 01/04/2017 @  7:22:34.08
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -50,7 +50,6 @@ function CleanToolsBin {
 #=======================================================================================================================
 function CheckClientCount {
 	Msg2 $V3 "*** $FUNCNAME -- Starting ***"
-
 	## Get number of clients in transactional
 	SetFileExpansion 'off'
 	sqlStmt="select count(*) from clients where is_active=\"Y\""
@@ -60,7 +59,6 @@ function CheckClientCount {
 	else
 		tCount=${resultSet[0]}
 	fi
-dump tCount
 	## Get number of clients in warehouse
 	sqlStmt="select count(*) from $clientInfoTable where recordstatus=\"A\""
 	RunMySql $sqlStmt
@@ -69,7 +67,6 @@ dump tCount
 	else
 		wCount=${resultSet[0]}
 	fi
-dump wCount
 	## Get number of clients on the ignore list
 	sqlStmt="select ignoreList from $scriptsTable where name=\"buildClientInfoTable\""
 	RunMySql $sqlStmt
@@ -79,7 +76,6 @@ dump wCount
 		let numIgnore=$(grep -o "," <<< "${resultSet[0]}r" | wc -l)+1
 		let tCount=$tCount-$numIgnore
 	fi
-dump numIgnore tcount
 	SetFileExpansion
 	if [[ $tCount -gt $wCount ]]; then
 		Msg2 "$FUNCNAME: New clients found in the transactional clients table, running 'clientList' report..."
@@ -314,14 +310,15 @@ dump runClientListReport
 				[[ $runClientListReport == true ]] && Call 'reports' "clientList -quiet -email 'dscudiero@leepfrog.com,sfrickson@leepfrog.com' $scriptArgs"
 
 			## Performance test
-				perfTest.sh
+				Msg2 "Running perfTest..."
+				Call perfTest
 				pwFile=$HOME/.pw2
 				pwRec=$(grep "^build7" $pwFile)
 				read -ra tokens <<< "$pwRec"
 				remoteUser=${tokens[1]}
 				remotePw=${tokens[2]}
 				remoteHost=${tokens[3]}
-				sshpass -p $remotePw ssh $remoteUser@$remoteHost perfTest.sh >/dev/null 2>&1
+				sshpass -p $remotePw ssh $remoteUser@$remoteHost $TOOLSPATH/src/perfTest.sh #>/dev/null 2>&1
 			;;
 	*) ## build5 and build7
 			sleep 30 ## Wait for process to start on mojave
@@ -345,6 +342,7 @@ esac
 #=======================================================================================================================
 ## Bye-bye
 [[ $fork == true ]] && wait
+Msg2 "\n$myName: Done\n"
 return 0
 
 #=======================================================================================================================
@@ -359,4 +357,5 @@ return 0
 ## Thu Dec 29 15:47:17 CST 2016 - dscudiero - testing
 ## Thu Dec 29 15:48:03 CST 2016 - dscudiero - eweerer
 ## Thu Dec 29 15:57:42 CST 2016 - dscudiero - Switch to use RunMySql
-## Tue Jan  3 07:24:32 CST 2017 - dscudiero - fix problem createing employee table
+## Tue Jan  3 07:24:32 CST 2017 - dscudiero - fix problem creating employee table
+## Wed Jan  4 07:24:06 CST 2017 - dscudiero - ake out debug statements, modify call to perfTest
