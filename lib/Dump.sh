@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.5" # -- dscudiero -- 11/07/2016 @ 14:16:13.70
+version="2.0.6" # -- dscudiero -- 01/04/2017 @ 12:24:57.44
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -18,6 +18,9 @@ function Dump {
 	local tabs=''
 	local dumpLogFile=$HOME/stdout.txt
 	local vName vVal prefix
+
+	PushSettings "$FUNCNAME"
+	set +xv # Turn off trace
 
 	writeIt() {
 		local writeItVar="$1"
@@ -82,7 +85,10 @@ function Dump {
 		[[ $quit == true ]] && Quit
 		[[ $pause == true ]] && Msg2 && Pause '*** Dump paused script execution, press enter to continue ***'
 
-		return 0
+
+	PopSettings "$FUNCNAME"
+	return 0
+
 } #Dump
 
 function dump { Dump $* ; }
@@ -93,3 +99,4 @@ export -f dump
 # Checkin Log
 #===================================================================================================
 
+## Wed Jan  4 12:25:20 CST 2017 - dscudiero - turn off tracing
