@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.7" # -- dscudiero -- 12/14/2016 @  8:18:12.92
+version="2.0.8" # -- dscudiero -- 01/04/2017 @ 11:33:10.17
 #===================================================================================================
 #
 #===================================================================================================
@@ -8,8 +8,8 @@ version="2.0.7" # -- dscudiero -- 12/14/2016 @  8:18:12.92
 # All rights reserved
 #===================================================================================================
 function PopSettings {
-	vSetting=$(set -o | grep verbose | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2)
-	xSetting=$(set -o | grep xtrace | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2)
+	#vSetting=$(set -o | grep verbose | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2)
+	#xSetting=$(set -o | grep xtrace | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2)
 	set +vx
 
 	local idx=${1:-N/A}
@@ -35,8 +35,8 @@ function PopSettings {
 		done
 		unset savedSettings[$i]
 	fi
-	[[ $vSetting == 'on' ]] && set -o verbose || set +o verbose
-	[[ $xSetting == 'on' ]] && set -o xtrace || set +o xtrace
+	#[[ $vSetting == 'on' ]] && set -o verbose || set +o verbose
+	#[[ $xSetting == 'on' ]] && set -o xtrace || set +o xtrace
 	return 0
 } #PopSettings
 export -f PopSettings
@@ -45,3 +45,4 @@ export -f PopSettings
 # Check-in Log
 #===================================================================================================
 
+## Wed Jan  4 12:25:36 CST 2017 - dscudiero - do not force tracing settings
