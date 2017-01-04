@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.0.60" # -- dscudiero -- 01/03/2017 @ 16:11:50.19
+# version="2.0.61" # -- dscudiero -- 01/04/2017 @ 13:36:17.38
 #=======================================================================================================================
 # Generic resolve file and call
 # Call scriptName ["$scriptArgs"]
@@ -113,3 +113,4 @@ export -f Call
 ## Tue Jan  3 11:56:53 CST 2017 - dscudiero - Ad 'utility' option to not tee results of call to stdout
 ## Tue Jan  3 15:21:33 CST 2017 - dscudiero - Removed extra execution of cmdstr
 ## Tue Jan  3 16:34:10 CST 2017 - dscudiero - remove io redirection from the actual call
+## Wed Jan  4 13:52:54 CST 2017 - dscudiero - General syncing of dev to prod
