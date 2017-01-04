@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.4" # -- dscudiero -- 11/07/2016 @ 14:47:30.11
+# version="2.0.5" # -- dscudiero -- 01/04/2017 @ 13:48:08.24
 #===================================================================================================
 # Display a selection menue
 # SelectMenuNew <MenueItemsArrayName> <returnVariableName> <Prompt text>
@@ -117,3 +117,4 @@ export -f SelectMenuNew
 # Check-in Log
 #===================================================================================================
 
+## Wed Jan  4 13:54:23 CST 2017 - dscudiero - General syncing of dev to prod
