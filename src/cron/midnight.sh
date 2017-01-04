@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.154 # -- dscudiero -- 01/04/2017 @  7:22:34.08
+version=1.21.155 # -- dscudiero -- 01/04/2017 @ 16:44:25.27
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -160,9 +160,15 @@ function BuildCourseleafDataTable {
 		for rhelDir in $(ls | grep '^rhel[0-9]$'); do
 			dirs=($(ls -c ./$rhelDir | ProtectedCall "grep -v prev_ver"))
 			[[ ${#dirs[@]} -gt 0 ]] && latest=${dirs[0]} || latest='master'
-			sqlStmt="insert into $courseleafDataTable values(NULL,\"courseleaf.cgi\",\"$rhelDir\",\"$latest\",NOW(),\"$userName\")"
+			if [[ $latest != 'master' ]]; then
+				cd $rhelDir/$latest
+				[[ -r ./courseleaf.log ]] && cgiVer=$(cat courseleaf.log | cut -d'|' -f5) || cgiVer=$latest
+				cd $cgisRoot
+			else
+				cgiVer=$latest
+			fi
+			sqlStmt="insert into $courseleafDataTable values(NULL,\"courseleaf.cgi\",\"$rhelDir\",\"$cgiVer\",NOW(),\"$userName\")"
 			RunMySql $sqlStmt
-		done
 
 	## Rebuild the page
 		cwd=$(pwd)
@@ -359,3 +365,4 @@ return 0
 ## Thu Dec 29 15:57:42 CST 2016 - dscudiero - Switch to use RunMySql
 ## Tue Jan  3 07:24:32 CST 2017 - dscudiero - fix problem creating employee table
 ## Wed Jan  4 07:24:06 CST 2017 - dscudiero - ake out debug statements, modify call to perfTest
+## Wed Jan  4 16:47:34 CST 2017 - dscudiero - Updated BuildCourseleafData table to reflect the cgi versions including the patch level
