@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.3" # -- dscudiero -- 11/07/2016 @ 14:45:39.08
+version="2.0.4" # -- dscudiero -- 01/04/2017 @ 12:49:01.09
 #===================================================================================================
 # Pause execution
 #===================================================================================================
@@ -16,13 +16,17 @@ function Pause {
 	fi
 
 	ans='junk'
+[[ $DEBUG == true ]] && Here P0 && dump ans
 	while [[ $ans != '' ]]; do
+[[ $DEBUG == true ]] && Here P1 && dump ans
 		unset ans; read ans; ans=$(Lower ${ans:0:1});
+[[ $DEBUG == true ]] && Here P2 && dump ans
 		[[ "$ans" == 'x' ]] && Goodbye 'quickquit'
 		[[ "$ans" == '?' ]] && echo -e "Stack trace:" && printf '\t%s\n' "${FUNCNAME[@]}"
 		[[ "$ans" == 'v' ]] && set -xv
 	done
 
+[[ $DEBUG == true ]] && Here P9 && dump ans
 	return 0
 } #Pause
 export -f Pause
@@ -30,3 +34,4 @@ export -f Pause
 #===================================================================================================
 # Check-in Log
 #===================================================================================================
+## Wed Jan  4 12:52:21 CST 2017 - dscudiero - Added debug code
