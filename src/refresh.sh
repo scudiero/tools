@@ -1,9 +1,10 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.79 # -- dscudiero -- 12/14/2016 @ 11:29:23.34
+version=1.3.83 # -- dscudiero -- 01/04/2017 @  9:57:57.44
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
+imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
+imports="$imports SelectMenu CopyFileWithCheck BackupCourseleafFile WriteChangelogEntry"
 Import "$imports"
 originalArgStr="$*"
 scriptDescription="Refresh courseleaf components - dispatcher"
@@ -337,3 +338,4 @@ Goodbye 0
 ## Mon Oct 17 07:51:17 CDT 2016 - dscudiero - add testworkflow.html to refresh core workflow files
 ## Mon Oct 17 11:32:07 CDT 2016 - dscudiero - Updated to reflect new name for courseleafPatch
 ## Tue Oct 18 11:07:04 CDT 2016 - dscudiero - Fix problem loging changes to changelog.txt in core workflow files
+## Wed Jan  4 10:29:52 CST 2017 - dscudiero - add missing items to imports
