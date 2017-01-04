@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.21" # -- dscudiero -- 01/04/2017 @ 13:04:57.56
+# version="2.0.22" # -- dscudiero -- 01/04/2017 @ 13:32:53.06
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -53,3 +53,4 @@ export -f Hello
 
 ## Wed Jan  4 11:17:57 CST 2017 - dscudiero - If verboseLevel is 99 then set -xv
 ## Wed Jan  4 13:05:34 CST 2017 - dscudiero - change debug levels
+## Wed Jan  4 13:34:00 CST 2017 - dscudiero - comment out the 'version=' line
