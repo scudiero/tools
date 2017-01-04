@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.7" # -- dscudiero -- 11/29/2016 @ 13:40:17.14
+# version="2.0.8" # -- dscudiero -- 01/04/2017 @ 13:46:12.78
 #===================================================================================================
 # Setup the execution environment for a secondary interpreter
 # SetupInterpreterExecutionEnv [interpreter|python] [interpreterVer]
@@ -72,3 +72,4 @@ export -f InitializeInterpreterRuntime
 # Check-in Log
 #===================================================================================================
 
+## Wed Jan  4 13:53:47 CST 2017 - dscudiero - General syncing of dev to prod
