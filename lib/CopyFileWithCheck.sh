@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.4" # -- dscudiero -- 11/07/2016 @ 14:30:49.57
+# version="2.0.5" # -- dscudiero -- 01/04/2017 @ 13:37:59.71
 #===================================================================================================
 # Copy a file only if files are diffeent
 # copyIfDifferent <srcFile> <tgtFile> <backup {true:false}>
@@ -37,3 +37,4 @@ export -f CopyFileWithCheck
 # Check in Log
 #===================================================================================================
 
+## Wed Jan  4 13:53:10 CST 2017 - dscudiero - General syncing of dev to prod
