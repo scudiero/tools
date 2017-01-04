@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.2" # -- dscudiero -- 11/07/2016 @ 14:45:21.22
+# version="2.0.3" # -- dscudiero -- 01/04/2017 @ 13:43:54.97
 #===================================================================================================
 # Parse a courseleaf client file returns <clientName> <clientEnv> <clientRoot> <fileEnd>
 # clientRoot is everything up to the 'web' directory.  e.g. '/mnt/rainier/uww/next' or
@@ -44,3 +44,4 @@ export -f ParseCourseleafFile
 #===================================================================================================
 # Check-in Log
 #===================================================================================================
+## Wed Jan  4 13:54:05 CST 2017 - dscudiero - General syncing of dev to prod
