@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.5" # -- dscudiero -- 11/29/2016 @ 12:47:55.86
+# version="2.0.6" # -- dscudiero -- 01/04/2017 @ 13:52:01.68
 #===================================================================================================
 # Display a selection menue of files in a directory that match a filter
 # SelectFile <dir> <returnVariableName> <filter> <Prompt text>
@@ -63,3 +63,4 @@ export -f SelectFile
 # Check-in Log
 #===================================================================================================
 
+## Wed Jan  4 13:54:19 CST 2017 - dscudiero - General syncing of dev to prod
