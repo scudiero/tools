@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.5" # -- dscudiero -- 11/07/2016 @ 14:48:15.05
+# version="2.0.6" # -- dscudiero -- 01/04/2017 @ 13:49:00.55
 #===================================================================================================
 # Set Directories based on the current hostName name and school name
 # Sets globals: devDir, nextDir, previewDir, publicDir, upgradeDir
@@ -81,3 +81,4 @@ export -f SetSiteDirs
 # Check-in Log
 #===================================================================================================
 
+## Wed Jan  4 13:54:27 CST 2017 - dscudiero - General syncing of dev to prod
