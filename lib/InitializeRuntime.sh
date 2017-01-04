@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.61" # -- dscudiero -- 01/04/2017 @ 13:44:08.26
+# version="2.0.64" # -- dscudiero -- 01/04/2017 @ 15:29:00.13
 #===================================================================================================
 # Initialize the tools runtime environment
 #===================================================================================================
@@ -21,7 +21,8 @@ unset helpSet helpNotes warningMsgs errorMsgs summaryMsgs myRealPath myRealName 
 ## Make sure we have avalue for TERM
 [[ $TERM == '' ]] && export TERM=xterm
 shopt -s checkwinsize
-set +e  # Turn OFF Exit immediately
+set -e  # Turn ON Exit immediately
+#set +e  # Turn OFF Exit immediately
 
 #echo "In framework. indentLevel = >$indentLevel<"
 [[ $indentLevel == '' ]] && indentLevel=0 && export indentLevel=$indentLevel
@@ -119,3 +120,4 @@ GD echo -e "\n=== Stopping InitializeRuntime ===================================
 #===================================================================================================
 ## Thu Dec 29 07:04:46 CST 2016 - dscudiero - Removed the CLASSPATH setting code
 ## Wed Jan  4 13:53:49 CST 2017 - dscudiero - General syncing of dev to prod
+## Wed Jan  4 15:29:42 CST 2017 - dscudiero - Turn on error exit by default
