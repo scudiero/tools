@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.12 # -- dscudiero -- 01/04/2017 @ 13:28:59.36
+version=3.11.26 # -- dscudiero -- 01/04/2017 @ 15:33:16.07
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -254,7 +254,6 @@ Hello
 [[ $mode == 'scripts' && $client != '' ]] && Init 'getClient'
 #[[ $mode == 'reports' && $client != '' ]] && report="$client"
 
-[[ $DEBUG == true ]] && set -v
 dump -1 mode report script originalArgStr itemType itemTypeCap table
 dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDate
 
@@ -263,9 +262,13 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 #==================================================================================================
 ## Check to see the user has access to the 'scripts' program, if not then add one to their .bashrc file
 	if [[ $batchMode != true ]]; then
-		{ ( which scripts ); } &> $tmpFile;
-		read line < $tmpFile
-		if [[ $(Contains "$line" 'which: no') == true ]]; then
+		PushSettings "$myName"
+		previousTrapERR=$(trap -p ERR | cut -d ' ' -f3-) ; trap - ERR ; set +e
+		grep -q 'alias scripts="$TOOLSPATH/bin/scripts"' $HOME/.bashrc ; rc=$?
+		[[ $previousTrapERR != '' ]] && eval "trap $previousTrapERR"
+		PopSettings "$myName"
+
+		if [[ $rc -gt 0 ]]; then
 			Msg2
 			Msg2 "Do you wish to add an alias to the scripts command to your .bashrc file?"
 			Msg2 "This will allow you to access the scripts command in the future by simply entering 'scripts' on the Linux command line."
@@ -396,3 +399,4 @@ Goodbye 0
 ## Wed Jan  4 13:16:25 CST 2017 - dscudiero - General syncing of dev to prod
 ## Wed Jan  4 13:27:02 CST 2017 - dscudiero - General syncing of dev to prod
 ## Wed Jan  4 13:29:24 CST 2017 - dscudiero - General syncing of dev to prod
+## Wed Jan  4 15:43:54 CST 2017 - dscudiero - Fix problem when checking to see if the user has a scripts alias in their .bashrc file
