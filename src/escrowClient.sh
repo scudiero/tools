@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.39 # -- dscudiero -- 12/14/2016 @ 11:26:18.31
+version=1.0.40 # -- dscudiero -- 01/04/2017 @ 16:27:03.12
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -61,10 +61,13 @@ Msg2 "Tarring directories: $(echo $dirsToTar | tr ' ' ','), process takes quite 
 
 set +f
 $DOIT tar -cJf $tarFile $dirsToTar; rc=$?
-rc=$?; [[ $rc -ne 0 ]] && Msg "T Process returned a non-zero return code ($rc), Please review messages" && Msg
+rc=$?; [[ $rc -ne 0 ]] && Terminate "Process returned a non-zero return code ($rc), Please review messages"
+chown leepfrog $tarFile
+chmod 669 $tarFile
 Msg2 "\nEscrow file generated at: $tarFile"
 
 #==================================================================================================
 ## Done
 #==================================================================================================
 Goodbye 0 'alert'
+## Wed Jan  4 16:27:32 CST 2017 - dscudiero - Set file ownership and permissions on the tar files
