@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.20" # -- dscudiero -- 01/04/2017 @ 11:16:34.92
+version="2.0.21" # -- dscudiero -- 01/04/2017 @ 13:04:57.56
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -41,7 +41,7 @@ function Hello {
 		DisplayNews
 
 	## If verbose level is 99 then show everything
-		[[ $verboseLevel -eq 99 ]] && set -xv
+		[[ $verboseLevel -eq 99 ]] && set -v
 
 	return 0
 } #Hello
@@ -52,3 +52,4 @@ export -f Hello
 #===================================================================================================
 
 ## Wed Jan  4 11:17:57 CST 2017 - dscudiero - If verboseLevel is 99 then set -xv
+## Wed Jan  4 13:05:34 CST 2017 - dscudiero - change debug levels
