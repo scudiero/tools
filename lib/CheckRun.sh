@@ -2,7 +2,7 @@
 
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.5" # -- dscudiero -- 11/07/2016 @ 14:27:34.46
+# version="2.0.6" # -- dscudiero -- 01/04/2017 @ 13:36:49.53
 #===================================================================================================
 ## Check to see if the current excution environment supports script execution
 ## Returns 1 in $? if user is authorized, otherwise it returns 0
@@ -74,3 +74,4 @@ export -f CheckRun
 # Checkin Log
 #===================================================================================================
 
+## Wed Jan  4 13:52:58 CST 2017 - dscudiero - General syncing of dev to prod
