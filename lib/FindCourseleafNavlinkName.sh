@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.5" # -- dscudiero -- 11/07/2016 @ 14:35:07.32
+# version="2.0.6" # -- dscudiero -- 01/04/2017 @ 13:38:35.41
 #===================================================================================================
 # Find the adminstration navlink in /courseleaf/index.tcf
 # FindCourseleafNavlinkName <siteDir>
@@ -26,3 +26,4 @@ export -f FindCourseleafNavlinkName
 # Check-in Log
 #===================================================================================================
 
+## Wed Jan  4 13:53:24 CST 2017 - dscudiero - General syncing of dev to prod
