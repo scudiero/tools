@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.7 # -- dscudiero -- 01/04/2017 @ 11:17:32.12
+version=3.11.8 # -- dscudiero -- 01/04/2017 @ 13:05:25.17
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -255,7 +255,7 @@ Hello
 [[ $mode == 'scripts' && $client != '' ]] && Init 'getClient'
 #[[ $mode == 'reports' && $client != '' ]] && report="$client"
 
-dump -1 -p client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDate
+dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDate
 
 #==================================================================================================
 ## Main
@@ -391,3 +391,4 @@ Goodbye 0
 ## Tue Jan  3 16:40:07 CST 2017 - dscudiero - update comments
 ## Wed Jan  4 10:29:40 CST 2017 - dscudiero - Add missing functions to imports
 ## Wed Jan  4 11:18:14 CST 2017 - dscudiero - Removed specific debug code
+## Wed Jan  4 13:05:56 CST 2017 - dscudiero - remove pause on debug statements
