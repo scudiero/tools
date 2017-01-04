@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.2 # -- dscudiero -- 01/04/2017 @ 10:28:51.98
+version=3.11.7 # -- dscudiero -- 01/04/2017 @ 11:17:32.12
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -58,7 +58,6 @@ function BuildMenuList {
 		fields="name,shortDescription,author,supported,edate"
 		unset $(echo $fields | tr ',' ' ')
 		sqlStmt="select $fields from $table where $whereClauseActive $whereClauseHost $whereClauseUser $whereClauseGroups order by name"
-		[[ $DEBUG == true ]] && dump -n sqlStmt -n
 		RunSql 'mysql' $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Sorry, you do not have access to any scripts.\n\tsqlStmt: $sqlStmt"
 
@@ -391,3 +390,4 @@ Goodbye 0
 ## Wed Oct 19 10:32:39 CDT 2016 - dscudiero - Only add TOOLSPATH to the path if it is not already there
 ## Tue Jan  3 16:40:07 CST 2017 - dscudiero - update comments
 ## Wed Jan  4 10:29:40 CST 2017 - dscudiero - Add missing functions to imports
+## Wed Jan  4 11:18:14 CST 2017 - dscudiero - Removed specific debug code
