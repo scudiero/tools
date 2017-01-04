@@ -2,7 +2,7 @@
 
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.5" # -- dscudiero -- 11/07/2016 @ 14:27:16.68
+# version="2.0.6" # -- dscudiero -- 01/04/2017 @ 13:36:35.62
 #===================================================================================================
 # Check to see if the logged user can run this script
 # Returns true if user is authorized, otherwise it returns a message
@@ -71,3 +71,4 @@ export -f CheckAuth
 # Checkin Log
 #===================================================================================================
 
+## Wed Jan  4 13:52:56 CST 2017 - dscudiero - General syncing of dev to prod
