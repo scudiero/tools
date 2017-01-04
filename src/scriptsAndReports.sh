@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.11 # -- dscudiero -- 01/04/2017 @ 13:26:37.52
+version=3.11.12 # -- dscudiero -- 01/04/2017 @ 13:28:59.36
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -240,8 +240,6 @@ mode=$(echo $1 | tr '[:upper:]' '[:lower:]')
 	fi
 
 noArgPromptList="_clearClientValue_"
-[[ $DEBUG == true ]] && set -v
-dump -1 mode report script originalArgStr itemType itemTypeCap table
 
 #===================================================================================================
 ## parse arguments
@@ -256,6 +254,8 @@ Hello
 [[ $mode == 'scripts' && $client != '' ]] && Init 'getClient'
 #[[ $mode == 'reports' && $client != '' ]] && report="$client"
 
+[[ $DEBUG == true ]] && set -v
+dump -1 mode report script originalArgStr itemType itemTypeCap table
 dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDate
 
 #==================================================================================================
@@ -395,3 +395,4 @@ Goodbye 0
 ## Wed Jan  4 13:05:56 CST 2017 - dscudiero - remove pause on debug statements
 ## Wed Jan  4 13:16:25 CST 2017 - dscudiero - General syncing of dev to prod
 ## Wed Jan  4 13:27:02 CST 2017 - dscudiero - General syncing of dev to prod
+## Wed Jan  4 13:29:24 CST 2017 - dscudiero - General syncing of dev to prod
