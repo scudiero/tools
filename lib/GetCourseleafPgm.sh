@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.4" # -- dscudiero -- 11/07/2016 @ 14:35:56.61
+# version="2.0.5" # -- dscudiero -- 01/04/2017 @ 13:39:26.43
 #===================================================================================================
 # find out what the courseleaf pgm is and its location
 # Expects to be run from a client root directory (i.e. in .../$client)
@@ -39,3 +39,4 @@ export -f  GetCourseleafPgm
 # Check-in Log
 #===================================================================================================
 
+## Wed Jan  4 13:53:32 CST 2017 - dscudiero - General syncing of dev to prod
