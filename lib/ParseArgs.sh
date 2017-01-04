@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.13" # -- dscudiero -- 12/06/2016 @ 10:20:07.08
+# version="2.0.14" # -- dscudiero -- 01/04/2017 @ 13:43:38.43
 #===================================================================================================
 # Parse an argumenst string driven by an control array that is passed in
 # argList+=(argFlag,minLen,type,scriptVariable,extraToken/exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
@@ -131,3 +131,4 @@ export -f ParseArgs
 #===================================================================================================
 # Check-in Log
 #===================================================================================================
+## Wed Jan  4 13:54:02 CST 2017 - dscudiero - General syncing of dev to prod
