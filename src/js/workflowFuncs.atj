@@ -83,8 +83,8 @@ wffuncs.IsNotNew = function(inval, wfrule) {
 //=================================================================================================
 // Import workflow helper functions (workflowLib.atj) -- imported from localsteps
 //=================================================================================================
-//wfLibName="/locallibs/workflowLib.atj"
-//%import %progdir%/locallibs/workflowLib.atj:atj;
+wfLibName="/locallibs/workflowLib.atj"
+%import %progdir%/locallibs/workflowLib.atj:atj;
 //=================================================================================================
 
 /*
