@@ -10,7 +10,7 @@ tcfview.onDataLoad = function(data, args) {
 
 ============================================================================================================================================================================
 print_debug('\ninval =' + inval + '\nwfrule =' + wfrule.toSource() + '\nargs =' + args.toSource() + '\n'  );
-print_debug('args.context = ' + args.context.toString() + '\n');	
+print_debug('args.context = ' + args.context.toString() + '\n');
 
 ============================================================================================================================================================================
 return [inval.replace(wfrule.regex,'')];
@@ -19,12 +19,12 @@ return [inval.replace(wfrule.ifregex,'')];
 ============================================================================================================================================================================
 //Loop through array using iterator
 for (var i=0,  tot=myArray.length; i < tot; i++) {
-  console.log(myArray[i]); 
+  console.log(myArray[i]);
 }
 
 ============================================================================================================================================================================
 //Loop through array using forEach
-resultSet.forEach(function(text) { 
+resultSet.forEach(function(text) {
 	print_debug('text = ' + text.toSource() + '\n');
 });
 
@@ -61,8 +61,8 @@ wffuncs.DisplayTCFValues = function(inval, wfrule, args) {
 		var subj=tcfdata.subject[0].code;
 	if ( typeof tcfdata.college != 'undefined' )
 		var col=tcfdata.college[0].code;
-	if ( typeof tcfdata.department != 'undefined' )	
-		var dept=tcfdata.department[0].code;		
+	if ( typeof tcfdata.department != 'undefined' )
+		var dept=tcfdata.department[0].code;
 	if ( typeof tcfdata.acad_level != 'undefined' )
 		var acadLevel=tcfdata.acad_level[0].code;
 	if ( typeof tcfdata.course_number != 'undefined' )
@@ -72,7 +72,7 @@ wffuncs.DisplayTCFValues = function(inval, wfrule, args) {
 	if (col != '') 			print_doc('<li> college = ' + col + '</li>');
 	if (dept != '') 		print_doc('<li> department = ' + dept + '</li>');
 	if (subj != '') 		print_doc('<li> subject = ' + subj + '</li>');
-	if (courseNum != '') 	print_doc('<li> courseNum = ' + courseNum + '</li>');		
+	if (courseNum != '') 	print_doc('<li> courseNum = ' + courseNum + '</li>');
 	if (acadLevel != '') 	print_doc('<li> acadLevel = ' + acadLevel + '</li>');
 	print_doc('</ul><hr>');
 
@@ -114,8 +114,8 @@ if (CheckChanged(diffdata,allowChangedFields,'any',true)) {
 	var sqlParms=[]
 	sqlParms.push(????);
 	sqlParms.push(????);
-	// Run Query 
-	var sql="SELECT DISTINCT path,dept FROM courseref WHERE code = ? AND dept <> ? AND dept <> ''" + pathClause;
+	// Run Query
+	var sqlStmt="SELECT DISTINCT path,dept FROM courseref WHERE code = ? AND dept <> ? AND dept <> ''" + pathClause;
 	var resultSet=dbquery("courseref", sqlStmt,sqlParms);
 	if(resultSet.length == 0) {
 		if (haveDebug) { Debug("\t *** No data returned from sql query: \n\t" +  sql); }
