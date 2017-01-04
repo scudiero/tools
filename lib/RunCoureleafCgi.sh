@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.5" # -- dscudiero -- 12/02/2016 @ 16:21:39.99
+# version="2.0.6" # -- dscudiero -- 01/04/2017 @ 13:51:37.28
 #===================================================================================================
 # Run a courseleaf.cgi command, check outpout
 # Courseleaf.cgi $LINENO <siteDir> <command string>
@@ -37,3 +37,4 @@ export -f RunCoureleafCgi
 # Check-in Log
 #===================================================================================================
 
+## Wed Jan  4 13:54:15 CST 2017 - dscudiero - General syncing of dev to prod
