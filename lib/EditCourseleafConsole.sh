@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.4" # -- dscudiero -- 11/07/2016 @ 14:34:10.60
+# version="2.0.5" # -- dscudiero -- 01/04/2017 @ 13:41:15.29
 #===================================================================================================
 # Insert a new line into the courseleaf console file
 # EditCourseleafConsole <action> <targetFile> <string>
@@ -93,3 +93,4 @@ export -f EditCourseleafConsole
 # Checkin Log
 #===================================================================================================
 
+## Wed Jan  4 13:53:21 CST 2017 - dscudiero - General syncing of dev to prod
