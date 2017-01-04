@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.0.58" # -- dscudiero -- 01/03/2017 @ 11:14:23.00
+# version="2.0.59" # -- dscudiero -- 01/04/2017 @ 13:39:45.97
 #=======================================================================================================================
 # Retrieve data from a Excel xlsx spreadsheet
 # Usage: GetExcel <workBook> <workSheet>
@@ -42,3 +42,4 @@ export -f GetExcel
 # Check-in Log
 #=======================================================================================================================
 ## Tue Jan  3 11:57:15 CST 2017 - dscudiero - Add 'utility' to call of getXlsx
+## Wed Jan  4 13:53:35 CST 2017 - dscudiero - General syncing of dev to prod
