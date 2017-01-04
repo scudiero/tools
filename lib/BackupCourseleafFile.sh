@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.4" # -- dscudiero -- 11/07/2016 @ 14:26:01.73
+# version="2.0.5" # -- dscudiero -- 01/04/2017 @ 13:35:52.22
 #===================================================================================================
 # Backup a courseleaf file, copy to the attic createing directories as necessary
 # Expects the variable 'client' to be set
@@ -37,3 +37,4 @@ export -f BackupCourseleafFile
 # Checkin Log
 #===================================================================================================
 
+## Wed Jan  4 13:52:50 CST 2017 - dscudiero - General syncing of dev to prod
