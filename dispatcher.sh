@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.35" # -- dscudiero -- 01/05/2017 @ 15:01:45.46
+version="1.2.36" # -- dscudiero -- 01/05/2017 @ 16:14:21.80
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -33,7 +33,9 @@ TOOLSPATH='/steamboat/leepfrog/docs/tools'
 #==================================================================================================
 	function prtStatus {
 		[[ $batchMode == true || $myQuiet == true ]] && return 0
-		statusLine="${statusLine}${1} $(( $(date "+%s") - $sTime ))s"
+		local elapTime=$(( $(date "+%s") - $sTime ))
+		[[ $elapTime -eq 0 ]] && elapTime=1
+		statusLine="${statusLine}${1} ${elapTime}s"
 		>&3 echo -n -e "${statusLine}\r"
 		return 0
 	}
@@ -322,3 +324,4 @@ prtStatus "parse args"
 ## Thu Jan  5 12:06:21 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Jan  5 12:23:20 CST 2017 - dscudiero - Check for DISPATCHER variable before setting
 ## Thu Jan  5 15:02:07 CST 2017 - dscudiero - remove RunMySql and RunSqlite
+## Thu Jan  5 16:15:23 CST 2017 - dscudiero - if status time is zero, display 1
