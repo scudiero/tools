@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.93 # -- dscudiero -- 12/29/2016 @ 12:01:13.86
+version=2.1.95 # -- dscudiero -- 01/05/2017 @ 14:46:38.11
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -11,7 +11,7 @@ version=2.1.93 # -- dscudiero -- 12/29/2016 @ 12:01:13.86
 # 12-18-15 -- dgs - New structure
 #=======================================================================================================================
 TrapSigs 'on'
-Import FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql Msg2 Call GetPW
+Import FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql2 Msg2 Call GetPW
 originalArgStr="$*"
 
 #=======================================================================================================================
@@ -90,7 +90,7 @@ function CheckMonitorFiles {
 	echo "set realname=\"File Monitor\"" > $tmpFile.2
 	## Get a list of currently defined monitoried files
 		sqlStmt="select file,userlist from monitorfiles where host=\"$hostName\""
-		RunMySql "$sqlStmt"
+		RunSql2 "$sqlStmt"
 		monitorRecs=("${resultSet[@]}")
 
 		for monitorRec in "${monitorRecs[@]}"; do
@@ -103,11 +103,11 @@ function CheckMonitorFiles {
 				#dump -t user
 				## Check to see if the file has changed since the last time we processed this user/file combo
 				sqlStmt="select idx from $newsInfoTable where object=\"$file\" and userName=\"$user\" and edate < $lastModTime"
-				RunMySql "$sqlStmt"
+				RunSql2 "$sqlStmt"
 				if [[ ${#resultSet[@]} -gt 0 ]]; then
 					## Update the checked time for this user/file combo
 					sqlStmt="update $newsInfoTable set date=NOW(),edate=\"$(date +%s)\" where idx=\"${resultSet[0]}\""
-					RunMySql "$sqlStmt"
+					RunSql2 "$sqlStmt"
 					## Add to this users associateive array
 					if [[ ${userNotifies[$user]+abc} ]]; then
 						userNotifies["$user"]="${userNotifies[$user]}|$file"
@@ -153,7 +153,7 @@ function BuildToolsAuthTable() {
 		if [[ ${#roles[@]} -gt 0 ]]; then
 			## Clear out db table
 				sqlStmt="truncate $authGroupsTable"
-				RunMySql "$sqlStmt"
+				RunSql2 "$sqlStmt"
 			## Insert auth records
 				i=0
 				for roleStr in "${roles[@]}"; do
@@ -163,7 +163,7 @@ function BuildToolsAuthTable() {
 					values="NULL,\"$roleCode\",\"$roleName\",\"$roleMembers\""
 					#dump -t -n roleStr -t roleCode roleName roleMembers values
 					sqlStmt="insert into $authGroupsTable values ($values)"
-					RunMySql "$sqlStmt"
+					RunSql2 "$sqlStmt"
 					(( i+=1 ))
 				done
 		else
@@ -203,4 +203,5 @@ return 0
 # Change Log
 #========================================================================================================================
 ## Thu Dec 29 11:51:43 CST 2016 - dscudiero - x
-## Thu Dec 29 12:01:46 CST 2016 - dscudiero - Switched to use the RunMySql java program
+## Thu Dec 29 12:01:46 CST 2016 - dscudiero - Switched to use the RunSql2 java program
+## Thu Jan  5 14:49:52 CST 2017 - dscudiero - Switch to use RunSql2
