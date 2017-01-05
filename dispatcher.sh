@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.29" # -- dscudiero -- 01/03/2017 @ 16:28:53.63
+version="1.2.31" # -- dscudiero -- 01/05/2017 @ 11:03:54.51
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -246,14 +246,14 @@ prtStatus "parse args"
 		[[ -z $sqlHostIP ]] && sqlHostIP=$(dig +short $mySqlHost.leepfrog.com)
 		[[ -n $sqlHostIP ]] && mySqlConnectString="-h $sqlHostIP -port=$mySqlPort -u $mySqlUser -p$mySqlPw $warehouseDb"
 	fi
-	[[ -z $mySqlConnectString ]] && echo && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
+	[[ -z $mySqlConnectString ]] && echo && echo "*Error* -- ($myName) Sorry, Insufficient information to set 'mySqlConnectString'" && exit -1
 	prtStatus ", find initFile"
 
 ## Import thins we need to continue
 	sTime=$(date "+%s")
 	includes='Colors Msg2 Dump DumpArray Here Quit Contains Lower Upper TitleCase Trim IsNumeric PushSettings PopSettings'
 	includes="$includes MkTmpFile Pause ProtectedCall SetFileExpansion PadChar PrintBanner Alert"
-	includes="$includes TrapSigs SignalHandeler RunSql DbLog GetCallStack DisplayNews Help"
+	includes="$includes TrapSigs SignalHandeler RunSql RunSql2 DbLog GetCallStack DisplayNews Help"
 	includes="$includes GetDefaultsData Call StartRemoteSession FindExecutable CheckRun CheckAuth CheckSemaphore Call"
 	Import "$includes"
 	#Import FindExecutable CheckRun CheckAuth CheckSemaphore Call
@@ -278,7 +278,7 @@ prtStatus "parse args"
 		## Get load data for this script from the scripts table
 			unset realCallName lib setSemaphore waitOn
 			sqlStmt="select exec,lib,setSemaphore,waitOn from $scriptsTable where name =\"$callPgmName\" "
-			RunMySql $sqlStmt
+			RunSql2 $sqlStmt
 			if [[ ${#resultSet[0]} -gt 0 ]]; then
 			 	resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString")
 				realCallName="$(cut -d'|' -f1 <<< "$resultString")"
@@ -383,3 +383,4 @@ prtStatus "parse args"
 ## Tue Jan  3 10:27:03 CST 2017 - dscudiero - add Quiet option to disable status messaging
 ## Tue Jan  3 12:32:29 CST 2017 - dscudiero - use myQuiet for my variable name
 ## Tue Jan  3 16:29:41 CST 2017 - dscudiero - add status messaging back in
+## Thu Jan  5 11:04:42 CST 2017 - dscudiero - Updated to use RunSql2
