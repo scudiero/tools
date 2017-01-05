@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.20 # -- dscudiero -- 12/14/2016 @ 11:32:29.07
+version=2.0.21 # -- dscudiero -- 01/05/2017 @ 14:22:04.74
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -32,7 +32,7 @@ Hello
 #==================================================================================================
 ## Load default settings
 GetDefaultsData 'buildSiteInfoTable'
-ignoreList="$scriptData1"
+ignoreList="${ignoreList##*ignoreShares:}" ; ignoreList="${ignoreList%% *}"
 
 ## DEV servers
 	unset newServers
@@ -114,3 +114,4 @@ Goodbye 0;
 ## Thu Oct  6 16:40:23 CDT 2016 - dscudiero - Set dbAcc level to Update for db writes
 ## Thu Oct  6 16:59:41 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Fri Oct  7 08:01:02 CDT 2016 - dscudiero - Take out the dbAcc switching logic, moved to framework RunSql
+## Thu Jan  5 14:50:53 CST 2017 - dscudiero - Fix problem setting the shares ignore list
