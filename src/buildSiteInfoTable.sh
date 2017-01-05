@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.2.107 # -- dscudiero -- 01/05/2017 @ 14:59:04.64
+version=4.2.109 # -- dscudiero -- 01/05/2017 @ 15:48:20.46
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -159,11 +159,13 @@ Msg2 "Table: $useSiteInfoTable"
 		dump -1 -n result -t client clientId devDir testDir nextDir currDir previewDir publicDir priorDir
 
 		## Remove any existing records for this client
-			sqlStmt="delete from $useSiteInfoTable where name like\"$client%\""
+			[[ -n $env ]] && andClause="and env=\"$env\"" || unset andClause
+			sqlStmt="delete from $useSiteInfoTable where name like\"$client%\" $andClause"
 			RunSql2 $sqlStmt
 
 		## Insert the record
-			for env in $(tr ',' ' ' <<< "$courseleafDevEnvs $courseleafProdEnvs"); do
+			[[ -n $env ]] && envList="$env" || envList="$courseleafDevEnvs $courseleafProdEnvs"
+			for env in $(tr ',' ' ' <<< "$envList"); do
 				[[ $env == 'pvt' ]] && continue
 				eval envDir=\$${env}Dir
 				[[ -z $envDir ]] && continue
@@ -250,3 +252,4 @@ Msg2 "Table: $useSiteInfoTable"
 ## Thu Dec 29 14:03:14 CST 2016 - dscudiero - switch to use RunMySql
 ## Thu Jan  5 13:40:29 CST 2017 - dscudiero - switch to RunSql2
 ## Thu Jan  5 14:59:40 CST 2017 - dscudiero - Switch to use RunSql2
+## Thu Jan  5 15:50:37 CST 2017 - dscudiero - Strip non-ascii chars from reportsVer, remove debug statements
