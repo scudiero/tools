@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.2" # -- dscudiero -- 01/04/2017 @ 13:39:04.45
+# version="2.0.3" # -- dscudiero -- 01/05/2017 @ 15:29:48.69
 #===================================================================================================
 # Get CIMs
 #===================================================================================================
@@ -47,7 +47,7 @@ function GetCims {
 		cimStr=${cimStr:0:${#cimStr}-2}
 	fi
 	#[[ $products == '' ]] && products='cim' || products="$products,cim"
-	[[ $verbose == true && $verboseLevel -ge 2 ]] && DumpArray 'cims' ${cims[@]} && dump cimStr
+	[[ $verbose == true && $verboseLevel -ge 2 ]] && dump cimStr
 
 	Msg2 $V3 "*** $FUNCNAME -- Completed ***"
 	return 0
@@ -59,3 +59,4 @@ export -f GetCims
 #===================================================================================================
 
 ## Wed Jan  4 13:53:29 CST 2017 - dscudiero - General syncing of dev to prod
+## Thu Jan  5 15:30:07 CST 2017 - dscudiero - modify debug messages
