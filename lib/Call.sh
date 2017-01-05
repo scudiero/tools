@@ -1,11 +1,17 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.0.61" # -- dscudiero -- 01/04/2017 @ 13:36:17.38
+# version="2.0.66" # -- dscudiero -- 01/05/2017 @  7:07:18.38
 #=======================================================================================================================
 # Generic resolve file and call
 # Call scriptName ["$scriptArgs"]
 # If passed in a full file name for scriptName, then just us it
+# scriptArgs parsed as follows:
+# 1) if first token = 'fork' then fork off the subshell task
+# 2) if first token is in the set {std,fast,full} then it is a searchMode specification (e.g. python:py)
+# 3) if first token of the form 'xxxx:xx' then it is a useTypes specification (e.g. python:py)
+# 4) if first token is in the set {cron,reports,features,patches,java} (from dispatcher.scriptData2) then it is a useLibs
+#	specification
 #=======================================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -14,10 +20,17 @@ function Call {
 		Import FindExecutable InitializeInterpreterRuntime Prompt VerifyPromptVal
 		local scriptName="$1"; shift
 		local scriptArgs="$*"
-		local searchMode useTypes useLibs executeFile executeAlias cmdStr token1 utility
+		local searchMode useTypes useLibs executeFile executeAlias cmdStr token1 utility fork
 
 		## If we were passed in a full file specification then just use it, otherwise find the executable
 		if [[ $(dirname $scriptName) == '.' ]]; then
+
+			## Is the first 'scriptArgs' token 'fork' if so then fork the called function
+				token1=$(cut -d ' ' -f1 <<< $scriptArgs)
+				if [[ $token1 == 'fork' ]]; then
+					shift; scriptArgs="$*"
+					fork=true
+				fi
 
 			## Is the first 'scriptArgs' token 'utility' if so then set utility flag (do not tee) and strip off
 				token1=$(cut -d ' ' -f1 <<< $scriptArgs)
@@ -26,7 +39,7 @@ function Call {
 					utility=true
 				fi
 
-			## Is the token of the form 'xxxx:xx' if so it is a type specification
+			## Is the token in the set {std,fast,full} if so it is a search specification
 				searchMode='std'
 				token1=$(cut -d ' ' -f1 <<< $scriptArgs)
 				if [[ $(Contains ',std,fast,full' ",$token1," ) == true ]]; then
@@ -34,7 +47,7 @@ function Call {
 					searchMode="$token1"
 				fi
 
-			## Is the first 'scriptArgs' token of the form 'xxxx:xx' if so it is a type specification
+			## Is the first 'scriptArgs' token of the form 'xxxx:xx' if so it is a useTypes specification
 				local useTypes='search'
 				token1=$(cut -d ' ' -f1 <<< $scriptArgs)
 				if [[ $(Contains "$token1" ':') == true ]]; then
@@ -98,7 +111,11 @@ function Call {
 			myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 			myPath="$(dirname $executeFile)"
 			#[[ $utility == true ]] && ($cmdStr) 2>&1 || ($cmdStr) 2>&1 | tee -a $logFile
-			($cmdStr) 2>&1
+			if [[ $fork == true ]]; then
+				($cmdStr) 2>&1 &
+			else
+				($cmdStr) 2>&1
+			fi
 			myName="$myNameSave" ; myPath="$myPathSave" ;
 			export PATH="$savePath"
 
@@ -114,3 +131,4 @@ export -f Call
 ## Tue Jan  3 15:21:33 CST 2017 - dscudiero - Removed extra execution of cmdstr
 ## Tue Jan  3 16:34:10 CST 2017 - dscudiero - remove io redirection from the actual call
 ## Wed Jan  4 13:52:54 CST 2017 - dscudiero - General syncing of dev to prod
+## Thu Jan  5 07:59:46 CST 2017 - dscudiero - Added 'fork' directive
