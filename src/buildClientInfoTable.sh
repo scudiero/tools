@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.80 # -- dscudiero -- 01/05/2017 @ 12:56:48.27
+version=2.3.82 # -- dscudiero -- 01/05/2017 @ 13:38:45.86
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -52,7 +52,7 @@ fi
 #=======================================================================================================================
 ParseArgsStd
 Hello
-
+}
 useClientInfoTable="${clientInfoTable}New"
 Msg2 "Database: $warehousedb"
 Msg2 "Table: $useClientInfoTable"
@@ -119,7 +119,7 @@ Msg2 "Table: $useClientInfoTable"
 ## Swap client tables
 	sqlStmt="select count{*) from ${clientInfoTable}New"
 	RunSql2
-	[[ $#resultSet[@]} -eq 0 ]] &&  Terminate "New clients table has zero rows, keeping original"
+	[[ ${#resultSet[@]} -eq 0 ]] &&  Terminate "New clients table has zero rows, keeping original"
 
 	sqlStmt="rename table $clientInfoTable to ${clientInfoTable}Bak"
 	RunSql2 $sqlStmt
@@ -142,3 +142,4 @@ Goodbye 0 'alert'
 ## Thu Jan  5 12:37:46 CST 2017 - dscudiero - refactored to create a new table, insert data and then rename if successful
 ## Thu Jan  5 12:53:22 CST 2017 - dscudiero - remove debug statements
 ## Thu Jan  5 12:56:56 CST 2017 - dscudiero - General syncing of dev to prod
+## Thu Jan  5 13:40:11 CST 2017 - dscudiero - removed debug code
