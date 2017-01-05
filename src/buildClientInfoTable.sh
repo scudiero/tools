@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.78 # -- dscudiero -- 01/05/2017 @ 12:35:32.40
+version=2.3.79 # -- dscudiero -- 01/05/2017 @ 12:52:53.86
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -53,7 +53,9 @@ fi
 ParseArgsStd
 Hello
 
-echo -e "\nHERE 0\n"
+useClientInfoTable="${clientInfoTable}New"
+Msg2 "Database: $warehousedb"
+Msg2 "Table: $useClientInfoTable"
 
 #=======================================================================================================================
 # Local Subs
@@ -62,29 +64,25 @@ echo -e "\nHERE 0\n"
 #=======================================================================================================================
 # Main
 #=======================================================================================================================
-## Get list of clients
+## Get list of clients from the transactional system
 	if [[ $client != '' ]]; then
 		clients+=($client);
 	else
 		sqlStmt="select clientcode from clients where is_active = \"Y\""
 		RunSql2 "$contactsSqliteFile" "$sqlStmt"
-		[[ ${#resultSet[@]} -eq 0 ]] && Msg2 $T "No records returned from clientcode query"
+		[[ ${#resultSet[@]} -eq 0 ]] && Terminate"No records returned from clientcode query"
 		for result in "${resultSet[@]}"; do
 			clients+=($result)
 		done
 	fi
 
-dump warehousedb
-Quit
-
 ## Create a temporary copy of the clients table, load new data to that table
 	sqlStmt="drop table if exists ${clientInfoTable}Bak"
 	RunSql2 $sqlStmt
-	sqlStmt="drop table if exists ${clientInfoTable}New"
+	sqlStmt="drop table if exists $useClientInfoTable"
 	RunSql2 $sqlStmt
-	sqlStmt="create table ${clientInfoTable}New like ${clientInfoTable}"
+	sqlStmt="create table $useClientInfoTable like ${clientInfoTable}"
 	RunSql2 $sqlStmt
-	useClientInfoTable="${clientInfoTable}New"
 
 ## Loop through clients
 	clientCntr=0
@@ -142,3 +140,4 @@ Goodbye 0 'alert'
 ## Mon Jun  6 13:27:36 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Tue Jul 12 07:10:42 CDT 2016 - dscudiero - Add override parameters to callPgm
 ## Thu Jan  5 12:37:46 CST 2017 - dscudiero - refactored to create a new table, insert data and then rename if successful
+## Thu Jan  5 12:53:22 CST 2017 - dscudiero - remove debug statements
