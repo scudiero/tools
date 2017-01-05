@@ -1,9 +1,13 @@
 #!/bin/bash
+## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.2.101 # -- dscudiero -- 01/05/2017 @ 13:39:16.62
+version=4.2.107 # -- dscudiero -- 01/05/2017 @ 14:59:04.64
 #=======================================================================================================================
 TrapSigs 'on'
-Import Hello Goodbye SetSiteDirs GetCims RunCoureleafCgi
+
+imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
+imports="$imports SetSiteDirs GetCims RunCoureleafCgi"
+Import "$imports"
 originalArgStr="$*"
 scriptDescription="Scratch build the warhouse 'sites' table"
 
@@ -130,7 +134,7 @@ ParseArgsStd
 Hello
 
 useSiteInfoTable="${siteInfoTable}"
-Msg2 "Database: $warehousedb"
+Msg2 "Database: $warehouseDb"
 Msg2 "Table: $useSiteInfoTable"
 
 #=======================================================================================================================
@@ -150,7 +154,7 @@ Msg2 "Table: $useSiteInfoTable"
 		client=$(cut -d'|' -f1 <<< $result)
 		clientId=$(cut -d'|' -f2 <<< $result)
 		SetSiteDirs
-		[[ $devDir == '' && $testDir == '' && $nextDir == '' && $currDir == '' && $priorDir == '' && $previewDir == '' && $publicDir == '' ]] && continue
+		[[ -z ${devDir}${testDir}${nextDir}${currDir}${priorDir}${previewDir}${publicDir} ]] && continue
 		[[ $batchMode != true ]] && Msg2 "Processing: $client -- $clientId ($cntr/$numClients)..."
 		dump -1 -n result -t client clientId devDir testDir nextDir currDir previewDir publicDir priorDir
 
@@ -162,7 +166,7 @@ Msg2 "Table: $useSiteInfoTable"
 			for env in $(tr ',' ' ' <<< "$courseleafDevEnvs $courseleafProdEnvs"); do
 				[[ $env == 'pvt' ]] && continue
 				eval envDir=\$${env}Dir
-				[[ $envDir == '' ]] && continue
+				[[ -z $envDir ]] && continue
 				if [[ -d $envDir/web ]]; then
 					Call "$workerScriptFile" "$forkStr" "$envDir" "$clientId"
 					(( forkCntr+=1 )) ; (( siteCntr+=1 ))
@@ -245,3 +249,4 @@ Msg2 "Table: $useSiteInfoTable"
 ## Tue Oct 11 07:59:27 CDT 2016 - dscudiero - Tweak messaging
 ## Thu Dec 29 14:03:14 CST 2016 - dscudiero - switch to use RunMySql
 ## Thu Jan  5 13:40:29 CST 2017 - dscudiero - switch to RunSql2
+## Thu Jan  5 14:59:40 CST 2017 - dscudiero - Switch to use RunSql2
