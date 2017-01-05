@@ -1,9 +1,9 @@
 #!/bin/bash
 #=======================================================================================================================
-version=4.2.95 # -- dscudiero -- 12/29/2016 @  8:22:55.37
+version=4.2.101 # -- dscudiero -- 01/05/2017 @ 13:39:16.62
 #=======================================================================================================================
 TrapSigs 'on'
-Import FindExecutable GetDefaultsData ParseArgsStd ParseArgs Hello RunSql Msg2 Call Goodbye SetSiteDirs GetCims RunCoureleafCgi
+Import Hello Goodbye SetSiteDirs GetCims RunCoureleafCgi
 originalArgStr="$*"
 scriptDescription="Scratch build the warhouse 'sites' table"
 
@@ -72,7 +72,7 @@ scriptDescription="Scratch build the warhouse 'sites' table"
 		local client=$1 clientId sqlStmt tempStr
 
 		sqlStmt="select idx from $clientInfoTable where name=\"$client\" "
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		if [[ ${#resultSet} -ne 0 ]]; then
 			clientId=${resultSet[0]}
 		else
@@ -85,7 +85,7 @@ scriptDescription="Scratch build the warhouse 'sites' table"
 				tempStr=$(echo $site -v | cut -d"-" -f1)
 			fi
 			sqlStmt="select idx from $clientInfoTable where name=\"$tempStr\" "
-			RunSql 'mysql' $sqlStmt
+			RunSql2 $sqlStmt
 			[[ ${#resultSet} -ne 0 ]] && clientId=${resultSet[0]} || clientId='NULL'
 		fi
 		echo $clientId
@@ -118,7 +118,9 @@ FindExecutable "$workerScript" 'std' 'bash:sh' ## Sets variable executeFile
 workerScriptFile="$executeFile"
 
 forkCntr=0; siteCntr=0; cntr=0;
-[[ $fork == true ]] && forkStr='&' || unset forkStr
+[[ $fork == true ]] && forkStr='fork' || unset forkStr
+
+[[ $testMode == true ]] && export warehousedb='warehouseDev'
 
 #=======================================================================================================================
 # Standard arg parsing and initialization
@@ -127,6 +129,10 @@ GetDefaultsData $myName
 ParseArgsStd
 Hello
 
+useSiteInfoTable="${siteInfoTable}"
+Msg2 "Database: $warehousedb"
+Msg2 "Table: $useSiteInfoTable"
+
 #=======================================================================================================================
 # Main
 #=======================================================================================================================
@@ -134,8 +140,9 @@ Hello
 	sqlStmt="select name,idx from clients where recordstatus='A'"
 	[[ $client != '' ]] && sqlStmt="$sqlStmt and name=\"$client\""
 	sqlStmt="$sqlStmt order by name"
-	RunSql $sqlStmt
+	RunSql2 $sqlStmt
 	numClients=${#resultSet[@]}
+	Msg2 "Found $numClients clients..."
 
 ## Loop through the results
 	for result in ${resultSet[@]}; do
@@ -144,12 +151,12 @@ Hello
 		clientId=$(cut -d'|' -f2 <<< $result)
 		SetSiteDirs
 		[[ $devDir == '' && $testDir == '' && $nextDir == '' && $currDir == '' && $priorDir == '' && $previewDir == '' && $publicDir == '' ]] && continue
-		Msg2 "Processing: $client -- $clientId ($cntr/$numClients)..."
+		[[ $batchMode != true ]] && Msg2 "Processing: $client -- $clientId ($cntr/$numClients)..."
 		dump -1 -n result -t client clientId devDir testDir nextDir currDir previewDir publicDir priorDir
 
 		## Remove any existing records for this client
-			sqlStmt="delete from $siteInfoTable where name like\"$client%\""
-			RunSql 'mysql' $sqlStmt
+			sqlStmt="delete from $useSiteInfoTable where name like\"$client%\""
+			RunSql2 $sqlStmt
 
 		## Insert the record
 			for env in $(tr ',' ' ' <<< "$courseleafDevEnvs $courseleafProdEnvs"); do
@@ -157,9 +164,8 @@ Hello
 				eval envDir=\$${env}Dir
 				[[ $envDir == '' ]] && continue
 				if [[ -d $envDir/web ]]; then
-					eval "Call "$workerScriptFile" "$envDir"  $clientId $forkStr"
-					(( forkCntr+=1 ))
-					(( siteCntr+=1 ))
+					Call "$workerScriptFile" "$forkStr" "$envDir" "$clientId"
+					(( forkCntr+=1 )) ; (( siteCntr+=1 ))
 				fi
 				if [[ $fork == true && $((forkCntr%$maxForkedProcesses)) -eq 0 ]]; then
 					[[ $batchMode != true ]] && Msg2 "^Waiting on forked processes, processed $forkCntr of $processedSiteCntr ...\n"
@@ -184,7 +190,7 @@ Hello
 	Msg2 "Processed $siteCntr Courseleaf site directories"
 	Msg2
 	sqlStmt="select count(*) from $siteInfoTable where host=\"$hostName\"";
-	RunSql 'mysql' "$sqlStmt"
+	RunSql2 "$sqlStmt"
 	if [[ ${resultSet[0]} -eq 0 ]]; then
 		Error "No records were inserted into in the $warehouseDb.$siteInfoTable table on host '$hostName'"
 		sendMail=true
@@ -238,3 +244,4 @@ Hello
 ## Mon Aug 22 08:59:10 CDT 2016 - dscudiero - Switch to use mutt for email
 ## Tue Oct 11 07:59:27 CDT 2016 - dscudiero - Tweak messaging
 ## Thu Dec 29 14:03:14 CST 2016 - dscudiero - switch to use RunMySql
+## Thu Jan  5 13:40:29 CST 2017 - dscudiero - switch to RunSql2
