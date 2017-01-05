@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.34" # -- dscudiero -- 01/05/2017 @ 12:22:40.81
+version="1.2.35" # -- dscudiero -- 01/05/2017 @ 15:01:45.46
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -18,77 +18,6 @@ TOOLSPATH='/steamboat/leepfrog/docs/tools'
 #==================================================================================================
 # Global Functions
 #==================================================================================================
-	#==============================================================================================
-	function RunMySql {
-		local sqlStmt="$*" ; [[ ${sqlStmt:${#sqlStmt}:1} != ';' ]] && sqlStmt="$sqlStmt;"
-		local stmtType=$(tr '[:lower:]' '[:upper:]' <<< "${sqlStmt%% *}")
-		[[ -n $DOIT && $stmtType != 'SELECT' ]] && echo "sqlStmt = >$sqlStmt<" && return 0
-		local prev=$(set -o | grep noglob | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2)
-		local resultStr msg tmpStr
-		local dbType='mysql'
-
-		## Run the query
-			set -f
-			resultStr=$(java runMySql $sqlStmt)
-			tmpStr="${resultStr%% *}"
-			if [[ $(tr '[:lower:]' '[:upper:]' <<< "${tmpStr:0:5}") == 'ERROR' ]]; then
-				msg="$FUNCNAME: Error reported from $dbType:\n\tFile: $dbFile\n\tSql: $sqlStmt\n\t$resultStr"
-				if [[ $(type -t 'Terminate') == function ]]; then
-					Terminate "$(ColorK "$myName").$msg"
-				else
-					echo "*Fatal Error* -- $msg"
-					exit -1
-				fi
-			fi
-			[[ $prev == 'on' ]] && set +f
-
-		## Write output to an array
-			unset resultSet
-			[[ $resultStr != '' ]] && IFS=$'\n' read -rd '' -a resultSet <<<"$resultStr"
-			[[ $prev == 'on' ]] && set +f
-
-		return 0
-	} #RunMySql
-	export -f RunMySql
-
-	#==================================================================================================
-	function RunSqlite {
-		local dbFile="$1" && shift
-		local sqlStmt="$*" ; [[ ${sqlStmt:${#sqlStmt}:1} != ';' ]] && sqlStmt="$sqlStmt;"
-		local stmtType=$(tr '[:lower:]' '[:upper:]' <<< "${sqlStmt%% *}")
-		[[ -n $DOIT && $stmtType != 'SELECT' ]] && echo "sqlStmt = >$sqlStmt<" && return 0
-		local prev=$(set -o | grep noglob | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2)
-		local resultStr msg tmpStr
-		local dbType='sqlite3'
-
-		## Run the query
-			set -f
-			unset resultSet
-			resultStr=$(sqlite3 $dbFile "$sqlStmt" 2>&1 | tr "\t" '|')
-			tmpStr="${resultStr%% *}"
-			if [[ $(tr '[:lower:]' '[:upper:]' <<< "${tmpStr:0:5}") == 'ERROR' ]]; then
-				msg="$FUNCNAME: Error reported from $dbType:\n\tFile: $dbFile\n\tSql: $sqlStmt\n\t$resultStr"
-				if [[ $(type -t 'Terminate') == function ]]; then
-					Terminate "$(ColorK "$myName").$msg"
-				else
-					echo "*Fatal Error* -- $msg"
-					exit -1
-				fi
-			fi
-			[[ $prev == 'on' ]] && set +f
-
-		## Write output to an array
-			unset resultSet
-			[[ $resultStr != '' ]] && IFS=$'\n' read -rd '' -a resultSet <<<"$resultStr"
-			[[ $prev == 'on' ]] && set +f
-
-		return 0
-
-
-		return 0
-	} ##RunSqlite
-	export -f RunSqlite
-
 	#==================================================================================================
 	function GD {
 		[[ $DEBUG != true ]] && return 0
@@ -392,3 +321,4 @@ prtStatus "parse args"
 ## Thu Jan  5 12:00:50 CST 2017 - dscudiero - Updated code to set warehouseDb
 ## Thu Jan  5 12:06:21 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Jan  5 12:23:20 CST 2017 - dscudiero - Check for DISPATCHER variable before setting
+## Thu Jan  5 15:02:07 CST 2017 - dscudiero - remove RunMySql and RunSqlite
