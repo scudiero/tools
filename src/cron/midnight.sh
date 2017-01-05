@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.155 # -- dscudiero -- 01/04/2017 @ 16:44:25.27
+version=1.21.157 # -- dscudiero -- 01/05/2017 @  7:16:32.73
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -169,6 +169,7 @@ function BuildCourseleafDataTable {
 			fi
 			sqlStmt="insert into $courseleafDataTable values(NULL,\"courseleaf.cgi\",\"$rhelDir\",\"$cgiVer\",NOW(),\"$userName\")"
 			RunMySql $sqlStmt
+		done
 
 	## Rebuild the page
 		cwd=$(pwd)
@@ -205,7 +206,6 @@ case "$hostName" in
 
 				## Compare number of clients in the warehouse vs the transactional if more in transactional then runClientListReport=true
 					runClientListReport=$(CheckClientCount)
-dump runClientListReport
 
 				## Copy the contacts db from internal
 					Msg2 "Copying contacts.sqlite files to $sqliteDbs/contacts.sqlite..."
@@ -366,3 +366,4 @@ return 0
 ## Tue Jan  3 07:24:32 CST 2017 - dscudiero - fix problem creating employee table
 ## Wed Jan  4 07:24:06 CST 2017 - dscudiero - ake out debug statements, modify call to perfTest
 ## Wed Jan  4 16:47:34 CST 2017 - dscudiero - Updated BuildCourseleafData table to reflect the cgi versions including the patch level
+## Thu Jan  5 07:59:27 CST 2017 - dscudiero - Fixed syntax error introduced on last commit
