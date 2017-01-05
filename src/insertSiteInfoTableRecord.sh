@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.85 # -- dscudiero -- 12/29/2016 @  8:22:51.92
+version=1.1.89 # -- dscudiero -- 01/05/2017 @ 13:39:37.56
 #==================================================================================================
 TrapSigs 'on'
 Import ParseCourseleafFile
@@ -60,25 +60,25 @@ Msg2 "^$env ($siteDir)"
 		host=$hostName
 	fi
 	valueStr="NULL,\"$client\",\"$clientId\",\"$env\",\"$host\",\"$share\",\"$myRhel\",now(),\"$userName\""
-	sqlStmt="insert into $siteInfoTable ($fields) values($valueStr)"
-	[[ $DOIT != '' || $informationOnlyMode == true ]] && echo -e "\t\tsqlStmt 0 = '>'$sqlStmt'<'" || RunSql 'mysql' $sqlStmt
+	sqlStmt="insert into $useSiteInfoTable ($fields) values($valueStr)"
+	[[ $DOIT != '' || $informationOnlyMode == true ]] && echo -e "\t\tsqlStmt 0 = '>'$sqlStmt'<'" || RunSql2 $sqlStmt
 	## Get newly inserted siteid
-	sqlStmt="select max(siteId) from $siteInfoTable"
-	RunSql 'mysql' $sqlStmt
+	sqlStmt="select max(siteId) from $useSiteInfoTable"
+	RunSql2 $sqlStmt
 	siteId=${resultSet[0]}
 	[[ $siteId == '' ]] && Msg2 $W "Could not retrieve the siteId" || Msg2 $V2 "\tSiteId for $client is '$siteId'"
 
 ## lookup urls from the clients table
 	if [[ $env == 'test' || $env == 'next' || $env == 'curr' ]]; then
 		sqlStmt="select ${env}url,${env}InternalUrl from $clientInfoTable where idx=\"$clientId\" "
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		url=\"$(cut -d'|' -f1 <<< ${resultSet[0]})\"
 		[[ $url == '"NULL"' ]] && url=NULL
 		internalUrl=\"$(cut -d'|' -f2 <<< ${resultSet[0]})\"
 		[[ $internalUrl == '"NULL"' ]] && internalUrl=NULL
 	else
 		sqlStmt="select ${env}url from $clientInfoTable where idx=\"$clientId\" "
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		url=\"${resultSet[0]}\"
 		[[ $url == '"NULL"' ]] && url=NULL
 		internalUrl=NULL
@@ -140,8 +140,8 @@ Msg2 "^$env ($siteDir)"
 			dump -2 archives
 		## Write out the record
 			setStr="url=$url,archives=$archives,googleType=$googleType"
-			sqlStmt="update $siteInfoTable set $setStr where siteId=\"$siteId\""
-			[[ $DOIT != '' || $informationOnlyMode == true ]] && echo -e "\t\tsqlStmt 1 = '>'$sqlStmt'<'" || RunSql 'mysql' $sqlStmt
+			sqlStmt="update $useSiteInfoTable set $setStr where siteId=\"$siteId\""
+			[[ $DOIT != '' || $informationOnlyMode == true ]] && echo -e "\t\tsqlStmt 1 = '>'$sqlStmt'<'" || RunSql2 $sqlStmt
 			return 0
 	fi #[[ $env = 'preview' || $env = 'public' ]]
 
@@ -257,7 +257,7 @@ Msg2 "^$env ($siteDir)"
 				if [[ -r $clUsersFile ]]; then
 					#sqlStmt='select * from sqlite_master;'
 					sqlStmt='select * from sqlite_master where type="table" and name="users";'
-					RunSql 'sqlite' "$clUsersFile" "$sqlStmt"
+					RunSql2 "$clUsersFile" "$sqlStmt"
 					if [[ ${#resultSet[@]} -ne 0 ]]; then
 						[[ $(Contains "${resultSet[0]}" ' userid ') == true && $(Contains "${resultSet[0]}" ' email ') == true ]] && haveClusers=true
 					fi
@@ -278,7 +278,7 @@ Msg2 "^$env ($siteDir)"
 						## If the email address is null then look up the email address in clusers
 							if [[ $adminEmail == '' && $haveClusers == true ]]; then
 								sqlStmt="select email from users where userid=\"$adminId\";"
-								RunSql 'sqlite' "$clUsersFile" "$sqlStmt"
+								RunSql2 "$clUsersFile" "$sqlStmt"
 								adminEmail="${resultSet[0]}"
 							fi
 						## If email is still null then set from the emailsuffix if it is not null
@@ -292,7 +292,7 @@ Msg2 "^$env ($siteDir)"
 						admins=${admins:1}
 						fields="idx,siteId,name,env,admins"
 						sqlStmt="insert into $siteAdminsTable ($fields) values(NULL,\"$siteId\",\"$client\",\"$env\",\"$admins\")"
-						[[ $DOIT != '' || $informationOnlyMode == true ]] && echo -e "\t\tsqlStmt 2 = '>'$sqlStmt'<'" || RunSql 'mysql' $sqlStmt
+						[[ $DOIT != '' || $informationOnlyMode == true ]] && echo -e "\t\tsqlStmt 2 = '>'$sqlStmt'<'" || RunSql2 $sqlStmt
 					fi
 		fi
 	fi
@@ -301,9 +301,9 @@ Msg2 "^$env ($siteDir)"
 	setStr="clver=$clVer,cimver=$cimVer,clssVer=$clssVer,courseleafCgiVer=$courseleafCgiVer,reportsVer=$reportsVer"
 	setStr="$setStr,CIMs=$cimStr,url=$url,internalUrl=$internalUrl,archives=$archives,googleType=$googleType"
 	setStr="$setStr,CATedition=$catEdition,publishing=$publishTarget,degreeWorks=$degreeWorks"
-	sqlStmt="update $siteInfoTable set $setStr where siteId=\"$siteId\""
+	sqlStmt="update $useSiteInfoTable set $setStr where siteId=\"$siteId\""
 	dump -2 -n -t sqlStmt
-	[[ $DOIT != '' || $informationOnlyMode == true ]] && echo -e "\t\tsqlStmt 3 = '>'$sqlStmt'<'" || RunSql 'mysql' $sqlStmt
+	[[ $DOIT != '' || $informationOnlyMode == true ]] && echo -e "\t\tsqlStmt 3 = '>'$sqlStmt'<'" || RunSql2 $sqlStmt
 
 #==================================================================================================
 ## Done
@@ -343,3 +343,4 @@ return 0
 ## Fri Oct  7 08:00:28 CDT 2016 - dscudiero - Take out the dbAcc switching logic, moved to framework RunSql
 ## Thu Dec 29 15:58:23 CST 2016 - dscudiero - Switch to use RunMySql
 ## Tue Jan  3 07:43:05 CST 2017 - dscudiero - remove debug statement
+## Thu Jan  5 13:40:42 CST 2017 - dscudiero - switch to RunSql2
