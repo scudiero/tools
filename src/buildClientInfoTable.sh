@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.79 # -- dscudiero -- 01/05/2017 @ 12:52:53.86
+version=2.3.80 # -- dscudiero -- 01/05/2017 @ 12:56:48.27
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -93,7 +93,7 @@ Msg2 "Table: $useClientInfoTable"
 		for client in "${clients[@]}"; do
 			(( clientCntr += 1 ))
 			if [[ $(Contains ",$ignoreList," ",$client,") == true ]]; then
-				[ $batchMode != true ]] && Msg2 "^Skipping '$client' is in the ignore list."
+				[[ $batchMode != true ]] && Msg2 "^Skipping '$client' is in the ignore list."
 				continue
 			fi
 			unset msgPrefix
@@ -141,3 +141,4 @@ Goodbye 0 'alert'
 ## Tue Jul 12 07:10:42 CDT 2016 - dscudiero - Add override parameters to callPgm
 ## Thu Jan  5 12:37:46 CST 2017 - dscudiero - refactored to create a new table, insert data and then rename if successful
 ## Thu Jan  5 12:53:22 CST 2017 - dscudiero - remove debug statements
+## Thu Jan  5 12:56:56 CST 2017 - dscudiero - General syncing of dev to prod
