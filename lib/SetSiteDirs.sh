@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.6" # -- dscudiero -- 01/04/2017 @ 13:49:00.55
+# version="2.0.16" # -- dscudiero -- 01/05/2017 @ 14:52:03.17
 #===================================================================================================
 # Set Directories based on the current hostName name and school name
 # Sets globals: devDir, nextDir, previewDir, publicDir, upgradeDir
@@ -35,9 +35,12 @@ function SetSiteDirs {
 		foundClient=false
 		for chkenv in $(echo $courseleafProdEnvs | tr ',' ' '); do
 			unset ${chkenv}Dir
-			[[ -d /mnt/$server/$client/$chkenv ]] && eval ${chkenv}Dir=/mnt/$server/$client/$chkenv && foundClient=true
+			if [[ $chkenv == 'test' ]]; then
+				[[ -d "/mnt/$server/$client-test/test" ]] && testDir="/mnt/$server/$client-test/test"
+			else
+				[[ -d "/mnt/$server/$client/$chkenv" ]] && eval ${chkenv}Dir=/mnt/$server/$client/$chkenv && foundClient=true
+			fi
 		done
-		[[ -d "/mnt/$server/$client-test/test" ]] && testDir="/mnt/$server/$client-test/test"
 		[[ $foundClient == true ]] && break
 	done
 
@@ -82,3 +85,4 @@ export -f SetSiteDirs
 #===================================================================================================
 
 ## Wed Jan  4 13:54:27 CST 2017 - dscudiero - General syncing of dev to prod
+## Thu Jan  5 14:53:53 CST 2017 - dscudiero - refactored checking for test site
