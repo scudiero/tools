@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.58 # -- dscudiero -- 12/15/2016 @  7:33:43.12
+version=2.3.62 # -- dscudiero -- 01/05/2017 @ 11:09:06.75
 #===================================================================================================
 TrapSigs 'on'
 originalArgStr="$*"
@@ -41,7 +41,6 @@ function MapTtoW {
 #===================================================================================================
 # Declare local variables and constants
 #===================================================================================================
-[[ $testMode == true ]] && clientInfoTable='clientsNew'
 
 #===================================================================================================
 # Main
@@ -50,7 +49,7 @@ function MapTtoW {
 	Msg2 $V1 ""
 	SetFileExpansion 'off'
 	sqlStmt="select * from sqlite_master where type=\"table\" and name=\"clients\""
-	RunSql 'sqlite' "$contactsSqliteFile" $sqlStmt
+	RunSql2 "$contactsSqliteFile" $sqlStmt
 	[[ ${#resultSet[@]} -le 0 ]] && Msg2 $T "Could not retrieve clients data from '$contactsSqliteFile'"
 	unset tFields
 	for ((i=1; i<${#resultSet[@]}-1; i++)); do
@@ -63,7 +62,7 @@ function MapTtoW {
 ## Get the transactional data
 	Msg2 $V1 ""
 	sql="select $tFields from clients where clientcode=\"$client\" and is_active=\"Y\""
-	RunSql 'sqlite' "$contactsSqliteFile" $sql
+	RunSql2 "$contactsSqliteFile" $sql
 	if [[ ${#resultSet[@]} -le 0 ]]; then
 		Msg2 $T "Could not retrieve clients data from '$contactsSqliteFile'"
 	else
@@ -82,7 +81,7 @@ function MapTtoW {
 	if [[ $primarycontact == '' ]]; then
 		fields='contactrole,firstname,lastname,title,workphone,cell,fax,email'
 		sqlStmt="select $fields from contacts where clientkey=\"$idx\" and contactrole like \"%primary%\" order by contactrole,lastname"
-		RunSql 'sqlite' "$contactsSqliteFile" $sqlStmt
+		RunSql2 "$contactsSqliteFile" $sqlStmt
 		for contactRec in "${resultSet[@]}"; do
 			primarycontact="$primarycontact|$(tr '|' ',' <<< $contactRec)"
 		done
@@ -97,7 +96,7 @@ function MapTtoW {
 	for env in $(tr ',' ' '<<< $envs); do
 		unset ${env}URL ${env}InternalURL
 		sqlStmt="select domain,internal from clientsites where clientkey=$idx and type=\"$env\""
-		RunSql 'sqlite' "$contactsSqliteFile" $sqlStmt
+		RunSql2 "$contactsSqliteFile" $sqlStmt
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
 			for result in "${resultSet[@]}"; do
 				domain=$(cut -d'|' -f1 <<< $result)
@@ -121,7 +120,7 @@ function MapTtoW {
 	for rep in $(tr ',' ' '<<< $reps); do
 		unset $rep
 		sqlStmt="select employees.db_firstname,employees.db_lastname,employees.db_email from clientroles,employees where clientroles.clientkey=$idx and role=\"$rep\" and clientroles.employeekey=employees.db_employeekey"
-		RunSql 'sqlite' "$contactsSqliteFile" $sqlStmt
+		RunSql2 "$contactsSqliteFile" $sqlStmt
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
 			firstName=$(cut -d'|' -f1 <<< ${resultSet[0]})
 			lastName=$(cut -d'|' -f2 <<< ${resultSet[0]})
@@ -134,8 +133,8 @@ function MapTtoW {
 ## Build insert record
 	Msg2 $V1 ""
 	#sql="select column_name from information_schema.columns where table_name =\"$clientInfoTable\""
-	sqlStmt="show columns from $clientInfoTable"
-	RunSql 'mysql' $sqlStmt
+	sqlStmt="show columns from $useClientInfoTable"
+	RunSql2 $sqlStmt
 	unset wFields insertVals
 	for result in "${resultSet[@]}"; do
 		field=$(cut -d'|' -f1 <<< $result)
@@ -160,7 +159,7 @@ function MapTtoW {
 
 ## Insert record
 	Msg2 $V1 ""
-	sqlStmt="insert into $clientInfoTable ($wFields) values($insertVals)"
+	sqlStmt="insert into $useClientInfoTable ($wFields) values($insertVals)"
 	dump -1 -sqlStmt -n
 	[[ $DOIT != '' || $informationOnlyMode == true ]] && echo -e "\t\tsqlStmt = '>'$sqlStmt'<'" || RunSql 'mysql' $sqlStmt
 
@@ -189,3 +188,4 @@ return 0
 ## Thu Oct  6 16:39:44 CDT 2016 - dscudiero - Set dbAcc level to Update for db writes
 ## Thu Oct  6 16:59:15 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Fri Oct  7 08:00:18 CDT 2016 - dscudiero - Take out the dbAcc switching logic, moved to framework RunSql
+## Thu Jan  5 12:38:15 CST 2017 - dscudiero - Switch to use RunSql2
