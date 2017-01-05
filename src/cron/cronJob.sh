@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.89 # -- dscudiero -- 12/29/2016 @  9:01:31.06
+version=2.0.90 # -- dscudiero -- 01/05/2017 @ 12:22:24.46
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -30,6 +30,7 @@ originalArgStr="$*"
 		prodmd5=$(md5sum "$TOOLSPATH/dispatcher.sh" | cut -f1 -d" ")
 		[[ $localmd5 != $prodmd5 ]] && dispatcher="$HOME/$toolsRepo/dispatcher.sh"
 	fi
+	export DISPATCHER="$dispatcher"
 	export TOOLSLIBPATH="$TOOLSPATH/lib"
 	[[ -d $HOME/$toolsRepo/lib ]] && export TOOLSLIBPATH="$HOME/$toolsRepo/lib:$TOOLSLIBPATH"
 	export TOOLSSRCPATH="$TOOLSPATH/src"
@@ -97,3 +98,4 @@ exit 0
 #=======================================================================================================================
 ## Thu Dec 29 08:18:05 CST 2016 - dscudiero - General syncing of dev to prod
 ## Thu Dec 29 09:02:34 CST 2016 - dscudiero - Fix problem where the inserted checkin comment was appended to the end of the exit line
+## Thu Jan  5 12:23:39 CST 2017 - dscudiero - set DISPATCHER
