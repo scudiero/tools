@@ -1,12 +1,12 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.157 # -- dscudiero -- 01/05/2017 @  7:16:32.73
+version=1.21.158 # -- dscudiero -- 01/05/2017 @ 14:46:24.96
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
 TrapSigs 'on'
-Import FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql Msg2 Call RunCoureleafCgi GetCourseleafPgm
+Import FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql2 Msg2 Call RunCoureleafCgi GetCourseleafPgm
 originalArgStr="$*";
 
 #=======================================================================================================================
@@ -53,7 +53,7 @@ function CheckClientCount {
 	## Get number of clients in transactional
 	SetFileExpansion 'off'
 	sqlStmt="select count(*) from clients where is_active=\"Y\""
-	RunSqlite "$contactsSqliteFile" $sqlStmt
+	RunSql2 "$contactsSqliteFile" $sqlStmt
 	if [[ ${#resultSet[@]} -le 0 ]]; then
 		Msg2 $T "Could not retrieve clients data from '$contactsSqliteFile'"
 	else
@@ -61,7 +61,7 @@ function CheckClientCount {
 	fi
 	## Get number of clients in warehouse
 	sqlStmt="select count(*) from $clientInfoTable where recordstatus=\"A\""
-	RunMySql $sqlStmt
+	RunSql2 $sqlStmt
 	if [[ ${#resultSet[@]} -le 0 ]]; then
 		Msg2 $T "Could not retrieve clients count data from '$warehouseDb.$clientInfoTable'"
 	else
@@ -69,7 +69,7 @@ function CheckClientCount {
 	fi
 	## Get number of clients on the ignore list
 	sqlStmt="select ignoreList from $scriptsTable where name=\"buildClientInfoTable\""
-	RunMySql $sqlStmt
+	RunSql2 $sqlStmt
 	if [[ ${#resultSet[@]} -le 0 ]]; then
 		Msg2 $T "Could not retrieve clients count data from '$warehouseDb.$clientInfoTable'"
 	else
@@ -90,10 +90,10 @@ function CheckClientCount {
 function BuildEmployeeTable {
 	Msg2 $V3 "*** $FUNCNAME -- Starting ***"
 	sqlStmt="truncate $employeeTable"
-	RunMySql $sqlStmt
+	RunSql2 $sqlStmt
 	### Get the list of columns in the transactional employees table
 	sqlStmt="pragma table_info(employees)"
-	RunSqlite "$contactsSqliteFile" $sqlStmt
+	RunSql2 "$contactsSqliteFile" $sqlStmt
 	unset transactionalFields transactionalColumns
 	for resultRec in "${resultSet[@]}"; do
 		transactionalColumns="$transactionalColumns,$(cut -d'|' -f2 <<< $resultRec)"
@@ -104,7 +104,7 @@ function BuildEmployeeTable {
 
 	### Get the transactonal values, loop through them and  write out the warehouse record
 	sqlStmt="select $transactionalColumns from employees where db_isactive = \"Y\" order  by db_employeekey"
-	RunSqlite "$contactsSqliteFile" $sqlStmt
+	RunSql2 "$contactsSqliteFile" $sqlStmt
 	for resultRec in "${resultSet[@]}"; do
 		fieldCntr=1; unset valuesString
 		for field in $(tr ',' ' ' <<< $transactionalFields); do
@@ -117,7 +117,7 @@ function BuildEmployeeTable {
 		done
 		valuesString=${valuesString:1}
 		sqlStmt="insert into $employeeTable values($valuesString)"
-		RunMySql $sqlStmt
+		RunSql2 $sqlStmt
 	done
 
 	Msg2 $V3 "*** $FUNCNAME -- Completed ***"
@@ -130,7 +130,7 @@ function BuildCourseleafDataTable {
 
 	## Clean out the existing data
 	sqlStmt="truncate $courseleafDataTable"
-	RunMySql $sqlStmt
+	RunSql2 $sqlStmt
 
 	## Get Courseleaf component versions
 		components=($(find $gitRepoShadow -maxdepth 1 -mindepth 1 -type d -printf "%f "))
@@ -138,7 +138,7 @@ function BuildCourseleafDataTable {
 			dirs=($(ls -c $gitRepoShadow/$component | ProtectedCall "grep -v master"))
 			[[ ${#dirs[@]} -gt 0 ]] && latest=${dirs[0]} || latest='master'
 			sqlStmt="insert into $courseleafDataTable values(NULL,\"$component\",NULL,\"$latest\",NOW(),\"$userName\")"
-			RunMySql $sqlStmt
+			RunSql2 $sqlStmt
 		done
 
 	## Get Courseleaf Reports versions
@@ -151,7 +151,7 @@ function BuildCourseleafDataTable {
 		reportsVersions=$(cut -d'.' -f1-3 <<< $reportsVersions)
 		SetFileExpansion
 		sqlStmt="insert into $courseleafDataTable values(NULL,\"reports\",NULL,\"$reportsVersions\",NOW(),\"$userName\")"
-		[[ -n $reportsVersions ]] && RunMySql $sqlStmt
+		[[ -n $reportsVersions ]] && RunSql2 $sqlStmt
 		cd "$cwd"
 
 	## Get Courseleaf cgi versions
@@ -168,7 +168,7 @@ function BuildCourseleafDataTable {
 				cgiVer=$latest
 			fi
 			sqlStmt="insert into $courseleafDataTable values(NULL,\"courseleaf.cgi\",\"$rhelDir\",\"$cgiVer\",NOW(),\"$userName\")"
-			RunMySql $sqlStmt
+			RunSql2 $sqlStmt
 		done
 
 	## Rebuild the page
@@ -200,9 +200,9 @@ case "$hostName" in
 	mojave)
 			## Set a semaphore
 				sqlStmt="truncate $semaphoreInfoTable"
-				RunMySql $sqlStmt
+				RunSql2 $sqlStmt
 				sqlStmt="insert into $semaphoreInfoTable values(NULL,\"$myName\",NULL,NULL,NULL)"
-				RunMySql $sqlStmt
+				RunSql2 $sqlStmt
 
 				## Compare number of clients in the warehouse vs the transactional if more in transactional then runClientListReport=true
 					runClientListReport=$(CheckClientCount)
@@ -216,18 +216,18 @@ case "$hostName" in
 
 				## Truncate the tables
 					sqlStmt="truncate $clientInfoTable"
-					RunMySql $sqlStmt
+					RunSql2 $sqlStmt
 					sqlStmt="truncate $siteInfoTable"
-					RunMySql $sqlStmt
+					RunSql2 $sqlStmt
 					sqlStmt="truncate $siteAdminsTable"
-					RunMySql $sqlStmt
+					RunSql2 $sqlStmt
 
 				## Build the clientInfoTable
 					Call 'buildClientInfoTable' "$scriptArgs"
 
 			## Clear a semaphore
 				sqlStmt="delete from $semaphoreInfoTable where processName=\"$myName\""
-				RunMySql $sqlStmt
+				RunSql2 $sqlStmt
 
 			## Build siteinfotabe and siteadmins table
 				Call 'buildSiteInfoTable' "$scriptArgs"
@@ -331,7 +331,7 @@ case "$hostName" in
 			## Check semaphore, wait for truncate to be done on mojave
 				sqlStmt="select count(*) from $semaphoreInfoTable where processName=\"$myName\""
 				while true; do
-					RunMySql $sqlStmt
+					RunSql2 $sqlStmt
 					[[ ${resultSet[@]} -eq 0 ]] && break
 					sleep 30
 				done
@@ -367,3 +367,4 @@ return 0
 ## Wed Jan  4 07:24:06 CST 2017 - dscudiero - ake out debug statements, modify call to perfTest
 ## Wed Jan  4 16:47:34 CST 2017 - dscudiero - Updated BuildCourseleafData table to reflect the cgi versions including the patch level
 ## Thu Jan  5 07:59:27 CST 2017 - dscudiero - Fixed syntax error introduced on last commit
+## Thu Jan  5 14:50:01 CST 2017 - dscudiero - Switch to use RunSql2
