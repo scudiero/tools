@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.0" # -- dscudiero -- 01/05/2017 @ 10:44:04.37
+# version="1.0.1" # -- dscudiero -- 01/05/2017 @ 13:46:40.93
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -23,7 +23,7 @@
 		fi
 		local sqlStmt="$*" ; [[ ${sqlStmt:${#sqlStmt}:1} != ';' ]] && sqlStmt="$sqlStmt;"
 		local stmtType=$(tr '[:lower:]' '[:upper:]' <<< "${sqlStmt%% *}")
-		[[ -n $DOIT && $stmtType != 'SELECT' ]] && echo "sqlStmt = >$sqlStmt<" && return 0
+		[[ -n $DOIT || $informationOnlyMode == true ]] && [[ $stmtType != 'SELECT' ]] && echo "sqlStmt = >$sqlStmt<" && return 0
 		local prevGlob=$(set -o | grep noglob | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2)
 		local resultStr msg tmpStr
 
@@ -55,3 +55,4 @@
 #===================================================================================================
 # Check-in Log
 #===================================================================================================
+## Thu Jan  5 13:47:13 CST 2017 - dscudiero - add a kill switch if informationOnly flag is set
