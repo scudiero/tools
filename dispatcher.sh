@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.33" # -- dscudiero -- 01/05/2017 @ 12:06:02.86
+version="1.2.34" # -- dscudiero -- 01/05/2017 @ 12:22:40.81
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -13,7 +13,7 @@ dispatcherArgs="$*"
 myName='dispatcher'
 TOOLSPATH='/steamboat/leepfrog/docs/tools'
 [[ -d '/steamboat/leepfrog/docs/toolsNew' ]] && TOOLSPATH='/steamboat/leepfrog/docs/toolsNew'
-export DISPATCHER="$TOOLSPATH/dispatcher.sh"
+[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
 
 #==================================================================================================
 # Global Functions
@@ -391,3 +391,4 @@ prtStatus "parse args"
 ## Thu Jan  5 11:04:42 CST 2017 - dscudiero - Updated to use RunSql2
 ## Thu Jan  5 12:00:50 CST 2017 - dscudiero - Updated code to set warehouseDb
 ## Thu Jan  5 12:06:21 CST 2017 - dscudiero - General syncing of dev to prod
+## Thu Jan  5 12:23:20 CST 2017 - dscudiero - Check for DISPATCHER variable before setting
