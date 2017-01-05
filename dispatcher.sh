@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.31" # -- dscudiero -- 01/05/2017 @ 11:03:54.51
+version="1.2.32" # -- dscudiero -- 01/05/2017 @ 11:33:02.43
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -234,7 +234,11 @@ prtStatus "parse args"
 	[[ -z $initFile ]] && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
 
 ## Set mysql connection information
-	[[ $useDevDb == true ]] && warehouseDb='warehouseDev' || warehouseDb='warehouse'
+	if [[ -n $warehousedb ]]; then
+		warehousedb="$warehousedb"
+	else
+		[[ $useDevDb == true ]] && warehouseDb='warehouseDev' || warehouseDb='warehouse'
+	fi
 	dbAcc='Read'
 	mySqlUser="leepfrog$dbAcc"
 	mySqlHost='duro'
@@ -384,3 +388,4 @@ prtStatus "parse args"
 ## Tue Jan  3 12:32:29 CST 2017 - dscudiero - use myQuiet for my variable name
 ## Tue Jan  3 16:29:41 CST 2017 - dscudiero - add status messaging back in
 ## Thu Jan  5 11:04:42 CST 2017 - dscudiero - Updated to use RunSql2
+## Thu Jan  5 12:00:50 CST 2017 - dscudiero - Updated code to set warehouseDb
