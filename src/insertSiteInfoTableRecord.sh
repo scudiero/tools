@@ -1,9 +1,10 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.89 # -- dscudiero -- 01/05/2017 @ 13:39:37.56
+version=1.1.97 # -- dscudiero -- 01/05/2017 @ 15:49:27.18
 #==================================================================================================
 TrapSigs 'on'
-Import ParseCourseleafFile
+imports='ParseCourseleafFile CleanString' #imports="$imports "
+Import "$imports"
 originalArgStr="$*"
 scriptDescription="Create a record in the siteInfoTable"
 
@@ -61,7 +62,7 @@ Msg2 "^$env ($siteDir)"
 	fi
 	valueStr="NULL,\"$client\",\"$clientId\",\"$env\",\"$host\",\"$share\",\"$myRhel\",now(),\"$userName\""
 	sqlStmt="insert into $useSiteInfoTable ($fields) values($valueStr)"
-	[[ $DOIT != '' || $informationOnlyMode == true ]] && echo -e "\t\tsqlStmt 0 = '>'$sqlStmt'<'" || RunSql2 $sqlStmt
+	RunSql2 $sqlStmt
 	## Get newly inserted siteid
 	sqlStmt="select max(siteId) from $useSiteInfoTable"
 	RunSql2 $sqlStmt
@@ -90,13 +91,13 @@ Msg2 "^$env ($siteDir)"
 	grepFile=$(dirname $siteDir)/$env/web/ribbit/fsinjector.rjs
 	if [[ -f $grepFile ]]; then
 		googleType=$(ProtectedCall "grep '^var googletype' $grepFile | grep -v null")
-		[[ $googleType != '' ]] && googleType=$(cut -d"=" -f2 <<< $googleType | tr -d "'" | tr -d ";" | tr -d " ")
+		[[ -n $googleType ]] && googleType=$(cut -d"=" -f2 <<< $googleType | tr -d "'" | tr -d ";" | tr -d " ")
 	fi
-	[[ $googleType == '' ]] && googleType=NULL || googleType="\"$googleType\""
+	[[ -z $googleType ]] && googleType=NULL || googleType="\"$googleType\""
 	dump -2 -t googletype
 
 ## Preview or Public -- Parse archives and write out a short record
-	if [[ $env = 'preview' || $env = 'public' ]]; then
+	if [[ $env == 'preview' || $env == 'public' ]]; then
 		unset archives archiveDir
 		#Check to see if the curr or next sites have archive path set, if the do then lookup archive directories
 		for checkEnv in next curr; do
@@ -106,7 +107,7 @@ Msg2 "^$env ($siteDir)"
 			dump -2 -n checkEnv grepFile
 			if [[ -f $grepFile ]]; then
 				archiveRoot=$(cut -d":" -f2 <<< $(ProtectedCall "grep '^archiveroot:' $grepFile"));
-				if [[ $archiveRoot != '' ]]; then
+				if [[ -n $archiveRoot ]]; then
 					archiveRoot=$(tr -d "[:space:]" <<< $archiveRoot | tr -d "[:blank:]")
 					dump -2 -t archiveRoot
 					[[ ${archiveRoot:0:1} != '/' ]] && archiveRoot='/'$archiveRoot
@@ -114,7 +115,7 @@ Msg2 "^$env ($siteDir)"
 				else
 					archivePath=$(cut -d":" -f2 <<< $(ProtectedCall "grep '^archivepath:' $grepFile"));
 					archivePath=$(tr -d "[:space:]" <<< $archivePath | tr -d "[:blank:]")
-					if [[ $archivePath != '' ]]; then
+					if [[ -n $archivePath ]]; then
 						archivePath=$(tr -d "[:space:]" <<< $archivePath | tr -d "[:blank:]")
 						dump -2 -t archivePath
 						[[ ${archivePath:0:1} != '/' ]] && archivePath='/'$archivePath
@@ -123,9 +124,9 @@ Msg2 "^$env ($siteDir)"
 						archiveDir=$(dirname $siteDir)/$env/web$archiveRoot
 					fi
 				fi
-				[[ $archiveDir == '' ]] && archiveDir=$(dirname $siteDir)/$env/web/archive/
+				[[ -z $archiveDir ]] && archiveDir=$(dirname $siteDir)/$env/web/archive/
 				dump -2 archiveDir
-				if [[ $archiveDir != '' && -d $archiveDir ]]; then
+				if [[ -n $archiveDir && -d $archiveDir ]]; then
 					cwd=$(pwd)
 					cd $archiveDir
 					SetFileExpansion 'on'; archives=$(ProtectedCall "ls -d */ 2> /dev/null"); SetFileExpansion 'off'
@@ -136,12 +137,12 @@ Msg2 "^$env ($siteDir)"
 			[[ $archives != '' ]] && break
 		done;
 		## Check to see what archives are active
-			[[ $archives == '' ]] && archives=NULL || archives="\"$archives\""
+			[[ -z $archives ]] && archives=NULL || archives="\"$archives\""
 			dump -2 archives
 		## Write out the record
 			setStr="url=$url,archives=$archives,googleType=$googleType"
 			sqlStmt="update $useSiteInfoTable set $setStr where siteId=\"$siteId\""
-			[[ $DOIT != '' || $informationOnlyMode == true ]] && echo -e "\t\tsqlStmt 1 = '>'$sqlStmt'<'" || RunSql2 $sqlStmt
+			RunSql2 $sqlStmt
 			return 0
 	fi #[[ $env = 'preview' || $env = 'public' ]]
 
@@ -152,7 +153,7 @@ Msg2 "^$env ($siteDir)"
 	allCims=true
 	GetCims $siteDir
 	unset allCims
-	[[ $cimStr != '' ]] && cimStr=\"$(tr -d ' ' <<< $cimStr)\" || cimStr=NULL
+	[[ -n $cimStr ]] && cimStr=\"$(tr -d ' ' <<< $cimStr)\" || cimStr=NULL
 	dump -2 -t cimStr
 
 ## Get the cimVer
@@ -205,6 +206,7 @@ Msg2 "^$env ($siteDir)"
 	if [[ -r "$checkFile" ]]; then
 		reportsVer="$(ProtectedCall "grep -s -m 1 'version:' $checkFile")"
 		reportsVer=${reportsVer##*: }
+		reportsVer=$(CleanString "$reportsVer")
 	fi
 	[[ $reportsVer != 'NULL' ]] && reportsVer=\""$reportsVer"\"
 	dump -2 -t reportsVer
@@ -240,7 +242,7 @@ Msg2 "^$env ($siteDir)"
 		grepFile=$siteDir/web/courseleaf/index.tcf
 		if [[ -f $grepFile ]]; then
 			unset tempStr; tempStr=$(ProtectedCall "grep '^navlinks\:.*dworksenable' $grepFile")
-			[[ $tempStr != '' ]] && degreeWorks='Yes'
+			[[ -n $tempStr ]] && degreeWorks='Yes'
 		fi
 	fi
 	[[ $degreeWorks != 'NULL' ]] && degreeWorks=\""$degreeWorks"\"
@@ -282,17 +284,17 @@ Msg2 "^$env ($siteDir)"
 								adminEmail="${resultSet[0]}"
 							fi
 						## If email is still null then set from the emailsuffix if it is not null
-							[[ $adminEmail == '' && $emailsuffix != '' ]] && adminEmail="$adminId@$emailsuffix"
-							[[ $adminEmail != '' ]] && admins=$admins,$adminEmail || admins=$admins,$adminId
+							[[ -z $adminEmail && -n $emailsuffix ]] && adminEmail="$adminId@$emailsuffix"
+							[[ -n $adminEmail ]] && admins=$admins,$adminEmail || admins=$admins,$adminId
 							dump -2 -t -t adminId adminEmail admins -n
 					done
 				fi
 				## Write out the record to the siteadmins table
-					if [[ $admins != '' ]]; then
+					if [[ -n $admins ]]; then
 						admins=${admins:1}
 						fields="idx,siteId,name,env,admins"
 						sqlStmt="insert into $siteAdminsTable ($fields) values(NULL,\"$siteId\",\"$client\",\"$env\",\"$admins\")"
-						[[ $DOIT != '' || $informationOnlyMode == true ]] && echo -e "\t\tsqlStmt 2 = '>'$sqlStmt'<'" || RunSql2 $sqlStmt
+						RunSql2 $sqlStmt
 					fi
 		fi
 	fi
@@ -302,8 +304,8 @@ Msg2 "^$env ($siteDir)"
 	setStr="$setStr,CIMs=$cimStr,url=$url,internalUrl=$internalUrl,archives=$archives,googleType=$googleType"
 	setStr="$setStr,CATedition=$catEdition,publishing=$publishTarget,degreeWorks=$degreeWorks"
 	sqlStmt="update $useSiteInfoTable set $setStr where siteId=\"$siteId\""
-	dump -2 -n -t sqlStmt
-	[[ $DOIT != '' || $informationOnlyMode == true ]] && echo -e "\t\tsqlStmt 3 = '>'$sqlStmt'<'" || RunSql2 $sqlStmt
+	#[[ $verboseLevel -ge 2 ]] && echo "setStr = >$setStr<" > $stdout && echo >> $stdout && echo "sqlStmt = >$sqlStmt<" >> $stdout
+	RunSql2 $sqlStmt
 
 #==================================================================================================
 ## Done
@@ -344,3 +346,4 @@ return 0
 ## Thu Dec 29 15:58:23 CST 2016 - dscudiero - Switch to use RunMySql
 ## Tue Jan  3 07:43:05 CST 2017 - dscudiero - remove debug statement
 ## Thu Jan  5 13:40:42 CST 2017 - dscudiero - switch to RunSql2
+## Thu Jan  5 15:50:53 CST 2017 - dscudiero - General syncing of dev to prod
