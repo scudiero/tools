@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.32" # -- dscudiero -- 01/05/2017 @ 11:33:02.43
+version="1.2.33" # -- dscudiero -- 01/05/2017 @ 12:06:02.86
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -234,10 +234,11 @@ prtStatus "parse args"
 	[[ -z $initFile ]] && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
 
 ## Set mysql connection information
-	if [[ -n $warehousedb ]]; then
+	warehouseDb='warehouse'
+	if [[ -n $WAREHOUSEDB ]]; then
 		warehousedb="$warehousedb"
 	else
-		[[ $useDevDb == true ]] && warehouseDb='warehouseDev' || warehouseDb='warehouse'
+		[[ $useDevDb == true ]] && warehouseDb='warehouseDev'
 	fi
 	dbAcc='Read'
 	mySqlUser="leepfrog$dbAcc"
@@ -389,3 +390,4 @@ prtStatus "parse args"
 ## Tue Jan  3 16:29:41 CST 2017 - dscudiero - add status messaging back in
 ## Thu Jan  5 11:04:42 CST 2017 - dscudiero - Updated to use RunSql2
 ## Thu Jan  5 12:00:50 CST 2017 - dscudiero - Updated code to set warehouseDb
+## Thu Jan  5 12:06:21 CST 2017 - dscudiero - General syncing of dev to prod
