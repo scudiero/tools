@@ -29,7 +29,7 @@ count=${1-1000}
         fi
 
 ## Create initial record
-        sqlStmt="insert into perfTest values(NULL,\"$(cut -d'.' -f1 <<< $(hostname))\",\"$(date +'%m-%d-%y')\",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)"
+        sqlStmt="insert into perfTest values(NULL,\"$(cut -d'.' -f1 <<< $(hostname))\",\"$(date +'%m-%d-%y %H:%M')\",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)"
         result=$(mysql --skip-column-names --batch $mySqlConnectString -e "$sqlStmt";)
         sqlStmt="select max(idx) from perfTest"
         idx=$(mysql --skip-column-names --batch $mySqlConnectString -e "$sqlStmt";)
@@ -115,3 +115,4 @@ count=${1-1000}
         echo
         rm -rf /steamboat/leepfrog/docs/tools/perfTest
         rm -f "$tmpFile"
+## Thu Jan  5 16:36:09 CST 2017 - dscudiero - Add time stamp to the date field
