@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.84 # -- dscudiero -- 01/06/2017 @  6:40:48.52
+version=2.3.86 # -- dscudiero -- 01/06/2017 @  7:41:08.67
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -103,7 +103,7 @@ Msg2 "Table: $useClientInfoTable"
 			(( forkCntr+=1 ))
 			## Wait for forked process to finish, only run maxForkedProcesses at a time
 			if [[ $fork == true && $((forkCntr%$maxForkedProcesses)) -eq 0 ]]; then
-				[[ $batchMode != true ]] && Msg2 "^Waiting on forked processes, processed $forkCntr of $processedSiteCntr ...\n"
+				[[ $batchMode != true ]] && Msg2 "^Waiting on forked processes...\n"
 				wait
 			fi
 			[[ $fork != true && $(($clientCntr % processNotify)) -eq 0 ]] && Msg2 "\n^*** Processed $clientCntr out of $numClients\n"
@@ -116,16 +116,17 @@ Msg2 "Table: $useClientInfoTable"
 	fi
 
 ## Swap client tables
+	[[ $batchMode != true ]] && Msg2 "^Swapping databases ..."
 	sqlStmt="select count{*) from ${clientInfoTable}New"
 	RunSql2
 	[[ ${#resultSet[@]} -eq 0 ]] &&  Terminate "New clients table has zero rows, keeping original"
 
 	sqlStmt="rename table $clientInfoTable to ${clientInfoTable}Bak"
 	RunSql2 $sqlStmt
+	[[ $batchMode != true ]] && Msg2 "^^$clientInfoTable --> ${clientInfoTable}Bak"
 	sqlStmt="rename table ${clientInfoTable}New to $clientInfoTable"
 	RunSql2 $sqlStmt
-
-	RunSql2 $sqlStmt
+	[[ $batchMode != true ]] && Msg2 "^^${clientInfoTable}New --> $clientInfoTable"
 
 #=======================================================================================================================
 # Done
@@ -144,3 +145,4 @@ Goodbye 0 'alert'
 ## Thu Jan  5 13:40:11 CST 2017 - dscudiero - removed debug code
 ## Thu Jan  5 14:00:07 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Jan  6 07:26:18 CST 2017 - dscudiero - Fix syntax error
+## Fri Jan  6 07:41:30 CST 2017 - dscudiero - Add Messages for the swap db process
