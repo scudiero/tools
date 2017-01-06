@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.2.114 # -- dscudiero -- 01/06/2017 @  7:51:42.90
+version=4.2.118 # -- dscudiero -- 01/06/2017 @  8:12:02.40
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -130,6 +130,8 @@ forkCntr=0; siteCntr=0; cntr=0;
 GetDefaultsData $myName
 ParseArgsStd
 Hello
+[[ -n $env ]] && envList="$env" || envList="$courseleafDevEnvs $courseleafProdEnvs"
+unset env
 
 [[ $fork == true ]] && forkStr='fork' || unset forkStr
 
@@ -164,7 +166,7 @@ Msg2 "Table: $useSiteInfoTable"
 			RunSql2 $sqlStmt
 
 		## Insert the record
-			[[ -n $env ]] && envList="$env" || envList="$courseleafDevEnvs $courseleafProdEnvs"
+
 			for env in $(tr ',' ' ' <<< "$envList"); do
 				[[ $env == 'pvt' ]] && continue
 				eval envDir=\$${env}Dir
@@ -254,3 +256,4 @@ Msg2 "Table: $useSiteInfoTable"
 ## Thu Jan  5 14:59:40 CST 2017 - dscudiero - Switch to use RunSql2
 ## Thu Jan  5 15:50:37 CST 2017 - dscudiero - Strip non-ascii chars from reportsVer, remove debug statements
 ## Fri Jan  6 08:04:17 CST 2017 - dscudiero - General syncing of dev to prod
+## Fri Jan  6 08:12:36 CST 2017 - dscudiero - Fix problem where not processing all envs for clients > 1
