@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.1 # -- dscudiero -- 01/06/2017 @  9:23:39.01
+version=4.3.2 # -- dscudiero -- 01/06/2017 @ 10:06:06.87
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -66,7 +66,6 @@ GetDefaultsData $myName
 ParseArgsStd
 Hello
 [[ -n $env ]] && envList="$env" || envList="$courseleafDevEnvs $courseleafProdEnvs"
-unset env
 
 [[ $fork == true ]] && forkStr='fork' || unset forkStr
 
@@ -190,3 +189,4 @@ Goodbye 0 'alert'
 ## Thu Jan  5 15:50:37 CST 2017 - dscudiero - Strip non-ascii chars from reportsVer, remove debug statements
 ## Fri Jan  6 08:04:17 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Jan  6 08:12:36 CST 2017 - dscudiero - Fix problem where not processing all envs for clients > 1
+## Fri Jan  6 10:10:29 CST 2017 - dscudiero - Do not unset env variable after argument parsing
