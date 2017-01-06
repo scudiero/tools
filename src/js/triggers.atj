@@ -1,0 +1,60 @@
+
+
+var old_onBeforeApprove = onBeforeApprove;
+
+var onBeforeApprove = function() {
+	var inworkflow = false;
+	var atAPC = false;
+	var nextsignoff = "";
+	if(tcfdata.views && tcfdata.views.tso && tcfdata.views.tso.mustsignoff && tcfdata.views.tso.mustsignoff.length) {
+		inworkflow = true;
+		nextsignoff = tcfdata.views.tso.mustsignoff[0];
+	}
+
+	if(inworkflow && /APC Chair$/.test(nextsignoff)) {
+		//make sure it isn't the second time through DOI
+		if(tcfdata.views && tcfdata.views.tso && tcfdata.views.tso.didsignoff && tcfdata.views.tso.didsignoff.length) {
+			var dso = tcfdata.views.tso.didsignoff.join("^") + "^";
+			if(!/APC Chair\^/.test(dso)){
+				atAPC = true;
+			}
+		}
+	}
+
+
+	if(atAPC && tcfdata.newrecord && tcfdata.newrecord.length &&
+			(!tcfdata.substantive || !tcfdata.substantive.length)) {
+		addwarning('Please indicate if this is a minor or major change.');
+		alert("Please indicate if this is a minor or major change.");
+		return false;
+	}
+	if(atAPC) {
+		var majorchange = (tcfdata.substantive && tcfdata.substantive.length ? tcfdata.substantive[0].code : "");
+		if(majorchange && majorchange.length){
+			var mso = tcfdata.views.tso.mustsignoff;
+			var newmso = [];
+
+			//print_debug("majorchange: " + majorchange + "\n");
+
+			if(majorchange == 'MAJ'){
+				//newmso =["FMC","APC Membership fyiall","APC Chair","Col Dean","Dept Chair","Registrar"];
+				mso.splice(1, 0, "FMC fyiall");
+				attr_write("tso/mustsignoff", mso);
+			}
+			//major change
+			else{
+				//newmso = ["APC Membership fyiall","APC Chair","Col Dean","Dept Chair","Registrar"];
+			}
+
+		}
+		else{
+			print_debug("tcfdata.substantive not found in tcfdata:\n\t" + "" + "\n\n");
+			addwarning('Please indicate if this is a minor or major change.');
+			//alert("Please indicate if this is a minor or major change.");
+			return false;
+		}
+
+	}
+
+	return old_onBeforeApprove();
+}
