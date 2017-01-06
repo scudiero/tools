@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.22" # -- dscudiero -- 01/04/2017 @ 13:32:53.06
+# version="2.0.23" # -- dscudiero -- 01/06/2017 @  9:29:53.56
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -23,8 +23,8 @@ function Hello {
 	Msg2 "${myName} ($version) -- Date: $(date +"%a") $(date +"%m-%d-%Y @ %H.%M.%S")"
 	[[ "$myDescription" != "" ]] && Msg2 && Msg2 "$myDescription"
 	[[ $checkName != $userName ]] && userStr="Real user $checkName, Tools user: $userName" || userStr="Tools user: $userName"
-	Msg2 "$userStr, Host: $hostName, PID: $$, PPID: $PPID"
-	[[ "$originalArgStr" != '' ]] && Msg2 "Arg String:($originalArgStr)"
+	Msg2 "$userStr, Host: $hostName, Database: $warehouseDb, PID: $$, PPID: $PPID"
+	[[ -n $originalArgStr ]] && Msg2 "Arg String: '$originalArgStr'"
 
 	# local myPath=$(dirname $(readlink -f $0))
 	# [[ ${myPath:0:6} == '/home/' ]] && 	Msg2 "$(ColorW "*** Running from '$myPath'")"
@@ -54,3 +54,4 @@ export -f Hello
 ## Wed Jan  4 11:17:57 CST 2017 - dscudiero - If verboseLevel is 99 then set -xv
 ## Wed Jan  4 13:05:34 CST 2017 - dscudiero - change debug levels
 ## Wed Jan  4 13:34:00 CST 2017 - dscudiero - comment out the 'version=' line
+## Fri Jan  6 09:30:22 CST 2017 - dscudiero - Added what database we are using to the header
