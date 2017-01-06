@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.2 # -- dscudiero -- 01/06/2017 @ 10:06:06.87
+version=4.3.3 # -- dscudiero -- 01/06/2017 @ 14:08:55.35
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -98,8 +98,10 @@ Msg2 "Loading table: $useSiteInfoTable"
 			client="$(basename $clientDir)"
 			clientId=${dbClients[$client]}
 			## Get directories, if none found then skip this directory
+			unset devDir testDir nextDir currDir priorDir previewDir publicDir
 			SetSiteDirs
 			[[ -z ${devDir}${testDir}${nextDir}${currDir}${priorDir}${previewDir}${publicDir} ]] && continue
+
 			[[ $batchMode != true ]] && Msg2 "Processing: $client -- $clientId ($clientCntr/$numClients)..."
 			## Remove any existing records for this client
 			[[ -n $env ]] && andClause="and env=\"$env\"" || unset andClause
@@ -190,3 +192,4 @@ Goodbye 0 'alert'
 ## Fri Jan  6 08:04:17 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Jan  6 08:12:36 CST 2017 - dscudiero - Fix problem where not processing all envs for clients > 1
 ## Fri Jan  6 10:10:29 CST 2017 - dscudiero - Do not unset env variable after argument parsing
+## Fri Jan  6 15:57:49 CST 2017 - dscudiero - General syncing of dev to prod
