@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.2.109 # -- dscudiero -- 01/05/2017 @ 15:48:20.46
+version=4.2.114 # -- dscudiero -- 01/06/2017 @  7:51:42.90
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -122,9 +122,7 @@ FindExecutable "$workerScript" 'std' 'bash:sh' ## Sets variable executeFile
 workerScriptFile="$executeFile"
 
 forkCntr=0; siteCntr=0; cntr=0;
-[[ $fork == true ]] && forkStr='fork' || unset forkStr
-
-[[ $testMode == true ]] && export warehousedb='warehouseDev'
+[[ $testMode == true ]] && export warehousedb="$warehouseDev"
 
 #=======================================================================================================================
 # Standard arg parsing and initialization
@@ -132,6 +130,8 @@ forkCntr=0; siteCntr=0; cntr=0;
 GetDefaultsData $myName
 ParseArgsStd
 Hello
+
+[[ $fork == true ]] && forkStr='fork' || unset forkStr
 
 useSiteInfoTable="${siteInfoTable}"
 Msg2 "Database: $warehouseDb"
@@ -174,12 +174,12 @@ Msg2 "Table: $useSiteInfoTable"
 					(( forkCntr+=1 )) ; (( siteCntr+=1 ))
 				fi
 				if [[ $fork == true && $((forkCntr%$maxForkedProcesses)) -eq 0 ]]; then
-					[[ $batchMode != true ]] && Msg2 "^Waiting on forked processes, processed $forkCntr of $processedSiteCntr ...\n"
+					[[ $batchMode != true ]] && Msg2 "^Waiting on forked processes...\n"
 					wait
 				fi
 			done
 			if [[ $fork == true ]]; then
-				[[ $batchMode != true ]] && Msg2 "^Waiting on forked processes, processed $forkCntr of $processedSiteCntr ...\n"
+				[[ $batchMode != true ]] && Msg2 "^Waiting on forked processes...\n"
 				wait
 			fi
 	done #result in ${resultSet[@]}
@@ -253,3 +253,4 @@ Msg2 "Table: $useSiteInfoTable"
 ## Thu Jan  5 13:40:29 CST 2017 - dscudiero - switch to RunSql2
 ## Thu Jan  5 14:59:40 CST 2017 - dscudiero - Switch to use RunSql2
 ## Thu Jan  5 15:50:37 CST 2017 - dscudiero - Strip non-ascii chars from reportsVer, remove debug statements
+## Fri Jan  6 08:04:17 CST 2017 - dscudiero - General syncing of dev to prod
