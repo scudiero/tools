@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.16" # -- dscudiero -- 01/05/2017 @ 14:52:03.17
+# version="2.0.17" # -- dscudiero -- 01/06/2017 @ 14:08:34.67
 #===================================================================================================
 # Set Directories based on the current hostName name and school name
 # Sets globals: devDir, nextDir, previewDir, publicDir, upgradeDir
@@ -13,8 +13,7 @@ function SetSiteDirs {
 	local mode=$1
 	if [[ $mode == 'check' ]]; then local checkEnv=$2; fi
 
-	if [[ "$client" = "" ]]; then client=$school; fi
-	if [[ "$client" = '' ]]; then printf "SetSiteDirs: No value for client/school.  Stopping\n\a"; Goodbye 1; fi
+	[[ -z $client ]] && Terminate "SetSiteDirs: No value for client"
 
 	local dir=""
 	## Find dev directories
@@ -45,7 +44,7 @@ function SetSiteDirs {
 	done
 
 	if [[ $mode = 'setDefault' ]]; then
-		if [[ $nextDir == '' ]]; then
+		if [[ -z $nextDir ]]; then
 			if [[ $noCheck != true ]]; then
 				## Get the share and
 				sqlStmt="select share from $siteInfoTable where name=\"$client\" and env=\"next\""
@@ -59,13 +58,13 @@ function SetSiteDirs {
 				nextDir="/mnt/$server/$client/next/"
 			fi
 		fi
-		[[ $testDir == '' ]] && testDir=$(sed "s!/next!-test/test!" <<< $nextDir)
-		[[ $currDir == '' ]] && currDir=$(sed "s/next/curr/" <<< $nextDir)
-		[[ $previewDir == '' ]] && previewDir=$(sed "s/next/preview/" <<< $nextDir)
-		[[ $priorDir == '' ]] && priorDir=$(sed "s/next/prior/" <<< $nextDir)
-		[[ $publicDir == '' ]] &&  publicDir=$(sed "s/next/public/" <<< $nextDir)
-		[[ $devDir == '' ]] && devDir="/mnt/$defaultDevServer/web/$client"
-		[[ $pvtDir == '' ]] && pvtDir=$(sed "s!$client!$client-$userName!" <<< $devDir)
+		[[ -z $testDir ]] && testDir=$(sed "s!/next!-test/test!" <<< $nextDir)
+		[[ -z $currDir ]] && currDir=$(sed "s/next/curr/" <<< $nextDir)
+		[[ -z $previewDir ]] && previewDir=$(sed "s/next/preview/" <<< $nextDir)
+		[[ -z $priorDir ]] && priorDir=$(sed "s/next/prior/" <<< $nextDir)
+		[[ -z $publicDir ]] &&  publicDir=$(sed "s/next/public/" <<< $nextDir)
+		[[ -z $devDir ]] && devDir="/mnt/$defaultDevServer/web/$client"
+		[[ -z $pvtDir ]] && pvtDir=$(sed "s!$client!$client-$userName!" <<< $devDir)
 		devSiteDir=$devDir
 		prodSiteDir=$(dirname $nextDir)
 	fi
@@ -86,3 +85,4 @@ export -f SetSiteDirs
 
 ## Wed Jan  4 13:54:27 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Jan  5 14:53:53 CST 2017 - dscudiero - refactored checking for test site
+## Fri Jan  6 14:39:27 CST 2017 - dscudiero - General cleanup , swithch to use -z and -n
