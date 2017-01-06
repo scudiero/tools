@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.158 # -- dscudiero -- 01/05/2017 @ 14:46:24.96
+version=1.21.159 # -- dscudiero -- 01/06/2017 @  7:25:30.02
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -301,7 +301,7 @@ case "$hostName" in
 				Call 'syncCourseleafGitRepos' "$scriptArgs"
 
 			## Create a clone of the warehouse db
-				Msg2 "Creating $warehouseDev database..."
+				Msg2 "Creating '$warehouseDev' database..."
 				tmpConnectString=$(sed "s/Read/Admin/" <<< ${mySqlConnectString% *})
 				mysqldump $tmpConnectString $warehouseProd > /tmp/warehouse.sql;
 				mysql $tmpConnectString -e "drop database if exists $warehouseDev"
@@ -368,3 +368,4 @@ return 0
 ## Wed Jan  4 16:47:34 CST 2017 - dscudiero - Updated BuildCourseleafData table to reflect the cgi versions including the patch level
 ## Thu Jan  5 07:59:27 CST 2017 - dscudiero - Fixed syntax error introduced on last commit
 ## Thu Jan  5 14:50:01 CST 2017 - dscudiero - Switch to use RunSql2
+## Fri Jan  6 07:26:07 CST 2017 - dscudiero - Tweak messaging
