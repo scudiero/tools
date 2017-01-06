@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.0.66" # -- dscudiero -- 01/05/2017 @  7:07:18.38
+# version="2.0.68" # -- dscudiero -- 01/06/2017 @  8:02:27.67
 #=======================================================================================================================
 # Generic resolve file and call
 # Call scriptName ["$scriptArgs"]
@@ -80,6 +80,12 @@ function Call {
 		else
 			executeFile="$scriptName"
 			unset executeAlias
+			## Is the first 'scriptArgs' token 'fork' if so then fork the called function
+				token1=$(cut -d ' ' -f1 <<< $scriptArgs)
+				if [[ $token1 == 'fork' ]]; then
+					shift; scriptArgs="$*"
+					fork=true
+				fi
 		fi
 
 		## set environment vars overrides
@@ -132,3 +138,4 @@ export -f Call
 ## Tue Jan  3 16:34:10 CST 2017 - dscudiero - remove io redirection from the actual call
 ## Wed Jan  4 13:52:54 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Jan  5 07:59:46 CST 2017 - dscudiero - Added 'fork' directive
+## Fri Jan  6 08:03:52 CST 2017 - dscudiero - Also parse for 'fork' if a full file name is passed in
