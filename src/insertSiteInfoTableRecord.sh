@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.97 # -- dscudiero -- 01/05/2017 @ 15:49:27.18
+version=1.1.99 # -- dscudiero -- 01/06/2017 @  8:03:24.67
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseCourseleafFile CleanString' #imports="$imports "
@@ -347,3 +347,4 @@ return 0
 ## Tue Jan  3 07:43:05 CST 2017 - dscudiero - remove debug statement
 ## Thu Jan  5 13:40:42 CST 2017 - dscudiero - switch to RunSql2
 ## Thu Jan  5 15:50:53 CST 2017 - dscudiero - General syncing of dev to prod
+## Fri Jan  6 08:04:22 CST 2017 - dscudiero - General syncing of dev to prod
