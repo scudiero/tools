@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.36" # -- dscudiero -- 01/05/2017 @ 16:14:21.80
+version="1.2.42" # -- dscudiero -- 01/06/2017 @ 16:40:14.70
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -18,7 +18,6 @@ TOOLSPATH='/steamboat/leepfrog/docs/tools'
 #==================================================================================================
 # Global Functions
 #==================================================================================================
-	#==================================================================================================
 	function GD {
 		[[ $DEBUG != true ]] && return 0
 		[[ -z $stdout ]] && stdout=/dev/tty
@@ -189,7 +188,7 @@ prtStatus "parse args"
 	sTime=$(date "+%s")
 	includes='Colors Msg2 Dump DumpArray Here Quit Contains Lower Upper TitleCase Trim IsNumeric PushSettings PopSettings'
 	includes="$includes MkTmpFile Pause ProtectedCall SetFileExpansion PadChar PrintBanner Alert"
-	includes="$includes TrapSigs SignalHandeler RunSql RunSql2 DbLog GetCallStack DisplayNews Help"
+	includes="$includes TrapSigs SignalHandeler RunSql RunSql2 DbLog ProcessLogger GetCallStack DisplayNews Help"
 	includes="$includes GetDefaultsData Call StartRemoteSession FindExecutable CheckRun CheckAuth CheckSemaphore Call"
 	Import "$includes"
 	#Import FindExecutable CheckRun CheckAuth CheckSemaphore Call
@@ -276,9 +275,6 @@ prtStatus "parse args"
 			$GD -e "\t logFile: $logFile"
 		fi
 
-	## Log Start in process log database
-		[[ $noLogInDb != true ]] && myLogRecordIdx=$(dbLog 'Start' "$callPgmName" "$inArgs")
-
 	prtStatus ", initialize logFile"
 
 	## Call program function
@@ -287,6 +283,8 @@ prtStatus "parse args"
 		$GD -e "\nCall $executeFile $scriptArgs\n"
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
+		## Log Start in process log database
+			[[ $noLogInDb != true ]] && myLogRecordIdx=$(ProcessLogger 'Start' "$myName")
 		(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile; rc=$?
 		rc="$?"
 
@@ -325,3 +323,4 @@ prtStatus "parse args"
 ## Thu Jan  5 12:23:20 CST 2017 - dscudiero - Check for DISPATCHER variable before setting
 ## Thu Jan  5 15:02:07 CST 2017 - dscudiero - remove RunMySql and RunSqlite
 ## Thu Jan  5 16:15:23 CST 2017 - dscudiero - if status time is zero, display 1
+## Fri Jan  6 16:40:40 CST 2017 - dscudiero - Switch to use ProcessLogger
