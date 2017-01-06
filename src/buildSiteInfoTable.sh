@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.2.118 # -- dscudiero -- 01/06/2017 @  8:12:02.40
+version=4.3.1 # -- dscudiero -- 01/06/2017 @  9:23:39.01
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -43,72 +43,6 @@ scriptDescription="Scratch build the warhouse 'sites' table"
 #=======================================================================================================================
 # local functions
 #=======================================================================================================================
-	#===================================================================================================================
-	# Check site name syntax
-	function CheckName {
-		local site="$1"
-		local checkStr
-
-		[[ $(Contains ",$allowList," ",$site,") == true ]] && echo true && return 0
-
-		for checkStr in RECOVERED bak old; do
-			[[ $(Contains "$site" "$checkStr") == true ]] && echo "name contains '$checkStr'" && return 0
-		done
-
-		[[ $(Contains "$site" ' ') == true ]] && echo "name contains a blank/space" && return 0
-
-		for checkStr in -pilot -test -dev -cim $(echo $scriptData2 | tr ',' ' '); do
-			[[ $(Contains "$site" "$checkStr") == true ]] && echo true && return 0
-		done
-
-		for checkStr in '-' '_' '.' ; do
-			[[ $(Contains "$site" "$checkStr") == true ]] && echo "name contains '$checkStr'" && return 0
-		done
-
-		echo true
-		return 0
-	}
-
-	#===================================================================================================================
-	# Retrieve the clientId from the clients table taking into accout for weirdness in client names
-	#===================================================================================================================
-	function GetClientId {
-		local client=$1 clientId sqlStmt tempStr
-
-		sqlStmt="select idx from $clientInfoTable where name=\"$client\" "
-		RunSql2 $sqlStmt
-		if [[ ${#resultSet} -ne 0 ]]; then
-			clientId=${resultSet[0]}
-		else
-			## Hack for xxx-alaska and sites that have embedded '-' in the name
-			if [[ ${site:${#site}-12} == '-alaska-test' ]]; then
-				tempStr=${site:0:${#site}-5}
-			elif [[ ${site:${#site}-7}  = '-alaska' ]]; then
-				tempStr=$site
-			else
-				tempStr=$(echo $site -v | cut -d"-" -f1)
-			fi
-			sqlStmt="select idx from $clientInfoTable where name=\"$tempStr\" "
-			RunSql2 $sqlStmt
-			[[ ${#resultSet} -ne 0 ]] && clientId=${resultSet[0]} || clientId='NULL'
-		fi
-		echo $clientId
-		return 0
-	}
-
-	#===================================================================================================================
-	# Check to see if the site directory is a properly formed courseleaf site
-	#===================================================================================================================
-	function CheckIfDirIsCourseLeaf {
-		local dir=$1
-
-		[[ ! -d $dir/web ]] && echo false; return
-		[[ $(ls $dir/web | wc -l) -le 0 ]] && echo false; return
-		[[ -f $dir/web/ribbit/fsinjector.sqlite ]] && echo true && return 0
-
-		echo false
-		return 0
-	}
 
 #=======================================================================================================================
 # Declare local variables and constants
@@ -117,11 +51,12 @@ insertInLine=false
 fork=false
 addedCalledScriptArgs="-secondaryMessagesOnly"
 
-workerScript='insertSiteInfoTableRecord'; useLocal=true
-FindExecutable "$workerScript" 'std' 'bash:sh' ## Sets variable executeFile
-workerScriptFile="$executeFile"
+## Find the location of the worker script, speeds up subsequent calls
+	workerScript='insertSiteInfoTableRecord'; useLocal=true
+	FindExecutable "$workerScript" 'std' 'bash:sh' ## Sets variable executeFile
+	workerScriptFile="$executeFile"
 
-forkCntr=0; siteCntr=0; cntr=0;
+forkCntr=0; siteCntr=0; clientCntr=0;
 [[ $testMode == true ]] && export warehousedb="$warehouseDev"
 
 #=======================================================================================================================
@@ -136,37 +71,42 @@ unset env
 [[ $fork == true ]] && forkStr='fork' || unset forkStr
 
 useSiteInfoTable="${siteInfoTable}"
-Msg2 "Database: $warehouseDb"
-Msg2 "Table: $useSiteInfoTable"
+Msg2 "Loading table: $useSiteInfoTable"
 
 #=======================================================================================================================
 # Main
 #=======================================================================================================================
-## Get a list of clients from the clientInfoTable, loop through the results
+## Get a list of clients from the clientInfoTable, loop through the results building a hash table
+	declare -A dbClients
 	sqlStmt="select name,idx from clients where recordstatus='A'"
 	[[ $client != '' ]] && sqlStmt="$sqlStmt and name=\"$client\""
 	sqlStmt="$sqlStmt order by name"
 	RunSql2 $sqlStmt
 	numClients=${#resultSet[@]}
+	[[ $numClients -eq 0 ]] && Terminate "Could not retrieve any client records from '$warehouseDb.$clientInfoTable'"
 	Msg2 "Found $numClients clients..."
-
-## Loop through the results
 	for result in ${resultSet[@]}; do
-		(( cntr+=1 ))
-		client=$(cut -d'|' -f1 <<< $result)
-		clientId=$(cut -d'|' -f2 <<< $result)
-		SetSiteDirs
-		[[ -z ${devDir}${testDir}${nextDir}${currDir}${priorDir}${previewDir}${publicDir} ]] && continue
-		[[ $batchMode != true ]] && Msg2 "Processing: $client -- $clientId ($cntr/$numClients)..."
-		dump -1 -n result -t client clientId devDir testDir nextDir currDir previewDir publicDir priorDir
+		dbClients["${result%%|*}"]="${result##*|}"
+	done
+	if [[ $verboseLevel -ge 1 ]]; then Msg2 "dbClients:"; for i in "${!dbClients[@]}"; do printf "\t\t[$i] = >${dbClients[$i]}<\n"; done; fi
 
-		## Remove any existing records for this client
+	#[[ ${usersFromDb["$member"]+abc} ]]
+## Get the list of actual site directories under /mnt, check to see if it is the dbCliens hash, if yes then process this client directory
+	clientDirs=($(find /mnt -maxdepth 2 -mindepth 1 -type d 2> /dev/null | grep -v '^/mnt/dev'))
+	for clientDir in ${clientDirs[@]}; do
+		if [[ ${dbClients[$(basename $clientDir)]+abc} ]]; then
+			(( clientCntr+=1 ))
+			client="$(basename $clientDir)"
+			clientId=${dbClients[$client]}
+			## Get directories, if none found then skip this directory
+			SetSiteDirs
+			[[ -z ${devDir}${testDir}${nextDir}${currDir}${priorDir}${previewDir}${publicDir} ]] && continue
+			[[ $batchMode != true ]] && Msg2 "Processing: $client -- $clientId ($clientCntr/$numClients)..."
+			## Remove any existing records for this client
 			[[ -n $env ]] && andClause="and env=\"$env\"" || unset andClause
 			sqlStmt="delete from $useSiteInfoTable where name like\"$client%\" $andClause"
 			RunSql2 $sqlStmt
-
-		## Insert the record
-
+			## Loop through envs and process the site env directory
 			for env in $(tr ',' ' ' <<< "$envList"); do
 				[[ $env == 'pvt' ]] && continue
 				eval envDir=\$${env}Dir
@@ -184,16 +124,16 @@ Msg2 "Table: $useSiteInfoTable"
 				[[ $batchMode != true ]] && Msg2 "^Waiting on forked processes...\n"
 				wait
 			fi
-	done #result in ${resultSet[@]}
+		fi #[[ ${dbClients[$(basename $clientDir)]+abc} ]]
+	done #clientDir in ${clientDirs[@]}
 
-## Wait for al the forked tasks to stop
+## Wait for all the forked tasks to stop
 	if [[ $fork == true ]]; then
 		[[ $batchMode != true ]] && Msg2 "Waiting for all forked processes to complete..."
 		wait
 	fi
 
-#=======================================================================================================================
-## How many did we do
+## Processing summary
 	Msg2
 	Msg2 "Processed $siteCntr Courseleaf site directories"
 	Msg2
@@ -203,18 +143,11 @@ Msg2 "Table: $useSiteInfoTable"
 		Error "No records were inserted into in the $warehouseDb.$siteInfoTable table on host '$hostName'"
 		sendMail=true
 	fi
+
 #=======================================================================================================================
 ## Bye-bye
 #=======================================================================================================================
-	if [[ $sendMail == true && $noEmails == false && $logFile != /dev/null ]]; then
-		[[ $verbose == true ]] && Msg2 "\nErrors detected, sending emails...\n"
-		tmpLogFile=$(mkTmpFile)
-		cat $logFile | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" > $tmpLogFile
-		#$DOIT mail -s "$myName detected Errors" $emailAddrs < $tmpLogFile
-		$DOIT mutt -a "$tmpLogFile" -s $myName detected Errors" - $(date +"%m-%d-%Y")" -- $emailAddrs < $tmpLogFile
-	fi
-
-	Goodbye 0 'alert'
+Goodbye 0 'alert'
 
 #=======================================================================================================================
 # Check in log
