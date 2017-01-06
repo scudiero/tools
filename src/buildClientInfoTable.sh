@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.83 # -- dscudiero -- 01/05/2017 @ 13:55:34.83
+version=2.3.84 # -- dscudiero -- 01/06/2017 @  6:40:48.52
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -52,7 +52,6 @@ fi
 #=======================================================================================================================
 ParseArgsStd
 Hello
-}
 useClientInfoTable="${clientInfoTable}New"
 Msg2 "Database: $warehouseDb"
 Msg2 "Table: $useClientInfoTable"
@@ -144,3 +143,4 @@ Goodbye 0 'alert'
 ## Thu Jan  5 12:56:56 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Jan  5 13:40:11 CST 2017 - dscudiero - removed debug code
 ## Thu Jan  5 14:00:07 CST 2017 - dscudiero - General syncing of dev to prod
+## Fri Jan  6 07:26:18 CST 2017 - dscudiero - Fix syntax error
