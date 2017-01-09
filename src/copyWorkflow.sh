@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.8.35 # -- dscudiero -- 12/14/2016 @ 11:23:11.88
+version=2.8.38 # -- dscudiero -- 01/09/2017 @ 16:16:20.31
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -346,7 +346,7 @@ Msg2
 		## Save old workflow files
 		Msg2
 		Msg2 "Saving target ($tgtEnv) workflow files ..."
-		$DOIT saveWorkflow $client -$tgtEnv -cims "$(echo $cimStr | tr -d ' ')" -suffix "beforeCopy-$fileSuffix" -nop -quiet $verboseArg
+		$DOIT saveWorkflow --quiet $client -$tgtEnv -cims "$(echo $cimStr | tr -d ' ')" -suffix "beforeCopy-$fileSuffix" -nop -quiet $verboseArg
 		## Copy files
 		Msg2 "Updating files:"
 		for filePair in "${copyFileList[@]}"; do
@@ -356,7 +356,7 @@ Msg2
 			[[ -f $tgtFile ]] && BackupCourseleafFile $tgtFile && rm -f $tgtFile
 			$DOIT cp -fp $srcFile $tgtFile
 			[[ $(basename $srcFile) == 'workflow.tcf' && $tgtEnv == 'next' ]] && $DOIT sed -i s'_*optional*_optional_' $tgtFile
-			filesUpdated+=($cpyFile)
+			filesUpdated+=(${file##*$tgtDir})
 		done
 	else
 		## Nothing to do
@@ -420,3 +420,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## Wed Oct 12 09:15:53 CDT 2016 - dscudiero - Tweak messages
 ## Tue Oct 25 15:45:15 CDT 2016 - dscudiero - Added logging of actions to trnsaction log in the clientsData folder
 ## Tue Oct 25 15:48:12 CDT 2016 - dscudiero - Only writout change log if the clientDataRoot folder exists
+## Mon Jan  9 16:16:53 CST 2017 - dscudiero - Fixd problem where the changelog.txt records were all the same file
