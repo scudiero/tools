@@ -97,7 +97,7 @@ if (typeof wfLibLoaded === "undefined") {
 // 11/15/16	- dgs - Re-factored to allow for the specification of the core proposal variable names
 //======================================================================================================================
 wffuncs.Related = function(inval, wfrule, args) {
-	var version='4.9.1'; var myName=wfrule.attrname
+	var version='4.9.2'; var myName=wfrule.attrname
 	wfDebug('\n*** In '+ myName + " (" + version + ") called as '" + args.context + " / " + wfrule.searchfor + "' ***");
 	wfDump(["Full Step text;"+inval]);
 
@@ -233,6 +233,8 @@ wffuncs.Related = function(inval, wfrule, args) {
 	//==================================================================================================================
 	// Helper functions
 	//==================================================================================================================
+	// Build a ref object based on the passed in format code
+	//==================================================================================================================
 	ParseRelatedData = function(dataObj,format,dataAttributeName) {
 		var ref={};
 		format=format.toLowerCase();
@@ -340,12 +342,12 @@ wffuncs.Related = function(inval, wfrule, args) {
 
 			// Scan the tca data and see if there are any elements not in the tcf data, i.e. it has been deleted
 			tcaData.forEach(function(b) {
-				if (refsLookup[b.toSource()] === undefined) {
-					ref=ParseRelatedData(b,formVarFormat,dataAttributeName);
-					if (ref != {}) {
-						wfDebug("\t\tAdding deleted code to refsArray: " + b.toSource());
-						ref.source="formVar:" + formVar;
-						refsArray.push(ref);
+				ref=ParseRelatedData(b,formVarFormat,dataAttributeName);
+				if (ref != {}) {
+					if (refsLookup[ref.data.toSource()] === undefined) {
+							wfDebug("\t\tAdding deleted code to refsArray: " + b.toSource());
+							ref.source="formVar:" + formVar;
+							refsArray.push(ref);
 					}
 				}
 			}); //tcfData
@@ -386,7 +388,8 @@ wffuncs.Related = function(inval, wfrule, args) {
 						outToken.source=ref.source;
 						outTokens.push(outToken);
 					} else if (ref.format === "subj" ) {
-						resultSet=LookupCode("deptCode","subjCode",ref.data,proposalDept,colVarName,deptVarName,subjVarName);
+						resultSet=LookupCode("deptCode","subjCode",ref.data,"",proposalDept,colVarName,deptVarName,subjVarName);
+					   //function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colColumnName,deptColumnName,subjColumnName) {
 					}
  					break;
   				case "college":
@@ -399,9 +402,12 @@ wffuncs.Related = function(inval, wfrule, args) {
 						outToken.source=ref.source;
 						outTokens.push(outToken);
 					} else if (ref.format === "dept" ) {
-						resultSet=LookupCode("colCode","deptCode",ref.data,proposalCol,colVarName,deptVarName,subjVarName);
+						resultSet=LookupCode("colCode","deptCode",ref.data,"",proposalCol,colVarName,deptVarName,subjVarName);
+						 //function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colColumnName,deptColumnName,subjColumnName) {
+
 					} else if (ref.format === "subj" ) {
-						resultSet=LookupCode("colCode","subjCode",ref.data,proposalCol,colVarName,deptVarName,subjVarName);
+						resultSet=LookupCode("colCode","subjCode",ref.data,"",proposalCol,colVarName,deptVarName,subjVarName);
+					   //function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colColumnName,deptColumnName,subjColumnName) {
 					}
 	 				break;
   				case "subj":
@@ -410,7 +416,8 @@ wffuncs.Related = function(inval, wfrule, args) {
 					//	steps=tcfdata.CrosslistedCollegesSteps;
 					if (ref.format === "dept" ) {
 						//sqlStmt="SELECT distinct college as token FROM cimlookup WHERE department=?";
-						resultSet=LookupCode("subjCode","deptCode",ref.data,proposalSubj,colVarName,deptVarName,subjVarName);
+						resultSet=LookupCode("subjCode","deptCode",ref.data,"",proposalSubj,colVarName,deptVarName,subjVarName);
+					   //function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colColumnName,deptColumnName,subjColumnName) {
 					} else if (ref.format === "subj" ) {
 						//sqlStmt="SELECT distinct college as token FROM cimlookup WHERE subject=?";
 						outToken={};
