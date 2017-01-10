@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.36 # -- dscudiero -- 01/03/2017 @ 15:27:32.12
+version=3.8.39 # -- dscudiero -- 01/10/2017 @  9:51:44.15
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -301,7 +301,8 @@ scriptDescription="Load Courseleaf Data"
 		## Merge the spreadsheet data and the file data
 			numNewUsers=0
 			numModifiedUsers=0
-			Msg2 "Merging User data..."
+			[[ $informationOnlyMode != true ]] && verb='Merging' || verb='Checking'
+			Msg2 "$verb User data..."
 
 			dbFile=$srcDir/db/clusers.sqlite
 			BackupCourseleafFile $dbFile
@@ -541,9 +542,11 @@ scriptDescription="Load Courseleaf Data"
 				BackupCourseleafFile $stepFile
 
 			## Find the step file to run
-				FindExecutable "$step" 'step:html'
-				srcStepFile="$executeFile"
-				Info 0 1 "Using step file: $srcStepFile"
+				if [[ $informationOnlyMode != true ]]; then
+					FindExecutable "$step" 'step:html'
+					srcStepFile="$executeFile"
+					Info 0 1 "Using step file: $srcStepFile"
+				fi
 
 			## Copy step file to localsteps
 				cp -fP $srcStepFile $stepFile
@@ -551,7 +554,8 @@ scriptDescription="Load Courseleaf Data"
 			## Update the page data in courseleaf
 			numPagesUpdated=0
 			numMembersMappedToUIN=0
-			Msg2 "^Updating catalog page data (this takes a while)..."
+			[[ $informationOnlyMode != true ]] && verb='Updating' || verb='Checking'
+			Msg2 "^$verb catalog page data (this takes a while)..."
 			local procesingCntr=0
 			for key in "${!workflowDataFromSpreadsheet[@]}"; do
 				pageTitle="$(echo ${workflowDataFromSpreadsheet[$key]} | cut -d'|' -f1)"
@@ -946,3 +950,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## Mon Oct 17 16:17:26 CDT 2016 - dscudiero - Move the skipnull code into the script from the step
 ## Tue Jan  3 13:44:34 CST 2017 - dscudiero - sync
 ## Tue Jan  3 15:36:36 CST 2017 - dscudiero - misc cleanup
+## Tue Jan 10 09:54:07 CST 2017 - dscudiero - Updated messaging to reflect if we are running with informationOnly set
