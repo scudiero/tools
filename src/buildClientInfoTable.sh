@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.99 # -- dscudiero -- 01/09/2017 @ 10:56:29.19
+version=2.3.102 # -- dscudiero -- 01/10/2017 @ 12:53:35.53
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -86,11 +86,13 @@ Msg2 "Table: $useClientInfoTable"
 		done
 	fi
 
-## Create a temporary copy of the clients table, load new data to that table
+## Table management
 	if [[ $inPlace == true ]]; then
 		sqlStmt="truncate $useClientInfoTable"
 		RunSql2 $sqlStmt
 	else
+		## Create a temporary copy of the clients table, load new data to that table
+		[[ $batchMode != true ]] && Msg2 "^Creating work table '$useClientInfoTable'..."
 		sqlStmt="drop table if exists ${clientInfoTable}Bak"
 		RunSql2 $sqlStmt
 		sqlStmt="drop table if exists $useClientInfoTable"
@@ -165,3 +167,4 @@ Goodbye 0 'alert'
 ## Fri Jan  6 07:26:18 CST 2017 - dscudiero - Fix syntax error
 ## Fri Jan  6 07:41:30 CST 2017 - dscudiero - Add Messages for the swap db process
 ## Mon Jan  9 13:29:00 CST 2017 - dscudiero - Add an inplace option to just update the clients table directly
+## Tue Jan 10 12:54:37 CST 2017 - dscudiero - Added 'inPlace' option
