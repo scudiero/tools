@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.52 # -- dscudiero -- 01/04/2017 @ 13:46:05.64
+# version=2.0.53 # -- dscudiero -- 01/10/2017 @ 10:55:14.55
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -188,7 +188,7 @@ function Init {
 		 	if [[ $noWarn != true ]]; then
 				verify=true
 				Msg2
-				Warning "You are asking to overlay the $(ColorW $(Upper $checkProdEnv)) environment"
+				Warning "You are asking to update/overlay the $(ColorW $(Upper $checkProdEnv)) environment"
 				unset ans; Prompt ans "Are you sure" "Yes No";
 				ans=$(Lower ${ans:0:1})
 				[[ $ans != 'y' ]] && Goodbye -1
@@ -300,3 +300,4 @@ export -f Init
 ## Check-in log
 #===================================================================================================
 ## Wed Jan  4 13:53:46 CST 2017 - dscudiero - General syncing of dev to prod
+## Tue Jan 10 10:55:40 CST 2017 - dscudiero - Tweak messaging when updateing next env
