@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.99 # -- dscudiero -- 01/06/2017 @  8:03:24.67
+version=1.1.103 # -- dscudiero -- 01/10/2017 @ 14:55:48.48
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseCourseleafFile CleanString' #imports="$imports "
@@ -36,6 +36,9 @@ clientId="$1"; shift
 originalArgStr="$*"
 ParseArgsStd "$*"
 
+verboseLevel=2
+Msg2 "*** verboseLevel forced to $verboseLevel ***"
+
 #==================================================================================================
 # Declare local variables and constants
 #==================================================================================================
@@ -64,10 +67,9 @@ Msg2 "^$env ($siteDir)"
 	sqlStmt="insert into $useSiteInfoTable ($fields) values($valueStr)"
 	RunSql2 $sqlStmt
 	## Get newly inserted siteid
-	sqlStmt="select max(siteId) from $useSiteInfoTable"
-	RunSql2 $sqlStmt
+	[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Could not insert seed record into $useSiteInfoTable"
 	siteId=${resultSet[0]}
-	[[ $siteId == '' ]] && Msg2 $W "Could not retrieve the siteId" || Msg2 $V2 "\tSiteId for $client is '$siteId'"
+	Msg2 $V2 "\tSiteId for $client is '$siteId'"
 
 ## lookup urls from the clients table
 	if [[ $env == 'test' || $env == 'next' || $env == 'curr' ]]; then
@@ -304,7 +306,7 @@ Msg2 "^$env ($siteDir)"
 	setStr="$setStr,CIMs=$cimStr,url=$url,internalUrl=$internalUrl,archives=$archives,googleType=$googleType"
 	setStr="$setStr,CATedition=$catEdition,publishing=$publishTarget,degreeWorks=$degreeWorks"
 	sqlStmt="update $useSiteInfoTable set $setStr where siteId=\"$siteId\""
-	#[[ $verboseLevel -ge 2 ]] && echo "setStr = >$setStr<" > $stdout && echo >> $stdout && echo "sqlStmt = >$sqlStmt<" >> $stdout
+	[[ $verboseLevel -ge 2 ]] && echo && echo "setStr = >$setStr<" && echo && echo "sqlStmt = >$sqlStmt<" && echo
 	RunSql2 $sqlStmt
 
 #==================================================================================================
@@ -348,3 +350,4 @@ return 0
 ## Thu Jan  5 13:40:42 CST 2017 - dscudiero - switch to RunSql2
 ## Thu Jan  5 15:50:53 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Jan  6 08:04:22 CST 2017 - dscudiero - General syncing of dev to prod
+## Tue Jan 10 14:57:02 CST 2017 - dscudiero - Fix problem getting the correct siteId after the insert of the seed record
