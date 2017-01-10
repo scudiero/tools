@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.39 # -- dscudiero -- 01/10/2017 @  9:51:44.15
+version=3.8.45 # -- dscudiero -- 01/10/2017 @ 15:24:27.16
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -851,11 +851,8 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 			fi
 		fi
 
-## Write out change log entries
-	$DOIT Msg2 "\n$userName\t$(date)" >> $srcDir/changelog.txt
-	$DOIT Msg2 "^$myName updated from $workbookFile" >> $srcDir/changelog.txt
-
 ## Processing summary
+	unset changeLogLines
 	Msg2
 	PrintBanner "Processing Summary"
 	[[ $informationOnlyMode == true ]] && Msg2 "" && Msg2 ">>> The Information Only flag was set, no data has been updated <<<" && Msg2
@@ -864,8 +861,12 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 		Msg2 "User data:"
 		Msg2 "^Retrieved $numUsersfromDb records from the clusers database"
 		Msg2 "^Retrieved $numUsersfromSpreadsheet records from $workbookFile"
-		Msg2 "^Added $numNewUsers new users" | tee -a $srcDir/changelog.txt
-		Msg2 "^Modified $numModifiedUsers existing users" | tee -a $srcDir/changelog.txt
+		string="Added $numNewUsers new users"
+		Msg2 "^$string"
+		[[ $numNewUsers -gt 0 ]] && changeLogLines+=("$string")
+		string="Modified $numModifiedUsers existing users"
+		Msg2 "^$string"
+		[[ $numModifiedUsers -gt 0 ]] && changeLogLines+=("$string")
 	fi
 
 	[[ $processedUserData == true ]] && Msg2
@@ -873,25 +874,36 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 		Msg2 "Role data:"
 		Msg2 "^Retrieved $numRolesFromFile records from the roles.tcf file"
 		Msg2 "^Retrieved $numRolesfromSpreadsheet records from $workbookFile"
-		Msg2 "^Added $numNewRoles new roles" | tee -a $srcDir/changelog.txt
-		Msg2 "^Modified $numModifiedRoles existing roles" | tee -a $srcDir/changelog.txt
-		[[ $numRoleMembersMappedToUIN -gt 0 ]] && Msg2 "^Mapped $numRoleMembersMappedToUIN role members from UID to UIN" | tee -a $srcDir/changelog.txt
-		[[ $numRoleMembersNotProvisoned -gt 0 ]] && Msg2 "^Found $numRoleMembersNotProvisoned role members not in user provisoning" | tee -a $srcDir/changelog.txt
+		string="Added $numNewRoles new roles"
+		Msg2 "^$string"
+		[[ $numNewRoles -gt 0 ]] && changeLogLines+=("$string")
+		string="Modified $numModifiedRoles existing roles"
+		Msg2 "^$string"
+		[[ $numModifiedRoles -gt 0 ]] && changeLogLines+=("$string")
+		string="Mapped $numRoleMembersMappedToUIN role members from UID to UIN"
+		[[ $numRoleMembersMappedToUIN -gt 0 ]] && Msg2 "^$string" && changeLogLines+=("$string")
+		string="Found $numRoleMembersNotProvisoned role members not in user provisioning"
+		[[ $numRoleMembersNotProvisoned -gt 0 ]] && Msg2 "^$string" && changeLogLines+=("$string")
 	fi
 
 	[[ $processedUserData == true || $processedRoleData == true ]] && Msg2
 	if [[ $processedPageData == true ]]; then
 		Msg2 "Page data:"
 		Msg2 "^Retrieved $numWorkflowDataFromSpreadsheet records from $workbookFile"
-		Msg2 "^Updated $numPagesUpdated pages" | tee -a $srcDir/changelog.txt
-		[[ $numMembersMappedToUIN -gt 0 ]] && Msg2 "^Mapped $numMembersMappedToUIN role members from UID to UIN" | tee -a $srcDir/changelog.txt
-		[[ $numPagesNotFound -gt 0 ]] && Msg2 "^$numPagesNotFound pages not found" | tee -a $srcDir/changelog.txt
-		[[ ${#membersErrors[@]} -gt 0 ]] && Msg2 "^Pages had errors in their owner/workflow data, see below for detailed information" | tee -a $srcDir/changelog.txt
-		## Member lookup errors
+		string="Updated $numPagesUpdated pages"
+		Msg2 "^$string"
+		[[ $numPagesUpdated -gt 0 ]] && changeLogLines+=("$string")
+		string="Mapped $numMembersMappedToUIN role members from UID to UIN"
+		[[ $numMembersMappedToUIN -gt 0 ]] && Msg2 "^$string" && changeLogLines+=("$string")
+		string="$numPagesNotFound pages not found"
+		[[ $numPagesNotFound -gt 0 ]] && Msg2 "^$string" && changeLogLines+=("$string")
+		string="Pages had errors in their owner/workflow data, see below for detailed information"
+		[[ ${#membersErrors[@]} -gt 0 ]] && Msg2 "^$string" && changeLogLines+=("$string")
 
+		## Member lookup errors
 		if [[ ${#membersErrors[@]} -gt 0 ]]; then
 			Msg2
-			WarningMsg 0 1 "Found page owner or role data without a defined user or role, please see above"
+			WarningMsg 0 1 "Found page owner or role data without a defined user or role:"
 			for key in "${!membersErrors[@]}"; do
 				Msg2 "^$(ColorW "*Warning*") -- Workflow/Owner member: '$key' not defined and used on the following pages:"
 				IFSsave=$IFS; IFS='|' read -a pages <<< "${membersErrors["$key"]}"; IFS=$IFSsave
@@ -902,6 +914,13 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 			done
 		fi
 	fi
+
+	## Write out change log entries
+	if [[ $informationOnlyMode != true ]]; then
+		changeLogLines=("Files updated from '$workbookFile':")
+		WriteChangelogEntry 'changeLogLines' "$srcDir/changelog.txt"
+	fi
+
 
 #==================================================================================================
 ## Done
@@ -951,3 +970,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## Tue Jan  3 13:44:34 CST 2017 - dscudiero - sync
 ## Tue Jan  3 15:36:36 CST 2017 - dscudiero - misc cleanup
 ## Tue Jan 10 09:54:07 CST 2017 - dscudiero - Updated messaging to reflect if we are running with informationOnly set
+## Tue Jan 10 15:24:53 CST 2017 - dscudiero - Tweek output messaging
