@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.159 # -- dscudiero -- 01/06/2017 @  7:25:30.02
+version=1.21.160 # -- dscudiero -- 01/10/2017 @ 12:53:29.08
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -214,16 +214,14 @@ case "$hostName" in
 					touch $sqliteDbs/contacts.syncDate
 					Msg2 "^...done"
 
-				## Truncate the tables
-					sqlStmt="truncate $clientInfoTable"
-					RunSql2 $sqlStmt
+				## Build the clientInfoTable
+					Call 'buildClientInfoTable' "-inPlace $scriptArgs"
+
+				## Truncate the sites tables
 					sqlStmt="truncate $siteInfoTable"
 					RunSql2 $sqlStmt
 					sqlStmt="truncate $siteAdminsTable"
 					RunSql2 $sqlStmt
-
-				## Build the clientInfoTable
-					Call 'buildClientInfoTable' "$scriptArgs"
 
 			## Clear a semaphore
 				sqlStmt="delete from $semaphoreInfoTable where processName=\"$myName\""
@@ -369,3 +367,4 @@ return 0
 ## Thu Jan  5 07:59:27 CST 2017 - dscudiero - Fixed syntax error introduced on last commit
 ## Thu Jan  5 14:50:01 CST 2017 - dscudiero - Switch to use RunSql2
 ## Fri Jan  6 07:26:07 CST 2017 - dscudiero - Tweak messaging
+## Tue Jan 10 12:54:12 CST 2017 - dscudiero - Add the -inPlace flag to the buildClientInfoTable call
