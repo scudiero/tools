@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.83 # -- dscudiero -- 01/04/2017 @  9:57:57.44
+version=1.3.84 # -- dscudiero -- 01/10/2017 @ 16:16:45.55
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -60,7 +60,7 @@ function mapRefreshObj {
 #==============================================================================================
 function vba {
 	[[ $userName != 'dscudiero' ]] && Msg2 $T "Sorry you cannot refresh objects of type $refreshObj"
-	## GecolorKt the list of vba applications
+	## Get the list of vba applications
 		srcDir="/home/dscudiero/windowsStuff/documents/Visual Studio 2015/Projects"
 		cwd=$(pwd)
 		cd "$srcDir"
@@ -105,7 +105,7 @@ function vba {
 		chgrp -R leepfrog "$tgtDir/$app-new"
 		chmod -R 750 "$tgtDir/$app-new"
 		touch .refreshedFrom.$project
-		[[ -d $tgtDir/$app ]] && mv $tgtDir/$app $tgtDir/attic/$app-$(date +"%H%M%S")
+		[[ -d $tgtDir/$app ]] && mv $tgtDir/$app $tgtDir/archive/$app-$(date +"%H%M%S")
 		mv -f $tgtDir/$app-new $tgtDir/$app
 	cd "$cwd"
 	Msg2 "Production '$app' refreshed from $project"
@@ -339,3 +339,4 @@ Goodbye 0
 ## Mon Oct 17 11:32:07 CDT 2016 - dscudiero - Updated to reflect new name for courseleafPatch
 ## Tue Oct 18 11:07:04 CDT 2016 - dscudiero - Fix problem loging changes to changelog.txt in core workflow files
 ## Wed Jan  4 10:29:52 CST 2017 - dscudiero - add missing items to imports
+## Tue Jan 10 16:17:06 CST 2017 - dscudiero - Fix problem making backup in vba refresh
