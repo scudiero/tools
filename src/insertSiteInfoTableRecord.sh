@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.103 # -- dscudiero -- 01/10/2017 @ 14:55:48.48
+version=1.1.104 # -- dscudiero -- 01/11/2017 @  6:52:38.70
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseCourseleafFile CleanString' #imports="$imports "
@@ -35,9 +35,6 @@ siteDir="$1" ; shift
 clientId="$1"; shift
 originalArgStr="$*"
 ParseArgsStd "$*"
-
-verboseLevel=2
-Msg2 "*** verboseLevel forced to $verboseLevel ***"
 
 #==================================================================================================
 # Declare local variables and constants
@@ -351,3 +348,4 @@ return 0
 ## Thu Jan  5 15:50:53 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Jan  6 08:04:22 CST 2017 - dscudiero - General syncing of dev to prod
 ## Tue Jan 10 14:57:02 CST 2017 - dscudiero - Fix problem getting the correct siteId after the insert of the seed record
+## Wed Jan 11 07:00:17 CST 2017 - dscudiero - Fix problem building the skeleton shadow
