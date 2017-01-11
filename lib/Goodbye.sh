@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.81" # -- dscudiero -- 01/04/2017 @ 13:40:33.73
+# version="2.0.82" # -- dscudiero -- 01/11/2017 @  7:30:43.71
 #===================================================================================================
 # Common script exit
 # args:
@@ -35,12 +35,12 @@ function Goodbye {
 	## Exit Process
 	case "$(Lower "$exitCode")" in
 		quiet)
-			[[ $myLogRecordIdx != '' ]] && dbLog 'remove' $myLogRecordIdx
+			[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Remove' $myLogRecordIdx
 			kill -1 $$
 			exitCode=0
 			;;
 		quickquit|x)
-			[[ $myLogRecordIdx != '' ]] && dbLog 'remove' $myLogRecordIdx
+			[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Remove' $myLogRecordIdx
 			Msg2 "\n*** Stopping at user's request ***\n"
 			kill -1 $$
 			exitCode=0
@@ -49,9 +49,6 @@ function Goodbye {
 			secondaryMessagesOnly=true
 			;;
 		*)
-			## Write end record to db log
-				[[ $myLogRecordIdx != "" ]] && dbLog 'xitCode' $myLogRecordIdx "$exitCode"
-
 			## If there are any forked process, then wait on them
 				if [[ ${#forkedProcesses[@]} -gt 0  && $waitOnForkedProcess == true ]]; then
 					Msg2; Msg2 "*** Waiting for ${#forkedProcesses[@]} forked processes to complete ***"
@@ -123,6 +120,10 @@ function Goodbye {
 			[[ $alert == true ]] && Alert
 	esac
 
+	## Write end record to db log
+		[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Update' $myLogRecordIdx 'exitCode' "$exitCode"
+		[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'End' $myLogRecordIdx
+
 	## If secondaryMessagesOnly is true then we are in a sub shell so just return, otherwise exit
 	[[ $secondaryMessagesOnly == true ]] && secondaryMessagesOnly=false && return 0
 	set +eE
@@ -138,3 +139,4 @@ export -f Goodbye
 #===================================================================================================
 
 ## Wed Jan  4 13:53:40 CST 2017 - dscudiero - General syncing of dev to prod
+## Wed Jan 11 07:50:53 CST 2017 - dscudiero - Switch to use ProcessLogger
