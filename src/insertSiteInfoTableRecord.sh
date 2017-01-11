@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.107 # -- dscudiero -- 01/11/2017 @  9:43:13.63
+version=1.1.108 # -- dscudiero -- 01/11/2017 @  9:51:23.67
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseCourseleafFile CleanString' #imports="$imports "
@@ -216,9 +216,15 @@ Msg2 "^$env ($siteDir)"
 	## Get daily.sh versions
 		dailyshVer=NULL
 		checkFile="$siteDir/bin/daily.sh"
-		dailyshVer=$(ProtectedCall "grep 'version=' $skeletonRoot/release/bin/daily.sh")
-		dailyshVer=${dailyshVer##*=} ; dailyshVer=${dailyshVer%% *}
-		[[ $dailyshVer != 'NULL' ]] && dailyshVer=\"$dailyshVer\"
+		if [[ -r $checkFile ]]; then
+
+			grepStr=$(ProtectedCall "grep '## Nightly cron job for client' $checkFile")
+			if [[ -n $grepStr ]]; then
+				dailyshVer=$(ProtectedCall "grep 'version=' $checkFile")
+				dailyshVer=${dailyshVer##*=} ; dailyshVer=${dailyshVer%% *}
+				[[ $dailyshVer != 'NULL' ]] && dailyshVer=\"$dailyshVer\"
+			fi
+		fi
 		dump -2 -t dailyshVer
 
 ## Get the edition variable
@@ -361,3 +367,4 @@ return 0
 ## Wed Jan 11 07:00:17 CST 2017 - dscudiero - Fix problem building the skeleton shadow
 ## Wed Jan 11 09:10:44 CST 2017 - dscudiero - Change clver to catVer, added dailyshVer
 ## Wed Jan 11 09:46:52 CST 2017 - dscudiero - x
+## Wed Jan 11 09:54:45 CST 2017 - dscudiero - Fixed various problems with dailyshVer code
