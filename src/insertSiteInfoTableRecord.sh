@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.104 # -- dscudiero -- 01/11/2017 @  6:52:38.70
+version=1.1.105 # -- dscudiero -- 01/11/2017 @  9:02:17.32
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseCourseleafFile CleanString' #imports="$imports "
@@ -156,7 +156,7 @@ Msg2 "^$env ($siteDir)"
 	dump -2 -t cimStr
 
 ## Get the cimVer
-	clverFile=$siteDir/web/courseleaf/cim/clver.txt
+	clverFile="$siteDir/web/courseleaf/cim/clver.txt"
 	cimVer=NULL
 	if [[ -r $clverFile ]]; then
 		cimVer=$(cat $clverFile);
@@ -166,22 +166,21 @@ Msg2 "^$env ($siteDir)"
 	dump -2 -t cimVer
 
 ## Get the clVer
-	clverFile=$siteDir/web/courseleaf/clver.txt
-	defaultTcfFile=$siteDir/web/courseleaf/default.tcf
-	clVer=NULL
+	clverFile="$siteDir/web/courseleaf/clver.txt"
+	defaultTcfFile="$siteDir/web/courseleaf/default.tcf"
+	catVer=NULL
 	if [[ -r $clverFile ]]; then
-		clVer=$(cat $clverFile);
-		clVer=$(cut -d":" -f2 <<< $clVer | tr -d '\040\011\012\015');
+		catVer=$(cat $clverFile);
+		catVer=$(cut -d":" -f2 <<< $clVer | tr -d '\040\011\012\015');
 	elif [[ -f $defaultTcfFile ]]; then
-		clVer=$(ProtectedCall "grep '^clver:' $defaultTcfFile");
-		clVer=$(cut -d":" -f2 <<< $clVer | tr -d '\040\011\012\015');
+		catVer=$(ProtectedCall "grep '^clver:' $defaultTcfFile");
+		catVer=$(cut -d":" -f2 <<< $catVer | tr -d '\040\011\012\015');
 	fi
-	#clVer=$(cut -d' ' -f1 <<< $clVer)
-	[[ $clVer != 'NULL' ]] && clVer=\""$clVer"\"
-	dump -2 -t clVer
+	[[ $catVer != 'NULL' ]] && catVer=\""$catVer"\"
+	dump -2 -t catVer
 
 ## Get the clssVer
-	clverFile=$siteDir/web/wen/clver.txt
+	clverFile="$siteDir/web/wen/clver.txt"
 	clssVer=NULL
 	if [[ -r $clverFile ]]; then
 		clssVer=$(cat $clverFile);
@@ -192,7 +191,7 @@ Msg2 "^$env ($siteDir)"
 
 ## Get the cgiVersion
 	courseleafCgiVer=NULL
-	cgiFile=$siteDir/web/courseleaf/courseleaf.cgi
+	cgiFile="$siteDir/web/courseleaf/courseleaf.cgi"
 	if [[ -x "$cgiFile" ]]; then
 		courseleafCgiVer="$($cgiFile -v  2> /dev/null | cut -d" " -f3)"
 	fi
@@ -201,7 +200,7 @@ Msg2 "^$env ($siteDir)"
 
 ## Get the reportsVer
 	reportsVer=NULL
-	checkFile=$siteDir/web/courseleaf/localsteps/reports.js
+	checkFile="$siteDir/web/courseleaf/localsteps/reports.js"
 	if [[ -r "$checkFile" ]]; then
 		reportsVer="$(ProtectedCall "grep -s -m 1 'version:' $checkFile")"
 		reportsVer=${reportsVer##*: }
@@ -210,10 +209,18 @@ Msg2 "^$env ($siteDir)"
 	[[ $reportsVer != 'NULL' ]] && reportsVer=\""$reportsVer"\"
 	dump -2 -t reportsVer
 
+	## Get daily.sh versions
+		dailyshVer=NULL
+		checkFile="$siteDir/bin/daily.sh"
+		dailyshVer=$(ProtectedCall "grep 'version=' $skeletonRoot/release/bin/daily.sh")
+		dailyshVer=${dailyshVer##*=} ; dailyshVer=${dailyshVer%% *}
+		[[ $dailyshVer != 'NULL' ]] && dailyshVer=\""$reportsVer"\"
+		dump -2 -t dailyshVer
+
 
 ## Get the edition variable
 	catEdition=NULL
-	grepFile=$siteDir/web/courseleaf/localsteps/default.tcf
+	grepFile="$siteDir/web/courseleaf/localsteps/default.tcf"
 	if [[ -f $grepFile ]]; then
 		catEdition=$(cut -d":" -f2 <<< $(ProtectedCall "grep '^edition:' $grepFile") | tr -d '\040\011\012\015');
 	fi
@@ -223,7 +230,7 @@ Msg2 "^$env ($siteDir)"
 ## Get the publishing
 	publishTarget=NULL
 	if [[ "$env" = 'next' || "$env" = 'curr' ]]; then
-		grepFile=$siteDir/courseleaf.cfg
+		grepFile="$siteDir/courseleaf.cfg"
 		if [[ -f $grepFile ]]; then
 			mapfileProd=$(ProtectedCall "grep '^mapfile:production|' $grepFile");
 			[[ $mapfileProd == '' ]] && mapfileProd=$(ProtectedCall "grep '^mapfile:production/|' $grepFile");
@@ -238,7 +245,7 @@ Msg2 "^$env ($siteDir)"
 ## See if site has degree works tools enabled
 	degreeWorks=NULL
 	if [[ "$env" != 'preview' && "$env" != 'public' ]]; then
-		grepFile=$siteDir/web/courseleaf/index.tcf
+		grepFile="$siteDir/web/courseleaf/index.tcf"
 		if [[ -f $grepFile ]]; then
 			unset tempStr; tempStr=$(ProtectedCall "grep '^navlinks\:.*dworksenable' $grepFile")
 			[[ -n $tempStr ]] && degreeWorks='Yes'
@@ -299,7 +306,7 @@ Msg2 "^$env ($siteDir)"
 	fi
 
 ## Create the sites table record
-	setStr="clver=$clVer,cimver=$cimVer,clssVer=$clssVer,courseleafCgiVer=$courseleafCgiVer,reportsVer=$reportsVer"
+	setStr="catver=$catVer,cimver=$cimVer,clssVer=$clssVer,courseleafCgiVer=$courseleafCgiVer,reportsVer=$reportsVer,dailyshVer=$dailyshVer"
 	setStr="$setStr,CIMs=$cimStr,url=$url,internalUrl=$internalUrl,archives=$archives,googleType=$googleType"
 	setStr="$setStr,CATedition=$catEdition,publishing=$publishTarget,degreeWorks=$degreeWorks"
 	sqlStmt="update $useSiteInfoTable set $setStr where siteId=\"$siteId\""
@@ -349,3 +356,4 @@ return 0
 ## Fri Jan  6 08:04:22 CST 2017 - dscudiero - General syncing of dev to prod
 ## Tue Jan 10 14:57:02 CST 2017 - dscudiero - Fix problem getting the correct siteId after the insert of the seed record
 ## Wed Jan 11 07:00:17 CST 2017 - dscudiero - Fix problem building the skeleton shadow
+## Wed Jan 11 09:10:44 CST 2017 - dscudiero - Change clver to catVer, added dailyshVer
