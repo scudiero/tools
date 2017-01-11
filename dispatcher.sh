@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.47" # -- dscudiero -- 01/11/2017 @ 11:04:22.45
+version="1.2.48" # -- dscudiero -- 01/11/2017 @ 11:31:33.02
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -187,10 +187,10 @@ prtStatus "parse args"
 
 ## Import thins we need to continue
 	sTime=$(date "+%s")
-	includes='Colors Msg2 Dump DumpArray Here Quit Contains PushSettings PopSettings'
-	includes="$includes MkTmpFile Pause ProtectedCall SetFileExpansion PadChar PrintBanner Alert"
-	includes="$includes TrapSigs SignalHandeler RunSql RunSql2 DbLog ProcessLogger GetCallStack DisplayNews Help"
-	includes="$includes GetDefaultsData Call StartRemoteSession FindExecutable CheckRun CheckAuth CheckSemaphore Call"
+	includes='Colors Msg2 Dump DumpArray Here Quit PushSettings PopSettings MkTmpFile Pause ProtectedCall '
+	includes="$includes SetFileExpansion PadChar PrintBanner Alert TrapSigs SignalHandeler RunSql RunSql2"
+	includes="$includes DbLog ProcessLogger GetCallStack DisplayNews Help GetDefaultsData Call StartRemoteSession"
+	includes="$includes FindExecutable CheckRun CheckAuth CheckSemaphore Call"
 	Import "$includes"
 	#Import FindExecutable CheckRun CheckAuth CheckSemaphore Call
 	prtStatus ", imports"
@@ -325,3 +325,4 @@ prtStatus "parse args"
 ## Fri Jan  6 16:40:40 CST 2017 - dscudiero - Switch to use ProcessLogger
 ## Wed Jan 11 07:54:19 CST 2017 - dscudiero - Set noLogInDb if module is test*
 ## Wed Jan 11 11:04:43 CST 2017 - dscudiero - Removed functions now in StrinFunctions
+## Wed Jan 11 11:31:58 CST 2017 - dscudiero - Remove import for Contains
