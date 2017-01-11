@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.102 # -- dscudiero -- 01/10/2017 @ 12:53:35.53
+version=2.3.103 # -- dscudiero -- 01/11/2017 @  6:55:27.37
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -148,6 +148,11 @@ Msg2 "Table: $useClientInfoTable"
 		RunSql2 $sqlStmt
 	fi
 
+	sqlStmt="select count{*) from $clientInfoTable"
+	RunSql2
+	Msg2 "\nInserted ${#resultSet[@]} records into $clientInfoTable"
+
+
 #=======================================================================================================================
 # Done
 #=======================================================================================================================
@@ -168,3 +173,4 @@ Goodbye 0 'alert'
 ## Fri Jan  6 07:41:30 CST 2017 - dscudiero - Add Messages for the swap db process
 ## Mon Jan  9 13:29:00 CST 2017 - dscudiero - Add an inplace option to just update the clients table directly
 ## Tue Jan 10 12:54:37 CST 2017 - dscudiero - Added 'inPlace' option
+## Wed Jan 11 07:00:04 CST 2017 - dscudiero - Add status at the end of processing
