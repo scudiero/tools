@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.3" # -- dscudiero -- 01/11/2017 @ 11:03:13.62
+# version="1.0.4" # -- dscudiero -- 01/11/2017 @ 11:14:02.31
 #===================================================================================================
 # Various string manipulation functions
 #===================================================================================================
@@ -69,8 +69,29 @@ function IsNumeric {
 } #IsNumeric
 export -f IsNumeric
 
+#===================================================================================================
+function Indent {
+	local line
+	while read line ; do
+		echo -e "\t\t$line"
+	done
+		return 0
+} #Indent
+export -f Indent
+
+#===================================================================================================
+function Contains {
+	local string="$1"
+	local substring="$2"
+	local testStr=${string#*$substring}
+
+	[[ "$testStr" != "$string" ]] && echo true || echo false
+	return 0
+} #Contains
+export -f Contains
 
 #===================================================================================================
 # Check-in Log
 #===================================================================================================
 ## Wed Jan 11 11:03:37 CST 2017 - dscudiero - Moved IsNumeric into file
+## Wed Jan 11 11:15:52 CST 2017 - dscudiero - Moved Conains into this file
