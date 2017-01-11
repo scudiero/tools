@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.42" # -- dscudiero -- 01/06/2017 @ 16:40:14.70
+version="1.2.45" # -- dscudiero -- 01/11/2017 @  7:52:43.95
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -59,7 +59,7 @@ function CleanUp {
 
 	## Cleanup semaphore and dblogging
 		[[ $semaphoreProcessing == true && $(Lower $setSemaphore) == 'yes' && $semaphoreId != "" ]] && Semaphore 'clear' $semaphoreId
-		[[ $logInDb != false && $myLogRecordIdx != "" ]] && dbLog 'End' $myLogRecordIdx
+		[[ $logInDb != false && $myLogRecordIdx != "" ]] && ProcessLogger 'End' $myLogRecordIdx
 		SetFileExpansion 'on'
 		rm -rf /tmp/$userName.$callPgmName.* > /dev/null 2>&1
 		SetFileExpansion
@@ -130,7 +130,8 @@ statusLine="\tDispatcher ($version): "
 	scriptArgs=${scriptArgs:1} ## Strip off leading blank
 
 ## Hello
-[[ $batchMode != true && $(hostname) == 'build7.leepfrog.com' ]] && echo -e "\tNote: (dispatcher) The current host has been found to be a bit slow, patience you must have my young padawan" >&3
+[[ $batchMode != true && $(hostname) == 'build7.leepfrog.com' ]] && \
+	echo -e "\tNote: (dispatcher) The current host has been found to be a bit slow, patience you must have my young padawan" >&3
 
 ## If called as ourselves, then the first token is the script name to call
 	if [[ $callPgmName == 'dispatcher.sh' ]]; then
@@ -140,7 +141,7 @@ statusLine="\tDispatcher ($version): "
 	$GD -e "callPgmName = '$callPgmName'\n scriptArgs = '$scriptArgs'"
 
 ## Overrides
-	[[ ${callPgmName:0:4} == 'test' ]] && noLog=true && noLognDb=true && useLocal=true
+	[[ ${callPgmName:0:4} == 'test' ]] && noLog=true && noLogInDb=true && useLocal=true
 	[[ $useLocal == true ]] && export USELOCAL=true
 
 prtStatus "parse args"
@@ -283,8 +284,6 @@ prtStatus "parse args"
 		$GD -e "\nCall $executeFile $scriptArgs\n"
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
-		## Log Start in process log database
-			[[ $noLogInDb != true ]] && myLogRecordIdx=$(ProcessLogger 'Start' "$myName")
 		(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile; rc=$?
 		rc="$?"
 
@@ -324,3 +323,4 @@ prtStatus "parse args"
 ## Thu Jan  5 15:02:07 CST 2017 - dscudiero - remove RunMySql and RunSqlite
 ## Thu Jan  5 16:15:23 CST 2017 - dscudiero - if status time is zero, display 1
 ## Fri Jan  6 16:40:40 CST 2017 - dscudiero - Switch to use ProcessLogger
+## Wed Jan 11 07:54:19 CST 2017 - dscudiero - Set noLogInDb if module is test*
