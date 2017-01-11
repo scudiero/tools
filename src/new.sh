@@ -1,9 +1,10 @@
 #!/bin/bash
 #===================================================================================================
-version=1.2.19 # -- dscudiero -- 12/29/2016 @ 16:44:24.69
+version=1.2.21 # -- dscudiero -- 01/11/2017 @ 16:41:08.52
 #===================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
+imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
+imports="$imports SelectMenu"
 Import "$imports"
 originalArgStr="$*"
 scriptDescription="Display news"
@@ -271,7 +272,7 @@ function NewVba {
 			[[ $ans != 'y' ]] && Goodbye 0
 			rm -rf $newProject
 		fi
-		Msg2 "^Createing new project directory: $newProject"
+		Msg2 "^Creating new project directory: $newProject"
 		cp -rfp $project $newProject
 		cd $newProject
 
@@ -382,7 +383,7 @@ Msg2; Msg2 "$objType object created"
 ## Thu Jun  2 13:29:43 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Thu Jun  2 13:30:42 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Tue Jun 14 15:33:49 CDT 2016 - dscudiero - Updated scripts processing
-## Mon Jun 20 10:22:57 CDT 2016 - dscudiero - update createing vba objects
+## Mon Jun 20 10:22:57 CDT 2016 - dscudiero - update creating vba objects
 ## Fri Jul 15 14:58:00 CDT 2016 - dscudiero - Add the usageCount field on the insert script call
 ## Mon Jul 18 10:49:45 CDT 2016 - dscudiero - For reports make arguments to report optional
 ## Mon Jul 18 15:57:54 CDT 2016 - dscudiero - Added client to create new client records in clients and sites tables
@@ -390,6 +391,7 @@ Msg2; Msg2 "$objType object created"
 ## Thu Oct  6 16:59:31 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Fri Oct  7 08:00:52 CDT 2016 - dscudiero - Take out the dbAcc switching logic, moved to framework RunSql
 ## Wed Oct 12 10:00:51 CDT 2016 - dscudiero - Updated to create new script link in the users local bin directory
-## Wed Oct 12 12:33:41 CDT 2016 - dscudiero - Refactor new script
+## Wed Oct 12 12:33:41 CDT 2016 - dscudiero - Re factor new script
 ## Fri Oct 21 13:43:48 CDT 2016 - dscudiero - Added libs data for scripts
 ## Thu Dec 29 16:50:57 CST 2016 - dscudiero - Updated creating a default to add the status column
+## Wed Jan 11 16:41:31 CST 2017 - dscudiero - fixed import statements
