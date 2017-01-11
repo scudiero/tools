@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=4.10.92 # -- dscudiero -- 12/21/2016 @  8:26:56.39
+version=4.10.93 # -- dscudiero -- 01/11/2017 @ 10:38:57.10
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCoureleafCgi WriteChangelogEntry GetCims'
@@ -227,6 +227,9 @@ dump -1 ignoreCatReleases ignoreCimReleases
 	cd $cwd
 	dump -1 cgisDir
 
+
+
+
 #==================================================================================================
 # Verify continue
 #==================================================================================================
@@ -431,24 +434,26 @@ unset changeLogRecs
 ## Copy /bin/daily.sh if this client is using the new common version
 	unset grepStr
 	grepFile="$tgtDir/bin/daily.sh"
-	grepStr=$(ProtectedCall "grep '## Nightly cron job for client' $grepFile")
-	if [[ $grepStr != '' ]]; then
-		updateFile="/bin/daily.sh"
-		Msg2; Msg2 "$(ColorK "Checking '$updateFile")"
-		srcFile="$skeletonRoot/release${updateFile}"
-		srcMd5=$(md5sum $srcFile | cut -f1 -d" ")
-		tgtFile="$tgtDir$updateFile"
-		tgtMd5=$(md5sum $tgtFile | cut -f1 -d" ")
-		if [[ $srcMd5 != $tgtMd5 ]]; then
-			if [[ -f "$tgtFile" ]]; then
-				[[ ! -d ${backupRootDir}$(dirname $updateFile) ]] && $DOIT mkdir -p "${backupRootDir}$(dirname $updateFile)"
-				$DOIT cp -fp "$tgtFile" "${backupRootDir}${updateFile}"
+	if [[ -r $grepFile ]]; then
+		grepStr=$(ProtectedCall "grep '## Nightly cron job for client' $grepFile")
+		if [[ $grepStr != '' ]]; then
+			updateFile="/bin/daily.sh"
+			Msg2; Msg2 "$(ColorK "Checking '$updateFile")"
+			srcFile="$skeletonRoot/release${updateFile}"
+			srcMd5=$(md5sum $srcFile | cut -f1 -d" ")
+			tgtFile="$tgtDir$updateFile"
+			tgtMd5=$(md5sum $tgtFile | cut -f1 -d" ")
+			if [[ $srcMd5 != $tgtMd5 ]]; then
+				if [[ -f "$tgtFile" ]]; then
+					[[ ! -d ${backupRootDir}$(dirname $updateFile) ]] && $DOIT mkdir -p "${backupRootDir}$(dirname $updateFile)"
+					$DOIT cp -fp "$tgtFile" "${backupRootDir}${updateFile}"
+				fi
+				$DOIT cp -fp $srcFile $tgtFile
+				Msg2 "^Upated '$updateFile'"
+				changeLogRecs+=("daily.sh updated")
+			else
+				Msg2 "^'$updateFile' is current"
 			fi
-			$DOIT cp -fp $srcFile $tgtFile
-			Msg2 "^Upated '$updateFile'"
-			changeLogRecs+=("daily.sh updated")
-		else
-			Msg2 "^'$updateFile' is current"
 		fi
 	fi
 
@@ -552,3 +557,4 @@ if [[ -f $myTempFile ]]; then rm $myTempFile; fi
 ## Wed Sep 28 08:03:18 CDT 2016 - dscudiero - tweak messaging
 ## Fri Oct 14 13:41:07 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Fri Oct 14 13:47:27 CDT 2016 - dscudiero - General syncing of dev to prod
+## Wed Jan 11 10:42:18 CST 2017 - dscudiero - Do not check the daily.sh file if it is not present
