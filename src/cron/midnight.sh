@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.163 # -- dscudiero -- 01/11/2017 @  7:03:22.29
+version=1.21.165 # -- dscudiero -- 01/11/2017 @  8:52:16.27
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -137,6 +137,7 @@ function BuildCourseleafDataTable {
 		for component in "${components[@]}"; do
 			dirs=($(ls -c $gitRepoShadow/$component | ProtectedCall "grep -v master"))
 			[[ ${#dirs[@]} -gt 0 ]] && latest=${dirs[0]} || latest='master'
+			dump -1 component latest
 			sqlStmt="insert into $courseleafDataTable values(NULL,\"$component\",NULL,\"$latest\",NOW(),\"$userName\")"
 			RunSql2 $sqlStmt
 		done
@@ -150,9 +151,17 @@ function BuildCourseleafDataTable {
 		reportsVersions=$(ls -d -t * 2> /dev/null | cut -d $'\n' -f1);
 		reportsVersions=$(cut -d'.' -f1-3 <<< $reportsVersions)
 		SetFileExpansion
+		dump -1 reportsVersions
 		sqlStmt="insert into $courseleafDataTable values(NULL,\"reports\",NULL,\"$reportsVersions\",NOW(),\"$userName\")"
 		[[ -n $reportsVersions ]] && RunSql2 $sqlStmt
 		cd "$cwd"
+
+	## Get daily.sh versions
+		dailyshVer=$(ProtectedCall "grep 'version=' $skeletonRoot/release/bin/daily.sh")
+		dailyshVer=${dailyshVer##*=} ; dailyshVer=${dailyshVer%% *}
+		dump -1 dailyshVer
+		sqlStmt="insert into $courseleafDataTable values(NULL,\"daily.sh\",NULL,\"$dailyshVer\",NOW(),\"$userName\")"
+		[[ -n $dailyshVer ]] && RunSql2 $sqlStmt
 
 	## Get Courseleaf cgi versions
 		cwd=$(pwd)
@@ -167,6 +176,7 @@ function BuildCourseleafDataTable {
 			else
 				cgiVer=$latest
 			fi
+			dump -1 rhelDir cgiVer
 			sqlStmt="insert into $courseleafDataTable values(NULL,\"courseleaf.cgi\",\"$rhelDir\",\"$cgiVer\",NOW(),\"$userName\")"
 			RunSql2 $sqlStmt
 		done
@@ -370,3 +380,4 @@ return 0
 ## Tue Jan 10 12:54:12 CST 2017 - dscudiero - Add the -inPlace flag to the buildClientInfoTable call
 ## Wed Jan 11 07:00:53 CST 2017 - dscudiero - fix problem building skeleton shadow
 ## Wed Jan 11 07:04:10 CST 2017 - dscudiero - turn off db logging
+## Wed Jan 11 09:09:57 CST 2017 - dscudiero - Add dailyshVer to UpdateCourseleafData
