@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.3 # -- dscudiero -- 01/06/2017 @ 14:08:55.35
+version=4.3.4 # -- dscudiero -- 01/11/2017 @  9:45:43.47
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -103,7 +103,7 @@ Msg2 "Loading table: $useSiteInfoTable"
 			[[ -z ${devDir}${testDir}${nextDir}${currDir}${priorDir}${previewDir}${publicDir} ]] && continue
 
 			[[ $batchMode != true ]] && Msg2 "Processing: $client -- $clientId ($clientCntr/$numClients)..."
-			## Remove any existing records for this client
+			## Remove any existing records for this client/env
 			[[ -n $env ]] && andClause="and env=\"$env\"" || unset andClause
 			sqlStmt="delete from $useSiteInfoTable where name like\"$client%\" $andClause"
 			RunSql2 $sqlStmt
@@ -193,3 +193,4 @@ Goodbye 0 'alert'
 ## Fri Jan  6 08:12:36 CST 2017 - dscudiero - Fix problem where not processing all envs for clients > 1
 ## Fri Jan  6 10:10:29 CST 2017 - dscudiero - Do not unset env variable after argument parsing
 ## Fri Jan  6 15:57:49 CST 2017 - dscudiero - General syncing of dev to prod
+## Wed Jan 11 09:46:21 CST 2017 - dscudiero - updated code comments
