@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.1" # -- dscudiero -- 01/05/2017 @ 13:46:40.93
+# version="1.0.7" # -- dscudiero -- 01/11/2017 @ 15:49:40.73
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -21,7 +21,10 @@
 		else
 			local dbType='mysql'
 		fi
-		local sqlStmt="$*" ; [[ ${sqlStmt:${#sqlStmt}:1} != ';' ]] && sqlStmt="$sqlStmt;"
+
+		local sqlStmt="$*"
+		[[ -z $sqlStmt ]] && unset resultSet && return 0
+		[[ ${sqlStmt:${#sqlStmt}:1} != ';' ]] && sqlStmt="$sqlStmt;"
 		local stmtType=$(tr '[:lower:]' '[:upper:]' <<< "${sqlStmt%% *}")
 		[[ -n $DOIT || $informationOnlyMode == true ]] && [[ $stmtType != 'SELECT' ]] && echo "sqlStmt = >$sqlStmt<" && return 0
 		local prevGlob=$(set -o | grep noglob | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2)
@@ -29,12 +32,16 @@
 
 		## Run the query
 			set -f
-			[[ $dbType == 'mysql' ]] && resultStr=$(java runMySql $sqlStmt) || resultStr=$(sqlite3 $dbFile "$sqlStmt" 2>&1 | tr "\t" '|')
-			tmpStr="${resultStr%% *}"
-			if [[ $(tr '[:lower:]' '[:upper:]' <<< "${tmpStr:0:5}") == 'ERROR' ]]; then
+			if [[ $dbType == 'mysql' ]]; then
+				resultStr=$(java runMySql $sqlStmt 2>&1)
+			else
+				resultStr=$(sqlite3 $dbFile "$sqlStmt" 2>&1 | tr "\t" '|')
+			fi
+			## Check for errors
+			if [[ $(Contains "$resultStr" 'SEVERE:') == true || $(Contains "$resultStr" 'ERROR') == true ]]; then
 				msg="$FUNCNAME: Error reported from $dbType"
 				[[ $dbType == 'sqlite3' ]] && msg="$msg\n\tFile: $dbFile"
-				msg="$msg\n\tsqlStmt: $sqlStmt"
+				msg="$msg\n\tsqlStmt: '$sqlStmt'\n\t$resultStr"
 				if [[ $(type -t 'Terminate') == function ]]; then
 					Terminate "$(ColorK "$myName").$msg"
 				else
@@ -56,3 +63,4 @@
 # Check-in Log
 #===================================================================================================
 ## Thu Jan  5 13:47:13 CST 2017 - dscudiero - add a kill switch if informationOnly flag is set
+## Wed Jan 11 15:52:04 CST 2017 - dscudiero - Fix error processing if java throws an error
