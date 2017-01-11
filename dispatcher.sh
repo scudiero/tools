@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.48" # -- dscudiero -- 01/11/2017 @ 11:31:33.02
+version="1.2.50" # -- dscudiero -- 01/11/2017 @ 11:39:35.06
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -187,7 +187,7 @@ prtStatus "parse args"
 
 ## Import thins we need to continue
 	sTime=$(date "+%s")
-	includes='Colors Msg2 Dump DumpArray Here Quit PushSettings PopSettings MkTmpFile Pause ProtectedCall '
+	includes='Colors StringFunctions Msg2 Dump DumpArray Here Quit PushSettings PopSettings MkTmpFile Pause ProtectedCall'
 	includes="$includes SetFileExpansion PadChar PrintBanner Alert TrapSigs SignalHandeler RunSql RunSql2"
 	includes="$includes DbLog ProcessLogger GetCallStack DisplayNews Help GetDefaultsData Call StartRemoteSession"
 	includes="$includes FindExecutable CheckRun CheckAuth CheckSemaphore Call"
@@ -326,3 +326,4 @@ prtStatus "parse args"
 ## Wed Jan 11 07:54:19 CST 2017 - dscudiero - Set noLogInDb if module is test*
 ## Wed Jan 11 11:04:43 CST 2017 - dscudiero - Removed functions now in StrinFunctions
 ## Wed Jan 11 11:31:58 CST 2017 - dscudiero - Remove import for Contains
+## Wed Jan 11 11:40:41 CST 2017 - dscudiero - Cleaned up imports
