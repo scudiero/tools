@@ -98,8 +98,8 @@ if (typeof wfLibLoaded === "undefined") {
 //======================================================================================================================
 wffuncs.Related = function(inval, wfrule, args) {
 	var version='4.9.2'; var myName=wfrule.attrname
-	wfDebug('\n*** In '+ myName + " (" + version + ") called as '" + args.context + " / " + wfrule.searchfor + "' ***");
-	wfDump(["Full Step text;"+inval]);
+	wfDebug(3,'\n*** In '+ myName + " (" + version + ") called as '" + args.context + " / " + wfrule.searchfor + "' ***");
+	wfDump(3,["Full Step text;"+inval]);
 
 	//==================================================================================================================
 	// Setup
@@ -128,7 +128,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 			substitutionType=callOpts.toString()
 		}
 
-	wfDump(["calledAs;"+calledAs,"reqType;"+reqType,"notifyMode;"+notifyMode,"callOpts;"+callOpts,"substitutionType;"+substitutionType]);
+	wfDump(3,["calledAs;"+calledAs,"reqType;"+reqType,"notifyMode;"+notifyMode,"callOpts;"+callOpts,"substitutionType;"+substitutionType]);
 
 	//Get the data from the config file
 		// Control data
@@ -193,7 +193,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 					formFieldVars=formFieldVarsStr.split(",");
 				}
 
-		wfDump(["\n\tcheckChanged;"+checkChanged.toSource(),"ecoSystemData;"+ecoSystemData.toSource(),"ecoSystemType;"+ecoSystemType,
+		wfDump(3,["\n\tcheckChanged;"+checkChanged.toSource(),"ecoSystemData;"+ecoSystemData.toSource(),"ecoSystemType;"+ecoSystemType,
 			"ecoSystemDataFyi;"+ecoSystemDataFyi.toSource(),"formFieldVars;"+formFieldVars.toSource()])
 
 	// Set internal variables for the proposal data, check we have what we need
@@ -223,10 +223,10 @@ wffuncs.Related = function(inval, wfrule, args) {
 		} //try
 		//Catch block for errors thrown in above try block
 		catch(err) { wfDebug("\t*Error* -- " + myName + ": " + err + "\n"); return false; }
-		wfDump(["\n\tproposalCode;"+proposalCode,"proposalSubj;"+proposalSubj,"proposalDept;"+proposalDept,,"proposalCol;"+proposalCol])
+		wfDump(3,["\n\tproposalCode;"+proposalCode,"proposalSubj;"+proposalSubj,"proposalDept;"+proposalDept,,"proposalCol;"+proposalCol])
 
 		if (proposalCode === undefined || proposalDept === undefined) {
-			wfDebug("\tproposalCode (" + proposalCode + ") or proposalDept (" + proposalDept + ") is undefined, skipping Eco System data")
+			wfDebug(3,"\tproposalCode (" + proposalCode + ") or proposalDept (" + proposalDept + ") is undefined, skipping Eco System data")
 			ecoSystemData=false;
 		}
 
@@ -263,7 +263,7 @@ wffuncs.Related = function(inval, wfrule, args) {
  				case "dept":
 	 				if (tcadata.department && tcadata.department.length > 0) {
 						if (tcadata.department[0].code != proposalDept) {
-							wfDebug('\tDepartment code changed, adding original (from tca): ' + tcadata.department[0].code);
+							wfDebug(3,'\tDepartment code changed, adding original (from tca): ' + tcadata.department[0].code);
 							refsArray.push({department:tcadata.department[0].code});
 						}
 					}
@@ -271,7 +271,7 @@ wffuncs.Related = function(inval, wfrule, args) {
   				case "college":
  	 				if (tcadata.college && tcadata.college.length > 0) {
 						if (tcadata.college[0].code != proposalCol) {
-							wfDebug('\tDepartment code changed, adding original (from tca): ' + tcadata.college[0].code);
+							wfDebug(3,'\tDepartment code changed, adding original (from tca): ' + tcadata.college[0].code);
 							refsArray.push({college:tcadata.college[0].code});
 						}
 					}
@@ -279,7 +279,7 @@ wffuncs.Related = function(inval, wfrule, args) {
   				case "subj":
  	 				if (tcadata.subject && tcadata.subject.length > 0) {
 						if (tcadata.subject[0].code != proposalSubj) {
-							wfDebug('\tDepartment code changed, adding original (from tca): ' + tcadata.subject[0].code);
+							wfDebug(3,'\tDepartment code changed, adding original (from tca): ' + tcadata.subject[0].code);
 							refsArray.push({code:tcadata.subject[0].code});
 						}
 					}
@@ -303,13 +303,13 @@ wffuncs.Related = function(inval, wfrule, args) {
 			} else {
 				dataAttributeName="data"
 			}
-			wfDebug("\n\tProcessing form variable: '" + formVar + "'");
-			wfDump(1,["\tformVarFormat;"+formVarFormat,"\tdataAttributeName;"+dataAttributeName,])
+			wfDebug(3,"\n\tProcessing form variable: '" + formVar + "'");
+			wfDump(3,["\tformVarFormat;"+formVarFormat,"\tdataAttributeName;"+dataAttributeName,])
 
 			var tcfData=[];
 			tcfData=eval('tcfdata.'+formVar); // jshint ignore:line
 			if (typeof(tcfData) === 'undefined') {
-				wfDebug('\t\t*** Variable ' + formVar + ' is not defined in the tcf file, skipping');
+				wfDebug(3,'\t\t*** Variable ' + formVar + ' is not defined in the tcf file, skipping');
 				return;
 			}
 			wfDump(1,["\ttcfData;"+tcfData.toSource()]);
@@ -317,7 +317,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 			var tcaData=[];
 			if (typeof eval('tcadata.'+formVar) != 'undefined' ) {
 				tcaData=eval('tcadata.'+formVar); // jshint ignore:line
-				wfDump(1,["\ttcaData;"+tcaData.toSource()]);
+				wfDump(3,["\ttcaData;"+tcaData.toSource()]);
 			}
 
 			// Parse the data and build a refs object for the tcf and tca data
@@ -345,7 +345,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 				ref=ParseRelatedData(b,formVarFormat,dataAttributeName);
 				if (ref != {}) {
 					if (refsLookup[ref.data.toSource()] === undefined) {
-							wfDebug("\t\tAdding deleted code to refsArray: " + b.toSource());
+							wfDebug(3,"\t\tAdding deleted code to refsArray: " + b.toSource());
 							ref.source="formVar:" + formVar;
 							refsArray.push(ref);
 					}
@@ -358,16 +358,16 @@ wffuncs.Related = function(inval, wfrule, args) {
 		if (ecoSystemData && wfCimInstance === "courseadmin") {
 			var tempArray=refsArray.concat(GetEcoSystemData(proposalCode,proposalDept,ecoSystemTypeStr))
 			if (tmpArray.length != refsArray.length) {
-				wfDebug("\t" + tmpArray.length-refsArray.length + "items to add from the Eco system");
+				wfDebug(3,"\t" + tmpArray.length-refsArray.length + "items to add from the Eco system");
 				refsArray=tempArray;
 			} else {
-				wfDebug("\tZero (0) items to add from the Eco system");
+				wfDebug(3,"\tZero (0) items to add from the Eco system");
 			}
 		}
 
 	// Do we have any references?
 		if (refsArray.length === 0) {
-			wfDebug("\t*** Zero (0) items to add, stopping");
+			wfDebug(3,"\t*** Zero (0) items to add, stopping");
 			return false;
 		}
 
@@ -446,9 +446,9 @@ wffuncs.Related = function(inval, wfrule, args) {
 
 		}); //refsArray.forEach(function(ref)
 		if (searchStr === "") {
-  			print_debug("\n\n*** Error in '" + myName + "' function in " + wfLibName +
+  			print_debug(3,"\n\n*** Error in '" + myName + "' function in " + wfLibName +
   				" , invalid value for substitutionType ('" + substitutionType + "') *** \n\n")
-			print_doc("<br>*** Error in " + myName + " function in " + wfLibName +
+			print_doc(3,"<br>*** Error in " + myName + " function in " + wfLibName +
 				",<br> *** invalid value for substitutionType ('" + substitutionType + "') *** <br> ")
 		}
 
@@ -466,11 +466,11 @@ wffuncs.Related = function(inval, wfrule, args) {
 		}//switch
 
 		if (outTokens.length > 0 ) {
-			wfDebug("\n\tReturn step data for " + searchStr + "(s)...");
+			wfDebug(3,"\n\tReturn step data for " + searchStr + "(s)...");
 			// if debug envronent then add starting line in the workflow
 			if (wfEnvIsDev) retArray.push("*** Start of  ' " + inval.toLowerCase().replace('optional','') + " ' output ***");
 		} else {
-			wfDebug("\t*** No additional data found to add ***")
+			wfDebug(3,"\t*** No additional data found to add ***")
 			if (wfEnvIsDev) return ["*** No additional 'related' data found for ' " + inval.toLowerCase().replace('optional','') + " ' ***"];
 			return false;
 		}
@@ -495,7 +495,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 							}
 						}
 						retArray.push(step.trim());
-						wfDebug("\t\t" + retArray[retArray.length-1]);
+						wfDebug(3,"\t\t" + retArray[retArray.length-1]);
 					});	//steps
 				} else {
 					// We have a workflow step so substitute the data into the step name
@@ -504,7 +504,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 						if (step.indexOf("fyi") < 0) step=step + ' ' + ecoSystemDataFyi;
 					}
 					retArray.push(step.replace(wfrule.regex,token.data).trim());
-					wfDebug("\t\t" + retArray[retArray.length-1]);
+					wfDebug(3,"\t\t" + retArray[retArray.length-1]);
 				}
 				tokensDone[token.data]=true;
 			}
