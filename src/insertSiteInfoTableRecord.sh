@@ -1,9 +1,9 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.109 # -- dscudiero -- 01/11/2017 @ 10:19:38.87
+version=1.1.111 # -- dscudiero -- 01/11/2017 @ 16:01:57.32
 #==================================================================================================
 TrapSigs 'on'
-imports='ParseCourseleafFile CleanString' #imports="$imports "
+imports='ParseCourseleafFile' #imports="$imports "
 Import "$imports"
 originalArgStr="$*"
 scriptDescription="Create a record in the siteInfoTable"
@@ -217,14 +217,17 @@ Msg2 "^$env ($siteDir)"
 		dailyshVer=NULL
 		checkFile="$siteDir/bin/daily.sh"
 		if [[ -r $checkFile ]]; then
-
 			grepStr=$(ProtectedCall "grep '## Nightly cron job for client' $checkFile")
 			if [[ -n $grepStr ]]; then
 				dailyshVer=$(ProtectedCall "grep 'version=' $checkFile")
 				dailyshVer=${dailyshVer##*=} ; dailyshVer=${dailyshVer%% *}
-				[[ $dailyshVer != 'NULL' ]] && dailyshVer=\"$dailyshVer\"
+			else
+				dailyshVer='Old'
 			fi
+		else
+			dailyshVer='None'
 		fi
+		[[ $dailyshVer != 'NULL' ]] && dailyshVer=\"$dailyshVer\"
 		dump -2 -t dailyshVer
 
 ## Get the edition variable
@@ -369,3 +372,4 @@ return 0
 ## Wed Jan 11 09:46:52 CST 2017 - dscudiero - x
 ## Wed Jan 11 09:54:45 CST 2017 - dscudiero - Fixed various problems with dailyshVer code
 ## Wed Jan 11 10:19:52 CST 2017 - dscudiero - General cleanup
+## Wed Jan 11 16:13:05 CST 2017 - dscudiero - Update dailyshver code to write out Old or None based on found file
