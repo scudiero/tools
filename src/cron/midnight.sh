@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.160 # -- dscudiero -- 01/10/2017 @ 12:53:29.08
+version=1.21.161 # -- dscudiero -- 01/11/2017 @  6:59:31.14
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -263,13 +263,13 @@ case "$hostName" in
 
 			## Scratch copy the skeleton shadow
 				Msg2 "Scratch copying the skeleton shadow..."
-				chmod u+wx $TOOLSPATH/courseleafSkeletonShadow
+				chmod u+wx $TOOLSPATH/$skeletonRoot
 				SetFileExpansion 'on'
-				rm -rf $TOOLSPATH/courseleafSkeletonShadow/*
+				rm -rf $TOOLSPATH/$skeletonRoot/*
 				rsyncOpts="-a --prune-empty-dirs"
-				rsync $rsyncOpts /mnt/dev6/web/_skeleton/* $TOOLSPATH/courseleafSkeletonShadow
+				rsync $rsyncOpts /mnt/dev6/web/_skeleton/* $TOOLSPATH/$skeletonRoot
 				SetFileExpansion
-				touch $TOOLSPATH/courseleafSkeletonShadow/.syncDate
+				touch $TOOLSPATH/$skeletonRoot/.syncDate
 				Msg2 "^...done"
 
 			## Build a sqlite clone of the data warehouse
@@ -368,3 +368,4 @@ return 0
 ## Thu Jan  5 14:50:01 CST 2017 - dscudiero - Switch to use RunSql2
 ## Fri Jan  6 07:26:07 CST 2017 - dscudiero - Tweak messaging
 ## Tue Jan 10 12:54:12 CST 2017 - dscudiero - Add the -inPlace flag to the buildClientInfoTable call
+## Wed Jan 11 07:00:53 CST 2017 - dscudiero - fix problem building skeleton shadow
