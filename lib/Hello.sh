@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.23" # -- dscudiero -- 01/06/2017 @  9:29:53.56
+# version="2.0.28" # -- dscudiero -- 01/11/2017 @  7:46:39.71
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -11,7 +11,7 @@
 function Hello {
 	[[ $quiet == true || $noHeaders == true || $secondaryMessagesOnly == true ]] && return 0
 	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
-	Msg2
+	echo
 	[[ $TERM == 'dumb' ]] && echo
 	Msg2 "$(PadChar)"
 	date=$(date)
@@ -35,7 +35,13 @@ function Hello {
 	[[ "$informationOnlyMode" == true  ]] && Msg2 "$(ColorW "*** The 'informationOnly' flag is set, changes not committed")"
 	[[ $userName != $checkName ]] && Msg2 "$(ColorW "*** Running as user $userName")"
 
-	Msg2
+	echo
+
+	## Log Start in process log database
+		if [[ $noLogInDb != true ]]; then
+			myLogRecordIdx=$(ProcessLogger 'Start' "$myName")
+			ProcessLogger 'Update' $myLogRecordIdx 'argString' "$originalArgStr"
+		fi
 
 	## Display script and tools news
 		DisplayNews
@@ -55,3 +61,4 @@ export -f Hello
 ## Wed Jan  4 13:05:34 CST 2017 - dscudiero - change debug levels
 ## Wed Jan  4 13:34:00 CST 2017 - dscudiero - comment out the 'version=' line
 ## Fri Jan  6 09:30:22 CST 2017 - dscudiero - Added what database we are using to the header
+## Wed Jan 11 07:51:01 CST 2017 - dscudiero - Switch to use ProcessLogger
