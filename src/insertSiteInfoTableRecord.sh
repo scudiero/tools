@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.108 # -- dscudiero -- 01/11/2017 @  9:51:23.67
+version=1.1.109 # -- dscudiero -- 01/11/2017 @ 10:19:38.87
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseCourseleafFile CleanString' #imports="$imports "
@@ -229,9 +229,9 @@ Msg2 "^$env ($siteDir)"
 
 ## Get the edition variable
 	catEdition=NULL
-	grepFile="$siteDir/web/courseleaf/localsteps/default.tcf"
-	if [[ -f $grepFile ]]; then
-		catEdition=$(cut -d":" -f2 <<< $(ProtectedCall "grep '^edition:' $grepFile") | tr -d '\040\011\012\015');
+	checkFile="$siteDir/web/courseleaf/localsteps/default.tcf"
+	if [[ -f $checkFile ]]; then
+		catEdition=$(cut -d":" -f2 <<< $(ProtectedCall "grep '^edition:' $checkFile") | tr -d '\040\011\012\015');
 	fi
 	[[ $catEdition != 'NULL' ]] && catEdition=\""$catEdition"\"
 	dump -2 -t catEdition
@@ -239,10 +239,10 @@ Msg2 "^$env ($siteDir)"
 ## Get the publishing
 	publishTarget=NULL
 	if [[ "$env" = 'next' || "$env" = 'curr' ]]; then
-		grepFile="$siteDir/courseleaf.cfg"
-		if [[ -f $grepFile ]]; then
-			mapfileProd=$(ProtectedCall "grep '^mapfile:production|' $grepFile");
-			[[ $mapfileProd == '' ]] && mapfileProd=$(ProtectedCall "grep '^mapfile:production/|' $grepFile");
+		checkFile="$siteDir/courseleaf.cfg"
+		if [[ -f $checkFile ]]; then
+			mapfileProd=$(ProtectedCall "grep '^mapfile:production|' $checkFile");
+			[[ $mapfileProd == '' ]] && mapfileProd=$(ProtectedCall "grep '^mapfile:production/|' $checkFile");
 			if [[ $mapfileProd != '' ]]; then
 				[[ $publishTarget == NULL ]] && publishTarget=$(cut -d'|' -f2 <<< $mapfileProd)
 			fi
@@ -254,9 +254,9 @@ Msg2 "^$env ($siteDir)"
 ## See if site has degree works tools enabled
 	degreeWorks=NULL
 	if [[ "$env" != 'preview' && "$env" != 'public' ]]; then
-		grepFile="$siteDir/web/courseleaf/index.tcf"
-		if [[ -f $grepFile ]]; then
-			unset tempStr; tempStr=$(ProtectedCall "grep '^navlinks\:.*dworksenable' $grepFile")
+		checkFile="$siteDir/web/courseleaf/index.tcf"
+		if [[ -f $checkFile ]]; then
+			unset tempStr; tempStr=$(ProtectedCall "grep '^navlinks\:.*dworksenable' $checkFile")
 			[[ -n $tempStr ]] && degreeWorks='Yes'
 		fi
 	fi
@@ -368,3 +368,4 @@ return 0
 ## Wed Jan 11 09:10:44 CST 2017 - dscudiero - Change clver to catVer, added dailyshVer
 ## Wed Jan 11 09:46:52 CST 2017 - dscudiero - x
 ## Wed Jan 11 09:54:45 CST 2017 - dscudiero - Fixed various problems with dailyshVer code
+## Wed Jan 11 10:19:52 CST 2017 - dscudiero - General cleanup
