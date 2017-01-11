@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.105 # -- dscudiero -- 01/11/2017 @  9:02:17.32
+version=1.1.107 # -- dscudiero -- 01/11/2017 @  9:43:13.63
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseCourseleafFile CleanString' #imports="$imports "
@@ -161,21 +161,23 @@ Msg2 "^$env ($siteDir)"
 	if [[ -r $clverFile ]]; then
 		cimVer=$(cat $clverFile);
 		cimVer=$(cut -d":" -f2 <<< $cimVer | tr -d '\040\011\012\015');
+		[[ $cimVer != 'NULL' ]] && cimVer=\""$cimVer"\"
 	fi
 	[[ $cimVer != 'NULL' ]] && cimVer=\""$cimVer"\"
 	dump -2 -t cimVer
 
-## Get the clVer
+## Get the catVer
 	clverFile="$siteDir/web/courseleaf/clver.txt"
 	defaultTcfFile="$siteDir/web/courseleaf/default.tcf"
 	catVer=NULL
 	if [[ -r $clverFile ]]; then
 		catVer=$(cat $clverFile);
-		catVer=$(cut -d":" -f2 <<< $clVer | tr -d '\040\011\012\015');
+		catVer=$(cut -d":" -f2 <<< $catVer | tr -d '\040\011\012\015');
 	elif [[ -f $defaultTcfFile ]]; then
 		catVer=$(ProtectedCall "grep '^clver:' $defaultTcfFile");
 		catVer=$(cut -d":" -f2 <<< $catVer | tr -d '\040\011\012\015');
 	fi
+	[[ -z $catVer ]] && catVer=NULL
 	[[ $catVer != 'NULL' ]] && catVer=\""$catVer"\"
 	dump -2 -t catVer
 
@@ -185,6 +187,7 @@ Msg2 "^$env ($siteDir)"
 	if [[ -r $clverFile ]]; then
 		clssVer=$(cat $clverFile);
 		clssVer=$(cut -d":" -f2 <<< $clssVer | tr -d '\040\011\012\015');
+		[[ $clssVer != 'NULL' ]] && clssVer=\""$clssVer"\"
 	fi
 	[[ $clssVer != 'NULL' ]] && clssVer=\""$clssVer"\"
 	dump -2 -t clssVer
@@ -205,6 +208,7 @@ Msg2 "^$env ($siteDir)"
 		reportsVer="$(ProtectedCall "grep -s -m 1 'version:' $checkFile")"
 		reportsVer=${reportsVer##*: }
 		reportsVer=$(CleanString "$reportsVer")
+		[[ -z $reportsVer ]] && reportsVer=NULL
 	fi
 	[[ $reportsVer != 'NULL' ]] && reportsVer=\""$reportsVer"\"
 	dump -2 -t reportsVer
@@ -214,9 +218,8 @@ Msg2 "^$env ($siteDir)"
 		checkFile="$siteDir/bin/daily.sh"
 		dailyshVer=$(ProtectedCall "grep 'version=' $skeletonRoot/release/bin/daily.sh")
 		dailyshVer=${dailyshVer##*=} ; dailyshVer=${dailyshVer%% *}
-		[[ $dailyshVer != 'NULL' ]] && dailyshVer=\""$reportsVer"\"
+		[[ $dailyshVer != 'NULL' ]] && dailyshVer=\"$dailyshVer\"
 		dump -2 -t dailyshVer
-
 
 ## Get the edition variable
 	catEdition=NULL
@@ -357,3 +360,4 @@ return 0
 ## Tue Jan 10 14:57:02 CST 2017 - dscudiero - Fix problem getting the correct siteId after the insert of the seed record
 ## Wed Jan 11 07:00:17 CST 2017 - dscudiero - Fix problem building the skeleton shadow
 ## Wed Jan 11 09:10:44 CST 2017 - dscudiero - Change clver to catVer, added dailyshVer
+## Wed Jan 11 09:46:52 CST 2017 - dscudiero - x
