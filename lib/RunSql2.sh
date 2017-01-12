@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.7" # -- dscudiero -- 01/11/2017 @ 15:49:40.73
+# version="1.0.8" # -- dscudiero -- 01/12/2017 @  7:09:18.08
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -41,7 +41,7 @@
 			if [[ $(Contains "$resultStr" 'SEVERE:') == true || $(Contains "$resultStr" 'ERROR') == true ]]; then
 				msg="$FUNCNAME: Error reported from $dbType"
 				[[ $dbType == 'sqlite3' ]] && msg="$msg\n\tFile: $dbFile"
-				msg="$msg\n\tsqlStmt: '$sqlStmt'\n\t$resultStr"
+				msg="$msg\n\tsqlStmt: '$sqlStmt'\n\n\t$resultStr"
 				if [[ $(type -t 'Terminate') == function ]]; then
 					Terminate "$(ColorK "$myName").$msg"
 				else
@@ -64,3 +64,4 @@
 #===================================================================================================
 ## Thu Jan  5 13:47:13 CST 2017 - dscudiero - add a kill switch if informationOnly flag is set
 ## Wed Jan 11 15:52:04 CST 2017 - dscudiero - Fix error processing if java throws an error
+## Thu Jan 12 07:11:32 CST 2017 - dscudiero - Add a blank line between message and command output when an error is detected
