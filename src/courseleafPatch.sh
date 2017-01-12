@@ -1,10 +1,10 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=4.10.93 # -- dscudiero -- 01/11/2017 @ 10:38:57.10
+version=4.10.101 # -- dscudiero -- 01/12/2017 @ 10:23:15.51
 #==================================================================================================
 TrapSigs 'on'
-includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCoureleafCgi WriteChangelogEntry GetCims'
+includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCoureleafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
 includes="$includes SelectMenuNew EditTcfValue BackupCourseleafFile ParseCourseleafFile GetCourseleafPgm CopyFileWithCheck"
 Import "$includes"
 originalArgStr="$*"
@@ -125,9 +125,9 @@ Hello
 allowExtraProducts=true
 
 if [[ $noCheck == true ]]; then
-	Prompt tgtDir 'Please specify full file name to the target site root directory' '*dir*'
-	allowMultiProds=true
-	Prompt products "What product(s) do you wish to work with" 'cat cim';
+	Init 'getClient'
+	GetSiteDirNoCheck $client $env
+	[[ -n $siteDir ]] && tgtDir="$siteDir" || Terminate "Could not resolve target site directory"
 else
 	Init 'getClient getProducts getEnv getDirs checkDirs noPreview noPublic'
 fi
@@ -156,7 +156,7 @@ dump -1 ignoreCatReleases ignoreCimReleases
 ## Get QA group members
 	unset qaGroupMembers
 	sqlStmt="select members from $authGroupsTable where code=\"qa\""
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	qaGroupMembers="${resultSet[0]}"
 
 ## Get refreshVersion(s)
@@ -225,10 +225,8 @@ dump -1 ignoreCatReleases ignoreCimReleases
 	cgisDir=${cgisDirRoot}/$cgisDir
 	[[ ! -d $cgisDir ]] && Terminate "Could not find skeleton directory: $cgisDir"
 	cd $cwd
-	dump -1 cgisDir
-
-
-
+	[[ -r "$cgisDir/courseleaf.log" ]] && cgiVer="$(cat "$cgisDir/courseleaf.log" | cut -d'|' -f5)" || cgiVer="$(basename $cgisDir).xx"
+	dump -1 cgisDir cgiVer
 
 #==================================================================================================
 # Verify continue
@@ -245,7 +243,7 @@ fi
 [[ $cimRefreshVersion != '' ]] && verifyArgs+=("CIM version:$cimRefreshVersion") && prodVersions="$prodVersions, CIM version:$catRefreshVersion"
 [[ $clssRefreshVersion != '' ]] && verifyArgs+=("CLSS version:$clssRefreshVersion") prodVersions="$prodVersions, CLSS version:$clssRefreshVersion"
 [[ $noCheck != true ]] && verifyArgs+=("Target Env:$(TitleCase $env) ($tgtDir)")
-verifyArgs+=("CGIs Version:$(basename $cgisDir).xx (from: '$cgisDir'")
+verifyArgs+=("CGIs Version:$cgiVer (from: '$cgisDir')")
 VerifyContinue "You are asking to refresh courseleaf code files:"
 
 myData="Client: '$client', Products: '$products', tgtEnv: '$env' $prodVersions"
@@ -558,3 +556,4 @@ if [[ -f $myTempFile ]]; then rm $myTempFile; fi
 ## Fri Oct 14 13:41:07 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Fri Oct 14 13:47:27 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Wed Jan 11 10:42:18 CST 2017 - dscudiero - Do not check the daily.sh file if it is not present
+## Thu Jan 12 10:25:02 CST 2017 - dscudiero - Add logic to get siteDir if nocheck flag is on, Resolve cgiVersion fully
