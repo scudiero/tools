@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.14" # -- dscudiero -- 01/04/2017 @ 13:39:35.35
+# version="2.0.22" # -- dscudiero -- 01/12/2017 @ 14:38:06.53
 #===================================================================================================
 # Get default variable values from the defaults database
 #===================================================================================================
@@ -10,7 +10,9 @@
 
 function GetDefaultsData {
 	Verbose 3 "*** Starting $FUNCNAME ***"
-	local scriptName="$1"
+	local scriptName="$1" ; shift || true
+	local table="${1:-$scriptsTable}"
+	local sqlStmt dbFields fields field fieldCntr varName variable whereClause
 
 	## Set myPath based on if the current file has been sourced
 		[[ -d $(dirname ${BASH_SOURCE[0]}) ]] && myPath=$(dirname ${BASH_SOURCE[0]})
@@ -21,7 +23,7 @@ function GetDefaultsData {
 			dbFields="name,value"
 			whereClause="(os=\"$osName\" or os is null) and (host=\"$hostName\" or host is null) and status=\"A\""
 			sqlStmt="select $dbFields from defaults where $whereClause order by name,host"
-			RunSql 'mysql' $sqlStmt
+			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -eq 0 ]]; then
 				Msg2 $T "Could not retrieve common defaults data from the $mySqlDb.defaults table."
 			else
@@ -35,23 +37,28 @@ function GetDefaultsData {
 			fi
 			## Get last viewed news eDate
 			sqlStmt="select edate from $newsInfoTable where userName=\"$userName\" and object=\"$scriptName\" "
-			RunSql 'mysql' $sqlStmt
+			RunSql2 $sqlStmt
 			[[ ${#resultSet[@]} -gt 0 ]] && lastViewedScriptNewsEdate=$(cut -d '|' -f2 <<< ${resultSet[0]})
 		fi
 
 	## Get script specific data from the script record in the scripts database
-		# echo "Loading script specific defaults"
-		fields='scriptData1,scriptData2,scriptData3,scriptData4,scriptData5,ignoreList,allowList,emailAddrs'
-		unset $(tr ',' ' ' <<< $fields)
-		sqlStmt="select $fields from $scriptsTable where name=\"$scriptName\""
-		RunSql 'mysql' $sqlStmt
-		if [[ ${#resultSet[@]} -ne 0 ]]; then
-			fieldCntr=1
-			for field in $(tr ',' ' ' <<< $fields); do
-				eval $field=\"$(cut -d '|' -f $fieldCntr <<< "${resultSet[0]}")\"
-				[[ ${!field} == 'NULL' ]] && eval unset $field
-				(( fieldCntr += 1 ))
-			done
+		if [[ -n $scriptName ]]; then
+			if [[ $table == $scriptsTable ]]; then
+				fields='scriptData1,scriptData2,scriptData3,scriptData4,scriptData5,ignoreList,allowList,emailAddrs'
+			else
+				fields='ignoreList,allowList'
+			fi
+			unset $(tr ',' ' ' <<< $fields)
+			sqlStmt="select $fields from $table where name=\"$scriptName\""
+			RunSql2 $sqlStmt
+			if [[ ${#resultSet[@]} -ne 0 ]]; then
+				fieldCntr=1
+				for field in $(tr ',' ' ' <<< $fields); do
+					eval $field=\"$(cut -d '|' -f $fieldCntr <<< "${resultSet[0]}")\"
+					[[ ${!field} == 'NULL' ]] && eval unset $field
+					(( fieldCntr += 1 ))
+				done
+			fi
 		fi
 
 	Verbose 3 "*** Ending $FUNCNAME ***"
@@ -63,3 +70,4 @@ export -f GetDefaultsData
 # Check-in Log
 #===================================================================================================
 ## Wed Jan  4 13:53:34 CST 2017 - dscudiero - General syncing of dev to prod
+## Thu Jan 12 14:38:36 CST 2017 - dscudiero - Update to add ability to pass in the table to load defaults from
