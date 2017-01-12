@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.64" # -- dscudiero -- 01/04/2017 @ 15:29:00.13
+# version="2.0.66" # -- dscudiero -- 01/12/2017 @ 16:02:24.78
 #===================================================================================================
 # Initialize the tools runtime environment
 #===================================================================================================
@@ -60,12 +60,13 @@ tabStr="$(PadChar ' ' 5)"
 	GetDefaultsData
 	SetFileExpansion
 ## If the user has a .tools file then read the values into a hash table
-	#echo "allowedUserVars = >$allowedUserVars<"
+[[ $userName == 'dscudiero' ]] && echo "allowedUserVars = >$allowedUserVars<"
 	if [[ -r "$HOME/tools.cfg" && ${myRhel:0:1} -gt 5 ]]; then
 		ifs="$IFS"; IFS=$'\n'; while read -r line; do
 			line=$(tr -d '\011\012\015' <<< "$line")
-			[[ $line == '' || ${line:0:1} == '#' ]] && continue
+			[[ -z $line || ${line:0:1} == '#' ]] && continue
 			vName=$(cut -d'=' -f1 <<< "$line"); [[ $vName == '' ]] && $(cut -d':' -f1 <<< "$line")
+[[ $userName == 'dscudiero' ]] && echo -e "\tvName = >$vName<"
 			[[ $(Contains ",${allowedUserVars}," ",${vName},") == false ]] && Msg2 $E "Variable '$vName' not allowed in tools.cfg file, setting will be ignored" && continue
 			vValue=$(cut -d'=' -f2 <<< "$line"); [[ $vName == '' ]] && $(cut -d':' -f2 <<< "$line")
 			eval $vName=\"$vValue\"
@@ -97,17 +98,17 @@ tabStr="$(PadChar ' ' 5)"
 	hour=$(date +%H)
 	hour=${hour#0}
 	[[ $hour -ge 20 && $maxForkedProcessesAfterHours -gt $maxForkedProcesses ]] && maxForkedProcesses=$maxForkedProcessesAfterHours
-	[[ $maxForkedProcesses == '' ]] && maxForkedProcesses=3
+	[[ -z $maxForkedProcesses ]] && maxForkedProcesses=3
 
 ## Set the CLASSPATH
 	sTime=$(date "+%s")
 	saveClasspath="$CLASSPATH"
 	searchDirs="$TOOLSPATH/src"
-	[[ $TOOLSSRCPATH != '' ]] && searchDirs="$( tr ':' ' ' <<< $TOOLSSRCPATH)"
+	[[ -n $TOOLSSRCPATH ]] && searchDirs="$( tr ':' ' ' <<< $TOOLSSRCPATH)"
 	unset CLASSPATH
 	for searchDir in $searchDirs; do
 		for jar in $(find $searchDir/java -mindepth 1 -maxdepth 1 -type f -name \*.jar); do
-			[[ $CLASSPATH == '' ]] && CLASSPATH="$jar" || CLASSPATH="$CLASSPATH:$jar"
+			[[ -z $CLASSPATH ]] && CLASSPATH="$jar" || CLASSPATH="$CLASSPATH:$jar"
 		done
 	done
 	export CLASSPATH="$CLASSPATH"
@@ -121,3 +122,4 @@ GD echo -e "\n=== Stopping InitializeRuntime ===================================
 ## Thu Dec 29 07:04:46 CST 2016 - dscudiero - Removed the CLASSPATH setting code
 ## Wed Jan  4 13:53:49 CST 2017 - dscudiero - General syncing of dev to prod
 ## Wed Jan  4 15:29:42 CST 2017 - dscudiero - Turn on error exit by default
+## Thu Jan 12 16:02:43 CST 2017 - dscudiero - Add debug messaging for dscudiero
