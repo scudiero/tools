@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=1.1.17 # -- dscudiero -- 12/14/2016 @ 11:24:27.74
+version=1.1.18 # -- dscudiero -- 01/12/2017 @ 10:17:31.24
 #===================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye WriteChangelogEntry BackupCourseleafFile'
@@ -71,7 +71,13 @@ GetDefaultsData $myName
 ParseArgsStd
 displayGoodbyeSummaryMessages=true
 Hello
-Init "getClient getEnv getDirs checkEnvs" # getCims
+if [[ $noCheck == true ]]; then
+	Init 'getClient'
+	GetSiteDirNoCheck $client $env
+	[[ -n $siteDir ]] && tgtDir="$siteDir" || Terminate "Could not resolve target site directory"
+else
+	Init "getClient getEnv getDirs checkEnvs"
+fi
 
 cleanDirs=$scriptData1
 cleanFiles=$scriptData2
@@ -266,3 +272,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client)")/$(ColorK "$(Upper $env)") to $(C
 ## Tue Oct 18 13:47:10 CDT 2016 - dscudiero - Use to call the exernam program
 ## Wed Oct 19 10:35:53 CDT 2016 - dscudiero - Call courseleafPatch not courseleafReresh
 ## Wed Oct 19 10:42:36 CDT 2016 - dscudiero - fixed another reference to courseleafRefresh
+## Thu Jan 12 10:23:48 CST 2017 - dscudiero - Add logic to get siteDir if nocheck is specified
