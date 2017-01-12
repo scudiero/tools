@@ -11,28 +11,13 @@
 count=${1-1000}
 
 ## Constants
-        TOOLSPATH="/steamboat/leepfrog/docs/tools"
         tmpFile="/tmp/$LOGNAME.perfTest.sh.out"
-
-## warhouse connection info
-        warehouseDb='warehouse'
-        dbAcc='Update'
-        mySqlUser="leepfrog$dbAcc"
-        mySqlHost='duro'
-        mySqlPort=3306
-        [[ -r "$TOOLSPATH/src/.pw1" ]] && mySqlPw=$(cat "$TOOLSPATH/src/.pw1")
-        if [[ $mySqlPw != '' ]]; then
-                unset sqlHostIP mySqlConnectString
-                sqlHostIP=$(dig +short $mySqlHost.inside.leepfrog.com)
-                [[ -z $sqlHostIP ]] && sqlHostIP=$(dig +short $mySqlHost.leepfrog.com)
-                [[ -n $sqlHostIP ]] && mySqlConnectString="-h $sqlHostIP -port=$mySqlPort -u $mySqlUser -p$mySqlPw $warehouseDb"
-        fi
 
 ## Create initial record
         sqlStmt="insert into perfTest values(NULL,\"$(cut -d'.' -f1 <<< $(hostname))\",\"$(date +'%m-%d-%y %H:%M')\",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)"
-        result=$(mysql --skip-column-names --batch $mySqlConnectString -e "$sqlStmt";)
-        sqlStmt="select max(idx) from perfTest"
-        idx=$(mysql --skip-column-names --batch $mySqlConnectString -e "$sqlStmt";)
+        RunSql2 $sqlStmt
+        idx=${resultSet[0]}
+        [[ -z $idx ]] && Terminate "Could not insert record into the '$warehouseDb.perfTest' table"
 
 ## Run test using local file systems
         unset localFSreal localFSuser localFSsys
@@ -60,7 +45,7 @@ count=${1-1000}
                 timeM=${time%%m*} ; time=${time##*m} ; time=${time%s*}
                 sec=$(( timeM * 60 )) ; sec=$(( sec + ${time%%.*} )) ; sec="${sec}.${time##*.}"
                 sqlStmt="update perfTest set localFs$type=\"$sec\" where idx=$idx"
-                result=$(mysql --skip-column-names --batch $mySqlConnectString -e "$sqlStmt";)
+                RunSql2 $sqlStmt
         done < $tmpFile;
 
 ## Run test using remote file systems
@@ -89,16 +74,14 @@ count=${1-1000}
                 timeM=${time%%m*} ; time=${time##*m} ; time=${time%s*}
                 sec=$(( timeM * 60 )) ; sec=$(( sec + ${time%%.*} )) ; sec="${sec}.${time##*.}"
                 sqlStmt="update perfTest set remoteFs$type=\"$sec\" where idx=$idx"
-                result=$(mysql --skip-column-names --batch $mySqlConnectString -e "$sqlStmt";)
+                RunSql2 $sqlStmt
         done < $tmpFile;
 
 ## Run database tests
-        table='sites'
-        sqlStmt="select * from $table where name is not null order by name"
-        sqlCmdString="mysql --skip-column-names --batch $mySqlConnectString -e "
+        set -f
+        sqlStmt="select * from sites where name is not null order by name"
         { time (
-                resultStr=$($sqlCmdString "$sqlStmt" 2>&1 | tr "\t" '|')
-                [[ $resultStr != '' ]] && IFS=$'\n' read -rd '' -a resultSet <<< "$resultStr"
+                RunSql2 $sqlStmt
         ); } 2> $tmpFile
         while read -r line; do
                 [[ -z $line ]] && continue
@@ -108,7 +91,7 @@ count=${1-1000}
                 timeM=${time%%m*} ; time=${time##*m} ; time=${time%s*}
                 sec=$(( timeM * 60 )) ; sec=$(( sec + ${time%%.*} )) ; sec="${sec}.${time##*.}"
                 sqlStmt="update perfTest set dbread$type=\"$sec\" where idx=$idx"
-                result=$(mysql --skip-column-names --batch $mySqlConnectString -e "$sqlStmt";)
+                RunSql2 $sqlStmt
         done < $tmpFile;
 
 ## Cleanup
@@ -116,3 +99,4 @@ count=${1-1000}
         rm -rf /steamboat/leepfrog/docs/tools/perfTest
         rm -f "$tmpFile"
 ## Thu Jan  5 16:36:09 CST 2017 - dscudiero - Add time stamp to the date field
+## Thu Jan 12 12:41:53 CST 2017 - dscudiero - Switch to use RunSql2
