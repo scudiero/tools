@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.4.66 # -- dscudiero -- 12/16/2016 @ 16:01:51.67
+version=3.4.69 # -- dscudiero -- 01/12/2017 @ 10:41:03.85
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -106,39 +106,31 @@ scriptDescription="Cleanup private dev sites"
 
 		case "$requestType" in
 			m*)
-				Msg2; Msg2 "Marking '$file' for automatic deletion in $deleteLimitDays days..."
+				echo; Msg2 "Marking '$file' for automatic deletion in $deleteLimitDays days..."
 				$DOIT mv "$file" "$file".AutoDelete
 				$DOIT touch "$file".AutoDelete/.AutoDelete
 				;;
 			s*)
-				Msg2; Msg2 "Holding '$file' as '$file'.save..."
+				echo; Msg2 "Holding '$file' as '$file'.save..."
 				$DOIT mv "$file" "$file".save
 				;;
 			u*)
-				Msg2; Msg2 "UnMarking '$file'..."
+				echo; Msg2 "UnMarking '$file'..."
 				newFileName=$(sed 's|.AutoDelete||g' <<< ${workFiles[$siteId]})
 				$DOIT mv "$file" /mnt/$share/web/$newFileName
 				$DOIT rm  /mnt/$share/web/$newFileName/.AutoDelete
 				;;
 			r*)
-				Msg2; Msg2 "Reseting 'marked' date for '$file'..."
+				echo; Msg2 "Reseting 'marked' date for '$file'..."
 				$DOIT touch "$file"/.clonedFrom*
 				;;
 			y*)
-				Msg2;
 				if [[ $userName = 'dscudiero' ]]; then
-					## Get the time date for the site
-# 					createTimeStamp=$(stat -c %Y $file/.clonedFrom*)
-# dump createTimeStamp
-					## Check to see if workflow files have changed
-# 					for wfFile in "$requiredInstanceFiles $optionalInstanceFiles"; do
-# 						wfFileTimeStamp=$(stat -c %Y $file/.clonedFrom*)
-# 					done
-# Quit
-				 	Msg2 "Saving workflow..."
-				 	Call saveWorkflow $processClient -p -all -suffix "beforeDelete-$fileSuffix" -nop -quiet
+					unset ans
+					Prompt ans "^Do you wish to save the workflow files" 'Yes No' 'Yes' ; ans=$(Lower "${ans:0:1}")
+					[[ $ans == 'y' ]] && Msg2 "Saving workflow..." && Call saveWorkflow $processClient -p -all -suffix "beforeDelete-$fileSuffix" -nop -quiet
 				fi
-				Msg2 "Removing '$file' offline..."
+				echo; Msg2 "Removing '$file' offline..."
 				if [[ $DOIT == '' ]]; then
 					mv -f "$file" "$file".BeingDeletedBy$(TitleCase "$myName")
 					(nohup rm -rf "$file".BeingDeletedBy$(TitleCase "$myName") &> /dev/null) &
@@ -212,7 +204,7 @@ while [ true == true ]; do
 	[[ ${#sites[@]} -eq 0 ]] && break
 	for site in ${sites[@]}; do
 		[[ $site == '' ]] && Msg2 "No sites found or all sites have been processed" && Goodbye 0
-		Msg2; Msg2  "You are asking to remove site: '$site', are you sure?"
+		echo; Msg2  "You are asking to process site: '$site', are you sure?"
 		unset ans; Prompt ans " " "$validActions"; requestType=$(Lower ${ans:0:2})
 		ProcessRequest "$requestType" "$site"
 	done
@@ -237,3 +229,4 @@ Goodbye 0
 ## Mon Oct 10 14:04:27 CDT 2016 - dscudiero - Fix looping problem
 ## Fri Oct 14 13:05:30 CDT 2016 - dscudiero - Fix problem with not returning after first delete
 ## Mon Oct 24 10:15:01 CDT 2016 - dscudiero - Fix message text
+## Thu Jan 12 10:44:24 CST 2017 - dscudiero - Prompt to see if we should save workfow
