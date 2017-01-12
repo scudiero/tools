@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.52" # -- dscudiero -- 01/12/2017 @ 14:31:09.63
+version="1.2.53" # -- dscudiero -- 01/12/2017 @ 14:34:48.53
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -31,8 +31,7 @@ TOOLSPATH='/steamboat/leepfrog/docs/tools'
 # Local Functions
 #==================================================================================================
 	function prtStatus {
-		return 0
-		[[ $batchMode == true || $myQuiet == true ]] && return 0
+		[[ $batchMode == true || $myVerbose != true ]] && return 0
 		local elapTime=$(( $(date "+%s") - $sTime ))
 		[[ $elapTime -eq 0 ]] && elapTime=1
 		statusLine="${statusLine}${1} ${elapTime}s"
@@ -329,3 +328,4 @@ prtStatus "parse args"
 ## Wed Jan 11 11:31:58 CST 2017 - dscudiero - Remove import for Contains
 ## Wed Jan 11 11:40:41 CST 2017 - dscudiero - Cleaned up imports
 ## Thu Jan 12 14:31:55 CST 2017 - dscudiero - Turn off loading messages
+## Thu Jan 12 14:34:51 CST 2017 - dscudiero - General syncing of dev to prod
