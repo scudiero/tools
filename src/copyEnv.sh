@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=4.9.118 # -- dscudiero -- 12/14/2016 @ 11:14:14.29
+version=4.9.121 # -- dscudiero -- 01/12/2017 @ 11:30:51.01
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -155,8 +155,8 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 	if [[ -d $tgtDir && $overlay == false ]]; then
 		unset ans
 		WarningMsg "Target site ($tgtDir) already existes."
-		Prompt ans 'Do you wish to refresh this site (Yes) or recopy the site from scratch (No) ?' 'Yes No' 'No'; ans=$(Lower $ans); ans=${ans:0:1}
-		if [[ $ans == 'n' ]]; then
+		Prompt ans "Do you wish to $(ColorK 'overwrite') the existing site (Yes) or $(ColorK 'refresh') files in the existing sites site (No) ?" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
+		if [[ $ans == 'y' ]]; then
 			cloneMode='Replace'
 		else
 			cloneMode='Refresh'
@@ -433,3 +433,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client)") clone from $(ColorK "$(Upper $en
 ## Thu Sep 29 15:08:45 CDT 2016 - dscudiero - Add -debug option to automatically start wizdebug
 ## Wed Oct  5 09:46:57 CDT 2016 - dscudiero - Make the leepfrog userid and password varibles pulled from defaults
 ## Tue Oct 18 09:28:04 CDT 2016 - dscudiero - Fix problem where nocheck was still checking the client in the db
+## Thu Jan 12 11:31:24 CST 2017 - dscudiero - Change overwrite prompt
