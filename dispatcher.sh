@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.50" # -- dscudiero -- 01/11/2017 @ 11:39:35.06
+version="1.2.52" # -- dscudiero -- 01/12/2017 @ 14:31:09.63
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -31,6 +31,7 @@ TOOLSPATH='/steamboat/leepfrog/docs/tools'
 # Local Functions
 #==================================================================================================
 	function prtStatus {
+		return 0
 		[[ $batchMode == true || $myQuiet == true ]] && return 0
 		local elapTime=$(( $(date "+%s") - $sTime ))
 		[[ $elapTime -eq 0 ]] && elapTime=1
@@ -327,3 +328,4 @@ prtStatus "parse args"
 ## Wed Jan 11 11:04:43 CST 2017 - dscudiero - Removed functions now in StrinFunctions
 ## Wed Jan 11 11:31:58 CST 2017 - dscudiero - Remove import for Contains
 ## Wed Jan 11 11:40:41 CST 2017 - dscudiero - Cleaned up imports
+## Thu Jan 12 14:31:55 CST 2017 - dscudiero - Turn off loading messages
