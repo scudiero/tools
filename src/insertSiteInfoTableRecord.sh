@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.111 # -- dscudiero -- 01/11/2017 @ 16:01:57.32
+version=1.1.112 # -- dscudiero -- 01/12/2017 @  7:10:56.02
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseCourseleafFile' #imports="$imports "
@@ -161,7 +161,6 @@ Msg2 "^$env ($siteDir)"
 	if [[ -r $clverFile ]]; then
 		cimVer=$(cat $clverFile);
 		cimVer=$(cut -d":" -f2 <<< $cimVer | tr -d '\040\011\012\015');
-		[[ $cimVer != 'NULL' ]] && cimVer=\""$cimVer"\"
 	fi
 	[[ $cimVer != 'NULL' ]] && cimVer=\""$cimVer"\"
 	dump -2 -t cimVer
@@ -373,3 +372,4 @@ return 0
 ## Wed Jan 11 09:54:45 CST 2017 - dscudiero - Fixed various problems with dailyshVer code
 ## Wed Jan 11 10:19:52 CST 2017 - dscudiero - General cleanup
 ## Wed Jan 11 16:13:05 CST 2017 - dscudiero - Update dailyshver code to write out Old or None based on found file
+## Thu Jan 12 07:12:04 CST 2017 - dscudiero - Fix problem where we were double quoting cimver
