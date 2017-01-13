@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.55" # -- dscudiero -- 01/13/2017 @  7:19:51.37
+version="1.2.56" # -- dscudiero -- 01/13/2017 @ 15:25:00.03
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -149,6 +149,20 @@ prtStatus "parse args"
 #==================================================================================================
 # MAIN
 #==================================================================================================
+
+## Set the CLASSPATH
+	sTime=$(date "+%s")
+	saveClasspath="$CLASSPATH"
+	searchDirs="$TOOLSPATH/src"
+	[[ -n $TOOLSSRCPATH ]] && searchDirs="$( tr ':' ' ' <<< $TOOLSSRCPATH)"
+	unset CLASSPATH
+	for searchDir in $searchDirs; do
+		for jar in $(find $searchDir/java -mindepth 1 -maxdepth 1 -type f -name \*.jar); do
+			[[ -z $CLASSPATH ]] && CLASSPATH="$jar" || CLASSPATH="$CLASSPATH:$jar"
+		done
+	done
+	export CLASSPATH="$CLASSPATH"
+
 ## Look for the Initialization and Import function in the library path
 	sTime=$(date "+%s")
 	unset initFile importFile;
@@ -330,3 +344,4 @@ prtStatus "parse args"
 ## Thu Jan 12 14:31:55 CST 2017 - dscudiero - Turn off loading messages
 ## Thu Jan 12 14:34:51 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Jan 13 07:20:02 CST 2017 - dscudiero - Misc cleanup
+## Fri Jan 13 15:25:28 CST 2017 - dscudiero - Move setting of classpath in from init
