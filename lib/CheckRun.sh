@@ -2,7 +2,7 @@
 
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.6" # -- dscudiero -- 01/04/2017 @ 13:36:49.53
+# version="2.0.7" # -- dscudiero -- 01/12/2017 @ 12:50:18.54
 #===================================================================================================
 ## Check to see if the current excution environment supports script execution
 ## Returns 1 in $? if user is authorized, otherwise it returns 0
@@ -23,7 +23,7 @@ function CheckRun {
 
 	## check to see if script is in the scripts table
 		sqlStmt="select count(*) from $scriptsTable where name=\"$script\""
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		[[ ${resultSet[0]} -eq 0 ]] && echo true && return 0
 
 	GD echo -e "\tChecking offline/inactive"
@@ -33,7 +33,7 @@ function CheckRun {
 		## Check to see if active flag is off
 		GD echo -e "\t\tChecking active flag"
 		sqlStmt="select active from $scriptsTable where name=\"$script\" and (host=\"$hostName\" or host is null) and (os=\"$osName\" or os is null)"
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
 			[[ ${resultSet[0]} != 'Yes' && ${resultSet[0]} != 'N/A' ]] && scriptActive=false
 			GD echo -e "\t\t\t\${resultSet[0]} = >${resultSet[0]}<"
@@ -51,13 +51,13 @@ function CheckRun {
 	GD echo -e "\tChecking env"
 	## check host and os information
 		sqlStmt="select os,host from $scriptsTable where name=\"$script\" and (host=\"$hostName\" or host is null) and (os=\"$osName\" or os is null)"
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		[[ ${#resultSet[@]} -ne 0 ]] && echo true && return 0
 
 	## return message
 		echo "Script is not supported in the current environment."
 		sqlStmt="select os,host from $scriptsTable where name=\"$script\""
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		resultString=${resultSet[0]}
 		resultString=$(echo "$resultString" | tr "\t" "|" )
 		os=$(echo $resultString | cut -d '|' -f 1)

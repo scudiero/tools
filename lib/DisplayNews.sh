@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.5" # -- dscudiero -- 01/04/2017 @ 13:40:48.87
+# version="2.0.6" # -- dscudiero -- 01/12/2017 @ 12:51:03.87
 #===================================================================================================
 # Display News
 #===================================================================================================
@@ -20,7 +20,7 @@ function DisplayNews {
 			eval "${newsType}LastRunEDate=0"
 			## Get users last accessed time date
 				sqlStmt="select date,edate from $newsInfoTable where userName=\"$userName\" and object=\"$newsType\""
-				RunSql 'mysql' "$sqlStmt"
+				RunSql2 $sqlStmt
 				#[[ ${#resultSet[@]} -gt 0 ]] && lastViewedDate=$(echo "${resultSet[0]}" | cut -d'|' -f1) && lastViewedEDate=$(echo "${resultSet[0]}" | cut -d'|' -f2)
 				if [[ ${#resultSet[@]} -gt 0 ]]; then
 					lastViewedDate=$(cut -d'|' -f1 <<< "${resultSet[0]}")
@@ -34,7 +34,7 @@ function DisplayNews {
 				#dump newsType lastViewedEdate
 
 				sqlStmt="select item,date from $newsTable where edate >= \"$lastViewedEdate\" and object=\"$newsType\""
-				RunSql 'mysql' "$sqlStmt"
+				RunSql2 $sqlStmt
 				for result in "${resultSet[@]}"; do
 					if [[ $displayedHeader == false ]]; then
 						msgText="\n$(ColorK "'$newsType'") news items"
@@ -54,7 +54,7 @@ function DisplayNews {
 				else
 					sqlStmt="update $newsInfoTable set date=NOW(),edate=\"$(date +%s)\" where userName=\"$userName\" and object=\"$newsType\""
 				fi
-				RunSql 'mysql' "$sqlStmt"
+				RunSql2 $sqlStmt
 		done
 			[[ $newsDisplayed == true ]] && Msg2
 	return 0

@@ -1,6 +1,6 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
-version=1.0.3 # -- dscudiero -- 11/03/2016 @ 13:36:57.73
+version=1.0.5 # -- dscudiero -- 01/12/2017 @ 14:14:56.19
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -60,7 +60,7 @@ fields="$fields,contacts.title,contacts.workphone,contacts.cell,contacts.fax,con
 # Standard arg parsing and initialization
 #==================================================================================================
 ParseArgsStd
-[[ $reportName != '' ]] && GetDefaultsData "$reportName"
+[[ $reportName != '' ]] && GetDefaultsData "$reportName" "$reportsTable"
 Hello
 
 ## Get the workbook file and worksheet
@@ -150,14 +150,14 @@ if [[ $workBook != '' ]]; then
 				whereClause="$whereClause and Lower(contacts.firstname)=\"$(Lower "$firstName")\" and Lower(contacts.lastname)=\"$(Lower "$lastName")\""
 				sqlStmt="select $fields from clients,contacts where $whereClause"
 				dump -2 -t sqlStmt
-				RunSql 'sqlite' "$contactsSqliteFile" $sqlStmt
+				RunSql2 "$contactsSqliteFile" $sqlStmt
 				if [[ ${#resultSet[@]} -eq 0 ]]; then
 					## Check for email match
 					whereClause="clients.clientkey=contacts.clientkey and Lower(contacts.email)=\"$(Lower "$email")\""
 					whereClause="$whereClause and Lower(contacts.firstname)=\"$(Lower "$firstName")\" and Lower(contacts.lastname)=\"$(Lower "$lastName")\""
 					sqlStmt="select $fields from clients,contacts where $whereClause"
 					dump -2 -t sqlStmt
-					RunSql 'sqlite' "$contactsSqliteFile" $sqlStmt
+					RunSql2 "$contactsSqliteFile" $sqlStmt
 				fi
 				## Process any results
 				if [[ ${#resultSet[@]} -gt 0 ]]; then
@@ -198,7 +198,7 @@ fi
 	whereClause='clients.clientkey=contacts.clientkey and Lower(clients.is_active)="y" and clients.products is not null'
 	orderBy="clients.clientcode,contactrole,contacts.lastname"
 	sqlStmt="select $fields from clients,contacts where $whereClause order by $orderBy"
-	RunSql 'sqlite' "$contactsSqliteFile" $sqlStmt
+	RunSql2 "$contactsSqliteFile" $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		numRecs=${#resultSet[@]}
 		Msg2 "^Found $numRecs contacts records..."
@@ -235,7 +235,7 @@ fi
 	whereClause='contacts.leepday="Y" and clients.clientkey=contacts.clientkey and clients.products is not null'
 	orderBy="clients.clientcode,contactrole,contacts.lastname"
 	sqlStmt="select $fields from clients,contacts where $whereClause order by $orderBy"
-	RunSql 'sqlite' "$contactsSqliteFile" $sqlStmt
+	RunSql2 "$contactsSqliteFile" $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		numRecs=${#resultSet[@]}
 		Msg2 "^Found $numRecs contacts records..."

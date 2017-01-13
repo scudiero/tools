@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.2.19 # -- dscudiero -- 12/14/2016 @ 11:28:50.71
+version=2.2.20 # -- dscudiero -- 01/12/2017 @ 13:20:37.94
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -260,7 +260,7 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 ## Find out if this client uses UINs
 	if [[ $noUinMap == false ]]; then
 		sqlStmt="select usesUINs from $clientInfoTable where name=\"$client\""
-			RunSql 'mysql' $sqlStmt
+			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -ne 0 ]]; then
 				result="${resultSet[0]}"
 				[[ $result == 'Y' ]] && useUINs=true && Msg2

@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.62 # -- dscudiero -- 01/05/2017 @ 11:09:06.75
+version=2.3.63 # -- dscudiero -- 01/12/2017 @ 12:58:21.96
 #===================================================================================================
 TrapSigs 'on'
 originalArgStr="$*"
@@ -161,7 +161,7 @@ function MapTtoW {
 	Msg2 $V1 ""
 	sqlStmt="insert into $useClientInfoTable ($wFields) values($insertVals)"
 	dump -1 -sqlStmt -n
-	[[ $DOIT != '' || $informationOnlyMode == true ]] && echo -e "\t\tsqlStmt = '>'$sqlStmt'<'" || RunSql 'mysql' $sqlStmt
+	[[ $DOIT != '' || $informationOnlyMode == true ]] && echo -e "\t\tsqlStmt = '>'$sqlStmt'<'" || RunSql2 sqlStmt
 
 #===================================================================================================
 # Done

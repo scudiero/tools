@@ -2,7 +2,7 @@
 
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.6" # -- dscudiero -- 01/04/2017 @ 13:36:35.62
+# version="2.0.7" # -- dscudiero -- 01/12/2017 @ 12:49:43.40
 #===================================================================================================
 # Check to see if the logged user can run this script
 # Returns true if user is authorized, otherwise it returns a message
@@ -17,12 +17,12 @@ function CheckAuth {
 
 	## check to see if script is in the scripts table
 		local sqlStmt="select count(*) from $scriptsTable where name=\"$myName\""
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		[[ ${resultSet[0]} -eq 0 ]] && echo true && return 0
 
 	## check user to see if they are the author
 		sqlStmt="select author from $scriptsTable where name=\"$myName\""
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -ne 0 ]]; then
 			local author="${resultSet[0]}"
 			[[ $author == $userName ]] && echo true && return 0
@@ -31,7 +31,7 @@ function CheckAuth {
 	## check user restrict informaton for this script
 		local haveRestrictToUsers=false
 		sqlStmt="select restrictToUsers from $scriptsTable where name=\"$myName\""
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -ne 0 ]]; then
 			local scriptUsers="$(echo ${resultSet[0]} | tr ' ' ',')"
 			if [[ $scriptUsers != 'NULL' && $scriptUsers != '' ]]; then
@@ -43,13 +43,13 @@ function CheckAuth {
 	## check group restrict informaton for this script
 		local haveRestrictToGroups=false
 		sqlStmt="select restrictToGroups from $scriptsTable where name=\"$myName\""
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -ne 0 ]]; then
 			local scriptGroups="\"$(echo ${resultSet[0]} | sed 's/,/","/g')\""
 			if [[ $scriptGroups != \"NULL\" && $scriptGroups != '' ]]; then
 				haveRestrictToGroups=true
 				sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\" and code in ($scriptGroups)"
-				RunSql 'mysql' $sqlStmt
+				RunSql2 $sqlStmt
 				[[ ${#resultSet[@]} -ne 0 ]] && echo true && return 0
 			fi
 		fi

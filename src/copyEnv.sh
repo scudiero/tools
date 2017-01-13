@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=4.9.121 # -- dscudiero -- 01/12/2017 @ 11:30:51.01
+version=4.9.122 # -- dscudiero -- 01/12/2017 @ 12:59:39.81
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -98,13 +98,13 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 ## check to see if this client is remote or on another host
 	if [[ $client != 'internal' && $noCheck != true ]]; then
 		sqlStmt="select hosting from $clientInfoTable where name=\"$client\""
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		clientHosting=${resultSet[0]}
 		if [[ $clientHosting == 'leepfrog' ]]; then
 			## check to see if this client is on another host
 			[[ $env == 'test' ]] && tempClient="${client}-test" || tempClient="${client}"
 			sqlStmt="select host,share,redhatVer from $siteInfoTable where name=\"$tempClient\" and env=\"$env\""
-			RunSql 'mysql' $sqlStmt
+			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -gt 0 ]]; then
 			 	resultString=${resultSet[0]}; resultString=$(echo "$resultString" | tr "\t" "|" )
 				clientHost=$(echo $resultString | cut -d'|' -f1)

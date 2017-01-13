@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.4 # -- dscudiero -- 12/14/2016 @ 11:28:41.01
+version=1.2.6 # -- dscudiero -- 01/12/2017 @ 13:20:14.27
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -104,13 +104,13 @@ Msg2
 	srcSqlFile=$srcDir/db/cimcourses.sqlite
 	[[ ! -r $srcSqlFile ]] && Terminate "Could not open source sql file\n\t'$srcSqlFile'"
 	sqlStmt="select count(*) key from codedesc"
-	RunSql 'sqlite' "$srcSqlFile" "$sqlStmt"
+	RunSql2 "$srcSqlFile" "$sqlStmt"
 	numSrcRecords=${resultSet[0]}
 
 	Msg2; Msg2 "Fetching source data ($numSrcRecords records)..."
 	fields="setname,groupname,code,name,rank,siscode,access"
 	sqlStmt="select $fields from codedesc order by setname,code"
-	RunSql 'sqlite' "$srcSqlFile" "$sqlStmt"
+	RunSql2 "$srcSqlFile" "$sqlStmt"
 	[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No records returned from source database"
 	Msg2 "Building source ($(TitleCase $srcEnv)) data hash table..."
 	for result in "${resultSet[@]}"; do
@@ -136,12 +136,12 @@ Msg2
 	tgtSqlFile=$tgtDir/db/cimcourses.sqlite
 	[[ ! -r $tgtSqlFile ]] && Terminate "Could not open target sql file\n\t'$tgtSqlFile'"
 	sqlStmt="select count(*) key from codedesc"
-	RunSql 'sqlite' "$tgtSqlFile" "$sqlStmt"
+	RunSql2 "$tgtSqlFile" "$sqlStmt"
 	numTgtRecords=${resultSet[0]}
 
 	Msg2; Msg2 "Fetching target ($(TitleCase $tgtEnv)) data ($numTgtRecords records)..."
 	sqlStmt="select $fields from codedesc order by setname,code"
-	RunSql 'sqlite' "$tgtSqlFile" "$sqlStmt"
+	RunSql2 "$tgtSqlFile" "$sqlStmt"
 	[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No records returned from source database"
 	Msg2 "Building target data hash table..."
 	for result in "${resultSet[@]}"; do
@@ -189,7 +189,7 @@ Msg2
 				if [[ $(Lower ${ans:0:1}) == 'y' ]]; then
 					sqlStmt="update codedesc set setname=\"$srcSetname\", groupname=\"$srcGroupname\", code=\"$srcCode\", name=\"$srcName\", rank=\"$srcRank\",\
 							siscode=\"$srcSiscode\",access=\"$srcAccess\" where key=\"$tgtDbKey\""
-					$DOIT RunSql 'sqlite' "$tgtSqlFile" "$sqlStmt"
+					RunSql2 "$tgtSqlFile" "$sqlStmt"
 					ProtectedCall "((numUpdated++))"
 				else
 					ProtectedCall "((numSkipped++))"
@@ -204,7 +204,7 @@ Msg2
 				Msg2; Msg2 "^Found new setname: '$srcSetname'"
 				Msg2 "^^Adding: [$key] = '${srcData[$key]}'"
 				sqlStmt="insert into codedesc values(NULL,\"$srcSetname\",\"$srcGroupname\",\"$srcCode\",\"$srcName\",\"$srcRank\",\"$srcSiscode\",\"$srcAccess\")"
-				[[ $informationOnlyMode != true ]] && $DOIT RunSql 'sqlite' "$tgtSqlFile" "$sqlStmt" && ProtectedCall "((numAdded++))" || ProtectedCall "((numSkipped++))"
+				[[ $informationOnlyMode != true ]] && RunSql2 "$tgtSqlFile" "$sqlStmt" && ProtectedCall "((numAdded++))" || ProtectedCall "((numSkipped++))"
 			else
 				## Existing setname, new data, prompt user
 				Msg2; Msg2 "^Found new data for setname: '$srcSetname'"
@@ -220,7 +220,7 @@ Msg2
 				fi
 				if [[ $ans == 'y' ]]; then
 					sqlStmt="insert into codedesc values(NULL,\"$srcSetname\",\"$srcGroupname\",\"$srcCode\",\"$srcName\",\"$srcRank\",\"$srcSiscode\",\"$srcAccess\")"
-					$DOIT RunSql 'sqlite' "$tgtSqlFile" "$sqlStmt"
+					RunSql2 "$tgtSqlFile" "$sqlStmt"
 					ProtectedCall "((numAdded++))"
 				else
 					ProtectedCall "((numSkipped++))"

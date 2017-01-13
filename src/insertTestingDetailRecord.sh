@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #==================================================================================================
-version=1.0.101 # -- dscudiero -- 12/19/2016 @ 12:11:11.08
+version=1.0.102 # -- dscudiero -- 01/12/2017 @ 13:04:57.69
 #==================================================================================================
 TrapSigs 'on'
 originalArgStr="$*"
@@ -69,14 +69,14 @@ jalotTaskNumber=$(cut -d'-' -f6 <<< $fileName)
 	Verbose 1 "^^^Retrieving qaStatusKey for '$clientCode.$product.$project.$instance.$env.$jalotTaskNumber'..."
 	whereClause="clientCode=\"$clientCode\" and  product=\"$product\" and project=\"$project\" and instance=\"$instance\" and env=\"$env\" and jalotTaskNumber=\"$jalotTaskNumber\" "
 	sqlStmt="select idx from $qaStatusTable where $whereClause"
-	RunSql $sqlStmt
+	RunSql2 $sqlStmt
 	[[ ${#resultSet[@]} -eq 0 ]] && Error "Could not retrieve record key in $warehouseDb.$qaStatusTable for:\n^$whereClause" && Goodbye 'Return' && return 2
 	qastatusKey=${resultSet[0]}
 	dump -2 -t -t qastatusKey
 
 ## Check to see if we have already processed this key
 	sqlStmt="select count(*) from $qaTestingDetailsTable where qatestid=$qastatusKey"
-	RunSql $sqlStmt
+	RunSql2 $sqlStmt
 	[[ ${resultSet[0]} -gt 0 ]] && Msg2 $WT2 "QaTestId '$qastatusKey' has already been processed, skipping file" && Goodbye 'Return' && return 1
 
 ## Read the Testing Detail Final data
@@ -133,7 +133,7 @@ jalotTaskNumber=$(cut -d'-' -f6 <<< $fileName)
 		values="NULL,$qastatusKey,$testCaseId,$description,$overallStatus,$iterationStatus,$iterationDate,$iterationPhase,$iterationPhaseQualifier"
 		values="$values,NULL,NULL,NULL,NULL"
 		sqlStmt="insert into $qaTestingDetailsTable values($values)"
-		RunSql $sqlStmt
+		RunSql2 $sqlStmt
 		(( insertCntr += 1))
 	done < $tmpFile
 	Verbose 1 "^^^^$insertCntr records inserted into the $warehouseDb.$qaTestingDetailsTable table"
@@ -143,7 +143,7 @@ jalotTaskNumber=$(cut -d'-' -f6 <<< $fileName)
 	updateCntr=0
 	unset updatedList
 	sqlStmt="select distinct testcaseid from $qaTestingDetailsTable where Lower(instanceStatus) like \"%failed%\""
-	RunSql $sqlStmt
+	RunSql2 $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		Verbose 1 "^^^^Setting 'fixed' data for failed test case instances ($(sed "s/ /, /g" <<< ${resultSet[*]}))..."
 		## Loop through the failed records and retrieve the 'fixed on' information
@@ -154,7 +154,7 @@ jalotTaskNumber=$(cut -d'-' -f6 <<< $fileName)
 			fields="idx,instanceDate,instancePhase,instancePhaseQualifier"
 			whereClause="Lower(instanceStatus) like \"%passed%\" and testcaseid=$failedId "
 			sqlStmt="select $fields from $qaTestingDetailsTable where $whereClause order by instanceDate DESC;"
-			RunSql $sqlStmt
+			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -gt 0 ]]; then
 				for result in "${resultSet[@]}"; do
 					dump -1 -t result
@@ -166,7 +166,7 @@ jalotTaskNumber=$(cut -d'-' -f6 <<< $fileName)
 				## Update the fixed data on all the testing records
 				fields="fixedDate=\"$instanceDate\", fixedPhase=\"$instancePhase\", fixedPhaseQualifier=\"$instancePhaseQualifier\""
 				sqlStmt="update $qaTestingDetailsTable set $fields where testcaseid=$failedId"
-				RunSql $sqlStmt
+				RunSql2 $sqlStmt
 				updatedList+=($failedId)
 				(( updateCntr += 1))
 			fi

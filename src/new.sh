@@ -1,6 +1,6 @@
 #!/bin/bash
 #===================================================================================================
-version=1.2.21 # -- dscudiero -- 01/11/2017 @ 16:41:08.52
+version=1.2.22 # -- dscudiero -- 01/12/2017 @ 13:21:51.89
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -127,7 +127,7 @@ function NewScript {
 			values="${values},NULL,$ignoreList,$allowList,$emailAddrs,$scriptData1,$scriptData2,$scriptData3,$scriptData4,$scriptData5,$semaphore,NULL,$active,\"$(date +%s)\",NULL"
 			sqlStmt="insert into $scriptsTable values($values)"
 			#echo 'sqlStmt = >'$sqlStmt'<'
-			RunSql 'mysql' $sqlStmt
+			RunSql2 $sqlStmt
 		fi
 }
 
@@ -161,7 +161,7 @@ function NewPatch {
 	values="NULL,$shortDescription,$longDescription,$clVersion,$cgiVersion,$acton,$actionTarget,$lineText,\"active\",\"$(date +%s)\",\"$userName\",NULL,NULL"
 	sqlStmt="insert into $courseleafPatchTable values($values)"
 	#echo 'sqlStmt = >'$sqlStmt'<'
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 }
 
 #===================================================================================================
@@ -207,7 +207,7 @@ function NewReport {
 	values="NULL,$name,$desc,\"$userName\",$supported,$repType,$header,$db,$dbtype,$sqlStmt,$script,$scriptArgs,$ignoreList,$allowList,$active,\"$(date +%s)\""
 	sqlStmt="insert into $reportsTable values($values)"
 	#echo 'sqlStmt = >'$sqlStmt'<'
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	set +f
 }
 
@@ -218,7 +218,7 @@ function NewNewsItem {
 	[[ ${itemText:${#itemText}-1:1} != '.' ]] && itemText="$itemText."
 
 	sqlStmt="insert into $newsTable values(NULL,\"$objName\",\"$itemText\",NOW(),\"$(date +%s)\",\"$userName\" )"
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 }
 
 #===================================================================================================
@@ -234,7 +234,7 @@ function NewDefault {
 	[[ $host == any ]] && host=NULL || host="\"$host\""
 
 	sqlStmt="insert into defaults values(NULL,$name,$value,$os,$host,\"A\",NOW(),\"$userName\",NULL,NULL)"
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 }
 
 #===================================================================================================
@@ -244,7 +244,7 @@ function NewMonitorFile {
 	lastModEtime=$(stat -c %Y $file)
 	file="\"$file\""
 	sqlStmt="insert into monitorfiles values(NULL,$file,\"$hostName\",$lastModEtime,NULL)"
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 }
 
 #===================================================================================================
@@ -310,14 +310,14 @@ function NewClient {
 	## Insert the clients record
 		unset clientId
 		sqlStmt="select idx from $clientInfoTable where name=\"$client\""
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
 			clientId=${resultSet[0]}
 			Msg2 $WT1 "Client record already exist for '$client' in the '$clientInfoTable' table"
 		else
 			$DOIT insertClientInfoRec $client -noLog -noLogInDb
 			sqlStmt="select max(idx) from $clientInfoTable"
-			RunSql 'mysql' $sqlStmt
+			RunSql2 $sqlStmt
 			clientId=${resultSet[0]}
 			Msg2 "^Created '$clientInfoTable' record for '$env'"
 
@@ -329,7 +329,7 @@ function NewClient {
 			eval siteDir="\$${env}Dir"
 			if [[ -d $siteDir ]]; then
 				sqlStmt="select siteId from $siteInfoTable where name=\"$client\" and env=\"$env\""
-				RunSql 'mysql' $sqlStmt
+				RunSql2 $sqlStmt
 				if [[ ${#resultSet[@]} -gt 0 ]]; then
 					Msg2 $WT1 "Site record already exist for '$env' in the '$siteInfoTable' table "
 				else

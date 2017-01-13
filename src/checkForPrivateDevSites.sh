@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.4.25 # -- dscudiero -- 12/14/2016 @ 11:19:17.47
+version=2.4.26 # -- dscudiero -- 01/12/2017 @ 13:13:21.42
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -44,7 +44,7 @@ fi
 	if [[ $client == '' ]]; then
 		Msg2 $V1 "Pulling employee userid data from $contactsSqliteFile...\n"
 		sqlStmt="SELECT db_email FROM employees WHERE db_isactive=\"Y\""
-		RunSql 'sqlite' "$contactsSqliteFile" "$sqlStmt"
+		RunSql2 "$contactsSqliteFile" "$sqlStmt"
 	else
 		unset resultSet
 		Msg2 $V1 "Note: Using userid passed in: $client\n"

@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.60 # -- dscudiero -- 12/14/2016 @ 11:28:04.17
+version=1.0.61 # -- dscudiero -- 01/12/2017 @ 13:00:50.90
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -57,7 +57,7 @@ Hello
 	if [[ $file != '' ]]; then
 		if [[ -f $file ]]; then
 			sqlStmt="Select count(*) from monitorfiles where file=\"$file\""
-			RunSql 'mysql' "$sqlStmt"
+			RunSql2 "$sqlStmt"
 			count=${resultSet[0]}
 			[[ $count -eq 0 ]] && newFile=true
 		else
@@ -70,11 +70,11 @@ Hello
 		unset menuList menuItem
 		## Get a list of currently defined monitoried files
 		sqlStmt="Select file from monitorfiles where userlist is null or userlist not like \"%$userName%\" order by file"
-		RunSql 'mysql' "$sqlStmt"
+		RunSql2 "$sqlStmt"
 		if [[ ${#resultSet[@]} -eq 0 ]]; then
 			Msg2 "You are already monitoring all of the files in the monitorfiles table:"
 			sqlStmt="Select file from monitorfiles order by file"
-			RunSql 'mysql' "$sqlStmt"
+			RunSql2 "$sqlStmt"
 			for result in "${resultSet[@]}"; do
 				Msg2 "^$result"
 			done
@@ -106,7 +106,7 @@ Hello
 ## retrieve the userList if necessary
 	if [[ $userList == '' ]]; then
 		sqlStmt="Select userlist from monitorfiles where file=\"$file\""
-		RunSql 'mysql' "$sqlStmt"
+		RunSql2 "$sqlStmt"
 		#[[ ${#resultSet[@]} -eq 0 ]] && Msg2 $T "No records returned from $warehouseDb.monitorfiles table when looking up the userlist for '$file'"
 		[[ ${resultSet[0]} == '' || ${resultSet[0]} == 'NULL' ]] && userList='' || userList="${resultSet[0]}"
 		[[ $(Contains ",$userList," ",$userName,") == false ]] && userList="$userList,$userName" || Msg2 $T "You are already on the monitor list for file\n^'$file'"
@@ -132,10 +132,10 @@ Hello
 	else
 		sqlStmt="update monitorfiles set userList=\"$userList\" where file=\"$file\""
 	fi
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 ## Add a 'viewed' record for this file for this user
 	sqlStmt="insert into $newsInfoTable values(NULL,\"$file\",\"$userName\",NOW(),\"$(date +%s)\")"
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 
 #===================================================================================================
 ## Done

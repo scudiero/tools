@@ -1,5 +1,5 @@
 #!/bin/bash
-version=1.0.44 # -- dscudiero -- 07/18/2016 @ 14:11:57.65
+version=1.0.46 # -- dscudiero -- 01/12/2017 @ 14:15:16.40
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -35,7 +35,7 @@ sendMail=false
 numFound=0
 
 outDir=/home/$userName/Reports/$myName
-[[ ! -d $outDir ]] && mkdir -p $outDir 
+[[ ! -d $outDir ]] && mkdir -p $outDir
 outFile=$outDir/$(date '+%Y-%m-%d-%H%M%S').txt
 
 GetDefaultsData
@@ -45,6 +45,7 @@ okCodes="$(cut -d':' -f2- <<< $scriptData1)"
 # Standard arg parsing and initialization
 #==================================================================================================
 ParseArgsStd
+[[ $reportName != '' ]] && GetDefaultsData "$reportName" "$reportsTable"
 
 #===================================================================================================
 # Main
@@ -60,7 +61,7 @@ ParseArgsStd
 
 	sendEmail=false
 	sqlStmt="select name,nextUrl,currUrl from $clientInfoTable where nextURL is not null or currUrl is not null and productsInSupport is not null order by name"
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	Msg2 "CurlRc\tClient\tEnv\tURL" | tee -a $outFile
 	for result in ${resultSet[@]}; do
 		client=$(cut -d'|' -f1 <<< $result)

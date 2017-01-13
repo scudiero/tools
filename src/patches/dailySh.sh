@@ -1,5 +1,5 @@
 #==================================================================================================
-version=1.2.57 # -- dscudiero -- 12/14/2016 @  9:29:05.42
+version=1.2.58 # -- dscudiero -- 01/12/2017 @ 13:07:37.54
 #==================================================================================================
 imports='ParseArgs ParseArgsStd ParseCourseleafFile'
 Import "$imports"
@@ -71,7 +71,7 @@ ParseArgs
 
 ## Get the max width of a client name
 	sqlStmt="select max(length(name)) FROM $clientInfoTable"
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	let maxClientNameLen=${resultSet[0]}+5
 
 ## Loop through sites and apply patch
@@ -129,7 +129,7 @@ ParseArgs
 ## Log the patch run
 	if [[ $informationOnlyMode != true && ${#patchedSiteDirs[@]} -gt 0 ]]; then
 		sqlStmt="insert into $courseleafPatchLogTable values(NULL,\"$patchId\",\"$client\",\"$envs\",\"$userName\",NOW(),\"$sitesStr\")"
-		$DOIT RunSql 'mysql' "$sqlStmt"
+		RunSql2 "$sqlStmt"
 	fi
 
 ##==================================================================================================

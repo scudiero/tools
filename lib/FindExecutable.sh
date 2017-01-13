@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.0.99" # -- dscudiero -- 01/04/2017 @ 13:38:43.60
+# version="1.0.100" # -- dscudiero -- 01/12/2017 @ 12:51:44.85
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -17,7 +17,7 @@
 # All rights reserved
 #=======================================================================================================================
 function FindExecutable {
-	Import RunSql Prompt VerifyPromptVal Goodbye
+	Import RunSql2 Prompt VerifyPromptVal Goodbye
 	#===================================================================================================================
 	local GD='GD echo'
 	#local GD='echo'
@@ -33,7 +33,7 @@ function FindExecutable {
 
 	if [[ $srcTypes == '' || $srcTypes == 'search' || $srcLibs == '' ]]; then
 		sqlStmt="select scriptData1,scriptData2 from $scriptsTable where name =\"dispatcher\" "
-		RunSql $sqlStmt
+		RunSql2 $sqlStmt
 	 	resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString")
 		local dbSrcTypes="$(cut -d'|' -f1 <<< "$resultString")"
 		local dbSrcLibs="$(cut -d'|' -f2 <<< "$resultString")"
@@ -49,7 +49,7 @@ function FindExecutable {
 	## Check db to see if there is a script name override
 		unset callPgmAlias
 		sqlStmt="select exec from $scriptsTable where name =\"$callPgmName\" "
-		RunSql $sqlStmt
+		RunSql2 $sqlStmt
 		if [[ ${#resultSet[0]} -gt 0 && ${resultSet[0]} != 'NULL' ]]; then
 			callPgmName="$(cut -d' ' -f1 <<< ${resultSet[0]})"
 			callPgmAlias="$(cut -d' ' -f2 <<< ${resultSet[0]})"

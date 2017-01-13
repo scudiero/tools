@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.0.68" # -- dscudiero -- 01/06/2017 @  8:02:27.67
+# version="2.0.69" # -- dscudiero -- 01/12/2017 @ 12:48:47.84
 #=======================================================================================================================
 # Generic resolve file and call
 # Call scriptName ["$scriptArgs"]
@@ -57,7 +57,7 @@ function Call {
 
 			## Is the first 'scriptArgs' token in the set 'cron,reports,features,patches,java', if so then it is a lib specification
 				sqlStmt="select scriptData2 from $scriptsTable where name =\"dispatcher\" "
-				RunSql $sqlStmt
+				RunSql2 $sqlStmt
 		 		resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString")
 				local dbSrcLibs="${resultSet[0]}"
 				local useLibs=''

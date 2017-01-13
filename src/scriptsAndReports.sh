@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.26 # -- dscudiero -- 01/04/2017 @ 15:33:16.07
+version=3.11.27 # -- dscudiero -- 01/12/2017 @ 13:07:04.17
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -45,7 +45,7 @@ function BuildMenuList {
 			whereClauseUser="and (restrictToUsers like \"%$userName%\" or restrictToUsers is null)"
 
 			sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\" "
-			RunSql 'mysql' $sqlStmt
+			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -ne 0 ]]; then
 				for result in "${resultSet[@]}"; do
 					[[ $whereClauseGroups == '' ]] && whereClauseGroups="restrictToGroups like \"%$result%\"" || \
@@ -58,7 +58,7 @@ function BuildMenuList {
 		fields="name,shortDescription,author,supported,edate"
 		unset $(echo $fields | tr ',' ' ')
 		sqlStmt="select $fields from $table where $whereClauseActive $whereClauseHost $whereClauseUser $whereClauseGroups order by name"
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Sorry, you do not have access to any scripts.\n\tsqlStmt: $sqlStmt"
 
 		unset menuList
@@ -94,7 +94,7 @@ function ExecScript {
 	## Lookup detailed script info from db
 		local fields="exec,lib,scriptArgs"
 		local sqlStmt="select $fields from $scriptsTable where lower(name) =\"$(Lower $name)\" "
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		[[ ${#resultSet[0]} -eq 0 ]] && Msg2 $T "Could not lookup script name ('$name') in the $mySqlDb.$scriptsTable"
 		resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString" )
 		local fieldCntr=1
@@ -134,7 +134,7 @@ function ExecReport {
 	## Lookup detailed script info from db
 		local fields="shortDescription,type,header,db,dbType,sqlStmt,script,scriptArgs,ignoreList"
 		local sqlStmt="select $fields from $reportsTable where lower(name) =\"$(Lower $name)\" "
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		[[ ${#resultSet[0]} -eq 0 ]] && Msg2 $T "Could not lookup report name ('$name') in the $mySqlDb.$reportsTable"
 		myData="Name: '$name' "
 		[[ $logInDb != false && $myLogRecordIdx != "" ]] && dbLog 'Update' $myLogRecordIdx "$myData"
@@ -163,7 +163,7 @@ function ExecReport {
 			if [[ -f $outFile ]]; then rm $outFile; fi
 			if [[ $dbType == 'mysql' ]]; then
 				#sqlStmt=$(sed "s/<ignoreList>/$ignoreList/g" <<< $sqlStmt)
-				$trapErrexitOff; RunSql 'mysql' $sqlStmt; rc=$?; $trapErrexitOn
+				$trapErrexitOff; RunSql2 $sqlStmt; rc=$?; $trapErrexitOn
 				[[ $rc -ne 0 ]] && Msg2 $T "Running MySql\n\tsqlStmt: '$sqlStmt'\n"
 
 				if [[ ${#resultSet[@]} -eq 0 ]]; then
@@ -210,19 +210,19 @@ mode=$(echo $1 | tr '[:upper:]' '[:lower:]')
 ## Check to see if the first argument is a report name
 	## Is it a client name?
 	sqlStmt="select count(*) from $clientInfoTable where LOWER(name)=\"$(Lower $1)\" and recordStatus=\"A\""
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	count=${resultSet[0]}
 	## Not a client name, look for report or script name
 	if [[ $count -eq 0 ]]; then
 		if [[ $mode == 'scripts' ]]; then
 			sqlStmt="select count(*) from $scriptsTable where LOWER(name)=\"$(Lower $1)\" and active=\"Yes\""
-			RunSql 'mysql' $sqlStmt
+			RunSql2 $sqlStmt
 			count=${resultSet[0]}
 			[[ $count -ne 0 ]] && script=$1 && shift && originalArgStr="$*"
 		elif [[ $mode == 'reports' ]]; then
 			unset report
 			sqlStmt="select count(*) from $reportsTable where LOWER(name)=\"$(Lower $1)\" and active=\"Yes\""
-			RunSql 'mysql' $sqlStmt
+			RunSql2 $sqlStmt
 			count=${resultSet[0]}
 			[[ $count -ne 0 ]] && report=$1 && shift && originalArgStr="$*"
 		fi

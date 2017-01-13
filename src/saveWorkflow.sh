@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.40 # -- dscudiero -- 12/16/2016 @ 15:23:34.57
+version=2.2.41 # -- dscudiero -- 01/12/2017 @ 13:16:23.03
 #====================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -61,7 +61,7 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 	unset requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles suffix
 	if [[ $scriptData1 == '' ]]; then
 		sqlStmt="select scriptData1 from $scriptsTable where name=\"copyWorkflow\""
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Could not retrieve workflow files data (scriptData1) from the $scriptsTable.";
 		scriptData="${resultSet[0]}"
 	fi
@@ -69,7 +69,7 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 
 	if [[ $scriptData2 == '' ]]; then
 		sqlStmt="select scriptData2 from $scriptsTable where name=\"copyWorkflow\""
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Could not retrieve workflow files data (scriptData1) from the $scriptsTable.";
 		scriptData="${resultSet[0]}"
 	fi
@@ -77,7 +77,7 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 
 	if [[ $scriptData3 == '' ]]; then
 		sqlStmt="select scriptData3 from $scriptsTable where name=\"copyWorkflow\""
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Could not retrieve workflow files data (scriptData1) from the $scriptsTable.";
 		scriptData="${resultSet[0]}"
 	fi
@@ -85,7 +85,7 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 
 	if [[ $scriptData4 == '' ]]; then
 		sqlStmt="select scriptData4 from $scriptsTable where name=\"copyWorkflow\""
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Could not retrieve workflow files data (scriptData1) from the $scriptsTable.";
 		scriptData="${resultSet[0]}"
 	fi

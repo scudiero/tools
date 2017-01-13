@@ -1,5 +1,5 @@
 #!/bin/bash
-version=1.0.5 # -- dscudiero -- 07/28/2016 @  8:16:10.71
+version=1.0.7 # -- dscudiero -- 01/12/2017 @ 14:15:06.94
 originalArgStr="$*"
 scriptDescription="Report on specific client data for marketning team member"
 TrapSigs 'on'
@@ -43,8 +43,7 @@ outFile=$outDir/$(date '+%Y-%m-%d-%H%M%S').xls
 # Standard arg parsing and initialization
 #==================================================================================================
 ParseArgsStd
-
-[[ $reportName != '' ]] && GetDefaultsData "$reportName"
+[[ $reportName != '' ]] && GetDefaultsData "$reportName" "$reportsTable"
 [[ $client != '' ]] && salesRep=$client
 
 Prompt salesRep "Please specify the userid of the Marketing Rep to report on" '*any*';
@@ -68,7 +67,7 @@ salesRep=$(Lower $salesRep)
 	## Get the list of clients
 		fields='idx,name,longName,ifnull(products,"") as products,ifnull(productsInSupport,"") as productsInSupport ,ifnull(sis,"") as sis,ifnull(hosting,"") as hosting'
 		sqlStmt="select $fields from $clientInfoTable where salesRep like \"%$salesRep%\" and recordStatus='A' order by name"
-		RunSql 'mySql' $sqlStmt
+		RunSql2 $sqlStmt
 		for rec in "${resultSet[@]}"; do clientSet+=("$rec"); done
 		for clientRec in "${clientSet[@]}"; do
 			clientKey=$(cut -d"|" -f1 <<< $clientRec)
@@ -76,7 +75,7 @@ salesRep=$(Lower $salesRep)
 			## Get the contact information from the contacts db
 				fields='contactrole,firstname,lastname,title,workphone,cell,fax,email'
 				sqlStmt="select $fields from contacts where clientkey=\"$clientKey\" and contactrole like \"%primary%\" order by contactrole,lastname"
-				RunSql 'sqlite' "$contactsSqliteFile" $sqlStmt
+				RunSql2 "$contactsSqliteFile" $sqlStmt
 				for contactRec in "${resultSet[@]}"; do
 					outRec="$outRec|$(tr '|' ',' <<< $contactRec)"
 				done

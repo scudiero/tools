@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.4.69 # -- dscudiero -- 01/12/2017 @ 10:41:03.85
+version=3.4.70 # -- dscudiero -- 01/12/2017 @ 13:17:28.77
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -152,7 +152,7 @@ deleteLimitDays=7
 
 ## Get the deleteLimitDays from db -- lookup from checkForPrivateDevSites script data
 sqlStmt="select scriptData1 from $scriptsTable where name=\"checkForPrivateDevSites\""
-RunSql 'mysql' $sqlStmt
+RunSql2 $sqlStmt
 [[ ${#resultSet[@]} -ne 0 ]] && deleteLimitDays=${resultSet[0]}
 
 #==================================================================================================

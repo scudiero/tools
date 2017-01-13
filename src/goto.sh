@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.52 # -- dscudiero -- 12/14/2016 @ 11:25:54.78
+version=2.0.53 # -- dscudiero -- 01/12/2017 @ 13:18:17.77
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd' #imports="$imports "
@@ -41,7 +41,7 @@ dump -l myName client env target
 ## lookup client in clients database
 #==================================================================================================
 sqlStmt="select hosting from $clientInfoTable where name=\"$client\""
-RunSql 'mysql' $sqlStmt
+RunSql2 $sqlStmt
 if [[ ${#resultSet[@]} -eq 0 ]]; then
 	Msg2  $E "Client '$client', Env '$env' not found in warehouse.$clientInfoTable table";
 	return
@@ -56,7 +56,7 @@ if [[ $hosting == 'leepfrog' ]]; then
 	[[ $env = 'test' ]] && client="$client-test" && whereClause="name=\"$client\" and env=\"test\" and host=\"$hostName\""
 	sqlStmt="select share,hosting from $siteInfoTable where $whereClause"
 	dump -l sqlStmt
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	if [[ ${#resultSet[@]} -eq 0 ]]; then
 		Msg2  $E "Client '$client', Env '$env' not found in warehouse.$siteInfoTable table";
 		return

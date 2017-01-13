@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.7.67 # -- dscudiero -- 12/14/2016 @ 11:30:00.93
+version=1.7.68 # -- dscudiero -- 01/12/2017 @ 13:22:18.73
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye SelectMenuNew ParseCourseleafFile'
@@ -81,7 +81,7 @@ addedCalledScriptArgs="-secondaryMessagesOnly"
 ## Get a list of avaiable patches from db
 	fields="idx,shortDescription,longDescription,requester,clVersion,cgiVersion,script,createdOn"
 	sqlStmt="Select $fields from $courseleafPatchTable where status=\"active\" order by idx"
-	RunSql 'mysql' "$sqlStmt"
+	RunSql2 "$sqlStmt"
 	#echo '${#resultSet[@]} = >'${#resultSet[@]}'<'
 	[[ ${#resultSet[@]} -eq 0 ]] && Msg "T No records returned from source database"
 	for result in "${resultSet[@]}"; do

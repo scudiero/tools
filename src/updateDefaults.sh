@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.21 # -- dscudiero -- 01/05/2017 @ 14:22:04.74
+version=2.0.22 # -- dscudiero -- 01/12/2017 @ 13:17:10.68
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -46,14 +46,14 @@ ignoreList="${ignoreList##*ignoreShares:}" ; ignoreList="${ignoreList%% *}"
 	Verbose "devServers = '$newServers'"
 	## Check to see if record exists
 		sqlStmt="select count(*) from defaults where name=\"devServers\" and host=\"$hostName\" and os=\"linux\""
-		RunSql 'mysql' $sqlStmt; count=${resultSet[0]}
+		RunSql2 $sqlStmt; count=${resultSet[0]}
 		if [[ $count -eq 0 ]]; then
 			sqlStmt="insert into defaults values(NULL,\"devServers\",\"$newServers\",\"linux\",\"$hostName\",Now(),\"$userName\",NULL,NULL)"
 		else
 			sqlStmt="update defaults set value=\"$newServers\",updatedOn=Now(),updatedBy=\"$userName\" where name=\"devServers\" and host=\"$hostName\" and os=\"linux\""
 		fi
 		dump -1 -t sqlStmt
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 
 ## PROD servers
 	unset newServers
@@ -68,14 +68,14 @@ ignoreList="${ignoreList##*ignoreShares:}" ; ignoreList="${ignoreList%% *}"
 	Verbose "prodServers = '$newServers'"
 	## Check to see if record exists
 		sqlStmt="select count(*) from defaults where name=\"prodServers\" and host=\"$hostName\" and os=\"linux\""
-		RunSql 'mysql' $sqlStmt; count=${resultSet[0]}
+		RunSql2 $sqlStmt; count=${resultSet[0]}
 		if [[ $count -eq 0 ]]; then
 			sqlStmt="insert into defaults values(NULL,\"prodServers\",\"$newServers\",\"linux\",\"$hostName\",Now(),\"$userName\",NULL,NULL)"
 		else
 			sqlStmt="update defaults set value=\"$newServers\",updatedOn=Now(),updatedBy=\"$userName\" where name=\"prodServers\" and host=\"$hostName\" and os=\"linux\""
 		fi
 		dump -1 -t sqlStmt
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 
 
 ## Update rhel version.
@@ -84,7 +84,7 @@ ignoreList="${ignoreList##*ignoreShares:}" ; ignoreList="${ignoreList%% *}"
 	rhel='rhel'$rhel
 	dump -1 rhel
 	sqlStmt="update defaults set value=\"$rhel\" where name=\"rhel\" and host=\"$hostName\" and os=\"linux\""
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 
 ## Default CL version from the 'release' directory in the skeleton
 	unset defaultClVer
@@ -92,7 +92,7 @@ ignoreList="${ignoreList##*ignoreShares:}" ; ignoreList="${ignoreList%% *}"
 		defaultClVer="$(cat $skeletonRoot/release/web/courseleaf/clver.txt)"
 		dump -1 defaultClVer
 		sqlStmt="update defaults set value=\"$defaultClVer\" where name=\"defaultClVer\""
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 	else
 		Msg2 "Could not read file: '$skeletonRoot/release/web/courseleaf/clver.txt'"
 	fi

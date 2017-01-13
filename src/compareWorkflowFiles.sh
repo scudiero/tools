@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.13 # -- dscudiero -- 12/14/2016 @ 11:23:00.90
+version=1.2.14 # -- dscudiero -- 01/12/2017 @ 12:59:19.16
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -36,7 +36,7 @@ wfFiles="$scriptData1"
 ## Get the list of files to work with
 	if [[ $wfFiles == '' ]]; then
 		sqlStmt="select scriptData1 from $scriptsTable where name=\"copyWorkflow\""
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Msg2 $T "Could not retrieve workflow files data (scriptData1) from the $scriptsTable."
 		wfFiles="${resultSet[0]}"
 	fi
@@ -45,7 +45,7 @@ systemWfFiles="$scriptData2"
 ## Get the list of files to work with
 	if [[ $systemWfFiles == '' ]]; then
 		sqlStmt="select scriptData2 from $scriptsTable where name=\"copyWorkflow\""
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Msg2 $T "Could not retrieve workflow files data (scriptData2) from the $scriptsTable."
 		systemWfFiles="${resultSet[0]}"
 	fi

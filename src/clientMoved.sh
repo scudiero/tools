@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.33 # -- dscudiero -- 12/16/2016 @ 10:23:56.31
+version=1.0.34 # -- dscudiero -- 01/12/2017 @ 13:12:43.05
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -64,13 +64,13 @@ Init "getClient"
 unset origHost origDevShare origProdShare
 ## Get current information
 	sqlStmt="select distinct host,share from $siteInfoTable where name=\"$client\" and env=\"next\""
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		origHost=$(cut -d'|' -f1 <<< ${resultSet[0]})
 		origProdShare=$(cut -d'|' -f2 <<< ${resultSet[0]})
 	fi
 	sqlStmt="select distinct share from $siteInfoTable where name=\"$client\" and env=\"dev\""
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		origDevShare=$(cut -d'|' -f2 <<< ${resultSet[0]})
 	fi
@@ -92,7 +92,7 @@ unset origHost origDevShare origProdShare
 
 ## New Production Server
 	sqlStmt="Select value from defaults where name=\"prodServers\" and host=\"$newHost\""
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	defaultProdShares=${resultSet[0]}
 	if [[ $(grep -o ',' <<< "$defaultProdShares" | wc -l) -gt 1 ]]; then
 		menuList=("|New Prod Server")
@@ -109,7 +109,7 @@ unset origHost origDevShare origProdShare
 
 ## New Dev Server
 	sqlStmt="Select value from defaults where name=\"devServers\" and host=\"$newHost\""
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	defaultDevShares=${resultSet[0]}
 	if [[ $(grep -o ',' <<< "$defaultDevShares" | wc -l) -gt 1 ]]; then
 		menuList=("|New Dev Server")
@@ -139,17 +139,17 @@ myData="Client: '$client', New Host: '$newHost', New Dev Share: '$newDevShare', 
 #===================================================================================================
 
 sqlStmt="Update $siteInfoTable set host=\"$newHost\" where name=\"$client\""
-RunSql 'mysql' $sqlStmt
+RunSql2 $sqlStmt
 
 sqlStmt="Update $siteInfoTable set share=\"$newDevShare\" where name=\"$client\" and env=\"dev\""
-RunSql 'mysql' $sqlStmt
+RunSql2 $sqlStmt
 sqlStmt="Update $siteInfoTable set share=\"$newProdShare\" where name=\"${client}\" and env not in (\"dev\",\"preview\",\"public\")"
-RunSql 'mysql' $sqlStmt
+RunSql2 $sqlStmt
 
 sqlStmt="Update $siteInfoTable set host=\"$newHost\" where name=\"${client}-test\" and env=\"test\""
-RunSql 'mysql' $sqlStmt
+RunSql2 $sqlStmt
 sqlStmt="Update $siteInfoTable set share=\"$newProdShare\" where name=\"${client}-test\" and env=\"test\""
-RunSql 'mysql' $sqlStmt
+RunSql2 $sqlStmt
 
 Msg2 "Data Warehouse data updated to reflect the clients new location"
 

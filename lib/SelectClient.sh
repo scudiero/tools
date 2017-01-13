@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.4" # -- dscudiero -- 01/04/2017 @ 13:51:51.18
+# version="2.0.5" # -- dscudiero -- 01/12/2017 @ 12:53:06.73
 #===================================================================================================
 # Display a selection list of clients, returns data in the client global variable
 #===================================================================================================
@@ -16,13 +16,13 @@ function SelectClient {
 
 	## Get the max width of client abbreviations
 	local sqlStmt="select max(length(name)) from $clientInfoTable"
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	maxNameWidth=${resultSet[0]}
 
 	## Get the clients data
 	local sqlStmt="select distinct clients.name,clients.longName from $clientInfoTable,$siteInfoTable \
 	where clients.idx=sites.clientId and sites.host = \"$hostName\" order by clients.name"
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	for resultRec in "${resultSet[@]}"; do
 		resultRec=$(tr "\t" "|" <<< "$resultRec" )
 

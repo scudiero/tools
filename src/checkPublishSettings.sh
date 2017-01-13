@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.3.9 # -- dscudiero -- 12/14/2016 @ 11:19:32.14
+version=2.3.10 # -- dscudiero -- 01/12/2017 @ 13:13:41.33
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -33,14 +33,14 @@ Hello
 #==================================================================================================
 unset dbRecs
 sqlStmt="select name,publishing from $siteInfoTable where publishing <> \"/dev/null\" and publishing is not null  and publishing <> \"\" group by name,publishing having count(publishing) > 1"
-RunSql 'mysql' $sqlStmt
+RunSql2 $sqlStmt
 dbRecs=("${resultSet[@]}")
 for dbRec in "${dbRecs[@]}"; do
 	dbRec=$(echo $dbRec | tr "\t" "|"); dbRec=$(echo $dbRec | tr " " "|")
 	client=$(echo $dbRec | cut -d "|" -f1)
 	publishing=$(echo $dbRec | cut -d "|" -f2)
 	sqlStmt="select distinct env from $siteInfoTable where name=\"$client\" and publishing=\"$publishing\";"
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	count=${#resultSet[@]}
 	if [[ $count -ge  2 ]]; then
 		IFSSave=$IFS; IFS=$','; envs=$(echo "${resultSet[*]}" | tr "\t" " "); IFS=$IFSSave

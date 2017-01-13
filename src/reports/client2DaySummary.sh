@@ -1,6 +1,6 @@
-#!/bin/bash
+RunSql2 #!/bin/bash
 #==================================================================================================
-version=1.1.8 # -- dscudiero -- 12/19/2016 @  7:53:19.19
+version=1.1.10 # -- dscudiero -- 01/12/2017 @ 14:14:17.43
 #==================================================================================================
 Import DumpMap
 originalArgStr="$*"
@@ -53,7 +53,7 @@ roleMap['implementation']='csmRep'
 #==================================================================================================
 unset client
 ParseArgsStd
-[[ $reportName != '' ]] && GetDefaultsData "$reportName"
+[[ $reportName != '' ]] && GetDefaultsData "$reportName" "$reportsTable"
 
 [[ $client != '' ]] && orgUnit="$(TitleCase "$client")" || orgUnit='Support'
 if [[ $role == '' ]]; then
@@ -74,7 +74,7 @@ clientsDir="/mnt/internal/site/stage/web/clients"
 	unset keysArray
 	[[ $ignoreList != '' ]] && ignoreList="and name not in (\"$(sed s'/,/","/g' <<< $ignoreList)\")"
 	sqlStmt="select name,$role from $clientInfoTable where recordStatus=\"A\" $ignoreList order by $role,name"
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	for result in "${resultSet[@]}"; do
 		clientCode=$(cut -d'|' -f1 <<< $result)
 		contactInfo=$(cut -d'|' -f2 <<< $result)

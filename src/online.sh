@@ -1,6 +1,6 @@
 #!/bin/bash
 #===================================================================================================
-version=1.0.4 # -- dscudiero -- 12/14/2016 @ 11:28:31.30
+version=1.0.5 # -- dscudiero -- 01/12/2017 @ 13:22:00.84
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -19,7 +19,7 @@ Prompt script "Please specify the script to take online" '*any*'
 
 [[ ${script: (-3)} == '.sh' ]] && script="$(cut -d'.' -f1 <<< $script)"
 sqlStmt="update $scriptsTable set active=\"Yes\" where name=\"$script\""
-RunSql 'mysql' $sqlStmt
+RunSql2 $sqlStmt
 #===================================================================================================
 ## Check-in log
 #===================================================================================================

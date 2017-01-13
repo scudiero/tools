@@ -1,6 +1,6 @@
 #!/bin/bash
 #===================================================================================================
-version=1.0.10 # -- dscudiero -- 12/14/2016 @ 11:28:23.07
+version=1.0.11 # -- dscudiero -- 01/12/2017 @ 13:01:04.82
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -19,7 +19,7 @@ script=$client
 if [[ $script = '' ]]; then
 	Msg2 "Current offline scripts:"
 	sqlStmt="select name from $scriptsTable where active=\"No\""
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	for result in ${resultSet[@]}; do
 		[[ $(Contains ",$ignoreScripts," ",$result,") != true ]] && Msg2 "^$result"
 	done
@@ -29,7 +29,7 @@ else
 
 	[[ ${script: (-3)} == '.sh' ]] && script="$(cut -d'.' -f1 <<< $script)"
 	sqlStmt="update $scriptsTable set active=\"No\" where name=\"$script\""
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 fi
 
 #===================================================================================================

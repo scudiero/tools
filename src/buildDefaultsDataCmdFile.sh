@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.4 # -- dscudiero -- 12/14/2016 @ 11:15:51.89
+version=2.0.5 # -- dscudiero -- 01/12/2017 @ 12:58:50.43
 #==================================================================================================
 scriptDescription="Build dos cmd file setting default values"
 TrapSigs 'on'
@@ -22,7 +22,7 @@ noLog=true; noDbLog=true;
 ## DEV servers
 	unset devServers
 	sqlStmt="select value from defaults where name=\"devServers\" "
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	for results in "${resultSet[@]}"; do
 		devServers=$devServers,$results
 	done
@@ -30,7 +30,7 @@ noLog=true; noDbLog=true;
 ## PROD servers
 	unset prodServers
 	sqlStmt="select value from defaults where name=\"prodServers\" "
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	for results in "${resultSet[@]}"; do
 		prodServers=$prodServers,$results
 	done

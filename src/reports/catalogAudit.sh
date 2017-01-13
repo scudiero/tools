@@ -1,6 +1,6 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
-version=1.0.15 # -- dscudiero -- 11/01/2016 @ 11:39:01.82
+version=1.0.17 # -- dscudiero -- 01/12/2017 @ 14:14:26.51
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -72,7 +72,7 @@ function CheckPageDb {
 
 	local cwd=$(pwd); cd $dir
 	sqlStmt="select count(*) from livepages where path=\"$dir/index.html\""
-	RunSql 'sqlite' "$siteDir/courseleaf/pagedb.dat" $sqlStmt
+	RunSql2 "$siteDir/courseleaf/pagedb.dat" $sqlStmt
 	[[ ${resultSet[0]} -eq 0 ]] && pagesNotInPagesDb+=("$dir")
 	cd $cwd
 
@@ -97,6 +97,8 @@ outFile=$outDir/$(date '+%Y-%m-%d-%H%M%S').txt;
 #==================================================================================================
 helpSet='script,client,env'
 ParseArgsStd
+[[ $reportName != '' ]] && GetDefaultsData "$reportName" "$reportsTable"
+
 Hello
 allCims=true
 Init "getClient getEnv getDirs checkEnvs getCims"

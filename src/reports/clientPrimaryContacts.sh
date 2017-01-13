@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.10 # -- dscudiero -- 12/02/2016 @ 12:45:32.37
+version=1.0.19 # -- dscudiero -- 01/12/2017 @ 14:13:09.22
 #==================================================================================================
 Import GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye
 originalArgStr="$*"
@@ -56,7 +56,8 @@ fields="$fields,contacts.title,contacts.workphone,contacts.cell,contacts.fax,con
 # Standard arg parsing and initialization
 #==================================================================================================
 ParseArgsStd
-[[ $reportName != '' ]] && GetDefaultsData "$reportName"
+
+[[ $reportName != '' ]] && GetDefaultsData "$reportName" "$reportsTable"
 Hello
 
 #===================================================================================================
@@ -75,7 +76,7 @@ Hello
 	orderBy="clients.clientcode,contactrole,contacts.lastname"
 	sqlStmt="select $fields from clients,contacts where $whereClause order by $orderBy"
 
-	RunSql 'sqlite' "$contactsSqliteFile" $sqlStmt
+	RunSql2 "$contactsSqliteFile" "$sqlStmt"
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		numRecs=${#resultSet[@]}
 		Msg2 "^Found $numRecs contacts records..."

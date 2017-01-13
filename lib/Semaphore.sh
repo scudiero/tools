@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.5" # -- dscudiero -- 01/04/2017 @ 13:48:45.49
+# version="2.0.6" # -- dscudiero -- 01/12/2017 @ 12:47:40.57
 #===================================================================================================
 # Process semaphores
 # Semaphore <mode> <key/name> <sleeptime>
@@ -29,26 +29,26 @@ function Semaphore {
 	if [[ $mode = 'set' ]]; then
 		sqlStmt="insert into $semaphoreInfoTable (keyId,processName,hostName,createdBy,createdOn) \
 						 values(NULL,\"$myName\",\"$hostName\",\"$userName\",\"$startTime\")";
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		sqlStmt="select max(keyId) from $semaphoreInfoTable"
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		echo ${resultSet[0]}
 
 	elif [[ $mode = 'check' ]]; then
 		sqlStmt="select count(*) from $semaphoreInfoTable where processName=\"$keyId\" $andClause";
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
  		[[ ${resultSet[0]} -ne 0 ]] && echo false || echo true
 
 	elif [[ $mode = 'clear' ]]; then
 		sqlStmt="delete from $semaphoreInfoTable where keyId=\"$keyId\"";
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 
 	elif [[ $mode = 'waiton' ]]; then
 		count=1
 		#echo 'Starting wait on' >> ~/stdout.txt
 		while [[ $count -gt 0 ]]; do
 			sqlStmt="select count(*) from $semaphoreInfoTable where processName=\"$keyId\"";
-			RunSql 'mysql' $sqlStmt
+			RunSql2 $sqlStmt
  			[[ ${#resultSet[@]} -ne 0 ]] && count=${resultSet[0]} || count=0
  			[[ $count -gt 0 ]] && dump -3 -l -t count && sleep $sleepTime
 		done

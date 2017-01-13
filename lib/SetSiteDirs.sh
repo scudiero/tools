@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.17" # -- dscudiero -- 01/06/2017 @ 14:08:34.67
+# version="2.0.18" # -- dscudiero -- 01/12/2017 @ 12:48:01.32
 #===================================================================================================
 # Set Directories based on the current hostName name and school name
 # Sets globals: devDir, nextDir, previewDir, publicDir, upgradeDir
@@ -48,7 +48,7 @@ function SetSiteDirs {
 			if [[ $noCheck != true ]]; then
 				## Get the share and
 				sqlStmt="select share from $siteInfoTable where name=\"$client\" and env=\"next\""
-				RunSql 'mysql' $sqlStmt
+				RunSql2 $sqlStmt
 				if [[ ${#resultSet[@]} -gt 0 ]]; then
 					nextDir="/mnt/${resultSet[0]}/$client/next"
 				else

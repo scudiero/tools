@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.53 # -- dscudiero -- 01/10/2017 @ 10:55:14.55
+# version=2.0.54 # -- dscudiero -- 01/12/2017 @ 12:52:10.39
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -113,7 +113,7 @@ function Init {
 				if [[ $noPublic == true ]]; then if [[ $noPreview == true ]]; then notIn="$notIn,'public'"; else notIn="$notIn'public'"; fi; fi
 				if [[ $noPreview == true || $noPublic == true ]]; then notIn="$notIn)"; fi
 				sqlStmt="select distinct env from $siteInfoTable where (name=\"$client\" or name=\"$client-test\") $notIn order by env"
-				RunSql 'mysql' $sqlStmt
+				RunSql2 $sqlStmt
 				if [[ ${#resultSet[@]} -eq 0 ]]; then
 					for checkEnv in pvt dev test next curr; do
 						[[ $(SetSiteDirs 'check' $checkEnv) == true ]] && clientEnvs="$clientEnvs $checkEnv"
@@ -206,7 +206,7 @@ function Init {
 			unset validProducts
 			## Get the products for this client
 			sqlStmt="select products from $clientInfoTable where (name=\"$client\")"
-			RunSql 'mysql' $sqlStmt
+			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -gt 0 ]]; then
 				## Remove the extra vanity products from the validProducts list
 				for prod in $(tr ',' ' ' <<< ${resultSet[0]}); do

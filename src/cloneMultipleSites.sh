@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.10 # -- dscudiero -- 12/14/2016 @ 11:22:55.99
+version=2.1.11 # -- dscudiero -- 01/12/2017 @ 13:17:49.67
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -52,14 +52,14 @@ VerifyContinue "You are asking to $mode 'xxx$siteSuffix' test sites for the foll
 #==================================================================================================
 for site in $client; do
 	sqlStmt="select idx from $clientInfoTable where name=\"$site\" "
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	clientId=${resultSet[0]}
 	if [[ "$clientId" = '' ]]; then
 		Msg2 "Client value of '$site' not found in leepfrog.$clientInfoTable" | tee $logFile
 		continue
 	else 
 		sqlStmt="select siteId from $siteInfoTable where clientId=\"$clientId\" and host = \"$hostName\" and env = \"next\""
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		siteId=${resultSet[0]}
 		if [[ "$siteId" != '' ]]; then
 			Msg2 "processing: $site" | tee $logFile

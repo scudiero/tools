@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.45 # -- dscudiero -- 01/10/2017 @ 15:24:27.16
+version=3.8.46 # -- dscudiero -- 01/12/2017 @ 13:06:05.74
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -101,7 +101,7 @@ scriptDescription="Load Courseleaf Data"
 
 		sqlLiteFields="userid,lname,fname,email"
 		sqlStmt="select $sqlLiteFields FROM users"
-		RunSql 'sqlite' "$dbFile" "$sqlStmt"
+		RunSql2 "$dbFile" "$sqlStmt"
 		if [[ ${#resultSet[@]} -ne 0 ]]; then
 			for resultRec in "${resultSet[@]}"; do
 				dump -2 resultRec
@@ -266,7 +266,7 @@ scriptDescription="Load Courseleaf Data"
 
 			## See if this client has special case handeling for usernames
 				sqlStmt="select useridCase from $clientInfoTable where name=\"$client\""
-				RunSql 'mysql' "$sqlStmt"
+				RunSql2 $sqlStmt
 				useridCase=$(Upper ${resultSet[0]:0:1}) || useridCase='M'
 
 			## Read/Parse the data rows into hash table
@@ -323,13 +323,13 @@ scriptDescription="Load Courseleaf Data"
 						Msg2 "^^New Data: $newData"
 						Msg2 "^^Old Data: $oldData"
 						sqlStmt="UPDATE users set lname=\"$lname\", fname=\"$fname\", email=\"$email\" where userid=\"$key\" "
-						[[ $informationOnlyMode == false ]] && $DOIT RunSql 'sqlite' "$dbFile" "$sqlStmt"
+						[[ $informationOnlyMode == false ]] && $DOIT RunSql2 "$dbFile" "$sqlStmt"
 						(( numModifiedUsers += 1 ))
 					fi
 				else
 					VerboseMsg 1 "Adding new user: $key"
 					sqlStmt="INSERT into users values(NULL,\"$key\",\"$lname\",\"$fname\",\"$email\") "
-					[[ $informationOnlyMode == false ]] && $DOIT RunSql 'sqlite' "$dbFile" "$sqlStmt"
+					[[ $informationOnlyMode == false ]] && $DOIT RunSql2 "$dbFile" "$sqlStmt"
 					usersFromDb["$key"]="${usersFromSpreadsheet["$key"]}"
 					VerboseMsg 1 2 "User added: $key"
 					(( numNewUsers += 1 ))
@@ -668,7 +668,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 			usesUINs=true
 		else
 			sqlStmt="select usesUINs from $clientInfoTable where name=\"$client\""
-			RunSql 'mysql' $sqlStmt
+			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -ne 0 ]]; then
 				result="${resultSet[0]}"
 				[[ $result == 'Y' ]] && useUINs=true && Msg2

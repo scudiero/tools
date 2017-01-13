@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.97 # -- dscudiero -- 12/14/2016 @ 11:24:38.26
+version=1.0.98 # -- dscudiero -- 01/12/2017 @ 13:00:07.71
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -76,7 +76,7 @@ function GetCimCourseDb {
 						if [[ $grepStr != '' ]]; then
 							dbTable=$(echo $grepStr | cut -d':' -f2)
 							sql="select count(*) from $dbTable;"
-							RunSql 'sqlite' "$srcDir/$dbFile" $sql
+							RunSql2 "$srcDir/$dbFile" $sql
 							[[ ${resultSet[0]} -gt 0 ]] && baseDbFile="${siteDir}${dbFile}" && break
 						fi
 					fi
