@@ -1,17 +1,13 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.69" # -- dscudiero -- 01/13/2017 @  7:32:37.19
+# version="2.0.70" # -- dscudiero -- 01/13/2017 @  9:19:48.10
 #===================================================================================================
 # Initialize the tools runtime environment
 #===================================================================================================
 # CopyrighFt 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-# commonIncludes='Colors Msg2 Dump Here Quit Contains Lower Upper TitleCase Trim IsNumeric PushSettings PopSettings'
-# commonIncludes="$commonIncludes MkTmpFile Pause ProtectedCall SetFileExpansion PadChar PrintBanner Alert"
-# commonIncludes="$commonIncludes TrapSigs SignalHandeler RunSql DbLog GetCallStack DisplayNews"
-# commonIncludes="$commonIncludes GetDefaultsData Call StartRemoteSession"
-# Import "$commonIncludes"
+
 TrapSigs 'on'
 
 GD echo -e "\n=== Starting InitializeRuntime ========================================================================"
@@ -57,6 +53,7 @@ tabStr="$(PadChar ' ' 5)"
 	TrapSigs 'on'
 
 ## Load defaults value
+	defaultsLoaded=false
 	GetDefaultsData
 	SetFileExpansion
 
@@ -160,3 +157,4 @@ GD echo -e "\n=== Stopping InitializeRuntime ===================================
 ## Fri Jan 13 07:21:22 CST 2017 - dscudiero - Bring colors processing into this module
 ## Fri Jan 13 07:22:16 CST 2017 - dscudiero - fix bug
 ## Fri Jan 13 08:28:37 CST 2017 - dscudiero - misc cleanup
+## Fri Jan 13 09:23:21 CST 2017 - dscudiero - General syncing of dev to prod
