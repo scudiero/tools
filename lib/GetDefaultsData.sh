@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.26" # -- dscudiero -- 01/13/2017 @ 14:20:31.12
+# version="2.0.28" # -- dscudiero -- 01/13/2017 @ 15:14:53.96
 #===================================================================================================
 # Get default variable values from the defaults database
 #===================================================================================================
@@ -32,8 +32,10 @@ echo "Loading global defaults"
 				recCntr=0
 				while [[ $recCntr -lt ${#resultSet[@]} ]]; do
 					varName=$(cut -d'|' -f1 <<< ${resultSet[$recCntr]})
+echo -e "\tvarName='$varName'"
 					[[ -z $varName ]] && continue
 					## If the variable does not already has a value, then set from the db data
+echo -e "\tvarValue='$(cut -d '|' -f 2-  <<< ${resultSet[$recCntr]})'"
 					[[ ${!varName} == '' ]] && eval $varName=\"$(cut -d '|' -f 2-  <<< ${resultSet[$recCntr]})\"
 					(( recCntr += 1 ))
 				done
@@ -82,3 +84,4 @@ export -f GetDefaultsData
 ## Thu Jan 12 14:38:36 CST 2017 - dscudiero - Update to add ability to pass in the table to load defaults from
 ## Fri Jan 13 06:59:57 CST 2017 - dscudiero - Set defaultsLoaded variable
 ## Fri Jan 13 09:23:19 CST 2017 - dscudiero - General syncing of dev to prod
+## Fri Jan 13 15:15:16 CST 2017 - dscudiero - Add debug statements
