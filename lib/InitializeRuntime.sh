@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.72" # -- dscudiero -- 01/13/2017 @ 15:25:09.90
+# version="2.0.73" # -- dscudiero -- 01/13/2017 @ 15:32:50.26
 #===================================================================================================
 # Initialize the tools runtime environment
 #===================================================================================================
@@ -96,7 +96,6 @@ tabStr="$(PadChar ' ' 5)"
 	function ColorE { local string="$*"; echo "${colorError}${string}${colorDefault}"; }
 
 ## If the user has a .tools file then read the values into a hash table
-[[ $userName == 'dscudiero' ]] && echo "allowedUserVars = >$allowedUserVars<"
 	if [[ -r "$HOME/tools.cfg" && ${myRhel:0:1} -gt 5 ]]; then
 		ifs="$IFS"; IFS=$'\n'; while read -r line; do
 			line=$(tr -d '\011\012\015' <<< "$line")
@@ -149,3 +148,4 @@ GD echo -e "\n=== Stopping InitializeRuntime ===================================
 ## Fri Jan 13 09:23:21 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Jan 13 15:11:07 CST 2017 - dscudiero - syc
 ## Fri Jan 13 15:25:47 CST 2017 - dscudiero - Remove setting classpath
+## Fri Jan 13 15:33:26 CST 2017 - dscudiero - remove debug code
