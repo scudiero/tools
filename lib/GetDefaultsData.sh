@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.25" # -- dscudiero -- 01/13/2017 @  9:22:28.17
+# version="2.0.26" # -- dscudiero -- 01/13/2017 @ 14:20:31.12
 #===================================================================================================
 # Get default variable values from the defaults database
 #===================================================================================================
@@ -10,6 +10,8 @@
 
 function GetDefaultsData {
 	Verbose 3 "*** Starting $FUNCNAME ***"
+echo "$FUNCNAME Starting"
+
 	local scriptName="$1" ; shift || true
 	local table="${1:-$scriptsTable}"
 	local sqlStmt dbFields fields field fieldCntr varName whereClause
@@ -18,7 +20,7 @@ function GetDefaultsData {
 		[[ -d $(dirname ${BASH_SOURCE[0]}) ]] && myPath=$(dirname ${BASH_SOURCE[0]})
 
 		if [[ $defaultsLoaded != true ]]; then
-			# echo "Loading global defaults"
+echo "Loading global defaults"
 			Msg2 $V3 "$FUNCNAME: Loading common values..."
 			dbFields="name,value"
 			whereClause="(os=\"$osName\" or os is null) and (host=\"$hostName\" or host is null) and status=\"A\""
@@ -45,24 +47,29 @@ function GetDefaultsData {
 
 	## Get script specific data from the script record in the scripts database
 		if [[ -n $scriptName ]]; then
+echo "Loading $scriptName defaults"
 			if [[ $table == $scriptsTable ]]; then
 				fields='scriptData1,scriptData2,scriptData3,scriptData4,scriptData5,ignoreList,allowList,emailAddrs'
 			else
 				fields='ignoreList,allowList'
 			fi
+echo -e "\tfields='$fields'"
 			unset $(tr ',' ' ' <<< $fields)
 			sqlStmt="select $fields from $table where name=\"$scriptName\""
 			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -ne 0 ]]; then
 				fieldCntr=1
 				for field in $(tr ',' ' ' <<< $fields); do
+echo -e "\t\tfield='$field'"
+echo -e "\t\tvalue='$(cut -d '|' -f $fieldCntr <<< "${resultSet[0]}")'"
+
 					eval $field=\"$(cut -d '|' -f $fieldCntr <<< "${resultSet[0]}")\"
 					[[ ${!field} == 'NULL' ]] && eval unset $field
 					(( fieldCntr += 1 ))
 				done
 			fi
 		fi
-
+echo "$FUNCNAME Done"
 	Verbose 3 "*** Ending $FUNCNAME ***"
 	return 0
 } #GetDefaultsData
