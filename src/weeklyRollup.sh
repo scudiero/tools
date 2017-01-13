@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #===================================================================================================
-version=1.0.23 # -- dscudiero -- 12/20/2016 @ 12:24:40.81
+version=1.0.24 # -- dscudiero -- 01/12/2017 @ 12:57:57.63
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -57,7 +57,7 @@ ParseArgsStd
 	Msg2 "\n*** Update script usage counts -- Starting ***"
 	## Get the aggregated processLog data and update counts in the scripts table.
 	sql="select name,count(*) from $processLogTable group by name order by name"
-	RunSql 'mySql' $sql
+	RunSql2 $sql
 	pLogRecs=(${resultSet[*]})
 	for pLogRec in ${pLogRecs[@]}; do
 		pName=$(cut -d'|' -f1 <<< $pLogRec)
@@ -65,14 +65,14 @@ ParseArgsStd
 		dump -1 -t pName pCount
 		## Get the current count from the script record in the scripts table
 			sql="select usageCount from scripts where name=\"$pName\""
-			RunSql 'mySql' $sql
+			RunSql2 $sql
 			usageCount=${resultSet[0]}
 			dump -1 -t usageCount
 		## Update usage count
 			let newCount=$usageCount+$pCount
 			dump -1 -t newCount
 			sql="update $scriptsTable set usageCount=$newCount where name=\"$pName\""
-			RunSql 'mySql' $sql
+			RunSql2 $sql
 	done
 	Msg2 "\n*** Update script usage counts -- Completed ***"
 
@@ -82,12 +82,12 @@ ParseArgsStd
 	outFile="$(date '+%m-%d-%y').processLog.xls"
 	## Get the column names
 	sqlStmt="select column_name from information_schema.columns where table_schema = \"$warehouseDb\" and table_name = \"$processLogTable\"";
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	resultString="${resultSet[@]}" ; resultString=$(tr " " "\t" <<< $resultString)
 	echo "$resultString" >> $outFile
 	SetFileExpansion 'off'
 	sqlStmt="select * from $processLogTable"
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		for result in "${resultSet[@]}"; do
 		 	resultString=$result; resultString=$(tr "|" "\t" <<< $resultString)
@@ -96,7 +96,7 @@ ParseArgsStd
 		tar -cvzf "$(date '+%m-%d-%y').processLog.tar" $outFile --remove-files  #> /dev/null 2>&1
 	fi
 	sqlStmt="truncate $processLogTable"
-	RunSql 'mySql' $sqlStmt
+	RunSql2 $sqlStmt
 	SetFileExpansion
 	Msg2 "\n*** Processlog rollup -- Completed ***"
 
@@ -119,3 +119,4 @@ Goodbye 0 #'alert'
 ## Check-in log
 #===================================================================================================
 ## Mon Oct 10 07:11:50 CDT 2016 - dscudiero - Script to perform weekly log processing
+## Fri Jan 13 07:53:53 CST 2017 - dscudiero - x
