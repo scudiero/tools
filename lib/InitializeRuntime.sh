@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.71" # -- dscudiero -- 01/13/2017 @ 15:03:16.77
+# version="2.0.72" # -- dscudiero -- 01/13/2017 @ 15:25:09.90
 #===================================================================================================
 # Initialize the tools runtime environment
 #===================================================================================================
@@ -133,19 +133,6 @@ tabStr="$(PadChar ' ' 5)"
 	[[ $hour -ge 20 && $maxForkedProcessesAfterHours -gt $maxForkedProcesses ]] && maxForkedProcesses=$maxForkedProcessesAfterHours
 	[[ -z $maxForkedProcesses ]] && maxForkedProcesses=3
 
-## Set the CLASSPATH
-	sTime=$(date "+%s")
-	saveClasspath="$CLASSPATH"
-	searchDirs="$TOOLSPATH/src"
-	[[ -n $TOOLSSRCPATH ]] && searchDirs="$( tr ':' ' ' <<< $TOOLSSRCPATH)"
-	unset CLASSPATH
-	for searchDir in $searchDirs; do
-		for jar in $(find $searchDir/java -mindepth 1 -maxdepth 1 -type f -name \*.jar); do
-			[[ -z $CLASSPATH ]] && CLASSPATH="$jar" || CLASSPATH="$CLASSPATH:$jar"
-		done
-	done
-	export CLASSPATH="$CLASSPATH"
-
 export FRAMEWORKLOADED=true
 GD echo -e "\n=== Stopping InitializeRuntime ========================================================================"
 
@@ -161,3 +148,4 @@ GD echo -e "\n=== Stopping InitializeRuntime ===================================
 ## Fri Jan 13 08:28:37 CST 2017 - dscudiero - misc cleanup
 ## Fri Jan 13 09:23:21 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Jan 13 15:11:07 CST 2017 - dscudiero - syc
+## Fri Jan 13 15:25:47 CST 2017 - dscudiero - Remove setting classpath
