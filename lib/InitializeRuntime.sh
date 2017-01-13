@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.68" # -- dscudiero -- 01/13/2017 @  7:22:01.27
+# version="2.0.69" # -- dscudiero -- 01/13/2017 @  7:32:37.19
 #===================================================================================================
 # Initialize the tools runtime environment
 #===================================================================================================
@@ -121,17 +121,10 @@ tabStr="$(PadChar ' ' 5)"
 	function ColorM { local string="$*"; echo "${colorMenu}${string}${colorDefault}"; }
 
 	export -f ColorD ColorK ColorI ColorN ColorW ColorE ColorT ColorV ColorM
-
-	# for token in K I B W E T V; do
-	# 	eval echo -e "$(Color$token "This is Color$token")"
+	# for token in D K I N W E T V M; do
+	# 	#echo "\$(Color$token \"This is Color '$token'\")"
+	# 	eval "echo -e \"\t$(Color$token \"This is Color '$token'\")\""
 	# done
-	# Msg " Default Color $(ColorK "This is ColorK") Default Color"
-	# Msg " Default Color $(ColorI "This is ColorI") Default Color"
-	# Msg " Default Color $(ColorN "This is ColorN") Default Color"
-	# Msg " Default Color $(ColorW "This is ColorW") Default Color"
-	# Msg " Default Color $(ColorE "This is ColorE") Default Color"
-	# Msg " Default Color $(ColorT "This is ColorT") Default Color"
-	# Msg " Default Color $(ColorV "This is ColorV") Default Color"
 
 ## Set forking limit
 	maxForkedProcesses=$maxForkedProcessesPrime
@@ -166,3 +159,4 @@ GD echo -e "\n=== Stopping InitializeRuntime ===================================
 ## Thu Jan 12 16:02:43 CST 2017 - dscudiero - Add debug messaging for dscudiero
 ## Fri Jan 13 07:21:22 CST 2017 - dscudiero - Bring colors processing into this module
 ## Fri Jan 13 07:22:16 CST 2017 - dscudiero - fix bug
+## Fri Jan 13 08:28:37 CST 2017 - dscudiero - misc cleanup
