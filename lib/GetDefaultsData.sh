@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.22" # -- dscudiero -- 01/12/2017 @ 14:38:06.53
+# version="2.0.23" # -- dscudiero -- 01/13/2017 @  6:59:18.64
 #===================================================================================================
 # Get default variable values from the defaults database
 #===================================================================================================
@@ -17,7 +17,7 @@ function GetDefaultsData {
 	## Set myPath based on if the current file has been sourced
 		[[ -d $(dirname ${BASH_SOURCE[0]}) ]] && myPath=$(dirname ${BASH_SOURCE[0]})
 
-		if [[ $scriptName == '' || $defaultsLoaded != true ]]; then
+		if [[ $defaultsLoaded != true ]]; then
 			# echo "Loading global defaults"
 			Msg2 $V3 "$FUNCNAME: Loading common values..."
 			dbFields="name,value"
@@ -39,6 +39,7 @@ function GetDefaultsData {
 			sqlStmt="select edate from $newsInfoTable where userName=\"$userName\" and object=\"$scriptName\" "
 			RunSql2 $sqlStmt
 			[[ ${#resultSet[@]} -gt 0 ]] && lastViewedScriptNewsEdate=$(cut -d '|' -f2 <<< ${resultSet[0]})
+			defaultsLoaded=true
 		fi
 
 	## Get script specific data from the script record in the scripts database
@@ -71,3 +72,4 @@ export -f GetDefaultsData
 #===================================================================================================
 ## Wed Jan  4 13:53:34 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Jan 12 14:38:36 CST 2017 - dscudiero - Update to add ability to pass in the table to load defaults from
+## Fri Jan 13 06:59:57 CST 2017 - dscudiero - Set defaultsLoaded variable
