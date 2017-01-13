@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.8.38 # -- dscudiero -- 01/09/2017 @ 16:16:20.31
+version=2.8.39 # -- dscudiero -- 01/13/2017 @ 14:04:35.00
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -47,6 +47,7 @@ function EditCimconfigCfg {
 	Msg2 $V1 "*** Starting $FUNCNAME ***"
 	local editFile="$1"
 	local searchStr grepStr fromStr toStr
+	[[ ! -f "$editFile" ]] && Error "Edit file '$editFile' not found, skipping" && return 0
 
 	BackupCourseleafFile $editFile
 	Msg2 $I "Converting 'cimconfig.cfg' file structure to match the source file structure"
@@ -85,6 +86,7 @@ function EditCustomAtj {
 	Msg2 $V1 "*** Starting $FUNCNAME ***"
 	local editFile="$1"
 	local searchStr grepStr fromStr toStr
+	[[ ! -f "$editFile" ]] && Error "Edit file '$editFile' not found, skipping" && return 0
 
 	BackupCourseleafFile $editFile
 	Msg2 $I "Converting 'custom.atj' file structure to match the source file structure"
@@ -276,7 +278,9 @@ Hello
 ## Loop through CIMs
  	Msg2 "Checking CIM instances ..."
 	for cim in $(echo $cimStr | tr ',' ' '); do
-		Msg2 "\t$cim:"
+		Msg2 "^$cim:"
+		[[ ! -d $tgtDir/web/$cim ]] && Msg2 "^Target CIM instance ($cim) does not exist, skipping" && continue
+
 		## Determin what structure the src and tgt have
 		[[ -f $srcDir/web/$cim/$checkFileNew ]] && srcStructure='new' || srcStructure='old'
 		[[ -f $tgtDir/web/$cim/$checkFileNew ]] && tgtStructure='new' || tgtStructure='old'
@@ -298,7 +302,7 @@ Hello
 			## Copy files
 				if [[ -f $srcDir/$cpyFile ]]; then
 					srcMd5=$(md5sum $srcDir/$cpyFile | cut -f1 -d" ")
-					tgtMd5=$(md5sum $tgtDir/$cpyFile | cut -f1 -d" ")
+					[[ -r  $tgtDir/$cpyFile ]] && $tgtMd5=$(md5sum $tgtDir/$cpyFile | cut -f1 -d" ") || unset tgtMd5
 					if [[ $srcMd5 != $tgtMd5 ]]; then
 						$DOIT DoCopy $file $cpyFile $srcDir $srcStructure $tgtDir $tgtStructure
 					else
@@ -421,3 +425,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## Tue Oct 25 15:45:15 CDT 2016 - dscudiero - Added logging of actions to trnsaction log in the clientsData folder
 ## Tue Oct 25 15:48:12 CDT 2016 - dscudiero - Only writout change log if the clientDataRoot folder exists
 ## Mon Jan  9 16:16:53 CST 2017 - dscudiero - Fixd problem where the changelog.txt records were all the same file
+## Fri Jan 13 15:45:44 CST 2017 - dscudiero - testing
