@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.67" # -- dscudiero -- 01/13/2017 @  7:20:14.41
+# version="2.0.68" # -- dscudiero -- 01/13/2017 @  7:22:01.27
 #===================================================================================================
 # Initialize the tools runtime environment
 #===================================================================================================
@@ -122,9 +122,9 @@ tabStr="$(PadChar ' ' 5)"
 
 	export -f ColorD ColorK ColorI ColorN ColorW ColorE ColorT ColorV ColorM
 
-	for token in K I B W E T V; do
-		eval echo -e "$(Color$token "This is Color$token")"
-	done
+	# for token in K I B W E T V; do
+	# 	eval echo -e "$(Color$token "This is Color$token")"
+	# done
 	# Msg " Default Color $(ColorK "This is ColorK") Default Color"
 	# Msg " Default Color $(ColorI "This is ColorI") Default Color"
 	# Msg " Default Color $(ColorN "This is ColorN") Default Color"
@@ -165,3 +165,4 @@ GD echo -e "\n=== Stopping InitializeRuntime ===================================
 ## Wed Jan  4 15:29:42 CST 2017 - dscudiero - Turn on error exit by default
 ## Thu Jan 12 16:02:43 CST 2017 - dscudiero - Add debug messaging for dscudiero
 ## Fri Jan 13 07:21:22 CST 2017 - dscudiero - Bring colors processing into this module
+## Fri Jan 13 07:22:16 CST 2017 - dscudiero - fix bug
