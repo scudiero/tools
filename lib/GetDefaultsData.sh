@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.23" # -- dscudiero -- 01/13/2017 @  6:59:18.64
+# version="2.0.25" # -- dscudiero -- 01/13/2017 @  9:22:28.17
 #===================================================================================================
 # Get default variable values from the defaults database
 #===================================================================================================
@@ -12,7 +12,7 @@ function GetDefaultsData {
 	Verbose 3 "*** Starting $FUNCNAME ***"
 	local scriptName="$1" ; shift || true
 	local table="${1:-$scriptsTable}"
-	local sqlStmt dbFields fields field fieldCntr varName variable whereClause
+	local sqlStmt dbFields fields field fieldCntr varName whereClause
 
 	## Set myPath based on if the current file has been sourced
 		[[ -d $(dirname ${BASH_SOURCE[0]}) ]] && myPath=$(dirname ${BASH_SOURCE[0]})
@@ -30,6 +30,7 @@ function GetDefaultsData {
 				recCntr=0
 				while [[ $recCntr -lt ${#resultSet[@]} ]]; do
 					varName=$(cut -d'|' -f1 <<< ${resultSet[$recCntr]})
+					[[ -z $varName ]] && continue
 					## If the variable does not already has a value, then set from the db data
 					[[ ${!varName} == '' ]] && eval $varName=\"$(cut -d '|' -f 2-  <<< ${resultSet[$recCntr]})\"
 					(( recCntr += 1 ))
@@ -73,3 +74,4 @@ export -f GetDefaultsData
 ## Wed Jan  4 13:53:34 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Jan 12 14:38:36 CST 2017 - dscudiero - Update to add ability to pass in the table to load defaults from
 ## Fri Jan 13 06:59:57 CST 2017 - dscudiero - Set defaultsLoaded variable
+## Fri Jan 13 09:23:19 CST 2017 - dscudiero - General syncing of dev to prod
