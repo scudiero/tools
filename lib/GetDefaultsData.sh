@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.28" # -- dscudiero -- 01/13/2017 @ 15:14:53.96
+# version="2.0.29" # -- dscudiero -- 01/13/2017 @ 15:21:26.16
 #===================================================================================================
 # Get default variable values from the defaults database
 #===================================================================================================
@@ -25,6 +25,8 @@ echo "Loading global defaults"
 			dbFields="name,value"
 			whereClause="(os=\"$osName\" or os is null) and (host=\"$hostName\" or host is null) and status=\"A\""
 			sqlStmt="select $dbFields from defaults where $whereClause order by name,host"
+echo -e "CLASSPATH='$CLASSPATH'"
+echo -e "sqlStmt='$sqlStmt'"
 			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -eq 0 ]]; then
 				Msg2 $T "Could not retrieve common defaults data from the $mySqlDb.defaults table."
@@ -85,3 +87,4 @@ export -f GetDefaultsData
 ## Fri Jan 13 06:59:57 CST 2017 - dscudiero - Set defaultsLoaded variable
 ## Fri Jan 13 09:23:19 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Jan 13 15:15:16 CST 2017 - dscudiero - Add debug statements
+## Fri Jan 13 15:21:55 CST 2017 - dscudiero - General syncing of dev to prod
