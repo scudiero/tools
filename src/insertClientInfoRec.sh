@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.70 # -- dscudiero -- 01/17/2017 @  8:36:17.03
+version=2.3.71 # -- dscudiero -- 01/17/2017 @  9:12:14.67
 #===================================================================================================
 TrapSigs 'on'
 originalArgStr="$*"
@@ -165,7 +165,7 @@ function MapTtoW {
 		echo -e "\t\tsqlStmt = '>'$sqlStmt'<'"
 	else
 		RunSql2 $sqlStmt
-		echo "resultSet[0] = ' ${resultSet[0]}'"
+		#echo "resultSet[0] = ' ${resultSet[0]}'"
 	fi
 
 #===================================================================================================
@@ -195,3 +195,4 @@ return 0
 ## Fri Oct  7 08:00:18 CDT 2016 - dscudiero - Take out the dbAcc switching logic, moved to framework RunSql
 ## Thu Jan  5 12:38:15 CST 2017 - dscudiero - Switch to use RunSql2
 ## Tue Jan 17 08:58:29 CST 2017 - dscudiero - x
+## Tue Jan 17 09:12:46 CST 2017 - dscudiero - remove debug statement
