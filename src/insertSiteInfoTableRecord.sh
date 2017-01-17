@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.113 # -- dscudiero -- 01/17/2017 @ 15:38:05.25
+version=1.1.115 # -- dscudiero -- 01/17/2017 @ 15:39:28.59
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseCourseleafFile' #imports="$imports "
@@ -47,8 +47,8 @@ shareType='prod'; suffix='/'; env=${siteDir##*/}
 dump -2 -n -t siteDir share shareType client env clientId
 
 ## Which table to use
+	useSiteInfoTable="$siteInfoTable"
 	[[ $WAREHOUSEDB == '$warehouseDev' ]] && useSiteInfoTable="${siteInfoTable}New"
-	[[ $WAREHOUSEDB == '$warehouseProd' ]] && useSiteInfoTable="${siteInfoTable}"
 
 #===================================================================================================
 # Main
@@ -378,3 +378,4 @@ return 0
 ## Wed Jan 11 16:13:05 CST 2017 - dscudiero - Update dailyshver code to write out Old or None based on found file
 ## Thu Jan 12 07:12:04 CST 2017 - dscudiero - Fix problem where we were double quoting cimver
 ## Tue Jan 17 15:38:34 CST 2017 - dscudiero - Set which table to load based on WAREHOUSEDB
+## Tue Jan 17 15:39:43 CST 2017 - dscudiero - Make production table the default table name
