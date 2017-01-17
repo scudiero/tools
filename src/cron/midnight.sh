@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.167 # -- dscudiero -- 01/17/2017 @  7:26:50.25
+version=1.21.168 # -- dscudiero -- 01/17/2017 @  9:35:58.86
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -225,7 +225,7 @@ case "$hostName" in
 					Msg2 "^...done"
 
 				## Build the clientInfoTable
-					Call 'buildClientInfoTable' "-inPlace $scriptArgs"
+					Call 'buildClientInfoTable' "$scriptArgs"
 
 				## Truncate the sites tables
 					sqlStmt="truncate $siteInfoTable"
@@ -383,3 +383,4 @@ return 0
 ## Wed Jan 11 07:04:10 CST 2017 - dscudiero - turn off db logging
 ## Wed Jan 11 09:09:57 CST 2017 - dscudiero - Add dailyshVer to UpdateCourseleafData
 ## Tue Jan 17 07:43:04 CST 2017 - dscudiero - cleanup
+## Tue Jan 17 09:37:13 CST 2017 - dscudiero - removed the -inPlace option on the buildClientInfo table call
