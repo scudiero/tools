@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.168 # -- dscudiero -- 01/17/2017 @  9:35:58.86
+version=1.21.169 # -- dscudiero -- 01/17/2017 @ 12:08:56.77
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -208,37 +208,52 @@ logInDb=false
 #=======================================================================================================================
 case "$hostName" in
 	mojave)
-			## Set a semaphore
-				sqlStmt="truncate $semaphoreInfoTable"
-				RunSql2 $sqlStmt
-				sqlStmt="insert into $semaphoreInfoTable values(NULL,\"$myName\",NULL,NULL,NULL)"
-				RunSql2 $sqlStmt
 
-				## Compare number of clients in the warehouse vs the transactional if more in transactional then runClientListReport=true
-					runClientListReport=$(CheckClientCount)
+			## Compare number of clients in the warehouse vs the transactional if more in transactional then runClientListReport=true
+				runClientListReport=$(CheckClientCount)
 
-				## Copy the contacts db from internal
-					Msg2 "Copying contacts.sqlite files to $sqliteDbs/contacts.sqlite..."
-					cd $clientsTransactionalDb
-					cp $clientsTransactionalDb/contacts.sqlite $sqliteDbs/contacts.sqlite
-					touch $sqliteDbs/contacts.syncDate
-					Msg2 "^...done"
+			## Copy the contacts db from internal
+				Msg2 "Copying contacts.sqlite files to $sqliteDbs/contacts.sqlite..."
+				cd $clientsTransactionalDb
+				cp $clientsTransactionalDb/contacts.sqlite $sqliteDbs/contacts.sqlite
+				touch $sqliteDbs/contacts.syncDate
+				Msg2 "^...done"
 
-				## Build the clientInfoTable
-					Call 'buildClientInfoTable' "$scriptArgs"
-
-				## Truncate the sites tables
-					sqlStmt="truncate $siteInfoTable"
+			## Build the clientInfoTable
+				## Set a semaphore
+					sqlStmt="truncate $semaphoreInfoTable"
 					RunSql2 $sqlStmt
-					sqlStmt="truncate $siteAdminsTable"
+					sqlStmt="insert into $semaphoreInfoTable values(NULL,\"buildClientInfoTable\",NULL,NULL,NULL)"
 					RunSql2 $sqlStmt
+				Call 'buildClientInfoTable' "$scriptArgs"
 
-			## Clear a semaphore
-				sqlStmt="delete from $semaphoreInfoTable where processName=\"$myName\""
+			## Check to see of clients table has data
+				sqlStmt="select count(*) from $clientInfoTable"
 				RunSql2 $sqlStmt
-
-			## Build siteinfotabe and siteadmins table
-				Call 'buildSiteInfoTable' "$scriptArgs"
+				if [[ ${#resultSet[@]} -eq 0 ]]; then
+					Error "Clients table is empty, skipping 'buildSiteInfoTable', semaphore kept in place"
+				else
+					## Create a temporary copy of the clients table, load new data to that table
+					for table in $siteInfoTable $siteAdminsTable; do
+						sqlStmt="drop table if exists ${table}Bak"
+						RunSql2 $sqlStmt
+						sqlStmt="drop table if exists ${table}New"
+						RunSql2 $sqlStmt
+						sqlStmt="create table ${table}New like ${table}"
+						RunSql2 $sqlStmt
+					done
+					## Clear buildClientsInfoTable semaphore
+						sqlStmt="delete from $semaphoreInfoTable where processName=\"buildClientsInfoTable\""
+						RunSql2 $sqlStmt
+					## Set a semaphore for this servers call to buildSiteInfoTable
+						sqlStmt="insert into $semaphoreInfoTable values(NULL,\"buildSiteInfoTable\",\"$hostName\",NULL,NULL)"
+						RunSql2 $sqlStmt
+					## Build siteinfotabe and siteadmins table
+						Call 'buildSiteInfoTable' "$scriptArgs"
+					## Clear buildSiteInfoTable semaphore
+						sqlStmt="delete from into $semaphoreInfoTable where processName=\"buildSiteInfoTable\" and host=\"$hostName\""
+						RunSql2 $sqlStmt
+				fi
 
 			## Build employee table
 				BuildEmployeeTable
@@ -255,6 +270,33 @@ case "$hostName" in
 
 			## Update the defaults data for this host
 				Call 'updateDefaults' "$scriptArgs"
+
+			## Wait for all of the buildSiteInfoTable process to finish
+				waitCntr=1 ; let maxLoop=2*2*60+30*2 ## 2.5 hours
+				while [[ $waitCntr -lt $maxLoop ]]; do    # Wait no longer than X
+					sleep 30 ## Wait for process to start on mojave and get the semaphore set
+					## Check 'buildClientsInfoTable' semaphore, wait for truncate to be done on mojave
+					sqlStmt="select count(*) from $semaphoreInfoTable where processName=\"buildSiteInfoTable\""
+					RunSql2 $sqlStmt
+					[[ ${resultSet[@]} -eq 0 ]] && break
+					((waitCntr++))
+				done
+				if [[ $waitCntr -ge $maxLoop ]]; then
+					Error "Waited 1 hour for buildSiteInfoTables to complete, activating original '$siteInfoTable'"
+					for table in $siteInfoTable $siteAdminsTable; do
+						sqlStmt="rename table ${siteInfoTable}Bak to $siteInfoTable"
+						RunSql2 $sqlStmt
+						sqlStmt="drop table if exists ${table}New"
+						RunSql2 $sqlStmt
+						sqlStmt="create table ${table}New like ${table}"
+						RunSql2 $sqlStmt
+					done
+				else
+					sqlStmt="rename table ${siteInfoTable}New to $siteInfoTable"
+					RunSql2 $sqlStmt
+					sqlStmt="rename table ${siteAdminsTable}New to $siteAdminsTable"
+					RunSql2 $sqlStmt
+				fi
 
 			## rebuild Internal pages to pickup any new database information
 				Msg2 "Rebuilding Internal pages"
@@ -309,13 +351,13 @@ case "$hostName" in
 				Call 'syncCourseleafGitRepos' "$scriptArgs"
 
 			## Create a clone of the warehouse db
-				Msg2 "Creating '$warehouseDev' database..."
-				tmpConnectString=$(sed "s/Read/Admin/" <<< ${mySqlConnectString% *})
-				mysqldump $tmpConnectString $warehouseProd > /tmp/warehouse.sql;
-				mysql $tmpConnectString -e "drop database if exists $warehouseDev"
-				mysqladmin $tmpConnectString create $warehouseDev
-				mysql $tmpConnectString $warehouseDev < /tmp/warehouse.sql
-				[[ -f /tmp/warehouse.sql ]] && rm -f /tmp/warehouse.sql
+				# Msg2 "Creating '$warehouseDev' database..."
+				# tmpConnectString=$(sed "s/Read/Admin/" <<< ${mySqlConnectString% *})
+				# mysqldump $tmpConnectString $warehouseProd > /tmp/warehouse.sql;
+				# mysql $tmpConnectString -e "drop database if exists $warehouseDev"
+				# mysqladmin $tmpConnectString create $warehouseDev
+				# mysql $tmpConnectString $warehouseDev < /tmp/warehouse.sql
+				# [[ -f /tmp/warehouse.sql ]] && rm -f /tmp/warehouse.sql
 
 			## Reports
 				froggerQa='sjones@leepfrog.com,mbruening@leepfrog.com,jlindeman@leepfrog.com'
@@ -333,20 +375,27 @@ case "$hostName" in
 				remotePw=${tokens[2]}
 				remoteHost=${tokens[3]}
 				sshpass -p $remotePw ssh $remoteUser@$remoteHost $TOOLSPATH/src/perfTest.sh #>/dev/null 2>&1
+
 			;;
 
 	*) ## build5 and build7
-			sleep 30 ## Wait for process to start on mojave
-			## Check semaphore, wait for truncate to be done on mojave
-				sqlStmt="select count(*) from $semaphoreInfoTable where processName=\"$myName\""
+			sleep 30 ## Wait for process to start on mojave and get the semaphore set
+			## Check 'buildClientsInfoTable' semaphore, wait for truncate to be done on mojave
+				sqlStmt="select count(*) from $semaphoreInfoTable where processName=\"buildClientsInfoTable\""
 				while true; do
 					RunSql2 $sqlStmt
 					[[ ${resultSet[@]} -eq 0 ]] && break
 					sleep 30
 				done
 
-			## Build siteinfotabe and siteadmins table
+			## Build $siteInfoTable and $siteAdminsTable tables
+				## Set a semaphore for this servers call to buildSiteInfoTable
+				sqlStmt="insert into $semaphoreInfoTable values(NULL,\"buildSiteInfoTable\",\"$hostName\",NULL,NULL)"
+				RunSql2 $sqlStmt
 				Call 'buildSiteInfoTable' "$scriptArgs"
+				## Clear buildSiteInfoTable semaphore
+				sqlStmt="delete from into $semaphoreInfoTable where processName=\"buildSiteInfoTable\" and host=\"$hostName\""
+				RunSql2 $sqlStmt
 			## Common Checks
 				Call 'checkCgiPermissions' "$scriptArgs"
 			## Update the defaults data for this host
@@ -384,3 +433,4 @@ return 0
 ## Wed Jan 11 09:09:57 CST 2017 - dscudiero - Add dailyshVer to UpdateCourseleafData
 ## Tue Jan 17 07:43:04 CST 2017 - dscudiero - cleanup
 ## Tue Jan 17 09:37:13 CST 2017 - dscudiero - removed the -inPlace option on the buildClientInfo table call
+## Tue Jan 17 16:35:27 CST 2017 - dscudiero - Refactor logic arround build client & site tables
