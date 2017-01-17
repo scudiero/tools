@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.105 # -- dscudiero -- 01/17/2017 @  7:48:00.76
+version=2.3.106 # -- dscudiero -- 01/17/2017 @  9:34:58.10
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -135,13 +135,18 @@ Msg2 "Table: $useClientInfoTable"
 ## Swap client tables
 	if [[ $inPlace != true ]]; then
 		[[ $batchMode != true ]] && Msg2 "^Swapping databases ..."
-		sqlStmt="select count{*) from ${clientInfoTable}New"
-		RunSql2
-		[[ ${#resultSet[@]} -eq 0 ]] &&  Terminate "New clients table has zero rows, keeping original"
-
-		[[ $batchMode != true ]] && Msg2 "^^$clientInfoTable --> ${clientInfoTable}Bak"
-		sqlStmt="rename table $clientInfoTable to ${clientInfoTable}Bak"
+		sqlStmt="select count(*) from ${clientInfoTable}New"
 		RunSql2 $sqlStmt
+		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "New clients table has zero rows, keeping original"
+
+		sqlStmt="select count(*) from ${clientInfoTable}New"
+		RunSql2 $sqlStmt
+		if [[ ${#resultSet[@]} -ne 0 ]]; then
+			[[ $batchMode != true ]] && Msg2 "^^$clientInfoTable --> ${clientInfoTable}Bak"
+			sqlStmt="rename table $clientInfoTable to ${clientInfoTable}Bak"
+			RunSql2 $sqlStmt
+		fi
+
 		[[ $batchMode != true ]] && Msg2 "^^${clientInfoTable}New --> $clientInfoTable"
 		sqlStmt="rename table ${clientInfoTable}New to $clientInfoTable"
 		RunSql2 $sqlStmt
@@ -174,3 +179,4 @@ Goodbye 0 'alert'
 ## Tue Jan 10 12:54:37 CST 2017 - dscudiero - Added 'inPlace' option
 ## Wed Jan 11 07:00:04 CST 2017 - dscudiero - Add status at the end of processing
 ## Tue Jan 17 08:58:27 CST 2017 - dscudiero - x
+## Tue Jan 17 09:36:47 CST 2017 - dscudiero - Fix issues with swapping databases
