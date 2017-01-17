@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #===================================================================================================
-version=1.0.24 # -- dscudiero -- 01/12/2017 @ 12:57:57.63
+version=1.0.25 # -- dscudiero -- 01/17/2017 @  9:55:48.42
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -93,7 +93,7 @@ ParseArgsStd
 		 	resultString=$result; resultString=$(tr "|" "\t" <<< $resultString)
 		 	echo "$resultString" >> $outFile
 		done
-		tar -cvzf "$(date '+%m-%d-%y').processLog.tar" $outFile --remove-files  #> /dev/null 2>&1
+		ProtectedCall "tar -cvzf \"$(date '+%m-%d-%y').processLog.tar\" $outFile --remove-files > /dev/null 2>&1"
 	fi
 	sqlStmt="truncate $processLogTable"
 	RunSql2 $sqlStmt
@@ -104,9 +104,9 @@ ParseArgsStd
 	Msg2 "\n*** Rollup weekly Logs -- Starting ***"
 	cd $TOOLSPATH/Logs
 	[[ -d ./cronJobs ]] && ProtectedCall "rm -rf ./cronJobs"
-	tar -cvzf "$(date '+%m-%d-%y').tar.gz" * --exclude '*.gz' --exclude "$myName*" #-remove-files
-	find . -maxdepth 1 -mindepth 1 -type d -exec rm -rf {} \; > /dev/null 2>&1
-	find . -maxdepth 1 -mindepth 1 -type f -name '*.tar' -exec rm -rf {} \; > /dev/null 2>&1
+	ProtectedCall "tar -cvzf \"$(date '+%m-%d-%y').tar.gz\" * --exclude '*.gz' --exclude \"$myName*\"" #-remove-files
+	ProtectedCall "find . -maxdepth 1 -mindepth 1 -type d -exec rm -rf {} \; > /dev/null 2>&1"
+	ProtectedCall "find . -maxdepth 1 -mindepth 1 -type f -name '*.tar' -exec rm -rf {} \; > /dev/null 2>&1"
 	Msg2 "\n*** Logs rollup -- Completed ***"
 
 
@@ -120,3 +120,4 @@ Goodbye 0 #'alert'
 #===================================================================================================
 ## Mon Oct 10 07:11:50 CDT 2016 - dscudiero - Script to perform weekly log processing
 ## Fri Jan 13 07:53:53 CST 2017 - dscudiero - x
+## Tue Jan 17 09:57:59 CST 2017 - dscudiero - Surround tar and find calls in a ProtectedCall
