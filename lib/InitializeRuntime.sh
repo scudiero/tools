@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.73" # -- dscudiero -- 01/13/2017 @ 15:32:50.26
+# version="2.0.76" # -- dscudiero -- 01/17/2017 @  8:22:25.29
 #===================================================================================================
 # Initialize the tools runtime environment
 #===================================================================================================
@@ -52,11 +52,6 @@ tabStr="$(PadChar ' ' 5)"
 ## Trap interrupts
 	TrapSigs 'on'
 
-## Load defaults value
-	defaultsLoaded=false
-	GetDefaultsData
-	SetFileExpansion
-
 ## Set default colors
 	if [[ $TERM != 'dumb' ]]; then
 		colorWhite='\e[97m'
@@ -94,6 +89,14 @@ tabStr="$(PadChar ' ' 5)"
 	fi
 
 	function ColorE { local string="$*"; echo "${colorError}${string}${colorDefault}"; }
+	function ColorI { local string="$*"; echo "${colorInfo}${string}${colorDefault}"; }
+	function ColorT { local string="$*"; echo "${colorTerminate}${string}${colorDefault}"; }
+	function ColorK { local string="$*"; echo "${colorKey}${string}${colorDefault}"; }
+
+## Load defaults value
+	defaultsLoaded=false
+	GetDefaultsData
+	SetFileExpansion
 
 ## If the user has a .tools file then read the values into a hash table
 	if [[ -r "$HOME/tools.cfg" && ${myRhel:0:1} -gt 5 ]]; then
@@ -149,3 +152,4 @@ GD echo -e "\n=== Stopping InitializeRuntime ===================================
 ## Fri Jan 13 15:11:07 CST 2017 - dscudiero - syc
 ## Fri Jan 13 15:25:47 CST 2017 - dscudiero - Remove setting classpath
 ## Fri Jan 13 15:33:26 CST 2017 - dscudiero - remove debug code
+## Tue Jan 17 08:55:29 CST 2017 - dscudiero - Move color definitions before getDefaultsData
