@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.71 # -- dscudiero -- 01/17/2017 @  9:12:14.67
+version=2.3.72 # -- dscudiero -- 01/17/2017 @  9:29:19.78
 #===================================================================================================
 TrapSigs 'on'
 originalArgStr="$*"
@@ -68,7 +68,6 @@ function MapTtoW {
 	else
 		result="${resultSet[0]}"
 		dump -1 -t result
-		unset insertVals
 		for ((i = 1 ; i < $numTFields+1 ; i++)); do
 			field=$(cut -d',' -f$i <<< $tFields)
 			fVal=$(cut -d'|' -f$i <<< $result)
@@ -196,3 +195,4 @@ return 0
 ## Thu Jan  5 12:38:15 CST 2017 - dscudiero - Switch to use RunSql2
 ## Tue Jan 17 08:58:29 CST 2017 - dscudiero - x
 ## Tue Jan 17 09:12:46 CST 2017 - dscudiero - remove debug statement
+## Tue Jan 17 09:38:03 CST 2017 - dscudiero - misc cleanup
