@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.8" # -- dscudiero -- 01/12/2017 @  7:09:18.08
+# version="1.0.9" # -- dscudiero -- 01/17/2017 @  8:14:41.58
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -38,7 +38,7 @@
 				resultStr=$(sqlite3 $dbFile "$sqlStmt" 2>&1 | tr "\t" '|')
 			fi
 			## Check for errors
-			if [[ $(Contains "$resultStr" 'SEVERE:') == true || $(Contains "$resultStr" 'ERROR') == true ]]; then
+			if [[ $(Contains "$resultStr" 'SEVERE:') == true || $(Contains "$resultStr" 'ERROR') == true || $(Contains "$resultStr" '*Error*') == true ]]; then
 				msg="$FUNCNAME: Error reported from $dbType"
 				[[ $dbType == 'sqlite3' ]] && msg="$msg\n\tFile: $dbFile"
 				msg="$msg\n\tsqlStmt: '$sqlStmt'\n\n\t$resultStr"
