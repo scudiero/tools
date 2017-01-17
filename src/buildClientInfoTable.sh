@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.103 # -- dscudiero -- 01/11/2017 @  6:55:27.37
+version=2.3.105 # -- dscudiero -- 01/17/2017 @  7:48:00.76
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -80,7 +80,7 @@ Msg2 "Table: $useClientInfoTable"
 	else
 		sqlStmt="select clientcode from clients where is_active = \"Y\""
 		RunSql2 "$contactsSqliteFile" "$sqlStmt"
-		[[ ${#resultSet[@]} -eq 0 ]] && Terminate"No records returned from clientcode query"
+		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No records returned from clientcode query"
 		for result in "${resultSet[@]}"; do
 			clients+=($result)
 		done
@@ -106,26 +106,25 @@ Msg2 "Table: $useClientInfoTable"
 	numClients=${#clients[@]}
 	Msg2 "Found $numClients clients..."
 	forkCntr=1;
-	## Loop through the server/share directories
-		for client in "${clients[@]}"; do
-			(( clientCntr += 1 ))
-			if [[ $(Contains ",$ignoreList," ",$client,") == true ]]; then
-				[[ $batchMode != true ]] && Msg2 "^Skipping '$client' is in the ignore list."
-				continue
-			fi
-			unset msgPrefix
-			[[ $fork == true ]] && msgPrefix='Forking off' || msgPrefix='Processing'
-			[[ $batchMode != true ]] && Msg2 "^$msgPrefix $client ($clientCntr / ${#clients[@]})..."
-			Call "$workerScriptFile" "$forkStr" "$addedCalledScriptArgs"
-			rc=$?
-			(( forkCntr+=1 ))
-			## Wait for forked process to finish, only run maxForkedProcesses at a time
-			if [[ $fork == true && $((forkCntr%$maxForkedProcesses)) -eq 0 ]]; then
-				[[ $batchMode != true ]] && Msg2 "^Waiting on forked processes...\n"
-				wait
-			fi
-			[[ $fork != true && $(($clientCntr % processNotify)) -eq 0 ]] && Msg2 "\n^*** Processed $clientCntr out of $numClients\n"
-		done
+	for client in "${clients[@]}"; do
+		(( clientCntr += 1 ))
+		if [[ $(Contains ",$ignoreList," ",$client,") == true ]]; then
+			[[ $batchMode != true ]] && Msg2 "^Skipping '$client' is in the ignore list."
+			continue
+		fi
+		unset msgPrefix
+		[[ $fork == true ]] && msgPrefix='Forking off' || msgPrefix='Processing'
+		[[ $batchMode != true ]] && Msg2 "^$msgPrefix $client ($clientCntr / ${#clients[@]})..."
+		Call "$workerScriptFile" "$forkStr" "$addedCalledScriptArgs"
+		rc=$?
+		(( forkCntr+=1 ))
+		## Wait for forked process to finish, only run maxForkedProcesses at a time
+		if [[ $fork == true && $((forkCntr%$maxForkedProcesses)) -eq 0 ]]; then
+			[[ $batchMode != true ]] && Msg2 "^Waiting on forked processes...\n"
+			wait
+		fi
+		[[ $fork != true && $(($clientCntr % processNotify)) -eq 0 ]] && Msg2 "\n^*** Processed $clientCntr out of $numClients\n"
+	done
 
 ## Wait for all the forked tasks to stop
 	if [[ $fork == true ]]; then
@@ -174,3 +173,4 @@ Goodbye 0 'alert'
 ## Mon Jan  9 13:29:00 CST 2017 - dscudiero - Add an inplace option to just update the clients table directly
 ## Tue Jan 10 12:54:37 CST 2017 - dscudiero - Added 'inPlace' option
 ## Wed Jan 11 07:00:04 CST 2017 - dscudiero - Add status at the end of processing
+## Tue Jan 17 08:58:27 CST 2017 - dscudiero - x
