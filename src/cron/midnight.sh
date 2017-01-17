@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.165 # -- dscudiero -- 01/11/2017 @  8:52:16.27
+version=1.21.167 # -- dscudiero -- 01/17/2017 @  7:26:50.25
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -273,13 +273,13 @@ case "$hostName" in
 
 			## Scratch copy the skeleton shadow
 				Msg2 "Scratch copying the skeleton shadow..."
-				chmod u+wx $TOOLSPATH/$skeletonRoot
+				chmod u+wx $skeletonRoot
 				SetFileExpansion 'on'
-				rm -rf $TOOLSPATH/$skeletonRoot/*
+				rm -rf $skeletonRoot/*
 				rsyncOpts="-a --prune-empty-dirs"
-				rsync $rsyncOpts /mnt/dev6/web/_skeleton/* $TOOLSPATH/$skeletonRoot
+				rsync $rsyncOpts /mnt/dev6/web/_skeleton/* $skeletonRoot
 				SetFileExpansion
-				touch $TOOLSPATH/$skeletonRoot/.syncDate
+				touch $skeletonRoot/.syncDate
 				Msg2 "^...done"
 
 			## Build a sqlite clone of the data warehouse
@@ -334,6 +334,7 @@ case "$hostName" in
 				remoteHost=${tokens[3]}
 				sshpass -p $remotePw ssh $remoteUser@$remoteHost $TOOLSPATH/src/perfTest.sh #>/dev/null 2>&1
 			;;
+
 	*) ## build5 and build7
 			sleep 30 ## Wait for process to start on mojave
 			## Check semaphore, wait for truncate to be done on mojave
@@ -381,3 +382,4 @@ return 0
 ## Wed Jan 11 07:00:53 CST 2017 - dscudiero - fix problem building skeleton shadow
 ## Wed Jan 11 07:04:10 CST 2017 - dscudiero - turn off db logging
 ## Wed Jan 11 09:09:57 CST 2017 - dscudiero - Add dailyshVer to UpdateCourseleafData
+## Tue Jan 17 07:43:04 CST 2017 - dscudiero - cleanup
