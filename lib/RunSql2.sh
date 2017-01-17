@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.9" # -- dscudiero -- 01/17/2017 @  8:14:41.58
+# version="1.0.11" # -- dscudiero -- 01/17/2017 @  8:30:41.31
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -38,10 +38,10 @@
 				resultStr=$(sqlite3 $dbFile "$sqlStmt" 2>&1 | tr "\t" '|')
 			fi
 			## Check for errors
-			if [[ $(Contains "$resultStr" 'SEVERE:') == true || $(Contains "$resultStr" 'ERROR') == true || $(Contains "$resultStr" '*Error*') == true ]]; then
+			if [[ $(Contains "$resultStr" 'SEVERE:') == true || $(Contains "$resultStr" 'ERROR') == true || $(Contains "$resultStr" '\*Error\*') == true ]]; then
 				msg="$FUNCNAME: Error reported from $dbType"
 				[[ $dbType == 'sqlite3' ]] && msg="$msg\n\tFile: $dbFile"
-				msg="$msg\n\tsqlStmt: '$sqlStmt'\n\n\t$resultStr"
+				msg="$msg\n\tsqlStmt: $sqlStmt\n\n\t$resultStr"
 				if [[ $(type -t 'Terminate') == function ]]; then
 					Terminate "$(ColorK "$myName").$msg"
 				else
@@ -65,3 +65,4 @@
 ## Thu Jan  5 13:47:13 CST 2017 - dscudiero - add a kill switch if informationOnly flag is set
 ## Wed Jan 11 15:52:04 CST 2017 - dscudiero - Fix error processing if java throws an error
 ## Thu Jan 12 07:11:32 CST 2017 - dscudiero - Add a blank line between message and command output when an error is detected
+## Tue Jan 17 08:58:15 CST 2017 - dscudiero - Add check for *Error* coming back from sql query
