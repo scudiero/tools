@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.63 # -- dscudiero -- 01/12/2017 @ 12:58:21.96
+version=2.3.70 # -- dscudiero -- 01/17/2017 @  8:36:17.03
 #===================================================================================================
 TrapSigs 'on'
 originalArgStr="$*"
@@ -160,8 +160,13 @@ function MapTtoW {
 ## Insert record
 	Msg2 $V1 ""
 	sqlStmt="insert into $useClientInfoTable ($wFields) values($insertVals)"
-	dump -1 -sqlStmt -n
-	[[ $DOIT != '' || $informationOnlyMode == true ]] && echo -e "\t\tsqlStmt = '>'$sqlStmt'<'" || RunSql2 sqlStmt
+	dump -1 sqlStmt -n
+	if [[ $DOIT != '' || $informationOnlyMode == true ]]; then
+		echo -e "\t\tsqlStmt = '>'$sqlStmt'<'"
+	else
+		RunSql2 $sqlStmt
+		echo "resultSet[0] = ' ${resultSet[0]}'"
+	fi
 
 #===================================================================================================
 # Done
@@ -189,3 +194,4 @@ return 0
 ## Thu Oct  6 16:59:15 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Fri Oct  7 08:00:18 CDT 2016 - dscudiero - Take out the dbAcc switching logic, moved to framework RunSql
 ## Thu Jan  5 12:38:15 CST 2017 - dscudiero - Switch to use RunSql2
+## Tue Jan 17 08:58:29 CST 2017 - dscudiero - x
