@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.11" # -- dscudiero -- 01/17/2017 @  8:30:41.31
+# version="1.0.13" # -- dscudiero -- 01/18/2017 @ 13:08:54.26
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -15,6 +15,7 @@
 #===================================================================================================
 
 	function RunSql2 {
+		[[ $informationOnlyMode == true ]] && return 0
 		if [[ ${1:0:1} == '/' ]]; then
 			local dbFile="$1" && shift
 			local dbType='sqlite3'
@@ -26,7 +27,9 @@
 		[[ -z $sqlStmt ]] && unset resultSet && return 0
 		[[ ${sqlStmt:${#sqlStmt}:1} != ';' ]] && sqlStmt="$sqlStmt;"
 		local stmtType=$(tr '[:lower:]' '[:upper:]' <<< "${sqlStmt%% *}")
-		[[ -n $DOIT || $informationOnlyMode == true ]] && [[ $stmtType != 'SELECT' ]] && echo "sqlStmt = >$sqlStmt<" && return 0
+		[[ -n $DOIT ]] && [[ $stmtType != 'SELECT' ]] && echo "sqlStmt = >$sqlStmt<" && return 0
+		[[ $informationOnlyMode == true ]] && return 0
+
 		local prevGlob=$(set -o | grep noglob | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2)
 		local resultStr msg tmpStr
 
@@ -66,3 +69,4 @@
 ## Wed Jan 11 15:52:04 CST 2017 - dscudiero - Fix error processing if java throws an error
 ## Thu Jan 12 07:11:32 CST 2017 - dscudiero - Add a blank line between message and command output when an error is detected
 ## Tue Jan 17 08:58:15 CST 2017 - dscudiero - Add check for *Error* coming back from sql query
+## Wed Jan 18 13:09:24 CST 2017 - dscudiero - Return immediatly if informationonly is on
