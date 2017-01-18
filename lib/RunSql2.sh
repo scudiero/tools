@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.13" # -- dscudiero -- 01/18/2017 @ 13:08:54.26
+# version="1.0.14" # -- dscudiero -- 01/18/2017 @ 13:13:27.57
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -15,16 +15,17 @@
 #===================================================================================================
 
 	function RunSql2 {
-		[[ $informationOnlyMode == true ]] && return 0
 		if [[ ${1:0:1} == '/' ]]; then
 			local dbFile="$1" && shift
 			local dbType='sqlite3'
 		else
 			local dbType='mysql'
 		fi
-
 		local sqlStmt="$*"
-		[[ -z $sqlStmt ]] && unset resultSet && return 0
+		unset resultSet
+
+		[[ $informationOnlyMode == true ]] && return 0
+		[[ -z $sqlStmt ]] && return 0
 		[[ ${sqlStmt:${#sqlStmt}:1} != ';' ]] && sqlStmt="$sqlStmt;"
 		local stmtType=$(tr '[:lower:]' '[:upper:]' <<< "${sqlStmt%% *}")
 		[[ -n $DOIT ]] && [[ $stmtType != 'SELECT' ]] && echo "sqlStmt = >$sqlStmt<" && return 0
@@ -70,3 +71,4 @@
 ## Thu Jan 12 07:11:32 CST 2017 - dscudiero - Add a blank line between message and command output when an error is detected
 ## Tue Jan 17 08:58:15 CST 2017 - dscudiero - Add check for *Error* coming back from sql query
 ## Wed Jan 18 13:09:24 CST 2017 - dscudiero - Return immediatly if informationonly is on
+## Wed Jan 18 13:13:30 CST 2017 - dscudiero - General syncing of dev to prod
