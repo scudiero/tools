@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.56" # -- dscudiero -- 01/13/2017 @ 15:25:00.03
+version="1.2.58" # -- dscudiero -- 01/18/2017 @ 14:40:35.67
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -58,15 +58,17 @@ function CleanUp {
 		fi
 
 	## Cleanup semaphore and dblogging
-		[[ $semaphoreProcessing == true && $(Lower $setSemaphore) == 'yes' && $semaphoreId != "" ]] && Semaphore 'clear' $semaphoreId
-		[[ $logInDb != false && $myLogRecordIdx != "" ]] && ProcessLogger 'End' $myLogRecordIdx
+		[[ $semaphoreProcessing == true && $(Lower $setSemaphore) == 'yes' && -n $semaphoreId ]] && Semaphore 'clear' $semaphoreId
+
+[[ $userName == 'dscudiero' ]] && dump logInDb myLogRecordIdx
+		[[ $logInDb != false && -n $myLogRecordIdx ]] && ProcessLogger 'End' $myLogRecordIdx
 		SetFileExpansion 'on'
 		rm -rf /tmp/$userName.$callPgmName.* > /dev/null 2>&1
 		SetFileExpansion
 
 	## Cleanup PATH and CLASSPATH
-		[[ $savePath != '' ]] && export PATH="$savePath"
-		[[ $saveClasspath != '' ]] && export CLASSPATH="$saveClasspath"
+		[[ -n $savePath ]] && export PATH="$savePath"
+		[[ -n $saveClasspath ]] && export CLASSPATH="$saveClasspath"
 
 	GD echo -e "\n=== Dispatcher.Cleanup Completed' =================================================================="
 	exec 3>&-
@@ -89,7 +91,7 @@ statusLine="\tDispatcher ($version): "
 	fi
 
 # Who is the logged in user
-[[ $(which logname 2>&1) != '' ]] && userName=$(logname 2>&1) || userName=$LOGNAME
+[[ -n $(which logname 2>&1) ]] && userName=$(logname 2>&1) || userName=$LOGNAME
 [[ $userName == 'dscudiero' ]] && userName=$LOGNAME
 
 #==================================================================================================
@@ -110,7 +112,7 @@ statusLine="\tDispatcher ($version): "
 ## Parse off my arguments
 	unset scriptArgs myVerbose useLocal semaphoreProcessing noLog noLogInDb batchMode useDevDb myVerbose myQuiet
 	[[ $USELOCAL == true ]] && $useLocal=true
-	while [[ $@ != '' ]]; do
+	while [[ -n $@ ]]; do
 		if [[ ${1:0:2} == '--' ]]; then
 			myArg=$(echo ${1:2} | tr '[:upper:]' '[:lower:]')
 			$GD -e '\t\tmyArg = >'$myArg'<'
@@ -170,7 +172,7 @@ prtStatus "parse args"
 	for searchDir in $searchDirs; do
 		[[ -r ${searchDir}/InitializeRuntime.sh ]] && initFile="${searchDir}/InitializeRuntime.sh"
 		[[ -r ${searchDir}/Import.sh ]] && importFile="${searchDir}/Import.sh" && source $importFile
-		[[ $initFile != '' && $importFile != '' ]] && break
+		[[ -n $initFile && -n $importFile ]] && break
 	done
 	#echo "initFile = '$initFile'" ; echo "importFile = '$importFile'"
 
@@ -190,7 +192,7 @@ prtStatus "parse args"
 	mySqlHost='duro'
 	mySqlPort=3306
 	[[ -r "$TOOLSPATH/src/.pw1" ]] && mySqlPw=$(cat "$TOOLSPATH/src/.pw1")
-	if [[ $mySqlPw != '' ]]; then
+	if [[ -n $mySqlPw ]]; then
 		unset sqlHostIP mySqlConnectString
 		sqlHostIP=$(dig +short $mySqlHost.inside.leepfrog.com)
 		[[ -z $sqlHostIP ]] && sqlHostIP=$(dig +short $mySqlHost.leepfrog.com)
@@ -235,10 +237,10 @@ prtStatus "parse args"
 				lib="$(cut -d'|' -f2 <<< "$resultString")"; [[ $lib == 'NULL' ]] && lib="src"
 				setSemaphore="$(cut -d'|' -f3 <<< "$resultString")"; [[ $setSemaphore == 'NULL' ]] && unset setSemaphore
 				waitOn="$(cut -d'|' -f4 <<< "$resultString")"; [[ $waitOn == 'NULL' ]] && unset waitOn
-				if [[ $realCallName != '' && $realCallName != 'NULL' ]]; then
+				if [[ -n $realCallName && $realCallName != 'NULL' ]]; then
 					callPgmName="$(cut -d' ' -f1 <<< "$realCallName")"
 					callArgs="$(cut -d' ' -f2- <<< "$realCallName")"
-					[[ $callArgs != '' ]] && scriptArgs="$callArgs $scriptArgs"
+					[[ -n $callArgs ]] && scriptArgs="$callArgs $scriptArgs"
 				fi
 			fi
 	fi ## [[ ${callPgmName:0:1} == '\' ]]
@@ -283,7 +285,7 @@ prtStatus "parse args"
 			touch "$logFile"
 			chmod ug+rwx "$logFile"
 			Msg2 "$(PadChar)" > $logFile
-			[[ $scriptArgs != '' ]] && scriptArgsTxt=" $scriptArgs" || unset scriptArgsTxt
+			[[ -n $scriptArgs ]] && scriptArgsTxt=" $scriptArgs" || unset scriptArgsTxt
 			Msg2 "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}" >> $logFile
 			Msg2 "$(PadChar)" >> $logFile
 			Msg2 >> $logFile
@@ -345,3 +347,4 @@ prtStatus "parse args"
 ## Thu Jan 12 14:34:51 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Jan 13 07:20:02 CST 2017 - dscudiero - Misc cleanup
 ## Fri Jan 13 15:25:28 CST 2017 - dscudiero - Move setting of classpath in from init
+## Wed Jan 18 15:00:06 CST 2017 - dscudiero - add debug code
