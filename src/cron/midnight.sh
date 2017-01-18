@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.170 # -- dscudiero -- 01/18/2017 @  7:18:58.01
+version=1.21.171 # -- dscudiero -- 01/18/2017 @ 10:45:47.42
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -327,23 +327,6 @@ case "$hostName" in
 			## Build a sqlite clone of the data warehouse
 				Call 'buildWarehouseSqlite' "$scriptArgs"
 
-			# ## Backup files
-			# 		mySqlConnectStringSave="$mySqlConnectString"
-			# 		mySqlConnectString=$(sed "s/Read/Admin/" <<< $mySqlConnectString)
-			# 	## Dump the production data warehouse database
-			# 		mysqldump $mySqlConnectString > /tmp/warehouse.sql
-			# 	## Dump the production contacts database
-			# 		sqlStmt=".dump"
-			# 		sqlite3 "$contactsSqliteFile" "$sqlStmt" > /tmp/contacts.sql
-			# 	## Create a clone of the warehouse db
-			# 		Msg2
-			# 		mysql $mySqlConnectString -e "drop database if exists $warehouseDev"
-			# 		mysqladmin ${mySqlConnectString% *} create $warehouseDev
-			# 		mysql ${mySqlConnectString% *} $warehouseDev < /tmp/warehouse.sql
-			# 	## Cleanup
-			# 		[[ -f /tmp/warehouse.sql ]] && rm -f /tmp/warehouse.sql
-			# 		[[ -f /tmp/contacts.sql ]] && rm -f /tmp/contacts.sql
-
 			## Clean up the tools bin directory.
 				#CleanToolsBin
 
@@ -351,13 +334,15 @@ case "$hostName" in
 				Call 'syncCourseleafGitRepos' "$scriptArgs"
 
 			## Create a clone of the warehouse db
-				# Msg2 "Creating '$warehouseDev' database..."
-				# tmpConnectString=$(sed "s/Read/Admin/" <<< ${mySqlConnectString% *})
-				# mysqldump $tmpConnectString $warehouseProd > /tmp/warehouse.sql;
-				# mysql $tmpConnectString -e "drop database if exists $warehouseDev"
-				# mysqladmin $tmpConnectString create $warehouseDev
-				# mysql $tmpConnectString $warehouseDev < /tmp/warehouse.sql
-				# [[ -f /tmp/warehouse.sql ]] && rm -f /tmp/warehouse.sql
+				Msg2 "Creating '$warehouseDev' database..."
+				tmpConnectString=$(sed "s/Read/Admin/" <<< ${mySqlConnectString% *})
+
+				mysqldump $tmpConnectString $warehouseProd > /tmp/warehouse.sql;
+				mysql $tmpConnectString -e "drop database if exists $warehouseDev"
+				mysqladmin $tmpConnectString create $warehouseDev
+
+				mysql $tmpConnectString $warehouseDev < /tmp/warehouse.sql
+				[[ -f /tmp/warehouse.sql ]] && rm -f /tmp/warehouse.sql
 
 			## Reports
 				froggerQa='sjones@leepfrog.com,mbruening@leepfrog.com,jlindeman@leepfrog.com'
@@ -435,3 +420,4 @@ return 0
 ## Tue Jan 17 09:37:13 CST 2017 - dscudiero - removed the -inPlace option on the buildClientInfo table call
 ## Tue Jan 17 16:35:27 CST 2017 - dscudiero - Refactor logic arround build client & site tables
 ## Wed Jan 18 07:19:58 CST 2017 - dscudiero - Pass table name on the buildSiteInfoTable call
+## Wed Jan 18 10:50:37 CST 2017 - dscudiero - Deleted 'backup' commented block, moved to local midnight file
