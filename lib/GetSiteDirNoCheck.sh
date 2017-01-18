@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.1" # -- dscudiero -- 01/12/2017 @  9:51:34.79
+# version="1.0.5" # -- dscudiero -- 01/18/2017 @ 12:54:33.66
 #===================================================================================================
 # Resolve a clients siteDir without using the database
 # Sets global variable: siteDir
@@ -13,44 +13,62 @@
 # Write a 'standard' format courseleaf changelog.txt
 # args: "logFileName" ${lineArray[@]}
 #===================================================================================================
+
 function GetSiteDirNoCheck {
+	Import 'SelectMenuNew'
 	local client="$1"
 	[[ -z $client ]] && return 0
-	local env="$2"
-	local checkDir envType server
+	#local env="$2"
+	local checkDir envType server ans dirs dir line
 	unset siteDir
-	while [[ -z $siteDir ]]; do
-		unset ans
-		Prompt ans "Does $client's site directory use standard naming conventions" 'Yes No' 'Yes' ; ans=$(Lower ${ans:0:1})
-		if [[ $ans == 'y' ]]; then
-			unset envType env
-			if [[ -z $env ]]; then
-				echo
-				Prompt envType "Do you wish to patch $client's development or production env" 'prod dev' 'prod'; envType=$(Lower ${envType:0:1})
-				[[ $envType == 'd' ]] && validEnvs="$(tr ',' ' ' <<< $courseleafDevEnvs)" || validEnvs="$(echo "$courseleafProdEnvs" | sed s/,preview,public,prior// | tr ',' ' ')"
-			fi
-			Prompt env "What environment do you wish to patch" "$validEnvs"
-			if [[ $env == 'dev' || $env == 'pvt' ]]; then
-				for server in $(tr ',' ' ' <<< $devServers); do
-					checkDir="/mnt/$server/web/$client/$env"
-					[[ $env == 'pvt' ]] && checkDir="/mnt/$server/web/$client-$userName/$env"
-					[[ -d $checkDir ]] && break
-				done
-			else
-				for server in $(tr ',' ' ' <<< $prodServers); do
-					checkDir="/mnt/$server/$client/$env"
-					[[ $env == 'test' ]] && checkDir="/mnt/$server/$client-test/$env"
-					[[ -d $checkDir ]] && break
-				done
-			fi
-			[[ -d $checkDir ]] && siteDir="$checkDir" && break
-			unset envType envType siteDir
-			Error "Could not locate '$checkDir', please try again"
+	cwd=$(pwd)
+
+	unset envType env
+	if [[ -z $env ]]; then
+		echo
+		Prompt envType "Do you wish to patch $client's development or production env" 'prod dev' 'dev'; envType=$(Lower ${envType:0:1})
+		[[ $envType == 'd' ]] && validEnvs="$(tr ',' ' ' <<< $courseleafDevEnvs)" || validEnvs="$(echo "$courseleafProdEnvs" | sed s/,preview,public,prior// | tr ',' ' ')"
+	fi
+
+	## Get the server and site names
+		if [[ $envType == 'd' ]]; then
+			unset dirs
+			for server in $(tr ',' ' ' <<< $devServers); do
+				cd /mnt/$server/web
+				find -mindepth 1 -maxdepth 1 -type d -name $client\* -printf "$server %f\n" > $tmpFile
+			done
 		else
-			Prompt siteDir 'Please specify full file name to the target site root directory' '*dir*'
+			for server in $(tr ',' ' ' <<< $prodServers); do
+				if [[ -d /mnt/$server/$client ]]; then
+					cd /mnt/$server/$client
+					find -mindepth 1 -maxdepth 1 -type d -printf "$server %f\n" | grep 'next\|curr\|prior' > $tmpFile
+				fi
+				[[ -d "/mnt/$server/$client-test" ]] && echo "$server test" >> $tmpFile
+			done
 		fi
-	done
-	return 0
+
+	## Build the menu and ask the user to select the site
+		local numLines=$(echo $(ProtectedCall "wc -l "$tmpFile"") | cut -d' ' -f1)
+		if [[ $numLines -gt 0 ]]; then
+			menuItems+=("|server/share| Site Type")
+			while read -r line; do menuItems+=("|$(tr ' ' '|' <<< $line)"); done < $tmpFile;
+			SelectMenuNew 'menuItems' 'menuItem' "\nEnter the $(ColorK '(ordinal)') number of the site you wish to act on (or 'x' to quit) > "
+			[[ $menuItem == '' ]] && Goodbye 0
+			server="$(cut -d'|' -f1 <<< $menuItem)"
+			if [[ $envType == 'd' ]]; then
+				client="$(cut -d'|' -f2 <<< $menuItem)"
+ 				siteDir="/mnt/$server/web/$client"
+			else
+				env="$(cut -d'|' -f2 <<< $menuItem)"
+				[[ $env == 'test' ]] && client="$client-test"
+				siteDir="/mnt/$server/$client/$env"
+			fi
+		fi
+
+	## Done
+		cd "$cwd"
+		[[ ! -d $siteDir ]] && unset siteDir
+		return 0
 }
 export -f GetSiteDirNoCheck
 
@@ -59,3 +77,4 @@ export -f GetSiteDirNoCheck
 #===================================================================================================
 ## Wed Jan  4 13:54:41 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Jan  5 07:58:49 CST 2017 - dscudiero - Refactored to correctly write data out to the appropriate file
+## Wed Jan 18 13:01:07 CST 2017 - dscudiero - Completely refactred
