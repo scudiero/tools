@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.169 # -- dscudiero -- 01/17/2017 @ 12:08:56.77
+version=1.21.170 # -- dscudiero -- 01/18/2017 @  7:18:58.01
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -249,7 +249,7 @@ case "$hostName" in
 						sqlStmt="insert into $semaphoreInfoTable values(NULL,\"buildSiteInfoTable\",\"$hostName\",NULL,NULL)"
 						RunSql2 $sqlStmt
 					## Build siteinfotabe and siteadmins table
-						Call 'buildSiteInfoTable' "$scriptArgs"
+						Call 'buildSiteInfoTable' "-table sitesNew $scriptArgs"
 					## Clear buildSiteInfoTable semaphore
 						sqlStmt="delete from into $semaphoreInfoTable where processName=\"buildSiteInfoTable\" and host=\"$hostName\""
 						RunSql2 $sqlStmt
@@ -376,7 +376,7 @@ case "$hostName" in
 				remoteHost=${tokens[3]}
 				sshpass -p $remotePw ssh $remoteUser@$remoteHost $TOOLSPATH/src/perfTest.sh #>/dev/null 2>&1
 
-			;;
+			;; ## mojave
 
 	*) ## build5 and build7
 			sleep 30 ## Wait for process to start on mojave and get the semaphore set
@@ -392,7 +392,7 @@ case "$hostName" in
 				## Set a semaphore for this servers call to buildSiteInfoTable
 				sqlStmt="insert into $semaphoreInfoTable values(NULL,\"buildSiteInfoTable\",\"$hostName\",NULL,NULL)"
 				RunSql2 $sqlStmt
-				Call 'buildSiteInfoTable' "$scriptArgs"
+				Call 'buildSiteInfoTable' "-table sitesNew $scriptArgs"
 				## Clear buildSiteInfoTable semaphore
 				sqlStmt="delete from into $semaphoreInfoTable where processName=\"buildSiteInfoTable\" and host=\"$hostName\""
 				RunSql2 $sqlStmt
@@ -434,3 +434,4 @@ return 0
 ## Tue Jan 17 07:43:04 CST 2017 - dscudiero - cleanup
 ## Tue Jan 17 09:37:13 CST 2017 - dscudiero - removed the -inPlace option on the buildClientInfo table call
 ## Tue Jan 17 16:35:27 CST 2017 - dscudiero - Refactor logic arround build client & site tables
+## Wed Jan 18 07:19:58 CST 2017 - dscudiero - Pass table name on the buildSiteInfoTable call
