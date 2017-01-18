@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.90 # -- dscudiero -- 01/05/2017 @ 12:22:24.46
+version=2.0.91 # -- dscudiero -- 01/18/2017 @ 10:02:18.18
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -59,9 +59,10 @@ originalArgStr="$*"
 	fi
 
 #=======================================================================================================================
-## Run the executable
+## Run the executable(s)
 	useLocal=true
 	Call "$callScriptName" 'std' 'cron:sh' "$callScriptArgs" > "$logFile" 2>&1
+	[[ -x "$(logname)/bin/$callScriptName.sh" ]] && "$(logname)/bin/$callScriptName.sh" > "$logFile" 2>&1
 
 #=======================================================================================================================
 ## Post process the logFile
@@ -99,3 +100,4 @@ exit 0
 ## Thu Dec 29 08:18:05 CST 2016 - dscudiero - General syncing of dev to prod
 ## Thu Dec 29 09:02:34 CST 2016 - dscudiero - Fix problem where the inserted checkin comment was appended to the end of the exit line
 ## Thu Jan  5 12:23:39 CST 2017 - dscudiero - set DISPATCHER
+## Wed Jan 18 10:03:13 CST 2017 - dscudiero - Added execution of local script if found in logged in users bin directory
