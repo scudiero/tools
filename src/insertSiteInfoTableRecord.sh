@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.115 # -- dscudiero -- 01/17/2017 @ 15:39:28.59
+version=1.1.116 # -- dscudiero -- 01/18/2017 @  7:19:02.71
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseCourseleafFile' #imports="$imports "
@@ -314,7 +314,7 @@ Msg2 "^$env ($siteDir)"
 					if [[ -n $admins ]]; then
 						admins=${admins:1}
 						fields="idx,siteId,name,env,admins"
-						sqlStmt="insert into $siteAdminsTable ($fields) values(NULL,\"$siteId\",\"$client\",\"$env\",\"$admins\")"
+						sqlStmt="insert into $useSiteAdminsTable ($fields) values(NULL,\"$siteId\",\"$client\",\"$env\",\"$admins\")"
 						RunSql2 $sqlStmt
 					fi
 		fi
@@ -379,3 +379,4 @@ return 0
 ## Thu Jan 12 07:12:04 CST 2017 - dscudiero - Fix problem where we were double quoting cimver
 ## Tue Jan 17 15:38:34 CST 2017 - dscudiero - Set which table to load based on WAREHOUSEDB
 ## Tue Jan 17 15:39:43 CST 2017 - dscudiero - Make production table the default table name
+## Wed Jan 18 07:20:50 CST 2017 - dscudiero - Modify siteAdmins table insert to use a variable for the table name
