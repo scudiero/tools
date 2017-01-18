@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.0.59" # -- dscudiero -- 01/04/2017 @ 13:39:45.97
+# version="2.0.60" # -- dscudiero -- 01/18/2017 @ 13:36:50.58
 #=======================================================================================================================
 # Retrieve data from a Excel xlsx spreadsheet
 # Usage: GetExcel <workBook> <workSheet>
@@ -35,7 +35,7 @@ function GetExcel {
 		[[ -f $tmpFile ]] && rm -f $tmpFile
 
 	return 0
-} #Call
+} #GetExcel
 export -f GetExcel
 
 #=======================================================================================================================
@@ -43,3 +43,4 @@ export -f GetExcel
 #=======================================================================================================================
 ## Tue Jan  3 11:57:15 CST 2017 - dscudiero - Add 'utility' to call of getXlsx
 ## Wed Jan  4 13:53:35 CST 2017 - dscudiero - General syncing of dev to prod
+## Wed Jan 18 13:37:05 CST 2017 - dscudiero - misc cleanup
