@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.14" # -- dscudiero -- 01/18/2017 @ 13:13:27.57
+# version="1.0.15" # -- dscudiero -- 01/18/2017 @ 13:36:09.00
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -24,12 +24,11 @@
 		local sqlStmt="$*"
 		unset resultSet
 
-		[[ $informationOnlyMode == true ]] && return 0
 		[[ -z $sqlStmt ]] && return 0
 		[[ ${sqlStmt:${#sqlStmt}:1} != ';' ]] && sqlStmt="$sqlStmt;"
 		local stmtType=$(tr '[:lower:]' '[:upper:]' <<< "${sqlStmt%% *}")
-		[[ -n $DOIT ]] && [[ $stmtType != 'SELECT' ]] && echo "sqlStmt = >$sqlStmt<" && return 0
-		[[ $informationOnlyMode == true ]] && return 0
+
+		[[ -n $DOIT || $informationOnlyMode == true ]] && [[ $stmtType != 'SELECT' ]] && return 0
 
 		local prevGlob=$(set -o | grep noglob | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2)
 		local resultStr msg tmpStr
@@ -72,3 +71,4 @@
 ## Tue Jan 17 08:58:15 CST 2017 - dscudiero - Add check for *Error* coming back from sql query
 ## Wed Jan 18 13:09:24 CST 2017 - dscudiero - Return immediatly if informationonly is on
 ## Wed Jan 18 13:13:30 CST 2017 - dscudiero - General syncing of dev to prod
+## Wed Jan 18 13:37:13 CST 2017 - dscudiero - misc cleanup
