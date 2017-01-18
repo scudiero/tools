@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.46 # -- dscudiero -- 01/12/2017 @ 13:06:05.74
+version=3.8.51 # -- dscudiero -- 01/18/2017 @ 13:38:20.67
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -49,7 +49,7 @@ scriptDescription="Load Courseleaf Data"
 
 		if [[ -f $logFile && $outFile != '' ]]; then
 			cat $logFile | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" > $outFile
-			Msg2; Msg2 $I "The output can be found in '$outFile'"
+			echo; Msg2 $I "The output can be found in '$outFile'"
 		fi
 		return 0
 	}
@@ -162,7 +162,7 @@ scriptDescription="Load Courseleaf Data"
 			numWorkflowsFromFile=${#workflowsFromFile[@]}
 			Msg2 "^Retrieved $numWorkflowsFromFile records"
 			if [[ $verboseLevel -ge 1 ]]; then Msg2 "\tworkflowsFromFile:"; for i in "${!workflowsFromFile[@]}"; do printf "\t\t[$i] = >${workflowsFromFile[$i]}<\n"; done; fi
-			Msg2
+			echo
 		return 0
 	} #GetWorkflowDataFromFile
 
@@ -348,7 +348,7 @@ scriptDescription="Load Courseleaf Data"
 			if [[ $informationOnlyMode == false ]]; then
 				RunCoureleafCgi "$srcDir" "-r /apache-group.html"
 			fi
-			Msg2
+			echo
 		return 0
 	} #ProcessUserData
 
@@ -482,7 +482,7 @@ scriptDescription="Load Courseleaf Data"
 					#IFS=$IFSsave
 				done
 			fi
-			Msg2
+			echo
 		return 0
 	} #ProcessRoleData
 
@@ -546,11 +546,10 @@ scriptDescription="Load Courseleaf Data"
 					FindExecutable "$step" 'step:html'
 					srcStepFile="$executeFile"
 					Info 0 1 "Using step file: $srcStepFile"
+					## Copy step file to localsteps
+					cp -fP $srcStepFile $stepFile
+					chmod ug+w $stepFile
 				fi
-
-			## Copy step file to localsteps
-				cp -fP $srcStepFile $stepFile
-				chmod ug+w $stepFile
 			## Update the page data in courseleaf
 			numPagesUpdated=0
 			numMembersMappedToUIN=0
@@ -671,7 +670,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -ne 0 ]]; then
 				result="${resultSet[0]}"
-				[[ $result == 'Y' ]] && useUINs=true && Msg2
+				[[ $result == 'Y' ]] && useUINs=true && echo
 			fi
 		fi
 	fi
@@ -707,7 +706,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 	fi
 	[[ -f "$tmpDataFile" ]] && rm -f "$tmpDataFile"
 
-	[[ $workbookFile == "" ]] && Msg2
+	[[ $workbookFile == "" ]] && echo
 	Prompt workbookFile 'Please specify the full path to the workbook file' '*file*'
 
 	## If the workbook file name contains blanks then copy to temp and use that one.
@@ -720,7 +719,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 		fi
 		[[ ! -r $workbookFile ]] && Terminate "Could not locate file: '$workbookFile'"
 
-	Msg2
+	echo
 
 ## Get the list of sheets in the workbook
 	GetExcel "$workbookFile" 'GetSheets' > $tmpFile
@@ -781,7 +780,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 	outFile="$(GetOutputFile "$client" "$env" "$product")"
 
 ## Verify processing
-	[[ $processUserData == false && $processRoleData == false && $processPageData == false ]] && Msg2 && Terminate "No actions requested, please review help text"
+	[[ $processUserData == false && $processRoleData == false && $processPageData == false ]] && echo && Terminate "No actions requested, please review help text"
 
 	verifyArgs+=("Client:$client")
 	verifyArgs+=("Env:$(TitleCase $env) ($srcDir)")
@@ -804,7 +803,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 #==================================================================================================
 ## Process spreadsheet
 	[[ $client == 'internal' ]] && courseleafProgDir='pagewiz' || courseleafProgDir='courseleaf'
-	Msg2
+	echo
 	rolesFile=$srcDir/web/$courseleafProgDir/roles.tcf
 
 	## Get process the sheets as directed
@@ -853,9 +852,9 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 
 ## Processing summary
 	unset changeLogLines
-	Msg2
+	echo
 	PrintBanner "Processing Summary"
-	[[ $informationOnlyMode == true ]] && Msg2 "" && Msg2 ">>> The Information Only flag was set, no data has been updated <<<" && Msg2
+	[[ $informationOnlyMode == true ]] && echo "" && Msg2 ">>> The Information Only flag was set, no data has been updated <<<" && echo
 
 	if [[ $processedUserData == true ]]; then
 		Msg2 "User data:"
@@ -869,7 +868,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 		[[ $numModifiedUsers -gt 0 ]] && changeLogLines+=("$string")
 	fi
 
-	[[ $processedUserData == true ]] && Msg2
+	[[ $processedUserData == true ]] && echo
 	if [[ $processedRoleData == true ]]; then
 		Msg2 "Role data:"
 		Msg2 "^Retrieved $numRolesFromFile records from the roles.tcf file"
@@ -886,7 +885,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 		[[ $numRoleMembersNotProvisoned -gt 0 ]] && Msg2 "^$string" && changeLogLines+=("$string")
 	fi
 
-	[[ $processedUserData == true || $processedRoleData == true ]] && Msg2
+	[[ $processedUserData == true || $processedRoleData == true ]] && echo
 	if [[ $processedPageData == true ]]; then
 		Msg2 "Page data:"
 		Msg2 "^Retrieved $numWorkflowDataFromSpreadsheet records from $workbookFile"
@@ -902,7 +901,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 
 		## Member lookup errors
 		if [[ ${#membersErrors[@]} -gt 0 ]]; then
-			Msg2
+			echo
 			WarningMsg 0 1 "Found page owner or role data without a defined user or role:"
 			for key in "${!membersErrors[@]}"; do
 				Msg2 "^$(ColorW "*Warning*") -- Workflow/Owner member: '$key' not defined and used on the following pages:"
@@ -910,7 +909,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 				for page in "${pages[@]}"; do
 					Msg2 "^^'$page'"
 				done
-				Msg2
+				echo
 			done
 		fi
 	fi
@@ -971,3 +970,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## Tue Jan  3 15:36:36 CST 2017 - dscudiero - misc cleanup
 ## Tue Jan 10 09:54:07 CST 2017 - dscudiero - Updated messaging to reflect if we are running with informationOnly set
 ## Tue Jan 10 15:24:53 CST 2017 - dscudiero - Tweek output messaging
+## Wed Jan 18 14:22:27 CST 2017 - dscudiero - Do not copy step file if infomationonly flag is set
