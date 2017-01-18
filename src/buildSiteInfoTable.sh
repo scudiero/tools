@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.4 # -- dscudiero -- 01/11/2017 @  9:45:43.47
+version=4.3.7 # -- dscudiero -- 01/18/2017 @  7:16:51.81
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -32,6 +32,7 @@ scriptDescription="Scratch build the warhouse 'sites' table"
 		quick=false
 		argList+=(-noNameCheck,3,switch,noNameCheck,,script,"Do not check site names for syntax - only valid with -x and when a site name is specified")
 		argList+=(-quick,3,switch,quick,,script,"Do Quickly, skip processing the admins information")
+		argList+=(-tableName,5,option,useSiteInfoTable,,script,"The name of the table to load")
 	}
 	function Goodbye-buildSiteInfoTable  { # or Goodbye-$myName
 		SetFileExpansion 'on'
@@ -50,6 +51,8 @@ scriptDescription="Scratch build the warhouse 'sites' table"
 insertInLine=false
 fork=false
 addedCalledScriptArgs="-secondaryMessagesOnly"
+useSiteInfoTable="$siteInfoTable"
+useSiteAdminsTable="$siteAdminsTable"
 
 ## Find the location of the worker script, speeds up subsequent calls
 	workerScript='insertSiteInfoTableRecord'; useLocal=true
@@ -69,8 +72,13 @@ Hello
 
 [[ $fork == true ]] && forkStr='fork' || unset forkStr
 
-useSiteInfoTable="${siteInfoTable}"
-Msg2 "Loading table: $useSiteInfoTable"
+[[ $useSiteInfoTable == "${siteInfoTable}New" ]] && useSiteAdminsTable="${siteAdminsTable}New"
+
+Msg2 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
+
+
+
+Quit
 
 #=======================================================================================================================
 # Main
@@ -194,3 +202,4 @@ Goodbye 0 'alert'
 ## Fri Jan  6 10:10:29 CST 2017 - dscudiero - Do not unset env variable after argument parsing
 ## Fri Jan  6 15:57:49 CST 2017 - dscudiero - General syncing of dev to prod
 ## Wed Jan 11 09:46:21 CST 2017 - dscudiero - updated code comments
+## Wed Jan 18 07:20:19 CST 2017 - dscudiero - Add -table argument
