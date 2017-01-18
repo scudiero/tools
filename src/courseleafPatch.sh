@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=4.10.101 # -- dscudiero -- 01/12/2017 @ 10:23:15.51
+version=4.10.107 # -- dscudiero -- 01/18/2017 @ 13:10:04.70
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCoureleafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -126,8 +126,10 @@ allowExtraProducts=true
 
 if [[ $noCheck == true ]]; then
 	Init 'getClient'
-	GetSiteDirNoCheck $client $env
-	[[ -n $siteDir ]] && tgtDir="$siteDir" || Terminate "Could not resolve target site directory"
+	GetSiteDirNoCheck $client
+dump siteDir
+	[[ -n $siteDir ]] && tgtDir="$siteDir" || Terminate "Nocheck option active, could not resolve target site directory"
+	Init 'getProducts'
 else
 	Init 'getClient getProducts getEnv getDirs checkDirs noPreview noPublic'
 fi
@@ -253,6 +255,7 @@ dump -1 -p client products catRefreshVersion cimRefreshVersion clssRefreshVersio
 
 ## Backup root
 	backupRootDir=$tgtDir/attic/$myName.$$
+	mkdir -p "$backupRootDir"
 
 unset changeLogRecs
 
@@ -557,3 +560,4 @@ if [[ -f $myTempFile ]]; then rm $myTempFile; fi
 ## Fri Oct 14 13:47:27 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Wed Jan 11 10:42:18 CST 2017 - dscudiero - Do not check the daily.sh file if it is not present
 ## Thu Jan 12 10:25:02 CST 2017 - dscudiero - Add logic to get siteDir if nocheck flag is on, Resolve cgiVersion fully
+## Wed Jan 18 15:00:15 CST 2017 - dscudiero - General syncing of dev to prod
