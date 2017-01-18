@@ -1,11 +1,12 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.51 # -- dscudiero -- 01/18/2017 @ 13:38:20.67
+version=3.8.52 # -- dscudiero -- 01/18/2017 @ 14:59:16.70
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
 imports="$imports GetOutputFile BackupCourseleafFile ParseCourseleafFile GetCourseleafPgm RunCoureleafCgi"
+imports="$imports WriteChangelogEntry"
 Import "$imports"
 originalArgStr="$*"
 scriptDescription="Load Courseleaf Data"
@@ -971,3 +972,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## Tue Jan 10 09:54:07 CST 2017 - dscudiero - Updated messaging to reflect if we are running with informationOnly set
 ## Tue Jan 10 15:24:53 CST 2017 - dscudiero - Tweek output messaging
 ## Wed Jan 18 14:22:27 CST 2017 - dscudiero - Do not copy step file if infomationonly flag is set
+## Wed Jan 18 14:59:40 CST 2017 - dscudiero - Import WriteChangelogEntry
