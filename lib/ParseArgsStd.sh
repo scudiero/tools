@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.17" # -- dscudiero -- 01/19/2017 @ 10:04:40.99
+# version="2.0.18" # -- dscudiero -- 01/19/2017 @ 11:56:14.70
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -28,6 +28,18 @@ function ParseArgsStd {
 		argList+=(-srcEnv,3,option,srcEnv,,src,"Source Environment (e.g. $courseleafDevEnvs,$courseleafProdEnvs)")
 		argList+=(-tgtEnv,3,option,tgtEnv,,tgt,"Target Environment (e.g. $courseleafDevEnvs,$courseleafProdEnvs)")
 
+	## cims
+		cimc=false; cimp=false; cimm=false; cims=false; allCims=false; unset cims; unset cimStr
+		argList+=(-cimc,4,switch,cimc,"cims+=('courseadmin')",cim,"CIM Courses")
+		argList+=(-cimp,4,switch,cimp,"cims+=('programadmin')",cim,"CIM Programs")
+		argList+=(-cimm,4,switch,cimm,"cims+=('miscadmin')",cim,"CIM Miscellanious")
+		argList+=(-cims,4,switch,cims,"cims+=('syllubusadmin')",cim,"CIM Syllabi")
+		argList+=(-cima,4,switch,allCims,,cim,"Use all CIMs found")
+
+		argList+=(-cat,3,switch,cat,,cat,"Product is CAT")
+		argList+=(-cim,3,switch,cim,,cim,"Product is CIM")
+		argList+=(-clss,4,switch,clss,,clss,"Product is CLSS/WEN")
+
 	## Setup ENV arguments
 		local singleCharArgs="pvt dev test next curr"
 		local doubleCharArgs="preview public qa"
@@ -48,17 +60,6 @@ function ParseArgsStd {
 		#falseVars="testMode noEmails noHeaders noCheck traceLog verbose quiet"
 		#local var; for var in $falseVars; do eval $var=false; done
 		#argList+=(argFlag,minLen,type,scriptVariable,extraToken/exCmd,helpSet,helpText)
-
-		cimc=false; cimp=false; cimm=false; cims=false; allCims=false; unset cims; unset cimStr
-		argList+=(-cimc,4,switch,cimc,"cims+=('courseadmin')",cim,"CIM Courses")
-		argList+=(-cimp,4,switch,cimp,"cims+=('programadmin')",cim,"CIM Programs")
-		argList+=(-cimm,4,switch,cimm,"cims+=('miscadmin')",cim,"CIM Miscellanious")
-		argList+=(-cims,4,switch,cims,"cims+=('syllubusadmin')",cim,"CIM Syllabi")
-		argList+=(-cima,4,switch,allCims,,cim,"Use all CIMs found")
-
-		argList+=(-cat,3,switch,cat,,cat,"Product is CAT")
-		argList+=(-cim,3,switch,cim,,cim,"Product is CIM")
-		argList+=(-clss,4,switch,clss,,clss,"Product is CLSS/WEN")
 
 		argList+=(-batchMode,9,switch,batchMode,,script2,"Run in batch mode")
 		argList+=(-noClear,4,switch,noClear,,script2,"Do not clear the screen on script start")
@@ -111,3 +112,4 @@ export -f ParseArgsStd
 #===================================================================================================
 ## Wed Jan  4 13:54:04 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Jan 19 10:05:01 CST 2017 - dscudiero - misc cleanup
+## Thu Jan 19 12:47:02 CST 2017 - dscudiero - Moved CIMS above envs
