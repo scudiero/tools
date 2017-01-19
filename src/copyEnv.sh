@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=4.9.122 # -- dscudiero -- 01/12/2017 @ 12:59:39.81
+version=4.9.128 # -- dscudiero -- 01/19/2017 @ 10:25:08.62
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -50,7 +50,6 @@ function parseArgs-copyEnv {
 	argList+=(-forUser,7,option,forUser,,'script',"Name the resulting site for the specified userid")
 	argList+=(-suffix,6,option,suffix,,'script',"Suffix text to be append to the resultant site name, e.g. -luc")
 	argList+=(-emailAddress,1,option,emailAddress,,'script',"The email address for CourseLeaf email notifications")
-	argList+=(-debug,5,switch,launchWizdebug,'script',"Launch the debugger in the site after the copy is completed")
 }
 function Goodbye-copyEnv {
 	[[ -d $tmpRoot ]] && rm -rf $tmpRoot
@@ -74,20 +73,25 @@ helpSet='client,script,env'
 helpNotes+=("If only a single environment is specified (i.e. -t, -n, -c, ...) then the target environment will be set to 'pvt'")
 helpNotes+=("If target env is not 'pvt' or 'dev' then a full copy will be done and auth, publising and email will NOT be changed")
 helpNotes+=("The 'forUser' and 'suffix' options are mutually exclusive.")
+
+dump originalArgStr
+
 GetDefaultsData $myName
 ParseArgsStd
+[[ -n $env && -z $srcEnv ]] && srcEnv="$env"
+
 [[ $allItems == true || $fullCopy == true ]] && cim='Yes' && overlay=false && manifest=false
 dump -2 -n client env cim cat fullCopy manifest overlay suffix emailAddress
 
 Hello
 addPvt=true
-[[ $env != '' ]] && srcEnv=$env && tgtEnv='pvt'
+[[ -z $env ]] && srcEnv=$env && tgtEnv='pvt'
 Init 'getClient'
 [[ $client != 'internal' ]] && Init 'getSrcEnv getTgtEnv getDirs' || Init 'getEnv getDirs'
 
-##Init 'getClient anyClient getSrcEnv getTgtEnv getDirs'
-[[ $env == '' ]] && env=$srcEnv
+[[ -z $env && -n $srcEnv ]] && env=$srcEnv
 dump -2 client env srcEnv srcDir tgtEnv tgtDir
+
 
 [[ $client == internal ]] && progDir='pagewiz'
 ignoreList=$(sed "s/<progDir>/$progDir/g" <<< $ignoreList)
@@ -136,14 +140,14 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 	fi
 	dump -2 -t srcDir devDir pvtDir remoteCopy
 
-	if [[ $overrideTarget != '' ]]; then
+	if [[ -z $overrideTarget ]]; then
 		[[ ${overrideTarget:(-1)} == '/' ]] && overrideTarget="${overrideTarget:0:${#overrideTarget}-1}"
 		[[ ! -d $overrideTarget ]] && Msg2 && Terminate "Could not locate override target diectory: '$overrideTarget'"
 		tgtDir="$overrideTarget/$client-$userName"
 	fi
-	[[ $forUser != '' && $suffix != '' ]] && Msg2 && Terminate "Cannot specify both 'forUser' and 'suffix'."
-	[[ $forUser != '' ]] && tgtDir=$(sed "s/$userName/$forUser/g" <<< $tgtDir) && emailAddress="$forUser@leepfrog.com"
-	[[ $suffix != '' ]] && tgtDir=$(sed "s/$userName/$suffix/g" <<< $tgtDir)
+	[[ -n $forUser && -x $suffix ]] && Msg2 && Terminate "Cannot specify both 'forUser' and 'suffix'."
+	[[ -n $forUser ]] && tgtDir=$(sed "s/$userName/$forUser/g" <<< $tgtDir) && emailAddress="$forUser@leepfrog.com"
+	[[ -n $suffix ]] && tgtDir=$(sed "s/$userName/$suffix/g" <<< $tgtDir)
 
 ## if target is not pvt or dev then do a full copy
 	[[ $tgtEnv != 'pvt' && $tgtEnv != 'dev' ]] && fullCopy=true
@@ -151,7 +155,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 
 #==================================================================================================
 ## Check to see if all dirs exist
-	[[ $srcDir ==  '' ]] && Terminate "No Source directory was specified"
+	[[ -z $srcDir ]] && Terminate "No Source directory was specified"
 	if [[ -d $tgtDir && $overlay == false ]]; then
 		unset ans
 		WarningMsg "Target site ($tgtDir) already existes."
@@ -214,7 +218,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 		done
 
 	[[ $remoteCopy != true ]] && cd $srcDir
-	[[ $DOIT == '' ]] && listOnly='' || listOnly='--list-only'
+	[[ -z $DOIT ]] && listOnly='' || listOnly='--list-only'
 	[[ $quiet == true || $quiet == 1 ]] && rsyncVerbose='' || rsyncVerbose='vh'
 	if [[ $fullCopy = true ]]; then
 		rsyncOpts="-a$rsyncVerbose $listOnly"
@@ -344,7 +348,7 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		[[ $emailAddress == "" ]] && emailAddress=$userName@leepfrog.com
 		editFile=$tgtDir/email/sendnow.atj
 		unset grepStr; grepStr=$(ProtectedCall "grep ^'// DO NOT MODIFY THIS FILE' $editFile");
-		if [[ $grepStr != '' ]]; then
+		if [[ -n $grepStr ]]; then
 			## New format file
 			if [[ -d $tgtDir/web/admin/wfemail ]]; then
 				editFile=$tgtDir/web/admin/wfemail/index.tcf
@@ -354,7 +358,7 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 			toStr="wfemail_testaddress:$emailAddress"
 			unset fromStr; fromStr=$(ProtectedCall "grep ^'wfemail_testaddress:' $editFile")
 			## Do we have multiples?
-			if [[ $fromStr == '' ]]; then
+			if [[ -z $fromStr ]]; then
 				echo $toStr >> $editFile
 			else
 				count=$(grep -o "wfemail_testaddress:" <<< $fromStr | wc -l)
@@ -364,7 +368,7 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 			## old format file
 			toStr="var testaddress = \"$emailAddress\""
 			unset grepStr; grepStr=$(ProtectedCall "grep '"$toStr"' $editFile")
-			if [[ $grepStr == '' ]]; then
+			if [[ -z $grepStr ]]; then
 				unset checkStr; checkStr=$(ProtectedCall "grep 'var type = \"cat\";' $editFile")
 				fromStr=$checkStr
 				$DOIT sed -i s"!${fromStr}!${toStr}\n\n${fromStr}!" $editFile
@@ -390,9 +394,6 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		$DOIT rm -f $tgtDir/.clonedFrom-* > /dev/null 2>&1
 		$DOIT touch $tgtDir/.clonedFrom-$env
 fi
-
-## Launch the debugger in the site we just created
-	[[ $launchWizdebug == true ]] && wizdebug $client -pvt
 
 #==================================================================================================
 ## Bye-bye
@@ -434,3 +435,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client)") clone from $(ColorK "$(Upper $en
 ## Wed Oct  5 09:46:57 CDT 2016 - dscudiero - Make the leepfrog userid and password varibles pulled from defaults
 ## Tue Oct 18 09:28:04 CDT 2016 - dscudiero - Fix problem where nocheck was still checking the client in the db
 ## Thu Jan 12 11:31:24 CST 2017 - dscudiero - Change overwrite prompt
+## Thu Jan 19 10:25:30 CST 2017 - dscudiero - misc cleanup
