@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.58" # -- dscudiero -- 01/18/2017 @ 14:40:35.67
+version="1.2.59" # -- dscudiero -- 01/18/2017 @ 15:21:11.20
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -59,8 +59,6 @@ function CleanUp {
 
 	## Cleanup semaphore and dblogging
 		[[ $semaphoreProcessing == true && $(Lower $setSemaphore) == 'yes' && -n $semaphoreId ]] && Semaphore 'clear' $semaphoreId
-
-[[ $userName == 'dscudiero' ]] && dump logInDb myLogRecordIdx
 		[[ $logInDb != false && -n $myLogRecordIdx ]] && ProcessLogger 'End' $myLogRecordIdx
 		SetFileExpansion 'on'
 		rm -rf /tmp/$userName.$callPgmName.* > /dev/null 2>&1
@@ -348,3 +346,4 @@ prtStatus "parse args"
 ## Fri Jan 13 07:20:02 CST 2017 - dscudiero - Misc cleanup
 ## Fri Jan 13 15:25:28 CST 2017 - dscudiero - Move setting of classpath in from init
 ## Wed Jan 18 15:00:06 CST 2017 - dscudiero - add debug code
+## Thu Jan 19 07:13:30 CST 2017 - dscudiero - Add debug statement
