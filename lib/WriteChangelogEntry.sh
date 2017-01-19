@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.7" # -- dscudiero -- 01/05/2017 @  7:58:29.88
+# version="2.0.10" # -- dscudiero -- 01/19/2017 @ 12:48:37.88
 #===================================================================================================
 # Write a 'standard' format courseleaf changelog.txt
 # args: "logFileName" ${lineArray[@]}
@@ -48,3 +48,4 @@ export -f WriteChangelogEntry
 #===================================================================================================
 ## Wed Jan  4 13:54:41 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Jan  5 07:58:49 CST 2017 - dscudiero - Refactored to correctly write data out to the appropriate file
+## Thu Jan 19 12:49:07 CST 2017 - dscudiero - x
