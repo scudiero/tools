@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.4" # -- dscudiero -- 01/11/2017 @ 11:14:02.31
+# version="1.0.5" # -- dscudiero -- 01/19/2017 @  9:56:55.45
 #===================================================================================================
 # Various string manipulation functions
 #===================================================================================================
@@ -8,30 +8,29 @@
 # All rights reserved
 #===================================================================================================
 
+#===================================================================================================
 function Lower {
-	echo $(tr '[:upper:]' '[:lower:]' <<< $*)
+	printf "%s" "$(tr '[:upper:]' '[:lower:]' <<< $*)"
 	return 0
 } #Lower
-export -f Lower
 
 #===================================================================================================
 function Upper {
-	echo $(tr '[:lower:]' '[:upper:]' <<< $*)
+	printf "%s" "$(tr '[:lower:]' '[:upper:]' <<< $*)"
 	return 0
-} #Lower
-export -f Upper
+} #Upper
 
 #===================================================================================================
 function TitleCase {
 	local args="$*"
-	echo $(tr '[:lower:]' '[:upper:]' <<< ${args:0:1})${args:1}
+	printf "%s" "$(tr '[:lower:]' '[:upper:]' <<< ${args:0:1})${args:1}"
 	return 0
-} #Lower
+} #TitleCase
 export -f TitleCase
 
 #===================================================================================================
 function Trim {
- 	echo "$(echo $* | sed 's/^[ \t]*//;s/[ \t]*$//')"
+ 	printf "%s" "$(sed 's/^[ \t]*//;s/[ \t]*$//' <<< "$*")"
  	return 0
 } #Trim
 export -f Trim
@@ -43,7 +42,7 @@ function CleanString {
 	local editOut2='\020\021\022\023\024\025\026\027\028\029\030\031\032\033\034\035\036\037\038\039'
 	inStr=$(tr -d $editOut1 <<< "$inStr")
 	inStr=$(tr -d $editOut2 <<< "$inStr")
- 	echo "$inStr"
+ 	printf "%s" "$inStr"
  	return 0
 } #CleanString
 export -f CleanString
@@ -71,11 +70,17 @@ export -f IsNumeric
 
 #===================================================================================================
 function Indent {
-	local line
-	while read line ; do
-		echo -e "\t\t$line"
+	local line i
+	[[ -z $indentLevel ]] && local indentLevel=1
+
+	for ((i=0; i<$indentLevel; i++)); do
+		local tabStr="$tabStr\t"
 	done
-		return 0
+
+	while read line ; do
+		printf "$tabStr%s\n" "$line"
+	done
+	return 0
 } #Indent
 export -f Indent
 
@@ -95,3 +100,4 @@ export -f Contains
 #===================================================================================================
 ## Wed Jan 11 11:03:37 CST 2017 - dscudiero - Moved IsNumeric into file
 ## Wed Jan 11 11:15:52 CST 2017 - dscudiero - Moved Conains into this file
+## Thu Jan 19 09:57:30 CST 2017 - dscudiero - Swithch to use printf since echo was absorbing leading -n and -e
