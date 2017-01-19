@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.106 # -- dscudiero -- 01/17/2017 @  9:34:58.10
+version=2.3.107 # -- dscudiero -- 01/19/2017 @  7:12:44.31
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -154,7 +154,7 @@ Msg2 "Table: $useClientInfoTable"
 
 	sqlStmt="select count{*) from $clientInfoTable"
 	RunSql2
-	Msg2 "\nInserted ${#resultSet[@]} records into $clientInfoTable"
+	Msg2 "\nInserted ${resultSet[0]} records into $clientInfoTable"
 
 
 #=======================================================================================================================
@@ -180,3 +180,4 @@ Goodbye 0 'alert'
 ## Wed Jan 11 07:00:04 CST 2017 - dscudiero - Add status at the end of processing
 ## Tue Jan 17 08:58:27 CST 2017 - dscudiero - x
 ## Tue Jan 17 09:36:47 CST 2017 - dscudiero - Fix issues with swapping databases
+## Thu Jan 19 07:13:53 CST 2017 - dscudiero - Fixed erronious messaging
