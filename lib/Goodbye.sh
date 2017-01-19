@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.83" # -- dscudiero -- 01/18/2017 @ 15:21:25.17
+# version="2.0.84" # -- dscudiero -- 01/19/2017 @  7:26:27.77
 #===================================================================================================
 # Common script exit
 # args:
@@ -122,9 +122,6 @@ function Goodbye {
 
 	## Write end record to db log
 		[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Update' $myLogRecordIdx 'exitCode' "$exitCode"
-
-[[ $userName == 'dscudiero' ]] && dump logInDb myLogRecordIdx
-
 		[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'End' $myLogRecordIdx
 
 	## If secondaryMessagesOnly is true then we are in a sub shell so just return, otherwise exit
@@ -144,3 +141,4 @@ export -f Goodbye
 ## Wed Jan  4 13:53:40 CST 2017 - dscudiero - General syncing of dev to prod
 ## Wed Jan 11 07:50:53 CST 2017 - dscudiero - Switch to use ProcessLogger
 ## Thu Jan 19 07:13:36 CST 2017 - dscudiero - Add debug statement
+## Thu Jan 19 07:26:50 CST 2017 - dscudiero - Remove debug statements
