@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.35" # -- dscudiero -- 01/19/2017 @ 10:02:09.16
+# version="2.0.36" # -- dscudiero -- 01/19/2017 @ 10:23:27.04
 #===================================================================================================
 # Parse an argumenst string driven by an control array that is passed in
 # argList+=(argFlag,minLen,type,scriptVariable,extraToken/exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
@@ -29,7 +29,7 @@ function ParseArgs {
 	until [[ -z "$*" ]]; do
 		origArgToken="$1"; shift || true
 		## If the token does not start with a '-' then set client variable if not already set
-		if [[ ${origArgToken:0:1} != '-' && -n $client ]]; then
+		if [[ ${origArgToken:0:1} != '-' && -z $client ]]; then
 			Client=$origArgToken; client=$(Lower $origArgToken)
 			Msg2 $V3 "\t\t*** found client value = '$client'"
 			continue
@@ -137,3 +137,4 @@ export -f ParseArgs
 #===================================================================================================
 ## Wed Jan  4 13:54:02 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Jan 19 10:04:51 CST 2017 - dscudiero - misc cleanup
+## Thu Jan 19 10:25:22 CST 2017 - dscudiero - Fix problem parsing client
