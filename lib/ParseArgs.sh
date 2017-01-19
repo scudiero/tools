@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.14" # -- dscudiero -- 01/04/2017 @ 13:43:38.43
+# version="2.0.35" # -- dscudiero -- 01/19/2017 @ 10:02:09.16
 #===================================================================================================
 # Parse an argumenst string driven by an control array that is passed in
 # argList+=(argFlag,minLen,type,scriptVariable,extraToken/exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
@@ -20,16 +20,16 @@
 function ParseArgs {
 #	verboseLevel=3
 	Msg2 $V3 "*** $FUNCNAME -- Starting ***"
-	local argToken foundArg parseStr argName minLen argType scriptVar exCmd argGroup helpText scriptVarVal badArgList
-	[[ "$*" == '' ]] && return 0
+	local argToken foundArg parseStr argName minLen argType scriptVar exCmd argGroup helpText scriptVarVal badArgList token1 token2
+	[[ -z "$*" ]] && return 0
 	local tmpStr
 
 	Msg2 $V3 "\tInitial ArgStr = >$*<"
 	## Loop through all of the tokens on the passed in argument list
-	until [[ "$*" == '' ]]; do
+	until [[ -z "$*" ]]; do
 		origArgToken="$1"; shift || true
 		## If the token does not start with a '-' then set client variable if not already set
-		if [[ ${origArgToken:0:1} != '-' && $client == '' ]]; then
+		if [[ ${origArgToken:0:1} != '-' && -n $client ]]; then
 			Client=$origArgToken; client=$(Lower $origArgToken)
 			Msg2 $V3 "\t\t*** found client value = '$client'"
 			continue
@@ -38,28 +38,32 @@ function ParseArgs {
 		## Loop through all defined arguments (argList)
 		foundArg=false
 		for argDef in "${argList[@]}"; do
-			origArgName=$(echo $argDef | cut  -d ',' -f 1)
+			origArgName=$(cut -d ',' -f 1 <<< $argDef)
 			## Check to see if this argument is defined in the users .tools file
 			minLen=$(echo $argDef | cut  -d ',' -f 2)
-			## Does the argument match the argument def
-			if [[ $(Lower "${origArgToken:0:$minLen+1}") == $(Lower ${origArgName:0:$minLen+1}) ]]; then
-				argType=$(Lower $(echo $argDef | cut  -d ',' -f 3))
-				scriptVar=$(echo $argDef | cut  -d ',' -f 4)
-				exCmd=$(echo $argDef | cut  -d ',' -f 5)
-				argGroup=$(Lower $(echo $argDef | cut  -d ',' -f 6))
-				helpText=$(echo $argDef | cut  -d ',' -f 7-)
+			[[ ${#origArgToken} -lt $minLen ]] && continue
+			## Does the argument match the argument definition name
+			token1="$(Lower "${origArgToken:0:$minLen+1}")"
+			token2="$(Lower "${origArgName:0:$minLen+1}")"
+
+			if [[ "$token1" == "$token2" ]]; then
+				argType=$(cut  -d ',' -f 3 <<< $argDef) ; argType=$(Lower "$argType")
+				scriptVar=$(cut  -d ',' -f 4 <<< $argDef)
+				exCmd=$(cut  -d ',' -f 5 <<< $argDef)
+				argGroup=$(cut  -d ',' -f 6 <<< $argDef) ; argGroup=$(Lower "$argGroup")
+				helpText=$(cut  -d ',' -f 7- <<< $argDef)
 				foundArg=true
 				## Parse data based on argument type
 				if [[ $argType == 'switch' ]]; then
-					[[ $scriptVar != '' ]] && eval $scriptVar=true
-					if [[ $exCmd != '' ]]; then eval $exCmd; fi
+					[[ -n $scriptVar ]] && eval $scriptVar=true
+					if [[ -n $exCmd ]]; then eval $exCmd; fi
 					break
 				elif [[ $argType == 'switch#' ]]; then
 					re='^[0-9]+$'
 					if   [[ ${origArgToken:2} =~ $re ]]; then
 						eval $exCmd=${origArgToken:2}
 					fi
-					if [[ $scriptVar != '' ]]; then eval $scriptVar=true; fi
+					if [[ -n $scriptVar ]]; then eval $scriptVar=true; fi
 					break
 				elif [[ $argType == 'option' ]]; then
 					[[ ${1:0:1} == '-' ]] && Msg2 $W "Option flag '$origArgToken' specified with no value" && continue
@@ -74,13 +78,13 @@ function ParseArgs {
 						done
 						tmpStr="$tmpStr $1"
 						scriptVarVal=${tmpStr:2:${#tmpStr}-3} ## Need to start at 2 since there is a leading blank char
-						[[ $scriptVar != '' ]] && eval $scriptVar=\""$scriptVarVal"\"
+						[[ -n $scriptVar ]] && eval $scriptVar=\""$scriptVarVal"\"
 						shift || true
 						break
 					## Not a quotes string
 					else
 						scriptVarVal="$1"
-						[[ $scriptVar != '' ]] && eval $scriptVar=\""$scriptVarVal"\"
+						[[ -n $scriptVar ]] && eval $scriptVar=\""$scriptVarVal"\"
 						shift || true
 						break
 					fi
@@ -104,14 +108,14 @@ function ParseArgs {
 	done ## tokens in the input string
 
 	Msg2 $V3 "\tSurviving Arguments = >$*<"
-	if [[ $badArgList != '' ]]; then
+	if [[ -n $badArgList ]]; then
 		badArgList="${badArgList:1}"
 	fi
 	parsedArgStr="$badArgList"
 
 	## Special processing for specific args
 	if [[ $verbose == true && $verboseLevel -eq 0 ]]; then verboseLevel=1; fi
-	if [[ ${#cims[@]} -gt 0 && $cimStr == '' ]]; then
+	if [[ ${#cims[@]} -gt 0 && -z $cimStr ]]; then
 		cimStr=$(printf '%s, ' "${cims[@]}")
 		cimStr=${cimStr:0:${#cimStr}-2}
 	fi
@@ -132,3 +136,4 @@ export -f ParseArgs
 # Check-in Log
 #===================================================================================================
 ## Wed Jan  4 13:54:02 CST 2017 - dscudiero - General syncing of dev to prod
+## Thu Jan 19 10:04:51 CST 2017 - dscudiero - misc cleanup
