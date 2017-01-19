@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.171 # -- dscudiero -- 01/18/2017 @ 10:45:47.42
+version=1.21.172 # -- dscudiero -- 01/19/2017 @ 15:31:11.19
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -251,7 +251,7 @@ case "$hostName" in
 					## Build siteinfotabe and siteadmins table
 						Call 'buildSiteInfoTable' "-table sitesNew $scriptArgs"
 					## Clear buildSiteInfoTable semaphore
-						sqlStmt="delete from into $semaphoreInfoTable where processName=\"buildSiteInfoTable\" and host=\"$hostName\""
+						sqlStmt="delete from $semaphoreInfoTable where processName=\"buildSiteInfoTable\" and host=\"$hostName\""
 						RunSql2 $sqlStmt
 				fi
 
@@ -379,7 +379,7 @@ case "$hostName" in
 				RunSql2 $sqlStmt
 				Call 'buildSiteInfoTable' "-table sitesNew $scriptArgs"
 				## Clear buildSiteInfoTable semaphore
-				sqlStmt="delete from into $semaphoreInfoTable where processName=\"buildSiteInfoTable\" and host=\"$hostName\""
+				sqlStmt="delete from $semaphoreInfoTable where processName=\"buildSiteInfoTable\" and host=\"$hostName\""
 				RunSql2 $sqlStmt
 			## Common Checks
 				Call 'checkCgiPermissions' "$scriptArgs"
@@ -421,3 +421,4 @@ return 0
 ## Tue Jan 17 16:35:27 CST 2017 - dscudiero - Refactor logic arround build client & site tables
 ## Wed Jan 18 07:19:58 CST 2017 - dscudiero - Pass table name on the buildSiteInfoTable call
 ## Wed Jan 18 10:50:37 CST 2017 - dscudiero - Deleted 'backup' commented block, moved to local midnight file
+## Thu Jan 19 15:32:02 CST 2017 - dscudiero - v
