@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.8.39 # -- dscudiero -- 01/13/2017 @ 14:04:35.00
+version=2.8.40 # -- dscudiero -- 01/19/2017 @ 12:36:59.87
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -391,9 +391,9 @@ Msg2
 ## Write out change log entries
 	if [[ ${#copyFileList} -gt 0 && $DOIT == '' ]]; then
 		## Log changes
-		changeLogLines=("Files updated from '$srcDir':")
+		changeLogLines=("Files updated from: '$srcDir'")
 		for file in "${filesUpdated[@]}"; do
-			changeLogLines+=($(Msg2 "^^$file"))
+			changeLogLines+=("$(Msg2 "^^$file")")
 		done
 		WriteChangelogEntry 'changeLogLines' "$tgtDir/changelog.txt" 'changeLogEntry'
 
@@ -426,3 +426,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## Tue Oct 25 15:48:12 CDT 2016 - dscudiero - Only writout change log if the clientDataRoot folder exists
 ## Mon Jan  9 16:16:53 CST 2017 - dscudiero - Fixd problem where the changelog.txt records were all the same file
 ## Fri Jan 13 15:45:44 CST 2017 - dscudiero - testing
+## Thu Jan 19 12:49:39 CST 2017 - dscudiero - Fix writeing to the changelog.txt file
