@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=4.9.128 # -- dscudiero -- 01/19/2017 @ 10:25:08.62
+version=4.10.1 # -- dscudiero -- 01/19/2017 @ 10:31:17.21
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -92,7 +92,6 @@ Init 'getClient'
 [[ -z $env && -n $srcEnv ]] && env=$srcEnv
 dump -2 client env srcEnv srcDir tgtEnv tgtDir
 
-
 [[ $client == internal ]] && progDir='pagewiz'
 ignoreList=$(sed "s/<progDir>/$progDir/g" <<< $ignoreList)
 mustHaveDirs=$(sed "s/<progDir>/$progDir/g" <<< $(cut -d":" -f2 <<< $scriptData1))
@@ -140,7 +139,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 	fi
 	dump -2 -t srcDir devDir pvtDir remoteCopy
 
-	if [[ -z $overrideTarget ]]; then
+	if [[ -n $overrideTarget ]]; then
 		[[ ${overrideTarget:(-1)} == '/' ]] && overrideTarget="${overrideTarget:0:${#overrideTarget}-1}"
 		[[ ! -d $overrideTarget ]] && Msg2 && Terminate "Could not locate override target diectory: '$overrideTarget'"
 		tgtDir="$overrideTarget/$client-$userName"
@@ -436,3 +435,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client)") clone from $(ColorK "$(Upper $en
 ## Tue Oct 18 09:28:04 CDT 2016 - dscudiero - Fix problem where nocheck was still checking the client in the db
 ## Thu Jan 12 11:31:24 CST 2017 - dscudiero - Change overwrite prompt
 ## Thu Jan 19 10:25:30 CST 2017 - dscudiero - misc cleanup
+## Thu Jan 19 10:38:39 CST 2017 - dscudiero - fixed problem with trying to use override target dir
