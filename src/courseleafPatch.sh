@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=4.10.107 # -- dscudiero -- 01/18/2017 @ 13:10:04.70
+version=4.10.108 # -- dscudiero -- 01/20/2017 @  9:52:05.96
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCoureleafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -127,7 +127,6 @@ allowExtraProducts=true
 if [[ $noCheck == true ]]; then
 	Init 'getClient'
 	GetSiteDirNoCheck $client
-dump siteDir
 	[[ -n $siteDir ]] && tgtDir="$siteDir" || Terminate "Nocheck option active, could not resolve target site directory"
 	Init 'getProducts'
 else
@@ -561,3 +560,4 @@ if [[ -f $myTempFile ]]; then rm $myTempFile; fi
 ## Wed Jan 11 10:42:18 CST 2017 - dscudiero - Do not check the daily.sh file if it is not present
 ## Thu Jan 12 10:25:02 CST 2017 - dscudiero - Add logic to get siteDir if nocheck flag is on, Resolve cgiVersion fully
 ## Wed Jan 18 15:00:15 CST 2017 - dscudiero - General syncing of dev to prod
+## Fri Jan 20 09:52:15 CST 2017 - dscudiero - remove debug statement
