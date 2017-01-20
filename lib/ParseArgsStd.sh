@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.18" # -- dscudiero -- 01/19/2017 @ 11:56:14.70
+# version="2.0.19" # -- dscudiero -- 01/20/2017 @ 10:03:13.73
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -40,19 +40,6 @@ function ParseArgsStd {
 		argList+=(-cim,3,switch,cim,,cim,"Product is CIM")
 		argList+=(-clss,4,switch,clss,,clss,"Product is CLSS/WEN")
 
-	## Setup ENV arguments
-		local singleCharArgs="pvt dev test next curr"
-		local doubleCharArgs="preview public qa"
-		local envStr
-		for envStr in $singleCharArgs $doubleCharArgs; do
-			[[ $(Contains "$doubleCharArgs" "$envStr") == true ]] && minLen=2 || minLen=1;
-			if [[ $myName != 'bashShell' ]]; then unset $envStr; fi
-			oldIFS=$IFS; IFS=''
-			tempStr="-$envStr,$minLen,switch,env,env='$envStr';$envStr=true,env,Use $(Upper $envStr) as source or target environment"
-			argList+=($tempStr)
-			IFS=$oldIFS
-		done
-
 	## Standard arguments
 		#for arg in "${argList[@]}"; do dump -l arg; done
 		#trueVars="verify"
@@ -84,6 +71,19 @@ function ParseArgsStd {
 		argList+=(-noCheck,4,switch,noCheck,,script,"Do not validate the client data in the $warehouseDb.$clientInfoTable table")
 		argList+=(-verbose,1,switch#,verbose,verboseLevel,script,"Additional messaging, -V# sets verbosity level to #")
 
+	## Setup ENV arguments
+		local singleCharArgs="pvt dev test next curr"
+		local doubleCharArgs="preview public qa"
+		local envStr
+		for envStr in $singleCharArgs $doubleCharArgs; do
+			[[ $(Contains "$doubleCharArgs" "$envStr") == true ]] && minLen=2 || minLen=1;
+			if [[ $myName != 'bashShell' ]]; then unset $envStr; fi
+			oldIFS=$IFS; IFS=''
+			tempStr="-$envStr,$minLen,switch,env,env='$envStr';$envStr=true,env,Use $(Upper $envStr) as source or target environment"
+			argList+=($tempStr)
+			IFS=$oldIFS
+		done
+
 	## Call arg parser
 		ParseArgs $myArgs
 
@@ -113,3 +113,4 @@ export -f ParseArgsStd
 ## Wed Jan  4 13:54:04 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Jan 19 10:05:01 CST 2017 - dscudiero - misc cleanup
 ## Thu Jan 19 12:47:02 CST 2017 - dscudiero - Moved CIMS above envs
+## Fri Jan 20 10:17:29 CST 2017 - dscudiero - switch order when searching for arguments
