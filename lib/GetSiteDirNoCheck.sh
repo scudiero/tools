@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.5" # -- dscudiero -- 01/18/2017 @ 12:54:33.66
+# version="1.0.6" # -- dscudiero -- 01/20/2017 @ 10:15:40.02
 #===================================================================================================
 # Resolve a clients siteDir without using the database
 # Sets global variable: siteDir
@@ -26,7 +26,7 @@ function GetSiteDirNoCheck {
 	unset envType env
 	if [[ -z $env ]]; then
 		echo
-		Prompt envType "Do you wish to patch $client's development or production env" 'prod dev' 'dev'; envType=$(Lower ${envType:0:1})
+		Prompt envType "Do you wish to work with $client's development or production env" 'prod dev' 'dev'; envType=$(Lower ${envType:0:1})
 		[[ $envType == 'd' ]] && validEnvs="$(tr ',' ' ' <<< $courseleafDevEnvs)" || validEnvs="$(echo "$courseleafProdEnvs" | sed s/,preview,public,prior// | tr ',' ' ')"
 	fi
 
@@ -78,3 +78,4 @@ export -f GetSiteDirNoCheck
 ## Wed Jan  4 13:54:41 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Jan  5 07:58:49 CST 2017 - dscudiero - Refactored to correctly write data out to the appropriate file
 ## Wed Jan 18 13:01:07 CST 2017 - dscudiero - Completely refactred
+## Fri Jan 20 10:17:01 CST 2017 - dscudiero - Fix message wording to make in generic
