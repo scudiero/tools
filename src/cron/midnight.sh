@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.172 # -- dscudiero -- 01/19/2017 @ 15:31:11.19
+version=1.21.173 # -- dscudiero -- 01/20/2017 @  7:16:38.28
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -223,7 +223,7 @@ case "$hostName" in
 				## Set a semaphore
 					sqlStmt="truncate $semaphoreInfoTable"
 					RunSql2 $sqlStmt
-					sqlStmt="insert into $semaphoreInfoTable values(NULL,\"buildClientInfoTable\",NULL,NULL,NULL)"
+					sqlStmt="insert into $semaphoreInfoTable values(NULL,\"buildClientInfoTable\",\"$hostName\",\"$LOGNAME\",NOW())"
 					RunSql2 $sqlStmt
 				Call 'buildClientInfoTable' "$scriptArgs"
 
@@ -242,16 +242,16 @@ case "$hostName" in
 						sqlStmt="create table ${table}New like ${table}"
 						RunSql2 $sqlStmt
 					done
-					## Clear buildClientsInfoTable semaphore
-						sqlStmt="delete from $semaphoreInfoTable where processName=\"buildClientsInfoTable\""
+					## Clear buildClientInfoTable semaphore
+						sqlStmt="delete from $semaphoreInfoTable where processName=\"buildClientInfoTable\""
 						RunSql2 $sqlStmt
 					## Set a semaphore for this servers call to buildSiteInfoTable
-						sqlStmt="insert into $semaphoreInfoTable values(NULL,\"buildSiteInfoTable\",\"$hostName\",NULL,NULL)"
+						sqlStmt="insert into $semaphoreInfoTable values(NULL,\"buildSiteInfoTable\",\"$hostName\",\"$LOGNAME\",NOW())"
 						RunSql2 $sqlStmt
 					## Build siteinfotabe and siteadmins table
 						Call 'buildSiteInfoTable' "-table sitesNew $scriptArgs"
 					## Clear buildSiteInfoTable semaphore
-						sqlStmt="delete from $semaphoreInfoTable where processName=\"buildSiteInfoTable\" and host=\"$hostName\""
+						sqlStmt="delete from $semaphoreInfoTable where processName=\"buildSiteInfoTable\" and hostName=\"$hostName\""
 						RunSql2 $sqlStmt
 				fi
 
@@ -375,11 +375,11 @@ case "$hostName" in
 
 			## Build $siteInfoTable and $siteAdminsTable tables
 				## Set a semaphore for this servers call to buildSiteInfoTable
-				sqlStmt="insert into $semaphoreInfoTable values(NULL,\"buildSiteInfoTable\",\"$hostName\",NULL,NULL)"
+				sqlStmt="insert into $semaphoreInfoTable values(NULL,\"buildSiteInfoTable\",\"$hostName\",\"$LOGNAME\",NOW())"
 				RunSql2 $sqlStmt
 				Call 'buildSiteInfoTable' "-table sitesNew $scriptArgs"
 				## Clear buildSiteInfoTable semaphore
-				sqlStmt="delete from $semaphoreInfoTable where processName=\"buildSiteInfoTable\" and host=\"$hostName\""
+				sqlStmt="delete from $semaphoreInfoTable where processName=\"buildSiteInfoTable\" and hostName=\"$hostName\""
 				RunSql2 $sqlStmt
 			## Common Checks
 				Call 'checkCgiPermissions' "$scriptArgs"
@@ -422,3 +422,4 @@ return 0
 ## Wed Jan 18 07:19:58 CST 2017 - dscudiero - Pass table name on the buildSiteInfoTable call
 ## Wed Jan 18 10:50:37 CST 2017 - dscudiero - Deleted 'backup' commented block, moved to local midnight file
 ## Thu Jan 19 15:32:02 CST 2017 - dscudiero - v
+## Fri Jan 20 07:18:02 CST 2017 - dscudiero - fix issue with semaphores
