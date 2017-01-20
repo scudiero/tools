@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.54 # -- dscudiero -- 01/12/2017 @ 12:52:10.39
+# version=2.0.55 # -- dscudiero -- 01/20/2017 @ 10:13:33.20
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -122,9 +122,9 @@ function Init {
 					for result in "${resultSet[@]}"; do
 						clientEnvs="$clientEnvs $result"
 					done
-				[[ $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs=" pvt$clientEnvs"
+					clientEnvs=${clientEnvs:1}
+					[[ $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt$clientEnvs"
 				fi
-				clientEnvs=${clientEnvs:1}
 			fi
 		fi
 
@@ -301,3 +301,4 @@ export -f Init
 #===================================================================================================
 ## Wed Jan  4 13:53:46 CST 2017 - dscudiero - General syncing of dev to prod
 ## Tue Jan 10 10:55:40 CST 2017 - dscudiero - Tweak messaging when updateing next env
+## Fri Jan 20 10:26:54 CST 2017 - dscudiero - fix problem setting environment if nocheck is active
