@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.33 # -- dscudiero -- 01/20/2017 @ 13:19:12.25
+version=3.11.42 # -- dscudiero -- 01/20/2017 @ 13:57:52.11
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -88,8 +88,8 @@ function BuildMenuList {
 #==================================================================================================
 function ExecScript {
 	local name=$1; shift
-	local scriptArgs="$1"
-	local field fieldVal
+	local userArgs="$1"
+	local field fieldVal exec lib scriptArgs
 
 	## Lookup detailed script info from db
 		local fields="exec,lib,scriptArgs"
@@ -105,19 +105,15 @@ function ExecScript {
 			eval $field=\"$fieldVal\"
 			((fieldCntr += 1))
 		done
+		[[ -n $scriptArgs ]] && scriptArgs="$scriptArgs $userArgs"
 
-	if [[ $scriptArgs == '<prompt>' ]]; then
-		unset scriptArgs;
-		if [[ $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true  && $quiet != true ]]; then
-			Msg2 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
-			Prompt scriptArgs "^$(ColorI "If you do not know what to enter here just press [ENTER] or '-h' for more info)")" '*optional*' '' 4;
+		if [[ $exec != '' ]]; then
+			name=$(cut -d' ' -f1 <<< "$exec")
+			scriptArgs="$(cut -d' ' -f2- <<< "$exec") $userArgs"
+			[[ -n $scriptArgs ]] && scriptArgs="$scriptArgs $(cut -d' ' -f2- <<< "$exec")" || scriptArgs="$(cut -d' ' -f2- <<< "$exec")"
 		fi
-	fi
-	if [[ $exec != '' ]]; then
-		name=$(cut -d' ' -f1 <<< "$exec")
-		scriptArgs="$(cut -d' ' -f2- <<< "$exec") $scriptArgs"
-	fi
-	Call "$name" 'bash:sh' "$lib" "$scriptArgs"
+
+	Call "$name" 'bash:sh' "$lib" "$scriptArgs $userArgs"
 	return $?
 } #ExecScript
 
@@ -163,8 +159,7 @@ function ExecReport {
 			if [[ -f $outFile ]]; then rm $outFile; fi
 			if [[ $dbType == 'mysql' ]]; then
 				#sqlStmt=$(sed "s/<ignoreList>/$ignoreList/g" <<< $sqlStmt)
-				$trapErrexitOff; RunSql2 $sqlStmt; rc=$?; $trapErrexitOn
-				[[ $rc -ne 0 ]] && Msg2 $T "Running MySql\n\tsqlStmt: '$sqlStmt'\n"
+				RunSql2 $sqlStmt
 
 				if [[ ${#resultSet[@]} -eq 0 ]]; then
 					Msg2 $W "No records returned from report query\n"
@@ -315,16 +310,16 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 		unset userArgs;
 		if [[ $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true  && $quiet != true ]]; then
 			Msg2 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
-			Prompt userArgs "^Enter '-h' for more info, you have 5 seconds to enter this data" '*optional*' '' 5;
+			Prompt userArgs "^Enter '-help' for more info, you have 8 seconds to enter this data" '*optional*' '' 8;
 			[[ -n $userArgs ]] && scriptArgs="$userArgs $scriptArgs"
 		fi
 
 		## call function to 'execute' the request
-		$trapErrexitOff
 		calledViaScripts=true
 		itemName="$(echo -e $itemName | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g")"
+		#TrapSigs 'off'
 		Exec$itemTypeCap "$itemName" "$scriptArgs" ; rc=$?
-		$trapErrexitOn
+		#TrapSigs 'on'
 		Msg2
 		[[ $rc -eq 0 ]] && Msg2 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed succesfully" || \
 			Msg2 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed with errors (exit code = $rc) \
@@ -407,3 +402,4 @@ Goodbye 0
 ## Wed Jan  4 13:29:24 CST 2017 - dscudiero - General syncing of dev to prod
 ## Wed Jan  4 15:43:54 CST 2017 - dscudiero - Fix problem when checking to see if the user has a scripts alias in their .bashrc file
 ## Fri Jan 20 13:21:12 CST 2017 - dscudiero - Add prompt for additional arguments
+## Fri Jan 20 13:58:14 CST 2017 - dscudiero - fix problems passing arguments to the script
