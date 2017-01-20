@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.55 # -- dscudiero -- 01/20/2017 @ 10:13:33.20
+# version=2.0.69 # -- dscudiero -- 01/20/2017 @ 12:44:05.52
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -27,7 +27,7 @@ function Init {
 	for var in $trueVars; do eval $var=true; done
 	for var in $falseVars; do eval $var=false; done
 
-	local token checkProdEnv noWarn checkEnv
+	local token checkEnv
 	#printf "%s\n" "$@"
 	for token in $@; do
 		token=$(Lower $token)
@@ -85,7 +85,7 @@ function Init {
 		[[ ! -d "$srcDir" ]] && Msg2 $T "Client = 'internal' but could not locate source directory:\n\t$srcDir"
 		nextDir="/mnt/internal/site/stage"
 		pvtDir=/mnt/dev11/web/internal-$userName
-		[[ $env == '' ]] && env='next'
+		[[ -z $env ]] && env='next'
 		eval "srcDir="\$${env}Dir""
 		PopSettings "$FUNCNAME"
 		siteDir="$srcDir"
@@ -97,6 +97,9 @@ function Init {
 	if [[ $getEnv == true || $getSrcEnv == true || $getTgtEnv == true ]]; then
 		unset clientEnvs
 		if [[ $noCheck == true ]]; then
+			unset tmpStr
+			[[ $getSrcEnv == true ]] && tmpStr="$(ColorK 'Source')"
+			[[ $getTgtEnv == true ]] && tmpStr="$(ColorK 'Target')"
 			Msg2 $W "Requiring a environment value and 'noCheck' flag was set"
 			clientEnvs="$courseleafDevEnvs,$courseleafProdEnvs"
 			[[ $noPreview == true ]] && clientEnvs=$(sed s"/,preview//"g <<< $clientEnvs)
@@ -131,7 +134,7 @@ function Init {
 		if [[ $getEnv == true ]]; then
 			unset promptModifer varSuffix
 			if [[ $allowMultiEnvs == true ]]; then
-				[[ $env != '' && $envs == '' ]] && envs="$env" && unset env
+				[[ -n $env && -z $envs ]] && envs="$env" && unset env
 				varSuffix='s'
 				promptModifer=" (comma separated)"
 				clientEnvs="all $clientEnvs"
@@ -140,24 +143,37 @@ function Init {
 			[[ $checkProdEnv == true ]] && checkProdEnv=$env
 		fi
 		if [[ $getSrcEnv == true ]]; then
-			[[ $srcEnv == '' && $env != '' ]] && srcEnv="$env"
+			[[ -z $srcEnv && -n $env ]] && srcEnv="$env"
 			clientEnvsSave="$clientEnvs"
 			clientEnvs="$clientEnvs skel"
-			Prompt srcEnv "What $(ColorK source) environment/site do you wish to use?" "$clientEnvs"; srcEnv=$(Lower $srcEnv)
+			if [[ -n $tgtEnv ]]; then
+				clientEnvs=$(echo $clientEnvs | sed s"/$tgtEnv//"g);
+				[[ ${clientEnvs:0:1} == ',' ]] && clientEnvs=${clientEnvs:1}
+				tmpLen=${#clientEnvs}
+				[[ ${clientEnvs:$tmpLen-1:1} == ',' ]] && tmpLen=${#clientEnvs} && clientEnvs=${clientEnvs:0:$tmpLen-1}
+				clientEnvs=$(echo $clientEnvs | sed s"/,,/,/"g);
+			fi
+			Prompt srcEnv "What $(ColorK 'source') environment/site do you wish to use?" "$clientEnvs"; srcEnv=$(Lower $srcEnv)
 			clientEnvs="$clientEnvsSave"
 			[[ $checkProdEnv == true ]] && checkProdEnv=$srcEnv
 		fi
 		if [[ $getTgtEnv == true ]]; then
-			[[ $tgtEnv == '' && $env != '' && $srcEnv != $env ]] && tgtEnv="$env"
-			if [[ $srcEnv != '' ]]; then clientEnvs=$(echo $clientEnvs | sed s"/$srcEnv//"g); fi
+			[[ -z $tgtEnv && -n $env && $srcEnv != $env ]] && tgtEnv="$env"
+			if [[ -n $srcEnv ]]; then
+				clientEnvs=$(echo $clientEnvs | sed s"/$srcEnv//"g);
+				[[ ${clientEnvs:0:1} == ',' ]] && clientEnvs=${clientEnvs:1}
+				tmpLen=${#clientEnvs}
+				[[ ${clientEnvs:$tmpLen-1:1} == ',' ]] && tmpLen=${#clientEnvs} && clientEnvs=${clientEnvs:0:$tmpLen-1}
+				clientEnvs=$(echo $clientEnvs | sed s"/,,/,/"g);
+			fi
 			unset defaultEnv
-			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false ]] && clientEnvs="pvt,$clientEnvs"
+			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false && $srcEnv != 'pvt' ]] && clientEnvs="pvt,$clientEnvs"
 			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt'
-			Prompt tgtEnv "What $(ColorK target) environment/site do you wish to use?" "$clientEnvs" "$defaultEnv"; tgtEnv=$(Lower $tgtEnv)
+			Prompt tgtEnv "What $(ColorK 'target') environment/site do you wish to use?" "$clientEnvs" "$defaultEnv"; tgtEnv=$(Lower $tgtEnv)
 			[[ $checkProdEnv == true ]] && checkProdEnv=$tgtEnv
 		fi
 
-		if [[ $envs != '' ]]; then
+		if [[ -n $envs ]]; then
 			if [[ $envs == 'all' ]]; then
 				envs="$clientEnvs"
 				envs=$(sed s'/all//' <<< $envs)
@@ -173,12 +189,12 @@ function Init {
 				envs="${envs:1}"
 			fi
 		fi
-		if [[ $srcEnv != '' ]]; then
+		if [[ -n $srcEnv ]]; then
 			for j in $(echo $clientEnvs skel | tr ',' ' '); do
 				[[ $srcEnv == ${j:0:${#srcEnv}} ]] && srcEnv="$j" && break;
 			done
 		fi
-		if [[ $tgtEnv != '' ]]; then
+		if [[ -n $tgtEnv ]]; then
 			for j in $(echo $clientEnvs | tr ',' ' '); do
 				[[ $tgtEnv == ${j:0:${#tgtEnv}} ]] && tgtEnv="$j" && break;
 			done
@@ -199,7 +215,7 @@ function Init {
 
 	#===================================================================================================
 	## get products
-	if [[ $getProducts == true && $client != '' ]]; then
+	if [[ $getProducts == true && -n $client ]]; then
 		if [[ $client == '*' || $client == 'all' || $client == '.' ]]; then
 			validProducts="$(tr ',' ' ' <<< $(Upper "$courseleafProducts"))"
 		else
@@ -237,14 +253,13 @@ function Init {
 	## Set Directories based on the current host name and client name
 	# Set src and tgt directories based on client and env
 	[[ $getDirs == true ]] && SetSiteDirs 'setDefault'
-	[[ $env != '' ]] && eval siteDir="\$${env}Dir" || unset siteDir
+	[[ -n $env ]] && eval siteDir="\$${env}Dir" || unset siteDir
 	dump -3 env pvtDir devDir testDir nextDir currDir previewDir publicDir skelDir siteDir checkEnvs
 
 	#===================================================================================================
 	## Check to see if the srcDir exists
-	#if [[ $checkEnvs == true && $anyClient != true && $srcDir == '' && $allowMultiEnvs != true ]] && [[ $getDirs == true || $getEnv == true || $getSrcEnv == true ]]; then
-	if [[ $srcDir == '' && $allowMultiEnvs != true ]] && [[ $getDirs == true || $getEnv == true || $getSrcEnv == true ]]; then
-		[[ $srcEnv == '' && $env != '' ]] && srcEnv=$env
+	if [[ -z $srcDir && $allowMultiEnvs != true ]] && [[ $getDirs == true || $getEnv == true || $getSrcEnv == true ]]; then
+		[[ -z $srcEnv && -n $env ]] && srcEnv=$env
 		dump -3 srcEnv
 		local i
 		for i in $(echo "$courseleafDevEnvs $courseleafProdEnvs" | tr ',' ' ') skel; do
@@ -260,8 +275,8 @@ function Init {
 
 	#===================================================================================================
 	## Check to see if the tgtDir exists
-	if [[ $getTgtEnv == true && $getDirs == true && $tgtDir == '' && $allowMultiEnvs != true ]]; then
-		[[ $tgtEnv == '' && $env != '' ]] && tgtEnv=$env
+	if [[ $getTgtEnv == true && $getDirs == true && -z $tgtDir && $allowMultiEnvs != true ]]; then
+		[[ -z $tgtEnv && -n $env ]] && tgtEnv=$env
 		dump -3 tgtEnv
 		local i
 		for i in $(echo "$courseleafDevEnvs $courseleafProdEnvs" | tr ',' ' '); do
@@ -279,9 +294,9 @@ function Init {
 
 	#===================================================================================================
 	## find CIMs
-	if [[ $getCims == true || $allCims == true ]] && [[ $getDirs == true ]] && [[ $cimStr == '' ]]; then
+	if [[ $getCims == true || $allCims == true ]] && [[ $getDirs == true ]] && [[ -z $cimStr ]]; then
 		[[ ${#cims} -eq 0 ]] && GetCims $siteDir
-		[[ $cimStr == '' ]] && cimStr=$(printf -- "%s, " "${cims[@]}") && cimStr=${cimStr:0:${#cimStr}-2}
+		[[ -z $cimStr ]] && cimStr=$(printf -- "%s, " "${cims[@]}") && cimStr=${cimStr:0:${#cimStr}-2}
 	fi
 
 	#===================================================================================================
@@ -302,3 +317,4 @@ export -f Init
 ## Wed Jan  4 13:53:46 CST 2017 - dscudiero - General syncing of dev to prod
 ## Tue Jan 10 10:55:40 CST 2017 - dscudiero - Tweak messaging when updateing next env
 ## Fri Jan 20 10:26:54 CST 2017 - dscudiero - fix problem setting environment if nocheck is active
+## Fri Jan 20 12:48:16 CST 2017 - dscudiero - cixes to getSrcEnv and getTgtEnv
