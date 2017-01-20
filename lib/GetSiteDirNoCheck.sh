@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.10" # -- dscudiero -- 01/20/2017 @ 11:09:41.96
+# version="1.0.17" # -- dscudiero -- 01/20/2017 @ 11:54:53.66
 #===================================================================================================
 # Resolve a clients siteDir without using the database
 # Sets global variable: siteDir
@@ -16,9 +16,9 @@
 
 function GetSiteDirNoCheck {
 	Import 'SelectMenuNew'
-	local client="$1"
+	local client="$1"; shift || true
 	[[ -z $client ]] && return 0
-	#local env="$2"
+	local promptStr=${1:-"Do you wish to work with '$client's development or production env"}
 	local checkDir envType server ans dirs dir line
 	unset siteDir
 	cwd=$(pwd)
@@ -26,7 +26,7 @@ function GetSiteDirNoCheck {
 	unset envType env
 	if [[ -z $env ]]; then
 		echo
-		Prompt envType "Do you wish to work with $client's development or production env" 'prod dev' 'dev'; envType=$(Lower ${envType:0:1})
+		Prompt envType "$promptStr" 'prod dev' 'dev'; envType=$(Lower ${envType:0:1})
 		[[ $envType == 'd' ]] && validEnvs="$(tr ',' ' ' <<< $courseleafDevEnvs)" || validEnvs="$(echo "$courseleafProdEnvs" | sed s/,preview,public,prior// | tr ',' ' ')"
 	fi
 
@@ -56,8 +56,8 @@ function GetSiteDirNoCheck {
 			[[ $menuItem == '' ]] && Goodbye 0
 			server="$(cut -d'|' -f1 <<< $menuItem)"
 			if [[ ${envType:0:1} == 'd' ]]; then
-				env='dev'
 				client="$(cut -d'|' -f2 <<< $menuItem)"
+				[[ $(Contains "$client" "-$userName") == true ]] && env='pvt' || env='dev'
  				siteDir="/mnt/$server/web/$client"
 			else
 				env="$(cut -d'|' -f2 <<< $menuItem)"
@@ -81,3 +81,4 @@ export -f GetSiteDirNoCheck
 ## Wed Jan 18 13:01:07 CST 2017 - dscudiero - Completely refactred
 ## Fri Jan 20 10:17:01 CST 2017 - dscudiero - Fix message wording to make in generic
 ## Fri Jan 20 11:10:04 CST 2017 - dscudiero - make sure we set the env variable for dev sites
+## Fri Jan 20 12:47:56 CST 2017 - dscudiero - Many fixes
