@@ -1,9 +1,10 @@
 #!/bin/bash
 #==================================================================================================
-version=4.10.1 # -- dscudiero -- 01/19/2017 @ 10:31:17.21
+version=4.10.17 # -- dscudiero -- 01/20/2017 @ 12:46:20.11
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
+imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
+imports="$imports GetSiteDirNoCheck"
 Import "$imports"
 [[ $1 == $myName ]] && shift
 originalArgStr="$*"
@@ -74,10 +75,9 @@ helpNotes+=("If only a single environment is specified (i.e. -t, -n, -c, ...) th
 helpNotes+=("If target env is not 'pvt' or 'dev' then a full copy will be done and auth, publising and email will NOT be changed")
 helpNotes+=("The 'forUser' and 'suffix' options are mutually exclusive.")
 
-dump originalArgStr
-
 GetDefaultsData $myName
 ParseArgsStd
+
 [[ -n $env && -z $srcEnv ]] && srcEnv="$env"
 
 [[ $allItems == true || $fullCopy == true ]] && cim='Yes' && overlay=false && manifest=false
@@ -85,12 +85,16 @@ dump -2 -n client env cim cat fullCopy manifest overlay suffix emailAddress
 
 Hello
 addPvt=true
-[[ -z $env ]] && srcEnv=$env && tgtEnv='pvt'
-Init 'getClient'
-[[ $client != 'internal' ]] && Init 'getSrcEnv getTgtEnv getDirs' || Init 'getEnv getDirs'
 
-[[ -z $env && -n $srcEnv ]] && env=$srcEnv
-dump -2 client env srcEnv srcDir tgtEnv tgtDir
+Init 'getClient'
+if [[ $noCheck == true ]]; then
+	GetSiteDirNoCheck $client "For the $(ColorK 'Source'), do you want to work with '$client's development or production env"
+	srcEnv="$env"; srcDir="$siteDir"; unset env
+	[[ $client != 'internal' ]] && Init 'getTgtEnv getDirs' || Init 'getEnv getDirs'
+else
+	[[ $client != 'internal' ]] && Init 'getSrcEnv getTgtEnv getDirs' || Init 'getEnv getDirs'
+fi
+dump -1 client env srcEnv srcDir tgtEnv tgtDir
 
 [[ $client == internal ]] && progDir='pagewiz'
 ignoreList=$(sed "s/<progDir>/$progDir/g" <<< $ignoreList)
@@ -436,3 +440,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client)") clone from $(ColorK "$(Upper $en
 ## Thu Jan 12 11:31:24 CST 2017 - dscudiero - Change overwrite prompt
 ## Thu Jan 19 10:25:30 CST 2017 - dscudiero - misc cleanup
 ## Thu Jan 19 10:38:39 CST 2017 - dscudiero - fixed problem with trying to use override target dir
+## Fri Jan 20 12:48:30 CST 2017 - dscudiero - Add -nocheck support
