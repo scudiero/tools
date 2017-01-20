@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.27 # -- dscudiero -- 01/12/2017 @ 13:07:04.17
+version=3.11.33 # -- dscudiero -- 01/20/2017 @ 13:19:12.25
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -312,6 +312,12 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 			loop=false
 		fi
 		[[ $itemName == 'REFRESHLIST' ]] && continue
+		unset userArgs;
+		if [[ $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true  && $quiet != true ]]; then
+			Msg2 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
+			Prompt userArgs "^Enter '-h' for more info, you have 5 seconds to enter this data" '*optional*' '' 5;
+			[[ -n $userArgs ]] && scriptArgs="$userArgs $scriptArgs"
+		fi
 
 		## call function to 'execute' the request
 		$trapErrexitOff
@@ -400,3 +406,4 @@ Goodbye 0
 ## Wed Jan  4 13:27:02 CST 2017 - dscudiero - General syncing of dev to prod
 ## Wed Jan  4 13:29:24 CST 2017 - dscudiero - General syncing of dev to prod
 ## Wed Jan  4 15:43:54 CST 2017 - dscudiero - Fix problem when checking to see if the user has a scripts alias in their .bashrc file
+## Fri Jan 20 13:21:12 CST 2017 - dscudiero - Add prompt for additional arguments
