@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.6" # -- dscudiero -- 01/20/2017 @ 10:15:40.02
+# version="1.0.10" # -- dscudiero -- 01/20/2017 @ 11:09:41.96
 #===================================================================================================
 # Resolve a clients siteDir without using the database
 # Sets global variable: siteDir
@@ -55,7 +55,8 @@ function GetSiteDirNoCheck {
 			SelectMenuNew 'menuItems' 'menuItem' "\nEnter the $(ColorK '(ordinal)') number of the site you wish to act on (or 'x' to quit) > "
 			[[ $menuItem == '' ]] && Goodbye 0
 			server="$(cut -d'|' -f1 <<< $menuItem)"
-			if [[ $envType == 'd' ]]; then
+			if [[ ${envType:0:1} == 'd' ]]; then
+				env='dev'
 				client="$(cut -d'|' -f2 <<< $menuItem)"
  				siteDir="/mnt/$server/web/$client"
 			else
@@ -79,3 +80,4 @@ export -f GetSiteDirNoCheck
 ## Thu Jan  5 07:58:49 CST 2017 - dscudiero - Refactored to correctly write data out to the appropriate file
 ## Wed Jan 18 13:01:07 CST 2017 - dscudiero - Completely refactred
 ## Fri Jan 20 10:17:01 CST 2017 - dscudiero - Fix message wording to make in generic
+## Fri Jan 20 11:10:04 CST 2017 - dscudiero - make sure we set the env variable for dev sites
