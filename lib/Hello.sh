@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.28" # -- dscudiero -- 01/11/2017 @  7:46:39.71
+# version="2.0.29" # -- dscudiero -- 01/20/2017 @ 13:14:03.44
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -24,7 +24,7 @@ function Hello {
 	[[ "$myDescription" != "" ]] && Msg2 && Msg2 "$myDescription"
 	[[ $checkName != $userName ]] && userStr="Real user $checkName, Tools user: $userName" || userStr="Tools user: $userName"
 	Msg2 "$userStr, Host: $hostName, Database: $warehouseDb, PID: $$, PPID: $PPID"
-	[[ -n $originalArgStr ]] && Msg2 "Arg String: '$originalArgStr'"
+	[[ -n $(Trim "$originalArgStr") ]] && Msg2 "Arg String: '$originalArgStr'"
 
 	# local myPath=$(dirname $(readlink -f $0))
 	# [[ ${myPath:0:6} == '/home/' ]] && 	Msg2 "$(ColorW "*** Running from '$myPath'")"
@@ -62,3 +62,4 @@ export -f Hello
 ## Wed Jan  4 13:34:00 CST 2017 - dscudiero - comment out the 'version=' line
 ## Fri Jan  6 09:30:22 CST 2017 - dscudiero - Added what database we are using to the header
 ## Wed Jan 11 07:51:01 CST 2017 - dscudiero - Switch to use ProcessLogger
+## Fri Jan 20 13:20:56 CST 2017 - dscudiero - Do not show arguments if they are blank
