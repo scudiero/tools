@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.108 # -- dscudiero -- 01/20/2017 @  7:05:24.40
+version=2.3.109 # -- dscudiero -- 01/23/2017 @  8:46:13.88
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -152,7 +152,7 @@ Msg2 "Table: $useClientInfoTable"
 		RunSql2 $sqlStmt
 	fi
 
-	sqlStmt="select count{*) from $clientInfoTable"
+	sqlStmt="select count(*) from $clientInfoTable"
 	RunSql2 $sqlStmt
 	Msg2 "\nInserted ${resultSet[0]} records into $clientInfoTable"
 
@@ -182,3 +182,4 @@ Goodbye 0 'alert'
 ## Tue Jan 17 09:36:47 CST 2017 - dscudiero - Fix issues with swapping databases
 ## Thu Jan 19 07:13:53 CST 2017 - dscudiero - Fixed erronious messaging
 ## Fri Jan 20 07:17:42 CST 2017 - dscudiero - General syncing of dev to prod
+## Mon Jan 23 11:26:38 CST 2017 - dscudiero - Fix sql query checking the clients table count
