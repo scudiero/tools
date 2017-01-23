@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.3.10 # -- dscudiero -- 01/12/2017 @ 13:13:41.33
+version=2.3.17 # -- dscudiero -- 01/23/2017 @ 12:26:22.35
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -34,6 +34,7 @@ Hello
 unset dbRecs
 sqlStmt="select name,publishing from $siteInfoTable where publishing <> \"/dev/null\" and publishing is not null  and publishing <> \"\" group by name,publishing having count(publishing) > 1"
 RunSql2 $sqlStmt
+[[ ${#resultSet[@]} -le 0 ]] && Goodbye 0
 dbRecs=("${resultSet[@]}")
 for dbRec in "${dbRecs[@]}"; do
 	dbRec=$(echo $dbRec | tr "\t" "|"); dbRec=$(echo $dbRec | tr " " "|")
@@ -44,16 +45,17 @@ for dbRec in "${dbRecs[@]}"; do
 	count=${#resultSet[@]}
 	if [[ $count -ge  2 ]]; then
 		IFSSave=$IFS; IFS=$','; envs=$(echo "${resultSet[*]}" | tr "\t" " "); IFS=$IFSSave
-		Msg "\t$client -- found multiple environments ($envs) publishing to the same locaton ($publishing)." | tee -a $tmpFile
+		Msg2 "^$client -- found multiple environments ($envs) publishing to the same locaton ($publishing)." | tee -a $tmpFile
 		sendMail=true
 	fi
 done
 
 #==================================================================================================
 ## Send out emails
+
 if [[ $sendMail == true && $noEmails == false ]]; then
-	Msg "\nEmails sent to: $emailAddrs\n" | tee -a $tmpFile
-	mail -s "$myName found discrepencies" $emailAddrs < $tmpFile
+	Msg2 "\nEmails sent to: $emailAddrs\n" | tee -a $tmpFile
+	mail -s "$myName found discrepancies" $emailAddrs < $tmpFile
 fi
 
 if [[ -f $tmpFile ]]; then
@@ -69,3 +71,4 @@ Goodbye 0
 ## Wed Apr 27 16:18:04 CDT 2016 - dscudiero - Switch to use RunSql
 ## Thu May 12 13:15:22 CDT 2016 - dscudiero - Fix problem where sites with publishing = were being picked up
 ## Mon Oct  3 07:06:17 CDT 2016 - dscudiero - Wrap clear statement with protection
+## Mon Jan 23 12:26:59 CST 2017 - dscudiero - Fix problem using Msg not Msg2
