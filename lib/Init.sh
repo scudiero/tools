@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.69 # -- dscudiero -- 01/20/2017 @ 12:44:05.52
+# version=2.0.82 # -- dscudiero -- 01/23/2017 @ 12:39:03.98
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -126,7 +126,7 @@ function Init {
 						clientEnvs="$clientEnvs $result"
 					done
 					clientEnvs=${clientEnvs:1}
-					[[ $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt$clientEnvs"
+					[[ $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt $clientEnvs"
 				fi
 			fi
 		fi
@@ -199,7 +199,6 @@ function Init {
 				[[ $tgtEnv == ${j:0:${#tgtEnv}} ]] && tgtEnv="$j" && break;
 			done
 		fi
-
 		if [[ $checkProdEnv != false && $informationOnlyMode != true ]] && [[ $checkProdEnv == 'next' || $checkProdEnv == 'curr' ]]; then
 		 	if [[ $noWarn != true ]]; then
 				verify=true
@@ -318,3 +317,4 @@ export -f Init
 ## Tue Jan 10 10:55:40 CST 2017 - dscudiero - Tweak messaging when updateing next env
 ## Fri Jan 20 10:26:54 CST 2017 - dscudiero - fix problem setting environment if nocheck is active
 ## Fri Jan 20 12:48:16 CST 2017 - dscudiero - cixes to getSrcEnv and getTgtEnv
+## Mon Jan 23 12:41:16 CST 2017 - dscudiero - Fix problem setting tgtEnv
