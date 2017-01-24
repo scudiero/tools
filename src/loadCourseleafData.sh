@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.54 # -- dscudiero -- 01/24/2017 @  8:34:02.06
+version=3.8.55 # -- dscudiero -- 01/24/2017 @ 12:47:43.08
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -922,7 +922,10 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 
 	## Write out change log entries
 	if [[ $informationOnlyMode != true ]]; then
-		changeLogLines=("Files updated from '$workbookFile':")
+		changeLogLines=("Data updated from '$workbookFile':")
+		[[ $processedUserData == true ]] && changeLogLines+=("\tUser data")
+		[[ $processedRoleData == true ]] && changeLogLines+=("\tRole data")
+		[[ $processedPageData == true ]] && changeLogLines+=("\tPage data")
 		WriteChangelogEntry 'changeLogLines' "$srcDir/changelog.txt"
 	fi
 
@@ -979,3 +982,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## Wed Jan 18 14:22:27 CST 2017 - dscudiero - Do not copy step file if infomationonly flag is set
 ## Wed Jan 18 14:59:40 CST 2017 - dscudiero - Import WriteChangelogEntry
 ## Tue Jan 24 08:34:58 CST 2017 - dscudiero - Add 'information only' verbiage to messaging
+## Tue Jan 24 12:48:26 CST 2017 - dscudiero - Tweak changelog text
