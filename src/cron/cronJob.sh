@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.92 # -- dscudiero -- 01/18/2017 @ 10:47:49.99
+version=2.0.93 # -- dscudiero -- 01/24/2017 @ 16:52:52.86
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -51,12 +51,12 @@ originalArgStr="$*"
 	[[ ! -d $TOOLSPATH/Logs/cronJobs ]] && mkdir -p $TOOLSPATH/Logs/cronJobs
 	echo "$hostName - $(date +'%m-%d-%Y @ %H.%M.%S') -- Starting $callScriptName" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 ## Set the jobs the log file
-	if [[ $callScriptName != 'hourly' ]]; then
+	#if [[ $callScriptName != 'hourly' ]]; then
 		[[ ! -d $TOOLSPATH/Logs/cronJobs/$callScriptName ]] && mkdir -p $TOOLSPATH/Logs/cronJobs/$callScriptName
 		logFile="$TOOLSPATH/Logs/cronJobs/$callScriptName/$hostName-$(date +'%m-%d-%Y_%H.%M.%S').log"
-	else
-		logFile="/dev/null"
-	fi
+	#else
+	#	logFile="/dev/null"
+	#fi
 
 #=======================================================================================================================
 ## Run the executable(s)
@@ -102,3 +102,4 @@ exit 0
 ## Thu Jan  5 12:23:39 CST 2017 - dscudiero - set DISPATCHER
 ## Wed Jan 18 10:03:13 CST 2017 - dscudiero - Added execution of local script if found in logged in users bin directory
 ## Wed Jan 18 10:50:09 CST 2017 - dscudiero - Add call to local script if found
+## Tue Jan 24 16:53:09 CST 2017 - dscudiero - activate log files for hourly
