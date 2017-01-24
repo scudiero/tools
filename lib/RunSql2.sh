@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.15" # -- dscudiero -- 01/18/2017 @ 13:36:09.00
+# version="1.0.17" # -- dscudiero -- 01/24/2017 @  7:30:22.24
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -28,7 +28,8 @@
 		[[ ${sqlStmt:${#sqlStmt}:1} != ';' ]] && sqlStmt="$sqlStmt;"
 		local stmtType=$(tr '[:lower:]' '[:upper:]' <<< "${sqlStmt%% *}")
 
-		[[ -n $DOIT || $informationOnlyMode == true ]] && [[ $stmtType != 'SELECT' ]] && return 0
+		local calledBy=$(caller 0 | cut -d' ' -f2)
+		[[ -n $DOIT || $informationOnlyMode == true ]] && [[ $stmtType != 'SELECT' && $calledBy != 'ProcessLogger' ]] && return 0
 
 		local prevGlob=$(set -o | grep noglob | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2)
 		local resultStr msg tmpStr
@@ -72,3 +73,4 @@
 ## Wed Jan 18 13:09:24 CST 2017 - dscudiero - Return immediatly if informationonly is on
 ## Wed Jan 18 13:13:30 CST 2017 - dscudiero - General syncing of dev to prod
 ## Wed Jan 18 13:37:13 CST 2017 - dscudiero - misc cleanup
+## Tue Jan 24 07:31:39 CST 2017 - dscudiero - Allow function to run if called by ProcessLogger and informationOnly is set
