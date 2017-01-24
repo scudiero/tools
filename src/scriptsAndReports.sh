@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.42 # -- dscudiero -- 01/20/2017 @ 13:57:52.11
+version=3.11.49 # -- dscudiero -- 01/24/2017 @ 16:20:30.14
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -89,7 +89,7 @@ function BuildMenuList {
 function ExecScript {
 	local name=$1; shift
 	local userArgs="$1"
-	local field fieldVal exec lib scriptArgs
+	local field fieldVal tmpStr
 
 	## Lookup detailed script info from db
 		local fields="exec,lib,scriptArgs"
@@ -105,15 +105,16 @@ function ExecScript {
 			eval $field=\"$fieldVal\"
 			((fieldCntr += 1))
 		done
-		[[ -n $scriptArgs ]] && scriptArgs="$scriptArgs $userArgs"
+		[[ -n $scriptArgs ]] && scriptArgs="$scriptArgs $userArgs" || scriptArgs="$userArgs"
 
+		## Parse the exec string for overrides, <scriptName> <scriptArgs>
 		if [[ $exec != '' ]]; then
 			name=$(cut -d' ' -f1 <<< "$exec")
-			scriptArgs="$(cut -d' ' -f2- <<< "$exec") $userArgs"
-			[[ -n $scriptArgs ]] && scriptArgs="$scriptArgs $(cut -d' ' -f2- <<< "$exec")" || scriptArgs="$(cut -d' ' -f2- <<< "$exec")"
+			local tmpStr="$(cut -d' ' -f2- <<< "$exec")"
+			[[ -n $tmpStr ]] && scriptArgs="$tmpStr $scriptArgs"
 		fi
 
-	Call "$name" 'bash:sh' "$lib" "$scriptArgs $userArgs"
+	Call "$name" 'bash:sh' "$lib" "$scriptArgs"
 	return $?
 } #ExecScript
 
@@ -235,6 +236,7 @@ mode=$(echo $1 | tr '[:upper:]' '[:lower:]')
 	fi
 
 noArgPromptList="_clearClientValue_"
+unset scriptArgs
 
 #===================================================================================================
 ## parse arguments
@@ -318,6 +320,8 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 		calledViaScripts=true
 		itemName="$(echo -e $itemName | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g")"
 		#TrapSigs 'off'
+
+
 		Exec$itemTypeCap "$itemName" "$scriptArgs" ; rc=$?
 		#TrapSigs 'on'
 		Msg2
@@ -403,3 +407,4 @@ Goodbye 0
 ## Wed Jan  4 15:43:54 CST 2017 - dscudiero - Fix problem when checking to see if the user has a scripts alias in their .bashrc file
 ## Fri Jan 20 13:21:12 CST 2017 - dscudiero - Add prompt for additional arguments
 ## Fri Jan 20 13:58:14 CST 2017 - dscudiero - fix problems passing arguments to the script
+## Tue Jan 24 16:20:52 CST 2017 - dscudiero - Updated logic setting scriptArgs
