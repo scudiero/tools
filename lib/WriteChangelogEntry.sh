@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.10" # -- dscudiero -- 01/19/2017 @ 12:48:37.88
+# version="2.0.11" # -- dscudiero -- 01/24/2017 @ 12:44:18.34
 #===================================================================================================
 # Write a 'standard' format courseleaf changelog.txt
 # args: "logFileName" ${lineArray[@]}
@@ -32,7 +32,7 @@ function WriteChangelogEntry {
 	## Write out records
 		echo -e "\n$userName\t$(date) via '$logger' version: $version" >> "$logFile"
 		[[ -n $clientDataLogFile ]] && echo -e "\n$userName\t$(date) via '$logger' version: $version" >> "$clientDataLogFile"
-		[[ -n $clientDataLogFile && -n $env ]] &&  echo -e '\t%s\n' "Environment: ${env}${tgtEnv}" >> "$clientDataLogFile"
+		[[ -n $clientDataLogFile && -n $env ]] &&  echo -e '\t\n' "Environment: ${env}${tgtEnv}" >> "$clientDataLogFile"
 
 		if [[ -n $ref ]]; then
 			printf '\t%s\n' "${!ref}" >> "$logFile"
@@ -49,3 +49,4 @@ export -f WriteChangelogEntry
 ## Wed Jan  4 13:54:41 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Jan  5 07:58:49 CST 2017 - dscudiero - Refactored to correctly write data out to the appropriate file
 ## Thu Jan 19 12:49:07 CST 2017 - dscudiero - x
+## Tue Jan 24 12:48:10 CST 2017 - dscudiero - Fix errant '%' in the output
