@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.7 # -- dscudiero -- 01/18/2017 @  7:16:51.81
+version=4.3.9 # -- dscudiero -- 01/24/2017 @  7:34:55.78
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -69,16 +69,12 @@ GetDefaultsData $myName
 ParseArgsStd
 Hello
 [[ -n $env ]] && envList="$env" || envList="$courseleafDevEnvs $courseleafProdEnvs"
-
 [[ $fork == true ]] && forkStr='fork' || unset forkStr
-
 [[ $useSiteInfoTable == "${siteInfoTable}New" ]] && useSiteAdminsTable="${siteAdminsTable}New"
-
 Msg2 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 
-
-
-Quit
+echo -e '\n*** Forcing batchMode = false ***\n'
+batchMode=false
 
 #=======================================================================================================================
 # Main
@@ -203,3 +199,4 @@ Goodbye 0 'alert'
 ## Fri Jan  6 15:57:49 CST 2017 - dscudiero - General syncing of dev to prod
 ## Wed Jan 11 09:46:21 CST 2017 - dscudiero - updated code comments
 ## Wed Jan 18 07:20:19 CST 2017 - dscudiero - Add -table argument
+## Tue Jan 24 07:35:08 CST 2017 - dscudiero - Add debug
