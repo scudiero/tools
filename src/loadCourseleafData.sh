@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.52 # -- dscudiero -- 01/18/2017 @ 14:59:16.70
+version=3.8.54 # -- dscudiero -- 01/24/2017 @  8:34:02.06
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -862,9 +862,11 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 		Msg2 "^Retrieved $numUsersfromDb records from the clusers database"
 		Msg2 "^Retrieved $numUsersfromSpreadsheet records from $workbookFile"
 		string="Added $numNewUsers new users"
+		[[ $informationOnlyMode == true ]] && string="$string $(ColorK "(Information Only flag was set)")"
 		Msg2 "^$string"
 		[[ $numNewUsers -gt 0 ]] && changeLogLines+=("$string")
 		string="Modified $numModifiedUsers existing users"
+		[[ $informationOnlyMode == true ]] && string="$string $(ColorK "(Information Only flag was set)")"
 		Msg2 "^$string"
 		[[ $numModifiedUsers -gt 0 ]] && changeLogLines+=("$string")
 	fi
@@ -875,8 +877,10 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 		Msg2 "^Retrieved $numRolesFromFile records from the roles.tcf file"
 		Msg2 "^Retrieved $numRolesfromSpreadsheet records from $workbookFile"
 		string="Added $numNewRoles new roles"
+		[[ $informationOnlyMode == true ]] && string="$string $(ColorK "(Information Only flag was set)")"
 		Msg2 "^$string"
 		[[ $numNewRoles -gt 0 ]] && changeLogLines+=("$string")
+		[[ $informationOnlyMode == true ]] && string="$string $(ColorK "(Information Only flag was set)")"
 		string="Modified $numModifiedRoles existing roles"
 		Msg2 "^$string"
 		[[ $numModifiedRoles -gt 0 ]] && changeLogLines+=("$string")
@@ -891,6 +895,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 		Msg2 "Page data:"
 		Msg2 "^Retrieved $numWorkflowDataFromSpreadsheet records from $workbookFile"
 		string="Updated $numPagesUpdated pages"
+		[[ $informationOnlyMode == true ]] && string="$string $(ColorK "(Information Only flag was set)")"
 		Msg2 "^$string"
 		[[ $numPagesUpdated -gt 0 ]] && changeLogLines+=("$string")
 		string="Mapped $numMembersMappedToUIN role members from UID to UIN"
@@ -973,3 +978,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## Tue Jan 10 15:24:53 CST 2017 - dscudiero - Tweek output messaging
 ## Wed Jan 18 14:22:27 CST 2017 - dscudiero - Do not copy step file if infomationonly flag is set
 ## Wed Jan 18 14:59:40 CST 2017 - dscudiero - Import WriteChangelogEntry
+## Tue Jan 24 08:34:58 CST 2017 - dscudiero - Add 'information only' verbiage to messaging
