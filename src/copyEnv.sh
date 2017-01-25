@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=4.10.21 # -- dscudiero -- 01/25/2017 @  9:27:12.43
+version=4.10.22 # -- dscudiero -- 01/25/2017 @ 10:11:53.10
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -93,6 +93,7 @@ if [[ $noCheck == true ]]; then
 	[[ $client != 'internal' ]] && Init 'getTgtEnv getDirs' || Init 'getEnv getDirs'
 else
 	[[ $client != 'internal' ]] && Init 'getSrcEnv getTgtEnv getDirs' || Init 'getEnv getDirs'
+	env="$srcEnv"
 fi
 dump -1 client env srcEnv srcDir tgtEnv tgtDir
 
@@ -443,3 +444,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client)") clone from $(ColorK "$(Upper $en
 ## Fri Jan 20 12:48:30 CST 2017 - dscudiero - Add -nocheck support
 ## Tue Jan 24 16:21:14 CST 2017 - dscudiero - unset scriptArgs befor starting script
 ## Wed Jan 25 09:34:55 CST 2017 - dscudiero - x
+## Wed Jan 25 10:13:47 CST 2017 - dscudiero - Fix problem where env was not set if nocheck was not active
