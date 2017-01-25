@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.82 # -- dscudiero -- 01/23/2017 @ 12:39:03.98
+# version=2.0.108 # -- dscudiero -- 01/25/2017 @ 12:40:56.23
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -142,29 +142,33 @@ function Init {
 			Prompt "env$varSuffix" "What environment$varSuffix/site$varSuffix do you wish to use$promptModifer?" "$clientEnvs"; env=$(Lower $env)
 			[[ $checkProdEnv == true ]] && checkProdEnv=$env
 		fi
+
 		if [[ $getSrcEnv == true ]]; then
 			[[ -z $srcEnv && -n $env ]] && srcEnv="$env"
 			clientEnvsSave="$clientEnvs"
 			clientEnvs="$clientEnvs skel"
 			if [[ -n $tgtEnv ]]; then
-				clientEnvs=$(echo $clientEnvs | sed s"/$tgtEnv//"g);
-				[[ ${clientEnvs:0:1} == ',' ]] && clientEnvs=${clientEnvs:1}
-				tmpLen=${#clientEnvs}
-				[[ ${clientEnvs:$tmpLen-1:1} == ',' ]] && tmpLen=${#clientEnvs} && clientEnvs=${clientEnvs:0:$tmpLen-1}
-				clientEnvs=$(echo $clientEnvs | sed s"/,,/,/"g);
+				unset clientEnvsNew
+				for token in $clientEnvs; do
+					[[ $token != $tgtEnv ]] && clientEnvsNew="$clientEnvsNew $token"
+				done
+				[[ ${clientEnvsNew:0:1} == '' ]] && $clientEnvsNew=${clientEnvsNew:1}
+				clientEnvs="$clientEnvsNew"
 			fi
-			Prompt srcEnv "What $(ColorK 'source') environment/site do you wish to use?" "$clientEnvs"; srcEnv=$(Lower $srcEnv)
+			Prompt srcEnv "What $(ColorK 'source') environment/site do you wish to use?" "$(tr ' ' ',' <<< $clientEnvs)"; srcEnv=$(Lower $srcEnv)
 			clientEnvs="$clientEnvsSave"
 			[[ $checkProdEnv == true ]] && checkProdEnv=$srcEnv
 		fi
+
 		if [[ $getTgtEnv == true ]]; then
 			[[ -z $tgtEnv && -n $env && $srcEnv != $env ]] && tgtEnv="$env"
 			if [[ -n $srcEnv ]]; then
-				clientEnvs=$(echo $clientEnvs | sed s"/$srcEnv//"g);
-				[[ ${clientEnvs:0:1} == ',' ]] && clientEnvs=${clientEnvs:1}
-				tmpLen=${#clientEnvs}
-				[[ ${clientEnvs:$tmpLen-1:1} == ',' ]] && tmpLen=${#clientEnvs} && clientEnvs=${clientEnvs:0:$tmpLen-1}
-				clientEnvs=$(echo $clientEnvs | sed s"/,,/,/"g);
+				unset clientEnvsNew
+				for token in $clientEnvs; do
+					[[ $token != $srcEnv ]] && clientEnvsNew="$clientEnvsNew $token"
+				done
+				[[ ${clientEnvsNew:0:1} == '' ]] && $clientEnvsNew=${clientEnvsNew:1}
+				clientEnvs="$clientEnvsNew"
 			fi
 			unset defaultEnv
 			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false && $srcEnv != 'pvt' ]] && clientEnvs="pvt,$clientEnvs"
@@ -190,7 +194,7 @@ function Init {
 			fi
 		fi
 		if [[ -n $srcEnv ]]; then
-			for j in $(echo $clientEnvs skel | tr ',' ' '); do
+			for j in $(echo pvt $clientEnvs skel | tr ',' ' '); do
 				[[ $srcEnv == ${j:0:${#srcEnv}} ]] && srcEnv="$j" && break;
 			done
 		fi
@@ -199,6 +203,7 @@ function Init {
 				[[ $tgtEnv == ${j:0:${#tgtEnv}} ]] && tgtEnv="$j" && break;
 			done
 		fi
+
 		if [[ $checkProdEnv != false && $informationOnlyMode != true ]] && [[ $checkProdEnv == 'next' || $checkProdEnv == 'curr' ]]; then
 		 	if [[ $noWarn != true ]]; then
 				verify=true
@@ -318,3 +323,4 @@ export -f Init
 ## Fri Jan 20 10:26:54 CST 2017 - dscudiero - fix problem setting environment if nocheck is active
 ## Fri Jan 20 12:48:16 CST 2017 - dscudiero - cixes to getSrcEnv and getTgtEnv
 ## Mon Jan 23 12:41:16 CST 2017 - dscudiero - Fix problem setting tgtEnv
+## Wed Jan 25 12:44:31 CST 2017 - dscudiero - Fix issue setting srcEnv and tgtEnv when abbreviated values were passed in on the command line
