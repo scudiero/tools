@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.8.40 # -- dscudiero -- 01/19/2017 @ 12:36:59.87
+version=2.8.42 # -- dscudiero -- 01/25/2017 @ 12:42:47.10
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -246,6 +246,8 @@ Hello
 
 # Initialize instance variables
 	Init 'getClient getSrcEnv getTgtEnv getDirs checkEnvs getCims'
+	dump -1 client env srcEnv srcDir tgtEnv tgtDir cimStr
+
 
 ## If pvtDir exists and src is not pvt make sure that this is what the user really wants to to
 	if [[ -d "$pvtDir" && $srcEnv != 'pvt' ]]; then
@@ -427,3 +429,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## Mon Jan  9 16:16:53 CST 2017 - dscudiero - Fixd problem where the changelog.txt records were all the same file
 ## Fri Jan 13 15:45:44 CST 2017 - dscudiero - testing
 ## Thu Jan 19 12:49:39 CST 2017 - dscudiero - Fix writeing to the changelog.txt file
+## Wed Jan 25 12:45:17 CST 2017 - dscudiero - Added debug statements
