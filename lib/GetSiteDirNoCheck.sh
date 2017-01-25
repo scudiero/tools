@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.17" # -- dscudiero -- 01/20/2017 @ 11:54:53.66
+# version="1.0.19" # -- dscudiero -- 01/25/2017 @  9:30:21.05
 #===================================================================================================
 # Resolve a clients siteDir without using the database
 # Sets global variable: siteDir
@@ -48,9 +48,9 @@ function GetSiteDirNoCheck {
 		fi
 
 	## Build the menu and ask the user to select the site
-		local numLines=$(echo $(ProtectedCall "wc -l "$tmpFile"") | cut -d' ' -f1)
+		local numLines=$(echo $(ProtectedCall "wc -l "$tmpFile" 2>/dev/null") | cut -d' ' -f1)
 		if [[ $numLines -gt 0 ]]; then
-			menuItems+=("|server/share| Site Type")
+			menuItems+=("|server/share|Site Type")
 			while read -r line; do menuItems+=("|$(tr ' ' '|' <<< $line)"); done < $tmpFile;
 			SelectMenuNew 'menuItems' 'menuItem' "\nEnter the $(ColorK '(ordinal)') number of the site you wish to act on (or 'x' to quit) > "
 			[[ $menuItem == '' ]] && Goodbye 0
@@ -82,3 +82,4 @@ export -f GetSiteDirNoCheck
 ## Fri Jan 20 10:17:01 CST 2017 - dscudiero - Fix message wording to make in generic
 ## Fri Jan 20 11:10:04 CST 2017 - dscudiero - make sure we set the env variable for dev sites
 ## Fri Jan 20 12:47:56 CST 2017 - dscudiero - Many fixes
+## Wed Jan 25 09:34:13 CST 2017 - dscudiero - minor cleanup of messaging
