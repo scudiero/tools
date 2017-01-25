@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=4.10.18 # -- dscudiero -- 01/24/2017 @ 15:46:04.77
+version=4.10.21 # -- dscudiero -- 01/25/2017 @  9:27:12.43
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -94,8 +94,7 @@ if [[ $noCheck == true ]]; then
 else
 	[[ $client != 'internal' ]] && Init 'getSrcEnv getTgtEnv getDirs' || Init 'getEnv getDirs'
 fi
-dump -q client env srcEnv srcDir tgtEnv tgtDir
-
+dump -1 client env srcEnv srcDir tgtEnv tgtDir
 
 [[ $client == internal ]] && progDir='pagewiz'
 ignoreList=$(sed "s/<progDir>/$progDir/g" <<< $ignoreList)
@@ -443,3 +442,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client)") clone from $(ColorK "$(Upper $en
 ## Thu Jan 19 10:38:39 CST 2017 - dscudiero - fixed problem with trying to use override target dir
 ## Fri Jan 20 12:48:30 CST 2017 - dscudiero - Add -nocheck support
 ## Tue Jan 24 16:21:14 CST 2017 - dscudiero - unset scriptArgs befor starting script
+## Wed Jan 25 09:34:55 CST 2017 - dscudiero - x
