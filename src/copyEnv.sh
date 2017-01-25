@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=4.10.22 # -- dscudiero -- 01/25/2017 @ 10:11:53.10
+version=4.10.23 # -- dscudiero -- 01/25/2017 @ 11:29:09.45
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -347,6 +347,16 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		$DOIT echo "user:$client|$client||admin" >> $tgtDir/$progDir.cfg
 		Msg2 "^'$client' added as an admin with pw: '$client'"
 
+	# Set nexturl so wf emails point to local instance
+		[[ $quiet == false || $quiet == 0 ]] && Msg2 "Changeing 'nexturl' to point to local instance..."
+		editFile="$tgtDir/web/courseleaf/localsteps/default.tcf"
+		toStr="nexturl:https://$client/$(cut -d '/' -f3 <<< $tgtDir).leepfrog.com"
+		unset grepStr; grepStr=$(grep "$toStr" $editFile)
+		if [[ -z $grepStr ]]; then
+			unset fromStr; fromStr=$(ProtectedCall "grep 'nexturl:' $editFile")
+			$DOIT sed -i s"!${fromStr}!${toStr}!" $editFile
+		fi
+
 	## email override
 		[[ $quiet == false || $quiet == 0 ]] && Msg2 "Override email routing..."
 		[[ $emailAddress == "" ]] && emailAddress=$userName@leepfrog.com
@@ -445,3 +455,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client)") clone from $(ColorK "$(Upper $en
 ## Tue Jan 24 16:21:14 CST 2017 - dscudiero - unset scriptArgs befor starting script
 ## Wed Jan 25 09:34:55 CST 2017 - dscudiero - x
 ## Wed Jan 25 10:13:47 CST 2017 - dscudiero - Fix problem where env was not set if nocheck was not active
+## Wed Jan 25 12:45:03 CST 2017 - dscudiero - Added updating the nexturl variable in localsteps/default.tcf to match the local instance
