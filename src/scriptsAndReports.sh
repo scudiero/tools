@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.49 # -- dscudiero -- 01/24/2017 @ 16:20:30.14
+version=3.11.50 # -- dscudiero -- 01/25/2017 @ 10:35:26.64
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -325,7 +325,7 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 		Exec$itemTypeCap "$itemName" "$scriptArgs" ; rc=$?
 		#TrapSigs 'on'
 		Msg2
-		[[ $rc -eq 0 ]] && Msg2 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed succesfully" || \
+		[[ $rc -eq 0 ]] && Msg2 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed successfully" || \
 			Msg2 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed with errors (exit code = $rc) \
 			\nPlease record any Messages and contact the $itemType owner\n"
 		[[ $batchMode != true && $quiet != true && $verify == true ]] && Pause "Please press enter to go back to '${itemType}s'"
@@ -408,3 +408,4 @@ Goodbye 0
 ## Fri Jan 20 13:21:12 CST 2017 - dscudiero - Add prompt for additional arguments
 ## Fri Jan 20 13:58:14 CST 2017 - dscudiero - fix problems passing arguments to the script
 ## Tue Jan 24 16:20:52 CST 2017 - dscudiero - Updated logic setting scriptArgs
+## Wed Jan 25 10:36:03 CST 2017 - dscudiero - Fix spelling errors in messaging
