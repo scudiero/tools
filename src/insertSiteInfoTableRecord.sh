@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.116 # -- dscudiero -- 01/18/2017 @  7:19:02.71
+version=1.1.118 # -- dscudiero -- 01/25/2017 @  8:21:23.16
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseCourseleafFile' #imports="$imports "
@@ -21,6 +21,7 @@ checkParent='buildsiteinfotable.sh'; calledFrom="$(Lower "$(basename "${BASH_SOU
 #==================================================================================================
 	function parseArgs-insertSiteInfoTableRecord {
 		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
+		argList+=(-tableName,5,option,tableName,,script,"The name of the table to load")
 		return 0
 	}
 
@@ -48,7 +49,13 @@ dump -2 -n -t siteDir share shareType client env clientId
 
 ## Which table to use
 	useSiteInfoTable="$siteInfoTable"
-	[[ $WAREHOUSEDB == '$warehouseDev' ]] && useSiteInfoTable="${siteInfoTable}New"
+	useSiteAdminsTable="$siteAdminsTable"
+	if [[ -n tableName ]]; then
+		useSiteInfoTable="$tableName"
+		let tmpLen=${#tableName}-3
+		[[ ${tableName:$tmpLen:3} == 'New' ]] && useSiteAdminsTable="${siteAdminsTable}New"
+	fi
+	[[ $WAREHOUSEDB == '$warehouseDev' ]] && useSiteInfoTable="${siteInfoTable}New" && useSiteAdminsTable="${siteAdminsTable}New"
 
 #===================================================================================================
 # Main
@@ -380,3 +387,4 @@ return 0
 ## Tue Jan 17 15:38:34 CST 2017 - dscudiero - Set which table to load based on WAREHOUSEDB
 ## Tue Jan 17 15:39:43 CST 2017 - dscudiero - Make production table the default table name
 ## Wed Jan 18 07:20:50 CST 2017 - dscudiero - Modify siteAdmins table insert to use a variable for the table name
+## Wed Jan 25 08:24:45 CST 2017 - dscudiero - refactor how we set useSitesTable & useSiteAdminsTable
