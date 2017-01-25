@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.24 # -- dscudiero -- 12/14/2016 @ 11:22:50.80
+version=1.0.25 # -- dscudiero -- 01/25/2017 @ 12:56:48.97
 #==================================================================================================
 #= Description +===================================================================================
 # Clone a Courseleaf git repository
@@ -135,7 +135,9 @@ cd $tgtDir
 	touch $tgtDir/.syncDate
 
 ## Set ownership
+	SetFileExpansion 'on'
 	cwd=$(pwd); cd $tgtDir; chgrp -R leepfrog *; chgrp leepfrog .*; cd "$cwd"
+	SetFileExpansion 'off'
 
 #==================================================================================================
 ## Done
@@ -152,3 +154,4 @@ Goodbye 'quiet'
 ## Wed Jun 22 07:00:00 CDT 2016 - dscudiero - Force permissions to 755 for the courseleaf directory
 ## Thu Jul 14 15:08:07 CDT 2016 - fred - Switch LOGNAME for userName
 ## Tue Sep 27 13:26:24 CDT 2016 - dscudiero - Set file ownership after syncing with masters
+## Wed Jan 25 12:58:17 CST 2017 - dscudiero - Fix issue where noglob was set when tryhing to chgrp all files in the new repo
