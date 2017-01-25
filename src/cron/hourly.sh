@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.95 # -- dscudiero -- 01/05/2017 @ 14:46:38.11
+version=2.1.96 # -- dscudiero -- 01/25/2017 @  8:00:25.67
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -28,7 +28,7 @@ scriptArgs="$*"
 function SyncInternalDb {
 	Msg2; Msg2 "*** $FUNCNAME -- Starting ***"
 	srcDir=$clientsTransactionalDb
-	tgtDir=$TOOLSPATH/internalContactsDbShadow
+	tgtDir=$TOOLSPATH/shadow/internalContactsDbShadow
 	SetFileExpansion 'on'
 	rsync -aq $srcDir/* $tgtDir 2>&1
 	chmod 770 $tgtDir
@@ -205,3 +205,4 @@ return 0
 ## Thu Dec 29 11:51:43 CST 2016 - dscudiero - x
 ## Thu Dec 29 12:01:46 CST 2016 - dscudiero - Switched to use the RunSql2 java program
 ## Thu Jan  5 14:49:52 CST 2017 - dscudiero - Switch to use RunSql2
+## Wed Jan 25 08:03:11 CST 2017 - dscudiero - change location of internalDb shadow
