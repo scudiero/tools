@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.9 # -- dscudiero -- 01/24/2017 @  7:34:55.78
+version=4.3.10 # -- dscudiero -- 01/25/2017 @  8:23:59.16
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -32,7 +32,7 @@ scriptDescription="Scratch build the warhouse 'sites' table"
 		quick=false
 		argList+=(-noNameCheck,3,switch,noNameCheck,,script,"Do not check site names for syntax - only valid with -x and when a site name is specified")
 		argList+=(-quick,3,switch,quick,,script,"Do Quickly, skip processing the admins information")
-		argList+=(-tableName,5,option,useSiteInfoTable,,script,"The name of the table to load")
+		argList+=(-tableName,5,option,tableName,,script,"The name of the 'sites' table to load")
 	}
 	function Goodbye-buildSiteInfoTable  { # or Goodbye-$myName
 		SetFileExpansion 'on'
@@ -51,8 +51,6 @@ scriptDescription="Scratch build the warhouse 'sites' table"
 insertInLine=false
 fork=false
 addedCalledScriptArgs="-secondaryMessagesOnly"
-useSiteInfoTable="$siteInfoTable"
-useSiteAdminsTable="$siteAdminsTable"
 
 ## Find the location of the worker script, speeds up subsequent calls
 	workerScript='insertSiteInfoTableRecord'; useLocal=true
@@ -70,7 +68,15 @@ ParseArgsStd
 Hello
 [[ -n $env ]] && envList="$env" || envList="$courseleafDevEnvs $courseleafProdEnvs"
 [[ $fork == true ]] && forkStr='fork' || unset forkStr
-[[ $useSiteInfoTable == "${siteInfoTable}New" ]] && useSiteAdminsTable="${siteAdminsTable}New"
+
+## Which table to use
+	useSiteInfoTable="$siteInfoTable"
+	useSiteAdminsTable="$siteAdminsTable"
+	if [[ -n tableName ]]; then
+		useSiteInfoTable="$tableName"
+		let tmpLen=${#tableName}-3
+		[[ ${tableName:$tmpLen:3} == 'New' ]] && useSiteAdminsTable="${siteAdminsTable}New"
+	fi
 Msg2 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 
 echo -e '\n*** Forcing batchMode = false ***\n'
@@ -117,7 +123,7 @@ batchMode=false
 				eval envDir=\$${env}Dir
 				[[ -z $envDir ]] && continue
 				if [[ -d $envDir/web ]]; then
-					Call "$workerScriptFile" "$forkStr" "$envDir" "$clientId"
+					Call "$workerScriptFile" "$forkStr" "$envDir" "$clientId" "-tableName $useSiteInfoTable"
 					(( forkCntr+=1 )) ; (( siteCntr+=1 ))
 				fi
 				if [[ $fork == true && $((forkCntr%$maxForkedProcesses)) -eq 0 ]]; then
@@ -200,3 +206,4 @@ Goodbye 0 'alert'
 ## Wed Jan 11 09:46:21 CST 2017 - dscudiero - updated code comments
 ## Wed Jan 18 07:20:19 CST 2017 - dscudiero - Add -table argument
 ## Tue Jan 24 07:35:08 CST 2017 - dscudiero - Add debug
+## Wed Jan 25 08:24:40 CST 2017 - dscudiero - refactor how we set useSitesTable & useSiteAdminsTable
