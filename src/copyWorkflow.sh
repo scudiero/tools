@@ -1,8 +1,7 @@
 #!/bin/bash
-#XO NOT y
-VERSION
+#XO NOT AUTOVERSION
 #====================================================================================================
-version=2.8.57 # -- dscudiero -- 01/26/2017 @ 12:30:11.12
+version=2.8.58 # -- dscudiero -- 01/26/2017 @ 12:53:10.95
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -434,3 +433,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## Wed Jan 25 12:45:17 CST 2017 - dscudiero - Added debug statements
 ## Thu Jan 26 12:26:41 CST 2017 - dscudiero - Fix file logging issue
 ## Thu Jan 26 12:30:37 CST 2017 - dscudiero - General syncing of dev to prod
+## Thu Jan 26 12:53:17 CST 2017 - dscudiero - General syncing of dev to prod
