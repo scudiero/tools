@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.11 # -- dscudiero -- 01/26/2017 @  6:55:40.50
+version=4.3.12 # -- dscudiero -- 01/26/2017 @  7:31:11.86
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -77,6 +77,11 @@ Hello
 		let tmpLen=${#tableName}-3
 		[[ ${tableName:$tmpLen:3} == 'New' ]] && useSiteAdminsTable="${siteAdminsTable}New"
 	fi
+	sqlStmt="SELECT count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") AND (TABLE_NAME = \"$useSiteInfoTable\")"
+	RunSql2 $RunSql2
+	[[ ${resultSet[0]} -ne 1 ]] && Terminate "Could not locate the load table '$useSitesTable'"
+
+
 Msg2 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 
 echo -e '\n*** Forcing batchMode = false ***\n'
@@ -208,3 +213,4 @@ Goodbye 0 'alert'
 ## Tue Jan 24 07:35:08 CST 2017 - dscudiero - Add debug
 ## Wed Jan 25 08:24:40 CST 2017 - dscudiero - refactor how we set useSitesTable & useSiteAdminsTable
 ## Thu Jan 26 06:56:00 CST 2017 - dscudiero - Fix problem setting tableName
+## Thu Jan 26 07:31:31 CST 2017 - dscudiero - Add a check to make sure the target table exists
