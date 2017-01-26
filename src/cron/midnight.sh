@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.173 # -- dscudiero -- 01/20/2017 @  7:16:38.28
+version=1.21.174 # -- dscudiero -- 01/26/2017 @  7:27:45.58
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -233,13 +233,15 @@ case "$hostName" in
 				if [[ ${#resultSet[@]} -eq 0 ]]; then
 					Error "Clients table is empty, skipping 'buildSiteInfoTable', semaphore kept in place"
 				else
-					## Create a temporary copy of the clients table, load new data to that table
+					## Create a temporary copy of the sites table, load new data to that table, backup master table
 					for table in $siteInfoTable $siteAdminsTable; do
 						sqlStmt="drop table if exists ${table}Bak"
 						RunSql2 $sqlStmt
 						sqlStmt="drop table if exists ${table}New"
 						RunSql2 $sqlStmt
 						sqlStmt="create table ${table}New like ${table}"
+						RunSql2 $sqlStmt
+						sqlStmt="rename table ${table} to ${table}Bak"
 						RunSql2 $sqlStmt
 					done
 					## Clear buildClientInfoTable semaphore
@@ -282,13 +284,11 @@ case "$hostName" in
 					((waitCntr++))
 				done
 				if [[ $waitCntr -ge $maxLoop ]]; then
-					Error "Waited 1 hour for buildSiteInfoTables to complete, activating original '$siteInfoTable'"
+					Error "Wait for buildSiteInfoTables to complete timed out, activating original '$siteInfoTable'"
 					for table in $siteInfoTable $siteAdminsTable; do
-						sqlStmt="rename table ${siteInfoTable}Bak to $siteInfoTable"
-						RunSql2 $sqlStmt
 						sqlStmt="drop table if exists ${table}New"
 						RunSql2 $sqlStmt
-						sqlStmt="create table ${table}New like ${table}"
+						sqlStmt="rename table ${siteInfoTable}Bak to $siteInfoTable"
 						RunSql2 $sqlStmt
 					done
 				else
@@ -365,15 +365,19 @@ case "$hostName" in
 
 	*) ## build5 and build7
 			sleep 30 ## Wait for process to start on mojave and get the semaphore set
-			## Check 'buildClientsInfoTable' semaphore, wait for truncate to be done on mojave
+			waitCntr=1 ; let maxLoop=1*2*60*2 ## 1 hours
+			while [[ $waitCntr -lt $maxLoop ]]; do    # Wait no longer than X
+				sleep 30 ## Wait for process to start on mojave and get the semaphore set
+				## Check 'buildClientsInfoTable' semaphore, wait for truncate to be done on mojave
 				sqlStmt="select count(*) from $semaphoreInfoTable where processName=\"buildClientsInfoTable\""
-				while true; do
-					RunSql2 $sqlStmt
-					[[ ${resultSet[@]} -eq 0 ]] && break
-					sleep 30
-				done
-
-			## Build $siteInfoTable and $siteAdminsTable tables
+				RunSql2 $sqlStmt
+				[[ ${resultSet[@]} -eq 0 ]] && break
+				((waitCntr++))
+			done
+			if [[ $waitCntr -ge $maxLoop ]]; then
+				Error "Wait for buildClientsInfoTable to complete timed out, skipping load of '$siteInfoTable'"
+			else
+				## Build $siteInfoTable and $siteAdminsTable tables
 				## Set a semaphore for this servers call to buildSiteInfoTable
 				sqlStmt="insert into $semaphoreInfoTable values(NULL,\"buildSiteInfoTable\",\"$hostName\",\"$LOGNAME\",NOW())"
 				RunSql2 $sqlStmt
@@ -381,6 +385,8 @@ case "$hostName" in
 				## Clear buildSiteInfoTable semaphore
 				sqlStmt="delete from $semaphoreInfoTable where processName=\"buildSiteInfoTable\" and hostName=\"$hostName\""
 				RunSql2 $sqlStmt
+			fi
+
 			## Common Checks
 				Call 'checkCgiPermissions' "$scriptArgs"
 			## Update the defaults data for this host
@@ -423,3 +429,4 @@ return 0
 ## Wed Jan 18 10:50:37 CST 2017 - dscudiero - Deleted 'backup' commented block, moved to local midnight file
 ## Thu Jan 19 15:32:02 CST 2017 - dscudiero - v
 ## Fri Jan 20 07:18:02 CST 2017 - dscudiero - fix issue with semaphores
+## Thu Jan 26 07:29:17 CST 2017 - dscudiero - Tweaked logic for waiting for build clientx table to complete
