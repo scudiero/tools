@@ -2,7 +2,7 @@
 #XO NOT y
 VERSION
 #====================================================================================================
-version=2.8.56 # -- dscudiero -- 01/26/2017 @ 12:21:20.46
+version=2.8.57 # -- dscudiero -- 01/26/2017 @ 12:30:11.12
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -395,6 +395,7 @@ Msg2
 		for file in "${filesUpdated[@]}"; do
 			changeLogLines+=("$(Msg2 "^^$file")")
 		done
+		env=$tgtEnv
 		WriteChangelogEntry 'changeLogLines' "$tgtDir/changelog.txt" "$myName"
 
 		echo; Msg2 "Saving target workflow files ..."
@@ -432,3 +433,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## Thu Jan 19 12:49:39 CST 2017 - dscudiero - Fix writing to the changelog.txt file
 ## Wed Jan 25 12:45:17 CST 2017 - dscudiero - Added debug statements
 ## Thu Jan 26 12:26:41 CST 2017 - dscudiero - Fix file logging issue
+## Thu Jan 26 12:30:37 CST 2017 - dscudiero - General syncing of dev to prod
