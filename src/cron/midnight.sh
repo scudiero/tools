@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.174 # -- dscudiero -- 01/26/2017 @  7:27:45.58
+version=1.21.175 # -- dscudiero -- 01/26/2017 @ 10:49:02.54
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -89,36 +89,61 @@ function CheckClientCount {
 #=======================================================================================================================
 function BuildEmployeeTable {
 	Msg2 $V3 "*** $FUNCNAME -- Starting ***"
-	sqlStmt="truncate $employeeTable"
-	RunSql2 $sqlStmt
+
+	## Create a temp table to load into
+		sqlStmt="drop table if exists ${employeeTable}New"
+		RunSql2 $sqlStmt
+		sqlStmt="create table ${employeeTable}New like ${employeeTable}"
+		RunSql2 $sqlStmt
+
 	### Get the list of columns in the transactional employees table
-	sqlStmt="pragma table_info(employees)"
-	RunSql2 "$contactsSqliteFile" $sqlStmt
-	unset transactionalFields transactionalColumns
-	for resultRec in "${resultSet[@]}"; do
-		transactionalColumns="$transactionalColumns,$(cut -d'|' -f2 <<< $resultRec)"
-		transactionalFields="$transactionalFields,$(cut -d'|' -f2 <<< $resultRec)|$(cut -d'|' -f3 <<< $resultRec)"
-	done
-	transactionalColumns=${transactionalColumns:1}
-	transactionalFields=${transactionalFields:1}
+		sqlStmt="pragma table_info(employees)"
+		RunSql2 "$contactsSqliteFile" $sqlStmt
+		unset transactionalFields transactionalColumns
+		for resultRec in "${resultSet[@]}"; do
+			transactionalColumns="$transactionalColumns,$(cut -d'|' -f2 <<< $resultRec)"
+			transactionalFields="$transactionalFields,$(cut -d'|' -f2 <<< $resultRec)|$(cut -d'|' -f3 <<< $resultRec)"
+		done
+		transactionalColumns=${transactionalColumns:1}
+		transactionalFields=${transactionalFields:1}
 
 	### Get the transactonal values, loop through them and  write out the warehouse record
-	sqlStmt="select $transactionalColumns from employees where db_isactive = \"Y\" order  by db_employeekey"
-	RunSql2 "$contactsSqliteFile" $sqlStmt
-	for resultRec in "${resultSet[@]}"; do
-		fieldCntr=1; unset valuesString
-		for field in $(tr ',' ' ' <<< $transactionalFields); do
-			column=$(cut -d'|' -f1 <<< $field)
-			columnType=$(cut -d'|' -f2 <<< $field)
-			eval "unset $column"
-			eval "$column=\"$(cut -d '|' -f $fieldCntr <<< $resultRec)\""
-			[[ $columnType == 'INTEGER' ]] && valuesString="$valuesString,${!column}" || valuesString="$valuesString,\"${!column}\""
-			(( fieldCntr += 1 ))
+		sqlStmt="select $transactionalColumns from employees where db_isactive = \"Y\" order  by db_employeekey"
+		RunSql2 "$contactsSqliteFile" $sqlStmt
+		for resultRec in "${resultSet[@]}"; do
+			fieldCntr=1; unset valuesString
+			for field in $(tr ',' ' ' <<< $transactionalFields); do
+				column=$(cut -d'|' -f1 <<< $field)
+				columnType=$(cut -d'|' -f2 <<< $field)
+				eval "unset $column"
+				eval "$column=\"$(cut -d '|' -f $fieldCntr <<< $resultRec)\""
+				[[ $columnType == 'INTEGER' ]] && valuesString="$valuesString,${!column}" || valuesString="$valuesString,\"${!column}\""
+				(( fieldCntr += 1 ))
+			done
+			valuesString=${valuesString:1}
+			sqlStmt="insert into ${employeeTable}New values($valuesString)"
+			RunSql2 $sqlStmt
 		done
-		valuesString=${valuesString:1}
-		sqlStmt="insert into $employeeTable values($valuesString)"
+
+	## Swap temp table for the real table
+		sqlStmt="select count(*) from ${employeeTable}New"
 		RunSql2 $sqlStmt
-	done
+		newCnt=${resultSet[0]}
+		sqlStmt="select count(*) from ${employeeTable}"
+		RunSql2 $sqlStmt
+		oldCnt=${resultSet[0]}
+		let countDiff=$oldCnt-$newCnt
+		let oneFourthsPrev=$oldCnt/4
+		if [[ $newCnt -eq 0 || $countDiff -gt $oneFourthsPrev ]]; then
+			Error "New employee table is significantly smaller than the origional, keeping origional"
+		else
+			sqlStmt="rename table ${employeeTable} to ${employeeTable}Bak"
+			RunSql2 $sqlStmt
+			sqlStmt="rename table ${employeeTable}New to ${employeeTable}"
+			RunSql2 $sqlStmt
+			sqlStmt="drop table if exists ${employeeTable}Bak"
+			RunSql2 $sqlStmt
+		fi
 
 	Msg2 $V3 "*** $FUNCNAME -- Completed ***"
 	return 0
@@ -430,3 +455,4 @@ return 0
 ## Thu Jan 19 15:32:02 CST 2017 - dscudiero - v
 ## Fri Jan 20 07:18:02 CST 2017 - dscudiero - fix issue with semaphores
 ## Thu Jan 26 07:29:17 CST 2017 - dscudiero - Tweaked logic for waiting for build clientx table to complete
+## Thu Jan 26 10:49:31 CST 2017 - dscudiero - Update BuileEmployeeTable to reflect changes to the transactonal
