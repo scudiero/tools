@@ -1,7 +1,8 @@
 #!/bin/bash
-#XO NOT AUTOVERSION
+#XO NOT y
+VERSION
 #====================================================================================================
-version=2.8.42 # -- dscudiero -- 01/25/2017 @ 12:42:47.10
+version=2.8.56 # -- dscudiero -- 01/26/2017 @ 12:21:20.46
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -23,7 +24,6 @@ scriptDescription="Copy workflow files"
 		#argList+=(-optionArg,1,option,scriptVar,,script,'Help text')
 		#argList+=(-flagArg,2,switch,scriptVar,,script,'Help text')
 		argList+=(-allCims,3,switch,allCims,,script,'Process all CIM instances present')
-		argList+=(-auto,4,switch,autoCopy,,script,'Automatically accept changes for the 'standard' workflow only files')
 	}
 	function Goodbye-copyWorkflow  { # or Goodbye-local
 		rm -rf $tmpRoot > /dev/null 2>&1
@@ -142,10 +142,11 @@ function DoCopy {
 			$DOIT sed -i s"_^${fromStr}_${toStr}_" $srcFile
 		fi
 
-	## Is autocopy on and the file is in the autocopy list then do not prompt, otherwise do diff and prompt
+	## If the target file does not exist then do not prompt, otherwise do diff and prompt
 		[[ $(Contains "$ignoreList" "$cpyFile") == true ]] && return 0
-		if [[ $autoCopy = true && $(Contains "$allowList" "$cpyFile") == true ]]; then
+		if [[ ! -f $tgtFile ]]; then
 			copyFileList+=("${srcFile}|${tgtFile}")
+			Msg2 "^^Target file does not exist, it will be copied"
 		else
 			[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
 			Msg2
@@ -153,11 +154,11 @@ function DoCopy {
 			Msg2 "\n\n* * * DIFF Output start * * *"
 			Msg2 "${colorRed}< is ${srcFile}${colorDefault}"
 			Msg2 "${colorBlue}> is ${tgtFile}${colorDefault}"
-			printf '=%.0s' {1..80}
+			printf '=%.0s' {1..120}
 			Msg2
-			ProtectedCall "colordiff $srcFile $tgtFile" #> $tmpFile
+			ProtectedCall "colordiff $srcFile $tgtFile | Indent" #> $tmpFile
 			Msg2 "$colorDefault"
-			printf '=%.0s' {1..80}
+			printf '=%.0s' {1..120}
 			Msg2 "\n* * * DIFF Output end * * *\n\n"
 
 			[[ $(Contains ",$setDefaultYesFiles," ",$(basename $cpyFile),") == true ]] && defVals='Yes' || unset defVals
@@ -265,9 +266,8 @@ Hello
 	verifyArgs+=("Source Env:$(TitleCase $srcEnv) ($srcDir)")
 	verifyArgs+=("Target Env:$(TitleCase $tgtEnv) ($tgtDir)")
 	verifyArgs+=("CIM(s):$cimStr")
-	[[ $autoCopy == true ]] && verifyArgs+=("Automatic Mode:$autoCopy")
 	VerifyContinue "You are copying CIM workflow files for:"
-	dump -1 client srcEnv tgtEnv srcDir tgtDir cimStr autoCopy
+	dump -1 client srcEnv tgtEnv srcDir tgtDir cimStr
 
 ## Log execution
 	myData="Client: '$client', srcEnv: '$srcEnv', tgtEnv: '$tgtEnv'"
@@ -276,7 +276,6 @@ Hello
 #====================================================================================================
 ## Main
 #====================================================================================================
-
 ## Loop through CIMs
  	Msg2 "Checking CIM instances ..."
 	for cim in $(echo $cimStr | tr ',' ' '); do
@@ -300,11 +299,11 @@ Hello
 			Msg2 "^^$file"
 			##  Cleanup any old backup workflow files (xxxx.yyyy, xxxx-yyyy, or ' - Copy.') in the source or target
 				CleanupOldFiles "$cpyFile"
-
 			## Copy files
 				if [[ -f $srcDir/$cpyFile ]]; then
 					srcMd5=$(md5sum $srcDir/$cpyFile | cut -f1 -d" ")
-					[[ -r  $tgtDir/$cpyFile ]] && $tgtMd5=$(md5sum $tgtDir/$cpyFile | cut -f1 -d" ") || unset tgtMd5
+					[[ -r  $tgtDir/$cpyFile ]] && tgtMd5=$(md5sum $tgtDir/$cpyFile | cut -f1 -d" ") || unset tgtMd5
+					# echo -e "\n\t\t $srcDir/$cpyFile : $srcMd5\n\t\t $tgtDir/$cpyFile : $tgtMd5"
 					if [[ $srcMd5 != $tgtMd5 ]]; then
 						$DOIT DoCopy $file $cpyFile $srcDir $srcStructure $tgtDir $tgtStructure
 					else
@@ -315,7 +314,7 @@ Hello
 	done #Cims
 
 ## Global files
-	Msg2; Msg2 "Checking global/system workflow files..."
+	echo; Msg2 "Checking global/system workflow files..."
 	for file in $(echo "$requiredGlobalFiles $optionalGlobalFiles" | tr ',' ' '); do
 		Msg2 "^$file"
 		cpyFile="/web$file"
@@ -335,10 +334,10 @@ Hello
 
 [[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
 Msg2
-## Copy the file
+## Copy the files
 	## If some files were not selected for update then as the user if they really want to copy the files
 	if [[ ${#filesNotCopied[@]} -gt 0 ]]; then
-		Msg2 $W "You asked that some files $ColorE('not') be copied: "
+		Msg2 $W "You asked that some files $ColorK('not') be copied: "
 		for file in "${filesNotCopied[@]}"; do
 			Msg2 "^$file"
 		done
@@ -347,7 +346,6 @@ Msg2
 		[[ $ans != 'y' ]] && Msg2 $W "No files have been updated" && Goodbye 1
 	fi
 
-	## Copy the files
 	if [[ ${#copyFileList[@]} -gt 0 ]]; then
 		## Save old workflow files
 		Msg2
@@ -362,15 +360,15 @@ Msg2
 			[[ -f $tgtFile ]] && BackupCourseleafFile $tgtFile && rm -f $tgtFile
 			$DOIT cp -fp $srcFile $tgtFile
 			[[ $(basename $srcFile) == 'workflow.tcf' && $tgtEnv == 'next' ]] && $DOIT sed -i s'_*optional*_optional_' $tgtFile
-			filesUpdated+=(${file##*$tgtDir})
+			filesUpdated+=(${tgtFile##*$tgtDir})
 		done
 	else
 		## Nothing to do
-		Msg2; Msg2 $WT1 "No files required updating, nothing changed"
+		echo; Msg2 $WT1 "No files required updating, nothing changed"
 	fi
 
 	if [[ ${#filesNotCopied[@]} -gt 0 ]]; then
-		Msg2; Msg2 $W "The following files were NOT updated:"
+		echo; Msg2 $W "The following files were NOT updated:"
 		for file in "${filesNotCopied[@]}"; do
 			Msg2 "^$file"
 		done
@@ -397,17 +395,20 @@ Msg2
 		for file in "${filesUpdated[@]}"; do
 			changeLogLines+=("$(Msg2 "^^$file")")
 		done
-		WriteChangelogEntry 'changeLogLines' "$tgtDir/changelog.txt" 'changeLogEntry'
+		WriteChangelogEntry 'changeLogLines' "$tgtDir/changelog.txt" "$myName"
 
-		## Write out change log entries
-		Msg2; Msg2 "Saving target workflow files ..."
+		echo; Msg2 "Saving target workflow files ..."
 		$DOIT saveWorkflow $client -$tgtEnv -cims "$(echo $cimStr | tr -d ' ')" -suffix "afterCopy-$fileSuffix" -nop -quiet $verboseArg
 	fi
 
 #====================================================================================================
 ## Bye-bye
 Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEnv))"
-## Fri Apr  1 13:30:01 CDT 2016 - dscudiero - Swithch --useLocal to $useLocal
+
+#====================================================================================================
+# Check-in Log
+#====================================================================================================
+## Fri Apr  1 13:30:01 CDT 2016 - dscudiero - Switch --useLocal to $useLocal
 ## Wed Apr  6 16:08:53 CDT 2016 - dscudiero - switch for
 ## Tue Apr 12 09:12:43 CDT 2016 - dscudiero - Add changing the wfStatus if copying to next
 ## Thu Apr 14 13:16:10 CDT 2016 - dscudiero - Tweak message colors
@@ -415,18 +416,19 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## Fri Jun 24 09:53:00 CDT 2016 - dscudiero - Added auto copy feature
 ## Tue Jul  5 16:35:09 CDT 2016 - dscudiero - Remove debug messages
 ## Fri Jul  8 09:16:21 CDT 2016 - dscudiero - Updates for cim cims
-## Thu Jul 14 12:06:49 CDT 2016 - dscudiero - Put checks in if target is next or curr, or src not pvt and pvt site was detected
+## Thu Jul 14 12:06:49 CDT 2016 - dscudiero - Put checks in if target is next or Curr, or src not pvt and pvt site was detected
 ## Fri Jul 15 10:31:48 CDT 2016 - dscudiero - Removed the No Backups done comment
-## Thu Aug 11 13:00:40 CDT 2016 - dscudiero - Refactored to pull files from db
+## Thu Aug 11 13:00:40 CDT 2016 - dscudiero - Re factored to pull files from db
 ## Fri Aug 12 08:02:49 CDT 2016 - dscudiero - Add -allCims flag
 ## Mon Sep 19 09:27:44 CDT 2016 - dscudiero - Add code to cleanup obsolete files
 ## Fri Sep 23 11:41:01 CDT 2016 - dscudiero - Only save workflows if we are going to actually change something
 ## Thu Sep 29 12:54:00 CDT 2016 - dscudiero - Do not clear screen if TERM=dumb
 ## Tue Oct 11 14:30:29 CDT 2016 - dscudiero - Cosmetic internal changes
 ## Wed Oct 12 09:15:53 CDT 2016 - dscudiero - Tweak messages
-## Tue Oct 25 15:45:15 CDT 2016 - dscudiero - Added logging of actions to trnsaction log in the clientsData folder
-## Tue Oct 25 15:48:12 CDT 2016 - dscudiero - Only writout change log if the clientDataRoot folder exists
-## Mon Jan  9 16:16:53 CST 2017 - dscudiero - Fixd problem where the changelog.txt records were all the same file
+## Tue Oct 25 15:45:15 CDT 2016 - dscudiero - Added logging of actions to transaction log in the clientsData folder
+## Tue Oct 25 15:48:12 CDT 2016 - dscudiero - Only write out change log if the clientDataRoot folder exists
+## Mon Jan  9 16:16:53 CST 2017 - dscudiero - Fixed problem where the changelog.txt records were all the same file
 ## Fri Jan 13 15:45:44 CST 2017 - dscudiero - testing
-## Thu Jan 19 12:49:39 CST 2017 - dscudiero - Fix writeing to the changelog.txt file
+## Thu Jan 19 12:49:39 CST 2017 - dscudiero - Fix writing to the changelog.txt file
 ## Wed Jan 25 12:45:17 CST 2017 - dscudiero - Added debug statements
+## Thu Jan 26 12:26:41 CST 2017 - dscudiero - Fix file logging issue
