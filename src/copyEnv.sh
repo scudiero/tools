@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=4.10.23 # -- dscudiero -- 01/25/2017 @ 11:29:09.45
+version=4.10.25 # -- dscudiero -- 01/26/2017 @ 13:39:21.98
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -350,8 +350,9 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 	# Set nexturl so wf emails point to local instance
 		[[ $quiet == false || $quiet == 0 ]] && Msg2 "Changeing 'nexturl' to point to local instance..."
 		editFile="$tgtDir/web/courseleaf/localsteps/default.tcf"
-		toStr="nexturl:https://$client/$(cut -d '/' -f3 <<< $tgtDir).leepfrog.com"
-		unset grepStr; grepStr=$(grep "$toStr" $editFile)
+		clientToken=$(cut -d'/' -f5 <<< $tgtDir)
+		toStr="nexturl:https://$clientToken/$(cut -d '/' -f3 <<< $tgtDir).leepfrog.com"
+		unset grepStr; grepStr=$(ProtectedCall "grep "$toStr" $editFile")
 		if [[ -z $grepStr ]]; then
 			unset fromStr; fromStr=$(ProtectedCall "grep 'nexturl:' $editFile")
 			$DOIT sed -i s"!${fromStr}!${toStr}!" $editFile
@@ -456,3 +457,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client)") clone from $(ColorK "$(Upper $en
 ## Wed Jan 25 09:34:55 CST 2017 - dscudiero - x
 ## Wed Jan 25 10:13:47 CST 2017 - dscudiero - Fix problem where env was not set if nocheck was not active
 ## Wed Jan 25 12:45:03 CST 2017 - dscudiero - Added updating the nexturl variable in localsteps/default.tcf to match the local instance
+## Thu Jan 26 13:39:37 CST 2017 - dscudiero - Fix problem setting nexturl value for pvt sites
