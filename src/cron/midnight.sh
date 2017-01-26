@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.175 # -- dscudiero -- 01/26/2017 @ 10:49:02.54
+version=1.21.177 # -- dscudiero -- 01/26/2017 @ 11:52:34.11
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -234,6 +234,21 @@ logInDb=false
 case "$hostName" in
 	mojave)
 
+			## Performance test
+				Msg2 "Running perfTest..."
+				Call perfTest
+				pwFile=$HOME/.pw2
+				if [[ -r $pwFile ]]; then
+					pwRec=$(grep "^build7" $pwFile)
+					read -ra tokens <<< "$pwRec"
+					remoteUser=${tokens[1]}
+					remotePw=${tokens[2]}
+					remoteHost=${tokens[3]}
+					sshpass -p $remotePw ssh $remoteUser@$remoteHost $TOOLSPATH/src/perfTest.sh #>/dev/null 2>&1
+				fi
+				Msg2 "^...done"
+
+
 			## Compare number of clients in the warehouse vs the transactional if more in transactional then runClientListReport=true
 				runClientListReport=$(CheckClientCount)
 
@@ -244,6 +259,7 @@ case "$hostName" in
 				touch $sqliteDbs/contacts.syncDate
 				Msg2 "^...done"
 
+			Msg2 "Running BuildClientInfoTable..."
 			## Build the clientInfoTable
 				## Set a semaphore
 					sqlStmt="truncate $semaphoreInfoTable"
@@ -281,6 +297,8 @@ case "$hostName" in
 						sqlStmt="delete from $semaphoreInfoTable where processName=\"buildSiteInfoTable\" and hostName=\"$hostName\""
 						RunSql2 $sqlStmt
 				fi
+				Msg2 "^...done"
+
 
 			## Build employee table
 				BuildEmployeeTable
@@ -375,17 +393,6 @@ case "$hostName" in
 				## Build a list of clients and contact info for Shelia
 				[[ $runClientListReport == true ]] && Call 'reports' "clientList -quiet -email 'dscudiero@leepfrog.com,sfrickson@leepfrog.com' $scriptArgs"
 
-			## Performance test
-				Msg2 "Running perfTest..."
-				Call perfTest
-				pwFile=$HOME/.pw2
-				pwRec=$(grep "^build7" $pwFile)
-				read -ra tokens <<< "$pwRec"
-				remoteUser=${tokens[1]}
-				remotePw=${tokens[2]}
-				remoteHost=${tokens[3]}
-				sshpass -p $remotePw ssh $remoteUser@$remoteHost $TOOLSPATH/src/perfTest.sh #>/dev/null 2>&1
-
 			;; ## mojave
 
 	*) ## build5 and build7
@@ -456,3 +463,4 @@ return 0
 ## Fri Jan 20 07:18:02 CST 2017 - dscudiero - fix issue with semaphores
 ## Thu Jan 26 07:29:17 CST 2017 - dscudiero - Tweaked logic for waiting for build clientx table to complete
 ## Thu Jan 26 10:49:31 CST 2017 - dscudiero - Update BuileEmployeeTable to reflect changes to the transactonal
+## Thu Jan 26 12:14:25 CST 2017 - dscudiero - Moved the performance test as the first item run
