@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.12 # -- dscudiero -- 01/26/2017 @  7:31:11.86
+version=4.3.13 # -- dscudiero -- 01/26/2017 @  7:50:06.67
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -117,7 +117,7 @@ batchMode=false
 			SetSiteDirs
 			[[ -z ${devDir}${testDir}${nextDir}${currDir}${priorDir}${previewDir}${publicDir} ]] && continue
 
-			[[ $batchMode != true ]] && Msg2 "Processing: $client -- $clientId ($clientCntr/$numClients)..."
+			[[ $batchMode != true ]] && Msg2 "Processing: $client -- $clientId (~$clientCntr/$numClients)..."
 			## Remove any existing records for this client/env
 			[[ -n $env ]] && andClause="and env=\"$env\"" || unset andClause
 			sqlStmt="delete from $useSiteInfoTable where name like\"$client%\" $andClause"
@@ -214,3 +214,4 @@ Goodbye 0 'alert'
 ## Wed Jan 25 08:24:40 CST 2017 - dscudiero - refactor how we set useSitesTable & useSiteAdminsTable
 ## Thu Jan 26 06:56:00 CST 2017 - dscudiero - Fix problem setting tableName
 ## Thu Jan 26 07:31:31 CST 2017 - dscudiero - Add a check to make sure the target table exists
+## Thu Jan 26 07:50:16 CST 2017 - dscudiero - Tweak messaging
