@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.41 # -- dscudiero -- 01/12/2017 @ 13:16:23.03
+version=2.2.42 # -- dscudiero -- 01/26/2017 @ 12:25:31.46
 #====================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -109,7 +109,9 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 		[[ $dir == '.' ]] && continue
 		cd $dir
 		tarFile="$dir.tar.gz"
-		set +f; tar -czf ../$tarFile * |> /dev/null ; set -f
+		SetFileExpansion 'on'
+		tar -czf ../$tarFile * |> /dev/null
+		SetFileExpansion
 		rm -rf $dir
 		cd ..
 	done
@@ -137,7 +139,9 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 		cwd=$(pwd)
 		cd $tgtDir
 		[[ $suffix == '' ]] && tarFile="$(basename $tgtDir).tar.gz" || tarFile="$(basename $tgtDir)-$suffix.tar.gz"
-		set +f; tar -czf ../$tarFile *; set -f
+		SetFileExpansion 'on'
+		tar -czf ../$tarFile * |> /dev/null
+		SetFileExpansion
 		rm -rf $tgtDir
 		Msg2 "Files saved to: $(pwd)/$tarFile"
 		cd $cwd
@@ -155,3 +159,4 @@ Goodbye 0
 ## Thu Aug 11 12:44:42 CDT 2016 - dscudiero - Refactored to use new files as defined in the db
 ## Tue Sep  6 07:54:54 CDT 2016 - dscudiero - Fix problem where it was not saving all files
 ## Tue Sep  6 08:19:50 CDT 2016 - dscudiero - General syncing of dev to prod
+## Thu Jan 26 12:26:59 CST 2017 - dscudiero - Misc cleanup
