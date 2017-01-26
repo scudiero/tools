@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.10 # -- dscudiero -- 01/25/2017 @  8:23:59.16
+version=4.3.11 # -- dscudiero -- 01/26/2017 @  6:55:40.50
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -72,7 +72,7 @@ Hello
 ## Which table to use
 	useSiteInfoTable="$siteInfoTable"
 	useSiteAdminsTable="$siteAdminsTable"
-	if [[ -n tableName ]]; then
+	if [[ -n $tableName ]]; then
 		useSiteInfoTable="$tableName"
 		let tmpLen=${#tableName}-3
 		[[ ${tableName:$tmpLen:3} == 'New' ]] && useSiteAdminsTable="${siteAdminsTable}New"
@@ -207,3 +207,4 @@ Goodbye 0 'alert'
 ## Wed Jan 18 07:20:19 CST 2017 - dscudiero - Add -table argument
 ## Tue Jan 24 07:35:08 CST 2017 - dscudiero - Add debug
 ## Wed Jan 25 08:24:40 CST 2017 - dscudiero - refactor how we set useSitesTable & useSiteAdminsTable
+## Thu Jan 26 06:56:00 CST 2017 - dscudiero - Fix problem setting tableName
