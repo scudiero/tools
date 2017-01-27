@@ -38,7 +38,7 @@ if (typeof wfFunctionsLoaded == "undefined") {
 			} else { var wfProposalMode='EDIT'; }
 			var d = new Date();
 			var prtStr="\n" + Array(40).join("=") + " " + d.toString() + " " + Array(40).join("=") +
-						"\n<<< Loading workflowFuncs.atj, proposal mode is " + wfProposalMode + " ...";
+						"\n<<< Loading workflowFuncs.atj, proposal mode is " + wfProposalMode;
 			print_debug(prtStr);
 		} //(host.indexOf(".dev") > 0)
 	} //(typeof tcfdata.wfDebugEnvs != 'undefined')
@@ -79,6 +79,28 @@ wffuncs.IsNotNew = function(inval, wfrule) {
 		return false;
 	return [inval.replace(wfrule.ifregex,'')];
 }; //IsNotEdit
+
+//==================================================================================================
+// Return the proposal mode
+// 01/25/2017 - dgs - New
+//==================================================================================================
+wffuncs.ProposalState = function(inval, wfrule, args) {
+	wfDebug(4,"\n*** In ProposalState ***, called as: '" + inval + "'");
+	var retVal='EDIT';
+	if (tcfdata.newrecord && tcfdata.newrecord.length) {
+		if (tcfdata.newrecord == 'true')
+			retVal='NEW';
+	}
+	if (tcfdata.deleterec && tcfdata.deleterec.length) {
+		if (tcfdata.deleterec == 'true')
+			retVal='DELETE';
+	}
+
+	retVal=inval.replace(wfrule.regex,retVal);
+	wfDebug(4,"\t*** Returning '" + retVal + "'\n")
+	return [retVal]
+
+}; //ProposalState
 
 //=================================================================================================
 // Import workflow helper functions (workflowLib.atj) -- imported from localsteps
@@ -130,4 +152,4 @@ wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 //==================================================================================================
 // END
 //==================================================================================================
-if (wfEnvIsDev && !wfInitialLoad) print_debug("... workflowFuncs.atj loaded >>>\n\n"); wfInitialLoad=false;
+if (wfEnvIsDev && !wfInitialLoad) print_debug("\tworkflowFuncs.atj loaded\n"); wfInitialLoad=false;
