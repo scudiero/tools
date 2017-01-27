@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.13 # -- dscudiero -- 01/26/2017 @  7:50:06.67
+version=4.3.14 # -- dscudiero -- 01/27/2017 @  8:04:21.56
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -79,7 +79,7 @@ Hello
 	fi
 	sqlStmt="SELECT count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") AND (TABLE_NAME = \"$useSiteInfoTable\")"
 	RunSql2 $RunSql2
-	[[ ${resultSet[0]} -ne 1 ]] && Terminate "Could not locate the load table '$useSitesTable'"
+	[[ ${resultSet[0]} -ne 1 ]] && Terminate "Could not locate the load table '$useSiteInfoTable'"
 
 
 Msg2 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
@@ -215,3 +215,4 @@ Goodbye 0 'alert'
 ## Thu Jan 26 06:56:00 CST 2017 - dscudiero - Fix problem setting tableName
 ## Thu Jan 26 07:31:31 CST 2017 - dscudiero - Add a check to make sure the target table exists
 ## Thu Jan 26 07:50:16 CST 2017 - dscudiero - Tweak messaging
+## Fri Jan 27 08:04:43 CST 2017 - dscudiero - General syncing of dev to prod
