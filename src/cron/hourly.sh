@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.98 # -- dscudiero -- 01/25/2017 @  9:33:14.47
+version=2.1.99 # -- dscudiero -- 01/27/2017 @  8:00:01.02
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -179,6 +179,7 @@ function BuildToolsAuthTable() {
 #=======================================================================================================================
 case "$hostName" in
 	mojave)
+			Call 'perfTest'
 			CheckMonitorFiles
 			SyncInternalDb
 			BuildToolsAuthTable
@@ -186,10 +187,8 @@ case "$hostName" in
 			SyncSkeleton
 			[[ $(date "+%H") == 12 ]] && Call 'syncCourseleafGitRepos' 'master'
 			;;
-	build5)
-			#CheckMonitorFiles -- commented out since build5 does not support 'declare -A'
-			;;
-	build7)
+	*)
+			Call 'perfTest'
 			CheckMonitorFiles
 			;;
 esac
@@ -207,3 +206,4 @@ return 0
 ## Thu Jan  5 14:49:52 CST 2017 - dscudiero - Switch to use RunSql2
 ## Wed Jan 25 08:03:11 CST 2017 - dscudiero - change location of internalDb shadow
 ## Wed Jan 25 09:33:50 CST 2017 - dscudiero - pull location of internals db shadow from defaults
+## Fri Jan 27 08:00:12 CST 2017 - dscudiero - Add perftest
