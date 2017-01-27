@@ -1,14 +1,12 @@
 //======================================================================================================================
-// version:1.6.89 // -- dscudiero -- 12/20/2016 @ 15:30:39.44
+// version:1.6.90 // -- dscudiero -- 01/25/2017 @ 16:00:30.45
 //======================================================================================================================
 // Common wf functions and helper functions to support workflow
 //======================================================================================================================
 if (typeof wfLibLoaded === "undefined") {
 	if (typeof wfInDebugEnv != "undefined") {
-		if (wfInDebugEnv) print_debug("\n\tLoading "+ wfLibName + " ...");
+		if (wfEnvIsDev) print_debug("\n<<< Loading "+ wfLibName);
 	} else { wfInDebugEnv = true }
-	var wfLibLoadFirst=true;
-	var wfLibLoaded=true;
 }
 
 //======================================================================================================================
@@ -1184,4 +1182,5 @@ wffuncs.WhatsChanged = function(inval, wfrule, args) {
 //==================================================================================================
 // END
 //==================================================================================================
-if (wfInDebugEnv) print_debug(" " + wfLibName + " loaded\n");
+if (wfEnvIsDev && !wfLibLoaded) print_debug("\n\t" + wfLibName + " loaded\n");
+var wfLibLoaded=true;
