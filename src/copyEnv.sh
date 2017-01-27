@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=4.10.25 # -- dscudiero -- 01/26/2017 @ 13:39:21.98
+version=4.10.34 # -- dscudiero -- 01/27/2017 @  7:16:21.69
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -86,25 +86,37 @@ dump -2 -n client env cim cat fullCopy manifest overlay suffix emailAddress
 Hello
 addPvt=true
 
-Init 'getClient'
-if [[ $noCheck == true ]]; then
-	GetSiteDirNoCheck $client "For the $(ColorK 'Source'), do you want to work with '$client's development or production env"
-	srcEnv="$env"; srcDir="$siteDir"; unset env
-	[[ $client != 'internal' ]] && Init 'getTgtEnv getDirs' || Init 'getEnv getDirs'
+if [[ $client == 'lilypadu' ]]; then
+	srcEnv='next'
+	srcDir='/mnt/lilypadu/site/next'
+	tgtEnv='pvt'
+	tgtDir="/mnt/dev7/web/lilypadu-$userName"
+elif [[ $client == 'internal' ]]; then
+	srcEnv='next'
+	srcDir='/mnt/internal/site/stage'
+	tgtEnv='pvt'
+	tgtDir="/mnt/dev11/web/internal-$userName"
+	progDir='pagewiz'
 else
-	[[ $client != 'internal' ]] && Init 'getSrcEnv getTgtEnv getDirs' || Init 'getEnv getDirs'
-	env="$srcEnv"
+	Init 'getClient'
+	if [[ $noCheck == true ]]; then
+		GetSiteDirNoCheck $client "For the $(ColorK 'Source'), do you want to work with '$client's development or production env"
+		srcEnv="$env"; srcDir="$siteDir"; unset env
+		Init 'getTgtEnv getDirs'
+	else
+		Init 'getSrcEnv getTgtEnv getDirs'
+		env="$srcEnv"
+	fi
 fi
 dump -1 client env srcEnv srcDir tgtEnv tgtDir
 
-[[ $client == internal ]] && progDir='pagewiz'
 ignoreList=$(sed "s/<progDir>/$progDir/g" <<< $ignoreList)
 mustHaveDirs=$(sed "s/<progDir>/$progDir/g" <<< $(cut -d":" -f2 <<< $scriptData1))
 mustHaveFiles=$(sed "s/<progDir>/$progDir/g" <<< $(cut -d":" -f2 <<< $scriptData2))
 dump -1 ignoreList mustHaveDirs mustHaveFiles
 
 ## check to see if this client is remote or on another host
-	if [[ $client != 'internal' && $noCheck != true ]]; then
+	if [[ $client != 'internal' && $client != 'lilypadu' && $noCheck != true ]]; then
 		sqlStmt="select hosting from $clientInfoTable where name=\"$client\""
 		RunSql2 $sqlStmt
 		clientHosting=${resultSet[0]}
@@ -164,19 +176,14 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 		unset ans
 		WarningMsg "Target site ($tgtDir) already existes."
 		Prompt ans "Do you wish to $(ColorK 'overwrite') the existing site (Yes) or $(ColorK 'refresh') files in the existing sites site (No) ?" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
-		if [[ $ans == 'y' ]]; then
-			cloneMode='Replace'
-		else
-			cloneMode='Refresh'
-		fi
+		[[ $ans == 'y' ]] && cloneMode='Replace' || cloneMode='Refresh'
 	fi
 
 ## Make sure the user really wants to do this
 	unset verifyArgs
 	verifyArgs+=("Client:$client")
-	[[ $client != 'internal' ]] && verifyArgs+=("Source Env:$(TitleCase $srcEnv)\t($srcDir)") || verifyArgs+=("Source Dir:$srcDir")
-	[[ $client != 'internal' ]] && verifyArgs+=("Target Env:$(TitleCase $tgtEnv)\t($tgtDir)") || verifyArgs+=("Target Dir:$tgtDir")
-	verifyArgs+=("Copy Mode:$cloneMode")
+	verifyArgs+=("Source Env:$(TitleCase $srcEnv)\t($srcDir)")
+	verifyArgs+=("Target Env:$(TitleCase $tgtEnv)\t($tgtDir)")
 	tmpStr=$(sed "s/,/, /g" <<< $ignoreList)
 	[[ $fullCopy != true ]] && verifyArgs+=("Ignore List:$tmpStr")
 	verifyArgs+=("Full Copy:$fullCopy")
@@ -458,3 +465,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client)") clone from $(ColorK "$(Upper $en
 ## Wed Jan 25 10:13:47 CST 2017 - dscudiero - Fix problem where env was not set if nocheck was not active
 ## Wed Jan 25 12:45:03 CST 2017 - dscudiero - Added updating the nexturl variable in localsteps/default.tcf to match the local instance
 ## Thu Jan 26 13:39:37 CST 2017 - dscudiero - Fix problem setting nexturl value for pvt sites
+## Fri Jan 27 07:56:11 CST 2017 - dscudiero - Fix problem for lilypadu
