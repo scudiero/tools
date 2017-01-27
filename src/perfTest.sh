@@ -12,6 +12,8 @@ mode=${1-'test'}; shift || true
 count=${1-1000}; shift || true
 tmpFile="/tmp/$LOGNAME.perfTest.sh.out"
 
+echo "mode = '$mode'"
+
 if [[ $mode == 'summary' ]]; then
         SetFileExpansion 'off'
         sqlStmt="select * from perftest where date like \"%$(date +%H):00%\""
@@ -28,11 +30,11 @@ if [[ $mode == 'summary' ]]; then
                         int2="$(tr -d '.' <<< $real2)"
                         let delta=$int2-$int1
                         percent=$((200*$delta/$int2 % 2 + 100*$delta/$int2))
-                        #dump -n field -t real1 int1 real2 int2 delta percent
+        dump -n field -t real1 int1 real2 int2 delta percent
                         valuesStr="$valuesStr,\"${percent}%\""
                 done
-
                 valuesStr="NULL,\"\",\"$(date +'%m-%d-%y %H:%M')\"$valuesStr"
+        dump valuesStr
                 sqlStmt="insert into perftest values($valuesStr)"
                 RunSql2 $sqlStmt
         fi
@@ -128,3 +130,4 @@ fi
 ## Thu Jan  5 16:36:09 CST 2017 - dscudiero - Add time stamp to the date field
 ## Thu Jan 12 12:41:53 CST 2017 - dscudiero - Switch to use RunSql2
 ## Fri Jan 27 14:30:03 CST 2017 - dscudiero - Add summary mode
+## Fri Jan 27 15:16:37 CST 2017 - dscudiero - Add debug messages
