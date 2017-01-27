@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.178 # -- dscudiero -- 01/27/2017 @  7:52:54.16
+version=1.21.180 # -- dscudiero -- 01/27/2017 @  8:02:59.07
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -137,12 +137,14 @@ function BuildEmployeeTable {
 		if [[ $newCnt -eq 0 || $countDiff -gt $oneFourthsPrev ]]; then
 			Error "New employee table is significantly smaller than the origional, keeping origional"
 		else
+			sqlStmt="drop table if exists ${employeeTable}Bak"
+			RunSql2 $sqlStmt
 			sqlStmt="rename table ${employeeTable} to ${employeeTable}Bak"
 			RunSql2 $sqlStmt
 			sqlStmt="rename table ${employeeTable}New to ${employeeTable}"
 			RunSql2 $sqlStmt
-			sqlStmt="drop table if exists ${employeeTable}Bak"
-			RunSql2 $sqlStmt
+			# sqlStmt="drop table if exists ${employeeTable}Bak"
+			# RunSql2 $sqlStmt
 		fi
 
 	Msg2 $V3 "*** $FUNCNAME -- Completed ***"
@@ -464,3 +466,4 @@ return 0
 ## Thu Jan 26 10:49:31 CST 2017 - dscudiero - Update BuileEmployeeTable to reflect changes to the transactonal
 ## Thu Jan 26 12:14:25 CST 2017 - dscudiero - Moved the performance test as the first item run
 ## Fri Jan 27 07:56:33 CST 2017 - dscudiero - Switch how perftest is called
+## Fri Jan 27 08:05:09 CST 2017 - dscudiero - Fix table swap for build employees table
