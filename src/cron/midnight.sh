@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.180 # -- dscudiero -- 01/27/2017 @  8:02:59.07
+version=1.21.181 # -- dscudiero -- 01/27/2017 @ 14:31:14.07
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -238,16 +238,6 @@ case "$hostName" in
 			## Performance test
 				Msg2 "Running perfTest..."
 				Call 'perfTest'
-				# pwFile=$HOME/.pw2
-				# if [[ -r $pwFile ]]; then
-				# 	pwRec=$(grep "^build7" $pwFile)
-				# 	read -ra tokens <<< "$pwRec"
-				# 	remoteUser=${tokens[1]}
-				# 	remotePw=${tokens[2]}
-				# 	remoteHost=${tokens[3]}
-				# 	sshpass -p $remotePw ssh $remoteUser@$remoteHost $TOOLSPATH/src/perfTest.sh #>/dev/null 2>&1
-				# fi
-				# Msg2 "^...done"
 
 			## Compare number of clients in the warehouse vs the transactional if more in transactional then runClientListReport=true
 				runClientListReport=$(CheckClientCount)
@@ -396,7 +386,9 @@ case "$hostName" in
 			;; ## mojave
 
 	*) ## build7
+			sleep 30 ## Wait for process to start on mojave and get the semaphore set
 			Call 'perfTest'
+			Call 'perfTest' 'summary'
 			sleep 30 ## Wait for process to start on mojave and get the semaphore set
 			waitCntr=1 ; let maxLoop=1*2*60*2 ## 1 hours
 			while [[ $waitCntr -lt $maxLoop ]]; do    # Wait no longer than X
@@ -467,3 +459,4 @@ return 0
 ## Thu Jan 26 12:14:25 CST 2017 - dscudiero - Moved the performance test as the first item run
 ## Fri Jan 27 07:56:33 CST 2017 - dscudiero - Switch how perftest is called
 ## Fri Jan 27 08:05:09 CST 2017 - dscudiero - Fix table swap for build employees table
+## Fri Jan 27 14:31:19 CST 2017 - dscudiero - General syncing of dev to prod
