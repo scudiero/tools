@@ -8,18 +8,42 @@
 # 3) read the clients table ~900 records
 #=======================================================================================================================
 
-count=${1-1000}
+mode=${1-'test'}; shift || true
+count=${1-1000}; shift || true
+tmpFile="/tmp/$LOGNAME.perfTest.sh.out"
 
-## Constants
-        tmpFile="/tmp/$LOGNAME.perfTest.sh.out"
+if [[ $mode == 'summary' ]]; then
+        SetFileExpansion 'off'
+        sqlStmt="select * from perftest where date like \"%$(date +%H):00%\""
+        RunSql2 $sqlStmt
+        SetFileExpansion
+        if [[ ${#resultSet[@]} -eq 2 ]]; then
+                unset valuesStr
+                # fields='localfsreal localfsuser localfssys remotefsreal remotefsuser remotefssys dbreadreal dbreaduser dbreadsys'
+                for ((i=4; i<13; i++)); do
+                        unset int1 int2 real1 real2 percent
+                        real1="$(cut -d'|' -f$i <<< ${resultSet[0]})"
+                        int1="$(tr -d '.' <<< $real1)"
+                        real2="$(cut -d'|' -f$i <<< ${resultSet[1]})"
+                        int2="$(tr -d '.' <<< $real2)"
+                        let delta=$int2-$int1
+                        percent=$((200*$delta/$int2 % 2 + 100*$delta/$int2))
+                        #dump -n field -t real1 int1 real2 int2 delta percent
+                        valuesStr="$valuesStr,\"${percent}%\""
+                done
 
-## Create initial record
+                valuesStr="NULL,\"\",\"$(date +'%m-%d-%y %H:%M')\"$valuesStr"
+                sqlStmt="insert into perftest values($valuesStr)"
+                RunSql2 $sqlStmt
+        fi
+else
+        ## Create initial record
         sqlStmt="insert into perfTest values(NULL,\"$(cut -d'.' -f1 <<< $(hostname))\",\"$(date +'%m-%d-%y %H:%M')\",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)"
         RunSql2 $sqlStmt
         idx=${resultSet[0]}
         [[ -z $idx ]] && Terminate "Could not insert record into the '$warehouseDb.perfTest' table"
 
-## Run test using local file systems
+        ## Run test using local file systems
         unset localFSreal localFSuser localFSsys
         { time (
                         cd /tmp
@@ -48,7 +72,7 @@ count=${1-1000}
                 RunSql2 $sqlStmt
         done < $tmpFile;
 
-## Run test using remote file systems
+        ## Run test using remote file systems
         mkdir -p /steamboat/leepfrog/docs/tools/perfTest
         { time (
                         cd /steamboat/leepfrog/docs/tools/perfTest
@@ -77,7 +101,7 @@ count=${1-1000}
                 RunSql2 $sqlStmt
         done < $tmpFile;
 
-## Run database tests
+        ## Run database tests
         set -f
         sqlStmt="select * from sites where name is not null order by name"
         { time (
@@ -94,9 +118,13 @@ count=${1-1000}
                 RunSql2 $sqlStmt
         done < $tmpFile;
 
-## Cleanup
+        ## Cleanup
         echo
-        rm -rf /steamboat/leepfrog/docs/tools/perfTest
-        rm -f "$tmpFile"
+        [[ -f "/steamboat/leepfrog/docs/tools/perfTest" ]] && rm -rf "/steamboat/leepfrog/docs/tools/perfTest"
+        [[ -f "$tmpFile" ]] && rm -f "$tmpFile"
+fi
+
+
 ## Thu Jan  5 16:36:09 CST 2017 - dscudiero - Add time stamp to the date field
 ## Thu Jan 12 12:41:53 CST 2017 - dscudiero - Switch to use RunSql2
+## Fri Jan 27 14:30:03 CST 2017 - dscudiero - Add summary mode
