@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.99 # -- dscudiero -- 01/27/2017 @  8:00:01.02
+version=2.1.101 # -- dscudiero -- 01/27/2017 @ 14:20:35.49
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -188,7 +188,32 @@ case "$hostName" in
 			[[ $(date "+%H") == 12 ]] && Call 'syncCourseleafGitRepos' 'master'
 			;;
 	*)
+			sleep 30
 			Call 'perfTest'
+				SetFileExpansion 'off'
+				sqlStmt="select * from perftest where date like \"%$(date +%H):00%\""
+				RunSql2 $sqlStmt
+				SetFileExpansion
+				if [[ ${#resultSet[@]} -eq 2 ]]; then
+					unset valuesStr
+					# fields='localfsreal localfsuser localfssys remotefsreal remotefsuser remotefssys dbreadreal dbreaduser dbreadsys'
+					for ((i=4; i<13; i++)); do
+						unset int1 int2 real1 real2 percent valuesStr
+						real1="$(cut -d'|' -f$i <<< ${resultSet[0]})"
+						int1="$(tr -d '.' <<< $real1)"
+						real2="$(cut -d'|' -f$i <<< ${resultSet[1]})"
+						int2="$(tr -d '.' <<< $real2)"
+						let delta=$int2-$int1
+						percent=$((200*$delta/$int2 % 2 + 100*$delta/$int2))
+						#dump -n field -t real1 int1 real2 int2 delta percent
+						valuesStr="$valuesStr,\"${percent}%\""
+					done
+
+					valuesStr="NULL,\"\",\"$(date +'%m-%d-%y %H:%M')\"$valuesStr"
+					sqlStmt="insert into perftest values($valuesStr)"
+					RunSql2 $sqlStmt
+				fi
+
 			CheckMonitorFiles
 			;;
 esac
@@ -207,3 +232,4 @@ return 0
 ## Wed Jan 25 08:03:11 CST 2017 - dscudiero - change location of internalDb shadow
 ## Wed Jan 25 09:33:50 CST 2017 - dscudiero - pull location of internals db shadow from defaults
 ## Fri Jan 27 08:00:12 CST 2017 - dscudiero - Add perftest
+## Fri Jan 27 14:21:16 CST 2017 - dscudiero - Add perftest summary record generation
