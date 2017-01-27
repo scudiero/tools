@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=1.1.18 # -- dscudiero -- 01/12/2017 @ 10:17:31.24
+version=1.1.20 # -- dscudiero -- 01/27/2017 @ 10:11:47.14
 #===================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye WriteChangelogEntry BackupCourseleafFile'
@@ -132,7 +132,7 @@ masterDate=$(stat -c %y $refreshSrcDir | cut -d'.' -f1 | awk 'BEGIN {FS=" "}{pri
 	fi
 
 	if [[ $refreshVersion == '' ]]; then
-		currentRel=$(ls -t $TOOLSPATH/courseleafGitRepoShadow/courseleaf | grep -v master | head -1)
+		currentRel=$(ls -t $gitRepoShadow/courseleaf | grep -v master | head -1)
 		if [[ $(Contains "$ignoreCatReleases" "$currentRel") == true ]]; then
 			unset currentRel
 			refreshVersion='master'
@@ -273,3 +273,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client)")/$(ColorK "$(Upper $env)") to $(C
 ## Wed Oct 19 10:35:53 CDT 2016 - dscudiero - Call courseleafPatch not courseleafReresh
 ## Wed Oct 19 10:42:36 CDT 2016 - dscudiero - fixed another reference to courseleafRefresh
 ## Thu Jan 12 10:23:48 CST 2017 - dscudiero - Add logic to get siteDir if nocheck is specified
+## Fri Jan 27 10:12:24 CST 2017 - dscudiero - Update finding out what the latest release of courseleaf is to use defaults variable for directory
