@@ -29,8 +29,10 @@ if [[ $mode == 'summary' ]]; then
                         unset int1 int2 real1 real2 percent
                         real1="$(cut -d'|' -f$i <<< ${resultSet[0]})"
                         int1="$(tr -d '.' <<< $real1)"
+                        int1=$(sed 's/^0//' <<< $int1)
                         real2="$(cut -d'|' -f$i <<< ${resultSet[1]})"
                         int2="$(tr -d '.' <<< $real2)"
+                        int2=$(sed 's/^0//' <<< $int2)
                         let delta=$int2-$int1
                         percent=$((200*$delta/$int2 % 2 + 100*$delta/$int2))
                         #dump -n field -t real1 int1 real2 int2 delta percent
@@ -135,3 +137,4 @@ fi
 ## Fri Jan 27 14:30:03 CST 2017 - dscudiero - Add summary mode
 ## Fri Jan 27 15:16:37 CST 2017 - dscudiero - Add debug messages
 ## Fri Feb  3 11:28:48 CST 2017 - dscudiero - Remove debug statements
+## Fri Feb  3 14:13:39 CST 2017 - dscudiero - Remove leading zeros from integers befor calculating the percentage
