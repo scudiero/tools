@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.102 # -- dscudiero -- 01/27/2017 @ 14:29:32.18
+version=2.1.103 # -- dscudiero -- 02/03/2017 @ 11:28:05.08
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -26,7 +26,7 @@ scriptArgs="$*"
 #=======================================================================================================================
 # Synchronize the internal database shadow with master
 function SyncInternalDb {
-	Msg2; Msg2 "*** $FUNCNAME -- Starting ***"
+	echo; Msg2 "*** $FUNCNAME -- Starting ***"
 	srcDir=$clientsTransactionalDb
 	tgtDir=$internalContactsDbShadow
 	SetFileExpansion 'on'
@@ -43,7 +43,7 @@ function SyncInternalDb {
 #=======================================================================================================================
 # Synchronize the courseleaf cgi's  shadow with master
 function SyncCourseleafCgis {
-	Msg2; Msg2 "*** $FUNCNAME -- Starting ***"
+	echo; Msg2 "*** $FUNCNAME -- Starting ***"
 	srcDir=/mnt/dev6/web/cgi
 	tgtDir=$cgisRoot
 	rsync -aq $srcDir/ $tgtDir 2>&1
@@ -57,7 +57,7 @@ function SyncCourseleafCgis {
 #=======================================================================================================================
 # Synchronize the skeleton shadow with master
 function SyncSkeleton {
-	Msg2; Msg2 "*** $FUNCNAME -- Starting ***"
+	echo; Msg2 "*** $FUNCNAME -- Starting ***"
 	srcDir=/mnt/dev6/web/_skeleton
 	tgtDir=$skeletonRoot
 
@@ -84,7 +84,7 @@ function SyncSkeleton {
 #=======================================================================================================================
 # Check Monitored files for changes
 function CheckMonitorFiles {
-	Msg2; Msg2 "*** $FUNCNAME -- Starting ***"
+	echo; Msg2 "*** $FUNCNAME -- Starting ***"
 
 	declare -A userNotifies
 	echo "set realname=\"File Monitor\"" > $tmpFile.2
@@ -137,7 +137,7 @@ function CheckMonitorFiles {
 
 #=======================================================================================================================
 function BuildToolsAuthTable() {
-	Msg2; Msg2 "*** $FUNCNAME -- Starting ***"
+	echo; Msg2 "*** $FUNCNAME -- Starting ***"
 	## Build the toolsgroups table from the role data from the stage-internal site
 		pw=$(GetPW 'stage-internal')
 		[[ $pw == '' ]] && Msg2 "T Could not lookup password for 'stage-internal' in password file.\n"
@@ -211,3 +211,4 @@ return 0
 ## Fri Jan 27 08:00:12 CST 2017 - dscudiero - Add perftest
 ## Fri Jan 27 14:21:16 CST 2017 - dscudiero - Add perftest summary record generation
 ## Fri Jan 27 14:29:55 CST 2017 - dscudiero - General syncing of dev to prod
+## Fri Feb  3 11:28:29 CST 2017 - dscudiero - Change Msg2; Msg2 to echo; Msg2
