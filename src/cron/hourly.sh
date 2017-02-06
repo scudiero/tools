@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.103 # -- dscudiero -- 02/03/2017 @ 11:28:05.08
+version=2.1.104 # -- dscudiero -- 02/06/2017 @  9:05:41.08
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -87,7 +87,6 @@ function CheckMonitorFiles {
 	echo; Msg2 "*** $FUNCNAME -- Starting ***"
 
 	declare -A userNotifies
-	echo "set realname=\"File Monitor\"" > $tmpFile.2
 	## Get a list of currently defined monitoried files
 		sqlStmt="select file,userlist from monitorfiles where host=\"$hostName\""
 		RunSql2 "$sqlStmt"
@@ -212,3 +211,4 @@ return 0
 ## Fri Jan 27 14:21:16 CST 2017 - dscudiero - Add perftest summary record generation
 ## Fri Jan 27 14:29:55 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Feb  3 11:28:29 CST 2017 - dscudiero - Change Msg2; Msg2 to echo; Msg2
+## Mon Feb  6 09:19:58 CST 2017 - dscudiero - Remove debug message
