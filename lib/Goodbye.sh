@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.84" # -- dscudiero -- 01/19/2017 @  7:26:27.77
+# version="2.0.85" # -- dscudiero -- 02/06/2017 @ 12:56:35.44
 #===================================================================================================
 # Common script exit
 # args:
@@ -80,29 +80,29 @@ function Goodbye {
 						local numMsgs=0
 						Alert 'off'
 						if [[ ${#summaryMsgs[@]} -gt 0 && $displayGoodbyeSummaryMessages == true ]]; then
-							Msg2
+							echo
 							PrintBanner "Processing Summary"
-							Msg2
+							echo
 							for msg in "${summaryMsgs[@]}"; do Msg2 "^$msg"; done
 							let numMsgs=$numMsgs+${#summaryMsgs[@]}
 						fi
 						if [[ ${#warningMsgs[@]} -gt 0 && $displayGoodbyeSummaryMessages == true ]]; then
-							Msg2
+							echo
 							PrintBanner "${#warningMsgs[@]} warning message(s) were issued during processing"
-							Msg2
+							echo
 							for msg in "${warningMsgs[@]}"; do Msg2 "^$msg"; done
 							let numMsgs=$numMsgs+${#warningMsgs[@]}
 						fi
 						if [[ ${#errorMsgs[@]} -gt 0 && $displayGoodbyeSummaryMessages == true ]]; then
-							Msg2
+							echo
 							PrintBanner "${#errorMsgs[@]} error message(s) were issued during processing"
-							Msg2
+							echo
 							for msg in "${errorMsgs[@]}"; do Msg2 "^$msg"; done
 							let numMsgs=$numMsgs+${#errorMsgs[@]}
 						fi
 						[[ $numMsgs -gt 0 ]] && printf "\n$(PadChar)\n"
 						Alert 'on'
-						Msg2
+						echo
 
 					fi
 					[[ $DOIT != '' ]] && Msg2 "$(ColorE "*** The 'DOIT' flag is turned off, changes not committed ***")"
@@ -142,3 +142,4 @@ export -f Goodbye
 ## Wed Jan 11 07:50:53 CST 2017 - dscudiero - Switch to use ProcessLogger
 ## Thu Jan 19 07:13:36 CST 2017 - dscudiero - Add debug statement
 ## Thu Jan 19 07:26:50 CST 2017 - dscudiero - Remove debug statements
+## Mon Feb  6 12:58:43 CST 2017 - dscudiero - switch bar Msg2 to echo
