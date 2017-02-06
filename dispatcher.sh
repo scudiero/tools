@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.60" # -- dscudiero -- 02/06/2017 @  9:29:06.23
+version="1.2.61" # -- dscudiero -- 02/06/2017 @ 10:32:10.71
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -99,8 +99,11 @@ userName=/tmp/$LOGNAME
 ## Initial Checks
 	sTime=$(date "+%s")
 	[[ "$0" = "-bash" ]] && callPgmName=bashShell || callPgmName=$(basename "$0")
-	[[ -z $(getent group leepfrog | grep ','$userName) ]] && \
-		echo "*Error* -- User '$userName' is not a member or the 'leepfrog' unix group, please contact the Unix Admin team" && exit -1
+
+	leepUsers="$(getent group leepfrog)"
+	leepUsers=",${leepUsers##*:},"
+	grep -q ",$userName," <<< "$leepUsers" ; rc=$?
+	[[ $rc -ne 0 ]] && echo "*Error* -- User '$userName' is not a member or the 'leepfrog' unix group, please contact the Unix Admin team" && exit -1
 
 	trueDir="$(dirname "$(readlink -f "$0")")"
 	$GD "==== Starting $trueDir/dispatcher callPgmName: '$callPgmName' -- $(date) ====";
@@ -349,3 +352,4 @@ prtStatus "parse args"
 ## Wed Jan 18 15:00:06 CST 2017 - dscudiero - add debug code
 ## Thu Jan 19 07:13:30 CST 2017 - dscudiero - Add debug statement
 ## Mon Feb  6 09:29:28 CST 2017 - dscudiero - Set tmpRoot
+## Mon Feb  6 10:32:37 CST 2017 - dscudiero - Update logic for checking if user is in the leepfrog group
