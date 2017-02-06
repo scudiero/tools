@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.40" # -- dscudiero -- 01/04/2017 @ 13:49:14.72
+# version="2.0.42" # -- dscudiero -- 02/06/2017 @  9:40:20.94
 #===================================================================================================
 # Process interrupts
 #===================================================================================================
@@ -15,13 +15,14 @@ function SignalHandeler {
     local errorCode="$3"
     parentModule="$(echo $(caller) | cut -d' ' -f2)"
     local errorLine="$(Trim "$(sed "$errorLineNo!d" "$parentModule")")"
+    parentModule=$(basename $parentModule)
     #dump -p sig errorLineNo errorCode parentModule errorLine
     #printf '%s\n' "${BASH_SOURCE[@]}"
     local message
 
     case "$sig" in
         ERR)
-            message="$FUNCNAME: Unknown error condition ($errorCode) raised in module\n^$parentModule, $(ColorE "line($errorLineNo)"):\n^$(ColorK "$errorLine")"
+            message="$FUNCNAME: Unknown error condition ($errorCode) raised in module^$parentModule, $(ColorE "\nline($errorLineNo)"): '(ColorK "$errorLine")'"
             ;;
         EXIT|SIGEXIT|SIGHUP|SIGTERM)
             unset message
@@ -39,7 +40,7 @@ function SignalHandeler {
     if [[ $message != '' && $errorCode != '255' ]]; then
         echo -e "\n$(PadChar)"
         ErrorMsg "$message";
-        Msg2 "^Call Stack: $(GetCallStack)"
+        Msg2 "\n^Call Stack: $(GetCallStack)"
         echo -e "$(PadChar)\n"
     fi
     trap - EXIT
@@ -53,3 +54,4 @@ export -f SignalHandeler
 #===================================================================================================
 
 ## Wed Jan  4 13:54:30 CST 2017 - dscudiero - General syncing of dev to prod
+## Mon Feb  6 09:41:06 CST 2017 - dscudiero - Tweak messaging
