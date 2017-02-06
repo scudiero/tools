@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.55 # -- dscudiero -- 01/24/2017 @ 12:47:43.08
+version=3.8.70 # -- dscudiero -- 02/03/2017 @ 16:11:19.26
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -106,10 +106,10 @@ scriptDescription="Load Courseleaf Data"
 		if [[ ${#resultSet[@]} -ne 0 ]]; then
 			for resultRec in "${resultSet[@]}"; do
 				dump -2 resultRec
-				key=$(echo $resultRec | cut -d '|' -f 1)
+				key=$(cut -d '|' -f 1 <<< "$resultRec")
 				key=$(cut -d'.' -f1 <<< $key)
 				[[ $key == '' ]] && continue
-				value=$(echo $resultRec | cut -d '|' -f 2)'|'$(echo $resultRec | cut -d '|' -f 3)'|'$(echo $resultRec | cut -d '|' -f 4)
+				value=$(cut -d '|' -f 2 <<< "$resultRec")'|'$(cut -d '|' -f 3 <<< "$resultRec")'|'$(cut -d '|' -f 4 <<< "$resultRec")
 				usersFromDb["$key"]="$value"
 			done
 		fi
@@ -130,9 +130,9 @@ scriptDescription="Load Courseleaf Data"
 			[[ ! -r $file ]] && Terminate "Could not read the roles file: '$file'"
 			while read line; do
 				if [[ ${line:0:5} == 'role:' ]]; then
-					key=$(echo $line | cut -d '|' -f 1 | cut -d ':' -f 2)
+					key=$(cut -d '|' -f 1 <<< "$line" | cut -d ':' -f 2)
 					[[ $key == '' ]] && continue
-					data=$(Trim $(echo $line | cut -d '|' -f 2-))
+					data=$(Trim $(cut -d '|' -f 2- <<< "$line"))
 					dump -3 -n line key data
 			      	rolesFromFile+=([$key]="$data")
 			      	rolesOut+=([$key]="$data")
@@ -155,7 +155,7 @@ scriptDescription="Load Courseleaf Data"
 			[[ ! -r $file ]] && Terminate "Could not read the '$file' file"
 			while read line; do
 				if [[ ${line:0:9} == 'workflow:' ]]; then
-					key=$(echo $line | cut -d ':' -f 2 | cut -d '|' -f 1)
+					key=$(cut -d ':' -f 2 <<< "$line" | cut -d '|' -f 1)
 					[[ $key == '' ]] && continue
 					workflowsFromFile[$key]=true
 		      	fi
@@ -273,11 +273,11 @@ scriptDescription="Load Courseleaf Data"
 			## Read/Parse the data rows into hash table
 			while read line; do
 				[[ $line == '' ]] && continue
-				key=$(echo $line | cut -d '|' -f $useridCol)
+				key=$(cut -d '|' -f $useridCol <<< "$line")
 				[[ $useridCase == 'U' ]] && key=$(Upper $key)
 				[[ $useridCase == 'L' ]] && key=$(Lower $key)
-				[[ $uinCol == '' ]] && value=$(echo $line | cut -d '|' -f $lastCol)'|'$(echo $line | cut -d '|' -f $firstCol)'|'$(echo $line | cut -d '|' -f $emailCol) || \
-							value=$(echo $line | cut -d '|' -f $lastCol)'|'$(echo $line | cut -d '|' -f $firstCol)'|'$(echo $line | cut -d '|' -f $emailCol)'|'$(echo $line | cut -d '|' -f $uinCol)
+				[[ $uinCol == '' ]] && value=$(cut -d '|' -f $lastCol <<< "$line")'|'$(cut -d '|' -f $firstCol <<< "$line")'|'$(cut -d '|' -f $emailCol <<< "$line") || \
+									value=$(cut -d '|' -f $lastCol <<< "$line")'|'$(cut -d '|' -f $firstCol <<< "$line")'|'$(cut -d '|' -f $emailCol <<< "$line")'|'$(cut -d '|' -f $uinCol <<< "$line")
 				dump -2 -n line -t key value
 				[[ $key == '' ]] && continue
 				key=$(cut -d'.' -f1 <<< $key)
@@ -309,11 +309,13 @@ scriptDescription="Load Courseleaf Data"
 			BackupCourseleafFile $dbFile
 			local procesingCntr=0
 			for key in "${!usersFromSpreadsheet[@]}"; do
-				#value="${rolesFromSpreadsheet["$key"]}"
+				[[ $verboseLevel -ge 1 ]] && echo -e "\t\${usersFromSpreadsheet["$key"]} = '${usersFromSpreadsheet["$key"]}'"
 				unset lname fname email
-				lname=$(Trim "$(echo ${usersFromSpreadsheet["$key"]} | cut -d '|' -f 1)")
-				fname=$(Trim "$(echo ${usersFromSpreadsheet["$key"]} | cut -d '|' -f 2)")
-				email=$(Trim "$(echo ${usersFromSpreadsheet["$key"]} | cut -d '|' -f 3)")
+				lname=$(Trim "$(cut -d '|' -f1 <<< ${usersFromSpreadsheet["$key"]})")
+				fname=$(Trim "$(cut -d '|' -f2 <<< ${usersFromSpreadsheet["$key"]})")
+				email=$(Trim "$(cut -d '|' -f3 <<< ${usersFromSpreadsheet["$key"]})")
+				dump -1 -t-t lname fname email
+
 				if [[ ${usersFromDb["$key"]+abc} ]]; then
 					unset oldData;  oldData="${usersFromDb["$key"]}"
 					[[ ${oldData:(-1)} == '|' ]] && oldData=${oldData:0:${#oldData}-1}
@@ -337,7 +339,7 @@ scriptDescription="Load Courseleaf Data"
 				fi
 				# If useUINs is active then build userid to uin map from the email information
 				if [[ $useUINs == true ]]; then
-					uid=$(echo ${usersFromDb["$key"]} | cut -d'|' -f 3 | cut -d'@' -f1)
+					uid=$(cut -d'|' -f 3 <<< $string | cut -d'@' -f1)
 					uidUinHash["$uid"]="$key"
 				fi
 				[[ $procesingCntr -ne 0 && $(($procesingCntr % 100)) -eq 0 ]] && Msg2 "^Processed $procesingCntr out of $numUsersfromSpreadsheet..."
@@ -372,9 +374,9 @@ scriptDescription="Load Courseleaf Data"
 			## Read/Parse the data rows into hash table
 			while read line; do
 				[[ $line == '' ]] && continue
-				key=$(echo $line | cut -d '|' -f $nameCol)
-				value=$(echo $line | cut -d '|' -f $membersCol)'|'$(echo $line | cut -d '|' -f $emailCol)
-				value=$(echo $value | tr -d ' ')
+				key=$(cut -d '|' -f $nameCol <<< $line)
+				value=$(cut -d '|' -f $membersCol <<< "$line")'|'$(cut -d '|' -f $emailCol <<< "$line")
+				value=$(tr -d ' ' <<< $value)
 				dump -2  -n line -t key value
 				[[ $key == '' ]] && continue
 				[[ $(IsNumeric ${value:0:1}) == true ]] && value=$(cut -d'.' -f1 <<< $value)
@@ -403,8 +405,8 @@ scriptDescription="Load Courseleaf Data"
 			local procesingCntr=0
 			for key in "${!rolesFromSpreadsheet[@]}"; do
 				## Edit role data if useUINs is on
-					memberData="$(echo "${rolesFromSpreadsheet["$key"]}" | cut -d'|' -f 1)"
-					emailData="$(echo "${rolesFromSpreadsheet["$key"]}" | cut -d'|' -f 2)"
+					memberData="$(cut -d'|' -f 1 <<< "${rolesFromSpreadsheet["$key"]}")"
+					emailData="$(cut -d'|' -f 2 <<< "${rolesFromSpreadsheet["$key"]}")"
 					newMemberData="$(EditRoleMembers "$memberData")"
 					if [[ $memberData != $newMemberData ]]; then
 						rolesFromSpreadsheet["$key"]="$newMemberData|$emailData"
@@ -472,7 +474,7 @@ scriptDescription="Load Courseleaf Data"
 				numRoleMembersNotProvisoned=0
 				Msg2 "Checking Role members..."
 				for key in "${!rolesOut[@]}"; do
-					members=$(echo ${rolesOut["$key"]} | cut -d '|' -f 1)
+					members=$(cut -d '|' -f1 <<< "${rolesOut["$key"]}")
 					#IFSsave=$IFS; IFS=','
 					for member in $(tr ',' ' ' <<< $members); do
 						if [[ ! ${usersFromDb["$member"]+abc} ]]; then
@@ -508,7 +510,7 @@ scriptDescription="Load Courseleaf Data"
 			numPagesNotFound=0
 			while read line; do
 				[[ -z $line ]] && continue
-				key=$(echo $line | cut -d '|' -f $pathCol)
+				key=$(cut -d '|' -f $pathCol <<< "$line")
 				dump -1 line -t key
 				[[ -z $key ]] && WarningMsg 0 1 "Work Sheet record:\n^^$line\n\tDoes not contain any path/url data, skipping" && continue
 				if [[ $key != '/' && ! -d $(dirname $srcDir/web/$key) ]]; then
@@ -516,7 +518,7 @@ scriptDescription="Load Courseleaf Data"
 					((numPagesNotFound += 1))
 					continue
 				fi
-				value=$(echo $line | cut -d '|' -f $titleCol)'|'$(echo $line | cut -d '|' -f $ownerCol)'|'$(echo $line | cut -d '|' -f $workflowCol)
+				value=$(cut -d '|' -f $titleCol <<< "$line")'|'$(cut -d '|' -f $ownerCol <<< "$line")'|'$(cut -d '|' -f $workflowCol <<< "$line")
 				dump -2 -n line -t key value
 				if [[ ${workflowDataFromSpreadsheet["$key"]} != '' ]]; then
 					if [[ ${workflowDataFromSpreadsheet["$key"]} != $value ]]; then
@@ -558,10 +560,10 @@ scriptDescription="Load Courseleaf Data"
 			Msg2 "^$verb catalog page data (this takes a while)..."
 			local procesingCntr=0
 			for key in "${!workflowDataFromSpreadsheet[@]}"; do
-				pageTitle="$(echo ${workflowDataFromSpreadsheet[$key]} | cut -d'|' -f1)"
-				pageOwner="$(CleanString $(echo ${workflowDataFromSpreadsheet[$key]} | cut -d'|' -f2))"
-				pageWorkflow="$(echo ${workflowDataFromSpreadsheet[$key]} | cut -d'|' -f3)"
-
+				tmpData="${workflowDataFromSpreadsheet[$key]}"
+				pageTitle="$(cut -d'|' -f1 <<< "$tmpData")"
+				pageOwner="$(CleanString "$(cut -d'|' -f2 <<< "$tmpData")")"
+				pageWorkflow="$(cut -d'|' -f3 <<< "$tmpData")"
 				## Check to see if the pageWorkflow data is a real defined workflow
 					# foundNamedWorkflow=false
 					# if [[ $pageWorkflow != '' && ${workflowsFromFile["$pageWorkflow"]} == true ]]; then
@@ -631,6 +633,8 @@ scriptDescription="Load Courseleaf Data"
 step='setPageData'
 falseVars='processUserData processRoleData processPageData processedUserData processedRoleData processedWorkflowData noUinMap uinMap useUINs informationOnlyMode'
 for var in $falseVars; do eval $var=false; done
+unset numUsersfromDb numUsersfromSpreadsheet numRolesFromFile numRolesfromSpreadsheet numWorkflowDataFromSpreadsheet numPagesUpdated
+unset numRoleMembersNotProvisoned numRoleMembersMappedToUIN numModifiedRoles numNewRoles
 
 declare -A usersFromSpreadsheet
 declare -A usersFromDb
@@ -825,7 +829,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 
 		if [[ $processRoleData == true ]]; then
 			if [[ $(Contains "$(Lower $sheets)" 'role') == true ]]; then
-				[[ $processUserData != true ]] && GetUsersDataFromDB
+				[[ $processUserData != true && -z numUsersfromDb ]] && GetUsersDataFromDB
 				## find the 'roles' sheet
 				unset rolesSheet
 				for sheet in $(tr ',' ' ' <<< $sheets); do
@@ -841,7 +845,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 
 		if [[ $processPageData == true ]]; then
 			if [[ $(Contains "$(Lower $sheets)" 'workflow') == true || $(Contains "$(Lower $sheets)" 'page') == true ]]; then
-				[[ $processUserData != true ]] && GetUsersDataFromDB
+				[[ $processUserData != true  && -z numUsersfromDb ]] && GetUsersDataFromDB
 				[[ $processRoleData != true ]] && GetRolesDataFromFile && rolesOut=${rolesFromFile[@]}
 				GetWorkflowDataFromFile
 				ProcessCatalogPageData
@@ -983,3 +987,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## Wed Jan 18 14:59:40 CST 2017 - dscudiero - Import WriteChangelogEntry
 ## Tue Jan 24 08:34:58 CST 2017 - dscudiero - Add 'information only' verbiage to messaging
 ## Tue Jan 24 12:48:26 CST 2017 - dscudiero - Tweak changelog text
+## Mon Feb  6 08:17:01 CST 2017 - dscudiero - General syncing of dev to prod
