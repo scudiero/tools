@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.72 # -- dscudiero -- 02/06/2017 @  9:53:08.51
+version=3.8.73 # -- dscudiero -- 02/06/2017 @ 13:04:45.33
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -43,7 +43,7 @@ scriptDescription="Load Courseleaf Data"
 	#==============================================================================================
 	function Goodbye-loadCourseleafData  {
 		local exitCode="$1"
-		[[ -f $tmpWorkbookFile == true ]] && rm $workbookFile
+		[[ $tmpWorkbookFile == true ]] && rm -f $workbookFile
 		[[ -f $stepFile ]] && rm -f $stepFile
 		[[ -f $backupStepFile ]] && mv -f $backupStepFile $stepFile
 		[[ -f "$tmpDataFile" ]] && rm -f "$tmpDataFile"
@@ -991,3 +991,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## Mon Feb  6 08:17:01 CST 2017 - dscudiero - General syncing of dev to prod
 ## Mon Feb  6 09:41:54 CST 2017 - dscudiero - Set tmpFile
 ## Mon Feb  6 12:59:49 CST 2017 - dscudiero - remove the temporary workkbook file if one is used
+## Mon Feb  6 13:04:58 CST 2017 - dscudiero - fix syntax error
