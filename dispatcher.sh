@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.59" # -- dscudiero -- 01/18/2017 @ 15:21:11.20
+version="1.2.60" # -- dscudiero -- 02/06/2017 @  9:29:06.23
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -91,6 +91,7 @@ statusLine="\tDispatcher ($version): "
 # Who is the logged in user
 [[ -n $(which logname 2>&1) ]] && userName=$(logname 2>&1) || userName=$LOGNAME
 [[ $userName == 'dscudiero' ]] && userName=$LOGNAME
+userName=/tmp/$LOGNAME
 
 #==================================================================================================
 # Parse arguments
@@ -347,3 +348,4 @@ prtStatus "parse args"
 ## Fri Jan 13 15:25:28 CST 2017 - dscudiero - Move setting of classpath in from init
 ## Wed Jan 18 15:00:06 CST 2017 - dscudiero - add debug code
 ## Thu Jan 19 07:13:30 CST 2017 - dscudiero - Add debug statement
+## Mon Feb  6 09:29:28 CST 2017 - dscudiero - Set tmpRoot
