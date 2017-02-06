@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.75 # -- dscudiero -- 02/06/2017 @ 13:44:03.16
+version=3.8.76 # -- dscudiero -- 02/06/2017 @ 16:10:48.98
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -928,9 +928,9 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 	## Write out change log entries
 	if [[ $informationOnlyMode != true ]]; then
 		changeLogLines=("Data updated from '$workbookFile':")
-		[[ $processedUserData == true ]] && changeLogLines+=("\tUser data")
-		[[ $processedRoleData == true ]] && changeLogLines+=("\tRole data")
-		[[ $processedPageData == true ]] && changeLogLines+=("\tPage data")
+		[[ $processedUserData == true ]] && changeLogLines+=("^User data")
+		[[ $processedRoleData == true ]] && changeLogLines+=("^Role data")
+		[[ $processedPageData == true ]] && changeLogLines+=("^Page data")
 		WriteChangelogEntry 'changeLogLines' "$srcDir/changelog.txt"
 	fi
 
@@ -993,3 +993,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## Mon Feb  6 12:59:49 CST 2017 - dscudiero - remove the temporary workkbook file if one is used
 ## Mon Feb  6 13:04:58 CST 2017 - dscudiero - fix syntax error
 ## Mon Feb  6 13:44:35 CST 2017 - dscudiero - Add client and env to the goodbye / complete message
+## Mon Feb  6 16:11:14 CST 2017 - dscudiero - tweak messageing written out to changelog
