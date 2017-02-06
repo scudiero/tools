@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.73 # -- dscudiero -- 02/06/2017 @ 13:04:45.33
+version=3.8.75 # -- dscudiero -- 02/06/2017 @ 13:44:03.16
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -509,7 +509,7 @@ scriptDescription="Load Courseleaf Data"
 			## Read/Parse the data rows into hash table
 			numPagesNotFound=0
 			while read line; do
-				[[ -z $line ]] && continue
+				[[ -z $line || $line == '|||' ]] && continue
 				key=$(cut -d '|' -f $pathCol <<< "$line")
 				dump -1 line -t key
 				[[ -z $key ]] && WarningMsg 0 1 "Work Sheet record:\n^^$line\n\tDoes not contain any path/url data, skipping" && continue
@@ -939,7 +939,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## Done
 #==================================================================================================
 ## Exit nicely
-	Goodbye 0 #'alert'
+	Goodbye 0 'alert' "$client/$env"
 
 #==================================================================================================
 ## Check-in log
@@ -992,3 +992,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## Mon Feb  6 09:41:54 CST 2017 - dscudiero - Set tmpFile
 ## Mon Feb  6 12:59:49 CST 2017 - dscudiero - remove the temporary workkbook file if one is used
 ## Mon Feb  6 13:04:58 CST 2017 - dscudiero - fix syntax error
+## Mon Feb  6 13:44:35 CST 2017 - dscudiero - Add client and env to the goodbye / complete message
