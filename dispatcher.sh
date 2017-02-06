@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.61" # -- dscudiero -- 02/06/2017 @ 10:32:10.71
+version="1.2.62" # -- dscudiero -- 02/06/2017 @ 10:35:56.03
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -91,7 +91,7 @@ statusLine="\tDispatcher ($version): "
 # Who is the logged in user
 [[ -n $(which logname 2>&1) ]] && userName=$(logname 2>&1) || userName=$LOGNAME
 [[ $userName == 'dscudiero' ]] && userName=$LOGNAME
-userName=/tmp/$LOGNAME
+tmpRoot=/tmp/$LOGNAME
 
 #==================================================================================================
 # Parse arguments
@@ -353,3 +353,4 @@ prtStatus "parse args"
 ## Thu Jan 19 07:13:30 CST 2017 - dscudiero - Add debug statement
 ## Mon Feb  6 09:29:28 CST 2017 - dscudiero - Set tmpRoot
 ## Mon Feb  6 10:32:37 CST 2017 - dscudiero - Update logic for checking if user is in the leepfrog group
+## Mon Feb  6 10:36:05 CST 2017 - dscudiero - set tmpFile
