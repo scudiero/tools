@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.14 # -- dscudiero -- 01/27/2017 @  8:04:21.56
+version=4.3.19 # -- dscudiero -- 02/07/2017 @  8:34:15.52
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -77,8 +77,8 @@ Hello
 		let tmpLen=${#tableName}-3
 		[[ ${tableName:$tmpLen:3} == 'New' ]] && useSiteAdminsTable="${siteAdminsTable}New"
 	fi
-	sqlStmt="SELECT count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") AND (TABLE_NAME = \"$useSiteInfoTable\")"
-	RunSql2 $RunSql2
+	sqlStmt="select count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA=\"$warehouseDb\") AND (TABLE_NAME=\"$useSiteInfoTable\")"
+	RunSql2 $sqlStmt
 	[[ ${resultSet[0]} -ne 1 ]] && Terminate "Could not locate the load table '$useSiteInfoTable'"
 
 
@@ -216,3 +216,4 @@ Goodbye 0 'alert'
 ## Thu Jan 26 07:31:31 CST 2017 - dscudiero - Add a check to make sure the target table exists
 ## Thu Jan 26 07:50:16 CST 2017 - dscudiero - Tweak messaging
 ## Fri Jan 27 08:04:43 CST 2017 - dscudiero - General syncing of dev to prod
+## Tue Feb  7 08:34:51 CST 2017 - dscudiero - Fix bug checking if the passed table name exists
