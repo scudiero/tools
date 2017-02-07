@@ -1,5 +1,5 @@
 //======================================================================================================================
-// version:1.6.91 // -- dscudiero -- 02/07/2017 @  9:55:13.07
+// version:1.6.90 // -- dscudiero -- 01/25/2017 @ 16:00:30.45
 //======================================================================================================================
 // Common wf functions and helper functions to support workflow
 //======================================================================================================================
@@ -204,7 +204,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 				if (wfCimInstance === "courseadmin") {
 					if (eval("typeof tcfdata." + codeVarName) === 'undefined') {
 						throw "Failed '" + codeVarName + "' not null check"
-					} else { proposalCode=eval("tcfdata." + codeVarName + "[0].code")}
+					} else { proposalCode=eval("tcfdata." + codeVarName + "[0]")}
 
 					if (eval("typeof tcfdata." + subjVarName) === 'undefined') {
 						throw "Failed '" + subjVarName + "' not null check"
@@ -499,7 +499,8 @@ wffuncs.Related = function(inval, wfrule, args) {
 					// We have a workflow step so substitute the data into the step name
 					step=inval
 					if (ecoSystemDataFyi != '' && token.source.substr(0,3) === 'eco') {
-						if (step.indexOf("fyi") < 0) step=step + ' ' + ecoSystemDataFyi;
+						// If the step name does not contain the string 'fyi' and ecoSystemDataFyi is true then add the 'fyi'
+						if (step.indexOf("fyi") < 0 && ecoSystemDataFyi === 'true') step=step + ' fyi';
 					}
 					retArray.push(step.replace(wfrule.regex,token.data).trim());
 					wfDebug(3,"\t\t" + retArray[retArray.length-1]);
