@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.108 # -- dscudiero -- 01/25/2017 @ 12:40:56.23
+# version=2.0.109 # -- dscudiero -- 02/07/2017 @ 13:32:40.71
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -225,16 +225,20 @@ function Init {
 		else
 			unset validProducts
 			## Get the products for this client
-			sqlStmt="select products from $clientInfoTable where (name=\"$client\")"
-			RunSql2 $sqlStmt
-			if [[ ${#resultSet[@]} -gt 0 ]]; then
-				## Remove the extra vanity products from the validProducts list
-				for prod in $(tr ',' ' ' <<< ${resultSet[0]}); do
-					[[ $(Contains ",$skipProducts," ",$prod,") == true ]] && continue
-					validProducts="$validProducts,$prod"
-				done
-				[[ ${validProducts:0:1} == ',' ]] && validProducts=${validProducts:1}
-				validProducts="$(tr ',' ' ' <<< $validProducts)"
+			if [[ $noCheck != true ]]; then
+				sqlStmt="select products from $clientInfoTable where (name=\"$client\")"
+				RunSql2 $sqlStmt
+				if [[ ${#resultSet[@]} -gt 0 ]]; then
+					## Remove the extra vanity products from the validProducts list
+					for prod in $(tr ',' ' ' <<< ${resultSet[0]}); do
+						[[ $(Contains ",$skipProducts," ",$prod,") == true ]] && continue
+						validProducts="$validProducts,$prod"
+					done
+					[[ ${validProducts:0:1} == ',' ]] && validProducts=${validProducts:1}
+					validProducts="$(tr ',' ' ' <<< $validProducts)"
+				fi
+			else
+				validProducts='cat cim'
 			fi
 		fi
 		unset promptModifer
@@ -324,3 +328,4 @@ export -f Init
 ## Fri Jan 20 12:48:16 CST 2017 - dscudiero - cixes to getSrcEnv and getTgtEnv
 ## Mon Jan 23 12:41:16 CST 2017 - dscudiero - Fix problem setting tgtEnv
 ## Wed Jan 25 12:44:31 CST 2017 - dscudiero - Fix issue setting srcEnv and tgtEnv when abbreviated values were passed in on the command line
+## Tue Feb  7 15:15:43 CST 2017 - dscudiero - x
