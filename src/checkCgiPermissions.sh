@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.2.26 # -- dscudiero -- 12/14/2016 @ 11:21:05.14
+version=2.2.27 # -- dscudiero -- 02/07/2017 @  7:56:14.89
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -71,7 +71,7 @@ for searchSpec in $checkFiles; do
 			Msg2 "\nThe following files $connector not have correct (${checkPermissions:1}) file execute permissions: " | tee -a $tmpFile
 			printedHeader=true
 		fi
-		Msg "\n$file" | tee -a $tmpFile;
+		Msg2 "\n$file" | tee -a $tmpFile;
 		currentPermissions=$(ls -lc $file | awk 'BEGIN {FS=" "}{print $1}')
 		fileCtime=$(ls -lc $file | awk 'BEGIN {FS=" "}{printf "%s %s %s", $6, $7, $8}')
 		Msg2 "^Current permissions: '${currentPermissions:1}'" | tee -a $tmpFile;
@@ -112,3 +112,4 @@ Goodbye 0
 ## Mon Jul 11 08:33:33 CDT 2016 - dscudiero - Remove extra SetFilexpansion call
 ## Mon Aug 22 08:59:27 CDT 2016 - dscudiero - Switch to use mutt for email
 ## Wed Oct  5 10:17:58 CDT 2016 - dscudiero - Tweak emailing
+## Tue Feb  7 07:56:26 CST 2017 - dscudiero - Fix problem printing out file names
