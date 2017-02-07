@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.104 # -- dscudiero -- 02/06/2017 @  9:05:41.08
+version=2.1.105 # -- dscudiero -- 02/07/2017 @ 15:13:42.35
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -76,7 +76,9 @@ function SyncSkeleton {
 		chmod 750 $tgtDir
 		touch $tgtDir/.syncDate
 		if [[ -f $rsyncFilters ]]; then rm $rsyncFilters; fi
+		SetFileExpansion 'on'
 		cwd=$(pwd); cd $tgtDir; chgrp -R leepfrog *; chgrp leepfrog .*; cd "$cwd"
+		SetFileExpansion
 		Msg2 "*** $FUNCNAME -- Completed ***"
 	return 0
 } #SyncSkeleton
@@ -212,3 +214,4 @@ return 0
 ## Fri Jan 27 14:29:55 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Feb  3 11:28:29 CST 2017 - dscudiero - Change Msg2; Msg2 to echo; Msg2
 ## Mon Feb  6 09:19:58 CST 2017 - dscudiero - Remove debug message
+## Tue Feb  7 15:15:13 CST 2017 - dscudiero - allow file expansion for the chgrp in syncskeleton
