@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.181 # -- dscudiero -- 01/27/2017 @ 14:31:14.07
+version=1.21.182 # -- dscudiero -- 02/07/2017 @  7:43:21.99
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -162,7 +162,7 @@ function BuildCourseleafDataTable {
 	## Get Courseleaf component versions
 		components=($(find $gitRepoShadow -maxdepth 1 -mindepth 1 -type d -printf "%f "))
 		for component in "${components[@]}"; do
-			dirs=($(ls -c $gitRepoShadow/$component | ProtectedCall "grep -v master"))
+			dirs=($(ls -t $gitRepoShadow/$component | ProtectedCall "grep -v master"))
 			[[ ${#dirs[@]} -gt 0 ]] && latest=${dirs[0]} || latest='master'
 			dump -1 component latest
 			sqlStmt="insert into $courseleafDataTable values(NULL,\"$component\",NULL,\"$latest\",NOW(),\"$userName\")"
@@ -460,3 +460,4 @@ return 0
 ## Fri Jan 27 07:56:33 CST 2017 - dscudiero - Switch how perftest is called
 ## Fri Jan 27 08:05:09 CST 2017 - dscudiero - Fix table swap for build employees table
 ## Fri Jan 27 14:31:19 CST 2017 - dscudiero - General syncing of dev to prod
+## Tue Feb  7 07:54:13 CST 2017 - dscudiero - Fix loadCourseleafData function
