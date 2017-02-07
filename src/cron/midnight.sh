@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.182 # -- dscudiero -- 02/07/2017 @  7:43:21.99
+version=1.21.185 # -- dscudiero -- 02/07/2017 @  8:21:57.88
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -264,6 +264,13 @@ case "$hostName" in
 				if [[ ${#resultSet[@]} -eq 0 ]]; then
 					Error "Clients table is empty, skipping 'buildSiteInfoTable', semaphore kept in place"
 				else
+echo '*** BEFORE ***'
+sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"warehouse\") order by create_time desc"
+RunSql2 $sqlStmt
+for ((i=0; i<${#resultSet[@]}; i++)); do
+	echo -e "\tresultSet[$i] = >$(tr '|' '\t' <<< ${resultSet[$i]})<"
+done
+echo
 					## Create a temporary copy of the sites table, load new data to that table, backup master table
 					for table in $siteInfoTable $siteAdminsTable; do
 						sqlStmt="drop table if exists ${table}Bak"
@@ -275,6 +282,15 @@ case "$hostName" in
 						sqlStmt="rename table ${table} to ${table}Bak"
 						RunSql2 $sqlStmt
 					done
+
+echo '*** AFTER ***'
+sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"warehouse\") order by create_time desc"
+RunSql2 $sqlStmt
+for ((i=0; i<${#resultSet[@]}; i++)); do
+	echo -e "\tresultSet[$i] = >$(tr '|' '\t' <<< ${resultSet[$i]})<"
+done
+echo
+
 					## Clear buildClientInfoTable semaphore
 						sqlStmt="delete from $semaphoreInfoTable where processName=\"buildClientInfoTable\""
 						RunSql2 $sqlStmt
@@ -282,13 +298,12 @@ case "$hostName" in
 						sqlStmt="insert into $semaphoreInfoTable values(NULL,\"buildSiteInfoTable\",\"$hostName\",\"$LOGNAME\",NOW())"
 						RunSql2 $sqlStmt
 					## Build siteinfotabe and siteadmins table
-						Call 'buildSiteInfoTable' "-table sitesNew $scriptArgs"
+						Call 'buildSiteInfoTable' "-table ${siteInfoTable}New $scriptArgs"
 					## Clear buildSiteInfoTable semaphore
 						sqlStmt="delete from $semaphoreInfoTable where processName=\"buildSiteInfoTable\" and hostName=\"$hostName\""
 						RunSql2 $sqlStmt
 				fi
 				Msg2 "^...done"
-
 
 			## Build employee table
 				BuildEmployeeTable
@@ -461,3 +476,4 @@ return 0
 ## Fri Jan 27 08:05:09 CST 2017 - dscudiero - Fix table swap for build employees table
 ## Fri Jan 27 14:31:19 CST 2017 - dscudiero - General syncing of dev to prod
 ## Tue Feb  7 07:54:13 CST 2017 - dscudiero - Fix loadCourseleafData function
+## Tue Feb  7 08:22:12 CST 2017 - dscudiero - Add debug messages
