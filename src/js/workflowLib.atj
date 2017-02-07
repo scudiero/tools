@@ -1,5 +1,5 @@
 //======================================================================================================================
-// version:1.6.90 // -- dscudiero -- 01/25/2017 @ 16:00:30.45
+// version:1.6.91 // -- dscudiero -- 02/07/2017 @  9:55:13.07
 //======================================================================================================================
 // Common wf functions and helper functions to support workflow
 //======================================================================================================================
@@ -693,8 +693,7 @@ wffuncs.AddSameAs = function(inval, wfrule, args) {
 //=========================================================================================================================
 wffuncs.AddSisStep = function(inval, wfrule, args) {
 	// setup
-	var myName=wfrule.attrname; var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
-	if (haveDebug) { Debug('\n*** In '+ myName + ' ***'); /* Dump('\tinval',inval); Dump('\twfrule',wfrule.toSource()); Dump('\targs',args.toSource()); */ }
+	var myName=wfrule.attrname;
 	// Check execution env
 	if(args && args.context && args.context != "wfrule")
 		return false;
@@ -703,24 +702,24 @@ wffuncs.AddSisStep = function(inval, wfrule, args) {
 	if (tcfdata.sisname === '') {
 		var spaceing='&nbsp;&nbsp;&nbsp;&nbsp;';
 		print_doc(spaceing + '<strong>*Error* -- (' + myName + ') Default SIS name not set in cimconfig.cfg file.<br>' + spaceing + 'Please contact your CourseLeaf Administrator.</strong>');
-		Debug('\t *Error* -- Default SIS name not set in cimconfig.cfg file.');
+		wfDebug(3,'\t *Error* -- Default SIS name not set in cimconfig.cfg file.');
 		return false;
 	}
 
-	if (typeof tcfdata.addSisEnvs == "undefined") {
-		Debug("\t*Warning* -- tcfdata.addSisEnvs undefined, adding sis sync step");
+	if (typeof tcfdata.wfAddSisEnvs == "undefined") {
+		wfDebug(3,"\t*Warning* -- tcfdata.addSisEnvs undefined, adding sis sync step");
 		return tcfdata.sisname.toString().trim();
 	}
 
-	if (tcfdata.addSisEnvs[0].indexOf(GetEnv().toString()) < 0){
+	if (tcfdata.wfAddSisEnvs[0].indexOf(GetEnv().toString()) < 0){
 		print_doc("&nbsp;&nbsp;&nbsp;<strong><em>*Warning*</strong> -- (" + myName + ") Not including SIS Sync step (" + tcfdata.sisname + ")");
 		print_doc("<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp" +
-			"env = " + GetEnv().toString() + " and addSisEnvs = '" + tcfdata.addSisEnvs + "'" );
+			"env = " + GetEnv().toString() + " and wfAddSisEnvs = '" + tcfdata.wfAddSisEnvs + "'" );
 		return false;
 	}
 
 	// Add SIS Sync Step
-	Debug('\tAdding SIS Sync step: ' + tcfdata.sisname.toString().trim());
+	wfDebug(3,'\tAdding SIS Sync step: ' + tcfdata.sisname.toString().trim());
 	return tcfdata.sisname.toString().trim();
 
 }; //AddSisStep
