@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.85" # -- dscudiero -- 02/06/2017 @ 12:56:35.44
+# version="2.0.86" # -- dscudiero -- 02/08/2017 @  8:58:03.82
 #===================================================================================================
 # Common script exit
 # args:
@@ -112,7 +112,7 @@ function Goodbye {
 					else
 						Msg2 "$(ColorK "${myName}") $(ColorE " -- $additionalText completed with errors, exit code = $exitCode")\a"
 					fi
-					[[ $logFile != '/dev/null' ]] && Msg2 "Additional details may be found in: \n^'$logFile'"
+					[[ $logFile != '/dev/null' ]] && Msg2 "Additional details may be found in:\n^'$logFile'"
 					Msg2 "$date (Elapsed time: $elapTime)"
 					[[ $TERM == 'dumb' ]] && echo
 					Msg2 "$(PadChar)"
@@ -143,3 +143,4 @@ export -f Goodbye
 ## Thu Jan 19 07:13:36 CST 2017 - dscudiero - Add debug statement
 ## Thu Jan 19 07:26:50 CST 2017 - dscudiero - Remove debug statements
 ## Mon Feb  6 12:58:43 CST 2017 - dscudiero - switch bar Msg2 to echo
+## Wed Feb  8 08:58:32 CST 2017 - dscudiero - Remove trailing blanks in messaging
