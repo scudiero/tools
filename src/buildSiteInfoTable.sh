@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.19 # -- dscudiero -- 02/07/2017 @  8:34:15.52
+version=4.3.20 # -- dscudiero -- 02/08/2017 @  8:42:27.36
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -153,10 +153,10 @@ batchMode=false
 	Msg2
 	Msg2 "Processed $siteCntr Courseleaf site directories"
 	Msg2
-	sqlStmt="select count(*) from $siteInfoTable where host=\"$hostName\"";
+	sqlStmt="select count(*) from $useSiteInfoTable where host=\"$hostName\"";
 	RunSql2 "$sqlStmt"
 	if [[ ${resultSet[0]} -eq 0 ]]; then
-		Error "No records were inserted into in the $warehouseDb.$siteInfoTable table on host '$hostName'"
+		Error "No records were inserted into in the $warehouseDb.$useSiteInfoTable table on host '$hostName'"
 		sendMail=true
 	fi
 
@@ -217,3 +217,4 @@ Goodbye 0 'alert'
 ## Thu Jan 26 07:50:16 CST 2017 - dscudiero - Tweak messaging
 ## Fri Jan 27 08:04:43 CST 2017 - dscudiero - General syncing of dev to prod
 ## Tue Feb  7 08:34:51 CST 2017 - dscudiero - Fix bug checking if the passed table name exists
+## Wed Feb  8 10:57:22 CST 2017 - dscudiero - v
