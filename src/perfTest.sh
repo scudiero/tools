@@ -28,17 +28,11 @@ if [[ $mode == 'summary' ]]; then
                 for ((i=4; i<13; i++)); do
                         unset int1 int2 real1 real2 percent
                         real1="$(cut -d'|' -f$i <<< ${resultSet[0]})"
-dump real1
                         int1="$(tr -d '.' <<< $real1)"
-dump int1
                         int1=$(sed 's/^0//' <<< $int1)
-dump int1
                         real2="$(cut -d'|' -f$i <<< ${resultSet[1]})"
-dump real2
                         int2="$(tr -d '.' <<< $real2)"
-dump int2
                         int2=$(sed 's/^0//' <<< $int2)
-dump int2
                         let delta=$int2-$int1
                         percent=$((200*$delta/$int2 % 2 + 100*$delta/$int2))
                         #dump -n field -t real1 int1 real2 int2 delta percent
@@ -145,3 +139,4 @@ fi
 ## Fri Feb  3 11:28:48 CST 2017 - dscudiero - Remove debug statements
 ## Fri Feb  3 14:13:39 CST 2017 - dscudiero - Remove leading zeros from integers befor calculating the percentage
 ## Tue Feb  7 07:54:23 CST 2017 - dscudiero - add debug messaging
+## Wed Feb  8 08:39:26 CST 2017 - dscudiero - Remove debug statements
