@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.6" # -- dscudiero -- 01/18/2017 @ 13:00:47.29
+# version="2.0.7" # -- dscudiero -- 02/08/2017 @  8:04:46.77
 #===================================================================================================
 # Backup a courseleaf file, copy to the attic createing directories as necessary
 # Expects the variable 'client' to be set
@@ -10,6 +10,7 @@
 #===================================================================================================
 
 function BackupCourseleafFile {
+	Import ParseCourseleafFile
 	[[ $DOIT != '' || $listOnly == true || $informationOnlyMode == true ]] && return 0
 	local file=$1; shift || true
 	[[ ! -r $file ]] && return 0
@@ -39,3 +40,4 @@ export -f BackupCourseleafFile
 
 ## Wed Jan  4 13:52:50 CST 2017 - dscudiero - General syncing of dev to prod
 ## Wed Jan 18 13:01:23 CST 2017 - dscudiero - Remove extranious DOIT's
+## Wed Feb  8 08:16:52 CST 2017 - dscudiero - Import parsecourseleaffile
