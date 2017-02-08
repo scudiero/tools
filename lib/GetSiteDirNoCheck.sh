@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.19" # -- dscudiero -- 01/25/2017 @  9:30:21.05
+# version="1.0.29" # -- dscudiero -- 02/08/2017 @ 10:55:20.41
 #===================================================================================================
 # Resolve a clients siteDir without using the database
 # Sets global variable: siteDir
@@ -26,27 +26,30 @@ function GetSiteDirNoCheck {
 	unset envType env
 	if [[ -z $env ]]; then
 		echo
-		Prompt envType "$promptStr" 'prod dev' 'dev'; envType=$(Lower ${envType:0:1})
+		Prompt envType "$promptStr" 'production(text,next,curr) development(pvt,dev)' 'development(pvt,dev)'; envType=$(Lower ${envType:0:1})
 		[[ $envType == 'd' ]] && validEnvs="$(tr ',' ' ' <<< $courseleafDevEnvs)" || validEnvs="$(echo "$courseleafProdEnvs" | sed s/,preview,public,prior// | tr ',' ' ')"
 	fi
 
 	## Get the server and site names
+		tmpFile=$(MkTmpFile $FUNCNAME)
+		[[ -f $tmpFile ]] && rm "$tmpFile"
 		if [[ $envType == 'd' ]]; then
 			unset dirs
 			for server in $(tr ',' ' ' <<< $devServers); do
-				cd /mnt/$server/web
-				find -mindepth 1 -maxdepth 1 -type d -name $client\* -printf "$server %f\n" > $tmpFile
+				if [[ -d /mnt/$server/web ]]; then
+					cd /mnt/$server/web
+					find -mindepth 1 -maxdepth 1 -type d -name $client\* -printf "$server %f\n" >> $tmpFile
+				fi
 			done
 		else
 			for server in $(tr ',' ' ' <<< $prodServers); do
 				if [[ -d /mnt/$server/$client ]]; then
 					cd /mnt/$server/$client
-					find -mindepth 1 -maxdepth 1 -type d -printf "$server %f\n" | grep 'next\|curr\|prior' > $tmpFile
+					find -mindepth 1 -maxdepth 1 -type d -printf "$server %f\n" | grep 'next\|curr\|prior' >> $tmpFile
 				fi
 				[[ -d "/mnt/$server/$client-test" ]] && echo "$server test" >> $tmpFile
 			done
 		fi
-
 	## Build the menu and ask the user to select the site
 		local numLines=$(echo $(ProtectedCall "wc -l "$tmpFile" 2>/dev/null") | cut -d' ' -f1)
 		if [[ $numLines -gt 0 ]]; then
@@ -83,3 +86,4 @@ export -f GetSiteDirNoCheck
 ## Fri Jan 20 11:10:04 CST 2017 - dscudiero - make sure we set the env variable for dev sites
 ## Fri Jan 20 12:47:56 CST 2017 - dscudiero - Many fixes
 ## Wed Jan 25 09:34:13 CST 2017 - dscudiero - minor cleanup of messaging
+## Wed Feb  8 10:57:04 CST 2017 - dscudiero - Fix problem getting list of development sites
