@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.84 # -- dscudiero -- 01/10/2017 @ 16:16:45.55
+version=1.3.91 # -- dscudiero -- 02/08/2017 @  8:16:37.30
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -247,12 +247,18 @@ function internal {
 # Refresh the /stdhtml/workflow.atj file
 #==============================================================================================
 function workflowcorefiles {
-	Msg2
+	local file srcFile tgtFile result changeLogRecs
+	echo
 	Init 'getClient getEnv getDirs checkEnv'
-	local files="/stdhtml/workflow.atj /cim/triggers.atj /steps/testworkflow.html"
-	for file in $files; do
-		srcFile="$skeletonRoot/release/web/courseleaf${file}"
-		tgtFile="$srcDir/web/courseleaf${file}"
+
+	local sqlStmt="select scriptData3 from $scriptsTable where name=\"copyWorkflow\""
+	RunSql2 $sqlStmt
+	[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Could not retrieve workflow files data (scriptData1) from the $scriptsTable.";
+	local scriptData="$(cut -d':' -f2- <<< ${resultSet[0]})"
+
+	for file in $(tr ',' ' ' <<< $scriptData); do
+		srcFile="$skeletonRoot/release/web${file}"
+		tgtFile="$srcDir/web${file}"
 		## Copy file if changed
 			result=$(CopyFileWithCheck "$srcFile" "$tgtFile" 'backup')
 			if [[ $result == true ]]; then
@@ -340,3 +346,4 @@ Goodbye 0
 ## Tue Oct 18 11:07:04 CDT 2016 - dscudiero - Fix problem loging changes to changelog.txt in core workflow files
 ## Wed Jan  4 10:29:52 CST 2017 - dscudiero - add missing items to imports
 ## Tue Jan 10 16:17:06 CST 2017 - dscudiero - Fix problem making backup in vba refresh
+## Wed Feb  8 08:24:32 CST 2017 - dscudiero - Switch refresh workflowCore to pull file names from saveWorkflow defaults data
