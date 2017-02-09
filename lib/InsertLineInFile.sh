@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.5" # -- dscudiero -- 01/04/2017 @ 13:42:20.16
+# version="2.0.6" # -- dscudiero -- 02/08/2017 @ 13:38:51.36
 #===================================================================================================
 # Insert a line onto a file, inserts BELOW the serachLine
 # InsertLineInFile lineToInsert fileName searchLine
@@ -42,6 +42,7 @@ function InsertLineInFile {
 		#echo '*** NOT FOUND ***' >> $stdout
 	fi
 
+	[[ -f "$tmpFile" ]] && rm "$tmpFile"
 	return 0
 } #InsertLineInFile
 export -f InsertLineInFile
@@ -51,3 +52,4 @@ export -f InsertLineInFile
 #===================================================================================================
 
 ## Wed Jan  4 13:53:52 CST 2017 - dscudiero - General syncing of dev to prod
+## Thu Feb  9 08:06:30 CST 2017 - dscudiero - make sure we are using our own tmpFile
