@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.79 # -- dscudiero -- 02/08/2017 @ 13:43:39.54
+version=3.8.83 # -- dscudiero -- 02/09/2017 @ 11:43:34.13
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -255,18 +255,20 @@ scriptDescription="Load Courseleaf Data"
 	function ProcessUserData {
 		local workbookSheet="$1"
 		local tmpFile=$(MkTmpFile $FUNCNAME)
-		Msg2 "Parsing the roles data from the '$workbookSheet' worksheet ..."
+		Msg2 "Parsing the 'user' data from the '$workbookSheet' worksheet ..."
 
 		## Get the user data from the spreadsheet
 			GetExcel "$workbookFile" "$workbookSheet" > $tmpFile
 			#echo; echo $tmpFile; cat $tmpFile; Pause
 
-			## Read the header record, look for the specific columns to determin how to parse subsequent records
+			## Read the header record, look for the specific columns to determine how to parse subsequent records
 				ParseWorksheetHeader "$tmpFile" "$workbookSheet" "userid first last email" "uin"
 				dump -1 startReadingAt
 				for field in userid first last email uin ; do dump -1 field ${field}Col; done
+			## If useUINs is set and there is no uin column in the user data then error
+				[[ $useUINs == true && -z $uinCol ]] && Terminate "Use UINs was set and no 'UIN' column was found in the user data"
 
-			## See if this client has special case handeling for usernames
+			## See if this client has special case handling for usernames
 				sqlStmt="select useridCase from $clientInfoTable where name=\"$client\""
 				RunSql2 $sqlStmt
 				useridCase=$(Upper ${resultSet[0]:0:1}) || useridCase='M'
@@ -364,7 +366,7 @@ scriptDescription="Load Courseleaf Data"
 	function ProcessRoleData {
 		local workbookSheet="$1"
 		local tmpFile=$(MkTmpFile $FUNCNAME)
-		Msg2 "Parsing the roles data from the '$workbookSheet' worksheet ..."
+		Msg2 "Parsing the 'roles' data from the '$workbookSheet' worksheet ..."
 
 		## Get the page data from the spreadsheet
 			GetExcel "$workbookFile" "$workbookSheet" > $tmpFile
@@ -505,7 +507,7 @@ scriptDescription="Load Courseleaf Data"
 			unset workbookSheet
 			[[ $(Contains "$(Lower $sheets)" 'page') == true ]] && workbookSheet='page'
 			[[ $(Contains "$(Lower $sheets)" 'workflow') == true ]] && workbookSheet='workflow'
-			Msg2 "Parsing the catalog page data from the '$workbookSheet' worksheet ..."
+			Msg2 "Parsing the 'catalog page' data from the '$workbookSheet' worksheet ..."
 			GetExcel "$workbookFile" "$workbookSheet" > $tmpFile
 			#echo $tmpFile; cat $tmpFile; Pause
 
@@ -1002,3 +1004,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## Mon Feb  6 13:44:35 CST 2017 - dscudiero - Add client and env to the goodbye / complete message
 ## Mon Feb  6 16:11:14 CST 2017 - dscudiero - tweak messageing written out to changelog
 ## Thu Feb  9 08:06:44 CST 2017 - dscudiero - make sure we are using our own tmpFile
+## Thu Feb  9 11:49:37 CST 2017 - dscudiero - check if there is a uin column in the user sheet if the client has useUins set
