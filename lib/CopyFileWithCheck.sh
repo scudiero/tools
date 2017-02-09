@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.5" # -- dscudiero -- 01/04/2017 @ 13:37:59.71
+# version="2.0.6" # -- dscudiero -- 02/08/2017 @ 13:35:22.53
 #===================================================================================================
 # Copy a file only if files are diffeent
 # copyIfDifferent <srcFile> <tgtFile> <backup {true:false}>
@@ -16,19 +16,20 @@ function CopyFileWithCheck {
 	local tgtFile=$2
 	local backup=${3:false}
 	local srcMd5 tgtMd5
+	local tmpFile=$(MkTmpFile ${FUNCNAME}.$$)
 
 	srcMd5=$(md5sum $srcFile | cut -f1 -d" ")
 	[[ -f $tgtFile ]] && tgtMd5=$(md5sum $tgtFile | cut -f1 -d" ") || unset tgtMd5
 	[[ $srcMd5 == $tgtMd5 ]] && echo 'same' && return 0
 
 	[[ $backup != false && -f $tgtFile ]] && BackupCourseleafFile $tgtFile
-	cp -fp $srcFile $tgtFile.new &> $tmpFile.$myName.$FUNCNAME.$$
+	cp -fp $srcFile $tgtFile.new &> $tmpFile
 	[[ -f $tgtFile.new ]] && tgtMd5=$(md5sum $tgtFile.new | cut -f1 -d" ") || unset tgtMd5
-	[[ $srcMd5 != $tgtMd5 ]] && echo $(cat $tmpFile.$myName.$FUNCNAME.$$) && rm -rf $tmpFile.$myName.$FUNCNAME.$$ && return 0
+	[[ $srcMd5 != $tgtMd5 ]] && echo $(cat $tmpFile) && rm -rf $tmpFile && return 0
 	[[ -f $tgtFile ]] && rm $tgtFile
 	mv -f $tgtFile.new $tgtFile
 	echo true
-	rm -rf $tmpFile.$myName.$FUNCNAME.$$
+	rm -rf $tmpFile
 	return 0
 } #CopyFileWithCheck
 export -f CopyFileWithCheck
@@ -38,3 +39,4 @@ export -f CopyFileWithCheck
 #===================================================================================================
 
 ## Wed Jan  4 13:53:10 CST 2017 - dscudiero - General syncing of dev to prod
+## Thu Feb  9 08:06:10 CST 2017 - dscudiero - make sure we are using our own tmpFile
