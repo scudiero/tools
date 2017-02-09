@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.50" # -- dscudiero -- 01/04/2017 @ 13:33:26.00
+# version="2.0.51" # -- dscudiero -- 02/08/2017 @ 13:36:52.06
 #===================================================================================================
 # Print/Log formatted messages
 #===================================================================================================
@@ -226,7 +226,7 @@ function Msg2 {
 		msgText=${msgText:$cutAt+1}
 
 		## process the remaining text using the fold command
-		tmpFile=$(mkTmpFile "$FUNCNAME")
+		local tmpFile=$(mkTmpFile "$FUNCNAME")
 		let foldCols=$screenWidth-${#msgPrefix}
 		let padLen=${#msgPrefix}-$subtractFactor
 		padStr=$(PadChar ' ' $padLen)
@@ -251,3 +251,4 @@ export -f Terminate Error Warning Info Note Verbose
 # Checkin Log
 #===================================================================================================
 ## Wed Jan  4 13:34:04 CST 2017 - dscudiero - comment out the 'version=' line
+## Thu Feb  9 08:06:34 CST 2017 - dscudiero - make sure we are using our own tmpFile
