@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.105 # -- dscudiero -- 02/07/2017 @ 15:13:42.35
+version=2.1.108 # -- dscudiero -- 02/09/2017 @  8:05:39.18
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -79,7 +79,9 @@ function SyncSkeleton {
 		SetFileExpansion 'on'
 		cwd=$(pwd); cd $tgtDir; chgrp -R leepfrog *; chgrp leepfrog .*; cd "$cwd"
 		SetFileExpansion
-		Msg2 "*** $FUNCNAME -- Completed ***"
+
+	[[ -f "$tmpFile" ]] && rm "$tmpFile"
+	Msg2 "*** $FUNCNAME -- Completed ***"
 	return 0
 } #SyncSkeleton
 
@@ -87,6 +89,7 @@ function SyncSkeleton {
 # Check Monitored files for changes
 function CheckMonitorFiles {
 	echo; Msg2 "*** $FUNCNAME -- Starting ***"
+	local tmpFile=$(MkTmpFile $FUNCNAME)
 
 	declare -A userNotifies
 	## Get a list of currently defined monitoried files
@@ -132,13 +135,16 @@ function CheckMonitorFiles {
 			$DOIT mutt -F $tmpFile.2 -s "File Monitor Notice" -- $user@leepfrog.com < $tmpFile
 		done;
 
+	[[ -f "$tmpFile" ]] && rm "$tmpFile"
 	Msg2 "*** $FUNCNAME -- Completed ***"
 	return 0
 } #CheckMonitorFiles
 
 #=======================================================================================================================
 function BuildToolsAuthTable() {
+	local tmpFile=$(MkTmpFile $FUNCNAME)
 	echo; Msg2 "*** $FUNCNAME -- Starting ***"
+
 	## Build the toolsgroups table from the role data from the stage-internal site
 		pw=$(GetPW 'stage-internal')
 		[[ $pw == '' ]] && Msg2 "T Could not lookup password for 'stage-internal' in password file.\n"
@@ -149,7 +155,6 @@ function BuildToolsAuthTable() {
 		else 
 			while read line; do roles+=("$line"); done < $tmpFile
 		fi
-		[[ -f $tmpFile ]] && rm -f $tmpFile
 
 		if [[ ${#roles[@]} -gt 0 ]]; then
 			## Clear out db table
@@ -171,6 +176,7 @@ function BuildToolsAuthTable() {
 			Msg2 "W No roles recovered from $rolesFileURL"
 		fi
 
+		[[ -f "$tmpFile" ]] && rm "$tmpFile"
 		Msg2 "*** $FUNCNAME -- Completed ***"
 	return 0
 } #BuildToolsAuthTable
@@ -180,20 +186,26 @@ function BuildToolsAuthTable() {
 #=======================================================================================================================
 case "$hostName" in
 	mojave)
-			Call 'perfTest'
-			CheckMonitorFiles
-			SyncInternalDb
-			BuildToolsAuthTable
-			SyncCourseleafCgis
-			SyncSkeleton
-			[[ $(date "+%H") == 12 ]] && Call 'syncCourseleafGitRepos' 'master'
-			;;
+		## Make sure we have a sites table before running perfTest
+		sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"sites%\" order by create_time desc"
+		RunSql2 $sqlStmt
+		[[ ${#resultSet[@]} -gt 0 ]] && Call 'perfTest'
+		CheckMonitorFiles
+		SyncInternalDb
+		BuildToolsAuthTable
+		SyncCourseleafCgis
+		SyncSkeleton
+		## If noon then update the git repo shadows
+		[[ $(date "+%H") == 12 ]] && Call 'syncCourseleafGitRepos' 'master'
+		;;
 	*)
-			sleep 30
-			Call 'perfTest'
-			Call 'perfTest' 'summary'
-			CheckMonitorFiles
-			;;
+		sleep 60 ## Wait for perfTest on Mojave to complete
+		## Make sure we have a sites table before running perfTest
+		sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"sites%\" order by create_time desc"
+		RunSql2 $sqlStmt
+		[[ ${#resultSet[@]} -gt 0 ]] && Call 'perfTest' && Call 'perfTest' 'summary'
+		CheckMonitorFiles
+		;;
 esac
 
 #=======================================================================================================================
@@ -215,3 +227,4 @@ return 0
 ## Fri Feb  3 11:28:29 CST 2017 - dscudiero - Change Msg2; Msg2 to echo; Msg2
 ## Mon Feb  6 09:19:58 CST 2017 - dscudiero - Remove debug message
 ## Tue Feb  7 15:15:13 CST 2017 - dscudiero - allow file expansion for the chgrp in syncskeleton
+## Thu Feb  9 08:07:08 CST 2017 - dscudiero - Check to make sure there is a sites table before running perftest
