@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.76 # -- dscudiero -- 02/06/2017 @ 16:10:48.98
+version=3.8.79 # -- dscudiero -- 02/08/2017 @ 13:43:39.54
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -254,6 +254,7 @@ scriptDescription="Load Courseleaf Data"
 	#==================================================================================================
 	function ProcessUserData {
 		local workbookSheet="$1"
+		local tmpFile=$(MkTmpFile $FUNCNAME)
 		Msg2 "Parsing the roles data from the '$workbookSheet' worksheet ..."
 
 		## Get the user data from the spreadsheet
@@ -352,6 +353,8 @@ scriptDescription="Load Courseleaf Data"
 				RunCoureleafCgi "$srcDir" "-r /apache-group.html"
 			fi
 			echo
+
+		[[ -f "$tmpFile" ]] && rm "$tmpFile"
 		return 0
 	} #ProcessUserData
 
@@ -360,6 +363,7 @@ scriptDescription="Load Courseleaf Data"
 	#==================================================================================================
 	function ProcessRoleData {
 		local workbookSheet="$1"
+		local tmpFile=$(MkTmpFile $FUNCNAME)
 		Msg2 "Parsing the roles data from the '$workbookSheet' worksheet ..."
 
 		## Get the page data from the spreadsheet
@@ -486,6 +490,8 @@ scriptDescription="Load Courseleaf Data"
 				done
 			fi
 			echo
+
+		[[ -f "$tmpFile" ]] && rm "$tmpFile"
 		return 0
 	} #ProcessRoleData
 
@@ -494,6 +500,7 @@ scriptDescription="Load Courseleaf Data"
 	#==================================================================================================
 	function ProcessCatalogPageData {
 		[[ $useUINs == true && $processedUserData != true ]] && Terminate "$FUNCNAME: Requesting UIN mapping but no userid sheet was provided"
+		local tmpFile=$(MkTmpFile $FUNCNAME)
 		## Get the user data from the spreadsheet
 			unset workbookSheet
 			[[ $(Contains "$(Lower $sheets)" 'page') == true ]] && workbookSheet='page'
@@ -511,7 +518,6 @@ scriptDescription="Load Courseleaf Data"
 			while read line; do
 				[[ -z $line || $line == '|||' ]] && continue
 				key=$(cut -d '|' -f $pathCol <<< "$line")
-				dump -1 line -t key
 				[[ -z $key ]] && WarningMsg 0 1 "Work Sheet record:\n^^$line\n\tDoes not contain any path/url data, skipping" && continue
 				if [[ $key != '/' && ! -d $(dirname $srcDir/web/$key) ]]; then
 					[[ $ignoreMissingPages != true ]] && WarningMsg 0 1 "Page: '$key' Not found"
@@ -624,6 +630,7 @@ scriptDescription="Load Courseleaf Data"
 					let procesingCntr=$procesingCntr+1
 			done
 			Msg2 "^$numWorkflowDataFromSpreadsheet out of $numWorkflowDataFromSpreadsheet processed"
+	[[ -f "$tmpFile" ]] && rm "$tmpFile"
 	return 0
 } #ProcessCatalogPageData
 
@@ -913,7 +920,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 		## Member lookup errors
 		if [[ ${#membersErrors[@]} -gt 0 ]]; then
 			echo
-			WarningMsg 0 1 "Found page owner or role data without a defined user or role:"
+			WarningMsg 0 1 "Found page owner or workflow data without a defined userid or role:"
 			for key in "${!membersErrors[@]}"; do
 				Msg2 "^$(ColorW "*Warning*") -- Workflow/Owner member: '$key' not defined and used on the following pages:"
 				IFSsave=$IFS; IFS='|' read -a pages <<< "${membersErrors["$key"]}"; IFS=$IFSsave
@@ -994,3 +1001,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## Mon Feb  6 13:04:58 CST 2017 - dscudiero - fix syntax error
 ## Mon Feb  6 13:44:35 CST 2017 - dscudiero - Add client and env to the goodbye / complete message
 ## Mon Feb  6 16:11:14 CST 2017 - dscudiero - tweak messageing written out to changelog
+## Thu Feb  9 08:06:44 CST 2017 - dscudiero - make sure we are using our own tmpFile
