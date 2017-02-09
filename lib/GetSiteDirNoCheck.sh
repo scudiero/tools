@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.29" # -- dscudiero -- 02/08/2017 @ 10:55:20.41
+# version="1.0.31" # -- dscudiero -- 02/08/2017 @ 13:30:45.47
 #===================================================================================================
 # Resolve a clients siteDir without using the database
 # Sets global variable: siteDir
@@ -31,7 +31,7 @@ function GetSiteDirNoCheck {
 	fi
 
 	## Get the server and site names
-		tmpFile=$(MkTmpFile $FUNCNAME)
+		local tmpFile=$(MkTmpFile $FUNCNAME)
 		[[ -f $tmpFile ]] && rm "$tmpFile"
 		if [[ $envType == 'd' ]]; then
 			unset dirs
@@ -72,6 +72,7 @@ function GetSiteDirNoCheck {
 	## Done
 		cd "$cwd"
 		[[ ! -d $siteDir ]] && unset siteDir
+		[[ -f "$tmpFile" ]] && rm "$tmpFile"
 		return 0
 }
 export -f GetSiteDirNoCheck
@@ -87,3 +88,4 @@ export -f GetSiteDirNoCheck
 ## Fri Jan 20 12:47:56 CST 2017 - dscudiero - Many fixes
 ## Wed Jan 25 09:34:13 CST 2017 - dscudiero - minor cleanup of messaging
 ## Wed Feb  8 10:57:04 CST 2017 - dscudiero - Fix problem getting list of development sites
+## Thu Feb  9 08:06:23 CST 2017 - dscudiero - make sure we are using our own tmpFile
