@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.8.58 # -- dscudiero -- 01/26/2017 @ 12:53:10.95
+version=2.8.59 # -- dscudiero -- 02/08/2017 @ 13:52:18.50
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -155,7 +155,7 @@ function DoCopy {
 			Msg2 "${colorBlue}> is ${tgtFile}${colorDefault}"
 			printf '=%.0s' {1..120}
 			Msg2
-			ProtectedCall "colordiff $srcFile $tgtFile | Indent" #> $tmpFile
+			ProtectedCall "colordiff $srcFile $tgtFile | Indent"
 			Msg2 "$colorDefault"
 			printf '=%.0s' {1..120}
 			Msg2 "\n* * * DIFF Output end * * *\n\n"
@@ -434,3 +434,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## Thu Jan 26 12:26:41 CST 2017 - dscudiero - Fix file logging issue
 ## Thu Jan 26 12:30:37 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Jan 26 12:53:17 CST 2017 - dscudiero - General syncing of dev to prod
+## Thu Feb  9 08:06:38 CST 2017 - dscudiero - make sure we are using our own tmpFile
