@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.0.60" # -- dscudiero -- 01/18/2017 @ 13:36:50.58
+# version="2.0.61" # -- dscudiero -- 02/08/2017 @ 13:36:09.70
 #=======================================================================================================================
 # Retrieve data from a Excel xlsx spreadsheet
 # Usage: GetExcel <workBook> <workSheet>
@@ -14,7 +14,7 @@ function GetExcel {
 		local workBook="$1"; shift
 		local workSheet="$1"; shift
 		local delimiter=${1-|}
-		local tmpFile=$(mkTmpFile)
+		local tmpFile=$(MkTmpFile $FUNCNAME)
 
 		Call 'getXlsx' 'utility' 'std' 'python:py' "$workBook" "$workSheet" "$delimiter" > $tmpFile 2>&1;
 
@@ -44,3 +44,4 @@ export -f GetExcel
 ## Tue Jan  3 11:57:15 CST 2017 - dscudiero - Add 'utility' to call of getXlsx
 ## Wed Jan  4 13:53:35 CST 2017 - dscudiero - General syncing of dev to prod
 ## Wed Jan 18 13:37:05 CST 2017 - dscudiero - misc cleanup
+## Thu Feb  9 08:06:19 CST 2017 - dscudiero - make sure we are using our own tmpFile
