@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.20 # -- dscudiero -- 02/08/2017 @  8:42:27.36
+version=4.3.25 # -- dscudiero -- 02/10/2017 @ 15:49:53.34
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -84,14 +84,13 @@ Hello
 
 Msg2 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 
-echo -e '\n*** Forcing batchMode = false ***\n'
-batchMode=false
-
 #=======================================================================================================================
 # Main
 #=======================================================================================================================
-## Get a list of clients from the clientInfoTable, loop through the results building a hash table
+## loop through the clients
 	declare -A dbClients
+	unset clientDirs
+	## Get clients from the clientinfotable, build a hash table with the clientInfoTable key for each client
 	sqlStmt="select name,idx from clients where recordstatus='A'"
 	[[ $client != '' ]] && sqlStmt="$sqlStmt and name=\"$client\""
 	sqlStmt="$sqlStmt order by name"
@@ -102,11 +101,20 @@ batchMode=false
 	for result in ${resultSet[@]}; do
 		dbClients["${result%%|*}"]="${result##*|}"
 	done
-	if [[ $verboseLevel -ge 1 ]]; then Msg2 "dbClients:"; for i in "${!dbClients[@]}"; do printf "\t\t[$i] = >${dbClients[$i]}<\n"; done; fi
+	## Get the list of actual clients on this server
+	if [[ -z $client ]]; then
+		clientDirs=($(find /mnt -maxdepth 2 -mindepth 1 -type d 2> /dev/null | grep -v '^/mnt/dev'))
+	else
+		clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep $client))
+	fi
+	if [[ $verboseLevel -ge 1 ]]; then
+		echo
+		Msg2 "dbClients:"; for i in "${!dbClients[@]}"; do printf "\t\t[$i] = >${dbClients[$i]}<\n"; done; echo
+		Msg2 "clientDirs:"; for i in "${!clientDirs[@]}"; do printf "\t\t[$i] = >${clientDirs[$i]}<\n"; done; echo
+	fi
+Pause
 
-	#[[ ${usersFromDb["$member"]+abc} ]]
-## Get the list of actual site directories under /mnt, check to see if it is the dbCliens hash, if yes then process this client directory
-	clientDirs=($(find /mnt -maxdepth 2 -mindepth 1 -type d 2> /dev/null | grep -v '^/mnt/dev'))
+	## Loop through actual clientDirs
 	for clientDir in ${clientDirs[@]}; do
 		if [[ ${dbClients[$(basename $clientDir)]+abc} ]]; then
 			(( clientCntr+=1 ))
@@ -218,3 +226,4 @@ Goodbye 0 'alert'
 ## Fri Jan 27 08:04:43 CST 2017 - dscudiero - General syncing of dev to prod
 ## Tue Feb  7 08:34:51 CST 2017 - dscudiero - Fix bug checking if the passed table name exists
 ## Wed Feb  8 10:57:22 CST 2017 - dscudiero - v
+## Fri Feb 10 15:59:40 CST 2017 - dscudiero - Add ability to specify a client name
