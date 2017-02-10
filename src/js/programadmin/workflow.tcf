@@ -1,8 +1,8 @@
 //======================================================================================================================
 // ??/??/16-- dgs -- initial
-// version:1.0.5 // -- dscudiero -- 02/10/2017 @ 10:00:29.99
+// version:1.0.6 // -- dscudiero -- 02/10/2017 @ 12:52:22.31
 //======================================================================================================================
-localsteps:Program Workflow Management|groups|workflow|attributes=isUndergraduate[Is Undergraduate],isGraduate[Is Graduate],isNew[New Program],isEdit[Program Change],isDelete[Program Delete],fyi[FYI Only],fyiall[FYI All],optional[If Role Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
+localsteps:Program Workflow Management|groups|workflow|attributes=isUndergraduate[Is Undergraduate],isGraduate[Is Graduate],isNew[New Program],isEdit[Program Change],isDelete[Program Delete],fyi[FYI Only],fyiall[FYI All],todo[ToDo Item],optional[If Role Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
 
 template:custom
 pageflags:autoapprove
