@@ -1,9 +1,9 @@
 //==================================================================================================
-// version:1.0.3 // -- dscudiero -- 02/10/2017 @ 10:00:21.25
+// version:1.0.4 // -- dscudiero -- 02/10/2017 @ 12:53:11.59
 //==================================================================================================
 // ??/??/17 -- dgs -- initial -- ??
 //==================================================================================================
-localsteps:GenEd Workflow Management|groups|workflow|attributes=isNew[New Course],isNotNew[Not New],isEdit[Course Change],isNotEdit[Not Course Change],isDelete[Course Delete],isNotDelete[Not Course Delete],fyi[FYI Only],fyiall[FYI All],optional[If Role Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
+localsteps:GenEd Workflow Management|groups|workflow|attributes=isNew[New Course],isNotNew[Not New],isEdit[Course Change],isNotEdit[Not Course Change],isDelete[Course Delete],isNotDelete[Not Course Delete],fyi[FYI Only],fyiall[FYI All],todo[ToDo Item],optional[If Role Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
 
 template:custom
 pageflags:autoapprove
