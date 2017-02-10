@@ -17,8 +17,8 @@ cronJob=/steamboat/leepfrog/docs/tools/src/cron/cronJob.sh
 # V 	V		V						V					V				V
 #==================================================================================================
 #*/2		*		*						*					* 				$cronJob testCron
-  0		2-23	*						*					1-5 			$cronJob hourly
-  0		0		*						*					1-5 			$cronJob midnight
+  0		2-23	*						*					*	 			$cronJob hourly
+  0		0		*						*					*	 			$cronJob midnight
   0		22		*						*					0 				$cronJob weekly
 # 0		0		1						*					*				$cronJob monthly
 # 0 	22 		1-7						* 					1 				$cronJob firstMonday
