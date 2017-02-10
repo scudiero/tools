@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.186 # -- dscudiero -- 02/08/2017 @ 10:07:20.65
+version=1.21.187 # -- dscudiero -- 02/10/2017 @ 14:16:40.61
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -268,8 +268,8 @@ case "$hostName" in
 			if [[ ${#resultSet[@]} -eq 0 ]]; then
 				Error "Clients table is empty, skipping 'buildSiteInfoTable', semaphore kept in place"
 			else
-echo '*** BEFORE ***'
-sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"warehouse\") order by create_time desc"
+echo "$hostName --- BEFORE BuildSiteInfoTable ..."
+sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name like \"sites%\" order by create_time desc"
 RunSql2 $sqlStmt
 for ((i=0; i<${#resultSet[@]}; i++)); do
 	echo -e "\tresultSet[$i] = >$(tr '|' '\t' <<< ${resultSet[$i]})<"
@@ -307,13 +307,20 @@ echo
 		fi
 		Msg2 "^...(Running BuildClientInfoTable) done"
 
-echo "$hostName --- AFTER BuildClientInfoTable/BuildSiteInfoTable ..."
-sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name like \"sites%\" order by create_time desc"
-RunSql2 $sqlStmt
-for ((i=0; i<${#resultSet[@]}; i++)); do
-	echo -e "\tresultSet[$i] = >$(tr '|' '\t' <<< ${resultSet[$i]})<"
-done
-echo
+		## Wait for the all buildSiteInfoTable process to complete
+			waitCntr=1 ; let maxLoop=2*60*60/30 # Number of hours * 60 min/hr * 60 sec/min / sleep time
+			while [[ $waitCntr -lt $maxLoop ]]; do    # Wait no longer than X
+				sleep 30
+				sqlStmt="select count(*) from $semaphoreInfoTable where processName=\"buildSiteInfoTable\""
+				RunSql2 $sqlStmt
+				[[ ${resultSet[@]} -eq 0 ]] && break
+				echo -e "\tWaiting for all buildSiteInfoTable process to complete, waitCntr=$waitCntr\t$(date)"
+				((waitCntr++))
+			done
+			if [[ $waitCntr -ge $maxLoop ]]; then
+				Terminate "Wait for buildSiteInfoTable processes to complete timed out"
+			else
+
 		## Build employee table
 			BuildEmployeeTable
 
@@ -456,6 +463,20 @@ echo
 			RunSql2 $sqlStmt
 		fi
 
+		## Wait for the all buildSiteInfoTable process to complete
+			waitCntr=1 ; let maxLoop=2*60*60/30 # Number of hours * 60 min/hr * 60 sec/min / sleep time
+			while [[ $waitCntr -lt $maxLoop ]]; do    # Wait no longer than X
+				sleep 30
+				sqlStmt="select count(*) from $semaphoreInfoTable where processName=\"buildSiteInfoTable\""
+				RunSql2 $sqlStmt
+				[[ ${resultSet[@]} -eq 0 ]] && break
+				echo -e "\tWaiting for all buildSiteInfoTable process to complete, waitCntr=$waitCntr\t$(date)"
+				((waitCntr++))
+			done
+			if [[ $waitCntr -ge $maxLoop ]]; then
+				Terminate "Wait for buildSiteInfoTable processes to complete timed out"
+			else
+
 		## Common Checks
 			Call 'checkCgiPermissions' "$scriptArgs"
 		## Update the defaults data for this host
@@ -507,3 +528,4 @@ return 0
 ## Tue Feb  7 07:54:13 CST 2017 - dscudiero - Fix loadCourseleafData function
 ## Tue Feb  7 08:22:12 CST 2017 - dscudiero - Add debug messages
 ## Wed Feb  8 10:57:32 CST 2017 - dscudiero - General syncing of dev to prod
+## Fri Feb 10 14:18:17 CST 2017 - dscudiero - Add debug code
