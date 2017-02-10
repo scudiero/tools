@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.91 # -- dscudiero -- 02/08/2017 @  8:16:37.30
+version=1.3.100 # -- dscudiero -- 02/10/2017 @  9:00:27.18
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -29,7 +29,6 @@ scriptDescription="Refresh courseleaf components - dispatcher"
 # Declare local variables and constants
 #==================================================================================================
 ParseArgsStd
-[[ $client != '' ]] && refreshObj="$client"
 if [[ $userName == 'dscudiero' ]]; then
 	refreshObjs+=('VBA')
 	refreshObjs+=('wharehouseSqliteShadow')
@@ -248,8 +247,8 @@ function internal {
 #==============================================================================================
 function workflowcorefiles {
 	local file srcFile tgtFile result changeLogRecs
-	echo
 	Init 'getClient getEnv getDirs checkEnv'
+	echo
 
 	local sqlStmt="select scriptData3 from $scriptsTable where name=\"copyWorkflow\""
 	RunSql2 $sqlStmt
@@ -266,7 +265,7 @@ function workflowcorefiles {
 				WriteChangelogEntry 'changeLogRecs' "$srcDir/changelog.txt"
 				Msg2 "^'$file' copied"
 			elif [[ $result == 'same' ]]; then
-				Msg2 "^$file - md5's match, no changes made"
+				Msg2 "^'$file' - md5's match, no changes made"
 			else
 				Msg2 $T "Error copying file:\n^$result"
 			fi
@@ -301,7 +300,7 @@ helpSet='script'
 
 if [[ $refreshObj == '' ]]; then
 	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
-	Msg2
+	echo
 	Msg2 "Please specify the ordinal number of the object type you wish to refresh\n"
 	SelectMenu 'refreshObjs' 'refreshObj' '\nRefresh object ordinal(or 'x' to quit) > '
 	[[ $refreshObj == '' ]] && Goodbye 0
@@ -311,8 +310,10 @@ fi
 ## Main
 #==================================================================================================
 ## call function to refresh the object
-	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
-	Msg2
+	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear && echo
+	echo
+	Msg2 "Starting $(mapRefreshObj "$refreshObj")..."
+	echo
 	eval $(mapRefreshObj "$refreshObj")
 
 #==================================================================================================
@@ -347,3 +348,4 @@ Goodbye 0
 ## Wed Jan  4 10:29:52 CST 2017 - dscudiero - add missing items to imports
 ## Tue Jan 10 16:17:06 CST 2017 - dscudiero - Fix problem making backup in vba refresh
 ## Wed Feb  8 08:24:32 CST 2017 - dscudiero - Switch refresh workflowCore to pull file names from saveWorkflow defaults data
+## Fri Feb 10 09:01:16 CST 2017 - dscudiero - Parse client name and env if passed in
