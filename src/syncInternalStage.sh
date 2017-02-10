@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.4 # -- dscudiero -- 12/14/2016 @ 11:30:50.03
+version=1.0.5 # -- dscudiero -- 02/09/2017 @ 16:30:50.62
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -9,7 +9,7 @@ originalArgStr="$*"
 scriptDescription="Sync internal dev site"
 
 #==================================================================================================
-# Copyright ©2014 David Scudiero -- all rights reserved.
+# Copyright Â©2014 David Scudiero -- all rights reserved.
 # 06-17-15 -- 	dgs - Initial coding
 # 07-17-15 --	dgs - Migrated to framework 5
 #==================================================================================================
@@ -17,6 +17,7 @@ scriptDescription="Sync internal dev site"
 #==================================================================================================
 # Declare local variables and constants
 #==================================================================================================
+tmpFile=$(MkTmpFile)
 
 #==================================================================================================
 # Standard arg parsing and initialization
@@ -111,3 +112,4 @@ fi
 ## Done
 #==================================================================================================
 Goodbye 0
+## Fri Feb 10 09:01:31 CST 2017 - dscudiero - General syncing of dev to prod
