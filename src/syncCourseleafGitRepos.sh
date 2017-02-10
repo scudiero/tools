@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.59 # -- dscudiero -- 12/14/2016 @ 11:30:40.93
+version=2.1.60 # -- dscudiero -- 02/10/2017 @ 13:59:40.90
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -27,8 +27,7 @@ scriptDescription="Sync git shadow"
 		argList+=(-fork,3,switch,fork,,script,"Fork off git sync processes")
 	}
 	function Goodbye-syncCourseleafGitRepos {
-		[[ -f $rsyncFilters ]] && rm -f $rsyncFilters
-		[[ -f $myTempFile ]] && rm -f $myTempFile
+		[[ -f $tmpFile ]] && rm -f $tmpFile
 	}
 	function testMode-syncCourseleafGitRepos  {
 		:
@@ -45,6 +44,7 @@ workerScript='cloneGitRepo'; useLocal=true
 FindExecutable "$workerScript" 'std' 'bash:sh' ## Sets variable executeFile
 workerScriptFile="$executeFile"
 addedCalledScriptArgs="-secondaryMessagesOnly"
+tmpFile=$(MkTmpFile)
 
 #==================================================================================================
 # Standard arg parsing and initialization
@@ -116,6 +116,7 @@ if [[ $sendMail == true && $noEmails == false && $newReleases != '' ]]; then
 	done
 fi
 
+[[ -f $tmpFile ]] && rm -f $tmpFile
 #==================================================================================================
 ## Done
 #==================================================================================================
@@ -127,3 +128,4 @@ Goodbye 0 'alert'
 ## Wed Apr  6 16:09:48 CDT 2016 - dscudiero - switch for
 ## Thu Apr  7 07:33:26 CDT 2016 - dscudiero - Pull setting of maxForkedProcess as it is now done in the framework
 ## Thu Jun 16 13:00:10 CDT 2016 - dscudiero - Moved Master to last
+## Fri Feb 10 13:59:56 CST 2017 - dscudiero - make sure tmpFile is setup correctly
