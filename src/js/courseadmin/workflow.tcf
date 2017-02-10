@@ -1,13 +1,13 @@
 //==================================================================================================
-// version:1.0.2 // -- dscudiero -- 01/27/2017 @  6:50:12.11
+// version:1.0.3 // -- dscudiero -- 02/10/2017 @ 10:00:21.25
 //==================================================================================================
 // ??/??/17 -- dgs -- initial -- ??
 //==================================================================================================
-localsteps:GenEd Workflow Management|groups|workflow|attributes=isNew[New Course],isNotNew[Not New],isEdit[Course Change],isNotEdit[Not Course Change],isDelete[Course Delete],isNotDelete[Not Course Delete],fyi[FYI Only],fyiall[FYI All],optional[If Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
+localsteps:GenEd Workflow Management|groups|workflow|attributes=isNew[New Course],isNotNew[Not New],isEdit[Course Change],isNotEdit[Not Course Change],isDelete[Course Delete],isNotDelete[Not Course Delete],fyi[FYI Only],fyiall[FYI All],optional[If Role Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
 
 template:custom
 pageflags:autoapprove
 
 workflow:standard|Subj Approver,Dept Chair,Col Dean,<SIS>
 
-//workflow:standard|START,College: Col,Department: Dept,Subject: Subj,[Is New] isNew,[Not New] isNotNew,[Course Change] isEdit,[Not Course Change] isNotEdit,[Course Delete] isDelete,[Not Course Delete] isNotDelete,END
+workflow:standard|START,College: Col,Colleges: Cols,Department: Dept,Departments: Depts,Subject: Subj,Subjects: Subjs,[Is New] isNew,[Not New] isNotNew,[Course Change] isEdit,[Not Course Change] isNotEdit,[Course Delete] isDelete,[Not Course Delete] isNotDelete,END
