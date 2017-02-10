@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.187 # -- dscudiero -- 02/10/2017 @ 14:16:40.61
+version=1.21.188 # -- dscudiero -- 02/10/2017 @ 16:12:25.27
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -268,74 +268,38 @@ case "$hostName" in
 			if [[ ${#resultSet[@]} -eq 0 ]]; then
 				Error "Clients table is empty, skipping 'buildSiteInfoTable', semaphore kept in place"
 			else
-echo "$hostName --- BEFORE BuildSiteInfoTable ..."
-sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name like \"sites%\" order by create_time desc"
-RunSql2 $sqlStmt
-for ((i=0; i<${#resultSet[@]}; i++)); do
-	echo -e "\tresultSet[$i] = >$(tr '|' '\t' <<< ${resultSet[$i]})<"
-done
-echo
-			## Clear buildClientInfoTable semaphore
+				## Clear buildClientInfoTable semaphore
 				sqlStmt="delete from $semaphoreInfoTable where processName=\"buildClientInfoTable\" and hostName=\"$hostName\""
 				RunSql2 $sqlStmt
 
-			## Set a semaphore for this servers call to buildSiteInfoTable
+				## Set a semaphore for this servers call to buildSiteInfoTable
 				sqlStmt="insert into $semaphoreInfoTable values(NULL,\"buildSiteInfoTable\",\"$hostName\",\"$LOGNAME\",NOW())"
 				RunSql2 $sqlStmt
 
-			## Create a temporary copy of the sites table, load new data to that table, backup master table
-			for table in $siteInfoTable $siteAdminsTable; do
-				sqlStmt="drop table if exists ${table}Bak"
-				RunSql2 $sqlStmt
-				sqlStmt="drop table if exists ${table}New"
-				RunSql2 $sqlStmt
-				sqlStmt="create table ${table}New like ${table}"
-				RunSql2 $sqlStmt
-				sqlStmt="rename table ${table} to ${table}Bak"
-				RunSql2 $sqlStmt
-			done
+				## Create a temporary copy of the sites table, load new data to that table, backup master table
+				for table in $siteInfoTable $siteAdminsTable; do
+					sqlStmt="drop table if exists ${table}Bak"
+					RunSql2 $sqlStmt
+					sqlStmt="drop table if exists ${table}New"
+					RunSql2 $sqlStmt
+					sqlStmt="create table ${table}New like ${table}"
+					RunSql2 $sqlStmt
+					sqlStmt="rename table ${table} to ${table}Bak"
+					RunSql2 $sqlStmt
+				done
 
-			## Clear buildClientInfoTable semaphore, allowing processes on other hosts to start
+				## Clear buildClientInfoTable semaphore, allowing processes on other hosts to start
 				sqlStmt="delete from $semaphoreInfoTable where processName=\"buildSiteInfoTable\""
 				RunSql2 $sqlStmt
 
-			## Build siteinfotabe and siteadmins table
+				## Build siteinfotabe and siteadmins table
 				Call 'buildSiteInfoTable' "-table ${siteInfoTable}New $scriptArgs"
-			## Clear buildSiteInfoTable semaphore
+
+				## Clear buildSiteInfoTable semaphore
 				sqlStmt="delete from $semaphoreInfoTable where processName=\"buildSiteInfoTable\" and hostName=\"$hostName\""
 				RunSql2 $sqlStmt
 		fi
 		Msg2 "^...(Running BuildClientInfoTable) done"
-
-		## Wait for the all buildSiteInfoTable process to complete
-			waitCntr=1 ; let maxLoop=2*60*60/30 # Number of hours * 60 min/hr * 60 sec/min / sleep time
-			while [[ $waitCntr -lt $maxLoop ]]; do    # Wait no longer than X
-				sleep 30
-				sqlStmt="select count(*) from $semaphoreInfoTable where processName=\"buildSiteInfoTable\""
-				RunSql2 $sqlStmt
-				[[ ${resultSet[@]} -eq 0 ]] && break
-				echo -e "\tWaiting for all buildSiteInfoTable process to complete, waitCntr=$waitCntr\t$(date)"
-				((waitCntr++))
-			done
-			if [[ $waitCntr -ge $maxLoop ]]; then
-				Terminate "Wait for buildSiteInfoTable processes to complete timed out"
-			else
-
-		## Build employee table
-			BuildEmployeeTable
-
-		## Build the courseleafData table
-			BuildCourseleafDataTable
-
-		## Build the qaStatus table
-			Call 'buildQaStatusTable' "$scriptArgs"
-
-		## Common Checks
-			Call 'checkCgiPermissions' "$scriptArgs"
-			Call 'checkPublishSettings' "$scriptArgs"
-
-		## Update the defaults data for this host
-			Call 'updateDefaults' "$scriptArgs"
 
 		## Wait for all of the buildSiteInfoTable process to finish
 			waitCntr=1 ; let maxLoop=2*2*60+30*2 ## 2.5 hours
@@ -345,6 +309,7 @@ echo
 				sqlStmt="select count(*) from $semaphoreInfoTable where processName=\"buildSiteInfoTable\""
 				RunSql2 $sqlStmt
 				[[ ${resultSet[@]} -eq 0 ]] && break
+				echo -e "\tWaiting for all buildSiteInfoTable process to complete, waitCntr=$waitCntr\t$(date)"
 				((waitCntr++))
 			done
 			if [[ $waitCntr -ge $maxLoop ]]; then
@@ -361,6 +326,22 @@ echo
 				sqlStmt="rename table ${siteAdminsTable}New to $siteAdminsTable"
 				RunSql2 $sqlStmt
 			fi
+
+		## Build employee table
+			BuildEmployeeTable
+
+		## Build the courseleafData table
+			BuildCourseleafDataTable
+
+		## Build the qaStatus table
+			Call 'buildQaStatusTable' "$scriptArgs"
+
+		## Common Checks
+			Call 'checkCgiPermissions' "$scriptArgs"
+			Call 'checkPublishSettings' "$scriptArgs"
+
+		## Update the defaults data for this host
+			Call 'updateDefaults' "$scriptArgs"
 
 		## rebuild Internal pages to pickup any new database information
 			Msg2 "Rebuilding Internal pages"
@@ -434,25 +415,19 @@ echo
 			Call 'perfTest' 'summary'
 		fi
 
-		## Wait for the buildSiteInfoTable process to start on mojave
+		## Wait for the buildClientsInfoTable process to complete on mojave
 		waitCntr=1 ; let maxLoop=1*60*60/30 # Number of hours * 60 min/hr * 60 sec/min / sleep time
 		while [[ $waitCntr -lt $maxLoop ]]; do    # Wait no longer than X
 			sleep 30
 			sqlStmt="select count(*) from $semaphoreInfoTable where processName=\"buildClientsInfoTable\""
 			RunSql2 $sqlStmt
 			[[ ${resultSet[@]} -eq 0 ]] && break
+			echo -e "\tWaiting for all buildClientsInfoTable process to complete, waitCntr=$waitCntr\t$(date)"
 			((waitCntr++))
 		done
 		if [[ $waitCntr -ge $maxLoop ]]; then
 			Error "Wait for buildClientsInfoTable to complete timed out, skipping load of '$siteInfoTable'"
 		else
-echo "$hostName --- BEFORE BuildSiteInfoTable ..."
-sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name like \"sites%\" order by create_time desc"
-RunSql2 $sqlStmt
-for ((i=0; i<${#resultSet[@]}; i++)); do
-	echo -e "\tresultSet[$i] = >$(tr '|' '\t' <<< ${resultSet[$i]})<"
-done
-echo
 			## Build $siteInfoTable and $siteAdminsTable tables
 			## Set a semaphore for this servers call to buildSiteInfoTable
 			sqlStmt="insert into $semaphoreInfoTable values(NULL,\"buildSiteInfoTable\",\"$hostName\",\"$LOGNAME\",NOW())"
@@ -529,3 +504,4 @@ return 0
 ## Tue Feb  7 08:22:12 CST 2017 - dscudiero - Add debug messages
 ## Wed Feb  8 10:57:32 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Feb 10 14:18:17 CST 2017 - dscudiero - Add debug code
+## Fri Feb 10 16:12:53 CST 2017 - dscudiero - tweak the logic arround buildsiteinfotable
