@@ -1,8 +1,8 @@
 //======================================================================================================
 // ??/??/16-- dgs -- initial
-// version:1.0.-1 // -- dscudiero -- 08/31/2016 @  9:34:34.28
+// version:1.0.0 // -- dscudiero -- 02/10/2017 @ 12:52:37.71
 //======================================================================================================
-localsteps:Miscellaneous Workflow Management|groups|workflow|attributes=fyi[FYI Only],fyiall[FYI All],optional[If Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
+localsteps:Miscellaneous Workflow Management|groups|workflow|attributes=todo[ToDo Item],fyi[FYI Only],fyiall[FYI All],optional[If Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
 
 template:custom
 pageflags:autoapprove
