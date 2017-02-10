@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.25 # -- dscudiero -- 02/10/2017 @ 15:49:53.34
+version=4.3.26 # -- dscudiero -- 02/10/2017 @ 16:01:27.26
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -105,7 +105,7 @@ Msg2 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 	if [[ -z $client ]]; then
 		clientDirs=($(find /mnt -maxdepth 2 -mindepth 1 -type d 2> /dev/null | grep -v '^/mnt/dev'))
 	else
-		clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep $client))
+		clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep $client\$))
 	fi
 	if [[ $verboseLevel -ge 1 ]]; then
 		echo
@@ -227,3 +227,4 @@ Goodbye 0 'alert'
 ## Tue Feb  7 08:34:51 CST 2017 - dscudiero - Fix bug checking if the passed table name exists
 ## Wed Feb  8 10:57:22 CST 2017 - dscudiero - v
 ## Fri Feb 10 15:59:40 CST 2017 - dscudiero - Add ability to specify a client name
+## Fri Feb 10 16:02:08 CST 2017 - dscudiero - Tweak client support to add $ to the grep to only pickup the base client dir
