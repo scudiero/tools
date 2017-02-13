@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.3.17 # -- dscudiero -- 01/23/2017 @ 12:26:22.35
+version=2.3.18 # -- dscudiero -- 02/13/2017 @ 15:57:56.44
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -27,6 +27,7 @@ sendMail=false
 GetDefaultsData $myName
 ParseArgsStd
 Hello
+tmpFile=$(MkTmpFile)
 
 #==================================================================================================
 # Main loop
@@ -64,6 +65,8 @@ if [[ -f $tmpFile ]]; then
 	rm $tmpFile
 fi
 
+[[ -f "$tmpFile" ]] && rm "$tmpFile"
+
 #==================================================================================================
 ## Bye-bye
 #==================================================================================================
@@ -72,3 +75,4 @@ Goodbye 0
 ## Thu May 12 13:15:22 CDT 2016 - dscudiero - Fix problem where sites with publishing = were being picked up
 ## Mon Oct  3 07:06:17 CDT 2016 - dscudiero - Wrap clear statement with protection
 ## Mon Jan 23 12:26:59 CST 2017 - dscudiero - Fix problem using Msg not Msg2
+## Mon Feb 13 15:59:27 CST 2017 - dscudiero - Make sure we are using our own tmpFile
