@@ -1,5 +1,5 @@
 #!/bin/bash
-version=1.0.7 # -- dscudiero -- 01/12/2017 @ 14:15:06.94
+version=1.0.8 # -- dscudiero -- 02/13/2017 @ 16:07:44.54
 originalArgStr="$*"
 scriptDescription="Report on specific client data for marketning team member"
 TrapSigs 'on'
@@ -101,10 +101,10 @@ salesRep=$(Lower $salesRep)
 #===================================================================================================
 ## Done
 #===================================================================================================
-[[ -f $tmpFile ]] && rm -f $tmpFile
 [[ $batchMode == true && -f $outFile ]] && rm -f $outFile
 Goodbye 0 #'alert'
 
 #===================================================================================================
 ## Check-in log
 #===================================================================================================
+## Mon Feb 13 16:09:26 CST 2017 - dscudiero - make sure we have our own tmpFile
