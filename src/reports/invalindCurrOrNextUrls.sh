@@ -1,5 +1,5 @@
 #!/bin/bash
-version=1.0.46 # -- dscudiero -- 01/12/2017 @ 14:15:16.40
+version=1.0.47 # -- dscudiero -- 02/13/2017 @ 16:08:45.13
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -17,7 +17,6 @@ function parseArgs-invalindCurrOrNextUrls  { # or parseArgs-local
 	return 0
 }
 function Goodbye-invalindCurrOrNextUrls  { # or Goodbye-local
-	rm -rf $tmpRoot > /dev/null 2>&1
 	return 0
 }
 function testMode-invalindCurrOrNextUrls  { # or testMode-local
@@ -98,3 +97,4 @@ Goodbye 0 #'alert'
 #===================================================================================================
 ## Check-in log
 #===================================================================================================
+## Mon Feb 13 16:09:33 CST 2017 - dscudiero - make sure we have our own tmpFile
