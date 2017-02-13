@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.2.27 # -- dscudiero -- 02/07/2017 @  7:56:14.89
+version=2.2.28 # -- dscudiero -- 02/13/2017 @ 15:57:34.36
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -48,6 +48,7 @@ helpSet='script'
 GetDefaultsData $myName
 ParseArgsStd
 Hello
+tmpFile=$(MkTmpFile)
 
 #==================================================================================================
 ## main
@@ -95,6 +96,8 @@ if [[ $sendMail == true && $noEmails == false ]]; then
 	$DOIT mutt -s "$myName detected Errors - $(date +"%m-%d-%Y")" -- $emailAddrs < $tmpFile
 fi
 
+[[ -f "$tmpFile" ]] && rm "$tmpFile"
+
 #==================================================================================================
 ## Bye-bye
 #==================================================================================================
@@ -113,3 +116,4 @@ Goodbye 0
 ## Mon Aug 22 08:59:27 CDT 2016 - dscudiero - Switch to use mutt for email
 ## Wed Oct  5 10:17:58 CDT 2016 - dscudiero - Tweak emailing
 ## Tue Feb  7 07:56:26 CST 2017 - dscudiero - Fix problem printing out file names
+## Mon Feb 13 15:59:17 CST 2017 - dscudiero - Make sure we are using our own tmpFile
