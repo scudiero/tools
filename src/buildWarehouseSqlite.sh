@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.16 # -- dscudiero -- 12/14/2016 @ 11:17:46.30
+version=1.0.17 # -- dscudiero -- 02/13/2017 @ 16:03:50.17
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -25,6 +25,7 @@ scriptDescription="Build abbreviated warehouse sqlite file"
 #==================================================================================================
 ParseArgsStd
 Hello
+tmpFile=$(MkTmpFile)
 [[ $client != '' ]] && sqliteFile="$sqliteDbs/$client.sqlite" || sqliteFile="$sqliteDbs/warehouseLite.sqlite"
 
 ##==================================================================================================
@@ -128,14 +129,16 @@ END {
 	print "END TRANSACTION;"
 }
 ' \
-| sqlite3 $sqliteFile > $tmpFile.out
+| sqlite3 $sqliteFile > $tmpFile
 
-if [[ $(cat $tmpFile.out) != 'memory' ]]; then
+if [[ $(cat $tmpFile) != 'memory' ]]; then
 	Msg2 $E "Errors returned from conversion:"
-	cat $tmpFile.out
+	cat $tmpFile
 	Msg $T "Stopping"
 fi
 touch $sqliteDbs/warehouseLite.syncDate
+
+[[ -f "$$tmpFile" ]] && rm "$$tmpFile"
 
 #==================================================================================================
 ## Done
@@ -146,3 +149,4 @@ Goodbye 0
 ## Wed May  4 08:31:34 CDT 2016 - dscudiero - Only pull clients and sites tables
 ## Fri May  6 09:27:06 CDT 2016 - dscudiero - Change default name of the file
 ## Mon May  9 09:07:07 CDT 2016 - dscudiero - Create syncdate file after extract
+## Mon Feb 13 16:04:07 CST 2017 - dscudiero - make sure we are using our one tmpFile
