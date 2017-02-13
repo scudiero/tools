@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #===================================================================================================
-version=1.0.25 # -- dscudiero -- 01/17/2017 @  9:55:48.42
+version=1.0.26 # -- dscudiero -- 02/13/2017 @ 16:11:56.80
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -23,7 +23,6 @@ function parseArgs-weeklyRollup  { # or parseArgs-local
 	return 0
 }
 function Goodbye-weeklyRollup  { # or Goodbye-local
-	rm -rf $tmpRoot > /dev/null 2>&1
 	return 0
 }
 function testMode-weeklyRollup  { # or testMode-local
@@ -38,7 +37,6 @@ function testMode-weeklyRollup  { # or testMode-local
 #===================================================================================================
 # Declare local variables and constants
 #===================================================================================================
-tmpFile=$(mkTmpFile)
 trueVars=''
 falseVars=''
 for var in $trueVars; do eval $var=true; done
@@ -121,3 +119,4 @@ Goodbye 0 #'alert'
 ## Mon Oct 10 07:11:50 CDT 2016 - dscudiero - Script to perform weekly log processing
 ## Fri Jan 13 07:53:53 CST 2017 - dscudiero - x
 ## Tue Jan 17 09:57:59 CST 2017 - dscudiero - Surround tar and find calls in a ProtectedCall
+## Mon Feb 13 16:12:36 CST 2017 - dscudiero - make sure we have our own tmpFile
