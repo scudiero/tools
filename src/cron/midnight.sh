@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.188 # -- dscudiero -- 02/10/2017 @ 16:12:25.27
+version=1.21.189 # -- dscudiero -- 02/13/2017 @  7:45:49.47
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -450,7 +450,7 @@ case "$hostName" in
 			done
 			if [[ $waitCntr -ge $maxLoop ]]; then
 				Terminate "Wait for buildSiteInfoTable processes to complete timed out"
-			else
+			fi
 
 		## Common Checks
 			Call 'checkCgiPermissions' "$scriptArgs"
@@ -505,3 +505,4 @@ return 0
 ## Wed Feb  8 10:57:32 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Feb 10 14:18:17 CST 2017 - dscudiero - Add debug code
 ## Fri Feb 10 16:12:53 CST 2017 - dscudiero - tweak the logic arround buildsiteinfotable
+## Mon Feb 13 07:49:37 CST 2017 - dscudiero - Fix syntax problem
