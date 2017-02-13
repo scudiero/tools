@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.19 # -- dscudiero -- 01/12/2017 @ 14:13:09.22
+version=1.0.20 # -- dscudiero -- 02/13/2017 @ 16:08:26.11
 #==================================================================================================
 Import GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye
 originalArgStr="$*"
@@ -20,7 +20,6 @@ function parseArgs-clientPrimaryContacts  { # or parseArgs-local
 	return 0
 }
 function Goodbye-clientPrimaryContacts  { # or Goodbye-local
-	rm -rf $tmpRoot > /dev/null 2>&1
 	return 0
 }
 function testMode-clientPrimaryContacts  { # or testMode-local
@@ -35,7 +34,6 @@ function testMode-clientPrimaryContacts  { # or testMode-local
 #==================================================================================================
 # Declare local variables and constants
 #==================================================================================================
-tmpFile=$(mkTmpFile)
 trueVars=''
 falseVars=''
 for var in $trueVars; do eval $var=true; done
@@ -112,7 +110,6 @@ Hello
 #===================================================================================================
 ## Done
 #===================================================================================================
-[[ -f $tmpFile ]] && rm -f $tmpFile
 [[ $batchMode == true && -f $outFile ]] && rm -f $outFileRoot*
 Goodbye 0 #'alert'
 
@@ -122,3 +119,4 @@ Goodbye 0 #'alert'
 
 
 
+## Mon Feb 13 16:09:30 CST 2017 - dscudiero - make sure we have our own tmpFile
