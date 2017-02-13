@@ -1,6 +1,6 @@
 RunSql2 #!/bin/bash
 #==================================================================================================
-version=1.1.10 # -- dscudiero -- 01/12/2017 @ 14:14:17.43
+version=1.1.11 # -- dscudiero -- 02/13/2017 @ 16:06:41.51
 #==================================================================================================
 Import DumpMap
 originalArgStr="$*"
@@ -42,6 +42,7 @@ clientsDir="/mnt/internal/site/stage/web/clients"
 outDir=/home/$userName/Reports/$myName
 [[ ! -d $outDir ]] && mkdir -p $outDir
 outFile=$outDir/$(date '+%Y-%m-%d-%H%M%S').txt
+tmpFile=$(MkTmpFile)
 
 declare -A roleMap
 roleMap['support']='support'
@@ -158,3 +159,4 @@ Goodbye 0 #'alert'
 #===================================================================================================
 ## Check-in log
 #===================================================================================================
+## Mon Feb 13 16:09:19 CST 2017 - dscudiero - make sure we have our own tmpFile
