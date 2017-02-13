@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.4.26 # -- dscudiero -- 01/12/2017 @ 13:13:21.42
+version=2.4.27 # -- dscudiero -- 02/13/2017 @ 15:56:52.89
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -22,7 +22,7 @@ scriptDescription="Check age of private dev sites"
 GetDefaultsData $myName
 ParseArgsStd
 Hello
-[[ $tmpFile == '' ]] && tmpFile="/tmp/$userName.$myName.data"
+tmpFile=$(MkTmpFile)
 
 #==================================================================================================
 # Pull script defined data from the script record in the scripts database
@@ -125,3 +125,4 @@ Goodbye 0
 ## Mon Aug  1 08:01:27 CDT 2016 - dscudiero - Switch to use sendmail
 ## Mon Aug 15 08:05:24 CDT 2016 - dscudiero - Fix problem with the emailaddress for the notificiaton email
 ## Mon Aug 22 08:59:35 CDT 2016 - dscudiero - Switch to use mutt for email
+## Mon Feb 13 15:59:23 CST 2017 - dscudiero - Make sure we are using our own tmpFile
