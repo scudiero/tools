@@ -1,6 +1,6 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
-version=1.0.5 # -- dscudiero -- 01/12/2017 @ 14:14:56.19
+version=1.0.6 # -- dscudiero -- 02/13/2017 @ 16:07:23.06
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -52,6 +52,7 @@ header="Client Key\tClient Code\tLong Name\tHome URL\tCourseleaf Role\tFirst Nam
 fields='clients.clientkey,clients.clientcode,clients.name,homeurl,contacts.contactrole,contacts.firstname,contacts.lastname'
 fields="$fields,contacts.title,contacts.workphone,contacts.cell,contacts.fax,contacts.email"
 
+tmpFile=$(MkTmpFile)
 
 # workBook="$HOME/LUC2016AttendeeList.xlsx"
 # workSheet='5780b9f8dd5f41feb5370735a559bbd'
@@ -274,3 +275,4 @@ Goodbye 0 #'alert'
 
 
 
+## Mon Feb 13 16:09:23 CST 2017 - dscudiero - make sure we have our own tmpFile
