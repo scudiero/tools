@@ -1,6 +1,6 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
-version=1.0.17 # -- dscudiero -- 01/12/2017 @ 14:14:26.51
+version=1.0.18 # -- dscudiero -- 02/13/2017 @ 16:05:54.87
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -20,7 +20,7 @@ function parseArgs-catalogAudit  { # or parseArgs-local
 	return 0
 }
 function Goodbye-catalogAudit  { # or Goodbye-local
-	rm -rf $tmpRoot > /dev/null 2>&1
+[[ -f "$tmpFile" ]] && rm "$tmpFile"
 	return 0
 }
 function testMode-catalogAudit  { # or testMode-local
@@ -244,8 +244,10 @@ fi
 #===================================================================================================
 secondaryMessagesOnly=false
 [[ $secondaryMessagesOnly == true ]] && secondaryMessagesOnly=false && return 0
+[[ -f "$tmpFile" ]] && rm "$tmpFile"
 Goodbye 0
 
 #===================================================================================================
 ## Check-in log
 #===================================================================================================
+## Mon Feb 13 16:09:13 CST 2017 - dscudiero - make sure we have our own tmpFile
