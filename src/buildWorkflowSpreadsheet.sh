@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.90 # -- dscudiero -- 12/27/2016 @ 12:17:09.78
+version=1.1.92 # -- dscudiero -- 02/13/2017 @ 16:01:22.61
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -36,6 +36,7 @@ scriptDescription="Build workflow spreadsheet from workflow file"
 		eval $errSigOn
 		if [[ -f $stepFile ]]; then echo rm stepFile; rm -f $stepFile; fi
 		if [[ -f $backupStepFile ]]; then mv -f $backupStepFile $stepFile; fi
+		[[ -f "$tmpFile" ]] && rm "$tmpFile"
 		return 0
 	}
 
@@ -130,6 +131,7 @@ declare -A conditionalsRef
 declare -A esigs
 declare -A wfrules
 declare -A substitutionVars
+tmpFile=$(MkTmpFile)
 
 #==================================================================================================
 # Standard arg parsing and initialization
@@ -323,6 +325,7 @@ done # cims
 Msg2
 Msg2 "Processed CIMs: $cimStr"
 [[ $informationOnlyMode != true ]] && Msg2 "Output written to: $outFile"
+[[ -f "$tmpFile" ]] && rm "$tmpFile"
 
 #==================================================================================================
 ## Done
@@ -338,3 +341,4 @@ Goodbye 0 #'alert'
 ## Tue Jul  5 16:25:33 CDT 2016 - dscudiero - Do not sort the conditions
 ## Thu Jul  7 11:47:14 CDT 2016 - dscudiero - Refactored to seperate out esigs
 ## Mon Oct 24 09:14:53 CDT 2016 - dscudiero - Display directory on verifyContinue
+## Mon Feb 13 16:04:12 CST 2017 - dscudiero - make sure we are using our one tmpFile
