@@ -41,6 +41,7 @@ function MapTtoW {
 #===================================================================================================
 # Declare local variables and constants
 #===================================================================================================
+## Variables inherited from parent: client
 
 #===================================================================================================
 # Main
@@ -50,7 +51,7 @@ function MapTtoW {
 	SetFileExpansion 'off'
 	sqlStmt="select * from sqlite_master where type=\"table\" and name=\"clients\""
 	RunSql2 "$contactsSqliteFile" $sqlStmt
-	[[ ${#resultSet[@]} -le 0 ]] && Msg2 $T "Could not retrieve clients data from '$contactsSqliteFile'"
+	[[ ${#resultSet[@]} -le 0 ]] && Msg2 $T "Could not retrieve clients table definition data from '$contactsSqliteFile'"
 	unset tFields
 	for ((i=1; i<${#resultSet[@]}-1; i++)); do
 		tFields="$tFields,$(cut -d '`' -f2 <<< ${resultSet[$i]})"
@@ -157,15 +158,20 @@ function MapTtoW {
 	dump -1 wFields insertVals
 
 ## Insert record
-	Msg2 $V1 ""
-	sqlStmt="insert into $useClientInfoTable ($wFields) values($insertVals)"
-	dump -1 sqlStmt -n
-	if [[ $DOIT != '' || $informationOnlyMode == true ]]; then
-		echo -e "\t\tsqlStmt = '>'$sqlStmt'<'"
-	else
+	## Delete old data
+		Msg2 $V1 ""
+		sqlStmt="delete from $useClientInfoTable where name=\"$client\""
 		RunSql2 $sqlStmt
-		#echo "resultSet[0] = ' ${resultSet[0]}'"
-	fi
+	## Insert new data
+		Msg2 $V1 ""
+		sqlStmt="insert into $useClientInfoTable ($wFields) values($insertVals)"
+		dump -1 sqlStmt -n
+		if [[ $DOIT != '' || $informationOnlyMode == true ]]; then
+			echo -e "\t\tsqlStmt = '>'$sqlStmt'<'"
+		else
+			RunSql2 $sqlStmt
+			#echo "resultSet[0] = ' ${resultSet[0]}'"
+		fi
 
 #===================================================================================================
 # Done
@@ -196,3 +202,4 @@ return 0
 ## Tue Jan 17 08:58:29 CST 2017 - dscudiero - x
 ## Tue Jan 17 09:12:46 CST 2017 - dscudiero - remove debug statement
 ## Tue Jan 17 09:38:03 CST 2017 - dscudiero - misc cleanup
+## Tue Feb 14 13:19:17 CST 2017 - dscudiero - Refactored to delete the client records before inserting a new one
