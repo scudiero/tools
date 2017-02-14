@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.194 # -- dscudiero -- 02/14/2017 @ 13:17:56.59
+version=1.21.195 # -- dscudiero -- 02/14/2017 @ 14:06:02.82
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -90,12 +90,6 @@ function CheckClientCount {
 function BuildEmployeeTable {
 	Msg2 "$FUNCNAME -- Starting"
 
-	## Create a temp table to load into
-		sqlStmt="drop table if exists ${employeeTable}New"
-		RunSql2 $sqlStmt
-		sqlStmt="create table ${employeeTable}New like ${employeeTable}"
-		RunSql2 $sqlStmt
-
 	### Get the list of columns in the transactional employees table
 		sqlStmt="pragma table_info(employees)"
 		RunSql2 "$contactsSqliteFile" $sqlStmt
@@ -124,28 +118,6 @@ function BuildEmployeeTable {
 			sqlStmt="insert into ${employeeTable}New values($valuesString)"
 			RunSql2 $sqlStmt
 		done
-
-	## Swap temp table for the real table
-		sqlStmt="select count(*) from ${employeeTable}New"
-		RunSql2 $sqlStmt
-		newCnt=${resultSet[0]}
-		sqlStmt="select count(*) from ${employeeTable}"
-		RunSql2 $sqlStmt
-		oldCnt=${resultSet[0]}
-		let countDiff=$oldCnt-$newCnt
-		let oneFourthsPrev=$oldCnt/4
-		if [[ $newCnt -eq 0 || $countDiff -gt $oneFourthsPrev ]]; then
-			Error "New employee table is significantly smaller than the origional, keeping origional"
-		else
-			sqlStmt="drop table if exists ${employeeTable}Bak"
-			RunSql2 $sqlStmt
-			sqlStmt="rename table ${employeeTable} to ${employeeTable}Bak"
-			RunSql2 $sqlStmt
-			sqlStmt="rename table ${employeeTable}New to ${employeeTable}"
-			RunSql2 $sqlStmt
-			# sqlStmt="drop table if exists ${employeeTable}Bak"
-			# RunSql2 $sqlStmt
-		fi
 
 	Msg2 "$FUNCNAME -- Completed"
 	return 0
@@ -240,7 +212,7 @@ case "$hostName" in
 			mySemaphoreId=$(Semaphore 'set' $myName)
 			## Backup database tables
 			SetFileExpansion 'off'
-			for table in $clientInfoTable $siteInfoTable $siteAdminsTable; do
+			for table in $clientInfoTable $siteInfoTable $siteAdminsTable $employeeTable ; do
 				sqlStmt="drop table if exists ${table}Bak"
 				RunSql2 $sqlStmt
 				sqlStmt="create table ${table}New like ${table}"
@@ -354,7 +326,7 @@ case "$hostName" in
 			Semaphore 'waiton' "buildClientInfoTable"
 			Semaphore 'waiton' "buildSiteInfoTable"
 			errorDetected=false
-			for table in $clientInfoTable $siteInfoTable $siteAdminsTable; do
+			for table in $clientInfoTable $siteInfoTable $siteAdminsTable $employeeTable; do
 				sqlStmt="select count(*) from $table"
 				RunSql2 $sqlStmt
 				if [[ ${resultSet[0]} -eq 0 ]]; then
@@ -438,3 +410,4 @@ return 0
 ## Fri Feb 10 16:12:53 CST 2017 - dscudiero - tweak the logic arround buildsiteinfotable
 ## Mon Feb 13 07:49:37 CST 2017 - dscudiero - Fix syntax problem
 ## Tue Feb 14 13:19:54 CST 2017 - dscudiero - Refactored control logic to sychronize processing amongst servers
+## Tue Feb 14 14:06:43 CST 2017 - dscudiero - Add employeetable to the backup and recover list
