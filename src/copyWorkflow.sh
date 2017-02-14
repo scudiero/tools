@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.8.59 # -- dscudiero -- 02/08/2017 @ 13:52:18.50
+version=2.8.60 # -- dscudiero -- 02/14/2017 @ 12:23:44.03
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -196,7 +196,7 @@ function CleanupOldFiles {
 
 		## Baclup/Delete Files
 			for ((i = 0; i < ${#oldFiles[@]}; i++)); do
-			    Msg2 "^^Backing up & Removeing: ${oldFiles[$i]}"
+			    Msg2 "^^^Backing up & Removeing: ${oldFiles[$i]}"
 				$DOIT BackupCourseleafFile ${oldFiles[$i]}
 				$DOIT rm -f ${oldFiles[$i]}
 			done
@@ -380,7 +380,7 @@ Msg2
 			[[ ${checkSrcFile:0:1} == '/' ]] && checkSrcFile="$srcDir/web${checkSrcFile}" || checkSrcFile="$srcDir/web/$cim/${checkSrcFile}"
 			[[ ${checkTgtFile:0:1} == '/' ]] && checkTgtFile="$tgtDir/web${checkTgtFile}" || checkTgtFile="$tgtDir/web/$cim/${checkTgtFile}"
 			if [[ -f $checkSrcFile && -f $checkTgtFile ]]; then
-				Msg2 "^^Backing up & Removeing: $checkTgtFile"
+				Msg2 "^^^Backing up & Removeing: $checkTgtFile"
 				$DOIT BackupCourseleafFile $checkTgtFile
 				$DOIT rm -f $checkTgtFile
 			fi
@@ -435,3 +435,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## Thu Jan 26 12:30:37 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Jan 26 12:53:17 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Feb  9 08:06:38 CST 2017 - dscudiero - make sure we are using our own tmpFile
+## Tue Feb 14 12:24:17 CST 2017 - dscudiero - Tweak messaging format
