@@ -1,12 +1,12 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.189 # -- dscudiero -- 02/13/2017 @  7:45:49.47
+version=1.21.194 # -- dscudiero -- 02/14/2017 @ 13:17:56.59
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
 TrapSigs 'on'
-Import FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql2 Msg2 Call RunCoureleafCgi GetCourseleafPgm
+Import FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql2 Msg2 Call RunCoureleafCgi GetCourseleafPgm Semaphore
 originalArgStr="$*";
 
 #=======================================================================================================================
@@ -235,15 +235,25 @@ logInDb=false
 #=======================================================================================================================
 case "$hostName" in
 	mojave)
+
+		## Processing that we want to completed before any cron tasks on other systems have started
+			mySemaphoreId=$(Semaphore 'set' $myName)
+			## Backup database tables
+			SetFileExpansion 'off'
+			for table in $clientInfoTable $siteInfoTable $siteAdminsTable; do
+				sqlStmt="drop table if exists ${table}Bak"
+				RunSql2 $sqlStmt
+				sqlStmt="create table ${table}New like ${table}"
+				RunSql2 $sqlStmt
+				sqlStmt="insert ${table}New select * from ${table}"
+				RunSql2 $sqlStmt
+			done
+			SetFileExpansion
+			Semaphore 'clear' $mySemaphoreId
+
 		## Performance test
 			Msg2 "Running perfTest..."
-			## Set a semaphore
-				sqlStmt="insert into $semaphoreInfoTable values(NULL,\"perfTest\",\"$hostName\",\"$LOGNAME\",NOW())"
-				RunSql2 $sqlStmt
 			Call 'perfTest'
-			## Clear buildClientInfoTable semaphore
-				sqlStmt="delete from $semaphoreInfoTable where processName=\"perfTest\" and hostName=\"$hostName\""
-				RunSql2 $sqlStmt
 
 		## Compare number of clients in the warehouse vs the transactional if more in transactional then runClientListReport=true
 			runClientListReport=$(CheckClientCount)
@@ -255,12 +265,10 @@ case "$hostName" in
 			touch $sqliteDbs/contacts.syncDate
 			Msg2 "^...done"
 
-		Msg2 "Running BuildClientInfoTable..."
 		## Build the clientInfoTable
-			## Set a semaphore
-				sqlStmt="insert into $semaphoreInfoTable values(NULL,\"buildClientInfoTable\",\"$hostName\",\"$LOGNAME\",NOW())"
-				RunSql2 $sqlStmt
+			Msg2 "Running BuildClientInfoTable..."
 			Call 'buildClientInfoTable' "$scriptArgs"
+			Msg2 "^...(Running BuildClientInfoTable) done"
 
 		## Check to see of clients table has data
 			sqlStmt="select count(*) from $clientInfoTable"
@@ -268,63 +276,8 @@ case "$hostName" in
 			if [[ ${#resultSet[@]} -eq 0 ]]; then
 				Error "Clients table is empty, skipping 'buildSiteInfoTable', semaphore kept in place"
 			else
-				## Clear buildClientInfoTable semaphore
-				sqlStmt="delete from $semaphoreInfoTable where processName=\"buildClientInfoTable\" and hostName=\"$hostName\""
-				RunSql2 $sqlStmt
-
-				## Set a semaphore for this servers call to buildSiteInfoTable
-				sqlStmt="insert into $semaphoreInfoTable values(NULL,\"buildSiteInfoTable\",\"$hostName\",\"$LOGNAME\",NOW())"
-				RunSql2 $sqlStmt
-
-				## Create a temporary copy of the sites table, load new data to that table, backup master table
-				for table in $siteInfoTable $siteAdminsTable; do
-					sqlStmt="drop table if exists ${table}Bak"
-					RunSql2 $sqlStmt
-					sqlStmt="drop table if exists ${table}New"
-					RunSql2 $sqlStmt
-					sqlStmt="create table ${table}New like ${table}"
-					RunSql2 $sqlStmt
-					sqlStmt="rename table ${table} to ${table}Bak"
-					RunSql2 $sqlStmt
-				done
-
-				## Clear buildClientInfoTable semaphore, allowing processes on other hosts to start
-				sqlStmt="delete from $semaphoreInfoTable where processName=\"buildSiteInfoTable\""
-				RunSql2 $sqlStmt
-
 				## Build siteinfotabe and siteadmins table
-				Call 'buildSiteInfoTable' "-table ${siteInfoTable}New $scriptArgs"
-
-				## Clear buildSiteInfoTable semaphore
-				sqlStmt="delete from $semaphoreInfoTable where processName=\"buildSiteInfoTable\" and hostName=\"$hostName\""
-				RunSql2 $sqlStmt
-		fi
-		Msg2 "^...(Running BuildClientInfoTable) done"
-
-		## Wait for all of the buildSiteInfoTable process to finish
-			waitCntr=1 ; let maxLoop=2*2*60+30*2 ## 2.5 hours
-			while [[ $waitCntr -lt $maxLoop ]]; do    # Wait no longer than X
-				sleep 30 ## Wait for process to start on mojave and get the semaphore set
-				## Check 'buildClientsInfoTable' semaphore, wait for truncate to be done on mojave
-				sqlStmt="select count(*) from $semaphoreInfoTable where processName=\"buildSiteInfoTable\""
-				RunSql2 $sqlStmt
-				[[ ${resultSet[@]} -eq 0 ]] && break
-				echo -e "\tWaiting for all buildSiteInfoTable process to complete, waitCntr=$waitCntr\t$(date)"
-				((waitCntr++))
-			done
-			if [[ $waitCntr -ge $maxLoop ]]; then
-				Error "Wait for buildSiteInfoTables to complete timed out, activating original '$siteInfoTable'"
-				for table in $siteInfoTable $siteAdminsTable; do
-					sqlStmt="drop table if exists ${table}New"
-					RunSql2 $sqlStmt
-					sqlStmt="rename table ${siteInfoTable}Bak to $siteInfoTable"
-					RunSql2 $sqlStmt
-				done
-			else
-				sqlStmt="rename table ${siteInfoTable}New to $siteInfoTable"
-				RunSql2 $sqlStmt
-				sqlStmt="rename table ${siteAdminsTable}New to $siteAdminsTable"
-				RunSql2 $sqlStmt
+				Call 'buildSiteInfoTable' "-table ${siteInfoTable} $scriptArgs"
 			fi
 
 		## Build employee table
@@ -342,21 +295,6 @@ case "$hostName" in
 
 		## Update the defaults data for this host
 			Call 'updateDefaults' "$scriptArgs"
-
-		## rebuild Internal pages to pickup any new database information
-			Msg2 "Rebuilding Internal pages"
-			RunCoureleafCgi "$stageInternal" "-r /clients"
-			RunCoureleafCgi "$stageInternal" "-r /support/tools"
-			RunCoureleafCgi "$stageInternal" "-r /support/qa"
-
-		## On the last day of the month roll-up the log files
-		  	if [[ $(date +"%d") == $(date -d "$(date +"%m")/1 + 1 month - 1 day" "+%d") ]]; then
-		  		Msg2 "Rolling up monthly log files"
-				cd $TOOLSPATH/Logs
-				SetFileExpansion 'on'
-				tar -cvzf "$(date '+%b-%Y').tar.gz" $(date +"%m")-* --remove-files > /dev/null 2>&1
-				SetFileExpansion
-		  	fi
 
 		## Scratch copy the skeleton shadow
 			Msg2 "Scratch copying the skeleton shadow..."
@@ -378,16 +316,24 @@ case "$hostName" in
 		## Sync GIT Shadow
 			Call 'syncCourseleafGitRepos' "$scriptArgs"
 
-		## Create a clone of the warehouse db
-			Msg2 "Creating '$warehouseDev' database..."
-			tmpConnectString=$(sed "s/Read/Admin/" <<< ${mySqlConnectString% *})
+		## Rebuild Internal pages to pickup any new database information
+			## Wait for all of the buildSiteInfoTable process to finish
+			Semaphore 'waiton' 'buildSiteInfoTable' 'true'
+			Msg2 "Rebuilding Internal pages"
+			RunCoureleafCgi "$stageInternal" "-r /clients"
+			RunCoureleafCgi "$stageInternal" "-r /support/tools"
+			RunCoureleafCgi "$stageInternal" "-r /support/qa"
 
-			mysqldump $tmpConnectString $warehouseProd > /tmp/warehouse.sql;
-			mysql $tmpConnectString -e "drop database if exists $warehouseDev"
-			mysqladmin $tmpConnectString create $warehouseDev
+		# ## Create a clone of the warehouse db
+		# 	Msg2 "Creating '$warehouseDev' database..."
+		# 	tmpConnectString=$(sed "s/Read/Admin/" <<< ${mySqlConnectString% *})
 
-			mysql $tmpConnectString $warehouseDev < /tmp/warehouse.sql
-			[[ -f /tmp/warehouse.sql ]] && rm -f /tmp/warehouse.sql
+		# 	mysqldump $tmpConnectString $warehouseProd > /tmp/warehouse.sql;
+		# 	mysql $tmpConnectString -e "drop database if exists $warehouseDev"
+		# 	mysqladmin $tmpConnectString create $warehouseDev
+
+		# 	mysql $tmpConnectString $warehouseDev < /tmp/warehouse.sql
+		# 	[[ -f /tmp/warehouse.sql ]] && rm -f /tmp/warehouse.sql
 
 		## Reports
 			froggerQa='sjones@leepfrog.com,mbruening@leepfrog.com,jlindeman@leepfrog.com'
@@ -395,65 +341,50 @@ case "$hostName" in
 			## Build a list of clients and contact info for Shelia
 			[[ $runClientListReport == true ]] && Call 'reports' "clientList -quiet -email 'dscudiero@leepfrog.com,sfrickson@leepfrog.com' $scriptArgs"
 
+		## On the last day of the month roll-up the log files
+		  	if [[ $(date +"%d") == $(date -d "$(date +"%m")/1 + 1 month - 1 day" "+%d") ]]; then
+		  		Msg2 "Rolling up monthly log files"
+				cd $TOOLSPATH/Logs
+				SetFileExpansion 'on'
+				tar -cvzf "$(date '+%b-%Y').tar.gz" $(date +"%m")-* --remove-files > /dev/null 2>&1
+				SetFileExpansion
+		  	fi
+
+		 ## Check that all things ran properly, otherwise revert the databases
+			Semaphore 'waiton' "buildClientInfoTable"
+			Semaphore 'waiton' "buildSiteInfoTable"
+			errorDetected=false
+			for table in $clientInfoTable $siteInfoTable $siteAdminsTable; do
+				sqlStmt="select count(*) from $table"
+				RunSql2 $sqlStmt
+				if [[ ${resultSet[0]} -eq 0 ]]; then
+					Error "'$table' table is empty, reverting to original"
+					errorDetected=true
+					sqlStmt="drop table if exists ${table}"
+					RunSql2 $sqlStmt
+					sqlStmt="rename table ${table}Bak to ${table}"
+					RunSql2 $sqlStmt
+				fi
+			done
+			[[ $errorDetected == true ]] && Terminate 'One or more of the database load procedures failed, please review messages'
+
 		;; ## mojave
 
 	*) ## build7
-		## Wait for the perftest process to complete
-		waitCntr=1 ; let maxLoop=1*60*60/30 # Number of hours * 60 min/hr * 60 sec/min / sleep time
-		while [[ $waitCntr -lt $maxLoop ]]; do    # Wait no longer than X
-			sleep 30
-			## Check 'perfTest' semaphore, wait for truncate to be done on mojave
-			sqlStmt="select count(*) from $semaphoreInfoTable where processName=\"perfTest\""
-			RunSql2 $sqlStmt
-			[[ ${resultSet[@]} -eq 0 ]] && break
-			((waitCntr++))
-		done
-		if [[ $waitCntr -ge $maxLoop ]]; then
-			Error "Wait for perfTest to complete timed out, skipping 'perfTest' on $hostName"
-		else
+		## Wait until processing is release by the master process on mojave
+			Semaphore 'waiton' "$myName"
+
+		## Wait for the perftest process on mojave to complete
+			Semaphore 'waiton' 'perftest'
 			Call 'perfTest'
 			Call 'perfTest' 'summary'
-		fi
 
-		## Wait for the buildClientsInfoTable process to complete on mojave
-		waitCntr=1 ; let maxLoop=1*60*60/30 # Number of hours * 60 min/hr * 60 sec/min / sleep time
-		while [[ $waitCntr -lt $maxLoop ]]; do    # Wait no longer than X
-			sleep 30
-			sqlStmt="select count(*) from $semaphoreInfoTable where processName=\"buildClientsInfoTable\""
-			RunSql2 $sqlStmt
-			[[ ${resultSet[@]} -eq 0 ]] && break
-			echo -e "\tWaiting for all buildClientsInfoTable process to complete, waitCntr=$waitCntr\t$(date)"
-			((waitCntr++))
-		done
-		if [[ $waitCntr -ge $maxLoop ]]; then
-			Error "Wait for buildClientsInfoTable to complete timed out, skipping load of '$siteInfoTable'"
-		else
-			## Build $siteInfoTable and $siteAdminsTable tables
-			## Set a semaphore for this servers call to buildSiteInfoTable
-			sqlStmt="insert into $semaphoreInfoTable values(NULL,\"buildSiteInfoTable\",\"$hostName\",\"$LOGNAME\",NOW())"
-			RunSql2 $sqlStmt
-			Call 'buildSiteInfoTable' "-table sitesNew $scriptArgs"
-			## Clear buildSiteInfoTable semaphore
-			sqlStmt="delete from $semaphoreInfoTable where processName=\"buildSiteInfoTable\" and hostName=\"$hostName\""
-			RunSql2 $sqlStmt
-		fi
-
-		## Wait for the all buildSiteInfoTable process to complete
-			waitCntr=1 ; let maxLoop=2*60*60/30 # Number of hours * 60 min/hr * 60 sec/min / sleep time
-			while [[ $waitCntr -lt $maxLoop ]]; do    # Wait no longer than X
-				sleep 30
-				sqlStmt="select count(*) from $semaphoreInfoTable where processName=\"buildSiteInfoTable\""
-				RunSql2 $sqlStmt
-				[[ ${resultSet[@]} -eq 0 ]] && break
-				echo -e "\tWaiting for all buildSiteInfoTable process to complete, waitCntr=$waitCntr\t$(date)"
-				((waitCntr++))
-			done
-			if [[ $waitCntr -ge $maxLoop ]]; then
-				Terminate "Wait for buildSiteInfoTable processes to complete timed out"
-			fi
+		## Build sites and siteadmins table
+			Call 'buildSiteInfoTable' "-table ${siteInfoTable} $scriptArgs"
 
 		## Common Checks
 			Call 'checkCgiPermissions' "$scriptArgs"
+
 		## Update the defaults data for this host
 			Call 'updateDefaults' "$scriptArgs"
 		;;
@@ -506,3 +437,4 @@ return 0
 ## Fri Feb 10 14:18:17 CST 2017 - dscudiero - Add debug code
 ## Fri Feb 10 16:12:53 CST 2017 - dscudiero - tweak the logic arround buildsiteinfotable
 ## Mon Feb 13 07:49:37 CST 2017 - dscudiero - Fix syntax problem
+## Tue Feb 14 13:19:54 CST 2017 - dscudiero - Refactored control logic to sychronize processing amongst servers
