@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.26 # -- dscudiero -- 02/10/2017 @ 16:01:27.26
+version=4.3.27 # -- dscudiero -- 02/14/2017 @  7:28:08.36
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -112,7 +112,6 @@ Msg2 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 		Msg2 "dbClients:"; for i in "${!dbClients[@]}"; do printf "\t\t[$i] = >${dbClients[$i]}<\n"; done; echo
 		Msg2 "clientDirs:"; for i in "${!clientDirs[@]}"; do printf "\t\t[$i] = >${clientDirs[$i]}<\n"; done; echo
 	fi
-Pause
 
 	## Loop through actual clientDirs
 	for clientDir in ${clientDirs[@]}; do
@@ -228,3 +227,4 @@ Goodbye 0 'alert'
 ## Wed Feb  8 10:57:22 CST 2017 - dscudiero - v
 ## Fri Feb 10 15:59:40 CST 2017 - dscudiero - Add ability to specify a client name
 ## Fri Feb 10 16:02:08 CST 2017 - dscudiero - Tweak client support to add $ to the grep to only pickup the base client dir
+## Tue Feb 14 07:28:32 CST 2017 - dscudiero - remove Pause statement
