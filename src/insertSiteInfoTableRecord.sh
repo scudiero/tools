@@ -63,6 +63,10 @@ dump -2 -n -t siteDir share shareType client env clientId
 [[ $DOIT != '' || $informationOnlyMode == true ]] && echo
 Msg2 "^$env ($siteDir)"
 
+## Remove any existing records for this client/env
+	sqlStmt="delete from $useSiteInfoTable where clientId =\"$clientId\" and env=\"$env\""
+	RunSql2 $sqlStmt
+
 ## Insert the initial record to get the siteId set
 	fields="siteId,name,clientId,env,host,share,redhatVer,createdOn,createdBy"
 	if [[ $env == 'preview' || $env == 'public' ]]; then
@@ -388,3 +392,4 @@ return 0
 ## Tue Jan 17 15:39:43 CST 2017 - dscudiero - Make production table the default table name
 ## Wed Jan 18 07:20:50 CST 2017 - dscudiero - Modify siteAdmins table insert to use a variable for the table name
 ## Wed Jan 25 08:24:45 CST 2017 - dscudiero - refactor how we set useSitesTable & useSiteAdminsTable
+## Tue Feb 14 13:19:24 CST 2017 - dscudiero - Refactored to delete the client records before inserting a new one
