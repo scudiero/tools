@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.8.60 # -- dscudiero -- 02/14/2017 @ 12:23:44.03
+version=2.8.61 # -- dscudiero -- 02/14/2017 @ 12:27:41.24
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -348,7 +348,7 @@ Msg2
 	if [[ ${#copyFileList[@]} -gt 0 ]]; then
 		## Save old workflow files
 		Msg2
-		Msg2 "Saving target ($tgtEnv) workflow files ..."
+		Msg2 "Saving target ($tgtEnv) workflow files (before updates)..."
 		$DOIT saveWorkflow --quiet $client -$tgtEnv -cims "$(echo $cimStr | tr -d ' ')" -suffix "beforeCopy-$fileSuffix" -nop -quiet $verboseArg
 		## Copy files
 		Msg2 "Updating files:"
@@ -397,7 +397,7 @@ Msg2
 		env=$tgtEnv
 		WriteChangelogEntry 'changeLogLines' "$tgtDir/changelog.txt" "$myName"
 
-		echo; Msg2 "Saving target workflow files ..."
+		echo; Msg2 "Saving target workflow files (after updates)..."
 		$DOIT saveWorkflow $client -$tgtEnv -cims "$(echo $cimStr | tr -d ' ')" -suffix "afterCopy-$fileSuffix" -nop -quiet $verboseArg
 	fi
 
@@ -436,3 +436,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## Thu Jan 26 12:53:17 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Feb  9 08:06:38 CST 2017 - dscudiero - make sure we are using our own tmpFile
 ## Tue Feb 14 12:24:17 CST 2017 - dscudiero - Tweak messaging format
+## Tue Feb 14 12:29:28 CST 2017 - dscudiero - Tweaked messaging
