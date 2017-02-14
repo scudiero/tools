@@ -90,65 +90,62 @@ Msg2 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 ## loop through the clients
 	declare -A dbClients
 	unset clientDirs
-	## Get clients from the clientinfotable, build a hash table with the clientInfoTable key for each client
-	sqlStmt="select name,idx from clients where recordstatus='A'"
-	[[ $client != '' ]] && sqlStmt="$sqlStmt and name=\"$client\""
-	sqlStmt="$sqlStmt order by name"
-	RunSql2 $sqlStmt
-	numClients=${#resultSet[@]}
-	[[ $numClients -eq 0 ]] && Terminate "Could not retrieve any client records from '$warehouseDb.$clientInfoTable'"
-	Msg2 "Found $numClients clients..."
-	for result in ${resultSet[@]}; do
-		dbClients["${result%%|*}"]="${result##*|}"
-	done
+
+	## Get clients from the clients transactional table, build a hash table with the clientInfoTable key for each client
+		declare -A dbClients
+		sqlStmt="select clientcode,clientkey from clients where is_active = \"Y\""
+		[[ $client != '' ]] && sqlStmt="$sqlStmt and client=\"$client\"";
+		RunSql2 "$contactsSqliteFile" "$sqlStmt"
+		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No records returned from clientcode query"
+		for result in ${resultSet[@]}; do
+			dbClients["${result%%|*}"]="${result##*|}"
+		done
+
 	## Get the list of actual clients on this server
-	if [[ -z $client ]]; then
-		clientDirs=($(find /mnt -maxdepth 2 -mindepth 1 -type d 2> /dev/null | grep -v '^/mnt/dev'))
-	else
-		clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep $client\$))
-	fi
-	if [[ $verboseLevel -ge 1 ]]; then
-		echo
-		Msg2 "dbClients:"; for i in "${!dbClients[@]}"; do printf "\t\t[$i] = >${dbClients[$i]}<\n"; done; echo
-		Msg2 "clientDirs:"; for i in "${!clientDirs[@]}"; do printf "\t\t[$i] = >${clientDirs[$i]}<\n"; done; echo
-	fi
+		if [[ -z $client ]]; then
+			clientDirs=($(find /mnt -maxdepth 2 -mindepth 1 -type d 2> /dev/null | grep -v '^/mnt/dev'))
+		else
+			clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep $client\$))
+		fi
+		if [[ $verboseLevel -ge 1 ]]; then
+			echo
+			Msg2 "dbClients:"; for i in "${!dbClients[@]}"; do printf "\t\t[$i] = >${dbClients[$i]}<\n"; done; echo
+			Msg2 "clientDirs:"; for i in "${!clientDirs[@]}"; do printf "\t\t[$i] = >${clientDirs[$i]}<\n"; done; echo
+		fi
 
 	## Loop through actual clientDirs
-	for clientDir in ${clientDirs[@]}; do
-		if [[ ${dbClients[$(basename $clientDir)]+abc} ]]; then
-			(( clientCntr+=1 ))
-			client="$(basename $clientDir)"
-			clientId=${dbClients[$client]}
-			## Get directories, if none found then skip this directory
-			unset devDir testDir nextDir currDir priorDir previewDir publicDir
-			SetSiteDirs
-			[[ -z ${devDir}${testDir}${nextDir}${currDir}${priorDir}${previewDir}${publicDir} ]] && continue
+		for clientDir in ${clientDirs[@]}; do
+			if [[ ${dbClients[$(basename $clientDir)]+abc} ]]; then
+				(( clientCntr+=1 ))
+				client="$(basename $clientDir)"
+				clientId=${dbClients[$client]}
+				## Get directories, if none found then skip this directory
+				unset devDir testDir nextDir currDir priorDir previewDir publicDir
+				SetSiteDirs
+				[[ -z ${devDir}${testDir}${nextDir}${currDir}${priorDir}${previewDir}${publicDir} ]] && continue
 
-			[[ $batchMode != true ]] && Msg2 "Processing: $client -- $clientId (~$clientCntr/$numClients)..."
-			## Remove any existing records for this client/env
-			[[ -n $env ]] && andClause="and env=\"$env\"" || unset andClause
-			sqlStmt="delete from $useSiteInfoTable where name like\"$client%\" $andClause"
-			RunSql2 $sqlStmt
-			## Loop through envs and process the site env directory
-			for env in $(tr ',' ' ' <<< "$envList"); do
-				[[ $env == 'pvt' ]] && continue
-				eval envDir=\$${env}Dir
-				[[ -z $envDir ]] && continue
-				if [[ -d $envDir/web ]]; then
-					Call "$workerScriptFile" "$forkStr" "$envDir" "$clientId" "-tableName $useSiteInfoTable"
-					(( forkCntr+=1 )) ; (( siteCntr+=1 ))
-				fi
-				if [[ $fork == true && $((forkCntr%$maxForkedProcesses)) -eq 0 ]]; then
+				[[ $batchMode != true ]] && Msg2 "Processing: $client -- $clientId (~$clientCntr/$numClients)..."
+
+				## Loop through envs and process the site env directory
+				for env in $(tr ',' ' ' <<< "$envList"); do
+					[[ $env == 'pvt' ]] && continue
+					eval envDir=\$${env}Dir
+					[[ -z $envDir ]] && continue
+					if [[ -d $envDir/web ]]; then
+						Call "$workerScriptFile" "$forkStr" "$envDir" "$clientId" "-tableName $useSiteInfoTable"
+						(( forkCntr+=1 )) ; (( siteCntr+=1 ))
+					fi
+					if [[ $fork == true && $((forkCntr%$maxForkedProcesses)) -eq 0 ]]; then
+						[[ $batchMode != true ]] && Msg2 "^Waiting on forked processes...\n"
+						wait
+					fi
+				done
+				if [[ $fork == true ]]; then
 					[[ $batchMode != true ]] && Msg2 "^Waiting on forked processes...\n"
 					wait
 				fi
-			done
-			if [[ $fork == true ]]; then
-				[[ $batchMode != true ]] && Msg2 "^Waiting on forked processes...\n"
-				wait
-			fi
-		fi #[[ ${dbClients[$(basename $clientDir)]+abc} ]]
-	done #clientDir in ${clientDirs[@]}
+			fi #[[ ${dbClients[$(basename $clientDir)]+abc} ]]
+		done #clientDir in ${clientDirs[@]}
 
 ## Wait for all the forked tasks to stop
 	if [[ $fork == true ]]; then
@@ -228,3 +225,4 @@ Goodbye 0 'alert'
 ## Fri Feb 10 15:59:40 CST 2017 - dscudiero - Add ability to specify a client name
 ## Fri Feb 10 16:02:08 CST 2017 - dscudiero - Tweak client support to add $ to the grep to only pickup the base client dir
 ## Tue Feb 14 07:28:32 CST 2017 - dscudiero - remove Pause statement
+## Tue Feb 14 13:19:07 CST 2017 - dscudiero - Refactored to delete the client records before inserting a new one
