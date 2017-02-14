@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.0.69" # -- dscudiero -- 01/12/2017 @ 12:48:47.84
+# version="2.0.75" # -- dscudiero -- 02/14/2017 @ 11:37:52.79
 #=======================================================================================================================
 # Generic resolve file and call
 # Call scriptName ["$scriptArgs"]
@@ -17,7 +17,7 @@
 # All rights reserved
 #=======================================================================================================================
 function Call {
-		Import FindExecutable InitializeInterpreterRuntime Prompt VerifyPromptVal
+		Import FindExecutable InitializeInterpreterRuntime Prompt VerifyPromptVal Semaphore
 		local scriptName="$1"; shift
 		local scriptArgs="$*"
 		local searchMode useTypes useLibs executeFile executeAlias cmdStr token1 utility fork
@@ -94,6 +94,18 @@ function Call {
 			[[ $executeAlias != '' ]] && scriptArgs="$executeAlias $scriptArgs"
 			local myPath="$(dirname $executeFile)"
 
+		## Get additional data from the scripts table for this scripts, process semaphores if required
+			local setSemaphore waitOn semaphoreId
+			sqlStmt="select setSemaphore,waitOn from $scriptsTable where name =\"$myName\" "
+			RunSql2 $sqlStmt
+			if [[ ${#resultSet[0]} -gt 0 ]]; then
+			 	resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString")
+				setSemaphore="$(cut -d'|' -f1 <<< "$resultString")"; [[ $setSemaphore == 'NULL' ]] && unset setSemaphore
+				waitOn="$(cut -d'|' -f2 <<< "$resultString")"; [[ $waitOn == 'NULL' ]] && unset waitOn
+				[[ -n $waitOn ]] && Semaphore 'waiton' $waitOn
+				[[ -n $setSemaphore ]] && semaphoreId=$(Semaphore 'set' $myName)
+			fi
+
 		## Call the program
 			savePath="$PATH"
 			case "$pgmType" in
@@ -122,6 +134,7 @@ function Call {
 			else
 				($cmdStr) 2>&1
 			fi
+			[[ -n $semaphoreId ]] && Semaphore 'clear' $semaphoreId
 			myName="$myNameSave" ; myPath="$myPathSave" ;
 			export PATH="$savePath"
 
@@ -139,3 +152,4 @@ export -f Call
 ## Wed Jan  4 13:52:54 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Jan  5 07:59:46 CST 2017 - dscudiero - Added 'fork' directive
 ## Fri Jan  6 08:03:52 CST 2017 - dscudiero - Also parse for 'fork' if a full file name is passed in
+## Tue Feb 14 11:38:03 CST 2017 - dscudiero - Add semaphore processing
