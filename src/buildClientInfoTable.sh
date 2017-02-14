@@ -87,10 +87,7 @@ Msg2 "Table: $useClientInfoTable"
 	fi
 
 ## Table management
-	if [[ $inPlace == true ]]; then
-		sqlStmt="truncate $useClientInfoTable"
-		RunSql2 $sqlStmt
-	else
+	if [[ $inPlace != true ]]; then
 		## Create a temporary copy of the clients table, load new data to that table
 		[[ $batchMode != true ]] && Msg2 "^Creating work table '$useClientInfoTable'..."
 		sqlStmt="drop table if exists ${clientInfoTable}Bak"
@@ -183,3 +180,4 @@ Goodbye 0 'alert'
 ## Thu Jan 19 07:13:53 CST 2017 - dscudiero - Fixed erronious messaging
 ## Fri Jan 20 07:17:42 CST 2017 - dscudiero - General syncing of dev to prod
 ## Mon Jan 23 11:26:38 CST 2017 - dscudiero - Fix sql query checking the clients table count
+## Tue Feb 14 13:18:42 CST 2017 - dscudiero - Refactored to delete the client records before inserting a new one
