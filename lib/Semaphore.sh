@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.6" # -- dscudiero -- 01/12/2017 @ 12:47:40.57
+# version="2.0.11" # -- dscudiero -- 02/14/2017 @  9:43:51.35
 #===================================================================================================
 # Process semaphores
 # Semaphore <mode> <key/name> <sleeptime>
@@ -34,6 +34,17 @@ function Semaphore {
 		RunSql2 $sqlStmt
 		echo ${resultSet[0]}
 
+	elif [[ $mode = 'getkeys' ]]; then
+		sqlStmt="select keyId from $semaphoreInfoTable where processName=\"$keyId\" $andClause";
+		RunSql2 $sqlStmt
+ 		if [[ ${#resultSet[@]} -ne 0 ]]; then
+ 			local retString
+ 			for result in ${resultSet[@]}; do
+ 				retString="$retString,$result"
+ 			done
+ 			echo ${retString:1}
+ 		fi
+
 	elif [[ $mode = 'check' ]]; then
 		sqlStmt="select count(*) from $semaphoreInfoTable where processName=\"$keyId\" $andClause";
 		RunSql2 $sqlStmt
@@ -63,3 +74,4 @@ export -f Semaphore
 #===================================================================================================
 
 ## Wed Jan  4 13:54:24 CST 2017 - dscudiero - General syncing of dev to prod
+## Tue Feb 14 09:44:10 CST 2017 - dscudiero - Added 'getKey' action to retrieve keys
