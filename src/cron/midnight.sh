@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.196 # -- dscudiero -- 02/15/2017 @  7:16:06.85
+version=1.21.203 # -- dscudiero -- 02/15/2017 @  7:40:23.92
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -211,16 +211,19 @@ case "$hostName" in
 		## Processing that we want to completed before any cron tasks on other systems have started
 			mySemaphoreId=$(Semaphore 'set' $myName)
 			## Backup database tables
-			SetFileExpansion 'off'
+			echo
 			for table in $clientInfoTable $siteInfoTable $siteAdminsTable $employeeTable ; do
+				Msg2 "Backing up '$table'..."
 				sqlStmt="drop table if exists ${table}Bak"
 				RunSql2 $sqlStmt
 				sqlStmt="create table ${table}Bak like ${table}"
 				RunSql2 $sqlStmt
+				SetFileExpansion 'off'
 				sqlStmt="insert ${table}Bak select * from ${table}"
 				RunSql2 $sqlStmt
+				SetFileExpansion
 			done
-			SetFileExpansion
+			echo
 			Semaphore 'clear' $mySemaphoreId
 
 		## Performance test
@@ -289,8 +292,10 @@ case "$hostName" in
 			Call 'syncCourseleafGitRepos' "$scriptArgs"
 
 		## Rebuild Internal pages to pickup any new database information
-			## Wait for all of the buildSiteInfoTable process to finish
-			Semaphore 'waiton' 'buildSiteInfoTable' 'true'
+				## Wait for all of the buildSiteInfoTable process to finish
+				Msg2 "Waiting on 'buildSiteInfoTable'..."
+				Semaphore 'waiton' 'buildSiteInfoTable' 'true'
+				Msg2 "^'buildSiteInfoTable' completed, continuing..."
 			Msg2 "Rebuilding Internal pages"
 			RunCoureleafCgi "$stageInternal" "-r /clients"
 			RunCoureleafCgi "$stageInternal" "-r /support/tools"
@@ -344,10 +349,14 @@ case "$hostName" in
 
 	*) ## build7
 		## Wait until processing is release by the master process on mojave
+			Msg2 "Waiting on '$myName'..."
 			Semaphore 'waiton' "$myName"
+			Msg2 "^'$myName' completed, continuing..."
 
 		## Wait for the perftest process on mojave to complete
+			Msg2 "Waiting on 'perftest'..."
 			Semaphore 'waiton' 'perftest'
+			Msg2 "^'perftest' completed, continuing..."
 			Call 'perfTest'
 			Call 'perfTest' 'summary'
 
@@ -412,3 +421,4 @@ return 0
 ## Tue Feb 14 13:19:54 CST 2017 - dscudiero - Refactored control logic to sychronize processing amongst servers
 ## Tue Feb 14 14:06:43 CST 2017 - dscudiero - Add employeetable to the backup and recover list
 ## Wed Feb 15 07:17:19 CST 2017 - dscudiero - Fix problem naming databases for backup
+## Wed Feb 15 10:31:00 CST 2017 - dscudiero - Added messageing
