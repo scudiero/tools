@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.108 # -- dscudiero -- 02/09/2017 @  8:05:39.18
+version=2.1.109 # -- dscudiero -- 02/15/2017 @  7:08:45.88
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -33,9 +33,9 @@ function SyncInternalDb {
 	rsync -aq $srcDir/* $tgtDir 2>&1
 	chmod 770 $tgtDir
 	chmod 770 $tgtDir/*
-	SetFileExpansion
 	touch $tgtDir/.syncDate
 	cwd=$(pwd); cd $tgtDir; chgrp -R leepfrog *; chgrp leepfrog .*; cd "$cwd"
+	SetFileExpansion
 	Msg2 "*** $FUNCNAME -- Completed ***"
 	return 0
 }
@@ -49,7 +49,9 @@ function SyncCourseleafCgis {
 	rsync -aq $srcDir/ $tgtDir 2>&1
 	chmod 750 $tgtDir
 	touch $tgtDir/.syncDate
+	SetFileExpansion 'on'
 	cwd=$(pwd); cd $tgtDir; chgrp -R leepfrog *; chgrp leepfrog .*; cd "$cwd"
+	SetFileExpansion
 	Msg2 "*** $FUNCNAME -- Completed ***"
 	return 0
 }
@@ -228,3 +230,4 @@ return 0
 ## Mon Feb  6 09:19:58 CST 2017 - dscudiero - Remove debug message
 ## Tue Feb  7 15:15:13 CST 2017 - dscudiero - allow file expansion for the chgrp in syncskeleton
 ## Thu Feb  9 08:07:08 CST 2017 - dscudiero - Check to make sure there is a sites table before running perftest
+## Wed Feb 15 07:09:08 CST 2017 - dscudiero - Turn on file expansion before chgrp commands
