@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.195 # -- dscudiero -- 02/14/2017 @ 14:06:02.82
+version=1.21.196 # -- dscudiero -- 02/15/2017 @  7:16:06.85
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -215,9 +215,9 @@ case "$hostName" in
 			for table in $clientInfoTable $siteInfoTable $siteAdminsTable $employeeTable ; do
 				sqlStmt="drop table if exists ${table}Bak"
 				RunSql2 $sqlStmt
-				sqlStmt="create table ${table}New like ${table}"
+				sqlStmt="create table ${table}Bak like ${table}"
 				RunSql2 $sqlStmt
-				sqlStmt="insert ${table}New select * from ${table}"
+				sqlStmt="insert ${table}Bak select * from ${table}"
 				RunSql2 $sqlStmt
 			done
 			SetFileExpansion
@@ -411,3 +411,4 @@ return 0
 ## Mon Feb 13 07:49:37 CST 2017 - dscudiero - Fix syntax problem
 ## Tue Feb 14 13:19:54 CST 2017 - dscudiero - Refactored control logic to sychronize processing amongst servers
 ## Tue Feb 14 14:06:43 CST 2017 - dscudiero - Add employeetable to the backup and recover list
+## Wed Feb 15 07:17:19 CST 2017 - dscudiero - Fix problem naming databases for backup
