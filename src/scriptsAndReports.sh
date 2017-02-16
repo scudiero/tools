@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.50 # -- dscudiero -- 01/25/2017 @ 10:35:26.64
+version=3.11.65 # -- dscudiero -- 02/16/2017 @  7:08:03.72
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -32,7 +32,6 @@ function parseArgs-scriptsAndReports {
 ## Build the menu list from the database
 #==================================================================================================
 function BuildMenuList {
-
 	## Eliminate things that do not work on windows if running from windows
 		[[ $TERM == 'dumb' ]] && excludeWindowsStuff="and $scriptsTable.name not in (\"wizdebug\")" || unset excludeWindowsStuff
 
@@ -55,32 +54,34 @@ function BuildMenuList {
 			fi
 		fi
 
-		fields="name,shortDescription,author,supported,edate"
+		fields="scriptId,name,shortDescription,author,supported,edate"
 		unset $(echo $fields | tr ',' ' ')
 		sqlStmt="select $fields from $table where $whereClauseActive $whereClauseHost $whereClauseUser $whereClauseGroups order by name"
 		RunSql2 $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Sorry, you do not have access to any scripts.\n\tsqlStmt: $sqlStmt"
 
 		unset menuList
-		[[ $fullDisplay == true ]] && menuList+=('|Script Name|Description|Author|Supported') || menuList+=('|Script Name|Description')
+		[[ $fullDisplay == true ]] && menuList+=('|Ordinal|Script Name|Description|Author|Supported') || menuList+=('|Ordinal|Script Name|Description')
 		newItem=false
 		for itemRec in "${resultSet[@]}"; do
 			itemRec=$(tr "\t" "|" <<< "$itemRec")
-			unset itemName itemDesc itemAuthor itemSupported itemEdate
-			itemName=$(cut -d"|" -f1 <<< "$itemRec")
-			itemDesc=$(cut -d"|" -f2 <<< "$itemRec")
-			itemEdate=$(cut -d"|" -f5 <<< "$itemRec")
+			unset itemNum itemName itemDesc itemAuthor itemSupported itemEdate
+			itemNum=$(cut -d"|" -f1 <<< "$itemRec")
+			itemName=$(cut -d"|" -f2 <<< "$itemRec")
+			itemDesc=$(cut -d"|" -f3 <<< "$itemRec")
+			itemEdate=$(cut -d"|" -f6 <<< "$itemRec")
 			#dump -n itemName itemEdate ${myName}LastRunEdate
-			[[ $itemEdate != 'NULL' && $itemEdate -gt ${myName}LastRunEdate ]] && itemName="$(ColorN "$itemName")" && newItem=true
+			[[ $itemEdate != 'NULL' && $itemEdate -gt ${myName}LastRunEdate ]] && itemName="${itemName}*" && newItem=true
 			if [[ $fullDisplay == true ]]; then
 				itemAuthor=$(cut -d"|" -f3 <<< "$itemRec")
 				itemAuthor="$(printf "%-$maxWidthAuthor"s "$itemAuthor")"
 				itemSupported=$(cut -d"|" -f4 <<< "$itemRec")
-				menuList+=("|$itemName|$itemDesc|$itemAuthor|$itemSupported")
+				menuList+=("|$itemNum|$itemName|$itemDesc|$itemAuthor|$itemSupported")
 			else
-				menuList+=("|$itemName|$itemDesc")
+				menuList+=("|$itemNum|$itemName|$itemDesc")
 			fi
 		done
+	return 0
 } #BuildMenuList
 
 #==================================================================================================
@@ -172,7 +173,7 @@ function ExecReport {
 						echo -e "$(tr '|' "\t" <<< "$result" )" >> $outFile
 					done
 					if [[ $quiet == false ]]; then Msg2; while read -r line; do echo -e "\t$line"; done < $outFile; fi
-					Msg2; Msg2 $N "Report output can be found in: $outFile"
+					echo; Msg2 $N "Report output can be found in: $outFile"
 					sendMail=true
 				fi
 			else
@@ -266,17 +267,17 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 		PopSettings "$myName"
 
 		if [[ $rc -gt 0 ]]; then
-			Msg2
+			echo
 			Msg2 "Do you wish to add an alias to the scripts command to your .bashrc file?"
 			Msg2 "This will allow you to access the scripts command in the future by simply entering 'scripts' on the Linux command line."
-			Msg2
+			echo
 			unset ans; Prompt ans "Yes to add, No to skip" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
 			if [[ $ans == 'y' ]]; then
 				echo '' >> $HOME/.bashrc
 				echo "export TOOLSPATH=\"$TOOLSPATH\" ## Added by' '$myName' on $(date)" >> $HOME/.bashrc
 				echo "alias scripts=\"\$TOOLSPATH/bin/scripts\" ## Added by' '$myName' on $(date)" >> $HOME/.bashrc
-				Msg2; Msg2 $I "An alias for the scripts command has been added to your '$HOME/.bashrc' file."
-				Msg2
+				echo; Msg2 $I "An alias for the scripts command has been added to your '$HOME/.bashrc' file."
+				echo
 			fi
 		fi
 	else
@@ -294,15 +295,17 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 			unset itemName
 			BuildMenuList
 			ProtectedCall "clear"
-			Msg2
+			echo
 			Msg2 "^Please specify the $(ColorM '(ordinal)') number of the $itemType you wish to run, 'x' to quit."
-			Msg2 "^$(ColorN "Note -- ")The ordinal number of the $itemType may change from time to time."
-			Msg2
-			[[ $newItem == true ]] && Msg2 "^$(ColorN "Note -- ")Items in $(ColorN "green") are new or have been updated since the last time you ran '$mode'."
+			[[ $newItem == true ]] && Msg2 $NT1 "Items with an '*' are new since the last time you ran '${itemType}s'"
+			echo
 			#[[ $mode == 'scripts' && $client != '' ]] && clientStr=" (client: '$client')" || unset clientStr
 			SelectMenuNew 'menuList' 'itemName'
-			[[ $itemName == '' ]] && Goodbye 'x' || itemName=$(cut -d'|' -f1 <<< $itemName)
-			Msg2
+			[[ $itemName == '' ]] && Goodbye 'x'
+			itemName=$(cut -d' ' -f1 <<< $itemName)
+			length=${#itemName}
+			[[ ${itemName:$length-1:1} == '*' ]] && itemName=${itemName:0:$length-1}
+			echo
 		else
 			## Otherwise use the passed in script/report
 			itemName="${report}${script}"
@@ -324,7 +327,7 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 
 		Exec$itemTypeCap "$itemName" "$scriptArgs" ; rc=$?
 		#TrapSigs 'on'
-		Msg2
+		echo
 		[[ $rc -eq 0 ]] && Msg2 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed successfully" || \
 			Msg2 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed with errors (exit code = $rc) \
 			\nPlease record any Messages and contact the $itemType owner\n"
@@ -334,7 +337,7 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 
 ## Send out emails
 	if [[ $emailAddrs != '' && $mode == 'reports' && $noEmails == false && $sendMail == true ]]; then
-		Msg2 | tee -a $outFile; Msg2 "Sending email(s) to: $emailAddrs" | tee -a $outFile; Msg2 | tee -a $outFile
+		echo | tee -a $outFile; Msg2 "Sending email(s) to: $emailAddrs" | tee -a $outFile; echo | tee -a $outFile
 		for emailAddr in $(echo $emailAddrs | tr ',' ' '); do
 			$DOIT mutt -a "$outFile" -s "$report report results: $(date +"%m-%d-%Y")" -- $emailAddr < $outFile
 		done
@@ -409,3 +412,4 @@ Goodbye 0
 ## Fri Jan 20 13:58:14 CST 2017 - dscudiero - fix problems passing arguments to the script
 ## Tue Jan 24 16:20:52 CST 2017 - dscudiero - Updated logic setting scriptArgs
 ## Wed Jan 25 10:36:03 CST 2017 - dscudiero - Fix spelling errors in messaging
+## Thu Feb 16 08:10:58 CST 2017 - dscudiero - Switch to use the scriptID as the ordinal numbers
