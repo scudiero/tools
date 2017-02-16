@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.65 # -- dscudiero -- 02/16/2017 @  7:08:03.72
+version=3.11.67 # -- dscudiero -- 02/16/2017 @  8:20:15.25
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -54,7 +54,7 @@ function BuildMenuList {
 			fi
 		fi
 
-		fields="scriptId,name,shortDescription,author,supported,edate"
+		fields="keyId,name,shortDescription,author,supported,edate"
 		unset $(echo $fields | tr ',' ' ')
 		sqlStmt="select $fields from $table where $whereClauseActive $whereClauseHost $whereClauseUser $whereClauseGroups order by name"
 		RunSql2 $sqlStmt
@@ -413,3 +413,4 @@ Goodbye 0
 ## Tue Jan 24 16:20:52 CST 2017 - dscudiero - Updated logic setting scriptArgs
 ## Wed Jan 25 10:36:03 CST 2017 - dscudiero - Fix spelling errors in messaging
 ## Thu Feb 16 08:10:58 CST 2017 - dscudiero - Switch to use the scriptID as the ordinal numbers
+## Thu Feb 16 08:21:54 CST 2017 - dscudiero - Switch to use keyId inlookups
