@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.203 # -- dscudiero -- 02/15/2017 @  7:40:23.92
+version=1.21.204 # -- dscudiero -- 02/16/2017 @  7:05:07.55
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -115,7 +115,7 @@ function BuildEmployeeTable {
 				(( fieldCntr += 1 ))
 			done
 			valuesString=${valuesString:1}
-			sqlStmt="insert into ${employeeTable}New values($valuesString)"
+			sqlStmt="insert into ${employeeTable} values($valuesString)"
 			RunSql2 $sqlStmt
 		done
 
@@ -422,3 +422,4 @@ return 0
 ## Tue Feb 14 14:06:43 CST 2017 - dscudiero - Add employeetable to the backup and recover list
 ## Wed Feb 15 07:17:19 CST 2017 - dscudiero - Fix problem naming databases for backup
 ## Wed Feb 15 10:31:00 CST 2017 - dscudiero - Added messageing
+## Thu Feb 16 08:02:03 CST 2017 - dscudiero - Fix bug with buildEmployeeTable
