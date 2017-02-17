@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.109 # -- dscudiero -- 02/15/2017 @  7:08:45.88
+version=2.1.110 # -- dscudiero -- 02/17/2017 @  6:57:25.31
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -191,7 +191,7 @@ case "$hostName" in
 		## Make sure we have a sites table before running perfTest
 		sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"sites%\" order by create_time desc"
 		RunSql2 $sqlStmt
-		[[ ${#resultSet[@]} -gt 0 ]] && Call 'perfTest'
+		[[ ${#resultSet[@]} -gt 0 ]] && Call 'perfTest' 
 		CheckMonitorFiles
 		SyncInternalDb
 		BuildToolsAuthTable
@@ -205,7 +205,7 @@ case "$hostName" in
 		## Make sure we have a sites table before running perfTest
 		sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"sites%\" order by create_time desc"
 		RunSql2 $sqlStmt
-		[[ ${#resultSet[@]} -gt 0 ]] && Call 'perfTest' && Call 'perfTest' 'summary'
+		[[ ${#resultSet[@]} -gt 0 ]] && Semaphore 'waiton' 'perfTest' && Call 'perfTest' && Call 'perfTest' 'summary'
 		CheckMonitorFiles
 		;;
 esac
@@ -231,3 +231,4 @@ return 0
 ## Tue Feb  7 15:15:13 CST 2017 - dscudiero - allow file expansion for the chgrp in syncskeleton
 ## Thu Feb  9 08:07:08 CST 2017 - dscudiero - Check to make sure there is a sites table before running perftest
 ## Wed Feb 15 07:09:08 CST 2017 - dscudiero - Turn on file expansion before chgrp commands
+## Fri Feb 17 06:58:55 CST 2017 - dscudiero - Add a waiton perftest on build7
