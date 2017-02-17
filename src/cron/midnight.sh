@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.204 # -- dscudiero -- 02/16/2017 @  7:05:07.55
+version=1.21.205 # -- dscudiero -- 02/17/2017 @  6:51:48.05
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -100,6 +100,10 @@ function BuildEmployeeTable {
 		done
 		transactionalColumns=${transactionalColumns:1}
 		transactionalFields=${transactionalFields:1}
+
+	### Clear out the employee table
+		sqlStmt="truncate ${employeeTable}"
+		RunSql2 $sqlStmt
 
 	### Get the transactonal values, loop through them and  write out the warehouse record
 		sqlStmt="select $transactionalColumns from employees where db_isactive = \"Y\" order  by db_employeekey"
@@ -423,3 +427,4 @@ return 0
 ## Wed Feb 15 07:17:19 CST 2017 - dscudiero - Fix problem naming databases for backup
 ## Wed Feb 15 10:31:00 CST 2017 - dscudiero - Added messageing
 ## Thu Feb 16 08:02:03 CST 2017 - dscudiero - Fix bug with buildEmployeeTable
+## Fri Feb 17 06:59:08 CST 2017 - dscudiero - truncate the employee table before loading
