@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.8.61 # -- dscudiero -- 02/14/2017 @ 12:27:41.24
+version=2.8.62 # -- dscudiero -- 02/20/2017 @  9:18:03.35
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -297,7 +297,7 @@ Hello
 			fi
 			Msg2 "^^$file"
 			##  Cleanup any old backup workflow files (xxxx.yyyy, xxxx-yyyy, or ' - Copy.') in the source or target
-				CleanupOldFiles "$cpyFile"
+				[[ $srcEnv != 'pvt' && $srcEnv != 'dev' ]] && CleanupOldFiles "$cpyFile"
 			## Copy files
 				if [[ -f $srcDir/$cpyFile ]]; then
 					srcMd5=$(md5sum $srcDir/$cpyFile | cut -f1 -d" ")
@@ -318,7 +318,8 @@ Hello
 		Msg2 "^$file"
 		cpyFile="/web$file"
 		##  Cleanup any old backup workflow files (xxxx.yyyy, xxxx-yyyy, or ' - Copy.') in the source or target
-			CleanupOldFiles "$cpyFile"
+			[[ $srcEnv != 'pvt' && $srcEnv != 'dev' ]] && CleanupOldFiles "$cpyFile"
+
 		## Copy Filescou
 			if [[ -f $srcDir/$cpyFile ]]; then
 				srcMd5=$(md5sum $srcDir/$cpyFile | cut -f1 -d" ")
@@ -437,3 +438,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## Thu Feb  9 08:06:38 CST 2017 - dscudiero - make sure we are using our own tmpFile
 ## Tue Feb 14 12:24:17 CST 2017 - dscudiero - Tweak messaging format
 ## Tue Feb 14 12:29:28 CST 2017 - dscudiero - Tweaked messaging
+## Mon Feb 20 09:26:45 CST 2017 - dscudiero - Do not clean up source directories if pvt or dev
