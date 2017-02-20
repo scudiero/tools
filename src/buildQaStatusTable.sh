@@ -1,7 +1,7 @@
 #!/bin/bash
-#DO NOT AUTOVERSION
+#DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.1.-1 # -- dscudiero -- 11/01/2016 @ 10:07:02.80
+version=1.1.0 # -- dscudiero -- 02/20/2017 @ 12:52:10.10
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye DumpMap GetExcel'
@@ -157,6 +157,7 @@ for workbook in "${workbooks[@]}"; do
 			dump -2 -n -t line
 			[[ $(tr -d '|' <<< $line) == '' ]] && continue
 			recType=$(Trim "$(cut -d'|' -f2 <<< $line)")
+			[[ -z $recType ]] && continue
 			dump -2 -t recType
 			## Special processing for failed and waiting details records
 				[[ $(Lower "$recType") == 'failed' ]] && foundFailed=true && foundWaiting=false
@@ -291,3 +292,4 @@ Goodbye 0 #'alert'
 ## Fri Oct  7 08:00:04 CDT 2016 - dscudiero - Take out the dbAcc switching logic, moved to framework RunSql
 ## Wed Oct 12 16:11:56 CDT 2016 - dscudiero - Incorporate building the testing details records
 ## Thu Oct 20 15:58:44 CDT 2016 - dscudiero - Make sure that the python environment is setup
+## Mon Feb 20 12:52:53 CST 2017 - dscudiero - Adjustments for new spreadsheet
