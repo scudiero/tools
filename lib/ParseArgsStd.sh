@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.19" # -- dscudiero -- 01/20/2017 @ 10:03:13.73
+# version="2.0.20" # -- dscudiero -- 02/17/2017 @ 11:51:34.58
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -61,7 +61,6 @@ function ParseArgsStd {
 		argList+=(-autoRemote,4,switch,autoRemote,,script2,"Automatically launch remote ssh session if the client is not hosted on the current host")
 
 		argList+=(-allItems,3,switch,allItems,,script,"Perform action on all items in the context of the script, e.g all envs")
-		argList+=(-asUser,2,switch,asUser,,script,"Perform action on behalf of another user")
 		argList+=(-force,5,switch,force,,script,"Perform action even if it has already been done on the site")
 		argList+=(-fork,4,switch,fork,,script,"Fork off sub-process if supported by script")
 		argList+=(-forUser,4,option,forUser,,script,'Run on behalf of another user (admins only)')
@@ -114,3 +113,4 @@ export -f ParseArgsStd
 ## Thu Jan 19 10:05:01 CST 2017 - dscudiero - misc cleanup
 ## Thu Jan 19 12:47:02 CST 2017 - dscudiero - Moved CIMS above envs
 ## Fri Jan 20 10:17:29 CST 2017 - dscudiero - switch order when searching for arguments
+## Mon Feb 20 12:54:04 CST 2017 - dscudiero - Removed the asUser variable, replaced with forUser
