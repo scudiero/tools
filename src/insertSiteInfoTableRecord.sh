@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.118 # -- dscudiero -- 01/25/2017 @  8:21:23.16
+version=1.1.119 # -- dscudiero -- 02/20/2017 @  7:19:35.84
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseCourseleafFile' #imports="$imports "
@@ -61,7 +61,7 @@ dump -2 -n -t siteDir share shareType client env clientId
 # Main
 #===================================================================================================
 [[ $DOIT != '' || $informationOnlyMode == true ]] && echo
-Msg2 "^$env ($siteDir)"
+verbose 1 "^$env ($siteDir)"
 
 ## Remove any existing records for this client/env
 	sqlStmt="delete from $useSiteInfoTable where clientId =\"$clientId\" and env=\"$env\""
@@ -393,3 +393,4 @@ return 0
 ## Wed Jan 18 07:20:50 CST 2017 - dscudiero - Modify siteAdmins table insert to use a variable for the table name
 ## Wed Jan 25 08:24:45 CST 2017 - dscudiero - refactor how we set useSitesTable & useSiteAdminsTable
 ## Tue Feb 14 13:19:24 CST 2017 - dscudiero - Refactored to delete the client records before inserting a new one
+## Mon Feb 20 07:20:01 CST 2017 - dscudiero - Make messages level 1
