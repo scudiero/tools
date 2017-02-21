@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.110 # -- dscudiero -- 02/17/2017 @  6:57:25.31
+version=2.1.111 # -- dscudiero -- 02/21/2017 @ 13:31:13.38
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -189,9 +189,9 @@ function BuildToolsAuthTable() {
 case "$hostName" in
 	mojave)
 		## Make sure we have a sites table before running perfTest
-		sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"sites%\" order by create_time desc"
+		sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
 		RunSql2 $sqlStmt
-		[[ ${#resultSet[@]} -gt 0 ]] && Call 'perfTest' 
+		[[ ${#resultSet[@]} -gt 0 ]] && Call 'perfTest'
 		CheckMonitorFiles
 		SyncInternalDb
 		BuildToolsAuthTable
@@ -203,7 +203,7 @@ case "$hostName" in
 	*)
 		sleep 60 ## Wait for perfTest on Mojave to complete
 		## Make sure we have a sites table before running perfTest
-		sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"sites%\" order by create_time desc"
+		sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
 		RunSql2 $sqlStmt
 		[[ ${#resultSet[@]} -gt 0 ]] && Semaphore 'waiton' 'perfTest' && Call 'perfTest' && Call 'perfTest' 'summary'
 		CheckMonitorFiles
@@ -232,3 +232,4 @@ return 0
 ## Thu Feb  9 08:07:08 CST 2017 - dscudiero - Check to make sure there is a sites table before running perftest
 ## Wed Feb 15 07:09:08 CST 2017 - dscudiero - Turn on file expansion before chgrp commands
 ## Fri Feb 17 06:58:55 CST 2017 - dscudiero - Add a waiton perftest on build7
+## Tue Feb 21 13:31:38 CST 2017 - dscudiero - Fix query checking for the sites table
