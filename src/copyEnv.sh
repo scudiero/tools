@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=4.10.34 # -- dscudiero -- 01/27/2017 @  7:16:21.69
+version=4.10.62 # -- dscudiero -- 02/21/2017 @  9:59:59.80
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -51,6 +51,7 @@ function parseArgs-copyEnv {
 	argList+=(-forUser,7,option,forUser,,'script',"Name the resulting site for the specified userid")
 	argList+=(-suffix,6,option,suffix,,'script',"Suffix text to be append to the resultant site name, e.g. -luc")
 	argList+=(-emailAddress,1,option,emailAddress,,'script',"The email address for CourseLeaf email notifications")
+	argList+=(-asSite,2,option,asSite,,script,'The name to give the new site)')
 }
 function Goodbye-copyEnv {
 	[[ -d $tmpRoot ]] && rm -rf $tmpRoot
@@ -86,29 +87,37 @@ dump -2 -n client env cim cat fullCopy manifest overlay suffix emailAddress
 Hello
 addPvt=true
 
-if [[ $client == 'lilypadu' ]]; then
-	srcEnv='next'
-	srcDir='/mnt/lilypadu/site/next'
-	tgtEnv='pvt'
-	tgtDir="/mnt/dev7/web/lilypadu-$userName"
-elif [[ $client == 'internal' ]]; then
-	srcEnv='next'
-	srcDir='/mnt/internal/site/stage'
-	tgtEnv='pvt'
-	tgtDir="/mnt/dev11/web/internal-$userName"
-	progDir='pagewiz'
-else
-	Init 'getClient'
-	if [[ $noCheck == true ]]; then
-		GetSiteDirNoCheck $client "For the $(ColorK 'Source'), do you want to work with '$client's development or production env"
-		srcEnv="$env"; srcDir="$siteDir"; unset env
-		Init 'getTgtEnv getDirs'
+## Resolve data based on passed in client, handle special cases
+	if [[ $(Lower "${client:0:5}") == 'luc20' && ${srcEnv:0:1} == 'p' && ${tgtEnv:0:1} == 'p' ]]; then
+		srcEnv='pvt'
+		srcDir="/mnt/dev7/web/lilypadu-$userName"
+		[[ ! -d "$srcDir" ]] && srcEnv='next' && srcDir='/mnt/lilypadu/site/next'
+		tgtEnv='pvt'
+		tgtDir="/mnt/dev7/web/luc$(date "+%Y")"
+		[[ -n $asSite ]] && tgtDir="$tgtDir-$asSite"
+	elif [[ $client == 'lilypadu' ]]; then
+		srcEnv='next'
+		srcDir='/mnt/lilypadu/site/next'
+		tgtEnv='pvt'
+		tgtDir="/mnt/dev7/web/lilypadu-$userName"
+	elif [[ $client == 'internal' ]]; then
+		srcEnv='next'
+		srcDir='/mnt/internal/site/stage'
+		tgtEnv='pvt'
+		tgtDir="/mnt/dev11/web/internal-$userName"
+		progDir='pagewiz'
 	else
-		Init 'getSrcEnv getTgtEnv getDirs'
-		env="$srcEnv"
+		Init 'getClient'
+		if [[ $noCheck == true ]]; then
+			GetSiteDirNoCheck $client "For the $(ColorK 'Source'), do you want to work with '$client's development or production env"
+			srcEnv="$env"; srcDir="$siteDir"; unset env
+			Init 'getTgtEnv getDirs'
+		else
+			Init 'getSrcEnv getTgtEnv getDirs'
+			env="$srcEnv"
+		fi
 	fi
-fi
-dump -1 client env srcEnv srcDir tgtEnv tgtDir
+	dump -1 client env srcEnv srcDir tgtEnv tgtDir
 
 ignoreList=$(sed "s/<progDir>/$progDir/g" <<< $ignoreList)
 mustHaveDirs=$(sed "s/<progDir>/$progDir/g" <<< $(cut -d":" -f2 <<< $scriptData1))
@@ -153,6 +162,9 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 			#dump pwRec remoteUser remotePw remoteHost remoteNext remoteCurr
 			#remoteCopy=true
 		fi
+	else
+		clientHost=$hostName
+		clientRhel=$myRhel
 	fi
 	dump -2 -t srcDir devDir pvtDir remoteCopy
 
@@ -161,8 +173,12 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 		[[ ! -d $overrideTarget ]] && Msg2 && Terminate "Could not locate override target diectory: '$overrideTarget'"
 		tgtDir="$overrideTarget/$client-$userName"
 	fi
-	[[ -n $forUser && -x $suffix ]] && Msg2 && Terminate "Cannot specify both 'forUser' and 'suffix'."
-	[[ -n $forUser ]] && tgtDir=$(sed "s/$userName/$forUser/g" <<< $tgtDir) && emailAddress="$forUser@leepfrog.com"
+	if [[ -n $forUser ]]; then
+		[[ -n $suffix ]] && Msg2 && Terminate "Cannot specify both 'forUser' and 'suffix'."
+		userAccount="${forUser%%/*}"
+		userPassword="${forUser##*/}"
+		[[ -z $asSite ]] && tgtDir=$(sed "s/$userName/$forUser/g" <<< $tgtDir)
+	fi
 	[[ -n $suffix ]] && tgtDir=$(sed "s/$userName/$suffix/g" <<< $tgtDir)
 
 ## if target is not pvt or dev then do a full copy
@@ -185,6 +201,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 	verifyArgs+=("Source Env:$(TitleCase $srcEnv)\t($srcDir)")
 	verifyArgs+=("Target Env:$(TitleCase $tgtEnv)\t($tgtDir)")
 	tmpStr=$(sed "s/,/, /g" <<< $ignoreList)
+	[[ $forUser != true ]] && verifyArgs+=("For User:$forUser")
 	[[ $fullCopy != true ]] && verifyArgs+=("Ignore List:$tmpStr")
 	verifyArgs+=("Full Copy:$fullCopy")
 
@@ -346,16 +363,19 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		$DOIT sed -i s'_^pdfeverypage:true$_//pdfeverypage:true_' $tgtDir/web/$progDir/localsteps/default.tcf
 
 	# leepfrog user account
-		[[ $quiet == false || $quiet == 0 ]] && Msg2 "Adding the 'leepfrog' & 'test' userids are in the $progDir.cfg file..."
-		$DOIT echo "user:$leepfrogUserId|$leepfrogPw||admin" >> $tgtDir/$progDir.cfg
-		Msg2 "^'$leepfrogUserId' added as an admin with pw: '<normal pw>'"
-		$DOIT echo "user:test|test||" >> $tgtDir/$progDir.cfg
-		Msg2 "^'test' added as a normal user with pw: 'test'"
+		[[ $quiet == false || $quiet == 0 ]] && Msg2 "Adding user-ids to $progDir.cfg file..."
+		if [[ $(Lower "${client:0:5}") != 'luc20' ]]; then
+			$DOIT echo "user:$leepfrogUserId|$leepfrogPw||admin" >> $tgtDir/$progDir.cfg
+			Msg2 "^'$leepfrogUserId' added as an admin with pw: '<normal pw>'"
+			$DOIT echo "user:test|test||" >> $tgtDir/$progDir.cfg
+			Msg2 "^'test' added as a normal user with pw: 'test'"
+			$DOIT echo "user:$client|$client||admin" >> $tgtDir/$progDir.cfg
+		fi
 		$DOIT echo "user:$client|$client||admin" >> $tgtDir/$progDir.cfg
-		Msg2 "^'$client' added as an admin with pw: '$client'"
+		[[ -n $forUser ]] && $DOIT echo "user:$userAccount|$userPassword||admin" >> $tgtDir/$progDir.cfg
 
 	# Set nexturl so wf emails point to local instance
-		[[ $quiet == false || $quiet == 0 ]] && Msg2 "Changeing 'nexturl' to point to local instance..."
+		[[ $quiet == false || $quiet == 0 ]] && Msg2 "Changing 'nexturl' to point to local instance..."
 		editFile="$tgtDir/web/courseleaf/localsteps/default.tcf"
 		clientToken=$(cut -d'/' -f5 <<< $tgtDir)
 		toStr="nexturl:https://$clientToken/$(cut -d '/' -f3 <<< $tgtDir).leepfrog.com"
@@ -422,7 +442,7 @@ fi
 #printf "0: noDbLog = '$noDbLog', myLogRecordIdx = '$myLogRecordIdx'\n" >> ~/stdout.txt
 #[[ $quiet == true || $quiet == 1 ]] && quiet=0 || Alert
 Msg2
-Msg2 "I Remember you can use the 'cleanDev' script to easily remove private dev sites."
+Info "Remember you can use the 'cleanDev' script to easily remove private dev sites."
 Goodbye 0 'alert' "$(ColorK "$(Upper $client)") clone from $(ColorK "$(Upper $env)")"
 
 # 10-16-2015 -- dscudiero -- Update for framework 6 (4.1)
@@ -466,3 +486,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client)") clone from $(ColorK "$(Upper $en
 ## Wed Jan 25 12:45:03 CST 2017 - dscudiero - Added updating the nexturl variable in localsteps/default.tcf to match the local instance
 ## Thu Jan 26 13:39:37 CST 2017 - dscudiero - Fix problem setting nexturl value for pvt sites
 ## Fri Jan 27 07:56:11 CST 2017 - dscudiero - Fix problem for lilypadu
+## Tue Feb 21 13:32:38 CST 2017 - dscudiero - add code for asSite and expand code for forUser
