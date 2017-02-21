@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=4.10.62 # -- dscudiero -- 02/21/2017 @  9:59:59.80
+version=4.10.63 # -- dscudiero -- 02/21/2017 @ 13:46:03.27
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -364,13 +364,11 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 
 	# leepfrog user account
 		[[ $quiet == false || $quiet == 0 ]] && Msg2 "Adding user-ids to $progDir.cfg file..."
-		if [[ $(Lower "${client:0:5}") != 'luc20' ]]; then
-			$DOIT echo "user:$leepfrogUserId|$leepfrogPw||admin" >> $tgtDir/$progDir.cfg
-			Msg2 "^'$leepfrogUserId' added as an admin with pw: '<normal pw>'"
-			$DOIT echo "user:test|test||" >> $tgtDir/$progDir.cfg
-			Msg2 "^'test' added as a normal user with pw: 'test'"
-			$DOIT echo "user:$client|$client||admin" >> $tgtDir/$progDir.cfg
-		fi
+		$DOIT echo "user:$leepfrogUserId|$leepfrogPw||admin" >> $tgtDir/$progDir.cfg
+		Msg2 "^'$leepfrogUserId' added as an admin with pw: '<normal pw>'"
+		$DOIT echo "user:test|test||" >> $tgtDir/$progDir.cfg
+		Msg2 "^'test' added as a normal user with pw: 'test'"
+		[[ $(Lower "${client:0:5}") != 'luc20' ]] && $DOIT echo "user:$client|$client||admin" >> $tgtDir/$progDir.cfg
 		$DOIT echo "user:$client|$client||admin" >> $tgtDir/$progDir.cfg
 		[[ -n $forUser ]] && $DOIT echo "user:$userAccount|$userPassword||admin" >> $tgtDir/$progDir.cfg
 
@@ -487,3 +485,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client)") clone from $(ColorK "$(Upper $en
 ## Thu Jan 26 13:39:37 CST 2017 - dscudiero - Fix problem setting nexturl value for pvt sites
 ## Fri Jan 27 07:56:11 CST 2017 - dscudiero - Fix problem for lilypadu
 ## Tue Feb 21 13:32:38 CST 2017 - dscudiero - add code for asSite and expand code for forUser
+## Tue Feb 21 13:46:08 CST 2017 - dscudiero - General syncing of dev to prod
