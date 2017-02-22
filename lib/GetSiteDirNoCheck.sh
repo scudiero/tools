@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.32" # -- dscudiero -- 02/22/2017 @ 13:06:55.24
+# version="1.0.34" # -- dscudiero -- 02/22/2017 @ 13:35:46.05
 #===================================================================================================
 # Resolve a clients siteDir without using the database
 # Sets global variable: siteDir
@@ -18,7 +18,7 @@ function GetSiteDirNoCheck {
 	Import 'SelectMenuNew'
 	local client="$1"; shift || true
 	[[ -z $client ]] && return 0
-	local promptStr=${1:-"Do you wish to work with '$client's development or production env"}
+	local promptStr=${1:-"Do you wish to work with a 'development' or 'production' environment"}
 	local checkDir envType server ans dirs dir line
 	unset siteDir
 	cwd=$(pwd)
@@ -26,7 +26,7 @@ function GetSiteDirNoCheck {
 	unset envType env
 	if [[ -z $env ]]; then
 		echo
-		Prompt envType "$promptStr" 'production(text,next,curr) development(pvt,dev)' 'development(pvt,dev)'; envType=$(Lower ${envType:0:1})
+		Prompt envType "$promptStr" 'production development' 'development'; envType=$(Lower ${envType:0:1})
 		[[ $envType == 'd' ]] && validEnvs="$(tr ',' ' ' <<< $courseleafDevEnvs)" || validEnvs="$(echo "$courseleafProdEnvs" | sed s/,preview,public,prior// | tr ',' ' ')"
 	fi
 
@@ -72,7 +72,7 @@ function GetSiteDirNoCheck {
 	## Done
 		cd "$cwd"
 		if [[ ! -d $siteDir ]]; then
-			Msg2 "Could not resolve the site directory with the information provided"
+			Error "Could not resolve the site directory with the information provided"
 			Prompt siteDir "Please enter the full path to the site you wish to patch" '*dir*'
 		fi
 		[[ ! -d $siteDir ]] && unset siteDir
@@ -94,3 +94,4 @@ export -f GetSiteDirNoCheck
 ## Wed Feb  8 10:57:04 CST 2017 - dscudiero - Fix problem getting list of development sites
 ## Thu Feb  9 08:06:23 CST 2017 - dscudiero - make sure we are using our own tmpFile
 ## Wed Feb 22 13:09:57 CST 2017 - dscudiero - If we cannot resolve the siteDir then prompt user
+## Wed Feb 22 13:36:07 CST 2017 - dscudiero - Change messaging on environment prompt
