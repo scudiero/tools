@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=4.10.65 # -- dscudiero -- 02/22/2017 @ 12:13:48.34
+version=4.10.66 # -- dscudiero -- 02/22/2017 @ 15:35:03.87
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -443,7 +443,8 @@ fi
 #[[ $quiet == true || $quiet == 1 ]] && quiet=0 || Alert
 Msg2
 Info "Remember you can use the 'cleanDev' script to easily remove private dev sites."
-Goodbye 0 'alert' "$(ColorK "$(Upper $client)") clone from $(ColorK "$(Upper $env)")"
+[[ -n $asSite ]] && msgText="$(ColorK "$(Upper $asSite)")" || msgText="$(ColorK "$(Upper $client)")"
+Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 
 # 10-16-2015 -- dscudiero -- Update for framework 6 (4.1)
 # 10-21-2015 -- dscudiero -- Updated for Framework 6, errexit (4.4)
@@ -489,3 +490,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client)") clone from $(ColorK "$(Upper $en
 ## Tue Feb 21 13:32:38 CST 2017 - dscudiero - add code for asSite and expand code for forUser
 ## Tue Feb 21 13:46:08 CST 2017 - dscudiero - General syncing of dev to prod
 ## Wed Feb 22 12:14:10 CST 2017 - dscudiero - Force emailaddress to disabled for LUC sites
+## Wed Feb 22 15:35:25 CST 2017 - dscudiero - Tweak ending message if asSite is active
