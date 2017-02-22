@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.31" # -- dscudiero -- 02/08/2017 @ 13:30:45.47
+# version="1.0.32" # -- dscudiero -- 02/22/2017 @ 13:06:55.24
 #===================================================================================================
 # Resolve a clients siteDir without using the database
 # Sets global variable: siteDir
@@ -71,6 +71,10 @@ function GetSiteDirNoCheck {
 
 	## Done
 		cd "$cwd"
+		if [[ ! -d $siteDir ]]; then
+			Msg2 "Could not resolve the site directory with the information provided"
+			Prompt siteDir "Please enter the full path to the site you wish to patch" '*dir*'
+		fi
 		[[ ! -d $siteDir ]] && unset siteDir
 		[[ -f "$tmpFile" ]] && rm "$tmpFile"
 		return 0
@@ -89,3 +93,4 @@ export -f GetSiteDirNoCheck
 ## Wed Jan 25 09:34:13 CST 2017 - dscudiero - minor cleanup of messaging
 ## Wed Feb  8 10:57:04 CST 2017 - dscudiero - Fix problem getting list of development sites
 ## Thu Feb  9 08:06:23 CST 2017 - dscudiero - make sure we are using our own tmpFile
+## Wed Feb 22 13:09:57 CST 2017 - dscudiero - If we cannot resolve the siteDir then prompt user
