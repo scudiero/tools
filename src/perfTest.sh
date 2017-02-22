@@ -16,12 +16,13 @@ tmpFile="/tmp/$LOGNAME.perfTest.sh.out"
 
 if [[ $mode == 'summary' ]]; then
         SetFileExpansion 'off'
-        sqlStmt="select * from perftest where date like \"%$(date "+%m-%d-%y %H")%\""
+        sqlStmt="select * from perftest where date like \"%$(date "+%m-%d-%y %H")%\" order by idx"
         RunSql2 $sqlStmt
         SetFileExpansion
         #echo "\${#resultSet[@]} = '${#resultSet[@]}'"
         #echo "\${resultSet[0]} = '${resultSet[0]}'"
         #echo "\${resultSet[1]} = '${resultSet[1]}'"
+        ## resultSet[0] = mojave, resultSet[1] = build7
         if [[ ${#resultSet[@]} -eq 2 ]]; then
                 unset valuesStr
                 # fields='localfsreal localfsuser localfssys remotefsreal remotefsuser remotefssys dbreadreal dbreaduser dbreadsys'
@@ -34,7 +35,8 @@ if [[ $mode == 'summary' ]]; then
                         int2="$(tr -d '.' <<< $real2)"
                         int2=$(sed 's/^0//' <<< $int2)
                         let delta=$int2-$int1
-                        percent=$((200*$delta/$int2 % 2 + 100*$delta/$int2))
+                        #percent=$((200*$delta/$int2 % 2 + 100*$delta/$int2))
+                        percent=$((200*$delta/$int1 % 2 + 100*$delta/$int1))
                         #dump -n field -t real1 int1 real2 int2 delta percent
                         valuesStr="$valuesStr,\"${percent}%\""
                 done
@@ -140,3 +142,4 @@ fi
 ## Fri Feb  3 14:13:39 CST 2017 - dscudiero - Remove leading zeros from integers befor calculating the percentage
 ## Tue Feb  7 07:54:23 CST 2017 - dscudiero - add debug messaging
 ## Wed Feb  8 08:39:26 CST 2017 - dscudiero - Remove debug statements
+## Wed Feb 22 14:39:21 CST 2017 - dscudiero - switch percentage to be based on delta/mojave
