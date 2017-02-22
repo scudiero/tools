@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.20" # -- dscudiero -- 02/17/2017 @ 11:51:34.58
+# version="2.0.21" # -- dscudiero -- 02/22/2017 @  7:24:19.23
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -98,7 +98,9 @@ function ParseArgsStd {
 		[[ $fork == true ]] && forkStr='&' || unset forkStr
 
 		if [[ -n $forUser ]]; then
-			[[ -d /home/$forUser ]] && userName=$forUser || Msg2 $E "Userid specified as -forUser ($forUser) is not valid, ignoring directive"
+			if [[ $(Contains "$forUser" '/') == false ]]; then
+				[[ -d /home/$forUser ]] && userName=$forUser || Error "Userid specified as -forUser ($forUser) is not valid, ignoring directive"
+			fi
 		fi
 
 	Msg2 $V3 "*** $FUNCNAME -- Completed ***"
@@ -114,3 +116,4 @@ export -f ParseArgsStd
 ## Thu Jan 19 12:47:02 CST 2017 - dscudiero - Moved CIMS above envs
 ## Fri Jan 20 10:17:29 CST 2017 - dscudiero - switch order when searching for arguments
 ## Mon Feb 20 12:54:04 CST 2017 - dscudiero - Removed the asUser variable, replaced with forUser
+## Wed Feb 22 07:24:53 CST 2017 - dscudiero - Only check forUser value if forUser does not contain a '/'
