@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=4.10.63 # -- dscudiero -- 02/21/2017 @ 13:46:03.27
+version=4.10.65 # -- dscudiero -- 02/22/2017 @ 12:13:48.34
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -95,11 +95,13 @@ addPvt=true
 		tgtEnv='pvt'
 		tgtDir="/mnt/dev7/web/luc$(date "+%Y")"
 		[[ -n $asSite ]] && tgtDir="$tgtDir-$asSite"
+		emailAddress='disabled'
 	elif [[ $client == 'lilypadu' ]]; then
 		srcEnv='next'
 		srcDir='/mnt/lilypadu/site/next'
 		tgtEnv='pvt'
 		tgtDir="/mnt/dev7/web/lilypadu-$userName"
+		emailAddress='disabled'
 	elif [[ $client == 'internal' ]]; then
 		srcEnv='next'
 		srcDir='/mnt/internal/site/stage'
@@ -385,7 +387,7 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 
 	## email override
 		[[ $quiet == false || $quiet == 0 ]] && Msg2 "Override email routing..."
-		[[ $emailAddress == "" ]] && emailAddress=$userName@leepfrog.com
+		[[ -z $emailAddress ]] && emailAddress=$userName@leepfrog.com
 		editFile=$tgtDir/email/sendnow.atj
 		unset grepStr; grepStr=$(ProtectedCall "grep ^'// DO NOT MODIFY THIS FILE' $editFile");
 		if [[ -n $grepStr ]]; then
@@ -486,3 +488,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client)") clone from $(ColorK "$(Upper $en
 ## Fri Jan 27 07:56:11 CST 2017 - dscudiero - Fix problem for lilypadu
 ## Tue Feb 21 13:32:38 CST 2017 - dscudiero - add code for asSite and expand code for forUser
 ## Tue Feb 21 13:46:08 CST 2017 - dscudiero - General syncing of dev to prod
+## Wed Feb 22 12:14:10 CST 2017 - dscudiero - Force emailaddress to disabled for LUC sites
