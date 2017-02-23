@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=4.10.75 # -- dscudiero -- 02/23/2017 @  9:05:38.63
+version=4.10.76 # -- dscudiero -- 02/23/2017 @ 10:07:22.72
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -203,11 +203,11 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 ## See if there are any additional directories the user wants to skip
 if [[ $verify == true ]]; then
 	echo
-	unset ans; Prompt ans "Do you wish to exclued additional directories/files from the copy operation" 'No,Yes' 'No'; ans="$(Lower "${ans:0:1}")"
+	unset ans; Prompt ans "Do you wish to exclude additional directories/files from the copy operation" 'No,Yes' 'No'; ans="$(Lower "${ans:0:1}")"
 	if [[ $ans == 'y' ]]; then
 		SetFileExpansion 'off'
 		Msg2 "^Please specify the directories/files you wish to exclude, use '*' as a the wild card,"
-		Msg2 "^specifications are relative to siteDir, e.g. '/wen' without the quotes."
+		Msg2 "^specifications are relative to siteDir, e.g. '/web/wen' without the quotes."
 		Msg2 "^To stop the prompt loop, just enter no data"
 		while true; do
 			MsgNoCRLF "^^==> "
@@ -518,3 +518,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## Wed Feb 22 12:14:10 CST 2017 - dscudiero - Force emailaddress to disabled for LUC sites
 ## Wed Feb 22 15:35:25 CST 2017 - dscudiero - Tweak ending message if asSite is active
 ## Thu Feb 23 09:13:18 CST 2017 - dscudiero - Added ability for the user to exclude additional directories
+## Thu Feb 23 10:08:24 CST 2017 - dscudiero - Fixed spelling error and tweaked messaging
