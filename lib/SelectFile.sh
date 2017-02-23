@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.6" # -- dscudiero -- 01/04/2017 @ 13:52:01.68
+# version="2.0.12" # -- dscudiero -- 02/23/2017 @ 13:58:39.29
 #===================================================================================================
 # Display a selection menue of files in a directory that match a filter
 # SelectFile <dir> <returnVariableName> <filter> <Prompt text>
@@ -44,6 +44,8 @@ function SelectFile {
 			file=$line
 			#cdate=$(stat -c %y "$file" | cut -d'.' -f1 | awk 'BEGIN {FS=" "}{printf "%s at %s", $1,$2}')
 			menuList+=("|$file|$(stat -c %y "$file" | cut -d'.' -f1 | awk 'BEGIN {FS=" "}{printf "%s at %s", $1,$2}')")
+			#menuList+=("|$file|$(date +"%m-%d-%y at %H:%M:%S" -r $file)")
+
 		done < "$tmpDataFile"
 		[[ -f "$tmpDataFile" ]] && rm -f "$tmpDataFile"
 
@@ -52,6 +54,7 @@ function SelectFile {
 		printf "$menuPrompt"
 		SelectMenuNew 'menuList' 'selectResp' "\nEnter the $(ColorK '(ordinal)') number of the file you wish to use (or 'X' to quit) > "
 		[[ $selectResp == '' ]] && SetFileExpansion && Goodbye 0 || selectResp=$(cut -d'|' -f1 <<< $selectResp)
+		selectResp=${selectResp% *}; selectResp=${selectResp% *}; selectResp=${selectResp% *};
 		eval $returnVarName=\"$(echo "$selectResp" | cut -d"|" -f2)\"
 
 	SetFileExpansion
@@ -64,3 +67,4 @@ export -f SelectFile
 #===================================================================================================
 
 ## Wed Jan  4 13:54:19 CST 2017 - dscudiero - General syncing of dev to prod
+## Thu Feb 23 14:11:40 CST 2017 - dscudiero - Fixed to adopt to changes to selectMenuNew
