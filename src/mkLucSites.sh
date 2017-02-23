@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.11 # -- dscudiero -- 02/22/2017 @ 11:31:25.13
+version=1.0.18 # -- dscudiero -- 02/23/2017 @ 13:02:35.61
 #==================================================================================================
 #= Description +===================================================================================
 # Make sites for the LUC conference
@@ -46,7 +46,7 @@ Import 'GetExcel PadChar StringFunctions'
 # for var in $trueVars; do eval $var=true; done
 # for var in $falseVars; do eval $var=false; done
 tmpFile=$(MkTmpFile)
-passWord='luc2017'
+passWord="luc$(date +"%Y")"
 
 #==================================================================================================
 # Standard arg parsing and initialization
@@ -68,19 +68,23 @@ dump -1 workbookFile workbookSheet
 ## Get the list of sheets in the workbook
 GetExcel "$workbookFile" "$workbookSheet" > $tmpFile
 
+##
+## control|firstName|lastName|email|institution
 ## Loop through records and create the sites
 SetFileExpansion 'off'
+echo > $stdout
 while read line; do
-	[[ -z $line || $line == '||' ]] && continue
+	[[ -z $line || $line == '||||' ]] && continue
 	[[ $(cut -d'|' -f1 <<< "$line") == '*' ]] && continue
 	institution=$(cut -d'|' -f5 <<< "$line")
 	line=$(Lower "$line")
 	fName=$(cut -d'|' -f2 <<< "$line")
 	lName=$(cut -d'|' -f3 <<< "$line")
-	siteName="${fName}${lName}"
 	userEmail=$(cut -d'|' -f4 <<< "$line")
+	[[ -z $fName || -z $lName || -z $userEmail || -z $institution ]] && Error "Invalid record '$line', skipping" && continue
+	siteName="${fName}${lName}"
 	userId=${userEmail%%@*}
-	dump -1 -t line -t fName lName siteName userId
+	dump -1 -t line -t fName lName siteName userId institution
 	copyEnv --useLocal $passWord -nocheck -src p -tgt p -asSite $siteName -forUser $userId/$passWord -nop
 
 	echo | tee -a $stdout
@@ -109,3 +113,4 @@ Goodbye 0 #'alert'
 ## Check-in log
 #===================================================================================================
 
+## Thu Feb 23 13:03:18 CST 2017 - dscudiero - Add error checking on the input lines
