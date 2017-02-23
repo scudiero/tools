@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=4.10.66 # -- dscudiero -- 02/22/2017 @ 15:35:03.87
+version=4.10.75 # -- dscudiero -- 02/23/2017 @  9:05:38.63
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -52,6 +52,7 @@ function parseArgs-copyEnv {
 	argList+=(-suffix,6,option,suffix,,'script',"Suffix text to be append to the resultant site name, e.g. -luc")
 	argList+=(-emailAddress,1,option,emailAddress,,'script',"The email address for CourseLeaf email notifications")
 	argList+=(-asSite,2,option,asSite,,script,'The name to give the new site)')
+	argList+=(-additionalIgnores,3,option,additionalIgnores,,script,'Additional directories to ignore)')
 }
 function Goodbye-copyEnv {
 	[[ -d $tmpRoot ]] && rm -rf $tmpRoot
@@ -191,19 +192,42 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 ## Check to see if all dirs exist
 	[[ -z $srcDir ]] && Terminate "No Source directory was specified"
 	if [[ -d $tgtDir && $overlay == false ]]; then
+		echo
 		unset ans
 		WarningMsg "Target site ($tgtDir) already existes."
 		Prompt ans "Do you wish to $(ColorK 'overwrite') the existing site (Yes) or $(ColorK 'refresh') files in the existing sites site (No) ?" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
 		[[ $ans == 'y' ]] && cloneMode='Replace' || cloneMode='Refresh'
 	fi
 
+#==================================================================================================
+## See if there are any additional directories the user wants to skip
+if [[ $verify == true ]]; then
+	echo
+	unset ans; Prompt ans "Do you wish to exclued additional directories/files from the copy operation" 'No,Yes' 'No'; ans="$(Lower "${ans:0:1}")"
+	if [[ $ans == 'y' ]]; then
+		SetFileExpansion 'off'
+		Msg2 "^Please specify the directories/files you wish to exclude, use '*' as a the wild card,"
+		Msg2 "^specifications are relative to siteDir, e.g. '/wen' without the quotes."
+		Msg2 "^To stop the prompt loop, just enter no data"
+		while true; do
+			MsgNoCRLF "^^==> "
+			read ignore
+			[[ -z $ignore || $(Lower "$ignore") == 'x' ]] && break
+			ignoreList="$ignoreList,$ignore"
+			unset ignore
+		done
+		SetFileExpansion
+	fi
+fi
+
+#==================================================================================================
 ## Make sure the user really wants to do this
 	unset verifyArgs
 	verifyArgs+=("Client:$client")
 	verifyArgs+=("Source Env:$(TitleCase $srcEnv)\t($srcDir)")
 	verifyArgs+=("Target Env:$(TitleCase $tgtEnv)\t($tgtDir)")
 	tmpStr=$(sed "s/,/, /g" <<< $ignoreList)
-	[[ $forUser != true ]] && verifyArgs+=("For User:$forUser")
+	[[ -n $forUser ]] && verifyArgs+=("For User:$forUser")
 	[[ $fullCopy != true ]] && verifyArgs+=("Ignore List:$tmpStr")
 	verifyArgs+=("Full Copy:$fullCopy")
 
@@ -243,9 +267,11 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 # Do the copy using rsync, including or excluding dirs as required
 	if [[ -f $rsyncFilters ]]; then rm $rsyncFilters; fi
 	## Build rrsync control file of excluded items
+		SetFileExpansion 'off'
 		for token in $(tr ',' ' ' <<< $ignoreList); do
 			echo "- ${token}" >> $rsyncFilters
 		done
+		SetFileExpansion
 
 	[[ $remoteCopy != true ]] && cd $srcDir
 	[[ -z $DOIT ]] && listOnly='' || listOnly='--list-only'
@@ -491,3 +517,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## Tue Feb 21 13:46:08 CST 2017 - dscudiero - General syncing of dev to prod
 ## Wed Feb 22 12:14:10 CST 2017 - dscudiero - Force emailaddress to disabled for LUC sites
 ## Wed Feb 22 15:35:25 CST 2017 - dscudiero - Tweak ending message if asSite is active
+## Thu Feb 23 09:13:18 CST 2017 - dscudiero - Added ability for the user to exclude additional directories
