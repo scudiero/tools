@@ -29,12 +29,17 @@ if [[ $mode == 'summary' ]]; then
                 for ((i=4; i<13; i++)); do
                         unset int1 int2 real1 real2 percent
                         real1="$(cut -d'|' -f$i <<< ${resultSet[0]})"
+dump real1
                         int1="$(tr -d '.' <<< $real1)"
+dump int1
                         int1=$(sed 's/^0//' <<< $int1)
+dump int1
                         real2="$(cut -d'|' -f$i <<< ${resultSet[1]})"
+dump real2
                         int2="$(tr -d '.' <<< $real2)"
+dump int2
                         int2=$(sed 's/^0//' <<< $int2)
-dump -n real1 int1 real2 int2
+dump int2
                         let delta=$int2-$int1
 dump delta
                         #percent=$((200*$delta/$int2 % 2 + 100*$delta/$int2))
@@ -147,3 +152,4 @@ fi
 ## Wed Feb  8 08:39:26 CST 2017 - dscudiero - Remove debug statements
 ## Wed Feb 22 14:39:21 CST 2017 - dscudiero - switch percentage to be based on delta/mojave
 ## Fri Feb 24 08:30:51 CST 2017 - dscudiero - Add debug messages
+## Fri Feb 24 08:32:06 CST 2017 - dscudiero - more debug stuff
