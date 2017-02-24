@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.112 # -- dscudiero -- 02/22/2017 @ 15:21:48.16
+version=2.1.114 # -- dscudiero -- 02/24/2017 @  9:38:49.86
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -189,7 +189,7 @@ function BuildToolsAuthTable() {
 case "$hostName" in
 	mojave)
 		## Run perftest on even numberd hours
-		if [[ $(( $(date +"%H") % 2 )) -eq 0 ]]; then
+		if [[ $(( $(date +"%-H") % 2 )) -eq 0 ]]; then
 			## Make sure we have a sites table before running perfTest
 			sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
 			RunSql2 $sqlStmt
@@ -206,7 +206,7 @@ case "$hostName" in
 	*)
 		sleep 60 ## Wait for perfTest on Mojave to set its semaphore
 		## Run perftest on even numberd hours
-		if [[ $(( $(date +"%H") % 2 )) -eq 0 ]]; then
+		if [[ $(( $(date +"%-H") % 2 )) -eq 0 ]]; then
 			## Make sure we have a sites table before running perfTest
 			sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
 			RunSql2 $sqlStmt
@@ -240,3 +240,4 @@ return 0
 ## Fri Feb 17 06:58:55 CST 2017 - dscudiero - Add a waiton perftest on build7
 ## Tue Feb 21 13:31:38 CST 2017 - dscudiero - Fix query checking for the sites table
 ## Wed Feb 22 15:22:49 CST 2017 - dscudiero - Only run perftest on even numered hours
+## Fri Feb 24 09:39:09 CST 2017 - dscudiero - Fix a problem checking if the hour was an even hour
