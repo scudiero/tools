@@ -34,9 +34,12 @@ if [[ $mode == 'summary' ]]; then
                         real2="$(cut -d'|' -f$i <<< ${resultSet[1]})"
                         int2="$(tr -d '.' <<< $real2)"
                         int2=$(sed 's/^0//' <<< $int2)
+dump -n real1 int1 real2 int2
                         let delta=$int2-$int1
+dump delta
                         #percent=$((200*$delta/$int2 % 2 + 100*$delta/$int2))
                         percent=$((200*$delta/$int1 % 2 + 100*$delta/$int1))
+dump percent
                         #dump -n field -t real1 int1 real2 int2 delta percent
                         valuesStr="$valuesStr,\"${percent}%\""
                 done
@@ -143,3 +146,4 @@ fi
 ## Tue Feb  7 07:54:23 CST 2017 - dscudiero - add debug messaging
 ## Wed Feb  8 08:39:26 CST 2017 - dscudiero - Remove debug statements
 ## Wed Feb 22 14:39:21 CST 2017 - dscudiero - switch percentage to be based on delta/mojave
+## Fri Feb 24 08:30:51 CST 2017 - dscudiero - Add debug messages
