@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.8.62 # -- dscudiero -- 02/20/2017 @  9:18:03.35
+version=2.8.72 # -- dscudiero -- 03/06/2017 @ 12:06:04.97
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -250,7 +250,7 @@ Hello
 
 
 ## If pvtDir exists and src is not pvt make sure that this is what the user really wants to to
-	if [[ -d "$pvtDir" && $srcEnv != 'pvt' ]]; then
+	if [[ -d "$pvtDir" && $srcEnv != 'pvt' && $tgtEnv != 'pvt' ]]; then
 		verify=true
 		Msg2
 		Msg2 $W "You are asking to source the copy from the $(ColorW $(Upper $srcEnv)) environment but a private site ($client-$userName) was detected"
@@ -259,11 +259,18 @@ Hello
 		[[ $ans != 'y' ]] && Goodbye -1
 	fi
 
+## Get update comment
+	unset updateComment
+	echo
+	Msg2 "Please enter the business reason for making this update:"
+	Prompt updateComment "^" "*any*"
+
 ## Verify continue
 	unset verifyArgs
 	verifyArgs+=("Client:$client")
 	verifyArgs+=("Source Env:$(TitleCase $srcEnv) ($srcDir)")
 	verifyArgs+=("Target Env:$(TitleCase $tgtEnv) ($tgtDir)")
+	verifyArgs+=("Update comment:$updateComment")
 	verifyArgs+=("CIM(s):$cimStr")
 	VerifyContinue "You are copying CIM workflow files for:"
 	dump -1 client srcEnv tgtEnv srcDir tgtDir cimStr
@@ -337,7 +344,7 @@ Msg2
 ## Copy the files
 	## If some files were not selected for update then as the user if they really want to copy the files
 	if [[ ${#filesNotCopied[@]} -gt 0 ]]; then
-		Msg2 $W "You asked that some files $ColorK('not') be copied: "
+		Msg2 $W "You asked that some changed files NOT be updated: "
 		for file in "${filesNotCopied[@]}"; do
 			Msg2 "^$file"
 		done
@@ -368,7 +375,7 @@ Msg2
 	fi
 
 	if [[ ${#filesNotCopied[@]} -gt 0 ]]; then
-		echo; Msg2 $W "The following files were NOT updated:"
+		echo; Msg2 $W "The following changed files were NOT updated:"
 		for file in "${filesNotCopied[@]}"; do
 			Msg2 "^$file"
 		done
@@ -391,9 +398,10 @@ Msg2
 ## Write out change log entries
 	if [[ ${#copyFileList} -gt 0 && $DOIT == '' ]]; then
 		## Log changes
-		changeLogLines=("Files updated from: '$srcDir'")
+		[[ -n $updateComment ]] && changeLogLines=("$updateComment")
+		changeLogLines+=("Files updated from: '$srcDir'")
 		for file in "${filesUpdated[@]}"; do
-			changeLogLines+=("$(Msg2 "^^$file")")
+			changeLogLines+=("\t$file")
 		done
 		env=$tgtEnv
 		WriteChangelogEntry 'changeLogLines' "$tgtDir/changelog.txt" "$myName"
@@ -439,3 +447,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## Tue Feb 14 12:24:17 CST 2017 - dscudiero - Tweak messaging format
 ## Tue Feb 14 12:29:28 CST 2017 - dscudiero - Tweaked messaging
 ## Mon Feb 20 09:26:45 CST 2017 - dscudiero - Do not clean up source directories if pvt or dev
+## Mon Mar  6 12:07:10 CST 2017 - dscudiero - added update comment for the log
