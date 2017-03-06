@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.28" # -- dscudiero -- 01/04/2017 @ 13:51:16.46
+# version="2.0.34" # -- dscudiero -- 03/06/2017 @ 15:41:33.10
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -111,7 +111,6 @@ function VerifyPromptVal {
 
 	## Product(s)
 	if [[ ${promptVar:0:7} == 'product' && $verifyMsg == '' ]]; then
-
 		validProducts='cat,cim,clss'
 		if [[ $client != '' ]]; then
 			local sqlStmt="select products from $clientInfoTable where name='$client'"
@@ -123,6 +122,7 @@ function VerifyPromptVal {
 		if [[ $allowMultiple != true && $(Contains "$ans" ",") == true ]]; then
 			verifyMsg=$(Msg2 $E "$promptVar' does not allow for multiple values, valid values is one in {$validProducts}")
 		else
+			[[ $ans == 'all' ]] && ans="$validProducts" && response="$ans"
 			local i j found foundAll=false
 			for i in $(tr ',' ' ' <<< $ans); do
 				found=false
@@ -187,3 +187,4 @@ export -f VerifyPromptVal
 # Check-in Log
 #===================================================================================================
 ## Wed Jan  4 13:54:39 CST 2017 - dscudiero - General syncing of dev to prod
+## Mon Mar  6 15:55:11 CST 2017 - dscudiero - Tweak product parsing
