@@ -1,5 +1,5 @@
 //======================================================================================================================
-// version:1.6.90 // -- dscudiero -- 01/25/2017 @ 16:00:30.45
+// version:1.6.91 // -- dscudiero -- 02/28/2017 @ 13:57:08.46
 //======================================================================================================================
 // Common wf functions and helper functions to support workflow
 //======================================================================================================================
@@ -510,6 +510,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 		}); //outTokens
 		// if debug envronent then add ending line in the workflow
 		if (wfEnvIsDev) retArray.push("*** End of  ' " + inval.toLowerCase().replace('optional','') + " ' output ***");
+Here(99)
 
 	return retArray;
 
