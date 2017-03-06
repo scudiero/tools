@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.34" # -- dscudiero -- 02/22/2017 @ 13:35:46.05
+# version="1.0.38" # -- dscudiero -- 03/06/2017 @ 14:35:28.78
 #===================================================================================================
 # Resolve a clients siteDir without using the database
 # Sets global variable: siteDir
@@ -57,13 +57,13 @@ function GetSiteDirNoCheck {
 			while read -r line; do menuItems+=("|$(tr ' ' '|' <<< $line)"); done < $tmpFile;
 			SelectMenuNew 'menuItems' 'menuItem' "\nEnter the $(ColorK '(ordinal)') number of the site you wish to act on (or 'x' to quit) > "
 			[[ $menuItem == '' ]] && Goodbye 0
-			server="$(cut -d'|' -f1 <<< $menuItem)"
+			server="$(cut -d' ' -f1 <<< $menuItem)"
 			if [[ ${envType:0:1} == 'd' ]]; then
-				client="$(cut -d'|' -f2 <<< $menuItem)"
+				client="$(cut -d' ' -f2 <<< $menuItem)"
 				[[ $(Contains "$client" "-$userName") == true ]] && env='pvt' || env='dev'
  				siteDir="/mnt/$server/web/$client"
 			else
-				env="$(cut -d'|' -f2 <<< $menuItem)"
+				env="$(cut -d' ' -f2 <<< $menuItem)"
 				[[ $env == 'test' ]] && client="$client-test"
 				siteDir="/mnt/$server/$client/$env"
 			fi
@@ -72,6 +72,7 @@ function GetSiteDirNoCheck {
 	## Done
 		cd "$cwd"
 		if [[ ! -d $siteDir ]]; then
+			unset siteDir
 			Error "Could not resolve the site directory with the information provided"
 			Prompt siteDir "Please enter the full path to the site you wish to patch" '*dir*'
 		fi
@@ -95,3 +96,5 @@ export -f GetSiteDirNoCheck
 ## Thu Feb  9 08:06:23 CST 2017 - dscudiero - make sure we are using our own tmpFile
 ## Wed Feb 22 13:09:57 CST 2017 - dscudiero - If we cannot resolve the siteDir then prompt user
 ## Wed Feb 22 13:36:07 CST 2017 - dscudiero - Change messaging on environment prompt
+## Mon Mar  6 14:39:13 CST 2017 - dscudiero - x
+## Mon Mar  6 15:56:21 CST 2017 - dscudiero - Tweak parsing results from menuSelect
