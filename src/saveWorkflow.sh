@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.42 # -- dscudiero -- 01/26/2017 @ 12:25:31.46
+version=2.2.43 # -- dscudiero -- 03/06/2017 @  8:55:41.03
 #====================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -58,7 +58,7 @@ Init "getClient getEnv getDirs checkEnvs getCims $allCims noPreview noPublic"
 
 dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 ## Get the files to act on from the database
-	unset requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles suffix
+	unset requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles
 	if [[ $scriptData1 == '' ]]; then
 		sqlStmt="select scriptData1 from $scriptsTable where name=\"copyWorkflow\""
 		RunSql2 $sqlStmt
@@ -160,3 +160,4 @@ Goodbye 0
 ## Tue Sep  6 07:54:54 CDT 2016 - dscudiero - Fix problem where it was not saving all files
 ## Tue Sep  6 08:19:50 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Thu Jan 26 12:26:59 CST 2017 - dscudiero - Misc cleanup
+## Mon Mar  6 12:07:35 CST 2017 - dscudiero - fixed problem overwritting the same file if suffix was passed
