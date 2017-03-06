@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.109 # -- dscudiero -- 02/07/2017 @ 13:32:40.71
+# version=2.0.112 # -- dscudiero -- 03/06/2017 @ 15:54:06.72
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -246,8 +246,9 @@ function Init {
 		## If there is only one product for this client then us it, otherwise prompt user
 		prodCnt=$(grep -o ' ' <<< "$validProducts" | wc -l)
 		if [[ $prodCnt -gt 0 ]]; then
-			Prompt $prodVar "What $prodVar do you wish to work with$promptModifer?" "$validProducts"
+			Prompt $prodVar "What $prodVar do you wish to work with$promptModifer?" "$validProducts all"
 			eval $prodVar=$(Lower \$$prodVar)
+			[[ $prodVar == 'all' ]] && eval $prodVar=$validProducts
 		else
 			Msg2 $NT1 "Only one value valid for '$prodVar', using '$validProducts'"
 			eval $prodVar=$(Lower $validProducts)
@@ -329,3 +330,4 @@ export -f Init
 ## Mon Jan 23 12:41:16 CST 2017 - dscudiero - Fix problem setting tgtEnv
 ## Wed Jan 25 12:44:31 CST 2017 - dscudiero - Fix issue setting srcEnv and tgtEnv when abbreviated values were passed in on the command line
 ## Tue Feb  7 15:15:43 CST 2017 - dscudiero - x
+## Mon Mar  6 15:55:02 CST 2017 - dscudiero - Tweak product parsing
