@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.5.64 # -- dscudiero -- 12/14/2016 @ 11:24:45.48
+version=1.5.66 # -- dscudiero -- 03/07/2017 @ 14:35:49.18
 #==================================================================================================
 # Install a courseleaf feature on a client site
 #==================================================================================================
@@ -105,7 +105,7 @@ while [[ true == true ]]; do
 		[[ $env != '' ]] && Msg2 "Please specify the feature you wish to install on '$client/$env':" || Msg2 "Please specify the feature you wish to install on '$client':"
 		Msg2
 		SelectMenuNew 'features' 'feature' "\nEnter the $(ColorK '(ordinal)') number of the feature you wish to install (or 'x' to quit) > "
-		[[ $feature == '' ]] && Goodbye 0 || feature=$(cut -d'|' -f1 <<< $feature)
+		[[ $feature == '' ]] && Goodbye 0 || feature=$(cut -d' ' -f1 <<< $feature)
 	else
 		[[ $(Contains "$feature" "email") == true ]] && feature='customEmails'
 		[[ $(Contains "$feature" "report") == true ]] && feature='courseleafReports'
@@ -152,3 +152,4 @@ Goodbye 0 #'alert'
 ## Tue Aug 23 11:21:40 CDT 2016 - dscudiero - Updated to correctly parse output of selectMenuNew
 ## Thu Aug 25 09:28:30 CDT 2016 - dscudiero - Remove errant quit statement
 ## Tue Oct 18 13:42:26 CDT 2016 - dscudiero - use var to call feature file
+## Tue Mar  7 14:45:27 CST 2017 - dscudiero - Fix parse of resultes from selectMenuNew after redo
