@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.6.98" // -- dscudiero -- 03/07/2017 @ 10:39:26.79
+wfLibVersion="1.6.98"; // -- dscudiero -- 03/07/2017 @ 10:35:10.15
 //======================================================================================================================
 // Common wf functions and helper functions to support workflow
 //======================================================================================================================
@@ -310,12 +310,12 @@ wffuncs.Related = function(inval, wfrule, args) {
 				wfDebug(3,'\t\t*** Variable ' + formVar + ' is not defined in the tcf file, skipping');
 				return;
 			}
-			wfDump(1,["\ttcfData;"+tcfData.toSource()]);
+			wfDump(4,["\ttcfData;"+tcfData.toSource()]);
 
 			var tcaData=[];
 			if (typeof eval('tcadata.'+formVar) != 'undefined' ) {
 				tcaData=eval('tcadata.'+formVar); // jshint ignore:line
-				wfDump(3,["\ttcaData;"+tcaData.toSource()]);
+				wfDump(4,["\ttcaData;"+tcaData.toSource()]);
 			}
 
 			// Parse the data and build a refs object for the tcf and tca data
@@ -549,13 +549,13 @@ wffuncs.Related = function(inval, wfrule, args) {
 //======================================================================================================================
 function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colColumnName,deptColumnName,subjColumnName) {
 	var myName=arguments.callee.toString().match(/function ([^\(]+)/)[1]; var version="2.0.0"
-	wfDebug(2,"\n\t*** In "+ myName + " (" + version +") ***")
+	wfDebug(4,"\n\t*** In "+ myName + " (" + version +") ***")
 
 	if (typeof colColumnName === 'undefined') { colColumnName="college";}
 	if (typeof deptColumnName === 'undefined') { deptColumnName="department";}
 	if (typeof subjColumnName === 'undefined') { subjColumnName="subject";}
 
-	wfDebug(2,"\t\tlookupType: " + lookupType + ", \tgivenType: " + givenType +
+	wfDebug(4,"\t\tlookupType: " + lookupType + ", \tgivenType: " + givenType +
 		", \tgivenData1: " + givenData1 + ", \tgivenData2: " + givenData2 + ", \texceptData: " + exceptData +
 		"\n\t\tcolColumnName: " + colColumnName + ", \tdeptColumnName: " + deptColumnName +
 		", \tsubjColumnName: " + subjColumnName);
@@ -605,9 +605,9 @@ function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colCol
 		}
 
 	// Run query
-		wfDump(3,["\tsqlStmt;"+sqlStmt,"\tsqlParms;"+sqlParms.toSource()])
+		wfDump(4,["\tsqlStmt;"+sqlStmt,"\tsqlParms;"+sqlParms.toSource()])
 		resultSet=dbquery("cimcourses",sqlStmt,sqlParms);
-		wfDump(2,["\tresultSet;"+resultSet.toSource()])
+		wfDump(4,["\tresultSet;"+resultSet.toSource()])
 
     return resultSet;
 } //LookupCollegeCode
