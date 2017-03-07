@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.8.72 # -- dscudiero -- 03/06/2017 @ 12:06:04.97
+version=2.8.73 # -- dscudiero -- 03/07/2017 @ 12:42:48.62
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -262,8 +262,10 @@ Hello
 ## Get update comment
 	unset updateComment
 	echo
+	Prompt jalotTask "Please enter the jalot task number:" "*optional*"
 	Msg2 "Please enter the business reason for making this update:"
 	Prompt updateComment "^" "*any*"
+	[[ -n $jalotTask ]] && updateComment="(Task:$jalotTask) $updateComment"
 
 ## Verify continue
 	unset verifyArgs
@@ -448,3 +450,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## Tue Feb 14 12:29:28 CST 2017 - dscudiero - Tweaked messaging
 ## Mon Feb 20 09:26:45 CST 2017 - dscudiero - Do not clean up source directories if pvt or dev
 ## Mon Mar  6 12:07:10 CST 2017 - dscudiero - added update comment for the log
+## Tue Mar  7 14:45:49 CST 2017 - dscudiero - add jalot task to the update comment
