@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.2.16 # -- dscudiero -- 12/05/2016 @  7:19:12.23
+version=1.2.17 # -- dscudiero -- 03/07/2017 @ 14:34:34.04
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
@@ -27,8 +27,6 @@ myName="courseleafFeature-$feature"
 minCgiVer=9.2.61
 unset changesMade
 
-dump srcDir tgtDir
-
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
@@ -41,7 +39,6 @@ srcDir=$skeletonRoot/release
 feature=$(echo $myName | cut -d'.' -f1)
 changeLogRecs+=("Feature: $feature")
 
-dump -p srcDir tgtDir
 #==================================================================================================
 # Main
 #==================================================================================================
@@ -293,4 +290,4 @@ return  ## We are called as a subprocess, just return to our parent
 
 #==================================================================================================
 ## Change Log
-#==================================================================================================
+#==================================================================================================## Tue Mar  7 14:44:52 CST 2017 - dscudiero - Update description
