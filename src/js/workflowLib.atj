@@ -1,5 +1,5 @@
 //======================================================================================================================
-// version:1.6.91 // -- dscudiero -- 02/28/2017 @ 13:57:08.46
+wfLibVersion="1.6.98" // -- dscudiero -- 03/07/2017 @ 10:39:26.79
 //======================================================================================================================
 // Common wf functions and helper functions to support workflow
 //======================================================================================================================
@@ -510,7 +510,6 @@ wffuncs.Related = function(inval, wfrule, args) {
 		}); //outTokens
 		// if debug envronent then add ending line in the workflow
 		if (wfEnvIsDev) retArray.push("*** End of  ' " + inval.toLowerCase().replace('optional','') + " ' output ***");
-Here(99)
 
 	return retArray;
 
@@ -1179,6 +1178,24 @@ wffuncs.WhatsChanged = function(inval, wfrule, args) {
 	WhatsChangedFirstRun = false;
 	return false;
 }; //wffuncs.WhatsChanged
+
+//==================================================================================================
+// Helper function to output tcfdata values in source() format
+// runs as a wforder directive
+// 		wfrules:wfDumpVars|function|wfDumpVars|
+// 		wforder:wfDumpVars cl_subject,other_depts,sponsors
+// 03/08/2017 -- dgs -- New
+//==================================================================================================
+wffuncs.wfDumpVars = function(varList) {
+	var varArray=varList.split(" ");
+	varArray=varArray[1].split(",");
+	print_debug("\n")
+	varArray.forEach(function(a) {
+		print_debug(a + " = " + eval("tcfdata."+a).toSource() + "\n");
+	});
+	print_debug("\n")
+	return false;
+}; //wffuncs.wfDumpVars
 
 //==================================================================================================
 // END
