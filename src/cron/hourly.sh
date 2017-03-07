@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.114 # -- dscudiero -- 02/24/2017 @  9:38:49.86
+version=2.1.115 # -- dscudiero -- 03/07/2017 @  7:32:27.40
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -30,7 +30,7 @@ function SyncInternalDb {
 	srcDir=$clientsTransactionalDb
 	tgtDir=$internalContactsDbShadow
 	SetFileExpansion 'on'
-	rsync -aq $srcDir/* $tgtDir 2>&1
+	rsync -aq $srcDir/* $tgtDir > /dev/null 2>&1
 	chmod 770 $tgtDir
 	chmod 770 $tgtDir/*
 	touch $tgtDir/.syncDate
@@ -241,3 +241,4 @@ return 0
 ## Tue Feb 21 13:31:38 CST 2017 - dscudiero - Fix query checking for the sites table
 ## Wed Feb 22 15:22:49 CST 2017 - dscudiero - Only run perftest on even numered hours
 ## Fri Feb 24 09:39:09 CST 2017 - dscudiero - Fix a problem checking if the hour was an even hour
+## Tue Mar  7 07:33:11 CST 2017 - dscudiero - Ignore messages from rsync for SyncInternalDb
