@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.22 # -- dscudiero -- 12/02/2016 @ 16:43:08.03
+version=1.0.25 # -- dscudiero -- 03/07/2017 @ 14:32:06.01
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
@@ -9,7 +9,7 @@ version=1.0.22 # -- dscudiero -- 12/02/2016 @ 16:43:08.03
 # Configure Custom emails on a Courseleaf site
 #==================================================================================================
 originalArgStr="$*"
-scriptDescription="Install Custom Workflow Emails (wfemail)"
+scriptDescription="Install System Refresh tool on the CourseLeaf console"
 TrapSigs 'on'
 parentScript=$(cut -d'.' -f1 <<< $(basename ${BASH_SOURCE[0]}))
 
@@ -75,4 +75,4 @@ return  ## We are called as a subprocess, just return to our parent
 
 #==================================================================================================
 ## Change Log
-#==================================================================================================
+#==================================================================================================## Tue Mar  7 14:44:41 CST 2017 - dscudiero - Update description
