@@ -110,34 +110,31 @@ wffuncs.ProposalState = function(inval, wfrule, args) {
 //=================================================================================================
 wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 	var myName=wfrule.attrname;
-	wfDebug("\n*** In "+ myName + " called as '" + wfrule.searchfor + "', Step: '" + inval +"' ***");
+	wfDebug("\n*** In " + myName + " called as '" + wfrule.searchfor + "', Step: '" + inval + "' ***");
 
 	var retArray=[];
 	var reqType=wfrule.searchfor.toLowerCase();
 
-	//Try block encapsulated main function
-	 try {
-		// Initial Checks
-			InitialChecks(["wfrule","college","department"],args)
-		// Value Checks
-			if (tcfdata.college_prog[0].code != "DN")
-		 		throw "*** Failed college_prog.code is not 'DN' check";
-		 	if (tcfdata.acad_level[0].code != "GR")
-		 		throw "*** Failed tcfdata.acad_level is not 'GR' check";
-
-		} //Try block
+	//Initial Checks
+	try {
+		InitialChecks(["wfrule","college","department"],args)
+		if (tcfdata.college_prog[0].code != "DN")
+	 		throw "*** Failed college_prog.code is not 'DN' check";
+	 	if (tcfdata.acad_level[0].code != "GR")
+	 		throw "*** Failed tcfdata.acad_level is not 'GR' check";
+	} //try
 	catch(err) { print_debug('\t' + myName + ": " + err + "\n") ; return false; }
 
-		// Main
+	// Main
+ 		var allowStep=false;
 
-
-		// Return results
-			if (haveDebug) { retArray.forEach(function(step) { Dump('\tReturning step/workflow: ',step) }); }
-			if (retArray.length > 0) {
-				return retArray
-			} else {
-				return false;
-			}
+	// Return results
+		if(allowStep) {
+			wfDebug(0,"\t*** Allowing step")
+			return [inval.replace(wfrule.ifregex,'')];
+		}
+		wfDebug(0,"\t*** Skipping step")
+		return false
 
 } //xxxxxxxx
 */
