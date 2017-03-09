@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.207 # -- dscudiero -- 02/20/2017 @  8:00:04.52
+version=1.21.208 # -- dscudiero -- 03/09/2017 @  7:50:10.55
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -318,7 +318,7 @@ case "$hostName" in
 
 		## Reports
 			froggerQa='sjones@leepfrog.com,mbruening@leepfrog.com,jlindeman@leepfrog.com'
-			Call 'reports' "qaStatusShort -quiet -email "dscudiero@leepfrog.com,$froggerQa" $scriptArgs"
+			Call 'reports' "qaStatusShort -quiet -email "$froggerQa" $scriptArgs"
 			## Build a list of clients and contact info for Shelia
 			[[ $runClientListReport == true ]] && Call 'reports' "clientList -quiet -email 'dscudiero@leepfrog.com,sfrickson@leepfrog.com' $scriptArgs"
 
@@ -429,3 +429,4 @@ return 0
 ## Thu Feb 16 08:02:03 CST 2017 - dscudiero - Fix bug with buildEmployeeTable
 ## Fri Feb 17 06:59:08 CST 2017 - dscudiero - truncate the employee table before loading
 ## Mon Feb 20 08:00:56 CST 2017 - dscudiero - switch qaStatus report to qaStatusReportShort
+## Thu Mar  9 07:50:47 CST 2017 - dscudiero - Take my userid out of the qa report email list
