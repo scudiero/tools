@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.6.98"; // -- dscudiero -- 03/07/2017 @ 10:35:10.15
+wfLibVersion="1.7.0"; // -- dscudiero -- 03/07/2017 @ 10:35:10.15
 //======================================================================================================================
 // Common wf functions and helper functions to support workflow
 //======================================================================================================================
@@ -95,7 +95,7 @@ if (typeof wfLibLoaded === "undefined") {
 // 11/15/16	- dgs - Re-factored to allow for the specification of the core proposal variable names
 //======================================================================================================================
 wffuncs.Related = function(inval, wfrule, args) {
-	var version='4.9.2'; var myName=wfrule.attrname
+	var version='4.9.5'; var myName=wfrule.attrname
 	wfDebug(3,'\n*** In '+ myName + " (" + version + ") called as '" + args.context + " / " + wfrule.searchfor + "' ***");
 	wfDump(3,["Full Step text;"+inval]);
 
@@ -431,6 +431,7 @@ wffuncs.Related = function(inval, wfrule, args) {
  			}//switch
 
 			//Process resultSet data (if any), set output array data
+
 			if (resultSet) {
 				resultSet.forEach(function(result) {
 					if (result.token != "") {
@@ -441,6 +442,8 @@ wffuncs.Related = function(inval, wfrule, args) {
 					}
 				});
 			} //(resultSet)
+
+
 
 		}); //refsArray.forEach(function(ref)
 		if (searchStr === "") {
@@ -479,22 +482,26 @@ wffuncs.Related = function(inval, wfrule, args) {
 			if (!tokensDone[token.data]) {
 				// Do we have a full step name from the workflow or do we pull the step data from the config file
 				if (inval == wfrule.searchfor) {
-					// Get steps from the config file
-					steps.forEach(function(step) {
-						step=step.replace(searchStr,token.data);
-						// Add fyi or fyiall if notify mode or if this is eco system reference and ecoSystemDataFyi is not null
-						if (ecoSystemDataFyi != '' && token.source.substr(0,3) === 'eco') {
-							if (step.indexOf("fyi") < 0) step=step + ' ' + ecoSystemDataFyi;
-						} else if (notifyMode) {
-							if (step.indexOf(' fyi') < 0) {
-								step=step + ' fyiall';
-							} else if (step.indexOf(' fyi') >= 0) {
-								step=step.replace(' fyi',' fyiall');
+					if (steps.length > 0) {
+						// Get steps from the config file
+						steps.forEach(function(step) {
+							step=step.replace(searchStr,token.data);
+							// Add fyi or fyiall if notify mode or if this is eco system reference and ecoSystemDataFyi is not null
+							if (ecoSystemDataFyi != '' && token.source.substr(0,3) === 'eco') {
+								if (step.indexOf("fyi") < 0) step=step + ' ' + ecoSystemDataFyi;
+							} else if (notifyMode) {
+								if (step.indexOf(' fyi') < 0) {
+									step=step + ' fyiall';
+								} else if (step.indexOf(' fyi') >= 0) {
+									step=step.replace(' fyi',' fyiall');
+								}
 							}
-						}
-						retArray.push(step.trim());
-						wfDebug(3,"\t\t" + retArray[retArray.length-1]);
-					});	//steps
+							retArray.push(step.trim());
+							wfDebug(3,"\t\t" + retArray[retArray.length-1]);
+						});	//steps
+					} else {
+						wfDebug(0,"\t" + myName + ": *** Error *** 'Bare' call to " + myName + " and no steps were defined");
+					}
 				} else {
 					// We have a workflow step so substitute the data into the step name
 					step=inval
@@ -510,7 +517,6 @@ wffuncs.Related = function(inval, wfrule, args) {
 		}); //outTokens
 		// if debug envronent then add ending line in the workflow
 		if (wfEnvIsDev) retArray.push("*** End of  ' " + inval.toLowerCase().replace('optional','') + " ' output ***");
-
 	return retArray;
 
 }; //Related
@@ -808,7 +814,7 @@ function GetEcoSystemData(parentCode,proposalDept,ecoSystemTypeStr) {
 			}
 		}); //resultSet
 
-		wfDebug("\n\tFound " + refsArray.length.toString() + " distinct references found from the Eco System")
+		wfDebug(4,"\n\tFound " + refsArray.length.toString() + " distinct references found from the Eco System")
 		refsArray.forEach(function(ref) { wfDump(['\tref;'+ref.toSource()]); });
 
 	return refsArray;
