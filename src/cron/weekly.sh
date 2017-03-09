@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.20 # -- dscudiero -- 02/10/2017 @ 14:58:31.84
+version=2.1.21 # -- dscudiero -- 03/09/2017 @  7:52:34.95
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -30,7 +30,7 @@ case "$hostName" in
 			Call 'reports' "publishing -email 'froggersupport@leepfrog.com' $scriptArgs"
 
 			Msg2 "\n Client 2 Day Summaries Report..."
-			Call 'reports' "client2DaySummaries -role 'support' -email 'dscudiero@leepfrog.com' $scriptArg"
+			Call 'reports' "client2DaySummaries -role 'support' -email 'froggersupport@leepfrog.com' $scriptArg"
 
 			Msg2 "\n Tools Usage Report..."
 			Call 'reports' "toolsUsage -email 'dscudiero@leepfrog.com' $scriptArgs"
@@ -57,3 +57,4 @@ return 0
 ## Thu Jan  5 14:50:18 CST 2017 - dscudiero - Switch to use RunSql2
 ## Tue Jan 17 07:42:31 CST 2017 - dscudiero - comment out some reports
 ## Fri Feb 10 14:58:55 CST 2017 - dscudiero - add 2 day summary reports back
+## Thu Mar  9 07:52:54 CST 2017 - dscudiero - send the 2 day summary report to froggersupport
