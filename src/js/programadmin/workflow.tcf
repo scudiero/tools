@@ -1,10 +1,36 @@
 //======================================================================================================================
 // ??/??/16-- dgs -- initial
-// version:1.0.6 // -- dscudiero -- 02/10/2017 @ 12:52:22.31
+// version:1.0.7 // -- dscudiero -- 03/10/2017 @ 16:25:47.16
 //======================================================================================================================
-localsteps:Program Workflow Management|groups|workflow|attributes=isUndergraduate[Is Undergraduate],isGraduate[Is Graduate],isNew[New Program],isEdit[Program Change],isDelete[Program Delete],fyi[FYI Only],fyiall[FYI All],todo[ToDo Item],optional[If Role Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
+localsteps:Program Workflow Management|
+	groups|
+	workflow|
+	attributes=isUndergraduate[Is Undergraduate],
+	isGraduate[Is Graduate],
+	isNew[New Program],
+	isEdit[Program Change],
+	isDelete[Program Delete],
+	fyi[FYI Only],
+	fyiall[FYI All],
+	todo[ToDo Item],
+	optional[If Role Exists];
+	buttonlabel=Save;lookuptypes=user,
+	role,
+	workflow;memberlabel=Step;
+
 
 template:custom
 pageflags:autoapprove
 
-workflow:standard|START,College: Col,Colleges: Cols,Department: Dept,Departments: Depts,Academic level: AcadLevel,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is New] isNew,[Is Edit/Change] isEdit,[Is Delete] isDelete,END
+
+workflow:standard|
+	START,
+	College: Col,
+	Department: Dept,
+	Academic level: AcadLevel,
+	[Is Undergraduate] isUndergraduate,
+	[Is Graduate] isGraduate,
+	[Is New] isNew,
+	[Is Edit/Change] isEdit,
+	[Is Delete] isDelete,
+	END
