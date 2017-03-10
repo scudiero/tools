@@ -1,5 +1,5 @@
 //==================================================================================================
-// version:1.0.4 // -- dscudiero -- 02/10/2017 @ 12:53:11.59
+// version:1.0.5 // -- dscudiero -- 03/10/2017 @ 10:46:54.82
 //==================================================================================================
 // ??/??/17 -- dgs -- initial -- ??
 //==================================================================================================
@@ -10,4 +10,4 @@ pageflags:autoapprove
 
 workflow:standard|Subj Approver,Dept Chair,Col Dean,<SIS>
 
-workflow:standard|START,College: Col,Colleges: Cols,Department: Dept,Departments: Depts,Subject: Subj,Subjects: Subjs,[Is New] isNew,[Not New] isNotNew,[Course Change] isEdit,[Not Course Change] isNotEdit,[Course Delete] isDelete,[Not Course Delete] isNotDelete,END
+workflow:standard|START,College: 'Col',Colleges: 'Cols',Department: 'Dept',Departments: 'Depts',Subject: 'Subj',Subjects: 'Subjs',[Is New] isNew,[Not New] isNotNew,[Course Change] isEdit,[Not Course Change] isNotEdit,[Course Delete] isDelete,[Not Course Delete] isNotDelete,END
