@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.208 # -- dscudiero -- 03/09/2017 @  7:50:10.55
+version=1.21.209 # -- dscudiero -- 03/10/2017 @  7:43:25.21
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -321,6 +321,7 @@ case "$hostName" in
 			Call 'reports' "qaStatusShort -quiet -email "$froggerQa" $scriptArgs"
 			## Build a list of clients and contact info for Shelia
 			[[ $runClientListReport == true ]] && Call 'reports' "clientList -quiet -email 'dscudiero@leepfrog.com,sfrickson@leepfrog.com' $scriptArgs"
+			[[ $(date +%d -d tomorrow) == '01' ]] && Call 'reports' "clientTimezone -quiet -email 'dscudiero@leepfrog.com,jlindeman@leepfrog.com' $scriptArgs"
 
 		## On the last day of the month roll-up the log files
 		  	if [[ $(date +"%d") == $(date -d "$(date +"%m")/1 + 1 month - 1 day" "+%d") ]]; then
@@ -430,3 +431,4 @@ return 0
 ## Fri Feb 17 06:59:08 CST 2017 - dscudiero - truncate the employee table before loading
 ## Mon Feb 20 08:00:56 CST 2017 - dscudiero - switch qaStatus report to qaStatusReportShort
 ## Thu Mar  9 07:50:47 CST 2017 - dscudiero - Take my userid out of the qa report email list
+## Fri Mar 10 10:31:38 CST 2017 - dscudiero - added call to clientTimezone report
