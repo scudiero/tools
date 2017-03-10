@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.18 # -- dscudiero -- 12/14/2016 @ 11:26:08.08
+version=1.0.19 # -- dscudiero -- 03/10/2017 @ 12:03:45.69
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -115,7 +115,7 @@ fi
 	verifyArgs+=("Env:$(TitleCase $env)")
 	[[ $wfType == 'proposal' ]] && verifyArgs+=("CIMs:$cimStr") && verifyArgs+=("Proposal:$proposal ($pageTitle)")
 	[[ $wfType == 'page' ]] && verifyArgs+=("Page:$page")
-	VerifyContinue "You are asking to generate a workflow spreadsheet for"
+	VerifyContinue "You are asking to generate a workflow report for"
 
 	myData="Client: '$client', Env: '$env', Cims: '$cimStr' "
 	[[ $logInDb != false && $myLogRecordIdx != "" ]] && dbLog 'data' $myLogRecordIdx "$myData"
@@ -191,3 +191,4 @@ Goodbye 0 #'alert'
 ## Thu May  5 11:38:49 CDT 2016 - dscudiero - Added checking the time/date of the tso file to the workflow file
 ## Tue Jul 12 14:22:31 CDT 2016 - dscudiero - Fix cim/cat prompt
 ## Thu Jul 14 14:04:37 CDT 2016 - dscudiero - Add page title to the verifyContinue display for cim proposals
+## Fri Mar 10 16:48:28 CST 2017 - dscudiero - Updated verify messages
