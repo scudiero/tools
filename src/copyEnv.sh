@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=4.10.76 # -- dscudiero -- 02/23/2017 @ 10:07:22.72
+version=4.10.77 # -- dscudiero -- 03/10/2017 @  9:04:01.60
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -195,7 +195,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 		echo
 		unset ans
 		WarningMsg "Target site ($tgtDir) already existes."
-		Prompt ans "Do you wish to $(ColorK 'overwrite') the existing site (Yes) or $(ColorK 'refresh') files in the existing sites site (No) ?" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
+		Prompt ans "Do you wish to $(ColorK 'overwrite') the existing site (Yes) or $(ColorK 'refresh') files in the existing sites site (No) ?" 'Yes No' 'Yes' '5'; ans=$(Lower ${ans:0:1})
 		[[ $ans == 'y' ]] && cloneMode='Replace' || cloneMode='Refresh'
 	fi
 
@@ -519,3 +519,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## Wed Feb 22 15:35:25 CST 2017 - dscudiero - Tweak ending message if asSite is active
 ## Thu Feb 23 09:13:18 CST 2017 - dscudiero - Added ability for the user to exclude additional directories
 ## Thu Feb 23 10:08:24 CST 2017 - dscudiero - Fixed spelling error and tweaked messaging
+## Fri Mar 10 10:31:17 CST 2017 - dscudiero - Added a timeout value to the exclued other prompt
