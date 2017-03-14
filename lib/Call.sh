@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.0.75" # -- dscudiero -- 02/14/2017 @ 11:37:52.79
+# version="2.0.76" # -- dscudiero -- 03/14/2017 @ 13:17:20.40
 #=======================================================================================================================
 # Generic resolve file and call
 # Call scriptName ["$scriptArgs"]
@@ -121,7 +121,6 @@ function Call {
 					;;
 				*)
 					cmdStr="source $executeFile $scriptArgs"
-					rc=$?
 			esac
 
 			[[ $verboseLevel -ge 2 ]] && echo && echo "$cmdStr" && echo && Pause
@@ -131,8 +130,10 @@ function Call {
 			#[[ $utility == true ]] && ($cmdStr) 2>&1 || ($cmdStr) 2>&1 | tee -a $logFile
 			if [[ $fork == true ]]; then
 				($cmdStr) 2>&1 &
+				rc=$?
 			else
 				($cmdStr) 2>&1
+				rc=$?
 			fi
 			[[ -n $semaphoreId ]] && Semaphore 'clear' $semaphoreId
 			myName="$myNameSave" ; myPath="$myPathSave" ;
@@ -153,3 +154,4 @@ export -f Call
 ## Thu Jan  5 07:59:46 CST 2017 - dscudiero - Added 'fork' directive
 ## Fri Jan  6 08:03:52 CST 2017 - dscudiero - Also parse for 'fork' if a full file name is passed in
 ## Tue Feb 14 11:38:03 CST 2017 - dscudiero - Add semaphore processing
+## Tue Mar 14 13:20:01 CDT 2017 - dscudiero - return the condition code after the call
