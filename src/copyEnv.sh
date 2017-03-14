@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=4.10.77 # -- dscudiero -- 03/10/2017 @  9:04:01.60
+version=4.10.78 # -- dscudiero -- 03/14/2017 @ 14:29:48.90
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -203,7 +203,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 ## See if there are any additional directories the user wants to skip
 if [[ $verify == true ]]; then
 	echo
-	unset ans; Prompt ans "Do you wish to exclude additional directories/files from the copy operation" 'No,Yes' 'No'; ans="$(Lower "${ans:0:1}")"
+	unset ans; Prompt ans "Do you wish to exclude additional directories/files from the copy operation" 'No,Yes' 'No' '5'; ans="$(Lower "${ans:0:1}")"
 	if [[ $ans == 'y' ]]; then
 		SetFileExpansion 'off'
 		Msg2 "^Please specify the directories/files you wish to exclude, use '*' as a the wild card,"
@@ -520,3 +520,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## Thu Feb 23 09:13:18 CST 2017 - dscudiero - Added ability for the user to exclude additional directories
 ## Thu Feb 23 10:08:24 CST 2017 - dscudiero - Fixed spelling error and tweaked messaging
 ## Fri Mar 10 10:31:17 CST 2017 - dscudiero - Added a timeout value to the exclued other prompt
+## Tue Mar 14 14:48:56 CDT 2017 - dscudiero - add a timer on the exclude others prompt
