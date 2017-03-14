@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.112 # -- dscudiero -- 03/06/2017 @ 15:54:06.72
+# version=2.0.115 # -- dscudiero -- 03/13/2017 @ 15:06:44.41
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -231,7 +231,7 @@ function Init {
 				if [[ ${#resultSet[@]} -gt 0 ]]; then
 					## Remove the extra vanity products from the validProducts list
 					for prod in $(tr ',' ' ' <<< ${resultSet[0]}); do
-						[[ $(Contains ",$skipProducts," ",$prod,") == true ]] && continue
+						[[ ${prod:0:3} == 'cat' || ${prod:0:3} == 'cim' ]] && [[ $prod != ${prod:0:3} ]] && continue
 						validProducts="$validProducts,$prod"
 					done
 					[[ ${validProducts:0:1} == ',' ]] && validProducts=${validProducts:1}
@@ -331,3 +331,4 @@ export -f Init
 ## Wed Jan 25 12:44:31 CST 2017 - dscudiero - Fix issue setting srcEnv and tgtEnv when abbreviated values were passed in on the command line
 ## Tue Feb  7 15:15:43 CST 2017 - dscudiero - x
 ## Mon Mar  6 15:55:02 CST 2017 - dscudiero - Tweak product parsing
+## Tue Mar 14 09:31:45 CDT 2017 - dscudiero - v
