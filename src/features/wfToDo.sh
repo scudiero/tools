@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.60 # -- dscudiero -- 03/14/2017 @ 13:05:43.76
+version=1.0.61 # -- dscudiero -- 03/14/2017 @ 13:10:13.90
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
@@ -65,6 +65,8 @@ minClVer='3.5.9'
 		if [[ $ans == 'y' ]]; then
 			sed -i s'/navlinks:Administration|/navlinks:CourseLeaf|/g' "$editFile"
 			sed -i s'/^sectionlinks:Administration|/sectionlinks:CourseLeaf|/g' "$editFile"
+		else
+			Terminate "Sorry, cannot edit the CourseLeaf console definition file without updates above"
 		fi
 	fi
 
@@ -110,3 +112,4 @@ return  ## We are called as a subprocess, just return to our parent
 #==================================================================================================
 ## Change Log
 #==================================================================================================
+## Tue Mar 14 13:21:18 CDT 2017 - dscudiero - Check to make sure the user requests that the console definitions are updated to 'CourseLeaf'
