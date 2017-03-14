@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.2.17 # -- dscudiero -- 03/07/2017 @ 14:34:34.04
+version=1.2.18 # -- dscudiero -- 03/14/2017 @ 10:55:46.22
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
@@ -9,6 +9,8 @@ version=1.2.17 # -- dscudiero -- 03/07/2017 @ 14:34:34.04
 # Configure Custom emails on a Courseleaf site
 #==================================================================================================
 Import GetCims
+currentScript=$(cut -d'.' -f1 <<< $(basename ${BASH_SOURCE[0]}))
+parentScript=$(cut -d'.' -f1 <<< $(basename ${BASH_SOURCE[1]}))
 originalArgStr="$*"
 scriptDescription="Install Custom Workflow Emails (wfemail)"
 TrapSigs 'on'
@@ -291,3 +293,4 @@ return  ## We are called as a subprocess, just return to our parent
 #==================================================================================================
 ## Change Log
 #==================================================================================================## Tue Mar  7 14:44:52 CST 2017 - dscudiero - Update description
+## Tue Mar 14 12:18:47 CDT 2017 - dscudiero - Tweak messaging
