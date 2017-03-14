@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.5" # -- dscudiero -- 01/04/2017 @ 13:41:15.29
+# version="2.0.30" # -- dscudiero -- 03/14/2017 @  9:12:40.93
 #===================================================================================================
 # Insert a new line into the courseleaf console file
 # EditCourseleafConsole <action> <targetFile> <string>
@@ -19,6 +19,8 @@ function EditCourseleafConsole {
 	local tgtFile="$2"
 	local string="$3"
 
+	Import 'BackupCourseleafFile InsertLineInFile CopyFileWithCheck StringFunctions'
+
 	[[ $action == '' ]] && echo "($FUNCNAME) Required argument 'action' not passed to function" && return 0
 	[[ $tgtFile == '' || ! -w $tgtFile ]] && echo "($FUNCNAME) Could not read/write tgtFile: '$tgtFile'" && return 0
 	[[ $string == '' ]] && echo "($FUNCNAME) Required argument 'string' not passed to function" && return 0
@@ -26,15 +28,16 @@ function EditCourseleafConsole {
 	local grepStr insertRec name navlinkName
 
 	if [[ $(Contains "$string" 'navlinks:') == true ]]; then
-		insertRec="$string"
+		insertRec="$(Trim "$string")"
 		name=$(echo $string | cut -d'|' -f2)
 	else
 		name="$string"
 		grepStr="$(ProtectedCall "grep \"|$name|\" $skelFile")"
 		if [[ $grepStr != '' ]]; then
-			insertRec="$grepStr"
+			insertRec="$(Trim "$grepStr")"
+			[[ ${insertRec:0:2} == '//' ]] && insertRec=${insertRec:2}
 		else
-			echo "($FUNCNAME) Could not locate navlinks record with 'name' of '|$name|'"
+			echo "($FUNCNAME) Could not locate a navlinks record with 'name' of '|$name|' in the skeleton"
 			return 0
 		fi
 	fi
@@ -61,9 +64,10 @@ function EditCourseleafConsole {
 		fi
 
 	## Scan skeleton looking for line:
-		unset foundLine afterLine insertMsg;
+		unset foundLine afterLine insertMsg
 		while read -r line; do
-			[[ "$line" == "$insertRec" ]] && foundLine=true && break
+			line=$(Trim "$line")
+			[[ "$line" == "$insertRec" || "$line" == "//$insertRec" ]] && foundLine=true && break
 			afterLine="$line"
 		done < "$skelFile"
 		dump -3 -l -t foundLine afterLine
@@ -74,17 +78,20 @@ function EditCourseleafConsole {
 			local verboseLevelSave=$verboseLevel
 			verboseLevel=0; insertMsg="$(InsertLineInFile "$insertRec" "$editFile" "$afterLine")"; verboseLevel=$verboseLevelSave
 			dump -3 -l -t insertMsg
-			[[ $foundLine == true && $insertMsg != '' ]] && [[ $(Contains "$insertMsg" 'Could not locate target string/line' ) != true ]] && echo "$insertMsg" return 0
-			[[ $insertMsg == true ]] && echo true && return 0
+			[[ $insertMsg == true ]] && echo true || echo "$insertMsg"
+			return 0
 		fi
-
 		## OK, we need to insert the line but cannot find the after record, so just add to the end of the group
 			navlinkName=$(echo $insertRec | cut -d'|' -f1)
 			afterLine="$(ProtectedCall "grep \"^$navlinkName\" $editFile | tail -1")"
-			verboseLevel=0; insertMsg=$(InsertLineInFile "$insertRec" "$editFile" "$afterLine"); verboseLevel=$verboseLevelSave
-			[[ $insertMsg != true ]] && echo "$FUNCNAME) Could not insert line:\n\t$insertRec\nMessages are:\n\t$insertMsg"
+			if [[ -z $afterLine ]]; then
+				insertMsg="($FUNCNAME) Could not insert line:\n\t$insertRec\nCould not locate suitable insert location"
+			else
+				verboseLevel=0; insertMsg=$(InsertLineInFile "$insertRec" "$editFile" "$afterLine"); verboseLevel=$verboseLevelSave
+				#[[ $insertMsg != true ]] && echo "($FUNCNAME) Could not insert line:\n\t$insertRec\nMessages are:\n\t$insertMsg" || echo true
+			fi
+			echo $insertMsg
 
-		echo true
 	return 0
 } #EditCourseleafConsole
 export -f EditCourseleafConsole
@@ -94,3 +101,4 @@ export -f EditCourseleafConsole
 #===================================================================================================
 
 ## Wed Jan  4 13:53:21 CST 2017 - dscudiero - General syncing of dev to prod
+## Tue Mar 14 09:31:40 CDT 2017 - dscudiero - Also look for commented lines in the skeleton
