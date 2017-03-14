@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.5.66 # -- dscudiero -- 03/07/2017 @ 14:35:49.18
+version=1.5.68 # -- dscudiero -- 03/14/2017 @ 13:19:34.97
 #==================================================================================================
 # Install a courseleaf feature on a client site
 #==================================================================================================
@@ -123,11 +123,8 @@ while [[ true == true ]]; do
 	## Call the feature script
 	[[ $env != '' ]] && sendEnv="-$env"
 	## Get the executable
-	Call "$feature" 'features'
-
-	# FindExecutable "$feature" 'full' 'Bash:sh' 'features' ## Sets variable executeFile
-	# ( source $executeFile ) ## Run helper in a sub shell to protect our variable values
-	installedFeatures="$installedFeatures,$feature"
+	Call "$feature" 'features'; rc=$?
+	[[ $rc -eq 0 ]] && installedFeatures="$installedFeatures,$feature"
 	unset feature
 done
 
@@ -153,3 +150,4 @@ Goodbye 0 #'alert'
 ## Thu Aug 25 09:28:30 CDT 2016 - dscudiero - Remove errant quit statement
 ## Tue Oct 18 13:42:26 CDT 2016 - dscudiero - use var to call feature file
 ## Tue Mar  7 14:45:27 CST 2017 - dscudiero - Fix parse of resultes from selectMenuNew after redo
+## Tue Mar 14 13:20:30 CDT 2017 - dscudiero - Check the return code from the install scripts before editing the installed features list
