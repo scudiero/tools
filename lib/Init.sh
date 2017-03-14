@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.115 # -- dscudiero -- 03/13/2017 @ 15:06:44.41
+# version=2.0.116 # -- dscudiero -- 03/14/2017 @ 10:34:14.47
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -304,7 +304,7 @@ function Init {
 	#===================================================================================================
 	## find CIMs
 	if [[ $getCims == true || $allCims == true ]] && [[ $getDirs == true ]] && [[ -z $cimStr ]]; then
-		[[ ${#cims} -eq 0 ]] && GetCims $siteDir
+		[[ ${#cims} -eq 0 ]] && GetCims "$siteDir" "/t"
 		[[ -z $cimStr ]] && cimStr=$(printf -- "%s, " "${cims[@]}") && cimStr=${cimStr:0:${#cimStr}-2}
 	fi
 
@@ -332,3 +332,4 @@ export -f Init
 ## Tue Feb  7 15:15:43 CST 2017 - dscudiero - x
 ## Mon Mar  6 15:55:02 CST 2017 - dscudiero - Tweak product parsing
 ## Tue Mar 14 09:31:45 CDT 2017 - dscudiero - v
+## Tue Mar 14 10:36:22 CDT 2017 - dscudiero - Add tab char to GetCims call
