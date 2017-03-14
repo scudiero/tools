@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.5" # -- dscudiero -- 01/19/2017 @  9:56:55.45
+# version="1.0.6" # -- dscudiero -- 03/14/2017 @ 12:17:32.80
 #===================================================================================================
 # Various string manipulation functions
 #===================================================================================================
@@ -85,6 +85,10 @@ function Indent {
 export -f Indent
 
 #===================================================================================================
+# Check if a string contains another string
+# 	string substring
+# returns true if found or false if not, returned via echo command
+#===================================================================================================
 function Contains {
 	local string="$1"
 	local substring="$2"
@@ -96,8 +100,45 @@ function Contains {
 export -f Contains
 
 #===================================================================================================
+# Compare two segmented version strings
+# i.e 1111.2222.3333
+# Called as
+# 	version1 operator version2
+# Where operator in {gt, ge, lt, le, eq}
+# returns true or false via echo command
+#===================================================================================================
+function CompareVersions {
+
+	local version1="$1"; shift || true
+	local compareOp="$1"; shift || true
+	local version2="$1"
+	local token1 token2 token3
+
+	token1=$(cut -d'.' -f1 <<< $version1); token1=${token1}00; token1=${token1:0:3}
+	token2=$(cut -d'.' -f2 <<< $version1); token2=${token2}00; token2=${token2:0:3}
+	token3=$(cut -d'.' -f3 <<< $version1)
+	version1="${token1}${token2}${token3}"
+
+	token1=$(cut -d'.' -f1 <<< $version2); token1=${token1}00; token1=${token1:0:3}
+	token2=$(cut -d'.' -f2 <<< $version2); token2=${token2}00; token2=${token2:0:3}
+	token3=$(cut -d'.' -f3 <<< $version2)
+	version2="${token1}${token2}${token3}"
+
+	#dump version1 compareOp version2
+	case "$compareOp" in
+		gt) [[ $version1 -gt $version2 ]] && echo true || echo false ;;
+		ge) [[ $version1 -ge $version2 ]] && echo true || echo false ;;
+		lt) [[ $version1 -lt $version2 ]] && echo true || echo false ;;
+		le) [[ $version1 -lt $version2 ]] && echo true || echo false ;;
+		*)  [[ $version1 -eq $version2 ]] && echo true || echo false ;;
+	esac
+	return 0
+}
+
+#===================================================================================================
 # Check-in Log
 #===================================================================================================
 ## Wed Jan 11 11:03:37 CST 2017 - dscudiero - Moved IsNumeric into file
 ## Wed Jan 11 11:15:52 CST 2017 - dscudiero - Moved Conains into this file
 ## Thu Jan 19 09:57:30 CST 2017 - dscudiero - Swithch to use printf since echo was absorbing leading -n and -e
+## Tue Mar 14 12:18:34 CDT 2017 - dscudiero - Added CompareVersions function
