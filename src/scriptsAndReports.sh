@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.67 # -- dscudiero -- 02/16/2017 @  8:20:15.25
+version=3.11.69 # -- dscudiero -- 03/14/2017 @ 14:42:42.65
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -108,14 +108,37 @@ function ExecScript {
 		done
 		[[ -n $scriptArgs ]] && scriptArgs="$scriptArgs $userArgs" || scriptArgs="$userArgs"
 
-		## Parse the exec string for overrides, <scriptName> <scriptArgs>
+	## Parse the exec string for overrides, <scriptName> <scriptArgs>
 		if [[ $exec != '' ]]; then
 			name=$(cut -d' ' -f1 <<< "$exec")
 			local tmpStr="$(cut -d' ' -f2- <<< "$exec")"
 			[[ -n $tmpStr ]] && scriptArgs="$tmpStr $scriptArgs"
 		fi
 
-	Call "$name" 'bash:sh' "$lib" "$scriptArgs"
+	## Override the log file
+		logFileSave="$logFile"
+		logFile=/dev/null
+		if [[ $noLog != true ]]; then
+			logFile=$logsRoot$name/$userName--$backupSuffix.log
+			if [[ ! -d $(dirname $logFile) ]]; then
+				mkdir -p "$(dirname $logFile)"
+				chown -R "$userName:leepfrog" "$(dirname $logFile)"
+				chmod -R ug+rwx "$(dirname $logFile)"
+			fi
+			touch "$logFile"
+			chmod ug+rwx "$logFile"
+			Msg2 "$(PadChar)" > $logFile
+			[[ -n $scriptArgs ]] && scriptArgsTxt=" $scriptArgs" || unset scriptArgsTxt
+			Msg2 "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}" >> $logFile
+			Msg2 "$(PadChar)" >> $logFile
+			Msg2 >> $logFile
+			$GD -e "\t logFile: $logFile"
+		fi
+
+	## Call the script
+		Call "$name" 'bash:sh' "$lib" "$scriptArgs" 2>&1 | tee -a $logFile; rc=$?
+		logFile="$logFileSave"
+
 	return $?
 } #ExecScript
 
@@ -414,3 +437,4 @@ Goodbye 0
 ## Wed Jan 25 10:36:03 CST 2017 - dscudiero - Fix spelling errors in messaging
 ## Thu Feb 16 08:10:58 CST 2017 - dscudiero - Switch to use the scriptID as the ordinal numbers
 ## Thu Feb 16 08:21:54 CST 2017 - dscudiero - Switch to use keyId inlookups
+## Tue Mar 14 14:49:25 CDT 2017 - dscudiero - Fix problem where the correct logfile was not being written out
