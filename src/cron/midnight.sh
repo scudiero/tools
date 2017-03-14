@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.209 # -- dscudiero -- 03/10/2017 @  7:43:25.21
+version=1.21.210 # -- dscudiero -- 03/14/2017 @ 13:56:30.29
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -238,10 +238,9 @@ case "$hostName" in
 			runClientListReport=$(CheckClientCount)
 
 		## Copy the contacts db from internal
-			Msg2 "Copying contacts.sqlite files to $sqliteDbs/contacts.sqlite..."
-			cd $clientsTransactionalDb
-			cp $clientsTransactionalDb/contacts.sqlite $sqliteDbs/contacts.sqlite
-			touch $sqliteDbs/contacts.syncDate
+			Msg2 "Copying contacts.sqlite files to $contactsSqliteFile..."
+			cp $clientsTransactionalDb/contacts.sqlite $contactsSqliteFile
+			touch $(dirname $contactsSqliteFile)/contacts.syncDate
 			Msg2 "^...done"
 
 		## Build the clientInfoTable
@@ -432,3 +431,4 @@ return 0
 ## Mon Feb 20 08:00:56 CST 2017 - dscudiero - switch qaStatus report to qaStatusReportShort
 ## Thu Mar  9 07:50:47 CST 2017 - dscudiero - Take my userid out of the qa report email list
 ## Fri Mar 10 10:31:38 CST 2017 - dscudiero - added call to clientTimezone report
+## Tue Mar 14 13:56:52 CDT 2017 - dscudiero - Change where the contacts db shadow is written
