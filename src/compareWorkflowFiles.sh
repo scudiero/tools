@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.14 # -- dscudiero -- 01/12/2017 @ 12:59:19.16
+version=1.2.38 # -- dscudiero -- 03/15/2017 @  9:59:22.54
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -32,24 +32,20 @@ scriptDescription="Compare workflow files"
 #==================================================================================================
 # Declare local variables and constants
 #==================================================================================================
-wfFiles="$scriptData1"
-## Get the list of files to work with
-	if [[ $wfFiles == '' ]]; then
-		sqlStmt="select scriptData1 from $scriptsTable where name=\"copyWorkflow\""
-		RunSql2 $sqlStmt
-		[[ ${#resultSet[@]} -eq 0 ]] && Msg2 $T "Could not retrieve workflow files data (scriptData1) from the $scriptsTable."
-		wfFiles="${resultSet[0]}"
-	fi
+## Get the files to act on from the database
+GetDefaultsData 'copyWorkflow'
+	unset requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles ifThenDelete
+	[[ $scriptData1 == '' ]] && Msg2 $T "'scriptData1 (requiredInstanceFiles)' is null, please check script configuration data"
+	requiredInstanceFiles="$(cut -d':' -f2- <<< $scriptData1)"
 
-systemWfFiles="$scriptData2"
-## Get the list of files to work with
-	if [[ $systemWfFiles == '' ]]; then
-		sqlStmt="select scriptData2 from $scriptsTable where name=\"copyWorkflow\""
-		RunSql2 $sqlStmt
-		[[ ${#resultSet[@]} -eq 0 ]] && Msg2 $T "Could not retrieve workflow files data (scriptData2) from the $scriptsTable."
-		systemWfFiles="${resultSet[0]}"
-	fi
-#dump wfFiles systemWfFiles
+	[[ $scriptData2 == '' ]] && Msg2 $T "'scriptData2 (optionalInstanceFiles)' is null, please check script configuration data"
+	optionalInstanceFiles="$(cut -d':' -f2- <<< $scriptData2)"
+
+	[[ $scriptData3 == '' ]] && Msg2 $T "'scriptData3 (requiredGlobalFiles)' is null, please check script configuration data"
+	requiredGlobalFiles="$(cut -d':' -f2- <<< $scriptData3)"
+
+	[[ $scriptData4 == '' ]] && Msg2 $T "'scriptData4 (optionalGlobalFiles)' is null, please check script configuration data"
+	optionalGlobalFiles="$(cut -d':' -f2- <<< $scriptData4)"
 
 #==================================================================================================
 # Standard arg parsing and initialization
@@ -61,6 +57,8 @@ ParseArgsStd
 
 Hello
 Init "getClient getSrcEnv getTgtEnv getDirs checkEnvs getCims $allCims noWarn"
+dump -1 requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles
+
 
 ## Verify continue
 unset verifyArgs
@@ -77,35 +75,35 @@ myData="Client: '$client', srcEnv: '$srcEnv', tgtEnv: '$tgtEnv'"
 ## Main
 #==================================================================================================
 if [[ $cimStr != '' ]]; then
-	Msg2 "Comparing CIM instances..."
-	for cim in $(echo $cimStr | tr ',' ' '); do
-		Msg2 "^$(Upper $cim)..."
+	Msg2 "Comparing CIM instance files..."
+	for cim in $(tr ',' ' ' <<< $cimStr); do
+		Msg2 "\n^Checking $(Upper $cim)..."
 		foundDiff=false
-		for file in  $(echo $wfFiles | tr ',' ' '); do
+		for file in  $(tr ',' ' ' <<< "$requiredInstanceFiles $optionalInstanceFiles"); do
 			srcFile=$srcDir/web/$cim/$file
 			tgtFile=$tgtDir/web/$cim/$file
+			#dump -n file -t srcFile tgtFile
 			[[ ! -f $srcFile ]] && continue
-			[[ ! -f $tgtFile ]] && Warning 0 2 "Source file '$srcFile' exists but target file not found" && continue
+			[[ ! -f $tgtFile ]] && Warning 0 2 "'$file' exists in source but target file not found" && continue
 
 			srcMd5=$(md5sum $srcFile | cut -f1 -d" ")
 			tgtMd5=$(md5sum $tgtFile | cut -f1 -d" ")
-			[[ $srcMd5 != $tgtMd5 ]] && Warning 0 2 "File '$(ColorE $file)' is different" || Msg2 "^^$file is OK"
+			[[ $srcMd5 != $tgtMd5 ]] && Warning 0 2 "'${file}', files are different" || Msg2 "^^'${file}', files match"
 		done
 	done
 fi
 
-Msg2
-Msg2 "Comparing system files..."
+Msg2 "\nComparing system files..."
 srcDir=$skeletonRoot/release
-for file in  $(echo $systemWfFiles | tr ',' ' '); do
+for file in  $(tr ',' ' ' <<< "$requiredGlobalFiles $optionalGlobalFiles"); do
 	srcFile=$srcDir/web${file}
 	tgtFile=$tgtDir/web${file}
-	[[ ! -f $srcFile ]] && Msg2 "^Skipping file $file, not in source" && continue
+	#dump -n file -t srcFile tgtFile
+	[[ ! -f $srcFile ]] && Msg2 "^'${file}, not in source, skipping" && continue
 	srcMd5=$(md5sum $srcFile | cut -f1 -d" ")
-	[[ ! -f $tgtFile ]] && Msg2 "^Skipping file $file, not in target" && continue
+	[[ ! -f $tgtFile ]] && Msg2 "^'${file}, not in target, skipping" && continue
 	tgtMd5=$(md5sum $tgtFile | cut -f1 -d" ")
-	Msg2 "^$file"
-	[[ $srcMd5 != $tgtMd5 ]] && Msg2 $WT2 "File '$(ColorE $file)' is different" || Msg2 "^^$file is OK"
+	[[ $srcMd5 != $tgtMd5 ]] && Warning 0 2 "'${file}', files are different" || Msg2 "^^'${file}', files match"
 done
 
 
@@ -116,3 +114,4 @@ Goodbye 0 #'alert'# 09-24-2015 -- dscudiero -- New script to compare workflow fi
 # 10-16-2015 -- dscudiero -- Update for framework 6 (1.2)
 ## Wed Apr 27 16:08:26 CDT 2016 - dscudiero - Switch to use RunSql
 ## Thu Apr 28 16:27:25 CDT 2016 - dscudiero - Cleanup and modernization
+## Wed Mar 15 10:22:27 CDT 2017 - dscudiero - Updated to compare all the files processed in copyworkflow
