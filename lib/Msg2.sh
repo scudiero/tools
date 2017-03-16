@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.51" # -- dscudiero -- 02/08/2017 @ 13:36:52.06
+# version="2.0.52" # -- dscudiero -- 03/16/2017 @  8:12:11.62
 #===================================================================================================
 # Print/Log formatted messages
 #===================================================================================================
@@ -113,6 +113,7 @@ function SetIndent {
 
 ## Print / Log the message
 function Msg2 {
+	[[ $quiet == true ]] && return 0
 	PushSettings "$FUNCNAME"
 	set +xv # Turn off trace
 	SetFileExpansion 'off'
@@ -252,3 +253,4 @@ export -f Terminate Error Warning Info Note Verbose
 #===================================================================================================
 ## Wed Jan  4 13:34:04 CST 2017 - dscudiero - comment out the 'version=' line
 ## Thu Feb  9 08:06:34 CST 2017 - dscudiero - make sure we are using our own tmpFile
+## Thu Mar 16 08:13:40 CDT 2017 - dscudiero - Quit immediataly if quiet is true
