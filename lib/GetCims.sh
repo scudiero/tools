@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.7" # -- dscudiero -- 03/14/2017 @ 10:29:37.95
+# version="2.0.12" # -- dscudiero -- 03/16/2017 @  7:55:18.41
 #===================================================================================================
 # Get CIMs
 #===================================================================================================
@@ -10,7 +10,10 @@
 function GetCims {
 	Msg2 $V3 "*** $FUNCNAME -- Starting ***"
 	local siteDir=$1 ; shift || true
-	local prefix="$1"; #[[ -z $prefix ]] && prefix="\t"
+	local prefix verb='use'
+	[[ ${#*} -eq 2 ]] && prefix="$1" && shift || true
+	[[ ${#*} -eq 1 ]] && local verb="$1"
+
 	local ans suffix validVals
 	if [[ $allowMultiCims == true ]]; then
 		suffix=', a for all cims'
@@ -32,7 +35,7 @@ function GetCims {
 			[[ $onlyCimsWithTestFile == true && ! -f $siteDir/web/$dir/wfTest.xml ]] && continue
 			if [[ $verify == true && $allCims != true ]]; then
 				unset ans
-				Prompt ans "${prefix}Found CIM Instance '$(ColorK $dir)' in source instance,\n${prefix}\tdo you wish to use it? (y to use$suffix)? >"\
+				Prompt ans "${prefix}Found CIM Instance '$(ColorK $dir)' in source instance,\n${prefix}\tdo you wish to $verb it? (y to use$suffix)? >"\
 			 			"$validVals"; ans=$(Lower ${ans:0:1});
 				[[ $ans == 'a' ]] && cims=(${adminDirs[@]}) && break
 				if [[ $ans == 'y' ]]; then
@@ -63,3 +66,4 @@ export -f GetCims
 ## Wed Jan  4 13:53:29 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Jan  5 15:30:07 CST 2017 - dscudiero - modify debug messages
 ## Tue Mar 14 10:36:01 CDT 2017 - dscudiero - Add prefix argument to controle tabbing
+## Thu Mar 16 08:13:26 CDT 2017 - dscudiero - add ability to pass in the verb to use in the message
