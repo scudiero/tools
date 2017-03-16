@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.69 # -- dscudiero -- 03/14/2017 @ 14:42:42.65
+version=3.11.71 # -- dscudiero -- 03/16/2017 @ 12:15:51.56
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -171,7 +171,7 @@ function ExecReport {
 			unset scriptArgs;
 			if [[ $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true  && $quiet != true ]]; then
 				Msg2 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
-				Prompt scriptArgs "^$(ColorI "If you do not know what to enter here just press [ENTER] or '-h' for more info)")" '*optional*' '' 3;
+				Prompt userArgs "^For command line arguments, just enter -help" '*optional*' 'n/a' '8';
 			fi
 		fi
 
@@ -338,7 +338,7 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 		unset userArgs;
 		if [[ $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true  && $quiet != true ]]; then
 			Msg2 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
-			Prompt userArgs "^Enter '-help' for more info, you have 8 seconds to enter this data" '*optional*' '' 8;
+			Prompt userArgs "^For command line arguments, just enter -help" '*optional*' 'n/a' '8';
 			[[ -n $userArgs ]] && scriptArgs="$userArgs $scriptArgs"
 		fi
 
@@ -438,3 +438,4 @@ Goodbye 0
 ## Thu Feb 16 08:10:58 CST 2017 - dscudiero - Switch to use the scriptID as the ordinal numbers
 ## Thu Feb 16 08:21:54 CST 2017 - dscudiero - Switch to use keyId inlookups
 ## Tue Mar 14 14:49:25 CDT 2017 - dscudiero - Fix problem where the correct logfile was not being written out
+## Thu Mar 16 13:00:00 CDT 2017 - dscudiero - Tweaked messaging
