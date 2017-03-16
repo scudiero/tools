@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.211 # -- dscudiero -- 03/16/2017 @ 12:39:38.66
+version=1.21.212 # -- dscudiero -- 03/16/2017 @ 12:45:47.27
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -106,7 +106,7 @@ function BuildEmployeeTable {
 		RunSql2 $sqlStmt
 
 	### Get the transactonal values, loop through them and  write out the warehouse record
-		sqlStmt="select $transactionalColumns from employees where db_isactive in (\"N\",\"L\") order  by db_employeekey"
+		sqlStmt="select $transactionalColumns from employees where db_isactive in (\"Y\",\"L\") order  by db_employeekey"
 		RunSql2 "$contactsSqliteFile" $sqlStmt
 		for resultRec in "${resultSet[@]}"; do
 			fieldCntr=1; unset valuesString
@@ -433,3 +433,4 @@ return 0
 ## Fri Mar 10 10:31:38 CST 2017 - dscudiero - added call to clientTimezone report
 ## Tue Mar 14 13:56:52 CDT 2017 - dscudiero - Change where the contacts db shadow is written
 ## Thu Mar 16 12:41:17 CDT 2017 - dscudiero - Update employee table to also get employees with status of L
+## Thu Mar 16 12:45:54 CDT 2017 - dscudiero - General syncing of dev to prod
