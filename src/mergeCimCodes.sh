@@ -1,15 +1,16 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.6 # -- dscudiero -- 01/12/2017 @ 13:20:14.27
+version=1.2.11 # -- dscudiero -- 03/15/2017 @ 14:51:15.42
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
+imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
+imports="$imports GetOutputFile"
 Import "$imports"
 originalArgStr="$*"
 scriptDescription="Merge CIM codes"
 
 #==================================================================================================
-# Merge cim code data (codedesc)
+# Merge cim code data (codedesc/cimlookup)
 #==================================================================================================
 #==================================================================================================
 # Copyright ©2015 David Scudiero -- all rights reserved.
@@ -23,6 +24,7 @@ scriptDescription="Merge CIM codes"
 	#==============================================================================================
 	function parseArgs-mergeCimCodes  {
 		argList+=(-informationOnly,2,switch,informationOnlyMode,,script,'Only analyze data and print error messages, do not change any client data.')
+		argList+=(-database,2,option,database,,script,'The database to analyze, values can be cimcodes or cimlookup')
 		return 0
 	}
 
@@ -72,12 +74,16 @@ displayGoodbyeSummaryMessages=true
 Init "getClient getSrcEnv getTgtEnv getDirs checkEnvs"
 dump -1 client srcDir tgtDir informationOnlyMode allItems testMode
 
+[[ -z $database ]] && database='cimcodes'
+[[ $Contains 'cimcodes,cimlookup' "$database" != true ]] && Terminate "Invalid value specified for database, value may be 'cimcodes' or 'cimlookup'"
+
 unset verifyArgs
 verifyArgs+=("Client:$client")
-verifyArgs+=("Source Env: $(TitleCase $srcEnv) ($srcDir)")
-verifyArgs+=("Target Env: $(TitleCase $tgtEnv) ($tgtDir)")
-[[ $informationOnlyMode == true ]] && verifyArgs+=("Information only mode: $informationOnlyMode")
-[[ $allItems == true ]] && verifyArgs+=("Auto process all items: $allItems")
+verifyArgs+=("Source Env:$(TitleCase $srcEnv) ($srcDir)")
+verifyArgs+=("Target Env:$(TitleCase $tgtEnv) ($tgtDir)")
+verifyArgs+=("database:$database")
+[[ $informationOnlyMode == true ]] && verifyArgs+=("Information only mode:$informationOnlyMode")
+[[ $allItems == true ]] && verifyArgs+=("Auto process all items:$allItems")
 VerifyContinue "You are asking to merge CIM code (codedesc) data:"
 
 myData="Client: '$client', srcEnv: '$srcEnv', tgtEnv: '$tgtEnv', informationOnlyMode: '$informationOnlyMode', allItems: '$allItems'"
@@ -97,19 +103,20 @@ Msg2
 #==================================================================================================
 # Main
 #==================================================================================================
+[[ $database == 'cimcodes' ]] && database='codedesc' || database='cimlookupkup'
 
 ## Retrieve source data
 	declare -A srcData
 	unset srcKeys
 	srcSqlFile=$srcDir/db/cimcourses.sqlite
 	[[ ! -r $srcSqlFile ]] && Terminate "Could not open source sql file\n\t'$srcSqlFile'"
-	sqlStmt="select count(*) key from codedesc"
+	sqlStmt="select count(*) key from $database"
 	RunSql2 "$srcSqlFile" "$sqlStmt"
 	numSrcRecords=${resultSet[0]}
 
 	Msg2; Msg2 "Fetching source data ($numSrcRecords records)..."
 	fields="setname,groupname,code,name,rank,siscode,access"
-	sqlStmt="select $fields from codedesc order by setname,code"
+	sqlStmt="select $fields from $database order by setname,code"
 	RunSql2 "$srcSqlFile" "$sqlStmt"
 	[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No records returned from source database"
 	Msg2 "Building source ($(TitleCase $srcEnv)) data hash table..."
@@ -135,12 +142,12 @@ Msg2
 	fields="key,setname,groupname,code,name,rank,siscode,access"
 	tgtSqlFile=$tgtDir/db/cimcourses.sqlite
 	[[ ! -r $tgtSqlFile ]] && Terminate "Could not open target sql file\n\t'$tgtSqlFile'"
-	sqlStmt="select count(*) key from codedesc"
+	sqlStmt="select count(*) key from $database"
 	RunSql2 "$tgtSqlFile" "$sqlStmt"
 	numTgtRecords=${resultSet[0]}
 
 	Msg2; Msg2 "Fetching target ($(TitleCase $tgtEnv)) data ($numTgtRecords records)..."
-	sqlStmt="select $fields from codedesc order by setname,code"
+	sqlStmt="select $fields from $database order by setname,code"
 	RunSql2 "$tgtSqlFile" "$sqlStmt"
 	[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No records returned from source database"
 	Msg2 "Building target data hash table..."
@@ -187,7 +194,7 @@ Msg2
 				[[ $allItems == true ]] && ans='y' || unset ans
 				[[ $informationOnlyMode != true && $allItems != true ]] && Prompt ans "\tDo you wish to insert the record" 'Yes No'; ans=$(Lower ${ans:0:1})
 				if [[ $(Lower ${ans:0:1}) == 'y' ]]; then
-					sqlStmt="update codedesc set setname=\"$srcSetname\", groupname=\"$srcGroupname\", code=\"$srcCode\", name=\"$srcName\", rank=\"$srcRank\",\
+					sqlStmt="update $database set setname=\"$srcSetname\", groupname=\"$srcGroupname\", code=\"$srcCode\", name=\"$srcName\", rank=\"$srcRank\",\
 							siscode=\"$srcSiscode\",access=\"$srcAccess\" where key=\"$tgtDbKey\""
 					RunSql2 "$tgtSqlFile" "$sqlStmt"
 					ProtectedCall "((numUpdated++))"
@@ -203,7 +210,7 @@ Msg2
 				## New target setname, just add it
 				Msg2; Msg2 "^Found new setname: '$srcSetname'"
 				Msg2 "^^Adding: [$key] = '${srcData[$key]}'"
-				sqlStmt="insert into codedesc values(NULL,\"$srcSetname\",\"$srcGroupname\",\"$srcCode\",\"$srcName\",\"$srcRank\",\"$srcSiscode\",\"$srcAccess\")"
+				sqlStmt="insert into $database values(NULL,\"$srcSetname\",\"$srcGroupname\",\"$srcCode\",\"$srcName\",\"$srcRank\",\"$srcSiscode\",\"$srcAccess\")"
 				[[ $informationOnlyMode != true ]] && RunSql2 "$tgtSqlFile" "$sqlStmt" && ProtectedCall "((numAdded++))" || ProtectedCall "((numSkipped++))"
 			else
 				## Existing setname, new data, prompt user
@@ -219,7 +226,7 @@ Msg2
 					fi
 				fi
 				if [[ $ans == 'y' ]]; then
-					sqlStmt="insert into codedesc values(NULL,\"$srcSetname\",\"$srcGroupname\",\"$srcCode\",\"$srcName\",\"$srcRank\",\"$srcSiscode\",\"$srcAccess\")"
+					sqlStmt="insert into $database values(NULL,\"$srcSetname\",\"$srcGroupname\",\"$srcCode\",\"$srcName\",\"$srcRank\",\"$srcSiscode\",\"$srcAccess\")"
 					RunSql2 "$tgtSqlFile" "$sqlStmt"
 					ProtectedCall "((numAdded++))"
 				else
@@ -267,3 +274,4 @@ Goodbye 0 #'alert'
 # 12-09-2015 -- dscudiero -- Heavily refactored, sorted key list, etc. (1.2)
 ## Wed Apr 27 16:33:07 CDT 2016 - dscudiero - Switch to use RunSql
 ## Thu Aug  4 11:02:05 CDT 2016 - dscudiero - Added displayGoodbyeSummaryMessages=true
+## Thu Mar 16 08:13:57 CDT 2017 - dscudiero - add ability to pass in the database to merge
