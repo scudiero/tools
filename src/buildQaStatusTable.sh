@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.1.0 # -- dscudiero -- 02/20/2017 @ 12:52:10.10
+version=1.1.1 # -- dscudiero -- 03/16/2017 @ 15:44:21.39
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye DumpMap GetExcel'
@@ -71,7 +71,8 @@ for var in $falseVars; do eval $var=false; done
 	variableMap['Remaining']='numRemaining'
 	variableMap['Passed']='numPassed'
 	variableMap['Failed']='numFailed'
-	variableMap['Waiting']='numWaiting'
+	variableMap['Waiting']='numBlocked'
+	variableMap['Blocked']='numWaiting'
 	variableMap['Other']='numOther'
 	variableMap['Estimated Effort (hours)']='resourcesEstimate'
 	variableMap['Effort to date (hours)']='resourcesUsed'
@@ -293,3 +294,4 @@ Goodbye 0 #'alert'
 ## Wed Oct 12 16:11:56 CDT 2016 - dscudiero - Incorporate building the testing details records
 ## Thu Oct 20 15:58:44 CDT 2016 - dscudiero - Make sure that the python environment is setup
 ## Mon Feb 20 12:52:53 CST 2017 - dscudiero - Adjustments for new spreadsheet
+## Thu Mar 16 15:44:50 CDT 2017 - dscudiero - Added support for the 'blocked' data
