@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.67" # -- dscudiero -- 01/04/2017 @ 13:45:21.86
+# version="2.0.78" # -- dscudiero -- 03/16/2017 @ 10:55:49.53
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -34,7 +34,7 @@ function Prompt {
 	local respFirstChar rc readTimeOutOpt
 	local numTabs=0
 	IFS=' ' read -ra validValues <<< $(echo $validateList | tr "," " ")
-	[[ $timeOut -ne 0 && $timeOut != '' ]] && readTimeOutOpt="-t $timeOut" || unset readTimeOutOpt
+	[[ $timeOut -ne 0 && -n $timeOut && -n $defaultVal ]] && readTimeOutOpt="-t $timeOut" || unset readTimeOutOpt
 
 	#===================================================================================================
 	## Main
@@ -54,7 +54,12 @@ function Prompt {
 			let numTabs=$(grep -o "^" <<< "$promptText" | wc -l)
 			promptText="$(sed "s/\^/$tabStr/g" <<< $promptText)"
 			if [[ $verify != false ]]; then
-				echo -n -e "$promptText > "
+				if [[ -z $readTimeOutOpt ]]; then
+					echo -e "$promptText > "
+				else
+					echo -e "$promptText"
+				 	echo -n -e "(Note, prompt will timeout in $timeOut secs.) > "
+				fi
 				ProtectedCall "read $readTimeOutOpt response";
 				if [[ $rc -ne 0 ]]; then
 					echo
@@ -129,3 +134,4 @@ export -f Prompt
 # Check-in Log
 #===================================================================================================
 ## Wed Jan  4 13:54:10 CST 2017 - dscudiero - General syncing of dev to prod
+## Thu Mar 16 10:57:45 CDT 2017 - dscudiero - Add messaging if there is a timeout value specified
