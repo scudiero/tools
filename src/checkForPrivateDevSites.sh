@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.4.28 # -- dscudiero -- 03/16/2017 @ 12:33:28.77
+version=2.4.29 # -- dscudiero -- 03/16/2017 @ 12:40:23.06
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -43,7 +43,7 @@ fi
 ## Get the list of userids from the employee table
 	if [[ $client == '' ]]; then
 		Msg2 $V1 "Pulling employee userid data from $contactsSqliteFile...\n"
-		sqlStmt="SELECT db_email FROM employees WHERE db_isactive<>\"N\""
+		sqlStmt="SELECT db_email FROM employees WHERE db_isactive=\"Y\""
 		RunSql2 "$contactsSqliteFile" "$sqlStmt"
 	else
 		unset resultSet
@@ -127,3 +127,4 @@ Goodbye 0
 ## Mon Aug 22 08:59:35 CDT 2016 - dscudiero - Switch to use mutt for email
 ## Mon Feb 13 15:59:23 CST 2017 - dscudiero - Make sure we are using our own tmpFile
 ## Thu Mar 16 12:35:31 CDT 2017 - dscudiero - Change employee query to be <> 'N'
+## Thu Mar 16 12:40:45 CDT 2017 - dscudiero - Undo last change
