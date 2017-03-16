@@ -1,6 +1,7 @@
 #!/bin/bash
+#DX NOT AUTOVERSION
 #==================================================================================================
-version=4.10.78 # -- dscudiero -- 03/14/2017 @ 14:29:48.90
+version=4.11.8 # -- dscudiero -- 03/16/2017 @  9:24:20.85
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -52,7 +53,10 @@ function parseArgs-copyEnv {
 	argList+=(-suffix,6,option,suffix,,'script',"Suffix text to be append to the resultant site name, e.g. -luc")
 	argList+=(-emailAddress,1,option,emailAddress,,'script',"The email address for CourseLeaf email notifications")
 	argList+=(-asSite,2,option,asSite,,script,'The name to give the new site)')
-	argList+=(-additionalIgnores,3,option,additionalIgnores,,script,'Additional directories to ignore)')
+	argList+=(-skipAlso,6,option,skipAlso,,script,'Additional directories and or files to ignore, comma separated list)')
+	argList+=(-skipCim,6,switch,skipCim,,script,'Skip CIM and CIM instance files)')
+	argList+=(-skipClss,6,switch,skipClss,,script,'Skip CLASS instance files)')
+	argList+=(-skipWen,6,switch,skipClss,,script,'Skip CLASS instance files)')
 }
 function Goodbye-copyEnv {
 	[[ -d $tmpRoot ]] && rm -rf $tmpRoot
@@ -138,10 +142,9 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 			sqlStmt="select host,share,redhatVer from $siteInfoTable where name=\"$tempClient\" and env=\"$env\""
 			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -gt 0 ]]; then
-			 	resultString=${resultSet[0]}; resultString=$(echo "$resultString" | tr "\t" "|" )
-				clientHost=$(echo $resultString | cut -d'|' -f1)
-				clientShare=$(echo $resultString | cut -d'|' -f2)
-				clientRhel=$(echo $resultString | cut -d'|' -f3)
+			 	clientHost=$(cut -d'|' -f1 <<< "${resultSet[0]}")
+				clientShare=$(cut -d'|' -f2 <<< "${resultSet[0]}")
+				clientRhel=$(cut -d'|' -f3 <<< "${resultSet[0]}")
 			else
 				Terminate "Could not retrieve data for client ($tempClient), env ($env) from $workflowDb.$siteInfoTable"
 			fi
@@ -192,7 +195,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 ## Check to see if all dirs exist
 	[[ -z $srcDir ]] && Terminate "No Source directory was specified"
 	if [[ -d $tgtDir && $overlay == false ]]; then
-		echo
+		Msg2
 		unset ans
 		WarningMsg "Target site ($tgtDir) already existes."
 		Prompt ans "Do you wish to $(ColorK 'overwrite') the existing site (Yes) or $(ColorK 'refresh') files in the existing sites site (No) ?" 'Yes No' 'Yes' '5'; ans=$(Lower ${ans:0:1})
@@ -202,23 +205,61 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 #==================================================================================================
 ## See if there are any additional directories the user wants to skip
 if [[ $verify == true ]]; then
-	echo
-	unset ans; Prompt ans "Do you wish to exclude additional directories/files from the copy operation" 'No,Yes' 'No' '5'; ans="$(Lower "${ans:0:1}")"
-	if [[ $ans == 'y' ]]; then
-		SetFileExpansion 'off'
-		Msg2 "^Please specify the directories/files you wish to exclude, use '*' as a the wild card,"
-		Msg2 "^specifications are relative to siteDir, e.g. '/web/wen' without the quotes."
-		Msg2 "^To stop the prompt loop, just enter no data"
-		while true; do
-			MsgNoCRLF "^^==> "
-			read ignore
-			[[ -z $ignore || $(Lower "$ignore") == 'x' ]] && break
-			ignoreList="$ignoreList,$ignore"
-			unset ignore
-		done
-		SetFileExpansion
+	Msg2
+	[[ $skipCim == true ]] && ans='Yes' || unset ans
+	Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CIM & CIM instances" 'No,Yes,Select' 'No' '6'; ans="$(Lower "${ans:0:1}")"
+	if [[ $ans == 'y' || $ans == 's' ]]; then
+		[[ $ans != 's' ]] && allCims=true
+		GetCims "$srcDir" "\t" "$(ColorK 'EXCLUDE')"
+		unset allCims
+		skipCim=true
+	fi
+
+	Msg2
+	[[ $skipClss == true ]] && ans='Yes' || unset ans
+	Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CLSS/WEN" 'No,Yes' 'No' '6'; ans="$(Lower "${ans:0:1}")"
+	[[ $ans == 'y' ]] && skipClss=true
+
+	Msg2
+	if [[ -z $skipAlso ]]; then
+		unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') additional directories/files from the copy operation" 'No,Yes' 'No' '6'; ans="$(Lower "${ans:0:1}")"
+		if [[ $ans == 'y' ]]; then
+			SetFileExpansion 'off'
+			Msg2 "^Please specify the directories/files you wish to exclude, use '*' as a the wild card,"
+			Msg2 "^specifications are relative to siteDir, e.g. '/web/wen' without the quotes."
+			Msg2 "^To stop the prompt loop, just enter no data"
+			while true; do
+				MsgNoCRLF "^^==> "
+				read ignore
+				[[ -z $ignore || $(Lower "$ignore") == 'x' ]] && break
+				ignoreList="$ignoreList,$ignore"
+				unset ignore
+			done
+			SetFileExpansion
+		fi
 	fi
 fi
+
+## Skip files as indicated
+	if [[ $skipCim == true ]]; then
+		for cim in $(tr ',' ' ' <<< $cimStr); do
+			ignoreList="$ignoreList,/web/$cim/"
+		done
+		ignoreList="$ignoreList,/web/courseleaf/cim/"
+	fi
+
+	if [[ $skipClss == true ]]; then
+		ignoreList="$ignoreList,/db/clwen*"
+		ignoreList="$ignoreList,/bin/clssimport-log-archive/"
+		ignoreList="$ignoreList,/web/courseleaf/wen/"
+		ignoreList="$ignoreList,/web/wen/"
+	fi
+
+	if [[ -n $skipAlso ]]; then
+		for token in $(tr ',' ' ' <<< $skipAlso); do
+			ignoreList="$ignoreList,$token"
+		done
+	fi
 
 #==================================================================================================
 ## Make sure the user really wants to do this
@@ -228,6 +269,8 @@ fi
 	verifyArgs+=("Target Env:$(TitleCase $tgtEnv)\t($tgtDir)")
 	tmpStr=$(sed "s/,/, /g" <<< $ignoreList)
 	[[ -n $forUser ]] && verifyArgs+=("For User:$forUser")
+	[[ $skipCim == true && $fullCopy != true ]] && verifyArgs+=("Skip CIM:$skipCim")
+	[[ $skipClss == true && $fullCopy != true ]] && verifyArgs+=("Skip CLSS:$skipClss")
 	[[ $fullCopy != true ]] && verifyArgs+=("Ignore List:$tmpStr")
 	verifyArgs+=("Full Copy:$fullCopy")
 
@@ -266,9 +309,10 @@ fi
 #==================================================================================================
 # Do the copy using rsync, including or excluding dirs as required
 	if [[ -f $rsyncFilters ]]; then rm $rsyncFilters; fi
-	## Build rrsync control file of excluded items
+	## Build rsync control file of excluded items
 		SetFileExpansion 'off'
 		for token in $(tr ',' ' ' <<< $ignoreList); do
+			[[ -d $srcDir/$token && ${token: -1} != / ]] && token="${token}/"
 			echo "- ${token}" >> $rsyncFilters
 		done
 		SetFileExpansion
@@ -281,16 +325,14 @@ fi
 		Msg2 "Performing a FULL copy..."
 	else
 		rsyncOpts="-a$rsyncVerbose --prune-empty-dirs $listOnly --include-from $rsyncFilters"
-		Msg2 "Excluding the following from the copy..."
+		Msg2 "Excluding the following from the copy:"
 		oldIFS=$IFS; IFS='';
 		while read line; do
-			line=$(echo $line | tr -cd "[:print:]" | echo ${line:1})
-			Msg2 "^$line"
+			SetIndent '+1'; Msg2 "^$line"; SetIndent '-1'
 		done < $rsyncFilters
 		IFS=$oldIFS;
 		printf "\n"
 	fi
-
 	if [[ $remoteCopy == true ]]; then
 		Msg2 "Calling rsync to copy the files, when prompted for password, please enter your password on '$clientHost' ..."
 		rsyncOpts="${rsyncOpts} -e"
@@ -298,7 +340,7 @@ fi
 		Msg2 "Calling rsync to copy the files ..."
 	fi
 
-	previousTrapERR=$(echo $(trap -p ERR) | cut -d ' ' -f3-)
+	previousTrapERR=$(cut -d ' ' -f3- <<< $(trap -p ERR))
 	trap - ERR
 	rsync $rsyncOpts $srcDir/ $tgtDir
 	eval "trap $previousTrapERR"
@@ -308,7 +350,7 @@ fi
 #==================================================================================================
 # Check RHEL versions
 	if [[ ${clientRhel:0:1} != ${myRhel:0:1} ]]; then
-		Msg2 "Rhel versions do not match, updating cgis..."
+		Msg2 "\nRhel versions do not match, updating cgis to current..."
 		cgisDirRoot=$cgisRoot/rhel${myRhel:0:1}
 		[[ ! -d $cgisDirRoot ]] && Terminate "Could not locate cgi source directory:\n\t$cgiRoot"
 		if [[ -d $cgisDirRoot/release ]]; then
@@ -369,7 +411,7 @@ fi
 if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 	#==================================================================================================
 	# Turn off publishing
-		[[ $quiet == false || $quiet == 0 ]] && Msg2 "Turn off Publishing..."
+		Msg2 "\nTurn off Publishing..."
 		$DOIT sed -i '1i mapfile:production/|/dev/null' $tgtDir/$progDir.cfg
 		#$DOIT sed -i s'_^//mapfile:production/|/dev/null_mapfile:production/|/dev/null_' $tgtDir/courseleaf.cfg
 		#$DOIT sed -i s'_^//mapfile:production|/dev/null_mapfile:production|/dev/null_' $tgtDir/courseleaf.cfg
@@ -377,7 +419,7 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		#$DOIT sed -i s'_^mapfile:production|../../../public/web_//mapfile:production|../../../public/web_' $tgtDir/courseleaf.cfg
 
 	# Turn off remote authenticaton
-		[[ $quiet == false || $quiet == 0 ]] && Msg2 "Turn off Authentication..."
+		Msg2 "Turn off Authentication..."
 		$DOIT sed -i s'_^authuser:true_//authuser:true_' $tgtDir/$progDir.cfg
 		for file in default.tcf localsteps/default.tcf; do
 			$DOIT sed -i s'_^authuser:true_//authuser:true_' $tgtDir/web/$progDir/$file
@@ -387,11 +429,11 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		done
 
 	# Turn off PDF generationw
-		[[ $quiet == false || $quiet == 0 ]] && Msg2 "Turn off PDF generation..."
+		Msg2 "Turn off PDF generation..."
 		$DOIT sed -i s'_^pdfeverypage:true$_//pdfeverypage:true_' $tgtDir/web/$progDir/localsteps/default.tcf
 
 	# leepfrog user account
-		[[ $quiet == false || $quiet == 0 ]] && Msg2 "Adding user-ids to $progDir.cfg file..."
+		Msg2 "Adding user-ids to $progDir.cfg file..."
 		$DOIT echo "user:$leepfrogUserId|$leepfrogPw||admin" >> $tgtDir/$progDir.cfg
 		Msg2 "^'$leepfrogUserId' added as an admin with pw: '<normal pw>'"
 		$DOIT echo "user:test|test||" >> $tgtDir/$progDir.cfg
@@ -401,7 +443,7 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		[[ -n $forUser ]] && $DOIT echo "user:$userAccount|$userPassword||admin" >> $tgtDir/$progDir.cfg
 
 	# Set nexturl so wf emails point to local instance
-		[[ $quiet == false || $quiet == 0 ]] && Msg2 "Changing 'nexturl' to point to local instance..."
+		Msg2 "Changing 'nexturl' to point to local instance..."
 		editFile="$tgtDir/web/courseleaf/localsteps/default.tcf"
 		clientToken=$(cut -d'/' -f5 <<< $tgtDir)
 		toStr="nexturl:https://$clientToken/$(cut -d '/' -f3 <<< $tgtDir).leepfrog.com"
@@ -412,7 +454,7 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		fi
 
 	## email override
-		[[ $quiet == false || $quiet == 0 ]] && Msg2 "Override email routing..."
+		Msg2 "Override email routing..."
 		[[ -z $emailAddress ]] && emailAddress=$userName@leepfrog.com
 		editFile=$tgtDir/email/sendnow.atj
 		unset grepStr; grepStr=$(ProtectedCall "grep ^'// DO NOT MODIFY THIS FILE' $editFile");
@@ -521,3 +563,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## Thu Feb 23 10:08:24 CST 2017 - dscudiero - Fixed spelling error and tweaked messaging
 ## Fri Mar 10 10:31:17 CST 2017 - dscudiero - Added a timeout value to the exclued other prompt
 ## Tue Mar 14 14:48:56 CDT 2017 - dscudiero - add a timer on the exclude others prompt
+## Thu Mar 16 09:39:01 CDT 2017 - dscudiero - Added new options to skip cims and clss files
