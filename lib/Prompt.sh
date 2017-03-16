@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.79" # -- dscudiero -- 03/16/2017 @ 10:58:19.56
+# version="2.0.97" # -- dscudiero -- 03/16/2017 @ 12:12:39.55
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -15,26 +15,28 @@ function Prompt {
 	declare promptText=$2
 	declare validateList=$3
 	declare defaultVal=$4
+	[[ $defaultVal == '-' || $defaultVal == 'n/a' || $defaultVal == 'N/A' ]] && unset defaultVal
 	declare timeOut=${5:-0}
+
 	declare validateListString="$(echo $validateList | tr " " ",")"
-	if [[ $defaultVal != '' ]]; then
+	if [[ -n $defaultVal ]]; then
 		validateListString=",$validateListString,"
 		validateListString=$(sed "s/,${defaultVal},/,\\${colorDefaultVal}${defaultVal}\\${colorDefault},/" <<< "$validateListString")
 		validateListString="${validateListString:1:${#validateListString}-2}"
 	fi
 
 	if [[ $inVerifyContinue != true ]]; then
-		[[ $validateListString != '' ]] && validateListString="$validateListString, or 'X' to quit" || validateListString="'X' to quit"
+		[[ -n $validateListString ]] && validateListString="$validateListString, or 'X' to quit" || validateListString="'X' to quit"
 	fi
 
-	[[ $promptText == '' ]] && promptText="Please specify a value for '$promptVar'"
-	[[ $validateListString != '' ]] && promptText="$promptText ($validateListString)"
+	[[ -z $promptText ]] && promptText="Please specify a value for '$promptVar'"
+	[[ -n $validateListString ]] && promptText="$promptText ($validateListString)"
 	dump -2 -r ; dump -2 -l promptVar response promptText defaultVal validateList validateListString inVerifyContinue
 
 	local respFirstChar rc readTimeOutOpt
 	local numTabs=0
 	IFS=' ' read -ra validValues <<< $(echo $validateList | tr "," " ")
-	[[ $timeOut -ne 0 && -n $timeOut && -n $defaultVal ]] && readTimeOutOpt="-t $timeOut" || unset readTimeOutOpt
+	[[ $timeOut -ne 0 && -n $timeOut ]] && readTimeOutOpt="-t $timeOut" || unset readTimeOutOpt
 
 	#===================================================================================================
 	## Main
@@ -43,22 +45,24 @@ function Prompt {
 	response=$(eval echo $response)
 
 	#printf "%s = >%s<\n" promptVar "$promptVar" response "$response" validateList "$validateList" >> ~/stdout.txt
-	local loop=true
-	local hadValue=true
+	local loop=true hadValue=true promptTextTabs
 
 	#local verifyMsg;
 	unset verifyMsg
 	until [[ $loop != true ]]; do
-		while [[ $response == '' ]]; do
+		while [[ -z $response ]]; do
 			hadValue=false
-			let numTabs=$(grep -o "^" <<< "$promptText" | wc -l)
+			numTabs=$(grep -o '\^' <<< "$promptText" | wc -l)
+			[[ $numTabs -ne 0 ]] && promptTextTabs="^${promptText%^*}"
 			promptText="$(sed "s/\^/$tabStr/g" <<< $promptText)"
 			if [[ $verify != false ]]; then
 				if [[ -z $readTimeOutOpt ]]; then
 					echo -n -e "$promptText > "
 				else
 					echo -e "$promptText"
-				 	echo -n -e "(Note, prompt will timeout in $timeOut secs.) > "
+					local promptTextTimeout="$promptTextTabs(Note, prompt will timeout in $timeOut secs.)"
+					promptTextTimeout="$(sed "s/\^/$tabStr/g" <<< $promptTextTimeout)"
+				 	echo -n -e "$promptTextTimeout > "
 				fi
 				ProtectedCall "read $readTimeOutOpt response";
 				if [[ $rc -ne 0 ]]; then
@@ -69,15 +73,15 @@ function Prompt {
 				fi
 			fi
 			[[ $(Lower ${response}) == 'x' ]] && Goodbye 'x'
-			if [[ $response == '' && $defaultVal != '' ]]; then
+			if [[ -z $response && -n $defaultVal ]]; then
 				eval $promptVar=\"$defaultVal\"
 				[[ $defaultValueUseNotes == true ]] && Note 0 1 "Using default value of '$defaultVal' for '$promptVar'"
 				return 0
 			fi
-			[[ $response != '' && $validateList == '*any*' ]] && eval $promptVar=\"$response\" && return 0
+			[[ -n $response && $validateList == '*any*' ]] && eval $promptVar=\"$response\" && return 0
 			[[ $validateList == '*optional*' ]] && eval $promptVar=\"$response\" && return 0
-			[[ $response == '' && $validateList == '*optional*' ]] && eval unset $promptVar && return 0
-			[[ $response != '' && $noCheck == true ]] && eval $promptVar=\"$response\" && return 0
+			[[ -z $response && $validateList == '*optional*' ]] && eval unset $promptVar && return 0
+			[[ -n $response && $noCheck == true ]] && eval $promptVar=\"$response\" && return 0
 		done
 		dump -2 -l response
 
@@ -98,7 +102,7 @@ function Prompt {
 		else
 			unset verifyMsg
 			VerifyPromptVal
-			if [[ $verifyMsg != '' && $verifyMsg != true ]]; then
+			if [[ -n $verifyMsg && $verifyMsg != true ]]; then
 				[[ $hadValue == true ]] && echo "Specified value for '$promptVar' is '$response'"
 				if [[ $numTabs -gt 0 ]]; then
 					local cntr
@@ -125,7 +129,7 @@ function Prompt {
 			fi
 		fi #[[  "$promptVar" == 'client' && $response == '?' ]]
 	done
-	[[ $hadValue != true && $logFile != '' ]] && Msg2 "\n^$FUNCNAME: Using specified value of '$response' for '$promptVar'" >> $logFile
+	[[ $hadValue != true && -n $logFile ]] && Msg2 "\n^$FUNCNAME: Using specified value of '$response' for '$promptVar'" >> $logFile
 	return 0
 } #Prompt
 export -f Prompt
@@ -136,3 +140,4 @@ export -f Prompt
 ## Wed Jan  4 13:54:10 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Mar 16 10:57:45 CDT 2017 - dscudiero - Add messaging if there is a timeout value specified
 ## Thu Mar 16 10:59:16 CDT 2017 - dscudiero - General syncing of dev to prod
+## Thu Mar 16 12:14:31 CDT 2017 - dscudiero - Fixed a problem with timeouts not timeing out, added tabbing to the timeout text
