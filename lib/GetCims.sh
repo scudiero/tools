@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.12" # -- dscudiero -- 03/16/2017 @  7:55:18.41
+# version="2.0.13" # -- dscudiero -- 03/16/2017 @  8:21:53.38
 #===================================================================================================
 # Get CIMs
 #===================================================================================================
@@ -24,7 +24,7 @@ function GetCims {
 	fi
 	dump -3 -t siteDir allowMultiCims suffix validVals
 
-	cd $siteDir/web
+	[[ -d $siteDir/web ]] && cd $siteDir/web || Terminate "($FUNCNAME) Could not locate siteDir:\n^'$siteDir/web'"
 	adminDirs=($(ProtectedCall "find -maxdepth 1 -type d -name '[a-z]*admin' -printf '%f\n' | sort"))
 
 	[[ -d $siteDir/web/cim ]] && adminDirs+=('cim')
@@ -67,3 +67,4 @@ export -f GetCims
 ## Thu Jan  5 15:30:07 CST 2017 - dscudiero - modify debug messages
 ## Tue Mar 14 10:36:01 CDT 2017 - dscudiero - Add prefix argument to controle tabbing
 ## Thu Mar 16 08:13:26 CDT 2017 - dscudiero - add ability to pass in the verb to use in the message
+## Thu Mar 16 09:38:34 CDT 2017 - dscudiero - Added a check to make sure the directory passed in exists
