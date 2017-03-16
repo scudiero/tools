@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.78" # -- dscudiero -- 03/16/2017 @ 10:55:49.53
+# version="2.0.79" # -- dscudiero -- 03/16/2017 @ 10:58:19.56
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -55,7 +55,7 @@ function Prompt {
 			promptText="$(sed "s/\^/$tabStr/g" <<< $promptText)"
 			if [[ $verify != false ]]; then
 				if [[ -z $readTimeOutOpt ]]; then
-					echo -e "$promptText > "
+					echo -n -e "$promptText > "
 				else
 					echo -e "$promptText"
 				 	echo -n -e "(Note, prompt will timeout in $timeOut secs.) > "
@@ -135,3 +135,4 @@ export -f Prompt
 #===================================================================================================
 ## Wed Jan  4 13:54:10 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Mar 16 10:57:45 CDT 2017 - dscudiero - Add messaging if there is a timeout value specified
+## Thu Mar 16 10:59:16 CDT 2017 - dscudiero - General syncing of dev to prod
