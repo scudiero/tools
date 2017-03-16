@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.210 # -- dscudiero -- 03/14/2017 @ 13:56:30.29
+version=1.21.211 # -- dscudiero -- 03/16/2017 @ 12:39:38.66
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -106,7 +106,7 @@ function BuildEmployeeTable {
 		RunSql2 $sqlStmt
 
 	### Get the transactonal values, loop through them and  write out the warehouse record
-		sqlStmt="select $transactionalColumns from employees where db_isactive = \"Y\" order  by db_employeekey"
+		sqlStmt="select $transactionalColumns from employees where db_isactive in (\"N\",\"L\") order  by db_employeekey"
 		RunSql2 "$contactsSqliteFile" $sqlStmt
 		for resultRec in "${resultSet[@]}"; do
 			fieldCntr=1; unset valuesString
@@ -432,3 +432,4 @@ return 0
 ## Thu Mar  9 07:50:47 CST 2017 - dscudiero - Take my userid out of the qa report email list
 ## Fri Mar 10 10:31:38 CST 2017 - dscudiero - added call to clientTimezone report
 ## Tue Mar 14 13:56:52 CDT 2017 - dscudiero - Change where the contacts db shadow is written
+## Thu Mar 16 12:41:17 CDT 2017 - dscudiero - Update employee table to also get employees with status of L
