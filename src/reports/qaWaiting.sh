@@ -1,5 +1,5 @@
 #!/bin/bash
-version=1.0.72 # -- dscudiero -- 03/16/2017 @ 16:52:10.84
+version=1.0.73 # -- dscudiero -- 03/16/2017 @ 16:56:21.55
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -120,7 +120,7 @@ ParseArgsStd
 		fi
 
 ## Send email
-	if [[ -n $emailAddrs '' && $sendMail == true ]]; then
+	if [[ -n $emailAddrs && $sendMail == true ]]; then
 		Msg2 >> $outFile; Msg2 "Sending email(s) to: $emailAddrs">> $outFile; Msg2 >> $outFile
 		for emailAddr in $(echo $emailAddrs | tr ',' ' '); do
 			mutt -a "$outFile" -s "$report report results: $(date +"%m-%d-%Y")" -- $emailAddr < $outFile
@@ -135,3 +135,4 @@ Goodbye 0 #'alert'
 #===================================================================================================
 ## Check-in log
 #===================================================================================================
+## Thu Mar 16 16:56:46 CDT 2017 - dscudiero - General syncing of dev to prod
