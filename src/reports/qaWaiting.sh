@@ -1,5 +1,5 @@
 #!/bin/bash
-version=1.0.73 # -- dscudiero -- 03/16/2017 @ 16:56:21.55
+version=1.0.74 # -- dscudiero -- 03/17/2017 @  8:01:27.77
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -76,7 +76,7 @@ ParseArgsStd
 		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
 			Msg2  | tee -a $outFile
-			Msg2 "Found ${#resultSet[@]} testing projects with at least one test case with 'bolcked' status:" | tee -a $outFile
+			Msg2 "Found ${#resultSet[@]} testing projects with at least one test case with 'blocked' status:" | tee -a $outFile
 			for ((i=0; i<${#resultSet[@]}; i++)); do
 				#echo -e "\n${resultSet[$i]}"
 				unset outStr
@@ -136,3 +136,4 @@ Goodbye 0 #'alert'
 ## Check-in log
 #===================================================================================================
 ## Thu Mar 16 16:56:46 CDT 2017 - dscudiero - General syncing of dev to prod
+## Fri Mar 17 10:45:25 CDT 2017 - dscudiero - v
