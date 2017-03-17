@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.1.2 # -- dscudiero -- 03/17/2017 @  8:41:36.59
+version=1.1.8 # -- dscudiero -- 03/17/2017 @  9:35:23.23
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye DumpMap GetExcel'
@@ -71,8 +71,8 @@ for var in $falseVars; do eval $var=false; done
 	variableMap['Remaining']='numRemaining'
 	variableMap['Passed']='numPassed'
 	variableMap['Failed']='numFailed'
-	variableMap['Waiting']='numBlocked'
-	variableMap['Blocked']='numWaiting'
+	variableMap['Waiting']='numWaiting'
+	variableMap['Blocked']='numBlocked'
 	variableMap['Other']='numOther'
 	variableMap['Estimated Effort (hours)']='resourcesEstimate'
 	variableMap['Effort to date (hours)']='resourcesUsed'
@@ -167,7 +167,7 @@ for workbook in "${workbooks[@]}"; do
 					sheetVersion=${line##*|}
 					token1=$(cut -d'.' -f1 <<< $sheetVersion); token1=${token1}00; token1=${token1:0:3}
 					token2=$(cut -d'.' -f2 <<< $sheetVersion); token2=${token2}00; token2=${token2:0:3}
-					token3=$(cut -d'.' -f3 <<< $sheetVersion)
+					token3=$(cut -d'.' -f3 <<< $sheetVersion); token3=00${token3}; token3=${token3: -3}
 					sheetVersion="${token1}${token2}${token3}"
 				fi
 
@@ -203,8 +203,8 @@ for workbook in "${workbooks[@]}"; do
 	## Do we have the data necessary to continue
 		Msg2 $V1 "^^Checking data..."
 		if [[ $clientCode == '' || $env == '' || $product == '' || $project == '' || $instance == '' || jalotTaskNumber == '' ]]; then
-			Msg2 $WT1 "Insufficient data to uniquely identify QA project"
-			dump -2 -t clientCode env product project instance jalotTaskNumber
+			Msg2 $WT1 "File '$workbook'\nhas insufficient data to uniquely identify QA project"
+			dump -t -t clientCode env product project instance jalotTaskNumber
 			Msg2 "^^Skipping file"
 			continue
 		fi
@@ -222,8 +222,8 @@ for workbook in "${workbooks[@]}"; do
 		done
 
 	## See if there is an existing record in the database do setup accordingly
-		sqlStmt="select $primaryKey from $qaStatusTable where clientCode=$clientCode and env=$env and \
-				product=$product and project=$project and instance=$instance and jalotTaskNumber=$jalotTaskNumber"
+		whereClause="clientCode=$clientCode and env=$env and product=$product and project=$project and instance=$instance and jalotTaskNumber=$jalotTaskNumber"
+		sqlStmt="select $primaryKey from $qaStatusTable where $whereClause"
 		RunSql 'mysql' $sqlStmt
 		if [[ ${#resultSet[@]} -eq 0 ]]; then
 			sqlAction='Insert'
@@ -270,7 +270,7 @@ for workbook in "${workbooks[@]}"; do
 				mv -f $workbook "$qaTrackingRoot/Archive/"
 				cd $cwd
 				## Get the key for the qastatus record
-					whereClause="clientCode=\"$clientCode\" and  product=\"$product\" and project=\"$project\" and instance=\"$instance\" and env=\"$env\" and jalotTaskNumber=\"$jalotTaskNumber\" "
+					whereClause="clientCode=$clientCode and  product=$product and project=$project and instance=$instance and env=$env and jalotTaskNumber=$jalotTaskNumber"
 					sqlStmt="select idx from $qaStatusTable where $whereClause"
 					RunSql $sqlStmt
 					if [[ ${#resultSet[@]} -eq 0 ]]; then
@@ -307,3 +307,4 @@ Goodbye 0 #'alert'
 ## Mon Feb 20 12:52:53 CST 2017 - dscudiero - Adjustments for new spreadsheet
 ## Thu Mar 16 15:44:50 CDT 2017 - dscudiero - Added support for the 'blocked' data
 ## Fri Mar 17 08:42:05 CDT 2017 - dscudiero - Added sheetVersion
+## Fri Mar 17 10:45:12 CDT 2017 - dscudiero - Fixed problem with doubly quotes strings
