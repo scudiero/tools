@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.1.1 # -- dscudiero -- 03/16/2017 @ 15:44:21.39
+version=1.1.2 # -- dscudiero -- 03/17/2017 @  8:41:36.59
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye DumpMap GetExcel'
@@ -160,16 +160,27 @@ for workbook in "${workbooks[@]}"; do
 			recType=$(Trim "$(cut -d'|' -f2 <<< $line)")
 			[[ -z $recType ]] && continue
 			dump -2 -t recType
+			recTypeLower=$(Lower "$recType")
+
+			## Is this the title record, parse of sheet version
+				if [[ $recTypeLower == 'projectsummary' ]]; then
+					sheetVersion=${line##*|}
+					token1=$(cut -d'.' -f1 <<< $sheetVersion); token1=${token1}00; token1=${token1:0:3}
+					token2=$(cut -d'.' -f2 <<< $sheetVersion); token2=${token2}00; token2=${token2:0:3}
+					token3=$(cut -d'.' -f3 <<< $sheetVersion)
+					sheetVersion="${token1}${token2}${token3}"
+				fi
+
 			## Special processing for failed and waiting details records
-				[[ $(Lower "$recType") == 'failed' ]] && foundFailed=true && foundWaiting=false
-				[[ $(Lower "$recType") == 'waiting' ]] && foundWaiting=true && foundFailed=false
-				[[ $(Lower "$recType") == 'dev' && $foundFailed == true ]] && numFailedDev="$(cut -d'|' -f3 <<< $line | cut -d'.' -f1)" && continue
-				[[ $(Lower "$recType") == 'csm' && $foundFailed == true ]] && numFailedCSM="$(cut -d'|' -f3 <<< $line | cut -d'.' -f1)" && continue
-				[[ $(Lower "$recType") == 'dev' && $foundWaiting == true ]] && numWaitingDev="$(cut -d'|' -f3 <<< $line | cut -d'.' -f1)" && continue
-				[[ $(Lower "$recType") == 'csm' && $foundWaiting == true ]] && numWaitingCSM="$(cut -d'|' -f3 <<< $line | cut -d'.' -f1)" && continue
+				[[ $recTypeLower == 'failed' ]] && foundFailed=true && foundWaiting=false
+				[[ $recTypeLower == 'waiting' ]] && foundWaiting=true && foundFailed=false
+				[[ $recTypeLower == 'dev' && $foundFailed == true ]] && numFailedDev="$(cut -d'|' -f3 <<< $line | cut -d'.' -f1)" && continue
+				[[ $recTypeLower == 'csm' && $foundFailed == true ]] && numFailedCSM="$(cut -d'|' -f3 <<< $line | cut -d'.' -f1)" && continue
+				[[ $recTypeLower == 'dev' && $foundWaiting == true ]] && numWaitingDev="$(cut -d'|' -f3 <<< $line | cut -d'.' -f1)" && continue
+				[[ $recTypeLower == 'csm' && $foundWaiting == true ]] && numWaitingCSM="$(cut -d'|' -f3 <<< $line | cut -d'.' -f1)" && continue
 
 			## If 'instance' record  then parse off product and instance
-				if [[ ${recType:0:8} == 'Instance' ]]; then
+				if [[ ${recTypeLower:0:8} == 'instance' ]]; then
 					product="$(cut -d'|' -f3 <<< $line | cut -d' ' -f1)"
 					instance="$(cut -d'|' -f3 <<< $line | cut -d' ' -f3)"
 					[[ $product == $instance ]] && unset instance
@@ -295,3 +306,4 @@ Goodbye 0 #'alert'
 ## Thu Oct 20 15:58:44 CDT 2016 - dscudiero - Make sure that the python environment is setup
 ## Mon Feb 20 12:52:53 CST 2017 - dscudiero - Adjustments for new spreadsheet
 ## Thu Mar 16 15:44:50 CDT 2017 - dscudiero - Added support for the 'blocked' data
+## Fri Mar 17 08:42:05 CDT 2017 - dscudiero - Added sheetVersion
