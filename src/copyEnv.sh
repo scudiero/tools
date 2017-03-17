@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.8 # -- dscudiero -- 03/16/2017 @  9:24:20.85
+version=4.11.10 # -- dscudiero -- 03/17/2017 @  7:57:36.84
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -72,6 +72,8 @@ specialSource=false
 fullCopy=false
 unset suffix emailAddress clientHost remoteCopy
 progDir='courseleaf'
+haveCims=false
+haveClss=false
 
 #==================================================================================================
 # Standard arg parsing and initialization
@@ -198,27 +200,45 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 		Msg2
 		unset ans
 		WarningMsg "Target site ($tgtDir) already existes."
-		Prompt ans "Do you wish to $(ColorK 'overwrite') the existing site (Yes) or $(ColorK 'refresh') files in the existing sites site (No) ?" 'Yes No' 'Yes' '5'; ans=$(Lower ${ans:0:1})
+		Prompt ans "Do you wish to $(ColorK 'overwrite') the existing site (Yes) or $(ColorK 'refresh') files in the existing sites site (No) ?" 'Yes No' 'Yes' ; ans=$(Lower ${ans:0:1})
 		[[ $ans == 'y' ]] && cloneMode='Replace' || cloneMode='Refresh'
 	fi
+
+## See if we have any CIMs
+	allCims=true; unset cimStr
+	GetCims "$srcDir"
+	unset allCims
+	[[ -z $cimStr ]] && haveCims=true
+
+
+## See if we have CLSS
+	[[ -d $srcDir/web/wen ]] && haveClss=true
 
 #==================================================================================================
 ## See if there are any additional directories the user wants to skip
 if [[ $verify == true ]]; then
 	Msg2
-	[[ $skipCim == true ]] && ans='Yes' || unset ans
-	Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CIM & CIM instances" 'No,Yes,Select' 'No' '6'; ans="$(Lower "${ans:0:1}")"
-	if [[ $ans == 'y' || $ans == 's' ]]; then
-		[[ $ans != 's' ]] && allCims=true
-		GetCims "$srcDir" "\t" "$(ColorK 'EXCLUDE')"
-		unset allCims
-		skipCim=true
+	if [[ $haveCims == true ]]; then
+		[[ $skipCim == true ]] && ans='Yes' || unset ans
+		Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CIM & CIM instances" 'No,Yes,Select' 'No' '6'; ans="$(Lower "${ans:0:1}")"
+		if [[ $ans == 'y' || $ans == 's' ]]; then
+			[[ $ans != 's' ]] && allCims=true
+			GetCims "$srcDir" "\t" "$(ColorK 'EXCLUDE')"
+			unset allCims
+			skipCim=true
+		fi
+	else
+		skipCim=false
 	fi
 
 	Msg2
-	[[ $skipClss == true ]] && ans='Yes' || unset ans
-	Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CLSS/WEN" 'No,Yes' 'No' '6'; ans="$(Lower "${ans:0:1}")"
-	[[ $ans == 'y' ]] && skipClss=true
+	if [[ $haveClss == true ]]; then
+		[[ $skipClss == true ]] && ans='Yes' || unset ans
+		Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CLSS/WEN" 'No,Yes' 'No' '6'; ans="$(Lower "${ans:0:1}")"
+		[[ $ans == 'y' ]] && skipClss=true
+	else
+		skipClss=false
+	fi
 
 	Msg2
 	if [[ -z $skipAlso ]]; then
@@ -564,3 +584,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## Fri Mar 10 10:31:17 CST 2017 - dscudiero - Added a timeout value to the exclued other prompt
 ## Tue Mar 14 14:48:56 CDT 2017 - dscudiero - add a timer on the exclude others prompt
 ## Thu Mar 16 09:39:01 CDT 2017 - dscudiero - Added new options to skip cims and clss files
+## Fri Mar 17 10:46:03 CDT 2017 - dscudiero - Optional ask to skip cim or clss only if the site has those products present
