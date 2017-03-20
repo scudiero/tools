@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.52" # -- dscudiero -- 03/16/2017 @  8:12:11.62
+# version="2.0.54" # -- dscudiero -- 03/20/2017 @  8:06:54.83
 #===================================================================================================
 # Print/Log formatted messages
 #===================================================================================================
@@ -135,18 +135,17 @@ function Msg2 {
 	[[ $tabStr = '' ]] && tabStr="$(PadChar ' ' 5)"
 	local msgType msgLevel msgTabs msgMode msgFold msgNewLine=true
 	unset msgType msgLevel msgTabs msgMode msgFold
-	dump -4 -n msgText -t msgCtrl
+	#dump -4 -n msgText -t msgCtrl
 
 	## Parse control string
 	local numTokens=1; for (( tCntr=0; tCntr<=${#msgCtrl}; tCntr++ )); do [[ ${msgCtrl:$tCntr:1} == ',' ]] && let numTokens=numTokens+1; done
 	msgType="$(Upper "$(cut -d',' -f1 <<< $msgCtrl)")"
-	dump -4 -t msgType
+	#dump -4 -t msgType
 	[[ $numTokens -gt 1 ]] && msgLevel=$(cut -d',' -f2 <<< $msgCtrl)
 	[[ $numTokens -gt 2 ]] && msgTabs=$(cut -d',' -f3 <<< $msgCtrl)
 	[[ $numTokens -gt 3 ]] && msgMode=$(cut -d',' -f4 <<< $msgCtrl)
 	[[ $numTokens -gt 4 ]] && msgFold=$(cut -d',' -f5 <<< $msgCtrl)
-	#[[ $verboseLevel -ge 4 ]] && echo -e '\tmsgLevel = >'$msgLevel'<'
-	dump -4 -t msgType msgTabs msgMode msgFold msgText
+	#dump -4 -t msgType msgTabs msgMode msgFold msgText
 
 	[[ $msgType == '.' || $msgType  == '-' || $msgType  == '' ]] && msgType='NORMAL'
 	[[ $msgType != 'NORMAL' && $msgType != 'NONL' ]] && msgType=$(Upper ${msgType:0:1})
@@ -156,7 +155,7 @@ function Msg2 {
 	[[ $msgFold  == '-' || $msgFold  == '.' || $msgFold  == '' ]] && msgFold=true
 
 	[[ $verboseLevel -ge 4 ]] && echo -e '\tmsgLevel = >'$msgLevel'<'
-	dump -4 -t msgType msgTabs msgMode msgFold msgText
+	#dump -4 -t msgType msgTabs msgMode msgFold msgText
 
 	## Check to see if we should just quit
 	if [[ $msgLevel != '' && $msgLevel -gt $verboseLevel ]] || [[ $quiet == true && $msgMode != 'L' && $msgMode != 'B' ]]; then
@@ -207,7 +206,7 @@ function Msg2 {
 	## Set screenwidth
 	local screenWidth=80
 	[[ $TERM == 'xterm' ]] && screenWidth=$(stty size </dev/tty | cut -d' ' -f2) || msgFold=false
-	dump -4 -t screenWidth msgFold #;echo -e '\t${#msgText} = >'${#msgText}'<'
+	#dump -4 -t screenWidth msgFold #;echo -e '\t${#msgText} = >'${#msgText}'<'
 
 	## Display / log message
 	if [[ $msgFold == false || ${#msgText} -le $screenWidth ]]; then
@@ -254,3 +253,4 @@ export -f Terminate Error Warning Info Note Verbose
 ## Wed Jan  4 13:34:04 CST 2017 - dscudiero - comment out the 'version=' line
 ## Thu Feb  9 08:06:34 CST 2017 - dscudiero - make sure we are using our own tmpFile
 ## Thu Mar 16 08:13:40 CDT 2017 - dscudiero - Quit immediataly if quiet is true
+## Mon Mar 20 08:07:34 CDT 2017 - dscudiero - Comment out Dump commands - trying to speed thing up
