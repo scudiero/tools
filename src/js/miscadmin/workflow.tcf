@@ -1,10 +1,14 @@
 //======================================================================================================
-// ??/??/16-- dgs -- initial
-// version:1.0.0 // -- dscudiero -- 02/10/2017 @ 12:52:37.71
+// ??/??/17-- dgs -- initial
+// version:1.0.1 // -- dscudiero -- 03/21/2017 @ 11:00:44.32
 //======================================================================================================
 localsteps:Miscellaneous Workflow Management|groups|workflow|attributes=todo[ToDo Item],fyi[FYI Only],fyiall[FYI All],optional[If Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
 
 template:custom
 pageflags:autoapprove
 
-workflow:standard|
+workflow:standard|START,END
+
+//======================================================================================================================
+// Check in log
+//==================================================================================================================// Tue Mar 21 11:07:12 CDT 2017 - dscudiero - Added check in log comments
