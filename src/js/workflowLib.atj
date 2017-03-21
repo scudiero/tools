@@ -1,19 +1,19 @@
 //======================================================================================================================
-wfLibVersion="1.7.2" // -- dscudiero -- 03/10/2017 @ 15:21:41.61
+wfLibVersion="1.7.5" // -- dscudiero -- 03/10/2017 @ 15:21:41.61
 //======================================================================================================================
-// Common wf functions and helper functions to support workflow
+// Common workflow functions and helper functions to support workflow
 //======================================================================================================================
+// 03/20/17 - dgs - Updated Related to use getTCFValue where appropriate
+//					Updated Related to not quit if college is not set unless substitution type is Col
+//					Updated other functions to use wfDebug and wfDump
+//======================================================================================================================
+
+// Loading message
 if (typeof wfLibLoaded === "undefined") {
 	if (typeof wfInDebugEnv != "undefined") {
-		if (wfEnvIsDev) print_debug("\n<<< Loading "+ wfLibName);
+		if (wfEnvIsDev) wfDebug(1,"\n<<< Loading "+ wfLibName);
 	} else { wfInDebugEnv = true }
 }
-
-//======================================================================================================================
-//======================================================================================================================
-// Common wffuncs
-//======================================================================================================================
-//======================================================================================================================
 
 //======================================================================================================================
 // Add related departments/colleges/schools to the workflow,
@@ -40,15 +40,15 @@ if (typeof wfLibLoaded === "undefined") {
 //		_formFieldVars		The form fields that contain 'related/crosslisted/associated/consultant' data.
 //							The formate is name[|format][|dataAttributeName] where :
 //							format is one item in the set {courseCode,colCode,deptCode,subjCode}, the default is 'code'
-//							dataAttributeName is the hame of the object attribute that contains the data for the reference, default is 'data'
+//							dataAttributeName is the name of the object attribute that contains the data for the reference, default is 'data'
 //							May be repeated as necessary.
 //							e.g. 	Related_formFieldVars:crosslisted|code; 	//Applies to all Related wfrule
 //									Related_formFieldVars:slashlisted|code; 	//Applies to all Related wfrule
 //
 //		_codeVarName		The name of the form variable containing the 'code' data, defaults to 'code'
-//		_colVarName			The name of the form variable containing the 'college' data, defaults to 'college'
-//		_deptVarName		The name of the form variable containing the 'department' data, defaults to 'department'
-//		_subjVarName		The name of the form variable containing the 'subject' data, defaults to 'subject'
+//		_collegeVarName		The name of the form variable containing the 'college' data, defaults to 'college'
+//		_departmentVarName	The name of the form variable containing the 'department' data, defaults to 'department'
+//		_subjectVarName		The name of the form variable containing the 'subject' data, defaults to 'subject'
 //
 //=================================================================================================
 // Notes:
@@ -95,7 +95,7 @@ if (typeof wfLibLoaded === "undefined") {
 // 11/15/16	- dgs - Re-factored to allow for the specification of the core proposal variable names
 //======================================================================================================================
 wffuncs.Related = function(inval, wfrule, args) {
-	var version='4.9.5'; var myName=wfrule.attrname
+	var version='4.9.6'; var myName=wfrule.attrname
 	wfDebug(3,'\n*** In '+ myName + " (" + version + ") called as '" + args.context + " / " + wfrule.searchfor + "' ***");
 	wfDump(3,["Full Step text;"+inval]);
 
@@ -111,7 +111,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 		if (reqType.substr(reqType.length - 'notify'.length) == 'notify') {
 			notifyMode=true;
 		}
-		var substitutionType;
+		var substitutionType, tmpData;
 		var callOpts=wfrule.options.toLowerCase()
 		var tmpArray=callOpts.split(";");
 		callOpts=tmpArray[0];
@@ -128,71 +128,69 @@ wffuncs.Related = function(inval, wfrule, args) {
 
 	wfDump(3,["calledAs;"+calledAs,"reqType;"+reqType,"notifyMode;"+notifyMode,"callOpts;"+callOpts,"substitutionType;"+substitutionType]);
 
-	//Get the data from the config file
-		// Control data
-			var checkChanged;
-				varName="tcfdata." + calledAs + "_" + "_checkChanged";
-				if (typeof eval(varName) === 'undefined') { varName="tcfdata." + myName + "_checkChanged"; }
-				if (typeof eval(varName) != 'undefined') { checkChanged=eval(varName)[0]; }
-				if (checkChanged === "true") {checkChanged=true} else {checkChanged=false}
+	//Get the configuration/control data from the config file
+		// Get variables that are boolean
+		var varList=["checkChanged","ecoSystemData"];
+		varList.forEach(function(name) {
+			eval (name + "=true")
+			varName=calledAs + "_" + name;
+			if (getTCFValue(varName) === "")
+				varName=myName + "_" + name;
+			if (getTCFValue(varName) != "true") {eval (name+ "=false")}
+		});
 
-			var ecoSystemData;
-				varName="tcfdata." + calledAs + "_" + "ecoSystemData";
-				if (typeof eval(varName) === 'undefined') { varName="tcfdata." + myName + "_ecoSystemData"; }
-				if (typeof eval(varName) != 'undefined') { ecoSystemData=eval(varName)[0]; }
-				if (ecoSystemData === "true") {ecoSystemData=true} else {ecoSystemData=false}
+		// Get variables that have data values
+		var varList=["ecoSystemDataFyi","ecoSystemType"];
+		varList.forEach(function(name) {
+			eval (name + "=''")
+			varName=calledAs + "_" + name;
+			if (getTCFValue(varName) === "")
+			 	varName=myName + "_" + name;
+			if (getTCFValue(varName) != "")
+				eval (name + "=getTCFValue("  +varName + ")");
+		});
 
-			var ecoSystemType="";
-				varName="tcfdata." + calledAs + "_" + "ecoSystemType";
-				// If we have ecoSystemType data then reformat the string to be an valid sql 'in' string
-				if (typeof eval(varName) === 'undefined') { varName="tcfdata." + myName + "_ecoSystemType"; }
-				if (typeof eval(varName) != 'undefined') {
-					ecoSystemType=eval(varName)[0];
-					var ecoSystemTypeStr='';
-					var tempArray = ecoSystemTypeStr.split(",");
-					tempArray.forEach(function(type) {
-						ecoSystemTypeStr=ecoSystemTypeStr + ",'" + type + "'";
-					});
-					ecoSystemTypeStr='(' + ecoSystemTypeStr.substring(1) + ')';
-				}
+		// Build ecoSystem query string
+		var ecoSystemTypeStr='';
+		if (ecoSystemType != "" ){
+			var ecoSystemTypeStr='';
+			var tempArray = ecoSystemTypeStr.split(",");
+			tempArray.forEach(function(type) {
+				ecoSystemTypeStr=ecoSystemTypeStr + ",'" + type + "'";
+			});
+			ecoSystemTypeStr='(' + ecoSystemTypeStr.substring(1) + ')';
+		}
 
-			var ecoSystemDataFyi="";
-				varName="tcfdata." + calledAs + "_" + "ecoSystemDataFyi"
-				if (typeof eval(varName) === 'undefined') { varName="tcfdata." + myName + "_ecoSystemDataFyi" }
-				if (typeof eval(varName) != 'undefined') { ecoSystemDataFyi=eval(varName)[0]; }
+		// Set the tcfdata variable names for the proposal data
+		var varList=["code","college","department","subject"];
+		varList.forEach(function(name) {
+			varName=name + "VarName";
+			eval (varName + "= '" + name + "'");
+			var tcfValue=getTCFValue(calledAs + "_" + varName);
+			if (tcfValue === '' ) {
+				tcfValue=getTCFValue(myName + "_" + name)
+				if (tcfValue != '' )
+					eval(varName + "= '" + tcfValue + "'");
+			} else {
+				eval(varName + "= '" + tcfValue + "'");
+			}
+			//eval (name + "VarName= '" + varName + "'");
+		});
 
-		// Get the name of the proposal form variables
-			var codeVarName="code";
-				varName="tcfdata." + calledAs + "_" + "codeVarName"
-				if (typeof eval(varName) === 'undefined') { varName="tcfdata." + myName + "_codeVarName" }
-				if (typeof eval(varName) != 'undefined') { codeVarName=eval(varName)[0]; }
+		// Get the form field variables data, parse off to an array if found
+		var formFieldVars=[];
+		var formFieldVarsStr="";
+		varName=calledAs + "_" + "formFieldVars"
+		if (getTCFValue(varName) === '' )
+			varName=myName + "_" + "formFieldVars"
+		if (getTCFValue(varName) != '') {
+			formFieldVarsStr=getTCFValue(varName).toString();
+			formFieldVars=formFieldVarsStr.split(",");
+		}
 
-			var colVarName="college";
-				varName="tcfdata." + calledAs + "_" + "colVarName"
-				if (typeof eval(varName) === 'undefined') { varName="tcfdata." + myName + "_colVarName" }
-				if (typeof eval(varName) != 'undefined') { colVarName=eval(varName)[0]; }
-
-			var deptVarName="department";
-				varName="tcfdata." + calledAs + "_" + "deptVarName"
-				if (typeof eval(varName) === 'undefined') { varName="tcfdata." + myName + "_deptVarName" }
-				if (typeof eval(varName) != 'undefined') { deptVarName=eval(varName)[0]; }
-
-			var subjVarName="subject";
-				varName="tcfdata." + calledAs + "_" + "subjVarName"
-				if (typeof eval(varName) === 'undefined') { varName="tcfdata." + myName + "_subjVarName" }
-				if (typeof eval(varName) != 'undefined') { subjVarName=eval(varName); }
-
-			var formFieldVars=[];
-			var formFieldVarsStr="";
-				varName="tcfdata." + calledAs + "_" + "formFieldVars"
-				if (typeof eval(varName) === 'undefined') { varName="tcfdata." + myName + "_formFieldVars" }
-				if (typeof eval(varName) != 'undefined') {
-					formFieldVarsStr=eval(varName).toString();
-					formFieldVars=formFieldVarsStr.split(",");
-				}
-
-		wfDump(3,["\n\tcheckChanged;"+checkChanged.toSource(),"ecoSystemData;"+ecoSystemData.toSource(),"ecoSystemType;"+ecoSystemType,
-			"ecoSystemDataFyi;"+ecoSystemDataFyi.toSource(),"formFieldVars;"+formFieldVars.toSource()])
+		wfDump(3,["\n\tcheckChanged;"+checkChanged,"ecoSystemData;"+ecoSystemData,"ecoSystemType;"+ecoSystemType,
+				"ecoSystemDataFyi;"+ecoSystemDataFyi,"formFieldVars;"+formFieldVars.toSource(),
+				"codeVarName;"+codeVarName,"collegeVarName;"+collegeVarName,"departmentVarName;"+departmentVarName,"subjectVarName;"+subjectVarName])
 
 	// Set internal variables for the proposal data, check we have what we need
 		var proposalCode=null, proposalSubj=null, proposalDept=null, proposalCol=null;
@@ -202,22 +200,22 @@ wffuncs.Related = function(inval, wfrule, args) {
 					throw "Failed 'rule type' check";
 
 				if (wfCimInstance === "courseadmin") {
-					if (eval("typeof tcfdata." + codeVarName) === 'undefined') {
-						throw "Failed '" + codeVarName + "' not null check"
-					} else { proposalCode=eval("tcfdata." + codeVarName + "[0]")}
+					proposalCode=getTCFValue(codeVarName)
+					if (proposalCode === "")
+						throw "Failed, code tcf variable '" + codeVarName + "' not null check"
 
-					if (eval("typeof tcfdata." + subjVarName) === 'undefined') {
-						throw "Failed '" + subjVarName + "' not null check"
-					} else { proposalSubj=eval("tcfdata." + subjVarName + "[0].code")}
+					proposalSubj=getTCFValue(subjectVarName)
+					if (proposalSubj === "" && substitutionType === 'subj')
+						throw "Failed, subject tcf variable '" + subjectVarName + "' not null check"
 				}
+				proposalCol=getTCFValue(collegeVarName)
+				if (proposalCol === "" && substitutionType === 'college')
+					throw "Failed, college tcf variable: '" + collegeVarName + "' not null check"
 
-				if (eval("typeof tcfdata." + colVarName) === 'undefined') {
-					throw "Failed '" + colVarName + "' not null check"
-				} else { proposalCol=eval("tcfdata." + colVarName + "[0].code")}
+				proposalDept=getTCFValue(departmentVarName)
+				if (proposalDept === "" && (substitutionType === 'dept' || substitutionType === 'college'))
+					throw "Failed, department tcf variable '" + departmentVarName + "' not null check"
 
-				if (eval("typeof tcfdata." + deptVarName) === 'undefined') {
-					throw "Failed '" + deptVarName + "' not null check"
-				} else { proposalDept=eval("tcfdata." + deptVarName + "[0].code")}
 		} //try
 		//Catch block for errors thrown in above try block
 		catch(err) { wfDebug("\t*Error* -- " + myName + ": " + err + "\n"); return false; }
@@ -237,8 +235,11 @@ wffuncs.Related = function(inval, wfrule, args) {
 		var ref={};
 		format=format.toLowerCase();
 		var data=eval("dataObj." + dataAttributeName);
-		var tempArray=data.split(' ');
-
+		if (data.indexOf('.') > 0 ) {
+			var tempArray=data.split('.')
+		} else {
+			var tempArray=data.split(' ');
+		}
 		ref.data=tempArray[0];
 		ref.format="subj";
 
@@ -291,7 +292,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 		formFieldVars.forEach(function(formVar) {
 			var tmpArray=formVar.split('|');
 			formVar=tmpArray[0];
-			formVarFormat='courseCode'
+			formVarFormat='courseCode' // default value
 			// Parse off formVar name and optional forVar format (i.e. formVarName|formVarFormat|dataAttributeName)
 			if (tmpArray.length > 1) {
 				formVarFormat=tmpArray[1].toLowerCase();
@@ -305,20 +306,21 @@ wffuncs.Related = function(inval, wfrule, args) {
 			wfDump(3,["\tformVarFormat;"+formVarFormat,"\tdataAttributeName;"+dataAttributeName,])
 
 			var tcfData=[];
-			tcfData=eval('tcfdata.'+formVar); // jshint ignore:line
-			if (typeof(tcfData) === 'undefined') {
+			if (typeof eval("tcfdata."+formVar) != "undefined" ) {
+				eval ("tcfData=tcfdata."+formVar); // jshint ignore:line
+				wfDump(3,["\ttcfData;"+tcfData.toSource()]);
+			} else {
 				wfDebug(3,'\t\t*** Variable ' + formVar + ' is not defined in the tcf file, skipping');
 				return;
 			}
-			wfDump(4,["\ttcfData;"+tcfData.toSource()]);
 
 			var tcaData=[];
-			if (typeof eval('tcadata.'+formVar) != 'undefined' ) {
-				tcaData=eval('tcadata.'+formVar); // jshint ignore:line
-				wfDump(4,["\ttcaData;"+tcaData.toSource()]);
+			if (typeof eval("tcadata."+formVar) != "undefined" ) {
+				eval ("tcaData=tcadata."+formVar); // jshint ignore:line
+				wfDump(3,["\ttcaData;"+tcaData.toSource()]);
 			}
 
-			// Parse the data and build a refs object for the tcf and tca data
+			// Parse the data and build a refs object for the tcf and tca data -- cannot use getTCFValue since we want an array back
 			tcfData.forEach(function(a) {
 				ref=ParseRelatedData(a,formVarFormat,dataAttributeName);
 				if (ref != {}) {
@@ -386,7 +388,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 						outToken.source=ref.source;
 						outTokens.push(outToken);
 					} else if (ref.format === "subj" ) {
-						resultSet=LookupCode("deptCode","subjCode",ref.data,"",proposalDept,colVarName,deptVarName,subjVarName);
+						resultSet=LookupCode("deptCode","subjCode",ref.data,"",proposalDept,collegeVarName,departmentVarName,subjectVarName);
 					   //function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colColumnName,deptColumnName,subjColumnName) {
 					}
  					break;
@@ -400,11 +402,11 @@ wffuncs.Related = function(inval, wfrule, args) {
 						outToken.source=ref.source;
 						outTokens.push(outToken);
 					} else if (ref.format === "dept" ) {
-						resultSet=LookupCode("colCode","deptCode",ref.data,"",proposalCol,colVarName,deptVarName,subjVarName);
+						resultSet=LookupCode("colCode","deptCode",ref.data,"",proposalCol,collegeVarName,departmentVarName,subjectVarName);
 						 //function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colColumnName,deptColumnName,subjColumnName) {
 
 					} else if (ref.format === "subj" ) {
-						resultSet=LookupCode("colCode","subjCode",ref.data,"",proposalCol,colVarName,deptVarName,subjVarName);
+						resultSet=LookupCode("colCode","subjCode",ref.data,"",proposalCol,collegeVarName,departmentVarName,subjectVarName);
 					   //function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colColumnName,deptColumnName,subjColumnName) {
 					}
 	 				break;
@@ -414,7 +416,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 					//	steps=tcfdata.CrosslistedCollegesSteps;
 					if (ref.format === "dept" ) {
 						//sqlStmt="SELECT distinct college as token FROM cimlookup WHERE department=?";
-						resultSet=LookupCode("subjCode","deptCode",ref.data,"",proposalSubj,colVarName,deptVarName,subjVarName);
+						resultSet=LookupCode("subjCode","deptCode",ref.data,"",proposalSubj,collegeVarName,departmentVarName,subjectVarName);
 					   //function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colColumnName,deptColumnName,subjColumnName) {
 					} else if (ref.format === "subj" ) {
 						//sqlStmt="SELECT distinct college as token FROM cimlookup WHERE subject=?";
@@ -623,9 +625,7 @@ function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colCol
 // Return additional steps for all 'equiv' courses in courseref table
 //=================================================================================================
 wffuncs.AddSameAs = function(inval, wfrule, args) {
-	var myName=wfrule.attrname; var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
-	if (haveDebug) Debug('\n*** In '+ myName + " called as '" + wfrule.searchfor + ", Step: '" + inval +"' ***");
-	//if (haveDebug) { Dump('\tinval',inval); Dump('\twfrule',wfrule.toSource()); Dump('\targs',args.toSource()); }
+	var myName=wfrule.attrname; wfDebug(3,'\n*** In '+ myName + " called as '" + wfrule.searchfor + ", Step: '" + inval +"' ***");
 
 	var retArray=[];
 	//Try block encapsulated main function
@@ -648,7 +648,7 @@ wffuncs.AddSameAs = function(inval, wfrule, args) {
 				var proposalSubj=tcfdata.subject[0].code;
 				var proposalDept=tcfdata.department[0].code;
 				var proposalCol=tcfdata.college[0].code;
-				if (haveDebug) { Dump('reqType',reqType); Dump('parentCode',parentCode); Dump('proposalCol',proposalCol); Dump('proposalDept',proposalDept); }
+				wfDump(3,['reqType;'+reqType,'parentCode;'+parentCode,'proposalCol;'+proposalCol,'proposalDept;'+proposalDept]);
 
 			// Lookup the equiv course from coursref
 			var refSubj;
@@ -656,9 +656,9 @@ wffuncs.AddSameAs = function(inval, wfrule, args) {
 			sqlParms=[parentCode,proposalDept];
 			resultSet1=dbquery("courseref",sqlStmt,sqlParms);
 			resultSet1.forEach(function(courserefResult) {
-				if (haveDebug) { Debug('\t Equiv result = >' + courserefResult.toSource() + '<\n'); }
+				wfDebug(3,'\t Equiv result = >' + courserefResult.toSource() + '<\n')
 				refSubj=courserefResult.dept;
-				if (haveDebug) { Dump('\t\t refSubj',refSubj); }
+				wfDump(3,['\trefSubj;'+refSubj]);
 				if (reqType.indexOf('depts') > 0) {
 					sqlStmt="SELECT DISTINCT department 'token' FROM cimlookup WHERE subject = ? AND department <> ? AND department <> ''";
 					sqlParms=[refSubj,proposalDept];
@@ -669,14 +669,14 @@ wffuncs.AddSameAs = function(inval, wfrule, args) {
 				//print_debug('\t\t sqlStmt = >' + sqlStmt + '<\n');
 				resultSet2=dbquery("cimcourses",sqlStmt,sqlParms);
 				resultSet2.forEach(function(cimlookupResult) {
-					if (haveDebug) { Dump('cimlookupResult',cimlookupResult.toSource()); }
+					wfDump(3,['cimlookupResult;'+cimlookupResult.toSource()]);
 					retArray.push(inval.replace(wfrule.regex,cimlookupResult.token))
 				}); //resultSet2
 			}); //resultSet1
 
 		// return steps if found or false if none added
 		if (retArray.length > 0) {
-			if (haveDebug) { retArray.forEach(function(step) { print_debug('\t Returning step:  >' + step + '<\n'); }); }
+			if (haveDebug) { retArray.forEach(function(step) { wfDebug(3,'\t Returning step:  >' + step + '<\n'); }); }
 			return retArray;
 		} else {
 			return false;
@@ -700,7 +700,9 @@ wffuncs.AddSameAs = function(inval, wfrule, args) {
 //=========================================================================================================================
 wffuncs.AddSisStep = function(inval, wfrule, args) {
 	// setup
-	var version='1.0.5'; var myName=wfrule.attrname;
+	var version='1.0.5';
+	var myName=wfrule.attrname; wfDebug(3,'\n*** In '+ myName + " called as '" + wfrule.searchfor + ", Step: '" + inval +"' ***");
+
 	// Check execution env
 	if(args && args.context && args.context != "wfrule")
 		return false;
@@ -736,13 +738,14 @@ wffuncs.AddSisStep = function(inval, wfrule, args) {
 // 09/10/2015 - dgs - New
 //==================================================================================================
 wffuncs.CheckProposalMode = function(inval, wfrule, args) {
-	var version='1.0.5'; var myName=wfrule.attrname; wfDebug('\n*** In '+ myName + "(" + version + ") called as '" + wfrule.searchfor + "' ***");
+	var version='1.0.5';
+	var myName=wfrule.attrname; wfDebug(3,'\n*** In '+ myName + "(" + version + ") called as '" + wfrule.searchfor + "' ***");
 	var reqType=wfrule.searchfor.toUpperCase();
  	var propMode = GetProposalMode();
 	//wfDump(['reqType;'+reqType,'propMode;'+propMode])
 
 	if (reqType.indexOf(propMode) >= 0) {
-		wfDebug("\t*** Including step")
+		wfDebug(3,"\t*** Including step")
 		return [inval.replace(wfrule.ifregex,'')];
 	}
 
@@ -758,7 +761,11 @@ wffuncs.CheckProposalMode = function(inval, wfrule, args) {
 
 //==================================================================================================
 // Return data from the eco system for this course
-// returns an array of reference objects, each reference object is of the form:
+// Called like 'GetEcoSystemData(parentCode,proposalDept,ecoSystemTypeStr)'
+// 'ecoSystemTypeStr' is a comma a string of comma separated 'type' values to compare against the data
+// in the type field in the courseref table
+//
+// Returns an array of reference objects, each reference object is of the form:
 // {ref:data ref:dept ref:format}
 // format is in {'subj','dept','path'}
 //==================================================================================================
@@ -834,9 +841,10 @@ function GetEcoSystemData(parentCode,proposalDept,ecoSystemTypeStr) {
 //=================================================================================================
 wffuncs.CheckChanged = function(inval, wfrule, args) {
 	var myName=wfrule.attrname;
-	var version='1.0.5'; wfDebug("\n*** In " + myName + "(" + version + ") called as '" + wfrule.searchfor + "', Step: '" + inval + "' ***");
+	var version='1.0.5'; wfDebug(3,"\n*** In " + myName + "(" + version + ") called as '" + wfrule.searchfor + "', Step: '" + inval + "' ***");
 	var retArray=[];
 	var reqType=wfrule.searchfor.toLowerCase();
+	var notMode=reqType.indexOf("not")>0;
 
 	//Initial Checks
 	try {
@@ -849,11 +857,12 @@ wffuncs.CheckChanged = function(inval, wfrule, args) {
 			var tmpArray=wfrule.options.split(" ");
 			var mode=tmpArray[0];
 			var checkFields=tmpArray[1];
+
 			tmpArray=mode.split(':');
 			mode=tmpArray[1];
 			tmpArray=checkFields.split(':');
-			checkFields=tmpArray[1].split(",");
-			wfDump(["wfrule.options;"+wfrule.options,"mode;"+mode,"checkFields;"+checkFields])
+			checkFields=checkFields.split(",");
+			wfDump(3,["wfrule.options;"+wfrule.options,"mode;"+mode,"checkFields;"+checkFields])
 
 		// Get the changed fields
 			var diffdata = {};
@@ -883,13 +892,21 @@ wffuncs.CheckChanged = function(inval, wfrule, args) {
 			allowStep=true;
 		if (mode === 'any' && oneInList === true)
 			allowStep=true;
+		if (notMode) {
+			wfDebug(3,"\t*** 'notMode' active, inverting results")
+			if (allowStep) {
+				allowStep=false
+			} else {
+				allowStep=true
+			}
+		}
 
 	// Return results
 		if(allowStep) {
-			wfDebug(0,"\t*** Allowing step")
+			wfDebug(3,"\t*** Allowing step")
 			return [inval.replace(wfrule.ifregex,'')];
 		}
-		wfDebug(0,"\t*** Skipping step")
+		wfDebug(3,"\t*** Skipping step")
 		return false
 
 } //CheckChanged
@@ -1238,20 +1255,20 @@ wffuncs.WhatsChanged = function(inval, wfrule, args) {
 	if (!haveDebug) return false;
 	if (!WhatsChangedFirstRun) return false;
 	var myName=wfrule.attrname;
-	Debug('\n*** In ' + myName + ' ***');
+	wfDebug(3,'\n*** In ' + myName + ' ***');
 
 	//Get a list of fields that have changed
 	var diffdata = {};
 	tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata});
 
 	if (!Object.keys(diffdata).length) {
-		Debug('\tNo Changes found in form data','b');
+		wfDebug(3,'\tNo Changes found in form data','b');
 	} else {
-		Debug('\t<strong><em>Changed Fields:</em></strong>','s');
-		Debug('\tChanged Fields:','d');
+		wfDebug(3,'\t<strong><em>Changed Fields:</em></strong>','s');
+		wfDebug(3,'\tChanged Fields:','d');
 		for (var i in diffdata) {
-			Debug('\t\t' + i.toString() + ' (' + eval('tcfdata.' + i + '.toSource()') + ')','d');  // jshint ignore:line
-			Debug('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp' + i.toString(),'s');
+			wfDebug(3,'\t\t' + i.toString() + ' (' + eval('tcfdata.' + i + '.toSource()') + ')','d');  // jshint ignore:line
+			wfDebug(3,'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp' + i.toString(),'s');
 		}
 	}
 
@@ -1280,5 +1297,6 @@ wffuncs.wfDumpVars = function(varList) {
 //==================================================================================================
 // END
 //==================================================================================================
-if (wfEnvIsDev && !wfLibLoaded) print_debug("\n\t" + wfLibName + " loaded\n");
+// Loaded message
+if (wfEnvIsDev && !wfLibLoaded) wfDebug(1,"\n\t" + wfLibName + " loaded\n");
 var wfLibLoaded=true;
