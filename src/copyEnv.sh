@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.37 # -- dscudiero -- 03/17/2017 @ 14:51:27.30
+version=4.11.43 # -- dscudiero -- 03/21/2017 @ 10:40:46.47
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -52,12 +52,15 @@ function parseArgs-copyEnv {
 	argList+=(-forUser,7,option,forUser,,'script',"Name the resulting site for the specified userid")
 	argList+=(-suffix,6,option,suffix,,'script',"Suffix text to be append to the resultant site name, e.g. -luc")
 	argList+=(-emailAddress,1,option,emailAddress,,'script',"The email address for CourseLeaf email notifications")
-	argList+=(-asSite,2,option,asSite,,script,'The name to give the new site)')
-	argList+=(-skipCat,6,switch,skipCat,,script,'Skip client CAT directories, i.e. web directories not in the skeleton)')
-	argList+=(-skipCim,6,switch,skipCim,,script,'Skip CIM and CIM instance files)')
-	argList+=(-skipClss,6,switch,skipClss,,script,'Skip CLASS instance files)')
-	argList+=(-skipWen,6,switch,skipClss,,script,'Skip CLASS instance files)')
-	argList+=(-skipAlso,6,option,skipAlso,,script,'Additional directories and or files to ignore, comma separated list)')
+	argList+=(-asSite,2,option,asSite,,script,'The name to give the new site')
+	argList+=(-skipCat,6,switch,skipCat,,script,'Skip client CAT directories, i.e. web directories not in the skeleton')
+	argList+=(-skipCim,6,switch,skipCim,,script,'Skip CIM and CIM instance files')
+	argList+=(-skipClss,6,switch,skipClss,,script,'Skip CLSS instance files')
+	argList+=(-skipWen,6,switch,skipClss,,script,'Skip CLSS instance files')
+	argList+=(-skipAlso,6,option,skipAlso,,script,'Additional directories and or files to ignore, comma separated list')
+	argList+=(-cim,3,switch,junk,onlyProduct='cim','Only copy CIM data')
+	argList+=(-cat,3,switch,junk,onlyProduct='cat','Only copy CAT data')
+	argList+=(-clss,3,switch,junk,onlyProduct='clss','Only copy CLSS data')
 }
 function Goodbye-copyEnv {
 	[[ -d $tmpRoot ]] && rm -rf $tmpRoot
@@ -67,7 +70,7 @@ function Goodbye-copyEnv {
 # Declare local variables and constants
 #==================================================================================================
 rsyncFilters=$(mkTmpFile 'rsyncFilters')
-unset suffix emailAddress clientHost remoteCopy
+unset suffix emailAddress clientHost remoteCopy onlyProduct
 progDir='courseleaf'
 falseVars='manifest overlay specialSource fullCopy skipCat skipCim skipClss haveCims haveClss'
 for var in $falseVars; do eval $var=false; done
@@ -84,9 +87,14 @@ GetDefaultsData $myName
 ParseArgsStd
 
 [[ -n $env && -z $srcEnv ]] && srcEnv="$env"
-
 [[ $allItems == true || $fullCopy == true ]] && cim='Yes' && overlay=false && manifest=false
-dump -2 -n client env cim cat fullCopy manifest overlay suffix emailAddress
+[[ $(Lower "$onlyProduct") == 'cat' ]] && skipCim=true && skipClss=true
+[[ $(Lower "$onlyProduct") == 'cim' ]] && skipCat=true && skipClss=true
+[[ $(Lower "$onlyProduct") == 'clss' ]] && skipCim=true && skipCat=true
+dump -2 -n client env cim cat fullCopy manifest overlay suffix emailAddress onlyProduct skipCim skipClss skipCat
+
+Here 0
+Pause
 
 Hello
 addPvt=true
@@ -1213,3 +1221,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## Thu Mar 16 09:39:01 CDT 2017 - dscudiero - Added new options to skip cims and clss files
 ## Fri Mar 17 10:46:03 CDT 2017 - dscudiero - Optional ask to skip cim or clss only if the site has those products present
 ## Fri Mar 17 14:53:53 CDT 2017 - dscudiero - Added ablity to skip client catalog files
+## Tue Mar 21 10:42:22 CDT 2017 - dscudiero - Added -cat, -cim, and -clss options
