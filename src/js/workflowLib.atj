@@ -1,11 +1,12 @@
 //======================================================================================================================
-wfLibVersion="1.7.5" // -- dscudiero -- 03/10/2017 @ 15:21:41.61
+wfLibVersion="1.7.6" // -- dscudiero -- 03/21/2017 @ 10:19
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
 // 03/20/17 - dgs - Updated Related to use getTCFValue where appropriate
 //					Updated Related to not quit if college is not set unless substitution type is Col
 //					Updated other functions to use wfDebug and wfDump
+//					Added HasValue function
 //======================================================================================================================
 
 // Loading message
@@ -1100,6 +1101,60 @@ GetProposalMode = function() {
 // 		wfDebug("\t *** Conditions not met for: " + varName + ", skipping step")
 // 		return false
 // } //CheckScienceCoreChanged
+
+//======================================================================================================================
+// Allow step only if one of the listed variables has a value
+// first token of the wfrule.options string is either 'and' or 'or'
+// use 'not' to inverse results
+//======================================================================================================================
+// 03-21-17 - dgs - Initial coding -- mit
+//======================================================================================================================
+wffuncs.HasValue = function(inval, wfrule, args) {
+	var myName=wfrule.attrname;
+	wfDebug(3,"\n*** In " + myName + " called as '" + wfrule.searchfor + "', Step: '" + inval + "' ***");
+
+	var reqType=wfrule.searchfor.toLowerCase();
+	var notMode=reqType.indexOf("not")>0;
+	wfDump(3,["reqType;"+reqType,"notMode;"+notMode]);
+
+	//Initial Checks
+	try {
+		InitialChecks(["wfrule"],args);
+	} //try
+	catch(err) { print_debug('\t' + myName + ": " + err + "\n") ; return false; }
+
+	// Main
+ 		var allowStep=false;
+		var tmpArray=wfrule.options.split(" "); // Get the cross references variable names from wfrule.options definition
+		tmpArray=tmpArray[0].split(",");
+		checkMode=tmpArray.shift();
+		wfDump(3,["checkMode;"+checkMode]);
+		tmpArray.forEach(function(field) {
+			wfDebug(3,"\tChecking form field: " + field);
+			eval("fieldData=tcfdata." + field);
+			wfDump(4,["\tfieldData:;"+fieldData.toSource()]);
+			if (!fieldData.length && checkMode === 'and') {
+				allowStep=false;
+				return;
+			}
+			else if (fieldData.length  && checkMode === 'or') {
+				allowStep=true;
+				return;
+			}
+			else if (fieldData.length  && checkMode === 'and') {
+				allowStep=true;
+			}
+		});
+
+	// Return results
+		if (notMode) allowStep=!allowStep
+		if(allowStep) {
+			wfDebug(3,"\t*** Allowing step")
+			return [inval.replace(wfrule.ifregex,'')];
+		}
+		wfDebug(3,"\t*** Skipping step")
+		return false
+} //HasValue
 
 //==================================================================================================
 // Check execution environment, passed one argument 'env' that can hav values 'dev' or 'test'
