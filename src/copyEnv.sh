@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.43 # -- dscudiero -- 03/21/2017 @ 10:40:46.47
+version=4.11.44 # -- dscudiero -- 03/22/2017 @ 11:23:25.72
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -92,9 +92,6 @@ ParseArgsStd
 [[ $(Lower "$onlyProduct") == 'cim' ]] && skipCat=true && skipClss=true
 [[ $(Lower "$onlyProduct") == 'clss' ]] && skipCim=true && skipCat=true
 dump -2 -n client env cim cat fullCopy manifest overlay suffix emailAddress onlyProduct skipCim skipClss skipCat
-
-Here 0
-Pause
 
 Hello
 addPvt=true
@@ -1222,3 +1219,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## Fri Mar 17 10:46:03 CDT 2017 - dscudiero - Optional ask to skip cim or clss only if the site has those products present
 ## Fri Mar 17 14:53:53 CDT 2017 - dscudiero - Added ablity to skip client catalog files
 ## Tue Mar 21 10:42:22 CDT 2017 - dscudiero - Added -cat, -cim, and -clss options
+## Wed Mar 22 11:23:42 CDT 2017 - dscudiero - Remove debug statements
