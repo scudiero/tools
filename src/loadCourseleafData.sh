@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.84 # -- dscudiero -- 02/09/2017 @ 11:55:10.30
+version=3.8.85 # -- dscudiero -- 03/20/2017 @ 14:14:39.13
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -781,7 +781,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 		fi
 		if [[ $ignoreMissingPages == '' ]]; then
 			if [[ $verify == true ]]; then
-				unset ans; Prompt ans 'Do you wish to ignore nonexiting pages' 'No Yes' 'No'; ans=$(Lower ${ans:0:1})
+				unset ans; Prompt ans 'Do you wish to ignore nonexistent pages' 'No Yes' 'No'; ans=$(Lower ${ans:0:1})
 				[[ $ans == 'y' ]] && ignoreMissingPages=true || ignoreMissingPages=false
 			fi
 		fi
@@ -1006,3 +1006,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## Thu Feb  9 08:06:44 CST 2017 - dscudiero - make sure we are using our own tmpFile
 ## Thu Feb  9 11:49:37 CST 2017 - dscudiero - check if there is a uin column in the user sheet if the client has useUins set
 ## Thu Feb  9 11:57:48 CST 2017 - dscudiero - tweak messaging
+## Wed Mar 22 15:30:31 CDT 2017 - dscudiero - Fix spelling error
