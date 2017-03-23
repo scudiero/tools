@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.44 # -- dscudiero -- 03/22/2017 @ 11:23:25.72
+version=4.11.45 # -- dscudiero -- 03/22/2017 @ 16:38:48.85
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -220,36 +220,38 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 ## See if there are any additional directories the user wants to skip
 if [[ $verify == true ]]; then
 
-	Msg2
-	[[ $skipCat == true ]] && ans='Yes' || unset ans
-	Prompt ans "Do you wish to $(ColorK 'EXCLUDE') Client CAT files" 'No,Yes,Select' 'No' '6'; ans="$(Lower "${ans:0:1}")"
-	if [[ $ans == 'y' || $ans == 's' ]]; then
-		skipCat=true
-	else
-		skipCat=false
-	fi
-
-	if [[ $haveCims == true ]]; then
-		[[ $skipCim == true ]] && ans='Yes' || unset ans
-		Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CIM & CIM instances" 'No,Yes,Select' 'No' '6'; ans="$(Lower "${ans:0:1}")"
-		if [[ $ans == 'y' || $ans == 's' ]]; then
-			[[ $ans != 's' ]] && allCims=true
-			GetCims "$srcDir" "\t" "$(ColorK 'EXCLUDE')"
-			unset allCims
-			skipCim=true
-		fi
-	else
-		skipCim=false
-	fi
-
-	if [[ $haveClss == true ]]; then
+	if [[ -z $onlyProduct ]]; then
 		Msg2
-		[[ $skipClss == true ]] && ans='Yes' || unset ans
-		Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CLSS/WEN" 'No,Yes' 'No' '6'; ans="$(Lower "${ans:0:1}")"
-		[[ $ans == 'y' ]] && skipClss=true
-	else
-		skipClss=false
-	fi
+		[[ $skipCat == true ]] && ans='Yes' || unset ans
+		Prompt ans "Do you wish to $(ColorK 'EXCLUDE') Client CAT files" 'No,Yes,Select' 'No' '6'; ans="$(Lower "${ans:0:1}")"
+		if [[ $ans == 'y' || $ans == 's' ]]; then
+			skipCat=true
+		else
+			skipCat=false
+		fi ## [[ $skipCat == true ]]
+
+		if [[ $haveCims == true ]]; then
+			[[ $skipCim == true ]] && ans='Yes' || unset ans
+			Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CIM & CIM instances" 'No,Yes,Select' 'No' '6'; ans="$(Lower "${ans:0:1}")"
+			if [[ $ans == 'y' || $ans == 's' ]]; then
+				[[ $ans != 's' ]] && allCims=true
+				GetCims "$srcDir" "\t" "$(ColorK 'EXCLUDE')"
+				unset allCims
+				skipCim=true
+			fi
+		else
+			skipCim=false
+		fi ## [[ $haveCims == true ]]
+
+		if [[ $haveClss == true ]]; then
+			Msg2
+			[[ $skipClss == true ]] && ans='Yes' || unset ans
+			Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CLSS/WEN" 'No,Yes' 'No' '6'; ans="$(Lower "${ans:0:1}")"
+			[[ $ans == 'y' ]] && skipClss=true
+		else
+			skipClss=false
+		fi ## [[ $haveClss == true ]]
+	fi ## [[ -z $onlyProduct ]]
 
 	if [[ -z $skipAlso ]]; then
 		Msg2
@@ -268,8 +270,8 @@ if [[ $verify == true ]]; then
 			done
 			SetFileExpansion
 		fi
-	fi
-fi
+	fi ## [[ -z $skipAlso ]]
+fi ## [[ $verify == true ]]
 
 ## Skip files as indicated
 	cimStr="$(tr -d ' ' <<< $cimStr)"
@@ -1220,3 +1222,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## Fri Mar 17 14:53:53 CDT 2017 - dscudiero - Added ablity to skip client catalog files
 ## Tue Mar 21 10:42:22 CDT 2017 - dscudiero - Added -cat, -cim, and -clss options
 ## Wed Mar 22 11:23:42 CDT 2017 - dscudiero - Remove debug statements
+## Thu Mar 23 08:25:28 CDT 2017 - dscudiero - Do not ask for exclude products if onlyProduct is set
