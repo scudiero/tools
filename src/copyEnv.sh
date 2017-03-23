@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.45 # -- dscudiero -- 03/22/2017 @ 16:38:48.85
+version=4.11.46 # -- dscudiero -- 03/23/2017 @ 14:15:19.58
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -1223,3 +1223,5 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## Tue Mar 21 10:42:22 CDT 2017 - dscudiero - Added -cat, -cim, and -clss options
 ## Wed Mar 22 11:23:42 CDT 2017 - dscudiero - Remove debug statements
 ## Thu Mar 23 08:25:28 CDT 2017 - dscudiero - Do not ask for exclude products if onlyProduct is set
+## 03-23-2017 @ 14.16.30 - (4.11.46)   - dscudiero - Added the -cim -cat -clss flags as short-cuts to only copy said product data
+## 03-23-2017 @ 14.17.29 - (4.11.46)   - dscudiero - General syncing of dev to prod
