@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.46 # -- dscudiero -- 03/23/2017 @ 14:15:19.58
+version=4.11.47 # -- dscudiero -- 03/23/2017 @ 14:21:29.93
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -315,6 +315,7 @@ fi ## [[ $verify == true ]]
 	verifyArgs+=("Target Env:$(TitleCase $tgtEnv)\t($tgtDir)")
 	tmpStr=$(sed "s/,/, /g" <<< $ignoreList)
 	[[ -n $forUser ]] && verifyArgs+=("For User:$forUser")
+	[[ $skipCat == true && $fullCopy != true ]] && verifyArgs+=("Skip CAT:$skipCat")
 	[[ $skipCim == true && $fullCopy != true ]] && verifyArgs+=("Skip CIM:$skipCim")
 	[[ $skipClss == true && $fullCopy != true ]] && verifyArgs+=("Skip CLSS:$skipClss")
 	[[ $fullCopy != true ]] && verifyArgs+=("Exclude List:$tmpStr")
@@ -1225,3 +1226,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## Thu Mar 23 08:25:28 CDT 2017 - dscudiero - Do not ask for exclude products if onlyProduct is set
 ## 03-23-2017 @ 14.16.30 - (4.11.46)   - dscudiero - Added the -cim -cat -clss flags as short-cuts to only copy said product data
 ## 03-23-2017 @ 14.17.29 - (4.11.46)   - dscudiero - General syncing of dev to prod
+## 03-23-2017 @ 14.32.38 - (4.11.47)   - dscudiero - General syncing of dev to prod
