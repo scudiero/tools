@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.6" # -- dscudiero -- 03/14/2017 @ 12:17:32.80
+# version="1.0.7" # -- dscudiero -- 03/23/2017 @  8:14:17.65
 #===================================================================================================
 # Various string manipulation functions
 #===================================================================================================
@@ -80,7 +80,7 @@ function Indent {
 	while read line ; do
 		printf "$tabStr%s\n" "$line"
 	done
-	return 0
+	return
 } #Indent
 export -f Indent
 
@@ -142,3 +142,4 @@ function CompareVersions {
 ## Wed Jan 11 11:15:52 CST 2017 - dscudiero - Moved Conains into this file
 ## Thu Jan 19 09:57:30 CST 2017 - dscudiero - Swithch to use printf since echo was absorbing leading -n and -e
 ## Tue Mar 14 12:18:34 CDT 2017 - dscudiero - Added CompareVersions function
+## Thu Mar 23 08:24:48 CDT 2017 - dscudiero - Remove the return code from Indent
