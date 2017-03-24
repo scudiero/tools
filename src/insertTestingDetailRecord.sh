@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #==================================================================================================
-version=1.0.104 # -- dscudiero -- 03/24/2017 @  7:35:57.20
+version=1.0.105 # -- dscudiero -- 03/24/2017 @  7:52:49.34
 #==================================================================================================
 TrapSigs 'on'
 originalArgStr="$*"
@@ -126,7 +126,7 @@ jalotTaskNumber=$(cut -d'-' -f6 <<< $fileName)
 		for field in $quoteFields; do
 			if [[ ${!field} != 'NULL' ]]; then
 				tmpStr="\"${!field}\""
-				tmpStr=$(sed s/'/\'/g <<< $tmpStr)
+				tmpStr=$(sed s"/'/\\\'/"g <<< $tmpStr)
 				eval $field=\'$tmpStr\'
 			fi
 		done
@@ -188,3 +188,4 @@ return 0 #'alert'
 ## Wed Oct 12 16:11:24 CDT 2016 - dscudiero - ETP process for QA Testing Details Table
 ## Mon Feb 13 16:12:33 CST 2017 - dscudiero - make sure we have our own tmpFile
 ## 03-24-2017 @ 07.36.41 - (1.0.104)   - dscudiero - escape single quotes in the text fields before sending to sql
+## 03-24-2017 @ 07.53.01 - (1.0.105)   - dscudiero - General syncing of dev to prod
