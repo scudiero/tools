@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.5" # -- dscudiero -- 01/04/2017 @ 13:39:55.26
+# version="2.0.6" # -- dscudiero -- 03/24/2017 @ 10:54:31.51
 #===================================================================================================
 # Set the standard output file name
 # args <client> <env> <product>
@@ -15,7 +15,7 @@ function GetOutputFile {
 	local env="$2"
 	local product="$3"
 	local outDir outFile outFileName
-	outFileName=$myName.out
+	outFileName=$myName.log
 	[[ $client == 'all' || $client == '*' ]] && client='allClients'
 	[[ $env == 'all' || $env == '*' ]] && env='allClients'
 	[[ $product == 'all' || $product == '*' ]] && product='allClients'
@@ -49,3 +49,4 @@ export -f GetOutputFile
 ## Check-in log
 #===================================================================================================
 ## Wed Jan  4 13:53:37 CST 2017 - dscudiero - General syncing of dev to prod
+## 03-24-2017 @ 10.55.10 - ("2.0.6")   - dscudiero - Change the output file extension to .log
