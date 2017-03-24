@@ -1,6 +1,6 @@
 //======================================================================================================================
 // ??/??/17-- dgs -- initial
-// version:1.0.1 // -- dscudiero -- 03/21/2017 @ 11:03:53.85
+// version:1.0.2 // -- dscudiero -- 03/23/2017 @ 12:42:46.61
 //======================================================================================================================
 // Workflow functions
 //======================================================================================================================
@@ -114,7 +114,7 @@ wffuncs.ProposalState = function(inval, wfrule, args) {
 //======================================================================================================================
 wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 	var myName=wfrule.attrname;
-	wfDebug("\n*** In " + myName + " called as '" + wfrule.searchfor + "', Step: '" + inval + "' ***");
+	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
 
 	var retArray=[];
 	var reqType=wfrule.searchfor.toLowerCase();
@@ -159,3 +159,4 @@ if (wfEnvIsDev && !wfInitialLoad) wfDebug(1,"\tworkflowFuncs.atj loaded\n"); wfI
 // Check in log
 //======================================================================================================================
 // Tue Mar 21 11:07:28 CDT 2017 - dscudiero - Added check in log comments
+// 03-24-2017 @ 07.36.56 - (//)        - dscudiero - General syncing of dev to prod
