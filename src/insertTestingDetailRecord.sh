@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #==================================================================================================
-version=1.0.105 # -- dscudiero -- 03/24/2017 @  7:52:49.34
+version=1.0.108 # -- dscudiero -- 03/24/2017 @  8:37:31.47
 #==================================================================================================
 TrapSigs 'on'
 originalArgStr="$*"
@@ -77,7 +77,7 @@ jalotTaskNumber=$(cut -d'-' -f6 <<< $fileName)
 ## Check to see if we have already processed this key
 	sqlStmt="select count(*) from $qaTestingDetailsTable where qatestid=$qastatusKey"
 	RunSql2 $sqlStmt
-	[[ ${resultSet[0]} -gt 0 ]] && Msg2 $WT2 "QaTestId '$qastatusKey' has already been processed, skipping file" && Goodbye 'Return' && return 1
+	[[ ${resultSet[0]} -gt 0 ]] && Msg2 $WT2 "QaTestId '$qastatusKey' has already been processed into '$warehouseDb.$qaTestingDetailsTable', skipping file" && Goodbye 'Return' && return 1
 
 ## Read the Testing Detail Final data
 	Verbose 1 "^^^^Parsing '$workSheet' worksheet..."
@@ -117,7 +117,7 @@ jalotTaskNumber=$(cut -d'-' -f6 <<< $fileName)
 		[[ $testCaseId == '' ]] && testCaseId="$previousTestCaseId"
 		[[ $overallStatus == '' ]] && overallStatus="$previousOverallStatus"
 
-		dump -1 -n -n line -t testCaseId description overallStatus iterationStatus iterationDate iterationPhase iterationPhaseQualifier
+		dump -2 -n -n line -t testCaseId description overallStatus iterationStatus iterationDate iterationPhase iterationPhaseQualifier
 		previousTestCaseId="$testCaseId"
 		previousOverallStatus="$overallStatus"
 
@@ -137,7 +137,7 @@ jalotTaskNumber=$(cut -d'-' -f6 <<< $fileName)
 		RunSql2 $sqlStmt
 		(( insertCntr += 1))
 	done < $tmpFile
-	Verbose 1 "^^^^$insertCntr records inserted into the $warehouseDb.$qaTestingDetailsTable table"
+	Verbose 1 "^^^^$insertCntr records inserted into the $warehouseDb.$qaTestingDetailsTable table for qaStatus key qastatusKey"
 
 	## Update the fixedDate, fixedPhase, and fixedPhaseQualifier columns
 	## Find the test inances that failed
@@ -146,11 +146,11 @@ jalotTaskNumber=$(cut -d'-' -f6 <<< $fileName)
 	sqlStmt="select distinct testcaseid from $qaTestingDetailsTable where Lower(instanceStatus) like \"%failed%\""
 	RunSql2 $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
-		Verbose 1 "^^^^Setting 'fixed' data for failed test case instances ($(sed "s/ /, /g" <<< ${resultSet[*]}))..."
+		Verbose 1 "^^^^Setting 'when fixed' data for failed test case instances ($(sed "s/ /, /g" <<< ${resultSet[*]}))..."
 		## Loop through the failed records and retrieve the 'fixed on' information
 		failedTestIds=(${resultSet[*]})
 		for failedId in ${failedTestIds[@]}; do
-			dump -1 failedId
+			dump -2 failedId
 			## OK get the fixed on data for each failed record
 			fields="idx,instanceDate,instancePhase,instancePhaseQualifier"
 			whereClause="Lower(instanceStatus) like \"%passed%\" and testcaseid=$failedId "
@@ -158,7 +158,7 @@ jalotTaskNumber=$(cut -d'-' -f6 <<< $fileName)
 			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -gt 0 ]]; then
 				for result in "${resultSet[@]}"; do
-					dump -1 -t result
+					dump -2 -t result
 					idx=$(cut -d'|' -f1 <<< "$result")
 					instanceDate=$(cut -d'|' -f2 <<< "$result"); [[ $instanceDate  == '' ]] && instanceDate=NULL
 					instancePhase=$(cut -d'|' -f3 <<< "$result"); [[ $instancePhase  == '' ]] && instancePhase=NULL
@@ -189,3 +189,4 @@ return 0 #'alert'
 ## Mon Feb 13 16:12:33 CST 2017 - dscudiero - make sure we have our own tmpFile
 ## 03-24-2017 @ 07.36.41 - (1.0.104)   - dscudiero - escape single quotes in the text fields before sending to sql
 ## 03-24-2017 @ 07.53.01 - (1.0.105)   - dscudiero - General syncing of dev to prod
+## 03-24-2017 @ 09.17.03 - (1.0.108)   - dscudiero - Tweak messaging
