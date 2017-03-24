@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.1.10 # -- dscudiero -- 03/24/2017 @  8:40:42.34
+version=1.1.11 # -- dscudiero -- 03/24/2017 @  9:05:25.83
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye DumpMap GetExcel'
@@ -306,5 +306,4 @@ Goodbye 0 #'alert'
 ## Mon Feb 20 12:52:53 CST 2017 - dscudiero - Adjustments for new spreadsheet
 ## Thu Mar 16 15:44:50 CDT 2017 - dscudiero - Added support for the 'blocked' data
 ## Fri Mar 17 08:42:05 CDT 2017 - dscudiero - Added sheetVersion
-## Fri Mar 17 10:45:12 CDT 2017 - dscudiero - Fixed problem with doubly quotes strings
-## 03-24-2017 @ 08.59.35 - (1.1.10)    - dscudiero - x
+## Fri Mar 17 10:45:12 CDT 2017 - dscudiero - Fixed problem with doubly quotes strings## 03-24-2017 @ 09.10.05 - (1.1.11)    - dscudiero - General syncing of dev to prod
