@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.1.11 # -- dscudiero -- 03/24/2017 @  9:05:25.83
+version=1.1.12 # -- dscudiero -- 03/24/2017 @  9:22:20.17
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye DumpMap GetExcel'
@@ -276,7 +276,7 @@ for workbook in "${workbooks[@]}"; do
 						Error "Could not retrieve record key in $warehouseDb.$qaStatusTable for:\n^$whereClause\nCould not set the record as deactivated"
 					else
 						qastatusKey=${resultSet[0]}
-						sqlStmt="update $qaStatusTable set recordStatus=\"D\" where idx=qastatusKey"
+						sqlStmt="update $qaStatusTable set recordStatus=\"D\" where idx=$qastatusKey"
 						RunSql $sqlStmt
 					fi
 			fi
@@ -307,3 +307,4 @@ Goodbye 0 #'alert'
 ## Thu Mar 16 15:44:50 CDT 2017 - dscudiero - Added support for the 'blocked' data
 ## Fri Mar 17 08:42:05 CDT 2017 - dscudiero - Added sheetVersion
 ## Fri Mar 17 10:45:12 CDT 2017 - dscudiero - Fixed problem with doubly quotes strings## 03-24-2017 @ 09.10.05 - (1.1.11)    - dscudiero - General syncing of dev to prod
+## 03-24-2017 @ 09.23.08 - (1.1.12)    - dscudiero - Fix problem setting the qastatus table record status=D
