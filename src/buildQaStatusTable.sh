@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.1.8 # -- dscudiero -- 03/17/2017 @  9:35:23.23
+version=1.1.10 # -- dscudiero -- 03/24/2017 @  8:40:42.34
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye DumpMap GetExcel'
@@ -142,7 +142,6 @@ for workbook in "${workbooks[@]}"; do
 	## Get the list of worksheets in the workbook
 		GetExcel "$workbook" 'GetSheets' > $tmpFile
 		sheets=$(tail -n 1 $tmpFile)
-
 	[[ $(Contains "|${sheets}|" '|ProjectSummary|') != true ]] && continue
 	Msg2 "^Processing File: '$(basename $workbook)'"
 
@@ -308,3 +307,4 @@ Goodbye 0 #'alert'
 ## Thu Mar 16 15:44:50 CDT 2017 - dscudiero - Added support for the 'blocked' data
 ## Fri Mar 17 08:42:05 CDT 2017 - dscudiero - Added sheetVersion
 ## Fri Mar 17 10:45:12 CDT 2017 - dscudiero - Fixed problem with doubly quotes strings
+## 03-24-2017 @ 08.59.35 - (1.1.10)    - dscudiero - x
