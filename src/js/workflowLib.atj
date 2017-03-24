@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.7" // -- dscudiero -- 03/21/2017 @ 11:04:56.72
+wfLibVersion="1.7.8" // -- dscudiero -- 03/23/2017 @ 14:07:35.54
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -51,6 +51,12 @@ if (typeof wfLibLoaded === "undefined") {
 //		_departmentVarName	The name of the form variable containing the 'department' data, defaults to 'department'
 //		_subjectVarName		The name of the form variable containing the 'subject' data, defaults to 'subject'
 //
+//		_dataMapper			Then name of a function that will be used to map the normally returned data to a new
+//							value.  Is passed two arguments:
+//							type 	- The 'searchStr', aka in the set {'Col','Dept','Subj'}
+//							data 	- The data value to map
+//							expects a string back.
+//
 //=================================================================================================
 // Notes:
 //	1) 	Variables above can be specific to a wfrule or general across all 'Related' wfrules in the
@@ -78,25 +84,29 @@ if (typeof wfLibLoaded === "undefined") {
 // RelatedCrosslistedSlashlistedDepts_ecoSystemDataFyi:false
 // RelatedCrosslistedSlashlistedDepts_formFieldVars:crosslisted|courseCode|code
 // RelatedCrosslistedSlashlistedDepts_formFieldVars:slashlisted|courseCode|code
+// RelatedCrosslistedSlashlistedDepts_datamapper:WfDataMapper
 //
 // wfrules:RelatedCrosslistedSlashlistedCols|function|Related|;
 // RelatedCrosslistedSlashlistedCols_ecoSystemData:true
 // RelatedCrosslistedSlashlistedCols_ecoSystemDataFyi:false
 // RelatedCrosslistedSlashlistedCols_formFieldVars:crosslisted|courseCode|code
 // RelatedCrosslistedSlashlistedCols_formFieldVars:slashlisted|courseCode|code
+// RelatedCrosslistedSlashlistedCols_datamapper:WfDataMapper
 //
 // - OR  - (yields the same results)
 //
+// wfrules:RelatedCrosslistedSlashlistedDepts|function|Related|;
 // Related_ecoSystemData:true
 // Related_ecoSystemDataFyi:fyi
 // Related_formFieldVars:crosslisted|courseCode|code
 // Related_formFieldVars:slashlisted|courseCode|code
-// wfrules:RelatedCrosslistedSlashlistedDepts|function|Related|;
+// Related_datamapper:WfDataMapper
+//
 //======================================================================================================================
 // 11/15/16	- dgs - Re-factored to allow for the specification of the core proposal variable names
 //======================================================================================================================
 wffuncs.Related = function(inval, wfrule, args) {
-	var version='4.9.6'; var myName=wfrule.attrname
+	var version='4.9.8'; var myName=wfrule.attrname
 	wfDebug(3,'\n*** In '+ myName + " (" + version + ") called as '" + args.context + " / " + wfrule.searchfor + "' ***");
 	wfDump(3,["Full Step text;"+inval]);
 
@@ -141,7 +151,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 		});
 
 		// Get variables that have data values
-		var varList=["ecoSystemDataFyi","ecoSystemType"];
+		var varList=["ecoSystemDataFyi","ecoSystemType","dataMapper"];
 		varList.forEach(function(name) {
 			eval (name + "=''")
 			varName=calledAs + "_" + name;
@@ -511,6 +521,9 @@ wffuncs.Related = function(inval, wfrule, args) {
 					if (ecoSystemDataFyi != '' && token.source.substr(0,3) === 'eco') {
 						// If the step name does not contain the string 'fyi' and ecoSystemDataFyi is true then add the 'fyi'
 						if (step.indexOf("fyi") < 0 && ecoSystemDataFyi === 'true') step=step + ' fyi';
+					}
+					if (dataMapper != "" ) {
+						token.data=eval(dataMapper)(searchStr,token.data)
 					}
 					retArray.push(step.replace(wfrule.regex,token.data).trim());
 					wfDebug(3,"\t\t" + retArray[retArray.length-1]);
@@ -1359,3 +1372,4 @@ var wfLibLoaded=true;
 // Check in log
 //======================================================================================================================
 // Tue Mar 21 11:07:32 CDT 2017 - dscudiero - Added check in log comments
+// 03-24-2017 @ 07.37.00 - (wfrule.att - dscudiero - General syncing of dev to prod
