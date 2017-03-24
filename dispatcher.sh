@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.62" # -- dscudiero -- 02/06/2017 @ 10:35:56.03
+version="1.2.63" # -- dscudiero -- 03/24/2017 @ 10:25:48.16
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -61,7 +61,7 @@ function CleanUp {
 		[[ $semaphoreProcessing == true && $(Lower $setSemaphore) == 'yes' && -n $semaphoreId ]] && Semaphore 'clear' $semaphoreId
 		[[ $logInDb != false && -n $myLogRecordIdx ]] && ProcessLogger 'End' $myLogRecordIdx
 		SetFileExpansion 'on'
-		rm -rf /tmp/$userName.$callPgmName.* > /dev/null 2>&1
+		[[ -f "$tmpFile" ]] && rm -f "$tmpFile"
 		SetFileExpansion
 
 	## Cleanup PATH and CLASSPATH
@@ -354,3 +354,4 @@ prtStatus "parse args"
 ## Mon Feb  6 09:29:28 CST 2017 - dscudiero - Set tmpRoot
 ## Mon Feb  6 10:32:37 CST 2017 - dscudiero - Update logic for checking if user is in the leepfrog group
 ## Mon Feb  6 10:36:05 CST 2017 - dscudiero - set tmpFile
+## 03-24-2017 @ 10.26.08 - ("1.2.63")  - dscudiero - Only remove the current tmpFile, not all for the called pgm
