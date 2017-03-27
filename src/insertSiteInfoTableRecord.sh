@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.120 # -- dscudiero -- 02/21/2017 @  6:46:26.73
+version=1.1.121 # -- dscudiero -- 03/24/2017 @  9:57:29.66
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseCourseleafFile' #imports="$imports "
@@ -395,3 +395,4 @@ return 0
 ## Tue Feb 14 13:19:24 CST 2017 - dscudiero - Refactored to delete the client records before inserting a new one
 ## Mon Feb 20 07:20:01 CST 2017 - dscudiero - Make messages level 1
 ## Tue Feb 21 06:46:58 CST 2017 - dscudiero - Fix error with verbose
+## 03-27-2017 @ 13.30.29 - (1.1.121)   - dscudiero - General syncing of dev to prod
