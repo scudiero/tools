@@ -1,5 +1,5 @@
 #!/bin/bash
-version=1.0.74 # -- dscudiero -- 03/17/2017 @  8:01:27.77
+version=1.0.75 # -- dscudiero -- Mon 03/27/2017 @ 13:29:18.97
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -72,7 +72,7 @@ ParseArgsStd
 		done
 
 	## Retrieve qaStatus data for blocked test instances and produce formatted output
-		sqlStmt="select $fields from $qaStatusTable where numBlocked > 0 and endDate is NULL order by $orderByFields"
+		sqlStmt="select $fields from $qaStatusTable where numBlocked > 0 and endDate is NULL and recordstatus = "A" order by $orderByFields"
 		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
 			Msg2  | tee -a $outFile
@@ -96,7 +96,7 @@ ParseArgsStd
 		fi
 
 	## Retrieve qaStatus data for waiting test instances and produce formatted output
-		sqlStmt="select $fields from $qaStatusTable where numWaiting > 0 and endDate is NULL order by $orderByFields"
+		sqlStmt="select $fields from $qaStatusTable where numWaiting > 0 and endDate is NULL and recordstatus = "A" order by $orderByFields"
 		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
 			Msg2  | tee -a $outFile
@@ -137,3 +137,4 @@ Goodbye 0 #'alert'
 #===================================================================================================
 ## Thu Mar 16 16:56:46 CDT 2017 - dscudiero - General syncing of dev to prod
 ## Fri Mar 17 10:45:25 CDT 2017 - dscudiero - v
+## 03-27-2017 @ 13.30.18 - (1.0.75)    - dscudiero - Only report on active records
