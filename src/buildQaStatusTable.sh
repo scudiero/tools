@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.1.12 # -- dscudiero -- 03/24/2017 @  9:22:20.17
+version=1.1.14 # -- dscudiero -- 03/24/2017 @ 10:56:21.38
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye DumpMap GetExcel'
@@ -269,11 +269,11 @@ for workbook in "${workbooks[@]}"; do
 				mv -f $workbook "$qaTrackingRoot/Archive/"
 				cd $cwd
 				## Get the key for the qastatus record
-					whereClause="clientCode=$clientCode and  product=$product and project=$project and instance=$instance and env=$env and jalotTaskNumber=$jalotTaskNumber"
+					whereClause="clientCode=$clientCode and product=$product and project=$project and instance=$instance and env=$env and jalotTaskNumber=$jalotTaskNumber"
 					sqlStmt="select idx from $qaStatusTable where $whereClause"
 					RunSql $sqlStmt
 					if [[ ${#resultSet[@]} -eq 0 ]]; then
-						Error "Could not retrieve record key in $warehouseDb.$qaStatusTable for:\n^$whereClause\nCould not set the record as deactivated"
+						Error "Could not retrieve record key in $warehouseDb.$qaStatusTable for: $whereClause\nCould not set the record as deactivated"
 					else
 						qastatusKey=${resultSet[0]}
 						sqlStmt="update $qaStatusTable set recordStatus=\"D\" where idx=$qastatusKey"
@@ -308,3 +308,4 @@ Goodbye 0 #'alert'
 ## Fri Mar 17 08:42:05 CDT 2017 - dscudiero - Added sheetVersion
 ## Fri Mar 17 10:45:12 CDT 2017 - dscudiero - Fixed problem with doubly quotes strings## 03-24-2017 @ 09.10.05 - (1.1.11)    - dscudiero - General syncing of dev to prod
 ## 03-24-2017 @ 09.23.08 - (1.1.12)    - dscudiero - Fix problem setting the qastatus table record status=D
+## 03-27-2017 @ 13.30.01 - (1.1.14)    - dscudiero - Only report on active records
