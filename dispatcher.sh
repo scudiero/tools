@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.75" # -- dscudiero -- Thu 03/30/2017 @ 13:25:30.90
+version="1.2.76" # -- dscudiero -- Thu 03/30/2017 @ 13:27:20.88
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -15,7 +15,7 @@ if [[ $LOGNAME == 'dscudiero' ]]; then
 	bootData="$(dirname "$(dirname "$0")")/tools/bootData"
 	[[ -r $bootData ]] && source "$bootData"
 	echo "TOOLSPATH = '$TOOLSPATH'"
-	echo "warehouseDb = '$warehouseDB'"
+	echo "warehouseDb = '$warehouseDb'"
 else
 	TOOLSPATH='/steamboat/leepfrog/docs/tools'
 	[[ -d '/steamboat/leepfrog/docs/toolsNew' ]] && TOOLSPATH='/steamboat/leepfrog/docs/toolsNew'
@@ -369,3 +369,4 @@ prtStatus "parse args"
 ## 03-30-2017 @ 13.01.48 - ("1.2.72")  - dscudiero - Remove debug Statements
 ## 03-30-2017 @ 13.15.59 - ("1.2.73")  - dscudiero - Add debug statements
 ## 03-30-2017 @ 13.25.50 - ("1.2.75")  - dscudiero - General syncing of dev to prod
+## 03-30-2017 @ 13.27.27 - ("1.2.76")  - dscudiero - General syncing of dev to prod
