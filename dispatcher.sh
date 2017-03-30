@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.78" # -- dscudiero -- Thu 03/30/2017 @ 13:30:33.81
+version="1.2.79" # -- dscudiero -- Thu 03/30/2017 @ 13:31:28.39
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -12,7 +12,7 @@ dispatcherArgs="$*"
 myName='dispatcher'
 
 if [[ $LOGNAME == 'dscudiero' ]]; then
-	bootData="$(dirname "$(dirname "$0")")/tools/bootData"
+	bootData="$(dirname "$(dirname "$0")")/bootData"
 	echo "bootData = '$bootData'"
 	[[ -r $bootData ]] && source "$bootData"
 	echo "TOOLSPATH = '$TOOLSPATH'"
@@ -372,3 +372,4 @@ prtStatus "parse args"
 ## 03-30-2017 @ 13.25.50 - ("1.2.75")  - dscudiero - General syncing of dev to prod
 ## 03-30-2017 @ 13.27.27 - ("1.2.76")  - dscudiero - General syncing of dev to prod
 ## 03-30-2017 @ 13.30.46 - ("1.2.78")  - dscudiero - General syncing of dev to prod
+## 03-30-2017 @ 13.31.33 - ("1.2.79")  - dscudiero - General syncing of dev to prod
