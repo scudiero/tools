@@ -1,22 +1,26 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.73" # -- dscudiero -- Thu 03/30/2017 @ 13:15:47.99
+version="1.2.75" # -- dscudiero -- Thu 03/30/2017 @ 13:25:30.90
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-
-[[ $LOGNAME == 'dscudiero' ]] && echo "$0 = '$0'"
-
 dispatcherArgs="$*"
 myName='dispatcher'
-myPath="$(dirname "$0")"
-TOOLSPATH='/steamboat/leepfrog/docs/tools'
-[[ -d '/steamboat/leepfrog/docs/toolsNew' ]] && TOOLSPATH='/steamboat/leepfrog/docs/toolsNew'
-[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
+
+if [[ $LOGNAME == 'dscudiero' ]]; then
+	bootData="$(dirname "$(dirname "$0")")/tools/bootData"
+	[[ -r $bootData ]] && source "$bootData"
+	echo "TOOLSPATH = '$TOOLSPATH'"
+	echo "warehouseDb = '$warehouseDB'"
+else
+	TOOLSPATH='/steamboat/leepfrog/docs/tools'
+	[[ -d '/steamboat/leepfrog/docs/toolsNew' ]] && TOOLSPATH='/steamboat/leepfrog/docs/toolsNew'
+	[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
+fi
 
 #==================================================================================================
 # Global Functions
@@ -96,7 +100,11 @@ statusLine="\tDispatcher ($version): "
 [[ $userName == 'dscudiero' ]] && userName=$LOGNAME
 tmpRoot=/tmp/$LOGNAME
 
-[[ $(dirname "$0") ]]
+# source $TOOLSPATH/bootData
+# [[ $LOGNAME == 'dscudiero' ]] && echo "warehouseDb = '$warehouseDb'"
+# [[ $LOGNAME == 'dscudiero' ]] && echo " = ''"
+# [[ $LOGNAME == 'dscudiero' ]] && echo " = ''"
+# [[ $LOGNAME == 'dscudiero' ]] && echo " = ''"
 
 #==================================================================================================
 # Parse arguments
@@ -360,3 +368,4 @@ prtStatus "parse args"
 ## 03-30-2017 @ 12.59.09 - ("1.2.71")  - dscudiero - add debug messages
 ## 03-30-2017 @ 13.01.48 - ("1.2.72")  - dscudiero - Remove debug Statements
 ## 03-30-2017 @ 13.15.59 - ("1.2.73")  - dscudiero - Add debug statements
+## 03-30-2017 @ 13.25.50 - ("1.2.75")  - dscudiero - General syncing of dev to prod
