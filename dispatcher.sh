@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.66" # -- dscudiero -- Thu 03/30/2017 @ 12:15:23.20
+version="1.2.71" # -- dscudiero -- Thu 03/30/2017 @ 12:58:44.82
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -185,23 +185,26 @@ prtStatus "parse args"
 ## Set mysql connection information
 	warehouseDb='warehouse'
 	if [[ -n $WAREHOUSEDB ]]; then
-		warehousedb="$WAREHOUSEDB"
+		warehouseDb="$WAREHOUSEDB"
 	else
 		[[ $useDevDb == true ]] && warehouseDb='warehouseDev'
 	fi
-	dbAcc='Read'
-	mySqlUser="leepfrog$dbAcc"
-	mySqlHost='duro'
-	mySqlPort=3306
-	[[ -r "$TOOLSPATH/src/.pw1" ]] && mySqlPw=$(cat "$TOOLSPATH/src/.pw1")
-	if [[ -n $mySqlPw ]]; then
-		unset sqlHostIP mySqlConnectString
-		sqlHostIP=$(dig +short $mySqlHost.inside.leepfrog.com)
-		[[ -z $sqlHostIP ]] && sqlHostIP=$(dig +short $mySqlHost.leepfrog.com)
-		[[ -n $sqlHostIP ]] && mySqlConnectString="-h $sqlHostIP -port=$mySqlPort -u $mySqlUser -p$mySqlPw $warehouseDb"
-	fi
-	[[ -z $mySqlConnectString ]] && echo && echo "*Error* -- ($myName) Sorry, Insufficient information to set 'mySqlConnectString'" && exit -1
-	prtStatus ", find initFile"
+
+[[ $LOGNAME == 'dscudiero' ]] && echo "warehouseDb 1 = '$warehouseDb'"
+
+	# dbAcc='Read'
+	# mySqlUser="leepfrog$dbAcc"
+	# mySqlHost='duro'
+	# mySqlPort=3306
+	# [[ -r "$TOOLSPATH/src/.pw1" ]] && mySqlPw=$(cat "$TOOLSPATH/src/.pw1")
+	# if [[ -n $mySqlPw ]]; then
+	# 	unset sqlHostIP mySqlConnectString
+	# 	sqlHostIP=$(dig +short $mySqlHost.inside.leepfrog.com)
+	# 	[[ -z $sqlHostIP ]] && sqlHostIP=$(dig +short $mySqlHost.leepfrog.com)
+	# 	[[ -n $sqlHostIP ]] && mySqlConnectString="-h $sqlHostIP -port=$mySqlPort -u $mySqlUser -p$mySqlPw $warehouseDb"
+	# fi
+	# [[ -z $mySqlConnectString ]] && echo && echo "*Error* -- ($myName) Sorry, Insufficient information to set 'mySqlConnectString'" && exit -1
+	# prtStatus ", find initFile"
 
 ## Import thins we need to continue
 	sTime=$(date "+%s")
@@ -217,6 +220,8 @@ prtStatus "parse args"
 	sTime=$(date "+%s")
 	source $initFile
 	prtStatus ", run initFile"
+
+[[ $LOGNAME == 'dscudiero' ]] && echo "warehouseDb 2 = '$warehouseDb'"
 
 ## If sourced then just return
 	[[ $calledViaSource == true ]] && return 0
@@ -358,3 +363,4 @@ prtStatus "parse args"
 ## 03-30-2017 @ 07.34.29 - ("1.2.64")  - dscudiero - weak messaging
 ## 03-30-2017 @ 08.07.05 - ("1.2.65")  - dscudiero - Tweak buil7 is slow message
 ## 03-30-2017 @ 12.17.16 - ("1.2.66")  - dscudiero - Update the code where WAREHOUSEDB overrides the default value
+## 03-30-2017 @ 12.59.09 - ("1.2.71")  - dscudiero - add debug messages
