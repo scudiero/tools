@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.65" # -- dscudiero -- Thu 03/30/2017 @  7:43:06.96
+version="1.2.66" # -- dscudiero -- Thu 03/30/2017 @ 12:15:23.20
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -185,7 +185,7 @@ prtStatus "parse args"
 ## Set mysql connection information
 	warehouseDb='warehouse'
 	if [[ -n $WAREHOUSEDB ]]; then
-		warehousedb="$warehousedb"
+		warehousedb="$WAREHOUSEDB"
 	else
 		[[ $useDevDb == true ]] && warehouseDb='warehouseDev'
 	fi
@@ -357,3 +357,4 @@ prtStatus "parse args"
 ## 03-24-2017 @ 10.26.08 - ("1.2.63")  - dscudiero - Only remove the current tmpFile, not all for the called pgm
 ## 03-30-2017 @ 07.34.29 - ("1.2.64")  - dscudiero - weak messaging
 ## 03-30-2017 @ 08.07.05 - ("1.2.65")  - dscudiero - Tweak buil7 is slow message
+## 03-30-2017 @ 12.17.16 - ("1.2.66")  - dscudiero - Update the code where WAREHOUSEDB overrides the default value
