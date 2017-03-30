@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.80" # -- dscudiero -- Thu 03/30/2017 @ 14:01:20.67
+version="1.2.81" # -- dscudiero -- Thu 03/30/2017 @ 14:40:40.96
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -19,6 +19,7 @@ else
 	[[ -d '/steamboat/leepfrog/docs/toolsNew' ]] && TOOLSPATH='/steamboat/leepfrog/docs/toolsNew'
 	[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
 fi
+export TOOLSWAREHOUSEDB="$warehouseDb"
 
 #==================================================================================================
 # Global Functions
@@ -97,12 +98,6 @@ statusLine="\tDispatcher ($version): "
 [[ -n $(which logname 2>&1) ]] && userName=$(logname 2>&1) || userName=$LOGNAME
 [[ $userName == 'dscudiero' ]] && userName=$LOGNAME
 tmpRoot=/tmp/$LOGNAME
-
-# source $TOOLSPATH/bootData
-# [[ $LOGNAME == 'dscudiero' ]] && echo "warehouseDb = '$warehouseDb'"
-# [[ $LOGNAME == 'dscudiero' ]] && echo " = ''"
-# [[ $LOGNAME == 'dscudiero' ]] && echo " = ''"
-# [[ $LOGNAME == 'dscudiero' ]] && echo " = ''"
 
 #==================================================================================================
 # Parse arguments
@@ -371,3 +366,4 @@ prtStatus "parse args"
 ## 03-30-2017 @ 13.30.46 - ("1.2.78")  - dscudiero - General syncing of dev to prod
 ## 03-30-2017 @ 13.31.33 - ("1.2.79")  - dscudiero - General syncing of dev to prod
 ## 03-30-2017 @ 14.02.03 - ("1.2.80")  - dscudiero - Remove debug statements
+## 03-30-2017 @ 14.41.01 - ("1.2.81")  - dscudiero - Make sure TOOLSWAREHOUSEDB is set
