@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.34" # -- dscudiero -- 03/06/2017 @ 15:41:33.10
+# version="2.0.35" # -- dscudiero -- Thu 03/30/2017 @ 15:03:59.72
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -44,7 +44,7 @@ function VerifyPromptVal {
 		else
 			## Look for client in the clients table
 			local sqlStmt="select idx from $clientInfoTable where name=\"$response\" "
-			RunSql 'mysql' $sqlStmt
+			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -eq 0 ]]; then
 				verifyMsg="$(Msg2 $E "Client value of '$response' not found in $warehouseDb.$clientInfoTable")"
 			fi
@@ -52,7 +52,7 @@ function VerifyPromptVal {
 			if [[ $verifyMsg == "" ]]; then
 				if [[ $anyClient != 'true' ]]; then
 					sqlStmt="select host from $siteInfoTable where name=\"$response\""
-					RunSql 'mysql' $sqlStmt
+					RunSql2 $sqlStmt
 					[[ ${#resultSet[0]} -eq 0 ]] && verifyMsg="$(Msg2 $E "Could not retrieve any records for '$response' in the $warehouseDb.$siteInfoTable")"
 					if [[ $verifyMsg == "" ]]; then
 						hostedOn="${resultSet[0]}"
@@ -114,7 +114,7 @@ function VerifyPromptVal {
 		validProducts='cat,cim,clss'
 		if [[ $client != '' ]]; then
 			local sqlStmt="select products from $clientInfoTable where name='$client'"
-			RunSql 'mysql' "$sqlStmt"
+			RunSql2 "$sqlStmt"
 			[[ ${#resultSet[@]} -gt 0 ]] && validProducts="${resultSet[0]}"
 		fi
 
@@ -188,3 +188,4 @@ export -f VerifyPromptVal
 #===================================================================================================
 ## Wed Jan  4 13:54:39 CST 2017 - dscudiero - General syncing of dev to prod
 ## Mon Mar  6 15:55:11 CST 2017 - dscudiero - Tweak product parsing
+## 03-30-2017 @ 15.06.14 - ("2.0.35")  - dscudiero - switch from runsql to runsql2
