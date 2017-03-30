@@ -1,7 +1,4 @@
-
 TOOLSPATH='/steamboat/leepfrog/docs/tools'
 [[ -d "$(dirname "$TOOLSPATH")/toolsNew" ]] && TOOLSPATH="$(dirname "$TOOLSPATH")/toolsNew"
-
 [[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
-
 [[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB" || warehouseDb='warehouse'
