@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.72" # -- dscudiero -- Thu 03/30/2017 @ 13:01:34.36
+version="1.2.73" # -- dscudiero -- Thu 03/30/2017 @ 13:15:47.99
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -9,8 +9,11 @@ version="1.2.72" # -- dscudiero -- Thu 03/30/2017 @ 13:01:34.36
 # All rights reserved
 #===================================================================================================
 
+[[ $LOGNAME == 'dscudiero' ]] && echo "$0 = '$0'"
+
 dispatcherArgs="$*"
 myName='dispatcher'
+myPath="$(dirname "$0")"
 TOOLSPATH='/steamboat/leepfrog/docs/tools'
 [[ -d '/steamboat/leepfrog/docs/toolsNew' ]] && TOOLSPATH='/steamboat/leepfrog/docs/toolsNew'
 [[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
@@ -92,6 +95,8 @@ statusLine="\tDispatcher ($version): "
 [[ -n $(which logname 2>&1) ]] && userName=$(logname 2>&1) || userName=$LOGNAME
 [[ $userName == 'dscudiero' ]] && userName=$LOGNAME
 tmpRoot=/tmp/$LOGNAME
+
+[[ $(dirname "$0") ]]
 
 #==================================================================================================
 # Parse arguments
@@ -183,13 +188,6 @@ prtStatus "parse args"
 	[[ -z $initFile ]] && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
 
 ## Set mysql connection information
-	warehouseDb='warehouse'
-	if [[ -n $WAREHOUSEDB ]]; then
-		warehouseDb="$WAREHOUSEDB"
-	else
-		[[ $useDevDb == true ]] && warehouseDb='warehouseDev'
-	fi
-
 	# dbAcc='Read'
 	# mySqlUser="leepfrog$dbAcc"
 	# mySqlHost='duro'
@@ -361,3 +359,4 @@ prtStatus "parse args"
 ## 03-30-2017 @ 12.17.16 - ("1.2.66")  - dscudiero - Update the code where WAREHOUSEDB overrides the default value
 ## 03-30-2017 @ 12.59.09 - ("1.2.71")  - dscudiero - add debug messages
 ## 03-30-2017 @ 13.01.48 - ("1.2.72")  - dscudiero - Remove debug Statements
+## 03-30-2017 @ 13.15.59 - ("1.2.73")  - dscudiero - Add debug statements
