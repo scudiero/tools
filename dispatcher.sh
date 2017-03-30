@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.71" # -- dscudiero -- Thu 03/30/2017 @ 12:58:44.82
+version="1.2.72" # -- dscudiero -- Thu 03/30/2017 @ 13:01:34.36
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -190,8 +190,6 @@ prtStatus "parse args"
 		[[ $useDevDb == true ]] && warehouseDb='warehouseDev'
 	fi
 
-[[ $LOGNAME == 'dscudiero' ]] && echo "warehouseDb 1 = '$warehouseDb'"
-
 	# dbAcc='Read'
 	# mySqlUser="leepfrog$dbAcc"
 	# mySqlHost='duro'
@@ -220,8 +218,6 @@ prtStatus "parse args"
 	sTime=$(date "+%s")
 	source $initFile
 	prtStatus ", run initFile"
-
-[[ $LOGNAME == 'dscudiero' ]] && echo "warehouseDb 2 = '$warehouseDb'"
 
 ## If sourced then just return
 	[[ $calledViaSource == true ]] && return 0
@@ -364,3 +360,4 @@ prtStatus "parse args"
 ## 03-30-2017 @ 08.07.05 - ("1.2.65")  - dscudiero - Tweak buil7 is slow message
 ## 03-30-2017 @ 12.17.16 - ("1.2.66")  - dscudiero - Update the code where WAREHOUSEDB overrides the default value
 ## 03-30-2017 @ 12.59.09 - ("1.2.71")  - dscudiero - add debug messages
+## 03-30-2017 @ 13.01.48 - ("1.2.72")  - dscudiero - Remove debug Statements
