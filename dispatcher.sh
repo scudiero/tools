@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.83" # -- dscudiero -- Thu 03/30/2017 @ 14:56:59.52
+version="1.2.84" # -- dscudiero -- Thu 03/30/2017 @ 15:08:36.56
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -11,22 +11,9 @@ version="1.2.83" # -- dscudiero -- Thu 03/30/2017 @ 14:56:59.52
 dispatcherArgs="$*"
 myName='dispatcher'
 
-# if [[ $LOGNAME == 'dscudiero' ]]; then
-# 	bootData="$(dirname "$(dirname "$0")")/bootData"
-# 	[[ -r $bootData ]] && source "$bootData"
-# else
-# 	TOOLSPATH='/steamboat/leepfrog/docs/tools'
-# 	[[ -d '/steamboat/leepfrog/docs/toolsNew' ]] && TOOLSPATH='/steamboat/leepfrog/docs/toolsNew'
-# 	[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
-# fi
+bootData="$(dirname "$(dirname "$0")")/bootData"
+[[ -r $bootData ]] && source "$bootData"
 
-TOOLSPATH="$(dirname "$(dirname "$0")")"
-[[ -d "$(dirname "$TOOLSPATH")/toolsNew" ]] && TOOLSPATH="$(dirname "$TOOLSPATH")/toolsNew"
-[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
-[[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB" || warehouseDb='warehouse'
-
-
-export TOOLSWAREHOUSEDB="$warehouseDb"
 echo
 echo "warehouseDb = '$warehouseDb'"
 echo "TOOLSWAREHOUSEDB = '$TOOLSWAREHOUSEDB'"
@@ -379,3 +366,4 @@ prtStatus "parse args"
 ## 03-30-2017 @ 14.41.01 - ("1.2.81")  - dscudiero - Make sure TOOLSWAREHOUSEDB is set
 ## 03-30-2017 @ 14.49.38 - ("1.2.82")  - dscudiero - Add debug messages
 ## 03-30-2017 @ 14.57.29 - ("1.2.83")  - dscudiero - patch boot problem
+## 03-30-2017 @ 15.09.22 - ("1.2.84")  - dscudiero - pull out fixed code to patch reading bootData
