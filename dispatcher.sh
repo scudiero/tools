@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.81" # -- dscudiero -- Thu 03/30/2017 @ 14:40:40.96
+version="1.2.82" # -- dscudiero -- Thu 03/30/2017 @ 14:49:29.49
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -20,6 +20,9 @@ else
 	[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
 fi
 export TOOLSWAREHOUSEDB="$warehouseDb"
+echo
+echo "warehouseDb = '$warehouseDb'"
+echo "TOOLSWAREHOUSEDB = '$TOOLSWAREHOUSEDB'"
 
 #==================================================================================================
 # Global Functions
@@ -367,3 +370,4 @@ prtStatus "parse args"
 ## 03-30-2017 @ 13.31.33 - ("1.2.79")  - dscudiero - General syncing of dev to prod
 ## 03-30-2017 @ 14.02.03 - ("1.2.80")  - dscudiero - Remove debug statements
 ## 03-30-2017 @ 14.41.01 - ("1.2.81")  - dscudiero - Make sure TOOLSWAREHOUSEDB is set
+## 03-30-2017 @ 14.49.38 - ("1.2.82")  - dscudiero - Add debug messages
