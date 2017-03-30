@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.17" # -- dscudiero -- 01/24/2017 @  7:30:22.24
+# version="1.0.20" # -- dscudiero -- Thu 03/30/2017 @  8:39:31.96
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -25,7 +25,8 @@
 		unset resultSet
 
 		[[ -z $sqlStmt ]] && return 0
-		[[ ${sqlStmt:${#sqlStmt}:1} != ';' ]] && sqlStmt="$sqlStmt;"
+		local sqlAction="${sqlStmt%% *}"
+		[[ ${sqlAction:0:5} != 'mysql' && ${sqlStmt:${#sqlStmt}:1} != ';' ]] && sqlStmt="$sqlStmt;"
 		local stmtType=$(tr '[:lower:]' '[:upper:]' <<< "${sqlStmt%% *}")
 
 		local calledBy=$(caller 0 | cut -d' ' -f2)
@@ -74,3 +75,4 @@
 ## Wed Jan 18 13:13:30 CST 2017 - dscudiero - General syncing of dev to prod
 ## Wed Jan 18 13:37:13 CST 2017 - dscudiero - misc cleanup
 ## Tue Jan 24 07:31:39 CST 2017 - dscudiero - Allow function to run if called by ProcessLogger and informationOnly is set
+## 03-30-2017 @ 08.40.53 - ("1.0.20")  - dscudiero - Do not add trailing ';' if the sql action is mysql*
