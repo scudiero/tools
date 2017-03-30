@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.100 # -- dscudiero -- 02/10/2017 @  9:00:27.18
+version=1.3.101 # -- dscudiero -- Thu 03/30/2017 @ 10:07:51.38
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -256,6 +256,7 @@ function workflowcorefiles {
 	local scriptData="$(cut -d':' -f2- <<< ${resultSet[0]})"
 
 	for file in $(tr ',' ' ' <<< $scriptData); do
+		[[ $file == 'roles.tcf' || ${file##*.} == 'plt' ]] && continue
 		srcFile="$skeletonRoot/release/web${file}"
 		tgtFile="$srcDir/web${file}"
 		## Copy file if changed
@@ -349,3 +350,4 @@ Goodbye 0
 ## Tue Jan 10 16:17:06 CST 2017 - dscudiero - Fix problem making backup in vba refresh
 ## Wed Feb  8 08:24:32 CST 2017 - dscudiero - Switch refresh workflowCore to pull file names from saveWorkflow defaults data
 ## Fri Feb 10 09:01:16 CST 2017 - dscudiero - Parse client name and env if passed in
+## 03-30-2017 @ 10.08.22 - (1.3.101)   - dscudiero - Do not overwrite roles.tcf or *.plt files when refreshing workflowCoreFiles
