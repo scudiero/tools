@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.63" # -- dscudiero -- 03/24/2017 @ 10:25:48.16
+version="1.2.64" # -- dscudiero -- Thu 03/30/2017 @  7:34:09.02
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -135,7 +135,7 @@ tmpRoot=/tmp/$LOGNAME
 
 ## Hello
 [[ $batchMode != true && $(hostname) == 'build7.leepfrog.com' ]] && \
-	echo -e "\tNote: (dispatcher) The current host has been found to be a bit slow, patience you must have my young padawan" >&3
+	echo -e "\tNote: (dispatcher) Fild system access from the current host has been found to be a bit slow,\n\tPatience you must have my young padawan" >&3
 
 ## If called as ourselves, then the first token is the script name to call
 	if [[ $callPgmName == 'dispatcher.sh' ]]; then
@@ -355,3 +355,4 @@ prtStatus "parse args"
 ## Mon Feb  6 10:32:37 CST 2017 - dscudiero - Update logic for checking if user is in the leepfrog group
 ## Mon Feb  6 10:36:05 CST 2017 - dscudiero - set tmpFile
 ## 03-24-2017 @ 10.26.08 - ("1.2.63")  - dscudiero - Only remove the current tmpFile, not all for the called pgm
+## 03-30-2017 @ 07.34.29 - ("1.2.64")  - dscudiero - weak messaging
