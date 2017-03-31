@@ -375,3 +375,4 @@ prtStatus "parse args"
 ## 03-31-2017 @ 07.14.23 - ("1.2.86")  - dscudiero - General syncing of dev to prod
 ## 03-31-2017 @ 07.17.42 - ("1.2.87")  - dscudiero - General syncing of dev to prod
 ## 03-31-2017 @ 07.20.10 - ("1.2.88")  - dscudiero - General syncing of dev to prod
+## Fri Mar 31 07:24:00 CDT 2017 - dscudiero - -m Sync
