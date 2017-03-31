@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.83" # -- dscudiero -- Thu 03/30/2017 @ 15:10:52.06
+version="1.2.84" # -- dscudiero -- Fri 03/31/2017 @  7:00:38.68
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -11,21 +11,17 @@ version="1.2.83" # -- dscudiero -- Thu 03/30/2017 @ 15:10:52.06
 dispatcherArgs="$*"
 myName='dispatcher'
 
-# if [[ $LOGNAME == 'dscudiero' ]]; then
-# 	bootData="$(dirname "$(dirname "$0")")/bootData"
-# 	[[ -r $bootData ]] && source "$bootData"
-# else
-# 	TOOLSPATH='/steamboat/leepfrog/docs/tools'
-# 	[[ -d '/steamboat/leepfrog/docs/toolsNew' ]] && TOOLSPATH='/steamboat/leepfrog/docs/toolsNew'
-# 	[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
-# fi
-
-TOOLSPATH="$(dirname "$(dirname "$0")")"
-[[ -d "$(dirname "$TOOLSPATH")/toolsNew" ]] && TOOLSPATH="$(dirname "$TOOLSPATH")/toolsNew"
-[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
-[[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB" || warehouseDb='warehouse'
-
+if [[ $LOGNAME == 'dscudiero' ]]; then
+	bootData="$(dirname "$(dirname "$0")")/bootData"
+	[[ -r $bootData ]] && source "$bootData"
+else
+	TOOLSPATH="$(dirname "$(dirname "$0")")"
+	[[ -d "$(dirname "$TOOLSPATH")/toolsNew" ]] && TOOLSPATH="$(dirname "$TOOLSPATH")/toolsNew"
+	[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
+	[[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB" || warehouseDb='warehouse'
+fi
 export TOOLSWAREHOUSEDB="$warehouseDb"
+
 echo
 echo "warehouseDb = '$warehouseDb'"
 echo "TOOLSWAREHOUSEDB = '$TOOLSWAREHOUSEDB'"
@@ -378,3 +374,4 @@ prtStatus "parse args"
 ## 03-30-2017 @ 14.41.01 - ("1.2.81")  - dscudiero - Make sure TOOLSWAREHOUSEDB is set
 ## 03-30-2017 @ 14.49.38 - ("1.2.82")  - dscudiero - Add debug messages
 ## 03-30-2017 @ 15.11.07 - ("1.2.83")  - dscudiero - Backout last change
+## 03-31-2017 @ 07.01.14 - ("1.2.84")  - dscudiero - only read bootdata if it is me
