@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.47 # -- dscudiero -- 03/23/2017 @ 14:21:29.93
+version=4.11.48 # -- dscudiero -- Fri 03/31/2017 @  7:26:55.32
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -244,7 +244,6 @@ if [[ $verify == true ]]; then
 		fi ## [[ $haveCims == true ]]
 
 		if [[ $haveClss == true ]]; then
-			Msg2
 			[[ $skipClss == true ]] && ans='Yes' || unset ans
 			Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CLSS/WEN" 'No,Yes' 'No' '6'; ans="$(Lower "${ans:0:1}")"
 			[[ $ans == 'y' ]] && skipClss=true
@@ -254,7 +253,6 @@ if [[ $verify == true ]]; then
 	fi ## [[ -z $onlyProduct ]]
 
 	if [[ -z $skipAlso ]]; then
-		Msg2
 		unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') additional directories/files from the copy operation" 'No,Yes' 'No' '6'; ans="$(Lower "${ans:0:1}")"
 		if [[ $ans == 'y' ]]; then
 			SetFileExpansion 'off'
@@ -1227,3 +1225,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 03-23-2017 @ 14.16.30 - (4.11.46)   - dscudiero - Added the -cim -cat -clss flags as short-cuts to only copy said product data
 ## 03-23-2017 @ 14.17.29 - (4.11.46)   - dscudiero - General syncing of dev to prod
 ## 03-23-2017 @ 14.32.38 - (4.11.47)   - dscudiero - General syncing of dev to prod
+## 03-31-2017 @ 07.27.40 - (4.11.48)   - dscudiero - Remove extra blank lines in prompting
