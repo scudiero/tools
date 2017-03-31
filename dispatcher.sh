@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.88" # -- dscudiero -- Fri 03/31/2017 @  7:20:05.47
+version="1.2.89" # -- dscudiero -- Fri 03/31/2017 @  7:29:20.34
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -10,7 +10,6 @@ version="1.2.88" # -- dscudiero -- Fri 03/31/2017 @  7:20:05.47
 #===================================================================================================
 dispatcherArgs="$*"
 myName='dispatcher'
-echo "Starting $myName"
 
 [[ -d "$(dirname "$TOOLSPATH")/toolsNew" ]] && TOOLSPATH="$(dirname "$TOOLSPATH")/toolsNew"
 [[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
@@ -18,8 +17,9 @@ echo "Starting $myName"
 export TOOLSWAREHOUSEDB="$warehouseDb"
 
 echo
-echo "\$0 = '$0'"
-echo "TOOLSWAREHOUSEDB = '$TOOLSWAREHOUSEDB'"
+echo "Starting $myName"
+echo -e "\t\$0 = '$0'"
+echo -e "\tTOOLSWAREHOUSEDB = '$TOOLSWAREHOUSEDB'"
 echo
 
 #==================================================================================================
@@ -376,3 +376,4 @@ prtStatus "parse args"
 ## 03-31-2017 @ 07.17.42 - ("1.2.87")  - dscudiero - General syncing of dev to prod
 ## 03-31-2017 @ 07.20.10 - ("1.2.88")  - dscudiero - General syncing of dev to prod
 ## Fri Mar 31 07:24:00 CDT 2017 - dscudiero - -m Sync
+## 03-31-2017 @ 07.29.34 - ("1.2.89")  - dscudiero - reformat debug stuff
