@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.87" # -- dscudiero -- Fri 03/31/2017 @  7:17:38.46
+version="1.2.88" # -- dscudiero -- Fri 03/31/2017 @  7:20:05.47
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -10,6 +10,7 @@ version="1.2.87" # -- dscudiero -- Fri 03/31/2017 @  7:17:38.46
 #===================================================================================================
 dispatcherArgs="$*"
 myName='dispatcher'
+echo "Starting $myName"
 
 [[ -d "$(dirname "$TOOLSPATH")/toolsNew" ]] && TOOLSPATH="$(dirname "$TOOLSPATH")/toolsNew"
 [[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
@@ -373,3 +374,4 @@ prtStatus "parse args"
 ## 03-31-2017 @ 07.02.23 - ("1.2.85")  - dscudiero - General syncing of dev to prod
 ## 03-31-2017 @ 07.14.23 - ("1.2.86")  - dscudiero - General syncing of dev to prod
 ## 03-31-2017 @ 07.17.42 - ("1.2.87")  - dscudiero - General syncing of dev to prod
+## 03-31-2017 @ 07.20.10 - ("1.2.88")  - dscudiero - General syncing of dev to prod
