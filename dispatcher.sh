@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.86" # -- dscudiero -- Fri 03/31/2017 @  7:14:17.71
+version="1.2.87" # -- dscudiero -- Fri 03/31/2017 @  7:17:38.46
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -17,7 +17,7 @@ myName='dispatcher'
 export TOOLSWAREHOUSEDB="$warehouseDb"
 
 echo
-echo "warehouseDb = '$warehouseDb'"
+echo "\$0 = '$0'"
 echo "TOOLSWAREHOUSEDB = '$TOOLSWAREHOUSEDB'"
 echo
 
@@ -372,3 +372,4 @@ prtStatus "parse args"
 ## 03-31-2017 @ 07.01.14 - ("1.2.84")  - dscudiero - only read bootdata if it is me
 ## 03-31-2017 @ 07.02.23 - ("1.2.85")  - dscudiero - General syncing of dev to prod
 ## 03-31-2017 @ 07.14.23 - ("1.2.86")  - dscudiero - General syncing of dev to prod
+## 03-31-2017 @ 07.17.42 - ("1.2.87")  - dscudiero - General syncing of dev to prod
