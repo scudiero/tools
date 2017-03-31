@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.84" # -- dscudiero -- Fri 03/31/2017 @  7:00:38.68
+version="1.2.85" # -- dscudiero -- Fri 03/31/2017 @  7:02:17.24
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -13,7 +13,9 @@ myName='dispatcher'
 
 if [[ $LOGNAME == 'dscudiero' ]]; then
 	bootData="$(dirname "$(dirname "$0")")/bootData"
-	[[ -r $bootData ]] && source "$bootData"
+	echo
+	echo "bootData = '$bootData'"
+	[[ -r $bootData ]] && echo 'Here' && source "$bootData"
 else
 	TOOLSPATH="$(dirname "$(dirname "$0")")"
 	[[ -d "$(dirname "$TOOLSPATH")/toolsNew" ]] && TOOLSPATH="$(dirname "$TOOLSPATH")/toolsNew"
@@ -25,6 +27,7 @@ export TOOLSWAREHOUSEDB="$warehouseDb"
 echo
 echo "warehouseDb = '$warehouseDb'"
 echo "TOOLSWAREHOUSEDB = '$TOOLSWAREHOUSEDB'"
+echo
 
 #==================================================================================================
 # Global Functions
@@ -375,3 +378,4 @@ prtStatus "parse args"
 ## 03-30-2017 @ 14.49.38 - ("1.2.82")  - dscudiero - Add debug messages
 ## 03-30-2017 @ 15.11.07 - ("1.2.83")  - dscudiero - Backout last change
 ## 03-31-2017 @ 07.01.14 - ("1.2.84")  - dscudiero - only read bootdata if it is me
+## 03-31-2017 @ 07.02.23 - ("1.2.85")  - dscudiero - General syncing of dev to prod
