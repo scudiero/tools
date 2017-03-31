@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.85" # -- dscudiero -- Fri 03/31/2017 @  7:02:17.24
+version="1.2.86" # -- dscudiero -- Fri 03/31/2017 @  7:14:17.71
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -11,17 +11,9 @@ version="1.2.85" # -- dscudiero -- Fri 03/31/2017 @  7:02:17.24
 dispatcherArgs="$*"
 myName='dispatcher'
 
-if [[ $LOGNAME == 'dscudiero' ]]; then
-	bootData="$(dirname "$(dirname "$0")")/bootData"
-	echo
-	echo "bootData = '$bootData'"
-	[[ -r $bootData ]] && echo 'Here' && source "$bootData"
-else
-	TOOLSPATH="$(dirname "$(dirname "$0")")"
-	[[ -d "$(dirname "$TOOLSPATH")/toolsNew" ]] && TOOLSPATH="$(dirname "$TOOLSPATH")/toolsNew"
-	[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
-	[[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB" || warehouseDb='warehouse'
-fi
+[[ -d "$(dirname "$TOOLSPATH")/toolsNew" ]] && TOOLSPATH="$(dirname "$TOOLSPATH")/toolsNew"
+[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
+[[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB" || warehouseDb='warehouse'
 export TOOLSWAREHOUSEDB="$warehouseDb"
 
 echo
@@ -379,3 +371,4 @@ prtStatus "parse args"
 ## 03-30-2017 @ 15.11.07 - ("1.2.83")  - dscudiero - Backout last change
 ## 03-31-2017 @ 07.01.14 - ("1.2.84")  - dscudiero - only read bootdata if it is me
 ## 03-31-2017 @ 07.02.23 - ("1.2.85")  - dscudiero - General syncing of dev to prod
+## 03-31-2017 @ 07.14.23 - ("1.2.86")  - dscudiero - General syncing of dev to prod
