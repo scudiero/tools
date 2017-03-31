@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.89" # -- dscudiero -- Fri 03/31/2017 @  7:29:20.34
+version="1.2.90" # -- dscudiero -- Fri 03/31/2017 @  8:06:48.23
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -15,12 +15,6 @@ myName='dispatcher'
 [[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
 [[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB" || warehouseDb='warehouse'
 export TOOLSWAREHOUSEDB="$warehouseDb"
-
-echo
-echo "Starting $myName"
-echo -e "\t\$0 = '$0'"
-echo -e "\tTOOLSWAREHOUSEDB = '$TOOLSWAREHOUSEDB'"
-echo
 
 #==================================================================================================
 # Global Functions
@@ -377,3 +371,4 @@ prtStatus "parse args"
 ## 03-31-2017 @ 07.20.10 - ("1.2.88")  - dscudiero - General syncing of dev to prod
 ## Fri Mar 31 07:24:00 CDT 2017 - dscudiero - -m Sync
 ## 03-31-2017 @ 07.29.34 - ("1.2.89")  - dscudiero - reformat debug stuff
+## 03-31-2017 @ 08.06.56 - ("1.2.90")  - dscudiero - Remove debug statements
