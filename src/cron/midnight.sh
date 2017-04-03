@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.213 # -- dscudiero -- Mon 04/03/2017 @  7:41:10.74
+version=1.21.215 # -- dscudiero -- Mon 04/03/2017 @  7:52:46.07
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -316,7 +316,7 @@ case "$hostName" in
 			froggerQa='sjones@leepfrog.com,mbruening@leepfrog.com,jlindeman@leepfrog.com'
 			Call 'reports' "qaStatusShort -quiet -email "$froggerQa" $scriptArgs"
 			## Build a list of clients and contact info for Shelia
-			[[ $runClientListReport == true ]] && Call 'reports' "clientList -quiet -email 'dscudiero@leepfrog.com,sfrickson@leepfrog.com' $scriptArgs"
+			#[[ $runClientListReport == true ]] && Call 'reports' "clientList -quiet -email 'dscudiero@leepfrog.com,sfrickson@leepfrog.com' $scriptArgs"
 			[[ $(date +%d -d tomorrow) == '01' ]] && Call 'reports' "clientTimezone -quiet -email 'dscudiero@leepfrog.com,jlindeman@leepfrog.com' $scriptArgs"
 
 		## On the last day of the month roll-up the log files
@@ -432,3 +432,4 @@ return 0
 ## Thu Mar 16 12:41:17 CDT 2017 - dscudiero - Update employee table to also get employees with status of L
 ## Thu Mar 16 12:45:54 CDT 2017 - dscudiero - General syncing of dev to prod
 ## 04-03-2017 @ 07.46.15 - (1.21.213)  - dscudiero - Take out call to buildWarhouseSqlite
+## 04-03-2017 @ 07.53.15 - (1.21.215)  - dscudiero - add clientByTimezone report
