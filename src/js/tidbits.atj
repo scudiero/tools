@@ -32,7 +32,23 @@ resultSet.forEach(function(text) {
 //Regular Expression testing
 var regex = new RegExp('^[123]..$','i');
 if (regex.test(tcfdata.course_number)) {
+}
 
+var uGradRegEx=/^[0-4]\d{3}[A-Za-z]*$/;
+var gradRegEx=/^[5-9]\d{3}[A-Za-z]*$/;
+
+// Undergraduate
+if (courseNumber != "" ) {
+	if (uGradRegEx.test(courseNumber)) {
+
+	}
+	// Graduate
+	if (gradRegEx.test(courseNumber)) {
+
+	}
+}
+
+============================================================================================================================================================================
 // Function to sort array of objects by dept field
 function compareDepts(a,b) {
   if (a.dept < b.dept)
@@ -124,3 +140,4 @@ if (CheckChanged(diffdata,allowChangedFields,'any',true)) {
 		resultSet.forEach(function(result) {
 		});
 	}
+// 04-03-2017 @ 10.54.45 - dscudiero - Add new info for regex
