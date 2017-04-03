@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.212 # -- dscudiero -- 03/16/2017 @ 12:45:47.27
+version=1.21.213 # -- dscudiero -- Mon 04/03/2017 @  7:41:10.74
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -285,9 +285,6 @@ case "$hostName" in
 			touch $skeletonRoot/.syncDate
 			Msg2 "^...done"
 
-		## Build a sqlite clone of the data warehouse
-			Call 'buildWarehouseSqlite' "$scriptArgs"
-
 		## Clean up the tools bin directory.
 			#CleanToolsBin
 
@@ -434,3 +431,4 @@ return 0
 ## Tue Mar 14 13:56:52 CDT 2017 - dscudiero - Change where the contacts db shadow is written
 ## Thu Mar 16 12:41:17 CDT 2017 - dscudiero - Update employee table to also get employees with status of L
 ## Thu Mar 16 12:45:54 CDT 2017 - dscudiero - General syncing of dev to prod
+## 04-03-2017 @ 07.46.15 - (1.21.213)  - dscudiero - Take out call to buildWarhouseSqlite
