@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.1.14 # -- dscudiero -- 03/24/2017 @ 10:56:21.38
+version=1.1.15 # -- dscudiero -- Mon 04/03/2017 @  7:45:38.60
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye DumpMap GetExcel'
@@ -80,13 +80,13 @@ for var in $falseVars; do eval $var=false; done
 
 ## Get the primary index column name
 	sqlStmt="select column_name from information_schema.columns where table_schema=\"$warehouseDb\" and table_name=\"$qaStatusTable\"and column_key='PRI'"
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	primaryKey=${resultSet[0]}
 
 ## Get all the fields in the database table
 	unset insertFields
 	sqlStmt="select column_name from information_schema.columns where table_schema=\"$warehouseDb\" and table_name=\"$qaStatusTable\" and column_name<>\"$primaryKey\""
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	for result in "${resultSet[@]}"; do
 		field=$(cut -d'|' -f1 <<< $result)
 		insertFields="$insertFields,$field"
@@ -96,7 +96,7 @@ for var in $falseVars; do eval $var=false; done
 ## Get the update fields in the database table
 	unset updateFields
 	sqlStmt="select column_name from information_schema.columns where table_schema=\"$warehouseDb\" and table_name=\"$qaStatusTable\" and is_nullable='yes' and column_name<>\"$primaryKey\""
-	RunSql 'mysql' $sqlStmt
+	RunSql2 $sqlStmt
 	for result in "${resultSet[@]}"; do
 		field=$(cut -d'|' -f1 <<< $result)
 		updateFields="$updateFields,$field"
@@ -223,7 +223,7 @@ for workbook in "${workbooks[@]}"; do
 	## See if there is an existing record in the database do setup accordingly
 		whereClause="clientCode=$clientCode and env=$env and product=$product and project=$project and instance=$instance and jalotTaskNumber=$jalotTaskNumber"
 		sqlStmt="select $primaryKey from $qaStatusTable where $whereClause"
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -eq 0 ]]; then
 			sqlAction='Insert'
 			fields="$insertFields"
@@ -253,7 +253,7 @@ for workbook in "${workbooks[@]}"; do
 
 	## Build & run sqlStmt
 		sqlStmt="$sqlAction $qaStatusTable $setClause $whereClause"
-		RunSql 'mysql' $sqlStmt
+		RunSql2 $sqlStmt
 		Msg2 $V1 "^^${sqlAction} of record completed"
 
 	## Populate the testing detains table if workbook is finalized
@@ -271,13 +271,13 @@ for workbook in "${workbooks[@]}"; do
 				## Get the key for the qastatus record
 					whereClause="clientCode=$clientCode and product=$product and project=$project and instance=$instance and env=$env and jalotTaskNumber=$jalotTaskNumber"
 					sqlStmt="select idx from $qaStatusTable where $whereClause"
-					RunSql $sqlStmt
+					RunSql2 $sqlStmt
 					if [[ ${#resultSet[@]} -eq 0 ]]; then
 						Error "Could not retrieve record key in $warehouseDb.$qaStatusTable for: $whereClause\nCould not set the record as deactivated"
 					else
 						qastatusKey=${resultSet[0]}
 						sqlStmt="update $qaStatusTable set recordStatus=\"D\" where idx=$qastatusKey"
-						RunSql $sqlStmt
+						RunSql2 $sqlStmt
 					fi
 			fi
 		fi
@@ -309,3 +309,4 @@ Goodbye 0 #'alert'
 ## Fri Mar 17 10:45:12 CDT 2017 - dscudiero - Fixed problem with doubly quotes strings## 03-24-2017 @ 09.10.05 - (1.1.11)    - dscudiero - General syncing of dev to prod
 ## 03-24-2017 @ 09.23.08 - (1.1.12)    - dscudiero - Fix problem setting the qastatus table record status=D
 ## 03-27-2017 @ 13.30.01 - (1.1.14)    - dscudiero - Only report on active records
+## 04-03-2017 @ 07.45.53 - (1.1.15)    - dscudiero - Switch from RunSql to RunSql2
