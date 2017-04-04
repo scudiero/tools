@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.8.74 # -- dscudiero -- 03/17/2017 @ 16:39:47.77
+version=2.8.75 # -- dscudiero -- Tue 04/04/2017 @  8:16:32.44
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -261,11 +261,13 @@ Hello
 
 ## Get update comment
 	unset updateComment
-	echo
+	[[ $verify == true ]] && echo
 	Prompt jalotTask "Please enter the jalot task number:" "*optional*"
-	Msg2 "Please enter the business reason for making this update:"
-	Prompt updateComment "^" "*any*"
-	[[ -n $jalotTask ]] && updateComment="(Task:$jalotTask) $updateComment"
+	if [[ $verify == true ]]; then
+		Msg2 "Please enter the business reason for making this update:"
+		Prompt updateComment "^" "*any*"
+		[[ -n $jalotTask ]] && updateComment="(Task:$jalotTask) $updateComment"
+	fi
 
 ## Verify continue
 	unset verifyArgs
@@ -452,3 +454,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## Mon Mar  6 12:07:10 CST 2017 - dscudiero - added update comment for the log
 ## Tue Mar  7 14:45:49 CST 2017 - dscudiero - add jalot task to the update comment
 ## Fri Mar 17 16:40:36 CDT 2017 - dscudiero - remove errant t from logged lines
+## 04-04-2017 @ 09.08.22 - (2.8.75)    - dscudiero - Fix issue where it wasa still prompting for jalot and reason when noPrompt was active
