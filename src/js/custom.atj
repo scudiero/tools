@@ -3,4 +3,6 @@
 // Import workflow functions
 %import /courseadmin/workflowFuncs.atj:atj%
 %import /programadmin/workflowFuncs.atj:atj%
+%import /miscadmin/workflowFuncs.atj:atj%
 
+// 04-04-2017 @ 11.00.35 - dscudiero - Added a line for miscadmin
