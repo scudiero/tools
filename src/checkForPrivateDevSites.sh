@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.4.35 # -- dscudiero -- Tue 04/04/2017 @  9:38:15.42
+version=2.4.36 # -- dscudiero -- Tue 04/04/2017 @  9:39:40.20
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -93,7 +93,7 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 				fi
 			done
 
-			Msg2 "\nYou can use the 'cleanDev' script to safely remove any sites that are no longer needed." >> $tmpFile
+			Msg2 "\nRemember, you can use the 'cleanDev' script to easily remove any sites that are no longer needed." >> $tmpFile
 			Msg2 "^See https://internal.leepfrog.com/support/tools/ for additional informaton." >> $tmpFile
 			Msg2 "V2 $(dump foundFiles noEmails)"
 			if [[ $foundFiles == true && $noEmails != true ]]; then
@@ -133,3 +133,4 @@ Goodbye 0
 ## Thu Mar 16 12:40:45 CDT 2017 - dscudiero - Undo last change
 ## 04-04-2017 @ 09.37.18 - (2.4.34)    - dscudiero - Add last modify date to the output
 ## 04-04-2017 @ 09.38.29 - (2.4.35)    - dscudiero - make autodelete based on last access date
+## 04-04-2017 @ 09.39.55 - (2.4.36)    - dscudiero - Tweak messaging
