@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.4.34 # -- dscudiero -- Tue 04/04/2017 @  9:28:56.95
+version=2.4.35 # -- dscudiero -- Tue 04/04/2017 @  9:38:15.42
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -82,11 +82,11 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 				dump -2 -n $file newestModEpoch newestAccEpoch todaysEpoch modDelta modDaysOld accDelta accDaysOld
 				## Auto delete old files
 				if [[ ${file:(-11)} == '.AutoDelete' ]]; then
-					if [[ $daysOld -gt $deleteLimitDays ]]; then
+					if [[ $accDaysOld -gt $deleteLimitDays ]]; then
 						[[ $userName = 'dscudiero' ]] && saveWorkflow $client -p -all -suffix "beforeDelete-$fileSuffix" -nop -quiet
 						mv $file $file.DELETE
 						$DOIT rm -rf $file.DELETE &
-						Msg2 "^$file - Was marked for deleteion and is over the threshold ($daysOld > $deleteLimitDays), it was deleted" | tee -a $tmpFile
+						Msg2 "^$file - Was marked for deleteion and is over the threshold ($accDaysOld > $deleteLimitDays), it was deleted" | tee -a $tmpFile
 					fi
 				else
 					Msg2 "^$file - Last modified $modDaysOld day(s) ago and last accessed $accDaysOld day(s) ago" | tee -a $tmpFile
@@ -132,3 +132,4 @@ Goodbye 0
 ## Thu Mar 16 12:35:31 CDT 2017 - dscudiero - Change employee query to be <> 'N'
 ## Thu Mar 16 12:40:45 CDT 2017 - dscudiero - Undo last change
 ## 04-04-2017 @ 09.37.18 - (2.4.34)    - dscudiero - Add last modify date to the output
+## 04-04-2017 @ 09.38.29 - (2.4.35)    - dscudiero - make autodelete based on last access date
