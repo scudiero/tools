@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.35" # -- dscudiero -- Thu 03/30/2017 @ 15:03:59.72
+# version="2.0.46" # -- dscudiero -- Tue 04/04/2017 @ 12:51:05.42
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -15,7 +15,7 @@ function VerifyPromptVal {
 	local allowMultiple=false
 	local processedRequest=false
 	[[ ${promptVar:(-1)} == 's' ]] && allowMultiple=true
-	dump -2 -l -t allowMultiple promptVar response validateList
+dump -l -t allowMultiple promptVar response validateList
 	unset verifyMsg
 
 	if [[ $(Contains "$validateListString" 'noCheck') == true ]]; then
@@ -163,13 +163,29 @@ function VerifyPromptVal {
 			eval $promptVar=$response
 		else
 			local answer=$(Lower $response)
-			local length=${#answer}
-			for i in "${validValues[@]}"; do
-				[[ $i == '*any*' ]] && PopSettings && verifyMsg=true && SetFileExpansion && return 0
-				local checkStr=$(Lower ${i:0:$length})
-				dump -2 -l -t -t answer length i checkStr
-				[[ $answer == $checkStr ]] && PopSettings && verifyMsg=true && SetFileExpansion && return 0
-			done
+			local length token checkStr foundAll found
+			## If allow multiples are allowed then loop throug responses and check each against valid values
+			if [[ $allowMultiple == true ]]; then
+				foundAll=true
+				for token in $(tr ',' ' ' <<< "$answer"); do
+					length=${#token}
+					found=false
+					for i in "${validValues[@]}"; do
+						checkStr=$(Lower ${i:0:$length})
+						[[ $token == $checkStr ]] && found=true && break
+					done
+					[[ $found != true ]] && foundAll=false && break
+				done
+				[[ $foundAll == true ]] && PopSettings && verifyMsg=true && SetFileExpansion && return 0
+			else  ## Single valued answer
+				length=${#answer}
+				for i in "${validValues[@]}"; do
+					[[ $i == '*any*' ]] && PopSettings && verifyMsg=true && SetFileExpansion && return 0
+					checkStr=$(Lower ${i:0:$length})
+					dump -2 -l -t -t answer length i checkStr
+					[[ $answer == $checkStr ]] && PopSettings && verifyMsg=true && SetFileExpansion && return 0
+				done
+			fi
 			verifyMsg=$(Msg2 $E "Value of '$response' not valid for '$promptVar', valid values in {$validateListString}")
 		fi
 		processedRequest=true
@@ -189,3 +205,4 @@ export -f VerifyPromptVal
 ## Wed Jan  4 13:54:39 CST 2017 - dscudiero - General syncing of dev to prod
 ## Mon Mar  6 15:55:11 CST 2017 - dscudiero - Tweak product parsing
 ## 03-30-2017 @ 15.06.14 - ("2.0.35")  - dscudiero - switch from runsql to runsql2
+## 04-04-2017 @ 13.17.36 - ("2.0.46")  - dscudiero - Added support to verify multi value responses
