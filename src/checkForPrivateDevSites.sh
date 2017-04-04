@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.4.29 # -- dscudiero -- 03/16/2017 @ 12:40:23.06
+version=2.4.34 # -- dscudiero -- Tue 04/04/2017 @  9:28:56.95
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -64,19 +64,22 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 			if [[ -f $tmpFile ]]; then rm $tmpFile; fi
 			foundFiles=true
 			Msg2 | tee -a $tmpFile
-			Msg2 "Subject: $myName found private dev sites on $hostName" | tee -a $tmpFile
+			Msg2 "$myName found private dev sites on $hostName" | tee -a $tmpFile
 			Msg2 | tee -a $tmpFile
 			Msg2 "The following private dev sites (/mnt/$share/web/xxx-$userId) where found for userid: '$userId' on $share:" | tee -a $tmpFile
 			Msg2 | tee -a $tmpFile
 			for file in "${filesFound[@]}"; do
 				## Get the newest last modified date for the site
 				cd $file
-				newestEpoch=$(find . -type f -printf '%A@ %p\n' | sort | tail -1 | cut -f1 -d" " | cut -f1 -d".") #Note: A = Access time, T = Modificaton time
+				newestModEpoch=$(find . -type f -printf '%T@ %p\n' | sort | tail -1 | cut -f1 -d" " | cut -f1 -d".") #Note: A = Access time, T = Modificaton time
+				newestAccEpoch=$(find . -type f -printf '%A@ %p\n' | sort | tail -1 | cut -f1 -d" " | cut -f1 -d".") #Note: A = Access time, T = Modificaton time
 				cd ..
 				todaysEpoch=$(date +'%s')
-				delta=$(( todaysEpoch - newestEpoch ))
-				daysOld=$(( delta / 86400 ))
-				dump -2 -n $file newestEpoch todaysEpoch delta daysOld
+				modDelta=$(( todaysEpoch - newestModEpoch ))
+				modDaysOld=$(( modDelta / 86400 ))  ## Convert to days
+				accDelta=$(( todaysEpoch - newestAccEpoch ))
+				accDaysOld=$(( accDelta / 86400 ))  ## Convert to days
+				dump -2 -n $file newestModEpoch newestAccEpoch todaysEpoch modDelta modDaysOld accDelta accDaysOld
 				## Auto delete old files
 				if [[ ${file:(-11)} == '.AutoDelete' ]]; then
 					if [[ $daysOld -gt $deleteLimitDays ]]; then
@@ -86,7 +89,7 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 						Msg2 "^$file - Was marked for deleteion and is over the threshold ($daysOld > $deleteLimitDays), it was deleted" | tee -a $tmpFile
 					fi
 				else
-					Msg2 "^$file - Last accessed $daysOld day(s) ago" | tee -a $tmpFile
+					Msg2 "^$file - Last modified $modDaysOld day(s) ago and last accessed $accDaysOld day(s) ago" | tee -a $tmpFile
 				fi
 			done
 
@@ -128,3 +131,4 @@ Goodbye 0
 ## Mon Feb 13 15:59:23 CST 2017 - dscudiero - Make sure we are using our own tmpFile
 ## Thu Mar 16 12:35:31 CDT 2017 - dscudiero - Change employee query to be <> 'N'
 ## Thu Mar 16 12:40:45 CDT 2017 - dscudiero - Undo last change
+## 04-04-2017 @ 09.37.18 - (2.4.34)    - dscudiero - Add last modify date to the output
