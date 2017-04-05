@@ -268,7 +268,6 @@ case "$hostName" in
 			Call 'buildQaStatusTable' "$scriptArgs"
 
 		## Common Checks
-			Call 'checkForPrivateDevSites' "$scriptArgs"
 			Call 'checkCgiPermissions' "$scriptArgs"
 			Call 'checkPublishSettings' "$scriptArgs"
 
@@ -435,3 +434,4 @@ return 0
 ## 04-03-2017 @ 07.46.15 - (1.21.213)  - dscudiero - Take out call to buildWarhouseSqlite
 ## 04-03-2017 @ 07.53.15 - (1.21.215)  - dscudiero - add clientByTimezone report
 ## 04-04-2017 @ 09.41.52 - (1.21.216)  - dscudiero - added checkForPrivateDevSites
+## 04-05-2017 @ 07.05.53 - (1.21.216)  - dscudiero - Take out checkForPrivateDevSites
