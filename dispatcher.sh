@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.90" # -- dscudiero -- Fri 03/31/2017 @  8:06:48.23
+version="1.2.91" # -- dscudiero -- Wed 04/05/2017 @ 13:45:16.83
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -11,6 +11,7 @@ version="1.2.90" # -- dscudiero -- Fri 03/31/2017 @  8:06:48.23
 dispatcherArgs="$*"
 myName='dispatcher'
 
+[[ -z $TOOLSPATH ]] && TOOLSPATH="/steamboat/leepfrog/docs/tools"
 [[ -d "$(dirname "$TOOLSPATH")/toolsNew" ]] && TOOLSPATH="$(dirname "$TOOLSPATH")/toolsNew"
 [[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
 [[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB" || warehouseDb='warehouse'
@@ -372,3 +373,4 @@ prtStatus "parse args"
 ## Fri Mar 31 07:24:00 CDT 2017 - dscudiero - -m Sync
 ## 03-31-2017 @ 07.29.34 - ("1.2.89")  - dscudiero - reformat debug stuff
 ## 03-31-2017 @ 08.06.56 - ("1.2.90")  - dscudiero - Remove debug statements
+## 04-05-2017 @ 13.46.35 - ("1.2.91")  - dscudiero - Make sure TOOLSPATH has a value
