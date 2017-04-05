@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.46" # -- dscudiero -- Tue 04/04/2017 @ 12:51:05.42
+# version="2.0.47" # -- dscudiero -- Wed 04/05/2017 @ 10:08:22.51
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -15,7 +15,7 @@ function VerifyPromptVal {
 	local allowMultiple=false
 	local processedRequest=false
 	[[ ${promptVar:(-1)} == 's' ]] && allowMultiple=true
-dump -l -t allowMultiple promptVar response validateList
+	dump -3 -l -t allowMultiple promptVar response validateList
 	unset verifyMsg
 
 	if [[ $(Contains "$validateListString" 'noCheck') == true ]]; then
@@ -182,7 +182,7 @@ dump -l -t allowMultiple promptVar response validateList
 				for i in "${validValues[@]}"; do
 					[[ $i == '*any*' ]] && PopSettings && verifyMsg=true && SetFileExpansion && return 0
 					checkStr=$(Lower ${i:0:$length})
-					dump -2 -l -t -t answer length i checkStr
+					dump -3 -l -t -t answer length i checkStr
 					[[ $answer == $checkStr ]] && PopSettings && verifyMsg=true && SetFileExpansion && return 0
 				done
 			fi
@@ -206,3 +206,4 @@ export -f VerifyPromptVal
 ## Mon Mar  6 15:55:11 CST 2017 - dscudiero - Tweak product parsing
 ## 03-30-2017 @ 15.06.14 - ("2.0.35")  - dscudiero - switch from runsql to runsql2
 ## 04-04-2017 @ 13.17.36 - ("2.0.46")  - dscudiero - Added support to verify multi value responses
+## 04-05-2017 @ 10.08.43 - ("2.0.47")  - dscudiero - Turn off debug statements
