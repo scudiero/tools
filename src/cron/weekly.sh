@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.22 # -- dscudiero -- 03/17/2017 @ 11:23:12.31
+version=2.1.23 # -- dscudiero -- Wed 04/05/2017 @  7:05:15.54
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -25,6 +25,10 @@ scriptArgs="$*"
 #========================================================================================================================
 case "$hostName" in
 	mojave)
+
+		## Checks
+			Call 'checkForPrivateDevSites' "$scriptArgs"
+
 		## Weekly reports
 			Msg2 "\n Publishing Report..."
 			Call 'reports' "publishing -email 'froggersupport@leepfrog.com' $scriptArgs"
@@ -62,3 +66,4 @@ return 0
 ## Fri Feb 10 14:58:55 CST 2017 - dscudiero - add 2 day summary reports back
 ## Thu Mar  9 07:52:54 CST 2017 - dscudiero - send the 2 day summary report to froggersupport
 ## Fri Mar 17 11:23:42 CDT 2017 - dscudiero - Added qaWaiting report
+## 04-05-2017 @ 07.06.09 - (2.1.23)    - dscudiero - Add checkForPrivateDevSites
