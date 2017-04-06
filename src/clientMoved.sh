@@ -1,11 +1,11 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.34 # -- dscudiero -- 01/12/2017 @ 13:12:43.05
+version=1.0.36 # -- dscudiero -- Thu 04/06/2017 @ 10:08:40.20
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
-imports="$imports SelectMenuNew"
+imports="$imports SelectMenuNew RunCourseLeafCgi"
 Import "$imports"
 originalArgStr="$*"
 scriptDescription=""
@@ -143,6 +143,7 @@ RunSql2 $sqlStmt
 
 sqlStmt="Update $siteInfoTable set share=\"$newDevShare\" where name=\"$client\" and env=\"dev\""
 RunSql2 $sqlStmt
+
 sqlStmt="Update $siteInfoTable set share=\"$newProdShare\" where name=\"${client}\" and env not in (\"dev\",\"preview\",\"public\")"
 RunSql2 $sqlStmt
 
@@ -156,9 +157,9 @@ Msg2 "Data Warehouse data updated to reflect the clients new location"
 lfinternal=$(ProtectedCall "grep lfinternal /etc/group")
 if [[ $lfinternal != '' ]]; then
 	if [[ $(Contains "$lfinternal" "$userName") == true ]]; then
-		RunCoureleafCgi "$stageInternal" "-r /clients/$client"
+		RunCourseLeafCgi "$stageInternal" "-r /clients/$client"
 		Msg2 "Internal client page republished to reflect change"
-		RunCoureleafCgi "$stageInternal" "-r /support/tools/quicklinks"
+		RunCourseLeafCgi "$stageInternal" "-r /support/tools/quicklinks"
 		Msg2 "Internal quicklinks page republished to reflect change"
 	else
 		Msg2 $W "Your account does not have access to the internal site file system, skipping client page republishing, please go to the client page on the internal site and republish the client page."
@@ -186,3 +187,4 @@ Goodbye 0 #'alert'
 ## Tue Oct  4 12:19:42 CDT 2016 - dscudiero - Edit out current host and share from the selection listes
 ## Wed Oct  5 09:46:17 CDT 2016 - dscudiero - Check to see if the user has access to the internal site befor rebuilding the client pages
 ## Mon Oct 17 08:48:30 CDT 2016 - dscudiero - Removed extra set of calls to rebuild pages
+## 04-06-2017 @ 10.09.28 - (1.0.36)    - dscudiero - renamed RunCourseLeafCgi, use new name
