@@ -1,11 +1,11 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.85 # -- dscudiero -- 03/20/2017 @ 14:14:39.13
+version=3.8.86 # -- dscudiero -- Thu 04/06/2017 @ 10:04:21.94
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
-imports="$imports GetOutputFile BackupCourseleafFile ParseCourseleafFile GetCourseleafPgm RunCoureleafCgi"
+imports="$imports GetOutputFile BackupCourseleafFile ParseCourseleafFile GetCourseleafPgm RunCourseLeafCgi"
 imports="$imports WriteChangelogEntry"
 Import "$imports"
 originalArgStr="$*"
@@ -352,7 +352,7 @@ scriptDescription="Load Courseleaf Data"
 
 		## Rebuild the appache-group file
 			if [[ $informationOnlyMode == false ]]; then
-				RunCoureleafCgi "$srcDir" "-r /apache-group.html"
+				RunCourseLeafCgi "$srcDir" "-r /apache-group.html"
 			fi
 			echo
 
@@ -624,7 +624,7 @@ scriptDescription="Load Courseleaf Data"
 					if [[ $informationOnlyMode == false ]]; then
 						if [[ $pageOwner != '' || $pageWorkflow != '' || $skipNulls == false ]]; then
 							export QUERY_STRING="owner=$pageOwner|workflow=$pageWorkflow|skipNulls=$skipNulls"
-							$DOIT ProtectedCall "RunCoureleafCgi "$srcDir" "$step $key""
+							$DOIT ProtectedCall "RunCourseLeafCgi "$srcDir" "$step $key""
 							((numPagesUpdated +=1))
 						fi
 					fi
@@ -1007,3 +1007,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## Thu Feb  9 11:49:37 CST 2017 - dscudiero - check if there is a uin column in the user sheet if the client has useUins set
 ## Thu Feb  9 11:57:48 CST 2017 - dscudiero - tweak messaging
 ## Wed Mar 22 15:30:31 CDT 2017 - dscudiero - Fix spelling error
+## 04-06-2017 @ 10.10.20 - (3.8.86)    - dscudiero - renamed RunCourseLeafCgi, use new name
