@@ -1,12 +1,12 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.216 # -- dscudiero -- Tue 04/04/2017 @  9:40:37.55
+version=1.21.217 # -- dscudiero -- Thu 04/06/2017 @ 10:05:11.22
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
 TrapSigs 'on'
-Import FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql2 Msg2 Call RunCoureleafCgi GetCourseleafPgm Semaphore
+Import FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql2 Msg2 Call RunCourseLeafCgi GetCourseleafPgm Semaphore
 originalArgStr="$*";
 
 #=======================================================================================================================
@@ -297,9 +297,9 @@ case "$hostName" in
 				Semaphore 'waiton' 'buildSiteInfoTable' 'true'
 				Msg2 "^'buildSiteInfoTable' completed, continuing..."
 			Msg2 "Rebuilding Internal pages"
-			RunCoureleafCgi "$stageInternal" "-r /clients"
-			RunCoureleafCgi "$stageInternal" "-r /support/tools"
-			RunCoureleafCgi "$stageInternal" "-r /support/qa"
+			RunCourseLeafCgi "$stageInternal" "-r /clients"
+			RunCourseLeafCgi "$stageInternal" "-r /support/tools"
+			RunCourseLeafCgi "$stageInternal" "-r /support/qa"
 
 		# ## Create a clone of the warehouse db
 		# 	Msg2 "Creating '$warehouseDev' database..."
@@ -435,3 +435,4 @@ return 0
 ## 04-03-2017 @ 07.53.15 - (1.21.215)  - dscudiero - add clientByTimezone report
 ## 04-04-2017 @ 09.41.52 - (1.21.216)  - dscudiero - added checkForPrivateDevSites
 ## 04-05-2017 @ 07.05.53 - (1.21.216)  - dscudiero - Take out checkForPrivateDevSites
+## 04-06-2017 @ 10.09.59 - (1.21.217)  - dscudiero - renamed RunCourseLeafCgi, use new name
