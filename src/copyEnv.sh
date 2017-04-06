@@ -1065,7 +1065,10 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 	#==================================================================================================
 	# Turn off publishing
 		Msg2 "\nTurn off Publishing..."
-		$DOIT sed -i '1i mapfile:production/|/dev/null' $tgtDir/$progDir.cfg
+		$DOIT sed -i s'mapfile:production/|/dev/null' $tgtDir/$progDir.cfg
+
+		$DOIT sed -i s'#^mapfile:production#//mapfile:production#'g $tgtDir/$courseleafProgDir.cfg
+		$DOIT sed -i s'#^//mapfile:production|/dev/null#mapfile:production|/dev/null#' $tgtDir/$courseleafProgDir.cfg
 		#$DOIT sed -i s'_^//mapfile:production/|/dev/null_mapfile:production/|/dev/null_' $tgtDir/courseleaf.cfg
 		#$DOIT sed -i s'_^//mapfile:production|/dev/null_mapfile:production|/dev/null_' $tgtDir/courseleaf.cfg
 		#$DOIT sed -i s'_^mapfile:production/|../../../public/web_//mapfile:production/|../../../public/web_' $tgtDir/courseleaf.cfg
@@ -1226,3 +1229,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 03-23-2017 @ 14.17.29 - (4.11.46)   - dscudiero - General syncing of dev to prod
 ## 03-23-2017 @ 14.32.38 - (4.11.47)   - dscudiero - General syncing of dev to prod
 ## 03-31-2017 @ 07.27.40 - (4.11.48)   - dscudiero - Remove extra blank lines in prompting
+## 04-06-2017 @ 14.53.46 - (4.11.48)   - dscudiero - Fix sed statement for turning off publising
