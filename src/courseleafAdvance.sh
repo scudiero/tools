@@ -1,11 +1,11 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=1.1.24 # -- dscudiero -- 01/27/2017 @ 10:34:31.17
+version=1.1.25 # -- dscudiero -- Thu 04/06/2017 @ 10:07:24.96
 #===================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye WriteChangelogEntry BackupCourseleafFile'
-includes="$includes GetCourseleafPgm ParseCourseleafFile RunCoureleafCgi"
+includes="$includes GetCourseleafPgm ParseCourseleafFile RunCourseLeafCgi"
 Import "$includes"
 originalArgStr="$*"
 scriptDescription="Advance a courseleaf site to next edition"
@@ -196,9 +196,9 @@ fi
 ## Clean out old files
 	Msg2 "Reseting console status (this may take a while)..."
 	Msg2 "^wfstatinit..."
-	RunCoureleafCgi $siteDir "wfstatinit /index.html"
+	RunCourseLeafCgi $siteDir "wfstatinit /index.html"
 	Msg2 "^wfstatbuild..."
-	RunCoureleafCgi $siteDir "-e wfstatbuild /"
+	RunCourseLeafCgi $siteDir "-e wfstatbuild /"
 
 ## Clean out old files
 	Msg2 "Cleaning up..."
@@ -275,3 +275,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client)")/$(ColorK "$(Upper $env)") to $(C
 ## Thu Jan 12 10:23:48 CST 2017 - dscudiero - Add logic to get siteDir if nocheck is specified
 ## Fri Jan 27 10:12:24 CST 2017 - dscudiero - Update finding out what the latest release of courseleaf is to use defaults variable for directory
 ## Fri Jan 27 10:35:07 CST 2017 - dscudiero - Trap error messages from ls command looking for courseleaf releases
+## 04-06-2017 @ 10.09.32 - (1.1.25)    - dscudiero - renamed RunCourseLeafCgi, use new name
