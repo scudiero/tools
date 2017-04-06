@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.5.68 # -- dscudiero -- 03/14/2017 @ 13:19:34.97
+version=1.5.69 # -- dscudiero -- Thu 04/06/2017 @ 10:07:01.27
 #==================================================================================================
 # Install a courseleaf feature on a client site
 #==================================================================================================
@@ -10,7 +10,7 @@ version=1.5.68 # -- dscudiero -- 03/14/2017 @ 13:19:34.97
 # 07-17-15 --	dgs - Migrated to framework 5
 #==================================================================================================
 TrapSigs 'on'
-includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCoureleafCgi WriteChangelogEntry SelectMenuNew'
+includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry SelectMenuNew'
 includes="$includes EditTcfValue BackupCourseleafFile GetCourseleafPgm CopyFileWithCheck ParseCourseleafFile EditCourseleafConsole"
 includes="$includes InsertLineInFile EditCourseleafConsole"
 Import "$includes"
@@ -151,3 +151,4 @@ Goodbye 0 #'alert'
 ## Tue Oct 18 13:42:26 CDT 2016 - dscudiero - use var to call feature file
 ## Tue Mar  7 14:45:27 CST 2017 - dscudiero - Fix parse of resultes from selectMenuNew after redo
 ## Tue Mar 14 13:20:30 CDT 2017 - dscudiero - Check the return code from the install scripts before editing the installed features list
+## 04-06-2017 @ 10.09.40 - (1.5.69)    - dscudiero - renamed RunCourseLeafCgi, use new name
