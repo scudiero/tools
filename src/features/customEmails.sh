@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.33 # -- dscudiero -- 12/05/2016 @ 15:12:12.79
+version=1.0.34 # -- dscudiero -- Thu 04/06/2017 @ 10:05:31.45
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
@@ -95,7 +95,7 @@ feature=$currentScript
 ## If changes made then rebuild the console page and log
 	if [[ $changesMade == true ]]; then
 		Msg2 "Rebuilding console..."
-		RunCoureleafCgi $tgtDir "-r /$courseleafDir/index.tcf"
+		RunCourseLeafCgi $tgtDir "-r /$courseleafDir/index.tcf"
 		Msg2
 		Note "You need to go and edit the control file '$tgtDir/admin/wfemail.tcf' to ensure that all the emails you wish to activate are defined."
 		unset changeLogRecs
@@ -115,4 +115,4 @@ return  ## We are called as a subprocess, just return to our parent
 
 #==================================================================================================
 ## Change Log
-#==================================================================================================
+#==================================================================================================## 04-06-2017 @ 10.10.05 - (1.0.34)    - dscudiero - renamed RunCourseLeafCgi, use new name
