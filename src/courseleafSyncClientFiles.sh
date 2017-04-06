@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.98 # -- dscudiero -- 01/12/2017 @ 13:00:07.71
+version=1.0.99 # -- dscudiero -- Thu 04/06/2017 @ 10:07:13.85
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -242,7 +242,7 @@ Msg2
 Prompt 'buildPages' "The pages database needs to be rebuilt, do you wish to do that now?" 'Yes No' 'Yes'; buildPages=$(Lower "${buildPages:0:1}")
 if [[ $buildPages = 'y' ]]; then
 	Msg2 "Rebuilding the pages database..."
-	RunCoureleafCgi "$tgtDir" "-p"
+	RunCourseLeafCgi "$tgtDir" "-p"
 else
 	Msg2 "Please remember to rebuild the pages database from the console before using the refreshed site."
 fi
@@ -265,3 +265,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client) -- Refreshed $(Upper $srcEnv) from
 ## Fri Jul  8 15:32:55 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Tue Jul 12 10:12:51 CDT 2016 - dscudiero - Fix problem if the source does not have any CIMs
 ## Thu Aug  4 11:01:28 CDT 2016 - dscudiero - Added displayGoodbyeSummaryMessages=true
+## 04-06-2017 @ 10.09.53 - (1.0.99)    - dscudiero - renamed RunCourseLeafCgi, use new name
