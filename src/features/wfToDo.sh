@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.61 # -- dscudiero -- 03/14/2017 @ 13:10:13.90
+version=1.0.62 # -- dscudiero -- Thu 04/06/2017 @ 10:05:57.25
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
@@ -92,7 +92,7 @@ minClVer='3.5.9'
 
 	if [[ $changesMade == true ]]; then
 		Msg2 "Rebuilding console..."
-		RunCoureleafCgi $tgtDir "-r /courseleaf/index.tcf"
+		RunCourseLeafCgi $tgtDir "-r /courseleaf/index.tcf"
 		unset changeLogRecs
 		changeLogRecs+=("Feature: $feature")
 		myName=$parentScript
@@ -113,3 +113,4 @@ return  ## We are called as a subprocess, just return to our parent
 ## Change Log
 #==================================================================================================
 ## Tue Mar 14 13:21:18 CDT 2017 - dscudiero - Check to make sure the user requests that the console definitions are updated to 'CourseLeaf'
+## 04-06-2017 @ 10.10.14 - (1.0.62)    - dscudiero - renamed RunCourseLeafCgi, use new name
