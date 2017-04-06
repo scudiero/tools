@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.6" # -- dscudiero -- 01/04/2017 @ 13:51:37.28
+# version="2.0.7" # -- dscudiero -- Thu 04/06/2017 @  8:34:57.62
 #===================================================================================================
 # Run a courseleaf.cgi command, check outpout
 # Courseleaf.cgi $LINENO <siteDir> <command string>
@@ -19,14 +19,14 @@ function RunCoureleafCgi {
 	courseLeafDir=$(GetCourseleafPgm | cut -d' ' -f2)
 	if [[ $courseLeafPgm == '.cgi' || $courseLeafDir == '' ]]; then Msg2 $T "Could not find courseleaf executable"; fi
 	dump -3  siteDir courseLeafPgm courseLeafDir cgiCmd
-	[[ ! -x $courseLeafDir/$courseLeafPgm ]] && Msg2 $TT1 "Could not find $courseLeafPgm in '$courseLeafDir' trying:\n^'$cgiCmd'\n^($calledLineNo)"
+	[[ ! -x $courseLeafDir/$courseLeafPgm ]] && Msg2 $TT1 "$FUNCNAME: Could not find $courseLeafPgm in '$courseLeafDir' trying:\n^'$cgiCmd'\n^($calledLineNo)"
 
 	## Run command
 	cd $courseLeafDir
 	local cgiOut=/tmp/$userName.$myName.$BASHPID.cgiOut
 	$DOIT ./$courseLeafPgm $cgiCmd 2>&1 > $cgiOut; rc=$?
 	grepStr="$(ProtectedCall "grep 'ATJ error:' $cgiOut")"
-	[[ $grepStr != '' ]] && Msg2 $TT1 "ATJ errors were reported by the step.\n^Cgi cmd: '$cgiCmd'\n^Please see below:\n^$grepStr\n\tAdditional information may be found in:\n^$cgiOut"
+	[[ $grepStr != '' ]] && Msg2 $TT1 "$FUNCNAME: ATJ errors were reported by the step.\n^Cgi cmd: '$cgiCmd'\n^Please see below:\n^$grepStr\n\tAdditional information may be found in:\n^$cgiOut"
 	rm -f $cgiOut
 	cd $cwd
 	return 0
@@ -38,3 +38,4 @@ export -f RunCoureleafCgi
 #===================================================================================================
 
 ## Wed Jan  4 13:54:15 CST 2017 - dscudiero - General syncing of dev to prod
+## 04-06-2017 @ 08.36.18 - ("2.0.7")   - dscudiero - Add function name to messages
