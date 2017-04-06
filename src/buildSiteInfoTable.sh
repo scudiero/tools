@@ -1,12 +1,12 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.27 # -- dscudiero -- 02/14/2017 @  7:28:08.36
+version=4.3.28 # -- dscudiero -- Thu 04/06/2017 @ 10:03:48.48
 #=======================================================================================================================
 TrapSigs 'on'
 
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
-imports="$imports SetSiteDirs GetCims RunCoureleafCgi"
+imports="$imports SetSiteDirs GetCims"
 Import "$imports"
 originalArgStr="$*"
 scriptDescription="Scratch build the warhouse 'sites' table"
@@ -226,3 +226,4 @@ Goodbye 0 'alert'
 ## Fri Feb 10 16:02:08 CST 2017 - dscudiero - Tweak client support to add $ to the grep to only pickup the base client dir
 ## Tue Feb 14 07:28:32 CST 2017 - dscudiero - remove Pause statement
 ## Tue Feb 14 13:19:07 CST 2017 - dscudiero - Refactored to delete the client records before inserting a new one
+## 04-06-2017 @ 10.09.20 - (4.3.28)    - dscudiero - renamed RunCourseLeafCgi, use new name
