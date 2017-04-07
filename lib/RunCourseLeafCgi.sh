@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.18" # -- dscudiero -- Fri 04/07/2017 @  8:29:48.31
+# version="2.0.19" # -- dscudiero -- Fri 04/07/2017 @  8:46:11.27
 #===================================================================================================
 # Run a courseleaf.cgi command, check outpout
 # Courseleaf.cgi $LINENO <siteDir> <command string>
@@ -8,10 +8,10 @@
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-
 function RunCourseLeafCgi {
 	local siteDir="$1"; shift
 	local cgiCmd="$*"
+	local cgiOut=$(MkTmpFile "$FUNCNAME")
 
 	cwd=$(pwd)
 	cd $siteDir
@@ -24,8 +24,9 @@ function RunCourseLeafCgi {
 	## Run command
 	cd $courseLeafDir
 	local cgiOut=/tmp/$userName.$myName.$BASHPID.cgiOut
-	$DOIT ./$courseLeafPgm $cgiCmd 2>&1 > $cgiOut; rc=$?
-	grepStr="$(ProtectedCall "grep 'ATJ error:' $cgiOut")"
+	#$DOIT ./$courseLeafPgm $cgiCmd 2>&1 > $cgiOut; rc=$?
+	{ ( ./$courseLeafPgm $cgiCmd ); } &> $cgiOut
+	grepStr="$(ProtectedCall "grep -m 1 'ATJ error:' $cgiOut")"
 	[[ $grepStr != '' ]] && Msg2 $TT1 "$FUNCNAME: ATJ errors were reported by the step.\n^^cgi cmd: '$cgiCmd'\n^^$grepStr"
 	rm -f $cgiOut
 	cd $cwd
@@ -44,3 +45,4 @@ export -f RunCourseLeafCgi
 ## 04-07-2017 @ 08.11.17 - ("2.0.15")  - dscudiero - General syncing of dev to prod
 ## 04-07-2017 @ 08.23.31 - ("2.0.17")  - dscudiero - General syncing of dev to prod
 ## 04-07-2017 @ 08.29.53 - ("2.0.18")  - dscudiero - General syncing of dev to prod
+## 04-07-2017 @ 08.46.26 - ("2.0.19")  - dscudiero - clean up how we process errors
