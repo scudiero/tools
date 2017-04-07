@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.10" # -- dscudiero -- Fri 04/07/2017 @  7:44:57.37
+# version="2.0.11" # -- dscudiero -- Fri 04/07/2017 @  8:00:52.43
 #===================================================================================================
 # Run a courseleaf.cgi command, check outpout
 # Courseleaf.cgi $LINENO <siteDir> <command string>
@@ -17,7 +17,7 @@ function RunCourseLeafCgi {
 	cd $siteDir
 	courseLeafPgm=$(GetCourseleafPgm | cut -d' ' -f1).cgi
 	courseLeafDir=$(GetCourseleafPgm | cut -d' ' -f2)
-	if [[ $courseLeafPgm == '.cgi' || $courseLeafDir == '' ]]; then Msg2 $T "Could not find courseleaf executable"; fi
+	if [[ $courseLeafPgm == '.cgi' || $courseLeafDir == '' ]]; then Msg2 $T "$FUNCNAME: Could not find courseleaf executable"; fi
 	dump -3  siteDir courseLeafPgm courseLeafDir cgiCmd
 	[[ ! -x $courseLeafDir/$courseLeafPgm ]] && Msg2 $TT1 "$FUNCNAME: Could not find $courseLeafPgm in '$courseLeafDir' trying:\n^'$cgiCmd'\n^($calledLineNo)"
 
@@ -40,3 +40,4 @@ export -f RunCourseLeafCgi
 ## Wed Jan  4 13:54:15 CST 2017 - dscudiero - General syncing of dev to prod
 ## 04-06-2017 @ 08.36.18 - ("2.0.7")   - dscudiero - Add function name to messages
 ## 04-07-2017 @ 07.47.19 - ("2.0.10")  - dscudiero - General syncing of dev to prod
+## 04-07-2017 @ 08.01.14 - ("2.0.11")  - dscudiero - Add Function name to output messages if we cannot find executable
