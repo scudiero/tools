@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.11" # -- dscudiero -- Fri 04/07/2017 @  8:00:52.43
+# version="2.0.15" # -- dscudiero -- Fri 04/07/2017 @  8:10:55.42
 #===================================================================================================
 # Run a courseleaf.cgi command, check outpout
 # Courseleaf.cgi $LINENO <siteDir> <command string>
@@ -24,9 +24,9 @@ function RunCourseLeafCgi {
 	## Run command
 	cd $courseLeafDir
 	local cgiOut=/tmp/$userName.$myName.$BASHPID.cgiOut
-	$DOIT ./$courseLeafPgm $cgiCmd 2>&1 > $cgiOut; rc=$?
+	$DOIT (./$courseLeafPgm $cgiCmd) 2>&1 > $cgiOut; rc=$?
 	grepStr="$(ProtectedCall "grep 'ATJ error:' $cgiOut")"
-	[[ $grepStr != '' ]] && Msg2 $TT1 "$FUNCNAME: ATJ errors were reported by the step.\n^Cgi cmd: '$cgiCmd'\n^Please see below:\n^$grepStr\n\tAdditional information may be found in:\n^$cgiOut"
+	[[ $grepStr != '' ]] && Msg2 $TT1 "$FUNCNAME: ATJ errors were reported by the step.\n^^cgi cmd: '$cgiCmd'\n^^$grepStr"
 	rm -f $cgiOut
 	cd $cwd
 	return 0
@@ -41,3 +41,4 @@ export -f RunCourseLeafCgi
 ## 04-06-2017 @ 08.36.18 - ("2.0.7")   - dscudiero - Add function name to messages
 ## 04-07-2017 @ 07.47.19 - ("2.0.10")  - dscudiero - General syncing of dev to prod
 ## 04-07-2017 @ 08.01.14 - ("2.0.11")  - dscudiero - Add Function name to output messages if we cannot find executable
+## 04-07-2017 @ 08.11.17 - ("2.0.15")  - dscudiero - General syncing of dev to prod
