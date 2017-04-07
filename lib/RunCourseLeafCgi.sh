@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.15" # -- dscudiero -- Fri 04/07/2017 @  8:10:55.42
+# version="2.0.17" # -- dscudiero -- Fri 04/07/2017 @  8:23:12.60
 #===================================================================================================
 # Run a courseleaf.cgi command, check outpout
 # Courseleaf.cgi $LINENO <siteDir> <command string>
@@ -42,3 +42,4 @@ export -f RunCourseLeafCgi
 ## 04-07-2017 @ 07.47.19 - ("2.0.10")  - dscudiero - General syncing of dev to prod
 ## 04-07-2017 @ 08.01.14 - ("2.0.11")  - dscudiero - Add Function name to output messages if we cannot find executable
 ## 04-07-2017 @ 08.11.17 - ("2.0.15")  - dscudiero - General syncing of dev to prod
+## 04-07-2017 @ 08.23.31 - ("2.0.17")  - dscudiero - General syncing of dev to prod
