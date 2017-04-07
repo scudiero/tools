@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.38" # -- dscudiero -- 03/06/2017 @ 14:35:28.78
+# version="1.0.44" # -- dscudiero -- Fri 04/07/2017 @ 14:49:13.93
 #===================================================================================================
 # Resolve a clients siteDir without using the database
 # Sets global variable: siteDir
@@ -23,7 +23,7 @@ function GetSiteDirNoCheck {
 	unset siteDir
 	cwd=$(pwd)
 
-	unset envType env
+	unset envType
 	if [[ -z $env ]]; then
 		echo
 		Prompt envType "$promptStr" 'production development' 'development'; envType=$(Lower ${envType:0:1})
@@ -73,8 +73,12 @@ function GetSiteDirNoCheck {
 		cd "$cwd"
 		if [[ ! -d $siteDir ]]; then
 			unset siteDir
-			Error "Could not resolve the site directory with the information provided"
-			Prompt siteDir "Please enter the full path to the site you wish to patch" '*dir*'
+			if [[ $testMode == true && -n $env ]]; then
+				[[ -d  $HOME/testData/$env ]] && siteDir="$HOME/testData/$env" || unset siteDir
+			else
+				Error "Could not resolve the site directory with the information provided"
+				Prompt siteDir "Please enter the full path to the site you wish to patch" '*dir*'
+			fi
 		fi
 		[[ ! -d $siteDir ]] && unset siteDir
 		[[ -f "$tmpFile" ]] && rm "$tmpFile"
@@ -98,3 +102,4 @@ export -f GetSiteDirNoCheck
 ## Wed Feb 22 13:36:07 CST 2017 - dscudiero - Change messaging on environment prompt
 ## Mon Mar  6 14:39:13 CST 2017 - dscudiero - x
 ## Mon Mar  6 15:56:21 CST 2017 - dscudiero - Tweak parsing results from menuSelect
+## 04-07-2017 @ 14.50.29 - ("1.0.44")  - dscudiero - default directory if in test mode
