@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.36" # -- dscudiero -- 01/19/2017 @ 10:23:27.04
+# version="2.0.45" # -- dscudiero -- Mon 04/10/2017 @  9:24:38.73
 #===================================================================================================
 # Parse an argumenst string driven by an control array that is passed in
 # argList+=(argFlag,minLen,type,scriptVariable,extraToken/exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
@@ -66,6 +66,8 @@ function ParseArgs {
 					if [[ -n $scriptVar ]]; then eval $scriptVar=true; fi
 					break
 				elif [[ $argType == 'option' ]]; then
+Here 1
+dump origArgName argType scriptVar token1 token2
 					[[ ${1:0:1} == '-' ]] && Msg2 $W "Option flag '$origArgToken' specified with no value" && continue
 					## Check for a quotes string, if found then pull whole string
 					if [[ ${1:0:1} == "'" || ${1:0:1} == '"' ]]; then
@@ -83,14 +85,16 @@ function ParseArgs {
 						break
 					## Not a quotes string
 					else
+Here 3
 						scriptVarVal="$1"
+dump scriptVarVal
 						[[ -n $scriptVar ]] && eval $scriptVar=\""$scriptVarVal"\"
+dump scriptVarVal $scriptVar
 						shift || true
 						break
 					fi
 				elif [[ $argType == 'help' ]]; then
 					Help "${argList[@]}"
-					Msg2 $V3 "*** $FUNCNAME -- Completed ***"
 					Goodbye 0
 				fi
 			fi ## token matched arg  def
@@ -104,14 +108,15 @@ function ParseArgs {
 			badArgList="$badArgList, $origArgToken"
 			myArgStr="${myArgStr:${#origArgToken}+1}" ## Remove argument token
 		fi
-		Msg2 $V3 "\t\tAfter parse \$* = >$*<"
+		Msg2 $V3 "^^After parse \$* = >$*<"
 	done ## tokens in the input string
 
-	Msg2 $V3 "\tSurviving Arguments = >$*<"
+	unset parsedArgStr
 	if [[ -n $badArgList ]]; then
+		Msg2 $V3 "\tSurviving Arguments = >$*<"
 		badArgList="${badArgList:1}"
+		parsedArgStr="$badArgList"
 	fi
-	parsedArgStr="$badArgList"
 
 	## Special processing for specific args
 	if [[ $verbose == true && $verboseLevel -eq 0 ]]; then verboseLevel=1; fi
@@ -126,8 +131,15 @@ function ParseArgs {
 		[[ $testMode == true && -n "$(type -t testMode-$myName)"  && "$(type -t testMode-$myName)" = function ]] && testMode-$myName
 		[[ $testMode == true && -n "$(type -t testMode-local)"  && "$(type -t testMode-local)" = function ]] && testMode-local
 
-	[[ $verboseLevel -ge 3 ]] && Pause
-	Msg2 $V3 "*** $FUNCNAME -- Completed ***"
+	if [[ $verboseLevel -ge 3 ]]; then
+		local prevScriptVar
+		for argDef in "${argList[@]}"; do
+			scriptVar=$(cut  -d ',' -f 4 <<< $argDef )
+			[[ $scriptVar != $prevScriptVar ]] && dump -t $scriptVar && prevScriptVar=$scriptVar
+		done
+		Pause "*** $FUNCNAME completed ***\nPlease press enter to continue (x to quit, d for debug)"
+	fi
+
 	return 0
 } #ParseArgs
 export -f ParseArgs
@@ -138,3 +150,4 @@ export -f ParseArgs
 ## Wed Jan  4 13:54:02 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Jan 19 10:04:51 CST 2017 - dscudiero - misc cleanup
 ## Thu Jan 19 10:25:22 CST 2017 - dscudiero - Fix problem parsing client
+## 04-10-2017 @ 09.36.28 - ("2.0.45")  - dscudiero - Tweak messaging
