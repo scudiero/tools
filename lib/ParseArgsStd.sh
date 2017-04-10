@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.21" # -- dscudiero -- 02/22/2017 @  7:24:19.23
+# version="2.0.23" # -- dscudiero -- Mon 04/10/2017 @  9:05:22.39
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -87,16 +87,7 @@ function ParseArgsStd {
 		ParseArgs $myArgs
 
 	## Misc stuff
-		if [[ $verboseLevel -ge 3 ]]; then
-			local prevScriptVar
-			for argDef in "${argList[@]}"; do
-				scriptVar=$(cut  -d ',' -f 4 <<< $argDef )
-				[[ $scriptVar != $prevScriptVar ]] && dump -t $scriptVar && prevScriptVar=$scriptVar
-			done
-		fi
-
 		[[ $fork == true ]] && forkStr='&' || unset forkStr
-
 		if [[ -n $forUser ]]; then
 			if [[ $(Contains "$forUser" '/') == false ]]; then
 				[[ -d /home/$forUser ]] && userName=$forUser || Error "Userid specified as -forUser ($forUser) is not valid, ignoring directive"
@@ -117,3 +108,4 @@ export -f ParseArgsStd
 ## Fri Jan 20 10:17:29 CST 2017 - dscudiero - switch order when searching for arguments
 ## Mon Feb 20 12:54:04 CST 2017 - dscudiero - Removed the asUser variable, replaced with forUser
 ## Wed Feb 22 07:24:53 CST 2017 - dscudiero - Only check forUser value if forUser does not contain a '/'
+## 04-10-2017 @ 09.36.37 - ("2.0.23")  - dscudiero - tweak messaging
