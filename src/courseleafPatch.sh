@@ -1,10 +1,10 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=4.10.108 # -- dscudiero -- 01/20/2017 @  9:52:05.96
+version=4.10.109 # -- dscudiero -- Mon 04/10/2017 @ 11:44:21.44
 #==================================================================================================
 TrapSigs 'on'
-includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCoureleafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
+includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
 includes="$includes SelectMenuNew EditTcfValue BackupCourseleafFile ParseCourseleafFile GetCourseleafPgm CopyFileWithCheck"
 Import "$includes"
 originalArgStr="$*"
@@ -470,7 +470,7 @@ unset changeLogRecs
 		Msg2; Msg2 "$(ColorK "Republishing /<CIM>/index.tcf pages...")"
 		for cim in $(echo $cimStr | tr ',' ' '); do
 			Msg2 "^Republishing /$cim/index.tcf..."
-			RunCoureleafCgi "$tgtDir" "-r /$cim/index.tcf"
+			RunCourseLeafCgi "$tgtDir" "-r /$cim/index.tcf"
 		done
 		Msg2 "^Done"
 	fi
@@ -478,8 +478,8 @@ unset changeLogRecs
 ## Rebuild console
 	if [[ $(Contains "$products" 'cat') == true ]]; then
 		Msg2; Msg2 "$(ColorK "Republishing CourseLeaf console & approve pages...")"
-		RunCoureleafCgi "$tgtDir" "-r /courseleaf/index.html"
-		RunCoureleafCgi "$tgtDir" "-r /courseleaf/approve/index.html"
+		RunCourseLeafCgi "$tgtDir" "-r /courseleaf/index.html"
+		RunCourseLeafCgi "$tgtDir" "-r /courseleaf/approve/index.html"
 		Msg2 "^Done"
 	fi
 
@@ -561,3 +561,4 @@ if [[ -f $myTempFile ]]; then rm $myTempFile; fi
 ## Thu Jan 12 10:25:02 CST 2017 - dscudiero - Add logic to get siteDir if nocheck flag is on, Resolve cgiVersion fully
 ## Wed Jan 18 15:00:15 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Jan 20 09:52:15 CST 2017 - dscudiero - remove debug statement
+## 04-10-2017 @ 11.44.44 - (4.10.109)  - dscudiero - fix problem with RunCourleafCi
