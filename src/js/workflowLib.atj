@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.8" // -- dscudiero -- 03/23/2017 @ 14:07:35.54
+wfLibVersion="1.7.10" // -- dscudiero -- 04/10/2017 @ 12:32
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -106,7 +106,7 @@ if (typeof wfLibLoaded === "undefined") {
 // 11/15/16	- dgs - Re-factored to allow for the specification of the core proposal variable names
 //======================================================================================================================
 wffuncs.Related = function(inval, wfrule, args) {
-	var version='4.9.8'; var myName=wfrule.attrname
+	var version='4.9.10'; var myName=wfrule.attrname
 	wfDebug(3,'\n*** In '+ myName + " (" + version + ") called as '" + args.context + " / " + wfrule.searchfor + "' ***");
 	wfDump(3,["Full Step text;"+inval]);
 
@@ -157,8 +157,11 @@ wffuncs.Related = function(inval, wfrule, args) {
 			varName=calledAs + "_" + name;
 			if (getTCFValue(varName) === "")
 			 	varName=myName + "_" + name;
-			if (getTCFValue(varName) != "")
-				eval (name + "=getTCFValue("  +varName + ")");
+			tmpVal=getTCFValue(varName);
+			if (tmpVal != "") {
+				tmpVal=getTCFValue(varName);
+				eval(name + "=" + tmpVal);
+			}
 		});
 
 		// Build ecoSystem query string
@@ -364,21 +367,21 @@ wffuncs.Related = function(inval, wfrule, args) {
 			}); //tcfData
 
 		}); //formFieldVars
+		wfDebug(3,"\n\t" + refsArray.length + " - items to add from the form fields data");
 
 	// Get the data from the eco system
 		if (ecoSystemData && wfCimInstance === "courseadmin") {
-			var tempArray=refsArray.concat(GetEcoSystemData(proposalCode,proposalDept,ecoSystemTypeStr))
-			if (tmpArray.length != refsArray.length) {
-				wfDebug(3,"\t" + tmpArray.length-refsArray.length + "items to add from the Eco system");
-				refsArray=tempArray;
-			} else {
-				wfDebug(3,"\tZero (0) items to add from the Eco system");
-			}
+			var tempArray=(GetEcoSystemData(proposalCode,proposalDept,ecoSystemTypeStr))
+			if (tempArray.length >0)
+				refsArray=refsArray.concat(tempArray);
 		}
+		wfDebug(3,"\t" + tempArray.length + " - items to add from the Eco system\n");
 
 	// Do we have any references?
 		if (refsArray.length === 0) {
 			wfDebug(3,"\t*** Zero (0) items to add, stopping");
+			if (wfEnvIsDev)
+				return ["*** No additional 'related' data found for ' " + inval.toLowerCase().replace('optional','') + " ' ***"];
 			return false;
 		}
 
@@ -455,9 +458,6 @@ wffuncs.Related = function(inval, wfrule, args) {
 					}
 				});
 			} //(resultSet)
-
-
-
 		}); //refsArray.forEach(function(ref)
 		if (searchStr === "") {
   			print_debug(3,"\n\n*** Error in '" + myName + "' function in " + wfLibName +
@@ -479,16 +479,17 @@ wffuncs.Related = function(inval, wfrule, args) {
 				tokensDone[proposalSubj]=true; break;
 		}//switch
 
-		if (outTokens.length > 0 ) {
-			wfDebug(3,"\n\tReturn step data for " + searchStr + "(s)...");
-			// if debug envronent then add starting line in the workflow
-			if (wfEnvIsDev) retArray.push("*** Start of  ' " + inval.toLowerCase().replace('optional','') + " ' output ***");
-		} else {
-			wfDebug(3,"\t*** No additional data found to add ***")
-			if (wfEnvIsDev) return ["*** No additional 'related' data found for ' " + inval.toLowerCase().replace('optional','') + " ' ***"];
-			return false;
-		}
+		// if (outTokens.length > 0 ) {
+		// 	wfDebug(3,"\n\tReturn step data for " + searchStr + "(s)...");
+		// 	// if debug envronent then add starting line in the workflow
+		// 	if (wfEnvIsDev) retArray.push("*** Start of  ' " + inval.toLowerCase().replace('optional','') + " ' output ***");
+		// } else {
+		// 	wfDebug(3,"\t*** No additional data found to add ***")
+		// 	if (wfEnvIsDev) return ["*** No additional 'related' data found for ' " + inval.toLowerCase().replace('optional','') + " ' ***"];
+		// 	return false;
+		// }
 
+		wfDebug(3,"\t*** Returning Steps:");
 		outTokens.forEach(function(token) {
 			if (token === '') return;
 			// Have we seen this one yet?
@@ -531,9 +532,13 @@ wffuncs.Related = function(inval, wfrule, args) {
 				tokensDone[token.data]=true;
 			}
 		}); //outTokens
-		// if debug envronent then add ending line in the workflow
-		if (wfEnvIsDev) retArray.push("*** End of  ' " + inval.toLowerCase().replace('optional','') + " ' output ***");
-	return retArray;
+		// if debug envronent then add delimter lines to output
+
+		if (wfEnvIsDev) {
+			retArray.unshift("*** Start of  ' " + inval.toLowerCase().replace('optional','') + " ' output ***");
+			retArray.push("*** End of  ' " + inval.toLowerCase().replace('optional','') + " ' output ***");
+		}
+		return retArray
 
 }; //Related
 
@@ -1200,7 +1205,7 @@ GetEnv = function(env) {
 //==================================================================================================
 // Quick formatted print of a variable
 //==================================================================================================
-function Dump(varName,varValue) { print_debug(varName + " = '" + varValue.toSource() + "'\n"); } //Dump
+function Dump(varName,varValue) { print_debug(varName + " = '" + varValue + "'\n"); } //Dump
 function dump(varName,varValue) { Dump(varName,varValue); }
 function Here(id) { print_debug('Here ' + id + '\n'); } //Here
 function here(id) { Here(id); }
@@ -1319,24 +1324,21 @@ function RemoveDupes(arr,exclude) {
 if(typeof WhatsChangedFirstRun == "undefined") var WhatsChangedFirstRun = true;
 wffuncs.WhatsChanged = function(inval, wfrule, args) {
 	if (!WhatsChangedFirstRun) return false;
-	var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
-	if (!haveDebug) return false;
-	if (!WhatsChangedFirstRun) return false;
 	var myName=wfrule.attrname;
-	wfDebug(3,'\n*** In ' + myName + ' ***');
+	wfDebug(0,'\n*** In ' + myName + ' ***');
 
 	//Get a list of fields that have changed
 	var diffdata = {};
 	tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata});
 
 	if (!Object.keys(diffdata).length) {
-		wfDebug(3,'\tNo Changes found in form data','b');
+		wfDebug(0,'\tNo Changes found in form data','b');
 	} else {
-		wfDebug(3,'\t<strong><em>Changed Fields:</em></strong>','s');
-		wfDebug(3,'\tChanged Fields:','d');
+		wfDebug(0,'\t<strong><em>Changed Fields:</em></strong>','s');
+		wfDebug(0,'\tChanged Fields:','d');
 		for (var i in diffdata) {
-			wfDebug(3,'\t\t' + i.toString() + ' (' + eval('tcfdata.' + i + '.toSource()') + ')','d');  // jshint ignore:line
-			wfDebug(3,'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp' + i.toString(),'s');
+			wfDebug(0,'\t\t' + i.toString() + ' (' + eval('tcfdata.' + i + '.toSource()') + ')','d');  // jshint ignore:line
+			wfDebug(0,'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp' + i.toString(),'s');
 		}
 	}
 
@@ -1373,3 +1375,4 @@ var wfLibLoaded=true;
 //======================================================================================================================
 // Tue Mar 21 11:07:32 CDT 2017 - dscudiero - Added check in log comments
 // 03-24-2017 @ 07.37.00 - (wfrule.att - dscudiero - General syncing of dev to prod
+// 04-10-2017 @ 13.56.39 - (wfrule.att - dscudiero - Tweak messageing in the Related function
