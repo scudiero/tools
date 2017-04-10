@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.13" # -- dscudiero -- 03/16/2017 @  8:21:53.38
+# version="2.0.14" # -- dscudiero -- Mon 04/10/2017 @ 14:34:35.32
 #===================================================================================================
 # Get CIMs
 #===================================================================================================
@@ -10,9 +10,10 @@
 function GetCims {
 	Msg2 $V3 "*** $FUNCNAME -- Starting ***"
 	local siteDir=$1 ; shift || true
-	local prefix verb='use'
-	[[ ${#*} -eq 2 ]] && prefix="$1" && shift || true
-	[[ ${#*} -eq 1 ]] && local verb="$1"
+	local verb prefix
+
+	[[ ${#*} -eq 2 ]] && verb="$2" && prefix="$1"
+	[[ ${#*} -eq 1 ]] && verb="use" && prefix="$1"
 
 	local ans suffix validVals
 	if [[ $allowMultiCims == true ]]; then
@@ -68,3 +69,4 @@ export -f GetCims
 ## Tue Mar 14 10:36:01 CDT 2017 - dscudiero - Add prefix argument to controle tabbing
 ## Thu Mar 16 08:13:26 CDT 2017 - dscudiero - add ability to pass in the verb to use in the message
 ## Thu Mar 16 09:38:34 CDT 2017 - dscudiero - Added a check to make sure the directory passed in exists
+## 04-10-2017 @ 14.37.46 - ("2.0.14")  - dscudiero - tweak argument parsing
