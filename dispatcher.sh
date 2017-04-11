@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.91" # -- dscudiero -- Wed 04/05/2017 @ 13:45:16.83
+version="1.2.98" # -- dscudiero -- Tue 04/11/2017 @  7:07:20.61
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -11,11 +11,12 @@ version="1.2.91" # -- dscudiero -- Wed 04/05/2017 @ 13:45:16.83
 dispatcherArgs="$*"
 myName='dispatcher'
 
-[[ -z $TOOLSPATH ]] && TOOLSPATH="/steamboat/leepfrog/docs/tools"
-[[ -d "$(dirname "$TOOLSPATH")/toolsNew" ]] && TOOLSPATH="$(dirname "$TOOLSPATH")/toolsNew"
-[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
-[[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB" || warehouseDb='warehouse'
-export TOOLSWAREHOUSEDB="$warehouseDb"
+## Read in data from the boot file, set base information
+	[[ -r $(dirname $0)/bootData ]] && source "$(dirname $0)/bootData" || source "$TOOLSPATH/bootData"
+	[[ -d "$(dirname "$TOOLSPATH")/toolsNew" ]] && TOOLSPATH="$(dirname "$TOOLSPATH")/toolsNew"
+	[[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB"
+	export TOOLSWAREHOUSEDB="$warehouseDb"
+	[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
 
 #==================================================================================================
 # Global Functions
@@ -248,7 +249,7 @@ prtStatus "parse args"
 		$GD -e "\tChecking Can we run ..."
 		checkMsg=$(CheckRun $callPgmName)
 		if [[ $checkMsg != true ]]; then
-			[[ $userName != 'dscudiero' ]] && echo && echo && Terminate "$checkMsg"
+			[[ $(Contains ",$adminUsers," ",$userName,") != true ]] && echo && echo && Terminate "$checkMsg"
 			[[ $callPgmName != 'testsh' ]] && echo && echo "$(ColorW "*** $checkMsg ***")"
 		fi
 		$GD -e "\tChecking Auth..."
@@ -374,3 +375,4 @@ prtStatus "parse args"
 ## 03-31-2017 @ 07.29.34 - ("1.2.89")  - dscudiero - reformat debug stuff
 ## 03-31-2017 @ 08.06.56 - ("1.2.90")  - dscudiero - Remove debug statements
 ## 04-05-2017 @ 13.46.35 - ("1.2.91")  - dscudiero - Make sure TOOLSPATH has a value
+## 04-11-2017 @ 07.08.37 - ("1.2.98")  - dscudiero - Impliment the boot process
