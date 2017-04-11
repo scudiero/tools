@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.10" // -- dscudiero -- 04/10/2017 @ 12:32
+wfLibVersion="1.7.11" // -- dscudiero -- 04/11/2017 @ ~10:58
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -106,7 +106,7 @@ if (typeof wfLibLoaded === "undefined") {
 // 11/15/16	- dgs - Re-factored to allow for the specification of the core proposal variable names
 //======================================================================================================================
 wffuncs.Related = function(inval, wfrule, args) {
-	var version='4.9.10'; var myName=wfrule.attrname
+	var version='4.9.11'; var myName=wfrule.attrname
 	wfDebug(3,'\n*** In '+ myName + " (" + version + ") called as '" + args.context + " / " + wfrule.searchfor + "' ***");
 	wfDump(3,["Full Step text;"+inval]);
 
@@ -575,7 +575,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 // 12/20/16 - dgs - re-wrote the sql statement for looking up college give subject
 //======================================================================================================================
 function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colColumnName,deptColumnName,subjColumnName) {
-	var version='1.0.5'; var myName=arguments.callee.toString().match(/function ([^\(]+)/)[1]; var version="2.0.0"
+	var version='1.0.6'; var myName=arguments.callee.toString().match(/function ([^\(]+)/)[1]; var version="2.0.0"
 	wfDebug(4,"\n\t*** In "+ myName + " (" + version +") ***")
 
 	if (typeof colColumnName === 'undefined') { colColumnName="college";}
@@ -592,17 +592,17 @@ function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colCol
 
 	// MAIN
 	sqlParms=[givenData1];
-	if (typeof exceptData != 'undefined')
-		sqlParms.push(exceptData);
+	// if (typeof exceptData != 'undefined')
+	// 	sqlParms.push(exceptData);
 
 	// Lookup college code
 		if (lookupType.toLowerCase().substr(0,1) === "c") { // lookup college code
 			if (givenType.toLowerCase().substr(0,1) === "s") { // give a subject code
 				sqlParms.push(givenData2);
-				sqlStmt="select distinct " + colColumnName + " from cimlookup where " + deptColumnName + " in (select " + deptColumnName +
-						" from cimlookup where " + subjColumnName + "=? and " + deptColumnName + " <> ? and " + colColumnName + "<> ''";
+				sqlStmt="select distinct " + colColumnName + " as token from cimlookup where " + deptColumnName + " in (select " + deptColumnName +
+						" from cimlookup where " + subjColumnName + "=? and " + deptColumnName + "<>?) and " + colColumnName + "<>''";
 				if (typeof exceptData != 'undefined') {
-					sqlStmt= sqlStmt + " and " + colColumnName + "<> ?";
+					sqlStmt= sqlStmt + " and " + colColumnName + "<>?";
 					sqlParms.push(exceptData);
 				}
 				sqlStmt= sqlStmt + " order by " + colColumnName;
@@ -610,8 +610,10 @@ function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colCol
 			} else if (givenType.toLowerCase().substr(0,1) === "d") { // give a department code
 					sqlStmt="select distinct " + colColumnName + " as token from cimlookup where " + deptColumnName +
 							" = ? and " + colColumnName + " <> '' ";
-					if (typeof exceptData != 'undefined')
+					if (typeof exceptData != 'undefined') {
+						sqlParms.push(exceptData);
 						sqlStmt= sqlStmt + " and " + colColumnName + " <> ?";
+					}
 			}
 		}
 
@@ -620,9 +622,11 @@ function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colCol
 			if (givenType.toLowerCase().substr(0,1) === "s") { // give a subject code
 				sqlStmt="select distinct " + deptColumnName + " as token from cimlookup where " + subjColumnName +
 						" = ? and " + deptColumnName + " <> '' ";
-				if (typeof exceptData != 'undefined')
+				if (typeof exceptData != 'undefined') {
+					sqlParms.push(exceptData);
 					sqlStmt=sqlStmt + " and " + deptColumnName + " <> ?";
 				}
+			}
 		}
 
 	// If we do not have sqlStmt set then something is wrong
@@ -634,7 +638,11 @@ function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colCol
 	// Run query
 		wfDump(4,["\tsqlStmt;"+sqlStmt,"\tsqlParms;"+sqlParms.toSource()])
 		resultSet=dbquery("cimcourses",sqlStmt,sqlParms);
-		wfDump(4,["\tresultSet;"+resultSet.toSource()])
+		if (resultSet.length > 0 ) {
+			wfDump(4,["\t*** resultSet;"+resultSet.toSource()]);
+		} else {
+			wfDebug(4,"\t\t*** Zero (0) results returned from lookup");
+		}
 
     return resultSet;
 } //LookupCollegeCode
@@ -1376,3 +1384,4 @@ var wfLibLoaded=true;
 // Tue Mar 21 11:07:32 CDT 2017 - dscudiero - Added check in log comments
 // 03-24-2017 @ 07.37.00 - (wfrule.att - dscudiero - General syncing of dev to prod
 // 04-10-2017 @ 13.56.39 - (wfrule.att - dscudiero - Tweak messageing in the Related function
+// 04-11-2017 @ 11.42.51 - (wfrule.att - dscudiero - Fixed a problem in Related, tweaked debug outout for lookupCode
