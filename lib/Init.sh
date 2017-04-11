@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.117 # -- dscudiero -- 03/14/2017 @ 10:37:50.90
+# version=2.0.120 # -- dscudiero -- Mon 04/10/2017 @ 17:05:34.66
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -310,8 +310,11 @@ function Init {
 
 	#===================================================================================================
 	## If testMode then run local customizations
-		[[ $testMode == true && $(type -t testmode-$myName) == 'function' ]] && testMode-$myName
-		[[ $testMode == true && $(type -t testmode-local) == 'function' ]] && testMode-local
+		if [[ $testMode == true ]]; then
+			[[ $(Contains ",$adminUsers," ",$userName,") != true ]] && Terminate "Sorry, you do not have sufficient permissions to run this script in 'testMode'"
+			[[ $(type -t testmode-$myName) == 'function' ]] && testMode-$myName
+			[[ $(type -t testmode-$myName) == 'function' ]] && testMode-$myName
+		fi
 
 	PopSettings "$FUNCNAME"
 	Msg2 $V3 "*** Ending: $FUNCNAME ***"
@@ -334,3 +337,4 @@ export -f Init
 ## Tue Mar 14 09:31:45 CDT 2017 - dscudiero - v
 ## Tue Mar 14 10:36:22 CDT 2017 - dscudiero - Add tab char to GetCims call
 ## Tue Mar 14 10:38:48 CDT 2017 - dscudiero - General syncing of dev to prod
+## 04-11-2017 @ 07.08.59 - (2.0.120)   - dscudiero - Add checks for admin functions
