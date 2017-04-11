@@ -1,24 +1,7 @@
-#!/bin/bash
-##O NOT AUTOVERSION
-#==================================================================================================
-version=1.0.34 # -- dscudiero -- Mon 04/10/2017 @ 15:49:31.50
-#==================================================================================================
 
-# [[ -d "$(dirname "$TOOLSPATH")/toolsNew" ]] && TOOLSPATH="$(dirname "$TOOLSPATH")/toolsNew"
-
-[[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB" || warehouseDb='warehouse'
-export TOOLSWAREHOUSEDB="$warehouseDb"
-[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
-
-
-# [[ -z $TOOLSPATH ]] && TOOLSPATH="/steamboat/leepfrog/docs/tools"
-# [[ -d "$(dirname "$TOOLSPATH")/toolsNew" ]] && TOOLSPATH="$(dirname "$TOOLSPATH")/toolsNew"
-
-
-# [[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
-
-# [[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB" || warehouseDb='warehouse'
-# export TOOLSWAREHOUSEDB="$warehouseDb"
+TOOLSPATH="/steamboat/leepfrog/docs/tools"
+warehouseDb="warehouse"
+adminUsers="dscudiero"
 
 #===================================================================================================
 ## Check-in log
