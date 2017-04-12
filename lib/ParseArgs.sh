@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.46" # -- dscudiero -- Mon 04/10/2017 @  9:38:46.78
+# version="2.0.47" # -- dscudiero -- Tue 04/11/2017 @ 15:50:59.62
 #===================================================================================================
 # Parse an argumenst string driven by an control array that is passed in
 # argList+=(argFlag,minLen,type,scriptVariable,extraToken/exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
@@ -147,3 +147,4 @@ export -f ParseArgs
 ## Thu Jan 19 10:25:22 CST 2017 - dscudiero - Fix problem parsing client
 ## 04-10-2017 @ 09.36.28 - ("2.0.45")  - dscudiero - Tweak messaging
 ## 04-10-2017 @ 09.39.06 - ("2.0.46")  - dscudiero - remove debug statements
+## 04-12-2017 @ 08.11.01 - ("2.0.47")  - dscudiero - changed
