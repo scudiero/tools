@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.98" # -- dscudiero -- Tue 04/11/2017 @  7:07:20.61
+version="1.2.99" # -- dscudiero -- Wed 04/12/2017 @ 15:27:49.72
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -376,3 +376,4 @@ prtStatus "parse args"
 ## 03-31-2017 @ 08.06.56 - ("1.2.90")  - dscudiero - Remove debug statements
 ## 04-05-2017 @ 13.46.35 - ("1.2.91")  - dscudiero - Make sure TOOLSPATH has a value
 ## 04-11-2017 @ 07.08.37 - ("1.2.98")  - dscudiero - Impliment the boot process
+## 04-12-2017 @ 15.28.05 - ("1.2.99")  - dscudiero - fix spelling errors
