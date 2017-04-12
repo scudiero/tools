@@ -10,9 +10,10 @@ pageflags:autoapprove
 
 workflow:standard|Subj Approver,Dept Chair,Col Dean,<SIS>
 
-workflow:standard|START,College: 'Col',Colleges: 'Cols',Department: 'Dept',Departments: 'Depts',Subject: 'Subj',Subjects: 'Subjs',[Is New] isNew,[Not New] isNotNew,[Course Change] isEdit,[Not Course Change] isNotEdit,[Course Delete] isDelete,[Not Course Delete] isNotDelete,END
+//workflow:standard|START,College: 'Col',Colleges: 'Cols',Department: 'Dept',Departments: 'Depts',Subject: 'Subj',Subjects: 'Subjs',[Is New] isNew,[Not New] isNotNew,[Course Change] isEdit,[Not Course Change] isNotEdit,[Course Delete] isDelete,[Not Course Delete] isNotDelete,END
 
 //======================================================================================================================
 // Check in log
 //======================================================================================================================
 // Tue Mar 21 11:07:01 CDT 2017 - dscudiero - Added check in log comments
+// 04-12-2017 @ 08.10.36 - (//)        - dscudiero - minor cleanup
