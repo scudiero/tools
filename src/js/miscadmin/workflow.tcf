@@ -1,6 +1,6 @@
 //======================================================================================================
 // ??/??/17-- dgs -- initial
-// version:1.0.1 // -- dscudiero -- 03/21/2017 @ 11:00:44.32
+// version:1.0.2 // -- dscudiero -- Wed 04/12/2017 @  7:32:06.11
 //======================================================================================================
 localsteps:Miscellaneous Workflow Management|groups|workflow|attributes=todo[ToDo Item],fyi[FYI Only],fyiall[FYI All],optional[If Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
 
@@ -11,4 +11,6 @@ workflow:standard|START,END
 
 //======================================================================================================================
 // Check in log
-//==================================================================================================================// Tue Mar 21 11:07:12 CDT 2017 - dscudiero - Added check in log comments
+//======================================================================================================================
+// Tue Mar 21 11:07:12 CDT 2017 - dscudiero - Added check in log comments
+// 04-12-2017 @ 08.10.42 - (//)        - dscudiero - minor cleanup
