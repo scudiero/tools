@@ -2,41 +2,15 @@
 // ??/??/17-- dgs -- initial
 // version:1.0.1 // -- dscudiero -- 03/21/2017 @ 11:04:13.30
 //======================================================================================================================
-localsteps:Program Workflow Management|
-	groups|
-	workflow|
-	attributes=isUndergraduate[Is Undergraduate],
-	isGraduate[Is Graduate],
-	isNew[New Program],
-	isEdit[Program Change],
-	isDelete[Program Delete],
-	fyi[FYI Only],
-	fyiall[FYI All],
-	todo[ToDo Item],
-	optional[If Role Exists];
-	buttonlabel=Save;lookuptypes=user,
-	role,
-	workflow;memberlabel=Step;
-
+localsteps:Program Workflow Management|groups|workflow|attributes=isUndergraduate[Is Undergraduate],isGraduate[Is Graduate],isNew[New Program],isEdit[Program Change],isDelete[Program Delete],fyi[FYI Only],fyiall[FYI All],todo[ToDo Item],optional[If Role Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
 
 template:custom
 pageflags:autoapprove
 
-
-workflow:standard|
-	START,
-	College: Col,
-	Department: Dept,
-	Academic level: AcadLevel,
-	[Is Undergraduate] isUndergraduate,
-	[Is Graduate] isGraduate,
-	[Is New] isNew,
-	[Is Edit/Change] isEdit,
-	[Is Delete] isDelete,
-	END
+workflow:standard|START,College: Col,Department: Dept,Academic level: AcadLevel,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is New] isNew,[Is Edit/Change] isEdit,[Is Delete] isDelete,END
 
 //======================================================================================================================
 // Check in log
 //======================================================================================================================
-
 // Tue Mar 21 11:07:23 CDT 2017 - dscudiero - Added check in log comments
+// 04-12-2017 @ 08.10.52 - (//)        - dscudiero - minor cleanup
