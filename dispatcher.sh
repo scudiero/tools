@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.99" # -- dscudiero -- Wed 04/12/2017 @ 15:27:49.72
+version="1.2.100" # -- dscudiero -- Thu 04/13/2017 @ 12:01:54.24
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -138,7 +138,7 @@ tmpRoot=/tmp/$LOGNAME
 
 ## Hello
 [[ $batchMode != true && $(hostname) == 'build7.leepfrog.com' ]] && \
-	echo -e "\tNote: (dispatcher) Fild system access from the current host has been found to be a bit slow,\n\tPatience you must have my young padawan..." >&3
+	echo -e "\tNote: (dispatcher) File system access from the current host has been found to be a bit slow,\n\tPatience you must have my young padawan..." >&3
 
 ## If called as ourselves, then the first token is the script name to call
 	if [[ $callPgmName == 'dispatcher.sh' ]]; then
@@ -377,3 +377,4 @@ prtStatus "parse args"
 ## 04-05-2017 @ 13.46.35 - ("1.2.91")  - dscudiero - Make sure TOOLSPATH has a value
 ## 04-11-2017 @ 07.08.37 - ("1.2.98")  - dscudiero - Impliment the boot process
 ## 04-12-2017 @ 15.28.05 - ("1.2.99")  - dscudiero - fix spelling errors
+## 04-13-2017 @ 12.02.10 - ("1.2.100") - dscudiero - Fix spelling error
