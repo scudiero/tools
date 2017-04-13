@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.11" # -- dscudiero -- 01/04/2017 @ 13:51:08.30
+# version="2.0.12" # -- dscudiero -- Thu 04/13/2017 @ 10:27:52.44
 #===================================================================================================
 ## Make sure the user really wants to do this
 ## If the first argument is 'loop' then loop back to self if user responds with 'n'
@@ -37,7 +37,7 @@ function VerifyContinue {
 	if [[ $verify == true && $quiet != true ]]; then
 		unset ans
 		inVerifyContinue=true
-		Prompt ans "\n'Yes' to continue, 'No' to exit" 'Yes No'; ans=$(Lower ${ans:0:1})
+		Prompt ans "\n'Yes' to continue, 'No' to exit" 'Yes No' "$verifyContinueDefault"; ans=$(Lower ${ans:0:1})
 		inVerifyContinue=false
 		if [[ $ans == "i" ]]; then
 			informationOnlyMode=true
@@ -56,3 +56,4 @@ export -f VerifyContinue
 # Check-in Log
 #===================================================================================================
 ## Wed Jan  4 13:54:38 CST 2017 - dscudiero - General syncing of dev to prod
+## 04-13-2017 @ 10.35.46 - ("2.0.12")  - dscudiero - Add ability to specify a default value
