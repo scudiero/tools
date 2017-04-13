@@ -1,8 +1,11 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.17" # -- dscudiero -- 01/11/2017 @  7:47:41.16
+# version="1.0.18" # -- dscudiero -- Thu 04/13/2017 @  8:10:16.73
 #===================================================================================================
 # Write out / update a start record into the process log database
+# Called as 'mode' 'token' 'data'
+# mode in {'start','end','update','remoge'}
+# token = name if mode = start, otherwise it is the db key to update
 #===================================================================================================
 # Copyright 2017 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -74,3 +77,4 @@ export -f ProcessLogger
 # Check-in Log
 #===================================================================================================
 ## Wed Jan 11 07:51:24 CST 2017 - dscudiero - Streamlined
+## 04-13-2017 @ 08.13.02 - ("1.0.18")  - dscudiero - add usage information
