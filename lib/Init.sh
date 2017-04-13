@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.120 # -- dscudiero -- Mon 04/10/2017 @ 17:05:34.66
+# version=2.0.125 # -- dscudiero -- Thu 04/13/2017 @  7:18:48.11
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -139,7 +139,9 @@ function Init {
 				promptModifer=" (comma separated)"
 				clientEnvs="all $clientEnvs"
 			fi
-			Prompt "env$varSuffix" "What environment$varSuffix/site$varSuffix do you wish to use$promptModifer?" "$clientEnvs"; env=$(Lower $env)
+			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false && $srcEnv != 'pvt' ]] && clientEnvs="pvt,$clientEnvs"
+			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt' || unset defaultEnv
+			Prompt srcEnv "What environment/site do you wish to use?" "$(tr ' ' ',' <<< $clientEnvs)" $defaultEnv; srcEnv=$(Lower $srcEnv)
 			[[ $checkProdEnv == true ]] && checkProdEnv=$env
 		fi
 
@@ -155,7 +157,10 @@ function Init {
 				[[ ${clientEnvsNew:0:1} == '' ]] && $clientEnvsNew=${clientEnvsNew:1}
 				clientEnvs="$clientEnvsNew"
 			fi
-			Prompt srcEnv "What $(ColorK 'source') environment/site do you wish to use?" "$(tr ' ' ',' <<< $clientEnvs)"; srcEnv=$(Lower $srcEnv)
+			unset defaultEnv
+			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false && $srcEnv != 'pvt' ]] && clientEnvs="pvt,$clientEnvs"
+			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt' || unset defaultEnv
+			Prompt srcEnv "What $(ColorK 'source') environment/site do you wish to use?" "$(tr ' ' ',' <<< $clientEnvs)" $defaultEnv; srcEnv=$(Lower $srcEnv)
 			clientEnvs="$clientEnvsSave"
 			[[ $checkProdEnv == true ]] && checkProdEnv=$srcEnv
 		fi
@@ -172,8 +177,8 @@ function Init {
 			fi
 			unset defaultEnv
 			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false && $srcEnv != 'pvt' ]] && clientEnvs="pvt,$clientEnvs"
-			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt'
-			Prompt tgtEnv "What $(ColorK 'target') environment/site do you wish to use?" "$clientEnvs" "$defaultEnv"; tgtEnv=$(Lower $tgtEnv)
+			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt' || unset defaultEnv
+			Prompt srcEnv "What $(ColorK 'target') environment/site do you wish to use?" "$(tr ' ' ',' <<< $clientEnvs)" $defaultEnv; srcEnv=$(Lower $srcEnv)
 			[[ $checkProdEnv == true ]] && checkProdEnv=$tgtEnv
 		fi
 
@@ -338,3 +343,4 @@ export -f Init
 ## Tue Mar 14 10:36:22 CDT 2017 - dscudiero - Add tab char to GetCims call
 ## Tue Mar 14 10:38:48 CDT 2017 - dscudiero - General syncing of dev to prod
 ## 04-11-2017 @ 07.08.59 - (2.0.120)   - dscudiero - Add checks for admin functions
+## 04-13-2017 @ 08.12.33 - (2.0.125)   - dscudiero - set default env to pvt if present in the env list
