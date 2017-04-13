@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.92 # -- dscudiero -- 02/13/2017 @ 16:01:22.61
+version=1.1.93 # -- dscudiero -- Thu 04/13/2017 @ 13:57:55.74
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -154,6 +154,7 @@ verifyArgs+=("Client:$client")
 verifyArgs+=("Env:$(TitleCase $env) ($srcDir)")
 verifyArgs+=("CIMs:$cimStr")
 verifyArgs+=("Output File:$outFile")
+verifyContinueDefault='Yes'
 VerifyContinue "You are asking to generate a workflow spreadsheet for"
 
 myData="Client: '$client', Env: '$env', Cims: '$cimStr' "
@@ -342,3 +343,4 @@ Goodbye 0 #'alert'
 ## Thu Jul  7 11:47:14 CDT 2016 - dscudiero - Refactored to seperate out esigs
 ## Mon Oct 24 09:14:53 CDT 2016 - dscudiero - Display directory on verifyContinue
 ## Mon Feb 13 16:04:12 CST 2017 - dscudiero - make sure we are using our one tmpFile
+## 04-13-2017 @ 13.58.16 - (1.1.93)    - dscudiero - add a default value for verifyContinue
