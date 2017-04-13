@@ -62,6 +62,7 @@ verifyArgs+=("Client:$client")
 verifyArgs+=("Env:$(TitleCase $env) ($srcDir)")
 verifyArgs+=("CIMs:$cimStr")
 verifyArgs+=("Output File:$outFile")
+verifyContinueDefault='Yes'
 VerifyContinue "You are asking generate CIM roles for"
 
 if [[ -e $outFile && $verify == true ]]; then
@@ -105,3 +106,4 @@ Goodbye 0
 ## Wed Jul 27 12:44:31 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Wed Aug 10 15:33:33 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Thu Aug 11 15:42:48 CDT 2016 - dscudiero - Add the -allCims flag
+## 04-13-2017 @ 14.01.02 - (1.10.20)   - dscudiero - Add a default for VerifyContinue
