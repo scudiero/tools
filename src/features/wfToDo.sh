@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.62 # -- dscudiero -- Thu 04/06/2017 @ 10:05:57.25
+version=1.0.63 # -- dscudiero -- Thu 04/13/2017 @ 10:58:46.69
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
@@ -79,6 +79,7 @@ minClVer='3.5.9'
 
 ## Add todo to CIMs
 	echo
+	allowMultiCims=true
 	GetCims "$tgtDir"
 	echo
 	for cim in $(tr ',' ' ' <<< "$cimStr"); do
@@ -114,3 +115,4 @@ return  ## We are called as a subprocess, just return to our parent
 #==================================================================================================
 ## Tue Mar 14 13:21:18 CDT 2017 - dscudiero - Check to make sure the user requests that the console definitions are updated to 'CourseLeaf'
 ## 04-06-2017 @ 10.10.14 - (1.0.62)    - dscudiero - renamed RunCourseLeafCgi, use new name
+## 04-13-2017 @ 11.02.55 - (1.0.63)    - dscudiero - Fixed problem where we were only allowing the selection of a signel cim
