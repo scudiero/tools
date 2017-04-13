@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.16" # -- dscudiero -- Thu 04/13/2017 @ 10:56:52.66
+# version="2.0.17" # -- dscudiero -- Thu 04/13/2017 @ 11:43:41.89
 #===================================================================================================
 # Get CIMs
 #===================================================================================================
@@ -31,7 +31,6 @@ function GetCims {
 	[[ -d $siteDir/web/cim ]] && adminDirs+=('cim')
 	for dir in ${adminDirs[@]}; do
 		dump -3 -t -t dir
-dump dir
 		[[ $(Contains "$dir" ".old") == true || $(Contains "$dir" ".bak") == true ]] && continue
 		if [[ -f $siteDir/web/$dir/cimconfig.cfg ]]; then
 			[[ $onlyCimsWithTestFile == true && ! -f $siteDir/web/$dir/wfTest.xml ]] && continue
@@ -72,3 +71,4 @@ export -f GetCims
 ## Thu Mar 16 09:38:34 CDT 2017 - dscudiero - Added a check to make sure the directory passed in exists
 ## 04-10-2017 @ 14.37.46 - ("2.0.14")  - dscudiero - tweak argument parsing
 ## 04-13-2017 @ 10.59.23 - ("2.0.16")  - dscudiero - s
+## 04-13-2017 @ 11.43.55 - ("2.0.17")  - dscudiero - remove debug stuff
