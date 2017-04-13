@@ -1,12 +1,8 @@
 ## XO NOT AUTOVERSION
-#===================================================================================================
-# version="2.0.11" # -- dscudiero -- 01/06/2017 @ 15:14:42.29
-#===================================================================================================
-# Write out a start record into the process log database
-#===================================================================================================
-# Copyright 2016 David Scudiero -- all rights reserved.
-# All rights reserved
-#===================================================================================================
+
+#
+#  REPLACED WITH THE PROCESSLOGGER FUNCTION
+#
 
 function DbLog {
 	return 0
@@ -21,3 +17,4 @@ export -f dbLog
 
 ## Wed Jan  4 13:53:13 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Jan  6 16:40:59 CST 2017 - dscudiero - disable
+## 04-13-2017 @ 08.12.10 - dscudiero - add a comment pointing to processlogger
