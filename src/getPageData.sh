@@ -30,6 +30,7 @@ ParseArgsStd
 Hello
 Msg2
 Init 'getClient getEnv checkEnv getDirs'
+verifyContinueDefault='Yes'
 VerifyContinue "You are asking to retrieve page data for\n\tclient:$client\n\tEnv: $env"
 
 #==================================================================================================
@@ -83,3 +84,4 @@ Msg2 "Output can be found in: $outFile\n"
 Goodbye 0 'alert'
 ## Tue Oct 18 07:56:54 CDT 2016 - dscudiero - Switch output file type to .xls
 ## Tue Oct 18 07:58:39 CDT 2016 - dscudiero - Add ENV to the output file name
+## 04-13-2017 @ 14.01.07 - (2.1.13)    - dscudiero - Add a default for VerifyContinue
