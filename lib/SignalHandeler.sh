@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.42" # -- dscudiero -- 02/06/2017 @  9:40:20.94
+# version="2.0.56" # -- dscudiero -- Fri 04/14/2017 @ 12:01:24.71
 #===================================================================================================
 # Process interrupts
 #===================================================================================================
@@ -9,6 +9,7 @@
 #===================================================================================================
 
 function SignalHandeler {
+    Import 'Goodbye'
     VerboseMsg 3 "*** Starting: $FUNCNAME ***"
 	local sig="$(Upper $1)"
     local errorLineNo="$2"
@@ -22,7 +23,7 @@ function SignalHandeler {
 
     case "$sig" in
         ERR)
-            message="$FUNCNAME: Unknown error condition ($errorCode) raised in module^$parentModule, $(ColorE "\nline($errorLineNo)"): '(ColorK "$errorLine")'"
+            message="$FUNCNAME: Unknown error condition ($errorCode) raised in module '$parentModule', \n^$(ColorE "line($errorLineNo)"): '$(ColorK "$errorLine")'"
             ;;
         EXIT|SIGEXIT|SIGHUP|SIGTERM)
             unset message
@@ -36,15 +37,19 @@ function SignalHandeler {
     esac
 
     ## Quit
-
-    if [[ $message != '' && $errorCode != '255' ]]; then
-        echo -e "\n$(PadChar)"
-        ErrorMsg "$message";
-        Msg2 "\n^Call Stack: $(GetCallStack)"
-        echo -e "$(PadChar)\n"
-    fi
-    trap - EXIT
-    exit $?
+        if [[ $message != '' && $errorCode != '255' ]]; then
+            echo -e "\n$(PadChar)"
+            Error "$message";
+            Msg2 "\n^Call Stack:"
+            local IFSsave="$IFS" module callStack
+            callStack="$(GetCallStack '|')"
+            IFS='|' ; for module in $callStack; do
+                Msg2 "^^$module"
+            done ; IFS="$IFSsave"
+            echo -e "$(PadChar)\n"
+        fi
+        trap - EXIT
+        Goodbye $?
 
 } #Signal_handler
 export -f SignalHandeler
@@ -55,3 +60,4 @@ export -f SignalHandeler
 
 ## Wed Jan  4 13:54:30 CST 2017 - dscudiero - General syncing of dev to prod
 ## Mon Feb  6 09:41:06 CST 2017 - dscudiero - Tweak messaging
+## 04-14-2017 @ 12.04.05 - ("2.0.56")  - dscudiero - refactor how the call path is displayed
