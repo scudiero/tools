@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.98" # -- dscudiero -- Fri 04/14/2017 @ 12:08:20.07
+# version="2.0.102" # -- dscudiero -- Fri 04/14/2017 @ 14:24:41.14
 #===================================================================================================
 # Common script exit
 # args:
@@ -27,7 +27,6 @@ function Goodbye {
 
 	## Call script specific goodbye script if defined
 		[[ $(type -t $FUNCNAME-$myName) == 'function' ]] && $FUNCNAME-$myName "$exitCode"
-		[[ $(type -t $FUNCNAME-local ) == 'function' ]] && $FUNCNAME-local "$exitCode"
 
 	## Cleanup temp files
 		[[ -f $tmpFile ]] && rm -f $tmpFile
@@ -146,3 +145,4 @@ export -f Goodbye
 ## Wed Feb  8 08:58:32 CST 2017 - dscudiero - Remove trailing blanks in messaging
 ## 04-14-2017 @ 12.03.47 - ("2.0.97")  - dscudiero - General syncing of dev to prod
 ## 04-14-2017 @ 12.17.42 - ("2.0.98")  - dscudiero - skip
+## 04-14-2017 @ 14.25.31 - ("2.0.102") - dscudiero - Remove the call to the local function
