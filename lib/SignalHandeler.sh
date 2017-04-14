@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.56" # -- dscudiero -- Fri 04/14/2017 @ 12:01:24.71
+# version="2.0.57" # -- dscudiero -- Fri 04/14/2017 @ 12:16:28.56
 #===================================================================================================
 # Process interrupts
 #===================================================================================================
@@ -49,7 +49,7 @@ function SignalHandeler {
             echo -e "$(PadChar)\n"
         fi
         trap - EXIT
-        Goodbye $?
+        Goodbye 3
 
 } #Signal_handler
 export -f SignalHandeler
@@ -61,3 +61,4 @@ export -f SignalHandeler
 ## Wed Jan  4 13:54:30 CST 2017 - dscudiero - General syncing of dev to prod
 ## Mon Feb  6 09:41:06 CST 2017 - dscudiero - Tweak messaging
 ## 04-14-2017 @ 12.04.05 - ("2.0.56")  - dscudiero - refactor how the call path is displayed
+## 04-14-2017 @ 12.18.05 - ("2.0.57")  - dscudiero - Send a bad condition code to Goodbye
