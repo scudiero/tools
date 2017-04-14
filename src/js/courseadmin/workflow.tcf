@@ -1,5 +1,5 @@
 //======================================================================================================================
-// version:1.0.1 // -- dscudiero -- 03/21/2017 @ 11:01:41.03
+// version:1.0.2 // -- dscudiero -- Fri 04/14/2017 @  7:26:01.97
 //======================================================================================================================
 // ??/??/17 -- dgs -- initial -- ??
 //======================================================================================================================
@@ -10,10 +10,11 @@ pageflags:autoapprove
 
 workflow:standard|Subj Approver,Dept Chair,Col Dean,<SIS>
 
-//workflow:standard|START,College: 'Col',Colleges: 'Cols',Department: 'Dept',Departments: 'Depts',Subject: 'Subj',Subjects: 'Subjs',[Is New] isNew,[Not New] isNotNew,[Course Change] isEdit,[Not Course Change] isNotEdit,[Course Delete] isDelete,[Not Course Delete] isNotDelete,END
+//workflow:standard|START,College: 'Col',Department: 'Dept',Subject: 'Subj',[Is New] isNew,[Not New] isNotNew,[Course Change] isEdit,[Not Course Change] isNotEdit,[Course Delete] isDelete,[Not Course Delete] isNotDelete,END
 
 //======================================================================================================================
 // Check in log
 //======================================================================================================================
 // Tue Mar 21 11:07:01 CDT 2017 - dscudiero - Added check in log comments
 // 04-12-2017 @ 08.10.36 - (//)        - dscudiero - minor cleanup
+// 04-14-2017 @ 07.26.39 - (//)        - dscudiero - remove the's steps
