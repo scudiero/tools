@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.100" # -- dscudiero -- Thu 04/13/2017 @ 12:01:54.24
+version="1.2.103" # -- dscudiero -- Fri 04/14/2017 @ 12:43:56.95
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -299,7 +299,8 @@ prtStatus "parse args"
 		$GD -e "\nCall $executeFile $scriptArgs\n"
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
-		(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile; rc=$?
+		#(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile; rc=$?
+		source $executeFile $scriptArgs 2>&1 | tee -a $logFile; rc=$?
 		rc="$?"
 
 ## Should never get here but just in case
@@ -378,3 +379,4 @@ prtStatus "parse args"
 ## 04-11-2017 @ 07.08.37 - ("1.2.98")  - dscudiero - Impliment the boot process
 ## 04-12-2017 @ 15.28.05 - ("1.2.99")  - dscudiero - fix spelling errors
 ## 04-13-2017 @ 12.02.10 - ("1.2.100") - dscudiero - Fix spelling error
+## 04-14-2017 @ 12.49.09 - ("1.2.103") - dscudiero - do not create a subshell when sourceing script
