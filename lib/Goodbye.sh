@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.86" # -- dscudiero -- 02/08/2017 @  8:58:03.82
+# version="2.0.97" # -- dscudiero -- Fri 04/14/2017 @ 12:03:29.60
 #===================================================================================================
 # Common script exit
 # args:
@@ -127,7 +127,7 @@ function Goodbye {
 	## If secondaryMessagesOnly is true then we are in a sub shell so just return, otherwise exit
 	[[ $secondaryMessagesOnly == true ]] && secondaryMessagesOnly=false && return 0
 	set +eE
-	trap - ERR
+	trap - ERR EXIT
 	[[ $(IsNumeric $exitCode) != true ]] && exitCode=0
 	exit $exitCode
 
@@ -144,3 +144,4 @@ export -f Goodbye
 ## Thu Jan 19 07:26:50 CST 2017 - dscudiero - Remove debug statements
 ## Mon Feb  6 12:58:43 CST 2017 - dscudiero - switch bar Msg2 to echo
 ## Wed Feb  8 08:58:32 CST 2017 - dscudiero - Remove trailing blanks in messaging
+## 04-14-2017 @ 12.03.47 - ("2.0.97")  - dscudiero - General syncing of dev to prod
