@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.14" # -- dscudiero -- Fri 04/14/2017 @ 11:33:38.77
+# version="2.0.15" # -- dscudiero -- Fri 04/14/2017 @ 11:47:47.78
 #===================================================================================================
 # Returns (echo) a formatted string of the call stack to the currently executing module
 #===================================================================================================
@@ -8,7 +8,7 @@
 # All rights reserved
 #===================================================================================================
 function GetCallStack {
-	local delim=${1:- ', '}
+	local delim="${1:- ', '}"
 	local callStack; unset callStack
 	for ((i=${#FUNCNAME[@]}-1; i >= 1; i--)); do
 		[[ $i -eq ${#FUNCNAME[@]}-1 ]] && callStack="${BASH_SOURCE[$i]}/${FUNCNAME[$i]} (${BASH_LINENO[$i]})" || \
@@ -26,3 +26,4 @@ export -f GetCallStack
 
 ## Wed Jan  4 13:53:28 CST 2017 - dscudiero - General syncing of dev to prod
 ## 04-14-2017 @ 11.42.36 - ("2.0.14")  - dscudiero - Add an optional delimiter on the call
+## 04-14-2017 @ 11.47.55 - ("2.0.15")  - dscudiero - General syncing of dev to prod
