@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.61 # -- dscudiero -- 01/12/2017 @ 13:00:50.90
+version=1.0.66 # -- dscudiero -- Mon 04/17/2017 @ 10:15:30.12
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -43,6 +43,7 @@ unset userList newFile
 #==================================================================================================
 # Standard arg parsing
 #==================================================================================================
+Import 'SelectMenuNew'
 helpSet='script'
 GetDefaultsData $myName
 ParseArgsStd
@@ -154,3 +155,4 @@ Goodbye 0 #'alert'
 ## Thu Oct  6 16:40:04 CDT 2016 - dscudiero - Set dbAcc level to Update for db writes
 ## Thu Oct  6 16:59:26 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Fri Oct  7 08:00:42 CDT 2016 - dscudiero - Take out the dbAcc switching logic, moved to framework RunSql
+## 04-17-2017 @ 10.31.36 - (1.0.66)    - dscudiero - fixed for selectMenuNew changes
