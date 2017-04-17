@@ -1,13 +1,12 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.7" # -- dscudiero -- 01/04/2017 @ 13:40:55.24
+# version="2.0.9" # -- dscudiero -- Mon 04/17/2017 @  7:38:21.42
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
-#===================================================================================================
-
+#==================================================================================================
 dumpFirstWrite=true
 function Dump {
 	declare lowervName
@@ -96,8 +95,77 @@ export -f Dump
 export -f dump
 
 #===================================================================================================
+## Dump an array, pass in the name of the array as follows
+# DumpArray <msgLevel> keysArray[@]
+# e.g. DumpArray keysArray[@]
+# e.g. DumpArray 1 keysArray[@]
+#===================================================================================================
+# Copyright 2016 David Scudiero -- all rights reserved.
+# All rights reserved
+#===================================================================================================
+function DumpArray {
+	## If we have 2 parms passed the parse off the msgLevel
+		if [[ ${#*} -eq 2 ]]; then
+			local dumpLevel=$1; shift
+			[[ $dumpLevel -gt $verboseLevel ]] && return 0
+		fi
+
+	declare -a argArray=("${!1}")
+	echo "Array: $1"
+	local total=${#argArray[*]}
+	local i
+	for (( i=1; i<=$(( $total -1 )); i++ )); do
+		echo -e "\t[$i] = >${argArray[$i]}<"
+	done
+	return 0
+} # DumpArray
+export -f DumpArray
+export -f dumparray
+
+#==================================================================================================
+# Dump an hash table
+# DumpMap <msgLevel> HashArrayDef
+# e.g. DumpMap "$(declare -p variableMap)"
+# e.g. DumpMap 1 "$(declare -p variableMap)"
+#==================================================================================================
+# Copyright 2016 David Scudiero -- all rights reserved.
+# All rights reserved
+#===================================================================================================
+function DumpMap {
+	local dumpMapCtr dumpMapKeyStr dumpMapMaxKeyWidth
+
+	## If we have 2 parms passed the parse off the msgLevel
+		if [[ ${#*} -eq 2 ]]; then
+			local dumpLevel=$1; shift
+			[[ $dumpLevel -gt $verboseLevel ]] && return 0
+		fi
+
+	## Get the name of the map we are printing, make a copy of the array
+		local dumpMapName=$(cut -d'=' -f1 <<< $*);
+		dumpMapName=$(cut -d' ' -f3 <<< $dumpMapName)
+		eval "declare -A dumpMap="${1#*=}
+
+	## Get the max width of the keys
+		for dumpMapCtr in "${!dumpMap[@]}"; do [[ ${#dumpMapCtr} -gt $dumpMapMaxKeyWidth ]] && dumpMapMaxKeyWidth=${#dumpMapCtr}; done;
+
+	## Print the map
+		echo; echo "Map '$dumpMapName':"
+		for dumpMapCtr in "${!dumpMap[@]}"; do
+			dumpMapKeyStr="${dumpMapCtr}$(PadChar ' ')";
+			echo -e "\tkey: ${dumpMapKeyStr:0:$dumpMapMaxKeyWidth}  value: '${dumpMap[$dumpMapCtr]}'";
+		done;
+		echo
+
+	return 0
+} #DumpMap
+export -f DumpMap
+export -f dumpmap
+export -f DumpHash
+export -f dumphash
+
+#===================================================================================================
 # Checkin Log
 #===================================================================================================
-
 ## Wed Jan  4 12:25:20 CST 2017 - dscudiero - turn off tracing
 ## Wed Jan  4 13:53:17 CST 2017 - dscudiero - General syncing of dev to prod
+## 04-17-2017 @ 07.41.52 - ("2.0.9")   - dscudiero - move in other dump functions
