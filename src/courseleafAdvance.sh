@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=1.1.25 # -- dscudiero -- Thu 04/06/2017 @ 10:07:24.96
+version=1.1.29 # -- dscudiero -- Mon 04/17/2017 @  8:05:07.10
 #===================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye WriteChangelogEntry BackupCourseleafFile'
@@ -99,12 +99,13 @@ if [[ $edition == '' ]]; then
 			if [[ $(Contains "$currentEdition" '-') == true ]]; then
 				fromYear=$(echo $currentEdition | cut -d'-' -f1)
 				toYear=$(echo $currentEdition | cut -d'-' -f2)
-				(( fromYear++ ))
-				(( toYear++ ))
-				newEdition="$fromYear-$toYear"
+				[[ $(IsNumeric $fromYear) == true  && $(IsNumeric $toYear) == true ]] && (( fromYear++ )) && (( toYear++ )) && newEdition="$fromYear-$toYear"
+			elif [[ $(Contains "$currentEdition" '_') == true ]]; then
+				fromYear=$(echo $currentEdition | cut -d'_' -f1)
+				toYear=$(echo $currentEdition | cut -d'_' -f2)
+				[[ $(IsNumeric $fromYear) == true  && $(IsNumeric $toYear) == true ]] && (( fromYear++ )) && (( toYear++ )) && newEdition="$fromYear-$toYear"
 			else
-				newEdition=$currentEdition
-				(( newEdition++ ))
+				[[ $(IsNumeric $currentEdition) == true ]] && newEdition=$currentEdition && (( newEdition++ ))
 			fi
 		else
 			:
@@ -276,3 +277,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client)")/$(ColorK "$(Upper $env)") to $(C
 ## Fri Jan 27 10:12:24 CST 2017 - dscudiero - Update finding out what the latest release of courseleaf is to use defaults variable for directory
 ## Fri Jan 27 10:35:07 CST 2017 - dscudiero - Trap error messages from ls command looking for courseleaf releases
 ## 04-06-2017 @ 10.09.32 - (1.1.25)    - dscudiero - renamed RunCourseLeafCgi, use new name
+## 04-17-2017 @ 08.18.27 - (1.1.29)    - dscudiero - fix problem if current edition number is not numeric
