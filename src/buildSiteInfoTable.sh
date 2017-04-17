@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.28 # -- dscudiero -- Thu 04/06/2017 @ 10:03:48.48
+version=4.3.33 # -- dscudiero -- Mon 04/17/2017 @ 12:15:08.57
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -94,7 +94,7 @@ Msg2 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 	## Get clients from the clients transactional table, build a hash table with the clientInfoTable key for each client
 		declare -A dbClients
 		sqlStmt="select clientcode,clientkey from clients where is_active = \"Y\""
-		[[ $client != '' ]] && sqlStmt="$sqlStmt and client=\"$client\"";
+		[[ $client != '' ]] && sqlStmt="$sqlStmt and clientcode=\"$client\"";
 		RunSql2 "$contactsSqliteFile" "$sqlStmt"
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No records returned from clientcode query"
 		for result in ${resultSet[@]}; do
@@ -105,7 +105,8 @@ Msg2 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 		if [[ -z $client ]]; then
 			clientDirs=($(find /mnt -maxdepth 2 -mindepth 1 -type d 2> /dev/null | grep -v '^/mnt/dev'))
 		else
-			clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep $client\$))
+			# clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep $client))
+			clientDirs+=($(ProtectedCall "find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep $client"))
 		fi
 		if [[ $verboseLevel -ge 1 ]]; then
 			echo
@@ -227,3 +228,4 @@ Goodbye 0 'alert'
 ## Tue Feb 14 07:28:32 CST 2017 - dscudiero - remove Pause statement
 ## Tue Feb 14 13:19:07 CST 2017 - dscudiero - Refactored to delete the client records before inserting a new one
 ## 04-06-2017 @ 10.09.20 - (4.3.28)    - dscudiero - renamed RunCourseLeafCgi, use new name
+## 04-17-2017 @ 12.31.07 - (4.3.33)    - dscudiero - run clientDirs in a ProtectedCall
