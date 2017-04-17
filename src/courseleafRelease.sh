@@ -1,10 +1,10 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.9 # -- dscudiero -- 12/14/2016 @ 11:24:11.79
+version=1.0.10 # -- dscudiero -- Mon 04/17/2017 @ 10:17:55.75
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
+imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye SelectMenuNew' #imports="$imports "
 Import "$imports"
 originalArgStr="$*"
 scriptDescription=""
@@ -117,3 +117,4 @@ Goodbye 0 #'alert'
 ## Tue Aug 23 12:56:53 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Fri Oct 14 13:47:39 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Wed Oct 19 10:42:46 CDT 2016 - dscudiero - fixed another reference to courseleafRefresh
+## 04-17-2017 @ 10.31.44 - (1.0.10)    - dscudiero - fixed for selectMenuNew changes
