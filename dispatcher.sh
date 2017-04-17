@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.103" # -- dscudiero -- Fri 04/14/2017 @ 12:43:56.95
+version="1.2.105" # -- dscudiero -- Mon 04/17/2017 @  7:39:42.11
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -202,7 +202,7 @@ prtStatus "parse args"
 
 ## Import thins we need to continue
 	sTime=$(date "+%s")
-	includes='StringFunctions Msg2 Dump DumpArray Here Quit PushSettings PopSettings MkTmpFile Pause ProtectedCall'
+	includes='StringFunctions Msg2 Dump Here Quit PushSettings PopSettings MkTmpFile Pause ProtectedCall'
 	includes="$includes SetFileExpansion PadChar PrintBanner Alert TrapSigs SignalHandeler RunSql RunSql2"
 	includes="$includes DbLog ProcessLogger GetCallStack DisplayNews Help Call StartRemoteSession FindExecutable"
 	includes="$includes CheckRun CheckAuth CheckSemaphore GetDefaultsData Call ParseArgs ParseArgsStd Hello Init Goodbye"
@@ -380,3 +380,4 @@ prtStatus "parse args"
 ## 04-12-2017 @ 15.28.05 - ("1.2.99")  - dscudiero - fix spelling errors
 ## 04-13-2017 @ 12.02.10 - ("1.2.100") - dscudiero - Fix spelling error
 ## 04-14-2017 @ 12.49.09 - ("1.2.103") - dscudiero - do not create a subshell when sourceing script
+## 04-17-2017 @ 07.41.20 - ("1.2.105") - dscudiero - remove import fpr dump array, moved code to the Dump file
