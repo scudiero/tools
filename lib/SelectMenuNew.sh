@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.12" # -- dscudiero -- 02/16/2017 @  6:53:39.25
+# version="2.0.15" # -- dscudiero -- Mon 04/17/2017 @ 10:28:55.46
 #===================================================================================================
 # Display a selection menue
 # SelectMenuNew <MenueItemsArrayName> <returnVariableName> <Prompt text>
@@ -115,7 +115,11 @@ function SelectMenuNew {
 			[[ ${ans:0:1} == 'r' ]] && eval $returnVarName='REFRESHLIST' && return 0
 
 			if [[ ${menuItems["$ans"]+abc} ]]; then
-				[[ $(Lower ${returnVarName:(-2)}) == 'id' ]] && $returnVarName=\"$ans\" || eval $returnVarName=\"${menuItems[$ans]}\"
+Here 1
+dump returnVarName ans
+echo "\${returnVarName:(-2)} = $(Lower ${returnVarName:(-2)})"
+
+				[[ $(Lower ${returnVarName:(-2)}) == 'id' ]] && Here 2 && eval $returnVarName=\"$ans\" || eval $returnVarName=\"${menuItems[$ans]}\"
 			else
 				let length=${#validVals}-2
 				printf "${tabStr}$(ColorE *Error*) -- Invalid selection, '$ans', valid value in ${validVals:1:$length}, please try again > "
@@ -130,3 +134,4 @@ function SelectMenuNew {
 
 ## Wed Jan  4 13:54:23 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Feb 16 06:59:22 CST 2017 - dscudiero - Added an option to pull the ordinals from the input data
+## 04-17-2017 @ 10.31.12 - ("2.0.15")  - dscudiero - fix issue when returning data for xxxxId variables
