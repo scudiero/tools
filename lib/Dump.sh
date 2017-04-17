@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.9" # -- dscudiero -- Mon 04/17/2017 @  7:38:21.42
+# version="2.0.10" # -- dscudiero -- Mon 04/17/2017 @  7:47:23.12
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -120,7 +120,7 @@ function DumpArray {
 	return 0
 } # DumpArray
 export -f DumpArray
-export -f dumparray
+function dumparray { DumpArray $* ; }
 
 #==================================================================================================
 # Dump an hash table
@@ -159,9 +159,12 @@ function DumpMap {
 	return 0
 } #DumpMap
 export -f DumpMap
+function dumpmap { DumpMap $* ; }
 export -f dumpmap
-export -f DumpHash
-export -f dumphash
+function dumparray { DumpMap $* ; }
+export -f dumparray
+
+
 
 #===================================================================================================
 # Checkin Log
@@ -169,3 +172,4 @@ export -f dumphash
 ## Wed Jan  4 12:25:20 CST 2017 - dscudiero - turn off tracing
 ## Wed Jan  4 13:53:17 CST 2017 - dscudiero - General syncing of dev to prod
 ## 04-17-2017 @ 07.41.52 - ("2.0.9")   - dscudiero - move in other dump functions
+## 04-17-2017 @ 07.48.09 - ("2.0.10")  - dscudiero - Fix problem defining alternate function names
