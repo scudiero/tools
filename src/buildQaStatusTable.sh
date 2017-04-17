@@ -1,10 +1,10 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.1.15 # -- dscudiero -- Mon 04/03/2017 @  7:45:38.60
+version=1.1.16 # -- dscudiero -- Mon 04/17/2017 @  7:40:37.98
 #=======================================================================================================================
 TrapSigs 'on'
-includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye DumpMap GetExcel'
+includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye GetExcel'
 Import "$includes"
 originalArgStr="$*"
 scriptDescription="Build the qsStatus table by parsing the workbook files (*.xlsm) found in: $qaTrackingWorkbooks"
@@ -310,3 +310,4 @@ Goodbye 0 #'alert'
 ## 03-24-2017 @ 09.23.08 - (1.1.12)    - dscudiero - Fix problem setting the qastatus table record status=D
 ## 03-27-2017 @ 13.30.01 - (1.1.14)    - dscudiero - Only report on active records
 ## 04-03-2017 @ 07.45.53 - (1.1.15)    - dscudiero - Switch from RunSql to RunSql2
+## 04-17-2017 @ 07.41.31 - (1.1.16)    - dscudiero - remove import fpr dump array, moved code to the Dump file
