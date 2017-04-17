@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.101 # -- dscudiero -- Thu 03/30/2017 @ 10:07:51.38
+version=1.3.102 # -- dscudiero -- Mon 04/17/2017 @ 12:29:46.01
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -39,6 +39,8 @@ refreshObjs+=('Courseleaf_File')
 refreshObjs+=('WorkflowCoreFiles')
 refreshObjs+=('Internal')
 refreshObjs+=('internalContacts-dbShadow')
+refreshObjs+=('clientData')
+
 
 #==================================================================================================
 # Map specified refreshObj to the function name
@@ -293,6 +295,30 @@ function internalcontacts-dbshadow {
 	return 0
 }
 
+#==============================================================================================
+# wharehousesqliteshadow
+#==============================================================================================
+function clientData {
+	echo; Msg2 "*** $FUNCNAME -- Starting ***"
+	srcDir=$clientsTransactionalDb
+	tgtDir=$internalContactsDbShadow
+	SetFileExpansion 'on'
+	rsync -av $srcDir/* $tgtDir > /dev/null 2>&1
+	chmod 770 $tgtDir
+	chmod 770 $tgtDir/*
+	touch $tgtDir/.syncDate
+	cwd=$(pwd); cd $tgtDir; chgrp -R leepfrog *; chgrp leepfrog .*; cd "$cwd"
+	SetFileExpansion
+
+	local file srcFile tgtFile result changeLogRecs
+	Init 'getClient getEnv getDirs checkEnv'
+	echo
+	buildClientInfoTable $client
+	buildSiteInfoTable $client
+
+	return 0
+}
+
 
 #==================================================================================================
 # Standard arg parsing and initialization
@@ -351,3 +377,4 @@ Goodbye 0
 ## Wed Feb  8 08:24:32 CST 2017 - dscudiero - Switch refresh workflowCore to pull file names from saveWorkflow defaults data
 ## Fri Feb 10 09:01:16 CST 2017 - dscudiero - Parse client name and env if passed in
 ## 03-30-2017 @ 10.08.22 - (1.3.101)   - dscudiero - Do not overwrite roles.tcf or *.plt files when refreshing workflowCoreFiles
+## 04-17-2017 @ 12.30.38 - (1.3.102)   - dscudiero - add clientData
