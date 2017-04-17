@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.86 # -- dscudiero -- Thu 04/06/2017 @ 10:04:21.94
+version=3.8.91 # -- dscudiero -- Wed 04/12/2017 @ 15:44:08.31
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -1008,3 +1008,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## Thu Feb  9 11:57:48 CST 2017 - dscudiero - tweak messaging
 ## Wed Mar 22 15:30:31 CDT 2017 - dscudiero - Fix spelling error
 ## 04-06-2017 @ 10.10.20 - (3.8.86)    - dscudiero - renamed RunCourseLeafCgi, use new name
+## 04-17-2017 @ 12.30.27 - (3.8.91)    - dscudiero - skip
