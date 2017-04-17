@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.109 # -- dscudiero -- 01/23/2017 @  8:46:13.88
+version=2.3.112 # -- dscudiero -- Mon 04/17/2017 @ 12:11:49.50
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -63,9 +63,6 @@ fi
 ParseArgsStd
 Hello
 
-[[ $inPlace == true ]] && useClientInfoTable="$clientInfoTable" || useClientInfoTable="${clientInfoTable}New"
-Msg2 "Database: $warehouseDb"
-Msg2 "Table: $useClientInfoTable"
 
 #=======================================================================================================================
 # Local Subs
@@ -77,7 +74,10 @@ Msg2 "Table: $useClientInfoTable"
 ## Get list of clients from the transactional system
 	if [[ $client != '' ]]; then
 		clients+=($client);
+		useClientInfoTable="$clientInfoTable"
+		inPlace=true
 	else
+		[[ $inPlace == true ]] && useClientInfoTable="$clientInfoTable" || useClientInfoTable="${clientInfoTable}New"
 		sqlStmt="select clientcode from clients where is_active = \"Y\""
 		RunSql2 "$contactsSqliteFile" "$sqlStmt"
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No records returned from clientcode query"
@@ -85,9 +85,11 @@ Msg2 "Table: $useClientInfoTable"
 			clients+=($result)
 		done
 	fi
+Msg2 "Database: $warehouseDb"
+Msg2 "Table: $useClientInfoTable"
 
 ## Table management
-	if [[ $inPlace != true ]]; then
+	if [[ $inPlace != true && -z $client ]]; then
 		## Create a temporary copy of the clients table, load new data to that table
 		[[ $batchMode != true ]] && Msg2 "^Creating work table '$useClientInfoTable'..."
 		sqlStmt="drop table if exists ${clientInfoTable}Bak"
@@ -181,3 +183,4 @@ Goodbye 0 'alert'
 ## Fri Jan 20 07:17:42 CST 2017 - dscudiero - General syncing of dev to prod
 ## Mon Jan 23 11:26:38 CST 2017 - dscudiero - Fix sql query checking the clients table count
 ## Tue Feb 14 13:18:42 CST 2017 - dscudiero - Refactored to delete the client records before inserting a new one
+## 04-17-2017 @ 12.30.14 - (2.3.112)   - dscudiero - modify logic for what database to use if a client was passed in
