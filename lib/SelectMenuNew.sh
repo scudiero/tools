@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.15" # -- dscudiero -- Mon 04/17/2017 @ 10:28:55.46
+# version="2.0.16" # -- dscudiero -- Tue 04/25/2017 @ 14:39:53.87
 #===================================================================================================
 # Display a selection menue
 # SelectMenuNew <MenueItemsArrayName> <returnVariableName> <Prompt text>
@@ -115,10 +115,6 @@ function SelectMenuNew {
 			[[ ${ans:0:1} == 'r' ]] && eval $returnVarName='REFRESHLIST' && return 0
 
 			if [[ ${menuItems["$ans"]+abc} ]]; then
-Here 1
-dump returnVarName ans
-echo "\${returnVarName:(-2)} = $(Lower ${returnVarName:(-2)})"
-
 				[[ $(Lower ${returnVarName:(-2)}) == 'id' ]] && Here 2 && eval $returnVarName=\"$ans\" || eval $returnVarName=\"${menuItems[$ans]}\"
 			else
 				let length=${#validVals}-2
@@ -135,3 +131,4 @@ echo "\${returnVarName:(-2)} = $(Lower ${returnVarName:(-2)})"
 ## Wed Jan  4 13:54:23 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Feb 16 06:59:22 CST 2017 - dscudiero - Added an option to pull the ordinals from the input data
 ## 04-17-2017 @ 10.31.12 - ("2.0.15")  - dscudiero - fix issue when returning data for xxxxId variables
+## 04-25-2017 @ 14.40.09 - ("2.0.16")  - dscudiero - Remove debug stuff
