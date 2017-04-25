@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.23" # -- dscudiero -- Mon 04/10/2017 @  9:05:22.39
+# version="2.0.26" # -- dscudiero -- Tue 04/25/2017 @  8:15:56.18
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -69,6 +69,7 @@ function ParseArgsStd {
 		argList+=(-noPrompt,3,switch,verify,"verify=false",script,"Turn off prompt mode, all data needs to be specified on command string")
 		argList+=(-noCheck,4,switch,noCheck,,script,"Do not validate the client data in the $warehouseDb.$clientInfoTable table")
 		argList+=(-verbose,1,switch#,verbose,verboseLevel,script,"Additional messaging, -V# sets verbosity level to #")
+		argList+=(-go,2,switch,go,,script,"Skip the verify continue y/n prompt")
 
 	## Setup ENV arguments
 		local singleCharArgs="pvt dev test next curr"
@@ -109,3 +110,4 @@ export -f ParseArgsStd
 ## Mon Feb 20 12:54:04 CST 2017 - dscudiero - Removed the asUser variable, replaced with forUser
 ## Wed Feb 22 07:24:53 CST 2017 - dscudiero - Only check forUser value if forUser does not contain a '/'
 ## 04-10-2017 @ 09.36.37 - ("2.0.23")  - dscudiero - tweak messaging
+## 04-25-2017 @ 08.38.13 - ("2.0.26")  - dscudiero - Added -go switch
