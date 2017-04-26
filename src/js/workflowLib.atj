@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.11" // -- dscudiero -- 04/11/2017 @ ~10:58
+wfLibVersion="1.7.12" // -- dscudiero -- Wed 04/26/2017 @ 10:05:36.73
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -7,6 +7,7 @@ wfLibVersion="1.7.11" // -- dscudiero -- 04/11/2017 @ ~10:58
 //					Updated Related to not quit if college is not set unless substitution type is Col
 //					Updated other functions to use wfDebug and wfDump
 //					Added HasValue function
+// 04/26/17 - dgs - Added helper function CheckChanged back again
 //======================================================================================================================
 
 // Loading message
@@ -936,6 +937,97 @@ wffuncs.CheckChanged = function(inval, wfrule, args) {
 		wfDebug(3,"\t*** Skipping step")
 		return false
 
+} //wffuncs.CheckChanged
+
+//==================================================================================================
+// Helper function to check changed fields against a list of fields to see if:
+// Usage:
+//	CheckChanged(<changedFields>,<checkFields>],<mode>)
+//
+//	mode 	- In the set of {"only","any"}
+// 			mode=only 	- true if ALL of the changed fields are in the list
+// 			mode=any 	- true if ANY of the change fields are in the list
+//
+// changedField is an array of the changed fields
+// checkFields is an array of the fields to check
+//===================================================================================================
+// 02/16/15	- dgs - New
+// 10/12/15 - dgs - simplified logic
+// 04/19/16 - dgs - Fix logic for 'ONLY'
+// 11/16/16 - dgs - Do not throw error if diff data is null, return false
+// 12/08/16 - dgs - Complete re-write
+//===================================================================================================
+function CheckChanged(checkFields,mode) {
+	var myName='CheckChanged'; wfDebug(3,"\n\t*** In "+ myName + " ***");
+
+	//Try block encapsulated main function
+	try {
+		// Initial Checks
+		if (arguments.length < 1)
+	 		throw "\t*** Insufficinent arguments passed in";
+	 } //try block
+	catch(err) { wfDebug(err); return false; }
+
+	// Main
+	if (arguments.length === 1)
+		mode="any";
+	var retVal = false;
+	mode=mode.toLowerCase();
+	wfDump(3,["\tmode;"+mode,"\tcheckFields;"+checkFields.toString()]);
+	// create a hash table for the cycleattrs
+		var cycleattrsHash=[];
+		wfDebug(4,"\t\tcycleattrs:");
+		cycleattrs=getTCFValue("cycleattrs", { delimiter: "\n", retarray: true });
+			cycleattrs.forEach(function(attr) {
+			wfDump(4,["\t\tattr;"+attr]);
+			cycleattrsHash[attr]=true;
+		});
+
+	// Loop thorough the changedFields setting a hash table
+		var changedHash=[], diffdata = {};
+		tcfview.compare(tcfdata.key[0], {retdata: diffdata});
+		wfDump(5,["\ndiffdata;"+diffdata.toSource()])
+		wfDebug(3,"\t\tchanged fields (other than cycleattrs):");
+		for (var property in diffdata) {
+			if (! cycleattrsHash[property]) {
+				wfDump(3,["\t\tchangedField;"+property]);
+	 			changedHash[property]=true;
+	 		}
+		}
+		if (Object.keys(changedHash).length === 0) {
+			wfDebug(3,"\t*** No fields have changed, returning false");
+			return false;
+		}
+
+		// ANY
+			if (mode == "any") {
+				var retVal=false;
+				// Loop thorough the checkField list
+				checkFields.forEach(function(field) {
+					if (changedHash[field])
+						retVal=true;
+				});
+			}
+		// ONLY
+			if (mode == "only") {
+				// Loop through the changed fields to make sure they are all on the checkFields list
+				var retVal=true;
+				for (var chgdField in changedHash) {
+					wfDump(4,["\tchgdField;"+chgdField])
+					var found=false;
+					checkFields.forEach(function(chkField) {
+						wfDump(4,["\t\tchkField;"+chkField])
+						if (chkField === chgdField) found=true;
+					});
+					wfDump(4,["\t\t\tfound;"+found])
+					retVal=retVal&&found;
+				}
+			} // Only
+
+		// Return
+		wfDump(3,["\tretVal;"+retVal]);
+		return retVal;
+
 } //CheckChanged
 
 ///==================================================================================================
@@ -1385,3 +1477,4 @@ var wfLibLoaded=true;
 // 03-24-2017 @ 07.37.00 - (wfrule.att - dscudiero - General syncing of dev to prod
 // 04-10-2017 @ 13.56.39 - (wfrule.att - dscudiero - Tweak messageing in the Related function
 // 04-11-2017 @ 11.42.51 - (wfrule.att - dscudiero - Fixed a problem in Related, tweaked debug outout for lookupCode
+// 04-26-2017 @ 13.47.35 - (wfrule.att - dscudiero - Added CheckChanged helper function
