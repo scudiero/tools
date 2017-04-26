@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.4.70 # -- dscudiero -- 01/12/2017 @ 13:17:28.77
+version=3.4.73 # -- dscudiero -- Wed 04/26/2017 @ 12:28:16.31
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -29,9 +29,9 @@ scriptDescription="Cleanup private dev sites"
 	}
 
 	#==================================================================================================
-	# Get site 
+	# Get sites
 	#==================================================================================================
-	function GetSite {
+	function GetSites {
 		local searchStr="$1"
 		local file tempStr printedSep sepLen sep i siteId loop
 		local maxLen=0
@@ -84,7 +84,7 @@ scriptDescription="Cleanup private dev sites"
 			sites+=("${workFiles[$i]}")
 		done
 		return 0
-	} #GetSite
+	} #GetSites
 
 	#==================================================================================================
 	# Process request
@@ -128,7 +128,7 @@ scriptDescription="Cleanup private dev sites"
 				if [[ $userName = 'dscudiero' ]]; then
 					unset ans
 					Prompt ans "^Do you wish to save the workflow files" 'Yes No' 'Yes' ; ans=$(Lower "${ans:0:1}")
-					[[ $ans == 'y' ]] && Msg2 "Saving workflow..." && Call saveWorkflow $processClient -p -all -suffix "beforeDelete-$fileSuffix" -nop -quiet
+					[[ $ans == 'y' ]] && Msg2 "Saving workflow..." && Call saveWorkflow $processClient -p -all -suffix "beforeDelete-$fileSuffix" -nop #-quiet
 				fi
 				echo; Msg2 "Removing '$file' offline..."
 				if [[ $DOIT == '' ]]; then
@@ -200,7 +200,7 @@ searchStr="$userName"
 [[ $client != '' ]] && searchStr="$client-$searchStr"
 while [ true == true ]; do
 	unset site requestType
-	GetSite "$searchStr"
+	GetSites "$searchStr"
 	[[ ${#sites[@]} -eq 0 ]] && break
 	for site in ${sites[@]}; do
 		[[ $site == '' ]] && Msg2 "No sites found or all sites have been processed" && Goodbye 0
@@ -230,3 +230,4 @@ Goodbye 0
 ## Fri Oct 14 13:05:30 CDT 2016 - dscudiero - Fix problem with not returning after first delete
 ## Mon Oct 24 10:15:01 CDT 2016 - dscudiero - Fix message text
 ## Thu Jan 12 10:44:24 CST 2017 - dscudiero - Prompt to see if we should save workfow
+## 04-26-2017 @ 13.46.55 - (3.4.73)    - dscudiero - General syncing of dev to prod
