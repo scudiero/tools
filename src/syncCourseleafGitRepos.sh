@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.60 # -- dscudiero -- 02/10/2017 @ 13:59:40.90
+version=2.1.61 # -- dscudiero -- Wed 04/26/2017 @ 16:22:25.45
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -102,6 +102,18 @@ done #repos
 	[[ $batchMode != true ]] && Msg2 "Waiting on forked processes..."
 	wait
 
+## Tar up any new release shadows
+	for token in ${newReleases[@]}; do
+		repo="${token%%/*}"
+		release="${token##*/}"
+		tarFile="$repo-$release--$(date '+%m-%d-%y').tar.gz"
+		srcDir="$gitRepoShadow/$repo/$release"
+		cd "$srcDir"
+		[[ -f $tarFile ]] && rm -f "$tarFile"
+		[[ $repo == 'pdfgen' ]] && repo='pdf'
+		tar -cpzvf "$tarFile" ./$repo --exclude '*.gz' --exclude '.git*'
+	done
+
 ## Send out emails
 dump -2 -t sendMail noEmails newReleases emailAddrs
 if [[ $sendMail == true && $noEmails == false && $newReleases != '' ]]; then
@@ -129,3 +141,4 @@ Goodbye 0 'alert'
 ## Thu Apr  7 07:33:26 CDT 2016 - dscudiero - Pull setting of maxForkedProcess as it is now done in the framework
 ## Thu Jun 16 13:00:10 CDT 2016 - dscudiero - Moved Master to last
 ## Fri Feb 10 13:59:56 CST 2017 - dscudiero - make sure tmpFile is setup correctly
+## 04-26-2017 @ 16.34.25 - (2.1.61)    - dscudiero - Build tar files for the repo directories
