@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.0.124 # -- dscudiero -- Mon 04/17/2017 @  9:36:58.31
+version=5.0.125 # -- dscudiero -- Thu 04/27/2017 @ 11:09:55.64
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -144,8 +144,8 @@ scriptDescription="Refresh a courseleaf product"
 					Msg2 "^^Target: '$rsyncTgt'"
 					Msg2 "^^Rsync Options: '$rsyncOpts'\n"
 					indentLevel=2
-					cat "$tmpErr" | Indent
-					rm -f "$tmpErr" "$rsyncOut"
+					cat "$rsyncErr" | Indent
+					rm -f "$rsyncOut"
 					Terminate "Stopping processing"
 			    fi
 			fi ##[[ -z $DOIT ]]
@@ -909,3 +909,4 @@ declare -A processedSpecs
 ## Wed Jan 18 15:00:15 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Jan 20 09:52:15 CST 2017 - dscudiero - remove debug statement
 ## 04-17-2017 @ 10.31.31 - (5.0.124)   - dscudiero - fixed for selectMenuNew changes
+## 04-27-2017 @ 11.10.21 - (5.0.125)   - dscudiero - Fixed error reporting rsync errors
