@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.121 # -- dscudiero -- 03/24/2017 @  9:57:29.66
+version=1.1.122 # -- dscudiero -- Fri 04/28/2017 @  8:25:53.58
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseCourseleafFile' #imports="$imports "
@@ -343,7 +343,7 @@ Verbose 1 "^$env ($siteDir)"
 ## Done
 #==================================================================================================
 [[ $verboseLevel -gt 0 ]] && echo -e "\t\t*** $myName - Ending ***"
-#Goodbye 'quiet'
+Goodbye 'Return'
 return 0
 
 #==================================================================================================
@@ -396,3 +396,4 @@ return 0
 ## Mon Feb 20 07:20:01 CST 2017 - dscudiero - Make messages level 1
 ## Tue Feb 21 06:46:58 CST 2017 - dscudiero - Fix error with verbose
 ## 03-27-2017 @ 13.30.29 - (1.1.121)   - dscudiero - General syncing of dev to prod
+## 04-28-2017 @ 08.26.26 - (1.1.122)   - dscudiero - use Goodbye 'return'
