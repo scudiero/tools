@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.61 # -- dscudiero -- Wed 04/26/2017 @ 16:22:25.45
+version=2.1.65 # -- dscudiero -- Fri 04/28/2017 @  8:36:14.04
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -88,7 +88,8 @@ for repo in $repos; do
 				else
 					Call "$workerScriptFile" "$repo" "$tag" "$gitRepoRoot/${repo}.git" "$relDir" "$addedCalledScriptArgs"
 				fi
-				[[ $tag != 'master' ]] && newReleases+=("$repo/$tag") && sendMail=true
+				newReleases+=("$repo/$tag") && sendMail=true
+				[[ $tag != 'master' ]] && sendMail=true
 			fi
 		done
 	if [[ $fork == true && $((waitCntr%$maxForkedProcesses)) -eq 0 ]]; then
@@ -111,7 +112,7 @@ done #repos
 		cd "$srcDir"
 		[[ -f $tarFile ]] && rm -f "$tarFile"
 		[[ $repo == 'pdfgen' ]] && repo='pdf'
-		tar -cpzvf "$tarFile" ./$repo --exclude '*.gz' --exclude '.git*'
+		tar -cpzf "$tarFile" ./$repo --exclude '*.gz' --exclude '.git*'
 	done
 
 ## Send out emails
@@ -119,7 +120,9 @@ dump -2 -t sendMail noEmails newReleases emailAddrs
 if [[ $sendMail == true && $noEmails == false && $newReleases != '' ]]; then
 	Note "The following CourseLeaf components have new release:" | tee -a $tmpFile;
 	for token in ${newReleases[@]}; do
-		Msg2 "^$token" | tee -a $tmpFile;
+		release="${token##*/}"
+		[[ $release == 'master' ]] && continue
+		Msg2 "^$token" | tee -a "$tmpFile"
 	done
 	Msg2
 	Msg2 "Emails sent to: $(echo $emailAddrs | sed s'/,/, /'g)" | tee -a $tmpFile
@@ -142,3 +145,4 @@ Goodbye 0 'alert'
 ## Thu Jun 16 13:00:10 CDT 2016 - dscudiero - Moved Master to last
 ## Fri Feb 10 13:59:56 CST 2017 - dscudiero - make sure tmpFile is setup correctly
 ## 04-26-2017 @ 16.34.25 - (2.1.61)    - dscudiero - Build tar files for the repo directories
+## 04-28-2017 @ 08.42.10 - (2.1.65)    - dscudiero - Fix problem generating tar file
