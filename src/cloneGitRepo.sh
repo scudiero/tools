@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.29 # -- dscudiero -- Fri 04/28/2017 @  8:18:21.93
+version=1.0.31 # -- dscudiero -- Fri 04/28/2017 @  8:24:12.87
 #==================================================================================================
 #= Description +===================================================================================
 # Clone a Courseleaf git repository
@@ -142,10 +142,8 @@ cd $tgtDir
 #==================================================================================================
 ## Done
 #==================================================================================================
-SetFileExpansion 'on'
-rm -rf /tmp/$userName.$myName* > /dev/null 2>&1
-SetFileExpansion
-return 0 
+Goodbye 'Return'
+return 0
 
 #==================================================================================================
 ## Check-in log
@@ -159,3 +157,4 @@ return 0
 ## Tue Sep 27 13:26:24 CDT 2016 - dscudiero - Set file ownership after syncing with masters
 ## Wed Jan 25 12:58:17 CST 2017 - dscudiero - Fix issue where noglob was set when tryhing to chgrp all files in the new repo
 ## 04-28-2017 @ 08.18.42 - (1.0.29)    - dscudiero - switch to just return to caller
+## 04-28-2017 @ 08.26.15 - (1.0.31)    - dscudiero - use Goodbye 'return'
