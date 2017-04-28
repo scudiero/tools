@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.0.77" # -- dscudiero -- Fri 04/14/2017 @ 12:50:27.18
+# version="2.0.78" # -- dscudiero -- Fri 04/28/2017 @ 16:41:30.57
 #=======================================================================================================================
 # Generic resolve file and call
 # Call scriptName ["$scriptArgs"]
@@ -129,12 +129,10 @@ function Call {
 			myPath="$(dirname $executeFile)"
 			#[[ $utility == true ]] && ($cmdStr) 2>&1 || ($cmdStr) 2>&1 | tee -a $logFile
 			if [[ $fork == true ]]; then
-				#($cmdStr) 2>&1 &
-				$cmdStr 2>&1 &
+				($cmdStr) 2>&1 &
 				rc=$?
 			else
-				#($cmdStr) 2>&1
-				$cmdStr 2>&1
+				($cmdStr) 2>&1
 				rc=$?
 			fi
 			[[ -n $semaphoreId ]] && Semaphore 'clear' $semaphoreId
@@ -158,3 +156,4 @@ export -f Call
 ## Tue Feb 14 11:38:03 CST 2017 - dscudiero - Add semaphore processing
 ## Tue Mar 14 13:20:01 CDT 2017 - dscudiero - return the condition code after the call
 ## 04-14-2017 @ 13.01.43 - ("2.0.77")  - dscudiero - remove subshell on call
+## 04-28-2017 @ 16.41.53 - ("2.0.78")  - dscudiero - run command in a subshell
