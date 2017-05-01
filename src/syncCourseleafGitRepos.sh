@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.65 # -- dscudiero -- Fri 04/28/2017 @  8:36:14.04
+version=2.1.67 # -- dscudiero -- Mon 05/01/2017 @  8:31:21.56
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -63,7 +63,7 @@ Hello
 #==================================================================================================
 ## Loop through the repos
 repos="$(echo $scriptData1 | tr ',' ' ')"
-[[ $client != '' && $client != 'master' ]] && repos="$(echo $client | tr ',' ' ')"
+[[ -n $client && $client != 'master' ]] && repos="$(echo $client | tr ',' ' ')"
 
 waitCntr=1;
 for repo in $repos; do
@@ -116,14 +116,19 @@ done #repos
 	done
 
 ## Send out emails
-dump -2 -t sendMail noEmails newReleases emailAddrs
-if [[ $sendMail == true && $noEmails == false && $newReleases != '' ]]; then
+#dump -2 -t sendMail noEmails newReleases emailAddrs
+dump -t sendMail noEmails newReleases emailAddrs
+if [[ -n $newReleases ]]; then
+	sendMail=false
 	Note "The following CourseLeaf components have new release:" | tee -a $tmpFile;
 	for token in ${newReleases[@]}; do
 		release="${token##*/}"
 		[[ $release == 'master' ]] && continue
 		Msg2 "^$token" | tee -a "$tmpFile"
+		sendMail=true
 	done
+fi
+if [[ $sendMail == true && $noEmails == false ]]; then
 	Msg2
 	Msg2 "Emails sent to: $(echo $emailAddrs | sed s'/,/, /'g)" | tee -a $tmpFile
 	for emailAddr in $(echo $emailAddrs | tr ',' ' '); do
@@ -146,3 +151,4 @@ Goodbye 0 'alert'
 ## Fri Feb 10 13:59:56 CST 2017 - dscudiero - make sure tmpFile is setup correctly
 ## 04-26-2017 @ 16.34.25 - (2.1.61)    - dscudiero - Build tar files for the repo directories
 ## 04-28-2017 @ 08.42.10 - (2.1.65)    - dscudiero - Fix problem generating tar file
+## 05-01-2017 @ 08.31.45 - (2.1.67)    - dscudiero - Do not send out emails if the only repos synced are masters
