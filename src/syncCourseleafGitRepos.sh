@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.67 # -- dscudiero -- Mon 05/01/2017 @  8:31:21.56
+version=2.1.68 # -- dscudiero -- Mon 05/01/2017 @  8:32:10.06
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -116,8 +116,7 @@ done #repos
 	done
 
 ## Send out emails
-#dump -2 -t sendMail noEmails newReleases emailAddrs
-dump -t sendMail noEmails newReleases emailAddrs
+dump -2 -t sendMail noEmails newReleases emailAddrs
 if [[ -n $newReleases ]]; then
 	sendMail=false
 	Note "The following CourseLeaf components have new release:" | tee -a $tmpFile;
@@ -152,3 +151,4 @@ Goodbye 0 'alert'
 ## 04-26-2017 @ 16.34.25 - (2.1.61)    - dscudiero - Build tar files for the repo directories
 ## 04-28-2017 @ 08.42.10 - (2.1.65)    - dscudiero - Fix problem generating tar file
 ## 05-01-2017 @ 08.31.45 - (2.1.67)    - dscudiero - Do not send out emails if the only repos synced are masters
+## 05-01-2017 @ 08.32.16 - (2.1.68)    - dscudiero - General syncing of dev to prod
