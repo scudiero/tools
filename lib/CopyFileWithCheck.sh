@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.6" # -- dscudiero -- 02/08/2017 @ 13:35:22.53
+# version="2.0.7" # -- dscudiero -- Mon 05/01/2017 @ 13:40:47.27
 #===================================================================================================
 # Copy a file only if files are diffeent
 # copyIfDifferent <srcFile> <tgtFile> <backup {true:false}>
@@ -21,6 +21,7 @@ function CopyFileWithCheck {
 	srcMd5=$(md5sum $srcFile | cut -f1 -d" ")
 	[[ -f $tgtFile ]] && tgtMd5=$(md5sum $tgtFile | cut -f1 -d" ") || unset tgtMd5
 	[[ $srcMd5 == $tgtMd5 ]] && echo 'same' && return 0
+	[[ ! -d $(dirname "$tgtFile") ]] && mkdir -p "$(dirname "$tgtFile")"
 
 	[[ $backup != false && -f $tgtFile ]] && BackupCourseleafFile $tgtFile
 	cp -fp $srcFile $tgtFile.new &> $tmpFile
@@ -40,3 +41,4 @@ export -f CopyFileWithCheck
 
 ## Wed Jan  4 13:53:10 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Feb  9 08:06:10 CST 2017 - dscudiero - make sure we are using our own tmpFile
+## 05-02-2017 @ 07.32.49 - ("2.0.7")   - dscudiero - cleanup tmp files
