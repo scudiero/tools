@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.134 # -- dscudiero -- Thu 04/13/2017 @  9:49:01.45
+# version=2.0.135 # -- dscudiero -- Tue 05/02/2017 @ 11:26:16.29
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -60,7 +60,7 @@ function Init {
 	if [[ $getClient == true ]]; then
 		local checkClient; unset checkClient
 		if [[ $noCheck == true ]]; then
-			Msg2 $W "Requiring a client value and 'noCheck' flag was set"
+			[[ $testMode != true ]] && Msg2 $W "Requiring a client value and 'noCheck' flag was set"
 			checkClient='noCheck';
 		fi
 		Prompt client 'What client do you wish to work with?' "$checkClient";
@@ -345,3 +345,4 @@ export -f Init
 ## 04-11-2017 @ 07.08.59 - (2.0.120)   - dscudiero - Add checks for admin functions
 ## 04-13-2017 @ 08.12.33 - (2.0.125)   - dscudiero - set default env to pvt if present in the env list
 ## 04-13-2017 @ 09.49.28 - (2.0.134)   - dscudiero - Fix problem parsing envs
+## 05-02-2017 @ 11.28.12 - (2.0.135)   - dscudiero - Hide nocheck message of in test mode
