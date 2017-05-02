@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.105" # -- dscudiero -- Mon 04/17/2017 @  7:39:42.11
+version="1.2.110" # -- dscudiero -- Tue 05/02/2017 @ 10:33:33.84
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -12,6 +12,10 @@ dispatcherArgs="$*"
 myName='dispatcher'
 
 ## Read in data from the boot file, set base information
+	[[ -z $TOOLSPATH ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is not set, cannot continue\n" && exit -1
+	[[ ! -d $TOOLSPATH ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but is not a directory, cannot continue\n" && exit -1
+	[[ ! -r $TOOLSPATH/bootData ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but you cannot access the boot record, cannot continue\n" && exit -1
+
 	[[ -r $(dirname $0)/bootData ]] && source "$(dirname $0)/bootData" || source "$TOOLSPATH/bootData"
 	[[ -d "$(dirname "$TOOLSPATH")/toolsNew" ]] && TOOLSPATH="$(dirname "$TOOLSPATH")/toolsNew"
 	[[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB"
@@ -381,3 +385,4 @@ prtStatus "parse args"
 ## 04-13-2017 @ 12.02.10 - ("1.2.100") - dscudiero - Fix spelling error
 ## 04-14-2017 @ 12.49.09 - ("1.2.103") - dscudiero - do not create a subshell when sourceing script
 ## 04-17-2017 @ 07.41.20 - ("1.2.105") - dscudiero - remove import fpr dump array, moved code to the Dump file
+## 05-02-2017 @ 10.34.00 - ("1.2.110") - dscudiero - Add checks to make sure TOOLSPATH is set
