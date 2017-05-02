@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.12" // -- dscudiero -- Wed 04/26/2017 @ 10:05:36.73
+wfLibVersion="1.7.14" // -- dscudiero -- Mon 05/01/2017 @ 15:00:21.56
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -8,6 +8,7 @@ wfLibVersion="1.7.12" // -- dscudiero -- Wed 04/26/2017 @ 10:05:36.73
 //					Updated other functions to use wfDebug and wfDump
 //					Added HasValue function
 // 04/26/17 - dgs - Added helper function CheckChanged back again
+// 05/01/17 - dgs - Added AttrIn function to accomidate allcodes sites
 //======================================================================================================================
 
 // Loading message
@@ -648,6 +649,83 @@ function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colCol
     return resultSet;
 } //LookupCollegeCode
 
+//======================================================================================================================
+// Check to see if a proposal attribute is in a specified list of values
+// the attribute is determined by looking at the workflow rule name:
+//	contains 'subjin-'	then check subject value
+//	contains 'deptin-'	then check departments value
+//	contains 'colin-'	then check college value
+// e.g:
+//	wfrules:deptIn-CHEM-PHYS-CDS-SOAN|function|AttrIn|CHEM,PHYS,CDS,SOAN; //Department code in the set as indicated
+//Note: can also include the list of departments as '-' seperated list as show above
+//
+//======================================================================================================================
+// 05-01-17 - dgs - Initial coding -- gmu
+//======================================================================================================================
+wffuncs.AttrIn = function(inval, wfrule, args) {
+	var version='1.0.0'; var myName=wfrule.attrname;
+	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
+	wfDump(["wfrule;"+wfrule.toSource()])
+
+	// Standard initilization
+		var retArray=[];
+		var reqType=wfrule.searchfor.toLowerCase();
+		// Which attribute should we check
+			var checkAttr;
+			if (reqType.indexOf("deptin-") >= 0) checkAttr="departments";
+			if (reqType.indexOf("subjin-") >= 0) checkAttr="subjects";
+			if (reqType.indexOf("colin-") >= 0) checkAttr="colleges";
+
+		// Get the check list from the options if specified, otherwise parse from the stepname
+			var options=wfrule.options.substring(0,wfrule.options.indexOf(";"));
+			if (options.length > 0) {
+				checkList="," + options + ",";
+			} else {
+				checkList=reqType.substring(reqType.indexOf("-")+1);
+				checkList="," + checkList.replace("-",',') + ",";
+			}
+
+		var notMode=reqType.indexOf("not")>0;
+		wfDump(1,["reqType;"+reqType,"checkAttr;"+checkAttr,"checkList;"+checkList,"notMode;"+notMode]);
+
+		// Get standard values
+		if (!tcfdata.allcodes || ! tcfdata.allcodes.length) {
+			var subjects=getTCFValue("subject", { delimiter: "\n", retarray: true });
+			var departments=getTCFValue("departments", { delimiter: "\n", retarray: true });
+			var colleges=getTCFValue("colleges", { delimiter: "\n", retarray: true });
+		} else {
+			var subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
+			var departments=wffuncs.getDepartments(subjects);
+			var colleges=wffuncs.getColleges(departments);
+		}
+		wfDump(2,["colleges;"+colleges.toSource(),"departments;"+departments.toSource(),"subjects;"+subjects.toSource(),])
+
+	//Initial Checks
+	try {
+		if (checkList === ",,") throw("No checkList specified in options or stepname");
+		InitialChecks(["wfrule"],args)
+	} //try
+	catch(err) { print_debug('\t' + myName + ": " + err + "\n") ; return false; }
+
+	// Main
+ 		var allowStep=false;
+ 		eval("array="+checkAttr);
+ 		wfDump(1,[checkAttr+";"+array]);
+ 		array.forEach(function(token) {
+			if (checkList.indexOf(","+token+",") >= 0)
+				allowStep=true;
+		});
+
+	// Return results
+		if (notMode) allowStep=!allowStep
+		if(allowStep) {
+			wfDebug(0,"\t*** Allowing step")
+			return [inval.replace(wfrule.ifregex,'')];
+		}
+		wfDebug(0,"\t*** Skipping step")
+		return false
+
+} //AttrIn
 
 //=================================================================================================
 // Return additional steps for all 'equiv' courses in courseref table
@@ -1478,3 +1556,4 @@ var wfLibLoaded=true;
 // 04-10-2017 @ 13.56.39 - (wfrule.att - dscudiero - Tweak messageing in the Related function
 // 04-11-2017 @ 11.42.51 - (wfrule.att - dscudiero - Fixed a problem in Related, tweaked debug outout for lookupCode
 // 04-26-2017 @ 13.47.35 - (wfrule.att - dscudiero - Added CheckChanged helper function
+// 05-02-2017 @ 07.33.06 - (wfrule.att - dscudiero - add AttrIn function
