@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.73 # -- dscudiero -- Fri 04/28/2017 @  8:25:43.50
+version=2.3.79 # -- dscudiero -- Wed 05/03/2017 @  8:52:59.55
 #===================================================================================================
 TrapSigs 'on'
 originalArgStr="$*"
@@ -53,11 +53,15 @@ function MapTtoW {
 	RunSql2 "$contactsSqliteFile" $sqlStmt
 	[[ ${#resultSet[@]} -le 0 ]] && Msg2 $T "Could not retrieve clients table definition data from '$contactsSqliteFile'"
 	unset tFields
-	for ((i=1; i<${#resultSet[@]}-1; i++)); do
-		tFields="$tFields,$(cut -d '`' -f2 <<< ${resultSet[$i]})"
+	tData="$(cut -d '(' -f2 <<< ${resultSet[0]})"; tData="$(cut -d ')' -f1 <<< $tData)"
+	ifsSave="$IFS"; IFS=',' read -ra tmpArray <<< "$tData"
+	for token in "${tmpArray[@]}"; do
+		[[ ${token:0:1} == ' ' ]] && token="${token:1}"
+    	tFields="$tFields,${token%% *}"
 	done
 	tFields=${tFields:1}
-	let numTFields=${#resultSet[@]}-2
+	numTFields=${#tmpArray[@]}
+	IFS="$ifsSave"; unset tmpArray
 	dump -1 numTFields tFields
 
 ## Get the transactional data
@@ -68,7 +72,7 @@ function MapTtoW {
 		Msg2 $T "Could not retrieve clients data from '$contactsSqliteFile'"
 	else
 		result="${resultSet[0]}"
-		dump -1 -t result
+		dump -1 result
 		for ((i = 1 ; i < $numTFields+1 ; i++)); do
 			field=$(cut -d',' -f$i <<< $tFields)
 			fVal=$(cut -d'|' -f$i <<< $result)
@@ -77,6 +81,7 @@ function MapTtoW {
 			dump -1 -t $(MapTtoW "$field")
 		done
 	fi
+
 ## If the primary contact field is blank, then build the data from the transactional db clients table data
 	if [[ $primarycontact == '' ]]; then
 		fields='contactrole,firstname,lastname,title,workphone,cell,fax,email'
@@ -155,7 +160,7 @@ function MapTtoW {
 	done
 	wFields=${wFields:1}
 	insertVals=${insertVals:1}
-	dump -1 wFields insertVals
+	dump -1 -n wFields -n insertVals -n useClientInfoTable client ; dump -2 -p
 
 ## Insert record
 	## Delete old data
@@ -205,3 +210,4 @@ return 0
 ## Tue Jan 17 09:38:03 CST 2017 - dscudiero - misc cleanup
 ## Tue Feb 14 13:19:17 CST 2017 - dscudiero - Refactored to delete the client records before inserting a new one
 ## 04-28-2017 @ 08.26.21 - (2.3.73)    - dscudiero - use Goodbye 'return'
+## 05-03-2017 @ 11.40.59 - (2.3.79)    - dscudiero - Refactore parsing of the fields from the transactional database
