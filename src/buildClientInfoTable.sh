@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.112 # -- dscudiero -- Mon 04/17/2017 @ 12:11:49.50
+version=2.3.113 # -- dscudiero -- Wed 05/03/2017 @ 10:55:35.53
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -78,7 +78,7 @@ Hello
 		inPlace=true
 	else
 		[[ $inPlace == true ]] && useClientInfoTable="$clientInfoTable" || useClientInfoTable="${clientInfoTable}New"
-		sqlStmt="select clientcode from clients where is_active = \"Y\""
+		sqlStmt="select clientcode from clients where is_active = \"Y\" order by clientcode"
 		RunSql2 "$contactsSqliteFile" "$sqlStmt"
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No records returned from clientcode query"
 		for result in "${resultSet[@]}"; do
@@ -184,3 +184,4 @@ Goodbye 0 'alert'
 ## Mon Jan 23 11:26:38 CST 2017 - dscudiero - Fix sql query checking the clients table count
 ## Tue Feb 14 13:18:42 CST 2017 - dscudiero - Refactored to delete the client records before inserting a new one
 ## 04-17-2017 @ 12.30.14 - (2.3.112)   - dscudiero - modify logic for what database to use if a client was passed in
+## 05-03-2017 @ 11.41.51 - (2.3.113)   - dscudiero - Order the client list by name
