@@ -1,9 +1,9 @@
 //======================================================================================================================
-// version:1.0.2 // -- dscudiero -- Fri 04/14/2017 @  7:26:01.97
+// version:1.0.3 // -- dscudiero -- Tue 05/02/2017 @ 16:57:12.05
 //======================================================================================================================
 // ??/??/17 -- dgs -- initial -- ??
 //======================================================================================================================
-localsteps:GenEd Workflow Management|groups|workflow|attributes=isNew[New Course],isNotNew[Not New],isEdit[Course Change],isNotEdit[Not Course Change],isDelete[Course Delete],isNotDelete[Not Course Delete],fyi[FYI Only],fyiall[FYI All],todo[ToDo Item],optional[If Role Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
+localsteps:Course Workflow Management|groups|workflow|attributes=isNew[New Course],isNotNew[Not New],isEdit[Course Change],isNotEdit[Not Course Change],isDelete[Course Delete],isNotDelete[Not Course Delete],fyi[FYI Only],fyiall[FYI All],todo[ToDo Item],optional[If Role Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
 
 template:custom
 pageflags:autoapprove
@@ -18,3 +18,4 @@ workflow:standard|Subj Approver,Dept Chair,Col Dean,<SIS>
 // Tue Mar 21 11:07:01 CDT 2017 - dscudiero - Added check in log comments
 // 04-12-2017 @ 08.10.36 - (//)        - dscudiero - minor cleanup
 // 04-14-2017 @ 07.26.39 - (//)        - dscudiero - remove the's steps
+// 05-03-2017 @ 11.17.35 - (//)        - dscudiero - General syncing of dev to prod
