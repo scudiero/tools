@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.217 # -- dscudiero -- Thu 04/06/2017 @ 10:05:11.22
+version=1.21.218 # -- dscudiero -- Thu 05/04/2017 @  7:03:29.71
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -261,9 +261,6 @@ case "$hostName" in
 		## Build employee table
 			BuildEmployeeTable
 
-		## Build the courseleafData table
-			BuildCourseleafDataTable
-
 		## Build the qaStatus table
 			Call 'buildQaStatusTable' "$scriptArgs"
 
@@ -290,6 +287,9 @@ case "$hostName" in
 
 		## Sync GIT Shadow
 			Call 'syncCourseleafGitRepos' "$scriptArgs"
+
+		## Build the courseleafData table
+			BuildCourseleafDataTable
 
 		## Rebuild Internal pages to pickup any new database information
 				## Wait for all of the buildSiteInfoTable process to finish
@@ -436,3 +436,4 @@ return 0
 ## 04-04-2017 @ 09.41.52 - (1.21.216)  - dscudiero - added checkForPrivateDevSites
 ## 04-05-2017 @ 07.05.53 - (1.21.216)  - dscudiero - Take out checkForPrivateDevSites
 ## 04-06-2017 @ 10.09.59 - (1.21.217)  - dscudiero - renamed RunCourseLeafCgi, use new name
+## 05-04-2017 @ 07.08.40 - (1.21.218)  - dscudiero - tweak order
