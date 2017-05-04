@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.4.114 # -- dscudiero -- Thu 05/04/2017 @ 14:16:21.52
+version=3.4.115 # -- dscudiero -- Thu 05/04/2017 @ 14:19:57.78
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -213,7 +213,7 @@ if [[ -n $client ]]; then
 			Msg2 "^Deleting '$file' with workflow save"
 			srcFile="${filePrefix}/${file}"
 			tgtFile="$srcFile.BeingDeletedBy$(TitleCase "$myName")"
-			Call saveWorkflow -daemon -siteFile "$srcFile" -all -suffix "beforeDelete-$backupSuffix" #-quiet -nop
+			Call saveWorkflow -daemon -siteFile "$srcFile" -all -suffix "beforeDelete-$backupSuffix -quiet -nop"
 			mv -f "$srcFile" "$tgtFile"
 			(nohup rm -rf "$tgtFile" &> /dev/null) &
 		done
@@ -266,3 +266,4 @@ Goodbye 0
 ## Thu Jan 12 10:44:24 CST 2017 - dscudiero - Prompt to see if we should save workfow
 ## 04-26-2017 @ 13.46.55 - (3.4.73)    - dscudiero - General syncing of dev to prod
 ## 05-04-2017 @ 14.17.07 - (3.4.114)   - dscudiero - Add daemon mode to support automatic cleanup
+## 05-04-2017 @ 14.20.26 - (3.4.115)   - dscudiero - Add quiet flag on saveWorkflow call
