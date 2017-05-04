@@ -1,9 +1,9 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.43 # -- dscudiero -- 03/06/2017 @  8:55:41.03
+version=2.2.52 # -- dscudiero -- Thu 05/04/2017 @ 13:44:49.50
 #====================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
+imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye ParseCourseleafFile' #imports="$imports "
 Import "$imports"
 originalArgStr="$*"
 scriptDescription="Save workflow files"
@@ -12,7 +12,7 @@ scriptDescription="Save workflow files"
 # Save off workflow files for safe keeling
 #==================================================================================================
 #==================================================================================================
-# Copyright ©2014 David Scudiero -- all rights reserved.
+# Copyright Â©2014 David Scudiero -- all rights reserved.
 # 06-17-15 -- dgs - Initial coding
 # 07-17-15 -- dgs - Migrated to framework 5
 #==================================================================================================
@@ -28,6 +28,8 @@ scriptDescription="Save workflow files"
 		argList+=(-all,1,switch,allCims,,,"Save all CIMs")
 		argList+=(-suffix,3,option,suffix,,,"suffix to add to the end of the file name")
 		argList+=(-cims,4,option,cimStr,,,"Comma seperated list of CIMS to backup")
+		argList+=(-daemon,6,switch,daemon,,,"Script being called as a daemon to auto save workflows")
+		argList+=(-siteFile,4,option,siteFile,,,"Full path of the site directory, only used in daemon mode")
 	}
 	function Goodbye-saveWorkflow  { # or Goodbye-local
 		rm -rf $tmpRoot > /dev/null 2>&1
@@ -54,7 +56,17 @@ GetDefaultsData $myName
 ParseArgsStd
 Hello
 [[ $allCims == true ]] && allCims='allCims' || unset allCims
-Init "getClient getEnv getDirs checkEnvs getCims $allCims noPreview noPublic"
+if [[ $daemon == true ]]; then
+	[[ -z $siteFile ]] && Terminate "If the -daemon flag is specified you must also specify a siteFile name"
+	data="$(ParseCourseleafFile "$siteFile")"
+	client="$(cut -d ' ' -f1 <<< "$data")"
+	client="$(cut -d '-' -f1 <<< "$data")"
+	env="$(cut -d ' ' -f2 <<< "$data")"
+	srcDir="$siteFile"
+	allCims=true; GetCims  "$siteFile"
+else
+	Init "getClient getEnv getDirs checkEnvs getCims $allCims noPreview noPublic"
+fi
 
 dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 ## Get the files to act on from the database
@@ -100,6 +112,8 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 	tgtDir=$localClientWorkFolder/$client/$env.backup
 	[[ -d $localClientWorkFolder/attic/$client ]] && tgtDir=$localClientWorkFolder/attic/$client/$env.backup
 	[[ ! -d $tgtDir ]] && mkdir -p $tgtDir
+
+dump -p client env tgtDir cimStr
 
 ## Clean up old stuff
 	cwd=$(pwd)
@@ -161,3 +175,4 @@ Goodbye 0
 ## Tue Sep  6 08:19:50 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Thu Jan 26 12:26:59 CST 2017 - dscudiero - Misc cleanup
 ## Mon Mar  6 12:07:35 CST 2017 - dscudiero - fixed problem overwritting the same file if suffix was passed
+## 05-04-2017 @ 14.16.56 - (2.2.52)    - dscudiero - Add daemon mode to support automatic cleanup
