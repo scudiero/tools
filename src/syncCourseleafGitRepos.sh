@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.68 # -- dscudiero -- Mon 05/01/2017 @  8:32:10.06
+version=2.1.69 # -- dscudiero -- Thu 05/04/2017 @  7:07:09.98
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -109,6 +109,7 @@ done #repos
 		release="${token##*/}"
 		tarFile="$repo-$release--$(date '+%m-%d-%y').tar.gz"
 		srcDir="$gitRepoShadow/$repo/$release"
+		[[ ! -d "$srcDir" ]] && continue
 		cd "$srcDir"
 		[[ -f $tarFile ]] && rm -f "$tarFile"
 		[[ $repo == 'pdfgen' ]] && repo='pdf'
@@ -152,3 +153,4 @@ Goodbye 0 'alert'
 ## 04-28-2017 @ 08.42.10 - (2.1.65)    - dscudiero - Fix problem generating tar file
 ## 05-01-2017 @ 08.31.45 - (2.1.67)    - dscudiero - Do not send out emails if the only repos synced are masters
 ## 05-01-2017 @ 08.32.16 - (2.1.68)    - dscudiero - General syncing of dev to prod
+## 05-04-2017 @ 07.08.33 - (2.1.69)    - dscudiero - Fix problem when taring up the repos if the srcDir does not exist
