@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.52 # -- dscudiero -- Thu 05/04/2017 @ 13:44:49.50
+version=2.2.53 # -- dscudiero -- Thu 05/04/2017 @ 15:28:06.06
 #====================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye ParseCourseleafFile' #imports="$imports "
@@ -113,8 +113,6 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 	[[ -d $localClientWorkFolder/attic/$client ]] && tgtDir=$localClientWorkFolder/attic/$client/$env.backup
 	[[ ! -d $tgtDir ]] && mkdir -p $tgtDir
 
-dump -p client env tgtDir cimStr
-
 ## Clean up old stuff
 	cwd=$(pwd)
 	cd $tgtDir
@@ -176,3 +174,4 @@ Goodbye 0
 ## Thu Jan 26 12:26:59 CST 2017 - dscudiero - Misc cleanup
 ## Mon Mar  6 12:07:35 CST 2017 - dscudiero - fixed problem overwritting the same file if suffix was passed
 ## 05-04-2017 @ 14.16.56 - (2.2.52)    - dscudiero - Add daemon mode to support automatic cleanup
+## 05-04-2017 @ 15.28.14 - (2.2.53)    - dscudiero - remove debug code
