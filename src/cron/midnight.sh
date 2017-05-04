@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.218 # -- dscudiero -- Thu 05/04/2017 @  7:03:29.71
+version=1.21.219 # -- dscudiero -- Thu 05/04/2017 @ 14:19:30.04
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -328,6 +328,9 @@ case "$hostName" in
 				SetFileExpansion
 		  	fi
 
+		## Remove private dev sites marked for auto deletion
+			cleanDev 'daemon'
+
 		 ## Check that all things ran properly, otherwise revert the databases
 			Semaphore 'waiton' "buildClientInfoTable"
 			Semaphore 'waiton' "buildSiteInfoTable"
@@ -437,3 +440,4 @@ return 0
 ## 04-05-2017 @ 07.05.53 - (1.21.216)  - dscudiero - Take out checkForPrivateDevSites
 ## 04-06-2017 @ 10.09.59 - (1.21.217)  - dscudiero - renamed RunCourseLeafCgi, use new name
 ## 05-04-2017 @ 07.08.40 - (1.21.218)  - dscudiero - tweak order
+## 05-04-2017 @ 14.20.54 - (1.21.219)  - dscudiero - Add call to cleanDevs
