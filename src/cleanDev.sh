@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.4.73 # -- dscudiero -- Wed 04/26/2017 @ 12:28:16.31
+version=3.4.114 # -- dscudiero -- Thu 05/04/2017 @ 14:16:21.52
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -38,11 +38,12 @@ scriptDescription="Cleanup private dev sites"
 
 		until [[ $loop == false ]]; do
 			## Get the list of files
-			unset validSiteIds workFiles filesStr1 filesStr2
-			filesStr1="$(ProtectedCall "ls /mnt/$share/web" | ProtectedCall "grep -v .BeingDeleted" | ProtectedCall "grep $searchStr" | ProtectedCall "grep -v .AutoDelete")"
-			filesStr2="$(ProtectedCall "ls /mnt/$share/web" | ProtectedCall "grep -v .BeingDeleted" | ProtectedCall "grep $searchStr" | ProtectedCall "grep .AutoDelete")"
-			filesStr3="$(ProtectedCall "ls /mnt/$share/web" | ProtectedCall "grep $searchStr" | ProtectedCall "grep .BeingDeleted")"
-			workFiles=($filesStr1 $filesStr2 $filesStr3)
+			unset validSiteIds workFiles filesList1 filesList2 filesList3 fileList4
+			filesList1="$(ProtectedCall "ls /mnt/$share/web" | ProtectedCall "grep -v .BeingDeleted" | ProtectedCall "grep $searchStr" | ProtectedCall "grep -v .AutoDelete")"
+			filesList2="$(ProtectedCall "ls /mnt/$share/web" | ProtectedCall "grep -v .BeingDeleted" | ProtectedCall "grep $searchStr" | ProtectedCall "grep .AutoDeleteWithSave")"
+			filesList3="$(ProtectedCall "ls /mnt/$share/web" | ProtectedCall "grep -v .BeingDeleted" | ProtectedCall "grep $searchStr" | ProtectedCall "grep .AutoDeleteNoSave")"
+			filesList4="$(ProtectedCall "ls /mnt/$share/web" | ProtectedCall "grep $searchStr" | ProtectedCall "grep .BeingDeleted")"
+			workFiles=($filesList1 $filesList2 $filesList3 $fileList4)
 
 			## Build menu list
 			if [[ ${#workFiles[@]} -gt 0 ]]; then
@@ -56,8 +57,7 @@ scriptDescription="Cleanup private dev sites"
 				dots=$(PadChar '.' $maxLen)
 				let sepLen=maxLen+22
 				sep="\t   $(PadChar '-' $sepLen)\n"
-				printedSep1=false
-				printedSep2=false
+				printedSep1=false; printedSep2=false; printedSep3=false;
 				for ((i = 0 ; i < ${#workFiles[@]} ; i++)); do
 					timeStamp='Unknown'
 					for env in dev test next curr qa; do
@@ -66,20 +66,22 @@ scriptDescription="Cleanup private dev sites"
 						[[ -f $file ]] && timeStamp=$(stat -c %z $file | awk 'BEGIN {FS=" "}{printf "%s", $1}' | awk 'BEGIN {FS="-"}{printf "%s-%s-%s", $2,$3,$1}') && break
 					done
 					tempStr=${workFiles[$i]}$dots; tempStr=${tempStr:0:$maxLen}
-					[[ $(Contains "$tempStr" ".AutoDelete") == true && $printedSep1 == false ]] && printf "$sep" && printedSep1=true
-					[[ $(Contains "$tempStr" ".BeingDeleted") == true && $printedSep2 == false ]] && printf "$sep" && printedSep2=true
+					[[ $(Contains "$tempStr" '.AutoDeleteWithSave') == true && $printedSep1 == false ]] && printf "$sep" && printedSep1=true
+					[[ $(Contains "$tempStr" '.AutoDeleteNoSave') == true && $printedSep2 == false ]] && printf "$sep" && printedSep2=true
+					[[ $(Contains "$tempStr" '.BeingDeleted') == true && $printedSep3 == false ]] && printf "$sep" && printedSep3=true
 				  	printf "\t%2s %s (Created: %s) \n" "$i" "$tempStr" "$timeStamp"
 				  	[[ "$validSiteIds" = '' ]] &&validSiteIds="$i" || validSiteIds="$validSiteIds $i"
 				done
 				unset siteId
-				Prompt siteId "\nPlease enter the ordinal number(s) of the site you wish to Process, \nor 'X' to quit" #"$validSiteIds"
+				#validSiteIds="$validSiteIds All Refresh"
+				Prompt siteId "\nPlease enter the ordinal number(s) of the site you wish to Process, \nor 'X' to quit" "$validSiteIds All Refresh"
 				[[ $(Lower $siteId) == 'r' ]] && loop=true || loop=false
 			fi ## [[ ${#workFiles[@]} -gt 0 ]]
 		done
 
-
 		## Build the sites array
 		unset sites
+		[[ $siteId == 'All' ]] && siteId="$(tr ' ' ',' <<< $validSiteIds)"
 		for i in $(tr ',' ' ' <<< $siteId); do
 			sites+=("${workFiles[$i]}")
 		done
@@ -107,8 +109,8 @@ scriptDescription="Cleanup private dev sites"
 		case "$requestType" in
 			m*)
 				echo; Msg2 "Marking '$file' for automatic deletion in $deleteLimitDays days..."
-				$DOIT mv "$file" "$file".AutoDelete
-				$DOIT touch "$file".AutoDelete/.AutoDelete
+				$DOIT mv "$file" "$file".AutoDeleteNoSave
+				$DOIT touch "$file".AutoDeleteNoSave/.AutoDeleteNoSave
 				;;
 			s*)
 				echo; Msg2 "Holding '$file' as '$file'.save..."
@@ -116,9 +118,9 @@ scriptDescription="Cleanup private dev sites"
 				;;
 			u*)
 				echo; Msg2 "UnMarking '$file'..."
-				newFileName=$(sed 's|.AutoDelete||g' <<< ${workFiles[$siteId]})
+				newFileName=$(sed 's|.AutoDeleteNoSave||g' <<< ${workFiles[$siteId]})
 				$DOIT mv "$file" /mnt/$share/web/$newFileName
-				$DOIT rm  /mnt/$share/web/$newFileName/.AutoDelete
+				$DOIT rm  /mnt/$share/web/$newFileName/.AutoDeleteNoSave
 				;;
 			r*)
 				echo; Msg2 "Reseting 'marked' date for '$file'..."
@@ -128,7 +130,7 @@ scriptDescription="Cleanup private dev sites"
 				if [[ $userName = 'dscudiero' ]]; then
 					unset ans
 					Prompt ans "^Do you wish to save the workflow files" 'Yes No' 'Yes' ; ans=$(Lower "${ans:0:1}")
-					[[ $ans == 'y' ]] && Msg2 "Saving workflow..." && Call saveWorkflow $processClient -p -all -suffix "beforeDelete-$fileSuffix" -nop #-quiet
+					[[ $ans == 'y' ]] && Msg2 "Saving workflow..." && Call saveWorkflow $processClient -p -all -suffix "beforeDelete-$backupSuffix" -nop #-quiet
 				fi
 				echo; Msg2 "Removing '$file' offline..."
 				if [[ $DOIT == '' ]]; then
@@ -137,6 +139,9 @@ scriptDescription="Cleanup private dev sites"
 				else
 					Msg2 "*** DOIT flag is off, skipping delete ***"
 				fi
+				;;
+			w*)
+				mv -f "$file" "$file--AutoDeleteWithSave"
 				;;
 		esac
 		return 0
@@ -196,8 +201,37 @@ elif [[ "$hostName" = 'build7' ]]; then share=dev7
 elif [[ "$hostName" = 'mojave' ]]; then share=dev6
 fi
 validActions='Yes No Mark Unmark ResetDate Save'
+[[ $userName == 'dscudiero' ]] && validActions="$validActions Workflow"
 searchStr="$userName"
-[[ $client != '' ]] && searchStr="$client-$searchStr"
+## if client was passed in then just delete that site, otherwise if it is 'daemon' then process autodeletes
+if [[ -n $client ]]; then
+	if [[ $client == 'daemon' ]]; then
+		Msg2 "Starting $myName in daemon mode..."
+		filePrefix="/mnt/$share/web"
+		fileList="$(ProtectedCall "ls $filePrefix" | ProtectedCall "grep $searchStr" | ProtectedCall "grep '.AutoDeleteWithSave\$'")"
+		for file in $fileList; do
+			Msg2 "^Deleting '$file' with workflow save"
+			srcFile="${filePrefix}/${file}"
+			tgtFile="$srcFile.BeingDeletedBy$(TitleCase "$myName")"
+			Call saveWorkflow -daemon -siteFile "$srcFile" -all -suffix "beforeDelete-$backupSuffix" #-quiet -nop
+			mv -f "$srcFile" "$tgtFile"
+			(nohup rm -rf "$tgtFile" &> /dev/null) &
+		done
+		fileList="$(ProtectedCall "ls /mnt/$share/web" | ProtectedCall "grep $searchStr" | ProtectedCall "grep .AutoDeleteNoSave")"
+		for file in $fileList; do
+			Msg2 "^Deleting '$file'"
+			srcFile="${filePrefix}/${file}"
+			tgtFile="$srcFile.BeingDeletedBy$(TitleCase "$myName")"
+			mv -f "$srcFile" "$tgtFile"
+			(nohup rm -rf "$tgtFile" &> /dev/null) &
+		done
+		Msg2 "Ending $myName in daemon mode..."
+		Goodbye 0
+	else
+		searchStr="$client-$searchStr"
+	fi
+fi
+
 while [ true == true ]; do
 	unset site requestType
 	GetSites "$searchStr"
@@ -231,3 +265,4 @@ Goodbye 0
 ## Mon Oct 24 10:15:01 CDT 2016 - dscudiero - Fix message text
 ## Thu Jan 12 10:44:24 CST 2017 - dscudiero - Prompt to see if we should save workfow
 ## 04-26-2017 @ 13.46.55 - (3.4.73)    - dscudiero - General syncing of dev to prod
+## 05-04-2017 @ 14.17.07 - (3.4.114)   - dscudiero - Add daemon mode to support automatic cleanup
