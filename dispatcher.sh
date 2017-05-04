@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.111" # -- dscudiero -- Tue 05/02/2017 @ 10:37:56.61
+version="1.2.112" # -- dscudiero -- Thu 05/04/2017 @ 10:31:08.83
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -122,13 +122,14 @@ tmpRoot=/tmp/$LOGNAME
 	$GD -e "trueDir = '$trueDir'\nTOOLSPATH = '$TOOLSPATH'"
 
 ## Parse off my arguments
-	unset scriptArgs myVerbose useLocal semaphoreProcessing noLog noLogInDb batchMode useDevDb myVerbose myQuiet
+	unset scriptArgs myVerbose useDev useLocal semaphoreProcessing noLog noLogInDb batchMode useDevDb myVerbose myQuiet
 	[[ $USELOCAL == true ]] && $useLocal=true
 	while [[ -n $@ ]]; do
 		if [[ ${1:0:2} == '--' ]]; then
 			myArg=$(echo ${1:2} | tr '[:upper:]' '[:lower:]')
 			$GD -e '\t\tmyArg = >'$myArg'<'
 			[[ ${myArg:0:1} == 'v' ]] && myVerbose=true
+			[[ $myArg == 'useDev' ]] && useDev=true
 			[[ $myArg == 'uselocal' ]] && useLocal=true
 			[[ $myArg == 'nosemaphore' ]] && semaphoreProcessing=false
 			[[ $myArg == 'nolog' ]] && noLog=true && noLogInDb=true
@@ -157,6 +158,7 @@ tmpRoot=/tmp/$LOGNAME
 ## Overrides
 	[[ ${callPgmName:0:4} == 'test' ]] && noLog=true && noLogInDb=true && useLocal=true
 	[[ $useLocal == true ]] && export USELOCAL=true
+	[[ $useDev == true ]] && export USEDEV=true
 
 prtStatus "parse args"
 
@@ -390,3 +392,4 @@ prtStatus "parse args"
 ## 04-17-2017 @ 07.41.20 - ("1.2.105") - dscudiero - remove import fpr dump array, moved code to the Dump file
 ## 05-02-2017 @ 10.34.00 - ("1.2.110") - dscudiero - Add checks to make sure TOOLSPATH is set
 ## 05-02-2017 @ 10.38.21 - ("1.2.111") - dscudiero - General syncing of dev to prod
+## 05-04-2017 @ 11.20.48 - ("1.2.112") - dscudiero - Add useDev flag
