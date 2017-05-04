@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.219 # -- dscudiero -- Thu 05/04/2017 @ 14:19:30.04
+version=1.21.221 # -- dscudiero -- Thu 05/04/2017 @ 14:21:39.32
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -372,6 +372,9 @@ case "$hostName" in
 
 		## Update the defaults data for this host
 			Call 'updateDefaults' "$scriptArgs"
+
+		## Remove private dev sites marked for auto deletion
+			cleanDev 'daemon'
 		;;
 esac
 
@@ -441,3 +444,4 @@ return 0
 ## 04-06-2017 @ 10.09.59 - (1.21.217)  - dscudiero - renamed RunCourseLeafCgi, use new name
 ## 05-04-2017 @ 07.08.40 - (1.21.218)  - dscudiero - tweak order
 ## 05-04-2017 @ 14.20.54 - (1.21.219)  - dscudiero - Add call to cleanDevs
+## 05-04-2017 @ 14.21.59 - (1.21.221)  - dscudiero - add cleanDevs call to build7
