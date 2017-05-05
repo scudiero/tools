@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.69 # -- dscudiero -- Thu 05/04/2017 @  7:07:09.98
+version=2.1.70 # -- dscudiero -- Fri 05/05/2017 @  7:14:55.85
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -88,8 +88,7 @@ for repo in $repos; do
 				else
 					Call "$workerScriptFile" "$repo" "$tag" "$gitRepoRoot/${repo}.git" "$relDir" "$addedCalledScriptArgs"
 				fi
-				newReleases+=("$repo/$tag") && sendMail=true
-				[[ $tag != 'master' ]] && sendMail=true
+				[[ $tag != 'master' ]] && newReleases+=("$repo/$tag") && sendMail=true
 			fi
 		done
 	if [[ $fork == true && $((waitCntr%$maxForkedProcesses)) -eq 0 ]]; then
@@ -154,3 +153,4 @@ Goodbye 0 'alert'
 ## 05-01-2017 @ 08.31.45 - (2.1.67)    - dscudiero - Do not send out emails if the only repos synced are masters
 ## 05-01-2017 @ 08.32.16 - (2.1.68)    - dscudiero - General syncing of dev to prod
 ## 05-04-2017 @ 07.08.33 - (2.1.69)    - dscudiero - Fix problem when taring up the repos if the srcDir does not exist
+## 05-05-2017 @ 07.15.26 - (2.1.70)    - dscudiero - Fix problem of sending emails when no named releases were created
