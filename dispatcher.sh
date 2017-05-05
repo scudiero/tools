@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.112" # -- dscudiero -- Thu 05/04/2017 @ 10:31:08.83
+version="1.2.114" # -- dscudiero -- Fri 05/05/2017 @  8:38:49.21
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -44,7 +44,7 @@ myName='dispatcher'
 		[[ $batchMode == true || $myVerbose != true ]] && return 0
 		local elapTime=$(( $(date "+%s") - $sTime ))
 		[[ $elapTime -eq 0 ]] && elapTime=1
-		statusLine="${statusLine}${1} ${elapTime}s"
+		statusLine="${statusLine}${1}: ${elapTime}s"
 		>&3 echo -n -e "${statusLine}\r"
 		return 0
 	}
@@ -161,6 +161,7 @@ tmpRoot=/tmp/$LOGNAME
 	[[ $useDev == true ]] && export USEDEV=true
 
 prtStatus "parse args"
+sTime=$(date "+%s")
 
 #==================================================================================================
 # MAIN
@@ -218,11 +219,12 @@ prtStatus "parse args"
 	Import "$includes"
 	#Import FindExecutable CheckRun CheckAuth CheckSemaphore Call
 	prtStatus ", imports"
+	sTime=$(date "+%s")
 
 ## Source the init script
-	sTime=$(date "+%s")
 	source $initFile
 	prtStatus ", run initFile"
+	sTime=$(date "+%s")
 
 ## If sourced then just return
 	[[ $calledViaSource == true ]] && return 0
@@ -277,6 +279,7 @@ prtStatus "parse args"
 		[[ ! -r $executeFile ]] && echo && echo && Terminate "callPgm.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"
 
 	prtStatus ", find scriptFile"
+	sTime=$(date "+%s")
 
 ## Call the script
 	## Initialize the log file
@@ -301,6 +304,8 @@ prtStatus "parse args"
 		fi
 
 	prtStatus ", initialize logFile"
+	sTime=$(date "+%s")
+
 
 	## Call program function
 		[[ $batchMode != true && $myQuiet != true ]] && echo
@@ -309,6 +314,7 @@ prtStatus "parse args"
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
 		#(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile; rc=$?
+		prtStatus ", calling script..."
 		source $executeFile $scriptArgs 2>&1 | tee -a $logFile; rc=$?
 		rc="$?"
 
@@ -393,3 +399,4 @@ prtStatus "parse args"
 ## 05-02-2017 @ 10.34.00 - ("1.2.110") - dscudiero - Add checks to make sure TOOLSPATH is set
 ## 05-02-2017 @ 10.38.21 - ("1.2.111") - dscudiero - General syncing of dev to prod
 ## 05-04-2017 @ 11.20.48 - ("1.2.112") - dscudiero - Add useDev flag
+## 05-05-2017 @ 08.41.58 - ("1.2.114") - dscudiero - Add additional verbose status statements
