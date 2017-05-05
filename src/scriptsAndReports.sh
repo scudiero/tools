@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.71 # -- dscudiero -- 03/16/2017 @ 12:15:51.56
+version=3.11.72 # -- dscudiero -- Fri 05/05/2017 @ 13:20:37.11
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -132,7 +132,6 @@ function ExecScript {
 			Msg2 "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}" >> $logFile
 			Msg2 "$(PadChar)" >> $logFile
 			Msg2 >> $logFile
-			$GD -e "\t logFile: $logFile"
 		fi
 
 	## Call the script
@@ -439,3 +438,4 @@ Goodbye 0
 ## Thu Feb 16 08:21:54 CST 2017 - dscudiero - Switch to use keyId inlookups
 ## Tue Mar 14 14:49:25 CDT 2017 - dscudiero - Fix problem where the correct logfile was not being written out
 ## Thu Mar 16 13:00:00 CDT 2017 - dscudiero - Tweaked messaging
+## 05-05-2017 @ 13.21.31 - (3.11.72)   - dscudiero - Remove GD code
