@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.4.36 # -- dscudiero -- Tue 04/04/2017 @  9:39:40.20
+version=2.4.53 # -- dscudiero -- Thu 05/04/2017 @ 17:06:06.86
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -33,22 +33,17 @@ dump -2 deleteLimitDays
 #==================================================================================================F
 ## main
 #==================================================================================================
-if [[ $hostName = 'mojave' ]]; then share=dev6
-elif [[ $hostName = 'build5' ]]; then share=dev9
-elif [[ $hostName = 'build7' ]]; then share=dev7
-else Msg2 $T "Do not recognize the current host '$hostName'"
-fi
-
 ## If client is specified then check files for that user, otherwise
 ## Get the list of userids from the employee table
-	if [[ $client == '' ]]; then
+	userId=$client
+	if [[ $userId == '' ]]; then
 		Msg2 $V1 "Pulling employee userid data from $contactsSqliteFile...\n"
 		sqlStmt="SELECT db_email FROM employees WHERE db_isactive=\"Y\""
 		RunSql2 "$contactsSqliteFile" "$sqlStmt"
 	else
 		unset resultSet
-		Msg2 $V1 "Note: Using userid passed in: $client\n"
-		resultSet+=($client)
+		Msg2 $V1 "Note: Using userid passed in: $userId\n"
+		resultSet+=($userId)
 	fi
 
 ## Loop through all users in the employee table looking for dev sites
@@ -56,41 +51,42 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 	for resultRec in "${resultSet[@]}"; do
 		emailAddr="$resultRec"
 		userId=$(echo $emailAddr | cut -d '@' -f 1)
+
 		[[ $(Contains "$ignoreList" "$userId") == true ]] && continue
 		foundFiles=false
-		cd /mnt/$share/web
-		filesFound=($(ProtectedCall "ls | grep \"\-$userId\""))
-		if [[ ${#filesFound[@]} -gt 0 ]]; then
+		dirsFound=($(ProtectedCall "ls /mnt/*/web/* | grep '/dev[0-99]/' | grep '\-$userId'"))
+		if [[ ${#dirsFound[@]} -gt 0 ]]; then
 			if [[ -f $tmpFile ]]; then rm $tmpFile; fi
 			foundFiles=true
 			Msg2 | tee -a $tmpFile
-			Msg2 "$myName found private dev sites on $hostName" | tee -a $tmpFile
+			Msg2 "^$myName found private dev sites on $(hostname)" | tee -a $tmpFile
 			Msg2 | tee -a $tmpFile
-			Msg2 "The following private dev sites (/mnt/$share/web/xxx-$userId) where found for userid: '$userId' on $share:" | tee -a $tmpFile
+			Msg2 "^The following private dev sites where found for userid: '$userId'" | tee -a $tmpFile
 			Msg2 | tee -a $tmpFile
-			for file in "${filesFound[@]}"; do
+			for dir in "${dirsFound[@]}"; do
 				## Get the newest last modified date for the site
-				cd $file
+				pushd "${dir%%:*}" >& /dev/null
 				newestModEpoch=$(find . -type f -printf '%T@ %p\n' | sort | tail -1 | cut -f1 -d" " | cut -f1 -d".") #Note: A = Access time, T = Modificaton time
 				newestAccEpoch=$(find . -type f -printf '%A@ %p\n' | sort | tail -1 | cut -f1 -d" " | cut -f1 -d".") #Note: A = Access time, T = Modificaton time
-				cd ..
+				#cd ..
 				todaysEpoch=$(date +'%s')
 				modDelta=$(( todaysEpoch - newestModEpoch ))
 				modDaysOld=$(( modDelta / 86400 ))  ## Convert to days
 				accDelta=$(( todaysEpoch - newestAccEpoch ))
 				accDaysOld=$(( accDelta / 86400 ))  ## Convert to days
-				dump -2 -n $file newestModEpoch newestAccEpoch todaysEpoch modDelta modDaysOld accDelta accDaysOld
+				dump -2 -n $dir newestModEpoch newestAccEpoch todaysEpoch modDelta modDaysOld accDelta accDaysOld
 				## Auto delete old files
-				if [[ ${file:(-11)} == '.AutoDelete' ]]; then
-					if [[ $accDaysOld -gt $deleteLimitDays ]]; then
-						[[ $userName = 'dscudiero' ]] && saveWorkflow $client -p -all -suffix "beforeDelete-$fileSuffix" -nop -quiet
-						mv $file $file.DELETE
-						$DOIT rm -rf $file.DELETE &
-						Msg2 "^$file - Was marked for deleteion and is over the threshold ($accDaysOld > $deleteLimitDays), it was deleted" | tee -a $tmpFile
-					fi
-				else
-					Msg2 "^$file - Last modified $modDaysOld day(s) ago and last accessed $accDaysOld day(s) ago" | tee -a $tmpFile
-				fi
+				# if [[ ${dir:(-11)} == '.AutoDelete' ]]; then
+				# 	if [[ $accDaysOld -gt $deleteLimitDays ]]; then
+				# 		[[ $userName = 'dscudiero' ]] && saveWorkflow $client -p -all -suffix "beforeDelete-$fileSuffix" -nop -quiet
+				# 		mv $dir $dir.DELETE
+				# 		$DOIT rm -rf $dir.DELETE &
+				# 		Msg2 "^$dir - Was marked for deleteion and is over the threshold ($accDaysOld > $deleteLimitDays), it was deleted" | tee -a $tmpFile
+				# 	fi
+				# else
+					Msg2 "^$(basename $dir) - Last modified $modDaysOld day(s) ago and last accessed $accDaysOld day(s) ago" | tee -a $tmpFile
+				# f
+				popd >& /dev/null
 			done
 
 			Msg2 "\nRemember, you can use the 'cleanDev' script to easily remove any sites that are no longer needed." >> $tmpFile
@@ -134,3 +130,4 @@ Goodbye 0
 ## 04-04-2017 @ 09.37.18 - (2.4.34)    - dscudiero - Add last modify date to the output
 ## 04-04-2017 @ 09.38.29 - (2.4.35)    - dscudiero - make autodelete based on last access date
 ## 04-04-2017 @ 09.39.55 - (2.4.36)    - dscudiero - Tweak messaging
+## 05-05-2017 @ 12.36.22 - (2.4.53)    - dscudiero - General syncing of dev to prod
