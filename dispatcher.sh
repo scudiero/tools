@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.114" # -- dscudiero -- Fri 05/05/2017 @  8:38:49.21
+version="1.2.115" # -- dscudiero -- Fri 05/05/2017 @  8:45:12.08
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -308,13 +308,13 @@ sTime=$(date "+%s")
 
 
 	## Call program function
-		[[ $batchMode != true && $myQuiet != true ]] && echo
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		$GD -e "\nCall $executeFile $scriptArgs\n"
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
 		#(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile; rc=$?
 		prtStatus ", calling script..."
+		[[ $batchMode != true && $myQuiet != true ]] && echo
 		source $executeFile $scriptArgs 2>&1 | tee -a $logFile; rc=$?
 		rc="$?"
 
@@ -400,3 +400,4 @@ sTime=$(date "+%s")
 ## 05-02-2017 @ 10.38.21 - ("1.2.111") - dscudiero - General syncing of dev to prod
 ## 05-04-2017 @ 11.20.48 - ("1.2.112") - dscudiero - Add useDev flag
 ## 05-05-2017 @ 08.41.58 - ("1.2.114") - dscudiero - Add additional verbose status statements
+## 05-05-2017 @ 08.45.26 - ("1.2.115") - dscudiero - tweak messaging
