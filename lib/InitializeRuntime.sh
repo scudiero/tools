@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.76" # -- dscudiero -- 01/17/2017 @  8:22:25.29
+# version="2.0.77" # -- dscudiero -- Fri 05/05/2017 @ 13:18:27.89
 #===================================================================================================
 # Initialize the tools runtime environment
 #===================================================================================================
@@ -9,9 +9,6 @@
 #===================================================================================================
 
 TrapSigs 'on'
-
-GD echo -e "\n=== Starting InitializeRuntime ========================================================================"
-
 unset helpSet helpNotes warningMsgs errorMsgs summaryMsgs myRealPath myRealName changeLogRecs parsedArgStr
 
 ## Make sure we have avalue for TERM
@@ -136,7 +133,6 @@ tabStr="$(PadChar ' ' 5)"
 	[[ -z $maxForkedProcesses ]] && maxForkedProcesses=3
 
 export FRAMEWORKLOADED=true
-GD echo -e "\n=== Stopping InitializeRuntime ========================================================================"
 
 #===================================================================================================
 ## Check-in log
@@ -153,3 +149,4 @@ GD echo -e "\n=== Stopping InitializeRuntime ===================================
 ## Fri Jan 13 15:25:47 CST 2017 - dscudiero - Remove setting classpath
 ## Fri Jan 13 15:33:26 CST 2017 - dscudiero - remove debug code
 ## Tue Jan 17 08:55:29 CST 2017 - dscudiero - Move color definitions before getDefaultsData
+## 05-05-2017 @ 13.21.21 - ("2.0.77")  - dscudiero - Remove GD code
