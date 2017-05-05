@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.221 # -- dscudiero -- Thu 05/04/2017 @ 14:21:39.32
+version=1.21.222 # -- dscudiero -- Fri 05/05/2017 @  7:04:26.06
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -292,14 +292,16 @@ case "$hostName" in
 			BuildCourseleafDataTable
 
 		## Rebuild Internal pages to pickup any new database information
-				## Wait for all of the buildSiteInfoTable process to finish
-				Msg2 "Waiting on 'buildSiteInfoTable'..."
-				Semaphore 'waiton' 'buildSiteInfoTable' 'true'
-				Msg2 "^'buildSiteInfoTable' completed, continuing..."
+			## Wait for all of the buildSiteInfoTable process to finish
+			Msg2 "\nWaiting on 'buildSiteInfoTable'..."
+			Semaphore 'waiton' 'buildSiteInfoTable' 'true'
+			Msg2 "^'buildSiteInfoTable' completed, continuing..."
+
 			Msg2 "Rebuilding Internal pages"
 			RunCourseLeafCgi "$stageInternal" "-r /clients"
 			RunCourseLeafCgi "$stageInternal" "-r /support/tools"
 			RunCourseLeafCgi "$stageInternal" "-r /support/qa"
+			Msg2 "^Done"
 
 		# ## Create a clone of the warehouse db
 		# 	Msg2 "Creating '$warehouseDev' database..."
@@ -329,7 +331,7 @@ case "$hostName" in
 		  	fi
 
 		## Remove private dev sites marked for auto deletion
-			cleanDev 'daemon'
+			Call 'cleanDev' 'daemon' "$scriptArgs"
 
 		 ## Check that all things ran properly, otherwise revert the databases
 			Semaphore 'waiton' "buildClientInfoTable"
@@ -445,3 +447,4 @@ return 0
 ## 05-04-2017 @ 07.08.40 - (1.21.218)  - dscudiero - tweak order
 ## 05-04-2017 @ 14.20.54 - (1.21.219)  - dscudiero - Add call to cleanDevs
 ## 05-04-2017 @ 14.21.59 - (1.21.221)  - dscudiero - add cleanDevs call to build7
+## 05-05-2017 @ 07.04.45 - (1.21.222)  - dscudiero - Fix call to cleanDev
