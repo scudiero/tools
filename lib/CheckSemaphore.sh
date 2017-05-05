@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.2" # -- dscudiero -- 01/04/2017 @ 13:37:05.14
+# version="1.0.3" # -- dscudiero -- Fri 05/05/2017 @ 13:18:01.24
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -36,7 +36,6 @@ function CheckSemaphore {
 	fi
 	## Set our semaphore
 	semaphoreId=$(Semaphore 'set')
-	GD echo -e "\t semaphoreId: $semaphoreId"
 
 	echo $semaphoreId
 	return 0
@@ -47,3 +46,4 @@ export -f CheckSemaphore
 # Checkin Log
 #===================================================================================================
 ## Wed Jan  4 13:53:00 CST 2017 - dscudiero - General syncing of dev to prod
+## 05-05-2017 @ 13.21.00 - ("1.0.3")   - dscudiero - Remove GD code
