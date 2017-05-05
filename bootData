@@ -2,6 +2,7 @@
 TOOLSPATH="/steamboat/leepfrog/docs/tools"
 warehouseDb="warehouse"
 adminUsers="dscudiero"
+setSemaphoreList='buildSiteInfoTable,buildClientInfoTable'
 
 #===================================================================================================
 ## Check-in log
