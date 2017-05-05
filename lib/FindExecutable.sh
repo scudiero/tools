@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.0.100" # -- dscudiero -- 01/12/2017 @ 12:51:44.85
+# version="1.0.101" # -- dscudiero -- Fri 05/05/2017 @ 13:19:26.65
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -18,10 +18,6 @@
 #=======================================================================================================================
 function FindExecutable {
 	Import RunSql2 Prompt VerifyPromptVal Goodbye
-	#===================================================================================================================
-	local GD='GD echo'
-	#local GD='echo'
-	$GD ">>> $FUNCNAME -- Starting: \$* = '$*' <<<"
 	local callPgmName=$1; shift
 	local searchMode=${1:-std}; shift
 	local srcTypes="$1"; shift
@@ -44,7 +40,6 @@ function FindExecutable {
 	## Search for the file scanning TOOLSSRC, TOOSSRCLIBS
 		searchDirs="$TOOLSPATH/src"
 		[[ $TOOLSSRCPATH != '' && $searchMode != 'fast' ]] && searchDirs=($( tr ':' ' ' <<< $TOOLSSRCPATH))
-		$GD -e "\tcallPgmName: '$callPgmName' \n\tsearchMode: '$searchMode' \n\tsrcTypes: '$srcTypes' \n\tsearchDirs: '$searchDirs' \n\tsrcLibs: '$srcLibs'"
 
 	## Check db to see if there is a script name override
 		unset callPgmAlias
@@ -55,17 +50,14 @@ function FindExecutable {
 			callPgmAlias="$(cut -d' ' -f2 <<< ${resultSet[0]})"
 		fi
 		[[ $callPgmAlias != '' ]] && executeAlias="$callPgmAlias"
-		$GD -e "\n\tResoloved: \n\t\tcallPgmName: $callPgmName \n\t\tcallPgmAlias: $callPgmAlias\n"
 
 	## Search for execution file
 		found=false;
 	    for searchDir in $( tr ':' ' ' <<< $TOOLSSRCPATH) $TOOLSPATH/src; do
 	    	[[ ! -d $searchDir ]] && continue
-			$GD -e "\tSearching: '$searchDir'..."
 	    	## Look for the '.sh' file in the root src directory, if found then use it
 	    	executeFile="$searchDir/${callPgmName}.sh"
 			if [[ -r "$executeFile" ]]; then
-				$GD -e "\t\tFound executable in the primary src directory, using that file"
 				found=true
 				break
 			else
@@ -73,11 +65,9 @@ function FindExecutable {
 			fi
 			## Loop through library directories
 	 	    for lib in $(tr ',' ' ' <<< $srcLibs); do
-	 	    	$GD -e "\t\tlib: '$lib'"
 				## Look for the '.sh' file in the root lib directory, if found then use it
 				executeFile="$searchDir/$lib/${callPgmName}.sh"
 				if [[ -r "$executeFile" ]]; then
-					$GD -e "\t\tFound executable in the root src/$lib directory, using that file"
 					found=true
 					break
 				else
@@ -87,7 +77,6 @@ function FindExecutable {
 	 	    	for type in $(tr ',' ' ' <<< $srcTypes); do
 					typeDir=$(cut -d':' -f1 <<< $type)
 					typeExt=$(cut -d':' -f2 <<< $type)
-					$GD -e "\t\ttype: '$type',\ttypeDir: '$typeDir',\ttypeExt: '$typeExt'\n\t\t\t$executeFile"
 	 	    		## Look for the '.sh' file in the root src directory, if found then use it
 					executeFile="$searchDir/$typeDir/${callPgmName}.${typeExt}"
 					if [[ -r "$executeFile" ]]; then
@@ -132,7 +121,6 @@ function FindExecutable {
 				fi
 			fi
 		fi
-	$GD -e "\n=== Resolved execution file: '$executeFile' ==========================================================="
 
 	return 0
 } ##FindExecutable
@@ -142,3 +130,4 @@ export -f FindExecutable
 # Check-in Log
 #=======================================================================================================================
 ## Wed Jan  4 13:53:26 CST 2017 - dscudiero - General syncing of dev to prod
+## 05-05-2017 @ 13.21.05 - ("1.0.101") - dscudiero - Remove GD code
