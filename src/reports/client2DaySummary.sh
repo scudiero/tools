@@ -1,6 +1,6 @@
 RunSql2 #!/bin/bash
 #==================================================================================================
-version=1.1.12 # -- dscudiero -- Mon 04/17/2017 @  7:40:52.91
+version=1.1.18 # -- dscudiero -- Mon 05/08/2017 @  8:47:01.36
 #==================================================================================================
 originalArgStr="$*"
 scriptDescription=""
@@ -73,11 +73,15 @@ clientsDir="/mnt/internal/site/stage/web/clients"
 	declare -A dataMap
 	unset keysArray
 	[[ $ignoreList != '' ]] && ignoreList="and name not in (\"$(sed s'/,/","/g' <<< $ignoreList)\")"
-	sqlStmt="select name,$role from $clientInfoTable where recordStatus=\"A\" $ignoreList order by $role,name"
+	sqlStmt="select name,products,productsinsupport,$role from $clientInfoTable where recordStatus=\"A\" $ignoreList order by $role,name"
 	RunSql2 $sqlStmt
 	for result in "${resultSet[@]}"; do
 		clientCode=$(cut -d'|' -f1 <<< $result)
-		contactInfo=$(cut -d'|' -f2 <<< $result)
+		products=$(cut -d'|' -f2 <<< $result)
+		[[ -z $products || $products == 'NULL' ]] && continue
+		productsInSupport=$(cut -d'|' -f3 <<< $result)
+		[[ -z $productsInSupport || $productsInSupport == 'NULL' ]] && continue
+		contactInfo=$(cut -d'|' -f4 <<< $result)
 		if [[ $contactInfo == 'NULL' ]]; then
 			contactName="Unassigned (i.e. no entry for role '$role' found in contacts/clientRoles)"
 			contactEmail=NULL
@@ -160,3 +164,4 @@ Goodbye 0 #'alert'
 #===================================================================================================
 ## Mon Feb 13 16:09:19 CST 2017 - dscudiero - make sure we have our own tmpFile
 ## 04-17-2017 @ 07.42.20 - (1.1.12)    - dscudiero - remove import of dumpmap
+## 05-08-2017 @ 09.13.11 - (1.1.18)    - dscudiero - filter out sites that do not have products or productsInSupport
