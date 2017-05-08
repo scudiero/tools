@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.102" # -- dscudiero -- Fri 04/14/2017 @ 14:24:41.14
+# version="2.0.103" # -- dscudiero -- Mon 05/08/2017 @  9:11:07.50
 #===================================================================================================
 # Common script exit
 # args:
@@ -40,7 +40,7 @@ function Goodbye {
 			;;
 		quickquit|x)
 			[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Remove' $myLogRecordIdx
-			Msg2 "\n*** Stopping at user's request ***\n"
+			Msg2 "\n*** $myName: Stopping at user's request ***\n"
 			kill -1 $$
 			exitCode=0
 			;;
@@ -146,3 +146,4 @@ export -f Goodbye
 ## 04-14-2017 @ 12.03.47 - ("2.0.97")  - dscudiero - General syncing of dev to prod
 ## 04-14-2017 @ 12.17.42 - ("2.0.98")  - dscudiero - skip
 ## 04-14-2017 @ 14.25.31 - ("2.0.102") - dscudiero - Remove the call to the local function
+## 05-08-2017 @ 09.12.48 - ("2.0.103") - dscudiero - Add script name to stopping message
