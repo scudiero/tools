@@ -3,12 +3,14 @@ wfLibVersion="1.7.14" // -- dscudiero -- Mon 05/01/2017 @ 15:00:21.56
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
-// 03/20/17 - dgs - Updated Related to use getTCFValue where appropriate
+// 03/20/17 - dgs 	- Updated Related to use getTCFValue where appropriate
 //					Updated Related to not quit if college is not set unless substitution type is Col
 //					Updated other functions to use wfDebug and wfDump
 //					Added HasValue function
-// 04/26/17 - dgs - Added helper function CheckChanged back again
-// 05/01/17 - dgs - Added AttrIn function to accomidate allcodes sites
+// 04/26/17 - dgs 	- Added helper function CheckChanged back again
+// 05/01/17 - dgs 	- Added AttrIn function to accomidate allcodes sites
+// 05/08/17 - dgs 	- Added wfAttr function to handle attribute expansion in the world of allcodes
+//					- Added getTCAValue function like getTCFValue function
 //======================================================================================================================
 
 // Loading message
@@ -648,6 +650,81 @@ function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colCol
 
     return resultSet;
 } //LookupCollegeCode
+
+//=======================================================================================================================
+// Retrive atribute code values takine into account all codes and tcf/tca values
+// 1) does 'allxxxx' return data -- use it
+// 2) otherwise is there tcf data -- then use it
+// if an options string that contans 'TCA' is passed then also include tca data (only if proposal is not allcodes)
+// Usage:
+//		wfrules:Cols|function|wfAttr|includeTCA; //Substitutes current, previous, and crosslisted value(s) of 'College' from allcodes data
+//		wfrules:Depts|function|wfAttr|; //Substitutes current, previous, and crosslisted value(s) of 'Department' from allcodes data
+//		wfrules:Subjs|function|wfAttr|; //Substitutes current, previous, and crosslisted value(s) of 'Subject' from allcodes data
+//=======================================================================================================================
+// 05/08/2017 - dgs - New
+//=======================================================================================================================
+wffuncs.wfAttr = function(inval, wfrule, args) {
+	wfDebug(3,"\n*** In wfDepts ***, called as: '" + inval + "'");
+	var reqType=wfrule.searchfor.toLowerCase();
+	var options=wfrule.options.substring(0,wfrule.options.indexOf(";"));
+	var includeTCA=false;
+	if (options.indexOf("TCA") >= 0)
+		includeTCA=true;
+
+	var subjects=[], departments=[], colleges=[];
+	// Get standard values, if all codes use the functions, otherwise pull data from the tcf file
+		if (tcfdata.allcodes && tcfdata.allcodes.length >0) {
+			var subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
+			var departments=wffuncs.getDepartments(subjects);
+			var colleges=wffuncs.getColleges(departments);
+		}
+
+	// If we did not find data above then try data from the tcf file
+		if (subjects.length === 0 ) {
+			subjects=getTCFValue("subject", { delimiter: "\n", retarray: true });
+			if (includeTCA) {
+				subjects=subjects.concat(getTCAValue("subjects", { delimiter: "\n", retarray: true }));
+				subjects=RemoveDupes(subjects);
+			}
+		}
+		if (departments.length === 0 ) {
+			departments=getTCFValue("department", { delimiter: "\n", retarray: true });
+			if (includeTCA) {
+				departments=departments.concat(getTCAValue("departments", { delimiter: "\n", retarray: true }));
+				departments=RemoveDupes(departments);
+			}
+		}
+		if (colleges.length === 0 ) {
+			colleges=getTCFValue("college", { delimiter: "\n", retarray: true });
+			if (includeTCA) {
+				colleges=colleges.concat(getTCAValue("college", { delimiter: "\n", retarray: true }));
+				colleges=RemoveDupes(colleges);
+			}
+		}
+
+	wfDump(3,["reqType;"+reqType,"options;"+options,"colleges;"+colleges.toSource(),"departments;"+departments.toSource(),"subjects;"+subjects.toSource(),]);
+
+	// return data based on how we were called
+	var tmpArray=[]; retArray=[];
+	if (reqType === "cols") {
+		tmpArray=colleges;
+	} else if (reqType === "depts") {
+		tmpArray=departments;
+	} else if (reqType === "subjs") {
+		tmpArray=subjects;
+	}
+
+	wfDebug(3,"\t*** Returning:")
+	tmpArray.forEach(function(retVal) {
+		retArray.push(inval.replace(wfrule.regex,retVal));
+		wfDebug(3,"\t\t"+retArray[retArray.length-1]);
+	});
+
+	if (retArray.length > 0)
+		return retArray;
+		return false
+}; //wfAttr
+
 
 //======================================================================================================================
 // Check to see if a proposal attribute is in a specified list of values
@@ -1542,6 +1619,71 @@ wffuncs.wfDumpVars = function(varList) {
 	return false;
 }; //wffuncs.wfDumpVars
 
+
+//==================================================================================================
+// Get values from the TCA file, cloned from getTCFValue in util.atj
+// 05/08/2017 -- dgs -- New
+//==================================================================================================
+function getTCAValue(attr, args) {
+	var retval = "";
+	var prop = "";
+	if(typeof args == "undefined")
+		args = {};
+	var data = tcadata;
+	var delimiter = ",";
+	if(args.data)
+		data = args.data;
+	if(args.delimiter)
+		delimiter = args.delimiter;
+	if(args.multiline)
+		delimiter = "\n";
+	var escape = false;
+	if(args.escape)
+		escape = true;
+	var retarray = false;
+	if(args.retarray)
+		retarray = true;
+	if(!attr || !attr.length) {
+		if(retarray)
+			return [];
+		return "";
+	}
+	if(typeof data[attr] == "string") {
+		if(retarray)
+			return [data[attr]];
+		return data[attr];
+	}
+	if(attr.indexOf(".") > 0) {
+		prop = attr.replace(/.*\.([^\.]*)$/, "$1");
+		attr = attr.replace(/(.*)\.[^\.]*$/, "$1");
+	}
+	//if it is an object (has a definition), use the first property found
+	if(data[attr] && data[attr].length) {
+		if(!prop.length) {
+			var def = getattr_defs(attr).definition;
+			if(def.length) {
+				prop = def.split("|")[0];
+			}
+		}
+	} else {
+		if(retarray)
+			return [];
+		return "";
+	}
+	for (var i = 0; i < data[attr].length; i++) {
+		//Combine all rows into one with a comma in between values.
+		var curr = data[attr][i];
+		if(prop.length && curr[prop])
+			retval += (retval.length ? delimiter : "") + (escape ? escxml(curr[prop]) : curr[prop]);
+		else if(typeof curr == "string" || typeof curr == "number")
+			retval += (retval.length ? delimiter : "") + (escape ? escxml(curr) : curr);
+	}
+	if(args.retarray)
+		return retval.split(delimiter);
+	return retval;
+}
+
+
 //==================================================================================================
 // END
 //==================================================================================================
@@ -1557,3 +1699,4 @@ var wfLibLoaded=true;
 // 04-11-2017 @ 11.42.51 - (wfrule.att - dscudiero - Fixed a problem in Related, tweaked debug outout for lookupCode
 // 04-26-2017 @ 13.47.35 - (wfrule.att - dscudiero - Added CheckChanged helper function
 // 05-02-2017 @ 07.33.06 - (wfrule.att - dscudiero - add AttrIn function
+// 05-08-2017 @ 15.23.04 - (wfrule.att - dscudiero - Added wfAttr and getTCAValue functions
