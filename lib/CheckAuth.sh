@@ -2,7 +2,7 @@
 
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.7" # -- dscudiero -- 01/12/2017 @ 12:49:43.40
+# version="2.0.8" # -- dscudiero -- Fri 05/05/2017 @ 16:13:22.92
 #===================================================================================================
 # Check to see if the logged user can run this script
 # Returns true if user is authorized, otherwise it returns a message
@@ -13,55 +13,29 @@
 #===================================================================================================
 
 function CheckAuth {
-	local sqlStmt
+	local sqlStmt author scriptUsers 
 
-	## check to see if script is in the scripts table
-		local sqlStmt="select count(*) from $scriptsTable where name=\"$myName\""
-		RunSql2 $sqlStmt
-		[[ ${resultSet[0]} -eq 0 ]] && echo true && return 0
+	sqlStmt="select author,restrictToUsers,restrictToGroups from $scriptsTable where name=\"$myName\""
+	RunSql2 $sqlStmt
+	[[ ${#resultSet[@]} -eq 0 ]] && echo true && return 0
+	local author="$(cut -f1 -d'|' <<< ${resultSet[0]})"
+	[[ $author == $userName ]] && echo true && return 0
 
-	## check user to see if they are the author
-		sqlStmt="select author from $scriptsTable where name=\"$myName\""
-		RunSql2 $sqlStmt
-		if [[ ${#resultSet[@]} -ne 0 ]]; then
-			local author="${resultSet[0]}"
-			[[ $author == $userName ]] && echo true && return 0
-		fi
+	local scriptUsers="$(cut -f2 -d'|' <<< ${resultSet[0]})"
+	scriptUsers="$(tr ' ' ',' <<< "$scriptUsers")"
+	if [[ $scriptUsers != 'NULL' && -n $scriptUsers ]]; then
+		[[ $(Contains ",$scriptUsers," ",$userName,") == true ]] && echo true && return 0
+	fi
 
-	## check user restrict informaton for this script
-		local haveRestrictToUsers=false
-		sqlStmt="select restrictToUsers from $scriptsTable where name=\"$myName\""
+	local scriptGroups="$(cut -f3 -d'|' <<< ${resultSet[0]})"; scriptGroups="\"$(sed 's/,/","/g' <<< "$scriptGroups")\""
+	if [[ $scriptGroups != \"NULL\" && -n $scriptGroups ]]; then
+		sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\" and code in ($scriptGroups)"
 		RunSql2 $sqlStmt
-		if [[ ${#resultSet[@]} -ne 0 ]]; then
-			local scriptUsers="$(echo ${resultSet[0]} | tr ' ' ',')"
-			if [[ $scriptUsers != 'NULL' && $scriptUsers != '' ]]; then
-				haveRestrictToUsers=true
-				[[ $(Contains ",$scriptUsers," ",$userName,") == true ]] && echo true && return 0
-			fi
-		fi
-
-	## check group restrict informaton for this script
-		local haveRestrictToGroups=false
-		sqlStmt="select restrictToGroups from $scriptsTable where name=\"$myName\""
-		RunSql2 $sqlStmt
-		if [[ ${#resultSet[@]} -ne 0 ]]; then
-			local scriptGroups="\"$(echo ${resultSet[0]} | sed 's/,/","/g')\""
-			if [[ $scriptGroups != \"NULL\" && $scriptGroups != '' ]]; then
-				haveRestrictToGroups=true
-				sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\" and code in ($scriptGroups)"
-				RunSql2 $sqlStmt
-				[[ ${#resultSet[@]} -ne 0 ]] && echo true && return 0
-			fi
-		fi
-		[[ $haveRestrictToUsers == false && $haveRestrictToGroups == false ]] && echo true && return 0
+		[[ ${#resultSet[@]} -ne 0 ]] && echo true && return 0
+	fi
 
 	## User does not have access
-	Msg2 "Current user ($userName) does not have permissions to run this script."
-	if [[ $restrictToGroupsIsNull == false || $restrictToUsersIsNull == false ]]; then
-		Msg2 "^Script $myName is restricted to:"
-		[[ $haveRestrictToUsers == true ]] && Msg2 "^Users in {$scriptUsers}"
-		[[ $haveRestrictToGroups == true ]] && Msg2 "^Users in auth group(s) {$scriptGroups}"
-	fi
+	echo "The logged in user ($userName) does not have permissions to run this script."
 	return 0
 
 } #CheckAuth
@@ -72,3 +46,4 @@ export -f CheckAuth
 #===================================================================================================
 
 ## Wed Jan  4 13:52:56 CST 2017 - dscudiero - General syncing of dev to prod
+## 05-09-2017 @ 13.57.12 - ("2.0.8")   - dscudiero - Refactored to improve performance
