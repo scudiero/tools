@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.222 # -- dscudiero -- Fri 05/05/2017 @  7:04:26.06
+version=1.21.223 # -- dscudiero -- Tue 05/09/2017 @  8:00:54.05
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -376,7 +376,7 @@ case "$hostName" in
 			Call 'updateDefaults' "$scriptArgs"
 
 		## Remove private dev sites marked for auto deletion
-			cleanDev 'daemon'
+			Call 'cleanDev' 'daemon' "$scriptArgs"
 		;;
 esac
 
@@ -448,3 +448,4 @@ return 0
 ## 05-04-2017 @ 14.20.54 - (1.21.219)  - dscudiero - Add call to cleanDevs
 ## 05-04-2017 @ 14.21.59 - (1.21.221)  - dscudiero - add cleanDevs call to build7
 ## 05-05-2017 @ 07.04.45 - (1.21.222)  - dscudiero - Fix call to cleanDev
+## 05-09-2017 @ 08.01.30 - (1.21.223)  - dscudiero - fix call to cleanDev in build7 section
