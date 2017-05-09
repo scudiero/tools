@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.17" // -- dscudiero -- Tue 05/09/2017 @  9:43:00.51
+wfLibVersion="1.7.18" // -- dscudiero -- Tue 05/09/2017 @ 10:59:53.32
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -671,17 +671,23 @@ wffuncs.wfAttr = function(inval, wfrule, args) {
 	var options=wfrule.options.substring(0,wfrule.options.indexOf(";"));
 	wfDump(3,["reqType;"+reqType,"options;"+options]);
 
-	var retArray=[];
-	var tmpArray=GetAttrVal(reqType, options);
-	wfDebug(3,"\t*** Returning:")
-	tmpArray.forEach(function(retVal) {
-		retArray.push(inval.replace(wfrule.regex,retVal));
-		wfDebug(3,"\t\t"+retArray[retArray.length-1]);
-	});
+	var tmpArray=[], retArray=[];
+	if (typeof tcfdata != "undefined")  {
+		tmpArray=GetAttrVal(reqType, options, tcadata);
+	} else {
+		tmpArray=GetAttrVal(reqType, options);
+	}
 
-	if (retArray.length > 0)
+	if (tmpArray.length > 0) {
+		wfDebug(3,"\t*** Returning:")
+		tmpArray.forEach(function(retVal) {
+			retArray.push(inval.replace(wfrule.regex,retVal));
+			wfDebug(3,"\t\t"+retArray[retArray.length-1]);
+		});
 		return retArray;
-		return false
+	} else {
+		return false;
+	}
 }; //wffuncs.wfAttr
 
 //=======================================================================================================================
@@ -690,19 +696,21 @@ wffuncs.wfAttr = function(inval, wfrule, args) {
 // 2) otherwise is there tcf data -- then use it
 // if an options string that contans 'TCA' is passed then also include tca data (only if proposal is not allcodes)
 // Usage:
-//		GetAttrVals(reqType, options)
+//		GetAttrVals(reqType, options, [tcadata])
 //	reqType is one in {'cols','depts','subjs'}
 // 	options is one or more in {'includeTCA'}
+// 	if options includes 'includeTCA' then you must also pass the tcadata object
 //=======================================================================================================================
-// 05/08/2017 - dgs - New
+// 05/08/2017 - dgs - 	New
+// 05/09/2017 - dgs -	Switched to use getTCFValue for tca data
 //=======================================================================================================================
-GetAttrVal = function(reqType, options) {
+GetAttrVal = function(reqType, options, tcaData) {
 	wfDebug(4,"\n\t*** In GetAttrVals ***"); wfDump(3,["\treqType;"+reqType,"\toptions;"+options]);
 
 	var reqType=reqType.toLowerCase();
-	var includeTCA=false;
-	var optionStr= options || "";
-	if (optionStr.toLowerCase().indexOf("includetca") >= 0)
+	var optionStr=options.toLowerCase() || "";
+
+	if (optionStr.indexOf("includetca") >= 0)
 		includeTCA=true;
 
 	var subjects=[], departments=[], colleges=[];
@@ -714,22 +722,22 @@ GetAttrVal = function(reqType, options) {
 	// If we did not find data above then see if there is any data in the tcf file
 		if (subjects.length === 0 ) {
 			subjects=getTCFValue("subject", { delimiter: "\n", retarray: true });
-			if (includeTCA) {
-				subjects=subjects.concat(getTCAValue("subjects", { delimiter: "\n", retarray: true }));
+			if (includeTCA && typeof(tcaData) != "undefined" && tcaData) {
+				subjects=subjects.concat(getTCFValue("subject", { data: tcaData, delimiter: "\n", retarray: true }));
 				subjects=RemoveDupes(subjects);
 			}
 		}
 		if (departments.length === 0 ) {
 			departments=getTCFValue("department", { delimiter: "\n", retarray: true });
-			if (includeTCA) {
-				departments=departments.concat(getTCAValue("departments", { delimiter: "\n", retarray: true }));
+			if (includeTCA && typeof(tcaData) != "undefined") {
+				departments=departments.concat(getTCFValue("department", { data: tcaData, delimiter: "\n", retarray: true }));
 				departments=RemoveDupes(departments);
 			}
 		}
 		if (colleges.length === 0 ) {
 			colleges=getTCFValue("college", { delimiter: "\n", retarray: true });
-			if (includeTCA) {
-				colleges=colleges.concat(getTCAValue("college", { delimiter: "\n", retarray: true }));
+			if (includeTCA && typeof(tcaData) != "undefined") {
+				colleges=colleges.concat(getTCFValue("college", { data: tcaData, delimiter: "\n", retarray: true }));
 				colleges=RemoveDupes(colleges);
 			}
 		}
@@ -1510,71 +1518,6 @@ wffuncs.wfDumpVars = function(varList) {
 	return false;
 }; //wffuncs.wfDumpVars
 
-
-//==================================================================================================
-// Get values from the TCA file, cloned from getTCFValue in util.atj
-// 05/08/2017 -- dgs -- New
-//==================================================================================================
-function getTCAValue(attr, args) {
-	var retval = "";
-	var prop = "";
-	if(typeof args == "undefined")
-		args = {};
-	var data = tcadata;
-	var delimiter = ",";
-	if(args.data)
-		data = args.data;
-	if(args.delimiter)
-		delimiter = args.delimiter;
-	if(args.multiline)
-		delimiter = "\n";
-	var escape = false;
-	if(args.escape)
-		escape = true;
-	var retarray = false;
-	if(args.retarray)
-		retarray = true;
-	if(!attr || !attr.length) {
-		if(retarray)
-			return [];
-		return "";
-	}
-	if(typeof data[attr] == "string") {
-		if(retarray)
-			return [data[attr]];
-		return data[attr];
-	}
-	if(attr.indexOf(".") > 0) {
-		prop = attr.replace(/.*\.([^\.]*)$/, "$1");
-		attr = attr.replace(/(.*)\.[^\.]*$/, "$1");
-	}
-	//if it is an object (has a definition), use the first property found
-	if(data[attr] && data[attr].length) {
-		if(!prop.length) {
-			var def = getattr_defs(attr).definition;
-			if(def.length) {
-				prop = def.split("|")[0];
-			}
-		}
-	} else {
-		if(retarray)
-			return [];
-		return "";
-	}
-	for (var i = 0; i < data[attr].length; i++) {
-		//Combine all rows into one with a comma in between values.
-		var curr = data[attr][i];
-		if(prop.length && curr[prop])
-			retval += (retval.length ? delimiter : "") + (escape ? escxml(curr[prop]) : curr[prop]);
-		else if(typeof curr == "string" || typeof curr == "number")
-			retval += (retval.length ? delimiter : "") + (escape ? escxml(curr) : curr);
-	}
-	if(args.retarray)
-		return retval.split(delimiter);
-	return retval;
-}
-
-
 //==================================================================================================
 // END
 //==================================================================================================
@@ -1591,4 +1534,4 @@ var wfLibLoaded=true;
 // 04-26-2017 @ 13.47.35 - (wfrule.att - dscudiero - Added CheckChanged helper function
 // 05-02-2017 @ 07.33.06 - (wfrule.att - dscudiero - add AttrIn function
 // 05-08-2017 @ 15.23.04 - (wfrule.att - dscudiero - Added wfAttr and getTCAValue functions
-// 05-09-2017 @ 09.47.47 - (wfrule.att - dscudiero - Refactored Related to use the GetAttrVal function to retrieve proposal values
+// 05-09-2017 @ 11.01.37 - (wfrule.att - dscudiero - Swithch to use getTCFValue to retrieve the tca data in getAttrVal
