@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.14" // -- dscudiero -- Mon 05/01/2017 @ 15:00:21.56
+wfLibVersion="1.7.17" // -- dscudiero -- Tue 05/09/2017 @  9:43:00.51
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -11,6 +11,8 @@ wfLibVersion="1.7.14" // -- dscudiero -- Mon 05/01/2017 @ 15:00:21.56
 // 05/01/17 - dgs 	- Added AttrIn function to accomidate allcodes sites
 // 05/08/17 - dgs 	- Added wfAttr function to handle attribute expansion in the world of allcodes
 //					- Added getTCAValue function like getTCFValue function
+// 05/09/17 - dgs 	- Refactored/renamed wfAttr so it could be called from anither function
+//					- Refactored Related to use GetAttrVal to retrieve the values for the proposal data (subject, department, college)
 //======================================================================================================================
 
 // Loading message
@@ -222,21 +224,24 @@ wffuncs.Related = function(inval, wfrule, args) {
 					if (proposalCode === "")
 						throw "Failed, code tcf variable '" + codeVarName + "' not null check"
 
-					proposalSubj=getTCFValue(subjectVarName)
+					//proposalSubj=getTCFValue(subjectVarName)
+					proposalSubj=GetAttrVal(subjectVarName);
 					if (proposalSubj === "" && substitutionType === 'subj')
 						throw "Failed, subject tcf variable '" + subjectVarName + "' not null check"
 				}
-				proposalCol=getTCFValue(collegeVarName)
+				//proposalCol=getTCFValue(collegeVarName)
+				proposalCol=GetAttrVal(collegeVarName)
 				if (proposalCol === "" && substitutionType === 'college')
 					throw "Failed, college tcf variable: '" + collegeVarName + "' not null check"
 
-				proposalDept=getTCFValue(departmentVarName)
+				//proposalDept=getTCFValue(departmentVarName)
+				proposalDept=GetAttrVal(departmentVarName)
 				if (proposalDept === "" && (substitutionType === 'dept' || substitutionType === 'college'))
 					throw "Failed, department tcf variable '" + departmentVarName + "' not null check"
 
 		} //try
 		//Catch block for errors thrown in above try block
-		catch(err) { wfDebug("\t*Error* -- " + myName + ": " + err + "\n"); return false; }
+		catch(err) { wfDebug(1,"\t*Error* -- " + myName + ": " + err + "\n"); return false; }
 		wfDump(3,["\n\tproposalCode;"+proposalCode,"proposalSubj;"+proposalSubj,"proposalDept;"+proposalDept,,"proposalCol;"+proposalCol])
 
 		if (proposalCode === undefined || proposalDept === undefined) {
@@ -544,7 +549,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 		}
 		return retArray
 
-}; //Related
+}; //wffuncs.Related
 
 //======================================================================================================================
 // Resolve a code from the cimlookup table
@@ -652,10 +657,7 @@ function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colCol
 } //LookupCollegeCode
 
 //=======================================================================================================================
-// Retrive atribute code values takine into account all codes and tcf/tca values
-// 1) does 'allxxxx' return data -- use it
-// 2) otherwise is there tcf data -- then use it
-// if an options string that contans 'TCA' is passed then also include tca data (only if proposal is not allcodes)
+//Adaptor for call to wfAttr from workflow
 // Usage:
 //		wfrules:Cols|function|wfAttr|includeTCA; //Substitutes current, previous, and crosslisted value(s) of 'College' from allcodes data
 //		wfrules:Depts|function|wfAttr|; //Substitutes current, previous, and crosslisted value(s) of 'Department' from allcodes data
@@ -664,22 +666,52 @@ function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colCol
 // 05/08/2017 - dgs - New
 //=======================================================================================================================
 wffuncs.wfAttr = function(inval, wfrule, args) {
-	wfDebug(3,"\n*** In wfDepts ***, called as: '" + inval + "'");
+	wfDebug(3,"\n*** In wffuncs.wfAttr ***, called as: '" + inval + "'");
 	var reqType=wfrule.searchfor.toLowerCase();
 	var options=wfrule.options.substring(0,wfrule.options.indexOf(";"));
+	wfDump(3,["reqType;"+reqType,"options;"+options]);
+
+	var retArray=[];
+	var tmpArray=GetAttrVal(reqType, options);
+	wfDebug(3,"\t*** Returning:")
+	tmpArray.forEach(function(retVal) {
+		retArray.push(inval.replace(wfrule.regex,retVal));
+		wfDebug(3,"\t\t"+retArray[retArray.length-1]);
+	});
+
+	if (retArray.length > 0)
+		return retArray;
+		return false
+}; //wffuncs.wfAttr
+
+//=======================================================================================================================
+// Retrive atribute code values takine into account all codes and tcf/tca values
+// 1) does 'allxxxx' return data -- use it
+// 2) otherwise is there tcf data -- then use it
+// if an options string that contans 'TCA' is passed then also include tca data (only if proposal is not allcodes)
+// Usage:
+//		GetAttrVals(reqType, options)
+//	reqType is one in {'cols','depts','subjs'}
+// 	options is one or more in {'includeTCA'}
+//=======================================================================================================================
+// 05/08/2017 - dgs - New
+//=======================================================================================================================
+GetAttrVal = function(reqType, options) {
+	wfDebug(4,"\n\t*** In GetAttrVals ***"); wfDump(3,["\treqType;"+reqType,"\toptions;"+options]);
+
+	var reqType=reqType.toLowerCase();
 	var includeTCA=false;
-	if (options.indexOf("TCA") >= 0)
+	var optionStr= options || "";
+	if (optionStr.toLowerCase().indexOf("includetca") >= 0)
 		includeTCA=true;
 
 	var subjects=[], departments=[], colleges=[];
-	// Get standard values, if all codes use the functions, otherwise pull data from the tcf file
-		if (tcfdata.allcodes && tcfdata.allcodes.length >0) {
-			var subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
-			var departments=wffuncs.getDepartments(subjects);
-			var colleges=wffuncs.getColleges(departments);
-		}
+	// Get standard values, First get the data assuming allcodes
+		var subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
+		var departments=wffuncs.getDepartments(subjects);
+		var colleges=wffuncs.getColleges(departments);
 
-	// If we did not find data above then try data from the tcf file
+	// If we did not find data above then see if there is any data in the tcf file
 		if (subjects.length === 0 ) {
 			subjects=getTCFValue("subject", { delimiter: "\n", retarray: true });
 			if (includeTCA) {
@@ -702,29 +734,23 @@ wffuncs.wfAttr = function(inval, wfrule, args) {
 			}
 		}
 
-	wfDump(3,["reqType;"+reqType,"options;"+options,"colleges;"+colleges.toSource(),"departments;"+departments.toSource(),"subjects;"+subjects.toSource(),]);
+	wfDump(4,["\tcolleges;"+colleges.toSource(),"\tdepartments;"+departments.toSource(),"\tsubjects;"+subjects.toSource(),]);
 
 	// return data based on how we were called
-	var tmpArray=[]; retArray=[];
-	if (reqType === "cols") {
-		tmpArray=colleges;
-	} else if (reqType === "depts") {
-		tmpArray=departments;
-	} else if (reqType === "subjs") {
-		tmpArray=subjects;
+	var retArray=[];
+	if (reqType.indexOf("col") >= 0) {
+		retArray=colleges;
+	} else if (reqType.indexOf("dep") >= 0) {
+		retArray=departments;
+	} else if (reqType.indexOf("subj") >= 0) {
+		retArray=subjects;
 	}
 
-	wfDebug(3,"\t*** Returning:")
-	tmpArray.forEach(function(retVal) {
-		retArray.push(inval.replace(wfrule.regex,retVal));
-		wfDebug(3,"\t\t"+retArray[retArray.length-1]);
-	});
-
+	wfDump(4,["\t*** retArray;"+retArray.toSource()]);
 	if (retArray.length > 0)
 		return retArray;
 		return false
-}; //wfAttr
-
+}; //GetAttrVal
 
 //======================================================================================================================
 // Check to see if a proposal attribute is in a specified list of values
@@ -742,7 +768,6 @@ wffuncs.wfAttr = function(inval, wfrule, args) {
 wffuncs.AttrIn = function(inval, wfrule, args) {
 	var version='1.0.0'; var myName=wfrule.attrname;
 	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
-	wfDump(["wfrule;"+wfrule.toSource()])
 
 	// Standard initilization
 		var retArray=[];
@@ -782,7 +807,7 @@ wffuncs.AttrIn = function(inval, wfrule, args) {
 		if (checkList === ",,") throw("No checkList specified in options or stepname");
 		InitialChecks(["wfrule"],args)
 	} //try
-	catch(err) { print_debug('\t' + myName + ": " + err + "\n") ; return false; }
+	catch(err) { wfDebug(1,"\t*Error* -- " + myName + ": " + err + "\n"); return false; }
 
 	// Main
  		var allowStep=false;
@@ -799,10 +824,9 @@ wffuncs.AttrIn = function(inval, wfrule, args) {
 			wfDebug(0,"\t*** Allowing step")
 			return [inval.replace(wfrule.ifregex,'')];
 		}
-		wfDebug(0,"\t*** Skipping step")
 		return false
 
-} //AttrIn
+} //wffuncs.AttrIn
 
 //=================================================================================================
 // Return additional steps for all 'equiv' courses in courseref table
@@ -867,9 +891,9 @@ wffuncs.AddSameAs = function(inval, wfrule, args) {
 
 	} //Try block
 	//Catch block for errors thrown in above try block
-	catch(err) { print_debug(wfrule.attrname + ": " + err) ; return false; }
+	catch(err) { wfDebug(1,"\t*Error* -- " + myName + ": " + wfrule.attrname + ": " + err + "\n"); return false; }
 	return false;  // Should never get here
-} //AddSameAs
+} //wffuncs.AddSameAs
 
 //Set include SIS step on (true) or off (false) -- only applys to DEV env.
 //addSisEnvs:test,next
@@ -914,7 +938,7 @@ wffuncs.AddSisStep = function(inval, wfrule, args) {
 	wfDebug(3,'\tAdding SIS Sync step: ' + tcfdata.sisname.toString().trim());
 	return tcfdata.sisname.toString().trim();
 
-}; //AddSisStep
+}; //wffuncs.AddSisStep
 
 //==================================================================================================
 // Check the proposal mode
@@ -934,7 +958,7 @@ wffuncs.CheckProposalMode = function(inval, wfrule, args) {
 
 	return false;
 
-}; //CheckProposalMode
+}; //wffuncs.CheckProposalMode
 
 //==================================================================================================
 //==================================================================================================
@@ -1008,7 +1032,7 @@ function GetEcoSystemData(parentCode,proposalDept,ecoSystemTypeStr) {
 		refsArray.forEach(function(ref) { wfDump(['\tref;'+ref.toSource()]); });
 
 	return refsArray;
-}
+} //GetEcoSystemData
 
 //=================================================================================================
 // Check to see if the list of variables passed in have changed or not.  The options string passed
@@ -1121,7 +1145,7 @@ function CheckChanged(checkFields,mode) {
 		if (arguments.length < 1)
 	 		throw "\t*** Insufficinent arguments passed in";
 	 } //try block
-	catch(err) { wfDebug(err); return false; }
+	catch(err) { print_debug('\t' + myName + ": " + err + "\n") ; return false; }
 
 	// Main
 	if (arguments.length === 1)
@@ -1242,139 +1266,6 @@ GetProposalMode = function() {
 
 }; //GetProposalMode
 
-// //==================================================================================================
-// // Helper function to check changed fields against a list of fields to see if:
-// // Usage:
-// //	CheckChanged(<changedFields>,<checkFields>][,<mode>,<quiet>])
-// //
-// //	mode 	- In the set of {"only","any"}
-// // 			mode=only 	- true if ALL of the changed fields are in the list
-// // 			mode=any 	- true if ANY of the change fields are in the list
-// //
-// // changedField is an array of the changed fields
-// // checkFields is an array of the fields to check
-// //===================================================================================================
-// // 02/16/15	- dgs - New
-// // 10/12/15 - dgs - simplified logic
-// // 04/19/16 - dgs - Fix logic for 'ONLY'
-// // 11/16/16 - dgs - Do not throw error if diff data is null, return false
-// // 12/08/16 - dgs - Complete re-write
-// //===================================================================================================
-// function CheckChanged(changedFields,checkFields,mode,quiet) {
-// 	var myName='CheckChanged'; wfDebug(3,"\n\t*** In "+ myName + " ***");
-
-// 	//Try block encapsulated main function
-// 	try {
-// 		// Initial Checks
-// 			if (arguments.length < 2)
-// 		 		throw "\t*** Insufficinent arguments passed in";
-
-// 			if (changedFields.length === 0)
-// 				throw "*Error* -- 'changedFields' is zero length"
-
-// 		// Main
-// 			var retVal = false;
-// 			mode=mode.toLowerCase();
-// 			wfDump(3,["\tmode;"+mode,"\tcheckFields;"+checkFields.toSource(),"\tchangedFields;"+changedFields.toSource()]);
-
-// 			// Loop thorough the changedFields setting a hash table
-// 				var changedHash={};
-// 				changedFields.forEach(function(field) { changedHash[field]=true; });
-// 				wfDump(3,["\tchangedHash;"+ changedHash.toSource()])
-
-// 			// Loop thorough the cycleattrs setting a hash table entry for any field that has a non null value
-// 				var cycleattrsHash={}, attrVal;
-// 				tcfdata.cycleattrs.forEach(function(attr) {
-// 					attrVal=eval('tcfdata.' + attr); //wfDump(0,["attr;"+attr,"attrVal;"+attrVal])
-// 					if (attrVal == "") cycleattrsHash[attr]=true;
-// 				});
-// 				wfDump(3,["\tcycleattrsHash;"+ cycleattrsHash.toSource()]);
-// 			// ANY
-// 				if (mode == "any") {
-// 					// Loop thorough the checkField list
-// 					checkFields.forEach(function(field) {
-// 						if (changedHash[field])
-// 							retVal=true;
-// 					});
-// 				}
-// 			// ONLY
-// 				if (mode == "only") {
-// 					// Loop through the changed fields to make sure they are all on the checkFields list
-// 					var retVal=true;
-// 					changedFields.forEach(function(chgField) {
-// 						wfDump(4,["\tchgField;"+chgField])
-// 						if (!cycleattrsHash[chgField]) {
-// 							var found=false;
-// 							checkFields.forEach(function(chkField) {
-// 								wfDump(4,["\t\tchkField;"+chkField])
-// 								if (chkField === chgField) found=true;
-// 							});
-// 							wfDump(4,["\t\t\tfound;"+found])
-// 							retVal=retVal&&found;
-// 						} else {
-// 							wfDebug(4,"\t\t\tField is on cycleattrs list and is null, skipping checks")
-// 						}
-// 					});
-// 				} // Only
-// 			// Return
-// 				wfDump(3,["\tretVal;"+retVal]);
-// 				return retVal;
-
-// 	 } //try block
-// 	catch(err) { wfDebug(err); return false; }	// Should never get here
-
-// } //CheckChanged
-
-// //=================================================================================================
-// // Check if a variable values have changed or not (based on called step name)
-// // changed or not changed determined by the step name, if step name includes 'not' then 'not changed'
-// // variable name is passed in in the options specified on the wfrule definition
-// // Needed since the 'haschanges' rule for iffieldmatch does not fire if data is missing on one side
-// //=================================================================================================
-// // 11-10-16 - dgs - Initial coding -- MIT
-// //=================================================================================================
-// wffuncs.CheckVarValChanged = function(inval, wfrule, args) {
-// 	var myName=wfrule.attrname; var haveDebug=false; if (typeof(Dump) == "function" && typeof(Debug) == "function") haveDebug=true;
-// 	if (haveDebug) Debug('\n*** In '+ myName + " called as '" + wfrule.searchfor + ", Step: '" + inval +"' ***");
-// 	//if (haveDebug) { Dump('\tinval',inval); Dump('\twfrule',wfrule.toSource()); Dump('\targs',args.toSource()); }
-
-// 	//Try block encapsulated main function
-// 	 try {
-// 		// Initial Checks
-// 			InitialChecks(["wfrule"],args)
-// 	} //Try block
-// 	//Catch block for errors thrown in above try block
-// 	catch(err) { print_debug('\t' + myName + ": " + err + "\n") ; return false; }
-
-// 	var calledAs=wfrule.searchfor;
-// 	var reqType=calledAs.toLowerCase();
-// 	// Parse the variable name from the options field on the wfrule definition
-// 	var tmpArray=wfrule.options.split(";");
-// 	var varName=tmpArray[0];
-
-// 	// Main
-// 		//Get a list of fields that have changed
-// 		var diffdata = {};
-// 		tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata});
-
-// 		var changed = CheckChanged(diffdata,[varName],"any",true);
-
-// 		if (reqType.indexOf('not') >=0 ) {
-// 			if (! changed) {
-// 				wfDebug("\t *** Conditions met for: " + varName + ", including step")
-// 				return [inval.replace(wfrule.ifregex,'')];
-// 			}
-// 		} else {
-// 			if (changed) {
-// 				wfDebug("\t *** Conditions met for: " + varName + ", including step")
-// 				return [inval.replace(wfrule.ifregex,'')];
-// 			}
-// 		}
-
-// 		wfDebug("\t *** Conditions not met for: " + varName + ", skipping step")
-// 		return false
-// } //CheckScienceCoreChanged
-
 //======================================================================================================================
 // Allow step only if one of the listed variables has a value
 // first token of the wfrule.options string is either 'and' or 'or'
@@ -1427,7 +1318,7 @@ wffuncs.HasValue = function(inval, wfrule, args) {
 		}
 		wfDebug(3,"\t*** Skipping step")
 		return false
-} //HasValue
+} //wffuncs.HasValue
 
 //==================================================================================================
 // Check execution environment, passed one argument 'env' that can hav values 'dev' or 'test'
@@ -1700,3 +1591,4 @@ var wfLibLoaded=true;
 // 04-26-2017 @ 13.47.35 - (wfrule.att - dscudiero - Added CheckChanged helper function
 // 05-02-2017 @ 07.33.06 - (wfrule.att - dscudiero - add AttrIn function
 // 05-08-2017 @ 15.23.04 - (wfrule.att - dscudiero - Added wfAttr and getTCAValue functions
+// 05-09-2017 @ 09.47.47 - (wfrule.att - dscudiero - Refactored Related to use the GetAttrVal function to retrieve proposal values
