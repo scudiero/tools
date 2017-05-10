@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.115" # -- dscudiero -- Fri 05/05/2017 @  8:45:12.08
+version="1.2.124" # -- dscudiero -- Wed 05/10/2017 @  9:19:24.38
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -24,6 +24,8 @@ myName='dispatcher'
 	[[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB"
 	export TOOLSWAREHOUSEDB="$warehouseDb"
 	[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
+
+echo "\$0 = $0"
 
 #==================================================================================================
 # Global Functions
@@ -58,6 +60,7 @@ function CleanUp {
 	set +eE
 	trap - ERR EXIT
 
+Here DC1
 	## Cleanup log file
 		if [[ $logFile != /dev/null && -r $logFile ]]; then
 			mv $logFile $logFile.bak
@@ -79,10 +82,13 @@ function CleanUp {
 		[[ -n $saveClasspath ]] && export CLASSPATH="$saveClasspath"
 
 	GD echo -e "\n=== Dispatcher.Cleanup Completed' =================================================================="
-	exec 3>&-
+	exec 3>&-  ## Close file descriptor #3 -
+Here DC2
 	exit $rc
 } #CleanUp
 
+
+echo "HERE D0"
 #==================================================================================================
 # Initialize local variables
 #==================================================================================================
@@ -222,6 +228,7 @@ sTime=$(date "+%s")
 	sTime=$(date "+%s")
 
 ## Source the init script
+	TrapSigs 'on'
 	source $initFile
 	prtStatus ", run initFile"
 	sTime=$(date "+%s")
@@ -308,15 +315,17 @@ sTime=$(date "+%s")
 
 
 	## Call program function
-		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		$GD -e "\nCall $executeFile $scriptArgs\n"
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
 		#(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile; rc=$?
 		prtStatus ", calling script..."
 		[[ $batchMode != true && $myQuiet != true ]] && echo
+Here D1
+		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		source $executeFile $scriptArgs 2>&1 | tee -a $logFile; rc=$?
 		rc="$?"
+Here D2
 
 ## Should never get here but just in case
 	CleanUp $rc
@@ -401,3 +410,4 @@ sTime=$(date "+%s")
 ## 05-04-2017 @ 11.20.48 - ("1.2.112") - dscudiero - Add useDev flag
 ## 05-05-2017 @ 08.41.58 - ("1.2.114") - dscudiero - Add additional verbose status statements
 ## 05-05-2017 @ 08.45.26 - ("1.2.115") - dscudiero - tweak messaging
+## 05-10-2017 @ 09.42.55 - ("1.2.124") - dscudiero - General syncing of dev to prod
