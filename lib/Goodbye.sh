@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.130" # -- dscudiero -- Wed 05/10/2017 @ 12:41:27.77
+# version="2.0.131" # -- dscudiero -- Wed 05/10/2017 @ 12:52:53.21
 #===================================================================================================
 # Common script exit
 # args:
@@ -38,7 +38,7 @@ function Goodbye {
 			;;
 		quickquit|x)
 			[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Remove' $myLogRecordIdx
-			Msg2 "\n*** $myName: Stopping at user's request ***\n"
+			Msg2 "\n*** $myName: Stopping at user's request ***"
 			[[ $$ -ne $BASHPID ]] && kill -1 $BASHPID  ## If the BASHPID != the current processid then we are in a subshell, send a HangUP signel to the subshell
 			;;
 		return|r)
@@ -149,3 +149,4 @@ export -f Goodbye
 ## 05-10-2017 @ 09.42.02 - ("2.0.123") - dscudiero - Update exit code
 ## 05-10-2017 @ 09.55.58 - ("2.0.124") - dscudiero - Remove debug statement
 ## 05-10-2017 @ 12.49.12 - ("2.0.130") - dscudiero - Kill subshells before exiting
+## 05-10-2017 @ 12.53.07 - ("2.0.131") - dscudiero - General syncing of dev to prod
