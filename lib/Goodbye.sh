@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.124" # -- dscudiero -- Wed 05/10/2017 @  9:55:37.49
+# version="2.0.130" # -- dscudiero -- Wed 05/10/2017 @ 12:41:27.77
 #===================================================================================================
 # Common script exit
 # args:
@@ -34,14 +34,12 @@ function Goodbye {
 	case "$(Lower "$exitCode")" in
 		quiet)
 			[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Remove' $myLogRecordIdx
-			kill -1 $$
-			exitCode=0
+			[[ $$ -ne $BASHPID ]] && kill -1 $BASHPID  ## If the BASHPID != the current processid then we are in a subshell, send a HangUP signel to the subshell
 			;;
 		quickquit|x)
 			[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Remove' $myLogRecordIdx
 			Msg2 "\n*** $myName: Stopping at user's request ***\n"
-			kill -1 $$
-			exitCode=0
+			[[ $$ -ne $BASHPID ]] && kill -1 $BASHPID  ## If the BASHPID != the current processid then we are in a subshell, send a HangUP signel to the subshell
 			;;
 		return|r)
 			secondaryMessagesOnly=true
@@ -121,8 +119,9 @@ function Goodbye {
 	## Write end record to db log
 	[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Update' $myLogRecordIdx 'exitCode' "$exitCode"
 	[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'End' $myLogRecordIdx
+
 	[[ $(IsNumeric $exitCode) != true ]] && exitCode=0
-	if [[ $calledViaScripts == true || $secondaryMessagesOnly == true ]]; then
+	if [[ $secondaryMessagesOnly == true ]]; then
 		secondaryMessagesOnly=false
 		return 0
 	else
@@ -149,3 +148,4 @@ export -f Goodbye
 ## 05-08-2017 @ 09.12.48 - ("2.0.103") - dscudiero - Add script name to stopping message
 ## 05-10-2017 @ 09.42.02 - ("2.0.123") - dscudiero - Update exit code
 ## 05-10-2017 @ 09.55.58 - ("2.0.124") - dscudiero - Remove debug statement
+## 05-10-2017 @ 12.49.12 - ("2.0.130") - dscudiero - Kill subshells before exiting
