@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.0.125 # -- dscudiero -- Thu 04/27/2017 @ 11:09:55.64
+version=5.1.22 # -- dscudiero -- Mon 05/08/2017 @ 15:04:17.36
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -28,12 +28,14 @@ scriptDescription="Refresh a courseleaf product"
 		argList+=(-noAdvance,4,switch,catalogAdvance=false,"catalogAdvance=false",script,"Do not advance the catalog")
 		argList+=(-fullAdvance,5,switch,fullAdance,,script,"Do a full catalog advance")
 		argList+=(-newest,3,switch,newest,,script,"Update each product to the newest named version of each product")
+		argList+=(-latest,3,switch,newest,,script,"Update each product to the newest named version of each product")
 		argList+=(-master,3,switch,master,,script,"Update each product to the master version of each product")
 		argList+=(-edition,2,option,edition,,script,'The new edition value')
 		argList+=(-catalogAudit,2,switch,catalogAudit,,script,"Run the catalog audit report as part of the process")
 		argList+=(-noAudit,4,switch,catalogAudit=false,"catalogAudit=false",script,"Do not run the catalog audit report as part of the process")
 		argList+=(-listOnly,1,switch,listOnly,,script,"Do not do copy, only list out files that would be copied")
 		argList+=(-noBackup,3,switch,backup,backup=false,script,"Do not create a backup of the target site before any actions")
+		argList+=(-buildPatchPackage,5,switch,buildPatchPackage,,script,"Build the remote patching package for remote sites")
 		#argList+=(-offline,3,switch,offline,,script,"Take the target site offline during processing")
 	}
 	function Goodbye-courseleafPatch  {
@@ -55,6 +57,7 @@ scriptDescription="Refresh a courseleaf product"
 		client='none'
 		env='next'
 		siteDir="$HOME/testData/next"
+		nextDir="$HOME/testData/next"
 		[[ -z $products ]] && products='all'
 		noCheck=true
 	}
@@ -62,9 +65,9 @@ scriptDescription="Refresh a courseleaf product"
 #=======================================================================================================================
 # local functions
 #=======================================================================================================================
-	#==============================================================================================
+	#===================================================================================================================
 	# Get the version of a product
-	#==============================================================================================
+	#===================================================================================================================
 	function GetVersion {
 		local product=$1
 		local siteDir=$2
@@ -95,33 +98,34 @@ scriptDescription="Refresh a courseleaf product"
 		return 0
 	} #GetVersion
 
-	#==============================================================================================
+	#===================================================================================================================
 	#=Run rsync
 	## Returns 	'true' <rsync output file>	if files where updated
 	##			'false' 					if files where not updated
 	##			'error' <rsync output file>	if rsync has an error
 	## via variable rsyncResults
-	#==============================================================================================
+	#===================================================================================================================
 	function RunRsync {
-		local product="$1"; shift
-		local rsyncSrc="$1"; shift
-		local rsyncTgt="$1"; shift
+		local product="$1"; shift || true
+		local rsyncSrc="$1"; shift || true
+		local rsyncTgt="$1"; shift || true
+		local rsyncIgnore="$1"; shift || true; [[ $rsyncIgnore == 'none' ]] && unset rsyncIgnore
 		local rsyncBackup="${1:-/dev/null}"
-		local token rsyncOpts rsyncSrc rsyncTgt rsyncBackup rsyncOut rsyncFilters rsyncVerbose rsyncListonly rc
-		dump -2 product rsyncSrc rsyncTgt rsyncOpts
-		local rsyncErr="$tmpRoot/$myName.$product.rsyncErr.out"
+		local token rsyncOpts rsyncSrc rsyncTgt rsyncOut rsyncFilters rsyncVerbose rsyncListonly rc
+		dump -2 product rsyncSrc rsyncTgt rsyncBackup
+		local rsyncErr="$tmpRoot/$myName.$product.rsyncErr"
 		[[ -r $rsyncErr ]] && rm "$rsyncErr"
 
 		## Set rsync options
 			[[ ! -d $rsyncBackup && $rsyncBackup != '/dev/null' ]] && $DOIT mkdir -p $rsyncBackup
 			[[ $quiet == true ]] && rsyncVerbose='' || rsyncVerbose='v'
 			[[ $listOnly == true ]] && rsyncListonly="--dry-run" || unset rsyncListonly
-			rsyncFilters=$tmpRoot/$myName.$product.rsyncFilters.txt
-			rsyncOut=$tmpRoot/$myName.$product.rsync.out
+			rsyncFilters=$tmpRoot/$myName.$product.rsyncFilters
+			rsyncOut=$tmpRoot/$myName.$product.rsyncOut
 			rsyncOpts="-rptb$rsyncVerbose --backup-dir $rsyncBackup --prune-empty-dirs $rsyncListonly --include-from $rsyncFilters"
 			echo > $rsyncFilters
 			SetFileExpansion 'off'
-			for token in $(tr '|' ' ' <<< "$specIgnoreList"); do echo "- $token" > $rsyncFilters; done
+			for token in $(tr '|' ' ' <<< "$rsyncIgnore"); do echo "- $token" > $rsyncFilters; done
 			echo '+ *.*' >> $rsyncFilters
 			SetFileExpansion
 
@@ -137,7 +141,7 @@ scriptDescription="Refresh a courseleaf product"
 				fi
 			    if [[ $rc -eq 0 ]]; then
 			       [[ $(wc -l < $rsyncOut) -gt 4 ]] && rsyncResults="true" || rsyncResults="false"
-					rm -f "$rsyncOut"
+					rm -f "$rsyncOut" "$rsyncErr" "$rsyncFilters"
 		    	else
 					Msg2 "^Errors reported from the rsync operation:"
 					Msg2 "^^Source: '$rsyncSrc'"
@@ -145,7 +149,7 @@ scriptDescription="Refresh a courseleaf product"
 					Msg2 "^^Rsync Options: '$rsyncOpts'\n"
 					indentLevel=2
 					cat "$rsyncErr" | Indent
-					rm -f "$rsyncOut"
+					rm -f "$rsyncOut" "$rsyncErr" "$rsyncFilters"
 					Terminate "Stopping processing"
 			    fi
 			fi ##[[ -z $DOIT ]]
@@ -153,13 +157,288 @@ scriptDescription="Refresh a courseleaf product"
 		return 0
 	} #RunRsync
 
+	#===================================================================================================================
+	# Build the remote packaging script
+	#===================================================================================================================
+	function BuildScriptFile {
+		local scriptFile="$1"
+		[[ -z $scriptFile ]] && Terminate "$FUNCNAME called without a scriptFile name"
+		echo "#!/bin/bash" > $scriptFile
+		echo "echo \"# Script file genrated by $userName via $myName($version) at $backupSuffix\"" >> $scriptFile
+		echo "version=\"$version\"" >> $scriptFile
+		echo "" >> $scriptFile
+		echo "clear" >> $scriptFile
+		echo "echo -e \"\n\"" >> $scriptFile
+		echo "cwd=\"\$(pwd)\"" >> $scriptFile
+		echo "" >> $scriptFile
+		echo "" >> $scriptFile
+		echo "##=======================================================================================================" >> $scriptFile
+		echo "function RunRsync {" >> $scriptFile
+		echo "	local rsyncSrc=\"\$1\"; shift" >> $scriptFile
+		echo "	local rsyncTgt=\"\$1\"; shift" >> $scriptFile
+		echo "	local rsyncIgnore=\"\$1\"; shift" >> $scriptFile
+		echo "	local rsyncBackup=\"\${1:-/dev/null}\"" >> $scriptFile
+		echo "	local token rsyncOpts rsyncOut rsyncFilters rsyncVerbose rsyncListonly rc" >> $scriptFile
+		echo "	local tmpRoot=\"/tmp/$myName\"" >> $scriptFile
+		echo "	local rsyncErr=\"\$tmpRoot.rsyncErr\"" >> $scriptFile
+		echo "	[[ -r \"\$rsyncErr\" ]] && rm \"\$rsyncErr\"" >> $scriptFile
+		echo "	## Set rsync options" >> $scriptFile
+		echo "		[[ ! -d \$rsyncBackup && \$rsyncBackup != '/dev/null' ]] && $DOIT mkdir -p \$rsyncBackup" >> $scriptFile
+		echo "		rsyncFilters=\$tmpRoot.rsyncFilters" >> $scriptFile
+		echo "		rsyncOut=\$tmpRoot.rsyncOut" >> $scriptFile
+		echo "		rsyncOpts=\"-rptqb --backup-dir \$rsyncBackup --prune-empty-dirs --include-from \"\$rsyncFilters\"\"" >> $scriptFile
+		echo "	echo > \"\$rsyncFilters\"" >> $scriptFile
+		echo "	set -f ## Set file expansion off" >> $scriptFile
+		echo "	for token in \$(tr '|' ' ' <<< \"\$rsyncIgnore\"); do" >> $scriptFile
+		echo "		echo \"- \$token\" >> \"\$rsyncFilters\"" >> $scriptFile
+		echo "	done" >> $scriptFile
+		echo "	echo '+ *.*' >> \"\$rsyncFilters\"" >> $scriptFile
+		#echo "cat \"\$rsyncFilters\"" >> $scriptFile
+
+		echo "	## Do copies" >> $scriptFile
+		echo "		rsync \$rsyncOpts \"\$rsyncSrc\" \"\$rsyncTgt\"" >> $scriptFile
+		echo "		if [[ \$? -ne 0 ]]; then" >> $scriptFile
+		echo "			echo -e \"\tErrors reported from the rsync operation:\"" >> $scriptFile
+		echo "			cat \"$rsyncOut\"" >> $scriptFile
+		echo "			[[ -f \"\$rsyncFilters\" ]] && rm -f \"\$rsyncFilters\"" >> $scriptFile
+		echo "			[[ -f \"\$rsyncErr\" ]] && rm -f \"\$rsyncErr\"" >> $scriptFile
+		echo "			[[ -f \"\$rsyncOut\" ]] && rm -f \"\$rsyncOut\"" >> $scriptFile
+		echo "			exit 3" >> $scriptFile
+		echo "		fi" >> $scriptFile
+		echo "	[[ -f \"\$rsyncFilters\" ]] && rm -f \"\$rsyncFilters\"" >> $scriptFile
+		echo "	[[ -f \"\$rsyncErr\" ]] && rm -f \"\$rsyncErr\"" >> $scriptFile
+		echo "	[[ -f \"\$rsyncOut\" ]] && rm -f \"\$rsyncOut\"" >> $scriptFile
+		echo "	return 0" >> $scriptFile
+		echo "} # RunRsync " >> $scriptFile
+		echo "" >> $scriptFile
+		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
+
+		echo "function Contains {" >> $scriptFile
+		echo "	local string=\"\$1\"" >> $scriptFile
+		echo "	local substring=\"\$2\"" >> $scriptFile
+		echo "	local testStr=\${string#*\$substring}" >> $scriptFile
+		echo "	[[ "\$testStr" != "\$string" ]] && echo true || echo false" >> $scriptFile
+		echo "	return 0" >> $scriptFile
+		echo "} #Contains" >> $scriptFile
+		echo "" >> $scriptFile
+		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
+
+		echo "function IsNumeric {" >> $scriptFile
+		echo "	local reNum='^[0-9]+\$'" >> $scriptFile
+		echo "	[[ \$1 =~ \$reNum ]] && echo true || echo false" >> $scriptFile
+		echo "	return 0" >> $scriptFile
+		echo "} #IsNumeric" >> $scriptFile
+		echo "" >> $scriptFile
+		echo "" >> $scriptFile
+		echo "##=======================================================================================================" >> $scriptFile
+		echo "## M A I N" >> $scriptFile
+		echo "##=======================================================================================================" >> $scriptFile
+		echo "unset clHome" >> $scriptFile
+		echo "if [[ -d /var/www/$client ]]; then" >> $scriptFile
+		echo "	clHome=\"/var/www/$client\"" >> $scriptFile
+		echo "elif [[ -d /var/www/CourseLeaf ]]; then" >> $scriptFile
+		echo "	clHome=\"/var/www/CourseLeaf\"" >> $scriptFile
+		echo "elif [[ -d /var/www/courseleaf ]]; then" >> $scriptFile
+		echo "	clHome=\"/var/www/courseleaf\"" >> $scriptFile
+		echo "fi" >> $scriptFile
+		echo "if [[ -n \$clHome && -d \"\$clHome\" ]]; then" >> $scriptFile
+		echo "	echo -en \"Found CourseLeaf installation at: '\$clHome', is that correct  ('yes' or 'no') > \"" >> $scriptFile
+		echo "	read ans" >> $scriptFile
+		echo "	[[ -z \$ans ]] && ans='y' " >> $scriptFile
+		echo "	[[ \$ans != 'y' ]] && unset clHome" >> $scriptFile
+		echo "	ans=\$(tr '[:upper:]' '[:lower:]' <<< \${ans:0:1})" >> $scriptFile
+		echo "else" >> $scriptFile
+		echo "	echo -e \"\\nPlease specify the full path to the CourseLeaf home directory (i.e. where 'next' and 'curr' are located)\"" >> $scriptFile
+		echo "	echo -en \"\\t > \"" >> $scriptFile
+		echo "	read clHome" >> $scriptFile
+		echo "fi" >> $scriptFile
+		echo "" >> $scriptFile
+		echo "[[ ! -d \"\$clHome/next\" ]] && echo -e \"\\n*Error* -- Could not find a 'next' directory, the specified location is not a CourseLeaf home directory, stopping\\n\" && exit 3" >> $scriptFile
+		echo "echo -e \"\\nPatch/Advance CourseLeaf Home NEXT instance: '\$clHome/next' \\n\\tPatch source data: '\$(pwd)' \" " >> $scriptFile
+		echo "tgtDir=\"\$clHome/next\"" >> $scriptFile
+		echo "dirSuffix=\"\$(date +"%m-%d-%Y@%H.%M.%S")\"" >> $scriptFile
+		echo "" >> $scriptFile
+
+		#===================================================================================================================
+		## Advance the CURR site
+		if [[ $addAdvanceCode == true ]]; then
+			echo "echo -en \"\\nDo you wish to advance the NEXT instance ('yes' or 'no') > \"" >> $scriptFile
+			echo "read ans" >> $scriptFile
+			echo "[[ -z \$ans ]] && ans='y' " >> $scriptFile
+			echo "ans=\$(tr '[:upper:]' '[:lower:]' <<< \${ans:0:1})" >> $scriptFile
+			echo "if  [[ \$ans == 'y' ]]; then" >> $scriptFile
+			echo "	advance=true" >> $scriptFile
+			echo "	sourceSpec=\"\$tgtDir/\"" >> $scriptFile
+			echo "	targetSpec=\"\$(dirname \$tgtDir)/next.\$dirSuffix\"" >> $scriptFile
+			echo "	## Get the current edition from the defults.tcf file" >> $scriptFile
+			echo "	unset grepStr" >> $scriptFile
+			echo "	currentEdition=\$(grep \"^edition:\" \$sourceSpec/web/courseleaf/localsteps/default.tcf | cut -d':' -f2)" >> $scriptFile
+			echo "	currentEdition=\$(tr -d '\040\011\012\015' <<< "\$currentEdition")" >> $scriptFile
+			echo "	## Set the new edition and prompt user" >> $scriptFile
+			echo "	unset newEdition" >> $scriptFile
+			echo "	if [[ \$currentEdition != '' && \$currentEdition != *'migration'* ]]; then" >> $scriptFile
+			echo "		if [[ \$(Contains "\$currentEdition" '-') == true ]]; then" >> $scriptFile
+			echo "			fromYear=\$(echo \$currentEdition | cut -d'-' -f1)" >> $scriptFile
+			echo "			toYear=\$(echo \$currentEdition | cut -d'-' -f2)" >> $scriptFile
+			echo "			[[ \$(IsNumeric \$fromYear) == true  && \$(IsNumeric \$toYear) == true ]] && (( fromYear++ )) && (( toYear++ )) && newEdition="\$fromYear-\$toYear"" >> $scriptFile
+			echo "		elif [[ \$(Contains "\$currentEdition" '_') == true ]]; then" >> $scriptFile
+			echo "			fromYear=\$(echo \$currentEdition | cut -d'_' -f1)" >> $scriptFile
+			echo "			toYear=\$(echo \$currentEdition | cut -d'_' -f2)" >> $scriptFile
+			echo "			[[ \$(IsNumeric \$fromYear) == true  && \$(IsNumeric \$toYear) == true ]] && (( fromYear++ )) && (( toYear++ )) && newEdition="\$fromYear-\$toYear"" >> $scriptFile
+			echo "		else" >> $scriptFile
+			echo "			[[ \$(IsNumeric $currentEdition) == true ]] && newEdition=\$currentEdition && (( newEdition++ ))" >> $scriptFile
+			echo "		fi" >> $scriptFile
+			echo "	fi" >> $scriptFile
+			echo "	if [[ -n \$currentEdition ]]; then" >> $scriptFile
+			echo "		echo -e \"\\tCurrent edition is '\$currentEdition', calculated new edition is: '\$newEdition'.\"" >> $scriptFile
+			echo "		echo -en \"\\tDo you wish to use the calculated new value ('yes' or 'no') > \"" >> $scriptFile
+			echo "		read ans" >> $scriptFile
+			echo "		[[ -z \$ans ]] && ans='y' " >> $scriptFile
+			echo "		ans=\$(tr '[:upper:]' '[:lower:]' <<< \${ans:0:1})" >> $scriptFile
+			echo "		[[ \$ans != 'y' ]] && unset newEdition" >> $scriptFile
+			echo "	fi" >> $scriptFile
+			echo "	if  [[ -z \$newEdition ]]; then" >> $scriptFile
+			echo "		unset newEdition" >> $scriptFile
+			echo "		until [[ -n \$newEdition ]]; do" >> $scriptFile
+			echo "			echo -en \"\\tPlease specify the new edition value > \"" >> $scriptFile
+			echo "			read newEdition" >> $scriptFile
+			echo "		done" >> $scriptFile
+			echo "	fi" >> $scriptFile
+			echo "fi ## advance" >> $scriptFile
+		fi ## catalogAdvance
+
+		echo "echo \"\"" >> $scriptFile
+		echo "unset ans" >> $scriptFile
+		echo "until [[ -n \$ans ]]; do" >> $scriptFile
+		echo "	echo -en \"Do you wish to continue with the patch/advance ('yes' or 'no') > \"" >> $scriptFile
+		echo "	read ans" >> $scriptFile
+		echo "	ans=\$(tr '[:upper:]' '[:lower:]' <<< \${ans:0:1})" >> $scriptFile
+		echo "	[[ \$ans != 'y' && \$ans != 'n' ]] && echo -e \"\\t*Error* -- Invalid response, please try again\" && unset ans" >> $scriptFile
+		echo "done" >> $scriptFile
+		echo "[[ \$ans != 'y' ]] && echo -e \"\\nStopping\\n\" && exit 1" >> $scriptFile
+		echo "clear" >> $scriptFile
+		echo "echo -e \"\n\"" >> $scriptFile
+
+		if [[ $addAdvanceCode == true ]]; then
+			echo -e "\\n##=======================================================================================================" >> $scriptFile
+			echo "if [[ \$advance == true ]]; then" >> $scriptFile
+			echo "	echo -e \"\\nAdvancing NEXT site to CURR site...\"" >> $scriptFile
+			echo "	if [[ ! -d \"\$targetSpec\" ]]; then" >> $scriptFile
+			echo "		echo -e \"\\n\\tMaking a copy of the current 'NEXT' sans CIMs/CLSS (this will take a while)...\"" >> $scriptFile
+			echo "		echo -e \"\\t\\t--> '\$targetSpec'\"" >> $scriptFile
+			echo "		ignoreList='/db/clwen*,/bin/clssimport-log-archive/,/web/$progDir/wen/,/web/wen/'" >> $scriptFile
+			[[ -n $cimStr ]] && ignoreList="$ignoreList|$(tr ',' '|' <<< "$cimStr")"
+			echo "		[[ ! -d \"\$targetSpec\" ]] && mkdir -p \"\$targetSpec\"" >> $scriptFile
+			echo "		RunRsync \"\$sourceSpec\" \"\$targetSpec\" \"\$ignoreList\"" >> $scriptFile
+			echo "		echo -e \"\\tRsync operation completed\\a\"" >> $scriptFile
+			echo "	else" >> $scriptFile
+			echo "		echo -e \"\\t*Error* -- Target location (\$targetSpec) already exists, cannot create clone, Stopping\\n\"" >> $scriptFile
+			echo "		exit 3" >> $scriptFile
+			echo "	fi" >> $scriptFile
+
+			echo "	# Edit the coursleaf/index.tcf to remove clss/wen stuff" >> $scriptFile
+			echo "	editFile="\$targetSpec/web/courseleaf/index.tcf"" >> $scriptFile
+			echo "	sed -i s'_^sectionlinks:WEN|_//sectionlinks:WEN|_'g "\$editFile"" >> $scriptFile
+			echo "	sed -i s'_^navlinks:WEN|_//navlinks:WEN|_'g "\$editFile"" >> $scriptFile
+			echo "	sed -e '/courseadmin/ s_^_//_' -i "\$editFile"" >> $scriptFile
+			echo "	[[ -d \"\$tgtDir/web/courseadmin\" ]] && mv -f \"\$tgtDir/web/courseadmin\" \"\$tgtDir/web/courseadmin.\$dirSuffix\"" >> $scriptFile
+
+			echo "	## Swap our copy of the next site with the curr site" >> $scriptFile
+			echo "	echo -e \"\\tSwapping our clone of the NEXT site with the CURR site\"" >> $scriptFile
+			echo "	[[ -d \"\$(dirname \$tgtDir)/curr\" ]] && mv -f \"\$(dirname \$tgtDir)/curr\" \"\$(dirname \$tgtDir)/curr.\$dirSuffix\"" >> $scriptFile
+			echo "	mv -f \"\$targetSpec\" \"\$(dirname \$tgtDir)/curr\"" >> $scriptFile
+			echo "	# Turn off pencils from the structured content draw" >> $scriptFile
+			echo "	editFile=\"\$tgtDir/web/\$courseleaf/localsteps/structuredcontentdraw.html\"" >> $scriptFile
+			echo "	[[ -f \"\$editFile\" ]] && sed -e '/pencil.png/ s|html|//html|' -i \"\$editFile\"" >> $scriptFile
+			echo "	echo -e \"\\n*** The new CURR site has been created, the old site was renamed to '$(dirname \$tgtDir)/curr.\$dirSuffix'\"" >> $scriptFile
+			echo "fi ## advance" >> $scriptFile
+			echo "" >> $scriptFile
+		fi ## catalogAdvance
+
+		#===================================================================================================================
+		## Patch the next site
+		echo -e "\\n##=======================================================================================================" >> $scriptFile
+		echo "echo -e \"\\nPatching the NEXT site...\\n\"" >> $scriptFile
+		echo "pushd \"\$tgtDir\" >& /dev/null" >> $scriptFile
+		echo "	ownerGroup=\"\$(stat -c \"%U\" ./courseleaf.cfg):\$(stat -c \"%G\" ./courseleaf.cfg)\"" >> $scriptFile
+		echo "	echo -e \"\\tSetting source files ownership to '\$ownerGroup' (again, this will take a while)...\"" >> $scriptFile
+		echo "	chown -R \$ownerGroup \$(pwd)" >> $scriptFile
+		echo "popd >& /dev/null" >> $scriptFile
+		echo "	sourceSpec=\"\$(pwd)/\"" >> $scriptFile
+		echo "	targetSpec=\"\$tgtDir/\"" >> $scriptFile
+		echo "	backupDir=\"\$targetSpec/attic/prePatch--\$(date +\"%m-%d-%y\")\"" >> $scriptFile
+		echo "	mkdir -p \"\$backupDir\"" >> $scriptFile
+		echo "	ignoreList='*.tar.gz'" >> $scriptFile
+		echo "	echo -e \"\\tSyncing files via rsync (again, this will take a while)...\"" >> $scriptFile
+		echo "	RunRsync \"\$sourceSpec\" \"\$targetSpec\" \"\$ignoreList\" \"\$backupDir\"" >> $scriptFile
+		echo "	echo -e \"\\tRsync operation completed\\a\"" >> $scriptFile
+
+		echo "" >> $scriptFile
+		if [[ \$advance == true ]]; then
+			## Set the new edition value
+			echo "if [[ \$advance == true ]]; then" >> $scriptFile
+			echo "	echo -e \"\\tUpdating catalog edition to '\$newEdition'\"" >> $scriptFile
+			echo "	fromStr=\"\$(grep \"^edition:\" \$targetSpec/web/courseleaf/localsteps/default.tcf)\"" >> $scriptFile
+			echo "	toStr=\"edition:\$newEdition\"" >> $scriptFile
+			echo "	sed -i s\"_^\${fromStr}_\${toStr}_\" \"\$tgtDir/web/courseleaf/localsteps/default.tcf\"" >> $scriptFile
+			echo "fi ## advance" >> $scriptFile
+			echo "" >> $scriptFile
+		fi ## catalogAdvance
+
+		echo -e "\\n##=======================================================================================================" >> $scriptFile
+		## Log changes
+		echo " echo -e \"\\n$LOGNAME\\t\$(date) via $myName(\$version), patchPachage: $tarFile\" >> \"\${targetSpec}changelog.txt\""  >> $scriptFile
+		[[ $(Contains "$patchProducts" 'cat') == true ]] && echo " echo -e \"\\tCourseLeaf refreshed to '$CATVersion'\" >> \"\${targetSpec}changelog.txt\""  >> $scriptFile
+		[[ $(Contains "$patchProducts" 'cim') == true ]] && echo " echo -e \"\\tCIM refreshed to '$CIMVersion'\" >> \"\${targetSpec}changelog.txt\""  >> $scriptFile
+		[[ -n $cgiVer ]] && echo " echo -e \"\\tCGIs refreshed to '$cgiVer'\" >> \"\${targetSpec}changelog.txt\""  >> $scriptFile
+		echo "" >> $scriptFile
+
+		## If CAT was refreshed rebuild console and approver page
+		if [[ $(Contains ",$patchProducts," ',cat,') == true ]]; then
+			echo "echo -e \"\\tRebuilding CourseLeaf Console and approver pages\"" >> $scriptFile
+			echo "pushd >& /dev/null" >> $scriptFile
+			echo "cd \"\$tgtDir/web/courseleaf\"" >> $scriptFile
+			echo "./courseleaf.cgi -r /courseleaf/index.html | xargs -I{} echo -e \"\\t\\t{}\"" >> $scriptFile
+			echo "./courseleaf.cgi -r /courseleaf/approve/index.html | xargs -I{} echo -e \"\\t\\t{}\"" >> $scriptFile
+			echo "popd >& /dev/null" >> $scriptFile
+		fi
+		## If CIM was refreshed then rebuild cims
+		if [[ $(Contains ",$patchProducts," ',cim,') == true && -n $cimStr ]]; then
+			echo "pushd >& /dev/null" >> $scriptFile
+			echo "cd \"\$tgtDir/web/courseleaf\"" >> $scriptFile
+			for cim in $(echo $cimStr | tr ',' ' '); do
+				echo "./courseleaf.cgi -r /$cim/index.tcf" >> $scriptFile
+			done
+			echo "popd" >> $scriptFile
+		fi
+
+		## If CAT was refreshed print notifications for the user to perform followup actios
+		if [[ $(Contains ",$patchProducts," ',cat,') == true ]]; then
+			echo "echo -e \"\\n\\t*** Note: The target site needs to be republished, please goto the 'CourseLeaf Console'\"" >> $scriptFile
+			echo "echo -e \"\\tand use the 'Republish Site' action to rebuild the site.\"" >> $scriptFile
+		fi
+
+		##  All done
+		echo -e "\\n##=======================================================================================================" >> $scriptFile
+		echo "echo -e \"\\n*** Patching operation completed\"" >> $scriptFile
+		[[ $(Contains "$patchProducts" 'cat') == true ]] && echo " echo -e \"\\tCourseLeaf refreshed to '$CATVersion'\""  >> $scriptFile
+		[[ $(Contains "$patchProducts" 'cim') == true ]] && echo " echo -e \"\\tCIM refreshed to '$CIMVersion'\""  >> $scriptFile
+		[[ -n $cgiVer ]] && echo " echo -e \"\\tCGIs refreshed to '$cgiVer'\""  >> $scriptFile
+		echo "echo -e \"\\n*** Patching operation completed\"" >> $scriptFile
+		echo "echo -e \"\\a\\n\"" >> $scriptFile
+		echo "exit 0" >> $scriptFile
+
+		return 0
+	} ## BuildScriptFile
+
+
 #=======================================================================================================================
 # Declare local variables and constants
 #=======================================================================================================================
-unset backup backupSite
-cleanDirs=${scriptData3##*:}
-cleanFiles=${scriptData4##*:}
+unset backup backupSite buildPatchPackage
 tmpFile=$(mkTmpFile)
+
+
 
 #=======================================================================================================================
 # Standard argument parsing and initialization
@@ -173,15 +452,39 @@ tmpFile=$(mkTmpFile)
 	displayGoodbyeSummaryMessages=true
 	Hello
 
+	cleanDirs="${scriptData3##*:}"
+	cleanFiles="${scriptData4##*:}"
+
 	[[ $listOnly == true ]] && Warning 0 1 "The 'listOnly' flag is turned on, files will not be copied"
 	if [[ $noCheck == true ]]; then
 		Init 'getClient'
 		GetSiteDirNoCheck $client
 		[[ -z $siteDir ]] && Terminate "Nocheck option active, could not resolve target site directory"
-
 	else
 		Init 'getClient getEnv getDirs checkDirs noPreview noPublic'
 	fi
+	if [[ $env == 'next' ]]; then
+		sqlStmt="Select hosting from $clientInfoTable where name=\"$client\""
+		RunSql2 $sqlStmt
+		hosting=${resultSet[0]}
+		if [[ $(Lower "$hosting") == 'client' ]]; then
+			if [[ -z $buildPatchPackage ]]; then
+				echo
+				Msg2 "The client host's their own instance of CourseLeaf locally."
+				Msg2 "Do you wish to advance/patch the Leepfrog local NEXT site or build a patchPackage to send to the client"
+				unset ans; Prompt ans "'Yes' to patch the Leepfrog instance, 'No' to build a patchPackage for the client" 'Yes No' 'Yes'; ans=$(Lower "${ans:0:1}")
+				[[ $ans == 'n' ]] && buildPatchPackage=true
+				echo
+			fi
+		else
+			if [[ -n $buildPatchPackage ]]; then
+				echo
+				Warning "The -buildPatchPackage flag was specified and this client does not host their own CourseLeaf instance, ignoring"
+				unset buildPatchPackage
+			fi
+		fi
+	fi #[[ $env == 'next' ]]
+	[[ $buildPatchPackage == true ]] && packageDir="$tmpRoot/$myName-$client/packageDir" && mkdir -p "$packageDir/web/courseleaf"
 
 	[[ $allItems == true && -z $products ]] && products='all'
 
@@ -189,6 +492,7 @@ tmpFile=$(mkTmpFile)
 	workbookFile="$HOME/tools/workbooks/$(basename $courseleafPatchControlFile)"
 	[[ -r $workbookFile ]] && Note 0 1 "Using workbook: '$workbookFile'" || workbookFile="$courseleafPatchControlFile"
 	## Get the list of sheets in the workbook
+		Note 0 1 "Parsing: '$workbookFile'..."
 		GetExcel "$workbookFile" 'GetSheets' > $tmpFile
 		sheets=$(tail -n 1 $tmpFile | tr '|' ' ')
 		#dump -t sheets
@@ -209,6 +513,8 @@ tmpFile=$(mkTmpFile)
 				dump -2 -t -t line
 				eval "$arrayName+=(\"$line\")"
 			done < "$tmpFile"
+			#tmpArrayName="$arrayName[@]" ; tmpArray=("${!tmpArrayName}")
+			#for ((jj=0; jj<${#tmpArray[@]}; jj++)); do echo -e "\t $arrayName [$jj] = >${tmpArray[$jj]}<"; done
 		done
 		productList="${productList:1}"
 
@@ -223,6 +529,7 @@ tmpFile=$(mkTmpFile)
 		[[ ${#resultSet[@]} -gt 0 ]] && purchasedProducts="$Lower "${resultSet[0]}")"
 	fi
 
+	echo
 	Prompt patchProds "What products do you wish to work with (comma separated)" "$productList,all" "$purchasedProducts"; patchProds="$(Lower "$patchProds")"
 	[[ $patchProds == 'all' ]] && patchProds="$productList"
 	## Check the products to make sure the client has them installed
@@ -261,11 +568,12 @@ tmpFile=$(mkTmpFile)
 		## Get the version
 		[[ $productLower == 'cat' ]] && srcDir=$gitRepoShadow/courseleaf || srcDir=$gitRepoShadow/$productLower
 		[[ ! -d $srcDir ]] && continue
-		unset fileList prodShadowVer prodMasterDate
+		unset fileList prodShadowVer catMasterDate cimMasterDate
 		fileList="$(ls -t $srcDir | grep -v .bad | grep -v master | tr "\n" " ")"
 		prodShadowVer=${fileList%% *}
 		[[ ! -f $srcDir/master/.syncDate ]] && Terminate "Could not locate '$srcDir/master/.syncDate'. The skeleton shadow is probably being updated, please try again later"
-		prodMasterDate=$(date +"%m-%d-%Y @ %H.%M.%S" -r $srcDir/master/.syncDate)
+		eval ${productLower}MasterDate=\"$(date +"%m-%d-%Y @ %H.%M.%S" -r $srcDir/master/.syncDate)\"
+		eval prodMasterDate=\$${productLower}MasterDate
 		if [[ -z $newest && -z $master ]]; then
 			echo
 			Msg2 "For '$(ColorK $product)', do you wish to apply the latest named version ($prodShadowVer) or the skeleton ($prodMasterDate)"
@@ -280,11 +588,14 @@ tmpFile=$(mkTmpFile)
 			[[ ${token: -2} == 'rc' ]] && betaProducts="$betaProducts, $product"
 		fi
 		processControl="$processControl,$productLower|$prodShadowVer|$srcDir"
+		eval "${product}Version=$prodShadowVer"
 	done
 
 	betaProducts=${betaProducts:2}
 	processControl=${processControl:1}
 	dump -2 processControl betaProducts
+	addAdvanceCode=false
+	allCims=true; GetCims "$tgtDir"
 
 ## If cat is one of the products, should we advance the edition, should we audit the catalog
 	if [[ $(Contains "$patchProducts" 'cat') == true ]]; then
@@ -295,10 +606,11 @@ tmpFile=$(mkTmpFile)
 				[[ $ans == 'y' ]] && catalogAdvance=true
 			else
 				Note 0 1 "Using specified value of '$catalogAdvance' for 'catalogAdvance'"
-				[[ $verify != true && $catalogAdvance == true ]] && Info 0 1 "Specifying -noPrompt and -catalogAdvance is not allowed, continuing with prompting active" && verify=true
+				[[ $verify != true && $catalogAdvance == true && $buildPatchPackage != true ]] && \
+						Info 0 1 "Specifying -noPrompt and -catalogAdvance is not allowed, continuing with prompting active" && verify=true
 			fi
-			if [[ $catalogAdvance == true ]]; then
-				catalogAdvance=true
+			[[ $catalogAdvance == true && $buildPatchPackage = true ]] && addAdvanceCode=true
+			if [[ $catalogAdvance == true && $buildPatchPackage != true ]]; then
 				[[ $verify == false && $edition == '' ]] && Msg2 $T "New edition has not been set and '-noPrompt' flag was specified on the call"
 				if [[ -z $edition ]]; then
 					## Get the current edition from the defults.tcf file
@@ -333,47 +645,59 @@ tmpFile=$(mkTmpFile)
 				catalogAdvance=false
 				fullAdvance=false
 			fi ## [[ $catalogAdvance == true ]]
-		fi ##[[ $env == 'next' ]]
-		if [[ -z $catalogAudit ]]; then
-			echo
-			unset ans; Prompt ans "Do you wish to run the catalog audit report" "No Yes" "No"; ans=$(Lower ${ans:0:1})
-			[[ $ans == 'y' ]] && catalogAudit=true
-		else
-			Note 0 1  "Using specified value of '$catalogAudit' for 'catalogAudit'"
+		fi ##[[ $env == 'next' || $env == 'pvt' ]]
+
+		if [[ $buildPatchPackage != true ]]; then
+			if [[ -z $catalogAudit ]]; then
+				echo
+				unset ans; Prompt ans "Do you wish to run the catalog audit report" "No Yes" "No"; ans=$(Lower ${ans:0:1})
+				[[ $ans == 'y' ]] && catalogAudit=true
+			else
+				Note 0 1  "Using specified value of '$catalogAudit' for 'catalogAudit'"
+			fi
 		fi
 	fi ##[[ $(Contains "$products" 'cat') == true ]]
-
-
-## Should we backup the target site
-	if [[ $env == 'next' || $env == 'curr' ]]; then
-		[[ $backup == true ]] && backup='Yes' ; [[ $backup == false ]] && backup='No'
-		Prompt backup "Do you wish to make a backup of the tartet site before patching" 'Yes No' 'Yes'; backup=$(Lower ${backup:0:1})
-		[[ $backup == 'y' ]] && backup=true || backup=false
-		# [[ $offline == true ]] && offline='Yes' ; [[ $offline == false ]] && offline='No'
-		# Prompt offline "Do you wish to take the site offline during the patching process" 'Yes No' 'Yes'; offline=$(Lower ${offline:0:1})
-		# [[ $offline == 'y' ]] && offline=true || offline=false
+	if [[ $buildPatchPackage != true ]]; then
+		## Should we backup the target site
+			if [[ $env == 'next' || $env == 'curr' ]]; then
+				[[ $backup == true ]] && backup='Yes' ; [[ $backup == false ]] && backup='No'
+				Prompt backup "Do you wish to make a backup of the tartet site before patching" 'Yes No' 'Yes'; backup=$(Lower ${backup:0:1})
+				[[ $backup == 'y' ]] && backup=true || backup=false
+				# [[ $offline == true ]] && offline='Yes' ; [[ $offline == false ]] && offline='No'
+				# Prompt offline "Do you wish to take the site offline during the patching process" 'Yes No' 'Yes'; offline=$(Lower ${offline:0:1})
+				# [[ $offline == 'y' ]] && offline=true || offline=false
+			fi
 	fi
 
-## Get the cgisDir
-	cgisDirRoot=$cgisRoot/rhel${myRhel:0:1}
-	[[ ! -d $cgisDirRoot ]] && Terminate "Could not locate cgi source directory:\n\t$cgiRoot"
-	cwd=$(pwd)
-	cd $cgisDirRoot
-	cgisDir=$(ls -t | tr "\n" ' ' | cut -d ' ' -f1)
-	cgisDir=${cgisDirRoot}/$cgisDir
-	[[ ! -d $cgisDir ]] && Terminate "Could not find cgis directory: $cgisDir"
-	cd $cwd
-	cgiVer="$($cgisDir/courseleaf.cgi -v  2> /dev/null | cut -d" " -f3)"
+	## Get the cgisDir
+		if [[ $buildPatchPackage == true ]]; then
+			sqlStmt="select redhatver from $clientInfoTable where name=\"$client\""
+			RunSql2 $sqlStmt
+			[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Building a remote installation package and could not retrieve the clients Redhat version from the database"
+			useRhel="rhel${resultSet[0]}"
+		else
+			useRhel="rhel${myRhel:0:1}"
+		fi
+		cgisDirRoot=$cgisRoot/$useRhel
+		[[ ! -d $cgisDirRoot ]] && Terminate "Could not locate cgi source directory:\n\t$cgiRoot"
+		cwd=$(pwd)
+		cd $cgisDirRoot
+		cgisDir=$(ls -t | tr "\n" ' ' | cut -d ' ' -f1)
+		cgisDir=${cgisDirRoot}/$cgisDir
+		[[ ! -d $cgisDir ]] && Terminate "Could not find cgis directory: $cgisDir"
+		cd $cwd
+		cgiVer="$($cgisDir/courseleaf.cgi -v  2> /dev/null | cut -d" " -f3)"
 
-## Get the daily.sh version
-	grepFile="$skeletonRoot/release/bin/daily.sh"
-	dailyShVer=$(ProtectedCall "grep -m 1 \"^version=\" $grepFile")
-	dailyShVer=${dailyShVer%% *}; dailyShVer=${dailyShVer##*=};
-	dump -2 dailyShVer
+	## Get the daily.sh version
+		grepFile="$skeletonRoot/release/bin/daily.sh"
+		dailyShVer=$(ProtectedCall "grep -m 1 \"^version=\" $grepFile")
+		dailyShVer=${dailyShVer%% *}; dailyShVer=${dailyShVer##*=};
+		dump -2 dailyShVer
 
-## Backup root
-	backupRootDir="$tgtDir/attic/$myName.$(date +"%m-%d-%Y").prePatch"
-	mkdir -p "$backupRootDir"
+	## Backup root
+		backupRootDir="$tgtDir/attic/$myName.$(date +"%m-%d-%Y").prePatch"
+		mkdir -p "$backupRootDir"
+
 
 #=======================================================================================================================
 # Verify continue
@@ -391,13 +715,19 @@ for token in $(tr ',' ' ' <<< $processControl); do
 	verifyArgs+=("$(Upper "$(cut -d '|' -f1 <<< $token)") version:$(cut -d '|' -f2 <<< $token)") 	## (from: '$(cut -d '|' -f3 <<< $token)/$(cut -d '|' -f2 <<< $token)')")
 done
 
-[[ $catalogAdvance == true ]] && verifyArgs+=("New catalog edition:$newEdition, fullAdvance=$fullAdvance")
+[[ $catalogAdvance == true && $buildPatchPackage != true ]] && verifyArgs+=("New catalog edition:$newEdition, fullAdvance=$fullAdvance")
 [[ $catalogAudit == true ]] && verifyArgs+=("Catalog Edit:$catalogAudit")
 
-verifyArgs+=("CGIs version:$cgiVer") 	## (from: '$cgisDir')")
-verifyArgs+=("Daily.sh version:$dailyShVer") 	## (from: '$skeletonRoot/release')")
-[[ $backup == true ]] && verifyArgs+=("Backup site:$backup") 	## (from: '$skeletonRoot/release')")
-[[ $offline == true ]] && verifyArgs+=("Take site offline:$offline") 	## (from: '$skeletonRoot/release')")
+
+
+[[ -n $cgiVer ]] && verifyArgs+=("CGIs version:$cgiVer") 	## (from: '$cgisDir')")
+[[ -n $dailyShVere ]] && verifyArgs+=("Daily.sh version:$dailyShVer") 	## (from: '$skeletonRoot/release')")
+[[ $backup == true ]] && verifyArgs+=("Backup site:$backup")
+[[ $offline == true ]] && verifyArgs+=("Take site offline:$offline")
+if [[ $buildPatchPackage == true ]]; then
+	verifyArgs+=("Build patcPackage:$buildPatchPackage")
+	[[ $addAdvanceCode == true ]] && verifyArgs+=("Catalog Advance:$addAdvanceCode")
+fi
 
 [[ -n $betaProducts ]] && [[ $env == 'next' || $env == 'curr' ]] && Warning "You are asking to refresh to beta version of the software for: $betaProducts\n"
 
@@ -409,6 +739,7 @@ myData="Client: '$client', Products: '$patchProducts', tgtEnv: '$env' $processCo
 [[ $noCheck == true ]] && myData="Target Path, $tgtDir, Products: '$patchProducts' $processControl"
 [[ $catalogAdvance == true ]] && myData="$myData New Edition: $newEdition"
 [[ $catalogAudit == true ]] && myData="$myData catalog audit"
+[[ $buildPatchPackage == true ]] && myData="$myData Build patchPackage"
 myData="$myData $processControl"
 [[ $logInDb != false && $myLogRecordIdx != "" && $testMode != true ]] && ProcessLogger 'Update' $myLogRecordIdx 'data' "$myData"
 dump -2 -p client products catRefreshVersion cimRefreshVersion clssRefreshVersion srcDir tgtDir cgisDir
@@ -430,8 +761,8 @@ if [[ $offline == true ]]; then
 fi
 
 if [[ $backup == true ]]; then
-	[[ $env == 'next' || $env == 'curr' ]] && backupSite="$(dirname $tgtDir)" || backupSite="$tgtDir"
-	backupSite="$backupSite.$myName.$(date +"%m-%d-%y")"
+	[[ $env == "next" || $env == "curr" ]] && backupSite="$tgtDir/$env" || backupSite="$tgtDir/$client"
+	backupSite="$backupSite.$(date +"%m-%d-%y").bak"
 	Msg2 "Backing up the target site to '$backupSite' (this may take a while)..."
 	sourceSpec="$tgtDir/"
 	targetSpec="$backupSite"
@@ -444,7 +775,10 @@ else
 	backup=false
 fi
 
-if [[ $catalogAdvance == true || $fullAdvance == true ]]; then
+##======================================================================================================================
+## Advance catalog
+##======================================================================================================================
+if [[ $catalogAdvance == true || $fullAdvance == true ]] && [[ $buildPatchPackage != true ]]; then
 	Msg2 "Catalog advance is active, advancing the '$(Upper $env)' site"
 	# # Turn off publishing
 	# 	Msg2 "^^Turn off Publishing..."
@@ -454,16 +788,17 @@ if [[ $catalogAdvance == true || $fullAdvance == true ]]; then
 
 	# Full advance, create a new curr site
 	if [[ $fullAdvance == true ]]; then
-		# Make a copy of next sans CLSS/WEN
+		# Make a copy of next sans CIMs and CLSS/WEN
 		sourceSpec="$tgtDir/"
 		targetSpec="$(dirname $tgtDir)/$env.$(date +"%m-%d-%y")"
-		Msg2 "^Making a backup copy of 'NEXT' to '$(basename $targetSpec)' sans CLSS/WEN (this will take a while)..."
-		specIgnoreList="/db/clwen*|/bin/clssimport-log-archive/|/web/$progDir/wen/|/web/wen/"
+		Msg2 "^Making a backup copy of 'NEXT' to '$(basename $targetSpec)' sans CIMs/CLSS (this will take a while)..."
+		ignoreList="/db/clwen*|/bin/clssimport-log-archive/|/web/$progDir/wen/|/web/wen/"
+		[[ -n $cimStr ]] && ignoreList="$ignoreList|$(tr ',' '|' <<< "$cimStr")"
 		sourceSpec="$tgtDir/"
-		targetSpec="$(dirname $tgtDir)/$env.$(date +"%m-%d-%y")"
+		targetSpec="$(dirname $tgtDir)/${env}.${backupSuffix}"
 		[[ ! -d "$targetSpec" ]] && mkdir -p "$targetSpec"
 		unset rsyncResults
-		RunRsync "$product" "$sourceSpec" "$targetSpec"
+		RunRsync "$product" "$sourceSpec" "$targetSpec" "$ignoreList"
 		Msg2 "^^Backup completed"
 		Alert 1
 
@@ -481,7 +816,8 @@ if [[ $catalogAdvance == true || $fullAdvance == true ]]; then
 
 		## Swap our copy of the next site with the curr site
 		Msg2 "^Full backup is active, swapping our copy of the NEXT site with the CURR site"
-		[[ -d $(dirname $tgtDir)/curr ]] && $DOIT mv -f "$(dirname $tgtDir)/curr" "$(dirname $tgtDir)/curr.$(cut -d '.' -f2 <<< $(basename $targetSpec))"
+		#[[ -d $(dirname $tgtDir)/curr ]] && $DOIT mv -f "$(dirname $tgtDir)/curr" "$(dirname $tgtDir)/curr.$(cut -d '.' -f2 <<< $(basename $targetSpec))"
+		[[ -d $(dirname $tgtDir)/curr ]] && $DOIT mv -f "$(dirname $tgtDir)/curr" "$(dirname $tgtDir)/curr-${targetSpec##*.}"
 		$DOIT mv -f "$targetSpec" "$(dirname $tgtDir)/curr"
 		## Fix the editcl login accounts
 		editFile="$(dirname $tgtDir)/curr/$courseleafProgDir.cfg"
@@ -559,8 +895,11 @@ if [[ $catalogAdvance == true || $fullAdvance == true ]]; then
 
 		Msg2 "Catalog advance completed"
 
-fi #[[ $catalogAdvance == true || $fullAdvance == true ]]
+fi #[[ $catalogAdvance == true || $fullAdvance == true ]] && [[ buildPatchPackage != true ]]
 
+##======================================================================================================================
+## Patch catalog
+##======================================================================================================================
 unset changeLogRecs processedDailysh
 declare -A processedSpecs
 ## Refresh proucts
@@ -570,9 +909,10 @@ declare -A processedSpecs
 		prodVer=$(cut -d '|' -f2 <<< $processSpec)
 		srcDir=$(cut -d '|' -f3 <<< $processSpec)
 		dump -2 -n -n processSpec product prodVer srcDir tgtDir
-		[[ $product == 'cim' ]] && allCims=true && GetCims $tgtDir
+#[[ $product == 'cim' ]] && allCims=true && GetCims $tgtDir
 		Msg2 "\nProcessing: $(Upper "$product")..."
-		## Check Versions
+		if [[ $buildPatchPackage != true ]]; then
+			## Check Versions
 			if [[ $(Lower $prodVer) != 'master' && $force != true ]]; then
 				srcVer=$(GetVersion "$product" "$srcDir/$prodVer"); srcVer="${srcVer%% *}"
 				tgtVer=$(GetVersion "$product" "$tgtDir"); tgtVer="${tgtVer%% *}"
@@ -583,13 +923,14 @@ declare -A processedSpecs
 					fi
 				#fi
 			fi
+		fi
 		changesMade=false
 		## Run through the action records for the product
 			productSpecArrayName="$product[@]"
 			productSpecArray=("${!productSpecArrayName}")
 			[[ ${#productSpecArray[@]} -le 0 ]] && Msg2 $WT1 "No patch file specs found for '$product', skipping" && continue
-			for ((i=0; i<${#productSpecArray[@]}; i++)); do
-				specLine="${productSpecArray[$i]}"
+			for ((cntr=0; cntr<${#productSpecArray[@]}; cntr++)); do
+				specLine="${productSpecArray[$cntr]}"
 				mapKey="$(tr -d ' ' <<< "$specLine")"
 				## Check to see if we have already processed this spec
 				[[ ${processedSpecs["$mapKey"]+abc} ]] && continue
@@ -598,6 +939,7 @@ declare -A processedSpecs
 				specPattern="$(cut -d'|' -f2 <<< "$specLine")"
 				specTarget="$(cut -d'|' -f3 <<< "$specLine")"
 				specIgnoreList="$(cut -d'|' -f4 <<< "$specLine")"
+				[[ -z $specIgnoreList ]] && specIgnoreList='none'
 				## Perform string substitutions
 					specPattern=$(sed "s/<release>/$prodVer/g" <<< $specPattern)
 					specTarget=$(sed "s/<release>/$prodVer/g" <<< $specTarget)
@@ -611,90 +953,124 @@ declare -A processedSpecs
 							Msg2 "\n^Processing '$specSource' record: '${specPattern%% *} --> ${specTarget}'"
 							sourceSpec="${gitRepoShadow}/${specPattern%% *}${specPattern##* }"
 							targetSpec="${tgtDir}${specTarget}"
+							[[ $buildPatchPackage == true ]] && targetSpec="${packageDir}${specTarget}" && unset backupDir
 							unset rsyncResults
-							RunRsync "$product" "$sourceSpec" "$targetSpec" "$backupDir"
-							if [[ $rsyncResults == 'false' ]]; then
-								Msg2 "^^All files are current, no files updated"
+							RunRsync "$product" "$sourceSpec" "$targetSpec" "$specIgnoreList" "$backupDir"
+							if [[ $buildPatchPackage != true ]]; then
+								if [[ $rsyncResults == 'false' ]]; then
+									Msg2 "^^All files are current, no files updated"
+								else
+									Msg2 "^^Files updated, check log for additional information"
+									[[ $verboseLevel -eq 0 ]] && Msg2 "^^Please check log for additional information"
+									changeLogRecs+=("${specPattern%% *} refreshed from ${specPattern##* } ")
+									changesMade=true
+								fi
 							else
-								Msg2 "^^Files updated, check log for additional information"
-								[[ $verboseLevel -eq 0 ]] && Msg2 "^^Please check log for additional information"
-								changeLogRecs+=("${specPattern%% *} refreshed from ${specPattern##* } ")
-								changesMade=true
+								Msg2 "^^Files copied to the staging area"
 							fi
 							;;
-						formbuilder)
-							Msg2 "\n^Processing '$specSource' record: '${specPattern%% *} --> ${specTarget}'"
-							sourceSpec="${gitRepoShadow}/${specPattern%% *}${specPattern##* }"
-							if [[ -n $cimStr ]]; then
-								for cim in $(echo $cimStr | tr ',' ' '); do
-									Msg2 "^^Refreshing $cim..."
-									targetSpec=$(sed "s/<cimInstance>/$cim/" <<< $specTarget)
-									unset rsyncResults
-									RunRsync "$product" "$sourceSpec" "$targetSpec" "$backupDir"
-									if [[ $rsyncResults == 'false' ]]; then
-										Msg2 "^^All files are current, no files updated"
-									else
-										Msg2 "^^Files updated, check log for additional information"
-										[[ $verboseLevel -eq 0 ]] && Msg2 "^^Please check log for additional information"
-										changeLogRecs+=("${specPattern%% *} refreshed from ${specPattern##* }")
-										changesMade=true
-									fi
-								done
-							else
-								Msg2 "^^No CIM instances found, skipping refresh"
-							fi
-									;;
+						# formbuilder)
+						# 	Msg2 "\n^Processing '$specSource' record: '${specPattern%% *} --> ${specTarget}'"
+						# 	sourceSpec="${gitRepoShadow}/${specPattern%% *}${specPattern##* }"
+						# 	if [[ -n $cimStr ]]; then
+						# 		for cim in $(echo $cimStr | tr ',' ' '); do
+						# 			Msg2 "^^Refreshing $cim..."
+						# 			targetSpec=$(sed "s/<cimInstance>/$cim/" <<< $specTarget)
+						# 			unset rsyncResults
+						# 			RunRsync "$product" "$sourceSpec" "$targetSpec" "$backupDir"
+						# 			if [[ $rsyncResults == 'false' ]]; then
+						# 				Msg2 "^^All files are current, no files updated"
+						# 			else
+						# 				Msg2 "^^Files updated, check log for additional information"
+						# 				[[ $verboseLevel -eq 0 ]] && Msg2 "^^Please check log for additional information"
+						# 				changeLogRecs+=("${specPattern%% *} refreshed from ${specPattern##* }")
+						# 				changesMade=true
+						# 			fi
+						# 		done
+						# 	else
+						# 		Msg2 "^^No CIM instances found, skipping refresh"
+						# 	fi
+						# 	;;
 						skeleton)
 							Msg2 "\n^Processing '$specSource' record: '${specPattern} --> ${specTarget}'"
 							sourceSpec="$skeletonRoot/release${specPattern%% *}"
 							targetSpec="${tgtDir}${specTarget}"
+							[[ $buildPatchPackage == true ]] && targetSpec="${packageDir}${specTarget}" && unset backupDir
 							unset rsyncResults
-							RunRsync "$product" "$sourceSpec" "$targetSpec" "$backupDir"
-							if [[ $rsyncResults == 'false' ]]; then
-								Msg2 "^^All files are current, no files updated"
+							RunRsync "$product" "$sourceSpec" "$targetSpec" 'none' "$backupDir"
+							if [[ $buildPatchPackage != true ]]; then
+								if [[ $rsyncResults == 'false' ]]; then
+									Msg2 "^^All files are current, no files updated"
+								else
+									Msg2 "^^Files updated, check log for additional information"
+									[[ $verboseLevel -eq 0 ]] && Msg2 "^^Please check log for additional information"
+									changeLogRecs+=("${specPattern%% *} refreshed from the skeleton")
+									changesMade=true
+								fi
 							else
-								Msg2 "^^Files updated, check log for additional information"
-								[[ $verboseLevel -eq 0 ]] && Msg2 "^^Please check log for additional information"
-								changeLogRecs+=("${specPattern%% *} refreshed from the skeleton")
-								changesMade=true
+								Msg2 "^^Files copied to the staging area"
 							fi
 							;;
 						daily.sh)
-							[[ $processedDailysh == true ]] && break
-							Msg2 "\n^Processing '$specSource' record: '${specPattern} --> ${specTarget}'"
-							grepFile="${tgtDir}${specPattern}"
-							if [[ -r $grepFile ]]; then
-								grepStr=$(ProtectedCall "grep '## Nightly cron job for client' $grepFile")
-								if [[ $grepStr != '' ]]; then
-									sourceSpec="$skeletonRoot/release${specPattern%% *}"
-									targetSpec="${tgtDir}${specTarget}"
-									unset rsyncResults
-									RunRsync "$product" "$sourceSpec" "$targetSpec" "$backupDir"
-									if [[ $rsyncResults == 'false' ]]; then
-										Msg2 "^^All files are current, no files updated"
+							if [[ $processedDailysh != true ]]; then
+								Msg2 "\n^Processing '$specSource' record: '${specPattern} --> ${specTarget}'"
+								if [[ $buildPatchPackage != true ]]; then
+									grepFile="${tgtDir}${specPattern}"
+									if [[ -r $grepFile ]]; then
+										grepStr=$(ProtectedCall "grep '## Nightly cron job for client' $grepFile")
+										if [[ $grepStr != '' ]]; then
+											sourceSpec="$skeletonRoot/release${specPattern%% *}"
+											targetSpec="${tgtDir}${specTarget}"
+											unset rsyncResults
+											RunRsync "$product" "$sourceSpec" "$targetSpec" 'none' "$backupDir"
+											if [[ $rsyncResults == 'false' ]]; then
+												Msg2 "^^All files are current, no files updated"
+											else
+												Msg2 "^^Files updated, check log for additional information"
+												[[ $verboseLevel -eq 0 ]] && Msg2 "^^Please check log for additional information"
+												changeLogRecs+=("${specPattern%% *} refreshed from the skeleton")
+												changesMade=true
+											fi
+										else
+											Msg2 "^^The daily.sh file is not the common daily.sh, skipping update"
+										fi
 									else
-										Msg2 "^^Files updated, check log for additional information"
-										[[ $verboseLevel -eq 0 ]] && Msg2 "^^Please check log for additional information"
-										changeLogRecs+=("${specPattern%% *} refreshed from the skeleton")
-										changesMade=true
+										Msg2 "^^No daily.sh file was found"
 									fi
 								else
-									Msg2 "^^The daily.sh file is not the common daily.sh, skipping update"
+									if [[ -n $nextDir ]]; then
+										grepFile="${nextDir}${specPattern}"
+										if [[ -r $grepFile ]]; then
+											grepStr=$(ProtectedCall "grep '## Nightly cron job for client' $grepFile")
+											[[ $grepStr != '' ]] && result=$(CopyFileWithCheck "$skeletonRoot/release${specPattern}" "${packageDir}${specPattern}")
+										fi
+									else
+										Msg2 "buildPatchPackage is true and could not locate a local nextDir for this client, cannot process daily.sh"
+									fi
 								fi
-							else
-								Msg2 "^^No daily.sh file was found"
 							fi
 							processedDailysh=true
 							;;
 						cgi)
 							Msg2 "\n^Processing '$specSource' record: '${specPattern} --> ${specTarget}'"
-							result=$(CopyFileWithCheck "$cgisDir/$specPattern" "${tgtDir}${specTarget}" 'courseleaf')
+							[[ ! -d $(dirname "${tgtDir}${specTarget}") ]] && echo "mkdir"  && mkdir -p "${tgtDir}${specTarget}"
+							if [[ $buildPatchPackage != true ]]; then
+
+								result=$(CopyFileWithCheck "$cgisDir/$specPattern" "${tgtDir}${specTarget}" 'courseleaf')
+							else
+								result=$(CopyFileWithCheck "$cgisDir/$specPattern" "${packageDir}${specTarget}")
+							fi
 							if [[ $result == true ]]; then
-								$DOIT chmod 755 ${tgtDir}${specTarget}
-								currentCgiVer=$(${tgtDir}${specTarget} -v | cut -d" " -f 3)
-								Msg2 "^^Updated: '$specPattern' to version $currentCgiVer"
-								changeLogRecs+=("courseleaf cgi updated (to $currentCgiVer)")
-								changesMade=true
+								[[ $buildPatchPackage != true ]] && $DOIT chmod 750 ${tgtDir}${specTarget} || $DOIT chmod 750 ${packageDir}${specTarget}
+								if [[ $buildPatchPackage != true ]]; then
+									currentCgiVer=$(${tgtDir}${specTarget} -v | cut -d" " -f 3)
+									Msg2 "^^Updated: '$specPattern' to version $currentCgiVer"
+									changeLogRecs+=("courseleaf cgi updated (to $currentCgiVer)")
+									changesMade=true
+								else
+									unset currentCgiVer
+									Msg2 "^^Files copied to the staging area"
+								fi
 							elif [[ $result == same ]]; then
 								Msg2 "^^'$specPattern' is current"
 							else
@@ -702,28 +1078,32 @@ declare -A processedSpecs
 							fi
 							;;
 						cgicommand)
-							if [[ $(Lower "${specTarget}") == 'always' ]] || [[ $(Lower "${specTarget}") == 'onchangeonly' || -z ${specTarget}  && $changesMade == true ]]; then
-								Msg2 "\n^Processing '$specSource' record: '${specPattern} ${specTarget}'"
-								cwd="$(pwd)"
-								cd "$tgtDir/web/$courseleafProgDir"
-								indentLevelSave=$indentLevel
-								indentLevel=2
-								RunCourseLeafCgi "$tgtDir" "$specPattern"
-								indentLevel=$indentLevelSave
-								cd "$cwd"
+							if [[ $buildPatchPackage != true ]]; then
+								if [[ $(Lower "${specTarget}") == 'always' ]] || [[ $(Lower "${specTarget}") == 'onchangeonly' || -z ${specTarget}  && $changesMade == true ]]; then
+									Msg2 "\n^Processing '$specSource' record: '${specPattern} ${specTarget}'"
+									cwd="$(pwd)"
+									cd "$tgtDir/web/$courseleafProgDir"
+									indentLevelSave=$indentLevel
+									indentLevel=2
+									RunCourseLeafCgi "$tgtDir" "$specPattern"
+									indentLevel=$indentLevelSave
+									cd "$cwd"
+								fi
 							fi
 							;;
 						command)
-							if [[ $(Lower "${specTarget}") == 'always' ]] || [[ $(Lower "${specTarget}") == 'onchangeonly' || -z ${specTarget}  && $changesMade == true ]]; then
-								Msg2 "\n^Processing '$specSource' record: '${specPattern} ${specTarget}'"
-								cwd="$(pwd)"
-								cd "$tgtDir"
-								indentLevelSave=$indentLevel
-								indentLevel=2
-								eval "$specPattern"
-								[[ $? -eq 0 ]] && changeLogRecs+=("Executed unix command: '$specPattern'")
-								indentLevel=$indentLevelSave
-								cd "$cwd"
+							if [[ $buildPatchPackage != true ]]; then
+								if [[ $(Lower "${specTarget}") == 'always' ]] || [[ $(Lower "${specTarget}") == 'onchangeonly' || -z ${specTarget}  && $changesMade == true ]]; then
+									Msg2 "\n^Processing '$specSource' record: '${specPattern} ${specTarget}'"
+									cwd="$(pwd)"
+									cd "$tgtDir"
+									indentLevelSave=$indentLevel
+									indentLevel=2
+									eval "$specPattern"
+									[[ $? -eq 0 ]] && changeLogRecs+=("Executed unix command: '$specPattern'")
+									indentLevel=$indentLevelSave
+									cd "$cwd"
+								fi
 							fi
 							;;
 						include)
@@ -739,131 +1119,177 @@ declare -A processedSpecs
 							;;
 					esac
 			done #Process records
+			if [[ $buildPatchPackage != true ]]; then
+				case $product in
+					cat)
+						## Republish the site message
+						echo
+						Note 0 1 "The target site needs to be republished, please goto $client's 'CourseLeaf Console' and use the 'Republish Site' action to rebuild the site."
+						;;
+					cim)
+						## Rebuild cims as necessary
+						if [[ -n $cimStr ]]; then
+							Msg2 "\n^Republishing /<CIM>/index.tcf pages..."
+							for cim in $(echo $cimStr | tr ',' ' '); do
+								Msg2 "^^Republishing /$cim/index.tcf..."
+								RunCourseLeafCgi "$tgtDir" "-r /$cim/index.tcf" | Indent | Indent
+							done
+						fi
+						;;
+				esac
+			fi
 
-			case $product in
-				cat)
-					## Republish the site message
-					echo
-					Note 0 1 "The target site needs to be republished, please goto $client's 'CourseLeaf Console' and use the 'Republish Site' action to rebuild the site."
-					;;
-				cim)
-					## Rebuild cims as necessary
-					allCims=true
-					GetCims $tgtDir
-					if [[ -n $cimStr ]]; then
-						Msg2 "\n^Republishing /<CIM>/index.tcf pages..."
-						for cim in $(echo $cimStr | tr ',' ' '); do
-							Msg2 "^^Republishing /$cim/index.tcf..."
-							RunCourseLeafCgi "$tgtDir" "-r /$cim/index.tcf" | Indent | Indent
-						done
-					fi
-					;;
-			esac
 	done ## processSpec (aka products)
 
 #=======================================================================================================================
 ## Cross product checks / updates
 #=======================================================================================================================
-## Check /ribbit/getcourse.rjs file
-	checkFile="$tgtDir/web/ribbit/getcourse.rjs"
-	if [[ -f "$checkFile" ]]; then
-		skelDate=$(date +%s -r $skeletonRoot/release/web/ribbit/getcourse.rjs)
-		fileDate=$(date +%s -r $tgtDir/web/ribbit/getcourse.rjs)
-		if [[ $skelDate -gt $fileDate ]]; then 
-			echo
-			text="The time date stamp of the file '$tgtDir/web/ribbit/getcourse.rjs' is less "
-			text="$text than the time date stamp of the file in the skeleton, you should complare the files and merge"
-			text="$text any required changes into '$tgtDir/web/ribbit/getcourse.rjs'."
-			Warning 0 1 "$text"
-			# echo
-			# Msg2 "^^^\n* * * DIFF Output start * * *"
-			# Msg2 "^^^${colorRed}< is $skeletonRoot/release/web/ribbit/getcourse.rjs${colorDefault}"
-			# Msg2 "^^^${colorBlue}> is $tgtDir/web/ribbit/getcourse.rjs${colorDefault}"
-			# indentLevelSave=$indentLevel
-			# indentLevel=3
-			# printf '=%.0s' {1..80} | Indent
-			# colordiff "$tgtDir/web/ribbit/getcourse.rjs" "$skeletonRoot/release/web/ribbit/getcourse.rjs" | Indent
-			# indentLevel=$indentLevelSave
-			# echo
-		fi
-	fi
-
-## Edit the console page, change title to 'CourseLeaf Console' (requested by Mike 02/09?)
-	rebuildConsole=false
-	editFile="$tgtDir/web/courseleaf/index.tcf"
-	if [[ -w "$editFile" ]]; then
-		fromStr='title:Catalog Console'
-		toStr='title:CourseLeaf Console'
-		grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
-		if [[ $grepStr != '' ]]; then
-			sed -i s'/^fromStr/$toStr/' $editFile
-			updateFile="/courseleaf/index.tcf"
-			changeLogRecs+=("$updateFile updated to change title")
-			Msg2; Msg2 "^Updated '$updateFile' to change 'title:Catalog Console' to 'title:CourseLeaf Console'"
-			rebuildConsole=true
-		fi
-	else
-		echo
-		Warning 0 1 "Could not locate '$editFile', please check the target site"
-	fi
-
-## Rebuild console & approve pages
-	if [[ $rebuildConsole == true ]]; then
-		Msg2 "\n^Republishing CourseLeaf console & approve pages..."
-		RunCourseLeafCgi "$tgtDir" "-r /courseleaf/index.html" | Indent
-		RunCourseLeafCgi "$tgtDir" "-r /courseleaf/approve/index.html" | Indent
-	fi
-
-## Check to see if there are any 'special' cgis installed, see if they are still necessary
-	tgtVer="$($tgtDir/web/$courseleafProgDir/$courseleafProgDir.cgi -v 2> /dev/null | cut -d" " -f3)"
-	for checkDir in tcfdb; do
-		if [[ -f $tgtDir/web/courseleaf/$checkDir/courseleaf.cgi ]]; then
-			checkCgiVer="$($tgtDir/web/$courseleafProgDir/$checkDir/$courseleafProgDir.cgi -v 2> /dev/null | cut -d" " -f3)"
-			if [[ $(CompareVersions "$checkCgiVer" 'le' "$tgtVer") == true ]]; then
-				Msg2 "\n^Found a 'special' courseleaf cgi directory ($checkDir) and the version of that cgi ($checkCgiVer) is less than the target version ($tgtVer).  Remove directory"
-				[[ ! -d $backupDir/web/$courseleafProgDir/$checkDir ]] && mkdir -p $backupDir/web/$courseleafProgDir/$checkDir
-				mv -f $tgtDir/web/$courseleafProgDir/$checkDir $backupDir/web/$courseleafProgDir
-				changeLogRecs+=("Removed '$tgtDir/web/$courseleafProgDir/$checkDir'")
+if [[ $buildPatchPackage != true ]]; then
+	## Check /ribbit/getcourse.rjs file
+		checkFile="$tgtDir/web/ribbit/getcourse.rjs"
+		if [[ -f "$checkFile" ]]; then
+			skelDate=$(date +%s -r $skeletonRoot/release/web/ribbit/getcourse.rjs)
+			fileDate=$(date +%s -r $tgtDir/web/ribbit/getcourse.rjs)
+			if [[ $skelDate -gt $fileDate ]]; then 
+				echo
+				text="The time date stamp of the file '$tgtDir/web/ribbit/getcourse.rjs' is less "
+				text="$text than the time date stamp of the file in the skeleton, you should complare the files and merge"
+				text="$text any required changes into '$tgtDir/web/ribbit/getcourse.rjs'."
+				Warning 0 1 "$text"
+				# echo
+				# Msg2 "^^^\n* * * DIFF Output start * * *"
+				# Msg2 "^^^${colorRed}< is $skeletonRoot/release/web/ribbit/getcourse.rjs${colorDefault}"
+				# Msg2 "^^^${colorBlue}> is $tgtDir/web/ribbit/getcourse.rjs${colorDefault}"
+				# indentLevelSave=$indentLevel
+				# indentLevel=3
+				# printf '=%.0s' {1..80} | Indent
+				# colordiff "$tgtDir/web/ribbit/getcourse.rjs" "$skeletonRoot/release/web/ribbit/getcourse.rjs" | Indent
+				# indentLevel=$indentLevelSave
+				# echo
 			fi
 		fi
-	done
 
-## If we took the site offline, then put it back online
-	if [[ $offline == true ]]; then
-		## uncomment the user records, remove the siteadmin: record from the bottoms
-		Msg2 "Bringing the site back online"
-		editFile="$tgtDir/courseleaf.cfg" 
-		sed -e '/user:/ s|^//||' -i "$editFile"
-		line=$(tail -1 "$editFile")
-		[[ $line == 'sitereadonly:true' ]] && sed -i '$ d' "$editFile"
-		offline=false
-	fi
+	## Edit the console page, change title to 'CourseLeaf Console' (requested by Mike 02/09?)
+		rebuildConsole=false
+		editFile="$tgtDir/web/courseleaf/index.tcf"
+		if [[ -w "$editFile" ]]; then
+			fromStr='title:Catalog Console'
+			toStr='title:CourseLeaf Console'
+			grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
+			if [[ $grepStr != '' ]]; then
+				sed -i s'/^fromStr/$toStr/' $editFile
+				updateFile="/courseleaf/index.tcf"
+				changeLogRecs+=("$updateFile updated to change title")
+				Msg2; Msg2 "^Updated '$updateFile' to change 'title:Catalog Console' to 'title:CourseLeaf Console'"
+				rebuildConsole=true
+			fi
+		else
+			echo
+			Warning 0 1 "Could not locate '$editFile', please check the target site"
+		fi
 
-## log updates in changelog.txt
-	WriteChangelogEntry 'changeLogRecs' "$tgtDir/changelog.txt"
+	## Rebuild console & approve pages
+		if [[ $rebuildConsole == true ]]; then
+			Msg2 "\n^Republishing CourseLeaf console & approve pages..."
+			RunCourseLeafCgi "$tgtDir" "-r /courseleaf/index.html" | Indent
+			RunCourseLeafCgi "$tgtDir" "-r /courseleaf/approve/index.html" | Indent
+		fi
 
-## tar up the backup files
-	tarFile="$myName-$(date +%D | tr '/' '-').tar.gz"
-	cd $backupRootDir
-	PushSettings
-	set +f
-	$DOIT tar -czf $tarFile * --exclude '*.gz' --remove-files
-	PopSettings
-	[[ -f ../$tarFile ]] && rm -f ../$tarFile
-	$DOIT mv $tarFile ..
-	cd ..
-	$DOIT rm -rf $backupRootDir
+	## Check to see if there are any 'special' cgis installed, see if they are still necessary
+		tgtVer="$($tgtDir/web/$courseleafProgDir/$courseleafProgDir.cgi -v 2> /dev/null | cut -d" " -f3)"
+		for checkDir in tcfdb; do
+			if [[ -f $tgtDir/web/courseleaf/$checkDir/courseleaf.cgi ]]; then
+				checkCgiVer="$($tgtDir/web/$courseleafProgDir/$checkDir/$courseleafProgDir.cgi -v 2> /dev/null | cut -d" " -f3)"
+				if [[ $(CompareVersions "$checkCgiVer" 'le' "$tgtVer") == true ]]; then
+					Msg2 "\n^Found a 'special' courseleaf cgi directory ($checkDir) and the version of that cgi ($checkCgiVer) is less than the target version ($tgtVer).  Remove directory"
+					[[ ! -d $backupDir/web/$courseleafProgDir/$checkDir ]] && mkdir -p $backupDir/web/$courseleafProgDir/$checkDir
+					mv -f $tgtDir/web/$courseleafProgDir/$checkDir $backupDir/web/$courseleafProgDir
+					changeLogRecs+=("Removed '$tgtDir/web/$courseleafProgDir/$checkDir'")
+				fi
+			fi
+		done
 
-## Tell the user what to do if there are problems
-	echo
-	Note "Should you need to restore the site to its previous state you will find a tar file in the attic called '$tarFile', copy the directories and files from the tar file to their corresponding location under the web directory for the site ($tgtDir/web)"
+	## If we took the site offline, then put it back online
+		if [[ $offline == true ]]; then
+			## uncomment the user records, remove the siteadmin: record from the bottoms
+			Msg2 "Bringing the site back online"
+			editFile="$tgtDir/courseleaf.cfg" 
+			sed -e '/user:/ s|^//||' -i "$editFile"
+			line=$(tail -1 "$editFile")
+			[[ $line == 'sitereadonly:true' ]] && sed -i '$ d' "$editFile"
+			offline=false
+		fi
 
-	[[ $backup == true ]] && echo && Note "A backup copy was made of the $(Upper $env) site, once you have verified that the patch results are satisfactory you should delete the backup site '$backupSite'"
+	## log updates in changelog.txt
+		WriteChangelogEntry 'changeLogRecs' "$tgtDir/changelog.txt"
 
+	## tar up the backup files
+		tarFile="$myName-$(date +%D | tr '/' '-').tar.gz"
+		cd $backupRootDir
+		PushSettings
+		set +f
+		$DOIT tar -czf $tarFile * --exclude '*.gz' --remove-files
+		PopSettings
+		[[ -f ../$tarFile ]] && rm -f ../$tarFile
+		$DOIT mv $tarFile ..
+		cd ..
+		$DOIT rm -rf $backupRootDir
+
+	## Tell the user what to do if there are problems
+		echo
+		Note "Should you need to restore the site to its previous state you will find a tar file in the attic called '$tarFile', copy the directories and files from the tar file to their corresponding location under the web directory for the site ($tgtDir/web)"
+
+		[[ $backup == true ]] && echo && Note "A backup copy was made of the $(Upper $env) site, once you have verified that the patch results are satisfactory you should delete the backup site '$backupSite'"
+else
+	## buildPatchPackage == true
+	pushd "$packageDir" >& /dev/null
+	## Create the patch scrpt
+		tarFile="${client}Patch--$backupSuffix.tar.gz"
+		Msg2 "\n^Building script"
+		scriptFile="./${client}Patch.sh"
+		BuildScriptFile "$scriptFile"
+		chmod 777 "$scriptFile"
+
+	## Create the readme file
+		echo "" > 'README'
+		echo -e "After untaring the package: cd to the directory where you untared the file and" >> 'README'
+		echo -e "\t1) cd to the directory where you untared the file" >> 'README'
+		echo -e "\t2) Run the command '$scriptFile'" >> 'README'
+		echo "" >> 'README'
+
+	## Create the patch tar file
+		Msg2 "^Building patch package file..."
+		SetFileExpansion 'on'
+		tar -cpzf "../$tarFile" --remove-files ./*
+		SetFileExpansion
+		rm -rf "$packageDir"
+
+		## Calculate output directory
+			if [[ -d $localClientWorkFolder ]]; then
+				outDir="$localClientWorkFolder"
+				[[ $client != '' ]] && outDir="$outDir/$client"
+			elif [[ $client != '' && -d "$clientDocs/$client" ]]; then
+				outDir="$clientDocs/$client"
+				[[ -d $outDir/Implementation ]] && outDir="$outDir/Implementation"
+				[[ -d $outDir/Attachments ]] && outDir="$outDir/Attachments"
+			else
+				outDir=$HOME/$myName
+			fi
+			[[ ! -d $outDir ]] && $DOIT mkdir -p "$outDir"
+
+		mv -f "$(dirname $packageDir)/$tarFile" "$outDir"
+		Msg2 "\nThe Patch package file created and can be found at \n^'$outDir/$tarFile'\n"
+	popd >& /dev/null
+fi ## [[ $buildPatchPackage != true ]]
+
+#=======================================================================================================================
 ## Done
 #=======================================================================================================================
-#if [[ -f $myTempFile ]]; then rm $myTempFile; fi
-[[ $noCheck == true ]] && Goodbye 0 "Applied refresh '$refreshVersion' to '$tgtDir'" || Goodbye 0 "Applied refresh '$refreshVersion' to $Upper($client/$env)"
+text1='Refresh of'
+text2="$Upper($client/$env)"
+[[ $buildPatchPackage == true ]] && text1="Build of Patch package for"
+[[ $noCheck == true ]] && text2="$tgtDir"
+Goodbye 0 "$text1" "$text2"
 
 #=======================================================================================================================
 ## Check-in Log
@@ -910,3 +1336,4 @@ declare -A processedSpecs
 ## Fri Jan 20 09:52:15 CST 2017 - dscudiero - remove debug statement
 ## 04-17-2017 @ 10.31.31 - (5.0.124)   - dscudiero - fixed for selectMenuNew changes
 ## 04-27-2017 @ 11.10.21 - (5.0.125)   - dscudiero - Fixed error reporting rsync errors
+## 05-10-2017 @ 07.02.02 - (5.1.22)    - dscudiero - Add support for remote patch packages
