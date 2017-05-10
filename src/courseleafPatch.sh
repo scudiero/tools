@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.1.22 # -- dscudiero -- Mon 05/08/2017 @ 15:04:17.36
+version=5.1.23 # -- dscudiero -- Wed 05/10/2017 @  7:08:28.27
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -359,13 +359,15 @@ scriptDescription="Refresh a courseleaf product"
 		## Patch the next site
 		echo -e "\\n##=======================================================================================================" >> $scriptFile
 		echo "echo -e \"\\nPatching the NEXT site...\\n\"" >> $scriptFile
-		echo "pushd \"\$tgtDir\" >& /dev/null" >> $scriptFile
+		echo "	sourceSpec=\"\$(pwd)/\"" >> $scriptFile
+		echo "	targetSpec=\"\$tgtDir/\"" >> $scriptFile
+		#echo "pushd \"\$tgtDir\" >& /dev/null" >> $scriptFile
 		echo "	ownerGroup=\"\$(stat -c \"%U\" ./courseleaf.cfg):\$(stat -c \"%G\" ./courseleaf.cfg)\"" >> $scriptFile
 		echo "	echo -e \"\\tSetting source files ownership to '\$ownerGroup' (again, this will take a while)...\"" >> $scriptFile
 		echo "	chown -R \$ownerGroup \$(pwd)" >> $scriptFile
-		echo "popd >& /dev/null" >> $scriptFile
-		echo "	sourceSpec=\"\$(pwd)/\"" >> $scriptFile
-		echo "	targetSpec=\"\$tgtDir/\"" >> $scriptFile
+		echo "	chmod 770 ./web/courseleaf" >> $scriptFile
+		#echo "popd >& /dev/null" >> $scriptFile
+
 		echo "	backupDir=\"\$targetSpec/attic/prePatch--\$(date +\"%m-%d-%y\")\"" >> $scriptFile
 		echo "	mkdir -p \"\$backupDir\"" >> $scriptFile
 		echo "	ignoreList='*.tar.gz'" >> $scriptFile
@@ -1337,3 +1339,4 @@ Goodbye 0 "$text1" "$text2"
 ## 04-17-2017 @ 10.31.31 - (5.0.124)   - dscudiero - fixed for selectMenuNew changes
 ## 04-27-2017 @ 11.10.21 - (5.0.125)   - dscudiero - Fixed error reporting rsync errors
 ## 05-10-2017 @ 07.02.02 - (5.1.22)    - dscudiero - Add support for remote patch packages
+## 05-10-2017 @ 07.08.45 - (5.1.23)    - dscudiero - fix problem setting ownership in the remote pachage
