@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.4.115 # -- dscudiero -- Thu 05/04/2017 @ 14:19:57.78
+version=3.4.137 # -- dscudiero -- Wed 05/10/2017 @ 14:35:55.95
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -66,11 +66,11 @@ scriptDescription="Cleanup private dev sites"
 						[[ -f $file ]] && timeStamp=$(stat -c %z $file | awk 'BEGIN {FS=" "}{printf "%s", $1}' | awk 'BEGIN {FS="-"}{printf "%s-%s-%s", $2,$3,$1}') && break
 					done
 					tempStr=${workFiles[$i]}$dots; tempStr=${tempStr:0:$maxLen}
-					[[ $(Contains "$tempStr" '.AutoDeleteWithSave') == true && $printedSep1 == false ]] && printf "$sep" && printedSep1=true
-					[[ $(Contains "$tempStr" '.AutoDeleteNoSave') == true && $printedSep2 == false ]] && printf "$sep" && printedSep2=true
-					[[ $(Contains "$tempStr" '.BeingDeleted') == true && $printedSep3 == false ]] && printf "$sep" && printedSep3=true
+					[[ $(Contains "$tempStr" 'AutoDeleteWithSave') == true && $printedSep1 == false ]] && printf "$sep" && printedSep1=true
+					[[ $(Contains "$tempStr" 'AutoDeleteNoSave') == true && $printedSep2 == false ]] && printf "$sep" && printedSep2=true
+					[[ $(Contains "$tempStr" 'BeingDeleted') == true && $printedSep3 == false ]] && printf "$sep" && printedSep3=true
 				  	printf "\t%2s %s (Created: %s) \n" "$i" "$tempStr" "$timeStamp"
-				  	[[ "$validSiteIds" = '' ]] &&validSiteIds="$i" || validSiteIds="$validSiteIds $i"
+				  	[[ "$validSiteIds" = '' ]] && validSiteIds="$i" || validSiteIds="$validSiteIds $i"
 				done
 				unset siteId
 				#validSiteIds="$validSiteIds All Refresh"
@@ -120,7 +120,7 @@ scriptDescription="Cleanup private dev sites"
 				echo; Msg2 "UnMarking '$file'..."
 				newFileName=$(sed 's|.AutoDeleteNoSave||g' <<< ${workFiles[$siteId]})
 				$DOIT mv "$file" /mnt/$share/web/$newFileName
-				$DOIT rm  /mnt/$share/web/$newFileName/.AutoDeleteNoSave
+				$DOIT rm /mnt/$share/web/$newFileName/.AutoDeleteNoSave
 				;;
 			r*)
 				echo; Msg2 "Reseting 'marked' date for '$file'..."
@@ -207,23 +207,18 @@ searchStr="$userName"
 if [[ -n $client ]]; then
 	if [[ $client == 'daemon' ]]; then
 		Msg2 "Starting $myName in daemon mode..."
-		filePrefix="/mnt/$share/web"
-		fileList="$(ProtectedCall "ls $filePrefix" | ProtectedCall "grep $searchStr" | ProtectedCall "grep '.AutoDeleteWithSave\$'")"
+		filePrefix="/mnt/dev*/web/*-$searchStr"
+		fileList="$(ProtectedCall "ls /mnt/dev*/web/*-$searchStr* | grep 'AutoDelete'")"
 		for file in $fileList; do
-			Msg2 "^Deleting '$file' with workflow save"
-			srcFile="${filePrefix}/${file}"
-			tgtFile="$srcFile.BeingDeletedBy$(TitleCase "$myName")"
-			Call saveWorkflow -daemon -siteFile "$srcFile" -all -suffix "beforeDelete-$backupSuffix -quiet -nop"
-			mv -f "$srcFile" "$tgtFile"
-			(nohup rm -rf "$tgtFile" &> /dev/null) &
-		done
-		fileList="$(ProtectedCall "ls /mnt/$share/web" | ProtectedCall "grep $searchStr" | ProtectedCall "grep .AutoDeleteNoSave")"
-		for file in $fileList; do
-			Msg2 "^Deleting '$file'"
-			srcFile="${filePrefix}/${file}"
-			tgtFile="$srcFile.BeingDeletedBy$(TitleCase "$myName")"
-			mv -f "$srcFile" "$tgtFile"
-			(nohup rm -rf "$tgtFile" &> /dev/null) &
+			file=$(tr -d ':' <<< "$file")
+			if [[ $(Contains "$file" 'WithSave') == true ]]; then
+				Msg2 "^Deleting '$(basename $file)' with workflow save"
+				echo Call saveWorkflow -daemon -siteFile "$file" -all -suffix "beforeDelete-$backupSuffix -quiet -nop"
+			else
+				Msg2 "^Deleting '$(basename $file)'"
+			fi
+			echo mv -f "$file" "$file.BeingDeletedBy$(TitleCase "$myName")"
+			(nohup rm -rf "$file.BeingDeletedBy$(TitleCase "$myName")" &> /dev/null) &
 		done
 		Msg2 "Ending $myName in daemon mode..."
 		Goodbye 0
@@ -267,3 +262,4 @@ Goodbye 0
 ## 04-26-2017 @ 13.46.55 - (3.4.73)    - dscudiero - General syncing of dev to prod
 ## 05-04-2017 @ 14.17.07 - (3.4.114)   - dscudiero - Add daemon mode to support automatic cleanup
 ## 05-04-2017 @ 14.20.26 - (3.4.115)   - dscudiero - Add quiet flag on saveWorkflow call
+## 05-10-2017 @ 14.36.11 - (3.4.137)   - dscudiero - Refactor the daemon code
