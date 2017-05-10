@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.65" # -- dscudiero -- Wed 05/10/2017 @  9:41:37.11
+# version="2.0.68" # -- dscudiero -- Wed 05/10/2017 @ 12:39:27.10
 #===================================================================================================
 # Process interrupts
 #===================================================================================================
@@ -9,7 +9,6 @@
 #===================================================================================================
 
 function SignalHandeler {
-    #Import 'Goodbye'
     VerboseMsg 3 "*** Starting: $FUNCNAME ***"
 	local sig="$(Upper $1)"
     local errorLineNo="$2"
@@ -19,7 +18,6 @@ function SignalHandeler {
     parentModule=$(basename $parentModule)
     local message
 
-    dump -1 sig
     case "$sig" in
         ERR)
             message="$FUNCNAME: Unknown error condition ($errorCode) raised in module '$parentModule', \n^$(ColorE "line($errorLineNo)"): '$(ColorK "$errorLine")'"
@@ -29,6 +27,9 @@ function SignalHandeler {
             ;;
         SIGINT|SIGQUIT)
             message="$FUNCNAME: Trapped signal: '$sig' in module '$myName'\n^Script '$myName' is terminating at user's request"
+            echo -e "\n$(PadChar)"
+            Error "$message";
+            unset message
             ;;
         *)
             message="$FUNCNAME: Trapped signal: '$sig' in module\n^'$parentModule'"
@@ -60,3 +61,4 @@ export -f SignalHandeler
 ## 04-14-2017 @ 12.04.05 - ("2.0.56")  - dscudiero - refactor how the call path is displayed
 ## 04-14-2017 @ 12.18.05 - ("2.0.57")  - dscudiero - Send a bad condition code to Goodbye
 ## 05-10-2017 @ 09.45.48 - ("2.0.65")  - dscudiero - General syncing of dev to prod
+## 05-10-2017 @ 12.49.43 - ("2.0.68")  - dscudiero - Do not display call stack for INT signels
