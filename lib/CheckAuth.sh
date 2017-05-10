@@ -2,7 +2,7 @@
 
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.13" # -- dscudiero -- Wed 05/10/2017 @  9:21:41.53
+# version="2.0.14" # -- dscudiero -- Wed 05/10/2017 @  9:23:12.38
 #===================================================================================================
 # Check to see if the logged user can run this script
 # Returns true if user is authorized, otherwise it returns a message
@@ -14,9 +14,9 @@
 
 function CheckAuth {
 	local sqlStmt author scriptUsers
-	local myName=${1-$myName}
+	local scriptName=${1-$myName}
 
-	sqlStmt="select author,restrictToUsers,restrictToGroups from $scriptsTable where name=\"$myName\""
+	sqlStmt="select author,restrictToUsers,restrictToGroups from $scriptsTable where name=\"$scriptName\""
 	RunSql2 $sqlStmt
 
 	[[ ${#resultSet[@]} -eq 0 ]] && echo true && return 0
@@ -50,3 +50,4 @@ export -f CheckAuth
 ## Wed Jan  4 13:52:56 CST 2017 - dscudiero - General syncing of dev to prod
 ## 05-09-2017 @ 13.57.12 - ("2.0.8")   - dscudiero - Refactored to improve performance
 ## 05-10-2017 @ 09.22.33 - ("2.0.13")  - dscudiero - Fix error not setting myname propery
+## 05-10-2017 @ 09.23.21 - ("2.0.14")  - dscudiero - General syncing of dev to prod
