@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.103" # -- dscudiero -- Mon 05/08/2017 @  9:11:07.50
+# version="2.0.123" # -- dscudiero -- Wed 05/10/2017 @  9:35:33.84
 #===================================================================================================
 # Common script exit
 # args:
@@ -11,7 +11,7 @@
 # All rights reserved
 #===================================================================================================
 function Goodbye {
-
+Here G0
 	SetFileExpansion 'off'
 	Msg2 $V3 "*** Starting: $FUNCNAME ***"
 
@@ -120,16 +120,17 @@ function Goodbye {
 	esac
 
 	## Write end record to db log
-		[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Update' $myLogRecordIdx 'exitCode' "$exitCode"
-		[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'End' $myLogRecordIdx
-
-	## If secondaryMessagesOnly is true then we are in a sub shell so just return, otherwise exit
-	[[ $secondaryMessagesOnly == true ]] && secondaryMessagesOnly=false && return 0
-	set +eE
-	trap - ERR EXIT
+	[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Update' $myLogRecordIdx 'exitCode' "$exitCode"
+	[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'End' $myLogRecordIdx
 	[[ $(IsNumeric $exitCode) != true ]] && exitCode=0
-	exit $exitCode
-
+	if [[ $calledViaScripts == true || $secondaryMessagesOnly == true ]]; then
+		secondaryMessagesOnly=false
+		return 0
+	else
+		trap - EXIT SIGHUP
+		#set +eE
+		exit $exitCode
+	fi
 } #Goodbye
 export -f Goodbye
 
@@ -147,3 +148,4 @@ export -f Goodbye
 ## 04-14-2017 @ 12.17.42 - ("2.0.98")  - dscudiero - skip
 ## 04-14-2017 @ 14.25.31 - ("2.0.102") - dscudiero - Remove the call to the local function
 ## 05-08-2017 @ 09.12.48 - ("2.0.103") - dscudiero - Add script name to stopping message
+## 05-10-2017 @ 09.42.02 - ("2.0.123") - dscudiero - Update exit code
