@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.72 # -- dscudiero -- Fri 05/05/2017 @ 13:20:37.11
+version=3.11.73 # -- dscudiero -- Wed 05/10/2017 @ 12:44:41.80
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -350,9 +350,9 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 		Exec$itemTypeCap "$itemName" "$scriptArgs" ; rc=$?
 		#TrapSigs 'on'
 		echo
-		[[ $rc -eq 0 ]] && Msg2 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed successfully" || \
-			Msg2 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed with errors (exit code = $rc) \
-			\nPlease record any Messages and contact the $itemType owner\n"
+		# [[ $rc -eq 0 ]] && Msg2 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed successfully" || \
+		# 	Msg2 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed with errors (exit code = $rc) \
+		# 	\nPlease record any Messages and contact the $itemType owner\n"
 		[[ $batchMode != true && $quiet != true && $verify == true ]] && Pause "Please press enter to go back to '${itemType}s'"
 		unset calledViaScripts
 	done
@@ -439,3 +439,4 @@ Goodbye 0
 ## Tue Mar 14 14:49:25 CDT 2017 - dscudiero - Fix problem where the correct logfile was not being written out
 ## Thu Mar 16 13:00:00 CDT 2017 - dscudiero - Tweaked messaging
 ## 05-05-2017 @ 13.21.31 - (3.11.72)   - dscudiero - Remove GD code
+## 05-10-2017 @ 12.50.19 - (3.11.73)   - dscudiero - turn off messages for success or faliure of called script
