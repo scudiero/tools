@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.123" # -- dscudiero -- Wed 05/10/2017 @  9:35:33.84
+# version="2.0.124" # -- dscudiero -- Wed 05/10/2017 @  9:55:37.49
 #===================================================================================================
 # Common script exit
 # args:
@@ -11,7 +11,6 @@
 # All rights reserved
 #===================================================================================================
 function Goodbye {
-Here G0
 	SetFileExpansion 'off'
 	Msg2 $V3 "*** Starting: $FUNCNAME ***"
 
@@ -149,3 +148,4 @@ export -f Goodbye
 ## 04-14-2017 @ 14.25.31 - ("2.0.102") - dscudiero - Remove the call to the local function
 ## 05-08-2017 @ 09.12.48 - ("2.0.103") - dscudiero - Add script name to stopping message
 ## 05-10-2017 @ 09.42.02 - ("2.0.123") - dscudiero - Update exit code
+## 05-10-2017 @ 09.55.58 - ("2.0.124") - dscudiero - Remove debug statement
