@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.124" # -- dscudiero -- Wed 05/10/2017 @  9:19:24.38
+version="1.2.126" # -- dscudiero -- Wed 05/10/2017 @  9:45:20.15
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -24,8 +24,6 @@ myName='dispatcher'
 	[[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB"
 	export TOOLSWAREHOUSEDB="$warehouseDb"
 	[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
-
-echo "\$0 = $0"
 
 #==================================================================================================
 # Global Functions
@@ -59,8 +57,6 @@ function CleanUp {
 	GD echo -e "\n=== Dispatcher.Cleanup Starting' =================================================================="
 	set +eE
 	trap - ERR EXIT
-
-Here DC1
 	## Cleanup log file
 		if [[ $logFile != /dev/null && -r $logFile ]]; then
 			mv $logFile $logFile.bak
@@ -83,12 +79,9 @@ Here DC1
 
 	GD echo -e "\n=== Dispatcher.Cleanup Completed' =================================================================="
 	exec 3>&-  ## Close file descriptor #3 -
-Here DC2
 	exit $rc
 } #CleanUp
 
-
-echo "HERE D0"
 #==================================================================================================
 # Initialize local variables
 #==================================================================================================
@@ -122,10 +115,8 @@ tmpRoot=/tmp/$LOGNAME
 	[[ $rc -ne 0 ]] && echo "*Error* -- User '$userName' is not a member or the 'leepfrog' unix group, please contact the Unix Admin team" && exit -1
 
 	trueDir="$(dirname "$(readlink -f "$0")")"
-	$GD "==== Starting $trueDir/dispatcher callPgmName: '$callPgmName' -- $(date) ====";
 	[[ -f $(dirname $trueDir)/offline ]] && printf "\n\e[0;31m >>> Sorry, support tools are temporarily off-line, please try again later <<<\n \n\e[m\a"
 	[[ -f $(dirname $trueDir)/offline && $userName != $ME ]] && exit
-	$GD -e "trueDir = '$trueDir'\nTOOLSPATH = '$TOOLSPATH'"
 
 ## Parse off my arguments
 	unset scriptArgs myVerbose useDev useLocal semaphoreProcessing noLog noLogInDb batchMode useDevDb myVerbose myQuiet
@@ -133,7 +124,6 @@ tmpRoot=/tmp/$LOGNAME
 	while [[ -n $@ ]]; do
 		if [[ ${1:0:2} == '--' ]]; then
 			myArg=$(echo ${1:2} | tr '[:upper:]' '[:lower:]')
-			$GD -e '\t\tmyArg = >'$myArg'<'
 			[[ ${myArg:0:1} == 'v' ]] && myVerbose=true
 			[[ $myArg == 'useDev' ]] && useDev=true
 			[[ $myArg == 'uselocal' ]] && useLocal=true
@@ -159,7 +149,6 @@ tmpRoot=/tmp/$LOGNAME
 		callPgmName=$(cut -d' ' -f1 <<< $scriptArgs)
 		[[ $callPgmName == $scriptArgs ]] && unset scriptArgs || scriptArgs=$(cut -d' ' -f2- <<< $scriptArgs)
 	fi
-	$GD -e "callPgmName = '$callPgmName'\n scriptArgs = '$scriptArgs'"
 
 ## Overrides
 	[[ ${callPgmName:0:4} == 'test' ]] && noLog=true && noLogInDb=true && useLocal=true
@@ -198,7 +187,6 @@ sTime=$(date "+%s")
 	#echo "initFile = '$initFile'" ; echo "importFile = '$importFile'"
 
 ## Initialize the runtime environment
-	$GD "-e \ninitFile = '$initFile'"
 	[[ -z $initFile ]] && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
 
 ## Set mysql connection information
@@ -261,26 +249,21 @@ sTime=$(date "+%s")
 				fi
 			fi
 	fi ## [[ ${callPgmName:0:1} == '\' ]]
-	$GD -e "\n\trealCallName: '$realCallName'\n\tcallPgmName: '$callPgmName'\n\lib: '$lib'\n\tsetSemaphore: '$setSemaphore'\n:\waitOn '$waitOn'"
 
 	## Check to make sure we can run and are authorized
-		$GD -e "\tChecking Can we run ..."
 		checkMsg=$(CheckRun $callPgmName)
 		if [[ $checkMsg != true ]]; then
 			[[ $(Contains ",$adminUsers," ",$userName,") != true ]] && echo && echo && Terminate "$checkMsg"
 			[[ $callPgmName != 'testsh' ]] && echo && echo "$(ColorW "*** $checkMsg ***")"
 		fi
-		$GD -e "\tChecking Auth..."
 		checkMsg=$(CheckAuth $callPgmName)
 		[[ $checkMsg != true ]] && echo && echo && Terminate "$checkMsg"
 
 	## Check semaphore
-		$GD -e "\tChecking Semaphore..."
 		[[ $semaphoreProcessing == true && $(Lower $setSemaphore) == 'yes' ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
 
 	## Resolve the executable file
 		[[ -z $executeFile ]] && FindExecutable "$callPgmName"  ## Sets variable executeFile
-		$GD -e "\n=== Resolved execution file: '$executeFile' ==========================================================="
 
 	## Do we have a viable script
 		[[ ! -r $executeFile ]] && echo && echo && Terminate "callPgm.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"
@@ -290,7 +273,6 @@ sTime=$(date "+%s")
 
 ## Call the script
 	## Initialize the log file
-		$GD -e "\n\tInitializing logFile..."
 		sTime=$(date "+%s")
 		logFile=/dev/null
 		if [[ $noLog != true ]]; then
@@ -307,25 +289,20 @@ sTime=$(date "+%s")
 			Msg2 "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}" >> $logFile
 			Msg2 "$(PadChar)" >> $logFile
 			Msg2 >> $logFile
-			$GD -e "\t logFile: $logFile"
 		fi
 
 	prtStatus ", initialize logFile"
 	sTime=$(date "+%s")
 
-
 	## Call program function
-		$GD -e "\nCall $executeFile $scriptArgs\n"
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
 		#(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile; rc=$?
 		prtStatus ", calling script..."
 		[[ $batchMode != true && $myQuiet != true ]] && echo
-Here D1
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		source $executeFile $scriptArgs 2>&1 | tee -a $logFile; rc=$?
 		rc="$?"
-Here D2
 
 ## Should never get here but just in case
 	CleanUp $rc
@@ -411,3 +388,4 @@ Here D2
 ## 05-05-2017 @ 08.41.58 - ("1.2.114") - dscudiero - Add additional verbose status statements
 ## 05-05-2017 @ 08.45.26 - ("1.2.115") - dscudiero - tweak messaging
 ## 05-10-2017 @ 09.42.55 - ("1.2.124") - dscudiero - General syncing of dev to prod
+## 05-10-2017 @ 09.45.37 - ("1.2.126") - dscudiero - General syncing of dev to prod
