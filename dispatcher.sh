@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.128" # -- dscudiero -- Wed 05/10/2017 @ 12:54:46.94
+version="1.2.130" # -- dscudiero -- Wed 05/10/2017 @ 12:58:58.79
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -26,18 +26,6 @@ myName='dispatcher'
 	[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/dispatcher.sh"
 
 #==================================================================================================
-# Global Functions
-#==================================================================================================
-	# function GD {
-	# 	[[ $DEBUG != true ]] && return 0
-	# 	[[ -z $stdout ]] && stdout=/dev/tty
-	# 	[[ $* == 'clear' ]] && echo > $stdout && return 0
-	# 	$* >> $stdout
-	# 	return 0
-	# }
-	# export -f GD
-
-#==================================================================================================
 # Local Functions
 #==================================================================================================
 	function prtStatus {
@@ -54,7 +42,6 @@ myName='dispatcher'
 #==================================================================================================
 function CleanUp {
 	local rc=$1
-	GD echo -e "\n=== Dispatcher.Cleanup Starting' =================================================================="
 	set +eE
 	trap - ERR EXIT
 	## Cleanup log file
@@ -77,7 +64,6 @@ function CleanUp {
 		[[ -n $savePath ]] && export PATH="$savePath"
 		[[ -n $saveClasspath ]] && export CLASSPATH="$saveClasspath"
 
-	GD echo -e "\n=== Dispatcher.Cleanup Completed' =================================================================="
 	exec 3>&-  ## Close file descriptor #3 -
 	exit $rc
 } #CleanUp
@@ -392,3 +378,4 @@ sTime=$(date "+%s")
 ## 05-10-2017 @ 09.45.37 - ("1.2.126") - dscudiero - General syncing of dev to prod
 ## 05-10-2017 @ 12.48.48 - ("1.2.127") - dscudiero - Turn off traps before script call
 ## 05-10-2017 @ 12.55.26 - ("1.2.128") - dscudiero - Removed the GD function
+## 05-10-2017 @ 12.58.59 - ("1.2.130") - dscudiero - removed extra GD calls
