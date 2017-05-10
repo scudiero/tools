@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.126" # -- dscudiero -- Wed 05/10/2017 @  9:45:20.15
+version="1.2.127" # -- dscudiero -- Wed 05/10/2017 @  9:59:27.58
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -300,6 +300,7 @@ sTime=$(date "+%s")
 		#(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile; rc=$?
 		prtStatus ", calling script..."
 		[[ $batchMode != true && $myQuiet != true ]] && echo
+		TrapSigs 'off'
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		source $executeFile $scriptArgs 2>&1 | tee -a $logFile; rc=$?
 		rc="$?"
@@ -389,3 +390,4 @@ sTime=$(date "+%s")
 ## 05-05-2017 @ 08.45.26 - ("1.2.115") - dscudiero - tweak messaging
 ## 05-10-2017 @ 09.42.55 - ("1.2.124") - dscudiero - General syncing of dev to prod
 ## 05-10-2017 @ 09.45.37 - ("1.2.126") - dscudiero - General syncing of dev to prod
+## 05-10-2017 @ 12.48.48 - ("1.2.127") - dscudiero - Turn off traps before script call
