@@ -28,6 +28,28 @@ resultSet.forEach(function(text) {
 	print_debug('text = ' + text.toSource() + '\n');
 });
 
+
+============================================================================================================================================================================
+//Parse an option list 
+var tmpArray1=options.split(" ");
+tmpArray1.forEach(function(text) {
+	print_debug('text = ' + text.toSource() + '\n');
+	tmpArray2=text.split(':');
+	switch(tmpArray2[0].toLowerCase()) {
+	    case "mode":
+	    	mode=tmpArray2[1];
+	        break;
+	    case "checkfields":
+	        checkFieldsStr=tmpArray2[1];
+	        break;
+	    case "notmode":
+	    	notMode=tmpArray2[1];
+	        break;
+	    default:
+	        unknownOpts=unknownOpts + text;
+	}
+});
+
 ============================================================================================================================================================================
 //Regular Expression testing
 var regex = new RegExp('^[123]..$','i');
@@ -199,3 +221,4 @@ WfDataMapper = function(type,data) {
 	return retVal;
 
 } //WfDataMapper// 05-09-2017 @ 13.27.42 - dscudiero - add mapping examples
+// 05-11-2017 @ 14.54.54 - dscudiero - add example of parsing options
