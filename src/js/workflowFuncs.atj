@@ -1,47 +1,43 @@
 //======================================================================================================================
+// version:1.0.3 // -- dscudiero -- Thu 05/11/2017 @  9:21:38.99
+//======================================================================================================================
+// Workflow functions unique for this CIM instance
+//======================================================================================================================
 // ??/??/17-- dgs -- initial
-// version:1.0.2 // -- dscudiero -- 03/23/2017 @ 12:42:46.61
+// 04/10/17 - dgs -	Refactored initialization block, removed end of load messages
 //======================================================================================================================
-// Workflow functions
-//======================================================================================================================
-//"use strict";
-// Do only once
 if (typeof wfFunctionsLoaded == "undefined") {
 	//Get the CIM instance name
 	var wfCimInstance=tcfdata.pagename[0].replace(/^\/([^\/]*)\/.*/, "/$1/");
 	wfCimInstance=wfCimInstance.replace(/\//g, "");
 
 	// If wfDebugLevel is set in the config file then set as global
-	var wfDebugLevel=0;
-	if (typeof tcfdata.wfDebugLevel != 'undefined')
-		wfDebugLevel=parseInt(tcfdata.wfDebugLevel[0]);
+	var wfDebugLevel=getTCFValue("wfDebugLevel");
+	if (wfDebugLevel === "" ) wfDebugLevel=0;
+	var wfDebugEnvs=getTCFValue("wfDebugEnvs");
+	var host=getenv("HTTP_HOST").toLowerCase();
 
-	var wfDebugEnvs='';
-	var wfInDebugEnv=false;
-	var wfEnv="";
-	var wfEnvIsDev=false;
-	var wfInitialLoad=true;
 	// Debug environment, print info
-	if (typeof tcfdata.wfDebugEnvs != 'undefined') {
-		wfDebugEnvs=","+tcfdata.wfDebugEnvs[0]+",";
-		// What environment are we running in
-		var host=getenv("HTTP_HOST").toLowerCase();
-		if (host.indexOf('.dev') > 0) { var wfEnv  ="dev"; wfEnvIsDev=true;
-		} else if (host.indexOf('-test') > 0) { var wfEnv = "test";
-		} else if (host.indexOf('-next') > 0) { var wfEnv = "next";
-		} else {wfEnv = "*unknown*"}
-		// If in a debug environment then print out stuff
-		if (wfDebugEnvs.indexOf(',' + wfEnv + ',') >= 0) {
-			wfInDebugEnv=true;
-			if (tcfdata.newrecord == 'true') { var wfProposalMode='NEW';
-			} else if (tcfdata.deleterec == 'true') { var wfProposalMode='DELETE';
-			} else { var wfProposalMode='EDIT'; }
-			var d = new Date();
-			var prtStr="\n" + Array(40).join("=") + " " + d.toString() + " " + Array(40).join("=") +
-						"\n<<< Loading workflowFuncs.atj, proposal mode is " + wfProposalMode;
-			wfDebug(1,prtStr);
-		} //(host.indexOf(".dev") > 0)
-	} //(typeof tcfdata.wfDebugEnvs != 'undefined')
+	wfDebugEnvs="," + wfDebugEnvs + ",";
+	var wfEnvIsDev=false;
+	var wfEnv = "*unknown*";
+	if (host.indexOf('.dev') > 0) { var wfEnv  ="dev"; wfEnvIsDev=true;
+	} else if (host.indexOf('-test') > 0) { var wfEnv = "test";
+	} else if (host.indexOf('-next') > 0) { var wfEnv = "next";
+	}
+	// If in a debug environment then print out stuff
+	if (wfDebugEnvs.indexOf("," + wfEnv + ",") >= 0) {
+		wfInDebugEnv=true;
+		var wfProposalMode='EDIT'
+		if (getTCFValue("newrecord") === "true") { var wfProposalMode='NEW';
+		} else if (getTCFValue("deleterec") === "true") { var wfProposalMode='DELETE';
+		}
+		var d = new Date();
+		var prtStr="\n" + Array(40).join("=") + " " + d.toString() + " " + Array(40).join("=") +
+					"\n<<< Loading workflowFuncs.atj, proposal mode is " + wfProposalMode;
+		if ( wfDebugLevel > 0 ) print_debug(prtStr);
+	} else { wfInDebugEnv=false }
+	//(host.indexOf(".dev") > 0)
 
 	var wfFunctionsLoaded=false;
 } //(typeof wfFunctionsLoaded == "undefined")
@@ -99,7 +95,6 @@ wffuncs.ProposalState = function(inval, wfrule, args) {
 	retVal=inval.replace(wfrule.regex,retVal);
 	wfDebug(4,"\t*** Returning '" + retVal + "'\n")
 	return [retVal]
-
 }; //ProposalState
 
 //======================================================================================================================
@@ -153,10 +148,11 @@ wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 //======================================================================================================================
 wfLibName="/locallibs/workflowLib.atj"
 %import %progdir%/locallibs/workflowLib.atj:atj;
-if (wfEnvIsDev && !wfInitialLoad) wfDebug(1,"\tworkflowFuncs.atj loaded\n"); wfInitialLoad=false;
+
 //======================================================================================================================
 //======================================================================================================================
 // Check in log
 //======================================================================================================================
 // Tue Mar 21 11:07:28 CDT 2017 - dscudiero - Added check in log comments
 // 03-24-2017 @ 07.36.56 - (//)        - dscudiero - General syncing of dev to prod
+// 05-11-2017 @ 14.55.28 - (//)        - dscudiero - refactored the begining stuff, removed loaded messages
