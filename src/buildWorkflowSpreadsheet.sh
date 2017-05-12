@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.93 # -- dscudiero -- Thu 04/13/2017 @ 13:57:55.74
+version=1.2.1 # -- dscudiero -- Fri 05/12/2017 @ 10:01:47.62
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -74,7 +74,7 @@ scriptDescription="Build workflow spreadsheet from workflow file"
 
 		Msg2 $V2 "*** Ending $FUNCNAME ***"
 		return 0
-	}
+	} ## ParseEsig
 
 	#==============================================================================================
 	# Parse an wfrules record
@@ -87,7 +87,7 @@ scriptDescription="Build workflow spreadsheet from workflow file"
 		local rtype value tmpStr
 		dump -2 -t ruleName line description
 
-		if [[ $(Contains "$line" '|attr|') == true ]]; then
+		if [[ $(Contains "$line" '|attr|') == true || $(Contains "$line" '|function|wfAttr|') == true ]]; then
 			#line = >Col|attr|college_prog.code|; <
 			substitutionVars[$ruleName]="$description\t\tattr{$(cut -d'|' -f3 <<< "$line")}"
 			substitutionVarsKeys+=($ruleName)
@@ -117,7 +117,7 @@ scriptDescription="Build workflow spreadsheet from workflow file"
 
 		Msg2 $V2 "*** Ending $FUNCNAME ***"
 		return 0
-	}
+	} ## ParseWfrule
 
 #==================================================================================================
 # Declare local variables and constants
@@ -176,13 +176,11 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 
 	## Read the workflow.cfg file for the cim
 	## Parse off the wfrules
-	unset substitutionVars wfrules wfrulesKeys substitutionVarsKeys esigsKeys
+	unset substitutionVars wfrules wfrulesKeys substitutionVarsKeys esigsKeys wfrules wforder
 	declare -A wfrules ; declare -A esigs ; declare -A substitutionVars
 	Msg2 "^Parsing '$grepFile'"
-	#lines=($(ProtectedCall grep '^wfrules:' $grepFile))
 	[[ -f $tmpFile ]] && rm -f $tmpFile
-	#ProtectedCall grep '^wfrules:\|^esiglist:' $grepFile >> $tmpFile
-	\grep '^wfrules:\|^esiglist:' $grepFile >> $tmpFile
+	\grep '^wfrules:\|^wforder:\|^esiglist:\|^voterules:' $grepFile >> $tmpFile
 	unset lines; while read line; do lines+=("$line"); done < $tmpFile; [[ -f $tmpFile ]] && rm -f $tmpFile
 	for line in "${lines[@]}"; do
 		dump -1 -n line
@@ -199,6 +197,10 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 			ParseEsig "$ruleName" "$line" "$description"
 		elif [[ $ruleType == 'wfrules' ]]; then
 			ParseWfrule "$ruleName" "$line" "$description"
+		elif [[ $ruleType == 'wforder' ]]; then
+			wforders+=("$(cut -d':' -f2 <<< "$line")")
+		elif [[ $ruleType == 'voterules' ]]; then
+			voterules+=("$(cut -d':' -f2 <<< "$line")")
 		else
 			:
 		fi
@@ -219,6 +221,8 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 			Msg2 "^substitutionVars:"; for i in "${substitutionVarsKeys[@]}"; do echo -e "\t[$i] = >${substitutionVars[$i]}<"; done;
 			Msg2 "^esigs:"; for i in "${esigsKeys[@]}"; do echo -e "\t[$i] = >${esigs[$i]}<"; done;
 			Msg2 "^wfrules:"; for i in "${wfrulesKeys[@]}"; do echo -e "\t[$i] = >${wfrules[$i]}<"; done;
+			Msg2 "^wforders:"; for ((jj=0; jj<${#wforders[@]}; jj++)); do echo -e "\t[$jj] = >${wforders[$jj]}<"; done;
+			Msg2 "^voterules:"; for ((jj=0; jj<${#voterules[@]}; jj++)); do echo -e "\t[$jj] = >${voterules[$jj]}<"; done;
 		fi
 
 	## Write out 'Substitution Vars' data
@@ -251,6 +255,24 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 				(( cntr += 1 ))
 			done
 			Msg2 "^^Found ${#wfrulesKeys[@]} Conditional rules"
+		fi
+
+	## Write out 'wforder' data
+		if [[ ${#wforders[@]} -gt 0 ]]; then
+			Msg2 "\n#\Workflow\t\t\tComment" >> $outFile
+			for ((i=0; i<${#wforders[@]}; i++)); do
+				echo -e "$i\t${wforders[$i]}" >> $outFile
+			done
+			Msg2 "^^Found ${#wforders[@]} Workflow order rules"
+		fi
+
+	## Write out 'voterules' data
+		if [[ ${#voterules[@]} -gt 0 ]]; then
+			Msg2 "\n#\Vote Rule\t\t\tComment" >> $outFile
+			for ((i=0; i<${#voterules[@]}; i++)); do
+				echo -e "$i\t${voterules[$i]}" >> $outFile
+			done
+			Msg2 "^^Found ${#voterules[@]} Vote rules"
 		fi
 
 	## Read the workflow.tcf file for the cim
@@ -344,3 +366,4 @@ Goodbye 0 #'alert'
 ## Mon Oct 24 09:14:53 CDT 2016 - dscudiero - Display directory on verifyContinue
 ## Mon Feb 13 16:04:12 CST 2017 - dscudiero - make sure we are using our one tmpFile
 ## 04-13-2017 @ 13.58.16 - (1.1.93)    - dscudiero - add a default value for verifyContinue
+## 05-12-2017 @ 11.09.09 - (1.2.1)     - dscudiero - Refactor parsing substitution variables to take into account wfAttr function bindings
