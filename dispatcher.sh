@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.136" # -- dscudiero -- Fri 05/12/2017 @ 14:57:29.71
+version="1.2.137" # -- dscudiero -- Fri 05/12/2017 @ 15:02:15.93
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -189,7 +189,7 @@ sTime=$(date "+%s")
 ## Source the init script
 	TrapSigs 'on'
 	source $initFile
-	prtStatus ", run initFile"
+	prtStatus ", load initFile"
 	sTime=$(date "+%s")
 
 ## If sourced then just return
@@ -246,14 +246,14 @@ sTime=$(date "+%s")
 			Msg2 >> $logFile
 		fi
 
-	prtStatus ", initialize logFile"
+	prtStatus ", logFile"
 	sTime=$(date "+%s")
 
 	## Call program function
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
 		#(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile; rc=$?
-		prtStatus ", calling script..."
+		prtStatus ", calling..."
 		[[ $batchMode != true && $myQuiet != true ]] && echo
 		TrapSigs 'off'
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
@@ -353,3 +353,4 @@ sTime=$(date "+%s")
 ## 05-12-2017 @ 14.46.21 - ("1.2.133") - dscudiero - General syncing of dev to prod
 ## 05-12-2017 @ 14.48.37 - ("1.2.134") - dscudiero - 1
 ## 05-12-2017 @ 14.58.05 - ("1.2.136") - dscudiero - misc changes to speed up
+## 05-12-2017 @ 15.05.20 - ("1.2.137") - dscudiero - tweak comments
