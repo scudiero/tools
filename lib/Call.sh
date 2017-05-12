@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.0.81" # -- dscudiero -- Fri 05/12/2017 @ 13:16:29.49
+# version="2.0.82" # -- dscudiero -- Fri 05/12/2017 @ 15:04:44.69
 #=======================================================================================================================
 # Generic resolve file and call
 # Call scriptName ["$scriptArgs"]
@@ -95,16 +95,16 @@ function Call {
 			local myPath="$(dirname $executeFile)"
 
 		## Get additional data from the scripts table for this scripts, process semaphores if required
-			local setSemaphore waitOn semaphoreId
-			sqlStmt="select setSemaphore,waitOn from $scriptsTable where name =\"$myName\" "
-			RunSql2 $sqlStmt
-			if [[ ${#resultSet[0]} -gt 0 ]]; then
-			 	resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString")
-				setSemaphore="$(cut -d'|' -f1 <<< "$resultString")"; [[ $setSemaphore == 'NULL' ]] && unset setSemaphore
-				waitOn="$(cut -d'|' -f2 <<< "$resultString")"; [[ $waitOn == 'NULL' ]] && unset waitOn
-				[[ -n $waitOn ]] && Semaphore 'waiton' $waitOn
-				[[ -n $setSemaphore ]] && semaphoreId=$(Semaphore 'set' $myName)
-			fi
+			# local setSemaphore waitOn semaphoreId
+			# sqlStmt="select setSemaphore,waitOn from $scriptsTable where name =\"$myName\" "
+			# RunSql2 $sqlStmt
+			# if [[ ${#resultSet[0]} -gt 0 ]]; then
+			#  	resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString")
+			# 	setSemaphore="$(cut -d'|' -f1 <<< "$resultString")"; [[ $setSemaphore == 'NULL' ]] && unset setSemaphore
+			# 	waitOn="$(cut -d'|' -f2 <<< "$resultString")"; [[ $waitOn == 'NULL' ]] && unset waitOn
+			# 	[[ -n $waitOn ]] && Semaphore 'waiton' $waitOn
+			# 	[[ -n $setSemaphore ]] && semaphoreId=$(Semaphore 'set' $myName)
+			# fi
 
 		## Call the program
 			savePath="$PATH"
@@ -158,3 +158,4 @@ export -f Call
 ## 04-14-2017 @ 13.01.43 - ("2.0.77")  - dscudiero - remove subshell on call
 ## 04-28-2017 @ 16.41.53 - ("2.0.78")  - dscudiero - run command in a subshell
 ## 05-12-2017 @ 13.16.49 - ("2.0.81")  - dscudiero - cleanup
+## 05-12-2017 @ 15.05.09 - ("2.0.82")  - dscudiero - Comment out semaphore stuff
