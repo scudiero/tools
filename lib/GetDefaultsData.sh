@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.30" # -- dscudiero -- 01/13/2017 @ 15:30:23.40
+# version="2.0.31" # -- dscudiero -- Fri 05/12/2017 @ 14:54:46.99
 #===================================================================================================
 # Get default variable values from the defaults database
 #===================================================================================================
@@ -9,19 +9,18 @@
 #===================================================================================================
 
 function GetDefaultsData {
-	Verbose 3 "*** Starting $FUNCNAME ***"
 	local scriptName="$1" ; shift || true
 	local table="${1:-$scriptsTable}"
-	local sqlStmt dbFields fields field fieldCntr varName whereClause
+	local sqlStmt fields field fieldCntr varName whereClause
 
 	## Set myPath based on if the current file has been sourced
 		[[ -d $(dirname ${BASH_SOURCE[0]}) ]] && myPath=$(dirname ${BASH_SOURCE[0]})
 
+	## Load common default values
 		if [[ $defaultsLoaded != true ]]; then
 			Verbose 3 "$FUNCNAME: Loading common values..."
-			dbFields="name,value"
 			whereClause="(os=\"$osName\" or os is null) and (host=\"$hostName\" or host is null) and status=\"A\""
-			sqlStmt="select $dbFields from defaults where $whereClause order by name,host"
+			sqlStmt="select name,value from defaults where $whereClause order by name,host"
 			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -eq 0 ]]; then
 				Msg2 $T "Could not retrieve common defaults data from the $mySqlDb.defaults table."
@@ -31,7 +30,7 @@ function GetDefaultsData {
 					varName=$(cut -d'|' -f1 <<< ${resultSet[$recCntr]})
 					[[ -z $varName ]] && continue
 					## If the variable does not already has a value, then set from the db data
-					[[ ${!varName} == '' ]] && eval $varName=\"$(cut -d '|' -f 2-  <<< ${resultSet[$recCntr]})\"
+					[[ -z ${!varName} ]] && eval $varName=\"$(cut -d '|' -f 2-  <<< ${resultSet[$recCntr]})\"
 					(( recCntr += 1 ))
 				done
 			fi
@@ -42,7 +41,7 @@ function GetDefaultsData {
 			defaultsLoaded=true
 		fi
 
-	## Get script specific data from the script record in the scripts database
+	## If scriptname was passed in then get script specific data from the script record in the scripts database
 		if [[ -n $scriptName ]]; then
 			Verbose 3 "Loading $scriptName defaults"
 			if [[ $table == $scriptsTable ]]; then
@@ -62,7 +61,6 @@ function GetDefaultsData {
 				done
 			fi
 		fi
-	Verbose 3 "*** Ending $FUNCNAME ***"
 	return 0
 } #GetDefaultsData
 export -f GetDefaultsData
@@ -77,3 +75,4 @@ export -f GetDefaultsData
 ## Fri Jan 13 15:15:16 CST 2017 - dscudiero - Add debug statements
 ## Fri Jan 13 15:21:55 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Jan 13 15:33:12 CST 2017 - dscudiero - remove debug code
+## 05-12-2017 @ 14.58.13 - ("2.0.31")  - dscudiero - misc changes to speed up
