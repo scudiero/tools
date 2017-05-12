@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.0.78" # -- dscudiero -- Fri 04/28/2017 @ 16:41:30.57
+# version="2.0.81" # -- dscudiero -- Fri 05/12/2017 @ 13:16:29.49
 #=======================================================================================================================
 # Generic resolve file and call
 # Call scriptName ["$scriptArgs"]
@@ -91,7 +91,7 @@ function Call {
 		## set environment vars overrides
 			local myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 			local pgmType="$(cut -d'.' -f2 <<< $(basename $executeFile))"
-			[[ $executeAlias != '' ]] && scriptArgs="$executeAlias $scriptArgs"
+			[[ -n $executeAlias ]] && scriptArgs="$executeAlias $scriptArgs"
 			local myPath="$(dirname $executeFile)"
 
 		## Get additional data from the scripts table for this scripts, process semaphores if required
@@ -157,3 +157,4 @@ export -f Call
 ## Tue Mar 14 13:20:01 CDT 2017 - dscudiero - return the condition code after the call
 ## 04-14-2017 @ 13.01.43 - ("2.0.77")  - dscudiero - remove subshell on call
 ## 04-28-2017 @ 16.41.53 - ("2.0.78")  - dscudiero - run command in a subshell
+## 05-12-2017 @ 13.16.49 - ("2.0.81")  - dscudiero - cleanup
