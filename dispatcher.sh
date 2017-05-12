@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.131" # -- dscudiero -- Fri 05/12/2017 @ 14:05:57.19
+version="1.2.132" # -- dscudiero -- Fri 05/12/2017 @ 14:23:30.35
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -201,24 +201,24 @@ sTime=$(date "+%s")
 		executeFile="$callPgmName"
 		callPgmName=$(basename $executeFile)
 		callPgmName=$(cut -d'.' -f1 <<< $callPgmName)
-	else
-		sTime=$(date "+%s")
-		## Get load data for this script from the scripts table
-			unset realCallName lib setSemaphore waitOn
-			sqlStmt="select exec,lib,setSemaphore,waitOn from $scriptsTable where name =\"$callPgmName\" "
-			RunSql2 $sqlStmt
-			if [[ ${#resultSet[0]} -gt 0 ]]; then
-			 	resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString")
-				realCallName="$(cut -d'|' -f1 <<< "$resultString")"
-				lib="$(cut -d'|' -f2 <<< "$resultString")"; [[ $lib == 'NULL' ]] && lib="src"
-				setSemaphore="$(cut -d'|' -f3 <<< "$resultString")"; [[ $setSemaphore == 'NULL' ]] && unset setSemaphore
-				waitOn="$(cut -d'|' -f4 <<< "$resultString")"; [[ $waitOn == 'NULL' ]] && unset waitOn
-				if [[ -n $realCallName && $realCallName != 'NULL' ]]; then
-					callPgmName="$(cut -d' ' -f1 <<< "$realCallName")"
-					callArgs="$(cut -d' ' -f2- <<< "$realCallName")"
-					[[ -n $callArgs ]] && scriptArgs="$callArgs $scriptArgs"
-				fi
-			fi
+	# else
+	# 	sTime=$(date "+%s")
+	# 	## Get load data for this script from the scripts table
+	# 		unset realCallName lib setSemaphore waitOn
+	# 		sqlStmt="select exec,lib,setSemaphore,waitOn from $scriptsTable where name =\"$callPgmName\" "
+	# 		RunSql2 $sqlStmt
+	# 		if [[ ${#resultSet[0]} -gt 0 ]]; then
+	# 		 	resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString")
+	# 			realCallName="$(cut -d'|' -f1 <<< "$resultString")"
+	# 			lib="$(cut -d'|' -f2 <<< "$resultString")"; [[ $lib == 'NULL' ]] && lib="src"
+	# 			setSemaphore="$(cut -d'|' -f3 <<< "$resultString")"; [[ $setSemaphore == 'NULL' ]] && unset setSemaphore
+	# 			waitOn="$(cut -d'|' -f4 <<< "$resultString")"; [[ $waitOn == 'NULL' ]] && unset waitOn
+	# 			if [[ -n $realCallName && $realCallName != 'NULL' ]]; then
+	# 				callPgmName="$(cut -d' ' -f1 <<< "$realCallName")"
+	# 				callArgs="$(cut -d' ' -f2- <<< "$realCallName")"
+	# 				[[ -n $callArgs ]] && scriptArgs="$callArgs $scriptArgs"
+	# 			fi
+	# 		fi
 	fi ## [[ ${callPgmName:0:1} == '\' ]]
 
 
@@ -367,3 +367,4 @@ sTime=$(date "+%s")
 ## 05-10-2017 @ 12.55.26 - ("1.2.128") - dscudiero - Removed the GD function
 ## 05-10-2017 @ 12.58.59 - ("1.2.130") - dscudiero - removed extra GD calls
 ## 05-12-2017 @ 14.19.21 - ("1.2.131") - dscudiero - x
+## 05-12-2017 @ 14.41.31 - ("1.2.132") - dscudiero - clean out commented code
