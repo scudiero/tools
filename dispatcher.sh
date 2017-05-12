@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.134" # -- dscudiero -- Fri 05/12/2017 @ 14:48:21.91
+version="1.2.136" # -- dscudiero -- Fri 05/12/2017 @ 14:57:29.71
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -178,7 +178,7 @@ sTime=$(date "+%s")
 ## Import thins we need to continue
 	sTime=$(date "+%s")
 	includes='StringFunctions Msg2 Dump Here Quit PushSettings PopSettings MkTmpFile Pause ProtectedCall'
-	includes="$includes SetFileExpansion PadChar PrintBanner Alert TrapSigs SignalHandeler RunSql RunSql2"
+	includes="$includes SetFileExpansion PadChar PrintBanner Alert TrapSigs SignalHandeler RunSql2 Prompt VerifyPromptVal"
 	includes="$includes DbLog ProcessLogger GetCallStack DisplayNews Help Call StartRemoteSession FindExecutable"
 	includes="$includes CheckRun CheckAuth CheckSemaphore GetDefaultsData Call ParseArgs ParseArgsStd Hello Init Goodbye"
 	Import "$includes"
@@ -352,3 +352,4 @@ sTime=$(date "+%s")
 ## 05-12-2017 @ 14.41.31 - ("1.2.132") - dscudiero - clean out commented code
 ## 05-12-2017 @ 14.46.21 - ("1.2.133") - dscudiero - General syncing of dev to prod
 ## 05-12-2017 @ 14.48.37 - ("1.2.134") - dscudiero - 1
+## 05-12-2017 @ 14.58.05 - ("1.2.136") - dscudiero - misc changes to speed up
