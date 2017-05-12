@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.130" # -- dscudiero -- Wed 05/10/2017 @ 12:58:58.79
+version="1.2.131" # -- dscudiero -- Fri 05/12/2017 @ 14:05:57.19
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -11,8 +11,11 @@ version="1.2.130" # -- dscudiero -- Wed 05/10/2017 @ 12:58:58.79
 dispatcherArgs="$*"
 myName='dispatcher'
 
+#==================================================================================================
+# Load BOOT data
+#==================================================================================================
 ## Read in data from the boot file, set base information
-	if [[ -r $(dirname $0)/bootData ]]; then 
+	if [[ -r $(dirname $0)/bootData ]]; then
 		source "$(dirname $0)/bootData"
 	else
 		[[ -z $TOOLSPATH ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is not set, cannot continue\n" && exit -1
@@ -54,7 +57,7 @@ function CleanUp {
 		fi
 
 	## Cleanup semaphore and dblogging
-		[[ $semaphoreProcessing == true && $(Lower $setSemaphore) == 'yes' && -n $semaphoreId ]] && Semaphore 'clear' $semaphoreId
+		[[ -n $semaphoreId ]] && Semaphore 'clear' $semaphoreId
 		[[ $logInDb != false && -n $myLogRecordIdx ]] && ProcessLogger 'End' $myLogRecordIdx
 		SetFileExpansion 'on'
 		[[ -f "$tmpFile" ]] && rm -f "$tmpFile"
@@ -71,10 +74,8 @@ function CleanUp {
 #==================================================================================================
 # Initialize local variables
 #==================================================================================================
-unset executeFile
 [[ "${BASH_SOURCE[0]}" != "${0}" ]] && calledViaSource=true || calledViaSource=false
 sTime=$(date "+%s")
-GD='GD echo'; #GD='echo'
 statusLine="\tDispatcher ($version): "
 ## Initialize file descriptor 3 to be stdout unless redirected by caller
 	if [[ -t 0 ]]; then # Im running interactive
@@ -105,7 +106,7 @@ tmpRoot=/tmp/$LOGNAME
 	[[ -f $(dirname $trueDir)/offline && $userName != $ME ]] && exit
 
 ## Parse off my arguments
-	unset scriptArgs myVerbose useDev useLocal semaphoreProcessing noLog noLogInDb batchMode useDevDb myVerbose myQuiet
+	unset scriptArgs myVerbose useDev useLocal noLog noLogInDb batchMode useDevDb myVerbose myQuiet
 	[[ $USELOCAL == true ]] && $useLocal=true
 	while [[ -n $@ ]]; do
 		if [[ ${1:0:2} == '--' ]]; then
@@ -113,7 +114,6 @@ tmpRoot=/tmp/$LOGNAME
 			[[ ${myArg:0:1} == 'v' ]] && myVerbose=true
 			[[ $myArg == 'useDev' ]] && useDev=true
 			[[ $myArg == 'uselocal' ]] && useLocal=true
-			[[ $myArg == 'nosemaphore' ]] && semaphoreProcessing=false
 			[[ $myArg == 'nolog' ]] && noLog=true && noLogInDb=true
 			[[ $myArg == 'nologindb' ]] && noLognDb=true
 			[[ $myArg == 'batchmode' ]] && batchMode=true && myQuiet=true
@@ -175,21 +175,6 @@ sTime=$(date "+%s")
 ## Initialize the runtime environment
 	[[ -z $initFile ]] && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
 
-## Set mysql connection information
-	# dbAcc='Read'
-	# mySqlUser="leepfrog$dbAcc"
-	# mySqlHost='duro'
-	# mySqlPort=3306
-	# [[ -r "$TOOLSPATH/src/.pw1" ]] && mySqlPw=$(cat "$TOOLSPATH/src/.pw1")
-	# if [[ -n $mySqlPw ]]; then
-	# 	unset sqlHostIP mySqlConnectString
-	# 	sqlHostIP=$(dig +short $mySqlHost.inside.leepfrog.com)
-	# 	[[ -z $sqlHostIP ]] && sqlHostIP=$(dig +short $mySqlHost.leepfrog.com)
-	# 	[[ -n $sqlHostIP ]] && mySqlConnectString="-h $sqlHostIP -port=$mySqlPort -u $mySqlUser -p$mySqlPw $warehouseDb"
-	# fi
-	# [[ -z $mySqlConnectString ]] && echo && echo "*Error* -- ($myName) Sorry, Insufficient information to set 'mySqlConnectString'" && exit -1
-	# prtStatus ", find initFile"
-
 ## Import thins we need to continue
 	sTime=$(date "+%s")
 	includes='StringFunctions Msg2 Dump Here Quit PushSettings PopSettings MkTmpFile Pause ProtectedCall'
@@ -236,6 +221,8 @@ sTime=$(date "+%s")
 			fi
 	fi ## [[ ${callPgmName:0:1} == '\' ]]
 
+
+
 	## Check to make sure we can run and are authorized
 		checkMsg=$(CheckRun $callPgmName)
 		if [[ $checkMsg != true ]]; then
@@ -246,7 +233,7 @@ sTime=$(date "+%s")
 		[[ $checkMsg != true ]] && echo && echo && Terminate "$checkMsg"
 
 	## Check semaphore
-		[[ $semaphoreProcessing == true && $(Lower $setSemaphore) == 'yes' ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
+		[[ $(Contains ",$setSemaphoreList," ",$callPgmName," ) == true ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
 
 	## Resolve the executable file
 		[[ -z $executeFile ]] && FindExecutable "$callPgmName"  ## Sets variable executeFile
@@ -379,3 +366,4 @@ sTime=$(date "+%s")
 ## 05-10-2017 @ 12.48.48 - ("1.2.127") - dscudiero - Turn off traps before script call
 ## 05-10-2017 @ 12.55.26 - ("1.2.128") - dscudiero - Removed the GD function
 ## 05-10-2017 @ 12.58.59 - ("1.2.130") - dscudiero - removed extra GD calls
+## 05-12-2017 @ 14.19.21 - ("1.2.131") - dscudiero - x
