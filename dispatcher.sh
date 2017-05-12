@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.133" # -- dscudiero -- Fri 05/12/2017 @ 14:45:40.01
+version="1.2.134" # -- dscudiero -- Fri 05/12/2017 @ 14:48:21.91
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -209,27 +209,22 @@ sTime=$(date "+%s")
 			[[ $(Contains ",$adminUsers," ",$userName,") != true ]] && echo && echo && Terminate "$checkMsg"
 			[[ $callPgmName != 'testsh' ]] && echo && echo "$(ColorW "*** $checkMsg ***")"
 		fi
-prtStatus ", CheckRun"
-sTime=$(date "+%s")
+
 		checkMsg=$(CheckAuth $callPgmName)
 		[[ $checkMsg != true ]] && echo && echo && Terminate "$checkMsg"
-prtStatus ", CheckAuth"
-sTime=$(date "+%s")
+
+		prtStatus ", check run"
+		sTime=$(date "+%s")
 
 	## Check semaphore
 		[[ $(Contains ",$setSemaphoreList," ",$callPgmName," ) == true ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
 
-	prtStatus ", check executable"
-	sTime=$(date "+%s")
-
 	## Resolve the executable file
 		[[ -z $executeFile ]] && FindExecutable "$callPgmName"  ## Sets variable executeFile
-
+		prtStatus ", find file"
+		sTime=$(date "+%s")
 	## Do we have a viable script
 		[[ ! -r $executeFile ]] && echo && echo && Terminate "callPgm.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"
-
-	prtStatus ", FindExecutable"
-	sTime=$(date "+%s")
 
 ## Call the script
 	## Initialize the log file
@@ -356,3 +351,4 @@ sTime=$(date "+%s")
 ## 05-12-2017 @ 14.19.21 - ("1.2.131") - dscudiero - x
 ## 05-12-2017 @ 14.41.31 - ("1.2.132") - dscudiero - clean out commented code
 ## 05-12-2017 @ 14.46.21 - ("1.2.133") - dscudiero - General syncing of dev to prod
+## 05-12-2017 @ 14.48.37 - ("1.2.134") - dscudiero - 1
