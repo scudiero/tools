@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.73 # -- dscudiero -- Wed 05/10/2017 @ 12:44:41.80
+version=3.11.76 # -- dscudiero -- Fri 05/12/2017 @ 13:24:31.78
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -47,7 +47,7 @@ function BuildMenuList {
 			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -ne 0 ]]; then
 				for result in "${resultSet[@]}"; do
-					[[ $whereClauseGroups == '' ]] && whereClauseGroups="restrictToGroups like \"%$result%\"" || \
+					[[ -z $whereClauseGroups ]] && whereClauseGroups="restrictToGroups like \"%$result%\"" || \
 													  whereClauseGroups="$whereClauseGroups or restrictToGroups like \"%$result%\""
 				done
 				whereClauseGroups="and ($whereClauseGroups or restrictToGroups is null)"
@@ -55,7 +55,7 @@ function BuildMenuList {
 		fi
 
 		fields="keyId,name,shortDescription,author,supported,edate"
-		unset $(echo $fields | tr ',' ' ')
+		unset $(tr ',' ' ' <<< "$fields")
 		sqlStmt="select $fields from $table where $whereClauseActive $whereClauseHost $whereClauseUser $whereClauseGroups order by name"
 		RunSql2 $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Sorry, you do not have access to any scripts.\n\tsqlStmt: $sqlStmt"
@@ -109,7 +109,7 @@ function ExecScript {
 		[[ -n $scriptArgs ]] && scriptArgs="$scriptArgs $userArgs" || scriptArgs="$userArgs"
 
 	## Parse the exec string for overrides, <scriptName> <scriptArgs>
-		if [[ $exec != '' ]]; then
+		if [[ -n $exec ]]; then
 			name=$(cut -d' ' -f1 <<< "$exec")
 			local tmpStr="$(cut -d' ' -f2- <<< "$exec")"
 			[[ -n $tmpStr ]] && scriptArgs="$tmpStr $scriptArgs"
@@ -147,8 +147,8 @@ function ExecScript {
 function ExecReport {
 	local name=$1; shift
 	local additionalArgs="$*"
-	[[ $additionalArgs != '' && $client != '' ]] && additionalArgs="$client $additionalArgs"
-	[[ $additionalArgs == '' && $client != '' ]] && additionalArgs="$client"
+	[[ -n ${additionalArgs}${client} ]] && additionalArgs="$client $additionalArgs"
+	[[ -z $additionalArgs && -n $client ]] && additionalArgs="$client"
 	local exec rc
 
 	## Lookup detailed script info from db
@@ -221,9 +221,9 @@ function ExecReport {
 fullDisplay=false
 askedDisplayWidthQuestion=false
 
-mode=$(echo $1 | tr '[:upper:]' '[:lower:]')
+mode=$(tr '[:upper:]' '[:lower:]' <<< "$1")
 [[ $mode == 'reports' || $mode == 'scripts' ]] && shift && originalArgStr="$*"
-[[ $mode == '' ]] && mode='scripts'
+[[ -z $mode ]] && mode='scripts'
 [[ $mode != 'scripts' && $mode != 'reports' ]] && Terminate "Invalid mode ($mode) specified on call"
 
 ## Check to see if the first argument is a report name
@@ -271,7 +271,7 @@ ParseArgsStd
 Hello
 
 [[ $newsDisplayed == true ]] && Pause "\nNews was displayed, please review and press any key to continue"
-[[ $mode == 'scripts' && $client != '' ]] && Init 'getClient'
+[[ $mode == 'scripts' && -n $client ]] && Init 'getClient'
 #[[ $mode == 'reports' && $client != '' ]] && report="$client"
 
 dump -1 mode report script originalArgStr itemType itemTypeCap table
@@ -285,7 +285,7 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 		PushSettings "$myName"
 		previousTrapERR=$(trap -p ERR | cut -d ' ' -f3-) ; trap - ERR ; set +e
 		grep -q 'alias scripts="$TOOLSPATH/bin/scripts"' $HOME/.bashrc ; rc=$?
-		[[ $previousTrapERR != '' ]] && eval "trap $previousTrapERR"
+		[[ -n $previousTrapERR ]] && eval "trap $previousTrapERR"
 		PopSettings "$myName"
 
 		if [[ $rc -gt 0 ]]; then
@@ -303,7 +303,7 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 			fi
 		fi
 	else
-		[[ $report == '' && $script == '' ]] && Terminate "Running in batchMode and no value specified for report/script"
+		[[ -z ${scripts}${reports} ]] && Terminate "Running in batchMode and no value specified for report/script"
 	fi
 
 ## If we do not have a report or script name then build & display the menu
@@ -313,7 +313,7 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 	[[ $(Contains "$grepStr" "$TOOLSPATH/bin") != true ]] && pathSave="$PATH" && export PATH="$PATH:$TOOLSPATH/bin"
 	loop=true
 	while [[ $loop == true ]]; do
-		if [[ $report == '' && $script == '' ]]; then
+		if [[ -z $report && -z $script ]]; then
 			unset itemName
 			BuildMenuList
 			ProtectedCall "clear"
@@ -323,8 +323,8 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 			echo
 			#[[ $mode == 'scripts' && $client != '' ]] && clientStr=" (client: '$client')" || unset clientStr
 			SelectMenuNew 'menuList' 'itemName'
-			[[ $itemName == '' ]] && Goodbye 'x'
-			itemName=$(cut -d' ' -f1 <<< $itemName)
+			[[ -z $itemName ]] && Goodbye 'x'
+			itemName=$(cut -d ' ' -f1 <<< $itemName)
 			length=${#itemName}
 			[[ ${itemName:$length-1:1} == '*' ]] && itemName=${itemName:0:$length-1}
 			echo
@@ -358,16 +358,16 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 	done
 
 ## Send out emails
-	if [[ $emailAddrs != '' && $mode == 'reports' && $noEmails == false && $sendMail == true ]]; then
+	if [[ -n $emailAddrs && $mode == 'reports' && $noEmails == false && $sendMail == true ]]; then
 		echo | tee -a $outFile; Msg2 "Sending email(s) to: $emailAddrs" | tee -a $outFile; echo | tee -a $outFile
-		for emailAddr in $(echo $emailAddrs | tr ',' ' '); do
+		for emailAddr in $(tr ',' ' ' <<< "$emailAddrs"); do
 			$DOIT mutt -a "$outFile" -s "$report report results: $(date +"%m-%d-%Y")" -- $emailAddr < $outFile
 		done
 	fi
 
 #==================================================================================================
 ## Bye-bye
-[[ $pathSave != '' ]] && export PATH="$pathSave"
+[[ -n $pathSave ]] && export PATH="$pathSave"
 Goodbye 0
 
 #==================================================================================================
@@ -440,3 +440,4 @@ Goodbye 0
 ## Thu Mar 16 13:00:00 CDT 2017 - dscudiero - Tweaked messaging
 ## 05-05-2017 @ 13.21.31 - (3.11.72)   - dscudiero - Remove GD code
 ## 05-10-2017 @ 12.50.19 - (3.11.73)   - dscudiero - turn off messages for success or faliure of called script
+## 05-12-2017 @ 13.45.57 - (3.11.76)   - dscudiero - Misc cleanup
