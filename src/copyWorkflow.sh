@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.8.75 # -- dscudiero -- Tue 04/04/2017 @  8:16:32.44
+version=2.8.76 # -- dscudiero -- Thu 05/11/2017 @ 12:33:47.41
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -23,6 +23,8 @@ scriptDescription="Copy workflow files"
 		#argList+=(-optionArg,1,option,scriptVar,,script,'Help text')
 		#argList+=(-flagArg,2,switch,scriptVar,,script,'Help text')
 		argList+=(-allCims,3,switch,allCims,,script,'Process all CIM instances present')
+		argList+=(-jalotTask,3,option,jalotTask,,script,'Jalot task number')
+		argList+=(-updateComment,3,option,updateComment,,script,'Comment describing the reason for the update')
 	}
 	function Goodbye-copyWorkflow  { # or Goodbye-local
 		rm -rf $tmpRoot > /dev/null 2>&1
@@ -455,3 +457,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## Tue Mar  7 14:45:49 CST 2017 - dscudiero - add jalot task to the update comment
 ## Fri Mar 17 16:40:36 CDT 2017 - dscudiero - remove errant t from logged lines
 ## 04-04-2017 @ 09.08.22 - (2.8.75)    - dscudiero - Fix issue where it wasa still prompting for jalot and reason when noPrompt was active
+## 05-12-2017 @ 11.10.41 - (2.8.76)    - dscudiero - Added -jalotTask and -changeComment as options to the command line call
