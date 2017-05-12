@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.0.101" # -- dscudiero -- Fri 05/05/2017 @ 13:19:26.65
+# version="1.0.102" # -- dscudiero -- Fri 05/12/2017 @ 14:57:45.11
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -17,7 +17,6 @@
 # All rights reserved
 #=======================================================================================================================
 function FindExecutable {
-	Import RunSql2 Prompt VerifyPromptVal Goodbye
 	local callPgmName=$1; shift
 	local searchMode=${1:-std}; shift
 	local srcTypes="$1"; shift
@@ -131,3 +130,4 @@ export -f FindExecutable
 #=======================================================================================================================
 ## Wed Jan  4 13:53:26 CST 2017 - dscudiero - General syncing of dev to prod
 ## 05-05-2017 @ 13.21.05 - ("1.0.101") - dscudiero - Remove GD code
+## 05-12-2017 @ 14.58.09 - ("1.0.102") - dscudiero - misc changes to speed up
