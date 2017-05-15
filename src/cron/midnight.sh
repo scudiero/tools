@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.223 # -- dscudiero -- Tue 05/09/2017 @  8:00:54.05
+version=1.21.224 # -- dscudiero -- Mon 05/15/2017 @  9:08:54.30
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -301,7 +301,7 @@ case "$hostName" in
 			RunCourseLeafCgi "$stageInternal" "-r /clients"
 			RunCourseLeafCgi "$stageInternal" "-r /support/tools"
 			RunCourseLeafCgi "$stageInternal" "-r /support/qa"
-			Msg2 "^Done"
+			Msg2 "^buildClientInfoTable & buildSiteInfoTable Done"
 
 		# ## Create a clone of the warehouse db
 		# 	Msg2 "Creating '$warehouseDev' database..."
@@ -449,3 +449,4 @@ return 0
 ## 05-04-2017 @ 14.21.59 - (1.21.221)  - dscudiero - add cleanDevs call to build7
 ## 05-05-2017 @ 07.04.45 - (1.21.222)  - dscudiero - Fix call to cleanDev
 ## 05-09-2017 @ 08.01.30 - (1.21.223)  - dscudiero - fix call to cleanDev in build7 section
+## 05-15-2017 @ 10.25.38 - (1.21.224)  - dscudiero - tweak message
