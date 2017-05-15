@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=1.1.29 # -- dscudiero -- Mon 04/17/2017 @  8:05:07.10
+version=1.1.31 # -- dscudiero -- Mon 05/15/2017 @ 16:17:21.97
 #===================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye WriteChangelogEntry BackupCourseleafFile'
@@ -13,6 +13,12 @@ scriptDescription="Advance a courseleaf site to next edition"
 #= Description +===================================================================================
 # Advance a courseleaf site to next edition
 #==================================================================================================
+
+Msg2
+Info "The functionality of this script has now been encorporated in the 'courseleafPatch' script."
+Info "Please run that script."
+Msg2
+Quit
 
 #= Change Log =====================================================================================
 # Copyright ©2015 David Scudiero -- all rights reserved.
@@ -278,3 +284,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client)")/$(ColorK "$(Upper $env)") to $(C
 ## Fri Jan 27 10:35:07 CST 2017 - dscudiero - Trap error messages from ls command looking for courseleaf releases
 ## 04-06-2017 @ 10.09.32 - (1.1.25)    - dscudiero - renamed RunCourseLeafCgi, use new name
 ## 04-17-2017 @ 08.18.27 - (1.1.29)    - dscudiero - fix problem if current edition number is not numeric
+## 05-15-2017 @ 16.18.51 - (1.1.31)    - dscudiero - Add deactivate message, point user to courseleafPatch
