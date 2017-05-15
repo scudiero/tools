@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.4.137 # -- dscudiero -- Wed 05/10/2017 @ 14:35:55.95
+version=3.4.138 # -- dscudiero -- Mon 05/15/2017 @  7:11:23.57
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -213,11 +213,11 @@ if [[ -n $client ]]; then
 			file=$(tr -d ':' <<< "$file")
 			if [[ $(Contains "$file" 'WithSave') == true ]]; then
 				Msg2 "^Deleting '$(basename $file)' with workflow save"
-				echo Call saveWorkflow -daemon -siteFile "$file" -all -suffix "beforeDelete-$backupSuffix -quiet -nop"
+				Call saveWorkflow -daemon -siteFile "$file" -all -suffix "beforeDelete-$backupSuffix -quiet -nop"
 			else
 				Msg2 "^Deleting '$(basename $file)'"
 			fi
-			echo mv -f "$file" "$file.BeingDeletedBy$(TitleCase "$myName")"
+			mv -f "$file" "$file.BeingDeletedBy$(TitleCase "$myName")"
 			(nohup rm -rf "$file.BeingDeletedBy$(TitleCase "$myName")" &> /dev/null) &
 		done
 		Msg2 "Ending $myName in daemon mode..."
@@ -263,3 +263,4 @@ Goodbye 0
 ## 05-04-2017 @ 14.17.07 - (3.4.114)   - dscudiero - Add daemon mode to support automatic cleanup
 ## 05-04-2017 @ 14.20.26 - (3.4.115)   - dscudiero - Add quiet flag on saveWorkflow call
 ## 05-10-2017 @ 14.36.11 - (3.4.137)   - dscudiero - Refactor the daemon code
+## 05-15-2017 @ 07.11.45 - (3.4.138)   - dscudiero - Activate code for daemon
