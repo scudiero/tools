@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.91 # -- dscudiero -- Wed 04/12/2017 @ 15:44:08.31
+version=3.8.94 # -- dscudiero -- Mon 05/15/2017 @ 14:27:27.21
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -821,6 +821,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 	echo
 	rolesFile=$srcDir/web/$courseleafProgDir/roles.tcf
 
+	dump -1 processUserData processRoleData processedPageData sheets
 	## Get process the sheets as directed
 		if [[ $processUserData == true ]]; then
 			if [[ $(Contains "$(Lower $sheets)" 'user') == true ]]; then
@@ -861,7 +862,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 				ProcessCatalogPageData
 				processedPageData=true
 			else
-				WarningMsg 0 1 "No page data sheet found in workbook, sheets found: '$sheets', skipping user data"
+				WarningMsg 0 1 "No page data sheet ('workflow' or 'page') found in workbook, sheets found: '$sheets', skipping page data"
 			fi
 		fi
 
@@ -936,10 +937,10 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 
 	## Write out change log entries
 	if [[ $informationOnlyMode != true ]]; then
-		changeLogLines=("Data updated from '$workbookFile':")
-		[[ $processedUserData == true ]] && changeLogLines+=("^User data")
-		[[ $processedRoleData == true ]] && changeLogLines+=("^Role data")
-		[[ $processedPageData == true ]] && changeLogLines+=("^Page data")
+		changeLogLines=("Data updated from '$workbookFileIn':")
+		[[ $processedUserData == true ]] && changeLogLines+=("User data")
+		[[ $processedRoleData == true ]] && changeLogLines+=("Role data")
+		[[ $processedPageData == true ]] && changeLogLines+=("Page data")
 		WriteChangelogEntry 'changeLogLines' "$srcDir/changelog.txt"
 	fi
 
@@ -1009,3 +1010,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## Wed Mar 22 15:30:31 CDT 2017 - dscudiero - Fix spelling error
 ## 04-06-2017 @ 10.10.20 - (3.8.86)    - dscudiero - renamed RunCourseLeafCgi, use new name
 ## 04-17-2017 @ 12.30.27 - (3.8.91)    - dscudiero - skip
+## 05-15-2017 @ 14.27.49 - (3.8.94)    - dscudiero - Tweek changelog messages
