@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.137" # -- dscudiero -- Fri 05/12/2017 @ 15:02:15.93
+version="1.2.138" # -- dscudiero -- Mon 05/15/2017 @ 10:24:32.79
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -18,7 +18,7 @@ myName='dispatcher'
 	if [[ -r $(dirname $0)/bootData ]]; then
 		source "$(dirname $0)/bootData"
 	else
-		[[ -z $TOOLSPATH ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is not set, cannot continue\n" && exit -1
+		[[ -z $TOOLSPATH ]] && TOOLSPATH="/steamboat/leepfrog/docs/tools"
 		[[ ! -d $TOOLSPATH ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but is not a directory, cannot continue\n" && exit -1
 		[[ ! -r $TOOLSPATH/bootData ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but you cannot access the boot record, cannot continue\n" && exit -1
 		source "$TOOLSPATH/bootData"
@@ -354,3 +354,4 @@ sTime=$(date "+%s")
 ## 05-12-2017 @ 14.48.37 - ("1.2.134") - dscudiero - 1
 ## 05-12-2017 @ 14.58.05 - ("1.2.136") - dscudiero - misc changes to speed up
 ## 05-12-2017 @ 15.05.20 - ("1.2.137") - dscudiero - tweak comments
+## 05-15-2017 @ 10.25.07 - ("1.2.138") - dscudiero - Set TOOLSPATH if not already set
