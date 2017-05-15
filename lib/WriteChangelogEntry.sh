@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.12" # -- dscudiero -- Tue 05/09/2017 @ 11:55:14.69
+# version="2.0.14" # -- dscudiero -- Mon 05/15/2017 @ 14:21:08.83
 #===================================================================================================
 # Write a 'standard' format courseleaf changelog.txt
 # args: "logFileName" ${lineArray[@]}
@@ -15,6 +15,7 @@
 # args: "logFileName" ${lineArray[@]}
 #===================================================================================================
 function WriteChangelogEntry {
+	Import "ParseCourseleafFile"
 	local ref=$1[@]
 	[[ -z $ref || -n $DOIT || $listOnly == true || $informationOnlyMode == true ]] && return 0
 	local logFile="$2"
@@ -25,6 +26,11 @@ function WriteChangelogEntry {
 	local usersClientLogFile="/dev/null"
 	local usersActivityLog="/dev/null"
 
+	local data=$(ParseCourseleafFile "$logFile")
+	local client=$(cut -d' ' -f1 <<< "$data")
+	local env=$(cut -d' ' -f2 <<< "$data")
+	[[ $env == 'pvt' ]] && client=${client%-*}
+
 	## If there is a clientData folder then write out to there also
 		if [[ -n $localClientWorkFolder && -d $localClientWorkFolder ]]; then
 			[[ -n $client && ! -d "$localClientWorkFolder/$client" ]] && mkdir -p $localClientWorkFolder/$client
@@ -34,7 +40,7 @@ function WriteChangelogEntry {
 
 	## Write out records
 		echo -e "\n$userName\t$(date) via '$logger' version: $version" | tee -a "$logFile" | tee -a "$usersActivityLog" >> "$usersClientLogFile"
-		[[ -n $env ]] && echo -e "\tEnvironment: $env" | tee -a "$usersActivityLog" >> "$usersClientLogFile"
+		echo -e "\tClient: $client, Environment: $env" | tee -a "$usersActivityLog" >> "$usersClientLogFile"
 		printf '\t%s\n' "${!ref}" | tee -a "$logFile" | tee -a "$usersActivityLog" >> "$usersClientLogFile"
 
 	return 0
@@ -49,3 +55,4 @@ export -f WriteChangelogEntry
 ## Thu Jan 19 12:49:07 CST 2017 - dscudiero - x
 ## Tue Jan 24 12:48:10 CST 2017 - dscudiero - Fix errant '%' in the output
 ## 05-09-2017 @ 11.55.51 - ("2.0.12")  - dscudiero - Refactored how logging is done, added an user activity log file
+## 05-15-2017 @ 14.24.30 - ("2.0.14")  - dscudiero - log client and environment into the activity log
