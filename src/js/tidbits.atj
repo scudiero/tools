@@ -154,7 +154,7 @@ if (CheckChanged(diffdata,allowChangedFields,'any',true)) {
 	sqlParms.push(????);
 	// Run Query
 	var sqlStmt="SELECT DISTINCT path,dept FROM courseref WHERE code = ? AND dept <> ? AND dept <> ''" + pathClause;
-	var resultSet=dbquery("courseref", sqlStmt,sqlParms);
+	var resultSet=dbquery(tcfdata.dbname[0], sqlStmt,sqlParms);
 	if(resultSet.length == 0) {
 		if (haveDebug) { Debug("\t *** No data returned from sql query: \n\t" +  sql); }
 		return false;
@@ -222,3 +222,4 @@ WfDataMapper = function(type,data) {
 
 } //WfDataMapper// 05-09-2017 @ 13.27.42 - dscudiero - add mapping examples
 // 05-11-2017 @ 14.54.54 - dscudiero - add example of parsing options
+// 05-15-2017 @ 10.25.26 - dscudiero - update sqlquery exmample
