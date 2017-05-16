@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.138" # -- dscudiero -- Mon 05/15/2017 @ 10:24:32.79
+version="1.2.139" # -- dscudiero -- Mon 05/15/2017 @ 17:02:22.95
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -88,6 +88,7 @@ statusLine="\tDispatcher ($version): "
 [[ -n $(which logname 2>&1) ]] && userName=$(logname 2>&1) || userName=$LOGNAME
 [[ $userName == 'dscudiero' ]] && userName=$LOGNAME
 tmpRoot=/tmp/$LOGNAME
+[[ ! -d $tmpRoot ]] && mkdir -p $tmpRoot
 
 #==================================================================================================
 # Parse arguments
@@ -355,3 +356,4 @@ sTime=$(date "+%s")
 ## 05-12-2017 @ 14.58.05 - ("1.2.136") - dscudiero - misc changes to speed up
 ## 05-12-2017 @ 15.05.20 - ("1.2.137") - dscudiero - tweak comments
 ## 05-15-2017 @ 10.25.07 - ("1.2.138") - dscudiero - Set TOOLSPATH if not already set
+## 05-16-2017 @ 06.43.27 - ("1.2.139") - dscudiero - Make sure that the tmpRoot directory exists
