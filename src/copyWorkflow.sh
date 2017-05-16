@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.8.88 # -- dscudiero -- Tue 05/16/2017 @  8:22:49.62
+version=2.8.89 # -- dscudiero -- Tue 05/16/2017 @ 10:29:49.40
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -390,7 +390,7 @@ Msg2
 		tarFile="$tarDir/${srcEnv}---${tgtEnv}--$backupSuffix.tar.gz"
 		tar -cpzf "$tarFile" ./*
 		cd ..
-		rm -rf "$backupFolder"
+		rm -rf "/${backupFolder#*/}"
 		popd >& /dev/null
 	else
 		## Nothing to do
@@ -473,3 +473,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 04-04-2017 @ 09.08.22 - (2.8.75)    - dscudiero - Fix issue where it wasa still prompting for jalot and reason when noPrompt was active
 ## 05-12-2017 @ 11.10.41 - (2.8.76)    - dscudiero - Added -jalotTask and -changeComment as options to the command line call
 ## 05-16-2017 @ 08.23.15 - (2.8.88)    - dscudiero - Incorporate save workflow functionality into the script proper
+## 05-16-2017 @ 10.30.20 - (2.8.89)    - dscudiero - only delete the created tmp directory, not all of tmpRoot
