@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.8.76 # -- dscudiero -- Thu 05/11/2017 @ 12:33:47.41
+version=2.8.88 # -- dscudiero -- Tue 05/16/2017 @  8:22:49.62
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -24,7 +24,7 @@ scriptDescription="Copy workflow files"
 		#argList+=(-flagArg,2,switch,scriptVar,,script,'Help text')
 		argList+=(-allCims,3,switch,allCims,,script,'Process all CIM instances present')
 		argList+=(-jalotTask,3,option,jalotTask,,script,'Jalot task number')
-		argList+=(-updateComment,3,option,updateComment,,script,'Comment describing the reason for the update')
+		argList+=(-comment,3,option,updateComment,,script,'Comment describing the reason for the update')
 	}
 	function Goodbye-copyWorkflow  { # or Goodbye-local
 		rm -rf $tmpRoot > /dev/null 2>&1
@@ -165,7 +165,7 @@ function DoCopy {
 			[[ $(Contains ",$setDefaultYesFiles," ",$(basename $cpyFile),") == true ]] && defVals='Yes' || unset defVals
 			unset ans; Prompt ans "Yes to copy $cpyFile, eXit to stop" 'Yes No' "$defVals"; ans=$(Lower ${ans:0:1});
 			[[ $ans != 'y' ]] && filesNotCopied+=($cpyFile) && return 0
-			copyFileList+=("${srcFile}|${tgtFile}")
+			copyFileList+=("${srcFile}|${tgtFile}|${cpyFile}")
 		fi
 
 	return 0
@@ -361,20 +361,37 @@ Msg2
 
 	if [[ ${#copyFileList[@]} -gt 0 ]]; then
 		## Save old workflow files
-		Msg2
-		Msg2 "Saving target ($tgtEnv) workflow files (before updates)..."
-		$DOIT saveWorkflow --quiet $client -$tgtEnv -cims "$(echo $cimStr | tr -d ' ')" -suffix "beforeCopy-$fileSuffix" -nop -quiet $verboseArg
+		backupFolder=$tmpRoot/$myName-$client-$tgtEnv
+		[[ -d $backupFolder ]] && rm -rf $backupFolder
+		mkdir -p $backupFolder/beforeCopy
+		mkdir -p $backupFolder/afterCopy
 		## Copy files
-		Msg2 "Updating files:"
-		for filePair in "${copyFileList[@]}"; do
-			srcFile=$(cut -d'|' -f1 <<< $filePair)
-			tgtFile=$(cut -d'|' -f2 <<< $filePair)
+		Msg2 "\nUpdating files:"
+		for fileSpec in "${copyFileList[@]}"; do
+			srcFile="$(cut -d'|' -f1 <<< $fileSpec)"
+			tgtFile="$(cut -d'|' -f2 <<< $fileSpec)"
+			cpyFile="$(cut -d'|' -f3 <<< $fileSpec)"
+			## Make a copy of the before and after in the temp area
+			mkdir -p "$backupFolder/beforeCopy$(dirname $cpyFile)"
+			mkdir -p "$backupFolder/afterCopy$(dirname $cpyFile)"
+			cp -fp "$tgtFile" "$backupFolder/beforeCopy${cpyFile}"
+			cp -fp "$srcFile" "$backupFolder/afterCopy${cpyFile}"
+			## Copy
 			Msg2 "^$(basename $srcFile)"
-			[[ -f $tgtFile ]] && BackupCourseleafFile $tgtFile && rm -f $tgtFile
+			[[ -f $tgtFile ]] && BackupCourseleafFile $tgtFile && $DOIT rm -f $tgtFile
 			$DOIT cp -fp $srcFile $tgtFile
 			[[ $(basename $srcFile) == 'workflow.tcf' && $tgtEnv == 'next' ]] && $DOIT sed -i s'_*optional*_optional_' $tgtFile
 			filesUpdated+=(${tgtFile##*$tgtDir})
 		done
+		## Tar up the before and after folders
+		pushd "$backupFolder" >& /dev/null
+		tarDir=$localClientWorkFolder/$client/workflowBackups
+		[[ ! -d $tarDir ]] && mkdir -p $tarDir
+		tarFile="$tarDir/${srcEnv}---${tgtEnv}--$backupSuffix.tar.gz"
+		tar -cpzf "$tarFile" ./*
+		cd ..
+		rm -rf "$backupFolder"
+		popd >& /dev/null
 	else
 		## Nothing to do
 		echo; Msg2 $WT1 "No files required updating, nothing changed"
@@ -411,9 +428,6 @@ Msg2
 		done
 		env=$tgtEnv
 		WriteChangelogEntry 'changeLogLines' "$tgtDir/changelog.txt" "$myName"
-
-		echo; Msg2 "Saving target workflow files (after updates)..."
-		$DOIT saveWorkflow $client -$tgtEnv -cims "$(echo $cimStr | tr -d ' ')" -suffix "afterCopy-$fileSuffix" -nop -quiet $verboseArg
 	fi
 
 #====================================================================================================
@@ -458,3 +472,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## Fri Mar 17 16:40:36 CDT 2017 - dscudiero - remove errant t from logged lines
 ## 04-04-2017 @ 09.08.22 - (2.8.75)    - dscudiero - Fix issue where it wasa still prompting for jalot and reason when noPrompt was active
 ## 05-12-2017 @ 11.10.41 - (2.8.76)    - dscudiero - Added -jalotTask and -changeComment as options to the command line call
+## 05-16-2017 @ 08.23.15 - (2.8.88)    - dscudiero - Incorporate save workflow functionality into the script proper
