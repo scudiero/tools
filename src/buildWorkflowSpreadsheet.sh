@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.1 # -- dscudiero -- Fri 05/12/2017 @ 10:01:47.62
+version=1.2.2 # -- dscudiero -- Tue 05/16/2017 @ 13:05:20.76
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -259,7 +259,7 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 
 	## Write out 'wforder' data
 		if [[ ${#wforders[@]} -gt 0 ]]; then
-			Msg2 "\n#\Workflow\t\t\tComment" >> $outFile
+			Msg2 "\n#\tWorkflow\t\t\t\tComment" >> $outFile
 			for ((i=0; i<${#wforders[@]}; i++)); do
 				echo -e "$i\t${wforders[$i]}" >> $outFile
 			done
@@ -367,3 +367,4 @@ Goodbye 0 #'alert'
 ## Mon Feb 13 16:04:12 CST 2017 - dscudiero - make sure we are using our one tmpFile
 ## 04-13-2017 @ 13.58.16 - (1.1.93)    - dscudiero - add a default value for verifyContinue
 ## 05-12-2017 @ 11.09.09 - (1.2.1)     - dscudiero - Refactor parsing substitution variables to take into account wfAttr function bindings
+## 05-16-2017 @ 13.05.44 - (1.2.2)     - dscudiero - Fix output format problem with wforders
