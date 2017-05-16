@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.53 # -- dscudiero -- Thu 05/04/2017 @ 15:28:06.06
+version=2.2.62 # -- dscudiero -- Tue 05/16/2017 @ 10:26:04.11
 #====================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye ParseCourseleafFile' #imports="$imports "
@@ -108,55 +108,40 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 #==================================================================================================
 ## Main
 #==================================================================================================
-## Set target location
-	tgtDir=$localClientWorkFolder/$client/$env.backup
-	[[ -d $localClientWorkFolder/attic/$client ]] && tgtDir=$localClientWorkFolder/attic/$client/$env.backup
-	[[ ! -d $tgtDir ]] && mkdir -p $tgtDir
-
-## Clean up old stuff
-	cwd=$(pwd)
-	cd $tgtDir
-	dirs=$(find -maxdepth 1 -type d -printf "%f ")
-	for dir in ${dirs[@]}; do
-		[[ $dir == '.' ]] && continue
-		cd $dir
-		tarFile="$dir.tar.gz"
-		SetFileExpansion 'on'
-		tar -czf ../$tarFile * |> /dev/null
-		SetFileExpansion
-		rm -rf $dir
-		cd ..
-	done
-	cd $cwd	
-
 ## Backup the folders
-	tgtDir=$tgtDir/$backupSuffix
-	[[ ! -d $tgtDir ]] && mkdir -p $tgtDir
+	echo
+	backupFolder=$tmpRoot/$myName-$client-$env/beforeDelete
+	[[ -d $backupFolder ]] && rm -rf $backupFolder
 	## Insance files
 		for dir in $(echo $cimStr | tr ',' ' '); do
 			Msg2 "Saving: $dir"
-			if [[ ! -d $tgtDir/$dir ]]; then $DOIT mkdir -p $tgtDir/$dir ; fi
 			for file in $(echo "$requiredInstanceFiles $optionalInstanceFiles" | tr ',' ' '); do
-				[[ -f $srcDir/web/$dir/$file ]] && $DOIT cp -rfp $srcDir/web/$dir/$file $tgtDir/$dir/$file
+				if [[ -f $srcDir/web/$dir/$file ]]; then
+					[[ ! -d $(dirname $backupFolder/web/$dir/$file) ]] && $DOIT mkdir -p "$(dirname $backupFolder/web/$dir/$file)"
+					$DOIT cp -rfp $srcDir/web/$dir/$file $backupFolder/web/$dir/$file
+				fi
 			done
 		done #CIMs
 
 	## Global files
 		Msg2 "Saving: System files"
 			for file in $(echo "$requiredGlobalFiles $optionalGlobalFiles" | tr ',' ' '); do
-			[[ -f $srcDir/web$file ]] && mkdir -p $(dirname $tgtDir/web$file) && $DOIT cp -rfP $srcDir/web$file $tgtDir/web$file 
-		done
+				if [[ -f $srcDir/web$file ]]; then
+					[[ ! -d $(dirname $backupFolder/web$file) ]] && $DOIT mkdir -p "$(dirname $backupFolder/web$file)"
+					$DOIT cp -rfP $srcDir/web$file $backupFolder/web$file
+				fi
+			done
 
-	## Create a tar file
-		cwd=$(pwd)
-		cd $tgtDir
-		[[ $suffix == '' ]] && tarFile="$(basename $tgtDir).tar.gz" || tarFile="$(basename $tgtDir)-$suffix.tar.gz"
-		SetFileExpansion 'on'
-		tar -czf ../$tarFile * |> /dev/null
-		SetFileExpansion
-		rm -rf $tgtDir
-		Msg2 "Files saved to: $(pwd)/$tarFile"
-		cd $cwd
+	## Tar up the workflow files
+	pushd "$backupFolder" >& /dev/null
+	tarDir=$localClientWorkFolder/$client/workflowBackups
+	[[ ! -d $tarDir ]] && mkdir -p "$tarDir"
+	tarFile="$tarDir/${env}---$backupSuffix.tar.gz"
+	tar -cpzf "$tarFile" ./*
+	cd ..
+	rm -rf "/${backupFolder#*/}"
+	popd >& /dev/null
+
 
 #==================================================================================================
 ## Done
@@ -175,3 +160,4 @@ Goodbye 0
 ## Mon Mar  6 12:07:35 CST 2017 - dscudiero - fixed problem overwritting the same file if suffix was passed
 ## 05-04-2017 @ 14.16.56 - (2.2.52)    - dscudiero - Add daemon mode to support automatic cleanup
 ## 05-04-2017 @ 15.28.14 - (2.2.53)    - dscudiero - remove debug code
+## 05-16-2017 @ 10.26.39 - (2.2.62)    - dscudiero - Renamed the target tar file to match copyWorkflow
