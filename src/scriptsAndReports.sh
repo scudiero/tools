@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.82 # -- dscudiero -- Wed 05/17/2017 @ 10:46:06.90
+version=3.11.83 # -- dscudiero -- Wed 05/17/2017 @ 13:39:25.46
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -328,10 +328,12 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 			length=${#itemName}
 			[[ ${itemName:$length-1:1} == '*' ]] && itemName=${itemName:0:$length-1}
 			echo
+			menuDisplayed=true
 		else
 			## Otherwise use the passed in script/report
 			itemName="${report}${script}"
 			loop=false
+			menuDisplayed=false
 		fi
 		[[ $itemName == 'REFRESHLIST' ]] && continue
 		unset userArgs;
@@ -353,7 +355,7 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 		# [[ $rc -eq 0 ]] && Msg2 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed successfully" || \
 		# 	Msg2 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed with errors (exit code = $rc) \
 		# 	\nPlease record any Messages and contact the $itemType owner\n"
-		[[ $batchMode != true && $quiet != true && $verify == true ]] && Pause "Please press enter to go back to '${itemType}s'"
+		[[ $batchMode != true && $quiet != true && $verify == true && menuDisplayed == true ]] && Pause "Please press enter to go back to '${itemType}s'"
 		unset calledViaScripts
 	done
 
@@ -442,3 +444,4 @@ Goodbye 0
 ## 05-10-2017 @ 12.50.19 - (3.11.73)   - dscudiero - turn off messages for success or faliure of called script
 ## 05-12-2017 @ 13.45.57 - (3.11.76)   - dscudiero - Misc cleanup
 ## 05-17-2017 @ 10.50.32 - (3.11.82)   - dscudiero - Update prompts to accomidate the new timed prompt support
+## 05-17-2017 @ 13.41.33 - (3.11.83)   - dscudiero - Do not pause if called with a scripr or report name
