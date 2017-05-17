@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.7" # -- dscudiero -- 03/23/2017 @  8:14:17.65
+# version="1.0.9" # -- dscudiero -- Wed 05/17/2017 @ 15:39:05.61
 #===================================================================================================
 # Various string manipulation functions
 #===================================================================================================
@@ -67,6 +67,14 @@ function IsNumeric {
 	return 0
 } #IsNumeric
 export -f IsNumeric
+
+#===================================================================================================
+function IsAlpha {
+	local reNum='^[a-Z]+$'
+	[[ $1 =~ $reNum ]] && echo true || echo false
+	return 0
+} #IsNumeric
+export -f IsAlpha
 
 #===================================================================================================
 function Indent {
@@ -143,3 +151,4 @@ function CompareVersions {
 ## Thu Jan 19 09:57:30 CST 2017 - dscudiero - Swithch to use printf since echo was absorbing leading -n and -e
 ## Tue Mar 14 12:18:34 CDT 2017 - dscudiero - Added CompareVersions function
 ## Thu Mar 23 08:24:48 CDT 2017 - dscudiero - Remove the return code from Indent
+## 05-17-2017 @ 16.08.15 - ("1.0.9")   - dscudiero - Added IsAlpha function
