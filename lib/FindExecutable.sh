@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.0.102" # -- dscudiero -- Fri 05/12/2017 @ 14:57:45.11
+# version="1.0.116" # -- dscudiero -- Wed 05/17/2017 @ 10:47:51.18
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -112,11 +112,11 @@ function FindExecutable {
 					unset ans
 					if [[ $useLocal != true && $batchMode != true ]]; then
 						Msg2 $N "\aFound a copy of '$callPgmName' in a local directory: '$(dirname $executeFile)'"
-						[[ $batchMode != true ]] && Prompt ans 'Do you want to use the dev/local copy ?' 'Yes No' 'Yes' '3'; ans=$(Lower ${ans:0:1}) || ans='y'
+						[[ $batchMode != true ]] && unset ans && Prompt ans "'Yes' to use the local copy, 'No' to use production version" 'Yes No' 'Yes' '4' && ans=$(Lower ${ans:0:1})
 					else
 						ans='y'
 					fi
-					[[ $ans != 'y' ]] && executeFile=$prodFile
+					[[ $ans != 'y' ]] && executeFile=$prodFile || USELOCAL=true
 				fi
 			fi
 		fi
@@ -131,3 +131,4 @@ export -f FindExecutable
 ## Wed Jan  4 13:53:26 CST 2017 - dscudiero - General syncing of dev to prod
 ## 05-05-2017 @ 13.21.05 - ("1.0.101") - dscudiero - Remove GD code
 ## 05-12-2017 @ 14.58.09 - ("1.0.102") - dscudiero - misc changes to speed up
+## 05-17-2017 @ 10.50.27 - ("1.0.116") - dscudiero - Update prompts to accomidate the new timed prompt support
