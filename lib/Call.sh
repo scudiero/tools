@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.0.82" # -- dscudiero -- Fri 05/12/2017 @ 15:04:44.69
+# version="2.0.83" # -- dscudiero -- Wed 05/17/2017 @ 13:30:30.45
 #=======================================================================================================================
 # Generic resolve file and call
 # Call scriptName ["$scriptArgs"]
@@ -66,6 +66,7 @@ function Call {
 					shift; scriptArgs="$*"
 					useLibs="$token1"
 				fi
+				useLibs="$useLibs,reports"
 
 			## Find the executable file
 				#===========================================================================================================================
@@ -159,3 +160,4 @@ export -f Call
 ## 04-28-2017 @ 16.41.53 - ("2.0.78")  - dscudiero - run command in a subshell
 ## 05-12-2017 @ 13.16.49 - ("2.0.81")  - dscudiero - cleanup
 ## 05-12-2017 @ 15.05.09 - ("2.0.82")  - dscudiero - Comment out semaphore stuff
+## 05-17-2017 @ 13.40.55 - ("2.0.83")  - dscudiero - Force add 'reports' to the list of librarys to search
