@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.1.16 # -- dscudiero -- Mon 04/17/2017 @  7:40:37.98
+version=1.1.20 # -- dscudiero -- Wed 05/17/2017 @ 12:40:20.66
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye GetExcel'
@@ -59,7 +59,8 @@ for var in $falseVars; do eval $var=false; done
 	variableMap['Jalot Task Number']='jalotTaskNumber'
 	variableMap['Instance Name']='instance'
 	variableMap['Environment']='env'
-	variableMap['Requestor (CSM)']='requestor'
+	variableMap['Requester (CSM)']='requester'
+	variableMap['Requestor (CSM)']='requester'
 	variableMap['Tester']='tester'
 	variableMap['Developer']='developer'
 	variableMap['Front End Dev']='frontEndDeveloper'
@@ -242,6 +243,7 @@ for workbook in "${workbooks[@]}"; do
 			whereClause="where idx=\"$idx\""
 			recordstatus="\"A\""
 		fi
+		dump -2 -n sqlAction fields whereClause
 
 	## Build sqlStmt 'set' clause
 		unset setClause
@@ -249,7 +251,7 @@ for workbook in "${workbooks[@]}"; do
 			setClause="$setClause,${token}=${!token}"
 		done
 		setClause="Set $(tr '@' ' ' <<< "${setClause:1}")"
-		dump -2 -n setClause -n
+		dump -2 -n setClause -n -p
 
 	## Build & run sqlStmt
 		sqlStmt="$sqlAction $qaStatusTable $setClause $whereClause"
@@ -311,3 +313,4 @@ Goodbye 0 #'alert'
 ## 03-27-2017 @ 13.30.01 - (1.1.14)    - dscudiero - Only report on active records
 ## 04-03-2017 @ 07.45.53 - (1.1.15)    - dscudiero - Switch from RunSql to RunSql2
 ## 04-17-2017 @ 07.41.31 - (1.1.16)    - dscudiero - remove import fpr dump array, moved code to the Dump file
+## 05-17-2017 @ 12.57.33 - (1.1.20)    - dscudiero - Fix problem parsing data for requester
