@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.97" # -- dscudiero -- 03/16/2017 @ 12:12:39.55
+# version="2.1.0" # -- dscudiero -- Wed 05/17/2017 @ 10:33:18.90
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -11,12 +11,16 @@
 #===================================================================================================
 
 function Prompt {
-	declare promptVar=$1
-	declare promptText=$2
-	declare validateList=$3
-	declare defaultVal=$4
+	declare promptVar=$1; shift || true
+	declare promptText=$1; shift || true
+	declare validateList=$1; shift || true
+	declare defaultVal=$1; shift || true
 	[[ $defaultVal == '-' || $defaultVal == 'n/a' || $defaultVal == 'N/A' ]] && unset defaultVal
-	declare timeOut=${5:-0}
+	declare timeOut=${1:-0}; shift || true
+	declare timerPrompt=${1:-"Timed prompt, please press enter to provide a response, otherwise processing will continue in"}; shift || true
+	[[ ${promptText:0:1} == '^' ]] && timerPrompt="^$timerPrompt"
+	declare timerInterruptPrompt=${1:-"$promptText"}; shift || true
+	dump -2 -r ; dump -2 -l promptVar promptText defaultVal validateList validateListString timeOut timerPrompt timerInterruptPrompt
 
 	declare validateListString="$(echo $validateList | tr " " ",")"
 	if [[ -n $defaultVal ]]; then
@@ -31,7 +35,7 @@ function Prompt {
 
 	[[ -z $promptText ]] && promptText="Please specify a value for '$promptVar'"
 	[[ -n $validateListString ]] && promptText="$promptText ($validateListString)"
-	dump -2 -r ; dump -2 -l promptVar response promptText defaultVal validateList validateListString inVerifyContinue
+	dump -2 -r ; dump -2 -l promptVar promptText defaultVal validateList validateListString timeOut timerPrompt timerInterruptPrompt inVerifyContinue
 
 	local respFirstChar rc readTimeOutOpt
 	local numTabs=0
@@ -45,7 +49,8 @@ function Prompt {
 	response=$(eval echo $response)
 
 	#printf "%s = >%s<\n" promptVar "$promptVar" response "$response" validateList "$validateList" >> ~/stdout.txt
-	local loop=true hadValue=true promptTextTabs
+	local loop=true hadValue=true timedRead=true promptTextTabs
+	[[ -z $timeOut || $timeOut -eq 0 ]] && timeOut=${maxReadTimeout:-3600} && timedRead=false
 
 	#local verifyMsg;
 	unset verifyMsg
@@ -54,24 +59,32 @@ function Prompt {
 			hadValue=false
 			numTabs=$(grep -o '\^' <<< "$promptText" | wc -l)
 			[[ $numTabs -ne 0 ]] && promptTextTabs="^${promptText%^*}"
-			promptText="$(sed "s/\^/$tabStr/g" <<< $promptText)"
 			if [[ $verify != false ]]; then
-				if [[ -z $readTimeOutOpt ]]; then
-					echo -n -e "$promptText > "
-				else
-					echo -e "$promptText"
-					local promptTextTimeout="$promptTextTabs(Note, prompt will timeout in $timeOut secs.)"
-					promptTextTimeout="$(sed "s/\^/$tabStr/g" <<< $promptTextTimeout)"
-				 	echo -n -e "$promptTextTimeout > "
-				fi
-				ProtectedCall "read $readTimeOutOpt response";
-				if [[ $rc -ne 0 ]]; then
-					echo
-					Note 0 1 "Read timed out, using default value for '$promptVar': '$defaultVal'"
-					eval $promptVar=\"$defaultVal\"
-					return 0
-				fi
-			fi
+					if [[ $timedRead == false ]]; then
+						promptText="$(sed "s/\^/$tabStr/g" <<< $promptText)"
+						#[[ ${promptText: (-1)} != " " ]] && promptText="$promptText "
+					 	echo -en "$promptText > "
+						read response; rc=$?
+					else
+						timerPrompt="$(sed "s/\^/$tabStr/g" <<< $timerPrompt)"
+						timerInterruptPrompt="$(sed "s/\^/$tabStr/g" <<< $timerInterruptPrompt)"
+						for ((tCntr=0; tCntr<$timeOut; tCntr++)); do
+							[[ -n $defaultVal ]] && echo -en "$timerPrompt $(ColorK "$((timeOut - tCntr))") seconds using a default value of $(ColorK "'$defaultVal'")\r" || \
+													echo -en "$timerPrompt $(ColorK "$((timeOut - tCntr))") seconds\r"
+
+							read -t 1 response; rc=$?
+							if [[ $rc -eq 0 ]]; then
+								if [[ -z $response ]]; then
+									echo -en "$timerInterruptPrompt > "
+									read response
+								fi
+								break
+							fi
+							[[ $rc -gt 0 && $tCntr -ge $maxReadTimeout ]] && echo && Terminate "Read operation timed out after the maximum time of $maxReadTimeout seconds" && exit
+						done ; echo
+						[[ -z $response ]] && Note 0 1 "Read timed out, using default value for '$promptVar': '$defaultVal'" && eval $promptVar=\"$defaultVal\" && return 0
+					fi
+			fi #[[ $verify != false ]]
 			[[ $(Lower ${response}) == 'x' ]] && Goodbye 'x'
 			if [[ -z $response && -n $defaultVal ]]; then
 				eval $promptVar=\"$defaultVal\"
@@ -141,3 +154,4 @@ export -f Prompt
 ## Thu Mar 16 10:57:45 CDT 2017 - dscudiero - Add messaging if there is a timeout value specified
 ## Thu Mar 16 10:59:16 CDT 2017 - dscudiero - General syncing of dev to prod
 ## Thu Mar 16 12:14:31 CDT 2017 - dscudiero - Fixed a problem with timeouts not timeing out, added tabbing to the timeout text
+## 05-17-2017 @ 10.50.03 - ("2.1.0")   - dscudiero - Update the timed prompt support to do a count down timer
