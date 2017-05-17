@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.23" // -- dscudiero -- Thu 05/11/2017 @ 11:15:08.31
+wfLibVersion="1.7.24" // -- dscudiero -- Wed 05/17/2017 @  8:27:37.60
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -17,6 +17,8 @@ wfLibVersion="1.7.23" // -- dscudiero -- Thu 05/11/2017 @ 11:15:08.31
 // 05/11/17 - des 	- Updated GetAttrVal to recognize differences between requests ending in "s" and not
 //					- Also changed argument passing to use an object
 //					- wfCheckChanged - allowed different tcf variables based on the rulename on the call
+// 05/17/17 - dgs 	- Updated calls to GetAttrVal to add passing in the names of the form variables
+//					- Fixed callse to GetAttrVal in Related
 //======================================================================================================================
 
 // Loading message
@@ -223,23 +225,25 @@ wffuncs.Related = function(inval, wfrule, args) {
 				if (args && args.context && args.context != "wfrule")
 					throw "Failed 'rule type' check";
 
+				var reqData={ request: "", subjVar: subjectVarName , deptVar: departmentVarName , colVar: collegeVarName };
 				if (wfCimInstance === "courseadmin") {
 					proposalCode=getTCFValue(codeVarName)
 					if (proposalCode === "")
 						throw "Failed, code tcf variable '" + codeVarName + "' not null check"
+					reqData.request="subjs";
+					proposalSubj=GetAttrVal(reqData);
 
-					//proposalSubj=getTCFValue(subjectVarName)
-					proposalSubj=GetAttrVal(subjectVarName);
 					if (proposalSubj === "" && substitutionType === 'subj')
 						throw "Failed, subject tcf variable '" + subjectVarName + "' not null check"
 				}
-				//proposalCol=getTCFValue(collegeVarName)
-				proposalCol=GetAttrVal(collegeVarName)
+
+				reqData.request="cols";
+				proposalSubj=GetAttrVal(reqData);
 				if (proposalCol === "" && substitutionType === 'college')
 					throw "Failed, college tcf variable: '" + collegeVarName + "' not null check"
 
-				//proposalDept=getTCFValue(departmentVarName)
-				proposalDept=GetAttrVal(departmentVarName)
+				reqData.request="depts";
+				proposalSubj=GetAttrVal(reqData);
 				if (proposalDept === "" && (substitutionType === 'dept' || substitutionType === 'college'))
 					throw "Failed, department tcf variable '" + departmentVarName + "' not null check"
 
@@ -387,8 +391,8 @@ wffuncs.Related = function(inval, wfrule, args) {
 			var tempArray=(GetEcoSystemData(proposalCode,proposalDept,ecoSystemTypeStr))
 			if (tempArray.length >0)
 				refsArray=refsArray.concat(tempArray);
+			wfDebug(3,"\t" + tempArray.length + " - items to add from the Eco system\n");
 		}
-		wfDebug(3,"\t" + tempArray.length + " - items to add from the Eco system\n");
 
 	// Do we have any references?
 		if (refsArray.length === 0) {
@@ -703,13 +707,18 @@ wffuncs.wfAttr = function(inval, wfrule, args) {
 // 05/11/2017 - dgs - Added logic to look at request type and if it does not end in an "s" then return only the proposal
 //						tca data
 // 					- Switched data passing to object
+// 05/17/17 - dgs 	- Updated calls to GetAttrVal to add passing in the names of the form variables
 //=======================================================================================================================
 GetAttrVal = function(data) {
 	wfDebug(4,"\n\t*** In GetAttrVals ***");
-
+	wfDump(4,["\tdata;"+data.toSource()]);
 	var reqType=data.request;
-	var optionStr=data.options;
-	var tcaData=data.tcadata;
+	var optionStr=data.options; 	if (optionStr === undefined) optionStr="";
+	var tcaData=data.tcadata; 		if (tcaData === undefined) tcaData="";
+	var subjVarName=data.subjVar; 	if (subjVarName === undefined || subjVarName === "") subjVarName="subject";
+	var deptVarName=data.deptVar; 	if (deptVarName === undefined || deptVarName === "") deptVarName="department";
+	var colVarName=data.colVar; 	if (colVarName === undefined || colVarName === "") colVarName="college";
+	wfDump(5,["reqType;"+reqType,"optionStr;"+optionStr,"tcaData;"+tcaData,"subjVarName;"+subjVarName,"deptVarName;"+deptVarName,"colVarName;"+colVarName]);
 
 	var includeTCA=false;
 	if (optionStr.indexOf("includetca") >= 0 && reqType.slice(-1) === "s" && typeof(tcaData) != "undefined" && tcaData)
@@ -746,7 +755,7 @@ GetAttrVal = function(data) {
 			}
 		}
 
-	wfDump(4,["\tcolleges;"+colleges.toSource(),"\tdepartments;"+departments.toSource(),"\tsubjects;"+subjects.toSource(),]);
+	wfDump(5,["\tcolleges;"+colleges.toSource(),"\tdepartments;"+departments.toSource(),"\tsubjects;"+subjects.toSource(),]);
 
 	// return data based on how we were called
 	var retArray=[];
@@ -758,7 +767,7 @@ GetAttrVal = function(data) {
 		retArray=subjects;
 	}
 
-	wfDump(4,["\t*** retArray;"+retArray.toSource()]);
+	wfDebug(4,"\t\t*** retArray (" + reqType + ") = >" + retArray.toSource() + "<");
 	if (retArray.length > 0)
 		return retArray;
 		return false
@@ -1519,3 +1528,4 @@ var wfLibLoaded=true;
 // 05-08-2017 @ 15.23.04 - (wfrule.att - dscudiero - Added wfAttr and getTCAValue functions
 // 05-09-2017 @ 11.01.37 - (wfrule.att - dscudiero - Swithch to use getTCFValue to retrieve the tca data in getAttrVal
 // 05-11-2017 @ 14.56.12 - (wfrule.att - dscudiero - Tweaked data passing and arg parsing for wffuncs.CheckChanged
+// 05-17-2017 @ 10.51.49 - (wfrule.att - dscudiero - Updated GetAttrVal to accept the variable names as input, updated Related to fix problem calling GetAttrVal
