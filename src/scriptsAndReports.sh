@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.76 # -- dscudiero -- Fri 05/12/2017 @ 13:24:31.78
+version=3.11.82 # -- dscudiero -- Wed 05/17/2017 @ 10:46:06.90
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -170,7 +170,7 @@ function ExecReport {
 			unset scriptArgs;
 			if [[ $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true  && $quiet != true ]]; then
 				Msg2 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
-				Prompt userArgs "^For command line arguments, just enter -help" '*optional*' 'n/a' '8';
+				unset userArgs; Prompt userArgs "^Please specify parameters to be passed to '$itemName'" '*optional*' '' '4'
 			fi
 		fi
 
@@ -337,7 +337,7 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 		unset userArgs;
 		if [[ $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true  && $quiet != true ]]; then
 			Msg2 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
-			Prompt userArgs "^For command line arguments, just enter -help" '*optional*' 'n/a' '8';
+			unset userArgs; Prompt userArgs "^Please specify parameters to be passed to '$itemName'" '*optional*' '' '4'
 			[[ -n $userArgs ]] && scriptArgs="$userArgs $scriptArgs"
 		fi
 
@@ -441,3 +441,4 @@ Goodbye 0
 ## 05-05-2017 @ 13.21.31 - (3.11.72)   - dscudiero - Remove GD code
 ## 05-10-2017 @ 12.50.19 - (3.11.73)   - dscudiero - turn off messages for success or faliure of called script
 ## 05-12-2017 @ 13.45.57 - (3.11.76)   - dscudiero - Misc cleanup
+## 05-17-2017 @ 10.50.32 - (3.11.82)   - dscudiero - Update prompts to accomidate the new timed prompt support
