@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.0.63" # -- dscudiero -- Wed 04/12/2017 @ 15:35:51.94
+# version="2.0.64" # -- dscudiero -- Wed 05/17/2017 @ 12:26:24.62
 #=======================================================================================================================
 # Retrieve data from a Excel xlsx spreadsheet
 # Usage: GetExcel <workBook> <workSheet>
@@ -15,8 +15,10 @@ function GetExcel {
 		local workSheet="$1"; shift
 		local delimiter=${1-|}
 		local tmpFile=$(MkTmpFile $FUNCNAME)
-
+		verboseLevelSave=$verboseLevel
+		verboseLevel=0
 		Call 'getXlsx' 'utility' 'std' 'python:py' "$workBook" "$workSheet" "$delimiter" > $tmpFile 2>&1;
+		verboseLevel=$verboseLevelSave
 
 		local grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
 		[[ $grepStr == '' ]] && grepStr=$(ProtectedCall "grep '*Error*' $tmpFile")
@@ -47,3 +49,4 @@ export -f GetExcel
 ## Thu Feb  9 08:06:19 CST 2017 - dscudiero - make sure we are using our own tmpFile
 ## 04-12-2017 @ 13.25.17 - ("2.0.62")  - dscudiero - x
 ## 04-12-2017 @ 15.36.02 - ("2.0.63")  - dscudiero - remove debug statements
+## 05-17-2017 @ 12.26.49 - ("2.0.64")  - dscudiero - Turn off messages when running the python procedure
