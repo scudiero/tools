@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.83 # -- dscudiero -- Wed 05/17/2017 @ 13:39:25.46
+version=3.11.86 # -- dscudiero -- Wed 05/17/2017 @ 15:43:47.46
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -190,7 +190,14 @@ function ExecReport {
 				else
 					echo -e "$name report run by $userName on $(date +"%m-%d-%Y") at $(date +"%H.%M.%S")" > $outFile
 					echo -e "($shortDescription)\n" >> $outFile
-					echo -e "$(tr "," "\t" <<< "$header")" >> $outFile
+					if [[ $(IsAlpha "${header:0:1}") == true ]]; then
+						echo -e "$(tr "," "\t" <<< "$header")" >> $outFile
+
+					else
+						firstChar=${header:0:1}
+						header=${header:1}
+						echo -e "$(tr "$firstChar" "\t" <<< "$header")" >> $outFile
+					fi
 					for result in "${resultSet[@]}"; do
 						echo -e "$(tr '|' "\t" <<< "$result" )" >> $outFile
 					done
@@ -445,3 +452,4 @@ Goodbye 0
 ## 05-12-2017 @ 13.45.57 - (3.11.76)   - dscudiero - Misc cleanup
 ## 05-17-2017 @ 10.50.32 - (3.11.82)   - dscudiero - Update prompts to accomidate the new timed prompt support
 ## 05-17-2017 @ 13.41.33 - (3.11.83)   - dscudiero - Do not pause if called with a scripr or report name
+## 05-17-2017 @ 16.09.17 - (3.11.86)   - dscudiero - Added delimiter parsing for report headers
