@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.32 # -- dscudiero -- Tue 05/02/2017 @  7:31:52.17
+version=1.0.33 # -- dscudiero -- Wed 05/17/2017 @ 16:42:57.93
 #==================================================================================================
 #= Description +===================================================================================
 # Clone a Courseleaf git repository
@@ -34,6 +34,7 @@ function Goodbye-cloneGitRepo  { # or Goodbye-$myName
 #==================================================================================================
 # local functions
 #==================================================================================================
+local tmpFile=$(MkTmpFile $FUNCNAME).$BASHPID
 
 #==================================================================================================
 # Declare local variables and constants
@@ -142,7 +143,9 @@ cd $tgtDir
 #==================================================================================================
 ## Done
 #==================================================================================================
-rm -f "$tmpFile.stderr" "$tmpFile.stdout" &> /dev/null
+SetFileExpansion 'On'
+rm -f "$tmpFile.*" &> /dev/null
+SetFileExpansion
 Goodbye 'Return'
 return 0
 
@@ -160,3 +163,4 @@ return 0
 ## 04-28-2017 @ 08.18.42 - (1.0.29)    - dscudiero - switch to just return to caller
 ## 04-28-2017 @ 08.26.15 - (1.0.31)    - dscudiero - use Goodbye 'return'
 ## 05-02-2017 @ 07.32.32 - (1.0.32)    - dscudiero - cleanup tmp files
+## 05-17-2017 @ 16.43.45 - (1.0.33)    - dscudiero - Add process id to the name of the tmpFile to avoid conflicts when running scripts in parallel
