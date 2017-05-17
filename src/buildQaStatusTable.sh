@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.1.20 # -- dscudiero -- Wed 05/17/2017 @ 12:40:20.66
+version=1.1.25 # -- dscudiero -- Wed 05/17/2017 @ 14:14:37.76
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye GetExcel'
@@ -153,7 +153,7 @@ for workbook in "${workbooks[@]}"; do
 
 	## Parse sheet data --  the variable names MUST match the data base column names
 		unset $(tr ',' ' ' <<< $insertFields)
-		foundFailed=false; foundWaiting=false;
+		foundFailed=false; foundWaiting=false; foundNotes=false
 		while read line; do
 			dump -2 -n -t line
 			[[ $(tr -d '|' <<< $line) == '' ]] && continue
@@ -178,6 +178,10 @@ for workbook in "${workbooks[@]}"; do
 				[[ $recTypeLower == 'csm' && $foundFailed == true ]] && numFailedCSM="$(cut -d'|' -f3 <<< $line | cut -d'.' -f1)" && continue
 				[[ $recTypeLower == 'dev' && $foundWaiting == true ]] && numWaitingDev="$(cut -d'|' -f3 <<< $line | cut -d'.' -f1)" && continue
 				[[ $recTypeLower == 'csm' && $foundWaiting == true ]] && numWaitingCSM="$(cut -d'|' -f3 <<< $line | cut -d'.' -f1)" && continue
+
+			## Special processing for failed and waiting details records
+				[[ $recTypeLower == 'notes:' ]] && foundNotes=true && continue
+				[[ $foundNotes == true ]] && notes="$(cut -d'|' -f2 <<< $line)" && dump -2 -t notes && foundNotes=false && continue
 
 			## If 'instance' record  then parse off product and instance
 				if [[ ${recTypeLower:0:8} == 'instance' ]]; then
@@ -314,3 +318,4 @@ Goodbye 0 #'alert'
 ## 04-03-2017 @ 07.45.53 - (1.1.15)    - dscudiero - Switch from RunSql to RunSql2
 ## 04-17-2017 @ 07.41.31 - (1.1.16)    - dscudiero - remove import fpr dump array, moved code to the Dump file
 ## 05-17-2017 @ 12.57.33 - (1.1.20)    - dscudiero - Fix problem parsing data for requester
+## 05-17-2017 @ 16.08.34 - (1.1.25)    - dscudiero - Added support for the notes field
