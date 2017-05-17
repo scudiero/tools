@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.62 # -- dscudiero -- Tue 05/16/2017 @ 10:26:04.11
+version=2.2.64 # -- dscudiero -- Wed 05/17/2017 @  7:09:07.81
 #====================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye ParseCourseleafFile' #imports="$imports "
@@ -110,7 +110,7 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 #==================================================================================================
 ## Backup the folders
 	echo
-	backupFolder=$tmpRoot/$myName-$client-$env/beforeDelete
+	backupFolder=$tmpRoot/$myName-$client-$env-$BASHPID/beforeDelete
 	[[ -d $backupFolder ]] && rm -rf $backupFolder
 	## Insance files
 		for dir in $(echo $cimStr | tr ',' ' '); do
@@ -161,3 +161,4 @@ Goodbye 0
 ## 05-04-2017 @ 14.16.56 - (2.2.52)    - dscudiero - Add daemon mode to support automatic cleanup
 ## 05-04-2017 @ 15.28.14 - (2.2.53)    - dscudiero - remove debug code
 ## 05-16-2017 @ 10.26.39 - (2.2.62)    - dscudiero - Renamed the target tar file to match copyWorkflow
+## 05-17-2017 @ 07.10.40 - (2.2.64)    - dscudiero - Added processid to the temp folder name
