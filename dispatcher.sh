@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.139" # -- dscudiero -- Mon 05/15/2017 @ 17:02:22.95
+version="1.2.140" # -- dscudiero -- Wed 05/17/2017 @ 10:36:54.83
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -125,6 +125,7 @@ tmpRoot=/tmp/$LOGNAME
 		fi
 		shift
 	done
+	export USELOCAL=$useLocal
 	scriptArgs=${scriptArgs:1} ## Strip off leading blank
 
 ## Hello
@@ -357,3 +358,4 @@ sTime=$(date "+%s")
 ## 05-12-2017 @ 15.05.20 - ("1.2.137") - dscudiero - tweak comments
 ## 05-15-2017 @ 10.25.07 - ("1.2.138") - dscudiero - Set TOOLSPATH if not already set
 ## 05-16-2017 @ 06.43.27 - ("1.2.139") - dscudiero - Make sure that the tmpRoot directory exists
+## 05-17-2017 @ 10.49.38 - ("1.2.140") - dscudiero - export USELOCAL
