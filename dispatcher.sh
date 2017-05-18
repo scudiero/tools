@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.140" # -- dscudiero -- Wed 05/17/2017 @ 10:36:54.83
+version="1.2.141" # -- dscudiero -- Thu 05/18/2017 @  7:30:23.82
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -60,7 +60,7 @@ function CleanUp {
 		[[ -n $semaphoreId ]] && Semaphore 'clear' $semaphoreId
 		[[ $logInDb != false && -n $myLogRecordIdx ]] && ProcessLogger 'End' $myLogRecordIdx
 		SetFileExpansion 'on'
-		[[ -f "$tmpFile" ]] && rm -f "$tmpFile"
+		[[ -f "$tmpFile*" ]] && rm -f "$tmpFile"
 		SetFileExpansion
 
 	## Cleanup PATH and CLASSPATH
@@ -359,3 +359,4 @@ sTime=$(date "+%s")
 ## 05-15-2017 @ 10.25.07 - ("1.2.138") - dscudiero - Set TOOLSPATH if not already set
 ## 05-16-2017 @ 06.43.27 - ("1.2.139") - dscudiero - Make sure that the tmpRoot directory exists
 ## 05-17-2017 @ 10.49.38 - ("1.2.140") - dscudiero - export USELOCAL
+## 05-18-2017 @ 07.34.06 - ("1.2.141") - dscudiero - Delete all files matching tmpFile in cleanup
