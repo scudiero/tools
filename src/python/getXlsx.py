@@ -1,5 +1,5 @@
 #!/bin/python
-# version=1.2.35 # -- dscudiero -- Thu 05/18/2017 @  9:20:26.24
+# version=1.2.36 # -- dscudiero -- Thu 05/18/2017 @ 12:03:33.98
 #==================================================================================================
 # Reads a xlsx spreadsheet and returns a single columns worth of data
 # called as:
@@ -26,7 +26,7 @@ import datetime, time
 import string
 from array import *
 
-print(sys.argv[1:])
+#print(sys.argv[1:])
 
 #==================================================================================================
 # Constants
