@@ -142,7 +142,6 @@ scriptDescription="Cleanup private dev sites"
 				;;
 			w*)
 				mv -f "$file" "$file--AutoDeleteWithSave"
-				;;
 		esac
 		return 0
 	} #ProcessRequest
@@ -264,3 +263,4 @@ Goodbye 0
 ## 05-04-2017 @ 14.20.26 - (3.4.115)   - dscudiero - Add quiet flag on saveWorkflow call
 ## 05-10-2017 @ 14.36.11 - (3.4.137)   - dscudiero - Refactor the daemon code
 ## 05-15-2017 @ 07.11.45 - (3.4.138)   - dscudiero - Activate code for daemon
+## 05-18-2017 @ 06.58.05 - (3.4.138)   - dscudiero - Fix the end of the case statement
