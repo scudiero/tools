@@ -1,5 +1,5 @@
 #!/bin/python
-# version=1.2.20 # -- dscudiero -- 11/23/2016 @  9:32:20.80
+# version=1.2.35 # -- dscudiero -- Thu 05/18/2017 @  9:20:26.24
 #==================================================================================================
 # Reads a xlsx spreadsheet and returns a single columns worth of data
 # called as:
@@ -26,9 +26,12 @@ import datetime, time
 import string
 from array import *
 
+print(sys.argv[1:])
+
 #==================================================================================================
 # Constants
 #==================================================================================================
+myName = os.path.basename(__file__)
 
 #==================================================================================================
 # Local Functions
@@ -41,7 +44,7 @@ def Quit(*args):
 
 # Print Msgs
 def Msg(*objs):
-	print(*objs, file=sys.stdout)
+	print(myName + ": " + str(*objs), file=sys.stdout)
 
 #==================================================================================================
 # Parse arguments
@@ -66,11 +69,11 @@ if verbosity == None:
 
 if verbosity > 0:
 	Msg("verbosity = >" + str(verbosity) + "<")
-	#Msg("hiddenSheets = >" + str(hiddenSheets) + "<")
-	#Msg("hiddenColumns = >" + str(hiddenColumns) + "<")
 	Msg("spreadsheetFile = >" + spreadsheetFile + "<")
 	Msg("target sheet = >" + readSheet + "<")
 	Msg("field outputFieldDelim = >" + outputFieldDelim + "<")
+	#Msg("hiddenSheets = >" + str(hiddenSheets) + "<")
+	#Msg("hiddenColumns = >" + str(hiddenColumns) + "<")
 	#Msg("args.noHeader = >'" + str(args.noHeader) + "<")
 
 # xlrd cell_type map
@@ -80,7 +83,7 @@ xlrdCellTypeMap=["Empty string","Unicode String","Float","Date/Float","Boolean/I
 # Main
 #==================================================================================================
 if not os.path.isfile(spreadsheetFile):
-	Msg("Could not locat the workbook file:\n\t" + spreadsheetFile)
+	Msg("*Fatal Error* -- Could not locate the workbook file:\n\t\t'" + spreadsheetFile + "'")
 	Quit(-1)
 
 book = xlrd.open_workbook(spreadsheetFile, encoding_override='cp1252')
@@ -108,7 +111,6 @@ if readSheet.lower() == 'getsheets':
 ## Get the datemode for the spreadsheet
 
 
-
 found=False
 for i in range(book.nsheets):
 	sh = book.sheet_by_index(i)
@@ -120,7 +122,7 @@ for i in range(book.nsheets):
 		break
 
 if found == False:
-	Msg("Could not find worksheet, " + readSheet + ", in the workbook file:\n\t" + spreadsheetFile + "\nAvaiable sheets are:\n\t" + sheets.replace('|',', '))
+	Msg("*Fatal Error* -- Could not find worksheet, " + readSheet + ", in the workbook file:\n\t" + spreadsheetFile + "\n\t\tAvaiable sheets are:\n\t" + sheets.replace('|',', '))
 	Quit(-1)
 
 ## Parse the header row
@@ -164,8 +166,7 @@ for rx in range(sh.nrows):
 
 	## Print the line to stdout
 	if outLine != '':
-		Msg (outLine.strip())
-
+		print(outLine, file=sys.stdout)
 
 ## Done
 Quit()
