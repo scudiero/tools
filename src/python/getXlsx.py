@@ -1,5 +1,5 @@
 #!/bin/python
-# version=1.2.36 # -- dscudiero -- Thu 05/18/2017 @ 12:03:33.98
+# version=1.2.37 # -- dscudiero -- Thu 05/18/2017 @ 16:46:46.12
 #==================================================================================================
 # Reads a xlsx spreadsheet and returns a single columns worth of data
 # called as:
@@ -105,7 +105,7 @@ for i in range(book.nsheets):
 
 ## If input sheet name is 'getsheets' then just return the list of sheets
 if readSheet.lower() == 'getsheets':
-	Msg(sheets.strip())
+	print(sheets.strip())
 	Quit()
 
 ## Get the datemode for the spreadsheet
