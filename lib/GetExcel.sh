@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.0.66" # -- dscudiero -- Thu 05/18/2017 @ 12:12:29.26
+# version="2.0.67" # -- dscudiero -- Thu 05/18/2017 @ 12:34:46.38
 #=======================================================================================================================
 # Retrieve data from a Excel xlsx spreadsheet
 # Usage: GetExcel <workBook> <workSheet>
@@ -24,7 +24,7 @@ function GetExcel {
 		fi
 
 		verboseLevelSave=$verboseLevel ; verboseLevel=0
-		Call 'getXlsx' 'utility' 'std' 'python:py' "$workBook" "$workSheet" "$delimiter" -vv > $tmpFile 2>&1;
+		Call 'getXlsx' 'utility' 'std' 'python:py' "$workBook" "$workSheet" "$delimiter" > $tmpFile 2>&1;
 		verboseLevel=$verboseLevelSave
 		local grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
 		[[ $grepStr == '' ]] && grepStr=$(ProtectedCall "grep '*Error*' $tmpFile")
@@ -53,3 +53,4 @@ function GetExcel {
 ## 04-12-2017 @ 15.36.02 - ("2.0.63")  - dscudiero - remove debug statements
 ## 05-17-2017 @ 12.26.49 - ("2.0.64")  - dscudiero - Turn off messages when running the python procedure
 ## 05-18-2017 @ 12.13.01 - ("2.0.66")  - dscudiero - General syncing of dev to prod
+## 05-18-2017 @ 12.35.13 - ("2.0.67")  - dscudiero - Remove the -vv from the call to getXlsx.py
