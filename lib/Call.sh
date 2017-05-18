@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.0.83" # -- dscudiero -- Wed 05/17/2017 @ 13:30:30.45
+# version="2.1.1" # -- dscudiero -- Thu 05/18/2017 @ 11:53:24.53
 #=======================================================================================================================
 # Generic resolve file and call
 # Call scriptName ["$scriptArgs"]
@@ -17,58 +17,29 @@
 # All rights reserved
 #=======================================================================================================================
 function Call {
-		Import FindExecutable InitializeInterpreterRuntime Prompt VerifyPromptVal Semaphore
+		Import 'FindExecutable' 'InitializeInterpreterRuntime' 'Prompt' 'VerifyPromptVal' 'Semaphore'
 		local scriptName="$1"; shift
-		local scriptArgs="$*"
-		local searchMode useTypes useLibs executeFile executeAlias cmdStr token1 utility fork
+		local fork utility useTypes scriptArgs executeFile executeAlias cmdStr searchMode='std'
 
-		## If we were passed in a full file specification then just use it, otherwise find the executable
+		pushd "$TOOLSPATH/src" >& /dev/null
+		SetFileExpansion 'on'
+		useLibs=$(ls  -d */ | tr -d '/' | tr $"\n" ',')
+		SetFileExpansion
+		popd >& /dev/null
+		until [[ -z $* ]]; do
+			[[ $1 == 'fork' ]] && fork=true && shift && continue
+			[[ $1 == 'utility' ]] && utility=true && shift && continue
+			[[ $1 == 'std' || $1 == 'fast' || $1 == 'full'  ]] && searchMode="$1" && shift && continue
+			[[ $(Contains "$1" ':') == true ]] && useTypes="$1" && shift && continue
+			[[ $(Contains ",$useLibs," ",$1,") == true ]] && shift && continue
+			scriptArgs="$scriptArgs $1"
+			shift || true
+		done
+		dump -2 scriptName scriptArgs fork utility searchMode useTypes useLibs
+
+		## Resolve the executable file
 		if [[ $(dirname $scriptName) == '.' ]]; then
-
-			## Is the first 'scriptArgs' token 'fork' if so then fork the called function
-				token1=$(cut -d ' ' -f1 <<< $scriptArgs)
-				if [[ $token1 == 'fork' ]]; then
-					shift; scriptArgs="$*"
-					fork=true
-				fi
-
-			## Is the first 'scriptArgs' token 'utility' if so then set utility flag (do not tee) and strip off
-				token1=$(cut -d ' ' -f1 <<< $scriptArgs)
-				if [[ $token1 == 'utility' ]]; then
-					shift; scriptArgs="$*"
-					utility=true
-				fi
-
-			## Is the token in the set {std,fast,full} if so it is a search specification
-				searchMode='std'
-				token1=$(cut -d ' ' -f1 <<< $scriptArgs)
-				if [[ $(Contains ',std,fast,full' ",$token1," ) == true ]]; then
-					shift; scriptArgs="$*"
-					searchMode="$token1"
-				fi
-
-			## Is the first 'scriptArgs' token of the form 'xxxx:xx' if so it is a useTypes specification
-				local useTypes='search'
-				token1=$(cut -d ' ' -f1 <<< $scriptArgs)
-				if [[ $(Contains "$token1" ':') == true ]]; then
-					shift; scriptArgs="$*"
-					useTypes="$token1"
-				fi
-
-			## Is the first 'scriptArgs' token in the set 'cron,reports,features,patches,java', if so then it is a lib specification
-				sqlStmt="select scriptData2 from $scriptsTable where name =\"dispatcher\" "
-				RunSql2 $sqlStmt
-		 		resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString")
-				local dbSrcLibs="${resultSet[0]}"
-				local useLibs=''
-				token1=$(cut -d ' ' -f1 <<< $scriptArgs)
-				if [[ $(Contains ",$dbSrcLibs," ",$token1," ) == true ]]; then
-					shift; scriptArgs="$*"
-					useLibs="$token1"
-				fi
-				useLibs="$useLibs,reports"
-
-			## Find the executable file
+			## Search for the executable file
 				#===========================================================================================================================
 				# FindExecutale <callPgmName> <searchMode> [<searchTypes> <searchLibs>
 				#	callPgmName	- The name of the program to search for
@@ -76,17 +47,12 @@ function Call {
 				#	searchTypes	- A comma separated list of Type:extension pairs.  e.g 'Bash:sh,Python:py,Java:class'
 				#	srcLibs		- A comma separated list of src subdirectories to search.  In the set {'cron','features','reports','patches'}
 				#===========================================================================================================================
-				FindExecutable "$scriptName" 'std'  "$useTypes" "$useLibs" ## Sets variable executeFile & executeAlias
+				FindExecutable "$scriptName" 'std' "$useTypes" "$useLibs" ## Sets variable executeFile & executeAlias
 				#dump executeFile executeAlias
 		else
+			## If we were passed in a full file specification then just use it
 			executeFile="$scriptName"
 			unset executeAlias
-			## Is the first 'scriptArgs' token 'fork' if so then fork the called function
-				token1=$(cut -d ' ' -f1 <<< $scriptArgs)
-				if [[ $token1 == 'fork' ]]; then
-					shift; scriptArgs="$*"
-					fork=true
-				fi
 		fi
 
 		## set environment vars overrides
@@ -95,45 +61,34 @@ function Call {
 			[[ -n $executeAlias ]] && scriptArgs="$executeAlias $scriptArgs"
 			local myPath="$(dirname $executeFile)"
 
-		## Get additional data from the scripts table for this scripts, process semaphores if required
-			# local setSemaphore waitOn semaphoreId
-			# sqlStmt="select setSemaphore,waitOn from $scriptsTable where name =\"$myName\" "
-			# RunSql2 $sqlStmt
-			# if [[ ${#resultSet[0]} -gt 0 ]]; then
-			#  	resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString")
-			# 	setSemaphore="$(cut -d'|' -f1 <<< "$resultString")"; [[ $setSemaphore == 'NULL' ]] && unset setSemaphore
-			# 	waitOn="$(cut -d'|' -f2 <<< "$resultString")"; [[ $waitOn == 'NULL' ]] && unset waitOn
-			# 	[[ -n $waitOn ]] && Semaphore 'waiton' $waitOn
-			# 	[[ -n $setSemaphore ]] && semaphoreId=$(Semaphore 'set' $myName)
-			# fi
-
 		## Call the program
 			savePath="$PATH"
 			case "$pgmType" in
 				py)
 					InitializeInterpreterRuntime 'python'
 					export PATH="$PYDIR:$PATH"
-					cmdStr="$PYDIR/bin/python -u $executeFile $scriptArgs" #$addArgs"
+					cmdStr="$PYDIR/bin/python -u $executeFile" #$addArgs"
 					;;
 				java)
 					setFileExpansion 'off'
-					cmdStr="java $scriptName $scriptArgs"
+					cmdStr="java $scriptName"
 					setFileExpansion
 					;;
 				*)
-					cmdStr="source $executeFile $scriptArgs"
+					cmdStr="source $executeFile"
 			esac
 
-			[[ $verboseLevel -ge 2 ]] && echo && echo "$cmdStr" && echo && Pause
 			local myNameSave="$myName"; local myPathSave="$myPath"
 			myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 			myPath="$(dirname $executeFile)"
 			#[[ $utility == true ]] && ($cmdStr) 2>&1 || ($cmdStr) 2>&1 | tee -a $logFile
+
+			[[ $verboseLevel -ge 2 ]] && echo && echo "$cmdStr" "$scriptArgs" && echo && Pause
 			if [[ $fork == true ]]; then
-				($cmdStr) 2>&1 &
+				($cmdStr $scriptArgs) 2>&1 &
 				rc=$?
 			else
-				($cmdStr) 2>&1
+				($cmdStr $scriptArgs) 2>&1
 				rc=$?
 			fi
 			[[ -n $semaphoreId ]] && Semaphore 'clear' $semaphoreId
@@ -161,3 +116,4 @@ export -f Call
 ## 05-12-2017 @ 13.16.49 - ("2.0.81")  - dscudiero - cleanup
 ## 05-12-2017 @ 15.05.09 - ("2.0.82")  - dscudiero - Comment out semaphore stuff
 ## 05-17-2017 @ 13.40.55 - ("2.0.83")  - dscudiero - Force add 'reports' to the list of librarys to search
+## 05-18-2017 @ 12.02.45 - ("2.1.1")   - dscudiero - Refactored parameter parsing
