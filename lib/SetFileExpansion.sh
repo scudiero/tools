@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.6" # -- dscudiero -- 01/04/2017 @ 13:48:51.82
+# version="2.0.7" # -- dscudiero -- Thu 05/18/2017 @  9:22:47.00
 #===================================================================================================
 # Set the noglob value
 #===================================================================================================
@@ -21,12 +21,12 @@ function SetFileExpansion {
 		## Toggle value
 		prev=${previousFileExpansionSettings[${#previousFileExpansionSettings[@]}-1]}
 		unset previousFileExpansionSettings[${#previousFileExpansionSettings[@]}-1]
-		[[ $prev == 'on' ]] && set -f || set +f
+		[[ $prev == 'on' ]] && set -o noglob || set +o noglob
 		return 0
 	fi
 
 	previousFileExpansionSettings+=($(set -o | grep noglob | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2))
-	[[ $(Lower $mode) == 'on' ]] && set +f || set -f
+	[[ $(Lower $mode) == 'on' ]] && set +o noglob || set -o noglob
 
 	return 0
 } #SetFileExpansion
@@ -37,3 +37,4 @@ export -f SetFileExpansion
 #===================================================================================================
 
 ## Wed Jan  4 13:54:25 CST 2017 - dscudiero - General syncing of dev to prod
+## 05-18-2017 @ 09.31.34 - ("2.0.7")   - dscudiero - Switch to use set -o for clarification
