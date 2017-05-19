@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.141" # -- dscudiero -- Thu 05/18/2017 @  7:30:23.82
+version="1.2.142" # -- dscudiero -- Fri 05/19/2017 @ 15:16:33.34
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -182,9 +182,8 @@ sTime=$(date "+%s")
 	includes='StringFunctions Msg2 Dump Here Quit PushSettings PopSettings MkTmpFile Pause ProtectedCall'
 	includes="$includes SetFileExpansion PadChar PrintBanner Alert TrapSigs SignalHandeler RunSql2 Prompt VerifyPromptVal"
 	includes="$includes DbLog ProcessLogger GetCallStack DisplayNews Help Call StartRemoteSession FindExecutable"
-	includes="$includes CheckRun CheckAuth CheckSemaphore GetDefaultsData Call ParseArgs ParseArgsStd Hello Init Goodbye"
+	includes="$includes CheckRun CheckAuth GetDefaultsData Call ParseArgs ParseArgsStd Hello Init Goodbye"
 	Import "$includes"
-	#Import FindExecutable CheckRun CheckAuth CheckSemaphore Call
 	prtStatus ", imports"
 	sTime=$(date "+%s")
 
@@ -360,3 +359,4 @@ sTime=$(date "+%s")
 ## 05-16-2017 @ 06.43.27 - ("1.2.139") - dscudiero - Make sure that the tmpRoot directory exists
 ## 05-17-2017 @ 10.49.38 - ("1.2.140") - dscudiero - export USELOCAL
 ## 05-18-2017 @ 07.34.06 - ("1.2.141") - dscudiero - Delete all files matching tmpFile in cleanup
+## 05-19-2017 @ 15.50.00 - ("1.2.142") - dscudiero - Remove includes that are not needed any longer (CheckSemaphore & IsNumeric)
