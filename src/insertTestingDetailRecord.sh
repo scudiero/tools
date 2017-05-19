@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #==================================================================================================
-version=1.0.109 # -- dscudiero -- Fri 05/19/2017 @ 15:55:56.70
+version=1.0.110 # -- dscudiero -- Fri 05/19/2017 @ 16:02:01.02
 #==================================================================================================
 TrapSigs 'on'
 originalArgStr="$*"
@@ -62,12 +62,11 @@ product=$(cut -d'-' -f2 <<< $fileName)
 instance=$(cut -d'-' -f3 <<< $fileName)
 project=$(cut -d'-' -f4 <<< $fileName)
 env=$(cut -d'-' -f5 <<< $fileName)
-jalotTaskNumber=$(cut -d'-' -f6 <<< $fileName)
-	dump -2 workbookFile -t clientCode product project instance env jalotTaskNumber
+dump -2 workbookFile -t clientCode product project instance env 
 
 ## Get the key for the qastatus record
-	Verbose 1 "^^^Retrieving qaStatusKey for '$clientCode.$product.$project.$instance.$env.$jalotTaskNumber'..."
-	whereClause="clientCode=\"$clientCode\" and  product=\"$product\" and project=\"$project\" and instance=\"$instance\" and env=\"$env\" and jalotTaskNumber=\"$jalotTaskNumber\" "
+	Verbose 1 "^^^Retrieving qaStatusKey for '$clientCode.$product.$project.$instance.$env'..."
+	whereClause="clientCode=\"$clientCode\" and  product=\"$product\" and project=\"$project\" and instance=\"$instance\" and env=\"$env\" "
 	sqlStmt="select idx from $qaStatusTable where $whereClause"
 	RunSql2 $sqlStmt
 	[[ ${#resultSet[@]} -eq 0 ]] && Error "Could not retrieve record key in $warehouseDb.$qaStatusTable for:\n^$whereClause" && Goodbye 'Return' && return 2
@@ -190,3 +189,4 @@ jalotTaskNumber=$(cut -d'-' -f6 <<< $fileName)
 ## 03-24-2017 @ 07.36.41 - (1.0.104)   - dscudiero - escape single quotes in the text fields before sending to sql
 ## 03-24-2017 @ 07.53.01 - (1.0.105)   - dscudiero - General syncing of dev to prod
 ## 03-24-2017 @ 09.17.03 - (1.0.108)   - dscudiero - Tweak messaging
+## 05-19-2017 @ 16.02.26 - (1.0.110)   - dscudiero - Remove dependence on jalot number
