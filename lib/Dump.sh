@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.12" # -- dscudiero -- Fri 04/28/2017 @ 15:39:28.10
+# version="2.0.24" # -- dscudiero -- Fri 05/19/2017 @  7:56:17.76
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -72,7 +72,9 @@ function Dump {
 					fi
 				fi
 			else
-				vVal=${!vName}
+				if [[ $vName == 'pwd' ]]; then vVal="$(pwd)"
+				else vVal=${!vName}
+				fi
 				caller=${FUNCNAME[1]}
 				[[ $(Lower $caller) == 'dump' ]] && caller=${FUNCNAME[2]}
 				writeIt $vName "$vVal"
@@ -93,6 +95,17 @@ function Dump {
 function dump { Dump $* ; }
 export -f Dump
 export -f dump
+
+#===================================================================================================
+# TODO tick marks
+#===================================================================================================
+function ToDo { 
+	echo -e "\n*** TODO ***"
+	[[ -n $* ]] && echo -e "\t$*"
+	echo
+} #ToDo
+function TODO { ToDo $* ; } ; function todo { ToDo $* ; } ; function Todo { ToDo $* ; }
+export -f ToDo ; export -f todo ; export -f Todo ; export -f TODO ;
 
 #===================================================================================================
 ## Dump an array, pass in the name of the array as follows
@@ -178,3 +191,4 @@ export -f dumphash
 ## 04-17-2017 @ 07.48.09 - ("2.0.10")  - dscudiero - Fix problem defining alternate function names
 ## 04-17-2017 @ 12.16.56 - ("2.0.11")  - dscudiero - General syncing of dev to prod
 ## 04-28-2017 @ 16.42.05 - ("2.0.12")  - dscudiero - General syncing of dev to prod
+## 05-19-2017 @ 07.56.51 - ("2.0.24")  - dscudiero - Add ToDo function
