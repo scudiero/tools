@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.4.138 # -- dscudiero -- Mon 05/15/2017 @  7:11:23.57
+version=3.4.139 # -- dscudiero -- Fri 05/19/2017 @  7:28:42.80
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -87,15 +87,6 @@ scriptDescription="Cleanup private dev sites"
 		done
 		return 0
 	} #GetSites
-
-	#==================================================================================================
-	# Process request
-	#==================================================================================================
-	function CheckChanged {
-
-		dump -2 requiredInstanceFiles requiredGlobalFiles optionalInstanceFiles optionalGlobalFiles
-
-	} #CheckChanged
 
 	#==================================================================================================
 	# Process request
@@ -264,3 +255,4 @@ Goodbye 0
 ## 05-10-2017 @ 14.36.11 - (3.4.137)   - dscudiero - Refactor the daemon code
 ## 05-15-2017 @ 07.11.45 - (3.4.138)   - dscudiero - Activate code for daemon
 ## 05-18-2017 @ 06.58.05 - (3.4.138)   - dscudiero - Fix the end of the case statement
+## 05-19-2017 @ 08.51.46 - (3.4.139)   - dscudiero - Removed dead code
