@@ -2,7 +2,7 @@
 
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.18" # -- dscudiero -- Fri 05/19/2017 @ 11:12:25.01
+# version="2.0.20" # -- dscudiero -- Fri 05/19/2017 @ 11:14:31.76
 #===================================================================================================
 # Check to see if the logged user can run this script
 # Returns true if user is authorized, otherwise it returns a message
@@ -16,16 +16,11 @@ function CheckAuth {
 	local scriptName=${1-$myName}
 
 	sqlStmt="select author,restrictToUsers,restrictToGroups from $scriptsTable where name=\"$scriptName\""
-echo "\$sqlStmt" > "$HOME/stdout.txt"
 	RunSql2 $sqlStmt
 	[[ ${#resultSet[@]} -eq 0 ]] && echo true && return 0
-echo "\${resultSet[0]} = '${resultSet[0]}'" >> "$HOME/stdout.txt"
 	local author="$(cut -f1 -d'|' <<< ${resultSet[0]})"
 	local scriptUsers="$(cut -f2 -d'|' <<< ${resultSet[0]})" ; [[ $scriptUsers == 'NULL' ]] && unset scriptUsers
 	local scriptGroups="$(cut -f3 -d'|' <<< ${resultSet[0]})" ; [[ $scriptGroups == 'NULL' ]] && unset scriptGroups
-echo "\$author = '$author'" >> "$HOME/stdout.txt"
-echo "\$scriptUsers = '$scriptUsers'" >> "$HOME/stdout.txt"
-echo "\$scriptGroups = '$scriptGroups'" >> "$HOME/stdout.txt"
 
 	[[ $author == $userName ]] && echo true && return 0
 	[[ -z ${scriptUsers}${scriptGroups} ]] && echo true && return
@@ -60,3 +55,4 @@ export -f CheckAuth
 ## 05-19-2017 @ 11.02.38 - ("2.0.15")  - dscudiero - Add debug stuff
 ## 05-19-2017 @ 11.06.08 - ("2.0.16")  - dscudiero - send debug stuff to stdout
 ## 05-19-2017 @ 11.12.37 - ("2.0.18")  - dscudiero - General syncing of dev to prod
+## 05-19-2017 @ 11.14.50 - ("2.0.20")  - dscudiero - remove debug stuff
