@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.118 # -- dscudiero -- Fri 05/19/2017 @  8:54:48.04
+version=2.1.120 # -- dscudiero -- Fri 05/19/2017 @ 11:21:40.17
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -189,9 +189,7 @@ function BuildToolsAuthTable() {
 case "$hostName" in
 	mojave)
 
-ToDo 'Remove debug code'
-Call 'cleanDev' 'daemon' "$scriptArgs"
-
+ToDo 'Remove debug code' ; Call 'cleanDev' 'daemon' "$scriptArgs"
 
 		## Run perftest on even numberd hours
 		if [[ $(( $(date +"%-H") % 2 )) -eq 0 ]]; then
@@ -209,6 +207,9 @@ Call 'cleanDev' 'daemon' "$scriptArgs"
 		[[ $(date "+%H") == 12 ]] && Call 'syncCourseleafGitRepos' 'master'
 		;;
 	*)
+
+ToDo 'Remove debug code' ; Call 'cleanDev' 'daemon' "$scriptArgs"
+
 		sleep 60 ## Wait for perfTest on Mojave to set its semaphore
 		## Run perftest on even numberd hours
 		if [[ $(( $(date +"%-H") % 2 )) -eq 0 ]]; then
@@ -249,3 +250,4 @@ return 0
 ## Tue Mar  7 07:33:11 CST 2017 - dscudiero - Ignore messages from rsync for SyncInternalDb
 ## 05-19-2017 @ 07.26.44 - (2.1.116)   - dscudiero - add call to reports as a test
 ## 05-19-2017 @ 08.55.20 - (2.1.118)   - dscudiero - Added debug stuff
+## 05-19-2017 @ 11.21.55 - (2.1.120)   - dscudiero - add debug code to build7
