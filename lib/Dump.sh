@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.29" # -- dscudiero -- Fri 05/19/2017 @  8:03:58.79
+# version="2.0.39" # -- dscudiero -- Fri 05/19/2017 @  8:38:41.49
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -10,39 +10,32 @@
 dumpFirstWrite=true
 function Dump {
 	declare lowervName
-	local singleLine=false
-	local quit=false
-	local pause=false
-	local logit=false
-	local tabs=''
-	local dumpLogFile=$HOME/stdout.txt
-	local vName vVal prefix
+	local singleLine=false quit=false pause=false logit=false tabs='' dumpLogFile=$HOME/stdout.txt vName vVal prefix
 
 	PushSettings "$FUNCNAME"
 	set +xv # Turn off trace
 
-	if [[ $1 == 'ifMe' ]]; then
-		[[ $userName != 'dscudiero' ]] && return 0
-		shift
-	fi
+	## Process our own special directives
+		if [[ $1 == 'ifMe' ]]; then [[ $userName != 'dscudiero' ]] && return 0 ; shift
+		elif [[ $1 == 'singleLine' || $1 == 'oneLine' ]]; then singleLine=true ; shift
+		fi
 
 	writeIt() {
 		local writeItVar="$1"
 		local writeItVal="$2"
-		local writeItOutStr
-		local sep='\n'
-		[[ $singleLine -eq 1 ]] && sep=', '
+		local sep writeItOutStr
+		[[ $singleLine == true && -n $writeItVar ]] && sep=', ' || sep='\n'
 		local prefix=''
 		[[ $caller != 'source' ]] && prefix="$(ColorV "$myName.$caller")."
 		local varStr="$(ColorN "$writeItVar")"
 
+		[[ -n $writeItVar ]] && writeItOutStr="${prefix}${varStr} = >${writeItVal}<${sep}" || writeItOutStr="$sep"
+		#[[ ${writeItOutStr: (-2)} == ",\n" ]] && writeItOutStr="${writeItOutStr:0:${#writeItOutStr}-2}\n"
+
 		if [[ $logit == false ]]; then
-			[[ $writeItVar != '' ]] && writeItOutStr="${prefix}${varStr} = >${writeItVal}<${sep}" || writeItOutStr="$sep"
 			echo -en "${tabs}${writeItOutStr}";
 		elif [[ -w $dumpLogFile ]]; then
-			[[ $dumpFirstWrite == true ]] && echo $(date) >> $dumpLogFile
-			dumpFirstWrite=dumpLogFile
-			[[ $writeItVar != '' ]] && writeItOutStr="${prefix}${writeItVar} = >${writeItVal}<${sep}" || writeItOutStr="$sep"
+			[[ $dumpFirstWrite == true ]] && echo $(date) >> $dumpLogFile && dumpFirstWrite=false
 			echo -en "$tabs$writeItOutStr" >> $dumpLogFile
 		fi
 		return 0
@@ -56,6 +49,8 @@ function Dump {
 				if [[ $lowervName == '-r' ]]; then
 					echo > $dumpLogFile
 				elif [[ $lowervName == '-s' ]]; then
+					singleLine=true
+				elif [[ $lowervName == '-o' ]]; then
 					singleLine=true
 				elif [[ $lowervName == '-l' ]]; then
 					logit=true
@@ -198,3 +193,4 @@ export -f dumphash
 ## 04-28-2017 @ 16.42.05 - ("2.0.12")  - dscudiero - General syncing of dev to prod
 ## 05-19-2017 @ 07.56.51 - ("2.0.24")  - dscudiero - Add ToDo function
 ## 05-19-2017 @ 08.04.42 - ("2.0.29")  - dscudiero - Added 'isMe' token
+## 05-19-2017 @ 08.51.15 - ("2.0.39")  - dscudiero - General syncing of dev to prod
