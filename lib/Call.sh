@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.1.1" # -- dscudiero -- Thu 05/18/2017 @ 11:53:24.53
+# version="2.1.5" # -- dscudiero -- Fri 05/19/2017 @  7:20:59.52
 #=======================================================================================================================
 # Generic resolve file and call
 # Call scriptName ["$scriptArgs"]
@@ -31,7 +31,7 @@ function Call {
 			[[ $1 == 'utility' ]] && utility=true && shift && continue
 			[[ $1 == 'std' || $1 == 'fast' || $1 == 'full'  ]] && searchMode="$1" && shift && continue
 			[[ $(Contains "$1" ':') == true ]] && useTypes="$1" && shift && continue
-			[[ $(Contains ",$useLibs," ",$1,") == true ]] && shift && continue
+			[[ $(Contains ",$useLibs," ",$1,") == true && $1 != 'reports' ]] && shift && continue
 			scriptArgs="$scriptArgs $1"
 			shift || true
 		done
@@ -117,3 +117,4 @@ export -f Call
 ## 05-12-2017 @ 15.05.09 - ("2.0.82")  - dscudiero - Comment out semaphore stuff
 ## 05-17-2017 @ 13.40.55 - ("2.0.83")  - dscudiero - Force add 'reports' to the list of librarys to search
 ## 05-18-2017 @ 12.02.45 - ("2.1.1")   - dscudiero - Refactored parameter parsing
+## 05-19-2017 @ 07.21.18 - ("2.1.5")   - dscudiero - Ignore 'reports' if passed in as an argument
