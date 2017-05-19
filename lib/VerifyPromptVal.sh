@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.47" # -- dscudiero -- Wed 04/05/2017 @ 10:08:22.51
+# version="2.0.49" # -- dscudiero -- Fri 05/19/2017 @ 14:36:19.26
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -43,10 +43,12 @@ function VerifyPromptVal {
 			checkClient=false
 		else
 			## Look for client in the clients table
-			local sqlStmt="select idx from $clientInfoTable where name=\"$response\" "
+			local sqlStmt="select \* from $clientInfoTable where name=\"$response\" "
 			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -eq 0 ]]; then
 				verifyMsg="$(Msg2 $E "Client value of '$response' not found in $warehouseDb.$clientInfoTable")"
+			else
+				ClientData="${resultSet[0]}"
 			fi
 			## OK found client, now make sure it is valid for the current host
 			if [[ $verifyMsg == "" ]]; then
@@ -207,3 +209,4 @@ export -f VerifyPromptVal
 ## 03-30-2017 @ 15.06.14 - ("2.0.35")  - dscudiero - switch from runsql to runsql2
 ## 04-04-2017 @ 13.17.36 - ("2.0.46")  - dscudiero - Added support to verify multi value responses
 ## 04-05-2017 @ 10.08.43 - ("2.0.47")  - dscudiero - Turn off debug statements
+## 05-19-2017 @ 14.38.31 - ("2.0.49")  - dscudiero - Set global client record when we look up client
