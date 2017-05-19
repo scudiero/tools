@@ -2,7 +2,7 @@
 
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.14" # -- dscudiero -- Wed 05/10/2017 @  9:23:12.38
+# version="2.0.15" # -- dscudiero -- Fri 05/19/2017 @ 10:57:20.17
 #===================================================================================================
 # Check to see if the logged user can run this script
 # Returns true if user is authorized, otherwise it returns a message
@@ -18,19 +18,21 @@ function CheckAuth {
 
 	sqlStmt="select author,restrictToUsers,restrictToGroups from $scriptsTable where name=\"$scriptName\""
 	RunSql2 $sqlStmt
-
 	[[ ${#resultSet[@]} -eq 0 ]] && echo true && return 0
 	local author="$(cut -f1 -d'|' <<< ${resultSet[0]})"
-	[[ $author == $userName ]] && echo true && return 0
-
 	local scriptUsers="$(cut -f2 -d'|' <<< ${resultSet[0]})"
-	scriptUsers="$(tr ' ' ',' <<< "$scriptUsers")"
-	if [[ $scriptUsers != 'NULL' && -n $scriptUsers ]]; then
+	local scriptGroups="$(cut -f3 -d'|' <<< ${resultSet[0]})"
+
+	[[ $author == $userName ]] && echo true && return 0
+	[[ -z ${scriptUsers}${scriptGroups} ]] && return
+
+	if [[ -n $scriptUsers ]]; then
+		scriptUsers="$(tr ' ' ',' <<< "$scriptUsers")"
 		[[ $(Contains ",$scriptUsers," ",$userName,") == true ]] && echo true && return 0
 	fi
 
-	local scriptGroups="$(cut -f3 -d'|' <<< ${resultSet[0]})"; scriptGroups="\"$(sed 's/,/","/g' <<< "$scriptGroups")\""
-	if [[ $scriptGroups != \"NULL\" && -n $scriptGroups ]]; then
+	if [[ -n $scriptGroups ]]; then
+		scriptGroups="\"$(sed 's/,/","/g' <<< "$scriptGroups")\""
 		sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\" and code in ($scriptGroups)"
 		RunSql2 $sqlStmt
 		[[ ${#resultSet[@]} -ne 0 ]] && echo true && return 0
@@ -51,3 +53,4 @@ export -f CheckAuth
 ## 05-09-2017 @ 13.57.12 - ("2.0.8")   - dscudiero - Refactored to improve performance
 ## 05-10-2017 @ 09.22.33 - ("2.0.13")  - dscudiero - Fix error not setting myname propery
 ## 05-10-2017 @ 09.23.21 - ("2.0.14")  - dscudiero - General syncing of dev to prod
+## 05-19-2017 @ 10.57.37 - ("2.0.15")  - dscudiero - Clean up logic
