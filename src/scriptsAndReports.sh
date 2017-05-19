@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.87 # -- dscudiero -- Fri 05/19/2017 @ 13:30:40.74
+version=3.11.90 # -- dscudiero -- Fri 05/19/2017 @ 14:19:51.59
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -454,3 +454,4 @@ Goodbye 0
 ## 05-17-2017 @ 13.41.33 - (3.11.83)   - dscudiero - Do not pause if called with a scripr or report name
 ## 05-17-2017 @ 16.09.17 - (3.11.86)   - dscudiero - Added delimiter parsing for report headers
 ## 05-19-2017 @ 13.31.47 - (3.11.87)   - dscudiero - Fix problem with not pausing after report / script is run from menu
+## 05-19-2017 @ 14.24.29 - (3.11.90)   - dscudiero - skip
