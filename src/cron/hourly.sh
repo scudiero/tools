@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.120 # -- dscudiero -- Fri 05/19/2017 @ 11:21:40.17
+version=2.1.121 # -- dscudiero -- Fri 05/19/2017 @ 12:09:37.81
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -188,9 +188,6 @@ function BuildToolsAuthTable() {
 #=======================================================================================================================
 case "$hostName" in
 	mojave)
-
-ToDo 'Remove debug code' ; Call 'cleanDev' 'daemon' "$scriptArgs"
-
 		## Run perftest on even numberd hours
 		if [[ $(( $(date +"%-H") % 2 )) -eq 0 ]]; then
 			## Make sure we have a sites table before running perfTest
@@ -207,9 +204,6 @@ ToDo 'Remove debug code' ; Call 'cleanDev' 'daemon' "$scriptArgs"
 		[[ $(date "+%H") == 12 ]] && Call 'syncCourseleafGitRepos' 'master'
 		;;
 	*)
-
-ToDo 'Remove debug code' ; Call 'cleanDev' 'daemon' "$scriptArgs"
-
 		sleep 60 ## Wait for perfTest on Mojave to set its semaphore
 		## Run perftest on even numberd hours
 		if [[ $(( $(date +"%-H") % 2 )) -eq 0 ]]; then
@@ -251,3 +245,4 @@ return 0
 ## 05-19-2017 @ 07.26.44 - (2.1.116)   - dscudiero - add call to reports as a test
 ## 05-19-2017 @ 08.55.20 - (2.1.118)   - dscudiero - Added debug stuff
 ## 05-19-2017 @ 11.21.55 - (2.1.120)   - dscudiero - add debug code to build7
+## 05-19-2017 @ 12.25.58 - (2.1.121)   - dscudiero - added debug
