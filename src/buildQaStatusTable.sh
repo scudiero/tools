@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.1.25 # -- dscudiero -- Wed 05/17/2017 @ 14:14:37.76
+version=1.2.26 # -- dscudiero -- Fri 05/19/2017 @ 12:24:36.88
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye GetExcel'
@@ -27,15 +27,91 @@ function Goodbye-buildQaStatusTable  { # or Goodbye-local
 	return 0
 }
 function testMode-buildQaStatusTable  { # or testMode-local
-	client='davetest'
+	cimTrackingWorkBook="$HOME/CIM - Multiweek - INTERNAL.xlsx"
 	logInDb=false
-	unset ignoreList
 	return 0
 }
 
 #=======================================================================================================================
 # local functions
 #=======================================================================================================================
+#=======================================================================================================================
+# Read the CIM tacking workbook and retrieve the data for the QA person
+# Usage:
+# GetCimPriorityData <outputHashName> <workBook> <workSheet> <QAperson>
+# Returns:
+#	'priorityWeek'	= The date from the priority spreadsheet
+#	'<outputHashName>'	= Hash table, the key is in the form 'client-instanceAdmin-project-env'
+#						 Value of the has is the allocated hours for the project tasks
+#
+#=======================================================================================================================
+	function GetCimPriorityData {
+		local outHashName="$1"; shift
+		local workBook="$1"; shift
+		local workSheet="$1"; shift
+		local findColText="$(Lower "$1")"; shift
+		local grepStr line lines found=false IFSave="$IFS" fieldCntr=0 sheetCol sheetCols itemCol
+		local itemHrsCol item itemHrs priority=1 ctClient ctInstance ctProject hashKey mapCtr
+		dump -2 product workBook workSheet findColText
+
+		## Read the Worksheet data
+			GetExcel "$workBook" "$workSheet" > $tmpFile 2>&1
+			local grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
+			if [[ $grepStr != '' || $(tail -n 1 $tmpFile) == '-1' ]]; then
+				Msg2 $E "Could not retrieve data from workbook, please see below"
+				tail -n 25 $tmpFile > $tmpFile.2
+				while read -r line; do echo -e "\t$line"; done < $tmpFile.2;
+				[[ -f $tmpFile.2 ]] && rm -f $tmpFile.2
+				Msg2; Goodbye -1
+			fi
+
+		## Read the output into an array, look for the header record
+			while read line; do lines+=("$line"); done < $tmpFile
+			[[ $(Contains "$(Lower "${lines[0]}")" "$findColText") != true ]] && Terminate "$FUNCNAME: First record:\n\t'${lines[0]}'\nof the file did not contain '$findColText'"
+
+		# Parse the header record, getting the column numbers of the fields
+			IFSave=$IFS; IFS=\|; sheetCols=(${lines[0]}); IFS=$IFSave;
+			for sheetCol in "${sheetCols[@]}"; do
+				(( fieldCntr += 1 ))
+				[[ $(Lower "$(Trim "$sheetCol")") == "$findColText" ]] && found=true && break
+			done
+			[[ $found != true ]] && Terminate "$FUNCNAME: Could not locate a column with name '$findColText' in the Worksheet"
+			itemCol=$fieldCntr
+			itemHrsCol=$((itemCol+1))
+			dump -2 itemCol itemHrsCol
+
+		## Loop throug spreadsheet lines getting data
+			priorityWeek=$(cut -d'|' -f $itemCol <<< ${lines[1]})
+			priorityWeek=${priorityWeek##* }
+			dump -2 priorityWeek
+			for ((jj=2; jj<${#lines[@]}; jj++)); do
+				item="$(Lower "$(cut -d'|' -f $itemCol <<< ${lines[$jj]})")"
+				itemHrs="$(cut -d'|' -f $itemHrsCol <<< ${lines[$jj]})"
+				[[ -z ${item}${itemHrs} ]] && continue
+				[[ $item == 'meetings (hrs)' ]] && break
+				ctClient="$(cut -f1 -d' ' <<< "$item")"
+				ctInstance="$(cut -f2 -d' ' <<< "$item")"
+				ctProject="$(cut -f3 -d' ' <<< "$item")"
+				[[ -z $ctProject ]] && ctProject='Implementation'
+				if [[ $ctProject == 'mn' ]]; then
+					ctProject='Implementation'
+					ctEnv='mn'
+				else
+					ctEnv="$(cut -f4 -d' ' <<< "$item")"
+				fi
+				[[ $ctEnv == 'mn' ]] && ctEnv='next' || ctEnv='test'
+				hashKey="$(Lower "$ctClient-$(TitleCase "$ctInstance")Admin-$ctProject-$ctEnv")"
+				dump -2 -n item itemHrs -t hashKey
+				cimTrackingHash[$hashKey]="$itemHrs"
+				eval "$outHashName[$hashKey]=\"$itemHrs|$priority\""
+				((priority+=1))
+			done
+
+			[[ -f $tmpFile ]] && rm -f $tmpFile
+			[[ -f $tmpFile.2 ]] && rm -f $tmpFile.2
+
+		return 0
+	} ##GetCimPriorityData
 
 #=======================================================================================================================
 # Declare local variables and constants
@@ -45,6 +121,13 @@ trueVars=''
 falseVars=''
 for var in $trueVars; do eval $var=true; done
 for var in $falseVars; do eval $var=false; done
+
+## source data and hash tables
+	declare -A cimTrackingHash
+	declare -A catTrackingHash
+	cimTrackingWorkBook="$cimTrackingDir/CIM - Multiweek - INTERNAL.xlsx"
+	cimTrackingWorkbookSheet='ThisWeekinCIM'
+	cimTester='Scotta'
 
 ## Find the helper script location
 	workerScript='insertTestingDetailRecord'; useLocal=true
@@ -122,6 +205,16 @@ DumpMap 2 "$(declare -p variableMap)"
 #================================================================================================================================================================
 # Main
 #================================================================================================================================================================
+Msg2; Msg2 "Retrieveing Implementation Team data from '$(basename "$cimTrackingWorkBook")/$cimTrackingWorkbookSheet' "
+GetCimPriorityData 'cimTrackingHash' "$cimTrackingWorkBook" "$cimTrackingWorkbookSheet" "$cimTester"
+if [[ $verboseLevel -ge 1 ]]; then
+	dump -t priorityWeek
+	echo -e "\tcimTrackingHash:"
+	for mapCtr in "${!cimTrackingHash[@]}"; do
+		echo -e "\t\tkey: '$mapCtr', value: '${cimTrackingHash[$mapCtr]}'";
+	done;
+fi
+
 Msg2; Msg2 "QA Tracking Root directory = '$qaTrackingRoot'"
 unset numTokens clientCode product project instance envName jalotTaskNumber
 ## Loop through workbooks
@@ -213,6 +306,16 @@ for workbook in "${workbooks[@]}"; do
 			continue
 		fi
 
+	## Do we have data for this record from the implimentaiton team tracking spreadsheet
+		checkKey="$(Lower "$clientCode-$instance-$project-$env")"
+		if [[ ${cimTrackingHash[$checkKey]+abc} ]]; then
+			implPriorityWeek="$priorityWeek"
+			tmpVal="${cimTrackingHash["$checkKey"]}"
+			implHours="${tmpVal%%|*}"
+			implPriority="${tmpVal##*|}"
+		else
+			unset implPriorityWeek implHours implPriority
+		fi
 	## Quote strings
 		unset values
 		for token in $(tr ',' ' ' <<< $insertFields); do
@@ -270,10 +373,9 @@ for workbook in "${workbooks[@]}"; do
 			ProtectedCall "Call "$workerScriptFile" "$workbook" 'TestingDetailFinal'"
 			[[ $rc -ge 2 ]] && Msg2 $T "Processing the Testing Detail data, please review messages"
 			if [[ $(Contains "$workbook" 'archive') == false ]]; then
-				cwd=$(pwd)
-				cd $(dirname $workbook)
-				mv -f $workbook "$qaTrackingRoot/Archive/"
-				cd $cwd
+				pushd $(dirname $workbook) >& /dev/null
+				$DOIT mv -f $workbook "$qaTrackingRoot/Archive/"
+				popd $(dirname $workbook) >& /dev/null
 				## Get the key for the qastatus record
 					whereClause="clientCode=$clientCode and product=$product and project=$project and instance=$instance and env=$env and jalotTaskNumber=$jalotTaskNumber"
 					sqlStmt="select idx from $qaStatusTable where $whereClause"
@@ -319,3 +421,4 @@ Goodbye 0 #'alert'
 ## 04-17-2017 @ 07.41.31 - (1.1.16)    - dscudiero - remove import fpr dump array, moved code to the Dump file
 ## 05-17-2017 @ 12.57.33 - (1.1.20)    - dscudiero - Fix problem parsing data for requester
 ## 05-17-2017 @ 16.08.34 - (1.1.25)    - dscudiero - Added support for the notes field
+## 05-19-2017 @ 12.25.35 - (1.2.26)    - dscudiero - Added data from the implementation team's tracking spreadsheet
