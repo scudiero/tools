@@ -10,19 +10,20 @@ TrapSigs 'on'
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function parseArgs-invalindCurrOrNextUrls  { # or parseArgs-local
+function parseArgs-qaStatus  { # or parseArgs-local
 	#argList+=(-ignoreXmlFiles,7,switch,ignoreXmlFiles,,script,'Ignore extra xml files')
-	argList+=(-short,5,switch,mode='short',,script,'Generate the short report')
-	argList+=(-long,4,switch,mode='long',,script,'Generate the long report')
-	argList+=(-cat,3,switch,cat,,script,'Generate report for catalog test results')
+	argList+=(-short,5,switch,short,,script,'Generate the short report')
+	argList+=(-long,4,switch,long,,script,'Generate the long report')
+	argList+=(-cat,3,switch,cat,,script,'Generate report for CAT test results')
 	argList+=(-cim,3,switch,cim,,script,'Generate report for CIM test results')
 	argList+=(-emailAddrs,5,option,emailAddrs,,script,'Email addresses to send reports to when running in batch mode')
 	return 0
 }
-function Goodbye-invalindCurrOrNextUrls  { # or Goodbye-local
+function Goodbye-qaStatus  { # or Goodbye-local
+	SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
 	return 0
 }
-function testMode-invalindCurrOrNextUrls  { # or testMode-local
+function testMode-qaStatus  { # or testMode-local
 	return 0
 }
 
@@ -37,9 +38,9 @@ sendMail=false
 numFound=0
 mode='short'
 
-outDir=\thome\t$userName\tReports\t$myName
+outDir="$HOME/Reports/$myName"
 [[ ! -d $outDir ]] && mkdir -p $outDir
-outFile=$outDir\t$(date '+%Y-%m-%d-%H%M%S').txt
+outFile=$outDir/$(date '+%Y-%m-%d-%H%M%S').txt
 
 GetDefaultsData
 okCodes="$(cut -d':' -f2- <<< $scriptData1)"
@@ -116,6 +117,10 @@ dump -1 mode cat cim
 		done
 		echo | tee -a $outFile
 
+	echo; echo
+	Note "Report output also save in '$outFile'"
+
+
 ## Send email
 	if [[ -n $emailAddrs && $sendMail == true ]]; then
 		Msg2 >> $outFile; Msg2 "Sending email(s) to: $emailAddrs">> $outFile; Msg2 >> $outFile
@@ -136,3 +141,4 @@ Goodbye 0 #'alert'
 ## Fri Mar 17 10:45:25 CDT 2017 - dscudiero - v
 ## 03-27-2017 @ 13.30.18 - (1.0.75)    - dscudiero - Only report on active records
 ## 05-17-2017 @ 13.41.10 - (1.0.77)    - dscudiero - Fix sql statements
+## 05-19-2017 @ 13.48.34 - (1.0.77)    - dscudiero - Add message where the report data is saved
