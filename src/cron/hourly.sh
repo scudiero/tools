@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.116 # -- dscudiero -- Fri 05/19/2017 @  7:25:26.05
+version=2.1.118 # -- dscudiero -- Fri 05/19/2017 @  8:54:48.04
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -189,8 +189,9 @@ function BuildToolsAuthTable() {
 case "$hostName" in
 	mojave)
 
-qaEmails='dscudiero@leepfrog.com'
-Call 'scriptsAndReports' 'reports' 'qaStatusShort' "-quiet -email \"$qaEmails\" $scriptArgs"
+ToDo 'Remove debug code'
+Call 'cleanDev' 'daemon' "$scriptArgs"
+
 
 		## Run perftest on even numberd hours
 		if [[ $(( $(date +"%-H") % 2 )) -eq 0 ]]; then
@@ -247,3 +248,4 @@ return 0
 ## Fri Feb 24 09:39:09 CST 2017 - dscudiero - Fix a problem checking if the hour was an even hour
 ## Tue Mar  7 07:33:11 CST 2017 - dscudiero - Ignore messages from rsync for SyncInternalDb
 ## 05-19-2017 @ 07.26.44 - (2.1.116)   - dscudiero - add call to reports as a test
+## 05-19-2017 @ 08.55.20 - (2.1.118)   - dscudiero - Added debug stuff
