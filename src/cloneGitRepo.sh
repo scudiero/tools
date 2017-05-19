@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.33 # -- dscudiero -- Wed 05/17/2017 @ 16:42:57.93
+version=1.0.35 # -- dscudiero -- Fri 05/19/2017 @ 12:15:15.15
 #==================================================================================================
 #= Description +===================================================================================
 # Clone a Courseleaf git repository
@@ -50,6 +50,8 @@ local tgtDir="$4"
 parseQuiet=true
 ParseArgsStd
 dump -2 -t originalArgStr repo tag srcDir tgtDir
+
+ToDo 'remove debug code' ; batchMode=true
 
 #===================================================================================================
 # Main
@@ -164,3 +166,4 @@ return 0
 ## 04-28-2017 @ 08.26.15 - (1.0.31)    - dscudiero - use Goodbye 'return'
 ## 05-02-2017 @ 07.32.32 - (1.0.32)    - dscudiero - cleanup tmp files
 ## 05-17-2017 @ 16.43.45 - (1.0.33)    - dscudiero - Add process id to the name of the tmpFile to avoid conflicts when running scripts in parallel
+## 05-19-2017 @ 12.25.49 - (1.0.35)    - dscudiero - Added debug statements
