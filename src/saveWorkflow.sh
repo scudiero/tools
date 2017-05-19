@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.64 # -- dscudiero -- Wed 05/17/2017 @  7:09:07.81
+version=2.2.68 # -- dscudiero -- Fri 05/19/2017 @  8:50:40.18
 #====================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye ParseCourseleafFile' #imports="$imports "
@@ -62,12 +62,15 @@ if [[ $daemon == true ]]; then
 	client="$(cut -d ' ' -f1 <<< "$data")"
 	client="$(cut -d '-' -f1 <<< "$data")"
 	env="$(cut -d ' ' -f2 <<< "$data")"
-	srcDir="$siteFile"
 	allCims=true; GetCims  "$siteFile"
+	srcDir="$siteFile"
+	backupFolder="$tmpRoot/$myName/$client-$env-$BASHPID/beforeDelete"
 else
 	Init "getClient getEnv getDirs checkEnvs getCims $allCims noPreview noPublic"
+	backupFolder="$tmpRoot/$myName/$client-$env-$BASHPID/$myName"
 fi
 
+dump isMe daemon siteFile client env srcDir cimStr backupFolder
 dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 ## Get the files to act on from the database
 	unset requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles
@@ -110,8 +113,7 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 #==================================================================================================
 ## Backup the folders
 	echo
-	backupFolder=$tmpRoot/$myName-$client-$env-$BASHPID/beforeDelete
-	[[ -d $backupFolder ]] && rm -rf $backupFolder
+	[[ -d $backupFolder ]] && rm -rf $backupFolder || mkdir -p "$backupFolder"
 	## Insance files
 		for dir in $(echo $cimStr | tr ',' ' '); do
 			Msg2 "Saving: $dir"
@@ -134,12 +136,18 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 
 	## Tar up the workflow files
 	pushd "$backupFolder" >& /dev/null
-	tarDir=$localClientWorkFolder/$client/workflowBackups
-	[[ ! -d $tarDir ]] && mkdir -p "$tarDir"
-	tarFile="$tarDir/${env}---$backupSuffix.tar.gz"
-	tar -cpzf "$tarFile" ./*
-	cd ..
-	rm -rf "/${backupFolder#*/}"
+	numFiles=$(find .//. ! -name . -print | grep -c //)
+	if [[ $numFiles -gt 0 ]]; then
+		tarDir=$localClientWorkFolder/$client/workflowBackups
+		[[ ! -d $tarDir ]] && mkdir -p "$tarDir"
+		tarFile="$tarDir/${env}---$backupSuffix.tar.gz"
+dump isMe pwd numFiles tarDir tarFile
+		tar -cpzf "$tarFile" ./*
+		cd ..
+		rm -rf "/${backupFolder#*/}"
+	else
+		Error "$myName: No files to save"
+	fi
 	popd >& /dev/null
 
 
@@ -162,3 +170,4 @@ Goodbye 0
 ## 05-04-2017 @ 15.28.14 - (2.2.53)    - dscudiero - remove debug code
 ## 05-16-2017 @ 10.26.39 - (2.2.62)    - dscudiero - Renamed the target tar file to match copyWorkflow
 ## 05-17-2017 @ 07.10.40 - (2.2.64)    - dscudiero - Added processid to the temp folder name
+## 05-19-2017 @ 08.51.28 - (2.2.68)    - dscudiero - Added debug statements
