@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.122 # -- dscudiero -- Fri 04/28/2017 @  8:25:53.58
+version=1.1.123 # -- dscudiero -- Fri 05/19/2017 @ 14:54:56.17
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseCourseleafFile' #imports="$imports "
@@ -333,7 +333,7 @@ Verbose 1 "^$env ($siteDir)"
 
 ## Create the sites table record
 	setStr="catver=$catVer,cimver=$cimVer,clssVer=$clssVer,courseleafCgiVer=$courseleafCgiVer,reportsVer=$reportsVer,dailyshVer=$dailyshVer"
-	setStr="$setStr,CIMs=$cimStr,url=$url,internalUrl=$internalUrl,archives=$archives,googleType=$googleType"
+	setStr="$setStr,CIMs=$cimStr,url=$url,internalUrl=$internalUrl,siteDir=\"$siteDir\",archives=$archives,googleType=$googleType"
 	setStr="$setStr,CATedition=$catEdition,publishing=$publishTarget,degreeWorks=$degreeWorks"
 	sqlStmt="update $useSiteInfoTable set $setStr where siteId=\"$siteId\""
 	[[ $verboseLevel -ge 2 ]] && echo && echo "setStr = >$setStr<" && echo && echo "sqlStmt = >$sqlStmt<" && echo
@@ -397,3 +397,4 @@ return 0
 ## Tue Feb 21 06:46:58 CST 2017 - dscudiero - Fix error with verbose
 ## 03-27-2017 @ 13.30.29 - (1.1.121)   - dscudiero - General syncing of dev to prod
 ## 04-28-2017 @ 08.26.26 - (1.1.122)   - dscudiero - use Goodbye 'return'
+## 05-19-2017 @ 15.13.04 - (1.1.123)   - dscudiero - Added siteDir to the sites record
