@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.24" # -- dscudiero -- Fri 05/19/2017 @  7:56:17.76
+# version="2.0.29" # -- dscudiero -- Fri 05/19/2017 @  8:03:58.79
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -20,6 +20,11 @@ function Dump {
 
 	PushSettings "$FUNCNAME"
 	set +xv # Turn off trace
+
+	if [[ $1 == 'ifMe' ]]; then
+		[[ $userName != 'dscudiero' ]] && return 0
+		shift
+	fi
 
 	writeIt() {
 		local writeItVar="$1"
@@ -192,3 +197,4 @@ export -f dumphash
 ## 04-17-2017 @ 12.16.56 - ("2.0.11")  - dscudiero - General syncing of dev to prod
 ## 04-28-2017 @ 16.42.05 - ("2.0.12")  - dscudiero - General syncing of dev to prod
 ## 05-19-2017 @ 07.56.51 - ("2.0.24")  - dscudiero - Add ToDo function
+## 05-19-2017 @ 08.04.42 - ("2.0.29")  - dscudiero - Added 'isMe' token
