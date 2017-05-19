@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.21.224 # -- dscudiero -- Mon 05/15/2017 @  9:08:54.30
+version=1.22.0 # -- dscudiero -- Fri 05/19/2017 @  7:22:51.36
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -315,8 +315,8 @@ case "$hostName" in
 		# 	[[ -f /tmp/warehouse.sql ]] && rm -f /tmp/warehouse.sql
 
 		## Reports
-			froggerQa='sjones@leepfrog.com,mbruening@leepfrog.com,jlindeman@leepfrog.com'
-			Call 'reports' "qaStatusShort -quiet -email "$froggerQa" $scriptArgs"
+			qaEmails='dscudiero@leepfrog.com,sjones@leepfrog.com,mbruening@leepfrog.com,jlindeman@leepfrog.com'
+			Call 'scriptsAndReports' 'reports' 'qaStatusShort' "-quiet -email \"$qaEmails\" $scriptArgs"
 			## Build a list of clients and contact info for Shelia
 			#[[ $runClientListReport == true ]] && Call 'reports' "clientList -quiet -email 'dscudiero@leepfrog.com,sfrickson@leepfrog.com' $scriptArgs"
 			[[ $(date +%d -d tomorrow) == '01' ]] && Call 'reports' "clientTimezone -quiet -email 'dscudiero@leepfrog.com,jlindeman@leepfrog.com' $scriptArgs"
@@ -450,3 +450,4 @@ return 0
 ## 05-05-2017 @ 07.04.45 - (1.21.222)  - dscudiero - Fix call to cleanDev
 ## 05-09-2017 @ 08.01.30 - (1.21.223)  - dscudiero - fix call to cleanDev in build7 section
 ## 05-15-2017 @ 10.25.38 - (1.21.224)  - dscudiero - tweak message
+## 05-19-2017 @ 07.27.02 - (1.22.0)    - dscudiero - update call string for quStatusShort report
