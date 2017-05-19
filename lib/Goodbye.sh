@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.131" # -- dscudiero -- Wed 05/10/2017 @ 12:52:53.21
+# version="2.0.132" # -- dscudiero -- Fri 05/19/2017 @  7:34:53.00
 #===================================================================================================
 # Common script exit
 # args:
@@ -28,7 +28,7 @@ function Goodbye {
 		[[ $(type -t $FUNCNAME-$myName) == 'function' ]] && $FUNCNAME-$myName "$exitCode"
 
 	## Cleanup temp files
-		[[ -f $tmpFile ]] && rm -f $tmpFile
+		[[ -n $tmpRoot ]] && SetFileExpansion 'on' && rm -rf $tmpRoot/${myName}* >& /dev/null && SetFileExpansion
 
 	## Exit Process
 	case "$(Lower "$exitCode")" in
@@ -150,3 +150,4 @@ export -f Goodbye
 ## 05-10-2017 @ 09.55.58 - ("2.0.124") - dscudiero - Remove debug statement
 ## 05-10-2017 @ 12.49.12 - ("2.0.130") - dscudiero - Kill subshells before exiting
 ## 05-10-2017 @ 12.53.07 - ("2.0.131") - dscudiero - General syncing of dev to prod
+## 05-19-2017 @ 07.35.57 - ("2.0.132") - dscudiero - Remove all tmpfiles under the scripts name under tmproot
