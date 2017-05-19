@@ -61,14 +61,6 @@ dump -1 mode cat cim
 
 ## Generate report
 	[[ $batchMode != true ]] && clear
-	Msg2 | tee -a $outFile
-	Msg2 "Report: $myName" | tee -a $outFile
-	Msg2 "Date: $(date)" | tee -a $outFile
-	[[ -n $shortDescription ]] && Msg2 "$shortDescription" | tee -a $outFile
-	Msg2 | tee -a $outFile
-
-## Generate report
-	[[ $batchMode != true ]] && clear
 	echo | tee $outFile
 	echo "$myName ($mode) report run by $userName on $(date +"%m-%d-%Y") at $(date +"%H.%M.%S")" > $outFile
 	[[ -n $shortDescription ]] && echo -e "($shortDescription)\n" >> $outFile
@@ -142,3 +134,4 @@ Goodbye 0 #'alert'
 ## 03-27-2017 @ 13.30.18 - (1.0.75)    - dscudiero - Only report on active records
 ## 05-17-2017 @ 13.41.10 - (1.0.77)    - dscudiero - Fix sql statements
 ## 05-19-2017 @ 13.48.34 - (1.0.77)    - dscudiero - Add message where the report data is saved
+## 05-19-2017 @ 13.50.46 - (1.0.77)    - dscudiero - General syncing of dev to prod
