@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.8.89 # -- dscudiero -- Tue 05/16/2017 @ 10:29:49.40
+version=2.8.90 # -- dscudiero -- Fri 05/19/2017 @ 14:07:16.39
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -128,7 +128,7 @@ function DoCopy {
 	local srcDirStruct=$1; shift
 	local tgtDir=$1; shift
 	local tgtDirStruct=$1; shift
-	local srcFile tgtFile fromStr toStr ans verb
+	local srcFile tgtFile fromStr toStr ans verb grepStr
 
 	srcFile=${srcDir}${cpyFile}
 	tgtFile=${tgtDir}${cpyFile}
@@ -166,6 +166,15 @@ function DoCopy {
 			unset ans; Prompt ans "Yes to copy $cpyFile, eXit to stop" 'Yes No' "$defVals"; ans=$(Lower ${ans:0:1});
 			[[ $ans != 'y' ]] && filesNotCopied+=($cpyFile) && return 0
 			copyFileList+=("${srcFile}|${tgtFile}|${cpyFile}")
+			## If workflow.cfg then turn off debug messages
+			if [[ $(Contains "$cpyFile" 'workflow.cfg') == true ]]l then
+				unset grepStr; grepStr=$(ProtectedCall "grep '^wfDebugLevel:' $scrFile")
+				if [[ -n $grepStr ]]l then
+					fromStr="$grepStr"
+					toStr="wfDebugLevel:0"
+					$DOIT sed -i s"_^${fromStr}_${toStr}_" $srcFile
+				fi
+			fi
 		fi
 
 	return 0
@@ -175,7 +184,6 @@ function DoCopy {
 #  Cleanup any old backup workflow files (xxxx.yyyy, xxxx-yyyy, or ' - Copy.') in the source or target
 #==============================================================================================
 function CleanupOldFiles {
-
 		local cpyFile="$1"
 		local tmpArray copyOfFile
 		## Get old file list
@@ -474,3 +482,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 05-12-2017 @ 11.10.41 - (2.8.76)    - dscudiero - Added -jalotTask and -changeComment as options to the command line call
 ## 05-16-2017 @ 08.23.15 - (2.8.88)    - dscudiero - Incorporate save workflow functionality into the script proper
 ## 05-16-2017 @ 10.30.20 - (2.8.89)    - dscudiero - only delete the created tmp directory, not all of tmpRoot
+## 05-19-2017 @ 14.08.07 - (2.8.90)    - dscudiero - Turn off debugging messages when copy a workflow
