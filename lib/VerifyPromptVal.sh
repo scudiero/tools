@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.51" # -- dscudiero -- Mon 05/22/2017 @  9:11:43.82
+# version="2.0.52" # -- dscudiero -- Mon 05/22/2017 @  9:16:01.00
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -162,7 +162,7 @@ function VerifyPromptVal {
 	fi ## Dir
 
 	## isNumeric
-	if [[ $(Contains "$validateListString" '*isNumber*') == true && $verifyMsg == '' ]]; then
+	if [[ $(Contains "$validateListString" '*isNumeric*') == true && $verifyMsg == '' ]]; then
 		[[ $(IsNumeric "$response") != true ]] && verifyMsg=$(Msg2 $E "Response must be numeric characters") || unset validateListString
 		[[ $verifyMsg == '' ]] && verifyMsg=true
 	fi ## isNumeric
@@ -226,3 +226,4 @@ export -f VerifyPromptVal
 ## 05-19-2017 @ 14.38.31 - ("2.0.49")  - dscudiero - Set global client record when we look up client
 ## 05-19-2017 @ 14.40.06 - ("2.0.50")  - dscudiero - General syncing of dev to prod
 ## 05-22-2017 @ 09.12.16 - ("2.0.51")  - dscudiero - Added isNumeric and isAlpha types
+## 05-22-2017 @ 09.16.07 - ("2.0.52")  - dscudiero - General syncing of dev to prod
