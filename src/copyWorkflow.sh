@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.8.90 # -- dscudiero -- Fri 05/19/2017 @ 14:07:16.39
+version=2.8.100 # -- dscudiero -- Mon 05/22/2017 @ 11:12:01.45
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -118,9 +118,9 @@ function EditCustomAtj {
 } #Editcustom.atj
 
 #==============================================================================================
-# Do the copy, backup old copies to attic
+# Check the files to see if they should be copied, backup old copies to attic
 #==============================================================================================
-function DoCopy {
+function CheckFilesForCopy {
 	eval $errSigOn
 	local rawFile=$1; shift
 	local cpyFile=$1; shift
@@ -167,9 +167,9 @@ function DoCopy {
 			[[ $ans != 'y' ]] && filesNotCopied+=($cpyFile) && return 0
 			copyFileList+=("${srcFile}|${tgtFile}|${cpyFile}")
 			## If workflow.cfg then turn off debug messages
-			if [[ $(Contains "$cpyFile" 'workflow.cfg') == true ]]l then
-				unset grepStr; grepStr=$(ProtectedCall "grep '^wfDebugLevel:' $scrFile")
-				if [[ -n $grepStr ]]l then
+			if [[ $(Contains "$cpyFile" 'workflow.cfg') == true ]]; then
+				unset grepStr; grepStr=$(ProtectedCall "grep '^wfDebugLevel:' $srcFile")
+				if [[ -n $grepStr ]]; then
 					fromStr="$grepStr"
 					toStr="wfDebugLevel:0"
 					$DOIT sed -i s"_^${fromStr}_${toStr}_" $srcFile
@@ -178,7 +178,7 @@ function DoCopy {
 		fi
 
 	return 0
-} #DoCopy
+} #CheckFilesForCopy
 
 #==============================================================================================
 #  Cleanup any old backup workflow files (xxxx.yyyy, xxxx-yyyy, or ' - Copy.') in the source or target
@@ -258,7 +258,6 @@ Hello
 	Init 'getClient getSrcEnv getTgtEnv getDirs checkEnvs getCims'
 	dump -1 client env srcEnv srcDir tgtEnv tgtDir cimStr
 
-
 ## If pvtDir exists and src is not pvt make sure that this is what the user really wants to to
 	if [[ -d "$pvtDir" && $srcEnv != 'pvt' && $tgtEnv != 'pvt' ]]; then
 		verify=true
@@ -272,7 +271,7 @@ Hello
 ## Get update comment
 	unset updateComment
 	[[ $verify == true ]] && echo
-	Prompt jalotTask "Please enter the jalot task number:" "*optional*"
+	Prompt jalotTask "Please enter the jalot task number:" "*isNumeric*"
 	if [[ $verify == true ]]; then
 		Msg2 "Please enter the business reason for making this update:"
 		Prompt updateComment "^" "*any*"
@@ -325,7 +324,7 @@ Hello
 					[[ -r  $tgtDir/$cpyFile ]] && tgtMd5=$(md5sum $tgtDir/$cpyFile | cut -f1 -d" ") || unset tgtMd5
 					# echo -e "\n\t\t $srcDir/$cpyFile : $srcMd5\n\t\t $tgtDir/$cpyFile : $tgtMd5"
 					if [[ $srcMd5 != $tgtMd5 ]]; then
-						$DOIT DoCopy $file $cpyFile $srcDir $srcStructure $tgtDir $tgtStructure
+						$DOIT CheckFilesForCopy $file $cpyFile $srcDir $srcStructure $tgtDir $tgtStructure
 					else
 						Msg2 "^^^File MD5's match"
 					fi
@@ -346,7 +345,7 @@ Hello
 				srcMd5=$(md5sum $srcDir/$cpyFile | cut -f1 -d" ")
 				[[ -f $tgtDir/$cpyFile ]] && tgtMd5=$(md5sum $tgtDir/$cpyFile | cut -f1 -d" ") || unset tgtMd5
 				if [[ $srcMd5 != $tgtMd5 ]]; then
-					$DOIT DoCopy $file $cpyFile $srcDir 'n/a' $tgtDir 'n/a';
+					$DOIT CheckFilesForCopy $file $cpyFile $srcDir 'n/a' $tgtDir 'n/a';
 				else
 					Msg2 "^^File MD5's match"
 				fi
@@ -483,3 +482,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 05-16-2017 @ 08.23.15 - (2.8.88)    - dscudiero - Incorporate save workflow functionality into the script proper
 ## 05-16-2017 @ 10.30.20 - (2.8.89)    - dscudiero - only delete the created tmp directory, not all of tmpRoot
 ## 05-19-2017 @ 14.08.07 - (2.8.90)    - dscudiero - Turn off debugging messages when copy a workflow
+## 05-22-2017 @ 11.12.35 - (2.8.100)   - dscudiero - Make check for jalot number isNumeric
