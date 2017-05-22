@@ -114,8 +114,8 @@ dump -1 mode cat cim
 
 
 ## Send email
-	if [[ -n $emailAddrs && $sendMail == true ]]; then
-		Msg2 >> $outFile; Msg2 "Sending email(s) to: $emailAddrs">> $outFile; Msg2 >> $outFile
+	if [[ -n $emailAddrs ]]; then
+		Msg2 "\nSending email(s) to: $emailAddrs \n" | tee -a $outFile
 		for emailAddr in $(echo $emailAddrs | tr ',' ' '); do
 			mutt -a "$outFile" -s "$report report results: $(date +"%m-%d-%Y")" -- $emailAddr < $outFile
 		done
@@ -135,3 +135,4 @@ Goodbye 0 #'alert'
 ## 05-17-2017 @ 13.41.10 - (1.0.77)    - dscudiero - Fix sql statements
 ## 05-19-2017 @ 13.48.34 - (1.0.77)    - dscudiero - Add message where the report data is saved
 ## 05-19-2017 @ 13.50.46 - (1.0.77)    - dscudiero - General syncing of dev to prod
+## 05-22-2017 @ 07.28.20 - (1.0.77)    - dscudiero - Fix problem with script not sending emails
