@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.0" # -- dscudiero -- Wed 05/17/2017 @ 10:33:18.90
+# version="2.1.5" # -- dscudiero -- Mon 05/22/2017 @ 10:50:34.33
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -60,6 +60,7 @@ function Prompt {
 			numTabs=$(grep -o '\^' <<< "$promptText" | wc -l)
 			[[ $numTabs -ne 0 ]] && promptTextTabs="^${promptText%^*}"
 			if [[ $verify != false ]]; then
+					dump -2 -l timedRead
 					if [[ $timedRead == false ]]; then
 						promptText="$(sed "s/\^/$tabStr/g" <<< $promptText)"
 						#[[ ${promptText: (-1)} != " " ]] && promptText="$promptText "
@@ -71,19 +72,23 @@ function Prompt {
 						for ((tCntr=0; tCntr<$timeOut; tCntr++)); do
 							[[ -n $defaultVal ]] && echo -en "$timerPrompt $(ColorK "$((timeOut - tCntr))") seconds using a default value of $(ColorK "'$defaultVal'")\r" || \
 													echo -en "$timerPrompt $(ColorK "$((timeOut - tCntr))") seconds\r"
-
 							read -t 1 response; rc=$?
 							if [[ $rc -eq 0 ]]; then
 								if [[ -z $response ]]; then
 									echo -en "$timerInterruptPrompt > "
 									read response
+								else
+									[[ $response = 'x' ]] && unset response && Here -l P1a && break
 								fi
+								Here -l P1b
 								break
 							fi
 							[[ $rc -gt 0 && $tCntr -ge $maxReadTimeout ]] && echo && Terminate "Read operation timed out after the maximum time of $maxReadTimeout seconds" && exit
 						done ; echo
 						[[ -z $response ]] && Note 0 1 "Read timed out, using default value for '$promptVar': '$defaultVal'" && eval $promptVar=\"$defaultVal\" && return 0
 					fi
+			else
+				[[ -n "$defaultVal" ]] && response="$defaultVal" || Terminate "No Prompt is active and no default value specified for '$promptVar'"
 			fi #[[ $verify != false ]]
 			[[ $(Lower ${response}) == 'x' ]] && Goodbye 'x'
 			if [[ -z $response && -n $defaultVal ]]; then
@@ -155,3 +160,4 @@ export -f Prompt
 ## Thu Mar 16 10:59:16 CDT 2017 - dscudiero - General syncing of dev to prod
 ## Thu Mar 16 12:14:31 CDT 2017 - dscudiero - Fixed a problem with timeouts not timeing out, added tabbing to the timeout text
 ## 05-17-2017 @ 10.50.03 - ("2.1.0")   - dscudiero - Update the timed prompt support to do a count down timer
+## 05-22-2017 @ 10.55.01 - ("2.1.5")   - dscudiero - added x out of timed read, fixed bug when verify is off
