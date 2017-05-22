@@ -1,5 +1,5 @@
 //======================================================================================================================
-// version:1.0.3 // -- dscudiero -- Thu 05/11/2017 @  9:21:38.99
+// version:1.0.4 // -- dscudiero -- Mon 05/22/2017 @  8:11:33.27
 //======================================================================================================================
 // Workflow functions unique for this CIM instance
 //======================================================================================================================
@@ -39,7 +39,7 @@ if (typeof wfFunctionsLoaded == "undefined") {
 	} else { wfInDebugEnv=false }
 	//(host.indexOf(".dev") > 0)
 
-	var wfFunctionsLoaded=false;
+	wfFunctionsLoaded=true;  // Scoped outside the module
 } //(typeof wfFunctionsLoaded == "undefined")
 
 //=======================================================================================================================
@@ -156,3 +156,4 @@ wfLibName="/locallibs/workflowLib.atj"
 // Tue Mar 21 11:07:28 CDT 2017 - dscudiero - Added check in log comments
 // 03-24-2017 @ 07.36.56 - (//)        - dscudiero - General syncing of dev to prod
 // 05-11-2017 @ 14.55.28 - (//)        - dscudiero - refactored the begining stuff, removed loaded messages
+// 05-22-2017 @ 08.11.47 - (//)        - dscudiero - General syncing of dev to prod
