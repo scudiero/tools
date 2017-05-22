@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.6 # -- dscudiero -- Mon 05/22/2017 @  8:23:21.30
+version=2.0.7 # -- dscudiero -- Mon 05/22/2017 @  8:27:23.17
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -37,7 +37,7 @@ VerifyContinue "You are asking to reset workflow statistics for\n\tclient:$clien
 cd $srcDir/web/courseleaf
 for cim in $(echo $cimStr | tr ',' ' '); do
 	Msg2 "Processing $cim"
-	$DOIT ./courseleaf.cgi rebuildstatus /$cim 2>&1 | Indent | sed -e 's/<br?//g'
+	$DOIT ./courseleaf.cgi rebuildstatus /$cim 2>&1 | Indent | sed -e 's/\<br\>//g'
 done
 
 #===================================================================================================
@@ -50,3 +50,4 @@ Goodbye 0 'alert'
 ##==================================================================================================
 ## 05-22-2017 @ 08.18.26 - (2.0.4)     - dscudiero - switch Msg to Msg2
 ## 05-22-2017 @ 08.23.29 - (2.0.6)     - dscudiero - General syncing of dev to prod
+## 05-22-2017 @ 08.28.27 - (2.0.7)     - dscudiero - General syncing of dev to prod
