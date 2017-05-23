@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.0 # -- dscudiero -- Fri 05/19/2017 @  7:22:51.36
+version=1.22.1 # -- dscudiero -- Tue 05/23/2017 @  7:12:57.21
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -316,7 +316,7 @@ case "$hostName" in
 
 		## Reports
 			qaEmails='dscudiero@leepfrog.com,sjones@leepfrog.com,mbruening@leepfrog.com,jlindeman@leepfrog.com'
-			Call 'scriptsAndReports' 'reports' 'qaStatusShort' "-email \"$qaEmails\" $scriptArgs"
+			Call 'reports' 'qaStatusShort' "-email \"$qaEmails\" $scriptArgs"
 			## Build a list of clients and contact info for Shelia
 			#[[ $runClientListReport == true ]] && Call 'reports' "clientList -quiet -email 'dscudiero@leepfrog.com,sfrickson@leepfrog.com' $scriptArgs"
 			[[ $(date +%d -d tomorrow) == '01' ]] && Call 'reports' "clientTimezone -quiet -email 'dscudiero@leepfrog.com,jlindeman@leepfrog.com' $scriptArgs"
@@ -452,3 +452,4 @@ return 0
 ## 05-15-2017 @ 10.25.38 - (1.21.224)  - dscudiero - tweak message
 ## 05-19-2017 @ 07.27.02 - (1.22.0)    - dscudiero - update call string for quStatusShort report
 ## 05-22-2017 @ 07.28.45 - (1.22.0)    - dscudiero - Removed quiet from qaStatusReport call
+## 05-23-2017 @ 07.56.21 - (1.22.1)    - dscudiero - Chang3e call string for reports
