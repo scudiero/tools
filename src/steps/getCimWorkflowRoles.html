@@ -247,46 +247,38 @@ if (debug) { Dump("sisName",sisName); }
 	if (debug) {print_debug('Found ' + conditionals.length + ' step attributes...\n'); }
 
 	// pre-process steps array to remove duplicates
-	steps.sort();
-	steps=RemoveDupes(steps,sisName);
+		steps.sort();
+		steps=RemoveDupes(steps,sisName);
 	// Remove the conditionals from the steps
-	for (var i=0,  tot=steps.length; i < tot; i++) {
-		conditionals.forEach(function(conditional) {
-			steps[i]=steps[i].replace(conditional,'');
-		});
-		steps[i]=steps[i].trim();
-	}
-	// Remove the steps that  are function calls
-	for (var i=0,  tot=steps.length; i < tot; i++) {
-		print_debug("steps["+i+"] = " + steps[i] + "\n")
-		for (var j=0,  tot2=functions.length; j < tot2; j++) {
-		 	//print_debug("\tfunctions["+j+"] = " + functions[j] + "\n")
-			if (steps[i].indexOf(functions[j]) >= 0) {
-				print_debug("remove element\n")
-				steps.splice(i,1);
-				break;
-			}
+		for (var i=0,  tot=steps.length; i < tot; i++) {
+			conditionals.forEach(function(conditional) {
+				steps[i]=steps[i].replace(conditional,'');
+			});
+			steps[i]=steps[i].trim();
 		}
-		if (i === steps.length-1) break // Break if we have deleted any dlements from steps
-	}
-
+	// Remove the steps that are function calls
+		for (var i=0,  tot=steps.length; i < tot; i++) {
+			//print_debug("steps["+i+"] = " + steps[i] + "\n")
+			for (var j=0,  tot2=functions.length; j < tot2; j++) {
+			 	//print_debug("\tfunctions["+j+"] = " + functions[j] + "\n")
+				if (steps[i].indexOf(functions[j]) >= 0) {
+					steps.splice(i,1);
+					break;
+				}
+			}
+			if (i === steps.length-1) break // Break if we have deleted any dlements from steps
+		}
 	// Remove duplicates from the steps array
-	steps.sort();
-	steps=RemoveDupes(steps);
-	if (debug) {print_debug('Found ' + steps.length + ' steps...\n'); }
+		steps.sort();
+		steps=RemoveDupes(steps);
+		if (debug) {print_debug('Found ' + steps.length + ' steps...\n'); }
 
-	if (debug) {
-		print_debug('\nSteps before:\n');
-		steps.forEach(function(step) {
-			print_debug('\tstep >' + step + '<\n');
-		});//steps
-	}
-
-print_debug('\nSteps before:\n');
-steps.forEach(function(step) {
-	print_debug('\tstep >' + step + '<\n');
-});//steps
-
+		if (debug) {
+			print_debug('\nSteps before:\n');
+			steps.forEach(function(step) {
+				print_debug('\tstep >' + step + '<\n');
+			});//steps
+		}
 
 //============================================================================================================
 //# Main
