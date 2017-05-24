@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.90 # -- dscudiero -- Fri 05/19/2017 @ 14:19:51.59
+version=3.11.93 # -- dscudiero -- Wed 05/24/2017 @  8:07:50.26
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -9,6 +9,7 @@ imports="$imports Call SelectMenuNew"
 Import "$imports"
 originalArgStr="$*"
 scriptDescription="Script dispatcher"
+# echo "\$* 2 = >$*<"
 
 #===================================================================================================
 # Tools scripts selection front end
@@ -310,7 +311,7 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 			fi
 		fi
 	else
-		[[ -z ${scripts}${reports} ]] && Terminate "Running in batchMode and no value specified for report/script"
+		[[ -z ${script}${report} ]] && Terminate "Running in batchMode and no value specified for report/script"
 	fi
 
 ## If we do not have a report or script name then build & display the menu
@@ -455,3 +456,4 @@ Goodbye 0
 ## 05-17-2017 @ 16.09.17 - (3.11.86)   - dscudiero - Added delimiter parsing for report headers
 ## 05-19-2017 @ 13.31.47 - (3.11.87)   - dscudiero - Fix problem with not pausing after report / script is run from menu
 ## 05-19-2017 @ 14.24.29 - (3.11.90)   - dscudiero - skip
+## 05-24-2017 @ 08.09.07 - (3.11.93)   - dscudiero - Fix bug when running in batchMode and passing in a script name
