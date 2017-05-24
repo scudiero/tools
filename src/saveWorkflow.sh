@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.70 # -- dscudiero -- Wed 05/24/2017 @  8:30:51.60
+version=2.2.71 # -- dscudiero -- Wed 05/24/2017 @ 12:17:49.12
 #====================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye ParseCourseleafFile' #imports="$imports "
@@ -142,7 +142,7 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 		[[ ! -d $tarDir ]] && mkdir -p "$tarDir"
 		tarFile="$tarDir/${env}--$backupSuffix.tar.gz"
 dump isMe pwd numFiles tarDir tarFile
-		ProtectedCall("tar -cpzf \"$tarFile\" ./*"); rc=$?
+		ProtectedCall "tar -cpzf \"$tarFile\" ./*"; rc=$?
 dump isMe rc
 		[[ $rc -ne 0 ]] && Error "Non-zero return code from tar"
 		cd ..
@@ -174,3 +174,4 @@ Goodbye 0
 ## 05-17-2017 @ 07.10.40 - (2.2.64)    - dscudiero - Added processid to the temp folder name
 ## 05-19-2017 @ 08.51.28 - (2.2.68)    - dscudiero - Added debug statements
 ## 05-24-2017 @ 08.31.07 - (2.2.70)    - dscudiero - Put call to tar in a protectedCall
+## 05-24-2017 @ 12.18.18 - (2.2.71)    - dscudiero - Fix issue with the ProtectedCall syntax
