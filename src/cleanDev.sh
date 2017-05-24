@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.4.139 # -- dscudiero -- Fri 05/19/2017 @  7:28:42.80
+version=3.4.140 # -- dscudiero -- Wed 05/24/2017 @  8:26:33.99
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -26,6 +26,10 @@ scriptDescription="Cleanup private dev sites"
 		argList+=(-mark,1,switch,mark,,'script',"Mark the site for deletion")
 		argList+=(-delete,3,switch,delete,,'script',"Delete the site")
 		argList+=(-unMark,1,switch,unMark,,'script',"Unmark the site")
+	}
+	function Goodbye-cleanDev  { # or Goodbye-local
+		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
+		return 0
 	}
 
 	#==================================================================================================
@@ -256,3 +260,4 @@ Goodbye 0
 ## 05-15-2017 @ 07.11.45 - (3.4.138)   - dscudiero - Activate code for daemon
 ## 05-18-2017 @ 06.58.05 - (3.4.138)   - dscudiero - Fix the end of the case statement
 ## 05-19-2017 @ 08.51.46 - (3.4.139)   - dscudiero - Removed dead code
+## 05-24-2017 @ 08.31.28 - (3.4.140)   - dscudiero - Add Goodbye-cleanDev function
