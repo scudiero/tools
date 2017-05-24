@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.14" # -- dscudiero -- Mon 05/15/2017 @ 14:21:08.83
+# version="2.0.15" # -- dscudiero -- Wed 05/24/2017 @ 13:30:04.97
 #===================================================================================================
 # Write a 'standard' format courseleaf changelog.txt
 # args: "logFileName" ${lineArray[@]}
@@ -29,7 +29,7 @@ function WriteChangelogEntry {
 	local data=$(ParseCourseleafFile "$logFile")
 	local client=$(cut -d' ' -f1 <<< "$data")
 	local env=$(cut -d' ' -f2 <<< "$data")
-	[[ $env == 'pvt' ]] && client=${client%-*}
+	[[ $env == 'pvt' || $env == 'test' ]] && client=${client%-*}
 
 	## If there is a clientData folder then write out to there also
 		if [[ -n $localClientWorkFolder && -d $localClientWorkFolder ]]; then
@@ -56,3 +56,4 @@ export -f WriteChangelogEntry
 ## Tue Jan 24 12:48:10 CST 2017 - dscudiero - Fix errant '%' in the output
 ## 05-09-2017 @ 11.55.51 - ("2.0.12")  - dscudiero - Refactored how logging is done, added an user activity log file
 ## 05-15-2017 @ 14.24.30 - ("2.0.14")  - dscudiero - log client and environment into the activity log
+## 05-24-2017 @ 13.30.23 - ("2.0.15")  - dscudiero - Strip off the -test for test environments
