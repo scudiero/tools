@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.8.100 # -- dscudiero -- Mon 05/22/2017 @ 11:12:01.45
+version=2.9.9 # -- dscudiero -- Tue 05/23/2017 @ 16:11:41.35
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -23,8 +23,8 @@ scriptDescription="Copy workflow files"
 		#argList+=(-optionArg,1,option,scriptVar,,script,'Help text')
 		#argList+=(-flagArg,2,switch,scriptVar,,script,'Help text')
 		argList+=(-allCims,3,switch,allCims,,script,'Process all CIM instances present')
-		argList+=(-jalotTask,3,option,jalotTask,,script,'Jalot task number')
-		argList+=(-comment,3,option,updateComment,,script,'Comment describing the reason for the update')
+		argList+=(-jalot,3,option,jalot,,script,'Jalot task number')
+		argList+=(-comment,7,option,comment,,script,'Comment describing the reason for the update')
 	}
 	function Goodbye-copyWorkflow  { # or Goodbye-local
 		rm -rf $tmpRoot > /dev/null 2>&1
@@ -165,7 +165,6 @@ function CheckFilesForCopy {
 			[[ $(Contains ",$setDefaultYesFiles," ",$(basename $cpyFile),") == true ]] && defVals='Yes' || unset defVals
 			unset ans; Prompt ans "Yes to copy $cpyFile, eXit to stop" 'Yes No' "$defVals"; ans=$(Lower ${ans:0:1});
 			[[ $ans != 'y' ]] && filesNotCopied+=($cpyFile) && return 0
-			copyFileList+=("${srcFile}|${tgtFile}|${cpyFile}")
 			## If workflow.cfg then turn off debug messages
 			if [[ $(Contains "$cpyFile" 'workflow.cfg') == true ]]; then
 				unset grepStr; grepStr=$(ProtectedCall "grep '^wfDebugLevel:' $srcFile")
@@ -175,6 +174,15 @@ function CheckFilesForCopy {
 					$DOIT sed -i s"_^${fromStr}_${toStr}_" $srcFile
 				fi
 			fi
+			## If workflow.tcf then make sure the test workflow is commented out
+			if [[ $(Contains "$cpyFile" 'workflow.tcf') == true ]]; then
+				unset grepStr; grepStr=$(ProtectedCall "grep '^workflow:standard|START' $srcFile")
+				if [[ -n $grepStr ]]; then
+					$DOIT sed -i s"_^workflow:standard|START_//workflow:standard|START_" $srcFile
+					Warning "Workflow.tcf file contained an uncommented test workflow definition, it will be commented out"
+				fi
+			fi
+			copyFileList+=("${srcFile}|${tgtFile}|${cpyFile}")
 		fi
 
 	return 0
@@ -269,21 +277,20 @@ Hello
 	fi
 
 ## Get update comment
-	unset updateComment
 	[[ $verify == true ]] && echo
-	Prompt jalotTask "Please enter the jalot task number:" "*isNumeric*"
+	Prompt jalot "Please enter the jalot task number:" "*isNumeric*"
 	if [[ $verify == true ]]; then
-		Msg2 "Please enter the business reason for making this update:"
-		Prompt updateComment "^" "*any*"
-		[[ -n $jalotTask ]] && updateComment="(Task:$jalotTask) $updateComment"
+		Prompt comment "Please enter the business reason for making this update:\n^" "*any*"
+		[[ -n $jalot ]] && comment="(Task:$jalot) $comment"
 	fi
+	[[ $jalot -eq 0 ]] && jalot='N/A'
 
 ## Verify continue
 	unset verifyArgs
 	verifyArgs+=("Client:$client")
 	verifyArgs+=("Source Env:$(TitleCase $srcEnv) ($srcDir)")
 	verifyArgs+=("Target Env:$(TitleCase $tgtEnv) ($tgtDir)")
-	verifyArgs+=("Update comment:$updateComment")
+	verifyArgs+=("Update comment:$comment")
 	verifyArgs+=("CIM(s):$cimStr")
 	VerifyContinue "You are copying CIM workflow files for:"
 	dump -1 client srcEnv tgtEnv srcDir tgtDir cimStr
@@ -296,6 +303,8 @@ Hello
 ## Main
 #====================================================================================================
 ## Loop through CIMs
+	## Force verify to on
+	verify=true
  	Msg2 "Checking CIM instances ..."
 	for cim in $(echo $cimStr | tr ',' ' '); do
 		Msg2 "^$cim:"
@@ -428,7 +437,7 @@ Msg2
 ## Write out change log entries
 	if [[ ${#copyFileList} -gt 0 && $DOIT == '' ]]; then
 		## Log changes
-		[[ -n $updateComment ]] && changeLogLines=("$updateComment")
+		[[ -n $comment ]] && changeLogLines=("$comment")
 		changeLogLines+=("Files updated from: '$srcDir'")
 		for file in "${filesUpdated[@]}"; do
 			changeLogLines+=("${tabStr}${file}")
@@ -478,8 +487,9 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## Tue Mar  7 14:45:49 CST 2017 - dscudiero - add jalot task to the update comment
 ## Fri Mar 17 16:40:36 CDT 2017 - dscudiero - remove errant t from logged lines
 ## 04-04-2017 @ 09.08.22 - (2.8.75)    - dscudiero - Fix issue where it wasa still prompting for jalot and reason when noPrompt was active
-## 05-12-2017 @ 11.10.41 - (2.8.76)    - dscudiero - Added -jalotTask and -changeComment as options to the command line call
+## 05-12-2017 @ 11.10.41 - (2.8.76)    - dscudiero - Added -jalot and -changeComment as options to the command line call
 ## 05-16-2017 @ 08.23.15 - (2.8.88)    - dscudiero - Incorporate save workflow functionality into the script proper
 ## 05-16-2017 @ 10.30.20 - (2.8.89)    - dscudiero - only delete the created tmp directory, not all of tmpRoot
 ## 05-19-2017 @ 14.08.07 - (2.8.90)    - dscudiero - Turn off debugging messages when copy a workflow
 ## 05-22-2017 @ 11.12.35 - (2.8.100)   - dscudiero - Make check for jalot number isNumeric
+## 05-24-2017 @ 08.11.15 - (2.9.9)     - dscudiero - Put in checks to make sure there is not a debug standard workflow active
