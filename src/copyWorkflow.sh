@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.9 # -- dscudiero -- Tue 05/23/2017 @ 16:11:41.35
+version=2.9.19 # -- dscudiero -- Wed 05/24/2017 @ 12:21:57.67
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -146,7 +146,7 @@ function CheckFilesForCopy {
 	## If the target file does not exist then do not prompt, otherwise do diff and prompt
 		[[ $(Contains "$ignoreList" "$cpyFile") == true ]] && return 0
 		if [[ ! -f $tgtFile ]]; then
-			copyFileList+=("${srcFile}|${tgtFile}")
+			copyFileList+=("${srcFile}|${tgtFile}|${cpyFile}")
 			Msg2 "^^Target file does not exist, it will be copied"
 		else
 			[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
@@ -162,7 +162,7 @@ function CheckFilesForCopy {
 			printf '=%.0s' {1..120}
 			Msg2 "\n* * * DIFF Output end * * *\n\n"
 
-			[[ $(Contains ",$setDefaultYesFiles," ",$(basename $cpyFile),") == true ]] && defVals='Yes' || unset defVals
+			[[ $(Contains ",$setDefaultYesFiles," ",$(basename $cpyFile),") == true ]] && defVals='Yes' || defVals='No'
 			unset ans; Prompt ans "Yes to copy $cpyFile, eXit to stop" 'Yes No' "$defVals"; ans=$(Lower ${ans:0:1});
 			[[ $ans != 'y' ]] && filesNotCopied+=($cpyFile) && return 0
 			## If workflow.cfg then turn off debug messages
@@ -390,11 +390,12 @@ Msg2
 			## Make a copy of the before and after in the temp area
 			mkdir -p "$backupFolder/beforeCopy$(dirname $cpyFile)"
 			mkdir -p "$backupFolder/afterCopy$(dirname $cpyFile)"
-			cp -fp "$tgtFile" "$backupFolder/beforeCopy${cpyFile}"
+			[[ -f "$tgtFile" ]] && cp -fp "$tgtFile" "$backupFolder/beforeCopy${cpyFile}"
 			cp -fp "$srcFile" "$backupFolder/afterCopy${cpyFile}"
 			## Copy
 			Msg2 "^$(basename $srcFile)"
 			[[ -f $tgtFile ]] && BackupCourseleafFile $tgtFile && $DOIT rm -f $tgtFile
+			[[ ! -d $(dirname "$tgtFile") ]] && $DOIT mkdir -p "$(dirname "$tgtFile")"
 			$DOIT cp -fp $srcFile $tgtFile
 			[[ $(basename $srcFile) == 'workflow.tcf' && $tgtEnv == 'next' ]] && $DOIT sed -i s'_*optional*_optional_' $tgtFile
 			filesUpdated+=(${tgtFile##*$tgtDir})
@@ -404,7 +405,8 @@ Msg2
 		tarDir=$localClientWorkFolder/$client/workflowBackups
 		[[ ! -d $tarDir ]] && mkdir -p $tarDir
 		tarFile="$tarDir/${srcEnv}---${tgtEnv}--$backupSuffix.tar.gz"
-		tar -cpzf "$tarFile" ./*
+		ProtectedCall "tar -cpzf \"$tarFile\" ./*"; rc=$?
+		[[ $rc -ne 0 ]] && Error "Non-zero return code from tar"
 		cd ..
 		rm -rf "/${backupFolder#*/}"
 		popd >& /dev/null
@@ -493,3 +495,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 05-19-2017 @ 14.08.07 - (2.8.90)    - dscudiero - Turn off debugging messages when copy a workflow
 ## 05-22-2017 @ 11.12.35 - (2.8.100)   - dscudiero - Make check for jalot number isNumeric
 ## 05-24-2017 @ 08.11.15 - (2.9.9)     - dscudiero - Put in checks to make sure there is not a debug standard workflow active
+## 05-24-2017 @ 12.22.33 - (2.9.19)    - dscudiero - Fix problem when the target file/directory does not exist
