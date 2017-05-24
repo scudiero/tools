@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.42" # -- dscudiero -- Wed 05/24/2017 @  8:17:03.57
+# version="2.0.45" # -- dscudiero -- Wed 05/24/2017 @  8:21:59.41
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -16,11 +16,11 @@ function Dump {
 	set +xv # Turn off trace
 
 	## Process our own special directives
-		if [[ $1 == 'if' ]]; then
+		if [[ $1 == 'if' || $1 == 'is' ]]; then
 			shift ; token1="$1" ; shift
 			[[ $userName != $token1 ]] && return 0
 			shift
-		elif [[ $1 == 'ifMe' ]]; then
+		elif [[ $1 == 'ifMe' || $1 == 'isMe' ]]; then
 			[[ $userName != 'dscudiero' ]] && return 0
 			shift
 		elif [[ $1 == 'singleLine' || $1 == 'oneLine' ]]; then
@@ -205,3 +205,4 @@ export -f dumphash
 ## 05-19-2017 @ 08.55.08 - ("2.0.40")  - dscudiero - Added script name to TODO output
 ## 05-19-2017 @ 14.15.28 - ("2.0.41")  - dscudiero - Added 'if <userid>' support
 ## 05-24-2017 @ 08.17.22 - ("2.0.42")  - dscudiero - Tweak ifMe logic
+## 05-24-2017 @ 08.22.16 - ("2.0.45")  - dscudiero - Added isMe
