@@ -15,7 +15,7 @@ var debug=false;
 	if (cims.length == 0)
 		cims=['courseadmin','programadmin'];
 	var env='';
-	var version="3.5";
+	var version="3.6";
 	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
 
 	var ignoreSteps = {
@@ -133,35 +133,49 @@ if (debug) { Dump("sisName",sisName); }
 
 // Build a list of workflow steps from cims workflow.tcf files (see cims definition)
 	print_doc('\nEnvironment: ' + env + '\n');
- 	var idx, str, steps=[], wfAttrs=[], tempArray=[], errorDetected=false, wfSubRulesHash=[];
+ 	var idx, str, steps=[], conditionals=[], functions=[], tempArray=[], errorDetected=false, wfSubRulesHash=[];
 	cims.forEach(function(cim) {
 		var workflowTcfData = load_tcf('/' + cim + '/workflow.tcf');
 		if (workflowTcfData) {
 			if (debug) { print_debug('Processing cim: ' + cim + '\n'); }
 			print_doc('Processing cim: ' + cim + '\n');
 
-			//pull off list of wfrules attributes off from the localsteps data
-			str=workflowTcfData.localsteps[0].params.replace('attributes=','');
-			idx1=str.indexOf(";");
-			str=str.substr(0,idx1);
-			str.split(',').forEach(function(text) {
-				idx1=text.indexOf("[");
-				text=text.substr(0,idx1);
-				wfAttrs.push(text);
-			});//str.split
+			//pull off list of conditional attributes from the localsteps data
+				str=workflowTcfData.localsteps[0].params.replace('attributes=','');
+				idx1=str.indexOf(";");
+				str=str.substr(0,idx1);
+				str.split(',').forEach(function(text) {
+					idx1=text.indexOf("[");
+					text=text.substr(0,idx1);
+					conditionals.push(text);
+				});//str.split
+				if (debug) {print_debug("\nconditionals: " + conditionals.toSource() + "\n\n" );}
+
+			//Get a list of workflow rules that are function calls
+				var configTcfData=load_tcf('/' + cim + '/workflow.cfg');
+				var wfrules=configTcfData["wfrules"];
+				//print_debug("\nwfrules: " + wfrules.toSource() + "\n\n" );
+				for (var key in wfrules) {
+				    // skip loop if the property is from prototype
+				    if (!wfrules.hasOwnProperty(key)) continue;
+				    //var tmpObj = wfrules[key];
+				    if (wfrules[key].type === "function" && wfrules[key].attrname != "wfAttr")
+				    	functions.push(wfrules[key].searchfor)
+				}
+				if (debug) {print_debug("\nfunctions: " + functions.toSource() + "\n\n" );}
 
 			//pull off steps and add to master list
-			workflows=workflowTcfData.workflow;
-			workflows.forEach(function(text) {
-				tempArray=[];
-				print_doc('\tScanning: ' + text.name + '\n' );
-				tempArray = text.members.split(',');
-				tempArray.forEach(function(step) {
-					var tmpArray=step.split(" ");
-					if (! ignoreSteps[tmpArray[0].toLowerCase()] )
-						steps.push(step)
-				});//steps
-			});//workflows
+				workflows=workflowTcfData.workflow;
+				workflows.forEach(function(text) {
+					tempArray=[];
+					print_doc('\tScanning: ' + text.name + '\n' );
+					tempArray = text.members.split(',');
+					tempArray.forEach(function(step) {
+						var tmpArray=step.split(" ");
+						if (! ignoreSteps[tmpArray[0].toLowerCase()] )
+							steps.push(step)
+					});//steps
+				});//workflows
 
 			//retrieve the substitution variables, and get values from database
 			var cimconfigTcfData = load_tcf('/' + cim + '/workflow.cfg');
@@ -226,21 +240,34 @@ if (debug) { Dump("sisName",sisName); }
 		return false;
 	}
 
-	// pre-process wfAttrs array to remove duplicates and then reverse order to take care of 'fyi' vs 'fyiall')
-	wfAttrs.sort();
-	wfAttrs=RemoveDupes(wfAttrs);
-	wfAttrs.reverse();
-	if (debug) {print_debug('Found ' + wfAttrs.length + ' step attributes...\n'); }
+	// pre-process conditionals array to remove duplicates and then reverse order to take care of 'fyi' vs 'fyiall')
+	conditionals.sort();
+	conditionals=RemoveDupes(conditionals);
+	conditionals.reverse();
+	if (debug) {print_debug('Found ' + conditionals.length + ' step attributes...\n'); }
 
 	// pre-process steps array to remove duplicates
 	steps.sort();
 	steps=RemoveDupes(steps,sisName);
-	// Remove the atrributes from the steps
+	// Remove the conditionals from the steps
 	for (var i=0,  tot=steps.length; i < tot; i++) {
-		wfAttrs.forEach(function(attr) {
-			steps[i]=steps[i].replace(attr,'');
+		conditionals.forEach(function(conditional) {
+			steps[i]=steps[i].replace(conditional,'');
 		});
 		steps[i]=steps[i].trim();
+	}
+	// Remove the steps that  are function calls
+	for (var i=0,  tot=steps.length; i < tot; i++) {
+		print_debug("steps["+i+"] = " + steps[i] + "\n")
+		for (var j=0,  tot2=functions.length; j < tot2; j++) {
+		 	//print_debug("\tfunctions["+j+"] = " + functions[j] + "\n")
+			if (steps[i].indexOf(functions[j]) >= 0) {
+				print_debug("remove element\n")
+				steps.splice(i,1);
+				break;
+			}
+		}
+		if (i === steps.length-1) break // Break if we have deleted any dlements from steps
 	}
 
 	// Remove duplicates from the steps array
@@ -252,8 +279,14 @@ if (debug) { Dump("sisName",sisName); }
 		print_debug('\nSteps before:\n');
 		steps.forEach(function(step) {
 			print_debug('\tstep >' + step + '<\n');
-		});//cols
+		});//steps
 	}
+
+print_debug('\nSteps before:\n');
+steps.forEach(function(step) {
+	print_debug('\tstep >' + step + '<\n');
+});//steps
+
 
 //============================================================================================================
 //# Main
