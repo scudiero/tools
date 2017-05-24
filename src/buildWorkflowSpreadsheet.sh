@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.2 # -- dscudiero -- Tue 05/16/2017 @ 13:05:20.76
+version=1.2.17 # -- dscudiero -- Wed 05/24/2017 @ 13:07:31.41
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -276,16 +276,18 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 		fi
 
 	## Read the workflow.tcf file for the cim
-	## Parse off the conditionals
+	## Parse off the conditionals from the localsteps record
 		grepFile="$srcDir/web/$cim/workflow.tcf"
 		[[ ! -r $grepFile ]] && Msg2 E "Could not read '$grepFile', skipping $cim" && continue
 		Msg2 "^Parsing '$grepFile'"
 		localsteps=$(ProtectedCall grep 'localsteps:' $grepFile)
-		[[ $localsteps == '' ]] && Msg2 E "Could not retrieve 'localsteps' record from $grepFile', skipping $cim" && continue
+		[[ -z $localsteps ]] && Msg2 E "Could not retrieve 'localsteps' record from $grepFile', skipping $cim" && continue
 		tokenStr=$(echo $localsteps | cut -d'|' -f4)
 		tokenStr=$(echo $tokenStr | cut -d'=' -f2)
 		tokenStr=$(echo $tokenStr | cut -d';' -f1)
-		IFSSave=$IFS; IFS=','; read -r -a tokens <<< "$tokenStr"; IFS=$IFSSave
+		unset tokens
+		ifs=$IFS; IFS=','; read -r -a tokens <<< "$tokenStr"; IFS=$ifs
+
 		declare -A modifiersRef
 		declare -A conditionalsRef
 		## Write out 'debug' workflow prefox
@@ -296,14 +298,14 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 			Msg2 "^Department 'Dept'" >> $outFile
 			Msg2 "^Subject 'Subj'" >> $outFile
 
-			## Parse out conditionals and modifiers
-			for token in "${tokens[@]}"; do
-				[[ $token == 'optional' || $token == 'fyi' || $token  == 'fyiall' ]] && continue
-				token=$(echo $token | cut -d'[' -f1)
-				token2="[$(Upper "$(echo $token | cut -d'[' -f2)")]"
-				[[ $token == 'fyi' || $token == 'fyiall' || $token == 'optional' || $token == '***optional***' ]] && modifiersRef["$token"]=true || conditionalsRef["$token"]=true
+			## Parse out conditionals and modifiers from the localsteps string
+			for str in "${tokens[@]}"; do
+				[[ $str == 'optional' || $str == 'fyi' || $str  == 'fyiall' ]] && continue
+				str=$(echo $str | cut -d'[' -f1)
+				str2="[$(Upper "$(echo $str | cut -d'[' -f2)")]"
+				[[ $str == 'fyi' || $str == 'fyiall' || $str == 'optional' || $str == '***optional***' ]] && modifiersRef["$str"]=true || conditionalsRef["$str"]=true
 				## Write out 'debug' workflow record
-					Msg2 "^$token2\t$token" >> $outFile
+					Msg2 "^$str2\t$str" >> $outFile
 			done
 			if [[ $verboseLevel -ge 1 ]]; then Msg2 "^modifiersRef:"; for i in "${!modifiersRef[@]}"; do printf "\t\t[$i] = >${modifiersRef[$i]}<\n"; done; fi
 			if [[ $verboseLevel -ge 1 ]]; then Msg2 "^conditionalsRef:"; for i in "${!conditionalsRef[@]}"; do printf "\t\t[$i] = >${conditionalsRef[$i]}<\n"; done; fi
@@ -368,3 +370,4 @@ Goodbye 0 #'alert'
 ## 04-13-2017 @ 13.58.16 - (1.1.93)    - dscudiero - add a default value for verifyContinue
 ## 05-12-2017 @ 11.09.09 - (1.2.1)     - dscudiero - Refactor parsing substitution variables to take into account wfAttr function bindings
 ## 05-16-2017 @ 13.05.44 - (1.2.2)     - dscudiero - Fix output format problem with wforders
+## 05-24-2017 @ 13.43.28 - (1.2.17)    - dscudiero - General syncing of dev to prod
