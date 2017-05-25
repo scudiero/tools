@@ -40,7 +40,7 @@ mode='short'
 
 outDir="$HOME/Reports/$myName"
 [[ ! -d $outDir ]] && mkdir -p $outDir
-outFile=$outDir/$(date '+%Y-%m-%d-%H%M%S').txt
+outFile=$outDir/$(date '+%Y-%m-%d@%H.%M.%S').txt
 
 GetDefaultsData
 okCodes="$(cut -d':' -f2- <<< $scriptData1)"
@@ -72,8 +72,8 @@ dump -1 mode cat cim
 	[[ ${#resultSet[@]} -gt 0 ]] && implPriorityWeek="${resultSet[0]}" || unset implPriorityWeek
 
 	if [[ $mode == 'short' ]]; then
-		header="Client\tProduct\tProject\tInstance\tTester\tRequester\tDeveloper\tStart Date\tDays Active\tResources Remaining (hrs)"
-		header="${header}\tWeek starting: ${implPriorityWeek}\tAssigned hours\tWaiting(csm,dev) Failed(csm,dev) -- Note"
+		header="Client|Product|Project|Instance      |Tester|Requester|Developer|Start Date|Days Active|Resources Remaining (hrs)"
+		header="${header}|Week starting: ${implPriorityWeek}|Assigned hours|Waiting(csm,dev) Failed(csm,dev) -- Note"
 		## Get the status records
 		sqlStmt="select clientcode,product,project,ifnull(instance,''),ifnull(tester,''),ifnull(requester,'') as Requester,ifnull(developer,''),"
 		sqlStmt="${sqlStmt}ifnull(date_format(startDate,'%Y-%m-%d'),''),"
@@ -83,9 +83,9 @@ dump -1 mode cat cim
 		sqlStmt="${sqlStmt}CONCAT('W(',ifnull(numWaitingCsm,0),',',ifnull(numWaitingDev,0),'), ','F(', ifnull(numFailedCsm,0),',',ifnull(numFailedDev,0) ,')'))"
 		sqlStmt="${sqlStmt}from $qaStatusTable where recordstatus='A' order by clientcode"
 	else
-		header="Client\tProduct\tProject\tInstance\tTester\tRequester\tDeveloper\tStart Date\tDays Active\tResources Remaining (hrs)"
-		header="${header}\t% Attempted\t%Attempted Passed\t% Attempted Failed"
-		header="${header}\tWeek starting: ${implPriorityWeek}\tAssigned hours\tWaiting(csm,dev) Failed(csm,dev) -- Note"
+		header="Client|Product|Project|Instance|Tester|Requester|Developer|Start Date|Days Active|Resources Remaining (hrs)"
+		header="${header}|% Attempted|%Attempted Passed|% Attempted Failed"
+		header="${header}|Week starting: ${implPriorityWeek}|Assigned hours|Waiting(csm,dev) Failed(csm,dev) -- Note"
 
 		sqlStmt="select clientcode,product,project,ifnull(instance,''),ifnull(tester,''),ifnull(requester,'') as Requester,ifnull(developer,''),"
 		sqlStmt="${sqlStmt}ifnull(date_format(startDate,'%Y-%m-%d'),''),"
@@ -102,15 +102,11 @@ dump -1 mode cat cim
 	[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No data returned from the query to the $qaStatusTable table"
 
 	## Output the report data
-		echo | tee -a $outFile
-		echo -e "$header" | tee -a $outFile
-		for ((i=0; i<${#resultSet[@]}; i++)); do
-			echo -e "$(tr '|' "\t" <<< "${resultSet[$i]}")" | tee -a $outFile
-		done
-		echo | tee -a $outFile
+		resultSet=("$header" "${resultSet[@]}")
+		PrintColumnarData 'resultSet' '|' | tee "$outFile"
 
-	echo; echo
-	Note "Report output also save in '$outFile'"
+		echo; echo
+		Note "Report output also save in '$outFile'"
 
 
 ## Send email
@@ -136,3 +132,4 @@ Goodbye 0 #'alert'
 ## 05-19-2017 @ 13.48.34 - (1.0.77)    - dscudiero - Add message where the report data is saved
 ## 05-19-2017 @ 13.50.46 - (1.0.77)    - dscudiero - General syncing of dev to prod
 ## 05-22-2017 @ 07.28.20 - (1.0.77)    - dscudiero - Fix problem with script not sending emails
+## 05-25-2017 @ 09.36.55 - (1.0.77)    - dscudiero - call PrintColumnarData function for output
