@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.26 # -- dscudiero -- Fri 05/19/2017 @ 12:24:36.88
+version=1.2.35 # -- dscudiero -- Wed 05/24/2017 @ 16:27:23.47
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye GetExcel'
@@ -139,7 +139,7 @@ for var in $falseVars; do eval $var=false; done
 
 	variableMap['Client Code']='clientCode'
 	variableMap['Project']='project'
-	variableMap['Jalot Task Number']='jalotTaskNumber'
+	#variableMap['Jalot Task Number']='jalotTaskNumber'
 	variableMap['Instance Name']='instance'
 	variableMap['Environment']='env'
 	variableMap['Requester (CSM)']='requester'
@@ -216,7 +216,7 @@ if [[ $verboseLevel -ge 1 ]]; then
 fi
 
 Msg2; Msg2 "QA Tracking Root directory = '$qaTrackingRoot'"
-unset numTokens clientCode product project instance envName jalotTaskNumber
+unset numTokens clientCode product project instance
 ## Loop through workbooks
 Msg2 "Scanning the directory..."
 SetFileExpansion 'off'
@@ -228,6 +228,7 @@ workbooks=($(ProtectedCall "ls $qaTrackingRoot/$fileSpec 2> /dev/null"))
 #workbooks+=($(ProtectedCall "ls $qaTrackingRoot/Archive/$fileSpec 2> /dev/null"))
 SetFileExpansion
 
+fileCntr=1
 for workbook in "${workbooks[@]}"; do
 	fileName=$(basename $workbook)
 	[[ ${fileName:0:1} == '~' ]] && continue
@@ -237,7 +238,7 @@ for workbook in "${workbooks[@]}"; do
 		GetExcel "$workbook" 'GetSheets' > $tmpFile
 		sheets=$(tail -n 1 $tmpFile)
 	[[ $(Contains "|${sheets}|" '|ProjectSummary|') != true ]] && continue
-	Msg2 "^Processing File: '$(basename $workbook)'"
+	Msg2 "^Processing File: '$(basename $workbook)' ($fileCntr of ${#workbooks[@]})"
 
 	## Read the Project summary data
 		workSheet='ProjectSummary'
@@ -289,7 +290,7 @@ for workbook in "${workbooks[@]}"; do
 					val="$(cut -d'|' -f3 <<< $line)"
 					var=${variableMap[$recType]}
 					[[ $(Contains "$var" 'Date') == true ]] && val="\"$(tr ' ' '@' <<< "$val")\""
-					[[ ${var:0:3} == 'num' || $(Contains "$var" 'jalot') == true ]] && val="$(cut -d'.' -f1 <<< "$val")"
+					[[ $(Contains "$var" 'resources') == true ]] && val=$(printf "%.2f" $val)
 					dump -2 -t -t var val
 					eval $var=\"$val\"
 					dump -2 -t $var
@@ -299,9 +300,9 @@ for workbook in "${workbooks[@]}"; do
 
 	## Do we have the data necessary to continue
 		Msg2 $V1 "^^Checking data..."
-		if [[ $clientCode == '' || $env == '' || $product == '' || $project == '' || $instance == '' || jalotTaskNumber == '' ]]; then
+		if [[ $clientCode == '' || $env == '' || $product == '' || $project == '' || $instance == '' ]]; then
 			Msg2 $WT1 "File '$workbook'\nhas insufficient data to uniquely identify QA project"
-			dump -t -t clientCode env product project instance jalotTaskNumber
+			dump -t -t clientCode env product project instance
 			Msg2 "^^Skipping file"
 			continue
 		fi
@@ -329,8 +330,8 @@ for workbook in "${workbooks[@]}"; do
 		done
 
 	## See if there is an existing record in the database do setup accordingly
-		whereClause="clientCode=$clientCode and env=$env and product=$product and project=$project and instance=$instance and jalotTaskNumber=$jalotTaskNumber"
-		sqlStmt="select $primaryKey from $qaStatusTable where $whereClause"
+		whereClause="clientCode=$clientCode and env=$env and product=$product and project=$project and instance=$instance"
+		sqlStmt="select $primaryKey from $qaStatusTable where $whereClause and recordStatus=\"A\""
 		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -eq 0 ]]; then
 			sqlAction='Insert'
@@ -355,6 +356,7 @@ for workbook in "${workbooks[@]}"; do
 	## Build sqlStmt 'set' clause
 		unset setClause
 		for token in $(tr ',' ' ' <<< $fields); do
+			[[ $token == 'jalot' ]] && continue
 			setClause="$setClause,${token}=${!token}"
 		done
 		setClause="Set $(tr '@' ' ' <<< "${setClause:1}")"
@@ -377,7 +379,7 @@ for workbook in "${workbooks[@]}"; do
 				$DOIT mv -f $workbook "$qaTrackingRoot/Archive/"
 				popd $(dirname $workbook) >& /dev/null
 				## Get the key for the qastatus record
-					whereClause="clientCode=$clientCode and product=$product and project=$project and instance=$instance and env=$env and jalotTaskNumber=$jalotTaskNumber"
+					whereClause="clientCode=$clientCode and product=$product and project=$project and instance=$instance and env=$env"
 					sqlStmt="select idx from $qaStatusTable where $whereClause"
 					RunSql2 $sqlStmt
 					if [[ ${#resultSet[@]} -eq 0 ]]; then
@@ -389,6 +391,7 @@ for workbook in "${workbooks[@]}"; do
 					fi
 			fi
 		fi
+	((fileCntr+=1))
 done # Workbooks
 
 #=======================================================================================================================
@@ -422,3 +425,4 @@ Goodbye 0 #'alert'
 ## 05-17-2017 @ 12.57.33 - (1.1.20)    - dscudiero - Fix problem parsing data for requester
 ## 05-17-2017 @ 16.08.34 - (1.1.25)    - dscudiero - Added support for the notes field
 ## 05-19-2017 @ 12.25.35 - (1.2.26)    - dscudiero - Added data from the implementation team's tracking spreadsheet
+## 05-25-2017 @ 06.46.23 - (1.2.35)    - dscudiero - Remove jalot task number
