@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #===================================================================================================
-version=3.11.93 # -- dscudiero -- Wed 05/24/2017 @  8:07:50.26
+version=3.11.95 # -- dscudiero -- Thu 05/25/2017 @  9:38:33.78
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -180,7 +180,7 @@ function ExecReport {
 		if [[ $type == 'query' ]]; then
 			outDir=/home/$userName/Reports/$name
 			[[ ! -d $outDir ]] && mkdir -p $outDir
-			outFile=$outDir/$(date '+%Y-%m-%d-%H%M%S').xls;
+			outFile=$outDir/$(date '+%Y-%m-%d@%H.%M.%S').xls
 			if [[ -f $outFile ]]; then rm $outFile; fi
 			if [[ $dbType == 'mysql' ]]; then
 				#sqlStmt=$(sed "s/<ignoreList>/$ignoreList/g" <<< $sqlStmt)
@@ -457,3 +457,4 @@ Goodbye 0
 ## 05-19-2017 @ 13.31.47 - (3.11.87)   - dscudiero - Fix problem with not pausing after report / script is run from menu
 ## 05-19-2017 @ 14.24.29 - (3.11.90)   - dscudiero - skip
 ## 05-24-2017 @ 08.09.07 - (3.11.93)   - dscudiero - Fix bug when running in batchMode and passing in a script name
+## 05-25-2017 @ 09.38.47 - (3.11.95)   - dscudiero - rename the output file for reports
