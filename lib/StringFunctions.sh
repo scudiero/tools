@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.9" # -- dscudiero -- Wed 05/17/2017 @ 15:39:05.61
+# version="1.0.10" # -- dscudiero -- Thu 05/25/2017 @  8:58:43.15
 #===================================================================================================
 # Various string manipulation functions
 #===================================================================================================
@@ -143,6 +143,52 @@ function CompareVersions {
 	return 0
 }
 
+#=======================================================================================================================
+# Print out structured data in a nicely formatted columnar fashion
+# Usage: PrintColumnarData <arrayName> [<delimiter>]
+#	- If delimiter is not specified it defaults to '|'
+#	- The first row of data (arrayName[0]) is taken to be the header record
+#=======================================================================================================================
+function PrintColumnarData() {
+	local dataArrayName=$1[@]
+	local dataArray=("${!dataArrayName}"); shift
+	local delim="${1-'|'}"
+
+	local header=${dataArray[0]}
+	local numCols=$(grep -o "$delim" <<< "$header" | wc -l) ; ((numCols+=1))
+
+	## Loop through data finding the max data widths for each column
+		local i j local tmpStr
+		for ((i=1; i<=$numCols; i++)); do
+			local col${i}Width
+			maxWidth=0
+			for ((j=0; j<${#dataArray[@]}; j++)); do
+				tmpStr=$(cut -d "$delim" -f $i <<< "${dataArray[$j]}" )
+				#dump -s -t j tmpStr
+				[[ ${#tmpStr} -gt $maxWidth ]] && maxWidth=${#tmpStr}
+			done
+			eval "col${i}Width=$maxWidth"
+			#eval "width=\$col${i}Width"
+			#echo "Max width for column $i = $width"
+		done
+
+	## Loop through the data printing the data
+		local outString data len
+		for ((j=0; j<${#dataArray[@]}; j++)); do
+			[[ $j -eq 0 ]] && data="$(tr "$delim" ' ' <<< ${dataArray[$j]})" || data="${dataArray[$j]}"
+			unset outString
+			for ((i=1; i<=$numCols; i++)); do
+				eval "width=\$col${i}Width"
+				tmpStr=$(cut -d "$delim" -f $i <<< "${dataArray[$j]}" )
+				outString="${outString} "$(printf "%-${width}s" "$tmpStr")" |"
+			done
+			len=${#outString}; ((len-=1))
+			echo "$(Trim "${outString:0:$len}")<"
+			[[ $j -eq 0 ]] && echo "$(PadChar "=" $len)"
+		done
+	return 0
+} ##PrintColumnarData
+
 #===================================================================================================
 # Check-in Log
 #===================================================================================================
@@ -152,3 +198,4 @@ function CompareVersions {
 ## Tue Mar 14 12:18:34 CDT 2017 - dscudiero - Added CompareVersions function
 ## Thu Mar 23 08:24:48 CDT 2017 - dscudiero - Remove the return code from Indent
 ## 05-17-2017 @ 16.08.15 - ("1.0.9")   - dscudiero - Added IsAlpha function
+## 05-25-2017 @ 09.36.32 - ("1.0.10")  - dscudiero - Added PrintColumnarData function
