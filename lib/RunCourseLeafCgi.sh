@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.20" # -- dscudiero -- Thu 05/04/2017 @ 13:17:40.79
+# version="2.0.21" # -- dscudiero -- Thu 05/25/2017 @ 13:25:32.27
 #===================================================================================================
 # Run a courseleaf.cgi command, check outpout
 # Courseleaf.cgi $LINENO <siteDir> <command string>
@@ -11,10 +11,9 @@
 function RunCourseLeafCgi {
 	local siteDir="$1"; shift
 	local cgiCmd="$*"
-	local cgiOut=$(MkTmpFile "$FUNCNAME")
+	local cgiOut="$(MkTmpFile "${FUNCNAME}.${BASHPID}")"
 
-	cwd=$(pwd)
-	cd $siteDir
+	pushd "$siteDir" > /dev/null
 	courseLeafPgm=$(GetCourseleafPgm | cut -d' ' -f1).cgi
 	courseLeafDir=$(GetCourseleafPgm | cut -d' ' -f2)
 	if [[ $courseLeafPgm == '.cgi' || $courseLeafDir == '' ]]; then Msg2 $T "$FUNCNAME: Could not find courseleaf executable"; fi
@@ -23,13 +22,11 @@ function RunCourseLeafCgi {
 
 	## Run command
 	cd $courseLeafDir
-	local cgiOut=/tmp/$userName.$myName.$BASHPID.cgiOut
-	#$DOIT ./$courseLeafPgm $cgiCmd 2>&1 > $cgiOut; rc=$?
 	{ ( ./$courseLeafPgm $cgiCmd ); } &> $cgiOut
 	grepStr="$(ProtectedCall "grep -m 1 'ATJ error:' $cgiOut")"
 	[[ $grepStr != '' ]] && Msg2 $TT1 "$FUNCNAME: ATJ errors were reported by the step.\n^^cgi cmd: '$cgiCmd'\n^^$grepStr"
-	rm -f $cgiOut
-	cd $cwd
+	rm -f "$cgiOut"
+	popd > /dev/null
 	return 0
 } #RunCourseLeafCgi
 export -f RunCourseLeafCgi
@@ -47,3 +44,4 @@ export -f RunCourseLeafCgi
 ## 04-07-2017 @ 08.29.53 - ("2.0.18")  - dscudiero - General syncing of dev to prod
 ## 04-07-2017 @ 08.46.26 - ("2.0.19")  - dscudiero - clean up how we process errors
 ## 05-04-2017 @ 13.18.23 - ("2.0.20")  - dscudiero - Restore from baclup
+## 05-25-2017 @ 13.26.11 - ("2.0.21")  - dscudiero - Tweak how the tmpFile is assigned
