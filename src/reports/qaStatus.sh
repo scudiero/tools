@@ -4,12 +4,12 @@ originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
 
-#= Description +===================================================================================
-# Get a report of all QA projects that are waiting
-#==================================================================================================
-#==================================================================================================
+#= Description +========================================================================================================
+# QA Status report
+#=======================================================================================================================
+#=======================================================================================================================
 # Standard call back functions
-#==================================================================================================
+#=======================================================================================================================
 function parseArgs-qaStatus  { # or parseArgs-local
 	#argList+=(-ignoreXmlFiles,7,switch,ignoreXmlFiles,,script,'Ignore extra xml files')
 	argList+=(-short,5,switch,short,,script,'Generate the short report')
@@ -27,27 +27,22 @@ function testMode-qaStatus  { # or testMode-local
 	return 0
 }
 
-#==================================================================================================
+#=======================================================================================================================
 # local functions
-#==================================================================================================
+#=======================================================================================================================
 
-#==================================================================================================
+#=======================================================================================================================
 # Declare local variables and constants
-#==================================================================================================
+#=======================================================================================================================
 sendMail=false
 numFound=0
 mode='short'
 
-outDir="$HOME/Reports/$myName"
-[[ ! -d $outDir ]] && mkdir -p $outDir
-outFile=$outDir/$(date '+%Y-%m-%d@%H.%M.%S').txt
-
 GetDefaultsData
-okCodes="$(cut -d':' -f2- <<< $scriptData1)"
 
-#==================================================================================================
+#=======================================================================================================================
 # Standard arg parsing and initialization
-#==================================================================================================
+#=======================================================================================================================
 ParseArgsStd
 [[ -n $reportName ]] && GetDefaultsData "$reportName" "$reportsTable"
 [[ $short == false && $short == false ]] && mode='short'
@@ -55,24 +50,18 @@ ParseArgsStd
 [[ $cat == false && $cim == false ]] && cat=true && cim=true
 dump -1 mode cat cim
 
-#===================================================================================================
+#========================================================================================================================
 # Main
-#===================================================================================================
+#========================================================================================================================
 
-## Generate report
-	[[ $batchMode != true ]] && clear
-	echo | tee $outFile
-	echo "$myName ($mode) report run by $userName on $(date +"%m-%d-%Y") at $(date +"%H.%M.%S")" > $outFile
-	[[ -n $shortDescription ]] && echo -e "($shortDescription)\n" >> $outFile
-	echo | tee -a $outFile
-
-	## Get the week that priority was assigned
+## Get the week that priority was assigned
 	sqlStmt="select distinct implPriorityWeek from $qaStatusTable where implPriorityWeek is not null"
 	RunSql2 $sqlStmt
 	[[ ${#resultSet[@]} -gt 0 ]] && implPriorityWeek="${resultSet[0]}" || unset implPriorityWeek
 
+## Get the report data
 	if [[ $mode == 'short' ]]; then
-		header="Client|Product|Project|Instance      |Tester|Requester|Developer|Start Date|Days Active|Resources Remaining (hrs)"
+		header='Client|Product|Project|Instance|Tester|Requester|Developer|Start Date|Days Active|Resources Remaining (hrs)'
 		header="${header}|Week starting: ${implPriorityWeek}|Assigned hours|Waiting(csm,dev) Failed(csm,dev) -- Note"
 		## Get the status records
 		sqlStmt="select clientcode,product,project,ifnull(instance,''),ifnull(tester,''),ifnull(requester,'') as Requester,ifnull(developer,''),"
@@ -83,7 +72,7 @@ dump -1 mode cat cim
 		sqlStmt="${sqlStmt}CONCAT('W(',ifnull(numWaitingCsm,0),',',ifnull(numWaitingDev,0),'), ','F(', ifnull(numFailedCsm,0),',',ifnull(numFailedDev,0) ,')'))"
 		sqlStmt="${sqlStmt}from $qaStatusTable where recordstatus='A' order by clientcode"
 	else
-		header="Client|Product|Project|Instance|Tester|Requester|Developer|Start Date|Days Active|Resources Remaining (hrs)"
+		header='Client|Product|Project|Instance|Tester|Requester|Developer|Start Date|Days Active|Resources Remaining (hrs)'
 		header="${header}|% Attempted|%Attempted Passed|% Attempted Failed"
 		header="${header}|Week starting: ${implPriorityWeek}|Assigned hours|Waiting(csm,dev) Failed(csm,dev) -- Note"
 
@@ -97,34 +86,25 @@ dump -1 mode cat cim
 		sqlStmt="${sqlStmt}from $qaStatusTable where recordstatus='A' order by clientcode"
 	fi
 
-	## Get the status records
-	RunSql2 $sqlStmt
-	[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No data returned from the query to the $qaStatusTable table"
+## Get the status records
+RunSql2 $sqlStmt
+[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No data returned from the query to the $qaStatusTable table"
 
-	## Output the report data
-		resultSet=("$header" "${resultSet[@]}")
-		PrintColumnarData 'resultSet' '|' | tee "$outFile"
+## Output the report data
+	resultSet=("${header}" "${resultSet[@]}")
+	for ((i=0; i<${#resultSet[@]}; i++)); do
+		echo "${resultSet[$i]}"
+	done
+	#PrintColumnarData 'resultSet' '|' | tee "$outFile"
 
-		echo; echo
-		Note "Report output also save in '$outFile'"
-
-
-## Send email
-	if [[ -n $emailAddrs ]]; then
-		Msg2 "\nSending email(s) to: $emailAddrs \n" | tee -a $outFile
-		for emailAddr in $(echo $emailAddrs | tr ',' ' '); do
-			mutt -a "$outFile" -s "$report report results: $(date +"%m-%d-%Y")" -- $emailAddr < $outFile
-		done
-	fi
-
-#===================================================================================================
+#========================================================================================================================
 ## Done
-#===================================================================================================
+#========================================================================================================================
 Goodbye 0 #'alert'
 
-#===================================================================================================
+#========================================================================================================================
 ## Check-in log
-#===================================================================================================
+#========================================================================================================================
 ## Thu Mar 16 16:56:46 CDT 2017 - dscudiero - General syncing of dev to prod
 ## Fri Mar 17 10:45:25 CDT 2017 - dscudiero - v
 ## 03-27-2017 @ 13.30.18 - (1.0.75)    - dscudiero - Only report on active records
@@ -133,3 +113,4 @@ Goodbye 0 #'alert'
 ## 05-19-2017 @ 13.50.46 - (1.0.77)    - dscudiero - General syncing of dev to prod
 ## 05-22-2017 @ 07.28.20 - (1.0.77)    - dscudiero - Fix problem with script not sending emails
 ## 05-25-2017 @ 09.36.55 - (1.0.77)    - dscudiero - call PrintColumnarData function for output
+## 05-25-2017 @ 16.25.34 - (1.0.77)    - dscudiero - Refactoredto just send data back
