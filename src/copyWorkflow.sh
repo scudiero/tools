@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.19 # -- dscudiero -- Wed 05/24/2017 @ 12:21:57.67
+version=2.9.22 # -- dscudiero -- Fri 05/26/2017 @  9:40:39.98
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -165,12 +165,18 @@ function CheckFilesForCopy {
 			[[ $(Contains ",$setDefaultYesFiles," ",$(basename $cpyFile),") == true ]] && defVals='Yes' || defVals='No'
 			unset ans; Prompt ans "Yes to copy $cpyFile, eXit to stop" 'Yes No' "$defVals"; ans=$(Lower ${ans:0:1});
 			[[ $ans != 'y' ]] && filesNotCopied+=($cpyFile) && return 0
-			## If workflow.cfg then turn off debug messages
+			## If workflow.cfg then turn off debug messages and make sure cimsync is on
 			if [[ $(Contains "$cpyFile" 'workflow.cfg') == true ]]; then
 				unset grepStr; grepStr=$(ProtectedCall "grep '^wfDebugLevel:' $srcFile")
 				if [[ -n $grepStr ]]; then
 					fromStr="$grepStr"
 					toStr="wfDebugLevel:0"
+					$DOIT sed -i s"_^${fromStr}_${toStr}_" $srcFile
+				fi
+				unset grepStr; grepStr=$(ProtectedCall "grep '^skiploadsync:true' $srcFile")
+				if [[ -n $grepStr ]]; then
+					fromStr="$grepStr"
+					toStr="//$grepStr"
 					$DOIT sed -i s"_^${fromStr}_${toStr}_" $srcFile
 				fi
 			fi
@@ -496,3 +502,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 05-22-2017 @ 11.12.35 - (2.8.100)   - dscudiero - Make check for jalot number isNumeric
 ## 05-24-2017 @ 08.11.15 - (2.9.9)     - dscudiero - Put in checks to make sure there is not a debug standard workflow active
 ## 05-24-2017 @ 12.22.33 - (2.9.19)    - dscudiero - Fix problem when the target file/directory does not exist
+## 05-26-2017 @ 09.41.06 - (2.9.22)    - dscudiero - Make sure that cimsync is not commentd out
