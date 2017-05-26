@@ -1,6 +1,6 @@
 RunSql2 #!/bin/bash
 #==================================================================================================
-version=1.1.18 # -- dscudiero -- Mon 05/08/2017 @  8:47:01.36
+version=1.1.21 # -- dscudiero -- Thu 05/25/2017 @ 16:55:12.96
 #==================================================================================================
 originalArgStr="$*"
 scriptDescription=""
@@ -19,9 +19,7 @@ function parseArgs-client2DaySummary  { # or parseArgs-local
 	argList+=(-role,4,option,role,,script,'The role to run the report on, values in {support,salesRep,csmRep}')
 }
 function Goodbye-client2DaySummary  { # or Goodbye-local
-	rm -rf $tmpRoot > /dev/null 2>&1
-	[[ -f $tmpFile ]] && rm -f $tmpFile
-	[[ -f $outFile ]] && rm -f $outFile
+	SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
 	return 0
 }
 function testMode-client2DaySummary  { # or testMode-local
@@ -38,10 +36,6 @@ function testMode-client2DaySummary  { # or testMode-local
 genReport=false
 numFound=0
 clientsDir="/mnt/internal/site/stage/web/clients"
-outDir=/home/$userName/Reports/$myName
-[[ ! -d $outDir ]] && mkdir -p $outDir
-outFile=$outDir/$(date '+%Y-%m-%d-%H%M%S').txt
-tmpFile=$(MkTmpFile)
 
 declare -A roleMap
 roleMap['support']='support'
@@ -115,48 +109,37 @@ clientsDir="/mnt/internal/site/stage/web/clients"
 			fi
 			done < $file; IFS="$ifs"
 	done
-	[[ -f $tmpFile ]] && rm -f $tmpFile
 	DumpMap 1 "$(declare -p dataMap)"
 
 ##  Generate output
 	dump -2 genReport
 	if [[ $genReport == true ]]; then
-		[[ $batchMode != true ]] && ProtectedCall "clear"
-		Msg2 | tee -a $outFile
-		Msg2 "Report: $myName" | tee -a $outFile
-		Msg2 "Date: $(date)" | tee -a $outFile
-		[[ $shortDescription != '' ]] && Msg2 "$shortDescription" | tee -a $outFile
-		Msg2 | tee -a $outFile
-		Msg2 "The following client pages have not had their '$searchString' paragraphs modified from the default" | tee -a $outFile
-		Msg2 "Client list based on the $warehouseDb/$clientInfoTable" as of $(date) | tee -a $outFile
+		Msg2
+		Msg2 "Report: $myName"
+		Msg2 "Date: $(date)"
+		[[ $shortDescription != '' ]] && Msg2 "$shortDescription"
+		Msg2
+		Msg2 "The following client pages have not had their '$searchString' paragraphs modified from the default"
+		Msg2 "Client list based on the $warehouseDb/$clientInfoTable as of $(date)"
 
 		for key in "${keysArray[@]}"; do
 			data=${dataMap["$key"]}
 			contactInfo="$(cut -d'|' -f1 <<< "$data")"
 			data="$(cut -d'|' -f2 <<< "$data")"
-			Msg2 | tee -a $outFile
-			Msg2 "$key:"| tee -a $outFile
+			Msg2
+			Msg2 "$key:"
 			found=0
 			for token in $(tr ',' ' ' <<< "$data"); do
-				Msg2 "^$token" | tee -a $outFile
+				Msg2 "^$token"
 				ProtectedCall "((found++))"
 			done
-			Msg2 "^Found $found clients" | tee -a $outFile
+			Msg2 "^Found $found clients"
 		done
-		## Send email
-			 if [[ $emailAddrs != '' ]]; then
-			 	Msg2 | tee -a $outFile; Msg2 "Sending email(s) to: $emailAddrs" | tee -a $outFile; Msg2 | tee -a $outFile
-			 	for emailAddr in $(echo $emailAddrs | tr ',' ' '); do
-			 		mutt -a "$outFile" -s "$report report results: $(date +"%m-%d-%Y")" -- $emailAddr < $outFile
-			 	done
-			 fi
 	fi
 
 #===================================================================================================
 ## Done
 #===================================================================================================
-[[ -f $tmpFile ]] && rm -f $tmpFile
-[[ -f $outFile ]] && rm -f $outFile
 Goodbye 0 #'alert'
 
 #===================================================================================================
@@ -165,3 +148,4 @@ Goodbye 0 #'alert'
 ## Mon Feb 13 16:09:19 CST 2017 - dscudiero - make sure we have our own tmpFile
 ## 04-17-2017 @ 07.42.20 - (1.1.12)    - dscudiero - remove import of dumpmap
 ## 05-08-2017 @ 09.13.11 - (1.1.18)    - dscudiero - filter out sites that do not have products or productsInSupport
+## 05-26-2017 @ 06.39.23 - (1.1.21)    - dscudiero - General syncing of dev to prod
