@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.2.20 # -- dscudiero -- 01/12/2017 @ 13:20:37.94
+version=2.2.21 # -- dscudiero -- Fri 05/26/2017 @ 12:49:13.00
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -490,7 +490,7 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 	if [[ $informationOnlyMode != true ]]; then
 		writeFile=true
 		if [[ ${#warningMsgs[@]} -gt 0 ]]; then
-			Msg; unset ans
+			Msg2; unset ans
 			Prompt ans "Warning messages were issued, do you wish to write the role data out to '$tgtEnv'" "Yes No"; ans=$(Lower ${ans:0:1})
 			[[ $ans != 'y' ]] && writeFile=false
 		fi
@@ -560,3 +560,4 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 ## Wed Apr 27 16:05:00 CDT 2016 - dscudiero - Switch to use RunSql
 ## Thu Aug  4 11:02:15 CDT 2016 - dscudiero - Added displayGoodbyeSummaryMessages=true
 ## Tue Sep 20 12:34:42 CDT 2016 - dscudiero - Switched to use Msg2
+## 05-26-2017 @ 12.49.39 - (2.2.21)    - dscudiero - Found an instance of Msg vs Msg2
