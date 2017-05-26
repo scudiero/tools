@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.1 # -- dscudiero -- Tue 05/23/2017 @  7:12:57.21
+version=1.22.3 # -- dscudiero -- Fri 05/26/2017 @  6:23:51.63
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -315,11 +315,12 @@ case "$hostName" in
 		# 	[[ -f /tmp/warehouse.sql ]] && rm -f /tmp/warehouse.sql
 
 		## Reports
-			qaEmails='dscudiero@leepfrog.com,sjones@leepfrog.com,mbruening@leepfrog.com,jlindeman@leepfrog.com'
-			Call 'reports' 'qaStatusShort' "-email \"$qaEmails\" $scriptArgs"
+			qaEmails='sjones@leepfrog.com,mbruening@leepfrog.com,jlindeman@leepfrog.com'
+			Call 'reports' "qaStatusShort -quiet -email \"$qaEmails\" $scriptArgs"
 			## Build a list of clients and contact info for Shelia
 			#[[ $runClientListReport == true ]] && Call 'reports' "clientList -quiet -email 'dscudiero@leepfrog.com,sfrickson@leepfrog.com' $scriptArgs"
-			[[ $(date +%d -d tomorrow) == '01' ]] && Call 'reports' "clientTimezone -quiet -email 'dscudiero@leepfrog.com,jlindeman@leepfrog.com' $scriptArgs"
+			tzEmails='dscudiero@leepfrog.com,jlindeman@leepfrog.com'
+			[[ $(date +%d -d tomorrow) == '01' ]] && Call 'reports' "clientTimezone -quiet -email \"$tzEmails\" $scriptArgs"
 
 		## On the last day of the month roll-up the log files
 		  	if [[ $(date +"%d") == $(date -d "$(date +"%m")/1 + 1 month - 1 day" "+%d") ]]; then
@@ -453,3 +454,4 @@ return 0
 ## 05-19-2017 @ 07.27.02 - (1.22.0)    - dscudiero - update call string for quStatusShort report
 ## 05-22-2017 @ 07.28.45 - (1.22.0)    - dscudiero - Removed quiet from qaStatusReport call
 ## 05-23-2017 @ 07.56.21 - (1.22.1)    - dscudiero - Chang3e call string for reports
+## 05-26-2017 @ 06.40.50 - (1.22.3)    - dscudiero - add quiet to qaStatusShort call
