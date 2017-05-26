@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.0.116" # -- dscudiero -- Wed 05/17/2017 @ 10:47:51.18
+# version="1.0.118" # -- dscudiero -- Fri 05/26/2017 @ 10:19:16.40
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -21,10 +21,11 @@ function FindExecutable {
 	local searchMode=${1:-std}; shift
 	local srcTypes="$1"; shift
 	local srcLibs="$1"; shift
-	local searchDirs searchMode srcTypes typeDir typeExt srcLibs localMd5 prodMd5 prodFile ans found searchDir type lib callPgmAlias useLocal
+	local searchDirs searchMode srcTypes typeDir typeExt srcLibs localMd5 prodMd5 prodFile ans found searchDir type lib callPgmAlias
 	#===================================================================================================================
 
-	useLocal=$USELOCAL
+	local useLocal=$USELOCAL
+	local useDev=$USEDEV
 
 	if [[ $srcTypes == '' || $srcTypes == 'search' || $srcLibs == '' ]]; then
 		sqlStmt="select scriptData1,scriptData2 from $scriptsTable where name =\"dispatcher\" "
@@ -38,7 +39,8 @@ function FindExecutable {
 
 	## Search for the file scanning TOOLSSRC, TOOSSRCLIBS
 		searchDirs="$TOOLSPATH/src"
-		[[ $TOOLSSRCPATH != '' && $searchMode != 'fast' ]] && searchDirs=($( tr ':' ' ' <<< $TOOLSSRCPATH))
+		[[ $useDev == true && -d "$TOOLSDEVPATH/src" ]] && searchDirs="$TOOLSDEVPATH/src $searchDirs"
+		[[ $TOOLSSRCPATH != '' && $searchMode != 'fast' ]] && searchDirs="$searchDirs $( tr ':' ' ' <<< $TOOLSSRCPATH)"
 
 	## Check db to see if there is a script name override
 		unset callPgmAlias
@@ -52,7 +54,7 @@ function FindExecutable {
 
 	## Search for execution file
 		found=false;
-	    for searchDir in $( tr ':' ' ' <<< $TOOLSSRCPATH) $TOOLSPATH/src; do
+	    for searchDir in $searchDirs ; do
 	    	[[ ! -d $searchDir ]] && continue
 	    	## Look for the '.sh' file in the root src directory, if found then use it
 	    	executeFile="$searchDir/${callPgmName}.sh"
@@ -110,7 +112,7 @@ function FindExecutable {
 				## Check md5's to see if different from production file
 				if [[ $prodMd5 != $localMd5 ]]; then
 					unset ans
-					if [[ $useLocal != true && $batchMode != true ]]; then
+					if [[ $useLocal != true && $useDev != true && $batchMode != true ]]; then
 						Msg2 $N "\aFound a copy of '$callPgmName' in a local directory: '$(dirname $executeFile)'"
 						[[ $batchMode != true ]] && unset ans && Prompt ans "'Yes' to use the local copy, 'No' to use production version" 'Yes No' 'Yes' '4' && ans=$(Lower ${ans:0:1})
 					else
@@ -132,3 +134,4 @@ export -f FindExecutable
 ## 05-05-2017 @ 13.21.05 - ("1.0.101") - dscudiero - Remove GD code
 ## 05-12-2017 @ 14.58.09 - ("1.0.102") - dscudiero - misc changes to speed up
 ## 05-17-2017 @ 10.50.27 - ("1.0.116") - dscudiero - Update prompts to accomidate the new timed prompt support
+## 05-26-2017 @ 10.31.55 - ("1.0.118") - dscudiero - Added --useDev support
