@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.142" # -- dscudiero -- Fri 05/19/2017 @ 15:16:33.34
+version="1.2.160" # -- dscudiero -- Fri 05/26/2017 @ 10:29:31.59
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -113,7 +113,7 @@ tmpRoot=/tmp/$LOGNAME
 		if [[ ${1:0:2} == '--' ]]; then
 			myArg=$(echo ${1:2} | tr '[:upper:]' '[:lower:]')
 			[[ ${myArg:0:1} == 'v' ]] && myVerbose=true
-			[[ $myArg == 'useDev' ]] && useDev=true
+			[[ $myArg == 'usedev' ]] && useDev=true
 			[[ $myArg == 'uselocal' ]] && useLocal=true
 			[[ $myArg == 'nolog' ]] && noLog=true && noLogInDb=true
 			[[ $myArg == 'nologindb' ]] && noLognDb=true
@@ -141,7 +141,10 @@ tmpRoot=/tmp/$LOGNAME
 ## Overrides
 	[[ ${callPgmName:0:4} == 'test' ]] && noLog=true && noLogInDb=true && useLocal=true
 	[[ $useLocal == true ]] && export USELOCAL=true
-	[[ $useDev == true ]] && export USEDEV=true
+	if [[ $useDev == true ]]; then
+		export USEDEV=true 
+		[[ $userName != 'dscudiero' ]] && echo "*Warning* -- ($myName) Using the tools development directories"
+	fi
 
 prtStatus "parse args"
 sTime=$(date "+%s")
@@ -149,11 +152,11 @@ sTime=$(date "+%s")
 #==================================================================================================
 # MAIN
 #==================================================================================================
-
 ## Set the CLASSPATH
 	sTime=$(date "+%s")
 	saveClasspath="$CLASSPATH"
 	searchDirs="$TOOLSPATH/src"
+	[[ $USEDEV == true && -d "$TOOLSDEVPATH/src" ]] && searchDirs="$TOOLSDEVPATH/src"
 	[[ -n $TOOLSSRCPATH ]] && searchDirs="$( tr ':' ' ' <<< $TOOLSSRCPATH)"
 	unset CLASSPATH
 	for searchDir in $searchDirs; do
@@ -167,12 +170,12 @@ sTime=$(date "+%s")
 	sTime=$(date "+%s")
 	unset initFile importFile;
 	[[ -z $TOOLSLIBPATH ]] && searchDirs="$TOOLSPATH/lib" || searchDirs="$( tr ':' ' ' <<< $TOOLSLIBPATH)"
+	[[ $USEDEV == true && -d "$TOOLSDEVPATH/lib" ]] && searchDirs="$TOOLSDEVPATH/lib"
 	for searchDir in $searchDirs; do
 		[[ -r ${searchDir}/InitializeRuntime.sh ]] && initFile="${searchDir}/InitializeRuntime.sh"
 		[[ -r ${searchDir}/Import.sh ]] && importFile="${searchDir}/Import.sh" && source $importFile
 		[[ -n $initFile && -n $importFile ]] && break
 	done
-	#echo "initFile = '$initFile'" ; echo "importFile = '$importFile'"
 
 ## Initialize the runtime environment
 	[[ -z $initFile ]] && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
@@ -258,6 +261,7 @@ sTime=$(date "+%s")
 		[[ $batchMode != true && $myQuiet != true ]] && echo
 		TrapSigs 'off'
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
+		[[ $(cut -d' ' -f1 <<< $(wc -l "$executeFile")) -eq 0 ]] && Terminate "Execution file ($executeFile) is empty"
 		source $executeFile $scriptArgs 2>&1 | tee -a $logFile; rc=$?
 		rc="$?"
 
@@ -360,3 +364,4 @@ sTime=$(date "+%s")
 ## 05-17-2017 @ 10.49.38 - ("1.2.140") - dscudiero - export USELOCAL
 ## 05-18-2017 @ 07.34.06 - ("1.2.141") - dscudiero - Delete all files matching tmpFile in cleanup
 ## 05-19-2017 @ 15.50.00 - ("1.2.142") - dscudiero - Remove includes that are not needed any longer (CheckSemaphore & IsNumeric)
+## 05-26-2017 @ 10.31.51 - ("1.2.160") - dscudiero - Added --useDev support
