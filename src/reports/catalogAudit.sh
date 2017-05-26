@@ -1,6 +1,6 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
-version=1.0.18 # -- dscudiero -- 02/13/2017 @ 16:05:54.87
+version=1.0.19 # -- dscudiero -- Thu 05/25/2017 @ 16:58:00.20
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -20,7 +20,7 @@ function parseArgs-catalogAudit  { # or parseArgs-local
 	return 0
 }
 function Goodbye-catalogAudit  { # or Goodbye-local
-[[ -f "$tmpFile" ]] && rm "$tmpFile"
+	SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
 	return 0
 }
 function testMode-catalogAudit  { # or testMode-local
@@ -251,3 +251,4 @@ Goodbye 0
 ## Check-in log
 #===================================================================================================
 ## Mon Feb 13 16:09:13 CST 2017 - dscudiero - make sure we have our own tmpFile
+## 05-26-2017 @ 06.39.10 - (1.0.19)    - dscudiero - Change cleanup code
