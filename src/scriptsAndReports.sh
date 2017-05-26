@@ -1,8 +1,8 @@
 #!/bin/bash
-# XO NOT AUTOVERSION
-#===================================================================================================
-version=3.11.95 # -- dscudiero -- Thu 05/25/2017 @  9:38:33.78
-#===================================================================================================
+# DO NOT AUTOVERSION
+#=======================================================================================================================
+version=3.12.-1 # -- dscudiero -- Thu 05/25/2017 @ 12:29:08.26
+#=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
 imports="$imports Call SelectMenuNew"
@@ -11,23 +11,28 @@ originalArgStr="$*"
 scriptDescription="Script dispatcher"
 # echo "\$* 2 = >$*<"
 
-#===================================================================================================
+#=======================================================================================================================
 # Tools scripts selection front end
-#===================================================================================================
+#=======================================================================================================================
 # 05-28-14 -- 	dgs - Initial coding
 # 07-17-15 --	dgs - Migrated to framework 5
-#===================================================================================================
-#===================================================================================================
+#=======================================================================================================================
+#=======================================================================================================================
 # Standard call back functions
-#===================================================================================================
+#=======================================================================================================================
 function parseArgs-scriptsAndReports {
 	# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
 	argList+=(-emailAddrs,1,option,emailAddrs,,script,'Email addresses to send reports to when running in batch mode')
+	argList+=(-noArgs,1,switch,noArgs,,script,'Do not prompt for additional arguments to send to the script/report')
+}
+function Goodbye-scriptsAndReports  { # or Goodbye-local
+	SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
+	return 0
 }
 
-#===================================================================================================
+#=======================================================================================================================
 # local functions
-#===================================================================================================
+#=======================================================================================================================
 
 #==================================================================================================
 ## Build the menu list from the database
@@ -176,56 +181,68 @@ function ExecReport {
 		fi
 
 	## Run report
+		outDir="$HOME/Reports/$name"
+		[[ ! -d $outDir ]] && mkdir -p "$outDir"
+		outFileXlsx="$outDir/$(date '+%Y-%m-%d@%H.%M.%S').xls"
+		outFileText="$outDir/$(date '+%Y-%m-%d@%H.%M.%S').txt"
+
 		## Report record defines a query
 		if [[ $type == 'query' ]]; then
-			outDir=/home/$userName/Reports/$name
-			[[ ! -d $outDir ]] && mkdir -p $outDir
-			outFile=$outDir/$(date '+%Y-%m-%d@%H.%M.%S').xls
-			if [[ -f $outFile ]]; then rm $outFile; fi
 			if [[ $dbType == 'mysql' ]]; then
-				#sqlStmt=$(sed "s/<ignoreList>/$ignoreList/g" <<< $sqlStmt)
 				RunSql2 $sqlStmt
-
-				if [[ ${#resultSet[@]} -eq 0 ]]; then
-					Msg2 $W "No records returned from report query\n"
-				else
-					echo -e "$name report run by $userName on $(date +"%m-%d-%Y") at $(date +"%H.%M.%S")" > $outFile
-					echo -e "($shortDescription)\n" >> $outFile
-					if [[ $(IsAlpha "${header:0:1}") == true ]]; then
-						echo -e "$(tr "," "\t" <<< "$header")" >> $outFile
-
-					else
-						firstChar=${header:0:1}
-						header=${header:1}
-						echo -e "$(tr "$firstChar" "\t" <<< "$header")" >> $outFile
-					fi
-					for result in "${resultSet[@]}"; do
-						echo -e "$(tr '|' "\t" <<< "$result" )" >> $outFile
+				if [[ ${#resultSet[@]} -gt 0 ]]; then
+					resultSet=("$(tr ',' '|' <<< "$header")" "${resultSet[@]}")
+					[[ -f $tmpFile ]] && rm $tmpFile
+					for ((i=0; i<${#resultSet[@]}; i++)); do
+						echo "${resultSet[$i]}" >> "$tmpFile"
 					done
-					if [[ $quiet == false ]]; then Msg2; while read -r line; do echo -e "\t$line"; done < $outFile; fi
-					echo; Msg2 $N "Report output can be found in: $outFile"
-					sendMail=true
 				fi
 			else
-				Msg2 $T "dbType type of '$dbType' not supported at this time"
+				Terminate "dbType type of '$dbType' not supported at this time"
 			fi
+			ignoreList='returnsRaw'
 		## Report record is to run a script
 		elif [[ $type == 'script' ]]; then
 			reportScript=$(cut -d'|' -f 7 <<< "$resultString")
 			reportArgs=$(cut -d'|' -f 8 <<< "$resultString"); [[ $reportArgs == 'NULL' ]] && unset reportArgs
 			reportIgnoreList=$(cut -d'|' -f 9 <<< "$resultString") ; [[ $reportIgnoreList == 'NULL' ]] && unset reportIgnoreList
 			## Call script
-				scriptArgs="-reportName $name -noHeaders"
-				Call "$reportScript" "$originalArgStr $reportArgs $scriptArgs"
+			scriptArgs="-reportName $name -noHeaders"
+			if [[ $(Lower "$reportIgnoreList") == 'standalone' ]]; then
+				Call "$reportScript" "$originalArgStr $reportArgs $scriptArgs" | tee "$tmpFile"
+			else
+				Call "$reportScript" "$originalArgStr $reportArgs $scriptArgs" > "$tmpFile"
+			fi
 		else
-			Msg2 $T "Report type of '$type' not supported at this time"
+			Terminate "Report type of '$type' not supported at this time"
 		fi
+
+		if [[ $(wc -l < "$tmpFile") -gt 1 ]]; then
+			if [[  $(Lower "$ignoreList") == 'returnsraw' ]]; then
+				echo | tee "$outFileXlsx" > "$outFileText"
+				echo "$name report run by $userName on $(date +"%m-%d-%Y") at $(date +"%H.%M.%S")" | tee -a "$outFileXlsx" >> "$outFileText"
+				echo "($shortDescription)" | tee -a "$outFileXlsx" >> "$outFileText"
+				echo  | tee -a "$outFileXlsx" >> "$outFileText"
+				sed s"/|/\t/g" < "$tmpFile" >> "$outFileXlsx"
+				mapfile -t resultSet < "$tmpFile"
+				PrintColumnarData 'resultSet' '|' >> "$outFileText"
+			else
+				cp -fp "$tmpFile" "$outFileText"
+				cp -fp "$tmpFile" "$outFileXlsx"
+			fi
+			[[ $quiet != true ]] && cat "$outFileText"
+			sendMail=true
+		else
+			Warning "No data returned from report script"
+		fi
+
 	return 0
 } #ExecReport
 
-#===================================================================================================
+#=======================================================================================================================
 # Declare variables and constants, bring in includes file with subs
-#===================================================================================================
+#=======================================================================================================================
+tmpFile=$(mkTmpFile)
 fullDisplay=false
 askedDisplayWidthQuestion=false
 
@@ -269,9 +286,9 @@ mode=$(tr '[:upper:]' '[:lower:]' <<< "$1")
 noArgPromptList="_clearClientValue_"
 unset scriptArgs
 
-#===================================================================================================
+#=======================================================================================================================
 ## parse arguments
-#===================================================================================================
+#=======================================================================================================================
 helpSet='script,client'
 parseQuiet=true
 GetDefaultsData $myName
@@ -321,7 +338,7 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 	[[ $(Contains "$grepStr" "$TOOLSPATH/bin") != true ]] && pathSave="$PATH" && export PATH="$PATH:$TOOLSPATH/bin"
 	loop=true
 	while [[ $loop == true ]]; do
-		if [[ -z $report && -z $script ]]; then
+		if [[ -z ${report}${script} ]]; then
 			unset itemName
 			BuildMenuList
 			ProtectedCall "clear"
@@ -345,7 +362,7 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 		fi
 		[[ $itemName == 'REFRESHLIST' ]] && continue
 		unset userArgs;
-		if [[ $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true  && $quiet != true ]]; then
+		if [[ $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true  && $quiet != true && $noArgs != true ]]; then
 			Msg2 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
 			unset userArgs; Prompt userArgs "^Please specify parameters to be passed to '$itemName'" '*optional*' '' '4'
 			[[ -n $userArgs ]] && scriptArgs="$userArgs $scriptArgs"
@@ -356,7 +373,7 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 		itemName="$(echo -e $itemName | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g")"
 		#TrapSigs 'off'
 
-
+		sendMail=false
 		Exec$itemTypeCap "$itemName" "$scriptArgs" ; rc=$?
 		#TrapSigs 'on'
 		echo
@@ -365,15 +382,18 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 		# 	\nPlease record any Messages and contact the $itemType owner\n"
 		[[ $batchMode != true && $quiet != true && $verify == true && $menuDisplayed == true ]] && Pause "Please press enter to go back to '${itemType}s'"
 		unset calledViaScripts
+
+		## Send out emails
+		if [[ -n $emailAddrs && $mode == 'reports' && $noEmails == false && $sendMail == true ]]; then
+			echo | tee -a $outFileText; Msg2 "Sending email(s) to: $emailAddrs" | tee -a $outFileText; echo | tee -a "$outFileText"
+			for addr in $(tr ',' ' ' <<< "$emailAddrs"); do
+				[[ $(Contains "$addr" '@') != true ]] && addr="$addr@leepfrog.com"
+				$DOIT mutt -a "$outFileXlsx" -s "$report report results: $(date +"%m-%d-%Y")" -- $addr < "$outFileText"
+			done
+		fi
+		#[[ -f $outFileText ]] && rm -f "$outFileText"
 	done
 
-## Send out emails
-	if [[ -n $emailAddrs && $mode == 'reports' && $noEmails == false && $sendMail == true ]]; then
-		echo | tee -a $outFile; Msg2 "Sending email(s) to: $emailAddrs" | tee -a $outFile; echo | tee -a $outFile
-		for emailAddr in $(tr ',' ' ' <<< "$emailAddrs"); do
-			$DOIT mutt -a "$outFile" -s "$report report results: $(date +"%m-%d-%Y")" -- $emailAddr < $outFile
-		done
-	fi
 
 #==================================================================================================
 ## Bye-bye
@@ -458,3 +478,4 @@ Goodbye 0
 ## 05-19-2017 @ 14.24.29 - (3.11.90)   - dscudiero - skip
 ## 05-24-2017 @ 08.09.07 - (3.11.93)   - dscudiero - Fix bug when running in batchMode and passing in a script name
 ## 05-25-2017 @ 09.38.47 - (3.11.95)   - dscudiero - rename the output file for reports
+## 05-26-2017 @ 06.40.08 - (3.12.-1)   - dscudiero - Updated output formatting for reports
