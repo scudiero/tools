@@ -1,5 +1,5 @@
 
-TOOLSPATH="/steamboat/leepfrog/docs/tools"
+export TOOLSDEVPATH="/home/dscudiero/tools"
 warehouseDb="warehouse"
 adminUsers="dscudiero"
 setSemaphoreList='buildSiteInfoTable,buildClientInfoTable'
