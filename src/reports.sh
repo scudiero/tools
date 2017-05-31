@@ -6,7 +6,7 @@ version=1.0.12 # -- dscudiero -- Wed 05/24/2017 @  8:07:28.75
 # Quick call to scriptsAndReports
 #==================================================================================================
 # echo "\$* 1 = >$*<"
-Call scriptsAndReports 'reports' $*
+Call 'scriptsAndReports' 'reports' $*
 
 #==================================================================================================
 # Check-in Log
@@ -18,3 +18,4 @@ Call scriptsAndReports 'reports' $*
 ## 05-19-2017 @ 14.22.32 - (1.0.8)     - dscudiero - Change call name to an absolute 'reports'
 ## 05-19-2017 @ 14.28.07 - (1.0.9)     - dscudiero - Changed to use absolute script name
 ## 05-24-2017 @ 08.08.44 - (1.0.12)    - dscudiero - Add commented debug statement
+## 05-31-2017 @ 07.57.33 - (1.0.12)    - dscudiero - quote scriptAndReports
