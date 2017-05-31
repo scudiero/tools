@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.5" # -- dscudiero -- Mon 05/22/2017 @ 10:50:34.33
+# version="2.1.6" # -- dscudiero -- Wed 05/31/2017 @  7:30:02.13
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -11,6 +11,7 @@
 #===================================================================================================
 
 function Prompt {
+	[[ $TERM != 'xterm' ]] && Terminate "TERM environment variable is not 'xterm', cannot continue"
 	declare promptVar=$1; shift || true
 	declare promptText=$1; shift || true
 	declare validateList=$1; shift || true
@@ -161,3 +162,4 @@ export -f Prompt
 ## Thu Mar 16 12:14:31 CDT 2017 - dscudiero - Fixed a problem with timeouts not timeing out, added tabbing to the timeout text
 ## 05-17-2017 @ 10.50.03 - ("2.1.0")   - dscudiero - Update the timed prompt support to do a count down timer
 ## 05-22-2017 @ 10.55.01 - ("2.1.5")   - dscudiero - added x out of timed read, fixed bug when verify is off
+## 05-31-2017 @ 07.31.49 - ("2.1.6")   - dscudiero - Terminate if TERM != 'xterm'
