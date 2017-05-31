@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.18" # -- dscudiero -- Thu 04/13/2017 @  8:10:16.73
+# version="1.0.19" # -- dscudiero -- Wed 05/31/2017 @ 15:38:06.68
 #===================================================================================================
 # Write out / update a start record into the process log database
 # Called as 'mode' 'token' 'data'
@@ -24,7 +24,7 @@ function ProcessLogger {
 			[[ -n $allItems && $(Contains "$argString" 'allItems') != true ]] && argString="${argString}, AllItems"
 			epochTime=$(date +%s)
 			sqlStmt="insert into $processLogTable (idx,name,hostName,userName,viaScripts,startTime,startEtime,endTime,endEtime,elapsedTime,exitCode,argString,data) \
-					values(NULL,\"$myName\",\"$hostName\",\"$userName\",\"$calledViaScripts\",\"$startTime\",$(date +%s),NULL,NULL,NULL,NULL,\"$argString\",NULL)"
+					values(NULL,\"$myName\",\"$version\",\"$hostName\",\"$userName\",\"$calledViaScripts\",\"$startTime\",$(date +%s),NULL,NULL,NULL,NULL,\"$argString\",NULL)"
 			RunSql2 $sqlStmt
 			## Get newly inserted record Id
 			[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Could not insert record into $processLogTable"
@@ -78,3 +78,4 @@ export -f ProcessLogger
 #===================================================================================================
 ## Wed Jan 11 07:51:24 CST 2017 - dscudiero - Streamlined
 ## 04-13-2017 @ 08.13.02 - ("1.0.18")  - dscudiero - add usage information
+## 05-31-2017 @ 15.38.24 - ("1.0.19")  - dscudiero - Add the script version to the log record
