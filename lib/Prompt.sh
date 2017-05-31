@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.6" # -- dscudiero -- Wed 05/31/2017 @  7:30:02.13
+# version="2.1.11" # -- dscudiero -- Wed 05/31/2017 @  7:44:11.11
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -11,7 +11,6 @@
 #===================================================================================================
 
 function Prompt {
-	[[ $TERM != 'xterm' ]] && Terminate "TERM environment variable is not 'xterm', cannot continue"
 	declare promptVar=$1; shift || true
 	declare promptText=$1; shift || true
 	declare validateList=$1; shift || true
@@ -22,6 +21,17 @@ function Prompt {
 	[[ ${promptText:0:1} == '^' ]] && timerPrompt="^$timerPrompt"
 	declare timerInterruptPrompt=${1:-"$promptText"}; shift || true
 	dump -2 -r ; dump -2 -l promptVar promptText defaultVal validateList validateListString timeOut timerPrompt timerInterruptPrompt
+
+	if [[ $batchMode == true || $TERM != 'xterm' ]]; then
+		if [[ -z $defaultVal ]]; then
+			[[ $batchMode == true ]] && Terminate "$FUNCNAME: batchMode flag is set and no defaultVal specified, cannot continue\n\t\tVar: '$promptVar', Prompt: '$promptText'"
+			[[ $TERM != 'xterm' ]] && Terminate "$FUNCNAME: TERM ($TERM) is not 'xterm' and no defaultVal specified, cannot continue\n\t\tVar: '$promptVar', Prompt: '$promptText'"
+		else
+			eval $promptVar=\"$defaultVal\"
+			Note 0 1 "'batchMode is set, using selected value of '$defaultVal' for 'client'"
+			return 0
+		fi
+	fi
 
 	declare validateListString="$(echo $validateList | tr " " ",")"
 	if [[ -n $defaultVal ]]; then
@@ -163,3 +173,4 @@ export -f Prompt
 ## 05-17-2017 @ 10.50.03 - ("2.1.0")   - dscudiero - Update the timed prompt support to do a count down timer
 ## 05-22-2017 @ 10.55.01 - ("2.1.5")   - dscudiero - added x out of timed read, fixed bug when verify is off
 ## 05-31-2017 @ 07.31.49 - ("2.1.6")   - dscudiero - Terminate if TERM != 'xterm'
+## 05-31-2017 @ 07.49.50 - ("2.1.11")  - dscudiero - if term is not xterm or in batchMode and we have a default then use the default value
