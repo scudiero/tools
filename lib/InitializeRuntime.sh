@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.79" # -- dscudiero -- Wed 05/10/2017 @  8:54:19.60
+# version="2.0.81" # -- dscudiero -- Wed 05/31/2017 @  7:25:43.54
 #===================================================================================================
 # Initialize the tools runtime environment
 #===================================================================================================
@@ -10,7 +10,7 @@
 unset helpSet helpNotes warningMsgs errorMsgs summaryMsgs myRealPath myRealName changeLogRecs parsedArgStr
 
 ## Make sure we have avalue for TERM
-[[ $TERM == '' ]] && export TERM=xterm
+TERM=${TERM:-dumb}
 shopt -s checkwinsize
 set -e  # Turn ON Exit immediately
 #set +e  # Turn OFF Exit immediately
@@ -146,3 +146,4 @@ export FRAMEWORKLOADED=true
 ## Tue Jan 17 08:55:29 CST 2017 - dscudiero - Move color definitions before getDefaultsData
 ## 05-05-2017 @ 13.21.21 - ("2.0.77")  - dscudiero - Remove GD code
 ## 05-10-2017 @ 09.42.22 - ("2.0.79")  - dscudiero - Move TrapSigs to dispatcher
+## 05-31-2017 @ 07.26.21 - ("2.0.81")  - dscudiero - Make sure TERM has a value , if not set then set to dumb
