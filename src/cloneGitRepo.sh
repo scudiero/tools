@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.35 # -- dscudiero -- Fri 05/19/2017 @ 12:15:15.15
+version=1.0.37 # -- dscudiero -- Wed 05/31/2017 @ 12:35:27.55
 #==================================================================================================
 #= Description +===================================================================================
 # Clone a Courseleaf git repository
@@ -27,7 +27,7 @@ function parseArgs-cloneGitRepo {
 }
 function Goodbye-cloneGitRepo  { # or Goodbye-$myName
 	SetFileExpansion 'on'
-	rm -rf /tmp/$userName.$myName* > /dev/null 2>&1
+	rm -f "$stdOut" "$stdErr" >& /dev/null
 	SetFileExpansion
 	return 0
 }
@@ -39,15 +39,17 @@ function Goodbye-cloneGitRepo  { # or Goodbye-$myName
 #==================================================================================================
 # Declare local variables and constants
 #==================================================================================================
-local tmpFile=$(MkTmpFile $FUNCNAME)
+tmpFile=$(MkTmpFile $FUNCNAME)
+stdOut="$tmpFile.stdout"
+stdErr="$tmpFile.stderr"
 
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-local repo="$1"
-local tag="$2"
-local srcDir="$3"
-local tgtDir="$4"
+repo="$1"
+tag="$2"
+srcDir="$3"
+tgtDir="$4"
 parseQuiet=true
 ParseArgsStd
 dump -2 -t originalArgStr repo tag srcDir tgtDir
@@ -61,13 +63,10 @@ ToDo 'remove debug code' ; batchMode=true
 mkdir -p ${tgtDir}/${repo}
 chmod gu+w ${tgtDir}/${repo}
 cd $tgtDir
-stdOut="$tmpFile.stdout"
-stdErr="$tmpFile.stderr"
-
 
 ## Initialize the repo
 	[[ $batchMode != true ]] && Msg2 "^^Initializing the '$repo' repository (takes a while)..."
-	rm -r "$stdOut" "$stdErr" >& /dev/null
+	rm -f "$stdOut" "$stdErr" >& /dev/null
 	gitCmd="git clone --depth 1 $srcDir"
 	ProtectedCall "$gitCmd" 1> $stdOut 2> $stdErr
 	unset grepStr; [[ -f $stdErr ]] && grepStr=$(ProtectedCall "grep Fatal: $stdErr")
@@ -78,7 +77,7 @@ stdErr="$tmpFile.stderr"
 	if [[ $tag  != 'master' ]]; then
 		[[ $batchMode != true ]] && Msg2 "^^Extracting tag '$tag' from the '$repo' repository..."
 		cd $tgtDir/$repo
-		rm -r "$stdOut" "$stdErr" >& /dev/null
+		rm -f "$stdOut" "$stdErr" >& /dev/null
 		gitCmd="git checkout --force tags/$tag"
 		ProtectedCall "$gitCmd" 1> $stdOut 2> $stdErr
 		unset grepStr; [[ -f $stdErr ]] && grepStr=$(ProtectedCall "grep Fatal: $stdErr")
@@ -89,7 +88,7 @@ stdErr="$tmpFile.stderr"
 ## git cleanup
 	[[ $batchMode != true ]] && Msg2 "^^Cleaning up the repo..."
 	cd $tgtDir/$repo
-	rm -r "$stdOut" "$stdErr" >& /dev/null
+	rm -f "$stdOut" "$stdErr" >& /dev/null
 	gitCmd="git clean -fxd"
 	ProtectedCall "$gitCmd" 1> $stdOut 2> $stdErr
 	unset grepStr; [[ -f $stdErr ]] && grepStr=$(ProtectedCall "grep Fatal: $stdErr")
@@ -172,3 +171,4 @@ return 0
 ## 05-17-2017 @ 16.43.45 - (1.0.33)    - dscudiero - Add process id to the name of the tmpFile to avoid conflicts when running scripts in parallel
 ## 05-19-2017 @ 12.25.49 - (1.0.35)    - dscudiero - Added debug statements
 ## 05-31-2017 @ 12.32.11 - (1.0.35)    - dscudiero - Misc cleanup
+## 05-31-2017 @ 12.35.33 - (1.0.37)    - dscudiero - General syncing of dev to prod
