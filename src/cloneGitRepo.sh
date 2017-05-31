@@ -31,14 +31,15 @@ function Goodbye-cloneGitRepo  { # or Goodbye-$myName
 	SetFileExpansion
 	return 0
 }
+
 #==================================================================================================
 # local functions
 #==================================================================================================
-local tmpFile=$(MkTmpFile $FUNCNAME).$BASHPID
 
 #==================================================================================================
 # Declare local variables and constants
 #==================================================================================================
+local tmpFile=$(MkTmpFile $FUNCNAME)
 
 #==================================================================================================
 # Standard arg parsing and initialization
@@ -60,37 +61,40 @@ ToDo 'remove debug code' ; batchMode=true
 mkdir -p ${tgtDir}/${repo}
 chmod gu+w ${tgtDir}/${repo}
 cd $tgtDir
+stdOut="$tmpFile.stdout"
+stdErr="$tmpFile.stderr"
+
 
 ## Initialize the repo
 	[[ $batchMode != true ]] && Msg2 "^^Initializing the '$repo' repository (takes a while)..."
-	[[ -f $tmpFile.stdout ]] && rm "$tmpFile.stdout"; [[ -f $tmpFile.stderr ]] && rm "$tmpFile.stderr";
+	rm -r "$stdOut" "$stdErr" >& /dev/null
 	gitCmd="git clone --depth 1 $srcDir"
-	ProtectedCall "$gitCmd" 1> $tmpFile.stdout 2> $tmpFile.stderr
-	unset grepStr; [[ -f $tmpFile.stderr ]] && grepStr=$(ProtectedCall "grep Fatal: $tmpFile.stderr")
-	[[ $grepStr != '' ]] && Terminate 0 1 "git command failed:\n\t\t\tCmd: '$gitCmd'\n$(cat $tmpFile.stderr | xargs -I {} echo -e "\t\t\t{}")"
-	[[ -f $tmpFile.stdout && $batchMode != true ]] && cat $tmpFile.stdout | xargs -I {} echo -e  "\t\t\t{}"
+	ProtectedCall "$gitCmd" 1> $stdOut 2> $stdErr
+	unset grepStr; [[ -f $stdErr ]] && grepStr=$(ProtectedCall "grep Fatal: $stdErr")
+	[[ $grepStr != '' ]] && Terminate 0 1 "git command failed:\n\t\t\tCmd: '$gitCmd'\n$(cat $stdErr | xargs -I {} echo -e "\t\t\t{}")"
+	[[ -f $stdOut && $batchMode != true ]] && cat $stdOut | xargs -I {} echo -e  "\t\t\t{}"
 
 ## Overlay the specific tagged files
 	if [[ $tag  != 'master' ]]; then
 		[[ $batchMode != true ]] && Msg2 "^^Extracting tag '$tag' from the '$repo' repository..."
 		cd $tgtDir/$repo
-		[[ -f $tmpFile.stdout ]] && rm "$tmpFile.stdout"; [[ -f $tmpFile.stderr ]] && rm "$tmpFile.stderr";
+		rm -r "$stdOut" "$stdErr" >& /dev/null
 		gitCmd="git checkout --force tags/$tag"
-		ProtectedCall "$gitCmd" 1> $tmpFile.stdout 2> $tmpFile.stderr
-		unset grepStr; [[ -f $tmpFile.stderr ]] && grepStr=$(ProtectedCall "grep Fatal: $tmpFile.stderr")
-		[[ $grepStr != '' ]] && Terminate 0 1 "git command failed:\n\t\t\tCmd: '$gitCmd'\n$(cat $tmpFile.stderr | xargs -I {} echo -e "\t\t\t{}")"
-		[[ -f $tmpFile.stdout && $batchMode != true ]] && cat $tmpFile.stdout | xargs -I {} echo -e  "\t\t\t{}"
+		ProtectedCall "$gitCmd" 1> $stdOut 2> $stdErr
+		unset grepStr; [[ -f $stdErr ]] && grepStr=$(ProtectedCall "grep Fatal: $stdErr")
+		[[ $grepStr != '' ]] && Terminate 0 1 "git command failed:\n\t\t\tCmd: '$gitCmd'\n$(cat $stdErr | xargs -I {} echo -e "\t\t\t{}")"
+		[[ -f $stdOut && $batchMode != true ]] && cat $stdOut | xargs -I {} echo -e  "\t\t\t{}"
 	fi
 
 ## git cleanup
 	[[ $batchMode != true ]] && Msg2 "^^Cleaning up the repo..."
 	cd $tgtDir/$repo
-	[[ -f $tmpFile.stdout ]] && rm "$tmpFile.stdout"; [[ -f $tmpFile.stderr ]] && rm "$tmpFile.stderr";
+	rm -r "$stdOut" "$stdErr" >& /dev/null
 	gitCmd="git clean -fxd"
-	ProtectedCall "$gitCmd" 1> $tmpFile.stdout 2> $tmpFile.stderr
-	unset grepStr; [[ -f $tmpFile.stderr ]] && grepStr=$(ProtectedCall "grep Fatal: $tmpFile.stderr")
-	[[ $grepStr != '' ]] && Terminate 0 1 "git command failed:\n\t\t\tCmd: '$gitCmd'\n$(cat $tmpFile.stderr | xargs -I {} echo -e "\t\t\t{}")"
-	[[ -f $tmpFile.stdout && $batchMode != true ]] && cat $tmpFile.stdout | xargs -I {} echo -e  "\t\t\t{}"
+	ProtectedCall "$gitCmd" 1> $stdOut 2> $stdErr
+	unset grepStr; [[ -f $stdErr ]] && grepStr=$(ProtectedCall "grep Fatal: $stdErr")
+	[[ $grepStr != '' ]] && Terminate 0 1 "git command failed:\n\t\t\tCmd: '$gitCmd'\n$(cat $stdErr | xargs -I {} echo -e "\t\t\t{}")"
+	[[ -f $stdOut && $batchMode != true ]] && cat $stdOut | xargs -I {} echo -e  "\t\t\t{}"
 
 ## set the time-date stamp on the extracted files
 	if [[ $tag  == 'master' ]]; then
@@ -167,3 +171,4 @@ return 0
 ## 05-02-2017 @ 07.32.32 - (1.0.32)    - dscudiero - cleanup tmp files
 ## 05-17-2017 @ 16.43.45 - (1.0.33)    - dscudiero - Add process id to the name of the tmpFile to avoid conflicts when running scripts in parallel
 ## 05-19-2017 @ 12.25.49 - (1.0.35)    - dscudiero - Added debug statements
+## 05-31-2017 @ 12.32.11 - (1.0.35)    - dscudiero - Misc cleanup
