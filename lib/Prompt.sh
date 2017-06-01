@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.11" # -- dscudiero -- Wed 05/31/2017 @  7:44:11.11
+# version="2.1.12" # -- dscudiero -- Thu 06/01/2017 @  9:16:38.33
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -22,10 +22,11 @@ function Prompt {
 	declare timerInterruptPrompt=${1:-"$promptText"}; shift || true
 	dump -2 -r ; dump -2 -l promptVar promptText defaultVal validateList validateListString timeOut timerPrompt timerInterruptPrompt
 
-	if [[ $batchMode == true || $TERM != 'xterm' ]]; then
+	if [[ $batchMode == true ]] || [[ $TERM != 'xterm' && $TERM != 'screen' ]]; then
 		if [[ -z $defaultVal ]]; then
 			[[ $batchMode == true ]] && Terminate "$FUNCNAME: batchMode flag is set and no defaultVal specified, cannot continue\n\t\tVar: '$promptVar', Prompt: '$promptText'"
-			[[ $TERM != 'xterm' ]] && Terminate "$FUNCNAME: TERM ($TERM) is not 'xterm' and no defaultVal specified, cannot continue\n\t\tVar: '$promptVar', Prompt: '$promptText'"
+			[[ $TERM != 'xterm' && $TERM != 'screen' ]] && \
+				Terminate "$FUNCNAME: TERM ($TERM) is not 'xterm' or 'screen' and no defaultVal specified, cannot continue\n\t\tVar: '$promptVar', Prompt: '$promptText'"
 		else
 			eval $promptVar=\"$defaultVal\"
 			Note 0 1 "'batchMode is set, using selected value of '$defaultVal' for 'client'"
@@ -174,3 +175,4 @@ export -f Prompt
 ## 05-22-2017 @ 10.55.01 - ("2.1.5")   - dscudiero - added x out of timed read, fixed bug when verify is off
 ## 05-31-2017 @ 07.31.49 - ("2.1.6")   - dscudiero - Terminate if TERM != 'xterm'
 ## 05-31-2017 @ 07.49.50 - ("2.1.11")  - dscudiero - if term is not xterm or in batchMode and we have a default then use the default value
+## 06-01-2017 @ 09.16.57 - ("2.1.12")  - dscudiero - Also check for TERM=screen
