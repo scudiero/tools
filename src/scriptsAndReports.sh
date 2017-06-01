@@ -1,7 +1,7 @@
 #!/bin/bash
-# DO NOT AUTOVERSION
+# DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.12.-1 # -- dscudiero -- Thu 05/25/2017 @ 12:29:08.26
+version=3.12.0 # -- dscudiero -- Thu 06/01/2017 @ 10:08:57.77
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -479,3 +479,4 @@ Goodbye 0
 ## 05-24-2017 @ 08.09.07 - (3.11.93)   - dscudiero - Fix bug when running in batchMode and passing in a script name
 ## 05-25-2017 @ 09.38.47 - (3.11.95)   - dscudiero - rename the output file for reports
 ## 05-26-2017 @ 06.40.08 - (3.12.-1)   - dscudiero - Updated output formatting for reports
+## 06-01-2017 @ 10.09.29 - (3.12.0)    - dscudiero - General syncing of dev to prod
