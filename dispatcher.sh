@@ -1,11 +1,7 @@
 #!/bin/bash
-echo "\$* = '$*'"
-echo "\$0 = '$0'"
-if [[ -r $HOME/tools/loader.sh ]]; then
-	"$HOME/tools/loader.sh" $*
-else
-	$(dirname $0)/loader.sh $*
-fi
+loaderDir="$(dirname $0)"
+[[ -r $HOME/tools/loader.sh ]] && loaderDir="$HOME/tools/" || loaderDir="$(dirname $0)"
+"$loaderDir/loader.sh" $(basename $0) $*
 exit
 
 #===================================================================================================
@@ -15,3 +11,4 @@ exit
 ## 06-02-2017 @ 14.14.06 - dscudiero - General syncing of dev to prod
 ## 06-02-2017 @ 14.23.14 - dscudiero - add debug
 ## 06-02-2017 @ 14.24.03 - dscudiero - General syncing of dev to prod
+## 06-02-2017 @ 14.26.56 - dscudiero - General syncing of dev to prod
