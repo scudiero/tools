@@ -4,7 +4,7 @@ export TOOLSSRCPATH="$TOOLSPATH/src"
 
 loaderDir="$(dirname $0)"
 if [[ -r $HOME/tools/loader.sh ]]; then
-	loaderDir="$HOME/tools/"
+	loaderDir="$HOME/tools"
 	[[ -d "$loaderDir/lib" ]] && export TOOLSLIBPATH="$loaderDir/lib:$TOOLSLIBPATH"
 	[[ -d "$loaderDir/src" ]] && export TOOLSSRCPATH="$loaderDir/src:$TOOLSSRCPATH"
 fi
@@ -16,4 +16,4 @@ exit
 ## Check-in log
 #===================================================================================================
 
-## 06-02-2017 @ 14.49.29 - dscudiero - Set TOOLSLIBPATH and TOOLSRCPATH
+## 06-02-2017 @ 14.53.07 - dscudiero - General syncing of dev to prod
