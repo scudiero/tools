@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.168" # -- dscudiero -- Fri 06/02/2017 @ 14:08:44.15
+version="1.2.176" # -- dscudiero -- Fri 06/02/2017 @ 15:19:38.39
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -14,19 +14,19 @@ myName='loader'
 #==================================================================================================
 # Load BOOT data
 #==================================================================================================
-## Read in data from the boot file, set base information
-	if [[ -r $(dirname $0)/bootData ]]; then
-		source "$(dirname $0)/bootData"
-	else
-		[[ -z $TOOLSPATH ]] && TOOLSPATH="/steamboat/leepfrog/docs/tools"
-		[[ ! -d $TOOLSPATH ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but is not a directory, cannot continue\n" && exit -1
-		[[ ! -r $TOOLSPATH/bootData ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but you cannot access the boot record, cannot continue\n" && exit -1
-		source "$TOOLSPATH/bootData"
-	fi
-	[[ -d "$(dirname "$TOOLSPATH")/toolsNew" ]] && TOOLSPATH="$(dirname "$TOOLSPATH")/toolsNew"
-	[[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB"
-	export TOOLSWAREHOUSEDB="$warehouseDb"
-	[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/${myName}.sh"
+# ## Read in data from the boot file, set base information
+# 	if [[ -r $(dirname $0)/bootData ]]; then
+# 		source "$(dirname $0)/bootData"
+# 	else
+# 		[[ -z $TOOLSPATH ]] && TOOLSPATH="/steamboat/leepfrog/docs/tools"
+# 		[[ ! -d $TOOLSPATH ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but is not a directory, cannot continue\n" && exit -1
+# 		[[ ! -r $TOOLSPATH/bootData ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but you cannot access the boot record, cannot continue\n" && exit -1
+# 		source "$TOOLSPATH/bootData"
+# 	fi
+# 	[[ -d "$(dirname "$TOOLSPATH")/toolsNew" ]] && TOOLSPATH="$(dirname "$TOOLSPATH")/toolsNew"
+# 	[[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB"
+# 	export TOOLSWAREHOUSEDB="$warehouseDb"
+# 	[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/${myName}.sh"
 
 #==================================================================================================
 # Local Functions
@@ -108,7 +108,7 @@ tmpRoot=/tmp/$LOGNAME
 
 ## Parse off my arguments
 	unset scriptArgs myVerbose useDev useLocal noLog noLogInDb batchMode useDevDb myVerbose myQuiet
-	[[ $USELOCAL == true ]] && $useLocal=true
+	[[ $USELOCAL == true ]] && useLocal=true
 	while [[ -n $@ ]]; do
 		if [[ ${1:0:2} == '--' ]]; then
 			myArg=$(echo ${1:2} | tr '[:upper:]' '[:lower:]')
@@ -365,3 +365,4 @@ sTime=$(date "+%s")
 ## 05-18-2017 @ 07.34.06 - ("1.2.141") - dscudiero - Delete all files matching tmpFile in cleanup
 ## 05-19-2017 @ 15.50.00 - ("1.2.142") - dscudiero - Remove includes that are not needed any longer (CheckSemaphore & IsNumeric)
 ## 05-26-2017 @ 10.31.51 - ("1.2.160") - dscudiero - Added --useDev support
+## 06-02-2017 @ 15.20.58 - ("1.2.176") - dscudiero - Move bootdata load to dispatcher
