@@ -4,4 +4,10 @@ if [[ -r $HOME/tools/loader.sh ]]; then
 else
 	$(dirname $0)/loader.sh $*
 fi
-exit## 06-02-2017 @ 14.11.58 - dscudiero - Refectored to call loader.sh
+exit
+
+#===================================================================================================
+## Check-in log
+#===================================================================================================
+## 06-02-2017 @ 14.11.58 - dscudiero - Refectored to call loader.sh
+## 06-02-2017 @ 14.14.06 - dscudiero - General syncing of dev to prod
