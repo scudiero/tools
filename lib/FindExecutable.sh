@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.0.118" # -- dscudiero -- Fri 05/26/2017 @ 10:19:16.40
+# version="1.0.125" # -- dscudiero -- Fri 06/02/2017 @ 15:18:13.77
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -22,8 +22,6 @@ function FindExecutable {
 	local srcTypes="$1"; shift
 	local srcLibs="$1"; shift
 	local searchDirs searchMode srcTypes typeDir typeExt srcLibs localMd5 prodMd5 prodFile ans found searchDir type lib callPgmAlias
-	#===================================================================================================================
-
 	local useLocal=$USELOCAL
 	local useDev=$USEDEV
 
@@ -40,6 +38,7 @@ function FindExecutable {
 	## Search for the file scanning TOOLSSRC, TOOSSRCLIBS
 		searchDirs="$TOOLSPATH/src"
 		[[ $useDev == true && -d "$TOOLSDEVPATH/src" ]] && searchDirs="$TOOLSDEVPATH/src $searchDirs"
+		[[ $useLocal == true && -d "$HOME/tools/src" ]] && searchDirs="$HOME/tools/src $searchDirs"
 		[[ $TOOLSSRCPATH != '' && $searchMode != 'fast' ]] && searchDirs="$searchDirs $( tr ':' ' ' <<< $TOOLSSRCPATH)"
 
 	## Check db to see if there is a script name override
@@ -135,3 +134,4 @@ export -f FindExecutable
 ## 05-12-2017 @ 14.58.09 - ("1.0.102") - dscudiero - misc changes to speed up
 ## 05-17-2017 @ 10.50.27 - ("1.0.116") - dscudiero - Update prompts to accomidate the new timed prompt support
 ## 05-26-2017 @ 10.31.55 - ("1.0.118") - dscudiero - Added --useDev support
+## 06-02-2017 @ 15.19.07 - ("1.0.125") - dscudiero - Refactor setting of the search path for local and dev
