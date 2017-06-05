@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.1.95 # -- dscudiero -- Mon 06/05/2017 @ 11:02:40.34
+version=5.1.101 # -- dscudiero -- Mon 06/05/2017 @ 14:51:33.95
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -588,7 +588,7 @@ tmpFile=$(mkTmpFile)
 				for token2 in $(tr ',' ' ' <<< "$purchasedProducts"); do
 					[[ $token == ${token2:0:${#token}} ]] && found=true && break
 				done
-				[[ $found != true && "$token" != 'formbuilder' ]] && Warning "This client does not have product '$token' registered in the clients database, skipping"
+				[[ $found != true && "$token" != 'formbuilder' ]] && Warning "This client does not have product '$token' registered in the clients database"
 				patchProducts="$patchProducts,$token"
 			done
 			patchProducts="${patchProducts:1}"
@@ -1135,30 +1135,34 @@ declare -A processedSpecs
 							;;
 						cgicommand)
 							if [[ $buildPatchPackage != true ]]; then
-								if [[ $(Lower "${specTarget}") == 'always' ]] || [[ $(Lower "${specTarget}") == 'onchangeonly' || -z ${specTarget}  && $changesMade == true ]]; then
-									Msg2 "\n^Processing '$specSource' record: '${specPattern} ${specTarget}'"
-									cwd="$(pwd)"
-									cd "$tgtDir/web/$courseleafProgDir"
-									indentLevelSave=$indentLevel
-									indentLevel=2
-									RunCourseLeafCgi "$tgtDir" "$specPattern"
-									indentLevel=$indentLevelSave
-									cd "$cwd"
+								if [[ -f "$specPattern" ]]; then
+									if [[ $(Lower "${specTarget}") == 'always' ]] || [[ $(Lower "${specTarget}") == 'onchangeonly' || -z ${specTarget}  && $changesMade == true ]]; then
+										Msg2 "\n^Processing '$specSource' record: '${specPattern} ${specTarget}'"
+										cwd="$(pwd)"
+										cd "$tgtDir/web/$courseleafProgDir"
+										indentLevelSave=$indentLevel
+										indentLevel=2
+										RunCourseLeafCgi "$tgtDir" "$specPattern"
+										indentLevel=$indentLevelSave
+										cd "$cwd"
+									fi
 								fi
 							fi
 							;;
 						command)
 							if [[ $buildPatchPackage != true ]]; then
-								if [[ $(Lower "${specTarget}") == 'always' ]] || [[ $(Lower "${specTarget}") == 'onchangeonly' || -z ${specTarget}  && $changesMade == true ]]; then
-									Msg2 "\n^Processing '$specSource' record: '${specPattern} ${specTarget}'"
-									cwd="$(pwd)"
-									cd "$tgtDir"
-									indentLevelSave=$indentLevel
-									indentLevel=2
-									eval "$specPattern"
-									[[ $? -eq 0 ]] && changeLogRecs+=("Executed unix command: '$specPattern'")
-									indentLevel=$indentLevelSave
-									cd "$cwd"
+								if [[ -f "${specPattern##* }" ]]; then
+									if [[ $(Lower "${specTarget}") == 'always' ]] || [[ $(Lower "${specTarget}") == 'onchangeonly' || -z ${specTarget}  && $changesMade == true ]]; then
+										Msg2 "\n^Processing '$specSource' record: '${specPattern} ${specTarget}'"
+										cwd="$(pwd)"
+										cd "$tgtDir"
+										indentLevelSave=$indentLevel
+										indentLevel=2
+										eval "$specPattern"
+										[[ $? -eq 0 ]] && changeLogRecs+=("Executed unix command: '$specPattern'")
+										indentLevel=$indentLevelSave
+										cd "$cwd"
+									fi
 								fi
 							fi
 							;;
@@ -1201,12 +1205,22 @@ declare -A processedSpecs
 ## Cross product checks / updates
 #=======================================================================================================================
 if [[ $buildPatchPackage != true ]]; then
+
+	Msg2 "\n^Cross product checks..."
+	## Check to see if there are any old formbuilder widgets
+		checkDir="$tgtDir/web/courseleaf/locallibs/widgets"
+		fileCount=$(ls "$checkDir" | grep 'banner_' | wc -l)
+		[[ $fileCount -gt 0 ]] && Warning 0 1 "Found 'banner' widgets in /courseleaf/locallibs/widgets, these are probably deprecated, please ask a CIM developer to evaluate."
+		fileCount=$(ls "$checkDir" | grep 'psoft_' | wc -l)
+		[[ $fileCount -gt 0 ]] && Warning 0 1 "Found 'psoft' widgets in /courseleaf/locallibs/widgets, these are probably deprecated, please ask a CIM developer to evaluate."
+
+
 	## Check /ribbit/getcourse.rjs file
 		checkFile="$tgtDir/web/ribbit/getcourse.rjs"
 		if [[ -f "$checkFile" ]]; then
 			skelDate=$(date +%s -r $skeletonRoot/release/web/ribbit/getcourse.rjs)
 			fileDate=$(date +%s -r $tgtDir/web/ribbit/getcourse.rjs)
-			if [[ $skelDate -gt $fileDate ]]; then 
+			if [[ $skelDate -gt $fileDate ]]; then
 				echo
 				text="The time date stamp of the file '$tgtDir/web/ribbit/getcourse.rjs' is less "
 				text="$text than the time date stamp of the file in the skeleton, you should complare the files and merge"
@@ -1401,3 +1415,4 @@ Goodbye 0 "$text1" "$text2"
 ## 05-12-2017 @ 13.46.25 - (5.1.63)    - dscudiero - Fix numerious problems with the patch package
 ## 06-05-2017 @ 07.58.16 - (5.1.88)    - dscudiero - Added support for selected refresh of index.cgi in the search directory
 ## 06-05-2017 @ 11.04.04 - (5.1.95)    - dscudiero - Tweaked messaging for product, fixed editing of courseleaf console
+## 06-05-2017 @ 14.52.03 - (5.1.101)   - dscudiero - Added checing for deprecated formbuilder widgets
