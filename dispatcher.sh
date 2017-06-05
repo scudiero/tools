@@ -17,7 +17,7 @@
 	export TOOLSSRCPATH="$TOOLSPATH/src"
 
 ## Find the loader
-	loaderDir="$(dirname $0)"
+	loaderDir="$TOOLSPATH"
 	if [[ -r $HOME/tools/loader.sh ]]; then
 		loaderDir="$HOME/tools"
 		[[ -d "$loaderDir/lib" ]] && export TOOLSLIBPATH="$loaderDir/lib:$TOOLSLIBPATH"
@@ -36,3 +36,4 @@ exit
 ## 06-02-2017 @ 14.53.07 - dscudiero - General syncing of dev to prod
 ## 06-02-2017 @ 15.03.26 - dscudiero - Move boot loader to here
 ## 06-02-2017 @ 15.05.38 - dscudiero - Add TOOLSWAREHOUSEDB
+## 06-05-2017 @ 13.47.22 - dscudiero - General syncing of dev to prod
