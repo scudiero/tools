@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.1.63 # -- dscudiero -- Fri 05/12/2017 @ 13:31:54.52
+version=5.1.88 # -- dscudiero -- Fri 06/02/2017 @ 16:56:40.96
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -742,7 +742,6 @@ tmpFile=$(mkTmpFile)
 		backupRootDir="$tgtDir/attic/$myName.$(date +"%m-%d-%Y").prePatch"
 		mkdir -p "$backupRootDir"
 
-
 #=======================================================================================================================
 # Verify continue
 #=======================================================================================================================
@@ -944,16 +943,16 @@ fi #[[ $catalogAdvance == true || $fullAdvance == true ]] && [[ buildPatchPackag
 ##======================================================================================================================
 ## Patch catalog
 ##======================================================================================================================
-unset changeLogRecs processedDailysh
+unset changeLogRecs processedDailysh skipProducts
 declare -A processedSpecs
 ## Refresh proucts
 	for processSpec in $(tr ',' ' ' <<< $processControl); do
-		dump -2 -n processSpec
+		dump -1 -n processSpec
 		product=$(cut -d '|' -f1 <<< $processSpec)
+		[[ $(Contains ",$skipProducts," ",$product,") == true ]] && continue
 		prodVer=$(cut -d '|' -f2 <<< $processSpec)
 		srcDir=$(cut -d '|' -f3 <<< $processSpec)
 		dump -2 -n -n processSpec product prodVer srcDir tgtDir
-#[[ $product == 'cim' ]] && allCims=true && GetCims $tgtDir
 		Msg2 "\nProcessing: $(Upper "$product")..."
 		if [[ $buildPatchPackage != true ]]; then
 			## Check Versions
@@ -963,6 +962,7 @@ declare -A processedSpecs
 				#if [[ -n $srcVer && -n $tgtVer ]]; then
 					if [[ $(CompareVersions "$srcVer" 'le' "$tgtVer") == true ]]; then
 						 Warning 0 1 "Source clver ($srcVer) is less than or equal than the target clver ($tgtVer), skipping '$(Upper "$product")' refresh"
+						 skipProducts="$skipProducts,$product"
 						 continue
 					fi
 				#fi
@@ -990,6 +990,18 @@ declare -A processedSpecs
 					specPattern=$(sed "s/<progDir>/$courseleafProgDir/g" <<< $specPattern)
 					specTarget=$(sed "s/<progDir>/$courseleafProgDir/g" <<< $specTarget)
 					dump -2 -t specLine -t specSource specPattern specTarget specIgnoreList backupDir
+
+				## If specSource type is 'searchCgi' then make sure that this client has the new focussearch
+					if [[ "$(Lower "$specSource")" == 'searchcgi' ]]; then
+					 	if [[ ! -f ${tgtDir}/web/search/results.tcf ]]; then
+							grepFile="${tgtDir}/web/search/index.tcf"
+							if [[ -r $grepFile ]]; then
+								grepStr=$(ProtectedCall "grep '^template:catsearch' $grepFile")
+								[[ -z $grepStr ]] && continue
+							fi
+					 	fi
+					fi
+
 				## Process record
 					backupDir=$backupRootDir/${product}${specTarget}
 					case "$(Lower "$specSource")" in
@@ -1095,11 +1107,10 @@ declare -A processedSpecs
 							fi
 							processedDailysh=true
 							;;
-						cgi)
+						cgi|searchcgi)
 							Msg2 "\n^Processing '$specSource' record: '${specPattern} --> ${specTarget}'"
 							[[ ! -d $(dirname "${tgtDir}${specTarget}") ]] && echo "mkdir"  && mkdir -p "${tgtDir}${specTarget}"
 							if [[ $buildPatchPackage != true ]]; then
-
 								result=$(CopyFileWithCheck "$cgisDir/$specPattern" "${tgtDir}${specTarget}" 'courseleaf')
 							else
 								result=$(CopyFileWithCheck "$cgisDir/$specPattern" "${packageDir}${specTarget}")
@@ -1200,20 +1211,10 @@ if [[ $buildPatchPackage != true ]]; then
 				text="$text than the time date stamp of the file in the skeleton, you should complare the files and merge"
 				text="$text any required changes into '$tgtDir/web/ribbit/getcourse.rjs'."
 				Warning 0 1 "$text"
-				# echo
-				# Msg2 "^^^\n* * * DIFF Output start * * *"
-				# Msg2 "^^^${colorRed}< is $skeletonRoot/release/web/ribbit/getcourse.rjs${colorDefault}"
-				# Msg2 "^^^${colorBlue}> is $tgtDir/web/ribbit/getcourse.rjs${colorDefault}"
-				# indentLevelSave=$indentLevel
-				# indentLevel=3
-				# printf '=%.0s' {1..80} | Indent
-				# colordiff "$tgtDir/web/ribbit/getcourse.rjs" "$skeletonRoot/release/web/ribbit/getcourse.rjs" | Indent
-				# indentLevel=$indentLevelSave
-				# echo
 			fi
 		fi
 
-	## Edit the console page, change title to 'CourseLeaf Console' (requested by Mike 02/09?)
+	## Edit the console page, change title to 'CourseLeaf Console' (requested by Mike 02/09/17)
 		rebuildConsole=false
 		editFile="$tgtDir/web/courseleaf/index.tcf"
 		if [[ -w "$editFile" ]]; then
@@ -1221,7 +1222,7 @@ if [[ $buildPatchPackage != true ]]; then
 			toStr='title:CourseLeaf Console'
 			grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
 			if [[ $grepStr != '' ]]; then
-				sed -i s'/^fromStr/$toStr/' $editFile
+				sed -i s'/^$fromStr/$toStr/' $editFile
 				updateFile="/courseleaf/index.tcf"
 				changeLogRecs+=("$updateFile updated to change title")
 				Msg2; Msg2 "^Updated '$updateFile' to change 'title:Catalog Console' to 'title:CourseLeaf Console'"
@@ -1230,6 +1231,18 @@ if [[ $buildPatchPackage != true ]]; then
 		else
 			echo
 			Warning 0 1 "Could not locate '$editFile', please check the target site"
+		fi
+
+	## Move / move fsinjector.sqlite to the ribbit folder (requested by Mike 06/03/17)
+		checkFile="$tgtDir/web/ribbit/fsinjector.sqlite"
+		if [[ ! -f $checkFile ]]; then
+			[[ -f "$tgtDir/db/fsinjector.sqlite" ]] && mv -f "$tgtDir/db/fsinjector.sqlite" "$checkFile"
+			editFile="$tgtDir/courseleaf.cfg"
+			updateFile="/courseleaf/index.tcf"
+			fromStr=$(ProtectedCall "grep '^db:fsinjector|sqlite|' $editFile")
+			toStr='db:fsinjector|sqlite|/ribbit/fsinjector.sqlite'
+			sed -i s"_^${fromStr}_${toStr}_" "$editFile"
+			Msg2; Msg2 "^Updated '$updateFile' to change changed the mapfile record for 'db:fsinjector' to point to the ribbit directory"
 		fi
 
 	## Rebuild console & approve pages
@@ -1270,14 +1283,16 @@ if [[ $buildPatchPackage != true ]]; then
 	## tar up the backup files
 		tarFile="$myName-$(date +%D | tr '/' '-').tar.gz"
 		cd $backupRootDir
+
 		PushSettings
-		set +f
-		$DOIT tar -czf $tarFile * --exclude '*.gz' --remove-files
+		SetFileExpansion 'off'
+		ProtectedCall "tar -czf $tarFile * --exclude '*.gz' --remove-files"
 		PopSettings
 		[[ -f ../$tarFile ]] && rm -f ../$tarFile
 		$DOIT mv $tarFile ..
 		cd ..
 		$DOIT rm -rf $backupRootDir
+		SetFileExpansion
 
 	## Tell the user what to do if there are problems
 		echo
@@ -1383,3 +1398,4 @@ Goodbye 0 "$text1" "$text2"
 ## 05-10-2017 @ 07.02.02 - (5.1.22)    - dscudiero - Add support for remote patch packages
 ## 05-10-2017 @ 07.08.45 - (5.1.23)    - dscudiero - fix problem setting ownership in the remote pachage
 ## 05-12-2017 @ 13.46.25 - (5.1.63)    - dscudiero - Fix numerious problems with the patch package
+## 06-05-2017 @ 07.58.16 - (5.1.88)    - dscudiero - Added support for selected refresh of index.cgi in the search directory
