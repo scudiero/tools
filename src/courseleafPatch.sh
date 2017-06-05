@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.1.88 # -- dscudiero -- Fri 06/02/2017 @ 16:56:40.96
+version=5.1.95 # -- dscudiero -- Mon 06/05/2017 @ 11:02:40.34
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -588,7 +588,8 @@ tmpFile=$(mkTmpFile)
 				for token2 in $(tr ',' ' ' <<< "$purchasedProducts"); do
 					[[ $token == ${token2:0:${#token}} ]] && found=true && break
 				done
-				[[ $found != true ]] && Error "This client does not have product '$token' registered in the clients database, skipping" || patchProducts="$patchProducts,$token"
+				[[ $found != true && "$token" != 'formbuilder' ]] && Warning "This client does not have product '$token' registered in the clients database, skipping"
+				patchProducts="$patchProducts,$token"
 			done
 			patchProducts="${patchProducts:1}"
 		else
@@ -627,7 +628,7 @@ tmpFile=$(mkTmpFile)
 			[[ -n $master ]] && prodShadowVer='master'
 			Note 0 1 "Using specified value of '$prodShadowVer' for $product 'prodShadowVer'"
 		fi
-		if [[ $prodShadowVer == 'master' ]]; then
+		if [[ $prodShadowVer == 'master' && -r "$srcDir/master/$(basename $srcDir)/clver.txt" ]]; then
 			token="$(Lower "$(cat "$srcDir/master/$(basename $srcDir)/clver.txt")")"
 			[[ ${token: -2} == 'rc' ]] && betaProducts="$betaProducts, $product"
 		fi
@@ -753,9 +754,9 @@ else
 	verifyArgs+=("Client:$client")
     verifyArgs+=("Target Env:$(TitleCase $env) ($tgtDir)")
 fi
-verifyArgs+=("Products:$(Upper $patchProducts)")
+verifyArgs+=("Products:$patchProducts")
 for token in $(tr ',' ' ' <<< $processControl); do
-	verifyArgs+=("$(Upper "$(cut -d '|' -f1 <<< $token)") version:$(cut -d '|' -f2 <<< $token)") 	## (from: '$(cut -d '|' -f3 <<< $token)/$(cut -d '|' -f2 <<< $token)')")
+	verifyArgs+=("$(cut -d '|' -f1 <<< "$token")" version:"$(cut -d '|' -f2 <<< "$token")") 	## (from: '$(cut -d '|' -f3 <<< $token)/$(cut -d '|' -f2 <<< $token)')")
 done
 
 [[ $catalogAdvance == true && $buildPatchPackage != true ]] && verifyArgs+=("New catalog edition:$newEdition, fullAdvance=$fullAdvance")
@@ -1221,8 +1222,8 @@ if [[ $buildPatchPackage != true ]]; then
 			fromStr='title:Catalog Console'
 			toStr='title:CourseLeaf Console'
 			grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
-			if [[ $grepStr != '' ]]; then
-				sed -i s'/^$fromStr/$toStr/' $editFile
+			if [[ -n $grepStr ]]; then
+				sed -i s"/^$fromStr/$toStr/" $editFile
 				updateFile="/courseleaf/index.tcf"
 				changeLogRecs+=("$updateFile updated to change title")
 				Msg2; Msg2 "^Updated '$updateFile' to change 'title:Catalog Console' to 'title:CourseLeaf Console'"
@@ -1399,3 +1400,4 @@ Goodbye 0 "$text1" "$text2"
 ## 05-10-2017 @ 07.08.45 - (5.1.23)    - dscudiero - fix problem setting ownership in the remote pachage
 ## 05-12-2017 @ 13.46.25 - (5.1.63)    - dscudiero - Fix numerious problems with the patch package
 ## 06-05-2017 @ 07.58.16 - (5.1.88)    - dscudiero - Added support for selected refresh of index.cgi in the search directory
+## 06-05-2017 @ 11.04.04 - (5.1.95)    - dscudiero - Tweaked messaging for product, fixed editing of courseleaf console
