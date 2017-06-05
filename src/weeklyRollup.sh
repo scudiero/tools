@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #===================================================================================================
-version=1.0.26 # -- dscudiero -- 02/13/2017 @ 16:11:56.80
+version=1.0.27 # -- dscudiero -- Mon 06/05/2017 @  8:15:31.69
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -72,7 +72,7 @@ ParseArgsStd
 			sql="update $scriptsTable set usageCount=$newCount where name=\"$pName\""
 			RunSql2 $sql
 	done
-	Msg2 "\n*** Update script usage counts -- Completed ***"
+	Msg2 "*** Update script usage counts -- Completed ***"
 
 ## Roll up the weeks processlog db table
 	Msg2 "\n*** Processlog rollup -- Starting ***"
@@ -96,16 +96,16 @@ ParseArgsStd
 	sqlStmt="truncate $processLogTable"
 	RunSql2 $sqlStmt
 	SetFileExpansion
-	Msg2 "\n*** Processlog rollup -- Completed ***"
+	Msg2 "*** Processlog rollup -- Completed ***"
 
 ## Roll up the weeks log files
 	Msg2 "\n*** Rollup weekly Logs -- Starting ***"
 	cd $TOOLSPATH/Logs
 	[[ -d ./cronJobs ]] && ProtectedCall "rm -rf ./cronJobs"
-	ProtectedCall "tar -cvzf \"$(date '+%m-%d-%y').tar.gz\" * --exclude '*.gz' --exclude \"$myName*\"" #-remove-files
+	ProtectedCall "tar -czf \"$(date '+%m-%d-%y').tar.gz\" * --exclude '*.gz' --exclude \"$myName*\"" #-remove-files
 	ProtectedCall "find . -maxdepth 1 -mindepth 1 -type d -exec rm -rf {} \; > /dev/null 2>&1"
 	ProtectedCall "find . -maxdepth 1 -mindepth 1 -type f -name '*.tar' -exec rm -rf {} \; > /dev/null 2>&1"
-	Msg2 "\n*** Logs rollup -- Completed ***"
+	Msg2 "*** Logs rollup -- Completed ***"
 
 
 #===================================================================================================
@@ -120,3 +120,4 @@ Goodbye 0 #'alert'
 ## Fri Jan 13 07:53:53 CST 2017 - dscudiero - x
 ## Tue Jan 17 09:57:59 CST 2017 - dscudiero - Surround tar and find calls in a ProtectedCall
 ## Mon Feb 13 16:12:36 CST 2017 - dscudiero - make sure we have our own tmpFile
+## 06-05-2017 @ 08.16.04 - (1.0.27)    - dscudiero - tweak messaging
