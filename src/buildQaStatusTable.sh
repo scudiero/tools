@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.35 # -- dscudiero -- Wed 05/24/2017 @ 16:27:23.47
+version=1.2.36 # -- dscudiero -- Mon 06/05/2017 @ 12:52:53.76
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye GetExcel'
@@ -93,7 +93,7 @@ function testMode-buildQaStatusTable  { # or testMode-local
 				ctInstance="$(cut -f2 -d' ' <<< "$item")"
 				ctProject="$(cut -f3 -d' ' <<< "$item")"
 				[[ -z $ctProject ]] && ctProject='Implementation'
-				if [[ $ctProject == 'mn' ]]; then
+				if [[ $ctProject == 'mn' || $(Contains "$(Lower "$item")" 'next') == true ]]; then
 					ctProject='Implementation'
 					ctEnv='mn'
 				else
@@ -426,3 +426,4 @@ Goodbye 0 #'alert'
 ## 05-17-2017 @ 16.08.34 - (1.1.25)    - dscudiero - Added support for the notes field
 ## 05-19-2017 @ 12.25.35 - (1.2.26)    - dscudiero - Added data from the implementation team's tracking spreadsheet
 ## 05-25-2017 @ 06.46.23 - (1.2.35)    - dscudiero - Remove jalot task number
+## 06-05-2017 @ 12.53.26 - (1.2.36)    - dscudiero - Add parsing for 'Next' in the cell to trigger move to next
