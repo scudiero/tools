@@ -229,6 +229,59 @@ WfDataMapper = function(type,data) {
 } //WfDataMapper// 
 
 
+//======================================================================================================================
+// Compare two tokens to see if they are equal, takes any kind of input (.e. can be objects)
+// Returns true or false
+//======================================================================================================================
+function wfDeepCompare(a, b) {
+	// Checking if a and b are strictly equal
+	if (a === b) return true;
+dump("a",a.toSource())
+dump("b",b.toSource())
+Here("DC0")
+  	// If either of the two is not an object, and they did not pass the last test, then they cannot be the same.
+ 	if (a == null || typeof a != "object" ||
+    	b == null || typeof b != "object")
+    return false;
+
+Here("DC1")
+	var propsInA = 0, propsInB = 0;
+	// OK we have two objects
+	// Get the number of properties in object a
+	for (var prop in a) {}
+		propsInA += 1;
+
+dump("propsInA",propsInA)
+	// Loop through the properties in object b and see if they are the same, if there is a different number of properties, then the objects are different
+	for (var prop in b) {
+		propsInB += 1;
+		// Compare properties
+		if (!(prop in a) || !wfDeepCompare(a[prop], b[prop]))
+      		return false;
+  	}
+dump("propsInB",propsInB)
+
+Here("DC2")
+  	// If we got here and the number of properties are the same then the objects are the same
+  	return propsInA == propsInB;
+} //wfDeepCompare
+
+
+
+attributes=["slo_competencies_subscreen","slo_outcome_text_subscreen","slo_assessment_text_subscreen"];
+attributes.forEach(function(attr) {
+	var tcfValue=getTCFValue("student_learning_outcomes_subscreen."+attr, { delimiter: "\n", retarray: true });
+	var tcaValue=getTCFValue("student_learning_outcomes_subscreen."+attr, { delimiter: "\n", retarray: true, data: tcadata });
+	if (tcfValue.length != tcaValue.length)
+		return "SLO Revision Only";
+	for (var i=0,  tot=tcfValue.length; i < tot; i++) {
+		if (tcfValue[i] != tcaValue[i]) {
+			break
+			return "SLO Revision Only";
+		}
+	}
+});
+
 //=================================================================================================
 // Check-in log
 // 05-09-2017 @ 13.27.42 - dscudiero - add mapping examples
@@ -237,3 +290,4 @@ WfDataMapper = function(type,data) {
 
 
 // 05-17-2017 @ 07.10.21 - dscudiero - General syncing of dev to prod
+// 06-06-2017 @ 08.57.51 - dscudiero - General syncing of dev to prod
