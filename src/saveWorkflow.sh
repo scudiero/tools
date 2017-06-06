@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.71 # -- dscudiero -- Wed 05/24/2017 @ 12:17:49.12
+version=2.2.72 # -- dscudiero -- Tue 06/06/2017 @  9:26:05.53
 #====================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye ParseCourseleafFile' #imports="$imports "
@@ -70,7 +70,7 @@ else
 	backupFolder="$tmpRoot/$myName/$client-$env-$BASHPID/$myName"
 fi
 
-dump isMe daemon siteFile client env srcDir cimStr backupFolder
+#dump isMe daemon siteFile client env srcDir cimStr backupFolder
 dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 ## Get the files to act on from the database
 	unset requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles
@@ -141,9 +141,7 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 		tarDir=$localClientWorkFolder/$client/workflowBackups
 		[[ ! -d $tarDir ]] && mkdir -p "$tarDir"
 		tarFile="$tarDir/${env}--$backupSuffix.tar.gz"
-dump isMe pwd numFiles tarDir tarFile
 		ProtectedCall "tar -cpzf \"$tarFile\" ./*"; rc=$?
-dump isMe rc
 		[[ $rc -ne 0 ]] && Error "Non-zero return code from tar"
 		cd ..
 		rm -rf "/${backupFolder#*/}"
@@ -175,3 +173,4 @@ Goodbye 0
 ## 05-19-2017 @ 08.51.28 - (2.2.68)    - dscudiero - Added debug statements
 ## 05-24-2017 @ 08.31.07 - (2.2.70)    - dscudiero - Put call to tar in a protectedCall
 ## 05-24-2017 @ 12.18.18 - (2.2.71)    - dscudiero - Fix issue with the ProtectedCall syntax
+## 06-06-2017 @ 09.49.36 - (2.2.72)    - dscudiero - removed debug statements
