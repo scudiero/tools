@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.25" // -- dscudiero -- Wed 05/24/2017 @  7:52:35.74
+wfLibVersion="1.7.26" // -- dscudiero -- Tue 06/06/2017 @ 11:04:04.77
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -20,6 +20,8 @@ wfLibVersion="1.7.25" // -- dscudiero -- Wed 05/24/2017 @  7:52:35.74
 // 05/17/17 - dgs 	- Updated calls to GetAttrVal to add passing in the names of the form variables
 //					- Fixed callse to GetAttrVal in Related
 // 05/24/17 - dgs 	- Refactored Related to use wffuncs.subjFromCode, wffuncs.getDeppartments, and wffuncs.getCollege
+// 06/06/17 - dgs 	- Updated and reanamed CheckChanged to wfCheckChanged and WfCheckChanged
+//					  Updated wfCheckChanged to check if the proposal is in EDIT mode
 //======================================================================================================================
 
 // Loading message
@@ -1049,13 +1051,20 @@ function GetEcoSystemData(parentCode,proposalDept,ecoSystemTypeStr) {
 //=======================================================================================================================
 //Adaptor for call to CheckChanged from workflow
 // Usage:
-//		wfrules:isMinorChange|function|CheckChanged|mode:only fields:description,assess_method_state; // Minor change
+//		wfrules:isMinorChange|function|CheckChanged|mode:only checkfields:description,assess_method_state; // Minor change
+// or
+//		wfCheckChangedFields:description,assess_method_state
+//		wfrules:isMinorChange|function|CheckChanged|mode:only; // Minor change
+// or
+//		isMinorChange_wfCheckChangedFields:description,assess_method_state
+//		wfrules:isMinorChange|function|CheckChanged|mode:only; // Minor change
 //
 //=======================================================================================================================
 // 05/08/2017 - dgs - New
+// 06/05/2017 - dgs - Check to make sure we are in EDIT mode
 //=======================================================================================================================
-wffuncs.CheckChanged = function(inval, wfrule, args) {
-	var version='1.0.0'; var myName=wfrule.attrname; wfDebug(3,"\n*** In wffuncs." + myName + "(" + version + ") called as " + wfrule.searchfor + " ***");
+wffuncs.wfCheckChanged = function(inval, wfrule, args) {
+	var version='1.0.3'; var myName=wfrule.attrname; wfDebug(3,"\n*** In wffuncs." + myName + "(" + version + ") called as " + wfrule.searchfor + " ***");
 	var calledAs=wfrule.searchfor;
 	var reqType=wfrule.searchfor.toLowerCase();
 	var notMode=false;
@@ -1064,49 +1073,54 @@ wffuncs.CheckChanged = function(inval, wfrule, args) {
 	if (options.slice(-1) === ";") options=options.slice(0, -1);
 	wfDump(4,["reqType;"+reqType,"notMode;"+notMode,"options;"+options,"calledAs;"+calledAs]);
 
-	// Parse the passed options
-		var mode="", checkFieldsStr="", unknownOpts=""
-		var tmpArray1=options.split(" ");
-		tmpArray1.forEach(function(text) {
-			tmpArray2=text.split(':');
-			switch(tmpArray2[0].toLowerCase()) {
-			    case "mode":
-			    	mode=tmpArray2[1];
-			        break;
-			    case "checkfields":
-			        checkFieldsStr=tmpArray2[1];
-			        break;
-			    case "notmode":
-			    	notMode=tmpArray2[1];
-			        break;
-			    default:
-			        unknownOpts=unknownOpts + text;
-			}
-		});
-		wfDump(3,["reqType;"+reqType,"mode;"+mode,"checkFields in;"+checkFieldsStr,"notMode;"+notMode,"unknownOpts;"+unknownOpts]);
+	// Make sure proposal is in edit mode
+		if (GetProposalMode() != 'EDIT') {
+			var allowStep=false;
+		} else {
+			// Parse the passed options
+				var mode="", checkFieldsStr="", unknownOpts=""
+				var tmpArray1=options.split(" ");
+				tmpArray1.forEach(function(text) {
+					tmpArray2=text.split(':');
+					switch(tmpArray2[0].toLowerCase()) {
+					    case "mode":
+					    	mode=tmpArray2[1];
+					        break;
+					    case "checkfields":
+					        checkFieldsStr=tmpArray2[1];
+					        break;
+					    case "notmode":
+					    	notMode=tmpArray2[1];
+					        break;
+					    default:
+					        unknownOpts=unknownOpts + text;
+					}
+				});
+				wfDump(3,["reqType;"+reqType,"mode;"+mode,"checkFields in;"+checkFieldsStr,"notMode;"+notMode,"unknownOpts;"+unknownOpts]);
 
-	// If the checkfields were not passed in the options record then check the tcfdata for a variable called "wfCheckChangedFields" 
-	// or <calledAs>_wfCheckChangedFields
+			// If the checkfields were not passed in the options record then check the tcfdata for a variable called "wfCheckChangedFields" 
+			// or <calledAs>_wfCheckChangedFields
 
-		if (checkFieldsStr === "") {
-			var varName, varValue=[];
-			varName=calledAs + "_" + "wfCheckChangedFields"
-			varValue=getTCFValue(varName);
-			if (varValue === "") {
-				varName="wfCheckChangedFields"
-				varValue=getTCFValue(varName);
-			}
-			if (varValue != "" )
-				checkFieldsStr=varValue;
-		}
-		if (checkFieldsStr === "") {
-			wfDebug(3,"\t*Error* -- Call to wffuncs.CheckChanged and could not resolve the list of fields to check");
-			return false;
-		}
-		wfDump(3,["checkFieldsStr;"+checkFieldsStr]);
+				if (checkFieldsStr === "") {
+					var varName, varValue=[];
+					varName=calledAs + "_" + "wfCheckChangedFields"
+					varValue=getTCFValue(varName);
+					if (varValue === "") {
+						varName="wfCheckChangedFields"
+						varValue=getTCFValue(varName);
+					}
+					if (varValue != "" )
+						checkFieldsStr=varValue;
+				}
+				if (checkFieldsStr === "") {
+					wfDebug(3,"\t*Error* -- Call to wffuncs.CheckChanged and could not resolve the list of fields to check");
+					return false;
+				}
+				wfDump(3,["checkFieldsStr;"+checkFieldsStr]);
 
-	// Call the real function to evaluate the data
-		var allowStep=CheckChanged({ mode: mode, checkFields: checkFieldsStr })
+			// Call the real function to evaluate the data
+				var allowStep=WfCheckChanged({ mode: mode, checkFields: checkFieldsStr })
+		} //else (GetProposalMode() != 'EDIT')
 
 	// Return results
 		if (notMode) allowStep=!allowStep;
@@ -1117,7 +1131,7 @@ wffuncs.CheckChanged = function(inval, wfrule, args) {
 		wfDebug(3,"\t*** Skipping step")
 		return false
 
-}; //wffuncs.wfAttr
+}; //wfCheckChanged
 
 
 //=================================================================================================
@@ -1132,7 +1146,7 @@ wffuncs.CheckChanged = function(inval, wfrule, args) {
 // 03-10-17 - dgs - 	Initial coding -- ???
 // 05/10/17 - dgs - 	Refactored into a local module to be called by a wffuncs. module
 //=================================================================================================
-CheckChanged = function(data) {
+WfCheckChanged = function(data) {
 	var version='2.0.0'; wfDebug(3,"\t*** In CheckChanged ***");
 
 	// Main
@@ -1198,7 +1212,7 @@ CheckChanged = function(data) {
 
 	return allowStep;
 
-} //wffuncs.CheckChanged
+} //WfCheckChanged
 
 ///==================================================================================================
 // Initial Checks
@@ -1521,3 +1535,4 @@ var wfLibLoaded=true;
 // 05-11-2017 @ 14.56.12 - (wfrule.att - dscudiero - Tweaked data passing and arg parsing for wffuncs.CheckChanged
 // 05-17-2017 @ 10.51.49 - (wfrule.att - dscudiero - Updated GetAttrVal to accept the variable names as input, updated Related to fix problem calling GetAttrVal
 // 05-24-2017 @ 08.10.37 - (wfrule.att - dscudiero - Refactored Related to use wffuncs from triggers to lookup depts and cols
+// 06-06-2017 @ 11.18.01 - (wfrule.att - dscudiero - Updated CheckChanged
