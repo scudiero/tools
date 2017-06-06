@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.4.140 # -- dscudiero -- Wed 05/24/2017 @  8:26:33.99
+version=3.5.0 # -- dscudiero -- Tue 06/06/2017 @  9:48:44.04
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -11,7 +11,7 @@ scriptDescription="Cleanup private dev sites"
 #==================================================================================================
 ## Clean up private dev sites
 #==================================================================================================
-# Copyright ©2015 David Scudiero -- all rights reserved.
+# Copyright Â©2015 David Scudiero -- all rights reserved.
 # 08-30-13 -- 	dgs - Initial coding
 # 07-17-15 --	dgs - Migrated to framework 5
 #==================================================================================================
@@ -37,9 +37,10 @@ scriptDescription="Cleanup private dev sites"
 	#==================================================================================================
 	function GetSites {
 		local searchStr="$1"
-		local file tempStr printedSep sepLen sep i siteId loop
+		local file tempStr printedSep sepLen sep i siteId loop=true
 		local maxLen=0
 
+		unset sites
 		until [[ $loop == false ]]; do
 			## Get the list of files
 			unset validSiteIds workFiles filesList1 filesList2 filesList3 fileList4
@@ -48,11 +49,12 @@ scriptDescription="Cleanup private dev sites"
 			filesList3="$(ProtectedCall "ls /mnt/$share/web" | ProtectedCall "grep -v .BeingDeleted" | ProtectedCall "grep $searchStr" | ProtectedCall "grep .AutoDeleteNoSave")"
 			filesList4="$(ProtectedCall "ls /mnt/$share/web" | ProtectedCall "grep $searchStr" | ProtectedCall "grep .BeingDeleted")"
 			workFiles=($filesList1 $filesList2 $filesList3 $fileList4)
+			[[ ${#workFiles[@]} -eq 0 ]] && return 0
 
 			## Build menu list
 			if [[ ${#workFiles[@]} -gt 0 ]]; then
-				[[ ${#workFiles[@]} -eq 1 ]] && sites=("${workFiles[0]}") && return 0
 				[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
+				[[ ${#workFiles[@]} -eq 1 ]] && echo && Info "Only a single site was found (${workFiles[0]})" && sites=("${workFiles[0]}") && return 0
 				Msg2; Msg2; Msg2 "The following private dev sites were found for you on this host:"
 				for file in "${workFiles[@]}"; do
 					[[ ${#file} -gt $maxLen ]] && maxLen=${#file}
@@ -76,19 +78,38 @@ scriptDescription="Cleanup private dev sites"
 				  	printf "\t%2s %s (Created: %s) \n" "$i" "$tempStr" "$timeStamp"
 				  	[[ "$validSiteIds" = '' ]] && validSiteIds="$i" || validSiteIds="$validSiteIds $i"
 				done
-				unset siteId
-				#validSiteIds="$validSiteIds All Refresh"
-				Prompt siteId "\nPlease enter the ordinal number(s) of the site you wish to Process, \nor 'X' to quit" "$validSiteIds All Refresh"
-				[[ $(Lower $siteId) == 'r' ]] && loop=true || loop=false
+				unset siteIds
+				Prompt siteIds "\nPlease enter the ordinal number(s) of the site you wish to Process.\nMay be comma seperated or n-m notation or any combination there of, \nor 'All', or 'X' to quit" "*any*"
+				[[ $(Lower ${siteIds:0:1}) == 'r' ]] && loop=true && continue
+				[[ $(Lower ${siteIds:0:1}) == 'a' ]] && siteIds="$(tr ' ' ',' <<< $validSiteIds)" && break
+				if [[ $(Contains "$siteIds" '-') == true ]]; then
+					front=${siteIds%%-*}; lowerIdx=${front: -1}
+					back=${siteIds##*-}; upperIdx=${back:0:1}
+					for ((iix=$lowerIdx+1; iix<$upperIdx; iix++)); do
+						front="$front,$iix"
+					done
+					siteIds="$front,$back"
+				fi
+				## Vaidate response
+				validSiteIdsCommas=",$(tr ' ' ',' <<< $validSiteIds),"
+				for i in $(tr ',' ' ' <<< $siteIds); do
+					if [[ $(Contains "$validSiteIdsCommas" ",$i,") != true ]]; then
+						Error "Invalid id ($i) specified, please try again"
+						Pause "Press enter to continue"
+						loop=true
+					else
+						loop=false
+					fi
+				done
 			fi ## [[ ${#workFiles[@]} -gt 0 ]]
 		done
 
 		## Build the sites array
 		unset sites
-		[[ $siteId == 'All' ]] && siteId="$(tr ' ' ',' <<< $validSiteIds)"
-		for i in $(tr ',' ' ' <<< $siteId); do
+		for i in $(tr ',' ' ' <<< $siteIds); do
 			sites+=("${workFiles[$i]}")
 		done
+
 		return 0
 	} #GetSites
 
@@ -123,8 +144,7 @@ scriptDescription="Cleanup private dev sites"
 				;;
 			y*)
 				if [[ $userName = 'dscudiero' ]]; then
-					unset ans
-					Prompt ans "^Do you wish to save the workflow files" 'Yes No' 'Yes' ; ans=$(Lower "${ans:0:1}")
+					unset ans; Prompt ans "^Do you wish to save the workflow files" 'Yes No' 'Yes' ; ans=$(Lower "${ans:0:1}")
 					[[ $ans == 'y' ]] && Msg2 "Saving workflow..." && Call saveWorkflow $processClient -p -all -suffix "beforeDelete-$backupSuffix" -nop #-quiet
 				fi
 				echo; Msg2 "Removing '$file' offline..."
@@ -137,6 +157,10 @@ scriptDescription="Cleanup private dev sites"
 				;;
 			w*)
 				mv -f "$file" "$file--AutoDeleteWithSave"
+				;;
+			*)
+				:
+				;;
 		esac
 		return 0
 	} #ProcessRequest
@@ -194,7 +218,7 @@ if [[ "$hostName" = 'build5' ]]; then share=dev9
 elif [[ "$hostName" = 'build7' ]]; then share=dev7
 elif [[ "$hostName" = 'mojave' ]]; then share=dev6
 fi
-validActions='Yes No Mark Unmark ResetDate Save'
+validActions='Yes No Mark Unmark ResetDate Save -'
 [[ $userName == 'dscudiero' ]] && validActions="$validActions Workflow"
 searchStr="$userName"
 ## if client was passed in then just delete that site, otherwise if it is 'daemon' then process autodeletes
@@ -224,7 +248,7 @@ fi
 while [ true == true ]; do
 	unset site requestType
 	GetSites "$searchStr"
-	[[ ${#sites[@]} -eq 0 ]] && break
+	[[ ${#sites[@]} -eq 0 ]] && echo && Info "No files found for user: '$userName'" && break
 	for site in ${sites[@]}; do
 		[[ $site == '' ]] && Msg2 "No sites found or all sites have been processed" && Goodbye 0
 		echo; Msg2  "You are asking to process site: '$site', are you sure?"
@@ -261,3 +285,4 @@ Goodbye 0
 ## 05-18-2017 @ 06.58.05 - (3.4.138)   - dscudiero - Fix the end of the case statement
 ## 05-19-2017 @ 08.51.46 - (3.4.139)   - dscudiero - Removed dead code
 ## 05-24-2017 @ 08.31.28 - (3.4.140)   - dscudiero - Add Goodbye-cleanDev function
+## 06-06-2017 @ 09.49.23 - (3.5.0)     - dscudiero - Added n-m notation, fixed comma notation
