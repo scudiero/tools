@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.48 # -- dscudiero -- Fri 03/31/2017 @  7:26:55.32
+version=4.11.64 # -- dscudiero -- Wed 06/07/2017 @  9:30:39.21
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -61,6 +61,7 @@ function parseArgs-copyEnv {
 	argList+=(-cim,3,switch,junk,onlyProduct='cim','Only copy CIM data')
 	argList+=(-cat,3,switch,junk,onlyProduct='cat','Only copy CAT data')
 	argList+=(-clss,3,switch,junk,onlyProduct='clss','Only copy CLSS data')
+	argList+=(-debug,5,switch,startWizdebug,,script,'Automatically start a debug session after the cloneing operation has competed')
 }
 function Goodbye-copyEnv {
 	[[ -d $tmpRoot ]] && rm -rf $tmpRoot
@@ -91,7 +92,7 @@ ParseArgsStd
 [[ $(Lower "$onlyProduct") == 'cat' ]] && skipCim=true && skipClss=true
 [[ $(Lower "$onlyProduct") == 'cim' ]] && skipCat=true && skipClss=true
 [[ $(Lower "$onlyProduct") == 'clss' ]] && skipCim=true && skipCat=true
-dump -2 -n client env cim cat fullCopy manifest overlay suffix emailAddress onlyProduct skipCim skipClss skipCat
+dump -2 -n -p client env cim cat fullCopy manifest overlay suffix emailAddress onlyProduct skipCim skipClss skipCat startWizdebug
 
 Hello
 addPvt=true
@@ -201,8 +202,8 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 	if [[ -d $tgtDir && $overlay == false ]]; then
 		Msg2
 		unset ans
-		WarningMsg "Target site ($tgtDir) already existes."
-		Prompt ans "Do you wish to $(ColorK 'overwrite') the existing site (Yes) or $(ColorK 'refresh') files in the existing sites site (No) ?" 'Yes No' 'Yes' ; ans=$(Lower ${ans:0:1})
+		WarningMsg "Target site ($tgtDir) already exists."
+		Prompt ans "Do you wish to $(ColorK 'overwrite') the existing site (Yes), \nor $(ColorK 'refresh') files in the existing sites site (No)" 'Yes No' 'Yes' ; ans=$(Lower ${ans:0:1})
 		[[ $ans == 'y' ]] && cloneMode='Replace' || cloneMode='Refresh'
 	fi
 
@@ -211,7 +212,6 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 	GetCims "$srcDir"
 	unset allCims
 	[[ -n $cimStr ]] && haveCims=true
-
 
 ## See if we have CLSS
 	[[ -d $srcDir/web/wen ]] && haveClss=true
@@ -317,6 +317,7 @@ fi ## [[ $verify == true ]]
 	[[ $skipCim == true && $fullCopy != true ]] && verifyArgs+=("Skip CIM:$skipCim")
 	[[ $skipClss == true && $fullCopy != true ]] && verifyArgs+=("Skip CLSS:$skipClss")
 	[[ $fullCopy != true ]] && verifyArgs+=("Exclude List:$tmpStr")
+	[[ $startWizdebug == true ]] && verifyArgs+=("Start wizDebug:$startWizdebug")
 	verifyArgs+=("Full Copy:$fullCopy")
 
 	[[ $manifest == true ]] && verifyArgs+=("Courseleaf manifest:$manifest")
@@ -887,9 +888,7 @@ fi
 		files=($(find $skeletonRoot/release/web -mindepth 1 -maxdepth 1 -type d))
 		for file in ${files[@]}; do
 			file="$ignoreList,${file##$skeletonRoot/release}"
-dump file
 			[[ $file == /web/$progDir ]] && continue
-echo -e "\t file added"
 			ignoreList="$file"
 		done
 	fi
@@ -925,7 +924,7 @@ echo -e "\t file added"
 	[[ $skipCim == true && $fullCopy != true ]] && verifyArgs+=("Skip CIM:$skipCim")
 	[[ $skipClss == true && $fullCopy != true ]] && verifyArgs+=("Skip CLSS:$skipClss")
 	[[ $fullCopy != true ]] && verifyArgs+=("Exclude List:$tmpStr")
-	verifyArgs+=("Full Copy:$fullCopy")
+	[[ -z $onlyProduct ]] verifyArgs+=("Full Copy:$fullCopy")
 
 	[[ $manifest == true ]] && verifyArgs+=("Courseleaf manifest:$manifest")
 	VerifyContinue "You are asking to clone/copy a CourseLeaf site:"
@@ -1161,6 +1160,20 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		$DOIT touch $tgtDir/.clonedFrom-$env
 fi
 
+## If we have cims and user is 'dscudiero' and env = 'pvt' and onlyProduct='cim' then turn on debugging
+	if [[  -n $cimStr && $userName == 'dscudiero' && $tgtEnv == 'pvt' &&  onlyProduct == 'cim' ]]; then
+		for cim in $(tr ',' ' ' <<< "$cimStr"); do
+			editFile="$tgtDir/web/$cim/workflow.cfg"
+			[[ != -f $editFile ]] && continue
+			unset grepStr; grepStr=$(ProtectedCall "grep '^wfDebugLevel:' $editFile")
+			if [[ -n $grepStr ]]; then
+				fromStr="$grepStr"
+				toStr="wfDebugLevel:2"
+				$DOIT sed -i s"_^${fromStr}_${toStr}_" $editFile
+			fi
+		done
+	fi
+
 #==================================================================================================
 ## Bye-bye
 #printf "0: noDbLog = '$noDbLog', myLogRecordIdx = '$myLogRecordIdx'\n" >> ~/stdout.txt
@@ -1168,6 +1181,11 @@ fi
 Msg2
 Info "Remember you can use the 'cleanDev' script to easily remove private dev sites."
 [[ -n $asSite ]] && msgText="$(ColorK "$(Upper $asSite)")" || msgText="$(ColorK "$(Upper $client)")"
+
+Here 0
+dump startWizdebug
+[[ $startWizdebug == true ]] && Call 'wizDebug' "$client" "$tgtEnv"
+
 Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 
 # 10-16-2015 -- dscudiero -- Update for framework 6 (4.1)
@@ -1230,3 +1248,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 03-23-2017 @ 14.32.38 - (4.11.47)   - dscudiero - General syncing of dev to prod
 ## 03-31-2017 @ 07.27.40 - (4.11.48)   - dscudiero - Remove extra blank lines in prompting
 ## 04-06-2017 @ 14.53.46 - (4.11.48)   - dscudiero - Fix sed statement for turning off publising
+## 06-07-2017 @ 09.35.06 - (4.11.64)   - dscudiero - add debug option
