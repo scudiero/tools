@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.12" # -- dscudiero -- Thu 06/01/2017 @  9:16:38.33
+# version="2.1.16" # -- dscudiero -- Wed 06/07/2017 @  9:18:10.40
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -72,15 +72,15 @@ function Prompt {
 			numTabs=$(grep -o '\^' <<< "$promptText" | wc -l)
 			[[ $numTabs -ne 0 ]] && promptTextTabs="^${promptText%^*}"
 			if [[ $verify != false ]]; then
-					dump -2 -l timedRead
+				[[ -n $promptText ]] && promptText="$(sed "s/\^/$tabStr/g" <<< $promptText)"
+				[[ -n $timerPrompt ]] && timerPrompt="$(sed "s/\^/$tabStr/g" <<< $timerPrompt)"
+				[[ -n $timerInterruptPrompt ]] && timerInterruptPrompt="$(sed "s/\^/$tabStr/g" <<< $timerInterruptPrompt)"
+					dump -2 -t promptText timedRead timerPrompt timerInterruptPrompt
 					if [[ $timedRead == false ]]; then
-						promptText="$(sed "s/\^/$tabStr/g" <<< $promptText)"
-						#[[ ${promptText: (-1)} != " " ]] && promptText="$promptText "
 					 	echo -en "$promptText > "
 						read response; rc=$?
 					else
-						timerPrompt="$(sed "s/\^/$tabStr/g" <<< $timerPrompt)"
-						timerInterruptPrompt="$(sed "s/\^/$tabStr/g" <<< $timerInterruptPrompt)"
+						[[ -n $promptText ]] && echo -e "$promptText"
 						for ((tCntr=0; tCntr<$timeOut; tCntr++)); do
 							[[ -n $defaultVal ]] && echo -en "$timerPrompt $(ColorK "$((timeOut - tCntr))") seconds using a default value of $(ColorK "'$defaultVal'")\r" || \
 													echo -en "$timerPrompt $(ColorK "$((timeOut - tCntr))") seconds\r"
@@ -176,3 +176,4 @@ export -f Prompt
 ## 05-31-2017 @ 07.31.49 - ("2.1.6")   - dscudiero - Terminate if TERM != 'xterm'
 ## 05-31-2017 @ 07.49.50 - ("2.1.11")  - dscudiero - if term is not xterm or in batchMode and we have a default then use the default value
 ## 06-01-2017 @ 09.16.57 - ("2.1.12")  - dscudiero - Also check for TERM=screen
+## 06-07-2017 @ 09.34.32 - ("2.1.16")  - dscudiero - Fix problem not getting primary prompt text in timed mode
