@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.12.0 # -- dscudiero -- Thu 06/01/2017 @ 10:08:57.77
+version=3.12.1 # -- dscudiero -- Wed 06/07/2017 @ 14:56:24.70
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -307,11 +307,9 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 #==================================================================================================
 ## Check to see the user has access to the 'scripts' program, if not then add one to their .bashrc file
 	if [[ $batchMode != true ]]; then
-		PushSettings "$myName"
 		previousTrapERR=$(trap -p ERR | cut -d ' ' -f3-) ; trap - ERR ; set +e
-		grep -q 'alias scripts="$TOOLSPATH/bin/scripts"' $HOME/.bashrc ; rc=$?
+		grep -q 'scripts="$TOOLSPATH/bin/scripts"' $HOME/.bashrc ; rc=$?
 		[[ -n $previousTrapERR ]] && eval "trap $previousTrapERR"
-		PopSettings "$myName"
 
 		if [[ $rc -gt 0 ]]; then
 			echo
@@ -480,3 +478,4 @@ Goodbye 0
 ## 05-25-2017 @ 09.38.47 - (3.11.95)   - dscudiero - rename the output file for reports
 ## 05-26-2017 @ 06.40.08 - (3.12.-1)   - dscudiero - Updated output formatting for reports
 ## 06-01-2017 @ 10.09.29 - (3.12.0)    - dscudiero - General syncing of dev to prod
+## 06-07-2017 @ 14.57.32 - (3.12.1)    - dscudiero - Change the way we determine if scripts is not isstalled
