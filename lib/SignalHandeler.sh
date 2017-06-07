@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.68" # -- dscudiero -- Wed 05/10/2017 @ 12:39:27.10
+# version="2.0.69" # -- dscudiero -- Wed 06/07/2017 @  9:57:12.75
 #===================================================================================================
 # Process interrupts
 #===================================================================================================
@@ -20,7 +20,7 @@ function SignalHandeler {
 
     case "$sig" in
         ERR)
-            message="$FUNCNAME: Unknown error condition ($errorCode) raised in module '$parentModule', \n^$(ColorE "line($errorLineNo)"): '$(ColorK "$errorLine")'"
+            message="$FUNCNAME: Unknown error condition ($errorCode) raised in module '$parentModule', \n^$(ColorE "line($errorLineNo)"): $(ColorK "$errorLine")"
             ;;
         EXIT|SIGEXIT|SIGHUP|SIGTERM)
             unset message
@@ -62,3 +62,4 @@ export -f SignalHandeler
 ## 04-14-2017 @ 12.18.05 - ("2.0.57")  - dscudiero - Send a bad condition code to Goodbye
 ## 05-10-2017 @ 09.45.48 - ("2.0.65")  - dscudiero - General syncing of dev to prod
 ## 05-10-2017 @ 12.49.43 - ("2.0.68")  - dscudiero - Do not display call stack for INT signels
+## 06-07-2017 @ 09.57.29 - ("2.0.69")  - dscudiero - remove single quotes arround error line
