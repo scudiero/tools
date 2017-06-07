@@ -1,10 +1,10 @@
 #!/bin/bash
 #==================================================================================================
-version=2.2.21 # -- dscudiero -- Fri 05/26/2017 @ 12:49:13.00
+version=2.2.22 # -- dscudiero -- Tue 06/06/2017 @ 13:54:05.34
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
-imports="$imports GetOutputFile"
+imports="$imports GetOutputFile BackupCourseleafFile"
 Import "$imports"
 originalArgStr="$*"
 scriptDescription="Merge role data"
@@ -561,3 +561,4 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 ## Thu Aug  4 11:02:15 CDT 2016 - dscudiero - Added displayGoodbyeSummaryMessages=true
 ## Tue Sep 20 12:34:42 CDT 2016 - dscudiero - Switched to use Msg2
 ## 05-26-2017 @ 12.49.39 - (2.2.21)    - dscudiero - Found an instance of Msg vs Msg2
+## 06-07-2017 @ 07.44.14 - (2.2.22)    - dscudiero - Added BackupCourseleafFIle to the import list
