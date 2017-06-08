@@ -29,7 +29,7 @@
 	if [[ $1 == '--viaCron' ]]; then
 		echo -e "\t-- $hostName - sourcing \"$loaderDir/loader.sh\" $(basename $0) --batchMode $*" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 		source "$loaderDir/loader.sh" $(basename $0) --batchMode $*
-		echo -e "\t\t-- $hostName - back" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
+		echo -e "\t\t-- $hostName - back from loader" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 		return 0
 	else
 		"$loaderDir/loader.sh" $(basename $0) $*
@@ -50,3 +50,4 @@ exit
 ## 06-08-2017 @ 10.03.49 - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 10.51.25 - dscudiero - add debug statements
 ## 06-08-2017 @ 11.38.51 - dscudiero - General syncing of dev to prod
+## 06-08-2017 @ 12.21.24 - dscudiero - add debug
