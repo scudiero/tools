@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.6.51 # -- dscudiero -- 12/14/2016 @ 16:37:10.83
+version=2.6.59 # -- dscudiero -- Thu 06/08/2017 @ 16:24:40.71
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' 
@@ -21,6 +21,7 @@ scriptDescription="Tail a site wizdebug.out file"
 #==================================================================================================
 # Declare local variables and constants
 #==================================================================================================
+unset client
 
 #==================================================================================================
 # Standard arg parsing and initialization
@@ -29,7 +30,8 @@ helpSet='script,client,env'
 GetDefaultsData $myName
 ParseArgsStd
 Hello
-Init 'getClient getEnv getDirs checkEnvs noPreview noPublic'
+
+Init 'Clear getClient getEnv getDirs checkEnvs noPreview noPublic'
 
 #===================================================================================================
 #= Main
@@ -59,3 +61,4 @@ Goodbye 0
 ## Thu Apr 21 08:32:25 CDT 2016 - dscudiero - Use GetCourseleafPgm to locate the wizdebug file location
 ## Thu Apr 21 08:56:26 CDT 2016 - dscudiero - Use echo command instead of Msg
 ## Thu Sep 29 12:54:34 CDT 2016 - dscudiero - Do not clear screen if TERM=dumb
+## 06-08-2017 @ 16.28.01 - (2.6.59)    - dscudiero - Added clearing of data on start
