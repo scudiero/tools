@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.136 # -- dscudiero -- Wed 05/24/2017 @ 11:47:17.61
+# version=2.0.138 # -- dscudiero -- Thu 06/08/2017 @ 16:24:23.37
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -32,6 +32,7 @@ function Init {
 	for token in $@; do
 		token=$(Lower $token)
 		dump -3 -t token
+		[[ $token == 'clean' || $token == 'clear' ]] && unset env srcEnv tgtEnv srcDir tgtDir siteDir pvtDir devDir testDir currDir previewDir publicDir
 		if [[ $token == 'courseleaf' || $token == 'all' ]]; then getClient=true; getEnv=true; getDirs=true; checkEnvs=true; fi
 		if [[ $token == 'getclient' || $token == 'getclients' ]]; then getClient=true; fi
 		if [[ $token == 'anyclient' || $token == 'anyclients' ]]; then anyClient=true; fi
@@ -347,3 +348,4 @@ export -f Init
 ## 04-13-2017 @ 09.49.28 - (2.0.134)   - dscudiero - Fix problem parsing envs
 ## 05-02-2017 @ 11.28.12 - (2.0.135)   - dscudiero - Hide nocheck message of in test mode
 ## 05-24-2017 @ 12.18.27 - (2.0.136)   - dscudiero - skip
+## 06-08-2017 @ 16.27.22 - (2.0.138)   - dscudiero - Add the clear option
