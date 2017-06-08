@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.176" # -- dscudiero -- Fri 06/02/2017 @ 15:19:38.39
+version="1.2.177" # -- dscudiero -- Thu 06/08/2017 @  9:10:43.47
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -76,7 +76,7 @@ function CleanUp {
 #==================================================================================================
 [[ "${BASH_SOURCE[0]}" != "${0}" ]] && calledViaSource=true || calledViaSource=false
 sTime=$(date "+%s")
-statusLine="\tDispatcher ($version): "
+statusLine="\tLoader ($version): "
 ## Initialize file descriptor 3 to be stdout unless redirected by caller
 	if [[ -t 0 ]]; then # Im running interactive
 		if { ! >&3; } 2> /dev/null; then exec 3<> /dev/tty ; fi
@@ -368,3 +368,4 @@ sTime=$(date "+%s")
 ## 05-26-2017 @ 10.31.51 - ("1.2.160") - dscudiero - Added --useDev support
 ## 06-02-2017 @ 15.20.58 - ("1.2.176") - dscudiero - Move bootdata load to dispatcher
 ## 06-08-2017 @ 08.32.56 - ("1.2.176") - dscudiero - Added --viaCron flag
+## 06-08-2017 @ 09.10.57 - ("1.2.176") - dscudiero - General syncing of dev to prod
