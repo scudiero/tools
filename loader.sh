@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.3.3" # -- dscudiero -- Thu 06/08/2017 @ 14:23:03.19
+version="1.3.4" # -- dscudiero -- Thu 06/08/2017 @ 16:35:29.43
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -260,7 +260,7 @@ sTime=$(date "+%s")
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
 		#(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile; rc=$?
-		prtStatus ", calling..."
+		prtStatus ", calling"
 		[[ $batchMode != true && $myQuiet != true ]] && echo
 		TrapSigs 'off'
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
@@ -375,3 +375,4 @@ sTime=$(date "+%s")
 ## 06-08-2017 @ 12.48.49 - ("1.3.1")   - dscudiero - Fix problem with run check and offline scripts
 ## 06-08-2017 @ 14.13.11 - ("1.3.2")   - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 14.23.50 - ("1.3.3")   - dscudiero - General syncing of dev to prod
+## 06-08-2017 @ 16.35.36 - ("1.3.4")   - dscudiero - tweak messaging
