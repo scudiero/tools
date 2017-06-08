@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.3.2" # -- dscudiero -- Thu 06/08/2017 @ 14:13:00.81
+version="1.3.3" # -- dscudiero -- Thu 06/08/2017 @ 14:23:03.19
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -213,7 +213,7 @@ sTime=$(date "+%s")
 		checkMsg=$(CheckRun $callPgmName)
 		if [[ $checkMsg != true ]]; then
 			[[ $(Contains ",$administrators," ",$userName,") != true ]] && echo && echo && Terminate "$checkMsg"
-			[[ $callPgmName != 'testsh' ]] && echo && echo -e "$(ColorW "*** $checkMsg ***")"
+			[[ $callPgmName != 'testsh' ]] && echo && echo -e "\t$(ColorW "*** $checkMsg ***")"
 		fi
 
 	## Check to make sure we are authorized
@@ -374,3 +374,4 @@ sTime=$(date "+%s")
 ## 06-08-2017 @ 09.12.53 - ("1.3.0")   - dscudiero - Turn on status messaging
 ## 06-08-2017 @ 12.48.49 - ("1.3.1")   - dscudiero - Fix problem with run check and offline scripts
 ## 06-08-2017 @ 14.13.11 - ("1.3.2")   - dscudiero - General syncing of dev to prod
+## 06-08-2017 @ 14.23.50 - ("1.3.3")   - dscudiero - General syncing of dev to prod
