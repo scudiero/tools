@@ -1,16 +1,11 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.95 # -- dscudiero -- Thu 06/08/2017 @  8:50:09.96
+version=2.0.96 # -- dscudiero -- Thu 06/08/2017 @  9:18:09.52
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
 originalArgStr="$*"
-
-#=======================================================================================================================
-# Parse Args
-	callScriptName=$1; shift
-	callScriptArgs="$* -noPrompt -noLogInDb -batchMode -fork"
 
 #=======================================================================================================================
 # Set defaults
@@ -22,13 +17,23 @@ originalArgStr="$*"
 	dispatcher="$TOOLSPATH/dispatcher.sh"
 
 #=======================================================================================================================
+# Parse Args
+	callScriptName=$1; shift
+	callScriptArgs="$* -noPrompt -noLogInDb -batchMode -fork"
+
+#=======================================================================================================================
+## Log the cronJob
+	[[ ! -d $TOOLSPATH/Logs/cronJobs ]] && mkdir -p $TOOLSPATH/Logs/cronJobs
+	echo -e "\t-- Starting $callScriptName" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
+
+#=======================================================================================================================
 ## Initialize the runtime env
 	source "$dispatcher" --batchMode --viaCron ## Setup the environment
 
 #=======================================================================================================================
 ## Log the cronJob
-	[[ ! -d $TOOLSPATH/Logs/cronJobs ]] && mkdir -p $TOOLSPATH/Logs/cronJobs
 	echo "$hostName - $(date +'%m-%d-%Y @ %H.%M.%S') -- Starting $callScriptName" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
+
 ## Set the jobs the log file
 	#if [[ $callScriptName != 'hourly' ]]; then
 		[[ ! -d $TOOLSPATH/Logs/cronJobs/$callScriptName ]] && mkdir -p $TOOLSPATH/Logs/cronJobs/$callScriptName
@@ -83,3 +88,4 @@ exit 0
 ## Wed Jan 18 10:50:09 CST 2017 - dscudiero - Add call to local script if found
 ## Tue Jan 24 16:53:09 CST 2017 - dscudiero - activate log files for hourly
 ## 06-08-2017 @ 08.50.15 - (2.0.95)    - dscudiero - General syncing of dev to prod
+## 06-08-2017 @ 09.18.23 - (2.0.96)    - dscudiero - Add debug statements
