@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.20 # -- dscudiero -- Thu 06/08/2017 @ 12:14:06.60
+version=4.11.21 # -- dscudiero -- Thu 06/08/2017 @ 12:15:41.13
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -58,7 +58,7 @@ function parseArgs-copyEnv {
 	argList+=(-skipClss,6,switch,skipClss,,script,'Skip CLASS instance files)')
 	argList+=(-skipWen,6,switch,skipClss,,script,'Skip CLASS instance files)')
 	argList+=(-skipAlso,6,option,skipAlso,,script,'Additional directories and or files to ignore, comma separated list)')
-	argList+=(-wizDebug,3,option,startWizdebug,,script,'Automatically start a wizDebug session after the copy)')
+	argList+=(-wizDebug,3,switch,startWizdebug,,script,'Automatically start a wizDebug session after the copy)')
 }
 function Goodbye-copyEnv {
 	[[ -d $tmpRoot ]] && rm -rf $tmpRoot
@@ -640,3 +640,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 06-08-2017 @ 12.02.24 - (4.11.17)   - dscudiero - remove extra code
 ## 06-08-2017 @ 12.11.04 - (4.11.19)   - dscudiero - Fix syntax error
 ## 06-08-2017 @ 12.14.13 - (4.11.20)   - dscudiero - General syncing of dev to prod
+## 06-08-2017 @ 12.17.04 - (4.11.21)   - dscudiero - General syncing of dev to prod
