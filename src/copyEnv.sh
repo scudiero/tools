@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.17 # -- dscudiero -- Thu 06/08/2017 @ 12:02:01.47
+version=4.11.19 # -- dscudiero -- Thu 06/08/2017 @ 12:10:31.73
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -58,6 +58,7 @@ function parseArgs-copyEnv {
 	argList+=(-skipClss,6,switch,skipClss,,script,'Skip CLASS instance files)')
 	argList+=(-skipWen,6,switch,skipClss,,script,'Skip CLASS instance files)')
 	argList+=(-skipAlso,6,option,skipAlso,,script,'Additional directories and or files to ignore, comma separated list)')
+	argList+=(-wizDebug,3,option,startWizdebug,,script,'Automatically start a wizDebug session after the copy)')
 }
 function Goodbye-copyEnv {
 	[[ -d $tmpRoot ]] && rm -rf $tmpRoot
@@ -311,7 +312,8 @@ fi
 	[[ $skipCim == true && $fullCopy != true ]] && verifyArgs+=("Skip CIM:$skipCim")
 	[[ $skipClss == true && $fullCopy != true ]] && verifyArgs+=("Skip CLSS:$skipClss")
 	[[ $fullCopy != true ]] && verifyArgs+=("Exclude List:$tmpStr")
-	[[ -z $onlyProduct ]] verifyArgs+=("Full Copy:$fullCopy")
+	[[ -z $startWizdebug == true  ]] && verifyArgs+=("Auto start wizDebug:$startWizdebug")
+	[[ -z $onlyProduct ]] && verifyArgs+=("Full Copy:$fullCopy")
 
 	[[ $manifest == true ]] && verifyArgs+=("Courseleaf manifest:$manifest")
 	VerifyContinue "You are asking to clone/copy a CourseLeaf site:"
@@ -636,3 +638,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 06-07-2017 @ 09.35.06 - (4.11.64)   - dscudiero - add debug option
 ## 06-08-2017 @ 11.40.21 - (4.11.65)   - dscudiero - add wizdebug option
 ## 06-08-2017 @ 12.02.24 - (4.11.17)   - dscudiero - remove extra code
+## 06-08-2017 @ 12.11.04 - (4.11.19)   - dscudiero - Fix syntax error
