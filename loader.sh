@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.3.0" # -- dscudiero -- Thu 06/08/2017 @  9:12:39.78
+version="1.3.1" # -- dscudiero -- Thu 06/08/2017 @ 12:48:16.05
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -209,13 +209,14 @@ sTime=$(date "+%s")
 		callPgmName=$(cut -d'.' -f1 <<< $callPgmName)
 	fi ## [[ ${callPgmName:0:1} == '\' ]]
 
-	## Check to make sure we can run and are authorized
+	## Check to make sure we can run
 		checkMsg=$(CheckRun $callPgmName)
 		if [[ $checkMsg != true ]]; then
-			[[ $(Contains ",$adminUsers," ",$userName,") != true ]] && echo && echo && Terminate "$checkMsg"
+			[[ $(Contains ",$administrators," ",$userName,") != true ]] && echo && echo && Terminate "$checkMsg"
 			[[ $callPgmName != 'testsh' ]] && echo && echo "$(ColorW "*** $checkMsg ***")"
 		fi
 
+	## Check to make sure we are authorized
 		checkMsg=$(CheckAuth $callPgmName)
 		[[ $checkMsg != true ]] && echo && echo && Terminate "$checkMsg"
 
@@ -371,3 +372,4 @@ sTime=$(date "+%s")
 ## 06-08-2017 @ 08.32.56 - ("1.2.176") - dscudiero - Added --viaCron flag
 ## 06-08-2017 @ 09.10.57 - ("1.2.176") - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 09.12.53 - ("1.3.0")   - dscudiero - Turn on status messaging
+## 06-08-2017 @ 12.48.49 - ("1.3.1")   - dscudiero - Fix problem with run check and offline scripts
