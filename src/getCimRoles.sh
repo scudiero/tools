@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.10.20 # -- dscudiero -- 12/14/2016 @ 11:25:46.55
+version=1.10.21 # -- dscudiero -- Thu 06/08/2017 @ 10:33:02.03
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -59,7 +59,7 @@ fi
 ## Make sure user wants to continue
 unset verifyArgs
 verifyArgs+=("Client:$client")
-verifyArgs+=("Env:$(TitleCase $env) ($srcDir)")
+verifyArgs+=("Env:$(TitleCase $env) ($siteDir)")
 verifyArgs+=("CIMs:$cimStr")
 verifyArgs+=("Output File:$outFile")
 verifyContinueDefault='Yes'
@@ -79,21 +79,21 @@ cimStr=\"$(sed 's|,|","|g' <<< $cimStr)\"
 	FindExecutable "$step" 'std' 'steps:html' 'steps' ## Sets variable executeFile
 	srcStepFile=$executeFile
 
-	if [[ -f /home/$userName/clientWork/$client/$step.html ]]; then
-		srcStepFile=/home/$userName/clientWork/$client/$step.html
+	if [[ -f /home/$userName/clientData/$client/$step.html ]]; then
+		srcStepFile=/home/$userName/clientData/$client/$step.html
 	fi
 	Msg2 "Using step file: $srcStepFile\n"
-	cp -fp $srcStepFile $srcDir/web/courseleaf/localsteps/$step.html
-	sed -i s"_var cims=\[\];_var cims=\[${cimStr}\];_" $srcDir/web/courseleaf/localsteps/$step.html
-	sed -i s"_var env='';_var env='${env}';_" $srcDir/web/courseleaf/localsteps/$step.html
+	[[ -f $siteDir/web/courseleaf/localsteps/$step.html ]] && mv -f $siteDir/web/courseleaf/localsteps/$step.html $siteDir/web/courseleaf/localsteps/$step.html.bak
+	cp -fp $srcStepFile $siteDir/web/courseleaf/localsteps/$step.html
+	sed -i s"_var cims=\[\];_var cims=\[${cimStr}\];_" $siteDir/web/courseleaf/localsteps/$step.html
+	sed -i s"_var env='';_var env='${env}';_" $siteDir/web/courseleaf/localsteps/$step.html
 
 	Msg2 "Running step $step...\n"
-	cd $srcDir/web/courseleaf
-	#./courseleaf.cgi $step /roles.tcf > $outFile
+	cd $siteDir/web/courseleaf
 	./courseleaf.cgi $step /courseadmin/index.tcf > $outFile
-	#rm $srcDir/web/courseleaf/localsteps/$step.html
 	Msg2 "\nOutput data generated in '$outFile'\n"
-	#rm -f $srcDir/web/courseleaf/localsteps/$step.html
+	rm -f "$siteDir/web/courseleaf/localsteps/$step.html"
+	[[ -f $siteDir/web/courseleaf/localsteps/$step.html.bak ]] && mv -f $siteDir/web/courseleaf/localsteps/$step.html.bak $siteDir/web/courseleaf/localsteps/$step.html
 
 #===================================================================================================
 #= Bye-bye
@@ -107,3 +107,4 @@ Goodbye 0
 ## Wed Aug 10 15:33:33 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Thu Aug 11 15:42:48 CDT 2016 - dscudiero - Add the -allCims flag
 ## 04-13-2017 @ 14.01.02 - (1.10.20)   - dscudiero - Add a default for VerifyContinue
+## 06-08-2017 @ 10.33.24 - (1.10.21)   - dscudiero - delete step file after run
