@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.100 # -- dscudiero -- Thu 06/08/2017 @ 11:38:28.71
+version=2.0.101 # -- dscudiero -- Thu 06/08/2017 @ 12:21:01.64
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -30,7 +30,7 @@ originalArgStr="$*"
 ## Initialize the runtime env
 	echo -e "\t-- $hostName - sourcing '$dispatcher'" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	source "$dispatcher" --viaCron ## Setup the environment
-	echo -e "\t\t-- $hostName - back" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
+	echo -e "\t\t-- $hostName - back from dispatcher" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 
 #=======================================================================================================================
 ## Log the cronJob
@@ -95,3 +95,4 @@ exit 0
 ## 06-08-2017 @ 10.47.07 - (2.0.98)    - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 10.48.33 - (2.0.99)    - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 11.39.20 - (2.0.100)   - dscudiero - General syncing of dev to prod
+## 06-08-2017 @ 12.21.30 - (2.0.101)   - dscudiero - add debug
