@@ -29,6 +29,7 @@
 	if [[ $1 == '--viaCron' ]]; then
 		source "$loaderDir/loader.sh" $(basename $0) $*
 		return 0
+	else
 		"$loaderDir/loader.sh" $(basename $0) $*
 	fi
 
@@ -43,3 +44,4 @@ exit
 ## 06-05-2017 @ 13.47.22 - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 08.49.22 - dscudiero - If called from cron then source the loader, otherwise call the loader
 ## 06-08-2017 @ 09.06.36 - dscudiero - General syncing of dev to prod
+## 06-08-2017 @ 09.07.38 - dscudiero - General syncing of dev to prod
