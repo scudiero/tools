@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.19 # -- dscudiero -- Thu 06/08/2017 @ 12:10:31.73
+version=4.11.20 # -- dscudiero -- Thu 06/08/2017 @ 12:14:06.60
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -312,7 +312,7 @@ fi
 	[[ $skipCim == true && $fullCopy != true ]] && verifyArgs+=("Skip CIM:$skipCim")
 	[[ $skipClss == true && $fullCopy != true ]] && verifyArgs+=("Skip CLSS:$skipClss")
 	[[ $fullCopy != true ]] && verifyArgs+=("Exclude List:$tmpStr")
-	[[ -z $startWizdebug == true  ]] && verifyArgs+=("Auto start wizDebug:$startWizdebug")
+	[[ $startWizdebug == true  ]] && verifyArgs+=("Auto start wizDebug:$startWizdebug")
 	[[ -z $onlyProduct ]] && verifyArgs+=("Full Copy:$fullCopy")
 
 	[[ $manifest == true ]] && verifyArgs+=("Courseleaf manifest:$manifest")
@@ -639,3 +639,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 06-08-2017 @ 11.40.21 - (4.11.65)   - dscudiero - add wizdebug option
 ## 06-08-2017 @ 12.02.24 - (4.11.17)   - dscudiero - remove extra code
 ## 06-08-2017 @ 12.11.04 - (4.11.19)   - dscudiero - Fix syntax error
+## 06-08-2017 @ 12.14.13 - (4.11.20)   - dscudiero - General syncing of dev to prod
