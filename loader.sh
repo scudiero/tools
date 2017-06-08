@@ -107,7 +107,7 @@ tmpRoot=/tmp/$LOGNAME
 	[[ -f $(dirname $trueDir)/offline && $userName != $ME ]] && exit
 
 ## Parse off my arguments
-	unset scriptArgs myVerbose useDev useLocal noLog noLogInDb batchMode useDevDb myVerbose myQuiet
+	unset scriptArgs myVerbose useDev useLocal noLog noLogInDb batchMode useDevDb myVerbose myQuiet viaCron
 	[[ $USELOCAL == true ]] && useLocal=true
 	while [[ -n $@ ]]; do
 		if [[ ${1:0:2} == '--' ]]; then
@@ -120,6 +120,7 @@ tmpRoot=/tmp/$LOGNAME
 			[[ $myArg == 'batchmode' ]] && batchMode=true && myQuiet=true
 			[[ $myArg == 'devdb' || $myArg == 'usedevdb' ]] && useDevDb=true
 			[[ $myArg == 'quiet' ]] && myQuiet=true
+			[[ $myArg == 'viacron' ]] && viaCron=true
 		else
 		 	scriptArgs="$scriptArgs $1"
 		fi
@@ -197,7 +198,7 @@ sTime=$(date "+%s")
 	sTime=$(date "+%s")
 
 ## If sourced then just return
-	[[ $calledViaSource == true ]] && return 0
+	[[ $viaCron == true || $calledViaSource == true ]] && return 0
 
 ## Resolve the script file to run
 	## Were we passed in a fully qualified file name
@@ -366,3 +367,4 @@ sTime=$(date "+%s")
 ## 05-19-2017 @ 15.50.00 - ("1.2.142") - dscudiero - Remove includes that are not needed any longer (CheckSemaphore & IsNumeric)
 ## 05-26-2017 @ 10.31.51 - ("1.2.160") - dscudiero - Added --useDev support
 ## 06-02-2017 @ 15.20.58 - ("1.2.176") - dscudiero - Move bootdata load to dispatcher
+## 06-08-2017 @ 08.32.56 - ("1.2.176") - dscudiero - Added --viaCron flag
