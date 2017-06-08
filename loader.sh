@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.2.177" # -- dscudiero -- Thu 06/08/2017 @  9:10:43.47
+version="1.3.0" # -- dscudiero -- Thu 06/08/2017 @  9:12:39.78
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -32,7 +32,8 @@ myName='loader'
 # Local Functions
 #==================================================================================================
 	function prtStatus {
-		[[ $batchMode == true || $myVerbose != true ]] && return 0
+		#[[ $batchMode == true || $myVerbose != true ]] && return 0
+		[[ $batchMode == true ]] && return 0
 		local elapTime=$(( $(date "+%s") - $sTime ))
 		[[ $elapTime -eq 0 ]] && elapTime=1
 		statusLine="${statusLine}${1}: ${elapTime}s"
@@ -369,3 +370,4 @@ sTime=$(date "+%s")
 ## 06-02-2017 @ 15.20.58 - ("1.2.176") - dscudiero - Move bootdata load to dispatcher
 ## 06-08-2017 @ 08.32.56 - ("1.2.176") - dscudiero - Added --viaCron flag
 ## 06-08-2017 @ 09.10.57 - ("1.2.176") - dscudiero - General syncing of dev to prod
+## 06-08-2017 @ 09.12.53 - ("1.3.0")   - dscudiero - Turn on status messaging
