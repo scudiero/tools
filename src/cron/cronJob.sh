@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.101 # -- dscudiero -- Thu 06/08/2017 @ 12:21:01.64
+version=2.0.104 # -- dscudiero -- Thu 06/08/2017 @ 13:06:31.50
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -50,6 +50,8 @@ originalArgStr="$*"
 	Call "$callScriptName" 'std' 'cron:sh' "$callScriptArgs" > "$logFile" 2>&1
 	[[ -x "$(logname)/bin/$callScriptName.sh" ]] && echo -e "\nFound a '$callScriptName' in $(logname)/bin, calling script/n" && "$(logname)/bin/$callScriptName.sh" > "$logFile" 2>&1
 
+	echo -e "\t-- $hostName - $callScriptName done" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
+
 #=======================================================================================================================
 ## Post process the logFile
 	## Turn off error traps
@@ -96,3 +98,4 @@ exit 0
 ## 06-08-2017 @ 10.48.33 - (2.0.99)    - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 11.39.20 - (2.0.100)   - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 12.21.30 - (2.0.101)   - dscudiero - add debug
+## 06-08-2017 @ 14.13.19 - (2.0.104)   - dscudiero - General syncing of dev to prod
