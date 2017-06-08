@@ -3,6 +3,7 @@
 //use this step to generate output to be pasted into Excel
 // 11/17/15 - dgs - Added ignoresteps
 // 08/09/16 - dgs - Added enumeration wfSubRules
+// 06/08/17 - dgs -	Updated roles to filter out functions unless the function is a substitution variable name
 //============================================================================================================
 // Function wrapper
 (function getCimRoles() {
@@ -11,11 +12,11 @@ var debug=false;
 //============================================================================================================
 //Variable Declares
 //============================================================================================================
-	var cims=[];
+	var cims=["courseadmin"];
 	if (cims.length == 0)
 		cims=['courseadmin','programadmin'];
-	var env='';
-	var version="3.6";
+	var env='pvt';
+	var version="4.0";
 	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
 
 	var ignoreSteps = {
@@ -83,7 +84,7 @@ var debug=false;
 //============================================================================================================
 //# Hello
 //============================================================================================================
-if (debug) {print_debug('\n*** In ' + myName + ' ***\n');}
+if (debug) {print_doc('\n*** In ' + myName + ' ***\n');}
 
 //============================================================================================================
 //# Setup
@@ -93,6 +94,7 @@ if (debug) {print_debug('\n*** In ' + myName + ' ***\n');}
 	var roleTcfData=[];
 	var rolesHash={};
 	var roleRec=[];
+	var wfSubRules=[];
 	var regex = new RegExp('^/courseleaf/roles.html$','i');
 	if (! regex.test(tcfdata.pagename[0])) {
 		if (debug) {print_doc('Loading Roles data from disk...\n'); }
@@ -105,7 +107,7 @@ if (debug) {print_debug('\n*** In ' + myName + ' ***\n');}
 	} else {
 		roles=tcfdata.role
 	}
-	if (debug) {print_debug('\nFound ' + roles.length + ' roles in /courseleaf/roles.tcf.\n');}
+	if (debug) {print_doc('\nFound ' + roles.length + ' roles in /courseleaf/roles.tcf.\n');}
 
 	//Build roles hash table
 	//roles.forEach(function(text) {
@@ -119,9 +121,9 @@ if (debug) {print_debug('\n*** In ' + myName + ' ***\n');}
 	});
 
 	if (debug) {
-		print_debug('\nrolesHash table:\n');
+		print_doc('\nrolesHash table:\n');
 		for (var key in rolesHash) {
-			print_debug('\trolesHash[' + key + '] = >' + rolesHash[key].toSource() + '<\n');
+			print_doc('\trolesHash[' + key + '] = >' + rolesHash[key].toSource() + '<\n');
 		}
 	}
 
@@ -137,7 +139,7 @@ if (debug) { Dump("sisName",sisName); }
 	cims.forEach(function(cim) {
 		var workflowTcfData = load_tcf('/' + cim + '/workflow.tcf');
 		if (workflowTcfData) {
-			if (debug) { print_debug('Processing cim: ' + cim + '\n'); }
+			if (debug) { print_doc('Processing cim: ' + cim + '\n'); }
 			print_doc('Processing cim: ' + cim + '\n');
 
 			//pull off list of conditional attributes from the localsteps data
@@ -149,12 +151,12 @@ if (debug) { Dump("sisName",sisName); }
 					text=text.substr(0,idx1);
 					conditionals.push(text);
 				});//str.split
-				if (debug) {print_debug("\nconditionals: " + conditionals.toSource() + "\n\n" );}
+				if (debug) {print_doc("\nconditionals: " + conditionals.toSource() + "\n\n" );}
 
 			//Get a list of workflow rules that are function calls
 				var configTcfData=load_tcf('/' + cim + '/workflow.cfg');
 				var wfrules=configTcfData["wfrules"];
-				//print_debug("\nwfrules: " + wfrules.toSource() + "\n\n" );
+				//print_doc("\nwfrules: " + wfrules.toSource() + "\n\n" );
 				for (var key in wfrules) {
 				    // skip loop if the property is from prototype
 				    if (!wfrules.hasOwnProperty(key)) continue;
@@ -162,13 +164,12 @@ if (debug) { Dump("sisName",sisName); }
 				    if (wfrules[key].type === "function" && wfrules[key].attrname != "wfAttr")
 				    	functions.push(wfrules[key].searchfor)
 				}
-				if (debug) {print_debug("\nfunctions: " + functions.toSource() + "\n\n" );}
+				if (debug) {print_doc("\nfunctions: " + functions.toSource() + "\n\n" );}
 
-			//pull off steps and add to master list
+			//pull off workflow steps and add to master list
 				workflows=workflowTcfData.workflow;
 				workflows.forEach(function(text) {
 					tempArray=[];
-					print_doc('\tScanning: ' + text.name + '\n' );
 					tempArray = text.members.split(',');
 					tempArray.forEach(function(step) {
 						var tmpArray=step.split(" ");
@@ -184,13 +185,12 @@ if (debug) { Dump("sisName",sisName); }
 			}
 			// Loop through wfSubRules data
 			if (cimconfigTcfData) {
-				print_doc('\tProcessing wfsubrules \n' );
+				print_doc('\tProcessing wfSubRules\n' );
 				if (cimconfigTcfData.wfSubRule) {
-					if (debug) { print_debug('cimconfigTcfData.wfSubRule >' + cimconfigTcfData.wfSubRule.toSource()  + '<\n') }
+					if (debug) { print_doc('cimconfigTcfData.wfSubRule >' + cimconfigTcfData.wfSubRule.toSource()  + '<\n') }
 					// wfSubRule:Col|SELECT code,name FROM codedesc WHERE setname="college" and rank >= 0 order by code  -or-
 					// wfSubRule:AcadLevel|['UG:Undergraduate','GR:Graduate','PR:Professional']
 					cimconfigTcfData.wfSubRule.forEach(function(text) {
-						Dump('\twfSubRule',text);
 						var idx1=text.indexOf("|");
 						var subRuleName=text.substr(0,idx1);
 						var subRuleText=text.substr(idx1+1);
@@ -198,7 +198,7 @@ if (debug) { Dump("sisName",sisName); }
 
 						// If we have not already processed this rule then create a new hash table element for the rulename
 						if (wfSubRulesHash[subRuleName] == undefined) {
-							print_doc('\t\t' + subRuleName + '\n' );
+							print_doc('\t\t' + subRuleName + " : " + subRuleText + '\n' );
 							// If rule is an enumeration then parse off and create an object array
 							var tmpHashArray=[];
 							if (subRuleText.substr(0,1) === "[" ) {
@@ -236,7 +236,7 @@ if (debug) { Dump("sisName",sisName); }
 	}); //cims
 
 	if (errorDetected) {
-		print_debug('\n*Error* --- Errors detected.\nStopping\n');
+		print_doc('\n*Error* --- Errors detected.\nStopping\n');
 		return false;
 	}
 
@@ -244,11 +244,12 @@ if (debug) { Dump("sisName",sisName); }
 	conditionals.sort();
 	conditionals=RemoveDupes(conditionals);
 	conditionals.reverse();
-	if (debug) {print_debug('Found ' + conditionals.length + ' step attributes...\n'); }
+	if (debug) {print_doc('Found ' + conditionals.length + ' step attributes...\n'); }
 
 	// pre-process steps array to remove duplicates
 		steps.sort();
 		steps=RemoveDupes(steps,sisName);
+
 	// Remove the conditionals from the steps
 		for (var i=0,  tot=steps.length; i < tot; i++) {
 			conditionals.forEach(function(conditional) {
@@ -256,27 +257,26 @@ if (debug) { Dump("sisName",sisName); }
 			});
 			steps[i]=steps[i].trim();
 		}
+
 	// Remove the steps that are function calls
 		for (var i=0,  tot=steps.length; i < tot; i++) {
-			//print_debug("steps["+i+"] = " + steps[i] + "\n")
 			for (var j=0,  tot2=functions.length; j < tot2; j++) {
-			 	//print_debug("\tfunctions["+j+"] = " + functions[j] + "\n")
-				if (steps[i].indexOf(functions[j]) >= 0) {
+				if (steps[i].indexOf(functions[j]) >= 0 && wfSubRulesHash[functions[j]] == undefined) {
 					steps.splice(i,1);
 					break;
 				}
 			}
-			if (i === steps.length-1) break // Break if we have deleted any dlements from steps
+			if (i === steps.length-1) break // Break if we have deleted any elements from steps
 		}
+
 	// Remove duplicates from the steps array
 		steps.sort();
 		steps=RemoveDupes(steps);
-		if (debug) {print_debug('Found ' + steps.length + ' steps...\n'); }
-
 		if (debug) {
-			print_debug('\nSteps before:\n');
+			print_doc('Found ' + steps.length + ' steps...\n'); 
+			print_doc('\nSteps before:\n');
 			steps.forEach(function(step) {
-				print_debug('\tstep >' + step + '<\n');
+				print_doc('\tstep >' + step + '<\n');
 			});//steps
 		}
 
@@ -290,27 +290,27 @@ debug=false;
 // Loop through all the steps, substuting in values
 i=0; while (true) {
 	editString=rolesOut[i];
-	if (debug) { print_debug('editString 1 = >' + editString + '<\n'); }
+	if (debug) { print_doc('editString 1 = >' + editString + '<\n'); }
 	if (editString != '') {
 		//Loop through substituted variable names
 		for (var key in wfSubRulesHash) {
 			subsFound=false;
 			re = new RegExp("\\b" + key + "\\b", "g");
-			if (debug) { print_debug("\tkey: '" + key + "'\tregex: '" + regex + "'\n") }
+			if (debug) { print_doc("\tkey: '" + key + "'\tregex: '" + regex + "'\n") }
 			if (re.test(editString)) {
-				if (debug) { print_debug("\tSubstitute: '" + key + "' into '" + editString + "'\n"); }
+				if (debug) { print_doc("\tSubstitute: '" + key + "' into '" + editString + "'\n"); }
 				subsFound=true;
 				rolesOut[i]='';
 				wfSubRulesHash[key].forEach(function(token) {
-					if (debug) { print_debug("\t\ttoken.code: " + token.code + ", token.name: " + token.name + "\n" ) }
+					if (debug) { print_doc("\t\ttoken.code: " + token.code + ", token.name: " + token.name + "\n" ) }
 					if (typeof token.code === 'undefined') { var repString=token.name; } else { var repString=token.code; }
 					// Make the strign substitution
 					var str=editString.replace(re,repString);
-					if (debug) { print_debug("\teditString (" + key + ") = " + str + "\n") }
+					if (debug) { print_doc("\teditString (" + key + ") = " + str + "\n") }
 
 					//If there are role members, then add to output string
 					if (rolesHash[str] != undefined ) {
-						if (debug) { print_debug('\t\t\trolesHash['+str+'] = >' + rolesHash[str].toSource() + '<\n'); }
+						if (debug) { print_doc('\t\t\trolesHash['+str+'] = >' + rolesHash[str].toSource() + '<\n'); }
 						str=str + '\t' + rolesHash[str].members.toString() + '\t' + rolesHash[str].email.toString() + '\t';
 					} else {
 						if (str.indexOf("\t") < 0 ) { str=str + '\t\t\t' }
@@ -402,11 +402,11 @@ function Dump(varName,varValue){
 	if (! debug) {return}
 	// Set variables if this is not a full call
 	text=varName + ' = >' + varValue + '<\n'
-	print_debug(text)
+	print_doc(text)
 }
 
 function Here(id) {
-	print_debug('Here ' + id + '\n');
+	print_doc('Here ' + id + '\n');
 }
 
 //============================================================================================================
