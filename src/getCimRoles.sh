@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.10.23 # -- dscudiero -- Thu 06/08/2017 @ 10:57:39.95
+version=1.10.24 # -- dscudiero -- Thu 06/08/2017 @ 11:55:14.16
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -78,17 +78,14 @@ cimStr=\"$(sed 's|,|","|g' <<< $cimStr)\"
 #= Run the step
 	FindExecutable "$step" 'std' 'steps:html' 'steps' ## Sets variable executeFile
 	srcStepFile=$executeFile
-dump srcStepFile
 
 	if [[ -f /home/$userName/clientData/$client/$step.html ]]; then
 		srcStepFile=/home/$userName/clientData/$client/$step.html
 	fi
 
-dump srcStepFile
 	Msg2 "Using step file: $srcStepFile\n"
 	[[ -f $siteDir/web/courseleaf/localsteps/$step.html ]] && mv -f $siteDir/web/courseleaf/localsteps/$step.html $siteDir/web/courseleaf/localsteps/$step.html.bak
 	cp -fp $srcStepFile $siteDir/web/courseleaf/localsteps/$step.html
-Pause
 	sed -i s"_var cims=\[\];_var cims=\[${cimStr}\];_" $siteDir/web/courseleaf/localsteps/$step.html
 	sed -i s"_var env='';_var env='${env}';_" $siteDir/web/courseleaf/localsteps/$step.html
 
@@ -113,3 +110,4 @@ Goodbye 0
 ## 04-13-2017 @ 14.01.02 - (1.10.20)   - dscudiero - Add a default for VerifyContinue
 ## 06-08-2017 @ 10.33.24 - (1.10.21)   - dscudiero - delete step file after run
 ## 06-08-2017 @ 11.39.13 - (1.10.23)   - dscudiero - General syncing of dev to prod
+## 06-08-2017 @ 11.55.25 - (1.10.24)   - dscudiero - General syncing of dev to prod
