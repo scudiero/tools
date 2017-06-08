@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.21 # -- dscudiero -- Thu 06/08/2017 @ 12:15:41.13
+version=4.11.62 # -- dscudiero -- Thu 06/08/2017 @ 16:26:30.22
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -47,6 +47,7 @@ function parseArgs-copyEnv {
 	argList+=(-manifest,1,switch,manifest,true,'script',"Create a CourseLeaf Manifest after copies")
 	argList+=(-noManifest,3,switch,manifest,manifest=false,'script',"Do not create a CourseLeaf Manifest after copies")
 	argList+=(-overlay,5,switch,overlay,true,'script',"Overlay/Replace any existing target directories")
+	argList+=(-refresh,5,switch,refresh,true,'script',"Refresh any existing target directories")
 	argList+=(-overrideTarget,5,option,overrideTarget,,'script',"Override the default target location, full file spec to where the site root should be located. e.g. /mnt/dev7/web")
 	argList+=(-fullCopy,4,switch,fullCopy,,'script',"Do a full copy, including all log and request files")
 	argList+=(-forUser,7,option,forUser,,'script',"Name the resulting site for the specified userid")
@@ -69,6 +70,7 @@ function Goodbye-copyEnv {
 #==================================================================================================
 rsyncFilters=$(mkTmpFile 'rsyncFilters')
 manifest=false
+refresh=false
 overlay=false
 specialSource=false
 fullCopy=false
@@ -91,10 +93,13 @@ ParseArgsStd
 [[ -n $env && -z $srcEnv ]] && srcEnv="$env"
 
 [[ $allItems == true || $fullCopy == true ]] && cim='Yes' && overlay=false && manifest=false
-dump -2 -n client env cim cat fullCopy manifest overlay suffix emailAddress
+dump -2 -n client env cim cat clss fullCopy manifest overlay suffix emailAddress
 
 Hello
 addPvt=true
+[[ $cat == true ]] && skipCat=false && skipCim=true && skipClss=true && unset skipAlso
+[[ $cim == true ]] && skipCat=true && skipCim=false && skipClss=true && unset skipAlso
+[[ $clss == true ]] && skipCat=true && skipCim=true && skipClss=false && unset skipAlso
 
 ## Resolve data based on passed in client, handle special cases
 	if [[ $(Lower "${client:0:5}") == 'luc20' && ${srcEnv:0:1} == 'p' && ${tgtEnv:0:1} == 'p' ]]; then
@@ -193,12 +198,13 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 
 ## if target is not pvt or dev then do a full copy
 	[[ $tgtEnv != 'pvt' && $tgtEnv != 'dev' ]] && fullCopy=true
+	[[ $overlay == true && $refresh == true ]] && Terminate "Cannot specify both the -overlay and -refresh flags at the same time"
 	[[ $overlay == true ]] && cloneMode='Replace' || cloneMode='Refresh'
 
 #==================================================================================================
 ## Check to see if all dirs exist
 	[[ -z $srcDir ]] && Terminate "No Source directory was specified"
-	if [[ -d $tgtDir && $overlay == false ]]; then
+	if [[ -d $tgtDir && $overlay == false  && $refresh == false ]]; then
 		Msg2
 		unset ans
 		WarningMsg "Target site ($tgtDir) already existes."
@@ -219,40 +225,22 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 #==================================================================================================
 ## See if there are any additional directories the user wants to skip
 if [[ $verify == true ]]; then
-
-	Msg2
-	[[ $skipCat == true ]] && ans='Yes' || unset ans
-	Prompt ans "Do you wish to $(ColorK 'EXCLUDE') Client CAT files" 'No,Yes,Select' 'No' '6'; ans="$(Lower "${ans:0:1}")"
-	if [[ $ans == 'y' || $ans == 's' ]]; then
-		skipCat=true
-	else
-		skipCat=false
+	echo
+	if [[ -z $skipCat ]]; then
+		Prompt ans "Do you wish to $(ColorK 'EXCLUDE') Client CAT files" 'No,Yes,Select' 'No' '6'; ans="$(Lower "${ans:0:1}")"
+		[[ $ans == 'y' || $ans == 's' ]] && skipCat=true
 	fi
-
-	if [[ $haveCims == true ]]; then
-		[[ $skipCim == true ]] && ans='Yes' || unset ans
+	if [[ -z $skipCim && $haveCims == true ]]; then
 		Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CIM & CIM instances" 'No,Yes,Select' 'No' '6'; ans="$(Lower "${ans:0:1}")"
-		if [[ $ans == 'y' || $ans == 's' ]]; then
-			[[ $ans != 's' ]] && allCims=true
-			GetCims "$srcDir" "\t" "$(ColorK 'EXCLUDE')"
-			unset allCims
-			skipCim=true
-		fi
-	else
-		skipCim=false
+		[[ $ans == 'y' || $ans == 's' ]] && skipCim=true
 	fi
-
-	if [[ $haveClss == true ]]; then
-		Msg2
-		[[ $skipClss == true ]] && ans='Yes' || unset ans
+	if [[ -z $skipClss && $haveClss == true ]]; then
 		Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CLSS/WEN" 'No,Yes' 'No' '6'; ans="$(Lower "${ans:0:1}")"
-		[[ $ans == 'y' ]] && skipClss=true
-	else
-		skipClss=false
+		[[ $ans == 'y' || $ans == 's' ]] && skipClss=true
 	fi
 
-	if [[ -z $skipAlso ]]; then
-		Msg2
+	if [[ -z $skipAlso && $cat != true && $cim != true && $clss != true ]]; then
+		echo
 		unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') additional directories/files from the copy operation" 'No,Yes' 'No' '6'; ans="$(Lower "${ans:0:1}")"
 		if [[ $ans == 'y' ]]; then
 			SetFileExpansion 'off'
@@ -271,34 +259,48 @@ if [[ $verify == true ]]; then
 	fi
 fi
 
+dump -1 skipCim skipCat skipClss skipAlso
 ## Skip files as indicated
 	if [[ $skipCat == true ]]; then
-		files=($(find $skeletonRoot/release/web -mindepth 1 -maxdepth 1 -type d))
-		for file in ${files[@]}; do
-			file="$ignoreList,${file##$skeletonRoot/release}"
-			[[ $file == /web/$progDir ]] && continue
-			ignoreList="$file"
+		SetFileExpansion 'off'
+		declare -A skelDirsHash
+		skelDirs=($(find $skeletonRoot/release/web -mindepth 1 -maxdepth 1 -type d ! -path $skeletonRoot/release/web/$progDir))
+		for skelDir in ${skelDirs[@]}; do
+			skelDirsHash["${skelDir##$skeletonRoot/release}"]=true
 		done
+		dirs=($(find $srcDir/web -mindepth 1 -maxdepth 1 -type d))
+		for dir in ${dirs[@]}; do
+			dir="${dir##$srcDir}"
+			[[ ${skelDirsHash["$dir"]+abc} ]] && continue
+			ignoreList="$ignoreList,$dir"
+		done
+		SetFileExpansion
 	fi
 
 	if [[ $skipCim == true ]]; then
+		SetFileExpansion 'off'
 		for cim in $(tr ',' ' ' <<< $cimStr); do
 			ignoreList="$ignoreList,/web/$cim/"
 		done
 		ignoreList="$ignoreList,/web/$progDir/cim/"
+		SetFileExpansion
 	fi
 
 	if [[ $skipClss == true ]]; then
+		SetFileExpansion 'off'
 		ignoreList="$ignoreList,/db/clwen*"
 		ignoreList="$ignoreList,/bin/clssimport-log-archive/"
 		ignoreList="$ignoreList,/web/$progDir/wen/"
 		ignoreList="$ignoreList,/web/wen/"
+		SetFileExpansion
 	fi
 
 	if [[ -n $skipAlso ]]; then
+		SetFileExpansion 'off'
 		for token in $(tr ',' ' ' <<< $skipAlso); do
 			ignoreList="$ignoreList,$token"
 		done
+		SetFileExpansion
 	fi
 
 #==================================================================================================
@@ -309,6 +311,7 @@ fi
 	verifyArgs+=("Target Env:$(TitleCase $tgtEnv)\t($tgtDir)")
 	tmpStr=$(sed "s/,/, /g" <<< $ignoreList)
 	[[ -n $forUser ]] && verifyArgs+=("For User:$forUser")
+	[[ $skipCat == true && $fullCopy != true ]] && verifyArgs+=("Skip Cat:$skipCat")
 	[[ $skipCim == true && $fullCopy != true ]] && verifyArgs+=("Skip CIM:$skipCim")
 	[[ $skipClss == true && $fullCopy != true ]] && verifyArgs+=("Skip CLSS:$skipClss")
 	[[ $fullCopy != true ]] && verifyArgs+=("Exclude List:$tmpStr")
@@ -366,13 +369,13 @@ fi
 		Msg2 "Performing a FULL copy..."
 	else
 		rsyncOpts="-a$rsyncVerbose --prune-empty-dirs $listOnly --include-from $rsyncFilters"
-		Msg2 "Excluding the following from the copy:"
-		oldIFS=$IFS; IFS='';
-		while read line; do
-			SetIndent '+1'; Msg2 "^$line"; SetIndent '-1'
-		done < $rsyncFilters
-		IFS=$oldIFS;
-		printf "\n"
+		# Msg2 "Excluding the following from the copy:"
+		# oldIFS=$IFS; IFS='';
+		# SetIndent '+1';
+		# while read line; do Msg2 "^$line"; done < $rsyncFilters
+		# SetIndent '-1'
+		# IFS=$oldIFS;
+		# printf "\n"
 	fi
 	if [[ $remoteCopy == true ]]; then
 		Msg2 "Calling rsync to copy the files, when prompted for password, please enter your password on '$clientHost' ..."
@@ -453,14 +456,13 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 	#==================================================================================================
 	# Turn off publishing
 		Msg2 "\nTurn off Publishing..."
-		$DOIT sed -i s'mapfile:production/|/dev/null' $tgtDir/$progDir.cfg
-
-		$DOIT sed -i s'#^mapfile:production#//mapfile:production#'g $tgtDir/$courseleafProgDir.cfg
-		$DOIT sed -i s'#^//mapfile:production|/dev/null#mapfile:production|/dev/null#' $tgtDir/$courseleafProgDir.cfg
-		#$DOIT sed -i s'_^//mapfile:production/|/dev/null_mapfile:production/|/dev/null_' $tgtDir/courseleaf.cfg
-		#$DOIT sed -i s'_^//mapfile:production|/dev/null_mapfile:production|/dev/null_' $tgtDir/courseleaf.cfg
-		#$DOIT sed -i s'_^mapfile:production/|../../../public/web_//mapfile:production/|../../../public/web_' $tgtDir/courseleaf.cfg
-		#$DOIT sed -i s'_^mapfile:production|../../../public/web_//mapfile:production|../../../public/web_' $tgtDir/courseleaf.cfg
+		editFile="$tgtDir/$progDir.cfg"
+		$DOIT sed -i s'_^mapfile:production_//mapfile:production_'g "$editFile"
+		$DOIT sed -i s'_^mapfile:/navbar/production_//mapfile:/navbar/production_'g "$editFile"
+		$DOIT sed -i s'_^//mapfile:production/|/dev/null_mapfile:production/|/dev/null_' "$editFile"
+		$DOIT sed -i s'_^//mapfile:production|/dev/null_mapfile:production|/dev/null_' "$editFile"
+		grepStr=$(ProtectedCall "grep '^mapfile:production.*/dev/null' $editFile")
+		[[ -z $grepStr ]] && Warning "Could not locate a publishing mapfile record pointing to /dev/null, publising may still be active, please check before using clone site"
 
 	# Turn off remote authenticaton
 		Msg2 "Turn off Authentication..."
@@ -553,7 +555,7 @@ fi
 	if [[  -n $cimStr && $userName == 'dscudiero' && $tgtEnv == 'pvt' &&  onlyProduct == 'cim' ]]; then
 		for cim in $(tr ',' ' ' <<< "$cimStr"); do
 			editFile="$tgtDir/web/$cim/workflow.cfg"
-			[[ != -f $editFile ]] && continue
+			[[ ! -f $editFile ]] && continue
 			unset grepStr; grepStr=$(ProtectedCall "grep '^wfDebugLevel:' $editFile")
 			if [[ -n $grepStr ]]; then
 				fromStr="$grepStr"
@@ -571,7 +573,7 @@ Msg2
 Info "Remember you can use the 'cleanDev' script to easily remove private dev sites."
 [[ -n $asSite ]] && msgText="$(ColorK "$(Upper $asSite)")" || msgText="$(ColorK "$(Upper $client)")"
 
-[[ $startWizdebug == true ]] && Call 'wizDebug' "$client" "$tgtEnv"
+[[ $startWizdebug == true ]] && Call 'wizdebug' 'bash:sh' "$client" "-${tgtEnv}"
 
 Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 
@@ -641,3 +643,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 06-08-2017 @ 12.11.04 - (4.11.19)   - dscudiero - Fix syntax error
 ## 06-08-2017 @ 12.14.13 - (4.11.20)   - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 12.17.04 - (4.11.21)   - dscudiero - General syncing of dev to prod
+## 06-08-2017 @ 16.27.41 - (4.11.62)   - dscudiero - refactored the skip logic
