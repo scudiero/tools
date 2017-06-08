@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.64 # -- dscudiero -- Wed 06/07/2017 @  9:30:39.21
+version=4.11.65 # -- dscudiero -- Thu 06/08/2017 @ 11:00:30.52
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -15,7 +15,7 @@ scriptDescription="Create a cloned private dev site"
 # Make a copy of the next environment in a dev site (a new developer named site or overlay real dev site)
 # Turns off authentication in the resulting site
 #==================================================================================================
-# Copyright ©2015 David Scudiero -- all rights reserved.
+# Copyright Â©2015 David Scudiero -- all rights reserved.
 # 04-24-13 -- 	dgs - Initial coding
 # 05-01-13 -- 	dgs - Added code to stop and then resume after an external republish is done
 #							Added make bubble step
@@ -61,7 +61,7 @@ function parseArgs-copyEnv {
 	argList+=(-cim,3,switch,junk,onlyProduct='cim','Only copy CIM data')
 	argList+=(-cat,3,switch,junk,onlyProduct='cat','Only copy CAT data')
 	argList+=(-clss,3,switch,junk,onlyProduct='clss','Only copy CLSS data')
-	argList+=(-debug,5,switch,startWizdebug,,script,'Automatically start a debug session after the cloneing operation has competed')
+	argList+=(-wizdebug,3,switch,startWizdebug,,script,'Automatically start a debug session after the cloneing operation has competed')
 }
 function Goodbye-copyEnv {
 	[[ -d $tmpRoot ]] && rm -rf $tmpRoot
@@ -628,7 +628,7 @@ scriptDescription="Create a cloned private dev site"
 # Make a copy of the next environment in a dev site (a new developer named site or overlay real dev site)
 # Turns off authentication in the resulting site
 #==================================================================================================
-# Copyright ©2015 David Scudiero -- all rights reserved.
+# Copyright Â©2015 David Scudiero -- all rights reserved.
 # 04-24-13 -- 	dgs - Initial coding
 # 05-01-13 -- 	dgs - Added code to stop and then resume after an external republish is done
 #							Added make bubble step
@@ -1249,3 +1249,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 03-31-2017 @ 07.27.40 - (4.11.48)   - dscudiero - Remove extra blank lines in prompting
 ## 04-06-2017 @ 14.53.46 - (4.11.48)   - dscudiero - Fix sed statement for turning off publising
 ## 06-07-2017 @ 09.35.06 - (4.11.64)   - dscudiero - add debug option
+## 06-08-2017 @ 11.40.21 - (4.11.65)   - dscudiero - add wizdebug option
