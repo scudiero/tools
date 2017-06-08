@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.1.5" # -- dscudiero -- Fri 05/19/2017 @  7:20:59.52
+# version="2.1.6" # -- dscudiero -- Thu 06/08/2017 @ 16:34:03.02
 #=======================================================================================================================
 # Generic resolve file and call
 # Call scriptName ["$scriptArgs"]
@@ -61,6 +61,17 @@ function Call {
 			[[ -n $executeAlias ]] && scriptArgs="$executeAlias $scriptArgs"
 			local myPath="$(dirname $executeFile)"
 
+		## Check to make sure we can run
+			checkMsg=$(CheckRun $myName)
+			if [[ $checkMsg != true ]]; then
+				[[ $(Contains ",$administrators," ",$userName,") != true ]] && echo && echo && Terminate "$checkMsg"
+				[[ $myName != 'testsh' ]] && echo && echo -e "\t$(ColorW "*** $checkMsg ***")"
+			fi
+
+		## Check to make sure we are authorized
+			checkMsg=$(CheckAuth $myName)
+			[[ $checkMsg != true ]] && echo && echo && Terminate "$checkMsg"
+
 		## Call the program
 			savePath="$PATH"
 			case "$pgmType" in
@@ -118,3 +129,4 @@ export -f Call
 ## 05-17-2017 @ 13.40.55 - ("2.0.83")  - dscudiero - Force add 'reports' to the list of librarys to search
 ## 05-18-2017 @ 12.02.45 - ("2.1.1")   - dscudiero - Refactored parameter parsing
 ## 05-19-2017 @ 07.21.18 - ("2.1.5")   - dscudiero - Ignore 'reports' if passed in as an argument
+## 06-08-2017 @ 16.34.25 - ("2.1.6")   - dscudiero - Add back the auth and run checks
