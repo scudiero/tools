@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.62 # -- dscudiero -- Thu 06/08/2017 @ 16:26:30.22
+version=4.11.63 # -- dscudiero -- Fri 06/09/2017 @ 12:07:31.05
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -227,15 +227,15 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 if [[ $verify == true ]]; then
 	echo
 	if [[ -z $skipCat ]]; then
-		Prompt ans "Do you wish to $(ColorK 'EXCLUDE') Client CAT files" 'No,Yes,Select' 'No' '6'; ans="$(Lower "${ans:0:1}")"
+		unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') Client CAT files" 'No,Yes,Select' 'No' '6'; ans="$(Lower "${ans:0:1}")"
 		[[ $ans == 'y' || $ans == 's' ]] && skipCat=true
 	fi
 	if [[ -z $skipCim && $haveCims == true ]]; then
-		Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CIM & CIM instances" 'No,Yes,Select' 'No' '6'; ans="$(Lower "${ans:0:1}")"
+		unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CIM & CIM instances" 'No,Yes,Select' 'No' '6'; ans="$(Lower "${ans:0:1}")"
 		[[ $ans == 'y' || $ans == 's' ]] && skipCim=true
 	fi
 	if [[ -z $skipClss && $haveClss == true ]]; then
-		Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CLSS/WEN" 'No,Yes' 'No' '6'; ans="$(Lower "${ans:0:1}")"
+		unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CLSS/WEN" 'No,Yes' 'No' '6'; ans="$(Lower "${ans:0:1}")"
 		[[ $ans == 'y' || $ans == 's' ]] && skipClss=true
 	fi
 
@@ -644,3 +644,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 06-08-2017 @ 12.14.13 - (4.11.20)   - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 12.17.04 - (4.11.21)   - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 16.27.41 - (4.11.62)   - dscudiero - refactored the skip logic
+## 06-09-2017 @ 12.07.57 - (4.11.63)   - dscudiero - Fix problem where we did not clear variable ans befor using it in a prompt
