@@ -139,7 +139,7 @@ if (debug) { Dump("sisName",sisName); }
 	cims.forEach(function(cim) {
 		var workflowTcfData = load_tcf('/' + cim + '/workflow.tcf');
 		if (workflowTcfData) {
-			if (debug) { print_doc('Processing cim: ' + cim + '\n'); }
+
 			print_doc('Processing cim: ' + cim + '\n');
 
 			//pull off list of conditional attributes from the localsteps data
@@ -187,7 +187,7 @@ if (debug) { Dump("sisName",sisName); }
 			if (cimconfigTcfData) {
 				print_doc('\tProcessing wfSubRules\n' );
 				if (cimconfigTcfData.wfSubRule) {
-					if (debug) { print_doc('cimconfigTcfData.wfSubRule >' + cimconfigTcfData.wfSubRule.toSource()  + '<\n') }
+					//if (debug) { print_doc('cimconfigTcfData.wfSubRule >' + cimconfigTcfData.wfSubRule.toSource()  + '<\n') }
 					// wfSubRule:Col|SELECT code,name FROM codedesc WHERE setname="college" and rank >= 0 order by code  -or-
 					// wfSubRule:AcadLevel|['UG:Undergraduate','GR:Graduate','PR:Professional']
 					cimconfigTcfData.wfSubRule.forEach(function(text) {
@@ -296,7 +296,7 @@ i=0; while (true) {
 		for (var key in wfSubRulesHash) {
 			subsFound=false;
 			re = new RegExp("\\b" + key + "\\b", "g");
-			if (debug) { print_doc("\tkey: '" + key + "'\tregex: '" + regex + "'\n") }
+			if (debug) { print_doc("\tkey: '" + key + "'\tre: '" + re + "'\n") }
 			if (re.test(editString)) {
 				if (debug) { print_doc("\tSubstitute: '" + key + "' into '" + editString + "'\n"); }
 				subsFound=true;
@@ -323,7 +323,7 @@ i=0; while (true) {
 					}
 				}); //wfSubRulesHash[key].forEach
 				break; //Stop processing wfSubRule -- only one at a time
-			} //(regex.test(editString))
+			} //(re.test(editString))
 		} //(key in wfSubRulesHash)
 	} //(editString != '')
 	//subsFound=false;
