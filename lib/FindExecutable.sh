@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.0.126" # -- dscudiero -- Fri 06/09/2017 @  8:13:24.53
+# version="1.0.127" # -- dscudiero -- Fri 06/09/2017 @  8:17:08.42
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -111,7 +111,7 @@ function FindExecutable {
 				## Check md5's to see if different from production file
 				if [[ $prodMd5 != $localMd5 ]]; then
 					unset ans
-dump ifMe useLocal useDev batchMode
+dump useLocal useDev batchMode
 					if [[ $useLocal != true && $useDev != true && $batchMode != true ]]; then
 						Msg2 $N "\aFound a copy of '$callPgmName' in a local directory: '$(dirname $executeFile)'"
 						unset ans && Prompt ans "'Yes' to use the local copy, 'No' to use production version" 'Yes No' 'Yes' '4' && ans=$(Lower ${ans:0:1})
@@ -137,3 +137,4 @@ export -f FindExecutable
 ## 05-26-2017 @ 10.31.55 - ("1.0.118") - dscudiero - Added --useDev support
 ## 06-02-2017 @ 15.19.07 - ("1.0.125") - dscudiero - Refactor setting of the search path for local and dev
 ## 06-09-2017 @ 08.13.33 - ("1.0.126") - dscudiero - add debug code
+## 06-09-2017 @ 08.17.34 - ("1.0.127") - dscudiero - General syncing of dev to prod
