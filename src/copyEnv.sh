@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.63 # -- dscudiero -- Fri 06/09/2017 @ 12:07:31.05
+version=4.11.65 # -- dscudiero -- Fri 06/09/2017 @ 16:11:38.80
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -263,15 +263,21 @@ dump -1 skipCim skipCat skipClss skipAlso
 ## Skip files as indicated
 	if [[ $skipCat == true ]]; then
 		SetFileExpansion 'off'
-		declare -A skelDirsHash
-		skelDirs=($(find $skeletonRoot/release/web -mindepth 1 -maxdepth 1 -type d ! -path $skeletonRoot/release/web/$progDir))
-		for skelDir in ${skelDirs[@]}; do
-			skelDirsHash["${skelDir##$skeletonRoot/release}"]=true
+		declare -A keepDirsHash
+		keepDirs=($(find $skeletonRoot/release/web -mindepth 1 -maxdepth 1 -type d ! -path $skeletonRoot/release/web/$progDir))
+		for keepDir in ${keepDirs[@]}; do
+			keepDirsHash["${keepDir##$skeletonRoot/release}"]=true
 		done
+		keepDirsHash["/web/$progDir"]=true
+		if [[ $skipCim != true && -n "$cimStr" ]]; then
+			for cim in $(tr ',' ' ' <<< "$cimStr" ); do
+				keepDirsHash["/web/$cim"]=true
+			done
+		fi
 		dirs=($(find $srcDir/web -mindepth 1 -maxdepth 1 -type d))
 		for dir in ${dirs[@]}; do
 			dir="${dir##$srcDir}"
-			[[ ${skelDirsHash["$dir"]+abc} ]] && continue
+			[[ ${keepDirsHash["$dir"]+abc} ]] && continue
 			ignoreList="$ignoreList,$dir"
 		done
 		SetFileExpansion
@@ -645,3 +651,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 06-08-2017 @ 12.17.04 - (4.11.21)   - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 16.27.41 - (4.11.62)   - dscudiero - refactored the skip logic
 ## 06-09-2017 @ 12.07.57 - (4.11.63)   - dscudiero - Fix problem where we did not clear variable ans befor using it in a prompt
+## 06-09-2017 @ 16.17.40 - (4.11.65)   - dscudiero - Fix problem of skipping cims and courseleaf if skipCat is active
