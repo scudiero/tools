@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.6.59 # -- dscudiero -- Thu 06/08/2017 @ 16:24:40.71
+version=2.6.60 # -- dscudiero -- Fri 06/09/2017 @  8:10:04.94
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' 
@@ -21,7 +21,7 @@ scriptDescription="Tail a site wizdebug.out file"
 #==================================================================================================
 # Declare local variables and constants
 #==================================================================================================
-unset client
+unset client env srcEnv tgtEnv srcDir tgtDir siteDir
 
 #==================================================================================================
 # Standard arg parsing and initialization
@@ -31,7 +31,7 @@ GetDefaultsData $myName
 ParseArgsStd
 Hello
 
-Init 'Clear getClient getEnv getDirs checkEnvs noPreview noPublic'
+Init 'getClient getEnv getDirs checkEnvs noPreview noPublic'
 
 #===================================================================================================
 #= Main
@@ -62,3 +62,4 @@ Goodbye 0
 ## Thu Apr 21 08:56:26 CDT 2016 - dscudiero - Use echo command instead of Msg
 ## Thu Sep 29 12:54:34 CDT 2016 - dscudiero - Do not clear screen if TERM=dumb
 ## 06-08-2017 @ 16.28.01 - (2.6.59)    - dscudiero - Added clearing of data on start
+## 06-09-2017 @ 08.19.24 - (2.6.60)    - dscudiero - Fix problem clearing the env variable
