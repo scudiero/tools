@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.3.6" # -- dscudiero -- Mon 06/12/2017 @ 11:16:44.92
+version="1.3.7" # -- dscudiero -- Mon 06/12/2017 @ 11:23:31.74
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -95,6 +95,8 @@ tmpRoot=/tmp/$LOGNAME
 # Parse arguments
 #==================================================================================================
 ## Initial Checks
+	[[ -z $TOOLSPATH ]] && echo -e "\n*Error* -- The TOOLSPATH environment value has not been set, cannot continue\n" && exit -3
+
 	sTime=$(date "+%s")
 	[[ "$0" = "-bash" ]] && callPgmName=bashShell || callPgmName=$(basename "$0")
 
@@ -192,16 +194,11 @@ sTime=$(date "+%s")
 	prtStatus ", imports"
 	sTime=$(date "+%s")
 
-
-echo "\$TOOLSPATH = '$TOOLSPATH'"
 ## Source the init script
 	TrapSigs 'on'
 	source $initFile
 	prtStatus ", load initFile"
 	sTime=$(date "+%s")
-
-echo "\$logsRoot 1 = '$logsRoot'"
-
 
 ## If sourced then just return
 	[[ $viaCron == true || $calledViaSource == true ]] && return 0
@@ -239,12 +236,6 @@ echo "\$logsRoot 1 = '$logsRoot'"
 		[[ ! -r $executeFile ]] && echo && echo && Terminate "callPgm.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"
 
 ## Call the script
-
-echo "\$logsRoot = '$logsRoot'"
-echo "\$callPgmName = '$callPgmName'"
-echo "\$userName = '$userName'"
-echo "\$backupSuffix = '$backupSuffix'"
-
 	## Initialize the log file
 		sTime=$(date "+%s")
 		logFile=/dev/null
@@ -389,3 +380,4 @@ echo "\$backupSuffix = '$backupSuffix'"
 ## 06-08-2017 @ 16.35.36 - ("1.3.4")   - dscudiero - tweak messaging
 ## 06-12-2017 @ 11.15.37 - ("1.3.5")   - dscudiero - add debug statements
 ## 06-12-2017 @ 11.16.56 - ("1.3.6")   - dscudiero - General syncing of dev to prod
+## 06-12-2017 @ 11.24.10 - ("1.3.7")   - dscudiero - remove debug statements
