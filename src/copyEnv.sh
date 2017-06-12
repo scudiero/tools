@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.65 # -- dscudiero -- Fri 06/09/2017 @ 16:11:38.80
+version=4.11.66 # -- dscudiero -- Fri 06/09/2017 @ 16:37:57.53
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -280,6 +280,7 @@ dump -1 skipCim skipCat skipClss skipAlso
 			[[ ${keepDirsHash["$dir"]+abc} ]] && continue
 			ignoreList="$ignoreList,$dir"
 		done
+		ignoreList="$ignoreList,/production-shared,/web/shared"
 		SetFileExpansion
 	fi
 
@@ -652,3 +653,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 06-08-2017 @ 16.27.41 - (4.11.62)   - dscudiero - refactored the skip logic
 ## 06-09-2017 @ 12.07.57 - (4.11.63)   - dscudiero - Fix problem where we did not clear variable ans befor using it in a prompt
 ## 06-09-2017 @ 16.17.40 - (4.11.65)   - dscudiero - Fix problem of skipping cims and courseleaf if skipCat is active
+## 06-12-2017 @ 06.57.07 - (4.11.66)   - dscudiero - Fix skipcat
