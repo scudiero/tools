@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.12.2 # -- dscudiero -- Mon 06/12/2017 @  7:27:47.21
+version=3.12.4 # -- dscudiero -- Mon 06/12/2017 @ 11:27:49.98
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -10,6 +10,8 @@ Import "$imports"
 originalArgStr="$*"
 scriptDescription="Script dispatcher"
 # echo "\$* 2 = >$*<"
+
+echo "\$0 = '$0'"
 
 #=======================================================================================================================
 # Tools scripts selection front end
@@ -287,6 +289,31 @@ noArgPromptList="_clearClientValue_"
 unset scriptArgs
 
 #=======================================================================================================================
+## Check to see the user has access to the 'scripts' program, if not then add one to their .bashrc file
+#=======================================================================================================================
+if [[ $batchMode != true ]]; then
+	previousTrapERR=$(trap -p ERR | cut -d ' ' -f3-) ; trap - ERR ; set +e
+	grep -q 'scripts="$TOOLSPATH/bin/scripts"' $HOME/.bashrc ; rc=$?
+	[[ -n $previousTrapERR ]] && eval "trap $previousTrapERR"
+	if [[ $rc -gt 0 ]]; then
+		echo
+		Msg2 "Do you wish to add an alias to the scripts command to your .bashrc file?"
+		Msg2 "This will allow you to access the scripts command in the future by simply entering 'scripts' on the Linux command line."
+		echo
+		unset ans; Prompt ans "Yes to add, No to skip" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
+		if [[ $ans == 'y' ]]; then
+			echo '' >> $HOME/.bashrc
+			echo "export TOOLSPATH=\"$TOOLSPATH\" ## Added by' '$myName' on $(date)" >> $HOME/.bashrc
+			echo "alias scripts=\"\$TOOLSPATH/bin/scripts\" ## Added by' '$myName' on $(date)" >> $HOME/.bashrc
+			echo; Msg2 $I "An alias for the scripts command has been added to your '$HOME/.bashrc' file."
+			echo
+		fi
+	fi
+else
+	[[ -z ${script}${report} ]] && Terminate "Running in batchMode and no value specified for report/script"
+fi
+
+#=======================================================================================================================
 ## parse arguments
 #=======================================================================================================================
 helpSet='script,client'
@@ -479,3 +506,4 @@ Goodbye 0
 ## 06-01-2017 @ 10.09.29 - (3.12.0)    - dscudiero - General syncing of dev to prod
 ## 06-07-2017 @ 14.57.32 - (3.12.1)    - dscudiero - Change the way we determine if scripts is not isstalled
 ## 06-12-2017 @ 07.35.25 - (3.12.2)    - dscudiero - General syncing of dev to prod
+## 06-12-2017 @ 11.28.20 - (3.12.4)    - dscudiero - Move the .bashrc check for the scrips alias before any other activities
