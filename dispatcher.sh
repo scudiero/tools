@@ -1,14 +1,14 @@
 #!/bin/bash
-## Load boot data
-	if [[ -r $(dirname $0)/bootData ]]; then
-		source "$(dirname $0)/bootData"
-	else
-		[[ -z $TOOLSPATH ]] && TOOLSPATH="/steamboat/leepfrog/docs/tools"
-		[[ ! -d $TOOLSPATH ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but is not a directory, cannot continue\n" && exit -1
-		[[ ! -r $TOOLSPATH/bootData ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but you cannot access the boot record, cannot continue\n" && exit -1
-		source "$TOOLSPATH/bootData"
-	fi
 
+## Make sure we have a TOOLSPATH and it is valid
+	[[ -z $TOOLSPATH ]] && TOOLSPATH="/steamboat/leepfrog/docs/tools"
+	[[ ! -d $TOOLSPATH ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but is not a directory, cannot continue\n" && exit -1
+	[[ ! -r $TOOLSPATH/bootData ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but you cannot access the boot record, cannot continue\n" && exit -1
+
+## Load boot data
+	[[ -r $(dirname $0)/bootData ]] && source "$(dirname $0)/bootData" || source "$TOOLSPATH/bootData"
+
+## Set global database variable
 	[[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB"
 	export TOOLSWAREHOUSEDB="$warehouseDb"
 
@@ -51,3 +51,4 @@ exit
 ## 06-08-2017 @ 10.51.25 - dscudiero - add debug statements
 ## 06-08-2017 @ 11.38.51 - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 12.21.24 - dscudiero - add debug
+## 06-12-2017 @ 07.26.00 - dscudiero - Make sure we have TOOLSPATH set
