@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.12.5 # -- dscudiero -- Mon 06/12/2017 @ 11:28:59.99
+version=3.12.6 # -- dscudiero -- Mon 06/12/2017 @ 11:30:47.66
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -294,7 +294,7 @@ if [[ $batchMode != true ]]; then
 	[[ -n $previousTrapERR ]] && eval "trap $previousTrapERR"
 	if [[ $rc -gt 0 ]]; then
 		echo
-		Msg2 "Do you wish to add an alias to the scripts command to your .bashrc file?"
+		Msg2 "Do you wish to add an alias to the scripts command to your .bashrc file (recommended) ?"
 		Msg2 "This will allow you to access the scripts command in the future by simply entering 'scripts' on the Linux command line."
 		echo
 		unset ans; Prompt ans "Yes to add, No to skip" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
@@ -505,3 +505,4 @@ Goodbye 0
 ## 06-12-2017 @ 07.35.25 - (3.12.2)    - dscudiero - General syncing of dev to prod
 ## 06-12-2017 @ 11.28.20 - (3.12.4)    - dscudiero - Move the .bashrc check for the scrips alias before any other activities
 ## 06-12-2017 @ 11.29.13 - (3.12.5)    - dscudiero - Remove debug stateement
+## 06-12-2017 @ 11.30.57 - (3.12.6)    - dscudiero - tweak messaging
