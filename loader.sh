@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.3.5" # -- dscudiero -- Mon 06/12/2017 @ 11:15:24.98
+version="1.3.6" # -- dscudiero -- Mon 06/12/2017 @ 11:16:44.92
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -192,6 +192,8 @@ sTime=$(date "+%s")
 	prtStatus ", imports"
 	sTime=$(date "+%s")
 
+
+echo "\$TOOLSPATH = '$TOOLSPATH'"
 ## Source the init script
 	TrapSigs 'on'
 	source $initFile
@@ -199,9 +201,7 @@ sTime=$(date "+%s")
 	sTime=$(date "+%s")
 
 echo "\$logsRoot 1 = '$logsRoot'"
-echo "\$callPgmName 1 = '$callPgmName'"
-echo "\$userName 1 = '$userName'"
-echo "\$backupSuffix 1 = '$backupSuffix'"
+
 
 ## If sourced then just return
 	[[ $viaCron == true || $calledViaSource == true ]] && return 0
@@ -388,3 +388,4 @@ echo "\$backupSuffix = '$backupSuffix'"
 ## 06-08-2017 @ 14.23.50 - ("1.3.3")   - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 16.35.36 - ("1.3.4")   - dscudiero - tweak messaging
 ## 06-12-2017 @ 11.15.37 - ("1.3.5")   - dscudiero - add debug statements
+## 06-12-2017 @ 11.16.56 - ("1.3.6")   - dscudiero - General syncing of dev to prod
