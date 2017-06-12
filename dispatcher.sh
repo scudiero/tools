@@ -4,7 +4,7 @@
 	[[ -z $TOOLSPATH ]] && TOOLSPATH="/steamboat/leepfrog/docs/tools"
 	[[ ! -d $TOOLSPATH ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but is not a directory, cannot continue\n" && exit -1
 	[[ ! -r $TOOLSPATH/bootData ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but you cannot access the boot record, cannot continue\n" && exit -1
-	#export TOOLSPATH="$TOOLSPATH"
+	export TOOLSPATH="$TOOLSPATH"
 
 ## Load boot data
 	[[ -r $(dirname $0)/bootData ]] && source "$(dirname $0)/bootData" || source "$TOOLSPATH/bootData"
@@ -58,3 +58,4 @@ exit
 ## 06-12-2017 @ 11.09.48 - dscudiero - General syncing of dev to prod
 ## 06-12-2017 @ 11.18.41 - dscudiero - export the value of toolspath
 ## 06-12-2017 @ 11.24.02 - dscudiero - General syncing of dev to prod
+## 06-12-2017 @ 11.24.54 - dscudiero - remove debug statements
