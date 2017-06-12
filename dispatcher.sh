@@ -32,6 +32,9 @@
 		echo -e "\t\t-- $hostName - back from loader" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 		return 0
 	else
+
+echo "TOOLSPATH = '$TOOLSPATH'"
+echo "$loaderDir/loader.sh" $(basename $0) $*
 		"$loaderDir/loader.sh" $(basename $0) $*
 	fi
 
@@ -52,3 +55,4 @@ exit
 ## 06-08-2017 @ 11.38.51 - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 12.21.24 - dscudiero - add debug
 ## 06-12-2017 @ 07.26.00 - dscudiero - Make sure we have TOOLSPATH set
+## 06-12-2017 @ 11.01.10 - dscudiero - add debug
