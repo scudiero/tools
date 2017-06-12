@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.3.4" # -- dscudiero -- Thu 06/08/2017 @ 16:35:29.43
+version="1.3.5" # -- dscudiero -- Mon 06/12/2017 @ 11:15:24.98
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -198,6 +198,11 @@ sTime=$(date "+%s")
 	prtStatus ", load initFile"
 	sTime=$(date "+%s")
 
+echo "\$logsRoot 1 = '$logsRoot'"
+echo "\$callPgmName 1 = '$callPgmName'"
+echo "\$userName 1 = '$userName'"
+echo "\$backupSuffix 1 = '$backupSuffix'"
+
 ## If sourced then just return
 	[[ $viaCron == true || $calledViaSource == true ]] && return 0
 
@@ -234,6 +239,12 @@ sTime=$(date "+%s")
 		[[ ! -r $executeFile ]] && echo && echo && Terminate "callPgm.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"
 
 ## Call the script
+
+echo "\$logsRoot = '$logsRoot'"
+echo "\$callPgmName = '$callPgmName'"
+echo "\$userName = '$userName'"
+echo "\$backupSuffix = '$backupSuffix'"
+
 	## Initialize the log file
 		sTime=$(date "+%s")
 		logFile=/dev/null
@@ -376,3 +387,4 @@ sTime=$(date "+%s")
 ## 06-08-2017 @ 14.13.11 - ("1.3.2")   - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 14.23.50 - ("1.3.3")   - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 16.35.36 - ("1.3.4")   - dscudiero - tweak messaging
+## 06-12-2017 @ 11.15.37 - ("1.3.5")   - dscudiero - add debug statements
