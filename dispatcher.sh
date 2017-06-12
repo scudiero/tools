@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "HERE HERE HERE"
+
 ## Make sure we have a TOOLSPATH and it is valid
 	[[ -z $TOOLSPATH ]] && TOOLSPATH="/steamboat/leepfrog/docs/tools"
 	[[ ! -d $TOOLSPATH ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but is not a directory, cannot continue\n" && exit -1
@@ -56,3 +58,4 @@ exit
 ## 06-08-2017 @ 12.21.24 - dscudiero - add debug
 ## 06-12-2017 @ 07.26.00 - dscudiero - Make sure we have TOOLSPATH set
 ## 06-12-2017 @ 11.01.10 - dscudiero - add debug
+## 06-12-2017 @ 11.08.50 - dscudiero - General syncing of dev to prod
