@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.12.1 # -- dscudiero -- Wed 06/07/2017 @ 14:56:24.70
+version=3.12.2 # -- dscudiero -- Mon 06/12/2017 @  7:27:47.21
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -310,7 +310,6 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 		previousTrapERR=$(trap -p ERR | cut -d ' ' -f3-) ; trap - ERR ; set +e
 		grep -q 'scripts="$TOOLSPATH/bin/scripts"' $HOME/.bashrc ; rc=$?
 		[[ -n $previousTrapERR ]] && eval "trap $previousTrapERR"
-
 		if [[ $rc -gt 0 ]]; then
 			echo
 			Msg2 "Do you wish to add an alias to the scripts command to your .bashrc file?"
@@ -479,3 +478,4 @@ Goodbye 0
 ## 05-26-2017 @ 06.40.08 - (3.12.-1)   - dscudiero - Updated output formatting for reports
 ## 06-01-2017 @ 10.09.29 - (3.12.0)    - dscudiero - General syncing of dev to prod
 ## 06-07-2017 @ 14.57.32 - (3.12.1)    - dscudiero - Change the way we determine if scripts is not isstalled
+## 06-12-2017 @ 07.35.25 - (3.12.2)    - dscudiero - General syncing of dev to prod
