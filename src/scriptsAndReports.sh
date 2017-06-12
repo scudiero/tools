@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.12.4 # -- dscudiero -- Mon 06/12/2017 @ 11:27:49.98
+version=3.12.5 # -- dscudiero -- Mon 06/12/2017 @ 11:28:59.99
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -9,9 +9,6 @@ imports="$imports Call SelectMenuNew"
 Import "$imports"
 originalArgStr="$*"
 scriptDescription="Script dispatcher"
-# echo "\$* 2 = >$*<"
-
-echo "\$0 = '$0'"
 
 #=======================================================================================================================
 # Tools scripts selection front end
@@ -507,3 +504,4 @@ Goodbye 0
 ## 06-07-2017 @ 14.57.32 - (3.12.1)    - dscudiero - Change the way we determine if scripts is not isstalled
 ## 06-12-2017 @ 07.35.25 - (3.12.2)    - dscudiero - General syncing of dev to prod
 ## 06-12-2017 @ 11.28.20 - (3.12.4)    - dscudiero - Move the .bashrc check for the scrips alias before any other activities
+## 06-12-2017 @ 11.29.13 - (3.12.5)    - dscudiero - Remove debug stateement
