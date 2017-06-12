@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo "HERE HERE HERE"
-
 ## Make sure we have a TOOLSPATH and it is valid
 	[[ -z $TOOLSPATH ]] && TOOLSPATH="/steamboat/leepfrog/docs/tools"
 	[[ ! -d $TOOLSPATH ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but is not a directory, cannot continue\n" && exit -1
@@ -34,9 +32,6 @@ echo "HERE HERE HERE"
 		echo -e "\t\t-- $hostName - back from loader" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 		return 0
 	else
-
-echo "TOOLSPATH = '$TOOLSPATH'"
-echo "$loaderDir/loader.sh" $(basename $0) $*
 		"$loaderDir/loader.sh" $(basename $0) $*
 	fi
 
@@ -59,3 +54,4 @@ exit
 ## 06-12-2017 @ 07.26.00 - dscudiero - Make sure we have TOOLSPATH set
 ## 06-12-2017 @ 11.01.10 - dscudiero - add debug
 ## 06-12-2017 @ 11.08.50 - dscudiero - General syncing of dev to prod
+## 06-12-2017 @ 11.09.48 - dscudiero - General syncing of dev to prod
