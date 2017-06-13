@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.71 # -- dscudiero -- Tue 05/16/2017 @ 13:12:50.11
+version=2.1.72 # -- dscudiero -- Tue 06/13/2017 @  8:35:30.92
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -46,17 +46,11 @@ workerScriptFile="$executeFile"
 addedCalledScriptArgs="-secondaryMessagesOnly"
 tmpFile=$(MkTmpFile)
 
-echo "$myName"
-Here 0
-dump workerScriptFile
-
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
 GetDefaultsData $myName
-Here 2
 ParseArgsStd
-Here 3
 unset addedCalledScriptArgs
 [[ $verbose == true ]] && addedCalledScriptArgs="$addedCalledScriptArgs -v$verboseLevel"
 [[ $batchMode == true ]] && addedCalledScriptArgs="$addedCalledScriptArgs -batchMode"
@@ -161,3 +155,4 @@ Goodbye 0 'alert'
 ## 05-04-2017 @ 07.08.33 - (2.1.69)    - dscudiero - Fix problem when taring up the repos if the srcDir does not exist
 ## 05-05-2017 @ 07.15.26 - (2.1.70)    - dscudiero - Fix problem of sending emails when no named releases were created
 ## 05-16-2017 @ 13.13.03 - (2.1.71)    - dscudiero - Add debug statements
+## 06-13-2017 @ 08.36.40 - (2.1.72)    - dscudiero - Remove debug code
