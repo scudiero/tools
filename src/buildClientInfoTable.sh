@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.113 # -- dscudiero -- Wed 05/03/2017 @ 10:55:35.53
+version=2.3.114 # -- dscudiero -- Tue 06/13/2017 @ 14:03:19.84
 #=======================================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -45,7 +45,7 @@ addedCalledScriptArgs="-secondaryMessagesOnly"
 ## Local variable initialization
 GetDefaultsData $myName
 unset tokens ignoreShares ignoreSites
-if [[ $ignoreList != '' ]]; then
+if [[ -n $ignoreList ]]; then
 	tokens+=("$(cut -d' ' -f1 <<< $ignoreList)")
 	#tokens+=("$(cut -d' ' -f2 <<< $ignoreList)")
 	for token in "${tokens[@]}"; do
@@ -72,7 +72,7 @@ Hello
 # Main
 #=======================================================================================================================
 ## Get list of clients from the transactional system
-	if [[ $client != '' ]]; then
+	if [[ -n $client ]]; then
 		clients+=($client);
 		useClientInfoTable="$clientInfoTable"
 		inPlace=true
@@ -185,3 +185,4 @@ Goodbye 0 'alert'
 ## Tue Feb 14 13:18:42 CST 2017 - dscudiero - Refactored to delete the client records before inserting a new one
 ## 04-17-2017 @ 12.30.14 - (2.3.112)   - dscudiero - modify logic for what database to use if a client was passed in
 ## 05-03-2017 @ 11.41.51 - (2.3.113)   - dscudiero - Order the client list by name
+## 06-13-2017 @ 14.03.50 - (2.3.114)   - dscudiero - Change to use -n and -z notation
