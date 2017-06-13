@@ -1,5 +1,5 @@
 //======================================================================================================================
-// version:1.0.4 // -- dscudiero -- Mon 05/22/2017 @  8:11:33.27
+// version:1.0.6 // -- dscudiero -- Mon 06/12/2017 @ 14:49:14.26
 //======================================================================================================================
 // Workflow functions unique for this CIM instance
 //======================================================================================================================
@@ -10,6 +10,9 @@ if (typeof wfFunctionsLoaded == "undefined") {
 	//Get the CIM instance name
 	var wfCimInstance=tcfdata.pagename[0].replace(/^\/([^\/]*)\/.*/, "/$1/");
 	wfCimInstance=wfCimInstance.replace(/\//g, "");
+	wfAllcodes=false;
+	if (tcfdata.allcodes && tcfdata.allcodes.length >0)
+		wfAllcodes=true;
 
 	// If wfDebugLevel is set in the config file then set as global
 	var wfDebugLevel=getTCFValue("wfDebugLevel");
@@ -157,3 +160,4 @@ wfLibName="/locallibs/workflowLib.atj"
 // 03-24-2017 @ 07.36.56 - (//)        - dscudiero - General syncing of dev to prod
 // 05-11-2017 @ 14.55.28 - (//)        - dscudiero - refactored the begining stuff, removed loaded messages
 // 05-22-2017 @ 08.11.47 - (//)        - dscudiero - General syncing of dev to prod
+// 06-13-2017 @ 14.04.53 - (//)        - dscudiero - add setting wfAllcodes
