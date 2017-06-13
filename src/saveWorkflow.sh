@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.73 # -- dscudiero -- Tue 06/13/2017 @  8:50:04.22
+version=2.2.74 # -- dscudiero -- Tue 06/13/2017 @  8:50:57.05
 #====================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye ParseCourseleafFile' #imports="$imports "
@@ -62,7 +62,7 @@ if [[ $daemon == true ]]; then
 	client="$(cut -d ' ' -f1 <<< "$data")"
 	client="$(cut -d '-' -f1 <<< "$data")"
 	env="$(cut -d ' ' -f2 <<< "$data")"
-dump siteFile data client env
+dump userName siteFile data client env
 	allCims=true; GetCims  "$siteFile"
 	srcDir="$siteFile"
 	backupFolder="$tmpRoot/$myName/$client-$env-$BASHPID/beforeDelete"
@@ -176,3 +176,4 @@ Goodbye 0
 ## 05-24-2017 @ 12.18.18 - (2.2.71)    - dscudiero - Fix issue with the ProtectedCall syntax
 ## 06-06-2017 @ 09.49.36 - (2.2.72)    - dscudiero - removed debug statements
 ## 06-13-2017 @ 08.50.14 - (2.2.73)    - dscudiero - Add debug statement
+## 06-13-2017 @ 08.51.01 - (2.2.74)    - dscudiero - General syncing of dev to prod
