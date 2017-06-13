@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.37 # -- dscudiero -- Wed 05/31/2017 @ 12:35:27.55
+version=1.0.38 # -- dscudiero -- Tue 06/13/2017 @  8:36:03.66
 #==================================================================================================
 #= Description +===================================================================================
 # Clone a Courseleaf git repository
@@ -53,8 +53,6 @@ tgtDir="$4"
 parseQuiet=true
 ParseArgsStd
 dump -2 -t originalArgStr repo tag srcDir tgtDir
-
-ToDo 'remove debug code' ; batchMode=true
 
 #===================================================================================================
 # Main
@@ -172,3 +170,4 @@ return 0
 ## 05-19-2017 @ 12.25.49 - (1.0.35)    - dscudiero - Added debug statements
 ## 05-31-2017 @ 12.32.11 - (1.0.35)    - dscudiero - Misc cleanup
 ## 05-31-2017 @ 12.35.33 - (1.0.37)    - dscudiero - General syncing of dev to prod
+## 06-13-2017 @ 08.36.22 - (1.0.38)    - dscudiero - Remove debug code
