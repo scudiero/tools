@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.3.7" # -- dscudiero -- Mon 06/12/2017 @ 11:23:31.74
+version="1.3.8" # -- dscudiero -- Tue 06/13/2017 @  8:48:25.32
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -86,10 +86,13 @@ statusLine="\tLoader ($version): "
 	fi
 
 # Who is the logged in user
-[[ -n $(which logname 2>&1) ]] && userName=$(logname 2>&1) || userName=$LOGNAME
-[[ $userName == 'dscudiero' ]] && userName=$LOGNAME
-tmpRoot=/tmp/$LOGNAME
-[[ ! -d $tmpRoot ]] && mkdir -p $tmpRoot
+	userName=$(/usr/bin/logname 2>&1)
+	[[ -z $userName && -n $LOGNAME ]] && userName=$LOGNAME
+	[[ $userName == 'dscudiero' ]] && userName=$LOGNAME
+
+## Set tmpRoot directory
+	tmpRoot=/tmp/$LOGNAME
+	[[ ! -d $tmpRoot ]] && mkdir -p $tmpRoot
 
 #==================================================================================================
 # Parse arguments
@@ -381,3 +384,4 @@ sTime=$(date "+%s")
 ## 06-12-2017 @ 11.15.37 - ("1.3.5")   - dscudiero - add debug statements
 ## 06-12-2017 @ 11.16.56 - ("1.3.6")   - dscudiero - General syncing of dev to prod
 ## 06-12-2017 @ 11.24.10 - ("1.3.7")   - dscudiero - remove debug statements
+## 06-13-2017 @ 08.48.40 - ("1.3.8")   - dscudiero - Tweak how userName is set
