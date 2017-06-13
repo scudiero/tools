@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.1.101 # -- dscudiero -- Mon 06/05/2017 @ 14:51:33.95
+version=5.1.105 # -- dscudiero -- Tue 06/13/2017 @ 12:45:47.63
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -226,8 +226,16 @@ scriptDescription="Refresh a courseleaf product"
 		echo "	[[ \$1 =~ \$reNum ]] && echo true || echo false" >> $scriptFile
 		echo "	return 0" >> $scriptFile
 		echo "} #IsNumeric" >> $scriptFile
+		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
+
+		echo "function Msg2 {" >> $scriptFile
+		echo "	echo -e \"$*\" " >> $scriptFile
+		echo "	return 0" >> $scriptFile
+		echo "} #Msg2" >> $scriptFile
+
 		echo "" >> $scriptFile
 		echo "" >> $scriptFile
+		echo "##=======================================================================================================" >> $scriptFile
 		echo "##=======================================================================================================" >> $scriptFile
 		echo "## Parse arguments" >> $scriptFile
 		echo "##=======================================================================================================" >> $scriptFile
@@ -368,13 +376,39 @@ scriptDescription="Refresh a courseleaf product"
 			echo "	pushd \"\$targetSpec/web/courseleaf\" >& /dev/null" >> $scriptFile
 			echo "	\$DOIT ./courseleaf.cgi -r /courseleaf/index.html | xargs -I{} echo -e \"\\t\\t{}\"" >> $scriptFile
 			echo "	popd >& /dev/null" >> $scriptFile
+			echo "" >> $scriptFile
 
-			echo "	## Swap our copy of the next site with the curr site" >> $scriptFile
+			echo " # Archive request logs" >> $scriptFile
+			echo " 	Msg2 \"^Archiving request logs...\"" >> $scriptFile
+			echo " 	if [[ -d $tgtDir/requestlog ]]; then" >> $scriptFile
+			echo " 		cd $tgtDir/requestlog" >> $scriptFile
+			echo " 		if [[ $(ls) != '' ]]; then" >> $scriptFile
+			echo " 			Msg2 \"^Archiving last requestlog directory...\"" >> $scriptFile
+			echo " 			set +o noglob" >> $scriptFile
+			echo " 			[[ ! -d \"$tgtDir/requestlog-archive/\" ]] && mkdir \"$tgtDir/requestlog-archive/\"" >> $scriptFile
+			echo " 			\$DOIT tar -cJf $tgtDir/requestlog-archive/requestlog-$(date \"+%Y-%m-%d\").tar.bz2 * --remove-files" >> $scriptFile
+			echo " 			set -o noglob" >> $scriptFile
+			echo " 		fi" >> $scriptFile
+			echo " 	fi" >> $scriptFile
+			echo " 	if [[ -d $tgtDir/requestlog-archive ]]; then" >> $scriptFile
+			echo " 		cd $tgtDir/requestlog-archive" >> $scriptFile
+			echo " 		if [[ $(ls | grep -v 'archive') != '' ]]; then" >> $scriptFile
+			echo " 			Msg2 \"^Taring up the requestlog-archive directory...\"" >> $scriptFile
+			echo " 			cd $tgtDir/requestlog-archive" >> $scriptFile
+			echo " 			set +o noglob" >> $scriptFile
+			echo " 			\$DOIT tar -cJf $tgtDir/requestlog-archive/archive-$(date \"+%Y-%m-%d\").tar.bz2 *  --exclude '*archive*' --remove-files" >> $scriptFile
+			echo " 			set -o noglob" >> $scriptFile
+			echo " 		fi" >> $scriptFile
+			echo " 	fi" >> $scriptFile
+			echo "" >> $scriptFile
+
+			echo " echo "	## Swap our copy of the next site with the curr site" >> $scriptFile
 			echo "	echo -e \"\\tSwapping our clone of the NEXT site with the CURR site\"" >> $scriptFile
 			echo "	if [[ -d \"\$(dirname \$tgtDir)/curr\" ]]; then" >> $scriptFile
 			echo "		echo -e \"\\t\\t '\$(dirname \$tgtDir)/curr\' --> '\$(dirname \$tgtDir)/curr.\$dirSuffix'\"" >> $scriptFile
 			echo "		\$DOIT mv -f \"\$(dirname \$tgtDir)/curr\" \"\$(dirname \$tgtDir)/curr.\$dirSuffix\"" >> $scriptFile
 			echo "	fi" >> $scriptFile
+			echo "" >> $scriptFile
 
 			echo "	echo -e \"\\t\\t '\$targetSpec' --> '\$(dirname \$tgtDir)/curr'\"" >> $scriptFile
 			echo "	\$DOIT mv -f \"\$targetSpec\" \"\$(dirname \$tgtDir)/curr\"" >> $scriptFile
@@ -1209,9 +1243,9 @@ if [[ $buildPatchPackage != true ]]; then
 	Msg2 "\n^Cross product checks..."
 	## Check to see if there are any old formbuilder widgets
 		checkDir="$tgtDir/web/courseleaf/locallibs/widgets"
-		fileCount=$(ls "$checkDir" | grep 'banner_' | wc -l)
+		fileCount=$(ls "$checkDir" 2> /dev/null | grep 'banner_' | wc -l)
 		[[ $fileCount -gt 0 ]] && Warning 0 1 "Found 'banner' widgets in /courseleaf/locallibs/widgets, these are probably deprecated, please ask a CIM developer to evaluate."
-		fileCount=$(ls "$checkDir" | grep 'psoft_' | wc -l)
+		fileCount=$(ls "$checkDir" 2> /dev/null | grep 'psoft_' | wc -l)
 		[[ $fileCount -gt 0 ]] && Warning 0 1 "Found 'psoft' widgets in /courseleaf/locallibs/widgets, these are probably deprecated, please ask a CIM developer to evaluate."
 
 
@@ -1416,3 +1450,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-05-2017 @ 07.58.16 - (5.1.88)    - dscudiero - Added support for selected refresh of index.cgi in the search directory
 ## 06-05-2017 @ 11.04.04 - (5.1.95)    - dscudiero - Tweaked messaging for product, fixed editing of courseleaf console
 ## 06-05-2017 @ 14.52.03 - (5.1.101)   - dscudiero - Added checing for deprecated formbuilder widgets
+## 06-13-2017 @ 12.46.00 - (5.1.105)   - dscudiero - g
