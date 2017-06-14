@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.3.15" # -- dscudiero -- Wed 06/14/2017 @  8:07:52.09
+version="1.3.21" # -- dscudiero -- Wed 06/14/2017 @  9:53:27.92
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -84,7 +84,12 @@ statusLine="\tLoader ($version): "
 	[[ -z $TOOLSPATH ]] && echo -e "\n*Error* -- The TOOLSPATH environment value has not been set, cannot continue\n" && exit -3
 
 	sTime=$(date "+%s")
-	[[ "$0" = "-bash" ]] && callPgmName=bashShell || callPgmName=$(basename "$0")
+	if [[ "$0" != "-bash" ]]; then
+		callPgmName=$(basename "$1")
+		shift
+	else
+		callPgmName='bashShell'
+	fi
 
 	leepUsers="$(getent group leepfrog)"
 	leepUsers=",${leepUsers##*:},"
@@ -367,3 +372,4 @@ sTime=$(date "+%s")
 ## 06-12-2017 @ 11.24.10 - ("1.3.7")   - dscudiero - remove debug statements
 ## 06-13-2017 @ 08.48.40 - ("1.3.8")   - dscudiero - Tweak how userName is set
 ## 06-14-2017 @ 08.08.20 - ("1.3.15")  - dscudiero - Remove debug statements
+## 06-14-2017 @ 09.54.08 - ("1.3.21")  - dscudiero - Strip off first token as the toCall program name
