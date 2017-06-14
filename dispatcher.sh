@@ -9,8 +9,6 @@
 ## Load boot data
 	[[ -r $(dirname $0)/bootData ]] && source "$(dirname $0)/bootData" || source "$TOOLSPATH/bootData"
 
-	[[ $LOGNAME == 'dscudiero' ]] && echo "warehouseDb = '$warehouseDb'"
-
 ## Set global database variable
 	[[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB"
 	export TOOLSWAREHOUSEDB="$warehouseDb"
@@ -35,7 +33,7 @@
 		echo -e "\t\t-- $hostName - back from loader" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 		return 0
 	else
-		"$loaderDir/loader.sh" $(basename $0) $*
+		source "$loaderDir/loader.sh" $(basename $0) $*
 	fi
 
 exit
@@ -62,3 +60,4 @@ exit
 ## 06-12-2017 @ 11.24.02 - dscudiero - General syncing of dev to prod
 ## 06-12-2017 @ 11.24.54 - dscudiero - remove debug statements
 ## 06-14-2017 @ 07.49.36 - dscudiero - Add debug messages
+## 06-14-2017 @ 08.08.05 - dscudiero - Remove debug statements
