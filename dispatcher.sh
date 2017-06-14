@@ -9,6 +9,8 @@
 ## Load boot data
 	[[ -r $(dirname $0)/bootData ]] && source "$(dirname $0)/bootData" || source "$TOOLSPATH/bootData"
 
+	[[ $LOGNAME == 'dscudiero' ]] && echo "warehouseDb = '$warehouseDb'"
+
 ## Set global database variable
 	[[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB"
 	export TOOLSWAREHOUSEDB="$warehouseDb"
@@ -59,3 +61,4 @@ exit
 ## 06-12-2017 @ 11.18.41 - dscudiero - export the value of toolspath
 ## 06-12-2017 @ 11.24.02 - dscudiero - General syncing of dev to prod
 ## 06-12-2017 @ 11.24.54 - dscudiero - remove debug statements
+## 06-14-2017 @ 07.49.36 - dscudiero - Add debug messages
