@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.3.8" # -- dscudiero -- Tue 06/13/2017 @  8:48:25.32
+version="1.3.15" # -- dscudiero -- Wed 06/14/2017 @  8:07:52.09
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -10,23 +10,6 @@ version="1.3.8" # -- dscudiero -- Tue 06/13/2017 @  8:48:25.32
 #===================================================================================================
 loaderArgs="$*"
 myName='loader'
-
-#==================================================================================================
-# Load BOOT data
-#==================================================================================================
-# ## Read in data from the boot file, set base information
-# 	if [[ -r $(dirname $0)/bootData ]]; then
-# 		source "$(dirname $0)/bootData"
-# 	else
-# 		[[ -z $TOOLSPATH ]] && TOOLSPATH="/steamboat/leepfrog/docs/tools"
-# 		[[ ! -d $TOOLSPATH ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but is not a directory, cannot continue\n" && exit -1
-# 		[[ ! -r $TOOLSPATH/bootData ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but you cannot access the boot record, cannot continue\n" && exit -1
-# 		source "$TOOLSPATH/bootData"
-# 	fi
-# 	[[ -d "$(dirname "$TOOLSPATH")/toolsNew" ]] && TOOLSPATH="$(dirname "$TOOLSPATH")/toolsNew"
-# 	[[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB"
-# 	export TOOLSWAREHOUSEDB="$warehouseDb"
-# 	[[ -z $DISPATCHER ]] && export DISPATCHER="$TOOLSPATH/${myName}.sh"
 
 #==================================================================================================
 # Local Functions
@@ -204,7 +187,7 @@ sTime=$(date "+%s")
 	sTime=$(date "+%s")
 
 ## If sourced then just return
-	[[ $viaCron == true || $calledViaSource == true ]] && return 0
+	[[ $viaCron == true ]] && return 0
 
 ## Resolve the script file to run
 	## Were we passed in a fully qualified file name
@@ -213,14 +196,12 @@ sTime=$(date "+%s")
 		callPgmName=$(basename $executeFile)
 		callPgmName=$(cut -d'.' -f1 <<< $callPgmName)
 	fi ## [[ ${callPgmName:0:1} == '\' ]]
-
 	## Check to make sure we can run
 		checkMsg=$(CheckRun $callPgmName)
 		if [[ $checkMsg != true ]]; then
 			[[ $(Contains ",$administrators," ",$userName,") != true ]] && echo && echo && Terminate "$checkMsg"
 			[[ $callPgmName != 'testsh' ]] && echo && echo -e "\t$(ColorW "*** $checkMsg ***")"
 		fi
-
 	## Check to make sure we are authorized
 		checkMsg=$(CheckAuth $callPgmName)
 		[[ $checkMsg != true ]] && echo && echo && Terminate "$checkMsg"
@@ -385,3 +366,4 @@ sTime=$(date "+%s")
 ## 06-12-2017 @ 11.16.56 - ("1.3.6")   - dscudiero - General syncing of dev to prod
 ## 06-12-2017 @ 11.24.10 - ("1.3.7")   - dscudiero - remove debug statements
 ## 06-13-2017 @ 08.48.40 - ("1.3.8")   - dscudiero - Tweak how userName is set
+## 06-14-2017 @ 08.08.20 - ("1.3.15")  - dscudiero - Remove debug statements
