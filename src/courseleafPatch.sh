@@ -1233,8 +1233,14 @@ declare -A processedSpecs
 									if [[ $tgtFileMd5 != $cmpFileMd5 ]]; then
 										if [[ $specIgnoreList == 'warn' ]]; then
 											Warning 0 2 "'${specPattern##* }' file is different than the skeleton file, please analyze the differnces to ensure a custom copy is still needed"
-										else
-											::
+										elif [[ $specIgnoreList == 'report' ]]; then
+											Msg2 "^^${colorRed}< is ${compareToFile}${colorDefault}"
+											Msg2 "^^${colorBlue}> is ${tgtFile}${colorDefault}"
+											indentLevelSave=$indentLevel
+											let indentLevel=$indentLevel+2
+											ProtectedCall "colordiff $compareToFile $tgtFile | Indent"
+											indentLevel=$indentLeve
+											Msg2 "$colorDefault"
 										fi
 									else
 										Msg2 "^^File is current"
@@ -1495,3 +1501,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-13-2017 @ 12.46.00 - (5.1.105)   - dscudiero - g
 ## 06-19-2017 @ 07.14.10 - (5.2.-1)    - dscudiero - Added the include calability back
 ## 06-19-2017 @ 15.07.53 - (5.2.-1)    - dscudiero - Add setting of siteadminmode in the curr site
+## 06-19-2017 @ 15.39.16 - (5.2.-1)    - dscudiero - Added report as an option to compare directive
