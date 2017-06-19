@@ -1,7 +1,7 @@
 #!/bin/bash
-# XO NOT AUTOVERSION
+# DO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.1.105 # -- dscudiero -- Tue 06/13/2017 @ 12:45:47.63
+version=5.2.-1 # -- dscudiero -- Thu 06/15/2017 @ 11:48:18.60
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -583,7 +583,7 @@ tmpFile=$(mkTmpFile)
 			GetExcel "$workbookFile" "$sheet" > $tmpFile
 			arrayName="$(tr -d '-' <<< $sheet)"
 			unset $arrayName ## Unset the sheet array
-			[[ $sheet != 'all' && ${sheet:0:8} != 'include-' ]] && productList="$productList,$sheet"
+			[[ $sheet != 'all' ]] && productList="$productList,$sheet"
 			while read line; do
 				[[ -z $line || $line == '|||' ]] && continue
 				token="$(Lower "$(cut -d'|' -f1 <<< "$line")")"
@@ -591,8 +591,7 @@ tmpFile=$(mkTmpFile)
 				dump -2 -t -t line
 				eval "$arrayName+=(\"$line\")"
 			done < "$tmpFile"
-			#tmpArrayName="$arrayName[@]" ; tmpArray=("${!tmpArrayName}")
-			#for ((jj=0; jj<${#tmpArray[@]}; jj++)); do echo -e "\t $arrayName [$jj] = >${tmpArray[$jj]}<"; done
+			#tmpArrayName="$arrayName[@]" ; tmpArray=("${!tmpArrayName}"); for ((jj=0; jj<${#tmpArray[@]}; jj++)); do echo -e "\t $arrayName [$jj] = >${tmpArray[$jj]}<"; done
 		done
 		productList="${productList:1}"
 
@@ -622,7 +621,7 @@ tmpFile=$(mkTmpFile)
 				for token2 in $(tr ',' ' ' <<< "$purchasedProducts"); do
 					[[ $token == ${token2:0:${#token}} ]] && found=true && break
 				done
-				[[ $found != true && "$token" != 'formbuilder' ]] && Warning "This client does not have product '$token' registered in the clients database"
+				[[ $found != true && $(Contains ',cat,cim,clss,' ",$token,") == true ]] && Warning 0 1 "This client does not have product '$token' registered in the clients database"
 				patchProducts="$patchProducts,$token"
 			done
 			patchProducts="${patchProducts:1}"
@@ -653,14 +652,14 @@ tmpFile=$(mkTmpFile)
 		[[ ! -f $srcDir/master/.syncDate ]] && Terminate "Could not locate '$srcDir/master/.syncDate'. The skeleton shadow is probably being updated, please try again later"
 		eval ${productLower}MasterDate=\"$(date +"%m-%d-%Y @ %H.%M.%S" -r $srcDir/master/.syncDate)\"
 		eval prodMasterDate=\$${productLower}MasterDate
-		if [[ -z $newest && -z $master ]]; then
+		if [[ -z $newest && -z $master && -n $prodShadowVer ]]; then
 			echo
 			Msg2 "For '$(ColorK $product)', do you wish to apply the latest named version ($prodShadowVer) or the skeleton ($prodMasterDate)"
 			unset ans; Prompt ans "^'Yes' for the named version, 'No' for the skeleton" 'Yes,No' 'Yes'; ans=$(Lower "${ans:0:1}")
 			[[ $ans != 'y' ]] && prodShadowVer='master'
 		else
-			[[ -n $master ]] && prodShadowVer='master'
-			Note 0 1 "Using specified value of '$prodShadowVer' for $product 'prodShadowVer'"
+			[[ -n $master || -z $prodShadowVer ]] && prodShadowVer='master'
+			Note 0 1 "Using specified value of '$prodShadowVer' for $product"
 		fi
 		if [[ $prodShadowVer == 'master' && -r "$srcDir/master/$(basename $srcDir)/clver.txt" ]]; then
 			token="$(Lower "$(cat "$srcDir/master/$(basename $srcDir)/clver.txt")")"
@@ -753,6 +752,7 @@ tmpFile=$(mkTmpFile)
 			sqlStmt="select redhatver from $clientInfoTable where name=\"$client\""
 			RunSql2 $sqlStmt
 			[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Building a remote installation package and could not retrieve the clients Redhat version from the database"
+			[[ ${resultSet[@]} == 'NULL' ]] && Terminate "Client record does not contain Redhat version information."
 			useRhel="rhel${resultSet[0]}"
 		else
 			useRhel="rhel${myRhel:0:1}"
@@ -790,13 +790,11 @@ else
 fi
 verifyArgs+=("Products:$patchProducts")
 for token in $(tr ',' ' ' <<< $processControl); do
-	verifyArgs+=("$(cut -d '|' -f1 <<< "$token")" version:"$(cut -d '|' -f2 <<< "$token")") 	## (from: '$(cut -d '|' -f3 <<< $token)/$(cut -d '|' -f2 <<< $token)')")
+	verifyArgs+=("^$(cut -d '|' -f1 <<< "$token") version":"$(cut -d '|' -f2 <<< "$token")") 	## (from: '$(cut -d '|' -f3 <<< $token)/$(cut -d '|' -f2 <<< $token)')")
 done
 
 [[ $catalogAdvance == true && $buildPatchPackage != true ]] && verifyArgs+=("New catalog edition:$newEdition, fullAdvance=$fullAdvance")
 [[ $catalogAudit == true ]] && verifyArgs+=("Catalog Edit:$catalogAudit")
-
-
 
 [[ -n $cgiVer ]] && verifyArgs+=("CGIs version:$cgiVer") 	## (from: '$cgisDir')")
 [[ -n $dailyShVere ]] && verifyArgs+=("Daily.sh version:$dailyShVer") 	## (from: '$skeletonRoot/release')")
@@ -1200,14 +1198,30 @@ declare -A processedSpecs
 								fi
 							fi
 							;;
+						compare)
+							if [[ $buildPatchPackage != true ]]; then
+								Msg2 "\n^Processing '$specSource' record: '${specPattern%% *}' --> '${specTarget}' $specIgnoreList "
+								if [[ -f "${tgtDir}${specPattern##* }" ]]; then
+									tgtFile="${tgtDir}${specPattern##* }"
+									tgtFileMd5=$(md5sum $tgtFile | cut -f1 -d" ")
+									[[ $specTarget == 'skeleton' ]] && compareToFile="$skeletonRoot/release${specPattern##* }"
+									cmpFileMd5=$(md5sum $compareToFile | cut -f1 -d" ")
+									if [[ $tgtFileMd5 != $cmpFileMd5 ]]; then
+										Warning 0 2 "'${specPattern##* }' file is different than the skeleton file, please analyze the differnces to ensure a custom copy is still needed"
+									else
+										Msg2 "^^File is current"
+									fi
+								fi
+							fi
+							;;
 						include)
 							## Insert the include process steps into the current productSpec Array
-							includeArrayName="$(Lower "include${specPattern%% *}")"
-							eval "includeArray=("\${$includeArrayName[@]}")"
-							tmpArray=("${productSpecArray[@]:0:$i+1}")
-							tmpArray+=(${includeArray[@]})
-							tmpArray+=("${productSpecArray[@]:$i+1}")
-							productSpecArray=("${tmpArray[@]}")
+							for ((jj=0; jj<$cntr+1; jj++)); do tmpArray+=("${productSpecArray[$jj]}"); done  ## Front part of existing productSpecArray
+							for jj in $(IndirKeys "$(Lower "${specPattern%% *}")"); do tmpArray+=("$(IndirVal "$(Lower "${specPattern%% *}")" $jj)"); done  ## Inculde steps
+							for ((jj=$cntr+1; jj<${#productSpecArray[@]}; jj++)); do tmpArray+=("${productSpecArray[$jj]}"); done ## Back part of existing productSpecArray
+							unset productSpecArray
+							for jj in $(IndirKeys tmpArray); do productSpecArray+=("$(IndirVal tmpArray $jj)"); done  ## Inculde steps
+							#for ((jj=0; jj<${#productSpecArray[@]}; jj++)); do echo "productSpecArray[$jj] = >${productSpecArray[$jj]}<"; done; Pause
 							;;
 						*) Terminate "^Encountered and invalid processing type '$specSource'\n^$specLine"
 							;;
@@ -1451,3 +1465,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-05-2017 @ 11.04.04 - (5.1.95)    - dscudiero - Tweaked messaging for product, fixed editing of courseleaf console
 ## 06-05-2017 @ 14.52.03 - (5.1.101)   - dscudiero - Added checing for deprecated formbuilder widgets
 ## 06-13-2017 @ 12.46.00 - (5.1.105)   - dscudiero - g
+## 06-19-2017 @ 07.14.10 - (5.2.-1)    - dscudiero - Added the include calability back
