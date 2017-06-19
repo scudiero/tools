@@ -26,7 +26,7 @@ scriptDescription="Refresh a courseleaf product"
 		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help
 		argList+=(-advance,3,switch,catalogAdvance,,script,"Advance the catalog")
 		argList+=(-noAdvance,4,switch,catalogAdvance=false,"catalogAdvance=false",script,"Do not advance the catalog")
-		argList+=(-fullAdvance,5,switch,fullAdance,,script,"Do a full catalog advance")
+		argList+=(-fullAdvance,5,switch,fullAdvance,,script,"Do a full catalog advance")
 		argList+=(-newest,3,switch,newest,,script,"Update each product to the newest named version of each product")
 		argList+=(-latest,3,switch,newest,,script,"Update each product to the newest named version of each product")
 		argList+=(-master,3,switch,master,,script,"Update each product to the master version of each product")
@@ -165,11 +165,11 @@ scriptDescription="Refresh a courseleaf product"
 		[[ -z $scriptFile ]] && Terminate "$FUNCNAME called without a scriptFile name"
 		echo "#!/bin/bash" > $scriptFile
 		echo "echo \"# Script file genrated by $userName via $myName($version) at $backupSuffix\"" >> $scriptFile
-		echo "version=\"$version\" ; DOIT=''" >> $scriptFile
-		echo "" >> $scriptFile
+		echo "version=\"1.1.0\" ; DOIT=''" >> $scriptFile
+		echo >> $scriptFile
 		echo "clear" >> $scriptFile
 		echo "echo -e \"\n\"" >> $scriptFile
-		echo "" >> $scriptFile
+		echo >> $scriptFile
 		echo "##=======================================================================================================" >> $scriptFile
 		echo "function RunRsync {" >> $scriptFile
 		echo "	local rsyncSrc=\"\$1\"; shift" >> $scriptFile
@@ -208,7 +208,7 @@ scriptDescription="Refresh a courseleaf product"
 		echo "	[[ -f \"\$rsyncOut\" ]] && rm -f \"\$rsyncOut\"" >> $scriptFile
 		echo "	return 0" >> $scriptFile
 		echo "} # RunRsync " >> $scriptFile
-		echo "" >> $scriptFile
+		echo >> $scriptFile
 		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
 
 		echo "function Contains {" >> $scriptFile
@@ -218,7 +218,7 @@ scriptDescription="Refresh a courseleaf product"
 		echo "	[[ "\$testStr" != "\$string" ]] && echo true || echo false" >> $scriptFile
 		echo "	return 0" >> $scriptFile
 		echo "} #Contains" >> $scriptFile
-		echo "" >> $scriptFile
+		echo >> $scriptFile
 		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
 
 		echo "function IsNumeric {" >> $scriptFile
@@ -229,12 +229,13 @@ scriptDescription="Refresh a courseleaf product"
 		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
 
 		echo "function Msg2 {" >> $scriptFile
+		echo "	msgText=\$(tr '^' \"\t\" <<< \"\$*\")" >> $scriptFile
 		echo "	echo -e \"$*\" " >> $scriptFile
 		echo "	return 0" >> $scriptFile
 		echo "} #Msg2" >> $scriptFile
 
-		echo "" >> $scriptFile
-		echo "" >> $scriptFile
+		echo >> $scriptFile
+		echo >> $scriptFile
 		echo "##=======================================================================================================" >> $scriptFile
 		echo "##=======================================================================================================" >> $scriptFile
 		echo "## Parse arguments" >> $scriptFile
@@ -251,11 +252,13 @@ scriptDescription="Refresh a courseleaf product"
 		echo "	esac" >> $scriptFile
 		echo "	argString=\"\${tmpStr:1}\"" >> $scriptFile
 		echo "done" >> $scriptFile
-		echo "" >> $scriptFile
+		echo >> $scriptFile
 
 		echo "##=======================================================================================================" >> $scriptFile
 		echo "## M A I N" >> $scriptFile
 		echo "##=======================================================================================================" >> $scriptFile
+		echo "echo -e \"\\n$myName: \$version \\n\"" >> $scriptFile
+		echo "courseleafProgDir=\"$courseleafProgDir\"" >> $scriptFile
 		echo "unset clHome" >> $scriptFile
 		echo "if [[ -n \$argString ]]; then" >> $scriptFile
 		echo "	clHome=\"\$argString\"" >> $scriptFile
@@ -265,6 +268,10 @@ scriptDescription="Refresh a courseleaf product"
 		echo "	clHome=\"/var/www/CourseLeaf\"" >> $scriptFile
 		echo "elif [[ -d /var/www/courseleaf ]]; then" >> $scriptFile
 		echo "	clHome=\"/var/www/courseleaf\"" >> $scriptFile
+		if [[ $testMode == true ]]; then
+			echo "elif [[ -d \$HOME/testData ]]; then" >> $scriptFile
+			echo "	clHome=\"\$HOME/testData\"" >> $scriptFile
+		fi
 		echo "fi" >> $scriptFile
 		echo "if [[ -n \$clHome && -d \"\$clHome\" ]]; then" >> $scriptFile
 		echo "	echo -en \"Found CourseLeaf installation at: '\$clHome', is that correct  ('yes' or 'no') > \"" >> $scriptFile
@@ -278,12 +285,13 @@ scriptDescription="Refresh a courseleaf product"
 		echo "	read clHome" >> $scriptFile
 		echo "fi" >> $scriptFile
 		echo "[[ \${clHome: (-1)} == '/' ]] && clHome=\${clHome:0:(-1)}" >> $scriptFile
-		echo "" >> $scriptFile
+		echo >> $scriptFile
 		echo "[[ ! -d \"\$clHome/next\" ]] && echo -e \"\\n*Error* -- Could not find a 'next' directory, the specified location is not a CourseLeaf home directory, stopping\\n\" && exit 3" >> $scriptFile
 		echo "echo -e \"\\nPatch/Advance CourseLeaf Home NEXT instance: '\$clHome/next' \\n\\tPatch source data: '\$(pwd)'\" " >> $scriptFile
 		echo "tgtDir=\"\$clHome/next\"" >> $scriptFile
-		echo "dirSuffix=\"\$(date +"%m-%d-%Y@%H.%M.%S")\"" >> $scriptFile
-		echo "" >> $scriptFile
+		echo "dirSuffix=\"\$(date +\"%m-%d-%Y@%H.%M.%S\")\"" >> $scriptFile
+		echo "srcDir=\"\$(pwd)\"" >> $scriptFile
+		echo >> $scriptFile
 
 		#===================================================================================================================
 		## Advance the CURR site
@@ -333,7 +341,7 @@ scriptDescription="Refresh a courseleaf product"
 			echo "fi ## advance" >> $scriptFile
 		fi ## catalogAdvance
 
-		echo "echo \"\"" >> $scriptFile
+		echo "echo" >> $scriptFile
 		echo "unset ans" >> $scriptFile
 		echo "until [[ -n \$ans ]]; do" >> $scriptFile
 		echo "	echo -en \"Do you wish to continue with the patch/advance ('yes' or 'no') > \"" >> $scriptFile
@@ -376,55 +384,68 @@ scriptDescription="Refresh a courseleaf product"
 			echo "	pushd \"\$targetSpec/web/courseleaf\" >& /dev/null" >> $scriptFile
 			echo "	\$DOIT ./courseleaf.cgi -r /courseleaf/index.html | xargs -I{} echo -e \"\\t\\t{}\"" >> $scriptFile
 			echo "	popd >& /dev/null" >> $scriptFile
-			echo "" >> $scriptFile
+			echo >> $scriptFile
 
 			echo " # Archive request logs" >> $scriptFile
 			echo " 	Msg2 \"^Archiving request logs...\"" >> $scriptFile
-			echo " 	if [[ -d $tgtDir/requestlog ]]; then" >> $scriptFile
-			echo " 		cd $tgtDir/requestlog" >> $scriptFile
-			echo " 		if [[ $(ls) != '' ]]; then" >> $scriptFile
+			echo " 	if [[ -d \$tgtDir/requestlog ]]; then" >> $scriptFile
+			echo " 		pushd \$tgtDir/requestlog >& /dev/null" >> $scriptFile
+			echo " 		if [[ -n \$(ls) ]]; then" >> $scriptFile
 			echo " 			Msg2 \"^Archiving last requestlog directory...\"" >> $scriptFile
 			echo " 			set +o noglob" >> $scriptFile
-			echo " 			[[ ! -d \"$tgtDir/requestlog-archive/\" ]] && mkdir \"$tgtDir/requestlog-archive/\"" >> $scriptFile
-			echo " 			\$DOIT tar -cJf $tgtDir/requestlog-archive/requestlog-$(date \"+%Y-%m-%d\").tar.bz2 * --remove-files" >> $scriptFile
+			echo " 			[[ ! -d \"\$tgtDir/requestlog-archive/\" ]] && mkdir \"\$tgtDir/requestlog-archive/\"" >> $scriptFile
+			echo " 			\$DOIT tar -cJf \$tgtDir/requestlog-archive/requestlog-\$(date \"+%Y-%m-%d\").tar.bz2 * --remove-files" >> $scriptFile
 			echo " 			set -o noglob" >> $scriptFile
 			echo " 		fi" >> $scriptFile
-			echo " 	fi" >> $scriptFile
-			echo " 	if [[ -d $tgtDir/requestlog-archive ]]; then" >> $scriptFile
-			echo " 		cd $tgtDir/requestlog-archive" >> $scriptFile
-			echo " 		if [[ $(ls | grep -v 'archive') != '' ]]; then" >> $scriptFile
-			echo " 			Msg2 \"^Taring up the requestlog-archive directory...\"" >> $scriptFile
-			echo " 			cd $tgtDir/requestlog-archive" >> $scriptFile
-			echo " 			set +o noglob" >> $scriptFile
-			echo " 			\$DOIT tar -cJf $tgtDir/requestlog-archive/archive-$(date \"+%Y-%m-%d\").tar.bz2 *  --exclude '*archive*' --remove-files" >> $scriptFile
-			echo " 			set -o noglob" >> $scriptFile
-			echo " 		fi" >> $scriptFile
-			echo " 	fi" >> $scriptFile
-			echo "" >> $scriptFile
+			echo " 		popd >& /dev/null" >> $scriptFile
 
-			echo " echo "	## Swap our copy of the next site with the curr site" >> $scriptFile
+			echo " 	fi" >> $scriptFile
+			echo " 	if [[ -d \$tgtDir/requestlog-archive ]]; then" >> $scriptFile
+			echo " 		pushd \$tgtDir/requestlog-archive >& /dev/null" >> $scriptFile
+			echo " 		if [[ \$(ls | grep -v 'archive') != '' ]]; then" >> $scriptFile
+			echo " 			Msg2 \"^Taring up the requestlog-archive directory...\"" >> $scriptFile
+			echo " 			pushd \$tgtDir/requestlog-archive >& /dev/null" >> $scriptFile
+			echo " 			set +o noglob" >> $scriptFile
+			echo " 			\$DOIT tar -cJf \$tgtDir/requestlog-archive/archive-\$(date \"+%Y-%m-%d\").tar.bz2 *  --exclude '*archive*' --remove-files" >> $scriptFile
+			echo " 			set -o noglob" >> $scriptFile
+			echo " 		popd >& /dev/null" >> $scriptFile
+			echo " 		fi" >> $scriptFile
+			echo " 	fi" >> $scriptFile
+			echo >> $scriptFile
+
+			echo "	## Swap our copy of the next site with the curr site" >> $scriptFile
 			echo "	echo -e \"\\tSwapping our clone of the NEXT site with the CURR site\"" >> $scriptFile
 			echo "	if [[ -d \"\$(dirname \$tgtDir)/curr\" ]]; then" >> $scriptFile
 			echo "		echo -e \"\\t\\t '\$(dirname \$tgtDir)/curr\' --> '\$(dirname \$tgtDir)/curr.\$dirSuffix'\"" >> $scriptFile
 			echo "		\$DOIT mv -f \"\$(dirname \$tgtDir)/curr\" \"\$(dirname \$tgtDir)/curr.\$dirSuffix\"" >> $scriptFile
 			echo "	fi" >> $scriptFile
-			echo "" >> $scriptFile
+			echo >> $scriptFile
 
 			echo "	echo -e \"\\t\\t '\$targetSpec' --> '\$(dirname \$tgtDir)/curr'\"" >> $scriptFile
 			echo "	\$DOIT mv -f \"\$targetSpec\" \"\$(dirname \$tgtDir)/curr\"" >> $scriptFile
 			echo "	# Turn off pencils from the structured content draw" >> $scriptFile
-			echo "	editFile=\"\$tgtDir/web/\$courseleaf/localsteps/structuredcontentdraw.html\"" >> $scriptFile
+			echo "	editFile=\"\$tgtDir/web/\$courseleafProgDir/localsteps/structuredcontentdraw.html\"" >> $scriptFile
 			echo "	[[ -f \"\$editFile\" ]] && \$DOIT sed -e '/pencil.png/ s|html|//html|' -i \"\$editFile\"" >> $scriptFile
+			echo >> $scriptFile
+
+			echo "	editFile=\"\$(dirname \$tgtDir)/curr/\$courseleafProgDir.cfg\"" >> $scriptFile
+			echo "	Msg2 \"^Editing the \$editFile...\"" >> $scriptFile
+			echo "	# Set sitereadonly" >> $scriptFile
+			echo "	Msg2 \"^^CURR site admin mode set ...\"" >> $scriptFile
+			echo "	\$DOIT sed -i s'_^//sitereadonly:Admin Mode:_sitereadonly:Admin Mode:_'g \"\$editFile\"" >> $scriptFile
+			echo >> $scriptFile
+
 			echo "	echo -e \"\\n*** The new CURR site has been created, the old site was renamed to 'curr.\$dirSuffix'\"" >> $scriptFile
 			echo "fi ## advance" >> $scriptFile
-			echo "" >> $scriptFile
+			echo >> $scriptFile
 		fi ## catalogAdvance
 
 		#===================================================================================================================
 		## Patch the next site
 		echo -e "\\n##=======================================================================================================" >> $scriptFile
 		echo "echo -e \"\\nPatching the NEXT site...\\n\"" >> $scriptFile
-		echo "	sourceSpec=\"\$(pwd)/\"" >> $scriptFile
+		echo "cd \"\$srcDir\"" >> $scriptFile
+		echo "	sourceSpec=\"\$srcDir/\"" >> $scriptFile
 		echo "	targetSpec=\"\$tgtDir/\"" >> $scriptFile
 		echo " 	[[ \$DOIT != '' ]] && echo \"sourceSpec = '\$sourceSpec'\"" >> $scriptFile
 		echo " 	[[ \$DOIT != '' ]] && echo \"targetSpec = '\$targetSpec'\"" >> $scriptFile
@@ -433,7 +454,7 @@ scriptDescription="Refresh a courseleaf product"
 		echo " 		setGroup=\"\$(stat -c \"%G\" ./courseleaf.cfg)\"" >> $scriptFile
 		echo "	popd >& /dev/null" >> $scriptFile
 		echo "	if [[ \$setOwner != 'UNKNOWN' && \$setGroup != 'UNKNOWN' ]]; then" >> $scriptFile
-		echo "		echo -e \"\\tSetting source files ownership to '${setOwner}:\${setGroup}' (again, this will take a while)...\"" >> $scriptFile
+		echo "		echo -e \"\\tSetting source files ownership to \${setOwner}:\${setGroup}' (again, this will take a while)...\"" >> $scriptFile
 		echo "		\$DOIT chown -R \${setOwner}:\${setGroup} \$(pwd)" >> $scriptFile
 		echo " 	else" >> $scriptFile
 		echo "		echo -e \"\\t*Warning* -- Could not set file ownership, either owner or group were 'UNKNOWN' \"" >> $scriptFile
@@ -450,7 +471,7 @@ scriptDescription="Refresh a courseleaf product"
 		echo "	\$DOIT RunRsync \"\$sourceSpec\" \"\$targetSpec\" \"\$ignoreList\" \"\$backupDir\"" >> $scriptFile
 		echo "	echo -e \"\\tRsync operation completed\\a\"" >> $scriptFile
 
-		echo "" >> $scriptFile
+		echo >> $scriptFile
 		echo "if [[ \$advance == true ]]; then" >> $scriptFile
 		## Set the new edition value
 		echo "if [[ \$advance == true ]]; then" >> $scriptFile
@@ -459,7 +480,7 @@ scriptDescription="Refresh a courseleaf product"
 		echo "	toStr=\"edition:\$newEdition\"" >> $scriptFile
 		echo "	\$DOIT sed -i s\"_^\${fromStr}_\${toStr}_\" \"\$tgtDir/web/courseleaf/localsteps/default.tcf\"" >> $scriptFile
 		echo "fi ## advance" >> $scriptFile
-		echo "" >> $scriptFile
+		echo >> $scriptFile
 		echo "fi ## catalogAdvance" >> $scriptFile
 
 		echo -e "\\n##=======================================================================================================" >> $scriptFile
@@ -469,7 +490,7 @@ scriptDescription="Refresh a courseleaf product"
 		[[ $(Contains "$patchProducts" 'cat') == true ]] && echo "\$DOIT echo -e \"\\tCourseLeaf refreshed to '$CATVersion'\" >> \"\${targetSpec}changelog.txt\""  >> $scriptFile
 		[[ $(Contains "$patchProducts" 'cim') == true ]] && echo "\$DOIT echo -e \"\\tCIM refreshed to '$CIMVersion'\" >> \"\${targetSpec}changelog.txt\""  >> $scriptFile
 		[[ -n $cgiVer ]] && echo "\$DOIT echo -e \"\\tCGIs refreshed to '$cgiVer'\" >> \"\${targetSpec}changelog.txt\""  >> $scriptFile
-		echo "" >> $scriptFile
+		echo >> $scriptFile
 
 		## If CAT was refreshed rebuild console and approver page
 		if [[ $(Contains ",$patchProducts," ',cat,') == true ]]; then
@@ -687,7 +708,7 @@ tmpFile=$(mkTmpFile)
 				[[ $verify != true && $catalogAdvance == true && $buildPatchPackage != true ]] && \
 						Info 0 1 "Specifying -noPrompt and -catalogAdvance is not allowed, continuing with prompting active" && verify=true
 			fi
-			[[ $catalogAdvance == true && $buildPatchPackage = true ]] && addAdvanceCode=true
+			[[ $catalogAdvance == true && $buildPatchPackage == true ]] && addAdvanceCode=true
 			if [[ $catalogAdvance == true && $buildPatchPackage != true ]]; then
 				[[ $verify == false && $edition == '' ]] && Msg2 $T "New edition has not been set and '-noPrompt' flag was specified on the call"
 				if [[ -z $edition ]]; then
@@ -696,7 +717,7 @@ tmpFile=$(mkTmpFile)
 					currentEdition=$(ProtectedCall "grep "^edition:" $siteDir/web/courseleaf/localsteps/default.tcf" | cut -d':' -f2)
 					currentEdition=$(tr -d '\040\011\012\015' <<< "$currentEdition")
 					## Set the new edition and prompt user
-					Msg2; Msg2 "Current CAT edition is: '$currentEdition'."
+					Msg2; Msg2 "^Current CAT edition is: '$currentEdition'."
 					unset newEdition
 					if [[ $currentEdition != '' && $currentEdition != *'migration'* ]]; then
 						if [[ $(Contains "$currentEdition" '-') == true ]]; then
@@ -717,7 +738,7 @@ tmpFile=$(mkTmpFile)
 				fi
 				[[ -z $newEdition ]] && Msg2 $T "New edition variable has not been set"
 				echo
-				unset ans; Prompt ans '^Do you wish to do a full advance (copy NEXT to CURR sans CLSS & CIMs, etc.)' 'Yes No' 'Yes'; ans="$(Lower ${ans:0:1})"
+				unset ans; Prompt ans '^Do you wish to do a full advance (i.e. copy NEXT to CURR sans CLSS & CIMs, etc.)' 'Yes No' 'Yes'; ans="$(Lower ${ans:0:1})"
 				[[ $ans == 'y' ]] && fullAdvance=true || fullAdvance=false
 			else
 				catalogAdvance=false
@@ -856,18 +877,13 @@ fi
 ##======================================================================================================================
 if [[ $catalogAdvance == true || $fullAdvance == true ]] && [[ $buildPatchPackage != true ]]; then
 	Msg2 "Catalog advance is active, advancing the '$(Upper $env)' site"
-	# # Turn off publishing
-	# 	Msg2 "^^Turn off Publishing..."
-	# 	editFile="$tgtDir/$courseleafProgDir.cfg"
-	# 	sed -i s'_^mapfile:production_//mapfile:production_'g "$editFile"
-	# 	sed -i s'_^//mapfile:production|/dev/null_mapfile:production|/dev/null_' "$editFile"
 
 	# Full advance, create a new curr site
 	if [[ $fullAdvance == true ]]; then
 		# Make a copy of next sans CIMs and CLSS/WEN
 		sourceSpec="$tgtDir/"
 		targetSpec="$(dirname $tgtDir)/$env.$(date +"%m-%d-%y")"
-		Msg2 "^Making a backup copy of 'NEXT' to '$(basename $targetSpec)' sans CIMs/CLSS (this will take a while)..."
+		Msg2 "^Making a copy of 'NEXT' to '$(basename $targetSpec)' sans CIMs/CLSS (this will take a while)..."
 		ignoreList="/db/clwen*|/bin/clssimport-log-archive/|/web/$progDir/wen/|/web/wen/"
 		[[ -n $cimStr ]] && ignoreList="$ignoreList|$(tr ',' '|' <<< "$cimStr")"
 		sourceSpec="$tgtDir/"
@@ -883,6 +899,7 @@ if [[ $catalogAdvance == true || $fullAdvance == true ]] && [[ $buildPatchPackag
 		Msg2 "^Editing the /$courseleafProgDir/index.tcf file..."
 		sed -i s'_^sectionlinks:WEN|_//sectionlinks:WEN|_'g "$editFile"
 		sed -i s'_^navlinks:WEN|_//navlinks:WEN|_'g "$editFile"
+		Msg2 "^^WEN records commented out"
 
 		# Edit the coursleaf/index.tcf to comment out courseadmin lines
 		sed -e '/courseadmin/ s_^_//_' -i "$editFile"
@@ -891,7 +908,7 @@ if [[ $catalogAdvance == true || $fullAdvance == true ]] && [[ $buildPatchPackag
 		[[ -d $tgtDir/web/courseadmin ]] && $DOIT mv -f "$tgtDir/web/courseadmin" "$tgtDir/web/courseadmin.$(basename $targetSpec)"
 
 		## Swap our copy of the next site with the curr site
-		Msg2 "^Full backup is active, swapping our copy of the NEXT site with the CURR site"
+		Msg2 "^Full advance is active, swapping our copy of the NEXT site with the CURR site"
 		#[[ -d $(dirname $tgtDir)/curr ]] && $DOIT mv -f "$(dirname $tgtDir)/curr" "$(dirname $tgtDir)/curr.$(cut -d '.' -f2 <<< $(basename $targetSpec))"
 		[[ -d $(dirname $tgtDir)/curr ]] && $DOIT mv -f "$(dirname $tgtDir)/curr" "$(dirname $tgtDir)/curr-${targetSpec##*.}"
 		$DOIT mv -f "$targetSpec" "$(dirname $tgtDir)/curr"
@@ -903,7 +920,14 @@ if [[ $catalogAdvance == true || $fullAdvance == true ]] && [[ $buildPatchPackag
 			Msg2 "^Editing the /localsteps/structuredcontentdraw.html file..."
 			editFile="$tgtDir/web/$courseleafProgDir/localsteps/structuredcontentdraw.html"
 			sed -e '/pencil.png/ s|html|//html|' -i "$editFile"
+			Msg2 "^^CURR pencils turned off in structuredcontentdraw ..."
 		fi
+
+		editFile="$(dirname $tgtDir)/curr/$courseleafProgDir.cfg"
+		Msg2 "^Editing the $editFile file..."
+		sed -i s'_^//sitereadonly:Admin Mode:_sitereadonly:Admin Mode:_'g "$editFile"
+		Msg2 "^^CURR site admin mode set ..."
+
 		Msg2 "^*** The new CURR site has been created"
 	fi #[[ $fullAdvance == true ]]
 
@@ -1207,7 +1231,11 @@ declare -A processedSpecs
 									[[ $specTarget == 'skeleton' ]] && compareToFile="$skeletonRoot/release${specPattern##* }"
 									cmpFileMd5=$(md5sum $compareToFile | cut -f1 -d" ")
 									if [[ $tgtFileMd5 != $cmpFileMd5 ]]; then
-										Warning 0 2 "'${specPattern##* }' file is different than the skeleton file, please analyze the differnces to ensure a custom copy is still needed"
+										if [[ $specIgnoreList == 'warn' ]]; then
+											Warning 0 2 "'${specPattern##* }' file is different than the skeleton file, please analyze the differnces to ensure a custom copy is still needed"
+										else
+											::
+										fi
 									else
 										Msg2 "^^File is current"
 									fi
@@ -1466,3 +1494,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-05-2017 @ 14.52.03 - (5.1.101)   - dscudiero - Added checing for deprecated formbuilder widgets
 ## 06-13-2017 @ 12.46.00 - (5.1.105)   - dscudiero - g
 ## 06-19-2017 @ 07.14.10 - (5.2.-1)    - dscudiero - Added the include calability back
+## 06-19-2017 @ 15.07.53 - (5.2.-1)    - dscudiero - Add setting of siteadminmode in the curr site
