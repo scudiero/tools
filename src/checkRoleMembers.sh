@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.6 # -- dscudiero -- 12/14/2016 @ 11:19:46.04
+version=1.0.12 # -- dscudiero -- Thu 06/15/2017 @ 14:05:13.14
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -42,6 +42,7 @@ GetDefaultsData $myName
 ParseArgsStd
 Hello
 Init 'getClient getEnv getDirs checkEnvs'
+verifyContinueDefault='Yes'
 VerifyContinue "You are asking to check role data for client:$client\n\tEnv: $env\n"
 Msg2
 
@@ -71,10 +72,10 @@ Msg2
 		if [[ ${line:0:5} == 'role:' ]]; then
 	    	role=$(echo $(echo $line | cut -d ':' -f 2) | cut -d '|' -f 1)
 	    	members=$(echo $(echo $line | cut -d '|' -f 2) | tr ',' ' ')
-	      	Verbose 1 1 "Role: $role\n^Members: >$members<"
+	      	#Verbose 1 1 "Role: $role\n^Members: >$members<"
 	      	IFSsave=$IFS; IFS=' '
 		    for user in $members; do
-		    	Verbose 1 2 "user = >$user<"
+		    	#Verbose 1 2 "user = >$user<"
 				users+=($user)
 		    done
 		    IFS=$IFSsave
@@ -92,7 +93,7 @@ Msg2
 		fi
 		prevUser=$user
 	done
-	Msg1 "^Found $numFound unique userids"
+	Msg2 "^Found $numFound unique userids"
 
 ## Process the user list
 	printedHeader=false
@@ -101,23 +102,29 @@ Msg2
 	for user in "${users[@]}"; do
 		sqlStmt="select count(*) from users where userid=\"$user\";"
 		results=$(sqlite3 /$srcDir/db/clusers.sqlite "$sqlStmt")
-		Verbose "\nUser: '$user'\n\t\tsqlStmt = >$sqlStmt<\n\t\tresults=>$results<"
+		#Verbose "\nUser: '$user'\n\t\tsqlStmt = >$sqlStmt<\n\t\tresults=>$results<"
 		if [[ $results -eq 0 ]]; then
-			[[ $printedHeader == false ]] && Msg2 "The following users were not found in User Provisioning:"
-			printedHeader=true
-			if [[ $verboseLevel -eq 0 ]]; then Msg2 "^$user" | tee -a $outFile; fi
-			(( numFound +=1 ))
+			grep -q "user\:$user\|" "$srcDir/courseleaf.cfg"; rc=$?
+			if [[ $rc -ne 0 ]]; then
+				[[ $printedHeader == false ]] && Msg2 "The following users were not found in User Provisioning:"
+				printedHeader=true
+				Msg2 "^$user" | tee -a $outFile
+				(( numFound +=1 ))
+			fi
 		fi
 	done
 ## Print summary
-	Msg2 "^Found $numFound users in roles that are not provisioned"
-	if [[ $numFound > 0 && $verboseLevel -eq 0 ]]; then
-		Msg2 "\nOutput file: $outFile"
+	echo
+	if [[ $numFound -eq 0 ]]; then
+		Msg2 "^All role members are provisioned or listed on a courseleaf.cfg user record"
+		rm -f "$outFile" >& /dev/null
 	else
-		if [[ -f $outFile ]]; then rm $outFile; fi
+		Msg2 "^Found $numFound users in roles that are not known"
+		Msg2 "\nOutput file: $outFile"
 	fi
 
 #==================================================================================================
 ## Done
 #==================================================================================================
 Goodbye 0 #'alert'## Fri Oct 14 13:37:34 CDT 2016 - dscudiero - Fix spelling problem
+## 06-19-2017 @ 07.07.26 - (1.0.12)    - dscudiero - Update to check courseleaf.cfg user records also
