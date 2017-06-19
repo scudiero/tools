@@ -257,7 +257,6 @@ sTime=$(date "+%s")
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		[[ $(cut -d' ' -f1 <<< $(wc -l "$executeFile")) -eq 0 ]] && Terminate "Execution file ($executeFile) is empty"
 		source $executeFile $scriptArgs 2>&1 | tee -a $logFile; rc=$?
-		rc="$?"
 
 ## Should never get here but just in case
 	CleanUp $rc
@@ -373,3 +372,4 @@ sTime=$(date "+%s")
 ## 06-13-2017 @ 08.48.40 - ("1.3.8")   - dscudiero - Tweak how userName is set
 ## 06-14-2017 @ 08.08.20 - ("1.3.15")  - dscudiero - Remove debug statements
 ## 06-14-2017 @ 09.54.08 - ("1.3.21")  - dscudiero - Strip off first token as the toCall program name
+## 06-19-2017 @ 07.06.50 - ("1.3.21")  - dscudiero - tweak formatting
