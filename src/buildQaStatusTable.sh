@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.36 # -- dscudiero -- Mon 06/05/2017 @ 12:52:53.76
+version=1.2.37 # -- dscudiero -- Mon 06/19/2017 @  7:06:09.99
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye GetExcel'
@@ -205,7 +205,7 @@ DumpMap 2 "$(declare -p variableMap)"
 #================================================================================================================================================================
 # Main
 #================================================================================================================================================================
-Msg2; Msg2 "Retrieveing Implementation Team data from '$(basename "$cimTrackingWorkBook")/$cimTrackingWorkbookSheet' "
+Msg2; Msg2 "Retrieveing Implementation Team data from '$(basename "$cimTrackingWorkBook")/$cimTrackingWorkbookSheet'"
 GetCimPriorityData 'cimTrackingHash' "$cimTrackingWorkBook" "$cimTrackingWorkbookSheet" "$cimTester"
 if [[ $verboseLevel -ge 1 ]]; then
 	dump -t priorityWeek
@@ -427,3 +427,4 @@ Goodbye 0 #'alert'
 ## 05-19-2017 @ 12.25.35 - (1.2.26)    - dscudiero - Added data from the implementation team's tracking spreadsheet
 ## 05-25-2017 @ 06.46.23 - (1.2.35)    - dscudiero - Remove jalot task number
 ## 06-05-2017 @ 12.53.26 - (1.2.36)    - dscudiero - Add parsing for 'Next' in the cell to trigger move to next
+## 06-19-2017 @ 07.06.59 - (1.2.37)    - dscudiero - tweak formatting
