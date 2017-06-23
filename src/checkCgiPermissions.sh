@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.2.28 # -- dscudiero -- 02/13/2017 @ 15:57:34.36
+version=2.2.29 # -- dscudiero -- Fri 06/23/2017 @  9:17:15.91
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -92,6 +92,7 @@ if [[ $sendMail == true && $noEmails == false ]]; then
 	[[ $fix == false ]] && addNot='NOT '
 	Msg2 "\nNote: The files have ${addNot}been fixed" | tee -a $tmpFile;
 	Msg2 "\nEmails sent to: $emailAddrs" | tee -a $tmpFile
+	Msg2 "\n*** Please do not respond to this email, it was sent by an automated process\n" | tee -a $tmpFile
 	#$DOIT mail -s "$myName found discrepancies" $emailAddrs < $tmpFile
 	$DOIT mutt -s "$myName detected Errors - $(date +"%m-%d-%Y")" -- $emailAddrs < $tmpFile
 fi
@@ -117,3 +118,4 @@ Goodbye 0
 ## Wed Oct  5 10:17:58 CDT 2016 - dscudiero - Tweak emailing
 ## Tue Feb  7 07:56:26 CST 2017 - dscudiero - Fix problem printing out file names
 ## Mon Feb 13 15:59:17 CST 2017 - dscudiero - Make sure we are using our own tmpFile
+## 06-23-2017 @ 09.26.32 - (2.2.29)    - dscudiero - Add 'do not respond' to the email
