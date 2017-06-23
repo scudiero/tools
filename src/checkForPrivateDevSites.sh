@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.4.53 # -- dscudiero -- Thu 05/04/2017 @ 17:06:06.86
+version=2.4.54 # -- dscudiero -- Fri 06/23/2017 @  9:18:36.32
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -94,7 +94,7 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 			Msg2 "V2 $(dump foundFiles noEmails)"
 			if [[ $foundFiles == true && $noEmails != true ]]; then
 				Verbose "Emails sent to: $resultRec"
-				#$DOIT /usr/sbin/sendmail $emailAddr < $tmpFile
+				Msg2"\n*** Please do not respond to this email, it was sent by an automated process\n" | tee -a $tmpFile
 				$DOIT mutt -a "$tmpFile" -s "Private Dev Sites - $(date +"%m-%d-%Y")" -- $emailAddr < $tmpFile
 			fi
 		fi
@@ -131,3 +131,4 @@ Goodbye 0
 ## 04-04-2017 @ 09.38.29 - (2.4.35)    - dscudiero - make autodelete based on last access date
 ## 04-04-2017 @ 09.39.55 - (2.4.36)    - dscudiero - Tweak messaging
 ## 05-05-2017 @ 12.36.22 - (2.4.53)    - dscudiero - General syncing of dev to prod
+## 06-23-2017 @ 09.26.40 - (2.4.54)    - dscudiero - Add 'do not respond' to the email
