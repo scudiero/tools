@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.46" # -- dscudiero -- Fri 06/09/2017 @  8:15:49.17
+# version="2.0.47" # -- dscudiero -- Fri 06/23/2017 @  8:29:38.71
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -90,9 +90,11 @@ function Dump {
 		done
 
 	## Write it out and or quit
+		local callerData="$(caller)"
+		local lineNo="$(basename $(cut -d' ' -f2 <<< $callerData))/$(cut -d' ' -f1 <<< $callerData)"
 		if [[ $singleLine == true ]]; then vName=''; writeIt; fi
 		[[ $quit == true ]] && Quit
-		[[ $pause == true ]] && Msg2 && Pause '*** Dump paused script execution, press enter to continue ***'
+		[[ $pause == true ]] && Msg2 && Pause '*** Dump paused script execution at $lineNo, press enter to continue ***'
 
 
 	PopSettings "$FUNCNAME"
@@ -207,3 +209,4 @@ export -f dumphash
 ## 05-24-2017 @ 08.17.22 - ("2.0.42")  - dscudiero - Tweak ifMe logic
 ## 05-24-2017 @ 08.22.16 - ("2.0.45")  - dscudiero - Added isMe
 ## 06-09-2017 @ 08.16.14 - ("2.0.46")  - dscudiero - lower case the first token before checking for special tokens
+## 06-23-2017 @ 09.26.13 - ("2.0.47")  - dscudiero - Add caller information if calling pause
