@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.30" // -- dscudiero -- Wed 06/21/2017 @  8:55:44.62
+wfLibVersion="1.7.31" // -- dscudiero -- Fri 06/23/2017 @  8:18:42.92
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -22,6 +22,7 @@ wfLibVersion="1.7.30" // -- dscudiero -- Wed 06/21/2017 @  8:55:44.62
 // 05/24/17 - dgs 	- Refactored Related to use wffuncs.subjFromCode, wffuncs.getDeppartments, and wffuncs.getCollege
 // 06/09/17 - dgs 	- Added mapping function call in GetAttrValue
 // 06/13/17 - dgs 	- Refactored LookupCode to use getXXXX functions if cim has allcodes
+// 06/23/17 - dgs 	- Added the ability to set the search/replacement string for Related (MIT)
 //======================================================================================================================
 
 // Loading message
@@ -66,9 +67,11 @@ if (typeof wfLibLoaded === "undefined") {
 //		_departmentVarName	The name of the form variable containing the 'department' data, defaults to 'department'
 //		_subjectVarName		The name of the form variable containing the 'subject' data, defaults to 'subject'
 //
+//		_searchString		The string to replace with the resolved values
+//
 //		_dataMapper			Then name of a function that will be used to map the normally returned data to a new
 //							value.  Is passed two arguments:
-//							type 	- The 'searchStr', aka in the set {'Col','Dept','Subj'}
+//							type 	- The 'searchString', aka in the set {'Col','Dept','Subj'}
 //							data 	- The data value to map
 //							expects a string back.
 //
@@ -121,6 +124,7 @@ if (typeof wfLibLoaded === "undefined") {
 // 11/15/16	- dgs -	Re-factored to allow for the specification of the core proposal variable names
 // 05/24/17 - dgs -	Refactored to use wffuncs.subjFromCode, wffuncs.getDeppartments, and wffuncs.getCollege
 // 06/12/17 - dgs - Use LookupCode to get codes if the not courseadmin or not allcodes
+// 06/23/17 - dgs 	- Added the ability to set the search/replacement string for Related (MIT)
 //======================================================================================================================
 wffuncs.Related = function(inval, wfrule, args) {
 	var version='4.9.11'; var myName=wfrule.attrname
@@ -200,8 +204,6 @@ wffuncs.Related = function(inval, wfrule, args) {
 			var tcfValue=getTCFValue(calledAs + "_" + varName);
 			if (tcfValue === "" )
 				tcfValue=getTCFValue(myName + "_" + varName)
-			if (tcfValue === "" )
-				tcfValue=getTCFValue(myName + "_" + varName)
 			if (tcfValue != "" ) {
 				eval(varName + "= '" + tcfValue + "'");
 			}
@@ -217,10 +219,6 @@ wffuncs.Related = function(inval, wfrule, args) {
 			formFieldVarsStr=getTCFValue(varName).toString();
 			formFieldVars=formFieldVarsStr.split(",");
 		}
-
-		wfDump(3,["\n\tcheckChanged;"+checkChanged,"ecoSystemData;"+ecoSystemData,"ecoSystemType;"+ecoSystemType,
-				"ecoSystemDataFyi;"+ecoSystemDataFyi,"formFieldVars;"+formFieldVars.toSource(),
-				"codeVarName;"+codeVarName,"collegeVarName;"+collegeVarName,"departmentVarName;"+departmentVarName,"subjectVarName;"+subjectVarName])
 
 	// Set internal variables for the proposal data, check we have what we need
 		var proposalCode=null, proposalSubj=null, proposalDept=null, proposalCol=null;
@@ -256,7 +254,30 @@ wffuncs.Related = function(inval, wfrule, args) {
 		} //try
 		//Catch block for errors thrown in above try block
 		catch(err) { wfDebug(1,"\t*Error* -- " + myName + ": " + err + "\n"); return false; }
-		wfDump(3,["\n\tproposalCode;"+proposalCode,"proposalSubj;"+proposalSubj,"proposalDept;"+proposalDept,,"proposalCol;"+proposalCol])
+
+		// Set the substitution string
+			var searchString=""
+			varName="searchString";
+			var tcfValue=getTCFValue(calledAs + "_searchString");
+			if (tcfValue === "" )
+				tcfValue=getTCFValue(myName + "_searchString")
+			if (tcfValue != "" ) {
+				eval(varName + "= '" + tcfValue + "'");
+			}
+			if (searchString === "") {
+				if (substitutionType === 'col') {
+					searchString="Col"
+				} else if (substitutionType === 'subj') {
+					searchString="Subj"
+				} else {
+					searchString="Dept"
+				}
+			}
+
+		wfDump(3,["\n\tproposalCode;"+proposalCode,"proposalSubj;"+proposalSubj,"proposalDept;"+proposalDept,"proposalCol;"+proposalCol,
+				"\n\tcheckChanged;"+checkChanged,"ecoSystemData;"+ecoSystemData,"ecoSystemType;"+ecoSystemType,
+				"ecoSystemDataFyi;"+ecoSystemDataFyi,"formFieldVars;"+formFieldVars.toSource(),"searchString;"+searchString.toSource(),
+				"codeVarName;"+codeVarName,"collegeVarName;"+collegeVarName,"departmentVarName;"+departmentVarName,"subjectVarName;"+subjectVarName])
 
 		if (proposalCode === undefined || proposalDept === undefined) {
 			wfDebug(3,"\tproposalCode (" + proposalCode + ") or proposalDept (" + proposalDept + ") is undefined, skipping Eco System data")
@@ -405,7 +426,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 		}
 
 	// Look up the output tokens based on how we were called (Dept, Col)
-		var outToken={}, outTokens=[], steps=[], searchStr="", tempDepts=[];
+		var outToken={}, outTokens=[], steps=[], tempDepts=[];
 		wfDebug(5,"\tProcessing refs...");
 		wfDump(5,["\tsubstitutionType;"+substitutionType]);
 		refsArray.forEach(function(ref) {
@@ -415,7 +436,6 @@ wffuncs.Related = function(inval, wfrule, args) {
 			//Resolve the ref based on the substitution type
  			switch (substitutionType) {
  				case "dept":
-					searchStr="Dept";
 					if (tcfdata.CrosslistedDeptsSteps && tcfdata.CrosslistedDeptsSteps.length > 0)
 						steps=tcfdata.CrosslistedDeptsSteps;
 					if (ref.format === "dept" ) {
@@ -429,7 +449,6 @@ wffuncs.Related = function(inval, wfrule, args) {
 					}
  					break;
   				case "college":
-					searchStr="Col"
 					if (tcfdata.CrosslistedCollegesSteps && tcfdata.CrosslistedCollegesSteps.length > 0)
 						steps=tcfdata.CrosslistedCollegesSteps;
 					if (ref.format === "col" ) {
@@ -453,7 +472,8 @@ wffuncs.Related = function(inval, wfrule, args) {
 					}
 	 				break;
   				default:
-  				  	wfDebug(3,"\t*Error* -- Related lookup error, ref = '" + ref.toSource() + "',\n\t\tsubstitutionType was '" + substitutionType + "'' and searchStr was '" + searchStr + "'")
+  				  	wfDebug(3,"\t*Error* -- Related lookup error, ref = '" + ref.toSource() + "',\n\t\tsubstitutionType was '" + substitutionType + 
+  				  		"'' and searchString was '" + searchString + "'")
   					return false;
   					break;
  			}//substitutionType switch
@@ -470,12 +490,14 @@ wffuncs.Related = function(inval, wfrule, args) {
 					}
 				});
 			} else {
-  				wfDebug(3,"\t*Warning* -- ref = '" + ref.toSource() + "',' no data returned from lookup,\n\t\tsubstitutionType was '" + substitutionType + "' and searchStr was '" + searchStr + "'")
+  				wfDebug(3,"\t\t*Warning* -- ref = '" + ref.toSource() + "',' no data returned from lookup,\n\t\tsubstitutionType was '" + substitutionType + 
+  					"' and searchString was '" + searchString + "'")
 			} //(resultSet)
 		}); //refsArray.forEach(function(ref)
-		wfDump(5,["\t\toutTokens;"+outTokens.toSource()]);
+		wfDebug(5,"\n");
+		wfDump(5,["\toutTokens;"+outTokens.toSource()]);
 
-		if (searchStr === "") {
+		if (searchString === "") {
   			print_debug(3,"\n\n*** Error in '" + myName + "' function in " + wfLibName +
   				" , invalid value for substitutionType ('" + substitutionType + "') *** \n\n")
 			print_doc(3,"<br>*** Error in " + myName + " function in " + wfLibName +
@@ -496,7 +518,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 		}//switch
 
 		if (outTokens.length) {
-			wfDebug(3,"\t*** Returning Steps:");
+			wfDebug(3,"\n\t*** Returning Steps:");
 			outTokens.forEach(function(token) {
 				if (token === '') return;
 				// Have we seen this one yet?
@@ -506,7 +528,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 						if (steps.length > 0) {
 							// Get steps from the config file
 							steps.forEach(function(step) {
-								step=step.replace(searchStr,token.data);
+								step=step.replace(searchString,token.data);
 								// Add fyi or fyiall if notify mode or if this is eco system reference and ecoSystemDataFyi is not null
 								if (ecoSystemDataFyi != '' && token.source.substr(0,3) === 'eco') {
 									if (step.indexOf("fyi") < 0) step=step + ' ' + ecoSystemDataFyi;
@@ -531,7 +553,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 							if (step.indexOf("fyi") < 0 && ecoSystemDataFyi === 'true') step=step + ' fyi';
 						}
 						if (dataMapper != "" ) {
-							token.data=eval(dataMapper)(searchStr,token.data)
+							token.data=eval(dataMapper)(searchString,token.data)
 						}
 						retArray.push(step.replace(wfrule.regex,token.data).trim());
 						wfDebug(3,"\t\t" + retArray[retArray.length-1]);
@@ -1566,3 +1588,4 @@ var wfLibLoaded=true;
 // 06-09-2017 @ 12.43.59 - (wfrule.att - dscudiero - Added callback to mapper functions in GetAttrValue
 // 06-13-2017 @ 14.05.05 - (wfrule.att - dscudiero - refactor allcodes and related
 // 06-21-2017 @ 08.56.20 - (wfrule.att - dscudiero - Added additional usage notes to wffuncs.CheckChanged
+// 06-23-2017 @ 09.27.14 - (wfrule.att - dscudiero - Added ability to specify the search string to Related
