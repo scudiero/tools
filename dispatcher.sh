@@ -12,7 +12,9 @@
 ## Set global database variable
 	[[ -n $TOOLSWAREHOUSEDBNAME ]] && warehouseDb="$TOOLSWAREHOUSEDBNAME"
 	export TOOLSWAREHOUSEDBNAME="$warehouseDbName"
-	export TOOLSWAREHOUSEDB="$warehouseDb"
+
+export TOOLSWAREHOUSEDB="$warehouseDb"
+
 	[[ -n $TOOLSWAREHOUSEDBHOST ]] && warehouseDbHost="$TOOLSWAREHOUSEDBHOST"
 	export TOOLSWAREHOUSEDBHOST="$warehouseDbHost"
 
@@ -65,3 +67,4 @@ exit
 ## 06-14-2017 @ 07.49.36 - dscudiero - Add debug messages
 ## 06-14-2017 @ 08.08.05 - dscudiero - Remove debug statements
 ## 06-26-2017 @ 07.50.30 - dscudiero - Add warhousedbHost, renamed warehousedb to warehousedbname
+## 06-26-2017 @ 10.19.37 - dscudiero - set TOOLSWAREHOUSEDB
