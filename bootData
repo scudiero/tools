@@ -1,6 +1,9 @@
 
 export TOOLSDEVPATH="/home/dscudiero/tools"
-warehouseDb="warehouse"
+#warehouseDb="courseleafdatawarehouse"
+#warehouseHost=mdb1-host.inside.leepfrog.com
+warehouseDbName="warehouse"
+warehouseDbHost=duro.inside.leepfrog.com
 adminUsers="dscudiero"
 setSemaphoreList='buildSiteInfoTable,buildClientInfoTable'
 
