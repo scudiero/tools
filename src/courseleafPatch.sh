@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.2.0 # -- dscudiero -- Mon 06/26/2017 @ 10:13:02.36
+version=5.2.1 # -- dscudiero -- Mon 06/26/2017 @ 15:32:34.95
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -336,7 +336,7 @@ cwdStart="$(pwd)"
 		echo "		popd >& /dev/null" >> $scriptFile
 		echo "	fi" >> $scriptFile
 		echo "fi" >> $scriptFile
-		echo "[[ ! -d \$locallibsDir ]] && Terminate "Could not resolve the 'locallibsDir' directory"" >> $scriptFile
+		echo "[[ ! -d \$locallibsDir ]] && Warning "Could not resolve the 'locallibsDir' directory"" >> $scriptFile
 		echo >> $scriptFile
 
 		#===================================================================================================================
@@ -1600,3 +1600,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-19-2017 @ 15.07.53 - (5.2.-1)    - dscudiero - Add setting of siteadminmode in the curr site
 ## 06-19-2017 @ 15.39.16 - (5.2.-1)    - dscudiero - Added report as an option to compare directive
 ## 06-26-2017 @ 10.14.14 - (5.2.0)     - dscudiero - Updated for new requirements
+## 06-26-2017 @ 15.33.06 - (5.2.1)     - dscudiero - Make not having a locallibs directory a warning
