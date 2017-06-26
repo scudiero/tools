@@ -10,8 +10,11 @@
 	[[ -r $(dirname $0)/bootData ]] && source "$(dirname $0)/bootData" || source "$TOOLSPATH/bootData"
 
 ## Set global database variable
-	[[ -n $TOOLSWAREHOUSEDB ]] && warehouseDb="$TOOLSWAREHOUSEDB"
+	[[ -n $TOOLSWAREHOUSEDBNAME ]] && warehouseDb="$TOOLSWAREHOUSEDBNAME"
+	export TOOLSWAREHOUSEDBNAME="$warehouseDbName"
 	export TOOLSWAREHOUSEDB="$warehouseDb"
+	[[ -n $TOOLSWAREHOUSEDBHOST ]] && warehouseDbHost="$TOOLSWAREHOUSEDBHOST"
+	export TOOLSWAREHOUSEDBHOST="$warehouseDbHost"
 
 ## Set global search variables
 	export TOOLSLIBPATH="$TOOLSPATH/lib"
@@ -61,3 +64,4 @@ exit
 ## 06-12-2017 @ 11.24.54 - dscudiero - remove debug statements
 ## 06-14-2017 @ 07.49.36 - dscudiero - Add debug messages
 ## 06-14-2017 @ 08.08.05 - dscudiero - Remove debug statements
+## 06-26-2017 @ 07.50.30 - dscudiero - Add warhousedbHost, renamed warehousedb to warehousedbname
