@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.20" # -- dscudiero -- Thu 03/30/2017 @  8:39:31.96
+# version="1.0.36" # -- dscudiero -- Mon 06/26/2017 @  9:56:28.01
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -34,6 +34,11 @@
 
 		local prevGlob=$(set -o | grep noglob | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2)
 		local resultStr msg tmpStr
+		if [[ ! -d $(pwd) ]]; then
+			msg="$msg\n\tsqlStmt: $sqlStmt\n\n\tCurrent working directory does not exist, cannot execute sql statement"
+			echo -e "$(ColorT "*Fatal Error*") -- ($lineNo) $msg"
+			exit -1
+		fi
 
 		## Run the query
 			set -f
@@ -43,16 +48,17 @@
 				resultStr=$(sqlite3 $dbFile "$sqlStmt" 2>&1 | tr "\t" '|')
 			fi
 			## Check for errors
-			if [[ $(Contains "$resultStr" 'SEVERE:') == true || $(Contains "$resultStr" 'ERROR') == true || $(Contains "$resultStr" '\*Error\*') == true ]]; then
+			if [[ $(Contains "$resultStr" 'SEVERE:') == true || \
+				$(Contains "$resultStr" 'ERROR') == true || \
+				$(Contains "$resultStr" '\*Error\*') == true || \
+				$(Contains "$resultStr" 'Error occurred during initialization of VM') == true ]]; then
+				local callerData="$(caller)"
+				local lineNo="$(basename $(cut -d' ' -f2 <<< $callerData))/$(cut -d' ' -f1 <<< $callerData)"
 				msg="$FUNCNAME: Error reported from $dbType"
 				[[ $dbType == 'sqlite3' ]] && msg="$msg\n\tFile: $dbFile"
 				msg="$msg\n\tsqlStmt: $sqlStmt\n\n\t$resultStr"
-				if [[ $(type -t 'Terminate') == function ]]; then
-					Terminate "$(ColorK "$myName").$msg"
-				else
-					echo "*Fatal Error* -- $msg"
-					exit -1
-				fi
+				echo -e "$(ColorT "*Fatal Error*") -- ($lineNo) $msg"
+				exit -1
 			fi
 
 		## Write output to an array
@@ -76,3 +82,4 @@
 ## Wed Jan 18 13:37:13 CST 2017 - dscudiero - misc cleanup
 ## Tue Jan 24 07:31:39 CST 2017 - dscudiero - Allow function to run if called by ProcessLogger and informationOnly is set
 ## 03-30-2017 @ 08.40.53 - ("1.0.20")  - dscudiero - Do not add trailing ';' if the sql action is mysql*
+## 06-26-2017 @ 10.13.49 - ("1.0.36")  - dscudiero - Add additional error checking for VM errors
