@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.38 # -- dscudiero -- Mon 07/17/2017 @  8:09:56.22
+version=2.1.42 # -- dscudiero -- Mon 07/17/2017 @ 14:00:40.14
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -42,19 +42,17 @@ function EscrowSite {
 		set +f
 		$DOIT tar -cJf $tarFile $dirsToTar; rc=$?
 		rc=$?; [[ $rc -ne 0 ]] && Terminate "Process returned a non-zero return code ($rc), Please review messages"
-		chown leepfrog $tarFile
-		chmod 669 $tarFile
+		chgrp leepfrog $tarFile
+		chmod 660 $tarFile
 		Msg2 "^^Escrow file generated at: $tarFile" >> $tmpFile
 	done
 
 	## Send emails
-dump escrowEmailAddrs
-escrowEmailAddrs='dscudiero@leepfrog.com'
 		Msg2 >> $tmpFile
 		if [[ $sendMail == true ]]; then
 			Msg2 "\nEmails sent to: $escrowEmailAddrs\n" >> $tmpFile
 			for emailAddr in $(tr ',' ' ' <<< $escrowEmailAddrs); do
-				mail -s "$myName: Clients escrowed" $emailAddrs < $tmpFile
+				mail -s "$myName: Clients escrowed" $emailAddr < $tmpFile
 			done
 		fi
 
@@ -87,7 +85,6 @@ esac
 
 #========================================================================================================================
 ## Bye-bye
-[[ $fork == true ]] && wait
 return 0
 
 #========================================================================================================================
@@ -98,5 +95,5 @@ return 0
 ## Thu Feb  9 08:06:49 CST 2017 - dscudiero - make sure we are using our own tmpFile
 ## 07-17-2017 @ 07.52.31 - (2.1.33)    - dscudiero - Fix script syntax error on for statement
 ## 07-17-2017 @ 07.53.51 - (2.1.34)    - dscudiero - uncomment call to escrowClient
-## 07-17-2017 @ 08.08.58 - (2.1.37)    - dscudiero - move escrowClient functionality into script
-## 07-17-2017 @ 08.18.36 - (2.1.38)    - dscudiero - General syncing of dev to prod
+## 07-17-2017 @ 08.08.58 - (2.1.38)    - dscudiero - move escrowClient functionality into script
+## 07-17-2017 @ 14.00.52 - (2.1.42)    - dscudiero - Many updates
