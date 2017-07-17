@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.34 # -- dscudiero -- Mon 07/17/2017 @  7:53:27.21
+version=2.1.37 # -- dscudiero -- Mon 07/17/2017 @  8:08:38.69
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -14,23 +14,49 @@ originalArgStr="$*"
 #=======================================================================================================================
 function EscrowSite {
 	local clientList="$*"
+	[[ -z $clientList ]] && return 0
 	local tmpFile=$(MkTmpFile $FUNCNAME)
+	tarDir=$courseleafEscrowedSitesDir
 
  	Msg2 > $tmpFile
  	Msg2 $(date) >> $tmpFile
  	Msg2 >> $tmpFile
  	Msg2 "The following sites have been escrowed, the escrow files can be found at \n^'$courseleafEscrowedSitesDir'" >> $tmpFile
+
  	for client in $(tr ',' ' ' <<< $clientList); do
-		Msg2 "^$client"
-		Call 'escrowClient' "$client" "$scriptArgs"
-	done
-	Msg2 >> $tmpFile
-	if [[ $sendMail == true ]]; then
-		Msg2 "\nEmails sent to: $escrowEmailAddrs\n" >> $tmpFile
-		for emailAddr in $(tr ',' ' ' <<< $escrowEmailAddrs); do
-			mail -s "$myName: Clients escrowed" $emailAddrs < $tmpFile
+		Msg2 "^Processing client: $client" >> $tmpFile
+		SetSiteDirs 'setDefault'
+		cd $prodSiteDir
+		[[ ! -d $tarDir ]] && mkdir $tarDir
+		tarFile=$tarDir/$client@$(date +"%m-%d-%Y").tar.xz
+		[[ -f $tarFile ]] && rm -f $tarFile
+
+		Msg2 >> $tmpFile
+		unset dirsToTar
+		for env in test next curr public; do
+			[[ -d ./$env ]] && dirsToTar="$env $dirsToTar"
 		done
- 	fi
+		dirsToTar=$(Trim "$dirsToTar")
+		Msg2 "^^Tarring directories: $(echo $dirsToTar | tr ' ' ',')" >> $tmpFile
+
+		set +f
+		$DOIT tar -cJf $tarFile $dirsToTar; rc=$?
+		rc=$?; [[ $rc -ne 0 ]] && Terminate "Process returned a non-zero return code ($rc), Please review messages"
+		chown leepfrog $tarFile
+		chmod 669 $tarFile
+		Msg2 "^^Escrow file generated at: $tarFile" >> $tmpFile
+	done
+
+	## Send emails
+		dump escrowEmailAddrs
+		escrowEmailAddrs='dscudiero@leepfrog.com'
+		Msg2 >> $tmpFile
+		if [[ $sendMail == true ]]; then
+			Msg2 "\nEmails sent to: $escrowEmailAddrs\n" >> $tmpFile
+			for emailAddr in $(tr ',' ' ' <<< $escrowEmailAddrs); do
+				mail -s "$myName: Clients escrowed" $emailAddrs < $tmpFile
+			done
+		fi
 
 	[[ -f "$tmpFile" ]] && rm "$tmpFile"
 	return 0
@@ -72,3 +98,4 @@ return 0
 ## Thu Feb  9 08:06:49 CST 2017 - dscudiero - make sure we are using our own tmpFile
 ## 07-17-2017 @ 07.52.31 - (2.1.33)    - dscudiero - Fix script syntax error on for statement
 ## 07-17-2017 @ 07.53.51 - (2.1.34)    - dscudiero - uncomment call to escrowClient
+## 07-17-2017 @ 08.08.58 - (2.1.37)    - dscudiero - move escrowClient functionality into script
