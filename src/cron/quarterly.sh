@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.37 # -- dscudiero -- Mon 07/17/2017 @  8:08:38.69
+version=2.1.38 # -- dscudiero -- Mon 07/17/2017 @  8:09:56.22
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -48,8 +48,8 @@ function EscrowSite {
 	done
 
 	## Send emails
-		dump escrowEmailAddrs
-		escrowEmailAddrs='dscudiero@leepfrog.com'
+dump escrowEmailAddrs
+escrowEmailAddrs='dscudiero@leepfrog.com'
 		Msg2 >> $tmpFile
 		if [[ $sendMail == true ]]; then
 			Msg2 "\nEmails sent to: $escrowEmailAddrs\n" >> $tmpFile
@@ -99,3 +99,4 @@ return 0
 ## 07-17-2017 @ 07.52.31 - (2.1.33)    - dscudiero - Fix script syntax error on for statement
 ## 07-17-2017 @ 07.53.51 - (2.1.34)    - dscudiero - uncomment call to escrowClient
 ## 07-17-2017 @ 08.08.58 - (2.1.37)    - dscudiero - move escrowClient functionality into script
+## 07-17-2017 @ 08.18.36 - (2.1.38)    - dscudiero - General syncing of dev to prod
