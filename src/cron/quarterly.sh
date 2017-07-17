@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.30 # -- dscudiero -- Mon 07/17/2017 @  7:47:34.88
+version=2.1.31 # -- dscudiero -- Mon 07/17/2017 @  7:48:42.38
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -50,6 +50,7 @@ Here 1
 # sendMail=true
 
 Here 1
+hostName='build7'
 echo "hostName = '$hostName'"
 echo "mojaveEscrowClients = '$mojaveEscrowClients'"
 echo "build7EscrowClients = '$build7EscrowClients'"
@@ -93,3 +94,4 @@ return 0
 ## 07-17-2017 @ 07.35.53 - (2.1.28)    - dscudiero - g
 ## 07-17-2017 @ 07.36.42 - (2.1.29)    - dscudiero - General syncing of dev to prod
 ## 07-17-2017 @ 07.47.45 - (2.1.30)    - dscudiero - General syncing of dev to prod
+## 07-17-2017 @ 07.48.52 - (2.1.31)    - dscudiero - General syncing of dev to prod
