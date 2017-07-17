@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.94 # -- dscudiero -- Mon 05/15/2017 @ 14:27:27.21
+version=3.8.95 # -- dscudiero -- Mon 07/17/2017 @ 13:48:13.40
 #==================================================================================================
 TrapSigs 'on'
 imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
@@ -262,7 +262,7 @@ scriptDescription="Load Courseleaf Data"
 			#echo; echo $tmpFile; cat $tmpFile; Pause
 
 			## Read the header record, look for the specific columns to determine how to parse subsequent records
-				ParseWorksheetHeader "$tmpFile" "$workbookSheet" "userid first last email" "uin"
+				ParseWorksheetHeader "$tmpFile" "$workbookSheet" 'userid first last email' 'uin'
 				dump -1 startReadingAt
 				for field in userid first last email uin ; do dump -1 field ${field}Col; done
 			## If useUINs is set and there is no uin column in the user data then error
@@ -373,7 +373,7 @@ scriptDescription="Load Courseleaf Data"
 			#echo $tmpFile; cat $tmpFile; Pause
 
 			## Read the header record, look for the specific columns to determin how to parse subsequent records
-				ParseWorksheetHeader "$tmpFile" "$workbookSheet" "name members|userlist email"
+				ParseWorksheetHeader "$tmpFile" "$workbookSheet" 'name members|userlist email'
 				dump -1 startReadingAt
 				for field in name members email; do dump -1 ${field}Col; done
 
@@ -512,7 +512,7 @@ scriptDescription="Load Courseleaf Data"
 			#echo $tmpFile; cat $tmpFile; Pause
 
 		## Read the header record, look for the specific columns to determin how to parse subsequent records
-			ParseWorksheetHeader "$tmpFile" "$workbookSheet" "path title owner workflow"
+			ParseWorksheetHeader "$tmpFile" "$workbookSheet" 'path title owner workflow'
 			dump -1 startReadingAt
 			for field in path title owner workflow; do dump -1 ${field}Col; done
 			## Read/Parse the data rows into hash table
@@ -1011,3 +1011,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## 04-06-2017 @ 10.10.20 - (3.8.86)    - dscudiero - renamed RunCourseLeafCgi, use new name
 ## 04-17-2017 @ 12.30.27 - (3.8.91)    - dscudiero - skip
 ## 05-15-2017 @ 14.27.49 - (3.8.94)    - dscudiero - Tweek changelog messages
+## 07-17-2017 @ 13.48.41 - (3.8.95)    - dscudiero - Single quote strings to ParseWorksheetHeader function
