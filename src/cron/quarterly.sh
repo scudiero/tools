@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.26 # -- dscudiero -- Mon 07/17/2017 @  7:32:20.29
+version=2.1.27 # -- dscudiero -- Mon 07/17/2017 @  7:34:32.51
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -13,16 +13,17 @@ Here 0
 #=======================================================================================================================
 # Declare local variables and constants
 #=======================================================================================================================
-# function EscrowSite {
-# Here 2
-# 	local clientList="$*"
-# 	local tmpFile=$(MkTmpFile $FUNCNAME)
-# Here 3
-# echo "clientList = '$clientList'"
-# 	Msg2 > $tmpFile
-# 	Msg2 "$(date)">> $tmpFile
-# 	Msg2 >> $tmpFile
-# 	Msg2 "The following sites have been escrowed, the escrow files can be found at \n^'$courseleafEscrowedSitesDir'" >> $tmpFile
+function EscrowSite {
+Here 2
+	local clientList="$*"
+	local tmpFile=$(MkTmpFile $FUNCNAME)
+Here 3
+echo "tmpFile = '$tmpFile'"
+echo "clientList = '$clientList'"
+	Msg2 > $tmpFile
+	Msg2 "$(date)">> $tmpFile
+	Msg2 >> $tmpFile
+	Msg2 "The following sites have been escrowed, the escrow files can be found at \n^'$courseleafEscrowedSitesDir'" >> $tmpFile
 # 	for client in $(tr ',' ' ' <<< $clientList) do
 # echo "client = '$client'"
 # 		Msg2 "^$client"
@@ -37,8 +38,8 @@ Here 0
 # 	fi
 
 # 	[[ -f "$tmpFile" ]] && rm "$tmpFile"
-# 	return 0
-# }
+	return 0
+}
 
 #=======================================================================================================================
 # Standard argument parsing and initialization
@@ -91,3 +92,4 @@ return 0
 ## 07-17-2017 @ 07.30.23 - (2.1.24)    - dscudiero - General syncing of dev to prod
 ## 07-17-2017 @ 07.31.31 - (2.1.25)    - dscudiero - General syncing of dev to prod
 ## 07-17-2017 @ 07.32.25 - (2.1.26)    - dscudiero - g
+## 07-17-2017 @ 07.34.35 - (2.1.27)    - dscudiero - General syncing of dev to prod
