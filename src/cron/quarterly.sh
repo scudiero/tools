@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.29 # -- dscudiero -- Mon 07/17/2017 @  7:36:34.76
+version=2.1.30 # -- dscudiero -- Mon 07/17/2017 @  7:47:34.88
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -14,20 +14,16 @@ Here 0
 # Declare local variables and constants
 #=======================================================================================================================
 function EscrowSite {
-Here 2
 	local clientList="$*"
 	local tmpFile=$(MkTmpFile $FUNCNAME)
-Here 3
-echo "tmpFile = '$tmpFile'"
-echo "clientList = '$clientList'"
-	Msg2 > $tmpFile
-	Msg2 "$(date)">> $tmpFile
-	Msg2 >> $tmpFile
-	Msg2 "The following sites have been escrowed, the escrow files can be found at \n^'$courseleafEscrowedSitesDir'" >> $tmpFile
-	for client in $(tr ',' ' ' <<< $clientList) do
-echo "client = '$client'"
+
+ 	Msg2 > $tmpFile
+ 	Msg2 $(date) >> $tmpFile
+ 	Msg2 >> $tmpFile
+ 	Msg2 "The following sites have been escrowed, the escrow files can be found at \n^'$courseleafEscrowedSitesDir'" >> $tmpFile
+ 	for client in $(tr ',' ' ' <<< $clientList); do
 		Msg2 "^$client"
-		Call 'escrowClient' "$client" "$scriptArgs"
+		#Call 'escrowClient' "$client" "$scriptArgs"
 	done
 	Msg2 >> $tmpFile
 	if [[ $sendMail == true ]]; then
@@ -35,7 +31,7 @@ echo "client = '$client'"
 		for emailAddr in $(tr ',' ' ' <<< $escrowEmailAddrs); do
 			mail -s "$myName: Clients escrowed" $emailAddrs < $tmpFile
 		done
-	fi
+ 	fi
 
 	[[ -f "$tmpFile" ]] && rm "$tmpFile"
 	return 0
@@ -96,3 +92,4 @@ return 0
 ## 07-17-2017 @ 07.34.35 - (2.1.27)    - dscudiero - General syncing of dev to prod
 ## 07-17-2017 @ 07.35.53 - (2.1.28)    - dscudiero - g
 ## 07-17-2017 @ 07.36.42 - (2.1.29)    - dscudiero - General syncing of dev to prod
+## 07-17-2017 @ 07.47.45 - (2.1.30)    - dscudiero - General syncing of dev to prod
