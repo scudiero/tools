@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.2.2 # -- dscudiero -- Mon 06/26/2017 @ 15:47:57.72
+version=5.2.4 # -- dscudiero -- Mon 07/17/2017 @ 11:32:59.66
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -326,7 +326,7 @@ cwdStart="$(pwd)"
 		echo >> $scriptFile
 		## Find the locallibs directory using the mapfile entery
 		echo "locallibsDir=\$tgtDir/web/\$courseleafProgDir/locallibs" >> $scriptFile
-		echo "if [[ ! -f \$locallibsDir/default.tcf ]]; then" >> $scriptFile
+		echo "if [[ ! -d \$locallibsDir ]]; then" >> $scriptFile
 		echo "	unset locallibsDir" >> $scriptFile
 		echo "	grepStr=\$(grep '^mapfile:locallibs' \"\$cfgFile\"); grepStr=\${grepStr##*|}" >> $scriptFile
 		echo "	if [[ -n \$grepStr ]]; then" >> $scriptFile
@@ -727,7 +727,7 @@ removeGitReposFromNext=true
 
 	## Find the locallibs directory using the mapfile entery
 		locallibsDir=$tgtDir/web/$courseleafProgDir/locallibs
-		if [[ ! -f $locallibsDir/default.tcf ]]; then
+		if [[ ! -d $locallibsDir ]]; then
 			unset locallibsDir
 			grepStr=$(ProtectedCall "grep '^mapfile:locallibs' \"$cfgFile\""); grepStr=${grepStr##*|}
 			if [[ -n $grepStr ]]; then
@@ -737,7 +737,7 @@ removeGitReposFromNext=true
 				popd >& /dev/null
 			fi
 		fi
-		[[ ! -d $locallibsDir ]] && Warning "Could not resolve the 'locallibsDir' directory"
+		[[ ! -d $locallibsDir ]] && Warning "Could not resolve the locallibsDir '$locallibsDir' directory"
 
 #=======================================================================================================================
 	[[ $client == 'internal' ]] && Terminate "Sorry, the internal site is not supported at this time"
@@ -1602,3 +1602,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-26-2017 @ 10.14.14 - (5.2.0)     - dscudiero - Updated for new requirements
 ## 06-26-2017 @ 15.33.06 - (5.2.1)     - dscudiero - Make not having a locallibs directory a warning
 ## 06-26-2017 @ 15.48.08 - (5.2.2)     - dscudiero - General syncing of dev to prod
+## 07-17-2017 @ 11.33.20 - (5.2.4)     - dscudiero - Updated code checking for locallibs directory
