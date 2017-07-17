@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.66 # -- dscudiero -- Fri 06/09/2017 @ 16:37:57.53
+version=4.11.68 # -- dscudiero -- Mon 07/17/2017 @ 14:47:27.83
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -62,7 +62,7 @@ function parseArgs-copyEnv {
 	argList+=(-wizDebug,3,switch,startWizdebug,,script,'Automatically start a wizDebug session after the copy)')
 }
 function Goodbye-copyEnv {
-	[[ -d $tmpRoot ]] && rm -rf $tmpRoot
+	SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
 }
 
 #==================================================================================================
@@ -498,11 +498,15 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 	# Set nexturl so wf emails point to local instance
 		Msg2 "Changing 'nexturl' to point to local instance..."
 		editFile="$tgtDir/web/courseleaf/localsteps/default.tcf"
+dump editFile
 		clientToken=$(cut -d'/' -f5 <<< $tgtDir)
+dump clientToken
 		toStr="nexturl:https://$clientToken/$(cut -d '/' -f3 <<< $tgtDir).leepfrog.com"
+dump toStr
 		unset grepStr; grepStr=$(ProtectedCall "grep "$toStr" $editFile")
 		if [[ -z $grepStr ]]; then
 			unset fromStr; fromStr=$(ProtectedCall "grep 'nexturl:' $editFile")
+dump fromStr
 			$DOIT sed -i s"!${fromStr}!${toStr}!" $editFile
 		fi
 
@@ -654,3 +658,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 06-09-2017 @ 12.07.57 - (4.11.63)   - dscudiero - Fix problem where we did not clear variable ans befor using it in a prompt
 ## 06-09-2017 @ 16.17.40 - (4.11.65)   - dscudiero - Fix problem of skipping cims and courseleaf if skipCat is active
 ## 06-12-2017 @ 06.57.07 - (4.11.66)   - dscudiero - Fix skipcat
+## 07-17-2017 @ 14.48.17 - (4.11.68)   - dscudiero - Fix problem with goodbye cleanup removing all of tmpRoot
