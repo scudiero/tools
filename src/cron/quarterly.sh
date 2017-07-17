@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.33 # -- dscudiero -- Mon 07/17/2017 @  7:52:06.65
+version=2.1.34 # -- dscudiero -- Mon 07/17/2017 @  7:53:27.21
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -22,7 +22,7 @@ function EscrowSite {
  	Msg2 "The following sites have been escrowed, the escrow files can be found at \n^'$courseleafEscrowedSitesDir'" >> $tmpFile
  	for client in $(tr ',' ' ' <<< $clientList); do
 		Msg2 "^$client"
-		#Call 'escrowClient' "$client" "$scriptArgs"
+		Call 'escrowClient' "$client" "$scriptArgs"
 	done
 	Msg2 >> $tmpFile
 	if [[ $sendMail == true ]]; then
@@ -71,3 +71,4 @@ return 0
 ## Thu Jan  5 14:50:11 CST 2017 - dscudiero - Switch to use RunSql2
 ## Thu Feb  9 08:06:49 CST 2017 - dscudiero - make sure we are using our own tmpFile
 ## 07-17-2017 @ 07.52.31 - (2.1.33)    - dscudiero - Fix script syntax error on for statement
+## 07-17-2017 @ 07.53.51 - (2.1.34)    - dscudiero - uncomment call to escrowClient
