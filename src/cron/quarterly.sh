@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.31 # -- dscudiero -- Mon 07/17/2017 @  7:48:42.38
+version=2.1.32 # -- dscudiero -- Mon 07/17/2017 @  7:49:53.08
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -41,13 +41,13 @@ function EscrowSite {
 # Standard argument parsing and initialization
 #=======================================================================================================================
 Here 1
-# GetDefaultsData $myName
-# Here 1a
-# ParseArgsStd
-# Here 1b
-# scriptArgs="$*"
+GetDefaultsData $myName
+Here 1a
+ParseArgsStd
+Here 1b
+scriptArgs="$*"
 
-# sendMail=true
+sendMail=true
 
 Here 1
 hostName='build7'
@@ -95,3 +95,4 @@ return 0
 ## 07-17-2017 @ 07.36.42 - (2.1.29)    - dscudiero - General syncing of dev to prod
 ## 07-17-2017 @ 07.47.45 - (2.1.30)    - dscudiero - General syncing of dev to prod
 ## 07-17-2017 @ 07.48.52 - (2.1.31)    - dscudiero - General syncing of dev to prod
+## 07-17-2017 @ 07.49.59 - (2.1.32)    - dscudiero - General syncing of dev to prod
