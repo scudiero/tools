@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.4.54 # -- dscudiero -- Fri 06/23/2017 @  9:18:36.32
+version=2.4.55 # -- dscudiero -- Mon 07/17/2017 @  6:56:14.14
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -51,7 +51,6 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 	for resultRec in "${resultSet[@]}"; do
 		emailAddr="$resultRec"
 		userId=$(echo $emailAddr | cut -d '@' -f 1)
-
 		[[ $(Contains "$ignoreList" "$userId") == true ]] && continue
 		foundFiles=false
 		dirsFound=($(ProtectedCall "ls /mnt/*/web/* | grep '/dev[0-99]/' | grep '\-$userId'"))
@@ -132,3 +131,4 @@ Goodbye 0
 ## 04-04-2017 @ 09.39.55 - (2.4.36)    - dscudiero - Tweak messaging
 ## 05-05-2017 @ 12.36.22 - (2.4.53)    - dscudiero - General syncing of dev to prod
 ## 06-23-2017 @ 09.26.40 - (2.4.54)    - dscudiero - Add 'do not respond' to the email
+## 07-17-2017 @ 06.56.31 - (2.4.55)    - dscudiero - remove blank line
