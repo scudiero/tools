@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.23 # -- dscudiero -- Mon 07/17/2017 @  7:29:27.64
+version=2.1.24 # -- dscudiero -- Mon 07/17/2017 @  7:30:19.75
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -13,32 +13,32 @@ Here 0
 #=======================================================================================================================
 # Declare local variables and constants
 #=======================================================================================================================
-function EscrowSite {
-Here 2
-	local clientList="$*"
-	local tmpFile=$(MkTmpFile $FUNCNAME)
-Here 3
-echo "clientList = '$clientList'"
-	Msg2 > $tmpFile
-	Msg2 "$(date)">> $tmpFile
-	Msg2 >> $tmpFile
-	Msg2 "The following sites have been escrowed, the escrow files can be found at \n^'$courseleafEscrowedSitesDir'" >> $tmpFile
-	for client in $(tr ',' ' ' <<< $clientList) do
-echo "client = '$client'"
-		Msg2 "^$client"
-		Call 'escrowClient' "$client" "$scriptArgs"
-	done
-	Msg2 >> $tmpFile
-	if [[ $sendMail == true ]]; then
-		Msg2 "\nEmails sent to: $escrowEmailAddrs\n" >> $tmpFile
-		for emailAddr in $(tr ',' ' ' <<< $escrowEmailAddrs); do
-			mail -s "$myName: Clients escrowed" $emailAddrs < $tmpFile
-		done
-	fi
+# function EscrowSite {
+# Here 2
+# 	local clientList="$*"
+# 	local tmpFile=$(MkTmpFile $FUNCNAME)
+# Here 3
+# echo "clientList = '$clientList'"
+# 	Msg2 > $tmpFile
+# 	Msg2 "$(date)">> $tmpFile
+# 	Msg2 >> $tmpFile
+# 	Msg2 "The following sites have been escrowed, the escrow files can be found at \n^'$courseleafEscrowedSitesDir'" >> $tmpFile
+# 	for client in $(tr ',' ' ' <<< $clientList) do
+# echo "client = '$client'"
+# 		Msg2 "^$client"
+# 		Call 'escrowClient' "$client" "$scriptArgs"
+# 	done
+# 	Msg2 >> $tmpFile
+# 	if [[ $sendMail == true ]]; then
+# 		Msg2 "\nEmails sent to: $escrowEmailAddrs\n" >> $tmpFile
+# 		for emailAddr in $(tr ',' ' ' <<< $escrowEmailAddrs); do
+# 			mail -s "$myName: Clients escrowed" $emailAddrs < $tmpFile
+# 		done
+# 	fi
 
-	[[ -f "$tmpFile" ]] && rm "$tmpFile"
-	return 0
-}
+# 	[[ -f "$tmpFile" ]] && rm "$tmpFile"
+# 	return 0
+# }
 
 #=======================================================================================================================
 # Standard argument parsing and initialization
@@ -85,3 +85,4 @@ return 0
 ## 07-17-2017 @ 07.23.01 - (2.1.21)    - dscudiero - General syncing of dev to prod
 ## 07-17-2017 @ 07.26.07 - (2.1.22)    - dscudiero - General syncing of dev to prod
 ## 07-17-2017 @ 07.29.32 - (2.1.23)    - dscudiero - General syncing of dev to prod
+## 07-17-2017 @ 07.30.23 - (2.1.24)    - dscudiero - General syncing of dev to prod
