@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.2.4 # -- dscudiero -- Mon 07/17/2017 @ 11:32:59.66
+version=5.2.6 # -- dscudiero -- Mon 07/17/2017 @ 15:42:57.19
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -1298,21 +1298,25 @@ declare -A processedSpecs
 									tgtFile="${tgtDir}${specPattern##* }"
 									tgtFileMd5=$(md5sum $tgtFile | cut -f1 -d" ")
 									[[ $specTarget == 'skeleton' ]] && compareToFile="$skeletonRoot/release${specPattern##* }"
-									cmpFileMd5=$(md5sum $compareToFile | cut -f1 -d" ")
-									if [[ $tgtFileMd5 != $cmpFileMd5 ]]; then
-										if [[ $specIgnoreList == 'warn' ]]; then
-											Warning 0 2 "'${specPattern##* }' file is different than the skeleton file, please analyze the differnces to ensure a custom copy is still needed"
-										elif [[ $specIgnoreList == 'report' ]]; then
-											Msg2 "^^${colorRed}< is ${compareToFile}${colorDefault}"
-											Msg2 "^^${colorBlue}> is ${tgtFile}${colorDefault}"
-											indentLevelSave=$indentLevel
-											let indentLevel=$indentLevel+2
-											ProtectedCall "colordiff $compareToFile $tgtFile | Indent"
-											indentLevel=$indentLeve
-											Msg2 "$colorDefault"
+									if [[ -f $compareToFile ]]; then
+										cmpFileMd5=$(md5sum $compareToFile | cut -f1 -d" ")
+										if [[ $tgtFileMd5 != $cmpFileMd5 ]]; then
+											if [[ $specIgnoreList == 'warn' ]]; then
+												Warning 0 2 "'${specPattern##* }' file is different than the skeleton file, please analyze the differnces to ensure a custom copy is still needed"
+											elif [[ $specIgnoreList == 'report' ]]; then
+												Msg2 "^^${colorRed}< is ${compareToFile}${colorDefault}"
+												Msg2 "^^${colorBlue}> is ${tgtFile}${colorDefault}"
+												indentLevelSave=$indentLevel
+												let indentLevel=$indentLevel+2
+												ProtectedCall "colordiff $compareToFile $tgtFile | Indent"
+												indentLevel=$indentLeve
+												Msg2 "$colorDefault"
+											fi
+										else
+											Msg2 "^^File is current"
 										fi
 									else
-										Msg2 "^^File is current"
+										Msg2 "^^Source file '$compareToFile', not found.  Cannot compare"
 									fi
 								fi
 							fi
@@ -1603,3 +1607,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-26-2017 @ 15.33.06 - (5.2.1)     - dscudiero - Make not having a locallibs directory a warning
 ## 06-26-2017 @ 15.48.08 - (5.2.2)     - dscudiero - General syncing of dev to prod
 ## 07-17-2017 @ 11.33.20 - (5.2.4)     - dscudiero - Updated code checking for locallibs directory
+## 07-17-2017 @ 16.25.46 - (5.2.6)     - dscudiero - check to see if source file exists for compare actions
