@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.20 # -- dscudiero -- Mon 07/17/2017 @  7:20:44.50
+version=2.1.21 # -- dscudiero -- Mon 07/17/2017 @  7:22:18.03
 echo "here xxx"
 #=======================================================================================================================
 # Run every day at noon from cron
@@ -19,13 +19,13 @@ function EscrowSite {
 	local clientList="$*"
 	local tmpFile=$(MkTmpFile $FUNCNAME)
 Here 3
-dump clientList
+echo "clientList = '$clientList'"
 	Msg2 > $tmpFile
 	Msg2 "$(date)">> $tmpFile
 	Msg2 >> $tmpFile
 	Msg2 "The following sites have been escrowed, the escrow files can be found at \n^'$courseleafEscrowedSitesDir'" >> $tmpFile
 	for client in $(tr ',' ' ' <<< $clientList) do
-dump client
+echo "client = '$client'"
 		Msg2 "^$client"
 		Call 'escrowClient' "$client" "$scriptArgs"
 	done
@@ -79,3 +79,4 @@ return 0
 ## 07-17-2017 @ 07.16.39 - (2.1.17)    - dscudiero - add debug
 ## 07-17-2017 @ 07.17.55 - (2.1.18)    - dscudiero - General syncing of dev to prod
 ## 07-17-2017 @ 07.21.02 - (2.1.20)    - dscudiero - General syncing of dev to prod
+## 07-17-2017 @ 07.23.01 - (2.1.21)    - dscudiero - General syncing of dev to prod
