@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.71 # -- dscudiero -- Tue 07/18/2017 @  7:14:07.25
+version=4.11.72 # -- dscudiero -- Tue 07/18/2017 @  7:33:04.03
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -217,7 +217,6 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 	GetCims "$srcDir"
 	unset allCims
 	[[ -n $cimStr ]] && haveCims=true
-
 
 ## See if we have CLSS
 	[[ -d $srcDir/web/wen ]] && haveClss=true
@@ -657,3 +656,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 06-12-2017 @ 06.57.07 - (4.11.66)   - dscudiero - Fix skipcat
 ## 07-17-2017 @ 14.48.17 - (4.11.68)   - dscudiero - Fix problem with goodbye cleanup removing all of tmpRoot
 ## 07-18-2017 @ 07.17.23 - (4.11.71)   - dscudiero - Fix problem in setting nexturl if multiple records exists in default.tcf file
+## 07-18-2017 @ 08.05.12 - (4.11.72)   - dscudiero - General syncing of dev to prod
