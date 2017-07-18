@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.31" // -- dscudiero -- Fri 06/23/2017 @  8:18:42.92
+wfLibVersion="1.7.32" // -- dscudiero -- Tue 07/18/2017 @ 11:26:31.67
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -23,6 +23,7 @@ wfLibVersion="1.7.31" // -- dscudiero -- Fri 06/23/2017 @  8:18:42.92
 // 06/09/17 - dgs 	- Added mapping function call in GetAttrValue
 // 06/13/17 - dgs 	- Refactored LookupCode to use getXXXX functions if cim has allcodes
 // 06/23/17 - dgs 	- Added the ability to set the search/replacement string for Related (MIT)
+// 07/18/17 - dgs 	- Updated logic in getAttr function to properly process includeTCA directive
 //======================================================================================================================
 
 // Loading message
@@ -722,7 +723,6 @@ wffuncs.wfAttr = function(inval, wfrule, args) {
 }; //wffuncs.wfAttr
 
 //=======================================================================================================================
-
 // Retrive atribute code values takine into account all codes and tcf/tca values.  Passed in a data
 // object of the form { request: reqType, options: options, tcadata: tcadata } where
 //
@@ -741,6 +741,7 @@ wffuncs.wfAttr = function(inval, wfrule, args) {
 // 					- Switched data passing to object
 // 05/17/17 - dgs 	- Updated calls to GetAttrVal to add passing in the names of the form variables
 // 06/09/17 - dgs 	- Added variable value mapping with the option to turn off.
+// 07/18/17 - dgs 	- Modifed includeTCA setting, if option include OR request type ends in 's' then include tca data
 //=======================================================================================================================
 GetAttrVal = function(data) {
 	wfDebug(4,"\t*** In GetAttrVals ***");
@@ -755,7 +756,9 @@ GetAttrVal = function(data) {
 	wfDump(5,["\t\treqType;"+reqType,"\t\toptionStr;"+optionStr,"\t\ttcaData;"+tcaData,"\t\tsubjVarName;"+subjVarName,"\t\tdeptVarName;"+deptVarName,"\t\tcolVarName;"+colVarName]);
 
 	var includeTCA=false;
-	if (optionStr.indexOf("includetca") >= 0 && reqType.slice(-1) === "s" && typeof(tcaData) != "undefined" && tcaData)
+	if (optionStr.indexOf("includetca") >= 0 && typeof(tcaData) != "undefined" && tcaData)
+		var includeTCA=true;
+	if (reqType.slice(-1) === "s" && typeof(tcaData) != "undefined" && tcaData)
 		var includeTCA=true;
 	var mapValue=true;
 	if (optionStr.indexOf("nomapvalue") >= 0)
@@ -763,6 +766,7 @@ GetAttrVal = function(data) {
 	var proposalOnly=false;
 	if (optionStr.indexOf("proposalonly") >= 0)
 		var proposalOnly=true;
+	wfDump(5,["\t\tincludeTCA;"+includeTCA,"\t\tmapValue;"+mapValue,"\t\tproposalOnly;"+proposalOnly]);
 
 	var subjects=[], departments=[], colleges=[];
 	// If the request ends in an "s" then get standard values using allcodes functions
@@ -1589,3 +1593,4 @@ var wfLibLoaded=true;
 // 06-13-2017 @ 14.05.05 - (wfrule.att - dscudiero - refactor allcodes and related
 // 06-21-2017 @ 08.56.20 - (wfrule.att - dscudiero - Added additional usage notes to wffuncs.CheckChanged
 // 06-23-2017 @ 09.27.14 - (wfrule.att - dscudiero - Added ability to specify the search string to Related
+// 07-18-2017 @ 13.15.54 - (wfrule.att - dscudiero - Updates to getAttr funcion
