@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.110 # -- dscudiero -- Wed 07/19/2017 @ 15:04:30.54
+version=1.3.112 # -- dscudiero -- Wed 07/19/2017 @ 15:09:39.57
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -35,7 +35,7 @@ if [[ $userName == 'dscudiero' ]]; then
 fi
 refreshObjs+=('Courseleaf')
 refreshObjs+=('CGIs')
-refreshObjs+=('CIM')
+#refreshObjs+=('CIM')
 refreshObjs+=('Courseleaf_File')
 refreshObjs+=('WorkflowCoreFiles')
 # refreshObjs+=('Internal')
@@ -152,6 +152,34 @@ function courseleaf_file {
 	$DOIT refreshCourseleafFile $originalArgStr
 	return 0
 }
+
+function CopyFileWithCheck {
+	[[ $DOIT != '' || $listOnly == true || $informationOnlyMode == true ]] && echo true && return 0
+	local srcFile=$1
+	local tgtFile=$2
+	local backup=${3:false}
+	local srcMd5 tgtMd5
+	local tmpFile=$(MkTmpFile ${FUNCNAME}.$$)
+
+	srcMd5=$(md5sum $srcFile | cut -f1 -d" ")
+	[[ -f $tgtFile ]] && tgtMd5=$(md5sum $tgtFile | cut -f1 -d" ") || unset tgtMd5
+
+dump srcFile srcMd5 tgtFile tgtMd5
+Pause
+
+	[[ $srcMd5 == $tgtMd5 ]] && echo 'same' && return 0
+	[[ ! -d $(dirname "$tgtFile") ]] && mkdir -p "$(dirname "$tgtFile")"
+
+	[[ $backup != false && -f $tgtFile ]] && BackupCourseleafFile $tgtFile
+	cp -fp $srcFile $tgtFile.new &> $tmpFile
+	[[ -f $tgtFile.new ]] && tgtMd5=$(md5sum $tgtFile.new | cut -f1 -d" ") || unset tgtMd5
+	[[ $srcMd5 != $tgtMd5 ]] && echo $(cat $tmpFile) && rm -rf $tmpFile && return 0
+	[[ -f $tgtFile ]] && rm $tgtFile
+	mv -f $tgtFile.new $tgtFile
+	echo true
+	rm -rf $tmpFile
+	return 0
+} #CopyFileWithCheck
 
 #==============================================================================================
 # Refresh a courseleaf file
@@ -431,3 +459,4 @@ Goodbye 0
 ## 07-19-2017 @ 14.57.45 - (1.3.106)   - dscudiero - General syncing of dev to prod
 ## 07-19-2017 @ 15.02.40 - (1.3.108)   - dscudiero - General syncing of dev to prod
 ## 07-19-2017 @ 15.04.38 - (1.3.110)   - dscudiero - General syncing of dev to prod
+## 07-19-2017 @ 15.09.47 - (1.3.112)   - dscudiero - General syncing of dev to prod
