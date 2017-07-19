@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.115 # -- dscudiero -- Wed 07/19/2017 @ 15:16:18.30
+version=1.3.117 # -- dscudiero -- Wed 07/19/2017 @ 15:23:39.66
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -21,8 +21,7 @@ scriptDescription="Refresh courseleaf components - dispatcher"
 	#==================================================================================================
 	function parseArgs-refresh {
 		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
-		#argList+=(-listOnly,1,switch,listOnly,,script,"Do not do copy, only list out files that would be copied")
-		:
+		myArgList+=(-action,3,option,refreshObj,,script,'The action you wish to perform')
 	}
 
 #==================================================================================================
@@ -175,13 +174,21 @@ function cgis {
 		#dump ribbigCgiSourceFile ribbitCgiVer
 
 		result=$(CopyFileWithCheck "$courseleafCgiSourceFile" "${siteDir}/web/courseleaf/courseleaf.cgi" 'courseleaf')
-dump result
 		if [[ $result == true ]]; then
-			Msg2 "^^Updated: 'courseleaf.cgi' to version $courseleafCgiVer"
+			Msg2 "^^Updated: '/courseleaf/courseleaf.cgi' to version $courseleafCgiVer"
 		elif [[ $result == same ]]; then
-			Msg2 "^^'courseleaf.cgi' is current (version: $courseleafCgiVer)"
+			Msg2 "^^'/courseleaf/courseleaf.cgi' is current (version: $courseleafCgiVer)"
 		else
-			Error 0 2 "Could not copy courseleaf.cgi,\n^^$result"
+			Error 0 2 "Could not copy '/courseleaf/courseleaf.cgi',\n^^$result"
+		fi
+
+		result=$(CopyFileWithCheck "$ribbigCgiSourceFile" "${siteDir}/web/ribbit/index.cgi" 'courseleaf')
+		if [[ $result == true ]]; then
+			Msg2 "^^Updated: '/ribbit/index.cgi' to version $ribbitCgiVer"
+		elif [[ $result == same ]]; then
+			Msg2 "^^'/ribbit/index.cgi' is current (version: $ribbitCgiVer)"
+		else
+			Error 0 2 "Could not copy '/ribbit/index.cgi',\n^^$result"
 		fi
 
 		## See if this client has the new focussearch
@@ -190,106 +197,20 @@ dump result
 			if [[ -r $grepFile ]]; then
 				grepStr=$(ProtectedCall "grep '^template:catsearch' $grepFile")
 				if [[ -n $grepStr ]]; then
-					:
+					result=$(CopyFileWithCheck "$ribbigCgiSourceFile" "${siteDir}/web/search/index.cgi" 'courseleaf')
+					if [[ $result == true ]]; then
+						Msg2 "^^Updated: '/ribbit/index.cgi' to version $ribbitCgiVer"
+					elif [[ $result == same ]]; then
+						Msg2 "^^'/search/index.cgi' is current (version: $ribbitCgiVer)"
+					else
+						Error 0 2 "Could not copy '/search/index.cgi',\n^^$result"
+					fi
 				fi
 			fi
 	 	fi
 
 	return 0
 }
-
-
-# #==============================================================================================
-# # Refresh the users private dev internal site (internal-$userName) from shadow
-# #==============================================================================================
-# function internal {
-# 	srcDir=$gitRepoShadow/courseleaf/master
-# 	tgtDir="/mnt/internal/site/stage"
-# 	if [[ $testMode == true ]]; then
-# 		tgtDir="$HOME/internal/site/stage"
-# 		[[ ! -d $tgtDir ]] && mkdir -p $tgtDir $tgtDir/web  $tgtDir/web/pagewiz $tgtDir/ribbit
-# 	fi
-# 	backupDir="$tgtDir/attic/web/pagewiz"
-
-# 	[[ ! -d $srcDir ]] && Msg2 $T "Could not locate srcDir: $srcDir"
-# 	[[ ! -f $srcDir/.syncDate ]] && Msg2 $T "Git repository is being updated, please try again later"
-# 	[[ ! -d $tgtDir ]] && Msg2 $T "Could not locate tgtDir: $tgtDir"
-
-# 	## Make sure the user wants to continue
-# 		unset verifyArgs
-# 		verifyArgs+=("Source Dir:$srcDir")
-# 		verifyArgs+=("Target Dir:$tgtDir")
-# 		VerifyContinue "You are asking to refresh the internal site:"
-
-# 	## Copy files using rsync
-# 		[[ $quiet == true || $quiet == 1 ]] && rsyncVerbose='' || rsyncVerbose='v'
-# 		[[ $listOnly == true ]] && rsyncListonly="--dry-run" || unset rsyncListonly
-# 		## Setup copy
-# 			rsyncFilters=/tmp/$userName.rsyncFilters.txt
-# 			printf "%s\n" '- *.git*' > $rsyncFilters
-# 			printf "%s\n" '+ *.*' >> $rsyncFilters
-# 			rsyncOpts="-rptb$rsyncVerbose --backup-dir $backupDir --prune-empty-dirs $rsyncListonly --include-from $rsyncFilters"
-# 		## Do Copy
-# 			Msg2 "^Syncing directories..."
-# 			tmpErr=/tmp/$userName.$myName.rsyncErr.out
-# 			$DOIT rsync $rsyncOpts "$srcDir/courseleaf/" $tgtDir/web/pagewiz 2>$tmpErr | xargs -I{} printf "\\t%s\\n" "{}"
-# 			[[ $(cat $tmpErr | wc -l) -gt 0 ]] && Msg2 $T "rsync process failed, please review messages:\n$(cat $tmpErr)\n" || rm -f $tmpErr
-# 			rm -f $rsyncFilters
-# 		## Make sure permissions on the directory are correct
-# 			$DOIT chmod 755 $tgtDir/web/pagewiz
-# 		## Make sure we have a clver.txt file
-# 			#if [[ ! -f $(dirname $tgtDir/web/${productDir}/$verFile) ]]; then
-# 			#	[[ $product == 'cat' ]] && cp -fp $skeletonRoot/release/web/courseleaf/$verFile $(dirname $tgtDir/web/${productDir}/$verFile)
-# 			#fi
-
-# 	## Copy correct cgis
-# 		Msg2; Msg2 "^Checking cgis..."
-# 		unset pageleafCgiVer ribbitCgiVer
-# 		## Get cgi source dir
-# 			cgisDirRoot=$cgisRoot/rhel${myRhel:0:1}
-# 			[[ ! -d $cgisDirRoot ]] && Msg2 $T "Could not locate cgi source directory:\n\t$cgiRoot"
-# 			cwd=$(pwd)
-# 			cd $cgisDirRoot
-# 			cgisDir=$(ls -t | tr "\n" ' ' | cut -d ' ' -f1)
-# 			cgisDir=${cgisDirRoot}/$cgisDir
-# 			cd $cwd
-# 		## Copy pagewiz.cgi
-# 			unset srcFile srcMd5 tgtFile tgtMd5
-# 			[[ -f $cgisDir/pagewiz.cgi ]] && srcFile="$cgisDir/pagewiz.cgi" || srcFile="$cgisDir/courseleaf.cgi"
-# 			srcMd5=$(md5sum $srcFile | cut -f1 -d" ")
-# 			tgtFile="$tgtDir/web/pagewiz/pagewiz.cgi"
-# 			[[ -f $tgtFile ]] && tgtMd5=$(md5sum $tgtFile | cut -f1 -d" ")
-# 			if [[ $srcMd5 != $tgtMd5 ]]; then
-# 				$DOIT cp -bf "$srcFile" "$tgtFile"
-# 				pageleafCgiVer=$($tgtDir/web/pagewiz/pagewiz.cgi -v | cut -d" " -f 3)
-# 				Msg2 "^^pagwiz.cgi refreshed: $pageleafCgiVer"
-# 			fi
-# 		## Copy ribbit/index.cgi
-# 			unset srcFile srcMd5 tgtFile tgtMd5
-# 			srcFile="$cgisDir/ribbit.cgi"
-# 			srcMd5=$(md5sum $srcFile | cut -f1 -d" ")
-# 			tgtFile="$tgtDir/web/ribbit/index.cgi"
-# 			[[ -f $tgtFile ]] && tgtMd5=$(md5sum $tgtFile | cut -f1 -d" ")
-# 			if [[ $srcMd5 != $tgtMd5 ]]; then
-# 				$DOIT cp -bf "$srcFile" "$tgtFile"
-# 				ribbitCgiVer=$($tgtDir/web/ribbit/index.cgi -v | cut -d" " -f 3)
-# 				Msg2 "^^ribbit/index.cgi refreshed: $ribbitCgiVer"
-# 			fi
-# 		## Make sure file permissions are set properly
-# 			cgiFiles=($(find $tgtDir/web/pagewiz -name \*.cgi) $(find $tgtDir/web/ribbit -name \*.cgi))
-# 			for file in "${cgiFiles[@]}"; do
-# 				$DOIT chmod 755 $file
-# 				$DOIT chmod 755 $(dirname $file)
-# 			done
-# 	## log updates in changelog.txt
-# 		unset changeLogRecs
-# 		changeLogRecs+=("Updated product: 'CAT' (to Master)")
-# 		[[ $pageleafCgiVer != '' ]] && changeLogRecs+=("pagewiz cgi updated (to $pageleafCgiVer)")
-# 		[[ $ribbitCgiVer != '' ]] && changeLogRecs+=("ribbit cgi updated (to $ribbitCgiVer)")
-# 		WriteChangelogEntry 'changeLogRecs' "$tgtDir/changelog.txt"
-
-# 	return 0
-# }
 
 #==============================================================================================
 # Refresh the /stdhtml/workflow.atj file
@@ -436,3 +357,4 @@ Goodbye 0
 ## 07-19-2017 @ 15.09.47 - (1.3.112)   - dscudiero - General syncing of dev to prod
 ## 07-19-2017 @ 15.13.11 - (1.3.114)   - dscudiero - General syncing of dev to prod
 ## 07-19-2017 @ 15.16.26 - (1.3.115)   - dscudiero - General syncing of dev to prod
+## 07-19-2017 @ 15.24.06 - (1.3.117)   - dscudiero - Add cgis action
