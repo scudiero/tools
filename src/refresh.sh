@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.119 # -- dscudiero -- Wed 07/19/2017 @ 15:26:40.97
+version=1.3.121 # -- dscudiero -- Wed 07/19/2017 @ 15:28:47.50
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -291,7 +291,6 @@ function clientData {
 # Standard arg parsing and initialization
 #==================================================================================================
 helpSet='script'
-GetDefaultsData $myName
 ParseArgsStd
 Hello
 echo
@@ -350,12 +349,6 @@ Goodbye 0
 ## 03-30-2017 @ 10.08.22 - (1.3.101)   - dscudiero - Do not overwrite roles.tcf or *.plt files when refreshing workflowCoreFiles
 ## 04-17-2017 @ 12.30.38 - (1.3.102)   - dscudiero - add clientData
 ## 07-19-2017 @ 14.37.52 - (1.3.103)   - dscudiero - Remove the Internal section
-## 07-19-2017 @ 14.55.27 - (1.3.105)   - dscudiero - General syncing of dev to prod
-## 07-19-2017 @ 14.57.45 - (1.3.106)   - dscudiero - General syncing of dev to prod
-## 07-19-2017 @ 15.02.40 - (1.3.108)   - dscudiero - General syncing of dev to prod
-## 07-19-2017 @ 15.04.38 - (1.3.110)   - dscudiero - General syncing of dev to prod
-## 07-19-2017 @ 15.09.47 - (1.3.112)   - dscudiero - General syncing of dev to prod
-## 07-19-2017 @ 15.13.11 - (1.3.114)   - dscudiero - General syncing of dev to prod
-## 07-19-2017 @ 15.16.26 - (1.3.115)   - dscudiero - General syncing of dev to prod
 ## 07-19-2017 @ 15.24.06 - (1.3.117)   - dscudiero - Add cgis action
 ## 07-19-2017 @ 15.26.58 - (1.3.119)   - dscudiero - add -action flag
+## 07-19-2017 @ 15.28.53 - (1.3.121)   - dscudiero - General syncing of dev to prod
