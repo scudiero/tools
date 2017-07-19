@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.103 # -- dscudiero -- Wed 07/19/2017 @ 14:28:46.09
+version=1.3.105 # -- dscudiero -- Wed 07/19/2017 @ 14:54:10.69
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -34,6 +34,7 @@ if [[ $userName == 'dscudiero' ]]; then
 	refreshObjs+=('wharehouseSqliteShadow')
 fi
 refreshObjs+=('Courseleaf')
+refreshObjs+=('CGIs')
 refreshObjs+=('CIM')
 refreshObjs+=('Courseleaf_File')
 refreshObjs+=('WorkflowCoreFiles')
@@ -151,6 +152,50 @@ function courseleaf_file {
 	$DOIT refreshCourseleafFile $originalArgStr
 	return 0
 }
+
+#==============================================================================================
+# Refresh a courseleaf file
+#==============================================================================================
+function cgis {
+	## Get the cgisDir
+		courseleafCgiDirRoot="$skeletonRoot/release/web/courseleaf"
+		useRhel="rhel${myRhel:0:1}"
+		courseleafCgiSourceFile="$courseleafCgiDirRoot/courseleaf.cgi"
+		[[ -f "$courseleafCgiDirRoot/courseleaf-$useRhel.cgi" ]] && courseleafCgiSourceFile="$courseleafCgiDirRoot/courseleaf-$useRhel.cgi"
+		courseleafCgiVer="$($courseleafCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
+		dump -1 courseleafCgiSourceFile courseleafCgiVer
+
+		ribbitCgiDirRoot="$skeletonRoot/release/web/ribbit"
+		ribbigCgiSourceFile="$ribbitCgiDirRoot/index.cgi"
+		[[ -f "$ribbitCgiDirRoot/courseleaf-$useRhel.cgi" ]] && ribbigCgiSourceFile="$ribbitCgiDirRoot/index-$useRhel.cgi"
+		ribbitCgiVer="$($ribbigCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
+		dump -1 ribbigCgiSourceFile ribbitCgiVer
+
+dump tgtDir courseleafCgiSourceFile courseleafCgiVer ribbigCgiSourceFile ribbitCgiVer
+		# result=$(CopyFileWithCheck "$courseleafCgiSourceFile" "${tgtDir}/web/courseleaf" 'courseleaf')
+		# if [[ $result == true ]]; then
+		# 	cgiVer=$("${tgtDir}/web/courseleaf" -v | cut -d" " -f 3)
+		# 	Msg2 "^^Updated: 'courseleaf.cgi' to version $cgiVer"
+		# elif [[ $result == same ]]; then
+		# 	Msg2 "^^'courseleaf.cgi' is current"
+		# else
+		# 	Error 0 2 "Could not copy courseleaf.cgi,\n^^$result"
+		# fi
+
+		## See if this client has the new focussearch
+	 	if [[ ! -f ${tgtDir}/web/search/results.tcf ]]; then
+			grepFile="${tgtDir}/web/search/index.tcf"
+			if [[ -r $grepFile ]]; then
+				grepStr=$(ProtectedCall "grep '^template:catsearch' $grepFile")
+				if [[ -n $grepStr ]]; then
+					:
+				fi
+			fi
+	 	fi
+
+	return 0
+}
+
 
 # #==============================================================================================
 # # Refresh the users private dev internal site (internal-$userName) from shadow
@@ -324,6 +369,7 @@ function clientData {
 # Standard arg parsing and initialization
 #==================================================================================================
 helpSet='script'
+Hello
 
 if [[ $refreshObj == '' ]]; then
 	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
@@ -379,3 +425,4 @@ Goodbye 0
 ## 03-30-2017 @ 10.08.22 - (1.3.101)   - dscudiero - Do not overwrite roles.tcf or *.plt files when refreshing workflowCoreFiles
 ## 04-17-2017 @ 12.30.38 - (1.3.102)   - dscudiero - add clientData
 ## 07-19-2017 @ 14.37.52 - (1.3.103)   - dscudiero - Remove the Internal section
+## 07-19-2017 @ 14.55.27 - (1.3.105)   - dscudiero - General syncing of dev to prod
