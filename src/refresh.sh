@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.108 # -- dscudiero -- Wed 07/19/2017 @ 15:02:22.08
+version=1.3.110 # -- dscudiero -- Wed 07/19/2017 @ 15:04:30.54
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -177,9 +177,9 @@ function cgis {
 		result=$(CopyFileWithCheck "$courseleafCgiSourceFile" "${siteDir}/web/courseleaf" 'courseleaf')
 dump result
 		if [[ $result == true ]]; then
-			Msg2 "^^Updated: 'courseleaf.cgi' to version $cgiVer"
+			Msg2 "^^Updated: 'courseleaf.cgi' to version $courseleafCgiVer"
 		elif [[ $result == same ]]; then
-			Msg2 "^^'courseleaf.cgi' is current"
+			Msg2 "^^'courseleaf.cgi' is current (version: $courseleafCgiVer)"
 		else
 			Error 0 2 "Could not copy courseleaf.cgi,\n^^$result"
 		fi
@@ -430,3 +430,4 @@ Goodbye 0
 ## 07-19-2017 @ 14.55.27 - (1.3.105)   - dscudiero - General syncing of dev to prod
 ## 07-19-2017 @ 14.57.45 - (1.3.106)   - dscudiero - General syncing of dev to prod
 ## 07-19-2017 @ 15.02.40 - (1.3.108)   - dscudiero - General syncing of dev to prod
+## 07-19-2017 @ 15.04.38 - (1.3.110)   - dscudiero - General syncing of dev to prod
