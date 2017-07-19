@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.72 # -- dscudiero -- Tue 07/18/2017 @  7:33:04.03
+version=4.11.73 # -- dscudiero -- Wed 07/19/2017 @ 14:26:25.66
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -397,66 +397,66 @@ dump -1 skipCim skipCat skipClss skipAlso
 
 	[[ -f $rsyncFilters ]] && rm $rsyncFilters
 
-#==================================================================================================
-# Check RHEL versions
-	if [[ ${clientRhel:0:1} != ${myRhel:0:1} ]]; then
-		Msg2 "\nRhel versions do not match, updating cgis to current..."
-		cgisDirRoot=$cgisRoot/rhel${myRhel:0:1}
-		[[ ! -d $cgisDirRoot ]] && Terminate "Could not locate cgi source directory:\n\t$cgiRoot"
-		if [[ -d $cgisDirRoot/release ]]; then
-			cgisDir=$cgisDirRoot/release
-		else
-			cwd=$(pwd)
-			cd $cgisDirRoot
-			cgisDir=$(ls -t | tr "\n" ' ' | cut -d ' ' -f1)
-			WarningMsg "^TCould not find the 'release' directory in the cgi root directory, using '$cgisDir'"
-			cgisDir=${cgisDirRoot}/$cgisDir
-			cd $cwd
-		fi
-		unset cgisUpdated
-		## /courseleaf/courseleaf.cgi
-			if [[ -f $cgisDir/courseleaf.cgi ]]; then
-				result=$(CopyFileWithCheck "$cgisDir/$progDir.cgi" "$tgtDir/web/$progDir/$progDir.cgi" 'courseleaf')
-				if [[ $result == true ]]; then
-					chmod 755 $tgtDir/web/$progDir/$progDir.cgi
-					Msg2 "^Upated: $progDir.cgi"
-					cgisUpdated=true
-				elif [[ $result == 'same' ]]; then
-					Msg2 "^'$progDir.cgi' is current"
-				else
-					Msg2 "TT Could not copy $progDir.cgi.\n\t$result"
-				fi
-			else
-				Terminate "^Could not locate source $progDir.cgi in \n\t\t'$cgisDir'."
-			fi
+# #==================================================================================================
+# # Check RHEL versions
+# 	if [[ ${clientRhel:0:1} != ${myRhel:0:1} ]]; then
+# 		Msg2 "\nRhel versions do not match, updating cgis to current..."
+# 		cgisDirRoot=$cgisRoot/rhel${myRhel:0:1}
+# 		[[ ! -d $cgisDirRoot ]] && Terminate "Could not locate cgi source directory:\n\t$cgiRoot"
+# 		if [[ -d $cgisDirRoot/release ]]; then
+# 			cgisDir=$cgisDirRoot/release
+# 		else
+# 			cwd=$(pwd)
+# 			cd $cgisDirRoot
+# 			cgisDir=$(ls -t | tr "\n" ' ' | cut -d ' ' -f1)
+# 			WarningMsg "^TCould not find the 'release' directory in the cgi root directory, using '$cgisDir'"
+# 			cgisDir=${cgisDirRoot}/$cgisDir
+# 			cd $cwd
+# 		fi
+# 		unset cgisUpdated
+# 		## /courseleaf/courseleaf.cgi
+# 			if [[ -f $cgisDir/courseleaf.cgi ]]; then
+# 				result=$(CopyFileWithCheck "$cgisDir/$progDir.cgi" "$tgtDir/web/$progDir/$progDir.cgi" 'courseleaf')
+# 				if [[ $result == true ]]; then
+# 					chmod 755 $tgtDir/web/$progDir/$progDir.cgi
+# 					Msg2 "^Upated: $progDir.cgi"
+# 					cgisUpdated=true
+# 				elif [[ $result == 'same' ]]; then
+# 					Msg2 "^'$progDir.cgi' is current"
+# 				else
+# 					Msg2 "TT Could not copy $progDir.cgi.\n\t$result"
+# 				fi
+# 			else
+# 				Terminate "^Could not locate source $progDir.cgi in \n\t\t'$cgisDir'."
+# 			fi
 
-		## /ribbit/index.cgi
-			if [[ -f $cgisDir/index.cgi ]]; then
-				result=$(CopyFileWithCheck "$cgisDir/index.cgi" "$tgtDir/web/ribbit/index.cgi" 'courseleaf')
-				if [[ $result == true ]]; then
-					chmod 755 $tgtDir/web/ribbit/index.cgi
-					Msg2 "^index.cgi copied"
-					cgisUpdated=true
-				elif [[ $result == 'same' ]]; then
-					Msg2 "^'index.cgi' is current"
-				else
-					Error "^Could not copy index.cgi.\n\t$result"
-				fi
-			elif [[ -f $cgisDir/ribbit.cgi ]]; then
-				result=$(CopyFileWithCheck "$cgisDir/ribbit.cgi" "$tgtDir/web/ribbit/index.cgi" 'courseleaf')
-				if [[ $result == true ]]; then
-					chmod 755 $tgtDir/web/ribbit/index.cgi
-					Msg2 "^ribbit.cgi copied as index.cgi"
-					cgisUpdated=true
-				elif [[ $result == 'same' ]]; then
-					Msg2 "^'tribbit.cgi' is current"
-				else
-					Terminate"^Could not copy ribbit.cgi as index.cgi.\n\t$result"
-				fi
-			else
-				Terminate "^Could not locate source ribbit.cgi or index.cgi, ribbit cgi not refreshed."
-			fi
-	fi
+# 		## /ribbit/index.cgi
+# 			if [[ -f $cgisDir/index.cgi ]]; then
+# 				result=$(CopyFileWithCheck "$cgisDir/index.cgi" "$tgtDir/web/ribbit/index.cgi" 'courseleaf')
+# 				if [[ $result == true ]]; then
+# 					chmod 755 $tgtDir/web/ribbit/index.cgi
+# 					Msg2 "^index.cgi copied"
+# 					cgisUpdated=true
+# 				elif [[ $result == 'same' ]]; then
+# 					Msg2 "^'index.cgi' is current"
+# 				else
+# 					Error "^Could not copy index.cgi.\n\t$result"
+# 				fi
+# 			elif [[ -f $cgisDir/ribbit.cgi ]]; then
+# 				result=$(CopyFileWithCheck "$cgisDir/ribbit.cgi" "$tgtDir/web/ribbit/index.cgi" 'courseleaf')
+# 				if [[ $result == true ]]; then
+# 					chmod 755 $tgtDir/web/ribbit/index.cgi
+# 					Msg2 "^ribbit.cgi copied as index.cgi"
+# 					cgisUpdated=true
+# 				elif [[ $result == 'same' ]]; then
+# 					Msg2 "^'tribbit.cgi' is current"
+# 				else
+# 					Terminate"^Could not copy ribbit.cgi as index.cgi.\n\t$result"
+# 				fi
+# 			else
+# 				Terminate "^Could not locate source ribbit.cgi or index.cgi, ribbit cgi not refreshed."
+# 			fi
+# 	fi
 
 if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 	#==================================================================================================
@@ -657,3 +657,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 07-17-2017 @ 14.48.17 - (4.11.68)   - dscudiero - Fix problem with goodbye cleanup removing all of tmpRoot
 ## 07-18-2017 @ 07.17.23 - (4.11.71)   - dscudiero - Fix problem in setting nexturl if multiple records exists in default.tcf file
 ## 07-18-2017 @ 08.05.12 - (4.11.72)   - dscudiero - General syncing of dev to prod
+## 07-19-2017 @ 14.37.14 - (4.11.73)   - dscudiero - Remove code that updates the cgis
