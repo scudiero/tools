@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.32" // -- dscudiero -- Tue 07/18/2017 @ 11:26:31.67
+wfLibVersion="1.7.33" // -- dscudiero -- Wed 07/19/2017 @ 11:04:48.63
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -24,12 +24,13 @@ wfLibVersion="1.7.32" // -- dscudiero -- Tue 07/18/2017 @ 11:26:31.67
 // 06/13/17 - dgs 	- Refactored LookupCode to use getXXXX functions if cim has allcodes
 // 06/23/17 - dgs 	- Added the ability to set the search/replacement string for Related (MIT)
 // 07/18/17 - dgs 	- Updated logic in getAttr function to properly process includeTCA directive
+// 07/19/17 - dgs 	- Numerious changes
 //======================================================================================================================
 
 // Loading message
 if (typeof wfLibLoaded === "undefined") {
 	if (typeof wfInDebugEnv != "undefined") {
-		if (wfEnvIsDev) wfDebug(1,"\n<<< Loading "+ wfLibName);
+		if (wfEnvIsDev) wfDebug(1,"\n*** Loading "+ wfLibName);
 	} else { wfInDebugEnv = true }
 }
 
@@ -125,7 +126,8 @@ if (typeof wfLibLoaded === "undefined") {
 // 11/15/16	- dgs -	Re-factored to allow for the specification of the core proposal variable names
 // 05/24/17 - dgs -	Refactored to use wffuncs.subjFromCode, wffuncs.getDeppartments, and wffuncs.getCollege
 // 06/12/17 - dgs - Use LookupCode to get codes if the not courseadmin or not allcodes
-// 06/23/17 - dgs 	- Added the ability to set the search/replacement string for Related (MIT)
+// 06/23/17 - dgs - Added the ability to set the search/replacement string for Related (MIT)
+// 07/18/17 - dgs - Updated lookup logic to fall back to calling the LookupCode function if the getXXX functions do not return data
 //======================================================================================================================
 wffuncs.Related = function(inval, wfrule, args) {
 	var version='4.9.11'; var myName=wfrule.attrname
@@ -445,8 +447,9 @@ wffuncs.Related = function(inval, wfrule, args) {
 						outToken.source=ref.source;
 						outTokens.push(outToken);
 					} else if (ref.format === "subj" ) {
-						//resultSet=wffuncs.getDepartments([ref.data]);
-						resultSet=LookupCode("deptCode","subjCode",ref.data,"",proposalDept,collegeVarName,departmentVarName,subjectVarName);
+						resultSet=wffuncs.getDepartments([ref.data]);
+						if (resultSet.length === 0 )
+							resultSet=LookupCode("deptCode","subjCode",ref.data,"",proposalDept,collegeVarName,departmentVarName,subjectVarName);
 					}
  					break;
   				case "college":
@@ -458,22 +461,21 @@ wffuncs.Related = function(inval, wfrule, args) {
 						outToken.source=ref.source;
 						outTokens.push(outToken);
 					} else if (ref.format === "dept" ) {
-						// if (wfCimInstance === 'courseadmin' && wfAllcodes) {
-						// 	resultSet=wffuncs.getColleges([ref.data]);
-						// } else {
+						if (wfCimInstance === 'courseadmin' && wfAllcodes)
+							resultSet=wffuncs.getColleges([ref.data]);
+						if (resultSet.length === 0 )
 							resultSet=LookupCode("colCode","deptCode",ref.data,"",proposalCol,collegeVarName,departmentVarName,subjectVarName);
-						// }
 					} else if (ref.format === "subj" ) {
 						if (wfCimInstance === 'courseadmin' && wfAllcodes) {
 							tempDepts=wffuncs.getDepartments([ref.data]);
 							resultSet=wffuncs.getColleges(tempDepts);
-						} else {
-							resultSet=LookupCode("colCode","subjCode",ref.data,"",proposalCol,collegeVarName,departmentVarName,subjectVarName);
 						}
+						if (resultSet.length === 0 )
+							resultSet=LookupCode("colCode","subjCode",ref.data,"",proposalCol,collegeVarName,departmentVarName,subjectVarName);
 					}
 	 				break;
   				default:
-  				  	wfDebug(3,"\t*Error* -- Related lookup error, ref = '" + ref.toSource() + "',\n\t\tsubstitutionType was '" + substitutionType + 
+  				  	wfDebug(3,"\t*Error* -- Related lookup error, ref = '" + ref.toSource() + "',\n\t\tsubstitutionType was '" + substitutionType +
   				  		"'' and searchString was '" + searchString + "'")
   					return false;
   					break;
@@ -607,6 +609,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 // 11/15/16	- dgs - Re-factored to allow the specification of the column names in the database
 // 12/20/16 - dgs - re-wrote the sql statement for looking up college give subject
 // 06/13/17 - dgs - Refactored to use getXXX functions for allcodes cims
+// 07/18/17 - dgs - Updated to use db lookup if the getXXX functions do not return data
 //======================================================================================================================
 function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colColumnName,deptColumnName,subjColumnName) {
 	var version='1.0.6'; var myName=arguments.callee.toString().match(/function ([^\(]+)/)[1]; var version="2.0.0"
@@ -620,9 +623,7 @@ function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colCol
 	wfDump(myDebugLevel,["\tlookupType;"+lookupType,"\tgivenType;"+givenType,"\tgivenData1;"+givenData1,"\tgivenData2;"+givenData2,"\texceptData;"+exceptData,"\twfAllcodes;"+wfAllcodes])
 	wfDump(myDebugLevel,["\tcolColumnName;"+colColumnName,"\tdeptColumnName;"+deptColumnName,"\tsubjColumnName;"+subjColumnName])
 
-
 	// MAIN
-
 		var resultSet=[];
 		var sqlStmt='';
 		var sqlParms=[givenData1];
@@ -630,21 +631,19 @@ function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colCol
 	// Lookup college code
 		if (lookupType.toLowerCase().substr(0,1) === "c") { // lookup college code
 			if (wfAllcodes) {
-				// Given data is subject codes
-				if (givenType.toLowerCase().substr(0,1) === "s") {
+				if (givenType.toLowerCase().substr(0,2) === "su") { // Given data is subject codes
 					wffuncs.getColleges(wffuncs.getDepartments([givenData1])).forEach(function(result) {
 						resultSet.push({data: result})
 					});
-				// Given data is department codes
-				} else {
+				} else { // Given data is department codes
 					wffuncs.getColleges([givenData1]).forEach(function(result) {
 						resultSet.push({data: result})
 					});
 				}
 			// Not allcodes
-			} else {
-				// Given data is subject codes
-				if (givenType.toLowerCase().substr(0,1) === "s") {
+			} //else {
+			if (resultSet.length === 0) {
+				if (givenType.toLowerCase().substr(0,2) === "su") { // Given data is subject codes
 					sqlParms.push(givenData2);
 					sqlStmt="select distinct " + colColumnName + " as data from cimlookup where " + deptColumnName + " in (select " + deptColumnName +
 							" from cimlookup where " + subjColumnName + "=? and " + deptColumnName + "<>?) and " + colColumnName + "<>''";
@@ -654,7 +653,7 @@ function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colCol
 					}
 					sqlStmt= sqlStmt + " order by " + colColumnName;
 				// Given data is department codes
-				} else {
+				} else { // Given data is college codes
 					sqlStmt="select distinct " + colColumnName + " as data from cimlookup where " + deptColumnName +
 							" = ? and " + colColumnName + " <> '' ";
 					if (typeof exceptData != 'undefined') {
@@ -673,8 +672,8 @@ function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colCol
 				wffuncs.getDepartments([givenData1]).forEach(function(result) {
 					resultSet.push({data: result})
 				});
-			// Not allcodes
-			} else {
+			}
+			if (resultSet.length === 0) {
 				sqlStmt="select distinct " + deptColumnName + " as data from cimlookup where " + subjColumnName +
 						" = ? and " + deptColumnName + " <> '' ";
 				if (typeof exceptData != 'undefined') {
@@ -1053,15 +1052,15 @@ wffuncs.CheckProposalMode = function(inval, wfrule, args) {
 // {ref:data ref:dept ref:format}
 // format is in {'subj','dept','path'}
 //==================================================================================================
-// 07/13/16 -- dgs -- Initial
-// 07/27/16 -- dgs -- Remove duplicates before returning data
+// 07/13/16 - dgs - Initial
+// 07/27/16 - dgs - Remove duplicates before returning data
+// 07/18/17 - dgs - Changed the printing of the refs to wfDump level 4
 //==================================================================================================
 function GetEcoSystemData(parentCode,proposalDept,ecoSystemTypeStr) {
 	if (parentCode == "" || proposalDept == "") return false;
 	var tmpArray=parentCode.split(' ');
 	var proposalSubj=tmpArray[0];
 	//wfDump(['parentCode;'+parentCode,'proposalDept;'+proposalDept,'proposalSubj;'+proposalSubj]);
-
 	var refsArray=[];
 	//Check for any cross references data for this course in the crossref table (eco system)
 		var sqlStmt="SELECT DISTINCT path,dept,type FROM courseref WHERE code = ? AND dept <> ? AND dept <> ''";
@@ -1106,7 +1105,7 @@ function GetEcoSystemData(parentCode,proposalDept,ecoSystemTypeStr) {
 		}); //resultSet
 
 		wfDebug(4,"\n\tFound " + refsArray.length.toString() + " distinct references found from the Eco System")
-		refsArray.forEach(function(ref) { wfDump(['\tref;'+ref.toSource()]); });
+		wfDump(4,['\t\trefsArray;'+refsArray.toSource()]);
 
 	return refsArray;
 } //GetEcoSystemData
@@ -1594,3 +1593,4 @@ var wfLibLoaded=true;
 // 06-21-2017 @ 08.56.20 - (wfrule.att - dscudiero - Added additional usage notes to wffuncs.CheckChanged
 // 06-23-2017 @ 09.27.14 - (wfrule.att - dscudiero - Added ability to specify the search string to Related
 // 07-18-2017 @ 13.15.54 - (wfrule.att - dscudiero - Updates to getAttr funcion
+// 07-19-2017 @ 14.06.30 - (wfrule.att - dscudiero - General syncing of dev to prod
