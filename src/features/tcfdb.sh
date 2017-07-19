@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.2.18 # -- dscudiero -- 03/14/2017 @ 10:55:46.22
+version=1.2.19 # -- dscudiero -- Wed 07/19/2017 @ 14:36:38.01
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
@@ -96,44 +96,27 @@ changeLogRecs+=("Feature: $feature")
 	Msg2 "^Checking completed"
 
 ## update the courseleaf.cgi file
-	Msg2; Msg2 "Checking courseleaf.cgi file version..."
 	if [[ $cgiVerIsOk != true ]]; then
-		## Set cgis dir
-			cgisDirRoot=$cgisRoot/rhel${myRhel:0:1}
-			[[ ! -d $cgisDirRoot ]] && Msg2 $T "Could not locate cgi source directory:\n\t$cgiRoot"
-			if [[ -d $cgisDirRoot/release ]]; then
-				cgisDir=$cgisDirRoot/release
-			else
-				cwd=$(pwd)
-				cd $cgisDirRoot
-				cgisDir=$(ls -t | tr "\n" ' ' | cut -d ' ' -f1)
-				#Msg "WT Could not find the 'release' directory in the cgi root directory, using '$cgisDir'"
-				cgisDir=${cgisDirRoot}/$cgisDir
-			fi
-			[[ ! -d $cgisDir ]] && Terminate "Could not find skeleton directory: $cgisDir"
+		## Get the cgisDir
+			courseleafCgiDirRoot="$skeletonRoot/release/web/courseleaf"
+			useRhel="rhel${myRhel:0:1}"
+			courseleafCgiSourceFile="$courseleafCgiDirRoot/courseleaf.cgi"
+			[[ -f "$courseleafCgiDirRoot/courseleaf-$useRhel.cgi" ]] && courseleafCgiSourceFile="$courseleafCgiDirRoot/courseleaf-$useRhel.cgi"
+			courseleafCgiVer="$($courseleafCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
+			dump -1 courseleafCgiSourceFile courseleafCgiVer
 
+		Msg2; Msg2 "Updating courseleaf.cgi file to version $courseleafCgiVer..."
 		## Copy the cgi file
 			unset courseleafCgiVer
-			if [[ -f $cgisDir/courseleaf.cgi ]]; then
-				myCourseleafCgi=$tgtDir/web/courseleaf/tcfdb/courseleaf.cgi
-				[[ ! -d $(dirname $myCourseleafCgi) ]] && mkdir -p $(dirname $myCourseleafCgi)
-				result=$(CopyFileWithCheck "$cgisDir/courseleaf.cgi" "$myCourseleafCgi" 'courseleaf')
-				if [[ $result == true ]]; then
-					chmod 755 $tgtDir/web/courseleaf/courseleaf.cgi
-					courseleafCgiVer=$($tgtDir/web/courseleaf/courseleaf.cgi -v | cut -d" " -f 3)
-					Msg2 "^courseleaf.cgi ($courseleafCgiVer) copied"
-					changeLogRecs+=("Updated: courseleaf.cfg")
-				else
-					Terminate "Could not copy courseleaf.cgi.\n\t$result"
-				fi
+			result=$(CopyFileWithCheck "$courseleafCgiSourceFile" "$myCourseleafCgi" 'courseleaf')
+			if [[ $result == true ]]; then
+				chmod 755 $tgtDir/web/courseleaf/courseleaf.cgi
+				changeLogRecs+=("Updated: courseleaf.cfg")
+				changesMade=true
 			else
-				Terminate "Could not locate source courseleaf.cgi, courseleaf cgi not refreshed."
+				Terminate "Could not copy courseleaf.cgi.\n\t$result"
 			fi
-			changesMade=true
-	else
-		Msg2 "^CGI version is OK ($myCourseleafCgi)"
 	fi
-	Msg2 "^Checking completed"
 
 ## Create the tcfdb database
 	Msg2; Msg2 "Creating tcfdb instance, finding base database..."
@@ -294,3 +277,4 @@ return  ## We are called as a subprocess, just return to our parent
 ## Change Log
 #==================================================================================================## Tue Mar  7 14:44:52 CST 2017 - dscudiero - Update description
 ## Tue Mar 14 12:18:47 CDT 2017 - dscudiero - Tweak messaging
+## 07-19-2017 @ 14.37.40 - (1.2.19)    - dscudiero - Update how the cgi files are sourced
