@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.112 # -- dscudiero -- Wed 07/19/2017 @ 15:09:39.57
+version=1.3.114 # -- dscudiero -- Wed 07/19/2017 @ 15:13:03.93
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -202,7 +202,7 @@ function cgis {
 		ribbitCgiVer="$($ribbigCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
 		#dump ribbigCgiSourceFile ribbitCgiVer
 
-		result=$(CopyFileWithCheck "$courseleafCgiSourceFile" "${siteDir}/web/courseleaf" 'courseleaf')
+		result=$(CopyFileWithCheck "$courseleafCgiSourceFile" "${siteDir}/web/courseleaf/courseleaf.cgi" 'courseleaf')
 dump result
 		if [[ $result == true ]]; then
 			Msg2 "^^Updated: 'courseleaf.cgi' to version $courseleafCgiVer"
@@ -399,6 +399,8 @@ function clientData {
 # Standard arg parsing and initialization
 #==================================================================================================
 helpSet='script'
+GetDefaultsData $myName
+ParseArgsStd
 Hello
 
 if [[ $refreshObj == '' ]]; then
@@ -460,3 +462,4 @@ Goodbye 0
 ## 07-19-2017 @ 15.02.40 - (1.3.108)   - dscudiero - General syncing of dev to prod
 ## 07-19-2017 @ 15.04.38 - (1.3.110)   - dscudiero - General syncing of dev to prod
 ## 07-19-2017 @ 15.09.47 - (1.3.112)   - dscudiero - General syncing of dev to prod
+## 07-19-2017 @ 15.13.11 - (1.3.114)   - dscudiero - General syncing of dev to prod
