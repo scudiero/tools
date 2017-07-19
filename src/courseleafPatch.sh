@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.2.6 # -- dscudiero -- Mon 07/17/2017 @ 15:42:57.19
+version=5.2.10 # -- dscudiero -- Wed 07/19/2017 @ 14:23:05.72
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -850,25 +850,18 @@ removeGitReposFromNext=true
 		fi
 
 	## Get the cgisDir
-		# if [[ $buildPatchPackage == true ]]; then
-		# 	sqlStmt="select redhatver from $clientInfoTable where name=\"$client\""
-		# 	RunSql2 $sqlStmt
-		# 	[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Building a remote installation package and could not retrieve the clients Redhat version from the database"
-		# 	[[ ${resultSet[@]} == 'NULL' ]] && Terminate "Client record does not contain Redhat version information."
-		# 	useRhel="rhel${resultSet[0]}"
-		# else
-		# 	useRhel="rhel${myRhel:0:1}"
-		# fi
+		courseleafCgiDirRoot="$skeletonRoot/release/web/courseleaf"
 		useRhel="rhel${myRhel:0:1}"
-		cgisDirRoot=$cgisRoot/$useRhel
-		[[ ! -d $cgisDirRoot ]] && Terminate "Could not locate cgi source directory:\n\t$cgiRoot"
-		cwd=$(pwd)
-		cd $cgisDirRoot
-		cgisDir=$(ls -t | tr "\n" ' ' | cut -d ' ' -f1)
-		cgisDir=${cgisDirRoot}/$cgisDir
-		[[ ! -d $cgisDir ]] && Terminate "Could not find cgis directory: $cgisDir"
-		cd $cwd
-		cgiVer="$($cgisDir/courseleaf.cgi -v  2> /dev/null | cut -d" " -f3)"
+		courseleafCgiSourceFile="$courseleafCgiDirRoot/courseleaf.cgi"
+		[[ -f "$courseleafCgiDirRoot/courseleaf-$useRhel.cgi" ]] && courseleafCgiSourceFile="$courseleafCgiDirRoot/courseleaf-$useRhel.cgi"
+		courseleafCgiVer="$($courseleafCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
+		dump -1 courseleafCgiSourceFile courseleafCgiVer
+
+		ribbitCgiDirRoot="$skeletonRoot/release/web/ribbit"
+		ribbigCgiSourceFile="$ribbitCgiDirRoot/index.cgi"
+		[[ -f "$ribbitCgiDirRoot/courseleaf-$useRhel.cgi" ]] && ribbigCgiSourceFile="$ribbitCgiDirRoot/index-$useRhel.cgi"
+		ribbitCgiVer="$($ribbigCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
+		dump -1 ribbigCgiSourceFile ribbitCgiVer
 
 	## Get the daily.sh version
 		grepFile="$skeletonRoot/release/bin/daily.sh"
@@ -899,8 +892,9 @@ done
 [[ $catalogAdvance == true ]] && verifyArgs+=("New catalog edition:$newEdition, fullAdvance=$fullAdvance")
 [[ $catalogAudit == true ]] && verifyArgs+=("Catalog Edit:$catalogAudit")
 
-[[ -n $cgiVer ]] && verifyArgs+=("CGIs version:$cgiVer") 	## (from: '$cgisDir')")
-[[ -n $dailyShVere ]] && verifyArgs+=("Daily.sh version:$dailyShVer") 	## (from: '$skeletonRoot/release')")
+[[ -n $courseleafCgiVer ]] && verifyArgs+=("courseleaf.cgi version:$courseleafCgiVer")
+[[ -n $ribbitCgiVer ]] && verifyArgs+=("ribbit.cgi version:$ribbitCgiVer")
+[[ -n $dailyShVer ]] && verifyArgs+=("daily.sh version:$dailyShVer") 	## (from: '$skeletonRoot/release')")
 [[ $backup == true ]] && verifyArgs+=("Backup site:$backup")
 [[ $offline == true ]] && verifyArgs+=("Take site offline:$offline")
 if [[ $buildPatchPackage == true ]]; then
@@ -921,7 +915,7 @@ myData="Client: '$client', Products: '$patchProducts', tgtEnv: '$env' $processCo
 [[ $buildPatchPackage == true ]] && myData="$myData Build patchPackage"
 myData="$myData $processControl"
 [[ $logInDb != false && $myLogRecordIdx != "" && $testMode != true ]] && ProcessLogger 'Update' $myLogRecordIdx 'data' "$myData"
-dump -2 -p client products catRefreshVersion cimRefreshVersion clssRefreshVersion srcDir tgtDir cgisDir
+dump -2 -p client products catRefreshVersion cimRefreshVersion clssRefreshVersion srcDir tgtDir
 
 #=======================================================================================================================
 ## Main
@@ -1243,7 +1237,8 @@ declare -A processedSpecs
 						cgi|searchcgi)
 							Msg2 "\n^Processing '$specSource' record: '${specPattern} --> ${specTarget}'"
 							[[ ! -d $(dirname "${tgtDir}${specTarget}") ]] && echo "mkdir"  && mkdir -p "${tgtDir}${specTarget}"
-							result=$(CopyFileWithCheck "$cgisDir/$specPattern" "${tgtDir}${specTarget}" 'courseleaf')
+							[[ $specPattern == ${courseleafProgDir}.cgi ]] && sourceFile="$courseleafCgiSourceFile" || sourceFile="$ribbigCgiSourceFile"
+							result=$(CopyFileWithCheck "$sourceFile" "${tgtDir}${specTarget}" 'courseleaf')
 							if [[ $result == true ]]; then
 								currentCgiVer=$(${tgtDir}${specTarget} -v | cut -d" " -f 3)
 								Msg2 "^^Updated: '$specPattern' to version $currentCgiVer"
@@ -1255,7 +1250,7 @@ declare -A processedSpecs
 								Error 0 2 "Could not copy courseleaf.cgi,\n^^$result"
 							fi
 							if [[ $buildPatchPackage == true ]]; then
-								result=$(CopyFileWithCheck "$cgisDir/$specPattern" "${packageDir}${specTarget}")
+								result=$(CopyFileWithCheck "$sourceFile" "${packageDir}${specTarget}")
 								if [[ $result == true ]]; then
 									Msg2 "^^Updated: '$specPattern' copied to the staging area"
 								elif [[ $result == same ]]; then
@@ -1608,3 +1603,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-26-2017 @ 15.48.08 - (5.2.2)     - dscudiero - General syncing of dev to prod
 ## 07-17-2017 @ 11.33.20 - (5.2.4)     - dscudiero - Updated code checking for locallibs directory
 ## 07-17-2017 @ 16.25.46 - (5.2.6)     - dscudiero - check to see if source file exists for compare actions
+## 07-19-2017 @ 14.37.32 - (5.2.10)    - dscudiero - Update how the cgi files are sourced
