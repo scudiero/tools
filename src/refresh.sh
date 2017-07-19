@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.117 # -- dscudiero -- Wed 07/19/2017 @ 15:23:39.66
+version=1.3.119 # -- dscudiero -- Wed 07/19/2017 @ 15:26:40.97
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -27,7 +27,6 @@ scriptDescription="Refresh courseleaf components - dispatcher"
 #==================================================================================================
 # Declare local variables and constants
 #==================================================================================================
-ParseArgsStd
 if [[ $userName == 'dscudiero' ]]; then
 	refreshObjs+=('VBA')
 	refreshObjs+=('wharehouseSqliteShadow')
@@ -295,6 +294,7 @@ helpSet='script'
 GetDefaultsData $myName
 ParseArgsStd
 Hello
+echo
 
 if [[ $refreshObj == '' ]]; then
 	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
@@ -358,3 +358,4 @@ Goodbye 0
 ## 07-19-2017 @ 15.13.11 - (1.3.114)   - dscudiero - General syncing of dev to prod
 ## 07-19-2017 @ 15.16.26 - (1.3.115)   - dscudiero - General syncing of dev to prod
 ## 07-19-2017 @ 15.24.06 - (1.3.117)   - dscudiero - Add cgis action
+## 07-19-2017 @ 15.26.58 - (1.3.119)   - dscudiero - add -action flag
