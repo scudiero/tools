@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.106 # -- dscudiero -- Wed 07/19/2017 @ 14:57:20.60
+version=1.3.108 # -- dscudiero -- Wed 07/19/2017 @ 15:02:22.08
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -158,7 +158,7 @@ function courseleaf_file {
 #==============================================================================================
 function cgis {
 	Init "getClient getEnv getDirs checkEnvs"
-	dump client env siteDir
+	#dump env siteDir
 
 	## Get the cgisDir
 		courseleafCgiDirRoot="$skeletonRoot/release/web/courseleaf"
@@ -166,24 +166,23 @@ function cgis {
 		courseleafCgiSourceFile="$courseleafCgiDirRoot/courseleaf.cgi"
 		[[ -f "$courseleafCgiDirRoot/courseleaf-$useRhel.cgi" ]] && courseleafCgiSourceFile="$courseleafCgiDirRoot/courseleaf-$useRhel.cgi"
 		courseleafCgiVer="$($courseleafCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
-		dump -1 courseleafCgiSourceFile courseleafCgiVer
+		#dump courseleafCgiSourceFile courseleafCgiVer
 
 		ribbitCgiDirRoot="$skeletonRoot/release/web/ribbit"
 		ribbigCgiSourceFile="$ribbitCgiDirRoot/index.cgi"
 		[[ -f "$ribbitCgiDirRoot/courseleaf-$useRhel.cgi" ]] && ribbigCgiSourceFile="$ribbitCgiDirRoot/index-$useRhel.cgi"
 		ribbitCgiVer="$($ribbigCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
-		dump -1 ribbigCgiSourceFile ribbitCgiVer
+		#dump ribbigCgiSourceFile ribbitCgiVer
 
-dump tgtDir courseleafCgiSourceFile courseleafCgiVer ribbigCgiSourceFile ribbitCgiVer
-		# result=$(CopyFileWithCheck "$courseleafCgiSourceFile" "${tgtDir}/web/courseleaf" 'courseleaf')
-		# if [[ $result == true ]]; then
-		# 	cgiVer=$("${tgtDir}/web/courseleaf" -v | cut -d" " -f 3)
-		# 	Msg2 "^^Updated: 'courseleaf.cgi' to version $cgiVer"
-		# elif [[ $result == same ]]; then
-		# 	Msg2 "^^'courseleaf.cgi' is current"
-		# else
-		# 	Error 0 2 "Could not copy courseleaf.cgi,\n^^$result"
-		# fi
+		result=$(CopyFileWithCheck "$courseleafCgiSourceFile" "${siteDir}/web/courseleaf" 'courseleaf')
+dump result
+		if [[ $result == true ]]; then
+			Msg2 "^^Updated: 'courseleaf.cgi' to version $cgiVer"
+		elif [[ $result == same ]]; then
+			Msg2 "^^'courseleaf.cgi' is current"
+		else
+			Error 0 2 "Could not copy courseleaf.cgi,\n^^$result"
+		fi
 
 		## See if this client has the new focussearch
 	 	if [[ ! -f ${tgtDir}/web/search/results.tcf ]]; then
@@ -430,3 +429,4 @@ Goodbye 0
 ## 07-19-2017 @ 14.37.52 - (1.3.103)   - dscudiero - Remove the Internal section
 ## 07-19-2017 @ 14.55.27 - (1.3.105)   - dscudiero - General syncing of dev to prod
 ## 07-19-2017 @ 14.57.45 - (1.3.106)   - dscudiero - General syncing of dev to prod
+## 07-19-2017 @ 15.02.40 - (1.3.108)   - dscudiero - General syncing of dev to prod
