@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.105 # -- dscudiero -- Wed 07/19/2017 @ 14:54:10.69
+version=1.3.106 # -- dscudiero -- Wed 07/19/2017 @ 14:57:20.60
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -157,6 +157,9 @@ function courseleaf_file {
 # Refresh a courseleaf file
 #==============================================================================================
 function cgis {
+	Init "getClient getEnv getDirs checkEnvs"
+	dump client env siteDir
+
 	## Get the cgisDir
 		courseleafCgiDirRoot="$skeletonRoot/release/web/courseleaf"
 		useRhel="rhel${myRhel:0:1}"
@@ -426,3 +429,4 @@ Goodbye 0
 ## 04-17-2017 @ 12.30.38 - (1.3.102)   - dscudiero - add clientData
 ## 07-19-2017 @ 14.37.52 - (1.3.103)   - dscudiero - Remove the Internal section
 ## 07-19-2017 @ 14.55.27 - (1.3.105)   - dscudiero - General syncing of dev to prod
+## 07-19-2017 @ 14.57.45 - (1.3.106)   - dscudiero - General syncing of dev to prod
