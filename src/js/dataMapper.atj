@@ -1,0 +1,67 @@
+
+
+wfSubRule:Depts|SELECT groupname,name,access FROM codedesc WHERE setname="department" and rank >= 0 and (access <> 'retired' OR access IS NULL) order by code
+wfSubRule:Depts|SELECT substr(code,5) as code,name,access FROM codedesc WHERE setname="department" and rank >= 0 and (access <> 'retired' OR access IS NULL) order by code
+
+
+//======================================================================================================================
+// Related and Associated steps
+//	_formFieldVars
+// 		The formate is name[|format][|dataAttributeName] where :
+// 		format is one item in the set {courseCode,colCode,deptCode,subjCode}, the default is 'code'
+// 		dataAttributeName is the name of the object attribute that contains the data for the reference, default is 'data'
+//======================================================================================================================
+// Setup rules for non-controlling entities, steps give for each
+Related_dataMapper:WfDataMapper
+
+
+//=================================================================================================
+// Set the department code by looking up the 'groupname' field in the 'codedesc' table
+//=================================================================================================
+// 07-19-17 - dgs - Initial coding -- UIC
+//=================================================================================================
+WfDataMapper = function(type,data) {
+	var myName="WfDataMapper"; wfDebug(5,"\n\t\t*** In " + myName + " ***");
+	wfDump(5,["\t\ttype;"+type,"\t\tdata;"+data])
+	var retVal="";
+
+	// Main
+	if (type.toLowerCase() === 'dept')
+		retVal=MapDeptVal(data);
+
+	if (retVal === "")
+		retVal=data;
+
+	// Return results
+	wfDebug(4,"\t\t*** " + myName + ": Data '" + data + "' mapped to: '" + retVal + "'")
+	return retVal;
+
+} //WfDataMapper//
+
+//=================================================================================================
+// Set the department code by looking up the 'groupname' field in the 'codedesc' table
+//=================================================================================================
+// 07-19-17 - dgs - Initial coding -- UIC
+//=================================================================================================
+MapDeptVal = function(data) {
+	var myName="MapDeptVal"; wfDebug(5,"\n\t\t*** In " + myName + " ***");
+	wfDump(5,["\t\tdata;"+data])
+	var retVal="";
+
+	// Main
+	var sqlStmt="select groupname from codedesc where setname='department' and code=?";
+	var sqlParms=[data];
+	var resultSet=dbquery(tcfdata.dbname[0],sqlStmt,sqlParms);
+	if (resultSet.length) {
+		wfDump(6,["\t\tresultSet;"+resultSet.toSource()]);
+		retVal=resultSet[0].groupname;
+		wfDebug(5,"\t\t*** " + myName + ": Data '" + data + "' mapped to: '" + retVal + "'")
+	}
+
+	if (retVal === "")
+		retVal=data;
+
+	// Return results
+	return retVal;
+
+} //WfDataMapper//
