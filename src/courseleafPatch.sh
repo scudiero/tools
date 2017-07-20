@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.2.20 # -- dscudiero -- Thu 07/20/2017 @ 11:06:56.45
+version=5.2.22 # -- dscudiero -- Thu 07/20/2017 @ 12:40:28.21
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -1121,7 +1121,6 @@ declare -A processedSpecs
 			[[ ${#productSpecArray[@]} -le 0 ]] && Msg2 $WT1 "No patch file specs found for '$product', skipping" && continue
 			for ((cntr=0; cntr<${#productSpecArray[@]}; cntr++)); do
 				specLine="${productSpecArray[$cntr]}"
-dump specLine
 				mapKey="$(tr -d ' ' <<< "$specLine")"
 				## Check to see if we have already processed this spec
 				[[ ${processedSpecs["$mapKey"]+abc} ]] && continue
@@ -1151,7 +1150,6 @@ dump specLine
 
 				## Process record
 					backupDir=$backupRootDir/${product}${specTarget}
-dump specSource
 					case "$(Lower "$specSource")" in
 						git)
 							Msg2 "\n^Processing '$specSource' record: '${specPattern%% *} --> ${specTarget}'"
@@ -1243,6 +1241,7 @@ dump specSource
 							result=$(CopyFileWithCheck "$sourceFile" "${tgtDir}${specTarget}" 'courseleaf')
 							if [[ $result == true ]]; then
 								currentCgiVer=$(${tgtDir}${specTarget} -v | cut -d" " -f 3)
+								chmod 750 "${tgtDir}${specTarget}"
 								Msg2 "^^Updated: '$specPattern' to version $currentCgiVer"
 								changeLogRecs+=("courseleaf cgi updated (to $currentCgiVer)")
 								changesMade=true
@@ -1605,3 +1604,4 @@ Goodbye 0 "$text1" "$text2"
 ## 07-17-2017 @ 16.25.46 - (5.2.6)     - dscudiero - check to see if source file exists for compare actions
 ## 07-19-2017 @ 14.37.32 - (5.2.10)    - dscudiero - Update how the cgi files are sourced
 ## 07-20-2017 @ 11.08.42 - (5.2.20)    - dscudiero - Fix problem where commands were not being run
+## 07-20-2017 @ 12.41.43 - (5.2.22)    - dscudiero - Move the setting of the permisions for /search/index.cgi into the searchcgi record processing in the script
