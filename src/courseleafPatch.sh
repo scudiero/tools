@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.2.17 # -- dscudiero -- Thu 07/20/2017 @ 10:53:43.38
+version=5.2.18 # -- dscudiero -- Thu 07/20/2017 @ 11:00:10.38
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -1263,34 +1263,30 @@ dump specSource
 							fi
 							;;
 						cgicommand)
-							if [[ -f "$specPattern" ]]; then
-								if [[ $(Lower "${specTarget}") == 'always' ]] || [[ $(Lower "${specTarget}") == 'onchangeonly' || -z ${specTarget} && $changesMade == true ]]; then
-									pushd "$tgtDir/web/$courseleafProgDir" >& /dev/null
-									indentLevelSave=$indentLevel ; indentLevel=2
-									RunCourseLeafCgi "$tgtDir" "$specPattern"
-									indentLevel=$indentLevelSave
-									popd >& /dev/null
-									[[ $buildPatchPackage == true ]] && cgiCommands+=("$specPattern")
-								fi
+							tmpStr=$(Lower "${specTarget}")
+							if [[ -z $tmpStr ]] || [[ $tmpStr == 'always' ]] || [[ $tmpStr == 'onchangeonly' && $changesMade == true ]]; then
+								pushd "$tgtDir/web/$courseleafProgDir" >& /dev/null
+								indentLevelSave=$indentLevel ; indentLevel=2
+								RunCourseLeafCgi "$tgtDir" "$specPattern"
+								indentLevel=$indentLevelSave
+								popd >& /dev/null
+								[[ $buildPatchPackage == true ]] && cgiCommands+=("$specPattern")
 							fi
 							;;
 						command)
 Here 1
-dump specPattern specTarget
-echo "\${specPattern##* } = '${specPattern##* }'"
-							if [[ -e "${specPattern##* }" ]]; then
-Here 2
-								if [[ $(Lower "${specTarget}") == 'always' ]] || [[ $(Lower "${specTarget}") == 'onchangeonly' || -z ${specTarget}  && $changesMade == true ]]; then
+dump specPattern specTarget changesMade
+							tmpStr=$(Lower "${specTarget}")
+							if [[ -z $tmpStr ]] || [[ $tmpStr == 'always' ]] || [[ $tmpStr == 'onchangeonly' && $changesMade == true ]]; then
 Here 3
-									Msg2 "\n^Processing '$specSource' record: '${specPattern} ${specTarget}'"
-									pushd "$tgtDir" >& /dev/null
-									indentLevelSave=$indentLevel ; indentLevel=2
-									eval "$specPattern"
-									[[ $? -eq 0 ]] && changeLogRecs+=("Executed unix command: '$specPattern'")
-									indentLevel=$indentLevelSave
-									popd >& /dev/null
-									[[ $buildPatchPackage == true ]] && unixCommands+=("$specPattern")
-								fi
+								Msg2 "\n^Processing '$specSource' record: '${specPattern} ${specTarget}'"
+								pushd "$tgtDir" >& /dev/null
+								indentLevelSave=$indentLevel ; indentLevel=2
+								eval "$specPattern"
+								[[ $? -eq 0 ]] && changeLogRecs+=("Executed unix command: '$specPattern'")
+								indentLevel=$indentLevelSave
+								popd >& /dev/null
+								[[ $buildPatchPackage == true ]] && unixCommands+=("$specPattern")
 							fi
 							;;
 						compare)
@@ -1615,3 +1611,4 @@ Goodbye 0 "$text1" "$text2"
 ## 07-20-2017 @ 10.47.22 - (5.2.14)    - dscudiero - General syncing of dev to prod
 ## 07-20-2017 @ 10.50.13 - (5.2.15)    - dscudiero - General syncing of dev to prod
 ## 07-20-2017 @ 10.53.51 - (5.2.17)    - dscudiero - Fast commit for testing
+## 07-20-2017 @ 11.00.34 - (5.2.18)    - dscudiero - Fast commit w/ push for testing
