@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.2.15 # -- dscudiero -- Thu 07/20/2017 @ 10:50:04.56
+version=5.2.17 # -- dscudiero -- Thu 07/20/2017 @ 10:53:43.38
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -1277,7 +1277,8 @@ dump specSource
 						command)
 Here 1
 dump specPattern specTarget
-							if [[ -f "${specPattern##* }" ]]; then
+echo "\${specPattern##* } = '${specPattern##* }'"
+							if [[ -e "${specPattern##* }" ]]; then
 Here 2
 								if [[ $(Lower "${specTarget}") == 'always' ]] || [[ $(Lower "${specTarget}") == 'onchangeonly' || -z ${specTarget}  && $changesMade == true ]]; then
 Here 3
@@ -1613,3 +1614,4 @@ Goodbye 0 "$text1" "$text2"
 ## 07-20-2017 @ 10.33.49 - (5.2.13)    - dscudiero - General syncing of dev to prod
 ## 07-20-2017 @ 10.47.22 - (5.2.14)    - dscudiero - General syncing of dev to prod
 ## 07-20-2017 @ 10.50.13 - (5.2.15)    - dscudiero - General syncing of dev to prod
+## 07-20-2017 @ 10.53.51 - (5.2.17)    - dscudiero - Fast commit for testing
