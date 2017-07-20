@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.2.10 # -- dscudiero -- Wed 07/19/2017 @ 14:23:05.72
+version=5.2.13 # -- dscudiero -- Thu 07/20/2017 @ 10:29:46.67
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -1121,6 +1121,7 @@ declare -A processedSpecs
 			[[ ${#productSpecArray[@]} -le 0 ]] && Msg2 $WT1 "No patch file specs found for '$product', skipping" && continue
 			for ((cntr=0; cntr<${#productSpecArray[@]}; cntr++)); do
 				specLine="${productSpecArray[$cntr]}"
+dump specLine
 				mapKey="$(tr -d ' ' <<< "$specLine")"
 				## Check to see if we have already processed this spec
 				[[ ${processedSpecs["$mapKey"]+abc} ]] && continue
@@ -1150,6 +1151,7 @@ declare -A processedSpecs
 
 				## Process record
 					backupDir=$backupRootDir/${product}${specTarget}
+dump specSource
 					case "$(Lower "$specSource")" in
 						git)
 							Msg2 "\n^Processing '$specSource' record: '${specPattern%% *} --> ${specTarget}'"
@@ -1274,7 +1276,10 @@ declare -A processedSpecs
 							;;
 						command)
 							if [[ -f "${specPattern##* }" ]]; then
+Here 1
+dump $specPattern $specTarget
 								if [[ $(Lower "${specTarget}") == 'always' ]] || [[ $(Lower "${specTarget}") == 'onchangeonly' || -z ${specTarget}  && $changesMade == true ]]; then
+Here 2
 									Msg2 "\n^Processing '$specSource' record: '${specPattern} ${specTarget}'"
 									pushd "$tgtDir" >& /dev/null
 									indentLevelSave=$indentLevel ; indentLevel=2
@@ -1604,3 +1609,4 @@ Goodbye 0 "$text1" "$text2"
 ## 07-17-2017 @ 11.33.20 - (5.2.4)     - dscudiero - Updated code checking for locallibs directory
 ## 07-17-2017 @ 16.25.46 - (5.2.6)     - dscudiero - check to see if source file exists for compare actions
 ## 07-19-2017 @ 14.37.32 - (5.2.10)    - dscudiero - Update how the cgi files are sourced
+## 07-20-2017 @ 10.33.49 - (5.2.13)    - dscudiero - General syncing of dev to prod
