@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.33" // -- dscudiero -- Wed 07/19/2017 @ 11:04:48.63
+wfLibVersion="1.7.37" // -- dscudiero -- Thu 07/20/2017 @  8:52:28.70
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -25,12 +25,14 @@ wfLibVersion="1.7.33" // -- dscudiero -- Wed 07/19/2017 @ 11:04:48.63
 // 06/23/17 - dgs 	- Added the ability to set the search/replacement string for Related (MIT)
 // 07/18/17 - dgs 	- Updated logic in getAttr function to properly process includeTCA directive
 // 07/19/17 - dgs 	- Numerious changes
+// 07/20/17 - dgs 	- Tweaked lookup logic in Related changed (resultSet.length === 0) to (resultSet[0] === "") since getXXX
+//						functions always return an object.
 //======================================================================================================================
 
 // Loading message
 if (typeof wfLibLoaded === "undefined") {
 	if (typeof wfInDebugEnv != "undefined") {
-		if (wfEnvIsDev) wfDebug(1,"\n*** Loading "+ wfLibName);
+		if (wfEnvIsDev) wfDebug(1,"\n*** Loading "+ wfLibName + ", version: " + wfLibVersion);
 	} else { wfInDebugEnv = true }
 }
 
@@ -128,9 +130,10 @@ if (typeof wfLibLoaded === "undefined") {
 // 06/12/17 - dgs - Use LookupCode to get codes if the not courseadmin or not allcodes
 // 06/23/17 - dgs - Added the ability to set the search/replacement string for Related (MIT)
 // 07/18/17 - dgs - Updated lookup logic to fall back to calling the LookupCode function if the getXXX functions do not return data
+// 07/20/17 - dgs - Fix problem with when using the GetXXX functions -- needed to map the output to the expected output format
 //======================================================================================================================
 wffuncs.Related = function(inval, wfrule, args) {
-	var version='4.9.11'; var myName=wfrule.attrname
+	var version='4.9.16'; var myName=wfrule.attrname
 	wfDebug(3,'\n*** In '+ myName + " (" + version + ") called as '" + args.context + " / " + wfrule.searchfor + "' ***");
 	wfDump(3,["Full Step text;"+inval]);
 
@@ -182,10 +185,9 @@ wffuncs.Related = function(inval, wfrule, args) {
 			if (getTCFValue(varName) === "")
 			 	varName=myName + "_" + name;
 			tmpVal=getTCFValue(varName);
-			if (tmpVal != "") {
-				tmpVal=getTCFValue(varName);
-				eval(name + "=" + tmpVal);
-			}
+			if (tmpVal != "")
+				eval(name + "= '" + tmpVal +"'");
+				//Dump(name,eval(name))
 		});
 
 		// Build ecoSystem query string
@@ -280,7 +282,8 @@ wffuncs.Related = function(inval, wfrule, args) {
 		wfDump(3,["\n\tproposalCode;"+proposalCode,"proposalSubj;"+proposalSubj,"proposalDept;"+proposalDept,"proposalCol;"+proposalCol,
 				"\n\tcheckChanged;"+checkChanged,"ecoSystemData;"+ecoSystemData,"ecoSystemType;"+ecoSystemType,
 				"ecoSystemDataFyi;"+ecoSystemDataFyi,"formFieldVars;"+formFieldVars.toSource(),"searchString;"+searchString.toSource(),
-				"codeVarName;"+codeVarName,"collegeVarName;"+collegeVarName,"departmentVarName;"+departmentVarName,"subjectVarName;"+subjectVarName])
+				"codeVarName;"+codeVarName,"collegeVarName;"+collegeVarName,"departmentVarName;"+departmentVarName,"subjectVarName;"+subjectVarName,
+				"dataMapper;"+dataMapper]);
 
 		if (proposalCode === undefined || proposalDept === undefined) {
 			wfDebug(3,"\tproposalCode (" + proposalCode + ") or proposalDept (" + proposalDept + ") is undefined, skipping Eco System data")
@@ -447,9 +450,15 @@ wffuncs.Related = function(inval, wfrule, args) {
 						outToken.source=ref.source;
 						outTokens.push(outToken);
 					} else if (ref.format === "subj" ) {
-						resultSet=wffuncs.getDepartments([ref.data]);
-						if (resultSet.length === 0 )
+						resultSet=wffuncs.getDepartments([ref.data]).toString().split(",");
+						if (resultSet[0] === "") {
 							resultSet=LookupCode("deptCode","subjCode",ref.data,"",proposalDept,collegeVarName,departmentVarName,subjectVarName);
+						} else {
+							// Convert the output of the getXXXX function to an object array as expected later on
+							for (var ii=0,  tot=resultSet.length; ii < tot; ii++) {
+							  var newDataObj={}; newDataObj.data=resultSet[ii]; resultSet[ii]=newDataObj;
+							}
+						}
 					}
  					break;
   				case "college":
@@ -463,15 +472,27 @@ wffuncs.Related = function(inval, wfrule, args) {
 					} else if (ref.format === "dept" ) {
 						if (wfCimInstance === 'courseadmin' && wfAllcodes)
 							resultSet=wffuncs.getColleges([ref.data]);
-						if (resultSet.length === 0 )
+						if (resultSet[0] === "") {
 							resultSet=LookupCode("colCode","deptCode",ref.data,"",proposalCol,collegeVarName,departmentVarName,subjectVarName);
+						} else {
+							// Convert the output of the getXXXX function to an object array as expected later on
+							for (var ii=0,  tot=resultSet.length; ii < tot; ii++) {
+							  var newDataObj={}; newDataObj.data=resultSet[ii]; resultSet[ii]=newDataObj;
+							}
+						}
 					} else if (ref.format === "subj" ) {
 						if (wfCimInstance === 'courseadmin' && wfAllcodes) {
 							tempDepts=wffuncs.getDepartments([ref.data]);
 							resultSet=wffuncs.getColleges(tempDepts);
 						}
-						if (resultSet.length === 0 )
+						if (resultSet[0] === "") {
 							resultSet=LookupCode("colCode","subjCode",ref.data,"",proposalCol,collegeVarName,departmentVarName,subjectVarName);
+						} else {
+							// Convert the output of the getXXXX function to an object array as expected later on
+							for (var ii=0,  tot=resultSet.length; ii < tot; ii++) {
+							  var newDataObj={}; newDataObj.data=resultSet[ii]; resultSet[ii]=newDataObj;
+							}
+						}
 					}
 	 				break;
   				default:
@@ -485,7 +506,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 			if (resultSet.length) {
 				wfDump(5,["\t\tresultSet;"+resultSet.toSource()]);
 				resultSet.forEach(function(result) {
-					if (result.token != "") {
+					if (result != "") {
 						outToken={};
 						outToken.data=result.data;
 						outToken.source=ref.source;
@@ -523,7 +544,8 @@ wffuncs.Related = function(inval, wfrule, args) {
 		if (outTokens.length) {
 			wfDebug(3,"\n\t*** Returning Steps:");
 			outTokens.forEach(function(token) {
-				if (token === '') return;
+				if (token === "") return;
+				if (token.data === "") { wfDebug(3,"\t\ttoken.data is empty, skipping token"); return; }
 				// Have we seen this one yet?
 				if (!tokensDone[token.data]) {
 					// Do we have a full step name from the workflow or do we pull the step data from the config file
@@ -1105,7 +1127,7 @@ function GetEcoSystemData(parentCode,proposalDept,ecoSystemTypeStr) {
 		}); //resultSet
 
 		wfDebug(4,"\n\tFound " + refsArray.length.toString() + " distinct references found from the Eco System")
-		wfDump(4,['\t\trefsArray;'+refsArray.toSource()]);
+		wfDump(4,['\trefsArray;'+refsArray.toSource()]);
 
 	return refsArray;
 } //GetEcoSystemData
@@ -1594,3 +1616,4 @@ var wfLibLoaded=true;
 // 06-23-2017 @ 09.27.14 - (wfrule.att - dscudiero - Added ability to specify the search string to Related
 // 07-18-2017 @ 13.15.54 - (wfrule.att - dscudiero - Updates to getAttr funcion
 // 07-19-2017 @ 14.06.30 - (wfrule.att - dscudiero - General syncing of dev to prod
+// 07-20-2017 @ 08.56.52 - (		if)      - dscudiero - Additional fixes for lookups in related
