@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.2.13 # -- dscudiero -- Thu 07/20/2017 @ 10:29:46.67
+version=5.2.14 # -- dscudiero -- Thu 07/20/2017 @ 10:39:30.73
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -1275,9 +1275,10 @@ dump specSource
 							fi
 							;;
 						command)
-							if [[ -f "${specPattern##* }" ]]; then
 Here 1
 dump $specPattern $specTarget
+							if [[ -f "${specPattern##* }" ]]; then
+
 								if [[ $(Lower "${specTarget}") == 'always' ]] || [[ $(Lower "${specTarget}") == 'onchangeonly' || -z ${specTarget}  && $changesMade == true ]]; then
 Here 2
 									Msg2 "\n^Processing '$specSource' record: '${specPattern} ${specTarget}'"
@@ -1610,3 +1611,4 @@ Goodbye 0 "$text1" "$text2"
 ## 07-17-2017 @ 16.25.46 - (5.2.6)     - dscudiero - check to see if source file exists for compare actions
 ## 07-19-2017 @ 14.37.32 - (5.2.10)    - dscudiero - Update how the cgi files are sourced
 ## 07-20-2017 @ 10.33.49 - (5.2.13)    - dscudiero - General syncing of dev to prod
+## 07-20-2017 @ 10.47.22 - (5.2.14)    - dscudiero - General syncing of dev to prod
