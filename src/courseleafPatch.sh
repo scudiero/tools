@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.2.14 # -- dscudiero -- Thu 07/20/2017 @ 10:39:30.73
+version=5.2.15 # -- dscudiero -- Thu 07/20/2017 @ 10:50:04.56
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -1276,11 +1276,11 @@ dump specSource
 							;;
 						command)
 Here 1
-dump $specPattern $specTarget
+dump specPattern specTarget
 							if [[ -f "${specPattern##* }" ]]; then
-
-								if [[ $(Lower "${specTarget}") == 'always' ]] || [[ $(Lower "${specTarget}") == 'onchangeonly' || -z ${specTarget}  && $changesMade == true ]]; then
 Here 2
+								if [[ $(Lower "${specTarget}") == 'always' ]] || [[ $(Lower "${specTarget}") == 'onchangeonly' || -z ${specTarget}  && $changesMade == true ]]; then
+Here 3
 									Msg2 "\n^Processing '$specSource' record: '${specPattern} ${specTarget}'"
 									pushd "$tgtDir" >& /dev/null
 									indentLevelSave=$indentLevel ; indentLevel=2
@@ -1612,3 +1612,4 @@ Goodbye 0 "$text1" "$text2"
 ## 07-19-2017 @ 14.37.32 - (5.2.10)    - dscudiero - Update how the cgi files are sourced
 ## 07-20-2017 @ 10.33.49 - (5.2.13)    - dscudiero - General syncing of dev to prod
 ## 07-20-2017 @ 10.47.22 - (5.2.14)    - dscudiero - General syncing of dev to prod
+## 07-20-2017 @ 10.50.13 - (5.2.15)    - dscudiero - General syncing of dev to prod
