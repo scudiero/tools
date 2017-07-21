@@ -1,5 +1,5 @@
 //======================================================================================================================
-// version:1.0.6 // -- dscudiero -- Mon 06/12/2017 @ 14:49:14.26
+// version:1.0.8 // -- dscudiero -- Fri 07/21/2017 @  7:19:00.61
 //======================================================================================================================
 // Workflow functions unique for this CIM instance
 //======================================================================================================================
@@ -113,8 +113,8 @@ wffuncs.ProposalState = function(inval, wfrule, args) {
 wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 	var myName=wfrule.attrname;
 	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
-
 	var retArray=[];
+
 	var reqType=wfrule.searchfor.toLowerCase();
 	var notMode=reqType.indexOf("not")>0;
 	wfDump(1,["reqType;"+reqType,"notMode;"+notMode]);
@@ -132,14 +132,22 @@ wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 	// Main
  		var allowStep=false;
 
-	// Return results
+	// Return results -- step
 		if (notMode) allowStep=!allowStep
 		if(allowStep) {
 			wfDebug(0,"\t*** Allowing step")
-			return [inval.replace(wfrule.ifregex,'')];
+			return [inval.replace(wfrule.regex,'')];
 		}
 		wfDebug(0,"\t*** Skipping step")
 		return false
+
+	// Return results -- date
+		if(retArray.length > 0) {
+			wfDebug(1,"\t*** Returning " + retArray.toSource())
+			return retArray;
+		}
+		return false
+
 
 } //xxxxxxxx
 */
@@ -161,3 +169,4 @@ wfLibName="/locallibs/workflowLib.atj"
 // 05-11-2017 @ 14.55.28 - (//)        - dscudiero - refactored the begining stuff, removed loaded messages
 // 05-22-2017 @ 08.11.47 - (//)        - dscudiero - General syncing of dev to prod
 // 06-13-2017 @ 14.04.53 - (//)        - dscudiero - add setting wfAllcodes
+// 07-21-2017 @ 13.17.08 - (//)        - dscudiero - add return data stanza
