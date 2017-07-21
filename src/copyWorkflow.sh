@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.22 # -- dscudiero -- Fri 05/26/2017 @  9:40:39.98
+version=2.9.23 # -- dscudiero -- Fri 07/21/2017 @ 13:15:26.93
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -173,12 +173,14 @@ function CheckFilesForCopy {
 					toStr="wfDebugLevel:0"
 					$DOIT sed -i s"_^${fromStr}_${toStr}_" $srcFile
 				fi
-				unset grepStr; grepStr=$(ProtectedCall "grep '^skiploadsync:true' $srcFile")
-				if [[ -n $grepStr ]]; then
-					fromStr="$grepStr"
-					toStr="//$grepStr"
-					$DOIT sed -i s"_^${fromStr}_${toStr}_" $srcFile
-				fi
+				for searchStr in skiploadsync:true wfrules:wfDumpVars wforder:wfDumpVars wfrules:WhatsChanged wforder:WhatsChanged ; do
+					unset grepStr; grepStr=$(ProtectedCall "grep ^$searchStr $srcFile")
+					if [[ -n $grepStr ]]; then
+						fromStr="$grepStr"
+						toStr="//$grepStr"
+						$DOIT sed -i s"_^${fromStr}_${toStr}_" $srcFile
+					fi
+				done
 			fi
 			## If workflow.tcf then make sure the test workflow is commented out
 			if [[ $(Contains "$cpyFile" 'workflow.tcf') == true ]]; then
@@ -503,3 +505,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 05-24-2017 @ 08.11.15 - (2.9.9)     - dscudiero - Put in checks to make sure there is not a debug standard workflow active
 ## 05-24-2017 @ 12.22.33 - (2.9.19)    - dscudiero - Fix problem when the target file/directory does not exist
 ## 05-26-2017 @ 09.41.06 - (2.9.22)    - dscudiero - Make sure that cimsync is not commentd out
+## 07-21-2017 @ 13.15.56 - (2.9.23)    - dscudiero - Add more records in the workflow.cfg record checking/commenting logic
