@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.37" // -- dscudiero -- Thu 07/20/2017 @  8:52:28.70
+wfLibVersion="1.7.40" // -- dscudiero -- Fri 07/21/2017 @  8:35:02.88
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -239,7 +239,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 						throw "Failed, code tcf variable '" + codeVarName + "' not null check"
 					reqData.request="subjs";
 					reqData.options="noMapValue";
-					proposalSubj=GetAttrVal(reqData)[0];
+					proposalSubj=GetAttrVal(reqData);
 
 					if (proposalSubj === "" && substitutionType === 'subj')
 						throw "Failed, subject tcf variable '" + subjectVarName + "' not null check"
@@ -247,12 +247,12 @@ wffuncs.Related = function(inval, wfrule, args) {
 
 				reqData.request="cols";
 				reqData.options="noMapValue";
-				proposalCol=GetAttrVal(reqData)[0];
+				proposalCol=GetAttrVal(reqData);
 				if (proposalCol === "" && substitutionType === 'college')
 					throw "Failed, college tcf variable: '" + collegeVarName + "' not null check"
 				reqData.request="depts";
 				reqData.options="noMapValue";
-				proposalDept=GetAttrVal(reqData)[0];
+				proposalDept=GetAttrVal(reqData);
 				if (proposalDept === "" && (substitutionType === 'dept' || substitutionType === 'college'))
 					throw "Failed, department tcf variable '" + departmentVarName + "' not null check"
 
@@ -448,10 +448,11 @@ wffuncs.Related = function(inval, wfrule, args) {
 						outToken={};
 						outToken.data=ref.data;
 						outToken.source=ref.source;
-						outTokens.push(outToken);
+						resultSet.push(outToken);
+
 					} else if (ref.format === "subj" ) {
 						resultSet=wffuncs.getDepartments([ref.data]).toString().split(",");
-						if (resultSet[0] === "") {
+						if (resultSet.length === 0 || resultSet[0] === "") {
 							resultSet=LookupCode("deptCode","subjCode",ref.data,"",proposalDept,collegeVarName,departmentVarName,subjectVarName);
 						} else {
 							// Convert the output of the getXXXX function to an object array as expected later on
@@ -468,11 +469,11 @@ wffuncs.Related = function(inval, wfrule, args) {
 						outToken={}
 						outToken.data=ref.data;
 						outToken.source=ref.source;
-						outTokens.push(outToken);
+						resultSet.push(outToken);
 					} else if (ref.format === "dept" ) {
 						if (wfCimInstance === 'courseadmin' && wfAllcodes)
 							resultSet=wffuncs.getColleges([ref.data]);
-						if (resultSet[0] === "") {
+						if (resultSet.length === 0 || resultSet[0] === "") {
 							resultSet=LookupCode("colCode","deptCode",ref.data,"",proposalCol,collegeVarName,departmentVarName,subjectVarName);
 						} else {
 							// Convert the output of the getXXXX function to an object array as expected later on
@@ -485,7 +486,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 							tempDepts=wffuncs.getDepartments([ref.data]);
 							resultSet=wffuncs.getColleges(tempDepts);
 						}
-						if (resultSet[0] === "") {
+						if (resultSet.length === 0 || resultSet[0] === "") {
 							resultSet=LookupCode("colCode","subjCode",ref.data,"",proposalCol,collegeVarName,departmentVarName,subjectVarName);
 						} else {
 							// Convert the output of the getXXXX function to an object array as expected later on
@@ -503,7 +504,7 @@ wffuncs.Related = function(inval, wfrule, args) {
  			}//substitutionType switch
 
 			//Process resultSet data (if any), set output array data
-			if (resultSet.length) {
+			if (resultSet.length > 0) {
 				wfDump(5,["\t\tresultSet;"+resultSet.toSource()]);
 				resultSet.forEach(function(result) {
 					if (result != "") {
@@ -1617,3 +1618,4 @@ var wfLibLoaded=true;
 // 07-18-2017 @ 13.15.54 - (wfrule.att - dscudiero - Updates to getAttr funcion
 // 07-19-2017 @ 14.06.30 - (wfrule.att - dscudiero - General syncing of dev to prod
 // 07-20-2017 @ 08.56.52 - (		if)      - dscudiero - Additional fixes for lookups in related
+// 07-21-2017 @ 13.17.30 - (		if)      - dscudiero - Tweak lookup logic again
