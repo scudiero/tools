@@ -1,5 +1,5 @@
 //======================================================================================================================
-// version:1.0.9 // -- dscudiero -- Fri 07/21/2017 @ 15:48:49.74
+// version:1.0.10 // -- dscudiero -- Mon 07/24/2017 @ 10:50:50.44
 //======================================================================================================================
 // Workflow functions unique for this CIM instance
 //======================================================================================================================
@@ -14,11 +14,15 @@ if (typeof wfFunctionsLoaded == "undefined") {
 	if (tcfdata.allcodes && tcfdata.allcodes.length >0)
 		wfAllcodes=true;
 
-	// If wfDebugLevel is set in the config file then set as global
-	var wfDebugLevel=getTCFValue("wfDebugLevel");
-	if (wfDebugLevel === "" ) wfDebugLevel=0;
-	var wfDebugEnvs=getTCFValue("wfDebugEnvs");
 	var host=getenv("HTTP_HOST").toLowerCase();
+
+	// If wfDebugLevel is set in the config file then set as global
+	var wfDebugLevel=0;
+	if (tcfdata.wfDebugLevel && tcfdata.wfDebugLevel.length > 0)
+		wfDebugLevel=tcfdata.wfDebugLevel[0]
+	wfDebugEnvs='dev';
+	if (tcfdata.wfDebugEnvs && tcfdata.wfDebugEnvs.length > 0)
+		wfDebugEnvs=tcfdata.wfDebugEnvs[0]
 
 	// Debug environment, print info
 	wfDebugEnvs="," + wfDebugEnvs + ",";
@@ -183,3 +187,4 @@ wfLibName="/locallibs/workflowLib.atj"
 // 06-13-2017 @ 14.04.53 - (//)        - dscudiero - add setting wfAllcodes
 // 07-21-2017 @ 13.17.08 - (//)        - dscudiero - add return data stanza
 // 07-24-2017 @ 07.59.33 - (//)        - dscudiero - Added isNotEdit and IsNotNew
+// 07-24-2017 @ 11.01.12 - (//)        - dscudiero - Fix the initial coded in workflowFuncs.atj
