@@ -1,5 +1,5 @@
 //======================================================================================================================
-// version:1.0.8 // -- dscudiero -- Fri 07/21/2017 @  7:19:00.61
+// version:1.0.9 // -- dscudiero -- Fri 07/21/2017 @ 15:48:49.74
 //======================================================================================================================
 // Workflow functions unique for this CIM instance
 //======================================================================================================================
@@ -48,6 +48,16 @@ if (typeof wfFunctionsLoaded == "undefined") {
 //=======================================================================================================================
 function wfDebug(text,mode) { return; } //wfDebug
 function wfDump(varList,delimiter){ return; } //wfDump
+
+//=======================================================================================================================
+// Check if proposal is Not Delete
+// 12/16/2016 - dgs - New
+//=======================================================================================================================
+wffuncs.IsNotNew = function(inval, wfrule) {
+	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
+		return false;
+	return [inval.replace(wfrule.ifregex,'')];
+}; //IsNotEdit
 //=======================================================================================================================
 // Check if proposal is in EDIT mode
 // 02/26/2015 - dgs - New
@@ -61,20 +71,22 @@ wffuncs.IsEdit = function(inval, wfrule) {
 	return [inval.replace(wfrule.ifregex,'')];
 }; //IsEdit
 //=======================================================================================================================
+// Check if proposal is not in EDIT mode
+// 07/17/2017 - dgs - New
+//=======================================================================================================================
+wffuncs.IsNotEdit = function(inval, wfrule) {
+	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
+		return [inval.replace(wfrule.ifregex,'')]
+	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
+		return [inval.replace(wfrule.ifregex,'')]
+	return false;
+}; //IsEdit
+//=======================================================================================================================
 // Check if proposal is Not Delete
 // 12/16/2016 - dgs - New
 //=======================================================================================================================
 wffuncs.IsNotDelete = function(inval, wfrule) {
 	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
-		return false;
-	return [inval.replace(wfrule.ifregex,'')];
-}; //IsNotEdit
-//=======================================================================================================================
-// Check if proposal is Not Delete
-// 12/16/2016 - dgs - New
-//=======================================================================================================================
-wffuncs.IsNotNew = function(inval, wfrule) {
-	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
 		return false;
 	return [inval.replace(wfrule.ifregex,'')];
 }; //IsNotEdit
@@ -170,3 +182,4 @@ wfLibName="/locallibs/workflowLib.atj"
 // 05-22-2017 @ 08.11.47 - (//)        - dscudiero - General syncing of dev to prod
 // 06-13-2017 @ 14.04.53 - (//)        - dscudiero - add setting wfAllcodes
 // 07-21-2017 @ 13.17.08 - (//)        - dscudiero - add return data stanza
+// 07-24-2017 @ 07.59.33 - (//)        - dscudiero - Added isNotEdit and IsNotNew
