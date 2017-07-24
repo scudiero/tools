@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.2.22 # -- dscudiero -- Thu 07/20/2017 @ 12:40:28.21
+version=5.2.23 # -- dscudiero -- Mon 07/24/2017 @  7:57:15.78
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -1163,7 +1163,7 @@ declare -A processedSpecs
 							else
 								Msg2 "^^Files updated, check log for additional information"
 								[[ $verboseLevel -eq 0 ]] && Msg2 "^^Please check log for additional information"
-								changeLogRecs+=("${specPattern%% *} refreshed from ${specPattern##* } ")
+								changeLogRecs+=("${specPattern%% *} refreshed from ${specPattern##* }")
 								changesMade=true
 							fi
 							if [[ $buildPatchPackage == true ]]; then
@@ -1605,3 +1605,4 @@ Goodbye 0 "$text1" "$text2"
 ## 07-19-2017 @ 14.37.32 - (5.2.10)    - dscudiero - Update how the cgi files are sourced
 ## 07-20-2017 @ 11.08.42 - (5.2.20)    - dscudiero - Fix problem where commands were not being run
 ## 07-20-2017 @ 12.41.43 - (5.2.22)    - dscudiero - Move the setting of the permisions for /search/index.cgi into the searchcgi record processing in the script
+## 07-24-2017 @ 07.57.41 - (5.2.23)    - dscudiero - remove trailing blanks in the log file entries
