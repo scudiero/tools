@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.40" // -- dscudiero -- Fri 07/21/2017 @  8:35:02.88
+wfLibVersion="1.7.43" // -- dscudiero -- Tue 07/25/2017 @  8:17:29.83
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -1222,6 +1222,8 @@ wffuncs.CheckChanged = function(inval, wfrule, args) {
 //=================================================================================================
 // 03-10-17 - dgs - 	Initial coding -- ???
 // 05/10/17 - dgs - 	Refactored into a local module to be called by a wffuncs. module
+// 06/24/17 - dgs - 	Check to see if any non cycleattr fields changed, if not then short circuit
+//						the variable checks
 //=================================================================================================
 CheckChanged = function(data) {
 	var version='2.0.0'; wfDebug(3,"\t*** In CheckChanged ***");
@@ -1257,26 +1259,32 @@ CheckChanged = function(data) {
 	 		}
 		}
 
-	// Loop through the changed fields array
-		var allInList=true;
-		// if (numChanged > numCheck) allInList=false;
-		wfDebug(3,"\t\tChecking fields...")
-		// loop through the list of changed fields and make sure they are all in the checkfields list
-		for (var key in changedHash) {
-			if (changedHash.hasOwnProperty(key)) {
-				if (checkFieldsStr.indexOf(","+key+",") < 0) {
-					wfDebug(3,"\t\t\tFound field '" + key + "' changed and not in the check list, setting allInList=false");
-					allInList=false;
+		if (Object.keys(changedHash).length === 0) {
+			wfDebug(3,"\t\t\tFound no fields changed (other than cycleattrs)");
+			var oneInList=false;
+			var allInList=false;
+		} else {
+			// Loop through the changed fields array
+			var allInList=true;
+			// if (numChanged > numCheck) allInList=false;
+			wfDebug(3,"\t\tChecking fields...")
+			// loop through the list of changed fields and make sure they are all in the checkfields list
+			for (var key in changedHash) {
+				if (changedHash.hasOwnProperty(key)) {
+					if (checkFieldsStr.indexOf(","+key+",") < 0) {
+						wfDebug(3,"\t\t\tFound field '" + key + "' changed and not in the check list, setting allInList=false");
+						allInList=false;
+					}
 				}
 			}
+			// loop through the check fields to see if any of them have changed
+			var oneInList=false;
+			checkFields.forEach(function(checkField) {
+				if (typeof changedHash[checkField] != "undefined") {
+					oneInList=true
+				}
+			});
 		}
-		// loop through the check fields to see if any of them have changed
-		var oneInList=false;
-		checkFields.forEach(function(checkField) {
-			if (typeof changedHash[checkField] != "undefined") {
-				oneInList=true
-			}
-		});
 		wfDump(3,["\toneInList;"+ oneInList,"\tallInList;"+ allInList])
 
 	// return results based on mode
@@ -1300,17 +1308,17 @@ CheckChanged = function(data) {
 // e.g. InitialChecks(["wforder","code","department"],args);
 //==================================================================================================
 InitialChecks = function(checkVars,args) {
-	wfDebug(4,"\n*** In InitialChecks ***");
+	wfDebug(4,"\t*** In InitialChecks ***");
 	var tcfData={};
-	wfDump(4,['args;'+args.toSource()]);
+	//wfDump(4,['\targs;'+args.toSource()]);
 
 	for (var i=0,  tot=checkVars.length; i < tot; i++) {
 		var checkVar=checkVars[i];
-		wfDump(4,["checkVars[" + i + "];"+checkVar]);
+		//wfDump(4,["\tcheckVars[" + i + "];"+checkVar]);
 		if (checkVar === "wfrule" || checkVar === "wforder") {
 			if (args && args.context && args.context != checkVar)
-		 		throw "*** Failed rule type='" + checkVar + "'' check";
-		 	wfDebug(4,"\t\tValue OK");
+		 		throw "*** Failed rule type='" + args.context + "'' check";
+		 	wfDebug(4,"\t\targs.context value (" + args.context + ") is OK");
 		} else {
 			tcfData=eval('tcfdata.'+checkVar); // jshint ignore:line
 			//Dump('\t\ttcfData',tcfData);
@@ -1320,8 +1328,8 @@ InitialChecks = function(checkVars,args) {
 				throw "*** Failed 'InitialChecks', variable 'tcfdata."+ checkVar + "' is not null check(1)";
 			if (tcfData == "")
 				throw "*** Failed 'InitialChecks', variable 'tcfdata."+ checkVar + "' is not null check(2)";
+			wfDebug(4,"\t\t" + checkVar + " value (" + tcfData.toSource() + ") is OK");
 		}
-		wfDebug(4,"\t\tHas value");
 	} //for loop
 	return;
 } //InitialChecks
@@ -1619,3 +1627,4 @@ var wfLibLoaded=true;
 // 07-19-2017 @ 14.06.30 - (wfrule.att - dscudiero - General syncing of dev to prod
 // 07-20-2017 @ 08.56.52 - (		if)      - dscudiero - Additional fixes for lookups in related
 // 07-21-2017 @ 13.17.30 - (		if)      - dscudiero - Tweak lookup logic again
+// 07-25-2017 @ 10.56.25 - (		if)      - dscudiero - tweaked initialchecks debug info
