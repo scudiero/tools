@@ -1,10 +1,10 @@
 //======================================================================================================================
-// version:1.0.10 // -- dscudiero -- Mon 07/24/2017 @ 10:50:50.44
-//======================================================================================================================
-// Workflow functions unique for this CIM instance
+// version:1.0.17 // -- dscudiero -- Tue 07/25/2017 @  9:49:37.81
 //======================================================================================================================
 // ??/??/17-- dgs -- initial
 // 04/10/17 - dgs -	Refactored initialization block, removed end of load messages
+// 07/24/17 - dgs - Fixed issue using getTCFValue before triggers are loaded
+// 07/25/17 - dgs - Added options to the function template
 //======================================================================================================================
 if (typeof wfFunctionsLoaded == "undefined") {
 	//Get the CIM instance name
@@ -36,9 +36,10 @@ if (typeof wfFunctionsLoaded == "undefined") {
 	if (wfDebugEnvs.indexOf("," + wfEnv + ",") >= 0) {
 		wfInDebugEnv=true;
 		var wfProposalMode='EDIT'
-		if (getTCFValue("newrecord") === "true") { var wfProposalMode='NEW';
-		} else if (getTCFValue("deleterec") === "true") { var wfProposalMode='DELETE';
-		}
+		if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
+			wfProposalMode='NEW'
+		if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
+			wfProposalMode='DELETE'
 		var d = new Date();
 		var prtStr="\n" + Array(40).join("=") + " " + d.toString() + " " + Array(40).join("=") +
 					"\n<<< Loading workflowFuncs.atj, proposal mode is " + wfProposalMode;
@@ -129,11 +130,14 @@ wffuncs.ProposalState = function(inval, wfrule, args) {
 wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 	var myName=wfrule.attrname;
 	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
+	var options=wfrule.options;	options=options.substring(0, options.indexOf(';'));
 	var retArray=[];
 
 	var reqType=wfrule.searchfor.toLowerCase();
-	var notMode=reqType.indexOf("not")>0;
-	wfDump(1,["reqType;"+reqType,"notMode;"+notMode]);
+	var notMode=reqType.indexOf('not')>=0;
+	if (notMode === false)
+		notMode=options.toLowerCase().indexOf('notmode')>=0;
+	wfDebug(1,'\treqType = "'+reqType+'", notMode= "'+notMode+'", options= "'+ options + '"\n');
 
 	//Initial Checks
 	try {
@@ -152,7 +156,7 @@ wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 		if (notMode) allowStep=!allowStep
 		if(allowStep) {
 			wfDebug(0,"\t*** Allowing step")
-			return [inval.replace(wfrule.regex,'')];
+			return [inval.replace(wfrule.ifregex,'')];
 		}
 		wfDebug(0,"\t*** Skipping step")
 		return false
@@ -187,4 +191,5 @@ wfLibName="/locallibs/workflowLib.atj"
 // 06-13-2017 @ 14.04.53 - (//)        - dscudiero - add setting wfAllcodes
 // 07-21-2017 @ 13.17.08 - (//)        - dscudiero - add return data stanza
 // 07-24-2017 @ 07.59.33 - (//)        - dscudiero - Added isNotEdit and IsNotNew
-// 07-24-2017 @ 11.01.12 - (//)        - dscudiero - Fix the initial coded in workflowFuncs.atj
+// 07-24-2017 @ 11.01.12 - (//)        - dscudiero - Fixed issue using getTCFValue before triggers are loaded
+// 07-25-2017 @ 10.56.02 - (//)        - dscudiero - added options to function template
