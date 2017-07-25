@@ -62,8 +62,10 @@ tmpArray1.forEach(function(text) {
 
 ============================================================================================================================================================================
 //Regular Expression testing
-var regex = new RegExp('^[123]..$','i');
-if (regex.test(tcfdata.course_number)) {
+var courseNumber=getTCFValue('course_number');
+var regex=/^[0-3]\d{2}\w{0,1}$/i 						//Note that this is not a string, there are no quotes arround the value
+if (regex.test(courseNumber)) {
+	Here(1);
 }
 
 var uGradRegEx=/^[0-4]\d{3}[A-Za-z]*$/;
@@ -297,3 +299,4 @@ attributes.forEach(function(attr) {
 // 06-06-2017 @ 08.57.51 - dscudiero - General syncing of dev to prod
 // 07-19-2017 @ 14.06.25 - dscudiero - General syncing of dev to prod
 // 07-20-2017 @ 08.56.18 - dscudiero - General syncing of dev to prod
+// 07-25-2017 @ 10.55.51 - dscudiero - Updated regex section
