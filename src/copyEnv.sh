@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.73 # -- dscudiero -- Wed 07/19/2017 @ 14:26:25.66
+version=4.11.74 # -- dscudiero -- Wed 07/26/2017 @ 12:50:55.40
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -503,7 +503,7 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		if [[ -z $grepStr ]]; then
 			unset fromStr; fromStr=$(ProtectedCall "grep '^nexturl:' $editFile")
 			fromStr=$(CleanString "$fromStr")
-			$DOIT sed -i s"!${fromStr}!${toStr}!" $editFile
+			[[ -n $fromStr ]] && $DOIT sed -i s"!${fromStr}!${toStr}!" $editFile || Warning "Could not set nexturl"
 		fi
 
 	## email override
@@ -658,3 +658,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 07-18-2017 @ 07.17.23 - (4.11.71)   - dscudiero - Fix problem in setting nexturl if multiple records exists in default.tcf file
 ## 07-18-2017 @ 08.05.12 - (4.11.72)   - dscudiero - General syncing of dev to prod
 ## 07-19-2017 @ 14.37.14 - (4.11.73)   - dscudiero - Remove code that updates the cgis
+## 07-26-2017 @ 12.51.16 - (4.11.74)   - dscudiero - Make sure we have a value for nexturl befor calling sed
