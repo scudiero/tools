@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.74 # -- dscudiero -- Wed 07/26/2017 @ 12:50:55.40
+version=4.11.75 # -- dscudiero -- Wed 07/26/2017 @ 14:35:41.95
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -458,9 +458,8 @@ dump -1 skipCim skipCat skipClss skipAlso
 # 			fi
 # 	fi
 
-if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
-	#==================================================================================================
-	# Turn off publishing
+if [[ $tgtEnv != 'next' && $tgtEnv != 'curr' ]]; then
+		# Turn off publishing
 		Msg2 "\nTurn off Publishing..."
 		editFile="$tgtDir/$progDir.cfg"
 		$DOIT sed -i s'_^mapfile:production_//mapfile:production_'g "$editFile"
@@ -469,7 +468,9 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		$DOIT sed -i s'_^//mapfile:production|/dev/null_mapfile:production|/dev/null_' "$editFile"
 		grepStr=$(ProtectedCall "grep '^mapfile:production.*/dev/null' $editFile")
 		[[ -z $grepStr ]] && Warning "Could not locate a publishing mapfile record pointing to /dev/null, publising may still be active, please check before using clone site"
+fi
 
+if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 	# Turn off remote authenticaton
 		Msg2 "Turn off Authentication..."
 		$DOIT sed -i s'_^authuser:true_//authuser:true_' $tgtDir/$progDir.cfg
@@ -659,3 +660,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 07-18-2017 @ 08.05.12 - (4.11.72)   - dscudiero - General syncing of dev to prod
 ## 07-19-2017 @ 14.37.14 - (4.11.73)   - dscudiero - Remove code that updates the cgis
 ## 07-26-2017 @ 12.51.16 - (4.11.74)   - dscudiero - Make sure we have a value for nexturl befor calling sed
+## 07-26-2017 @ 14.36.26 - (4.11.75)   - dscudiero - turn off publising for any env other than next or curr
