@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.45" // -- dscudiero -- Wed 07/26/2017 @  8:01:25.53
+wfLibVersion="1.7.46" // -- dscudiero -- Wed 07/26/2017 @ 16:06:39.15
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -765,6 +765,7 @@ wffuncs.wfAttr = function(inval, wfrule, args) {
 // 05/17/17 - dgs 	- Updated calls to GetAttrVal to add passing in the names of the form variables
 // 06/09/17 - dgs 	- Added variable value mapping with the option to turn off.
 // 07/18/17 - dgs 	- Modifed includeTCA setting, if option include OR request type ends in 's' then include tca data
+// 07/26/17 - dgs 	- Always do the lookups for subjects, departments, and colleges regardless of request type
 //=======================================================================================================================
 GetAttrVal = function(data) {
 	wfDebug(4,"\t*** In GetAttrVals ***");
@@ -791,29 +792,35 @@ GetAttrVal = function(data) {
 		var proposalOnly=true;
 	wfDump(5,["\t\tincludeTCA;"+includeTCA,"\t\tmapValue;"+mapValue,"\t\tproposalOnly;"+proposalOnly]);
 
-	var subjects=[], departments=[], colleges=[];
+	var subjects={}, departments={}, colleges={};
 	// If the request ends in an "s" then get standard values using allcodes functions
-		if (reqType.slice(-1) === "s" && ! proposalOnly) {
-			var subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
-			var departments=wffuncs.getDepartments(subjects);
-			var colleges=wffuncs.getColleges(departments);
+		if (reqType.slice(-1) === "s" && ! proposalOnly && wfAllcodes) {
+			subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
+			departments=wffuncs.getDepartments(subjects);
+
+			colleges=wffuncs.getColleges(departments);
+			wfDebug(5,"\t\tFrom wffuncs.GetXXXX function calls:")
+			wfDump(5,["\t\tcolleges;"+colleges.toSource(),"\t\tdepartments;"+departments.toSource(),"\t\tsubjects;"+subjects.toSource(),]);
 		}
-		wfDebug(5,"\t\tFrom wffuncs.GetXXXX function calls:")
-		wfDump(5,["\t\tcolleges;"+colleges.toSource(),"\t\tdepartments;"+departments.toSource(),"\t\tsubjects;"+subjects.toSource(),]);
 
 	// If we did not find data above then see if there is any data in the tcf file
-		if (subjects.length === 0 && reqType.indexOf("subj") >= 0) {
+		if (subjects.length === 0) {
 			subjects=getTCFValue(subjVarName, { delimiter: "\n", retarray: true });
 			if (includeTCA)
 				subjects=subjects.concat(getTCFValue("subject", { data: tcaData, delimiter: "\n", retarray: true }));
 		}
-		if (departments.length === 0 && reqType.indexOf("dep") >= 0) {
+		if (departments.length === 0) {
 			departments=getTCFValue(deptVarName, { delimiter: "\n", retarray: true });
 			if (includeTCA)
 				departments=departments.concat(getTCFValue("department", { data: tcaData, delimiter: "\n", retarray: true }));
 		}
-		if (colleges.length === 0 && reqType.indexOf("col") >= 0) {
+		if (colleges.length === 0) {
 			colleges=getTCFValue(colVarName, { delimiter: "\n", retarray: true });
+			if(colleges.length === 0 && departments.length != 0) {
+				Here(2)
+				colleges=wffuncs.getColleges(departments)
+			}
+
 			if (includeTCA)
 				colleges=colleges.concat(getTCFValue("college", { data: tcaData, delimiter: "\n", retarray: true }));
 		}
@@ -1636,3 +1643,4 @@ var wfLibLoaded=true;
 // 07-25-2017 @ 10.56.25 - (		if)      - dscudiero - tweaked initialchecks debug info
 // 07-26-2017 @ 08.00.25 - (		if)      - dscudiero - 
 // 07-26-2017 @ 08.01.53 - (		if)      - dscudiero - Updated wffuncs.AttrIn
+// 07-26-2017 @ 16.07.21 - ("1.7.46")  - dscudiero - Tweak getAttr to always do lookups for all three objects regardless of request type
