@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.75 # -- dscudiero -- Wed 07/26/2017 @ 14:35:41.95
+version=4.11.76 # -- dscudiero -- Wed 07/26/2017 @ 14:42:25.96
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -504,7 +504,7 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		if [[ -z $grepStr ]]; then
 			unset fromStr; fromStr=$(ProtectedCall "grep '^nexturl:' $editFile")
 			fromStr=$(CleanString "$fromStr")
-			[[ -n $fromStr ]] && $DOIT sed -i s"!${fromStr}!${toStr}!" $editFile || Warning "Could not set nexturl"
+			[[ -n $fromStr ]] && $DOIT sed -i s"!${fromStr}!${toStr}!" $editFile || Msg2 $WT1 "Could not set nexturl"
 		fi
 
 	## email override
@@ -661,3 +661,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 07-19-2017 @ 14.37.14 - (4.11.73)   - dscudiero - Remove code that updates the cgis
 ## 07-26-2017 @ 12.51.16 - (4.11.74)   - dscudiero - Make sure we have a value for nexturl befor calling sed
 ## 07-26-2017 @ 14.36.26 - (4.11.75)   - dscudiero - turn off publising for any env other than next or curr
+## 07-26-2017 @ 14.42.41 - (4.11.76)   - dscudiero - Tweak messaging for nexturl
