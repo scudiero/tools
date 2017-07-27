@@ -1,18 +1,16 @@
 //======================================================================================================================
-// version:1.0.17 // -- dscudiero -- Tue 07/25/2017 @  9:49:37.81
+// version:1.0.18 // -- dscudiero -- Thu 07/27/2017 @ 12:29:56.46
 //======================================================================================================================
 // ??/??/17-- dgs -- initial
 // 04/10/17 - dgs -	Refactored initialization block, removed end of load messages
 // 07/24/17 - dgs - Fixed issue using getTCFValue before triggers are loaded
 // 07/25/17 - dgs - Added options to the function template
+// 07/27/17 - dgs - Removed wfAllcodes, set in the individual functions now
 //======================================================================================================================
 if (typeof wfFunctionsLoaded == "undefined") {
 	//Get the CIM instance name
 	var wfCimInstance=tcfdata.pagename[0].replace(/^\/([^\/]*)\/.*/, "/$1/");
 	wfCimInstance=wfCimInstance.replace(/\//g, "");
-	wfAllcodes=false;
-	if (tcfdata.allcodes && tcfdata.allcodes.length >0)
-		wfAllcodes=true;
 
 	var host=getenv("HTTP_HOST").toLowerCase();
 
@@ -193,3 +191,4 @@ wfLibName="/locallibs/workflowLib.atj"
 // 07-24-2017 @ 07.59.33 - (//)        - dscudiero - Added isNotEdit and IsNotNew
 // 07-24-2017 @ 11.01.12 - (//)        - dscudiero - Fixed issue using getTCFValue before triggers are loaded
 // 07-25-2017 @ 10.56.02 - (//)        - dscudiero - added options to function template
+// 07-27-2017 @ 12.37.27 - (56.46)     - dscudiero - Removed setting wfAllcodes, moved to workflowLib
