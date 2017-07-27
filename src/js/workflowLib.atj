@@ -881,9 +881,10 @@ GetAttrVal = function(data) {
 //======================================================================================================================
 // 05-01-17 - dgs - Initial coding -- gmu
 // 05/27-17 - dgs - Added code for 'xxxxNOTin-' requeste types
+// 07/27/16 - dgs - Tweaked debug output
 //======================================================================================================================
 wffuncs.AttrIn = function(inval, wfrule, args) {
-	var version='1.0.2'; var myName=wfrule.attrname;
+	var version='1.0.3'; var myName=wfrule.attrname;
 	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
 
 	// Standard initilization
@@ -902,16 +903,17 @@ wffuncs.AttrIn = function(inval, wfrule, args) {
 		// Get the check list from the options if specified, otherwise parse from the stepname
 			var options=wfrule.options.substring(0,wfrule.options.indexOf(";"));
 			if (options.length > 0) {
-				checkList="," + options + ",";
+				checkList=options;
 			} else {
-				checkList=reqType.substring(reqType.indexOf("-")+1);
-				checkList="," + checkList.replace("-",',') + ",";
+				checkList=wfrule.searchfor.substring(reqType.indexOf("-")+1);
+				checkList=checkList.replace("-",',');
 			}
 
 		if (wffuncs.getAllCodes(tcfdata) === '') {var wfAllcodes=false} else {var wfAllcodes=true}
 
 		var notMode=reqType.indexOf("not")>0;
 		wfDump(1,["reqType;"+reqType,"checkAttr;"+checkAttr,"checkList;"+checkList,"notMode;"+notMode,"wfAllcodes;"+wfAllcodes]);
+		checkList="," + checkList + ",";
 
 		// Get standard values
 		if (wfAllcodes) {
@@ -923,7 +925,9 @@ wffuncs.AttrIn = function(inval, wfrule, args) {
 			var departments=getTCFValue("departments", { delimiter: "\n", retarray: true });
 			var colleges=getTCFValue("colleges", { delimiter: "\n", retarray: true });
 		}
-		wfDump(2,["colleges;"+colleges.toSource(),"departments;"+departments.toSource(),"subjects;"+subjects.toSource(),])
+		if (checkAttr === 'subjects') wfDump(2,["subjects;"+subjects.toSource(),])
+		if (checkAttr === 'departments') wfDump(2,["departments;"+departments.toSource()])
+		if (checkAttr === 'colleges') wfDump(2,["colleges;"+colleges.toSource()])
 
 	//Initial Checks
 	try {
@@ -935,8 +939,8 @@ wffuncs.AttrIn = function(inval, wfrule, args) {
 	// Main
  		var allowStep=false;
  		eval("array="+checkAttr);
- 		wfDump(1,[checkAttr+";"+array]);
  		array.forEach(function(token) {
+	 		//wfDump(1,["\ttoken;"+token]);
 			if (checkList.indexOf(","+token+",") >= 0)
 				allowStep=true;
 		});
@@ -1743,4 +1747,4 @@ var wfLibLoaded=true;
 // 07-26-2017 @ 08.00.25 - (		if)      - dscudiero - 
 // 07-26-2017 @ 08.01.53 - (		if)      - dscudiero - Updated wffuncs.AttrIn
 // 07-26-2017 @ 16.07.21 - ("1.7.46")  - dscudiero - Tweak getAttr to always do lookups for all three objects regardless of request type
-// 07-27-2017 @ 12.37.49 - ("1.7.51")  - dscudiero - Set wfAllcodes in each function
+// 07-27-2017 @ 16.47.05 - ("1.7.51")  - dscudiero - General syncing of dev to prod
