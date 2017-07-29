@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.77 # -- dscudiero -- Sat 07/29/2017 @ 10:02:53.35
+version=4.11.81 # -- dscudiero -- Sat 07/29/2017 @ 10:20:29.81
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -221,10 +221,10 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 ## See if we have CLSS
 	[[ -d $srcDir/web/wen ]] && haveClss=true
 
-## If full copy then skip all of the product prompts 
+## If full copy then skip all of the product prompts
  if [[ $fullCopy == true ]]; then
 	skipCim=false
-	skilCat=false
+	skipCat=false
 	skipClss=false
 	skipAlso=false
  fi
@@ -580,7 +580,16 @@ fi
 			fi
 		done
 	fi
-
+## If running for another user, then send an email to that user
+	if [[ -n $forUser ]]; then
+		Msg2 > $tmpFile
+		Msg2 "A cloned site for '$client' was created for you by $userName, the site is located at:" >> $tmpFile
+		Msg2 "^$tgtDir" >> $tmpFile
+		Msg2 >> $tmpFile
+		Msg2 "\nEmail sent to: ${forUser}@leepfrog.com" 
+		#$DOIT mail -s "$myName found discrepancies" $emailAddrs < $tmpFile
+		$DOIT mutt -s "$myName '$client' site created - $(date +"%m-%d-%Y")" -- ${forUser}@leepfrog.com < $tmpFile
+	fi
 #==================================================================================================
 ## Bye-bye
 #printf "0: noDbLog = '$noDbLog', myLogRecordIdx = '$myLogRecordIdx'\n" >> ~/stdout.txt
@@ -671,3 +680,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 07-26-2017 @ 14.36.26 - (4.11.75)   - dscudiero - turn off publising for any env other than next or curr
 ## 07-26-2017 @ 14.42.41 - (4.11.76)   - dscudiero - Tweak messaging for nexturl
 ## 07-29-2017 @ 10.04.01 - (4.11.77)   - dscudiero - set skipXXX to false if -fullcopy specified
+## 07-29-2017 @ 10.21.03 - (4.11.81)   - dscudiero - Add emailing foruser
