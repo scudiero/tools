@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.81 # -- dscudiero -- Sat 07/29/2017 @ 10:20:29.81
+version=4.11.83 # -- dscudiero -- Sat 07/29/2017 @ 12:27:24.94
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -50,6 +50,7 @@ function parseArgs-copyEnv {
 	argList+=(-refresh,5,switch,refresh,true,'script',"Refresh any existing target directories")
 	argList+=(-overrideTarget,5,option,overrideTarget,,'script',"Override the default target location, full file spec to where the site root should be located. e.g. /mnt/dev7/web")
 	argList+=(-fullCopy,4,switch,fullCopy,,'script',"Do a full copy, including all log and request files")
+	argList+=(-lite,4,lite,lite,,'script',"Do a full copy without the archives and logs")
 	argList+=(-forUser,7,option,forUser,,'script',"Name the resulting site for the specified userid")
 	argList+=(-suffix,6,option,suffix,,'script',"Suffix text to be append to the resultant site name, e.g. -luc")
 	argList+=(-emailAddress,1,option,emailAddress,,'script',"The email address for CourseLeaf email notifications")
@@ -222,7 +223,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 	[[ -d $srcDir/web/wen ]] && haveClss=true
 
 ## If full copy then skip all of the product prompts
- if [[ $fullCopy == true ]]; then
+ if [[ $fullCopy == true || $lite == true ]]; then
 	skipCim=false
 	skipCat=false
 	skipClss=false
@@ -329,6 +330,7 @@ dump -1 skipCim skipCat skipClss skipAlso
 	[[ $skipCim == true && $fullCopy != true ]] && verifyArgs+=("Skip CIM:$skipCim")
 	[[ $skipClss == true && $fullCopy != true ]] && verifyArgs+=("Skip CLSS:$skipClss")
 	[[ $fullCopy != true ]] && verifyArgs+=("Exclude List:$tmpStr")
+	[[ $lite == true ]] && verifyArgs+=("Exclude List:$tmpStr")
 	[[ $startWizdebug == true  ]] && verifyArgs+=("Auto start wizDebug:$startWizdebug")
 	[[ -z $onlyProduct ]] && verifyArgs+=("Full Copy:$fullCopy")
 
@@ -378,7 +380,7 @@ dump -1 skipCim skipCat skipClss skipAlso
 	[[ $remoteCopy != true ]] && cd $srcDir
 	[[ -z $DOIT ]] && listOnly='' || listOnly='--list-only'
 	[[ $quiet == true || $quiet == 1 ]] && rsyncVerbose='' || rsyncVerbose='vh'
-	if [[ $fullCopy = true ]]; then
+	if [[ $fullCopy == true && $lite != true ]]; then
 		rsyncOpts="-a$rsyncVerbose $listOnly"
 		Msg2 "Performing a FULL copy..."
 	else
@@ -681,3 +683,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 07-26-2017 @ 14.42.41 - (4.11.76)   - dscudiero - Tweak messaging for nexturl
 ## 07-29-2017 @ 10.04.01 - (4.11.77)   - dscudiero - set skipXXX to false if -fullcopy specified
 ## 07-29-2017 @ 10.21.03 - (4.11.81)   - dscudiero - Add emailing foruser
+## 07-29-2017 @ 12.27.37 - (4.11.83)   - dscudiero - Added -lite option
