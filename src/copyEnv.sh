@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.76 # -- dscudiero -- Wed 07/26/2017 @ 14:42:25.96
+version=4.11.77 # -- dscudiero -- Sat 07/29/2017 @ 10:02:53.35
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -220,6 +220,14 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 
 ## See if we have CLSS
 	[[ -d $srcDir/web/wen ]] && haveClss=true
+
+## If full copy then skip all of the product prompts 
+ if [[ $fullCopy == true ]]; then
+	skipCim=false
+	skilCat=false
+	skipClss=false
+	skipAlso=false
+ fi
 
 #==================================================================================================
 ## See if there are any additional directories the user wants to skip
@@ -662,3 +670,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 07-26-2017 @ 12.51.16 - (4.11.74)   - dscudiero - Make sure we have a value for nexturl befor calling sed
 ## 07-26-2017 @ 14.36.26 - (4.11.75)   - dscudiero - turn off publising for any env other than next or curr
 ## 07-26-2017 @ 14.42.41 - (4.11.76)   - dscudiero - Tweak messaging for nexturl
+## 07-29-2017 @ 10.04.01 - (4.11.77)   - dscudiero - set skipXXX to false if -fullcopy specified
