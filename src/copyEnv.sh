@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.83 # -- dscudiero -- Sat 07/29/2017 @ 12:27:24.94
+version=4.11.86 # -- dscudiero -- Sat 07/29/2017 @ 12:34:23.29
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -50,7 +50,7 @@ function parseArgs-copyEnv {
 	argList+=(-refresh,5,switch,refresh,true,'script',"Refresh any existing target directories")
 	argList+=(-overrideTarget,5,option,overrideTarget,,'script',"Override the default target location, full file spec to where the site root should be located. e.g. /mnt/dev7/web")
 	argList+=(-fullCopy,4,switch,fullCopy,,'script',"Do a full copy, including all log and request files")
-	argList+=(-lite,4,lite,lite,,'script',"Do a full copy without the archives and logs")
+	argList+=(-lite,4,switch,lite,,'script',"Do a full copy without the archives and logs")
 	argList+=(-forUser,7,option,forUser,,'script',"Name the resulting site for the specified userid")
 	argList+=(-suffix,6,option,suffix,,'script',"Suffix text to be append to the resultant site name, e.g. -luc")
 	argList+=(-emailAddress,1,option,emailAddress,,'script',"The email address for CourseLeaf email notifications")
@@ -101,6 +101,7 @@ addPvt=true
 [[ $cat == true ]] && skipCat=false && skipCim=true && skipClss=true && unset skipAlso
 [[ $cim == true ]] && skipCat=true && skipCim=false && skipClss=true && unset skipAlso
 [[ $clss == true ]] && skipCat=true && skipCim=true && skipClss=false && unset skipAlso
+[[ $fullCopy == true && $lite == true ]] && Terminate "The -fullCopy and -lite flags cannot both be specified on a invocation"
 
 ## Resolve data based on passed in client, handle special cases
 	if [[ $(Lower "${client:0:5}") == 'luc20' && ${srcEnv:0:1} == 'p' && ${tgtEnv:0:1} == 'p' ]]; then
@@ -330,7 +331,6 @@ dump -1 skipCim skipCat skipClss skipAlso
 	[[ $skipCim == true && $fullCopy != true ]] && verifyArgs+=("Skip CIM:$skipCim")
 	[[ $skipClss == true && $fullCopy != true ]] && verifyArgs+=("Skip CLSS:$skipClss")
 	[[ $fullCopy != true ]] && verifyArgs+=("Exclude List:$tmpStr")
-	[[ $lite == true ]] && verifyArgs+=("Exclude List:$tmpStr")
 	[[ $startWizdebug == true  ]] && verifyArgs+=("Auto start wizDebug:$startWizdebug")
 	[[ -z $onlyProduct ]] && verifyArgs+=("Full Copy:$fullCopy")
 
@@ -684,3 +684,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 07-29-2017 @ 10.04.01 - (4.11.77)   - dscudiero - set skipXXX to false if -fullcopy specified
 ## 07-29-2017 @ 10.21.03 - (4.11.81)   - dscudiero - Add emailing foruser
 ## 07-29-2017 @ 12.27.37 - (4.11.83)   - dscudiero - Added -lite option
+## 07-29-2017 @ 12.35.22 - (4.11.86)   - dscudiero - Check to see if lite and fullcopy were both specified
