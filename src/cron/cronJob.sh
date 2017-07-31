@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.104 # -- dscudiero -- Thu 06/08/2017 @ 13:06:31.50
+version=2.0.105 # -- dscudiero -- Mon 07/31/2017 @  7:24:21.97
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -47,8 +47,8 @@ originalArgStr="$*"
 #=======================================================================================================================
 ## Run the executable(s)
 	useLocal=true
-	Call "$callScriptName" 'std' 'cron:sh' "$callScriptArgs" > "$logFile" 2>&1
-	[[ -x "$(logname)/bin/$callScriptName.sh" ]] && echo -e "\nFound a '$callScriptName' in $(logname)/bin, calling script/n" && "$(logname)/bin/$callScriptName.sh" > "$logFile" 2>&1
+	echo -e "\n$(date) -- Calling script/n" > "$logFile" 2>&1
+	Call "$callScriptName" 'std' 'cron:sh' "$callScriptArgs" >> "$logFile" 2>&1
 
 	echo -e "\t-- $hostName - $callScriptName done" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 
@@ -99,3 +99,4 @@ exit 0
 ## 06-08-2017 @ 11.39.20 - (2.0.100)   - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 12.21.30 - (2.0.101)   - dscudiero - add debug
 ## 06-08-2017 @ 14.13.19 - (2.0.104)   - dscudiero - General syncing of dev to prod
+## 07-31-2017 @ 07.24.49 - (2.0.105)   - dscudiero - Add the name of the cron job called to the log
