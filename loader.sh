@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.3.21" # -- dscudiero -- Wed 06/14/2017 @  9:53:27.92
+version="1.3.22" # -- dscudiero -- Mon 07/31/2017 @ 16:43:05.26
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -237,6 +237,7 @@ sTime=$(date "+%s")
 			fi
 			touch "$logFile"
 			chmod ug+rwx "$logFile"
+			chown "$userName:leepfrog" "$logFile"
 			Msg2 "$(PadChar)" > $logFile
 			[[ -n $scriptArgs ]] && scriptArgsTxt=" $scriptArgs" || unset scriptArgsTxt
 			Msg2 "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}" >> $logFile
@@ -373,3 +374,4 @@ sTime=$(date "+%s")
 ## 06-14-2017 @ 08.08.20 - ("1.3.15")  - dscudiero - Remove debug statements
 ## 06-14-2017 @ 09.54.08 - ("1.3.21")  - dscudiero - Strip off first token as the toCall program name
 ## 06-19-2017 @ 07.06.50 - ("1.3.21")  - dscudiero - tweak formatting
+## 07-31-2017 @ 16.43.25 - ("1.3.22")  - dscudiero - Set the group for the log file to leepfrog
