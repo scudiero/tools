@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.8" # -- dscudiero -- Thu 06/22/2017 @ 14:43:20.96
+# version="2.0.9" # -- dscudiero -- Tue 08/01/2017 @ 13:40:00.22
 #===================================================================================================
 # Save or restore shell settings
 #===================================================================================================
@@ -33,13 +33,13 @@ function PushSettings {
 export -f PushSettings
 
 function Pushd {
-	pushd "$*" >2 /dev/null
+	pushd "$*" &> /dev/null
 	return 0
 } #Pushd
 export -f Pushd
 
 function Popd {
-	popd >2 /dev/null
+	popd &> /dev/null
 	return 0
 } #Popd
 export -f Popd
@@ -51,3 +51,4 @@ export -f Popd
 ## Wed Jan  4 13:54:12 CST 2017 - dscudiero - General syncing of dev to prod
 ## 06-22-2017 @ 14.41.11 - ("2.0.7")   - dscudiero - Added Pushd and Popd
 ## 06-22-2017 @ 14.43.24 - ("2.0.8")   - dscudiero - General syncing of dev to prod
+## 08-01-2017 @ 13.40.55 - ("2.0.9")   - dscudiero - Fix problem with Popd and Pushd creating '2' files
