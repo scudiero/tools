@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.86 # -- dscudiero -- Sat 07/29/2017 @ 12:34:23.29
+version=4.11.87 # -- dscudiero -- Tue 08/01/2017 @  7:43:20.63
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -582,16 +582,7 @@ fi
 			fi
 		done
 	fi
-## If running for another user, then send an email to that user
-	if [[ -n $forUser ]]; then
-		Msg2 > $tmpFile
-		Msg2 "A cloned site for '$client' was created for you by $userName, the site is located at:" >> $tmpFile
-		Msg2 "^$tgtDir" >> $tmpFile
-		Msg2 >> $tmpFile
-		Msg2 "\nEmail sent to: ${forUser}@leepfrog.com" 
-		#$DOIT mail -s "$myName found discrepancies" $emailAddrs < $tmpFile
-		$DOIT mutt -s "$myName '$client' site created - $(date +"%m-%d-%Y")" -- ${forUser}@leepfrog.com < $tmpFile
-	fi
+
 #==================================================================================================
 ## Bye-bye
 #printf "0: noDbLog = '$noDbLog', myLogRecordIdx = '$myLogRecordIdx'\n" >> ~/stdout.txt
@@ -685,3 +676,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 07-29-2017 @ 10.21.03 - (4.11.81)   - dscudiero - Add emailing foruser
 ## 07-29-2017 @ 12.27.37 - (4.11.83)   - dscudiero - Added -lite option
 ## 07-29-2017 @ 12.35.22 - (4.11.86)   - dscudiero - Check to see if lite and fullcopy were both specified
+## 08-01-2017 @ 08.08.17 - (4.11.87)   - dscudiero - remove emailing to the foruser, moved to Goodbye
