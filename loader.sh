@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.3.22" # -- dscudiero -- Mon 07/31/2017 @ 16:43:05.26
+version="1.3.23" # -- dscudiero -- Tue 08/01/2017 @ 10:56:45.47
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -60,7 +60,7 @@ function CleanUp {
 #==================================================================================================
 [[ "${BASH_SOURCE[0]}" != "${0}" ]] && calledViaSource=true || calledViaSource=false
 sTime=$(date "+%s")
-statusLine="\tLoader ($version): "
+statusLine="Loader ($version): "
 ## Initialize file descriptor 3 to be stdout unless redirected by caller
 	if [[ -t 0 ]]; then # Im running interactive
 		if { ! >&3; } 2> /dev/null; then exec 3<> /dev/tty ; fi
@@ -375,3 +375,4 @@ sTime=$(date "+%s")
 ## 06-14-2017 @ 09.54.08 - ("1.3.21")  - dscudiero - Strip off first token as the toCall program name
 ## 06-19-2017 @ 07.06.50 - ("1.3.21")  - dscudiero - tweak formatting
 ## 07-31-2017 @ 16.43.25 - ("1.3.22")  - dscudiero - Set the group for the log file to leepfrog
+## 08-01-2017 @ 10.57.18 - ("1.3.23")  - dscudiero - reformat messages
