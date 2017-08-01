@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.3.23" # -- dscudiero -- Tue 08/01/2017 @ 10:56:45.47
+version="1.3.24" # -- dscudiero -- Tue 08/01/2017 @ 13:05:40.78
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -205,7 +205,7 @@ sTime=$(date "+%s")
 		checkMsg=$(CheckRun $callPgmName)
 		if [[ $checkMsg != true ]]; then
 			[[ $(Contains ",$administrators," ",$userName,") != true ]] && echo && echo && Terminate "$checkMsg"
-			[[ $callPgmName != 'testsh' ]] && echo && echo -e "\t$(ColorW "*** $checkMsg ***")"
+			[[ $callPgmName != 'testsh' ]] && echo && echo -e "$(ColorW "*** $checkMsg ***")"
 		fi
 	## Check to make sure we are authorized
 		checkMsg=$(CheckAuth $callPgmName)
@@ -376,3 +376,4 @@ sTime=$(date "+%s")
 ## 06-19-2017 @ 07.06.50 - ("1.3.21")  - dscudiero - tweak formatting
 ## 07-31-2017 @ 16.43.25 - ("1.3.22")  - dscudiero - Set the group for the log file to leepfrog
 ## 08-01-2017 @ 10.57.18 - ("1.3.23")  - dscudiero - reformat messages
+## 08-01-2017 @ 13.21.58 - ("1.3.24")  - dscudiero - Tweak messages
