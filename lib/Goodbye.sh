@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.132" # -- dscudiero -- Fri 05/19/2017 @  7:34:53.00
+# version="2.0.136" # -- dscudiero -- Tue 08/01/2017 @  8:06:52.96
 #===================================================================================================
 # Common script exit
 # args:
@@ -120,6 +120,19 @@ function Goodbye {
 	[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Update' $myLogRecordIdx 'exitCode' "$exitCode"
 	[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'End' $myLogRecordIdx
 
+	## If running for another user, then send an email to that user
+	if [[ -n $forUser ]]; then
+		Msg2 > $tmpFile
+		Msg2 "'$myName' was run in your behalf by $userName, the log is attached" >> $tmpFile
+		Msg2 >> $tmpFile
+		Msg2 "\nRunning on behalf of user: ${forUser}, email sent to: ${forUser}@leepfrog.com\n"
+		Msg2 "$(PadChar)" >> $tmpFile
+		Msg2 >> $tmpFile
+		cat "$logFile" >> $tmpFile
+		Msg2 >> $tmpFile
+		$DOIT mutt -a "$logFile" -s "$myName '$client' site created - $(date +"%m-%d-%Y")" -- ${forUser}@leepfrog.com < $tmpFile
+	fi
+
 	[[ $(IsNumeric $exitCode) != true ]] && exitCode=0
 	if [[ $secondaryMessagesOnly == true ]]; then
 		secondaryMessagesOnly=false
@@ -151,3 +164,4 @@ export -f Goodbye
 ## 05-10-2017 @ 12.49.12 - ("2.0.130") - dscudiero - Kill subshells before exiting
 ## 05-10-2017 @ 12.53.07 - ("2.0.131") - dscudiero - General syncing of dev to prod
 ## 05-19-2017 @ 07.35.57 - ("2.0.132") - dscudiero - Remove all tmpfiles under the scripts name under tmproot
+## 08-01-2017 @ 08.07.58 - ("2.0.136") - dscudiero - Add emailing to the foruser
