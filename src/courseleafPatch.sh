@@ -1,12 +1,12 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.3.12 # -- dscudiero -- Wed 08/02/2017 @ 11:20:39.98
+version=5.3.24 # -- dscudiero -- Wed 08/02/2017 @ 15:07:25.97
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
 includes="$includes GetExcel EditTcfValue BackupCourseleafFile ParseCourseleafFile GetCourseleafPgm CopyFileWithCheck"
-includes="$includes ArrayRef"
+includes="$includes ArrayRef GitUtilities"
 Import "$includes"
 originalArgStr="$*"
 scriptDescription="Refresh a courseleaf product"
@@ -232,8 +232,8 @@ cwdStart="$(pwd)"
 		echo "	return 0" >> $scriptFile
 		echo "} # RunRsync " >> $scriptFile
 		echo >> $scriptFile
-		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
 
+		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
 		echo "function Contains {" >> $scriptFile
 		echo "	local string=\"\$1\"" >> $scriptFile
 		echo "	local substring=\"\$2\"" >> $scriptFile
@@ -242,36 +242,53 @@ cwdStart="$(pwd)"
 		echo "	return 0" >> $scriptFile
 		echo "} #Contains" >> $scriptFile
 		echo >> $scriptFile
-		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
 
+		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
 		echo "function IsNumeric {" >> $scriptFile
 		echo "	local reNum='^[0-9]+\$'" >> $scriptFile
 		echo "	[[ \$1 =~ \$reNum ]] && echo true || echo false" >> $scriptFile
 		echo "	return 0" >> $scriptFile
 		echo "} #IsNumeric" >> $scriptFile
-		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
+		echo >> $scriptFile
 
+		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
 		echo "function Msg2 {" >> $scriptFile
 		echo "	msgText=\$(tr '^' \"\t\" <<< \"\$*\")" >> $scriptFile
 		echo "	echo -e \"$*\" " >> $scriptFile
 		echo "	return 0" >> $scriptFile
 		echo "} #Msg2" >> $scriptFile
+		echo >> $scriptFile
 
+		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
 		echo "function Error {" >> $scriptFile
 		echo "	msgText=\"*Error* -- \$msgText\"" >> $scriptFile
 		echo "	msgText=\$(tr '^' \"\t\" <<< \"\$*\")" >> $scriptFile
 		echo "	echo -e \"$*\" " >> $scriptFile
 		echo "} #Error" >> $scriptFile
+		echo >> $scriptFile
 
+		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
 		echo "function Terminate {" >> $scriptFile
 		echo "	msgText=\"*Fatal Error* -- \$msgText\"" >> $scriptFile
 		echo "	msgText=\$(tr '^' \"\t\" <<< \"\$*\")" >> $scriptFile
 		echo "	echo -e \"$*\" " >> $scriptFile
 		echo "	exit -1" >> $scriptFile
 		echo "} #Terminate" >> $scriptFile
+		echo >> $scriptFile
 
+		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
+		echo "function CheckForChangedGitFiles {" >> $scriptFile
+		echo "	local repo=\"$1\"" >> $scriptFile
+		echo "	[[ ! -d "\$repo/.git" ]] && echo 'Not a git repository' && return 0" >> $scriptFile
+		echo "	local nonCommittedFiles" >> $scriptFile
+		echo "	pushd \"\$repo\" &> /dev/null" >> $scriptFile
+		echo "	nonCommittedFiles=\$(git status -s)" >> $scriptFile
+		echo "	popd &> /dev/null" >> $scriptFile
+		echo "	[[ -z $nonCommittedFiles ]] && echo false || echo true" >> $scriptFile
+		echo "	return 0" >> $scriptFile
+		echo "} ##CheckForChangedGitFiles" >> $scriptFile
 		echo >> $scriptFile
-		echo >> $scriptFile
+
 		echo "##=======================================================================================================" >> $scriptFile
 		echo "##=======================================================================================================" >> $scriptFile
 		echo "## Parse arguments" >> $scriptFile
@@ -343,39 +360,15 @@ cwdStart="$(pwd)"
 		echo "targetHasGit=false" >> $scriptFile
 		echo "[[ -d $tgtDir/.git ]] && targetHasGit=true" >> $scriptFile
 
+		echo "## Check to see if the targetDir is a git repo, if so make sure there are no active files that have not been pushed." >> $scriptFile
 		echo "if [[ $targetHasGit == true ]]; then" >> $scriptFile
-		echo "	Msg2 \"\nThe target site has a .git repository, checking git repository...\"" >> $scriptFile
-		echo "	## Get the list of files that have changed in the git repository" >> $scriptFile
-		echo "	pushd \"$tgtDir\" >& /dev/null" >> $scriptFile
-		echo "	foundNonCommittedFiles=false" >> $scriptFile
-		echo "	while read line; do" >> $scriptFile
-		echo "		[[ -z $line || ${line:0:1} == '#' ]] && continue" >> $scriptFile
-		echo "		fileStat=${line%% *}; fileName=${line##* }" >> $scriptFile
-		echo "		[[ $fileStat == '??' ]] && fileStat='untracked'" >> $scriptFile
-		echo "		[[ $foundNonCommittedFiles == false ]] && Error \"Found the following non-tracked files or files with non-committed changes:\"" >> $scriptFile
-		echo "		foundNonCommittedFiles=true" >> $scriptFile
-		echo "		Msg2 \"^$fileName ($fileStat)\"" >> $scriptFile
-		echo "	done < <(git status -s)" >> $scriptFile
-		echo " 	popd >& /dev/null" >> $scriptFile
-		echo "	[[ $foundNonCommittedFiles == true ]] && Terminate \"Cannot continue with non-committed changes\"" >> $scriptFile
+		echo "	[[ \$(CheckForChangedGitFiles \"\$tgtDir\") == true ]] && Terminate \"The target site has non-tracked or non-committed files, processing cannot continue\"" >> $scriptFile
 		echo "fi" >> $scriptFile
-
 		if [[ $addAdvanceCode == true ]]; then
+			echo "## Advance active, Check to see if the CURR is a git repo, if so make sure there are no active files that have not been pushed." >> $scriptFile
 			echo "if [[ -d \"\$(dirname \$tgtDir)/curr/.git\" ]]; then" >> $scriptFile
-			echo "	Msg2 "\nFull advance is active and the 'curr' site has a .git repository, checking git repository..."" >> $scriptFile
-			echo "	## Get the list of files that have changed in the git repository" >> $scriptFile
-			echo "	Pushd \"$(dirname $tgtDir)/curr\"" >> $scriptFile
-			echo "	foundNonCommittedFiles=false" >> $scriptFile
-			echo "	while read line; do" >> $scriptFile
-			echo "		[[ -z $line || ${line:0:1} == '#' ]] && continue" >> $scriptFile
-			echo "		fileStat=${line%% *}; fileName=${line##* }" >> $scriptFile
-			echo "		[[ $fileStat == '??' ]] && fileStat='untracked'" >> $scriptFile
-			echo "		[[ $foundNonCommittedFiles == false ]] && Error \"Found the following non-tracked files or files with non-committed changes:\"" >> $scriptFile
-			echo "		foundNonCommittedFiles=true" >> $scriptFile
-			echo "		Msg2 \"^$fileName ($fileStat)\"" >> $scriptFile
-			echo "	done < <(git status -s)" >> $scriptFile
-			echo " 	popd >& /dev/null" >> $scriptFile
-			echo "	[[ $foundNonCommittedFiles == true ]] && Terminate \"Cannot continue with non-committed changes\"" >> $scriptFile
+			echo "	[[ \$(CheckForChangedGitFiles \"\$(dirname \$tgtDir)/curr)\") == true ]] && \\" >> $scriptFile
+			echo "			Terminate \"Full advance is active and the 'curr' site has non-tracked or non-committed files, processing cannot continue\"" >> $scriptFile
 			echo "fi" >> $scriptFile
 		fi
 
@@ -531,20 +524,45 @@ cwdStart="$(pwd)"
 		## If CAT was refreshed rebuild console and approver page
 		if [[ $(Contains ",$patchProducts," ',cat,') == true ]]; then
 			echo "echo -e \"\\tRebuilding CourseLeaf Console and approver pages\"" >> $scriptFile
-			echo "pushd >& /dev/null" >> $scriptFile
-			echo "cd \"\$tgtDir/web/courseleaf\"" >> $scriptFile
+			echo "pushd \"\$tgtDir/web/courseleaf\" >& /dev/null" >> $scriptFile
 			echo "\$DOIT ./courseleaf.cgi -r /courseleaf/index.html | xargs -I{} echo -e \"\\t\\t{}\"" >> $scriptFile
 			echo "\$DOIT ./courseleaf.cgi -r /courseleaf/approve/index.html | xargs -I{} echo -e \"\\t\\t{}\"" >> $scriptFile
 			echo "popd >& /dev/null" >> $scriptFile
 		fi
 		## If CIM was refreshed then rebuild cims
 		if [[ $(Contains ",$patchProducts," ',cim,') == true && -n $cimStr ]]; then
-			echo "pushd >& /dev/null" >> $scriptFile
-			echo "cd \"\$tgtDir/web/courseleaf\"" >> $scriptFile
+			echo "pushd \"\$tgtDir/web/courseleaf\" >& /dev/null" >> $scriptFile
 			for cim in $(echo $cimStr | tr ',' ' '); do
 				echo "\$DOIT ./courseleaf.cgi -r /$cim/index.tcf" >> $scriptFile
 			done
-			echo "popd" >> $scriptFile
+			echo "popd >& /dev/null" >> $scriptFile
+		fi
+		echo >> $scriptFile
+
+		echo "## If the target site is a git repo then check for changed files" >> $scriptFile
+		echo "	commitComment=\"Files updated by \$userName via \$myName (\$version)\"" >> $scriptFile
+		echo "	if [[ \$targetHasGit == true ]]; then" >> $scriptFile
+		echo "		if [[ \$(CheckForChangedGitFiles \"\$tgtDir\") == true ]]; then" >> $scriptFile
+		echo "			Msg2 \"Committing changed git files in the NEXT environment...\"" >> $scriptFile
+		echo "			pushd \"\$tgtDir\" &> /dev/null" >> $scriptFile
+		echo "			{ ( $DOIT git commit --all -m \"\$commitComment\"); } | Indent" >> $scriptFile
+		echo "			popd &> /dev/null" >> $scriptFile
+		echo "		fi" >> $scriptFile
+		echo "	fi" >> $scriptFile
+
+		echo "	if [[ -d \"\$(dirname \$tgtDir)/curr/.git\" ]]; then" >> $scriptFile
+		echo "		if [[ $(CheckForChangedGitFiles "$(dirname $tgtDir)/curr)") == true ]]; then" >> $scriptFile
+		echo "			Msg2 "Committing changed git files in the CURR environment..."" >> $scriptFile
+		echo "			Pushd \"\$(dirname \$tgtDir)/curr)\"" >> $scriptFile
+		echo "			{ ( $DOIT git commit --all -m \"$commitComment\"); } | Indent" >> $scriptFile
+		echo "			popd &> /dev/null" >> $scriptFile
+		echo "		fi" >> $scriptFile
+		echo "	fi" >> $scriptFile
+
+		echo "## ## If full advance and the curr site is a git repo then check for changed files" >> $scriptFile
+		echo "currGitFilesChanged=false" >> $scriptFile
+		if [[ $addAdvanceCode == true ]]; then
+:
 		fi
 
 		## If CAT was refreshed print notifications for the user to perform followup actios
@@ -740,31 +758,36 @@ removeGitReposFromNext=true
 		productLower="$(Lower "$product")"
 		## Get the version
 		[[ $productLower == 'cat' ]] && srcDir=$gitRepoShadow/courseleaf || srcDir=$gitRepoShadow/$productLower
-		[[ ! -d $srcDir ]] && continue
-		unset fileList prodShadowVer catMasterDate cimMasterDate
-		fileList="$(ls -t $srcDir | grep -v .bad | grep -v master | tr "\n" " ")"
-		prodShadowVer=${fileList%% *}
-		[[ ! -f $srcDir/master/.syncDate ]] && Terminate "Could not locate '$srcDir/master/.syncDate'. The skeleton shadow is probably being updated, please try again later"
-master=true
-		eval ${productLower}MasterDate=\"$(date +"%m-%d-%Y @ %H.%M.%S" -r $srcDir/master/.syncDate)\"
-		eval prodMasterDate=\$${productLower}MasterDate
-		if [[ -z $newest && -z $master && -n $prodShadowVer ]]; then
-			echo
-			Msg2 "For '$(ColorK $product)', do you wish to apply the latest named version ($prodShadowVer) or the skeleton ($prodMasterDate)"
-			unset ans; Prompt ans "^'Yes' for the named version, 'No' for the skeleton" 'Yes,No' 'Yes'; ans=$(Lower "${ans:0:1}")
-			[[ $ans != 'y' ]] && prodShadowVer='master'
+		if [[ -d "$srcDir" ]]; then
+			unset fileList prodShadowVer catMasterDate cimMasterDate
+			fileList="$(ls -t $srcDir | grep -v .bad | grep -v master | tr "\n" " ")"
+			prodShadowVer=${fileList%% *}
+			[[ ! -f $srcDir/master/.syncDate ]] && Terminate "Could not locate '$srcDir/master/.syncDate'. The skeleton shadow is probably being updated, please try again later"
+	master=true
+			eval ${productLower}MasterDate=\"$(date +"%m-%d-%Y @ %H.%M.%S" -r $srcDir/master/.syncDate)\"
+			eval prodMasterDate=\$${productLower}MasterDate
+			if [[ -z $newest && -z $master && -n $prodShadowVer ]]; then
+				echo
+				Msg2 "For '$(ColorK $product)', do you wish to apply the latest named version ($prodShadowVer) or the skeleton ($prodMasterDate)"
+				unset ans; Prompt ans "^'Yes' for the named version, 'No' for the skeleton" 'Yes,No' 'Yes'; ans=$(Lower "${ans:0:1}")
+				[[ $ans != 'y' ]] && prodShadowVer='master'
+			else
+				[[ -n $master || -z $prodShadowVer ]] && prodShadowVer='master'
+				Note 0 1 "Using specified value of '$prodShadowVer' for $product"
+			fi
+			unset masterVer
+			if [[ $prodShadowVer == 'master' && -r "$srcDir/master/$(basename $srcDir)/clver.txt" ]]; then
+				masterVer="$(Lower "$(cat "$srcDir/master/$(basename $srcDir)/clver.txt")")"
+				[[ "${masterVer: -2}" == 'rc' ]] && betaProducts="$betaProducts, $product" && masterVer="$(tr -d ' ' <<< "$masterVer")"
+				eval ${productLower}MasterVer=\"$masterVer\"
+				prodShadowVer="$prodShadowVer/$masterVer"
+			fi
 		else
-			[[ -n $master || -z $prodShadowVer ]] && prodShadowVer='master'
-			Note 0 1 "Using specified value of '$prodShadowVer' for $product"
-		fi
-		unset masterVer
-		if [[ $prodShadowVer == 'master' && -r "$srcDir/master/$(basename $srcDir)/clver.txt" ]]; then
-			masterVer="$(Lower "$(cat "$srcDir/master/$(basename $srcDir)/clver.txt")")"
-			[[ "${masterVer: -2}" == 'rc' ]] && betaProducts="$betaProducts, $product" && masterVer="$(tr -d ' ' <<< "$masterVer")"
-			eval ${productLower}MasterVer=\"$masterVer\"
-			prodShadowVer="$prodShadowVer/$masterVer"
+			prodShadowVer='N/A'
+			srcDir='N/A'
 		fi
 		processControl="$processControl,$productLower|$prodShadowVer|$srcDir"
+dump processControl
 		eval "${product}Version=\"$prodShadowVer\""
 	done
 	betaProducts=${betaProducts:2}
@@ -886,7 +909,7 @@ for token in $(tr ',' ' ' <<< $processControl); do
 	tmpStr1="$(cut -d '|' -f1 <<< "$token")"
 	[[ $tmpStr1 == 'rc' ]] && continue
 	tmpStr2="$(cut -d '|' -f2 <<< "$token")"
-	verifyArgs+=("^$tmpStr1 version":"$tmpStr2")
+	[[ $tmpStr2 != 'N/A' ]] && verifyArgs+=("^$tmpStr1 version":"$tmpStr2")
 done
 
 if [[ $catalogAdvance == true ]]; then
@@ -915,36 +938,11 @@ VerifyContinue "You are asking to refresh CourseLeaf code files for:"
 ## Check to see if the targetDir is a git repo, if so make sure there are no active files that have not been pushed.
 #=======================================================================================================================
 if [[ $targetHasGit == true ]]; then
-	Msg2 "\nThe target site has a .git repository, checking git repository..."
-	## Get the list of files that have changed in the git repository
-	Pushd $tgtDir
-	foundNonCommittedFiles=false
-	while read line; do
-		[[ -z $line || ${line:0:1} == '#' ]] && continue
-		fileStat=${line%% *}; fileName=${line##* }
-		[[ $fileStat == '??' ]] && fileStat='untracked'
-		[[ $foundNonCommittedFiles == false ]] && Error "Found the following non-tracked files or files with non-committed changes:"
-		foundNonCommittedFiles=true
-		Msg2 "^$fileName ($fileStat)"
-	done < <(git status -s)
- 	Popd
-	[[ $foundNonCommittedFiles == true ]] && Terminate "Cannot continue with non-committed changes"
+	[[ $(CheckForChangedGitFiles "$tgtDir") == true ]] && Terminate "The target site has non-tracked or non-committed files, processing cannot continue"
 fi
 if [[ $catalogAdvance == true || $fullAdvance == true ]] && [[ -d "$(dirname $tgtDir)/curr/.git" ]]; then
-	Msg2 "\nFull advance is active and the 'curr' site has a .git repository, checking git repository..."
-	## Get the list of files that have changed in the git repository
-	Pushd "$(dirname $tgtDir)/curr"
-	foundNonCommittedFiles=false
-	while read line; do
-		[[ -z $line || ${line:0:1} == '#' ]] && continue
-		fileStat=${line%% *}; fileName=${line##* }
-		[[ $fileStat == '??' ]] && fileStat='untracked'
-		[[ $foundNonCommittedFiles == false ]] && Error "Found the following non-tracked files or files with non-committed changes:"
-		foundNonCommittedFiles=true
-		Msg2 "^$fileName ($fileStat)"
-	done < <(git status -s)
-	Popd
-	[[ $foundNonCommittedFiles == true ]] && Terminate "Cannot continue with non-committed changes"
+	[[ $(CheckForChangedGitFiles "$(dirname $tgtDir)/curr)") == true ]] && /
+			Terminate "Full advance is active and the 'curr' site has non-tracked or non-committed files, processing cannot continue"
 fi
 
 #=======================================================================================================================
@@ -1513,51 +1511,23 @@ Msg2 "\nCross product checks..."
 
 	[[ $backup == true ]] && echo && Note "A backup copy was made of the $(Upper $env) site, once you have verified that the patch results are satisfactory you should delete the backup site '$backupSite'"
 
-## If the target site is a git repo then check for changed files
-	nextGitFilesChanged=false
+## If the target or curr site is a git repo and there are uncommitted changes then commit the changes
+	commitComment="Files updated by $userName via $myName ($version)"
 	if [[ $targetHasGit == true ]]; then
-		Msg2 "\nThe target site has a .git repository, checking git repository..."
-		Pushd $tgtDir
-		foundNonCommittedFiles=false
-		while read line; do
-			[[ -z $line || ${line:0:1} == '#' ]] && continue
-			fileStat=${line%% *}; fileName=${line##* }
-			[[ $fileStat == '??' ]] && fileStat='untracked'
-			[[ $foundNonCommittedFiles == false ]] && Msg2 "Updated the following files under git control:"
-			foundNonCommittedFiles=true
-			Msg2 "^$fileName ($fileStat)"
-			nextGitFilesChanged=true
-		done < <(git status -s)
-		if [[ $nextGitFilesChanged == true ]]; then
+		if [[ $(CheckForChangedGitFiles "$tgtDir") == true ]]; then
 			Msg2 "Committing changed git files in the NEXT environment..."
-			commitComment="Files updated by $userName via $myName ($version)"
+			Pushd "$tgtDir"
 			{ ( $DOIT git commit --all -m "$commitComment"); } | Indent
+			Popd
 		fi
-		Popd
 	fi
-
-## If full advance and the curr site is a git repo then check for changed files
-	currGitFilesChanged=false
 	if [[ $catalogAdvance == true || $fullAdvance == true ]] && [[ -d "$(dirname $tgtDir)/curr/.git" ]]; then
-		Msg2 "\nFull advance is active and the 'curr' site has a .git repository, checking git repository..."
-		Pushd $tgtDir
-		foundNonCommittedFiles=false
-		while read line; do
-			[[ -z $line || ${line:0:1} == '#' ]] && continue
-			fileStat=${line%% *}; fileName=${line##* }
-			[[ $fileStat == '??' ]] && fileStat='untracked'
-			[[ $foundNonCommittedFiles == false ]] && Msg2 "Updated the following files under git control:"
-			foundNonCommittedFiles=true
-			Msg2 "^$fileName ($fileStat)"
-			currGitFilesChanged=true
-		done < <(git status -s)
-		if [[ $currGitFilesChanged == true ]]; then
+		if [[ $(CheckForChangedGitFiles "$(dirname $tgtDir)/curr)") == true ]]; then
 			Msg2 "Committing changed git files in the CURR environment..."
-			commitComment="Files updated by $userName via $myName ($version)"
+			Pushd "$(dirname $tgtDir)/curr)"
 			{ ( $DOIT git commit --all -m "$commitComment"); } | Indent
+			Popd
 		fi
-		Popd
-		#[[ $foundNonCommittedFiles == true ]] && Terminate "Cannot continue with non-committed changes"
 	fi
 
 ## Get the list of files that have changed in the git repository if it exists, if found the commit them
@@ -1686,3 +1656,4 @@ Goodbye 0 "$text1" "$text2"
 ## 07-24-2017 @ 07.57.41 - (5.2.23)    - dscudiero - remove trailing blanks in the log file entries
 ## 08-02-2017 @ 09.32.38 - (5.3.9)     - dscudiero - Updates to cgi selection and add git processing
 ## 08-02-2017 @ 11.20.43 - (5.3.12)    - dscudiero - Change not having a locallibs directory a warning
+## 08-02-2017 @ 15.12.51 - (5.3.24)    - dscudiero - Fix problem not setting processControl for proucts not in git (e.g. cgis)
