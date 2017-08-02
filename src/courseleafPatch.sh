@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.3.9 # -- dscudiero -- Wed 08/02/2017 @  8:46:57.08
+version=5.3.12 # -- dscudiero -- Wed 08/02/2017 @ 11:20:39.98
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -257,8 +257,14 @@ cwdStart="$(pwd)"
 		echo "	return 0" >> $scriptFile
 		echo "} #Msg2" >> $scriptFile
 
-		echo "function Terminate {" >> $scriptFile
+		echo "function Error {" >> $scriptFile
 		echo "	msgText=\"*Error* -- \$msgText\"" >> $scriptFile
+		echo "	msgText=\$(tr '^' \"\t\" <<< \"\$*\")" >> $scriptFile
+		echo "	echo -e \"$*\" " >> $scriptFile
+		echo "} #Error" >> $scriptFile
+
+		echo "function Terminate {" >> $scriptFile
+		echo "	msgText=\"*Fatal Error* -- \$msgText\"" >> $scriptFile
 		echo "	msgText=\$(tr '^' \"\t\" <<< \"\$*\")" >> $scriptFile
 		echo "	echo -e \"$*\" " >> $scriptFile
 		echo "	exit -1" >> $scriptFile
@@ -321,7 +327,7 @@ cwdStart="$(pwd)"
 
 		echo "[[ \${clHome: (-1)} == '/' ]] && clHome=\${clHome:0:(-1)}" >> $scriptFile
 		echo >> $scriptFile
-		echo "[[ ! -d \"\$clHome/next\" ]] && echo -e \"\\n*Error* -- Could not find a 'next' directory, the specified location is not a CourseLeaf home directory, stopping\\n\" && exit 3" >> $scriptFile
+		echo "[[ ! -d \"\$clHome/next\" ]] && echo Terminate \"Could not find a 'next' directory, the specified location is not a CourseLeaf home directory, stopping\"" >> $scriptFile
 		echo "echo -e \"\\nPatch/Advance CourseLeaf Home NEXT instance: '\$clHome/next' \\n\\tPatch source data: '\$(pwd)'\" " >> $scriptFile
 		echo "tgtDir=\"\$clHome/next\"" >> $scriptFile
 		echo "dirSuffix=\"\$(date +\"%m-%d-%Y@%H.%M.%S\")\"" >> $scriptFile
@@ -333,85 +339,50 @@ cwdStart="$(pwd)"
 		echo "[[ ! -w \$cfgFile ]] && [[ $addAdvanceCode == true ]] && Terminate \"Could not write to file: '\$cfgFile'\"" >> $scriptFile
 		echo >> $scriptFile
 
-		# ## Find the localsteps directory using the mapfile entry
-		# echo "## Find the localsteps directory using the mapfile entry" >> $scriptFile
-		# echo "	unset localstepsDir" >> $scriptFile
-		# echo "	grepStr=\$(grep '^mapfile:localsteps' \"\$cfgFile\"); grepStr=\${grepStr##*|}" >> $scriptFile
-		# echo "	if [[ -n \$grepStr ]]; then" >> $scriptFile
-		# echo "		pushd \$tgtDir/web/\$courseleafProgDir >& /dev/null" >> $scriptFile
-		# echo "		cd \$grepStr" >> $scriptFile
-		# echo "		localstepsDir=\"\$(pwd)\"" >> $scriptFile
-		# echo "		popd >& /dev/null" >> $scriptFile
-		# echo "	fi" >> $scriptFile
-		# echo "[[ ! -d \$localstepsDir ]] && Terminate "Could not resolve the 'localsteps' directory"" >> $scriptFile
-		# echo >> $scriptFile
+		## Does the target directory have a git repository
+		echo "targetHasGit=false" >> $scriptFile
+		echo "[[ -d $tgtDir/.git ]] && targetHasGit=true" >> $scriptFile
 
-		# ## Find the locallibs directory using the mapfile entry
-		# echo "## Find the locallibs directory using the mapfile entry" >> $scriptFile
-		# echo "	unset locallibsDir" >> $scriptFile
-		# echo "	grepStr=\$(grep '^mapfile:locallibs' \"\$cfgFile\"); grepStr=\${grepStr##*|}" >> $scriptFile
-		# echo "	if [[ -n \$grepStr ]]; then" >> $scriptFile
-		# echo "		pushd \$tgtDir/web/\$courseleafProgDir >& /dev/null" >> $scriptFile
-		# echo "		cd \$grepStr" >> $scriptFile
-		# echo "		locallibsDir=\"\$(pwd)\"" >> $scriptFile
-		# echo "		popd >& /dev/null" >> $scriptFile
-		# echo "	fi" >> $scriptFile
-		# echo "[[ ! -d \$locallibsDir ]] && Warning "Could not resolve the 'locallibsDir' directory"" >> $scriptFile
-		# echo >> $scriptFile
+		echo "if [[ $targetHasGit == true ]]; then" >> $scriptFile
+		echo "	Msg2 \"\nThe target site has a .git repository, checking git repository...\"" >> $scriptFile
+		echo "	## Get the list of files that have changed in the git repository" >> $scriptFile
+		echo "	pushd \"$tgtDir\" >& /dev/null" >> $scriptFile
+		echo "	foundNonCommittedFiles=false" >> $scriptFile
+		echo "	while read line; do" >> $scriptFile
+		echo "		[[ -z $line || ${line:0:1} == '#' ]] && continue" >> $scriptFile
+		echo "		fileStat=${line%% *}; fileName=${line##* }" >> $scriptFile
+		echo "		[[ $fileStat == '??' ]] && fileStat='untracked'" >> $scriptFile
+		echo "		[[ $foundNonCommittedFiles == false ]] && Error \"Found the following non-tracked files or files with non-committed changes:\"" >> $scriptFile
+		echo "		foundNonCommittedFiles=true" >> $scriptFile
+		echo "		Msg2 \"^$fileName ($fileStat)\"" >> $scriptFile
+		echo "	done < <(git status -s)" >> $scriptFile
+		echo " 	popd >& /dev/null" >> $scriptFile
+		echo "	[[ $foundNonCommittedFiles == true ]] && Terminate \"Cannot continue with non-committed changes\"" >> $scriptFile
+		echo "fi" >> $scriptFile
+
+		if [[ $addAdvanceCode == true ]]; then
+			echo "if [[ -d \"\$(dirname \$tgtDir)/curr/.git\" ]]; then" >> $scriptFile
+			echo "	Msg2 "\nFull advance is active and the 'curr' site has a .git repository, checking git repository..."" >> $scriptFile
+			echo "	## Get the list of files that have changed in the git repository" >> $scriptFile
+			echo "	Pushd \"$(dirname $tgtDir)/curr\"" >> $scriptFile
+			echo "	foundNonCommittedFiles=false" >> $scriptFile
+			echo "	while read line; do" >> $scriptFile
+			echo "		[[ -z $line || ${line:0:1} == '#' ]] && continue" >> $scriptFile
+			echo "		fileStat=${line%% *}; fileName=${line##* }" >> $scriptFile
+			echo "		[[ $fileStat == '??' ]] && fileStat='untracked'" >> $scriptFile
+			echo "		[[ $foundNonCommittedFiles == false ]] && Error \"Found the following non-tracked files or files with non-committed changes:\"" >> $scriptFile
+			echo "		foundNonCommittedFiles=true" >> $scriptFile
+			echo "		Msg2 \"^$fileName ($fileStat)\"" >> $scriptFile
+			echo "	done < <(git status -s)" >> $scriptFile
+			echo " 	popd >& /dev/null" >> $scriptFile
+			echo "	[[ $foundNonCommittedFiles == true ]] && Terminate \"Cannot continue with non-committed changes\"" >> $scriptFile
+			echo "fi" >> $scriptFile
+		fi
 
 		#===================================================================================================================
 		## Advance the CURR site
 		echo "newEdition=\"$newEdition\"" >> $scriptFile
 		echo "echo \"\tnewEdition: \$newEdition\"" >> $scriptFile
-
-		# if [[ $addAdvanceCode == true ]]; then
-		# 	echo "echo -en \"\\nDo you wish to advance the NEXT instance ('yes' or 'no') > \"" >> $scriptFile
-		# 	echo "read ans" >> $scriptFile
-		# 	echo "[[ -z \$ans ]] && ans='y'" >> $scriptFile
-		# 	echo "ans=\$(tr '[:upper:]' '[:lower:]' <<< \${ans:0:1})" >> $scriptFile
-		# 	echo "if  [[ \$ans == 'y' ]]; then" >> $scriptFile
-		# 	echo "	advance=true" >> $scriptFile
-		# 	echo "	sourceSpec=\"\$tgtDir/\"" >> $scriptFile
-		# 	echo "	targetSpec=\"\$(dirname \$tgtDir)/next.\$dirSuffix\"" >> $scriptFile
-		# 	echo "	## Get the current edition from the defults.tcf file" >> $scriptFile
-		# 	echo "	unset grepStr" >> $scriptFile
-		# 	echo "	currentEdition=\$(grep \"^edition:\" \"\$localstepsDir/default.tcf\" | cut -d':' -f2)" >> $scriptFile
-		# 	echo "	currentEdition=\$(tr -d '\040\011\012\015' <<< "\$currentEdition")" >> $scriptFile
-		# 	echo "	## Set the new edition and prompt user" >> $scriptFile
-		# 	echo "	unset newEdition" >> $scriptFile
-		# 	echo "	if [[ \$currentEdition != '' && \$currentEdition != *'migration'* ]]; then" >> $scriptFile
-		# 	echo "		if [[ \$(Contains "\$currentEdition" '-') == true ]]; then" >> $scriptFile
-		# 	echo "			fromYear=\$(echo \$currentEdition | cut -d'-' -f1)" >> $scriptFile
-		# 	echo "			toYear=\$(echo \$currentEdition | cut -d'-' -f2)" >> $scriptFile
-		# 	echo "			[[ \$(IsNumeric \$fromYear) == true  && \$(IsNumeric \$toYear) == true ]] && (( fromYear++ )) && (( toYear++ )) && newEdition="\$fromYear-\$toYear"" >> $scriptFile
-		# 	echo "		elif [[ \$(Contains "\$currentEdition" '_') == true ]]; then" >> $scriptFile
-		# 	echo "			fromYear=\$(echo \$currentEdition | cut -d'_' -f1)" >> $scriptFile
-		# 	echo "			toYear=\$(echo \$currentEdition | cut -d'_' -f2)" >> $scriptFile
-		# 	echo "			[[ \$(IsNumeric \$fromYear) == true  && \$(IsNumeric \$toYear) == true ]] && (( fromYear++ )) && (( toYear++ )) && newEdition="\$fromYear-\$toYear"" >> $scriptFile
-		# 	echo "		else" >> $scriptFile
-		# 	echo "			[[ \$(IsNumeric $currentEdition) == true ]] && newEdition=\$currentEdition && (( newEdition++ ))" >> $scriptFile
-		# 	echo "		fi" >> $scriptFile
-		# 	echo "	fi" >> $scriptFile
-
-		# 	echo "	[[ -n \$currentEdition ]] && echo -e \"\\tCurrent edition is '\$currentEdition'\"" >> $scriptFile
-		# 	echo "	if [[ -n \$newEdition ]]; then" >> $scriptFile
-		# 	echo "		echo -e \"\\tCalculated new edition is: '\$newEdition'.\"" >> $scriptFile
-		# 	echo "		echo -en \"\\tDo you wish to use the calculated new value ('yes' or 'no') > \"" >> $scriptFile
-		# 	echo "		read ans" >> $scriptFile
-		# 	echo "		[[ -z \$ans ]] && ans='y'" >> $scriptFile
-		# 	echo "		ans=\$(tr '[:upper:]' '[:lower:]' <<< \${ans:0:1})" >> $scriptFile
-		# 	echo "		[[ \$ans != 'y' ]] && unset newEdition" >> $scriptFile
-		# 	echo "	fi" >> $scriptFile
-
-		# 	echo "	if  [[ -z \$newEdition ]]; then" >> $scriptFile
-		# 	echo "		unset newEdition" >> $scriptFile
-		# 	echo "		until [[ -n \$newEdition ]]; do" >> $scriptFile
-		# 	echo "			echo -en \"\\tPlease specify the new edition value > \"" >> $scriptFile
-		# 	echo "			read newEdition" >> $scriptFile
-		# 	echo "		done" >> $scriptFile
-		# 	echo "	fi" >> $scriptFile
-		# 	echo "fi ## advance" >> $scriptFile
-		# fi ## catalogAdvance
 
 		echo "echo" >> $scriptFile
 		echo "unset ans" >> $scriptFile
@@ -496,12 +467,10 @@ cwdStart="$(pwd)"
 			echo >> $scriptFile
 			echo "	\$DOIT mv -f \"\$targetSpec\" \"\$(dirname \$tgtDir)/curr\"" >> $scriptFile
 
-			# echo "	echo -e \"\\t\\t '\$targetSpec' --> '\$(dirname \$tgtDir)/curr'\"" >> $scriptFile
-			# echo "	\$DOIT mv -f \"\$targetSpec\" \"\$(dirname \$tgtDir)/curr\"" >> $scriptFile
-			# echo "	# Turn off pencils from the structured content draw" >> $scriptFile
-			# echo "	editFile=\"\$tgtDir/web/\$courseleafProgDir/localsteps/structuredcontentdraw.html\"" >> $scriptFile
-			# echo "	[[ -f \"\$editFile\" ]] && \$DOIT sed -e '/pencil.png/ s|html|//html|' -i \"\$editFile\"" >> $scriptFile
-			# echo >> $scriptFile
+			echo "	# Turn off pencils from the structured content draw" >> $scriptFile
+			echo "	editFile=\"\$(dirname \$tgtDir)/curr/local/localsteps/structuredcontentdraw.html\"" >> $scriptFile
+			echo "	[[ -f \"\$editFile\" ]] && \$DOIT sed -e '/pencil.png/ s|html|//html|' -i \"\$editFile\"" >> $scriptFile
+			echo >> $scriptFile
 
 			echo "	editFile=\"\$(dirname \$tgtDir)/curr/\$courseleafProgDir.cfg\"" >> $scriptFile
 			echo "	Msg2 \"^Editing the \$editFile...\"" >> $scriptFile
@@ -509,6 +478,7 @@ cwdStart="$(pwd)"
 			echo "	Msg2 \"^^CURR site admin mode set ...\"" >> $scriptFile
 			echo "	\$DOIT sed -i s'_^//sitereadonly:Admin Mode:_sitereadonly:Admin Mode:_'g \"\$editFile\"" >> $scriptFile
 			echo >> $scriptFile
+
 			echo "	echo -e \"\\n*** The new CURR site has been created, the old site was renamed to 'curr.\$dirSuffix'\"" >> $scriptFile
 			echo "	echo -e \"\\n\\t*** Note: The new CURR site needs to be republished, please goto the 'CourseLeaf Console'\"" >> $scriptFile
 			echo "	echo -e \"\\tand use the 'Republish Site' action to rebuild the site.\"" >> $scriptFile
@@ -546,17 +516,7 @@ cwdStart="$(pwd)"
 		echo " 	[[ \$DOIT != '' ]] && echo \"ignoreList = '\$ignoreList'\"" >> $scriptFile
 		echo "	\$DOIT RunRsync \"\$sourceSpec\" \"\$targetSpec\" \"\$ignoreList\" \"\$backupDir\"" >> $scriptFile
 		echo "	echo -e \"\\tRsync operation completed\\a\"" >> $scriptFile
-
 		echo >> $scriptFile
-		# ## Set the new edition value
-		# echo "if [[ -n \$newEdition ]]; then" >> $scriptFile
-		# echo "	editFile=\"\$localstepsDir/default.tcf\"" >> $scriptFile
-		# echo "	echo -e \"\\tUpdating catalog edition to '\$newEdition'\"" >> $scriptFile
-		# echo "	fromStr=\"\$(grep \"^edition:\" \"\$localstepsDir/default.tcf\")\"" >> $scriptFile
-		# echo "	toStr=\"edition:\$newEdition\"" >> $scriptFile
-		# echo "	\$DOIT sed -i s\"_^\${fromStr}_\${toStr}_\" \"\$localstepsDir/default.tcf\"" >> $scriptFile
-		# echo "fi" >> $scriptFile
-		# echo >> $scriptFile
 
 		echo -e "\\n##=======================================================================================================" >> $scriptFile
 		## Log changes
@@ -768,7 +728,7 @@ removeGitReposFromNext=true
 			locallibsDir=$tgtDir/web/$courseleafProgDir/locallibs
 			[[ ! -d $locallibsDir ]] && unset locallibsDir
 		fi
-		[[ ! -d $locallibsDir && $client != 'internal' ]] && Terminate "Could not resolve the 'locallibs' directory"
+		[[ ! -d $locallibsDir && $client != 'internal' ]] && Warning "Could not resolve the 'locallibs' directory, updates and checks will be skipped"
 
 #=======================================================================================================================
 ##[[ $client == 'internal' ]] && Terminate "Sorry, the internal site is not supported at this time"
@@ -1444,7 +1404,7 @@ declare -A processedSpecs
 echo
 Msg2 "\nCross product checks..."
 ## Check to see if there are any old formbuilder widgets
-	if [[ $client != 'internal' ]]; then
+	if [[ $client != 'internal' && -d "$locallibsDir/locallibs" ]]; then
 		checkDir="$locallibsDir/locallibs/widgets"
 		fileCount=$(ls "$checkDir" 2> /dev/null | grep 'banner_' | wc -l)
 		[[ $fileCount -gt 0 ]] && Warning 0 1 "Found 'banner' widgets in '$checkDir', these are probably deprecated, please ask a CIM developer to evaluate."
@@ -1725,3 +1685,4 @@ Goodbye 0 "$text1" "$text2"
 ## 07-20-2017 @ 12.41.43 - (5.2.22)    - dscudiero - Move the setting of the permisions for /search/index.cgi into the searchcgi record processing in the script
 ## 07-24-2017 @ 07.57.41 - (5.2.23)    - dscudiero - remove trailing blanks in the log file entries
 ## 08-02-2017 @ 09.32.38 - (5.3.9)     - dscudiero - Updates to cgi selection and add git processing
+## 08-02-2017 @ 11.20.43 - (5.3.12)    - dscudiero - Change not having a locallibs directory a warning
