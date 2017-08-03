@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.55" # -- dscudiero -- Tue 05/16/2017 @  6:42:33.63
+# version="2.0.56" # -- dscudiero -- Thu 08/03/2017 @  8:41:01.82
 #===================================================================================================
 # Print/Log formatted messages
 #===================================================================================================
@@ -180,9 +180,9 @@ function Msg2 {
 	elif [[ $msgType == 'W' ]]; then
 		msgPrefix="$(ColorW "*Warning*") -- " ; subtractFactor=$subtractor1 ; [[ $allowAlerts != true || $batchMode != true ]] && msgSuffix="\a"
 	elif [[ $msgType == 'E' ]]; then
-		msgPrefix="$(ColorE "*Error*") -- " ; subtractFactor=$subtractor1 ; [[ $allowAlerts != true || $batchMode != true ]] && msgSuffix="\a"
+		msgPrefix="$(ColorE "*Error*") -- " ; subtractFactor=$subtractor1 ; [[ $allowAlerts != true || $batchMode != true ]] && msgSuffix="\a\a"
 	elif [[ $msgType == 'T' ]]; then
-		msgPrefix="\n$(ColorT "*Fatal Error*") ($myName) -- " ; subtractFactor=$subtractor2 ; terminateProcessing=true ; [[ $allowAlerts != true || $batchMode != true ]] && msgSuffix="\a"
+		msgPrefix="\n$(ColorT "*Fatal Error*") ($myName) -- " ; subtractFactor=$subtractor2 ; terminateProcessing=true ; [[ $allowAlerts != true || $batchMode != true ]] && msgSuffix="\a\a\a"
 	elif [[ $msgType == 'V' ]]; then
 		msgText="$(ColorV "$msgText")" ; subtractFactor=$subtractor1
 	elif [[ $msgType == 'NONL' ]]; then
@@ -255,3 +255,4 @@ export -f Terminate Error Warning Info Note Verbose
 ## Thu Mar 16 08:13:40 CDT 2017 - dscudiero - Quit immediataly if quiet is true
 ## Mon Mar 20 08:07:34 CDT 2017 - dscudiero - Comment out Dump commands - trying to speed thing up
 ## 05-16-2017 @ 06.43.01 - ("2.0.55")  - dscudiero - Add script name to fatal error messages
+## 08-03-2017 @ 08.47.54 - ("2.0.56")  - dscudiero - Add different alert counts based on message severity
