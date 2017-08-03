@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.53" // -- dscudiero -- Thu 08/03/2017 @ 11:14:29.74
+wfLibVersion="1.7.55" // -- dscudiero -- Thu 08/03/2017 @ 14:41:40.54
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -31,14 +31,116 @@ wfLibVersion="1.7.53" // -- dscudiero -- Thu 08/03/2017 @ 11:14:29.74
 // 07/26-17 - dgs - Removed 'HasValue', replaced by 'CheckSetHasValue'
 // 07/27/17 - dgs - Updated wfDumpVars to dump subjects, departments, and collegs if no data passed in the wfrules.options
 //					Set wfAllcodes in each function that requires it since the tcfdata is not avaiable to workflowFuncs
+// 08/03/17 - dgs - Moved in the common code from workflowFuncs
 //======================================================================================================================
 
 // Loading message
+// If this is the first time call then do the initialization
 if (typeof wfLibLoaded === "undefined") {
-	if (typeof wfInDebugEnv != "undefined") {
-		if (wfEnvIsDev) wfDebug(1,"\n*** Loading "+ wfLibName + ", version: " + wfLibVersion);
-	} else { wfInDebugEnv = false }
-}
+	//Get the CIM instance name
+	var wfCimInstance=tcfdata.pagename[0].replace(/^\/([^\/]*)\/.*/, "/$1/");
+	wfCimInstance=wfCimInstance.replace(/\//g, "");
+
+	var host=getenv("HTTP_HOST").toLowerCase();
+
+	// If wfDebugLevel is set in the config file then set as global
+	var wfDebugLevel=0;
+	if (tcfdata.wfDebugLevel && tcfdata.wfDebugLevel.length > 0)
+		wfDebugLevel=tcfdata.wfDebugLevel[0]
+	wfDebugEnvs='dev';
+	if (tcfdata.wfDebugEnvs && tcfdata.wfDebugEnvs.length > 0)
+		wfDebugEnvs=tcfdata.wfDebugEnvs[0]
+
+	// Debug environment, print info
+	wfDebugEnvs="," + wfDebugEnvs + ",";
+	var wfEnvIsDev=false;
+	var wfEnv = "*unknown*";
+	if (host.indexOf('.dev') > 0) { var wfEnv  ="dev"; wfEnvIsDev=true;
+	} else if (host.indexOf('-test') > 0) { var wfEnv = "test";
+	} else if (host.indexOf('-next') > 0) { var wfEnv = "next";
+	}
+	// If in a debug environment then print out stuff
+	var wfInDebugEnv=false
+	if (wfDebugEnvs.indexOf("," + wfEnv + ",") >= 0) {
+		wfInDebugEnv=true;
+		var wfProposalMode='EDIT'
+		if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
+			wfProposalMode='NEW'
+		if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
+			wfProposalMode='DELETE'
+		var d = new Date();
+		var prtStr="\n" + Array(40).join("=") + " " + d.toString() + " " + Array(40).join("=") +
+					"\n<<< Loading workflowFuncs.atj, proposal mode is " + wfProposalMode;
+		if ( wfDebugLevel > 0 ) print_debug(prtStr);
+	}
+	if (wfEnvIsDev) wfDebug(1,"\n*** Loading "+ wfLibName + ", version: " + wfLibVersion);
+} //(typeof wfLibLoaded === "undefined")
+
+//=======================================================================================================================
+// Check if proposal is Not Delete
+// 12/16/2016 - dgs - New
+//=======================================================================================================================
+wffuncs.IsNotNew = function(inval, wfrule) {
+	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
+		return false;
+	return [inval.replace(wfrule.ifregex,'')];
+}; //IsNotEdit
+
+//=======================================================================================================================
+// Check if proposal is in EDIT mode
+// 02/26/2015 - dgs - New
+// 11/02/2016 - dgs - Streamlined
+//=======================================================================================================================
+wffuncs.IsEdit = function(inval, wfrule) {
+	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
+		return false;
+	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
+		return false;
+	return [inval.replace(wfrule.ifregex,'')];
+}; //IsEdit
+
+//=======================================================================================================================
+// Check if proposal is not in EDIT mode
+// 07/17/2017 - dgs - New
+//=======================================================================================================================
+wffuncs.IsNotEdit = function(inval, wfrule) {
+	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
+		return [inval.replace(wfrule.ifregex,'')]
+	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
+		return [inval.replace(wfrule.ifregex,'')]
+	return false;
+}; //IsEdit
+
+//=======================================================================================================================
+// Check if proposal is Not Delete
+// 12/16/2016 - dgs - New
+//=======================================================================================================================
+wffuncs.IsNotDelete = function(inval, wfrule) {
+	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
+		return false;
+	return [inval.replace(wfrule.ifregex,'')];
+}; //IsNotEdit
+
+//=======================================================================================================================
+// Return the proposal mode
+// 01/25/2017 - dgs - New
+//=======================================================================================================================
+wffuncs.ProposalState = function(inval, wfrule, args) {
+	wfDebug(4,"\n*** In ProposalState ***, called as: '" + inval + "'");
+	var retVal='EDIT';
+	if (tcfdata.newrecord && tcfdata.newrecord.length) {
+		if (tcfdata.newrecord == 'true')
+			retVal='NEW';
+	}
+	if (tcfdata.deleterec && tcfdata.deleterec.length) {
+		if (tcfdata.deleterec == 'true')
+			retVal='DELETE';
+	}
+
+	retVal=inval.replace(wfrule.regex,retVal);
+	wfDebug(4,"\t*** Returning '" + retVal + "'\n")
+	return [retVal]
+}; //ProposalState
 
 //======================================================================================================================
 // Add related departments/colleges/schools to the workflow,
@@ -1749,3 +1851,4 @@ var wfLibLoaded=true;
 // 07-26-2017 @ 16.07.21 - ("1.7.46")  - dscudiero - Tweak getAttr to always do lookups for all three objects regardless of request type
 // 07-27-2017 @ 16.47.05 - ("1.7.51")  - dscudiero - General syncing of dev to prod
 // 08-03-2017 @ 11.18.51 - ("1.7.53")  - dscudiero - Only add message steps in Related if dnv is in debugEnvs
+// 08-03-2017 @ 15.12.37 - ("1.7.55")  - dscudiero - Moved in the common code from workflowFuncs
