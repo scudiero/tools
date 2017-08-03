@@ -1,123 +1,10 @@
 //======================================================================================================================
-// version:1.0.18 // -- dscudiero -- Thu 07/27/2017 @ 12:29:56.46
+// version:2.0.0 // -- dscudiero -- Thu 08/03/2017 @ 15:10:34.05
 //======================================================================================================================
-// ??/??/17-- dgs -- initial
-// 04/10/17 - dgs -	Refactored initialization block, removed end of load messages
-// 07/24/17 - dgs - Fixed issue using getTCFValue before triggers are loaded
-// 07/25/17 - dgs - Added options to the function template
-// 07/27/17 - dgs - Removed wfAllcodes, set in the individual functions now
+// Import the common code
+wfLibName="/locallibs/workflowLib.atj"
+%import %progdir%/locallibs/workflowLib.atj:atj;
 //======================================================================================================================
-if (typeof wfFunctionsLoaded == "undefined") {
-	//Get the CIM instance name
-	var wfCimInstance=tcfdata.pagename[0].replace(/^\/([^\/]*)\/.*/, "/$1/");
-	wfCimInstance=wfCimInstance.replace(/\//g, "");
-
-	var host=getenv("HTTP_HOST").toLowerCase();
-
-	// If wfDebugLevel is set in the config file then set as global
-	var wfDebugLevel=0;
-	if (tcfdata.wfDebugLevel && tcfdata.wfDebugLevel.length > 0)
-		wfDebugLevel=tcfdata.wfDebugLevel[0]
-	wfDebugEnvs='dev';
-	if (tcfdata.wfDebugEnvs && tcfdata.wfDebugEnvs.length > 0)
-		wfDebugEnvs=tcfdata.wfDebugEnvs[0]
-
-	// Debug environment, print info
-	wfDebugEnvs="," + wfDebugEnvs + ",";
-	var wfEnvIsDev=false;
-	var wfEnv = "*unknown*";
-	if (host.indexOf('.dev') > 0) { var wfEnv  ="dev"; wfEnvIsDev=true;
-	} else if (host.indexOf('-test') > 0) { var wfEnv = "test";
-	} else if (host.indexOf('-next') > 0) { var wfEnv = "next";
-	}
-	// If in a debug environment then print out stuff
-	if (wfDebugEnvs.indexOf("," + wfEnv + ",") >= 0) {
-		wfInDebugEnv=true;
-		var wfProposalMode='EDIT'
-		if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
-			wfProposalMode='NEW'
-		if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
-			wfProposalMode='DELETE'
-		var d = new Date();
-		var prtStr="\n" + Array(40).join("=") + " " + d.toString() + " " + Array(40).join("=") +
-					"\n<<< Loading workflowFuncs.atj, proposal mode is " + wfProposalMode;
-		if ( wfDebugLevel > 0 ) print_debug(prtStr);
-	} else { wfInDebugEnv=false }
-	//(host.indexOf(".dev") > 0)
-
-	wfFunctionsLoaded=true;  // Scoped outside the module
-} //(typeof wfFunctionsLoaded == "undefined")
-
-//=======================================================================================================================
-function wfDebug(text,mode) { return; } //wfDebug
-function wfDump(varList,delimiter){ return; } //wfDump
-
-//=======================================================================================================================
-// Check if proposal is Not Delete
-// 12/16/2016 - dgs - New
-//=======================================================================================================================
-wffuncs.IsNotNew = function(inval, wfrule) {
-	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
-		return false;
-	return [inval.replace(wfrule.ifregex,'')];
-}; //IsNotEdit
-//=======================================================================================================================
-// Check if proposal is in EDIT mode
-// 02/26/2015 - dgs - New
-// 11/02/2016 - dgs - Streamlined
-//=======================================================================================================================
-wffuncs.IsEdit = function(inval, wfrule) {
-	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
-		return false;
-	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
-		return false;
-	return [inval.replace(wfrule.ifregex,'')];
-}; //IsEdit
-//=======================================================================================================================
-// Check if proposal is not in EDIT mode
-// 07/17/2017 - dgs - New
-//=======================================================================================================================
-wffuncs.IsNotEdit = function(inval, wfrule) {
-	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
-		return [inval.replace(wfrule.ifregex,'')]
-	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
-		return [inval.replace(wfrule.ifregex,'')]
-	return false;
-}; //IsEdit
-//=======================================================================================================================
-// Check if proposal is Not Delete
-// 12/16/2016 - dgs - New
-//=======================================================================================================================
-wffuncs.IsNotDelete = function(inval, wfrule) {
-	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
-		return false;
-	return [inval.replace(wfrule.ifregex,'')];
-}; //IsNotEdit
-
-//=======================================================================================================================
-// Return the proposal mode
-// 01/25/2017 - dgs - New
-//=======================================================================================================================
-wffuncs.ProposalState = function(inval, wfrule, args) {
-	wfDebug(4,"\n*** In ProposalState ***, called as: '" + inval + "'");
-	var retVal='EDIT';
-	if (tcfdata.newrecord && tcfdata.newrecord.length) {
-		if (tcfdata.newrecord == 'true')
-			retVal='NEW';
-	}
-	if (tcfdata.deleterec && tcfdata.deleterec.length) {
-		if (tcfdata.deleterec == 'true')
-			retVal='DELETE';
-	}
-
-	retVal=inval.replace(wfrule.regex,retVal);
-	wfDebug(4,"\t*** Returning '" + retVal + "'\n")
-	return [retVal]
-}; //ProposalState
-
-//======================================================================================================================
-//======================================================================================================================
-
 
 /*
 //======================================================================================================================
@@ -170,25 +57,7 @@ wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 } //xxxxxxxx
 */
 
-
-//======================================================================================================================
-//======================================================================================================================
-// Import workflow helper functions (workflowLib.atj) -- imported from localsteps
-//======================================================================================================================
-wfLibName="/locallibs/workflowLib.atj"
-%import %progdir%/locallibs/workflowLib.atj:atj;
-
-//======================================================================================================================
 //======================================================================================================================
 // Check in log
 //======================================================================================================================
-// Tue Mar 21 11:07:28 CDT 2017 - dscudiero - Added check in log comments
-// 03-24-2017 @ 07.36.56 - (//)        - dscudiero - General syncing of dev to prod
-// 05-11-2017 @ 14.55.28 - (//)        - dscudiero - refactored the begining stuff, removed loaded messages
-// 05-22-2017 @ 08.11.47 - (//)        - dscudiero - General syncing of dev to prod
-// 06-13-2017 @ 14.04.53 - (//)        - dscudiero - add setting wfAllcodes
-// 07-21-2017 @ 13.17.08 - (//)        - dscudiero - add return data stanza
-// 07-24-2017 @ 07.59.33 - (//)        - dscudiero - Added isNotEdit and IsNotNew
-// 07-24-2017 @ 11.01.12 - (//)        - dscudiero - Fixed issue using getTCFValue before triggers are loaded
-// 07-25-2017 @ 10.56.02 - (//)        - dscudiero - added options to function template
-// 07-27-2017 @ 12.37.27 - (56.46)     - dscudiero - Removed setting wfAllcodes, moved to workflowLib
+// 08-03-2017 @ 15.12.23 - (34.05)     - dscudiero - moved out the common code to workflowLib
