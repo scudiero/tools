@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.71" # -- dscudiero -- Thu 08/03/2017 @  7:27:11.00
+# version="2.0.72" # -- dscudiero -- Thu 08/03/2017 @  7:35:21.60
 #===================================================================================================
 # Process interrupts
 #===================================================================================================
@@ -18,10 +18,10 @@ function SignalHandeler {
     parentModule=$(basename $parentModule)
     local message
 
+    indentLevel=0
     case "$sig" in
         ERR)
-            message="$FUNCNAME: Unknown error condition ($errorCode) raised in module '$parentModule'\n^Called as: $parentModule $originalArgStr,\
-                     \n^$(ColorE "line($errorLineNo)"): $(ColorK "$errorLine")"
+            message="$FUNCNAME: Unknown error condition ($errorCode) raised in module '$parentModule'\n^Called as: $parentModule $originalArgStr"
             ;;
         EXIT|SIGEXIT|SIGHUP|SIGTERM)
             unset message
@@ -33,12 +33,11 @@ function SignalHandeler {
             unset message
             ;;
         *)
-            message="$FUNCNAME: Trapped signal: '$sig' in module\n^'$parentModule'\n^Called as: $parentModule $originalArgStr,\
-                     \n^$(ColorE "line($errorLineNo)"): $(ColorK "$errorLine")"
+            message="$FUNCNAME: Trapped signal: '$sig' in module\n^'$parentModule'\n^Called as: $parentModule $originalArgStr"
     esac
 
     if [[ -n $message && $errorCode != '255' ]]; then
-        indentLevel=0
+        message="$message,\n^$(ColorE "line($errorLineNo)"): $(ColorK "$errorLine")"
         echo -e "\n$(PadChar)"
         Error "$message";
         Msg2 "\n^Call Stack:"
@@ -68,3 +67,4 @@ export -f SignalHandeler
 ## 06-07-2017 @ 09.57.29 - ("2.0.69")  - dscudiero - remove single quotes arround error line
 ## 07-31-2017 @ 07.18.03 - ("2.0.70")  - dscudiero - Add the original arg string to the outout if an error was caught
 ## 08-03-2017 @ 07.27.40 - ("2.0.71")  - dscudiero - reformat messages
+## 08-03-2017 @ 07.35.29 - ("2.0.72")  - dscudiero - General syncing of dev to prod
