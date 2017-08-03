@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.70" # -- dscudiero -- Mon 07/31/2017 @  7:17:34.13
+# version="2.0.71" # -- dscudiero -- Thu 08/03/2017 @  7:27:11.00
 #===================================================================================================
 # Process interrupts
 #===================================================================================================
@@ -20,7 +20,7 @@ function SignalHandeler {
 
     case "$sig" in
         ERR)
-            message="$FUNCNAME: Unknown error condition ($errorCode) raised in module '$parentModule' ($originalArgStr),\
+            message="$FUNCNAME: Unknown error condition ($errorCode) raised in module '$parentModule'\n^Called as: $parentModule $originalArgStr,\
                      \n^$(ColorE "line($errorLineNo)"): $(ColorK "$errorLine")"
             ;;
         EXIT|SIGEXIT|SIGHUP|SIGTERM)
@@ -33,10 +33,12 @@ function SignalHandeler {
             unset message
             ;;
         *)
-            message="$FUNCNAME: Trapped signal: '$sig' in module\n^'$parentModule' ($originalArgStr),"
+            message="$FUNCNAME: Trapped signal: '$sig' in module\n^'$parentModule'\n^Called as: $parentModule $originalArgStr,\
+                     \n^$(ColorE "line($errorLineNo)"): $(ColorK "$errorLine")"
     esac
 
     if [[ -n $message && $errorCode != '255' ]]; then
+        indentLevel=0
         echo -e "\n$(PadChar)"
         Error "$message";
         Msg2 "\n^Call Stack:"
@@ -65,3 +67,4 @@ export -f SignalHandeler
 ## 05-10-2017 @ 12.49.43 - ("2.0.68")  - dscudiero - Do not display call stack for INT signels
 ## 06-07-2017 @ 09.57.29 - ("2.0.69")  - dscudiero - remove single quotes arround error line
 ## 07-31-2017 @ 07.18.03 - ("2.0.70")  - dscudiero - Add the original arg string to the outout if an error was caught
+## 08-03-2017 @ 07.27.40 - ("2.0.71")  - dscudiero - reformat messages
