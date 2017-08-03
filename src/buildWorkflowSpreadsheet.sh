@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.17 # -- dscudiero -- Wed 05/24/2017 @ 13:07:31.41
+version=1.2.18 # -- dscudiero -- Thu 08/03/2017 @  9:55:24.96
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -176,7 +176,7 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 
 	## Read the workflow.cfg file for the cim
 	## Parse off the wfrules
-	unset substitutionVars wfrules wfrulesKeys substitutionVarsKeys esigsKeys wfrules wforder
+	unset substitutionVars wfrules wfrulesKeys substitutionVarsKeys esigsKeys wforders
 	declare -A wfrules ; declare -A esigs ; declare -A substitutionVars
 	Msg2 "^Parsing '$grepFile'"
 	[[ -f $tmpFile ]] && rm -f $tmpFile
@@ -259,7 +259,7 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 
 	## Write out 'wforder' data
 		if [[ ${#wforders[@]} -gt 0 ]]; then
-			Msg2 "\n#\tWorkflow\t\t\t\tComment" >> $outFile
+			Msg2 "\n#\tWorkflow\tComment" >> $outFile
 			for ((i=0; i<${#wforders[@]}; i++)); do
 				echo -e "$i\t${wforders[$i]}" >> $outFile
 			done
@@ -268,7 +268,7 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 
 	## Write out 'voterules' data
 		if [[ ${#voterules[@]} -gt 0 ]]; then
-			Msg2 "\n#\Vote Rule\t\t\tComment" >> $outFile
+			Msg2 "\n#\Vote Rule\t\t\tComments / Explanation" >> $outFile
 			for ((i=0; i<${#voterules[@]}; i++)); do
 				echo -e "$i\t${voterules[$i]}" >> $outFile
 			done
@@ -371,3 +371,4 @@ Goodbye 0 #'alert'
 ## 05-12-2017 @ 11.09.09 - (1.2.1)     - dscudiero - Refactor parsing substitution variables to take into account wfAttr function bindings
 ## 05-16-2017 @ 13.05.44 - (1.2.2)     - dscudiero - Fix output format problem with wforders
 ## 05-24-2017 @ 13.43.28 - (1.2.17)    - dscudiero - General syncing of dev to prod
+## 08-03-2017 @ 09.55.58 - (1.2.18)    - dscudiero - Fix problems with wforders
