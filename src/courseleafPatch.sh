@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.4.0 # -- dscudiero -- Mon 08/07/2017 @ 13:50:58.94
+version=5.4.1 # -- dscudiero -- Mon 08/07/2017 @ 13:57:55.18
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -11,6 +11,9 @@ Import "$includes"
 originalArgStr="$*"
 scriptDescription="Refresh a courseleaf product"
 cwdStart="$(pwd)"
+
+## TODO
+[[ $LOGNAME != 'mzollo' && $LOGNAME != 'epingel' ]] && Terminate "Sorry, $myName is currently offline until the issues with the cgi's get straightened out"
 
 #=======================================================================================================================
 # Refresh a Courseleaf component from the git repo
@@ -1696,3 +1699,4 @@ Goodbye 0 "$text1" "$text2"
 ## 08-02-2017 @ 11.20.43 - (5.3.12)    - dscudiero - Change not having a locallibs directory a warning
 ## 08-02-2017 @ 15.12.51 - (5.3.24)    - dscudiero - Fix problem not setting processControl for proucts not in git (e.g. cgis)
 ## 08-07-2017 @ 13.51.42 - (5.4.0)     - dscudiero - Refreshed how git controlled files are handled
+## 08-07-2017 @ 13.58.18 - (5.4.1)     - dscudiero - Allow only mzollo and epingel to run the script
