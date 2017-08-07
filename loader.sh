@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.3.24" # -- dscudiero -- Tue 08/01/2017 @ 13:05:40.78
+version="1.3.36" # -- dscudiero -- Mon 08/07/2017 @ 15:35:20.76
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -214,6 +214,18 @@ sTime=$(date "+%s")
 		prtStatus ", check run"
 		sTime=$(date "+%s")
 
+	## What auth groups is this user in
+		sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\""
+		RunSql2 $sqlStmt
+		unset UsersAuthGroups
+		if [[ ${#resultSet[@]} -ne 0 ]]; then
+			for ((i=0; i<${#resultSet[@]}; i++)); do
+				UsersAuthGroups="$UsersAuthGroups,${resultSet[$i]}"
+			done
+			UsersAuthGroups=${UsersAuthGroups:1}
+		fi
+		export UsersAuthGroups
+
 	## Check semaphore
 		[[ $(Contains ",$setSemaphoreList," ",$callPgmName," ) == true ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
 
@@ -377,3 +389,4 @@ sTime=$(date "+%s")
 ## 07-31-2017 @ 16.43.25 - ("1.3.22")  - dscudiero - Set the group for the log file to leepfrog
 ## 08-01-2017 @ 10.57.18 - ("1.3.23")  - dscudiero - reformat messages
 ## 08-01-2017 @ 13.21.58 - ("1.3.24")  - dscudiero - Tweak messages
+## 08-07-2017 @ 15.49.31 - ("1.3.36")  - dscudiero - Set the UserAuthGroups global variable
