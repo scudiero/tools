@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.4.1 # -- dscudiero -- Mon 08/07/2017 @ 15:51:12.52
+version=5.4.2 # -- dscudiero -- Mon 08/07/2017 @ 17:00:35.17
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -11,9 +11,6 @@ Import "$includes"
 originalArgStr="$*"
 scriptDescription="Refresh a courseleaf product"
 cwdStart="$(pwd)"
-
-## TODO
-[[ $userName != 'mzollo' && $userName != 'epingel' && $userName != 'dscudiero' ]] && Terminate "Sorry, $myName is currently offline until the issues with the cgi's get straightened out"
 
 #=======================================================================================================================
 # Refresh a Courseleaf component from the git repo
@@ -1707,3 +1704,4 @@ Goodbye 0 "$text1" "$text2"
 ## 08-07-2017 @ 13.58.18 - (5.4.1)     - dscudiero - Allow only mzollo and epingel to run the script
 ## 08-07-2017 @ 14.12.41 - (5.4.0)     - dscudiero - Add dscudiero to the allow list
 ## 08-07-2017 @ 15.52.39 - (5.4.1)     - dscudiero - Add checkProdEnv on the Init calls, verify the user can change a production env
+## 08-07-2017 @ 17.00.43 - (5.4.2)     - dscudiero - remove debug code
