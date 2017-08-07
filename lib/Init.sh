@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.138 # -- dscudiero -- Thu 06/08/2017 @ 16:24:23.37
+# version=2.1.0 # -- dscudiero -- Mon 08/07/2017 @ 15:48:50.75
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -210,11 +210,22 @@ function Init {
 			done
 		fi
 
+		## Check to see if check production env is on and we are working in a next or curr environment, if yes then verify that
+		## the user has authorization to modify a produciton environment.
 		if [[ $checkProdEnv != false && $informationOnlyMode != true ]] && [[ $checkProdEnv == 'next' || $checkProdEnv == 'curr' ]]; then
 		 	if [[ $noWarn != true ]]; then
 				verify=true
-				Msg2
-				Warning "You are asking to update/overlay the $(ColorW $(Upper $checkProdEnv)) environment"
+				echo
+				Warning "You are asking to update/overlay the $(ColorW $(Upper $checkProdEnv)) environment."
+		 		sqlStmt="Select productsinsupport from $clientInfoTable where name=\"$client\""
+		 		RunSql2 $sqlStmt
+		 		if [[ ${resultSet[0]} != 'NULL' ]]; then
+		 			if [[ $(Contains ",$UsersAuthGroups," 'support') == true ]]; then
+		 				Msg2 "^The client has the following products active in production: '${resultSet[0]}'"
+		 			else
+		 				Terminate "You do not have authority to modify the $env environment, please contact the support person assigned to this client"
+		 			fi
+		 		fi
 				unset ans; Prompt ans "Are you sure" "Yes No";
 				ans=$(Lower ${ans:0:1})
 				[[ $ans != 'y' ]] && Goodbye -1
@@ -349,3 +360,4 @@ export -f Init
 ## 05-02-2017 @ 11.28.12 - (2.0.135)   - dscudiero - Hide nocheck message of in test mode
 ## 05-24-2017 @ 12.18.27 - (2.0.136)   - dscudiero - skip
 ## 06-08-2017 @ 16.27.22 - (2.0.138)   - dscudiero - Add the clear option
+## 08-07-2017 @ 15.50.01 - (2.1.0)     - dscudiero - Refactor checking the production enviroments, check user's auth
