@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.4.0 # -- dscudiero -- Mon 08/07/2017 @ 14:12:01.08
+version=5.4.1 # -- dscudiero -- Mon 08/07/2017 @ 15:51:12.52
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -622,11 +622,11 @@ removeGitReposFromNext=true
 	[[ $listOnly == true ]] && Warning 0 1 "The 'listOnly' flag is turned on, files will not be copied"
 	if [[ $testMode != true ]]; then
 		if [[ $noCheck == true ]]; then
-			Init 'getClient'
+			Init 'getClient checkProdEnv'
 			GetSiteDirNoCheck $client
 			[[ -z $siteDir ]] && Terminate "Nocheck option active, could not resolve target site directory"
 		else
-			Init 'getClient getEnv getDirs checkDirs noPreview noPublic'
+			Init 'getClient getEnv getDirs checkDirs noPreview noPublic checkProdEnv'
 		fi
 	fi
 
@@ -1706,3 +1706,4 @@ Goodbye 0 "$text1" "$text2"
 ## 08-07-2017 @ 13.51.42 - (5.4.0)     - dscudiero - Refreshed how git controlled files are handled
 ## 08-07-2017 @ 13.58.18 - (5.4.1)     - dscudiero - Allow only mzollo and epingel to run the script
 ## 08-07-2017 @ 14.12.41 - (5.4.0)     - dscudiero - Add dscudiero to the allow list
+## 08-07-2017 @ 15.52.39 - (5.4.1)     - dscudiero - Add checkProdEnv on the Init calls, verify the user can change a production env
