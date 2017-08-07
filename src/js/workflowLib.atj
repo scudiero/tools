@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.55" // -- dscudiero -- Thu 08/03/2017 @ 14:41:40.54
+wfLibVersion="1.7.56" // -- dscudiero -- Mon 08/07/2017 @ 12:55:49.49
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -32,6 +32,7 @@ wfLibVersion="1.7.55" // -- dscudiero -- Thu 08/03/2017 @ 14:41:40.54
 // 07/27/17 - dgs - Updated wfDumpVars to dump subjects, departments, and collegs if no data passed in the wfrules.options
 //					Set wfAllcodes in each function that requires it since the tcfdata is not avaiable to workflowFuncs
 // 08/03/17 - dgs - Moved in the common code from workflowFuncs
+// 08/07/17 - dgs - Added a check to make sure we are in courseadmin before using allcodes
 //======================================================================================================================
 
 // Loading message
@@ -762,7 +763,7 @@ function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colCol
 
 	// Lookup college code
 		if (lookupType.toLowerCase().substr(0,1) === "c") { // lookup college code
-			if (wfAllcodes) {
+			if (wfAllcodes && wfCimInstance === 'courseadmin') {
 				if (givenType.toLowerCase().substr(0,2) === "su") { // Given data is subject codes
 					wffuncs.getColleges(wffuncs.getDepartments([givenData1])).forEach(function(result) {
 						resultSet.push({data: result})
@@ -800,7 +801,7 @@ function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colCol
 
 	// Lookup department code -- assumes that we were passed subject codes
 		if (lookupType.toLowerCase().substr(0,1) === "d") { // lookup department code
-			if (wfAllcodes) {
+			if (wfAllcodes && wfCimInstance === 'courseadmin') {
 				wffuncs.getDepartments([givenData1]).forEach(function(result) {
 					resultSet.push({data: result})
 				});
@@ -1017,7 +1018,7 @@ wffuncs.AttrIn = function(inval, wfrule, args) {
 		checkList="," + checkList + ",";
 
 		// Get standard values
-		if (wfAllcodes) {
+		if (wfAllcodes && wfCimInstance === 'courseadmin') {
 			var subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
 			var departments=wffuncs.getDepartments(subjects);
 			var colleges=wffuncs.getColleges(departments);
@@ -1852,3 +1853,4 @@ var wfLibLoaded=true;
 // 07-27-2017 @ 16.47.05 - ("1.7.51")  - dscudiero - General syncing of dev to prod
 // 08-03-2017 @ 11.18.51 - ("1.7.53")  - dscudiero - Only add message steps in Related if dnv is in debugEnvs
 // 08-03-2017 @ 15.12.37 - ("1.7.55")  - dscudiero - Moved in the common code from workflowFuncs
+// 08-07-2017 @ 12.56.22 - ("1.7.56")  - dscudiero - Check to make sure we are in courseadmin before using allcode4s
