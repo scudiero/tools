@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.4.1 # -- dscudiero -- Mon 08/07/2017 @ 13:57:55.18
+version=5.4.0 # -- dscudiero -- Mon 08/07/2017 @ 14:12:01.08
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -13,7 +13,7 @@ scriptDescription="Refresh a courseleaf product"
 cwdStart="$(pwd)"
 
 ## TODO
-[[ $LOGNAME != 'mzollo' && $LOGNAME != 'epingel' ]] && Terminate "Sorry, $myName is currently offline until the issues with the cgi's get straightened out"
+[[ $userName != 'mzollo' && $userName != 'epingel' && $userName != 'dscudiero' ]] && Terminate "Sorry, $myName is currently offline until the issues with the cgi's get straightened out"
 
 #=======================================================================================================================
 # Refresh a Courseleaf component from the git repo
@@ -409,7 +409,11 @@ cwdStart="$(pwd)"
 			echo " 		[[ -n \$DOIT ]] && echo \"sourceSpec = '\$sourceSpec'\" && echo \"targetSpec = '\$targetSpec'\" && echo \"ignoreList = '\$ignoreList'\"" >> $scriptFile
 			echo "		\$DOIT RunRsync \"\$sourceSpec/\" \"\$targetSpec\" \"\$ignoreList\"" >> $scriptFile
 			echo "		echo -e \"\\tRsync operation completed\\a\\n\"" >> $scriptFile
+			echo "		touch \"\${targetSpec}/.$myName.$LOGNAME.advance\"   " >> $scriptFile
 			echo "		echo -e \"\\t\\t'\$sourceSpec'\\t--> '\$targetSpec'\"" >> $scriptFile
+
+
+
 			echo "	else" >> $scriptFile
 			echo "		echo -e \"\\t*Error* -- Target location (\$targetSpec) already exists, cannot create clone, Stopping\\n\"" >> $scriptFile
 			echo "		exit 3" >> $scriptFile
@@ -512,6 +516,7 @@ cwdStart="$(pwd)"
 		echo " 	[[ \$DOIT != '' ]] && echo \"ignoreList = '\$ignoreList'\"" >> $scriptFile
 		echo "	\$DOIT RunRsync \"\$sourceSpec\" \"\$targetSpec\" \"\$ignoreList\" \"\$backupDir\"" >> $scriptFile
 		echo "	echo -e \"\\tRsync operation completed\\a\"" >> $scriptFile
+		echo "	touch \"\${targetSpec}/.$myName.$LOGNAME.patched\"   " >> $scriptFile
 		echo >> $scriptFile
 		echo -e "\\n#========================================================================================================" >> $scriptFile
 		## Log changes
@@ -1557,7 +1562,7 @@ Msg2 "\nCross product checks..."
 				Popd
 			fi
 			if [[ $hasChangedGitFiles == true && -n $newGitFiles ]]; then
-				Warning 0 2 "The $token environment has the non-tracked files, they were ignored..."
+				Warning 0 3 "The $token environment has the non-tracked files, they were ignored..."
 				for file in $(tr ',' ' ' <<< "$newGitFiles"); do
 					Msg2 "^^$file"
 				done
@@ -1700,3 +1705,4 @@ Goodbye 0 "$text1" "$text2"
 ## 08-02-2017 @ 15.12.51 - (5.3.24)    - dscudiero - Fix problem not setting processControl for proucts not in git (e.g. cgis)
 ## 08-07-2017 @ 13.51.42 - (5.4.0)     - dscudiero - Refreshed how git controlled files are handled
 ## 08-07-2017 @ 13.58.18 - (5.4.1)     - dscudiero - Allow only mzollo and epingel to run the script
+## 08-07-2017 @ 14.12.41 - (5.4.0)     - dscudiero - Add dscudiero to the allow list
