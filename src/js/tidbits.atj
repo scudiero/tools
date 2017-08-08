@@ -45,6 +45,15 @@ checkFieldsStr.split(',').every(function (field) {
 });
 -or-
 
+
+============================================================================================================================================================================
+//Loop through an hasg
+for (var key in hash) {
+	Dump("hash[" + key + "]",hash[key].toSource())
+}
+
+
+
 ============================================================================================================================================================================
 //Parse an option list 
 var tmpArray1=options.split(" ");
@@ -315,3 +324,4 @@ attributes.forEach(function(attr) {
 // 07-25-2017 @ 10.55.51 - dscudiero - Updated regex section
 // 07-26-2017 @ 09.13.19 - dscudiero - Added examples of 'some' and 'every' loops
 // 08-08-2017 @ 10.53.48 - dscudiero - Consolidated regex stuff
+// 08-08-2017 @ 16.31.29 - dscudiero - misc updates
