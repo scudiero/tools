@@ -65,3 +65,49 @@ MapDeptVal = function(data) {
 	return retVal;
 
 } //WfDataMapper//
+
+//======================================================================================================================
+// 08/12/15 - dgs - Map department values stripping off the 'nnn - ' from the front of the code value
+// e.g. '131 - CEL' --> 'CEL'
+//======================================================================================================================
+MapDeptsVal = function(value) {
+	var myName="MapDeptsVal";
+	if (typeof value === "undefined") {
+		print_doc("Here 2\n")
+		return;
+	} else if (typeof value === "object") {
+		var retVal=value[0];
+	} else {
+		var retVal=value;
+	}
+
+	if (retVal.indexOf("-") > 0)
+		retVal=retVal.substr(retVal.indexOf("-")+1).trim();
+
+	return retVal;
+} //MapDeptVal
+
+//======================================================================================================================
+// 08/12/15 - dgs - Map college numeric values from using the acad_group_table
+//======================================================================================================================
+MapColsVal = function(value) {
+	var myName="MapColsVal";
+	if (typeof value === "undefined") {
+		return;
+	} else if (typeof value === "object") {
+		var retVal=value[0];
+	} else {
+		var retVal=value;
+	}
+
+	var sqlStmt="select descrshort from acad_group_tbl where acad_group=?";
+	var sqlParms=[retVal];
+	if (tcfdata.dbname.length === 0)
+		tcfdata.dbname[0]="cimcourses";
+	var resultSet=dbquery(tcfdata.dbname[0],sqlStmt,sqlParms);
+	if (resultSet.length)
+		retVal=resultSet[0].descrshort;
+
+	return retVal;
+} //MapDeptVal
+// 08-08-2017 @ 12.12.46 - dscudiero - added more example code
