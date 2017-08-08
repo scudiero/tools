@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.23 # -- dscudiero -- Fri 07/21/2017 @ 13:15:26.93
+version=2.9.24 # -- dscudiero -- Tue 08/08/2017 @ 16:55:37.26
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -401,7 +401,7 @@ Msg2
 			[[ -f "$tgtFile" ]] && cp -fp "$tgtFile" "$backupFolder/beforeCopy${cpyFile}"
 			cp -fp "$srcFile" "$backupFolder/afterCopy${cpyFile}"
 			## Copy
-			Msg2 "^$(basename $srcFile)"
+			Msg2 "^$(basename $(dirname $srcFile))/$(basename $srcFile)"
 			[[ -f $tgtFile ]] && BackupCourseleafFile $tgtFile && $DOIT rm -f $tgtFile
 			[[ ! -d $(dirname "$tgtFile") ]] && $DOIT mkdir -p "$(dirname "$tgtFile")"
 			$DOIT cp -fp $srcFile $tgtFile
@@ -506,3 +506,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 05-24-2017 @ 12.22.33 - (2.9.19)    - dscudiero - Fix problem when the target file/directory does not exist
 ## 05-26-2017 @ 09.41.06 - (2.9.22)    - dscudiero - Make sure that cimsync is not commentd out
 ## 07-21-2017 @ 13.15.56 - (2.9.23)    - dscudiero - Add more records in the workflow.cfg record checking/commenting logic
+## 08-08-2017 @ 16.56.10 - (2.9.24)    - dscudiero - Display the directory with the file when updating files
