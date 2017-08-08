@@ -1,10 +1,6 @@
 //======================================================================================================================
-// version:2.0.2 // -- dscudiero -- Tue 08/08/2017 @ 10:48:13.67
+// version:2.0.3 // -- dscudiero -- Tue 08/08/2017 @ 12:09:59.80
 //======================================================================================================================
-// Import custom mapping functions if defined
-//%import /courseadmin/workflowVarValMapperFunctions.atj:atj;
-//%import /programadmin/workflowVarValMapperFunctions.atj:atj;
-
 // Import the common setup and functions library
 wfLibName="/locallibs/workflowLib.atj"
 %import %progdir%/locallibs/workflowLib.atj:atj;
@@ -66,3 +62,4 @@ wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 //======================================================================================================================
 // 08-03-2017 @ 15.12.23 - (34.05)     - dscudiero - moved out the common code to workflowLib
 // 08-08-2017 @ 10.54.18 - (13.67)     - dscudiero - Refactored to import mapper functioins
+// 08-08-2017 @ 12.13.17 - (59.80)     - dscudiero - removed import of mapper functions file, moved to the workflowFuncs file
