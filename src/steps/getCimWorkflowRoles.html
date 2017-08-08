@@ -1,15 +1,17 @@
 
-<!-- Import custom mapping code if defined -->
-%import /courseadmin/workflowVarValMapperFunctions.atj:atj%
-%import /programadmin/workflowValueMappingFunctions.atj:atj%
+%import /courseadmin/workflowFuncs.atj:atj%
+%import /programadmin/workflowFuncs.atj:atj%
 
 %spidercode%
+//%import /courseadmin/workflowVarValMapperFunctions.atj:atj%
+//%import /programadmin/workflowValueMappingFunctions.atj:atj%
 //============================================================================================================
 //use this step to generate output to be pasted into Excel
 // 11/17/15 - dgs - Added ignoresteps
 // 08/09/16 - dgs - Added enumeration wfSubRules
 // 06/08/17 - dgs -	Updated roles to filter out functions unless the function is a substitution variable name
 // 08/08/17 - dgs -	Added call back to the code mapping functions if defined.
+// 08/08/17 - dgs -	Add the cim instance name to the output, if the value was mapped also include the unmapped value.
 //============================================================================================================
 // Function wrapper
 (function getCimRoles() {
@@ -18,11 +20,11 @@ var debug=false;
 //============================================================================================================
 //Variable Declares
 //============================================================================================================
-	var cims=["courseadmin"];
+	var cims=['courseadmin','programadmin'];
 	if (cims.length == 0)
 		cims=['courseadmin','programadmin'];
 	var env='pvt';
-	var version="4.0";
+	var version="5.0";
 	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
 
 	var ignoreSteps = {
@@ -78,12 +80,24 @@ var debug=false;
 		var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
 		if (! debug) {return}
 		// Set variables if this is not a full call
-		text=varName + ' = >' + varValue + '<\n'
-		print_doc(text)
+		if (varName === '') {
+			var text='\n';
+		} else {
+			text=varName + ' = >' + varValue + '<\n';
+		}
+		print_doc(text);
 	}
 
 	function Here(id) {
 		print_doc('Here ' + id + '\n');
+	}
+
+	function compare(a,b) {
+	  if (a.stepData < b.stepData)
+	    return -1;
+	  if (a.stepData > b.stepData)
+	    return 1;
+	  return 0;
 	}
 
 	function RemoveDupes(arr,exclude) {
@@ -192,7 +206,11 @@ if (debug) { wfDump("sisName",sisName); }
 					tempArray.forEach(function(step) {
 						var tmpArray=step.split(" ");
 						if (! ignoreSteps[tmpArray[0].toLowerCase()] )
-							steps.push(step)
+							//steps.push(step)
+							var tmpObj={};
+							tmpObj.stepData=step;
+							tmpObj.cimInstance=cim;
+							steps.push(tmpObj);
 					});//steps
 				});//workflows
 
@@ -232,6 +250,7 @@ if (debug) { wfDump("sisName",sisName); }
 									tmpObj.code=token;
 									tmpObj.name=token;
 								}
+								//tmpObj.origCode=tmpObj.code;
 								tmpHashArray.push(tmpObj);
 								});
 								wfSubRulesHash[subRuleName]=tmpHashArray;
@@ -246,14 +265,15 @@ if (debug) { wfDump("sisName",sisName); }
 								mappedArray=[];
 								wfSubRulesHash[subRuleName].forEach(function(token) {
 									tmpObj={};
-									eval("tmpObj.code="+ mapperFunctionName + "(" + token.code + ")");
+									eval("tmpObj.code="+ mapperFunctionName + "(\"" + token.code + "\")");
 									tmpObj.name=token.name;
+									tmpObj.origCode=token.code;
 									mappedArray.push(tmpObj);
 								});//wfSubRulesHash[key].forEach
 								wfSubRulesHash[subRuleName]=mappedArray;
 
-						}
-						wfDump("\nwfSubRulesHash = >",wfSubRulesHash[subRuleName].toSource())
+							}
+							wfDump("\nwfSubRulesHash",wfSubRulesHash[subRuleName].toSource())
 					}); // wfSubRules
 				} else {
 					print_doc('\n\t* Warning * -- could not find any wfSubRules defined in ' + cim + ' cimconfig.cfg file.\n\tStopping\n\n');
@@ -266,6 +286,14 @@ if (debug) { wfDump("sisName",sisName); }
 		}
 	}); //cims
 
+	if (debug) {
+		print_doc('\nFound ' + Object.keys(wfSubRulesHash).length + ' subRules...\n');
+		for (var key in wfSubRulesHash) {
+			wfDump("\twfSubRulesHash[" + key + "]",wfSubRulesHash[key].toSource())
+		}
+		wfDump('');
+	}
+
 	if (errorDetected) {
 		print_doc('\n*Error* --- Errors detected.\nStopping\n');
 		return false;
@@ -277,37 +305,41 @@ if (debug) { wfDump("sisName",sisName); }
 	conditionals.reverse();
 	if (debug) {print_doc('Found ' + conditionals.length + ' step attributes...\n'); }
 
-	// pre-process steps array to remove duplicates
-		steps.sort();
-		steps=RemoveDupes(steps,sisName);
-
-	// Remove the conditionals from the steps
+	// Pre-process the steps array: 1) remove the conditionals strings from the steps, 2)remove the steps that are function calls; 3) remove dups
+		//wfDump("\nsteps before pre-processing:",steps.toSource())
+		steps.sort(compare);
 		for (var i=0,  tot=steps.length; i < tot; i++) {
+			// conditionals
+			var stepData=steps[i].stepData
 			conditionals.forEach(function(conditional) {
-				steps[i]=steps[i].replace(conditional,'');
+				stepData=stepData.replace(conditional,'').trim();
 			});
-			steps[i]=steps[i].trim();
-		}
-
-	// Remove the steps that are function calls
-		for (var i=0,  tot=steps.length; i < tot; i++) {
+			steps[i].stepData=stepData;
+			// functions
 			for (var j=0,  tot2=functions.length; j < tot2; j++) {
-				if (steps[i].indexOf(functions[j]) >= 0 && wfSubRulesHash[functions[j]] == undefined) {
-					steps.splice(i,1);
+				if (steps[i].stepData.indexOf(functions[j]) >= 0 && wfSubRulesHash[functions[j]] == undefined) {
+					steps[i].stepData='' ; steps[i].cimInstance=''
 					break;
 				}
 			}
-			if (i === steps.length-1) break // Break if we have deleted any elements from steps
 		}
+		// Remove empty records and duplicates
+		var tmpArray=[], tmpStr1='', tmpStr2='';
+		for (var i=0,  tot=steps.length; i < tot; i++) {
+			tmpStr1=steps[i].stepData
+			if (steps[i].stepData === '' && steps[i].cimInstance === '') continue;
+			if (tmpStr1 === tmpStr2) continue;
+			tmpArray.push(steps[i]);
+			tmpStr2=tmpStr1;
+		}
+		steps=tmpArray;
+		//wfDump("\nsteps after pre-processing:",steps.toSource())
 
-	// Remove duplicates from the steps array
-		steps.sort();
-		steps=RemoveDupes(steps);
 		if (debug) {
-			print_doc('Found ' + steps.length + ' steps...\n'); 
-			print_doc('\nSteps before:\n');
+			print_doc('\nFound ' + steps.length + ' steps...\n'); 
+			print_doc('\nSteps after pre-processing:\n');
 			steps.forEach(function(step) {
-				print_doc('\tstep >' + step + '<\n');
+				print_doc('\tstep >' + step.toSource() + '<\n');
 			});//steps
 		}
 
@@ -315,14 +347,16 @@ if (debug) { wfDump("sisName",sisName); }
 //# Main
 //============================================================================================================
 // Loop through the steps, substitute values and build initial output roles array
-var rolesOut=steps, expandedSteps=[], editString='';
+var rolesOut=[], expandedSteps=[], editString='';
 
 // Loop through all the steps, substuting in values
-i=0; while (true) {
-	editString=rolesOut[i];
+//i=0; while (true) {
+for (var i=0, tot=steps.length; i < tot; i++) {
+	editString=steps[i].stepData;
 	if (debug) { print_doc('editString 1 = >' + editString + '<\n'); }
 	if (editString != '') {
 		//Loop through substituted variable names
+		var substitutionMade=false;
 		for (var key in wfSubRulesHash) {
 			subsFound=false;
 			re = new RegExp("\\b" + key + "\\b", "g");
@@ -347,18 +381,20 @@ i=0; while (true) {
 					}
 					//Add the substituted variable info
 					if (str.indexOf("(") < 0 ) {
-						rolesOut.push(str + '(' + key.toLowerCase() + ':' + repString + ')');
+						rolesOut.push(str + '(' + steps[i].cimInstance + ' -- ' + key.toLowerCase() + ':' + token.origCode + ')');
 					} else {
 						rolesOut.push(str + ' (' + key.toLowerCase() + ':' + repString + ')');
 					}
 				}); //wfSubRulesHash[key].forEach
+				var substitutionMade=true;
 				break; //Stop processing wfSubRule -- only one at a time
 			} //(re.test(editString))
 		} //(key in wfSubRulesHash)
 	} //(editString != '')
+
 	//subsFound=false;
-	i++; if (i >= rolesOut.length) break;
-} // while (true)
+	rolesOut.push(steps[i].stepData + "\t\t\t" + steps[i].cimInstance);
+} //(var i=0, tot=steps.length; i < tot; i++)
 
 //Write the putput to stdout
 // Header
