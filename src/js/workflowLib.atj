@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.56" // -- dscudiero -- Mon 08/07/2017 @ 12:55:49.49
+wfLibVersion="1.7.59" // -- dscudiero -- Tue 08/08/2017 @  9:35:35.34
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -33,6 +33,7 @@ wfLibVersion="1.7.56" // -- dscudiero -- Mon 08/07/2017 @ 12:55:49.49
 //					Set wfAllcodes in each function that requires it since the tcfdata is not avaiable to workflowFuncs
 // 08/03/17 - dgs - Moved in the common code from workflowFuncs
 // 08/07/17 - dgs - Added a check to make sure we are in courseadmin before using allcodes
+// 08/07/17 - dgs - Added CheckAcadLevel and GetAcadLevel
 //======================================================================================================================
 
 // Loading message
@@ -142,6 +143,123 @@ wffuncs.ProposalState = function(inval, wfrule, args) {
 	wfDebug(4,"\t*** Returning '" + retVal + "'\n")
 	return [retVal]
 }; //ProposalState
+
+//======================================================================================================================
+// Check the academic level of a course/program
+// Usage:
+//		wfUgRe:^[0-4]\d{2}\w{0,2}$
+//		wfGrRe:^[5-9]\d{2}\w{0,2}$
+//
+//		wfrules:isUndergraduate|function|checkAcadLevel|course_number,wfUgRe; //Proposal for an Undergraduate course
+//		wfrules:isGraduate|function|checkAcadLevel|course_number,wfGrRe; //Proposal for an Graduate course
+//
+// i.e.
+//		wfrules:isGraduate|function|checkAcadLevel|<variable to check>,<regular expression tcfdata variable name>;
+//
+// looks up the value of 'tcfdata.<regular expression tcfdata variable name>' and uses that to build a regular expression
+// object to test against the value of 'tcfdata.<variable to check>'
+//
+// returns 'false' or the exited step name removing the conditional
+//
+//======================================================================================================================
+// 08-08-17 - dgs - Initial coding
+//======================================================================================================================
+wffuncs.CheckAcadLevel = function(inval, wfrule, args) {
+	var myName=wfrule.attrname;
+	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
+	var optionStr=wfrule.options; optionStr=optionStr.substring(0, optionStr.indexOf(';')); options=optionStr.split(',')
+	var retArray=[];
+
+	var reqType=wfrule.searchfor.toLowerCase();
+	var notMode=reqType.indexOf('not')>=0;
+	if (notMode === false)
+		notMode=optionStr.toLowerCase().indexOf('notmode')>=0;
+	wfDebug(1,'\treqType = "'+reqType+'", notMode= "'+notMode+'", optionStr= "'+ optionStr + '"\n');
+
+	// Main
+ 		var allowStep=false;
+		checkVal=getTCFValue(options[0]);
+		reStr=getTCFValue(options[1]);
+		if ( reStr.charAt(0) === '/')
+			reStr=reStr.substr(1, reStr.length-2)
+		var re = new RegExp(reStr, "i");
+		wfDump(1,["checkVal;"+checkVal,"reStr;"+reStr,"re;"+re.toSource()])
+		if (re.test(checkVal))
+			allowStep=true;
+
+	// Return results
+		if (notMode) allowStep=!allowStep;
+		if(allowStep) {
+			wfDebug(1,"\t*** Allowing step");
+			return [inval.replace(wfrule.ifregex,'')];
+		}
+		wfDebug(1,"\t*** Skipping step");
+		return false;
+
+} //CheckAcadLevel
+
+//======================================================================================================================
+// Return the academic level of a course/program
+// Usage:
+//		wfUgRe:^[0-4]\d{2}\w{0,2}$
+//		wfGrRe:^[5-8]\d{2}\w{0,2}$
+//		wfPrRe:^[9]\d{2}\w{0,2}$
+//
+//		wfrules:AcadLevel|function|GetAcadLevel|course_number,wfUgRe,UG,wfGrRe,GR,wfPrRe,PR; //Proposal for an Undergraduate course
+//
+// i.e.
+//		wfrules:AcadLevel|function|GetAcadLevel|<variable to check>,<regular expression tcfdata variable name><return string>,<regular expression tcfdata variable name><return string>;
+//
+// looks up the value of 'tcfdata.<regular expression tcfdata variable name>' and uses that to build a regular expression
+// object to test against the value of 'tcfdata.<variable to check>'
+//
+// <regular expression tcfdata variable name><return string> must be passed in as a tuple, as many as necessary may be specified.
+// returns the value passed into function as '<return string>' if regex is true, otherwise returns 'false'
+//
+//======================================================================================================================
+// 08-08-17 - dgs - Initial coding
+//======================================================================================================================
+wffuncs.GetAcadLevel = function(inval, wfrule, args) {
+	var myName=wfrule.attrname;
+	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
+	var optionStr=wfrule.options; optionStr=optionStr.substring(0, optionStr.indexOf(';')); options=optionStr.split(',')
+	var retArray=[];
+
+	var reqType=wfrule.searchfor.toLowerCase();
+	var notMode=reqType.indexOf('not')>=0;
+	if (notMode === false)
+		notMode=optionStr.toLowerCase().indexOf('notmode')>=0;
+	wfDebug(1,'\treqType = "'+reqType+'", notMode= "'+notMode+'", optionStr= "'+ optionStr + '"\n');
+
+	// Main
+ 		var allowStep=false;
+		checkVal=getTCFValue(options[0]);
+		options.shift();
+
+		while (options.length > 0) {
+			var reStr=getTCFValue(options[0]);
+			if ( reStr.charAt(0) === '/')
+				reStr=reStr.substr(1, reStr.length-2)
+			options.shift();
+			var retVal=options[0];
+			options.shift();
+			var re = new RegExp(reStr, "i");
+			if (re.test(checkVal)) {
+				allowStep=true;
+				break;
+			}
+		}
+
+	// Return results -- step
+		if (notMode) allowStep=!allowStep;
+		if(allowStep) {
+			wfDebug(1,"\t*** Returning: '" + retVal + "'" );
+			return [inval.replace(wfrule.regex,retVal)];
+		}
+		wfDebug(1,"\t*** Returning 'false'");
+		return false;
+
+} //GetAcadLevel
 
 //======================================================================================================================
 // Add related departments/colleges/schools to the workflow,
@@ -1854,3 +1972,4 @@ var wfLibLoaded=true;
 // 08-03-2017 @ 11.18.51 - ("1.7.53")  - dscudiero - Only add message steps in Related if dnv is in debugEnvs
 // 08-03-2017 @ 15.12.37 - ("1.7.55")  - dscudiero - Moved in the common code from workflowFuncs
 // 08-07-2017 @ 12.56.22 - ("1.7.56")  - dscudiero - Check to make sure we are in courseadmin before using allcode4s
+// 08-08-2017 @ 10.54.50 - ("1.7.59")  - dscudiero - added AcadLevel functions
