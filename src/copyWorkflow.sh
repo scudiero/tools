@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.24 # -- dscudiero -- Tue 08/08/2017 @ 16:55:37.26
+version=2.9.25 # -- dscudiero -- Tue 08/08/2017 @ 16:57:57.67
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -164,7 +164,7 @@ function CheckFilesForCopy {
 
 			[[ $(Contains ",$setDefaultYesFiles," ",$(basename $cpyFile),") == true ]] && defVals='Yes' || defVals='No'
 			unset ans; Prompt ans "Yes to copy $cpyFile, eXit to stop" 'Yes No' "$defVals"; ans=$(Lower ${ans:0:1});
-			[[ $ans != 'y' ]] && filesNotCopied+=($cpyFile) && return 0
+			[[ $ans != 'y' ]] && filesNotCopied+=("$(basename $(dirname $srcFile))/$(basename $srcFile)") && return 0
 			## If workflow.cfg then turn off debug messages and make sure cimsync is on
 			if [[ $(Contains "$cpyFile" 'workflow.cfg') == true ]]; then
 				unset grepStr; grepStr=$(ProtectedCall "grep '^wfDebugLevel:' $srcFile")
@@ -507,3 +507,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 05-26-2017 @ 09.41.06 - (2.9.22)    - dscudiero - Make sure that cimsync is not commentd out
 ## 07-21-2017 @ 13.15.56 - (2.9.23)    - dscudiero - Add more records in the workflow.cfg record checking/commenting logic
 ## 08-08-2017 @ 16.56.10 - (2.9.24)    - dscudiero - Display the directory with the file when updating files
+## 08-08-2017 @ 16.58.02 - (2.9.25)    - dscudiero - General syncing of dev to prod
