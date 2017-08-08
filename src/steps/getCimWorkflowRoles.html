@@ -1,9 +1,15 @@
+
+<!-- Import custom mapping code if defined -->
+%import /courseadmin/workflowVarValMapperFunctions.atj:atj%
+%import /programadmin/workflowValueMappingFunctions.atj:atj%
+
 %spidercode%
 //============================================================================================================
 //use this step to generate output to be pasted into Excel
 // 11/17/15 - dgs - Added ignoresteps
 // 08/09/16 - dgs - Added enumeration wfSubRules
 // 06/08/17 - dgs -	Updated roles to filter out functions unless the function is a substitution variable name
+// 08/08/17 - dgs -	Added call back to the code mapping functions if defined.
 //============================================================================================================
 // Function wrapper
 (function getCimRoles() {
@@ -66,20 +72,32 @@ var debug=false;
 	header.push("Role Name\tRole Members (Comma seperated userids)\tEmail Override (Please see above)\tSubstitution variables/values (FYI only, not used by workflow)");
 
 //============================================================================================================
-//Roles that need special handeling -- uncomment and define as necessary
-	/*
-	var specialLabels = [];
-	specialLabels.push('School (\'School\') Roles:');
-	specialLabels.push('cimcourses');
-	specialLabels.push('SELECT distinct school FROM cimlookup where school is not null order by school');
-	specialLabels.push('');
-	specialLabels.push('');
-	specialLabels.push('');
-	specialLabels.push('');
-	specialLabels.push('');
-	specialLabels.push('');
-	*/
+//# Helper Functions
+//============================================================================================================
+	function wfDump(varName,varValue){
+		var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
+		if (! debug) {return}
+		// Set variables if this is not a full call
+		text=varName + ' = >' + varValue + '<\n'
+		print_doc(text)
+	}
 
+	function Here(id) {
+		print_doc('Here ' + id + '\n');
+	}
+
+	function RemoveDupes(arr,exclude) {
+	    var noDupes=[];
+	    exclude=' ' + exclude + ' ';
+	    arr=arr.sort();
+	    arr.forEach(function(value) {
+			//if (typeof(wfDump) == "function") { var num=noDupes.indexOf(value); wfDump('\t\tIn Remove Dupes, index of ' + value + ' in input array',num); }
+	        if ( noDupes.indexOf(value) == -1 && exclude.indexOf(' '+value+' ') < 0 ) {
+	            noDupes.push(value);
+	        }
+	    });
+	    return noDupes;
+	}
 
 //============================================================================================================
 //# Hello
@@ -131,7 +149,7 @@ if (debug) {print_doc('\n*** In ' + myName + ' ***\n');}
 var sisName='';
 var cimconfigData = load_tcf('/courseadmin/cimconfig.cfg');
 if (cimconfigData && cimconfigData.sisname) { sisName=cimconfigData.sisname[0] }
-if (debug) { Dump("sisName",sisName); }
+if (debug) { wfDump("sisName",sisName); }
 
 // Build a list of workflow steps from cims workflow.tcf files (see cims definition)
 	print_doc('\nEnvironment: ' + env + '\n');
@@ -194,14 +212,14 @@ if (debug) { Dump("sisName",sisName); }
 						var idx1=text.indexOf("|");
 						var subRuleName=text.substr(0,idx1);
 						var subRuleText=text.substr(idx1+1);
-						Dump('\twfSubRule',text); Dump('\t\tsubRuleName',subRuleName); Dump('\t\tsubRuleText',subRuleText);
+						wfDump('\twfSubRule',text); wfDump('\t\tsubRuleName',subRuleName); wfDump('\t\tsubRuleText',subRuleText);
 
 						// If we have not already processed this rule then create a new hash table element for the rulename
 						if (wfSubRulesHash[subRuleName] == undefined) {
 							print_doc('\t\t' + subRuleName + " : " + subRuleText + '\n' );
 							// If rule is an enumeration then parse off and create an object array
-							var tmpHashArray=[];
 							if (subRuleText.substr(0,1) === "[" ) {
+								var tmpHashArray=[];
 								var tmpStr=subRuleText.substr(1,subRuleText.length-2);
 								var tmpArray=tmpStr.split(',');
 								tmpArray.forEach(function(token) {
@@ -214,15 +232,28 @@ if (debug) { Dump("sisName",sisName); }
 									tmpObj.code=token;
 									tmpObj.name=token;
 								}
-								tmpHashArray.push(tmpObj)
+								tmpHashArray.push(tmpObj);
 								});
-								wfSubRulesHash[subRuleName]=tmpHashArray
+								wfSubRulesHash[subRuleName]=tmpHashArray;
 							// Otherwise assume rule is a sql query on the cimcodes table
 							} else {
 								wfSubRulesHash[subRuleName]=dbquery('cimcourses',text.substr(idx1+1));
+								}
 							}
+							// See if we have a mapper function for this variable
+							var mapperFunctionName="Map" + subRuleName + "Val";
+							if (eval("typeof " + mapperFunctionName) === "function") {
+								mappedArray=[];
+								wfSubRulesHash[subRuleName].forEach(function(token) {
+									tmpObj={};
+									eval("tmpObj.code="+ mapperFunctionName + "(" + token.code + ")");
+									tmpObj.name=token.name;
+									mappedArray.push(tmpObj);
+								});//wfSubRulesHash[key].forEach
+								wfSubRulesHash[subRuleName]=mappedArray;
+
 						}
-						Dump("\nwfSubRulesHash = >",wfSubRulesHash[subRuleName].toSource())
+						wfDump("\nwfSubRulesHash = >",wfSubRulesHash[subRuleName].toSource())
 					}); // wfSubRules
 				} else {
 					print_doc('\n\t* Warning * -- could not find any wfSubRules defined in ' + cim + ' cimconfig.cfg file.\n\tStopping\n\n');
@@ -285,7 +316,6 @@ if (debug) { Dump("sisName",sisName); }
 //============================================================================================================
 // Loop through the steps, substitute values and build initial output roles array
 var rolesOut=steps, expandedSteps=[], editString='';
-debug=false;
 
 // Loop through all the steps, substuting in values
 i=0; while (true) {
@@ -347,67 +377,37 @@ return;
 //============================================================================================================
 // Subs
 //============================================================================================================
-//============================================================================================================
-// Function to remove duplicates from an array
-//===========================================================================================================+
-function RemoveDupes(arr,exclude) {
-    var noDupes=[];
-    exclude=' ' + exclude + ' ';
-    arr=arr.sort();
-    arr.forEach(function(value) {
-		//if (typeof(Dump) == "function") { var num=noDupes.indexOf(value); Dump('\t\tIn Remove Dupes, index of ' + value + ' in input array',num); }
-        if ( noDupes.indexOf(value) == -1 && exclude.indexOf(' '+value+' ') < 0 ) {
-            noDupes.push(value);
-        }
-    });
-    return noDupes;
-}
+// function SpecialPrintRoles(labelArray) {
+// 	var labelArray;
+// 	var debug=false;
+// 	var addSep=true;
+// 	var label='', table='', selectClause='';
+// 	var tokens=[];
+// 	if (labelArray.length <= 0) { return }
+// 	if (debug) { for(var i=0; i < labelArray.length; i++) { print_stdout('labelArray[' + i + '] = ' + labelArray[i] + "\n"); } }
 
+// 	// Pull config data off the top of the array
+// 	sep=labelArray[0]; labelArray.shift();
+// 	table=labelArray[0]; labelArray.shift();
+// 	selectClause=labelArray[0]; labelArray.shift();
+// 	if (debug) { print_stdout('sep = >' + sep + '<\ntable = >' + table + '<\nselectClause = >' + selectClause + '<\n') }
 
-function SpecialPrintRoles(labelArray) {
-	var labelArray;
-	var debug=false;
-	var addSep=true;
-	var label='', table='', selectClause='';
-	var tokens=[];
-	if (labelArray.length <= 0) { return }
-	if (debug) { for(var i=0; i < labelArray.length; i++) { print_stdout('labelArray[' + i + '] = ' + labelArray[i] + "\n"); } }
+// 	// retrieve data from database & loop through values
+// 	var tokens = dbquery(table, selectClause);
+// 	if (debug) { for(var i=0; i < tokens.length; i++) { print_stdout('tokens[' + i + '] = ' + tokens[i].school + '\n'); } }
 
-	// Pull config data off the top of the array
-	sep=labelArray[0]; labelArray.shift();
-	table=labelArray[0]; labelArray.shift();
-	selectClause=labelArray[0]; labelArray.shift();
-	if (debug) { print_stdout('sep = >' + sep + '<\ntable = >' + table + '<\nselectClause = >' + selectClause + '<\n') }
+// 	tokens.forEach(function(token) {
+// 		labelArray.forEach(function(text) {
+// 			if ( text != '' ) {
+// 				if (addSep) { print_stdout('** ' + sep + '\n'); addSep=false }
+// 				print_stdout(token.school + ' ' + text + '\n');
+// 			}
+// 		});
+// 	});
 
-	// retrieve data from database & loop through values
-	var tokens = dbquery(table, selectClause);
-	if (debug) { for(var i=0; i < tokens.length; i++) { print_stdout('tokens[' + i + '] = ' + tokens[i].school + '\n'); } }
-
-	tokens.forEach(function(token) {
-		labelArray.forEach(function(text) {
-			if ( text != '' ) {
-				if (addSep) { print_stdout('** ' + sep + '\n'); addSep=false }
-				print_stdout(token.school + ' ' + text + '\n');
-			}
-		});
-	});
-
-	print_stdout('\n');
-	return;
-}
-
-
-function Dump(varName,varValue){
-	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
-	if (! debug) {return}
-	// Set variables if this is not a full call
-	text=varName + ' = >' + varValue + '<\n'
-	print_doc(text)
-}
-
-function Here(id) {
-	print_doc('Here ' + id + '\n');
-}
+// 	print_stdout('\n');
+// 	return;
+// }
 
 //============================================================================================================
 //Close function wrapper
