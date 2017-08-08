@@ -1,7 +1,11 @@
 //======================================================================================================================
-// version:2.0.0 // -- dscudiero -- Thu 08/03/2017 @ 15:10:34.05
+// version:2.0.2 // -- dscudiero -- Tue 08/08/2017 @ 10:48:13.67
 //======================================================================================================================
-// Import the common code
+// Import custom mapping functions if defined
+//%import /courseadmin/workflowVarValMapperFunctions.atj:atj;
+//%import /programadmin/workflowVarValMapperFunctions.atj:atj;
+
+// Import the common setup and functions library
 wfLibName="/locallibs/workflowLib.atj"
 %import %progdir%/locallibs/workflowLib.atj:atj;
 //======================================================================================================================
@@ -38,20 +42,20 @@ wffuncs.xxxxxxxx = function(inval, wfrule, args) {
  		var allowStep=false;
 
 	// Return results -- step
-		if (notMode) allowStep=!allowStep
+		if (notMode) allowStep=!allowStep;
 		if(allowStep) {
-			wfDebug(0,"\t*** Allowing step")
+			wfDebug(0,"\t*** Allowing step");
 			return [inval.replace(wfrule.ifregex,'')];
 		}
-		wfDebug(0,"\t*** Skipping step")
-		return false
+		wfDebug(0,"\t*** Skipping step");
+		return false;
 
 	// Return results -- date
 		if(retArray.length > 0) {
-			wfDebug(1,"\t*** Returning " + retArray.toSource())
+			wfDebug(1,"\t*** Returning " + retArray.toSource());
 			return retArray;
 		}
-		return false
+		return false;
 
 
 } //xxxxxxxx
@@ -61,3 +65,4 @@ wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 // Check in log
 //======================================================================================================================
 // 08-03-2017 @ 15.12.23 - (34.05)     - dscudiero - moved out the common code to workflowLib
+// 08-08-2017 @ 10.54.18 - (13.67)     - dscudiero - Refactored to import mapper functioins
