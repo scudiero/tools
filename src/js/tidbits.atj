@@ -8,16 +8,6 @@ tcfview.onDataLoad = function(data, args) {
 	}
 }
 
-
-============================================================================================================================================================================
-Regular expressions
-============================================================================================================================================================================
-^[0-4]\d{2}[A-Z]{0,1}$		--> 3 digits starting with a 0-4 followed by an optional char
-
-in wfrules
-	wfrules:isROTC|iffieldmatch|subject.code|value=/^(AS%7CNS%7CMS)$/; //Proposal is for ROTC subject
-
-
 ============================================================================================================================================================================
 print_debug('\ninval =' + inval + '\nwfrule =' + wfrule.toSource() + '\nargs =' + args.toSource() + '\n'  );
 print_debug('args.context = ' + args.context.toString() + '\n');
@@ -77,6 +67,13 @@ tmpArray1.forEach(function(text) {
 });
 
 ============================================================================================================================================================================
+Regular expressions
+============================================================================================================================================================================
+^[0-4]\d{2}[A-Z]{0,1}$		--> 3 digits starting with a 0-4 followed by two digits followed by an optional cap char
+
+in wfrules
+	wfrules:isROTC|iffieldmatch|subject.code|value=/^(AS%7CNS%7CMS)$/; //Proposal is for ROTC subject
+
 //Regular Expression testing
 var courseNumber=getTCFValue('course_number');
 var regex=/^[0-3]\d{2}\w{0,1}$/i 						//Note that this is not a string, there are no quotes arround the value
@@ -317,3 +314,4 @@ attributes.forEach(function(attr) {
 // 07-20-2017 @ 08.56.18 - dscudiero - General syncing of dev to prod
 // 07-25-2017 @ 10.55.51 - dscudiero - Updated regex section
 // 07-26-2017 @ 09.13.19 - dscudiero - Added examples of 'some' and 'every' loops
+// 08-08-2017 @ 10.53.48 - dscudiero - Consolidated regex stuff
