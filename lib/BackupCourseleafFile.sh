@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.7" # -- dscudiero -- 02/08/2017 @  8:04:46.77
+# version="2.0.9" # -- dscudiero -- Wed 08/09/2017 @ 16:46:39.81
 #===================================================================================================
 # Backup a courseleaf file, copy to the attic createing directories as necessary
 # Expects the variable 'client' to be set
@@ -18,7 +18,7 @@ function BackupCourseleafFile {
 	local client=$(ParseCourseleafFile "$file" | cut -d ' ' -f1)
 	local clientRoot=$(ParseCourseleafFile "$file" | cut -d ' ' -f3)
 	local fileEnd=$(ParseCourseleafFile "$file" | cut -d ' ' -f4)
-	local backupRoot="${clientRoot}/attic/$myName.$userName.$(date +"%H-%M-%S")"
+	local backupRoot="${clientRoot}/attic/$myName/$userName.$backupSuffix"
 	[[ ! -d $backupRoot ]] && mkdir -p $backupRoot
 	local bakFile="${backupRoot}${fileEnd}"
 
@@ -41,3 +41,4 @@ export -f BackupCourseleafFile
 ## Wed Jan  4 13:52:50 CST 2017 - dscudiero - General syncing of dev to prod
 ## Wed Jan 18 13:01:23 CST 2017 - dscudiero - Remove extranious DOIT's
 ## Wed Feb  8 08:16:52 CST 2017 - dscudiero - Import parsecourseleaffile
+## 08-09-2017 @ 16.47.09 - ("2.0.9")   - dscudiero - Change the location of the backup directory
