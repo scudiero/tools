@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.59" // -- dscudiero -- Tue 08/08/2017 @  9:35:35.34
+wfLibVersion="1.7.62" // -- dscudiero -- Wed 08/09/2017 @ 14:34:32.75
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -34,9 +34,14 @@ wfLibVersion="1.7.59" // -- dscudiero -- Tue 08/08/2017 @  9:35:35.34
 // 08/03/17 - dgs - Moved in the common code from workflowFuncs
 // 08/07/17 - dgs - Added a check to make sure we are in courseadmin before using allcodes
 // 08/07/17 - dgs - Added CheckAcadLevel and GetAcadLevel
+// 08/09/17 - dgs - Added IsNew and IsDelete
+//					Added Array.prototype.compare
 //======================================================================================================================
 
-// Loading message
+// Make sure wffucs is defined
+if (typeof wffuncs === "undefined")
+	var wffuncs={};
+
 // If this is the first time call then do the initialization
 if (typeof wfLibLoaded === "undefined") {
 	//Get the CIM instance name
@@ -78,15 +83,46 @@ if (typeof wfLibLoaded === "undefined") {
 	if (wfEnvIsDev) wfDebug(1,"\n*** Loading "+ wfLibName + ", version: " + wfLibVersion);
 } //(typeof wfLibLoaded === "undefined")
 
-//=======================================================================================================================
-// Check if proposal is Not Delete
-// 12/16/2016 - dgs - New
-//=======================================================================================================================
-wffuncs.IsNotNew = function(inval, wfrule) {
-	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
+//======================================================================================================================
+// Check to see if two arrays are the same
+// Usage:
+//		array1.compare(array2);
+// compares arra1 length to array2 length, if different then return false
+// compares each element in array1 to make sure it in array2, if all are there then return true, otherwise false
+//======================================================================================================================
+// 08-09-17 - dgs - Initial coding
+//======================================================================================================================
+Array.prototype.compare = function(array2) {
+	if (this.length != array2.length)
 		return false;
-	return [inval.replace(wfrule.ifregex,'')];
-}; //IsNotEdit
+	var array1=this.sort();
+	array2=array2.sort();
+	var allOf1In2=true;
+	for (var i = 0, l = array1.length; i < l; i++) {
+		var foundIn2=false;
+		for (var j = 0, l = array2.length; j < l; j++) {
+			if (array1[i] === array2[j]) {
+				foundIn2=true;
+				break;
+			}
+		}
+		if (! foundIn2) {
+			allOf1In2=false;
+			break;
+		}
+	}
+	return allOf1In2;
+}
+
+//=======================================================================================================================
+// Check if proposal is in EDIT mode
+// 08/09/2017 - dgs - Initial code
+//=======================================================================================================================
+wffuncs.IsNew = function(inval, wfrule) {
+	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
+		return [inval.replace(wfrule.ifregex,'')];
+	return false;
+}; //IsNew
 
 //=======================================================================================================================
 // Check if proposal is in EDIT mode
@@ -100,6 +136,26 @@ wffuncs.IsEdit = function(inval, wfrule) {
 		return false;
 	return [inval.replace(wfrule.ifregex,'')];
 }; //IsEdit
+
+//=======================================================================================================================
+// Check if proposal is in EDIT mode
+// 08/09/2017 - dgs - Initial code
+//=======================================================================================================================
+wffuncs.IsDelete = function(inval, wfrule) {
+	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
+		return [inval.replace(wfrule.ifregex,'')];
+	return false;
+}; //IsDelete
+
+//=======================================================================================================================
+// Check if proposal is Not Delete
+// 12/16/2016 - dgs - New
+//=======================================================================================================================
+wffuncs.IsNotNew = function(inval, wfrule) {
+	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
+		return false;
+	return [inval.replace(wfrule.ifregex,'')];
+}; //IsNotEdit
 
 //=======================================================================================================================
 // Check if proposal is not in EDIT mode
@@ -1973,3 +2029,4 @@ var wfLibLoaded=true;
 // 08-03-2017 @ 15.12.37 - ("1.7.55")  - dscudiero - Moved in the common code from workflowFuncs
 // 08-07-2017 @ 12.56.22 - ("1.7.56")  - dscudiero - Check to make sure we are in courseadmin before using allcode4s
 // 08-08-2017 @ 10.54.50 - ("1.7.59")  - dscudiero - added AcadLevel functions
+// 08-09-2017 @ 14.42.59 - ("1.7.62")  - dscudiero - Added Array.compare
