@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.62" // -- dscudiero -- Wed 08/09/2017 @ 14:34:32.75
+wfLibVersion="1.7.67" // -- dscudiero -- Thu 08/17/2017 @ 11:03:21.76
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -36,6 +36,8 @@ wfLibVersion="1.7.62" // -- dscudiero -- Wed 08/09/2017 @ 14:34:32.75
 // 08/07/17 - dgs - Added CheckAcadLevel and GetAcadLevel
 // 08/09/17 - dgs - Added IsNew and IsDelete
 //					Added Array.prototype.compare
+// 08/16/17 - dgs - Tweaked formatting of the starting logic
+// 08/17/17 - dgs - Refactored proposal state functions, added REACTIVATE state
 //======================================================================================================================
 
 // Make sure wffucs is defined
@@ -62,9 +64,13 @@ if (typeof wfLibLoaded === "undefined") {
 	wfDebugEnvs="," + wfDebugEnvs + ",";
 	var wfEnvIsDev=false;
 	var wfEnv = "*unknown*";
-	if (host.indexOf('.dev') > 0) { var wfEnv  ="dev"; wfEnvIsDev=true;
-	} else if (host.indexOf('-test') > 0) { var wfEnv = "test";
-	} else if (host.indexOf('-next') > 0) { var wfEnv = "next";
+	if (host.indexOf('.dev') > 0) {
+		var wfEnv  ="dev";
+		wfEnvIsDev=true;
+	} else if (host.indexOf('-test') > 0) {
+		var wfEnv = "test";
+	} else if (host.indexOf('-next') > 0) {
+		var wfEnv = "next";
 	}
 	// If in a debug environment then print out stuff
 	var wfInDebugEnv=false
@@ -80,8 +86,15 @@ if (typeof wfLibLoaded === "undefined") {
 					"\n<<< Loading workflowFuncs.atj, proposal mode is " + wfProposalMode;
 		if ( wfDebugLevel > 0 ) print_debug(prtStr);
 	}
-	if (wfEnvIsDev) wfDebug(1,"\n*** Loading "+ wfLibName + ", version: " + wfLibVersion);
+	if (wfEnvIsDev) {
+		if (typeof wfDebug === 'function')
+			wfDebug(1,"\n*** Loading "+ wfLibName + ", version: " + wfLibVersion);
+	}
 } //(typeof wfLibLoaded === "undefined")
+
+//======================================================================================================================
+// COMMON FUNCTIONS
+//======================================================================================================================
 
 //======================================================================================================================
 // Check to see if two arrays are the same
@@ -116,75 +129,106 @@ Array.prototype.compare = function(array2) {
 
 //=======================================================================================================================
 // Check if proposal is in EDIT mode
-// 08/09/2017 - dgs - Initial code
+// 08/09/17 - dgs - Initial code
+// 08/17/17 - dgs - use ProposalState function
 //=======================================================================================================================
 wffuncs.IsNew = function(inval, wfrule) {
-	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
+	if (ProposalState() === 'NEW')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsNew
+//=======================================================================================================================
+// Check if proposal is Not Delete
+// 12/16/16 - dgs - New
+// 08/17/17 - dgs - use ProposalState function
+//=======================================================================================================================
+wffuncs.IsNotNew = function(inval, wfrule) {
+	if (ProposalState() != 'NEW')
+		return [inval.replace(wfrule.ifregex,'')];
+	return false;
+}; //IsNotNew
 
 //=======================================================================================================================
 // Check if proposal is in EDIT mode
-// 02/26/2015 - dgs - New
-// 11/02/2016 - dgs - Streamlined
+// 02/26/15 - dgs - New
+// 11/02/16 - dgs - Streamlined
+// 08/17/17 - dgs - use ProposalState function
 //=======================================================================================================================
 wffuncs.IsEdit = function(inval, wfrule) {
-	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
-		return false;
-	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
-		return false;
-	return [inval.replace(wfrule.ifregex,'')];
+	if (ProposalState() === 'EDIT')
+		return [inval.replace(wfrule.ifregex,'')];
+	return false;
 }; //IsEdit
+//=======================================================================================================================
+// Check if proposal is not in EDIT mode
+// 02/26/15 - dgs - New
+// 11/02/16 - dgs - Streamlined
+// 08/17/17 - dgs - use ProposalState function
+//=======================================================================================================================
+wffuncs.IsNotEdit = function(inval, wfrule) {
+	if (ProposalState() != 'EDIT')
+		return [inval.replace(wfrule.ifregex,'')];
+	return false;
+}; //IsNotEdit
 
 //=======================================================================================================================
-// Check if proposal is in EDIT mode
-// 08/09/2017 - dgs - Initial code
+// Check if proposal is in DELETE mode
+// 08/09/17 - dgs - Initial code
+// 08/17/17 - dgs - use ProposalState function
 //=======================================================================================================================
 wffuncs.IsDelete = function(inval, wfrule) {
-	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
+	if (ProposalState() === 'DELETE')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsDelete
-
 //=======================================================================================================================
-// Check if proposal is Not Delete
-// 12/16/2016 - dgs - New
-//=======================================================================================================================
-wffuncs.IsNotNew = function(inval, wfrule) {
-	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
-		return false;
-	return [inval.replace(wfrule.ifregex,'')];
-}; //IsNotEdit
-
-//=======================================================================================================================
-// Check if proposal is not in EDIT mode
-// 07/17/2017 - dgs - New
-//=======================================================================================================================
-wffuncs.IsNotEdit = function(inval, wfrule) {
-	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
-		return [inval.replace(wfrule.ifregex,'')]
-	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
-		return [inval.replace(wfrule.ifregex,'')]
-	return false;
-}; //IsEdit
-
-//=======================================================================================================================
-// Check if proposal is Not Delete
-// 12/16/2016 - dgs - New
+// Check if proposal is not in DELETE mode
+// 08/09/17 - dgs - Initial code
+// 08/17/17 - dgs - use ProposalState function
 //=======================================================================================================================
 wffuncs.IsNotDelete = function(inval, wfrule) {
-	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
-		return false;
-	return [inval.replace(wfrule.ifregex,'')];
-}; //IsNotEdit
+	if (ProposalState() != 'DELETE')
+		return [inval.replace(wfrule.ifregex,'')];
+	return false;
+}; //IsNotDelete
 
 //=======================================================================================================================
-// Return the proposal mode
+// Check if proposal is in REACTIVATE mode
+// 08/17/17 - dgs - Initial code
+//=======================================================================================================================
+wffuncs.IsReactivate = function(inval, wfrule) {
+	if (ProposalState() === 'REACTIVATE')
+		return [inval.replace(wfrule.ifregex,'')];
+	return false;
+}; //IsReactivate
+//=======================================================================================================================
+// Check if proposal is not in REACTIVATE mode
+// 08/17/17 - dgs - Initial code
+//=======================================================================================================================
+wffuncs.IsNotReactivate = function(inval, wfrule) {
+	if (ProposalState() != 'REACTIVATE')
+		return [inval.replace(wfrule.ifregex,'')];
+	return false;
+}; //IsNotReactivate
+
+//=======================================================================================================================
+// Return the proposal mode, to be called from a wfrule or wforder
 // 01/25/2017 - dgs - New
+// 08/17/2017 - dgs - Added Reactivate
 //=======================================================================================================================
 wffuncs.ProposalState = function(inval, wfrule, args) {
 	wfDebug(4,"\n*** In ProposalState ***, called as: '" + inval + "'");
+	var retVal=ProposalState();
+	retVal=inval.replace(wfrule.regex,retVal);
+	wfDebug(4,"\t*** Returning '" + retVal + "'\n")
+	return [retVal]
+}; //ProposalState
+
+//=======================================================================================================================
+// Return the current state of a proposal
+// 08/17/2017 - dgs - New
+//=======================================================================================================================
+ProposalState = function() {
 	var retVal='EDIT';
 	if (tcfdata.newrecord && tcfdata.newrecord.length) {
 		if (tcfdata.newrecord == 'true')
@@ -194,10 +238,11 @@ wffuncs.ProposalState = function(inval, wfrule, args) {
 		if (tcfdata.deleterec == 'true')
 			retVal='DELETE';
 	}
-
-	retVal=inval.replace(wfrule.regex,retVal);
-	wfDebug(4,"\t*** Returning '" + retVal + "'\n")
-	return [retVal]
+	if (tcfdata.reactivate && tcfdata.reactivate.length) {
+		if (tcfdata.reactivate == 'true')
+			retVal='REACTIVATE';
+	}
+	return retVal;
 }; //ProposalState
 
 //======================================================================================================================
@@ -1579,6 +1624,8 @@ CheckChanged = function(data) {
 					if (checkFieldsStr.indexOf(","+key+",") < 0) {
 						wfDebug(3,"\t\t\tFound field '" + key + "' changed and not in the check list, setting allInList=false");
 						allInList=false;
+					} else {
+						wfDebug(3,"\t\t\tFound field '" + key + "' changed and in the check list");
 					}
 				}
 			}
@@ -2030,3 +2077,4 @@ var wfLibLoaded=true;
 // 08-07-2017 @ 12.56.22 - ("1.7.56")  - dscudiero - Check to make sure we are in courseadmin before using allcode4s
 // 08-08-2017 @ 10.54.50 - ("1.7.59")  - dscudiero - added AcadLevel functions
 // 08-09-2017 @ 14.42.59 - ("1.7.62")  - dscudiero - Added Array.compare
+// 08-17-2017 @ 15.57.15 - ("1.7.67")  - dscudiero - Refactored the proposal state functions
