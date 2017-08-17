@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.25 # -- dscudiero -- Tue 08/08/2017 @ 16:57:57.67
+version=2.9.26 # -- dscudiero -- Thu 08/17/2017 @ 15:33:49.79
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -45,6 +45,7 @@ scriptDescription="Copy workflow files"
 # Edit cimconfig.cfg
 #==============================================================================================
 function EditCimconfigCfg {
+	[[ $informationOnly == true ]] && return 0
 	Msg2 $V1 "*** Starting $FUNCNAME ***"
 	local editFile="$1"
 	local searchStr grepStr fromStr toStr
@@ -84,6 +85,7 @@ function EditCimconfigCfg {
 # Edit cusom.atj
 #==============================================================================================
 function EditCustomAtj {
+	[[ $informationOnly == true ]] && return 0
 	Msg2 $V1 "*** Starting $FUNCNAME ***"
 	local editFile="$1"
 	local searchStr grepStr fromStr toStr
@@ -311,6 +313,7 @@ Hello
 ## Main
 #====================================================================================================
 ## Loop through CIMs
+	if [[ $informationOnly == true ]] && DOIT='echo'
 	## Force verify to on
 	verify=true
  	Msg2 "Checking CIM instances ..."
@@ -386,9 +389,9 @@ Msg2
 	if [[ ${#copyFileList[@]} -gt 0 ]]; then
 		## Save old workflow files
 		backupFolder=$tmpRoot/$myName-$client-$tgtEnv
-		[[ -d $backupFolder ]] && rm -rf $backupFolder
-		mkdir -p $backupFolder/beforeCopy
-		mkdir -p $backupFolder/afterCopy
+		[[ -d $backupFolder ]] && $DOIT rm -rf $backupFolder
+		$DOIT mkdir -p $backupFolder/beforeCopy
+		$DOIT mkdir -p $backupFolder/afterCopy
 		## Copy files
 		Msg2 "\nUpdating files:"
 		for fileSpec in "${copyFileList[@]}"; do
@@ -396,10 +399,10 @@ Msg2
 			tgtFile="$(cut -d'|' -f2 <<< $fileSpec)"
 			cpyFile="$(cut -d'|' -f3 <<< $fileSpec)"
 			## Make a copy of the before and after in the temp area
-			mkdir -p "$backupFolder/beforeCopy$(dirname $cpyFile)"
-			mkdir -p "$backupFolder/afterCopy$(dirname $cpyFile)"
+			$DOIT mkdir -p "$backupFolder/beforeCopy$(dirname $cpyFile)"
+			$DOIT mkdir -p "$backupFolder/afterCopy$(dirname $cpyFile)"
 			[[ -f "$tgtFile" ]] && cp -fp "$tgtFile" "$backupFolder/beforeCopy${cpyFile}"
-			cp -fp "$srcFile" "$backupFolder/afterCopy${cpyFile}"
+			$DOIT cp -fp "$srcFile" "$backupFolder/afterCopy${cpyFile}"
 			## Copy
 			Msg2 "^$(basename $(dirname $srcFile))/$(basename $srcFile)"
 			[[ -f $tgtFile ]] && BackupCourseleafFile $tgtFile && $DOIT rm -f $tgtFile
@@ -413,10 +416,10 @@ Msg2
 		tarDir=$localClientWorkFolder/$client/workflowBackups
 		[[ ! -d $tarDir ]] && mkdir -p $tarDir
 		tarFile="$tarDir/${srcEnv}---${tgtEnv}--$backupSuffix.tar.gz"
-		ProtectedCall "tar -cpzf \"$tarFile\" ./*"; rc=$?
+		$DOIT ProtectedCall "tar -cpzf \"$tarFile\" ./*"; rc=$?
 		[[ $rc -ne 0 ]] && Error "Non-zero return code from tar"
 		cd ..
-		rm -rf "/${backupFolder#*/}"
+		$DOIT rm -rf "/${backupFolder#*/}"
 		popd >& /dev/null
 	else
 		## Nothing to do
@@ -445,7 +448,7 @@ Msg2
 	done
 
 ## Write out change log entries
-	if [[ ${#copyFileList} -gt 0 && $DOIT == '' ]]; then
+	if [[ ${#copyFileList} -gt 0 ]]; then
 		## Log changes
 		[[ -n $comment ]] && changeLogLines=("$comment")
 		changeLogLines+=("Files updated from: '$srcDir'")
@@ -453,7 +456,13 @@ Msg2
 			changeLogLines+=("${tabStr}${file}")
 		done
 		env=$tgtEnv
-		WriteChangelogEntry 'changeLogLines' "$tgtDir/changelog.txt" "$myName"
+		if [[ $DOIT == '' ]]; then
+			WriteChangelogEntry 'changeLogLines' "$tgtDir/changelog.txt" "$myName"
+		else
+			for ((i=0; i<${#changeLogLines[@]}; i++)); do
+				echo -e "\t${changeLogLines[$i]}"
+			done
+		fi
 	fi
 
 #====================================================================================================
@@ -508,3 +517,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 07-21-2017 @ 13.15.56 - (2.9.23)    - dscudiero - Add more records in the workflow.cfg record checking/commenting logic
 ## 08-08-2017 @ 16.56.10 - (2.9.24)    - dscudiero - Display the directory with the file when updating files
 ## 08-08-2017 @ 16.58.02 - (2.9.25)    - dscudiero - General syncing of dev to prod
+## 08-17-2017 @ 15.56.56 - (2.9.26)    - dscudiero - set DOIT to echo if informationMode
