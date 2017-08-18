@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.121 # -- dscudiero -- Fri 05/19/2017 @ 12:09:37.81
+version=2.1.122 # -- dscudiero -- Fri 08/18/2017 @ 17:05:04.15
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -202,6 +202,7 @@ case "$hostName" in
 		SyncSkeleton
 		## If noon then update the git repo shadows
 		[[ $(date "+%H") == 12 ]] && Call 'syncCourseleafGitRepos' 'master'
+		[[ $(date "+%H") == 22 ]] && Call 'backupData'
 		;;
 	*)
 		sleep 60 ## Wait for perfTest on Mojave to set its semaphore
@@ -246,3 +247,4 @@ return 0
 ## 05-19-2017 @ 08.55.20 - (2.1.118)   - dscudiero - Added debug stuff
 ## 05-19-2017 @ 11.21.55 - (2.1.120)   - dscudiero - add debug code to build7
 ## 05-19-2017 @ 12.25.58 - (2.1.121)   - dscudiero - added debug
+## 08-18-2017 @ 17.06.16 - (2.1.122)   - dscudiero - Added call to backupData
