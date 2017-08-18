@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.0 # -- dscudiero -- Tue 06/06/2017 @  9:48:44.04
+version=3.5.1 # -- dscudiero -- Fri 08/18/2017 @  7:54:42.91
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -44,7 +44,7 @@ scriptDescription="Cleanup private dev sites"
 		until [[ $loop == false ]]; do
 			## Get the list of files
 			unset validSiteIds workFiles filesList1 filesList2 filesList3 fileList4
-			filesList1="$(ProtectedCall "ls /mnt/$share/web" | ProtectedCall "grep -v .BeingDeleted" | ProtectedCall "grep $searchStr" | ProtectedCall "grep -v .AutoDelete")"
+			filesList1="$(ProtectedCall "ls /mnt/$share/web" | ProtectedCall "grep -v .BeingDeleted" | ProtectedCall "grep $searchStr" | ProtectedCall "grep -v .AutoDelete" | ProtectedCall "grep -v lilypadu-dscudiero")"
 			filesList2="$(ProtectedCall "ls /mnt/$share/web" | ProtectedCall "grep -v .BeingDeleted" | ProtectedCall "grep $searchStr" | ProtectedCall "grep .AutoDeleteWithSave")"
 			filesList3="$(ProtectedCall "ls /mnt/$share/web" | ProtectedCall "grep -v .BeingDeleted" | ProtectedCall "grep $searchStr" | ProtectedCall "grep .AutoDeleteNoSave")"
 			filesList4="$(ProtectedCall "ls /mnt/$share/web" | ProtectedCall "grep $searchStr" | ProtectedCall "grep .BeingDeleted")"
@@ -286,3 +286,4 @@ Goodbye 0
 ## 05-19-2017 @ 08.51.46 - (3.4.139)   - dscudiero - Removed dead code
 ## 05-24-2017 @ 08.31.28 - (3.4.140)   - dscudiero - Add Goodbye-cleanDev function
 ## 06-06-2017 @ 09.49.23 - (3.5.0)     - dscudiero - Added n-m notation, fixed comma notation
+## 08-18-2017 @ 08.00.12 - (3.5.1)     - dscudiero - Filter out lilypadu-dscudiero
