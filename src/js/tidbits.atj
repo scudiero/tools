@@ -52,7 +52,13 @@ for (var key in hash) {
 	Dump("hash[" + key + "]",hash[key].toSource())
 }
 
+============================================================================================================================================================================
+//getTCFValue
+var tcfValue=getTCFValue('course_number');
+var tcfValue=getTCFValue("<someVariable", { delimiter: "\n", retarray: true });
 
+if definition is <variable>:id|<attr1>|<attr2>|<attr3>
+var competency=getTCFValue("<variable>.<attr1>", { delimiter: "\n", retarray: true });
 
 ============================================================================================================================================================================
 //Parse an option list 
@@ -325,3 +331,4 @@ attributes.forEach(function(attr) {
 // 07-26-2017 @ 09.13.19 - dscudiero - Added examples of 'some' and 'every' loops
 // 08-08-2017 @ 10.53.48 - dscudiero - Consolidated regex stuff
 // 08-08-2017 @ 16.31.29 - dscudiero - misc updates
+// 08-22-2017 @ 14.16.21 - dscudiero - Add examples of getTCFValue calls
