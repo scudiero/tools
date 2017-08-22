@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.26 # -- dscudiero -- Thu 08/17/2017 @ 15:33:49.79
+version=2.9.31 # -- dscudiero -- Tue 08/22/2017 @ 14:10:42.70
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -289,12 +289,9 @@ Hello
 ## Get update comment
 	[[ $verify == true ]] && echo
 	Prompt jalot "Please enter the jalot task number:" "*isNumeric*"
-	if [[ $verify == true ]]; then
-		Prompt comment "Please enter the business reason for making this update:\n^" "*any*"
-		[[ -n $jalot ]] && comment="(Task:$jalot) $comment"
-	fi
+	Prompt comment "Please enter the business reason for making this update:\n^" "*any*"
 	[[ $jalot -eq 0 ]] && jalot='N/A'
-
+	comment="(Task:$jalot) $comment"
 ## Verify continue
 	unset verifyArgs
 	verifyArgs+=("Client:$client")
@@ -313,7 +310,7 @@ Hello
 ## Main
 #====================================================================================================
 ## Loop through CIMs
-	if [[ $informationOnly == true ]] && DOIT='echo'
+	[[ $informationOnly == true ]] && DOIT='echo'
 	## Force verify to on
 	verify=true
  	Msg2 "Checking CIM instances ..."
@@ -518,3 +515,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 08-08-2017 @ 16.56.10 - (2.9.24)    - dscudiero - Display the directory with the file when updating files
 ## 08-08-2017 @ 16.58.02 - (2.9.25)    - dscudiero - General syncing of dev to prod
 ## 08-17-2017 @ 15.56.56 - (2.9.26)    - dscudiero - set DOIT to echo if informationMode
+## 08-22-2017 @ 14.16.02 - (2.9.31)    - dscudiero - Fix syntax error
