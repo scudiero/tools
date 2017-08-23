@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.68" // -- dscudiero -- Tue 08/22/2017 @  8:25:01.91
+wfLibVersion="1.7.70" // -- dscudiero -- Wed 08/23/2017 @  8:06:04.06
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -39,6 +39,7 @@ wfLibVersion="1.7.68" // -- dscudiero -- Tue 08/22/2017 @  8:25:01.91
 // 08/16/17 - dgs - Tweaked formatting of the starting logic
 // 08/17/17 - dgs - Refactored proposal state functions, added REACTIVATE state
 // 09/22/17 - dgs - Updated GetEcoSystemData to deal with proposalDepts that can be an array
+// 08/23/17 - dgs - Only display the debug messages from Related to the preview workflow if debug levels is >= 4
 //======================================================================================================================
 
 // Make sure wffucs is defined
@@ -458,6 +459,7 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 // 06/23/17 - dgs - Added the ability to set the search/replacement string for Related (MIT)
 // 07/18/17 - dgs - Updated lookup logic to fall back to calling the LookupCode function if the getXXX functions do not return data
 // 07/20/17 - dgs - Fix problem with when using the GetXXX functions -- needed to map the output to the expected output format
+// 08/23/17 - dgs - Only display the debug messages from Related to the preview workflow if debug levels is >= 4
 //======================================================================================================================
 wffuncs.Related = function(inval, wfrule, args) {
 	var version='4.9.16'; var myName=wfrule.attrname
@@ -755,7 +757,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 	// Do we have any references?
 		if (refsArray.length === 0) {
 			wfDebug(3,"\t*** Zero (0) items to add, stopping");
-			if (wfEnvIsDev)
+			if (wfEnvIsDev && wfInDebugEnv && wfDebugLevel >= 4)
 				return ["*** No additional 'related' data found for ' " + inval.toLowerCase().replace('optional','') + " ' ***"];
 			return false;
 		}
@@ -921,7 +923,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 		}
 		// if debug envronent then add delimter lines to output
 
-		if (wfEnvIsDev && wfInDebugEnv) {
+		if (wfEnvIsDev && wfInDebugEnv && wfDebugLevel >= 4) {
 			retArray.unshift("*** Start of  ' " + inval.toLowerCase().replace('optional','') + " ' output ***");
 			retArray.push("*** End of  ' " + inval.toLowerCase().replace('optional','') + " ' output ***");
 		}
@@ -2093,3 +2095,4 @@ var wfLibLoaded=true;
 // 08-09-2017 @ 14.42.59 - ("1.7.62")  - dscudiero - Added Array.compare
 // 08-17-2017 @ 15.57.15 - ("1.7.67")  - dscudiero - Refactored the proposal state functions
 // 08-22-2017 @ 08.41.34 - ("1.7.68")  - dscudiero - Updated GeEcoSystemData to deal with multi value proposalDept data
+// 08-23-2017 @ 08.18.05 - ("1.7.70")  - dscudiero - Only include the debug messages from Related to the preview screen if debuglevel >= 4
