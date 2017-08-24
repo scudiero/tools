@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.0" # -- dscudiero -- Thu 08/24/2017 @ 10:02:24.97
+# version="1.0.0" # -- dscudiero -- Thu 08/24/2017 @ 10:04:40.42
 #===================================================================================================
 # Common script to send email, if we have an attachment then attach using mutt if we have it, otherwise
 # include the attachment text in the body of the email
@@ -43,7 +43,7 @@
         stdbuf -oL echo >> $tmpMailFile
 
         ## Check to see if we have mutt
-            local whichOut=$(which muttX 2> /dev/null)
+            local whichOut=$(which mutt 2> /dev/null)
             [[ -n ${whichOut%% *} ]] && haveMutt=true || haveMutt=false
 
         ## If we have mutt and attachments then use it, otherwise use sendmail
@@ -83,3 +83,4 @@ export -f SendEmail
 #===================================================================================================
 # Check-in Log
 #===================================================================================================
+## 08-24-2017 @ 10.04.54 - ("1.0.0")   - dscudiero - uncoment out mutt
