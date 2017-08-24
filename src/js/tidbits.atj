@@ -54,8 +54,11 @@ for (var key in hash) {
 
 ============================================================================================================================================================================
 //getTCFValue
-var tcfValue=getTCFValue('course_number');
-var tcfValue=getTCFValue("<someVariable", { delimiter: "\n", retarray: true });
+var tcfValue=getTCFValue('someVariable');
+var tcfValue=getTCFValue("someVariable", { delimiter: "\n", retarray: true });
+var tcaValue=getTCFValue("someVariable", { data: tcadata });
+var tcaValue=getTCFValue("someVariable", { delimiter: "\n", retarray: true, data: tcadata });
+
 
 if definition is <variable>:id|<attr1>|<attr2>|<attr3>
 var competency=getTCFValue("<variable>.<attr1>", { delimiter: "\n", retarray: true });
@@ -332,3 +335,4 @@ attributes.forEach(function(attr) {
 // 08-08-2017 @ 10.53.48 - dscudiero - Consolidated regex stuff
 // 08-08-2017 @ 16.31.29 - dscudiero - misc updates
 // 08-22-2017 @ 14.16.21 - dscudiero - Add examples of getTCFValue calls
+// 08-24-2017 @ 14.19.28 - dscudiero - Added get tca data example
