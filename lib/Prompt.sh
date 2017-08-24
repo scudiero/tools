@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.16" # -- dscudiero -- Wed 06/07/2017 @  9:18:10.40
+# version="2.1.17" # -- dscudiero -- Thu 08/24/2017 @ 16:31:25.41
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -82,7 +82,7 @@ function Prompt {
 					else
 						[[ -n $promptText ]] && echo -e "$promptText"
 						for ((tCntr=0; tCntr<$timeOut; tCntr++)); do
-							[[ -n $defaultVal ]] && echo -en "$timerPrompt $(ColorK "$((timeOut - tCntr))") seconds using a default value of $(ColorK "'$defaultVal'")\r" || \
+							[[ -n $defaultVal ]] && echo -en "$timerPrompt $(ColorK "$((timeOut - tCntr))") seconds using a default value: $(ColorK "'$defaultVal'")\r" || \
 													echo -en "$timerPrompt $(ColorK "$((timeOut - tCntr))") seconds\r"
 							read -t 1 response; rc=$?
 							if [[ $rc -eq 0 ]]; then
@@ -97,7 +97,7 @@ function Prompt {
 							fi
 							[[ $rc -gt 0 && $tCntr -ge $maxReadTimeout ]] && echo && Terminate "Read operation timed out after the maximum time of $maxReadTimeout seconds" && exit
 						done ; echo
-						[[ -z $response ]] && Note 0 1 "Read timed out, using default value for '$promptVar': '$defaultVal'" && eval $promptVar=\"$defaultVal\" && return 0
+						[[ -z $response ]] && Note 0 1 "Read timed out, using default value '$defaultVal' for '$promptVar'" && eval $promptVar=\"$defaultVal\" && return 0
 					fi
 			else
 				[[ -n "$defaultVal" ]] && response="$defaultVal" || Terminate "No Prompt is active and no default value specified for '$promptVar'"
@@ -177,3 +177,4 @@ export -f Prompt
 ## 05-31-2017 @ 07.49.50 - ("2.1.11")  - dscudiero - if term is not xterm or in batchMode and we have a default then use the default value
 ## 06-01-2017 @ 09.16.57 - ("2.1.12")  - dscudiero - Also check for TERM=screen
 ## 06-07-2017 @ 09.34.32 - ("2.1.16")  - dscudiero - Fix problem not getting primary prompt text in timed mode
+## 08-24-2017 @ 16.32.08 - ("2.1.17")  - dscudiero - Change prompt text when a timed read times out
