@@ -12,11 +12,12 @@
 // 06/08/17 - dgs -	Updated roles to filter out functions unless the function is a substitution variable name
 // 08/08/17 - dgs -	Added call back to the code mapping functions if defined.
 // 08/08/17 - dgs -	Add the cim instance name to the output, if the value was mapped also include the unmapped value.
+// 08/25/17 - dgs -	make sure that we add the real departement code to the subruleshash even if it is not mapped.
 //============================================================================================================
 // Function wrapper
 (function getCimRoles() {
 
-var debug=false;
+var debug=true;
 //============================================================================================================
 //Variable Declares
 //============================================================================================================
@@ -205,12 +206,12 @@ if (debug) { wfDump("sisName",sisName); }
 					tempArray = text.members.split(',');
 					tempArray.forEach(function(step) {
 						var tmpArray=step.split(" ");
-						if (! ignoreSteps[tmpArray[0].toLowerCase()] )
-							//steps.push(step)
+						if (! ignoreSteps[tmpArray[0].toLowerCase()] ) {
 							var tmpObj={};
 							tmpObj.stepData=step;
 							tmpObj.cimInstance=cim;
 							steps.push(tmpObj);
+						}
 					});//steps
 				});//workflows
 
@@ -259,20 +260,42 @@ if (debug) { wfDump("sisName",sisName); }
 								wfSubRulesHash[subRuleName]=dbquery('cimcourses',text.substr(idx1+1));
 								}
 							}
+
 							// See if we have a mapper function for this variable
 							var mapperFunctionName="Map" + subRuleName + "Val";
-							if (eval("typeof " + mapperFunctionName) === "function") {
-								mappedArray=[];
-								wfSubRulesHash[subRuleName].forEach(function(token) {
+							mappedArray=[];
+							wfSubRulesHash[subRuleName].forEach(function(token) {
+								if (eval("typeof " + mapperFunctionName) === "function") {
 									tmpObj={};
 									eval("tmpObj.code="+ mapperFunctionName + "(\"" + token.code + "\")");
 									tmpObj.name=token.name;
 									tmpObj.origCode=token.code;
 									mappedArray.push(tmpObj);
-								});//wfSubRulesHash[key].forEach
-								wfSubRulesHash[subRuleName]=mappedArray;
+								} else {
+									token.origCode=token.code
+									mappedArray.push(token)
+								}
+							});//wfSubRulesHash[key].forEach
+							wfSubRulesHash[subRuleName]=mappedArray
 
-							}
+
+							// // See if we have a mapper function for this variable
+							// var mapperFunctionName="Map" + subRuleName + "Val";
+							// if (eval("typeof " + mapperFunctionName) === "function") {
+							// 	mappedArray=[];
+							// 	wfSubRulesHash[subRuleName].forEach(function(token) {
+							// 		tmpObj={};
+							// 		eval("tmpObj.code="+ mapperFunctionName + "(\"" + token.code + "\")");
+							// 		tmpObj.name=token.name;
+							// 		tmpObj.origCode=token.code;
+							// 		mappedArray.push(tmpObj);
+							// 	});//wfSubRulesHash[key].forEach
+							// 	wfSubRulesHash[subRuleName]=mappedArray;
+
+							// } else {
+							// 	wfSubRulesHash[subRuleName].origCode=token.code;
+							// }
+
 							wfDump("\nwfSubRulesHash",wfSubRulesHash[subRuleName].toSource())
 					}); // wfSubRules
 				} else {
@@ -366,6 +389,7 @@ for (var i=0, tot=steps.length; i < tot; i++) {
 				subsFound=true;
 				rolesOut[i]='';
 				wfSubRulesHash[key].forEach(function(token) {
+if (debug) { print_doc("\ntoken: " + token.toSource() ) }
 					if (debug) { print_doc("\t\ttoken.code: " + token.code + ", token.name: " + token.name + "\n" ) }
 					if (typeof token.code === 'undefined') { var repString=token.name; } else { var repString=token.code; }
 					// Make the strign substitution
