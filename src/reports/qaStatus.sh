@@ -87,6 +87,7 @@ dump -1 mode cat cim
 	fi
 
 ## Get the status records
+dump -1 sqlStmt
 RunSql2 $sqlStmt
 [[ ${#resultSet[@]} -eq 0 ]] && Terminate "No data returned from the query to the $qaStatusTable table"
 
@@ -114,3 +115,4 @@ Goodbye 0 #'alert'
 ## 05-22-2017 @ 07.28.20 - (1.0.77)    - dscudiero - Fix problem with script not sending emails
 ## 05-25-2017 @ 09.36.55 - (1.0.77)    - dscudiero - call PrintColumnarData function for output
 ## 05-25-2017 @ 16.25.34 - (1.0.77)    - dscudiero - Refactoredto just send data back
+## 08-25-2017 @ 07.42.04 - (1.0.77)    - dscudiero - Added debug statement
