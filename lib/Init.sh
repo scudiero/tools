@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.1 # -- dscudiero -- Fri 08/25/2017 @ 15:34:36.62
+# version=2.1.2 # -- dscudiero -- Fri 08/25/2017 @ 15:35:16.87
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -221,7 +221,7 @@ function Init {
 		 		RunSql2 $sqlStmt
 		 		if [[ ${resultSet[0]} != 'NULL' ]]; then
 		 			if [[ $(Contains ",$UsersAuthGroups," 'support') == true ]]; then
-		 				Msg2 "^FYI, the client has the following products active in production: '${resultSet[0]}'"
+		 				Info "^FYI, the client has the following products active in production: '${resultSet[0]}'"
 		 			else
 		 				Terminate "You do not have authority to modify the $env environment, please contact the support person assigned to this client"
 		 			fi
@@ -362,3 +362,4 @@ export -f Init
 ## 06-08-2017 @ 16.27.22 - (2.0.138)   - dscudiero - Add the clear option
 ## 08-07-2017 @ 15.50.01 - (2.1.0)     - dscudiero - Refactor checking the production enviroments, check user's auth
 ## 08-25-2017 @ 15.34.51 - (2.1.1)     - dscudiero - Change messageing
+## 08-25-2017 @ 15.35.25 - (2.1.2)     - dscudiero - Tweak messaging
