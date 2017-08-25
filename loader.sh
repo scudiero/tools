@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.3.38" # -- dscudiero -- Thu 08/24/2017 @ 11:25:23.37
+version="1.3.39" # -- dscudiero -- Fri 08/25/2017 @ 10:50:10.47
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -125,7 +125,7 @@ statusLine="Loader ($version): "
 
 ## Hello
 [[ $batchMode != true && $(hostname) == 'build7.leepfrog.com' ]] && \
-	echo -e "\tNote: (loader) File system access from the current host has been found to be a bit slow,\n\tPatience you must have my young padawan..." >&3
+	echo -e "\tNote: (loader) File system access from the current host has been found to be a bit slow,\n\tPatience you must have, my young padawan..." >&3
 
 ## If called as ourselves, then the first token is the script name to call
 	if [[ $callPgmName == 'loader.sh' ]]; then
@@ -1209,3 +1209,4 @@ sTime=$(date "+%s")
 ## 08-24-2017 @ 10.06.49 - dscudiero - Add SendEmail to default import list
 ## 08-24-2017 @ 10.07.26 - ("1.3.37")  - dscudiero - General syncing of dev to prod
 ## 08-24-2017 @ 11.25.42 - ("1.3.38")  - dscudiero - Add SendEmail to import list
+## 08-25-2017 @ 10.50.23 - ("1.3.39")  - dscudiero - Tweak messaging
