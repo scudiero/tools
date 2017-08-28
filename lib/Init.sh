@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.3 # -- dscudiero -- Fri 08/25/2017 @ 16:50:28.87
+# version=2.1.4 # -- dscudiero -- Mon 08/28/2017 @  7:46:36.82
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -221,7 +221,7 @@ function Init {
 		 				Terminate "You do not have authority to modify the $env environment, please contact the support person assigned to this client"
 		 		sqlStmt="Select productsinsupport from $clientInfoTable where name=\"$client\""
 		 		RunSql2 $sqlStmt
-		 		[[ ${resultSet[0]} != 'NULL' ]] && Info "^FYI, the client has the following products active in production: '${resultSet[0]}'"
+		 		[[ ${resultSet[0]} != 'NULL' ]] && Info "^FYI, the client has the following products in production: '${resultSet[0]}'"
 				unset ans; Prompt ans "Are you sure" "Yes No";
 				ans=$(Lower ${ans:0:1})
 				[[ $ans != 'y' ]] && Goodbye -1
@@ -360,3 +360,4 @@ export -f Init
 ## 08-25-2017 @ 15.34.51 - (2.1.1)     - dscudiero - Change messageing
 ## 08-25-2017 @ 15.35.25 - (2.1.2)     - dscudiero - Tweak messaging
 ## 08-28-2017 @ 07.25.51 - (2.1.3)     - dscudiero - skip
+## 08-28-2017 @ 07.46.41 - (2.1.4)     - dscudiero - General syncing of dev to prod
