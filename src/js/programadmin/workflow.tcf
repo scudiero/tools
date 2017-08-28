@@ -6,9 +6,10 @@ localsteps:Program Workflow Management|groups|workflow|attributes=isUndergraduat
 template:custom
 pageflags:autoapprove
 
-workflow:standard|START,College: Col,Department: Dept,Academic level: AcadLevel,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is New] isNew,[Is Edit/Change] isEdit,[Is Delete] isDelete,END
+workflow:standard|TODO,Depts Chair,Cols Dean,Curriculum Committee fyiall, Curriculum Committee Chair,Registrar
 
-workflow:standard|Depts Chair,Cols Dean,Curriculum Committee fyiall, Curriculum Committee Chair,Registrar
+//workflow:standard|START,College: Col,Department: Dept,Academic level: AcadLevel,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is New] isNew,[Is Edit/Change] isEdit,[Is Delete] isDelete,END
+
 
 //======================================================================================================================
 // Check in log
@@ -16,3 +17,4 @@ workflow:standard|Depts Chair,Cols Dean,Curriculum Committee fyiall, Curriculum 
 // Tue Mar 21 11:07:23 CDT 2017 - dscudiero - Added check in log comments
 // 04-12-2017 @ 08.10.52 - (//)        - dscudiero - minor cleanup
 // 08-02-2017 @ 16.46.14 - dscudiero - Add a default workflow that is meaningful to the client
+// 08-28-2017 @ 11.45.42 - dscudiero - Add TODO step
