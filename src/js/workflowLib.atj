@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.73" // -- dscudiero -- Fri 08/25/2017 @ 11:44:34.89
+wfLibVersion="1.7.74" // -- dscudiero -- Mon 08/28/2017 @ 11:24:39.42
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -42,6 +42,7 @@ wfLibVersion="1.7.73" // -- dscudiero -- Fri 08/25/2017 @ 11:44:34.89
 // 08/23/17 - dgs - Only display the debug messages from Related to the preview workflow if debug levels is >= 4
 // 				  - Added GetRelated function.
 // 08/25/17 - dgs - Refactored Related to use the GetRelated function
+// 08/28/17 - dgs - Added 'TODO' step
 //======================================================================================================================
 
 // Make sure wffucs is defined
@@ -2199,6 +2200,22 @@ wffuncs.wfDumpVars = function(inval, wfrule, args) {
 	return false;
 }; //wffuncs.wfDumpVars
 
+//======================================================================================================================
+// Add a todo item to the workflow display
+// runs as a wfrule directive
+//		workflow step = 'TODO'
+// 		wfrules:TODO|function|TODO|<Message to display>; //Put a TODO message to the preview workflow screen
+//======================================================================================================================
+// 08-28-17 - dgs - Initial coding -
+//======================================================================================================================
+wffuncs.TODO = function(inval, wfrule, args) {
+	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
+	if (options === "" ) options="Workflow is not complete, waiting on further specifications"
+	var spaceing='&nbsp;&nbsp;&nbsp;&nbsp;';
+	print_doc(spaceing + '<strong>*Note*</strong> -- ' + options + ', please contact your CSM.</strong><br>');
+	return false;
+} //TODO
+
 
 //==================================================================================================
 // END
@@ -2241,3 +2258,4 @@ var wfLibLoaded=true;
 // 08-22-2017 @ 08.41.34 - ("1.7.68")  - dscudiero - Updated GeEcoSystemData to deal with multi value proposalDept data
 // 08-23-2017 @ 08.18.05 - ("1.7.70")  - dscudiero - Only include the debug messages from Related to the preview screen if debuglevel >= 4
 // 08-28-2017 @ 10.34.56 - ("1.7.73")  - dscudiero - Tweak the logic for products in support
+// 08-28-2017 @ 11.36.45 - ("1.7.74")  - dscudiero - Added TODO
