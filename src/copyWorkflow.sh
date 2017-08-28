@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.31 # -- dscudiero -- Tue 08/22/2017 @ 14:10:42.70
+version=2.9.32 # -- dscudiero -- Mon 08/28/2017 @ 11:32:06.44
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -167,7 +167,7 @@ function CheckFilesForCopy {
 			[[ $(Contains ",$setDefaultYesFiles," ",$(basename $cpyFile),") == true ]] && defVals='Yes' || defVals='No'
 			unset ans; Prompt ans "Yes to copy $cpyFile, eXit to stop" 'Yes No' "$defVals"; ans=$(Lower ${ans:0:1});
 			[[ $ans != 'y' ]] && filesNotCopied+=("$(basename $(dirname $srcFile))/$(basename $srcFile)") && return 0
-			## If workflow.cfg then turn off debug messages and make sure cimsync is on
+			## If workflow.cfg then chec specific conditions
 			if [[ $(Contains "$cpyFile" 'workflow.cfg') == true ]]; then
 				unset grepStr; grepStr=$(ProtectedCall "grep '^wfDebugLevel:' $srcFile")
 				if [[ -n $grepStr ]]; then
@@ -186,6 +186,8 @@ function CheckFilesForCopy {
 			fi
 			## If workflow.tcf then make sure the test workflow is commented out
 			if [[ $(Contains "$cpyFile" 'workflow.tcf') == true ]]; then
+				unset grepStr; grepStr=$(ProtectedCall "grep 'TODO,' $srcFile")
+				[[ -n $grepStr && tgtEnv == 'next' ]] && Terminate "Workflow.tcf file contained an 'TODO' step in the workflow"
 				unset grepStr; grepStr=$(ProtectedCall "grep '^workflow:standard|START' $srcFile")
 				if [[ -n $grepStr ]]; then
 					$DOIT sed -i s"_^workflow:standard|START_//workflow:standard|START_" $srcFile
@@ -516,3 +518,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 08-08-2017 @ 16.58.02 - (2.9.25)    - dscudiero - General syncing of dev to prod
 ## 08-17-2017 @ 15.56.56 - (2.9.26)    - dscudiero - set DOIT to echo if informationMode
 ## 08-22-2017 @ 14.16.02 - (2.9.31)    - dscudiero - Fix syntax error
+## 08-28-2017 @ 11.37.12 - (2.9.32)    - dscudiero - Add checking for TODO step if target env is NEXT
