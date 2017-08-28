@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.4.55 # -- dscudiero -- Mon 07/17/2017 @  6:56:14.14
+version=2.4.56 # -- dscudiero -- Mon 08/28/2017 @  7:23:26.17
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -90,7 +90,7 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 
 			Msg2 "\nRemember, you can use the 'cleanDev' script to easily remove any sites that are no longer needed." >> $tmpFile
 			Msg2 "^See https://internal.leepfrog.com/support/tools/ for additional informaton." >> $tmpFile
-			Msg2 "V2 $(dump foundFiles noEmails)"
+			Verbose 2 "$(dump foundFiles noEmails)"
 			if [[ $foundFiles == true && $noEmails != true ]]; then
 				Verbose "Emails sent to: $resultRec"
 				Msg2"\n*** Please do not respond to this email, it was sent by an automated process\n" | tee -a $tmpFile
@@ -132,3 +132,4 @@ Goodbye 0
 ## 05-05-2017 @ 12.36.22 - (2.4.53)    - dscudiero - General syncing of dev to prod
 ## 06-23-2017 @ 09.26.40 - (2.4.54)    - dscudiero - Add 'do not respond' to the email
 ## 07-17-2017 @ 06.56.31 - (2.4.55)    - dscudiero - remove blank line
+## 08-28-2017 @ 07.25.34 - (2.4.56)    - dscudiero - misc cleanup
