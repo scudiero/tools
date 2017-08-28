@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.2 # -- dscudiero -- Mon 08/28/2017 @  7:32:02.21
+version=3.5.3 # -- dscudiero -- Mon 08/28/2017 @  7:35:10.14
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -106,9 +106,11 @@ scriptDescription="Cleanup private dev sites"
 
 		## Build the sites array
 		unset sites
-		for i in $(tr ',' ' ' <<< $siteIds); do
-			sites+=("${workFiles[$i]}")
-		done
+		if [[ -n $siteIds ]]; then
+			for i in $(tr ',' ' ' <<< $siteIds); do
+				sites+=("${workFiles[$i]}")
+			done
+		fi
 
 		return 0
 	} #GetSites
@@ -289,3 +291,4 @@ Goodbye 0
 ## 06-06-2017 @ 09.49.23 - (3.5.0)     - dscudiero - Added n-m notation, fixed comma notation
 ## 08-18-2017 @ 08.00.12 - (3.5.1)     - dscudiero - Filter out lilypadu-dscudiero
 ## 08-28-2017 @ 07.32.11 - (3.5.2)     - dscudiero - tweak messaging
+## 08-28-2017 @ 07.35.42 - (3.5.3)     - dscudiero - check to see if siteIds string is not null before setting sites array
