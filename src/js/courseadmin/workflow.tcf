@@ -1,5 +1,5 @@
 //======================================================================================================================
-// version:1.0.3 // -- dscudiero -- Tue 05/02/2017 @ 16:57:12.05
+// version:1.0.4 // -- dscudiero -- Mon 08/28/2017 @ 11:42:52.17
 //======================================================================================================================
 // ??/??/17 -- dgs -- initial -- ??
 //======================================================================================================================
@@ -8,7 +8,7 @@ localsteps:Course Workflow Management|groups|workflow|attributes=isNew[New Cours
 template:custom
 pageflags:autoapprove
 
-workflow:standard|Subj Approver,Dept Chair,Col Dean,<SIS>
+workflow:standard|TODO,Depts Chair,Cols Dean,Curriculum Committee fyiall, Curriculum Committee Chair,Registrar,AddSisStep
 
 //workflow:standard|START,College: 'Col',Department: 'Dept',Subject: 'Subj',[Is New] isNew,[Not New] isNotNew,[Course Change] isEdit,[Not Course Change] isNotEdit,[Course Delete] isDelete,[Not Course Delete] isNotDelete,END
 
@@ -19,3 +19,4 @@ workflow:standard|Subj Approver,Dept Chair,Col Dean,<SIS>
 // 04-12-2017 @ 08.10.36 - (//)        - dscudiero - minor cleanup
 // 04-14-2017 @ 07.26.39 - (//)        - dscudiero - remove the's steps
 // 05-03-2017 @ 11.17.35 - (//)        - dscudiero - General syncing of dev to prod
+// 08-28-2017 @ 11.45.36 - (52.17)     - dscudiero - Add TODO step
