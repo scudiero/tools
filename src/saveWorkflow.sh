@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.74 # -- dscudiero -- Tue 06/13/2017 @  8:50:57.05
+version=2.2.75 # -- dscudiero -- Mon 08/28/2017 @  7:28:17.96
 #====================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye ParseCourseleafFile' #imports="$imports "
@@ -62,7 +62,7 @@ if [[ $daemon == true ]]; then
 	client="$(cut -d ' ' -f1 <<< "$data")"
 	client="$(cut -d '-' -f1 <<< "$data")"
 	env="$(cut -d ' ' -f2 <<< "$data")"
-dump userName siteFile data client env
+	dump -1 userName siteFile data client env
 	allCims=true; GetCims  "$siteFile"
 	srcDir="$siteFile"
 	backupFolder="$tmpRoot/$myName/$client-$env-$BASHPID/beforeDelete"
@@ -177,3 +177,4 @@ Goodbye 0
 ## 06-06-2017 @ 09.49.36 - (2.2.72)    - dscudiero - removed debug statements
 ## 06-13-2017 @ 08.50.14 - (2.2.73)    - dscudiero - Add debug statement
 ## 06-13-2017 @ 08.51.01 - (2.2.74)    - dscudiero - General syncing of dev to prod
+## 08-28-2017 @ 07.28.29 - (2.2.75)    - dscudiero - turn off debug statement
