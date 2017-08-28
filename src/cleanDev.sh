@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.1 # -- dscudiero -- Fri 08/18/2017 @  7:54:42.91
+version=3.5.2 # -- dscudiero -- Mon 08/28/2017 @  7:32:02.21
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -232,6 +232,7 @@ if [[ -n $client ]]; then
 			if [[ $(Contains "$file" 'WithSave') == true ]]; then
 				Msg2 "^Deleting '$(basename $file)' with workflow save"
 				Call saveWorkflow -daemon -siteFile "$file" -all -suffix "beforeDelete-$backupSuffix -quiet -nop"
+				Msg2 "^^workflow saved"
 			else
 				Msg2 "^Deleting '$(basename $file)'"
 			fi
@@ -287,3 +288,4 @@ Goodbye 0
 ## 05-24-2017 @ 08.31.28 - (3.4.140)   - dscudiero - Add Goodbye-cleanDev function
 ## 06-06-2017 @ 09.49.23 - (3.5.0)     - dscudiero - Added n-m notation, fixed comma notation
 ## 08-18-2017 @ 08.00.12 - (3.5.1)     - dscudiero - Filter out lilypadu-dscudiero
+## 08-28-2017 @ 07.32.11 - (3.5.2)     - dscudiero - tweak messaging
