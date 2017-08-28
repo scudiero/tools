@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.2 # -- dscudiero -- Fri 08/25/2017 @ 15:35:16.87
+# version=2.1.3 # -- dscudiero -- Fri 08/25/2017 @ 16:50:28.87
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -217,15 +217,11 @@ function Init {
 				verify=true
 				echo
 				Warning "You are asking to update/overlay the $(ColorW $(Upper $checkProdEnv)) environment."
+		 		[[ $(Contains ",$UsersAuthGroups," 'support') != true ]] && \
+		 				Terminate "You do not have authority to modify the $env environment, please contact the support person assigned to this client"
 		 		sqlStmt="Select productsinsupport from $clientInfoTable where name=\"$client\""
 		 		RunSql2 $sqlStmt
-		 		if [[ ${resultSet[0]} != 'NULL' ]]; then
-		 			if [[ $(Contains ",$UsersAuthGroups," 'support') == true ]]; then
-		 				Info "^FYI, the client has the following products active in production: '${resultSet[0]}'"
-		 			else
-		 				Terminate "You do not have authority to modify the $env environment, please contact the support person assigned to this client"
-		 			fi
-		 		fi
+		 		[[ ${resultSet[0]} != 'NULL' ]] && Info "^FYI, the client has the following products active in production: '${resultSet[0]}'"
 				unset ans; Prompt ans "Are you sure" "Yes No";
 				ans=$(Lower ${ans:0:1})
 				[[ $ans != 'y' ]] && Goodbye -1
@@ -363,3 +359,4 @@ export -f Init
 ## 08-07-2017 @ 15.50.01 - (2.1.0)     - dscudiero - Refactor checking the production enviroments, check user's auth
 ## 08-25-2017 @ 15.34.51 - (2.1.1)     - dscudiero - Change messageing
 ## 08-25-2017 @ 15.35.25 - (2.1.2)     - dscudiero - Tweak messaging
+## 08-28-2017 @ 07.25.51 - (2.1.3)     - dscudiero - skip
