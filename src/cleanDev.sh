@@ -295,3 +295,4 @@ Goodbye 0
 ## 08-28-2017 @ 07.32.11 - (3.5.2)     - dscudiero - tweak messaging
 ## 08-28-2017 @ 07.35.42 - (3.5.3)     - dscudiero - check to see if siteIds string is not null before setting sites array
 ## 08-29-2017 @ 08.13.34 - (3.5.4)     - dscudiero - Turn quiet on before we call saveworkflow
+## Tue Aug 29 08:15:20 CDT 2017 - dscudiero - -m sync
