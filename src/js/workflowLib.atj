@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.74" // -- dscudiero -- Mon 08/28/2017 @ 11:24:39.42
+wfLibVersion="1.7.75" // -- dscudiero -- Tue 08/29/2017 @ 11:15:07.01
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -43,6 +43,7 @@ wfLibVersion="1.7.74" // -- dscudiero -- Mon 08/28/2017 @ 11:24:39.42
 // 				  - Added GetRelated function.
 // 08/25/17 - dgs - Refactored Related to use the GetRelated function
 // 08/28/17 - dgs - Added 'TODO' step
+// 08/29/17 - dgs - GetRelated -- Remove duplicates when processing the final resultSet array
 //======================================================================================================================
 
 // Make sure wffucs is defined
@@ -765,6 +766,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 //		{data:"7", source:"formVar:equivalents"}
 //==================================================================================================================
 // 08/23/17 - dgs - Initial
+// 08/29/17 - dgs - Remove duplicates when processing the final resultSet array
 //==================================================================================================================
 GetRelated = function(type,data) {
 	var myName="GetRelated"; wfDebug(1,"\n*** In " + myName + " ***");
@@ -888,6 +890,7 @@ GetRelated = function(type,data) {
 
 	// map the related data to the requested data type (i.e. type)
 	wfDebug(4,"\tProcessing refs...");
+	var checkArray=[];
 	refsArray.forEach(function(ref) {
 		wfDump(4,["\tref;"+ref.toSource()]);
 		var sqlStmt='', resultSet=[];
@@ -1063,8 +1066,10 @@ GetRelated = function(type,data) {
 					retToken={};
 					retToken.data=result.data;
 					retToken.source=ref.source;
-					retArray.push(retToken);
-					wfDebug(4,"\t\t\t   returning ref data: " + retToken.toSource());
+					if (Object.keys(retToken).length != 0 && typeof checkArray[retToken.data] === 'undefined') {
+						retArray.push(retToken); checkArray[retToken.data]=true;
+						wfDebug(4,"\t\t\t   returning ref data: " + retToken.toSource());
+					}
 				}
 			});
 		} else {
@@ -2259,3 +2264,4 @@ var wfLibLoaded=true;
 // 08-23-2017 @ 08.18.05 - ("1.7.70")  - dscudiero - Only include the debug messages from Related to the preview screen if debuglevel >= 4
 // 08-28-2017 @ 10.34.56 - ("1.7.73")  - dscudiero - Tweak the logic for products in support
 // 08-28-2017 @ 11.36.45 - ("1.7.74")  - dscudiero - Added TODO
+// 08-29-2017 @ 12.10.56 - ("1.7.75")  - dscudiero - Updated GetRelated to remove duplicates before returning data
