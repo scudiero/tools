@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.5 # -- dscudiero -- Tue 08/29/2017 @  8:18:24.89
+version=3.5.6 # -- dscudiero -- Tue 08/29/2017 @  8:23:29.97
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -106,8 +106,11 @@ scriptDescription="Cleanup private dev sites"
 
 		## Build the sites array
 		unset sites
+Dump siteIds
 		if [[ -n $siteIds ]]; then
 			for i in $(tr ',' ' ' <<< $siteIds); do
+Dump i
+echo "\${workFiles[$i]} = ${workFiles[$i]}"
 				sites+=("${workFiles[$i]}")
 			done
 		fi
@@ -297,3 +300,4 @@ Goodbye 0
 ## 08-29-2017 @ 08.13.34 - (3.5.4)     - dscudiero - Turn quiet on before we call saveworkflow
 ## Tue Aug 29 08:15:20 CDT 2017 - dscudiero - -m sync
 ## 08-29-2017 @ 08.19.43 - (3.5.5)     - dscudiero - Wrap the call to saveworkflow in quiet=true quiet=false
+## 08-29-2017 @ 08.23.43 - (3.5.6)     - dscudiero - Add some debug messages
