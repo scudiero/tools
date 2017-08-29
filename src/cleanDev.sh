@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.4 # -- dscudiero -- Tue 08/29/2017 @  8:13:00.30
+version=3.5.5 # -- dscudiero -- Tue 08/29/2017 @  8:18:24.89
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -296,3 +296,4 @@ Goodbye 0
 ## 08-28-2017 @ 07.35.42 - (3.5.3)     - dscudiero - check to see if siteIds string is not null before setting sites array
 ## 08-29-2017 @ 08.13.34 - (3.5.4)     - dscudiero - Turn quiet on before we call saveworkflow
 ## Tue Aug 29 08:15:20 CDT 2017 - dscudiero - -m sync
+## 08-29-2017 @ 08.19.43 - (3.5.5)     - dscudiero - Wrap the call to saveworkflow in quiet=true quiet=false
