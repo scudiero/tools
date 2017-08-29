@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.37 # -- dscudiero -- Mon 08/28/2017 @ 14:28:32.72
+version=2.9.38 # -- dscudiero -- Tue 08/29/2017 @ 13:11:45.99
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -188,6 +188,7 @@ function CheckFilesForCopy {
 			if [[ $(Contains "$cpyFile" 'workflow.tcf') == true ]]; then
 				unset grepStr; grepStr=$(ProtectedCall "grep 'TODO,' $srcFile")
 				[[ -n $grepStr && $tgtEnv == 'next' ]] && Terminate "Source 'workflow.tcf' file contained an 'TODO' step in the workflow definitions"
+				[[ -n $grepStr && $tgtEnv == 'test' ]] && Warning "Source 'workflow.tcf' file contained an 'TODO' step in the workflow definitions"
 				unset grepStr; grepStr=$(ProtectedCall "grep '^workflow:standard|START' $srcFile")
 				if [[ -n $grepStr ]]; then
 					$DOIT sed -i s"_^workflow:standard|START_//workflow:standard|START_" $srcFile
@@ -520,3 +521,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 08-22-2017 @ 14.16.02 - (2.9.31)    - dscudiero - Fix syntax error
 ## 08-28-2017 @ 11.37.12 - (2.9.32)    - dscudiero - Add checking for TODO step if target env is NEXT
 ## 08-28-2017 @ 14.29.02 - (2.9.37)    - dscudiero - Fixed check for TODO in workflow.tcf
+## 08-29-2017 @ 13.12.12 - (2.9.38)    - dscudiero - Add warning message if a workflow contains the TODO step
