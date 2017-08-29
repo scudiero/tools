@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.3 # -- dscudiero -- Mon 08/28/2017 @  7:35:10.14
+version=3.5.4 # -- dscudiero -- Tue 08/29/2017 @  8:13:00.30
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -233,7 +233,9 @@ if [[ -n $client ]]; then
 			file=$(tr -d ':' <<< "$file")
 			if [[ $(Contains "$file" 'WithSave') == true ]]; then
 				Msg2 "^Deleting '$(basename $file)' with workflow save"
+				quiet=true
 				Call saveWorkflow -daemon -siteFile "$file" -all -suffix "beforeDelete-$backupSuffix -quiet -nop"
+				quiet=false
 				Msg2 "^^workflow saved"
 			else
 				Msg2 "^Deleting '$(basename $file)'"
@@ -292,3 +294,4 @@ Goodbye 0
 ## 08-18-2017 @ 08.00.12 - (3.5.1)     - dscudiero - Filter out lilypadu-dscudiero
 ## 08-28-2017 @ 07.32.11 - (3.5.2)     - dscudiero - tweak messaging
 ## 08-28-2017 @ 07.35.42 - (3.5.3)     - dscudiero - check to see if siteIds string is not null before setting sites array
+## 08-29-2017 @ 08.13.34 - (3.5.4)     - dscudiero - Turn quiet on before we call saveworkflow
