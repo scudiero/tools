@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.1 # -- dscudiero -- 01/04/2017 @ 13:45:46.89
+# version=2.0.2 # -- dscudiero -- Wed 08/30/2017 @ 13:43:27.93
 #===================================================================================================
 # Display script help -- passed an array of argument definitinons, see ParseArg function
 #===================================================================================================
@@ -21,7 +21,13 @@ function Help {
 	## Print out header info
 		[[ $shortDescription != '' ]] && Msg2 "$(ColorK "$shortDescription.")"
 		[[ $longDescription != '' ]] && Msg2 && Msg2 "$longDescription" && Msg2
-		[[ $scriptHelpDesc != '' ]] && Msg2 && Msg2 "$scriptHelpDesc" && Msg2
+		if [[ -n $scriptHelpDesc ]]; then
+			echo
+			for text in "${scriptHelpDesc[@]}"; do
+				Msg2 "$text"
+			done
+			echo
+		fi
 		[[ $author != '' ]] && Msg2 "$(ColorK "Author:") $author"
 		[[ $supported != '' ]] && Msg2 "$(ColorK "Supported:") $supported"
 
@@ -125,3 +131,4 @@ export -f Help
 # Check-in Log
 #===================================================================================================
 ## Wed Jan  4 13:53:41 CST 2017 - dscudiero - General syncing of dev to prod
+## 08-30-2017 @ 13.53.59 - (2.0.2)     - dscudiero - treat scriptHelpDescription as an array
