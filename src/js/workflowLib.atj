@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.75" // -- dscudiero -- Tue 08/29/2017 @ 11:15:07.01
+wfLibVersion="1.7.76" // -- dscudiero -- Wed 08/30/2017 @ 16:51:20.41
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -44,6 +44,7 @@ wfLibVersion="1.7.75" // -- dscudiero -- Tue 08/29/2017 @ 11:15:07.01
 // 08/25/17 - dgs - Refactored Related to use the GetRelated function
 // 08/28/17 - dgs - Added 'TODO' step
 // 08/29/17 - dgs - GetRelated -- Remove duplicates when processing the final resultSet array
+// 08/30/17 - dgs - Updates GetAttr to allow for request to be passed in as an option
 //======================================================================================================================
 
 // Make sure wffucs is defined
@@ -1247,6 +1248,7 @@ wffuncs.wfAttr = function(inval, wfrule, args) {
 // 06/09/17 - dgs 	- Added variable value mapping with the option to turn off.
 // 07/18/17 - dgs 	- Modifed includeTCA setting, if option include OR request type ends in 's' then include tca data
 // 07/26/17 - dgs 	- Always do the lookups for subjects, departments, and colleges regardless of request type
+// 08/30/17 - dgs 	- The target attribute 'request' (above) can be passed in as an option on the wfrule,e.g. 'wfrules:Divs|function|wfAttr|Cols'
 //=======================================================================================================================
 GetAttrVal = function(data) {
 	wfDebug(5,"\t*** In GetAttrVal ***");
@@ -1254,6 +1256,7 @@ GetAttrVal = function(data) {
 	var reqType=data.request;
 	var optionStr=data.options; 	if (optionStr === undefined) optionStr="";
 	optionStr=optionStr.toLowerCase();
+
 	var tcaData=data.tcadata; 		if (tcaData === undefined) tcaData="";
 	var subjVarName=data.subjVar; 	if (subjVarName === undefined || subjVarName === "") subjVarName="subject";
 	var deptVarName=data.deptVar; 	if (deptVarName === undefined || deptVarName === "") deptVarName="department";
@@ -1284,21 +1287,24 @@ GetAttrVal = function(data) {
 
 			colleges=wffuncs.getColleges(departments);
 			wfDebug(5,"\t\tFrom wffuncs.GetXXXX function calls:")
-			wfDump(5,["\t\tcolleges;"+colleges.toSource(),"\t\tdepartments;"+departments.toSource(),"\t\tsubjects;"+subjects.toSource(),]);
+			wfDump(5,["\t\tcolleges;"+colleges.toSource(),"\t\tdepartments;"+departments.toSource(),"\t\tsubjects;"+subjects.toSource()+"\n",]);
 		}
 
 	// If we did not find data above then see if there is any data in the tcf file
 		if (subjects.length === 0) {
+			wfDebug(5,"\t\twffuncs.getSubjects returned nothing, checking the '" + subjVarName + "' variable");
 			subjects=getTCFValue(subjVarName, { delimiter: "\n", retarray: true });
 			if (includeTCA)
 				subjects=subjects.concat(getTCFValue("subject", { data: tcaData, delimiter: "\n", retarray: true }));
 		}
 		if (departments.length === 0) {
+			wfDebug(5,"\t\twffuncs.getDepartments returned nothing, checking the '" + deptVarName + "' variable");
 			departments=getTCFValue(deptVarName, { delimiter: "\n", retarray: true });
 			if (includeTCA)
 				departments=departments.concat(getTCFValue("department", { data: tcaData, delimiter: "\n", retarray: true }));
 		}
 		if (colleges.length === 0) {
+			wfDebug(5,"\t\twffuncs.getColleges returned nothing, checking the '" + colVarName + "' variable");
 			colleges=getTCFValue(colVarName, { delimiter: "\n", retarray: true });
 			if(colleges.length === 0 && departments.length != 0) {
 				colleges=wffuncs.getColleges(departments)
@@ -1308,16 +1314,16 @@ GetAttrVal = function(data) {
 				colleges=colleges.concat(getTCFValue("college", { data: tcaData, delimiter: "\n", retarray: true }));
 		}
 
-	wfDebug(5,"\t\tFinal:")
+	wfDebug(5,"\n\t\tFinal:")
 	wfDump(5,["\t\tcolleges;"+colleges.toSource(),"\t\tdepartments;"+departments.toSource(),"\t\tsubjects;"+subjects.toSource(),]);
 
 	// return data based on how we were called
 		var retArray=[];
-		if (reqType.indexOf("col") >= 0) {
+		if (reqType.indexOf("col") >= 0 || optionStr.indexOf("col") >= 0) {
 			retArray=colleges;
-		} else if (reqType.indexOf("dep") >= 0) {
+		} else if (reqType.indexOf("dep") >= 0 || optionStr.indexOf("dep") >= 0) {
 			retArray=departments;
-		} else if (reqType.indexOf("subj") >= 0) {
+		} else if (reqType.indexOf("subj") >= 0 || optionStr.indexOf("subj") >= 0) {
 			retArray=subjects;
 		}
 		retArray=RemoveDupes(retArray)
@@ -2265,3 +2271,4 @@ var wfLibLoaded=true;
 // 08-28-2017 @ 10.34.56 - ("1.7.73")  - dscudiero - Tweak the logic for products in support
 // 08-28-2017 @ 11.36.45 - ("1.7.74")  - dscudiero - Added TODO
 // 08-29-2017 @ 12.10.56 - ("1.7.75")  - dscudiero - Updated GetRelated to remove duplicates before returning data
+// 08-30-2017 @ 16.52.22 - ("1.7.76")  - dscudiero - Tweaked wfAttr / GetAttt to allow passing in the request type as a wfrule option
