@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.45 # -- dscudiero -- Wed 08/30/2017 @  9:36:12.16
+version=2.9.46 # -- dscudiero -- Wed 08/30/2017 @  9:38:10.85
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -300,15 +300,15 @@ Hello
 	[[ $jalot -eq 0 ]] && jalot='N/A'
 	comment="(Task:$jalot) $comment"
 
-## Get update comment
-	if [[ -z $refreshSystem ]]; then
-		[[ $verify == true ]] && echo
-		defVals='Yes'
-		Msg2 "Do you wish to refresh the system level files from the skeleton or use those found in the source"
-		unset ans ; Prompt ans "'Yes' to refresh, 'No' to use those from the source" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
-		unset defVals
-		[[ $ans == 'y' ]] && refreshSystem=true || refreshSystem=false
-	fi
+# ## Get update comment
+# 	if [[ -z $refreshSystem ]]; then
+# 		[[ $verify == true ]] && echo
+# 		defVals='Yes'
+# 		Msg2 "Do you wish to refresh the system level files from the skeleton or use those found in the source"
+# 		unset ans ; Prompt ans "'Yes' to refresh, 'No' to use those from the source" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
+# 		unset defVals
+# 		[[ $ans == 'y' ]] && refreshSystem=true || refreshSystem=false
+# 	fi
 
 ## Verify continue
 	unset verifyArgs
@@ -317,7 +317,7 @@ Hello
 	verifyArgs+=("Target Env:$(TitleCase $tgtEnv) ($tgtDir)")
 	verifyArgs+=("Update comment:$comment")
 	verifyArgs+=("CIM(s):$cimStr")
-	verifyArgs+=("Refresh system files:$refreshSystem")
+	#verifyArgs+=("Refresh system files:$refreshSystem")
 	VerifyContinue "You are copying CIM workflow files for:"
 	dump -1 client srcEnv tgtEnv srcDir tgtDir cimStr
 
@@ -540,3 +540,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 08-28-2017 @ 14.29.02 - (2.9.37)    - dscudiero - Fixed check for TODO in workflow.tcf
 ## 08-29-2017 @ 13.12.12 - (2.9.38)    - dscudiero - Add warning message if a workflow contains the TODO step
 ## 08-30-2017 @ 09.37.22 - (2.9.45)    - dscudiero - Hack to turn off requiredGlobalFiles
+## 08-30-2017 @ 09.38.48 - (2.9.46)    - dscudiero - Commented out the 'refreshSystem' option
