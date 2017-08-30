@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.73 # -- dscudiero -- Wed 08/30/2017 @ 14:01:01.47
+version=2.9.75 # -- dscudiero -- Wed 08/30/2017 @ 15:07:44.93
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -328,6 +328,13 @@ Hello
 		[[ $ans == 'y' ]] && refreshSystem=true || refreshSystem=false
 	fi
 
+## check cim and courseleaf versios
+	unset srcClVer srcCimVer tgtClVer tgtCimVer
+	[[ -r "$srcDir/web/courseleaf/clver.txt" ]] && srcClVer=$(cat "$srcDir/web/courseleaf/clver.txt")
+	[[ -r "$srcDir/web/courseleaf/cim/clver.txt" ]] && srcCimVer=$(cat "$srcDir/web/courseleaf/cim/clver.txt")
+	[[ -r "$tgtDir/web/courseleaf/clver.txt" ]] && tgtClVer=$(cat "$tgtDir/web/courseleaf/clver.txt")
+	[[ -r "$tgtDir/web/courseleaf/cim/clver.txt" ]] && tgtCimVer=$(cat "$tgtDir/web/courseleaf/cim/clver.txt")
+
 ## Verify continue
 	unset verifyArgs
 	verifyArgs+=("Client:$client")
@@ -335,6 +342,8 @@ Hello
 	verifyArgs+=("Target Env:$(TitleCase $tgtEnv) ($tgtDir)")
 	verifyArgs+=("Update comment:$comment")
 	verifyArgs+=("CIM(s):$cimStr")
+	[[ $srcClVer != $tgtClVer ]] && verifyArgs+=("Warning:CourseLeaf version for source ($srcClVer) not the same as target ($tgtClVer)")
+	[[ $srcCimVer != $tgtCimVer ]] && verifyArgs+=("Warning:CIM version for source ($srcCimVer) not the same as target ($tgtCimVer)")
 	[[ $refreshSystem == true ]] && verifyArgs+=("Refresh system files:$refreshSystem")
 	VerifyContinue "You are copying CIM workflow files for:"
 	dump -1 client srcEnv tgtEnv srcDir tgtDir cimStr
@@ -561,3 +570,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 08-30-2017 @ 09.38.48 - (2.9.46)    - dscudiero - Commented out the 'refreshSystem' option
 ## 08-30-2017 @ 13.55.26 - (2.9.72)    - dscudiero - Add help text
 ## 08-30-2017 @ 14.07.46 - (2.9.73)    - dscudiero - move name and version to the Help file
+## 08-30-2017 @ 15.16.12 - (2.9.75)    - dscudiero - Add a check to make sure the courseleaf or cim versions are the same from src to target
