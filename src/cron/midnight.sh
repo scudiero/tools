@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.4 # -- dscudiero -- Wed 05/31/2017 @  7:59:27.35
+version=1.22.5 # -- dscudiero -- Wed 08/30/2017 @ 12:44:40.21
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -333,9 +333,6 @@ case "$hostName" in
 				SetFileExpansion
 		  	fi
 
-		## Remove private dev sites marked for auto deletion
-			Call 'cleanDev' 'daemon' "$scriptArgs"
-
 		 ## Check that all things ran properly, otherwise revert the databases
 			Semaphore 'waiton' "buildClientInfoTable"
 			Semaphore 'waiton' "buildSiteInfoTable"
@@ -353,6 +350,9 @@ case "$hostName" in
 				fi
 			done
 			[[ $errorDetected == true ]] && Terminate 'One or more of the database load procedures failed, please review messages'
+
+		## Remove private dev sites marked for auto deletion
+			Call 'cleanDev' 'daemon' "$scriptArgs"
 
 		;; ## mojave
 
@@ -458,3 +458,4 @@ return 0
 ## 05-23-2017 @ 07.56.21 - (1.22.1)    - dscudiero - Chang3e call string for reports
 ## 05-26-2017 @ 06.40.50 - (1.22.3)    - dscudiero - add quiet to qaStatusShort call
 ## 05-31-2017 @ 07.59.47 - (1.22.4)    - dscudiero - call scriptsAndReports directly for reports
+## 08-30-2017 @ 12.45.12 - (1.22.5)    - dscudiero - move cleanDev to the en
