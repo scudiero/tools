@@ -337,7 +337,6 @@ if (debug) { wfDump("sisName",sisName); }
 	}
 
 	// Pre-process the steps array: 1) remove the conditionals strings from the steps, 2)remove the steps that are function calls, 3) Combine cimInstance data for duplicate steps, 4) remove dups
-		//wfDump("\nsteps before pre-processing:",steps.toSource())
 		steps.sort(compare);
 		for (var i=0,  tot=steps.length; i < tot; i++) {
 			var stepData=steps[i].stepData
@@ -369,7 +368,6 @@ if (debug) { wfDump("sisName",sisName); }
 			tmpInstancePrev=steps[i].cimInstance;
 		}
 		steps=tmpArray;
-		//wfDump("\nsteps after pre-processing:",steps.toSource())
 
 		if (debug) {
 			print_doc('\nFound ' + steps.length + ' steps...\n'); 
