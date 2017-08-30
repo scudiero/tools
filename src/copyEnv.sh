@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.87 # -- dscudiero -- Tue 08/01/2017 @  7:43:20.63
+version=4.11.90 # -- dscudiero -- Wed 08/30/2017 @ 13:02:54.52
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -407,69 +407,8 @@ dump -1 skipCim skipCat skipClss skipAlso
 
 	[[ -f $rsyncFilters ]] && rm $rsyncFilters
 
-# #==================================================================================================
-# # Check RHEL versions
-# 	if [[ ${clientRhel:0:1} != ${myRhel:0:1} ]]; then
-# 		Msg2 "\nRhel versions do not match, updating cgis to current..."
-# 		cgisDirRoot=$cgisRoot/rhel${myRhel:0:1}
-# 		[[ ! -d $cgisDirRoot ]] && Terminate "Could not locate cgi source directory:\n\t$cgiRoot"
-# 		if [[ -d $cgisDirRoot/release ]]; then
-# 			cgisDir=$cgisDirRoot/release
-# 		else
-# 			cwd=$(pwd)
-# 			cd $cgisDirRoot
-# 			cgisDir=$(ls -t | tr "\n" ' ' | cut -d ' ' -f1)
-# 			WarningMsg "^TCould not find the 'release' directory in the cgi root directory, using '$cgisDir'"
-# 			cgisDir=${cgisDirRoot}/$cgisDir
-# 			cd $cwd
-# 		fi
-# 		unset cgisUpdated
-# 		## /courseleaf/courseleaf.cgi
-# 			if [[ -f $cgisDir/courseleaf.cgi ]]; then
-# 				result=$(CopyFileWithCheck "$cgisDir/$progDir.cgi" "$tgtDir/web/$progDir/$progDir.cgi" 'courseleaf')
-# 				if [[ $result == true ]]; then
-# 					chmod 755 $tgtDir/web/$progDir/$progDir.cgi
-# 					Msg2 "^Upated: $progDir.cgi"
-# 					cgisUpdated=true
-# 				elif [[ $result == 'same' ]]; then
-# 					Msg2 "^'$progDir.cgi' is current"
-# 				else
-# 					Msg2 "TT Could not copy $progDir.cgi.\n\t$result"
-# 				fi
-# 			else
-# 				Terminate "^Could not locate source $progDir.cgi in \n\t\t'$cgisDir'."
-# 			fi
-
-# 		## /ribbit/index.cgi
-# 			if [[ -f $cgisDir/index.cgi ]]; then
-# 				result=$(CopyFileWithCheck "$cgisDir/index.cgi" "$tgtDir/web/ribbit/index.cgi" 'courseleaf')
-# 				if [[ $result == true ]]; then
-# 					chmod 755 $tgtDir/web/ribbit/index.cgi
-# 					Msg2 "^index.cgi copied"
-# 					cgisUpdated=true
-# 				elif [[ $result == 'same' ]]; then
-# 					Msg2 "^'index.cgi' is current"
-# 				else
-# 					Error "^Could not copy index.cgi.\n\t$result"
-# 				fi
-# 			elif [[ -f $cgisDir/ribbit.cgi ]]; then
-# 				result=$(CopyFileWithCheck "$cgisDir/ribbit.cgi" "$tgtDir/web/ribbit/index.cgi" 'courseleaf')
-# 				if [[ $result == true ]]; then
-# 					chmod 755 $tgtDir/web/ribbit/index.cgi
-# 					Msg2 "^ribbit.cgi copied as index.cgi"
-# 					cgisUpdated=true
-# 				elif [[ $result == 'same' ]]; then
-# 					Msg2 "^'tribbit.cgi' is current"
-# 				else
-# 					Terminate"^Could not copy ribbit.cgi as index.cgi.\n\t$result"
-# 				fi
-# 			else
-# 				Terminate "^Could not locate source ribbit.cgi or index.cgi, ribbit cgi not refreshed."
-# 			fi
-# 	fi
-
-if [[ $tgtEnv != 'next' && $tgtEnv != 'curr' ]]; then
-		# Turn off publishing
+if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
+	# Turn off publishing
 		Msg2 "\nTurn off Publishing..."
 		editFile="$tgtDir/$progDir.cfg"
 		$DOIT sed -i s'_^mapfile:production_//mapfile:production_'g "$editFile"
@@ -478,9 +417,7 @@ if [[ $tgtEnv != 'next' && $tgtEnv != 'curr' ]]; then
 		$DOIT sed -i s'_^//mapfile:production|/dev/null_mapfile:production|/dev/null_' "$editFile"
 		grepStr=$(ProtectedCall "grep '^mapfile:production.*/dev/null' $editFile")
 		[[ -z $grepStr ]] && Warning "Could not locate a publishing mapfile record pointing to /dev/null, publising may still be active, please check before using clone site"
-fi
 
-if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 	# Turn off remote authenticaton
 		Msg2 "Turn off Authentication..."
 		$DOIT sed -i s'_^authuser:true_//authuser:true_' $tgtDir/$progDir.cfg
@@ -567,6 +504,10 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 	## touch clone data and source file in root
 		$DOIT rm -f $tgtDir/.clonedFrom-* > /dev/null 2>&1
 		$DOIT touch $tgtDir/.clonedFrom-$env
+else
+	echo
+	Warning "Target of copy is '$tgtEnv', you should manually check the publising settings in $progDir.cfg"
+	echo
 fi
 
 ## If we have cims and user is 'dscudiero' and env = 'pvt' and onlyProduct='cim' then turn on debugging
@@ -577,7 +518,7 @@ fi
 			unset grepStr; grepStr=$(ProtectedCall "grep '^wfDebugLevel:' $editFile")
 			if [[ -n $grepStr ]]; then
 				fromStr="$grepStr"
-				toStr="wfDebugLevel:2"
+				toStr="wfDebugLevel:3"
 				$DOIT sed -i s"_^${fromStr}_${toStr}_" $editFile
 			fi
 		done
@@ -587,7 +528,8 @@ fi
 ## Bye-bye
 #printf "0: noDbLog = '$noDbLog', myLogRecordIdx = '$myLogRecordIdx'\n" >> ~/stdout.txt
 #[[ $quiet == true || $quiet == 1 ]] && quiet=0 || Alert
-Msg2
+echo
+Info "To act on private dev sites within the 'scripts' family of scripts you should specify 'pvt' as the environment name."
 Info "Remember you can use the 'cleanDev' script to easily remove private dev sites."
 [[ -n $asSite ]] && msgText="$(ColorK "$(Upper $asSite)")" || msgText="$(ColorK "$(Upper $client)")"
 
@@ -677,3 +619,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 07-29-2017 @ 12.27.37 - (4.11.83)   - dscudiero - Added -lite option
 ## 07-29-2017 @ 12.35.22 - (4.11.86)   - dscudiero - Check to see if lite and fullcopy were both specified
 ## 08-01-2017 @ 08.08.17 - (4.11.87)   - dscudiero - remove emailing to the foruser, moved to Goodbye
+## 08-30-2017 @ 13.53.18 - (4.11.90)   - dscudiero - Added help text
