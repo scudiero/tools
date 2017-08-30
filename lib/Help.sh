@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.2 # -- dscudiero -- Wed 08/30/2017 @ 13:43:27.93
+# version=2.0.6 # -- dscudiero -- Wed 08/30/2017 @ 14:07:18.82
 #===================================================================================================
 # Display script help -- passed an array of argument definitinons, see ParseArg function
 #===================================================================================================
@@ -13,16 +13,19 @@ function Help {
 	local parseDefs=("$@")
 	local helpSet=$(echo $helpSet,script | tr ' ' ',')
 	local tempStr="$(ColorK "Usage:") $myName"
-	[[ $(Contains ",$helpSet," ",client,") == true ]] && hasClient=true && tempStr="$tempStr [client]"
-	tempStr="$tempStr [OPTIONS]"
 
 	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
-	Msg2; Msg2 "$tempStr"; Msg2
+	echo; echo
+	Msg2 "$myName version: $version"
+	echo
+	[[ $(Contains ",$helpSet," ",client,") == true ]] && hasClient=true && tempStr="$tempStr [client]"
+	tempStr="$tempStr [OPTIONS]"
+	Msg2 "$tempStr"
+	echo
 	## Print out header info
 		[[ $shortDescription != '' ]] && Msg2 "$(ColorK "$shortDescription.")"
-		[[ $longDescription != '' ]] && Msg2 && Msg2 "$longDescription" && Msg2
+		[[ $longDescription != '' ]] && echo && Msg2 "$longDescription" && echo
 		if [[ -n $scriptHelpDesc ]]; then
-			echo
 			for text in "${scriptHelpDesc[@]}"; do
 				Msg2 "$text"
 			done
@@ -42,7 +45,7 @@ function Help {
 		done
 		(( maxWidthMin += 1 ))
 
-	Msg2
+	echo
 	Msg2 "$(ColorK "[client]:")"
 	Msg2 "^This is the client code (abbreviation) for the client that you wish to work with."
 
@@ -72,7 +75,7 @@ function Help {
 			[[ ${argType:0:6} == 'option' ]] && optionsArray+=("$msgString") || switchesArray+=("$msgString")
 		done
 
-	Msg2
+	echo
 	Msg2 "$(ColorK "[OPTIONS]:")"
 	## Options
 		if [[ ${#optionsArray[@]} -gt 0 ]]; then
@@ -83,7 +86,7 @@ function Help {
 		fi
 	## Switches
 		if [[ ${#switchesArray[@]} -gt 0 ]]; then
-			Msg2
+			echo
 			Msg2 "^$(ColorK "Arguments without values (i.e. a flag e.g. -flag):")"
 			for msgString in "${switchesArray[@]}"; do
 				Msg2 "$msgString"
@@ -92,7 +95,7 @@ function Help {
 
 	## print out script specific help notes
 		if [[ ${#helpNotes[@]} -gt 0 ]]; then
-			Msg2
+			echo
 			Msg2 "$(ColorK "Script specific notes:")"
 			for ((cntr = 0 ; cntr < ${#helpNotes[@]} ; cntr++)); do
 				let idx=$cntr+1
@@ -101,7 +104,7 @@ function Help {
 		fi
 
 	## General help notes for all scripts
-		Msg2
+		echo
 		Msg2 "$(ColorK "General Notes:")"
 		local notesClient notesAlways notes
 		notesClient+=("The minimum abbreviations for argument flags are indicated in the $(ColorK highlight) color above.")
@@ -110,7 +113,7 @@ function Help {
 
 		notesAlways+=("All flags must be delimited from other flags by at lease one blank character.")
 		notesAlways+=("While all flags may be specified, not all of them may active.")
-		notesAlways+=("If a argument is an option with a value, and the value contains blanks/spaces, the argument value needs to be enclosed in single quotes which need to be escaped on the command line, e.g. -wo \'This is a File Name\'")
+		notesAlways+=("If a argument is an option with a value, and the value contains blanks/spaces, the argument value needs to be enclosed in single quotes which need to be escaped on the command line, e.g. -file \'This is a File Name\'")
 
 		notes=("${notesAlways[@]}")
 		[[ $hasClient == true ]] && notes=("${notesClient[@]}" "${notes[@]}")
@@ -120,7 +123,7 @@ function Help {
 			Msg2 ",,+1,,true" "$idx) $line"
 			((idx+=1))
 		done
-		Msg2
+		echo
 
 		Msg2 $V3 "*** $FUNCNAME -- Completed ***"
 		return 0
@@ -132,3 +135,4 @@ export -f Help
 #===================================================================================================
 ## Wed Jan  4 13:53:41 CST 2017 - dscudiero - General syncing of dev to prod
 ## 08-30-2017 @ 13.53.59 - (2.0.2)     - dscudiero - treat scriptHelpDescription as an array
+## 08-30-2017 @ 14.07.33 - (2.0.6)     - dscudiero - Tweak output format
