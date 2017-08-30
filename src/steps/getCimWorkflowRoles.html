@@ -15,7 +15,7 @@
 // Function wrapper
 (function getCimWorkflowRoles() {
 
-var debug=false;
+var debug=true;
 //============================================================================================================
 //Variable Declares
 //============================================================================================================
@@ -23,7 +23,7 @@ var debug=false;
 	if (cims.length == 0)
 		cims=['courseadmin','programadmin'];
 	var env='pvt';
-	var version="5.2";
+	var version="5.3";
 	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
 
 	var ignoreSteps = {
@@ -423,11 +423,12 @@ for (var i=0, tot=steps.length; i < tot; i++) {
 					}
 				}); //wfSubRulesHash[key].forEach
 				var substitutionMade=true;
-
 				break; //Stop processing wfSubRule -- only one at a time
 			} //(re.test(editString))
 		} //(key in wfSubRulesHash)
 	} //(editString != '')
+	if (! substitutionMade)
+		rolesOut.push(steps[i].stepData);
 } //(var i=0, tot=steps.length; i < tot; i++)
 
 //Write the putput to stdout
@@ -437,7 +438,7 @@ for (var i=0, tot=steps.length; i < tot; i++) {
 			print_doc(text + '\n');
 		});
 	// Roles
-		//rolesOut=rolesOut.sort();
+		rolesOut=rolesOut.sort();
 		rolesOut.forEach(function(text) {
 			if (text != '' ) print_doc(text + '\n');
 		});
