@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.72 # -- dscudiero -- Wed 08/30/2017 @ 13:53:00.22
+version=2.9.73 # -- dscudiero -- Wed 08/30/2017 @ 14:01:01.47
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -560,3 +560,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 08-30-2017 @ 09.37.22 - (2.9.45)    - dscudiero - Hack to turn off requiredGlobalFiles
 ## 08-30-2017 @ 09.38.48 - (2.9.46)    - dscudiero - Commented out the 'refreshSystem' option
 ## 08-30-2017 @ 13.55.26 - (2.9.72)    - dscudiero - Add help text
+## 08-30-2017 @ 14.07.46 - (2.9.73)    - dscudiero - move name and version to the Help file
