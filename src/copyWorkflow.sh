@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.38 # -- dscudiero -- Tue 08/29/2017 @ 13:11:45.99
+version=2.9.45 # -- dscudiero -- Wed 08/30/2017 @  9:36:12.16
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -25,6 +25,7 @@ scriptDescription="Copy workflow files"
 		argList+=(-allCims,3,switch,allCims,,script,'Process all CIM instances present')
 		argList+=(-jalot,3,option,jalot,,script,'Jalot task number')
 		argList+=(-comment,7,option,comment,,script,'Comment describing the reason for the update')
+		argList+=(-refresh,1,switch,refreshSystem,,script,'Refresh system files from the skeleton')
 	}
 	function Goodbye-copyWorkflow  { # or Goodbye-local
 		rm -rf $tmpRoot > /dev/null 2>&1
@@ -273,6 +274,9 @@ Hello
 
 	[[ $allowList != '' ]] && setDefaultYesFiles="$(cut -d':' -f2- <<< $allowList)"
 
+## Hack to turn off system files
+	unset requiredGlobalFiles
+
 	dump -1 requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles setDefaultYesFiles ifThenDelete
 
 # Initialize instance variables
@@ -295,6 +299,17 @@ Hello
 	Prompt comment "Please enter the business reason for making this update:\n^" "*any*"
 	[[ $jalot -eq 0 ]] && jalot='N/A'
 	comment="(Task:$jalot) $comment"
+
+## Get update comment
+	if [[ -z $refreshSystem ]]; then
+		[[ $verify == true ]] && echo
+		defVals='Yes'
+		Msg2 "Do you wish to refresh the system level files from the skeleton or use those found in the source"
+		unset ans ; Prompt ans "'Yes' to refresh, 'No' to use those from the source" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
+		unset defVals
+		[[ $ans == 'y' ]] && refreshSystem=true || refreshSystem=false
+	fi
+
 ## Verify continue
 	unset verifyArgs
 	verifyArgs+=("Client:$client")
@@ -302,6 +317,7 @@ Hello
 	verifyArgs+=("Target Env:$(TitleCase $tgtEnv) ($tgtDir)")
 	verifyArgs+=("Update comment:$comment")
 	verifyArgs+=("CIM(s):$cimStr")
+	verifyArgs+=("Refresh system files:$refreshSystem")
 	VerifyContinue "You are copying CIM workflow files for:"
 	dump -1 client srcEnv tgtEnv srcDir tgtDir cimStr
 
@@ -360,7 +376,8 @@ Hello
 		##  Cleanup any old backup workflow files (xxxx.yyyy, xxxx-yyyy, or ' - Copy.') in the source or target
 			[[ $srcEnv != 'pvt' && $srcEnv != 'dev' ]] && CleanupOldFiles "$cpyFile"
 
-		## Copy Filescou
+		## Copy Files
+			[[ $refreshSystem == true ]] && srcDir="$skeletonRoot/release"
 			if [[ -f $srcDir/$cpyFile ]]; then
 				srcMd5=$(md5sum $srcDir/$cpyFile | cut -f1 -d" ")
 				[[ -f $tgtDir/$cpyFile ]] && tgtMd5=$(md5sum $tgtDir/$cpyFile | cut -f1 -d" ") || unset tgtMd5
@@ -382,7 +399,7 @@ Msg2
 			Msg2 "^$file"
 		done
 		Msg2
-		unset ans; Prompt ans "Do you wish to perform a partial update to the site" 'Yes No' 'No'; ans=$(Lower ${ans:0:1});
+		unset ans defVals; Prompt ans "Do you wish to perform a partial update to the site" 'Yes No' 'No'; ans=$(Lower ${ans:0:1});
 		[[ $ans != 'y' ]] && Msg2 $W "No files have been updated" && Goodbye 1
 	fi
 
@@ -522,3 +539,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 08-28-2017 @ 11.37.12 - (2.9.32)    - dscudiero - Add checking for TODO step if target env is NEXT
 ## 08-28-2017 @ 14.29.02 - (2.9.37)    - dscudiero - Fixed check for TODO in workflow.tcf
 ## 08-29-2017 @ 13.12.12 - (2.9.38)    - dscudiero - Add warning message if a workflow contains the TODO step
+## 08-30-2017 @ 09.37.22 - (2.9.45)    - dscudiero - Hack to turn off requiredGlobalFiles
