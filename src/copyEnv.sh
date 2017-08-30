@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.90 # -- dscudiero -- Wed 08/30/2017 @ 13:02:54.52
+version=4.11.91 # -- dscudiero -- Wed 08/30/2017 @ 16:09:17.01
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -402,6 +402,7 @@ dump -1 skipCim skipCat skipClss skipAlso
 
 	previousTrapERR=$(cut -d ' ' -f3- <<< $(trap -p ERR))
 	trap - ERR
+	Msg2 -l "\nrsync $rsyncOpts $srcDir/ $tgtDir\n" 
 	rsync $rsyncOpts $srcDir/ $tgtDir
 	eval "trap $previousTrapERR"
 
@@ -620,3 +621,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 07-29-2017 @ 12.35.22 - (4.11.86)   - dscudiero - Check to see if lite and fullcopy were both specified
 ## 08-01-2017 @ 08.08.17 - (4.11.87)   - dscudiero - remove emailing to the foruser, moved to Goodbye
 ## 08-30-2017 @ 13.53.18 - (4.11.90)   - dscudiero - Added help text
+## 08-30-2017 @ 16.10.04 - (4.11.91)   - dscudiero - Send the rsync command to the logFile
