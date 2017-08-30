@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.46 # -- dscudiero -- Wed 08/30/2017 @  9:38:10.85
+version=2.9.72 # -- dscudiero -- Wed 08/30/2017 @ 13:53:00.22
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -242,42 +242,60 @@ unset copyFileList filesUpdated filesNotCopied setDefaultYesFiles
 checkFileNew=workflow.cfg
 fileSuffix="$(date +%s)"
 
+GetDefaultsData $myName
+
+## Get the files to act on from the database
+	unset requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles ifThenDelete
+	[[ -z $scriptData1 ]] && Msg2 $T "'scriptData1 (requiredInstanceFiles)' is null, please check script configuration data"
+	requiredInstanceFiles="$(cut -d':' -f2- <<< $scriptData1)"
+
+	[[ -z $scriptData2 ]] && Msg2 $T "'scriptData2 (optionalInstanceFiles)' is null, please check script configuration data"
+	optionalInstanceFiles="$(cut -d':' -f2- <<< $scriptData2)"
+
+	[[ -z $scriptData3 ]] && Msg2 $T "'scriptData3 (requiredGlobalFiles)' is null, please check script configuration data"
+	requiredGlobalFiles="$(cut -d':' -f2- <<< $scriptData3)"
+
+	[[ -z $scriptData4 ]] && Msg2 $T "'scriptData4 (optionalGlobalFiles)' is null, please check script configuration data"
+	optionalGlobalFiles="$(cut -d':' -f2- <<< $scriptData4)"
+
+	if [[ -n $scriptData5 ]]; then
+		ifThenDelete="$(cut -d':' -f2- <<< $scriptData5)"
+		ifThenDelete=$(tr ',' ';' <<< $ifThenDelete)
+		ifThenDelete=$(tr ' ' ',' <<< $ifThenDelete)
+		ifThenDelete=$(tr ';' ' ' <<< $ifThenDelete)
+	fi
+	[[ $allowList != '' ]] && setDefaultYesFiles="$(cut -d':' -f2- <<< $allowList)"
+
+## Hack to turn off system files
+## TODO
+	unset requiredGlobalFiles
+
+	dump -1 requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles setDefaultYesFiles ifThenDelete
+
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-GetDefaultsData $myName
+helpSet='script,client,env'
+scriptHelpDesc+=("This script can be used to copy workflow related files from one environment to another.")
+scriptHelpDesc+=("The actions performed are:")
+scriptHelpDesc+=("\t1) Copies CIM instance files: $(tr ',' ' ' <<< $requiredInstanceFiles) $(tr ',' ' ' <<< $optionalInstanceFiles)")
+scriptHelpDesc+=("\t2) Copies CIM instance shared files: $(tr ',' ' ' <<< $optionalGlobalFiles)")
+scriptHelpDesc+=("\t3) Copies/refreshes CourseLeaf core files: $(tr ',' ' ' <<< $requiredGlobalFiles)")
+scriptHelpDesc+=("\tEach source file is compared to the target file (using md5's) and if different the differences are displayed in a 'diff' format and the user is asked to confirm or reject the copy.")
+scriptHelpDesc+=("\tAll copied files are backed up to '$backupFolder', an entry in the changelog.txt file is made what, why, when, and who.")
+scriptHelpDesc+=("\t4) Performs workflow data checks:")
+scriptHelpDesc+=("\t\t- Checks to see of the target file structure is old (just cimconfig.cfg etc.) and the source target file structure is new (workflow.cfg etc.) and if different then it comments out the 'old' workflow elements in the target before copying files.")
+scriptHelpDesc+=("\t\t- Sets the debug level to 0.")
+scriptHelpDesc+=("\t\t- Checks for the presence of an active debug workflow (workflow:standard|START), if found the debug workflow is commented out.")
+scriptHelpDesc+=("\t\t- Checks for the presence of a TODO step in any workflow, if found and the target is NEXT then the script terminates, otherwise a warning message is displayed.")
+scriptHelpDesc+=("\t5) Finally, any old files are moved to '$backupFolder")
+scriptHelpDesc+=("\t\t- ignoreList: $(tr ',' ' ' <<< $ignoreList)")
+scriptHelpDesc+=("\t\t- ifThenDelete: $(tr ',' ' ' <<< $ifThenDelete)")
+
 ParseArgsStd
 [[ $verbose == true ]] && verboseArg='-v' || unset verboseArg
 [[ $env != '' ]] && srcEnv=$env
 Hello
-
-## Get the files to act on from the database
-	unset requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles ifThenDelete
-	[[ $scriptData1 == '' ]] && Msg2 $T "'scriptData1 (requiredInstanceFiles)' is null, please check script configuration data"
-	requiredInstanceFiles="$(cut -d':' -f2- <<< $scriptData1)"
-
-	[[ $scriptData2 == '' ]] && Msg2 $T "'scriptData2 (optionalInstanceFiles)' is null, please check script configuration data"
-	optionalInstanceFiles="$(cut -d':' -f2- <<< $scriptData2)"
-
-	[[ $scriptData3 == '' ]] && Msg2 $T "'scriptData3 (requiredGlobalFiles)' is null, please check script configuration data"
-	requiredGlobalFiles="$(cut -d':' -f2- <<< $scriptData3)"
-
-	[[ $scriptData4 == '' ]] && Msg2 $T "'scriptData4 (optionalGlobalFiles)' is null, please check script configuration data"
-	optionalGlobalFiles="$(cut -d':' -f2- <<< $scriptData4)"
-
-	if [[ $scriptData5 ]]; then
-		ifThenDelete="$(cut -d':' -f2- <<< $scriptData5)"
-		deleteThenIf=$(tr ',' ';' <<< $deleteThenIf)
-		deleteThenIf=$(tr ' ' ',' <<< $deleteThenIf)
-		deleteThenIf=$(tr ';' ' ' <<< $deleteThenIf)
-	fi
-
-	[[ $allowList != '' ]] && setDefaultYesFiles="$(cut -d':' -f2- <<< $allowList)"
-
-## Hack to turn off system files
-	unset requiredGlobalFiles
-
-	dump -1 requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles setDefaultYesFiles ifThenDelete
 
 # Initialize instance variables
 	Init 'getClient getSrcEnv getTgtEnv getDirs checkEnvs getCims'
@@ -300,15 +318,15 @@ Hello
 	[[ $jalot -eq 0 ]] && jalot='N/A'
 	comment="(Task:$jalot) $comment"
 
-# ## Get update comment
-# 	if [[ -z $refreshSystem ]]; then
-# 		[[ $verify == true ]] && echo
-# 		defVals='Yes'
-# 		Msg2 "Do you wish to refresh the system level files from the skeleton or use those found in the source"
-# 		unset ans ; Prompt ans "'Yes' to refresh, 'No' to use those from the source" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
-# 		unset defVals
-# 		[[ $ans == 'y' ]] && refreshSystem=true || refreshSystem=false
-# 	fi
+## Get update comment
+	if [[ -z $refreshSystem && -n "$requiredGlobalFiles" ]]; then
+		[[ $verify == true ]] && echo
+		defVals='Yes'
+		Msg2 "Do you wish to refresh the system level files from the skeleton or use those found in the source"
+		unset ans ; Prompt ans "'Yes' to refresh, 'No' to use those from the source" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
+		unset defVals
+		[[ $ans == 'y' ]] && refreshSystem=true || refreshSystem=false
+	fi
 
 ## Verify continue
 	unset verifyArgs
@@ -317,7 +335,7 @@ Hello
 	verifyArgs+=("Target Env:$(TitleCase $tgtEnv) ($tgtDir)")
 	verifyArgs+=("Update comment:$comment")
 	verifyArgs+=("CIM(s):$cimStr")
-	#verifyArgs+=("Refresh system files:$refreshSystem")
+	[[ $refreshSystem == true ]] && verifyArgs+=("Refresh system files:$refreshSystem")
 	VerifyContinue "You are copying CIM workflow files for:"
 	dump -1 client srcEnv tgtEnv srcDir tgtDir cimStr
 
@@ -452,7 +470,7 @@ Msg2
 
 ## Delete obsolete files
 	for cim in $(echo $cimStr | tr ',' ' '); do
-		for filePair in $deleteThenIf; do
+		for filePair in $ifThenDelete; do
 			checkSrcFile=$(cut -d ',' -f1 <<< $filePair); checkTgtFile=$(cut -d ',' -f2 <<< $filePair)
 			[[ ${checkSrcFile:0:1} == '/' ]] && checkSrcFile="$srcDir/web${checkSrcFile}" || checkSrcFile="$srcDir/web/$cim/${checkSrcFile}"
 			[[ ${checkTgtFile:0:1} == '/' ]] && checkTgtFile="$tgtDir/web${checkTgtFile}" || checkTgtFile="$tgtDir/web/$cim/${checkTgtFile}"
@@ -541,3 +559,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 08-29-2017 @ 13.12.12 - (2.9.38)    - dscudiero - Add warning message if a workflow contains the TODO step
 ## 08-30-2017 @ 09.37.22 - (2.9.45)    - dscudiero - Hack to turn off requiredGlobalFiles
 ## 08-30-2017 @ 09.38.48 - (2.9.46)    - dscudiero - Commented out the 'refreshSystem' option
+## 08-30-2017 @ 13.55.26 - (2.9.72)    - dscudiero - Add help text
