@@ -1,7 +1,4 @@
 
-%import /courseadmin/workflowFuncs.atj:atj%
-%import /programadmin/workflowFuncs.atj:atj%
-
 %spidercode%
 //%import /courseadmin/workflowVarValMapperFunctions.atj:atj%
 //%import /programadmin/workflowValueMappingFunctions.atj:atj%
@@ -13,9 +10,10 @@
 // 08/08/17 - dgs -	Added call back to the code mapping functions if defined.
 // 08/08/17 - dgs -	Add the cim instance name to the output, if the value was mapped also include the unmapped value.
 // 08/25/17 - dgs -	make sure that we add the real departement code to the subruleshash even if it is not mapped.
+// 08/30/17 - dgs -	Clean up debug messaging, fix problem adding the raw step text to the output array
 //============================================================================================================
 // Function wrapper
-(function getCimRoles() {
+(function getCimWorkflowRoles() {
 
 var debug=false;
 //============================================================================================================
@@ -25,7 +23,7 @@ var debug=false;
 	if (cims.length == 0)
 		cims=['courseadmin','programadmin'];
 	var env='pvt';
-	var version="5.0";
+	var version="5.2";
 	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
 
 	var ignoreSteps = {
@@ -44,34 +42,34 @@ var debug=false;
 //Headings
 //============================================================================================================
 	var header=[];;
-	header.push("Step Version:" + version);
-	header.push("");
-	header.push("Instructions -- Please read before completing, if you have questions please contact your Client Services Manager");
-	header.push("   1 - Please provide information for only those roles that will actually be active in the workflow.");
-	header.push("       If a role is not going to be used in the workflow then please DELETE the line from the spreadsheet.");
-	header.push("")
-	header.push("   2 - Role Members -- Userids should be seperated with commas, no blanks please.  If your institution uses user ID NUMBERS");
-	header.push("       (UINs) as your login id then please specify the UIN for this data, failure to do so will result in a");
-	header.push("       non-functional role.");
-	header.push("")
-	header.push("   3 - Email Override -- Note: This data field only applies to \'approver\' steps in the workflow, not \'fyi\' or \'fyiall\' steps.");
-	header.push("       - Leave to blank to notify only the first indvidual in the userid list.");
-	header.push("       - Set to \'all\' to notify all indviduals in the userid list.  Note if the role has an \'fyiall\' directive");
-	header.push("         then please do not specify all here.");
-	header.push("       - Set to \'none\' to send out no notifications.");
-	header.push("       - Othewise the specified address will be used for emails for this role.  you only need to specify if you want");
-	header.push("         Note: You should only need to specify if you want a different email than what would be normally used for the");
-	header.push("         users in the role.  Please do not specify if you are NOT overriding the normal user email addresses.");
-	header.push("")
-	header.push("Notes:");
-	header.push("   1) Data for college, department, and subject code values is pulled from the data provided in the CIM \'codes\' table.");
-  	header.push("   2) If any particular role is not going to be used (e.g. the department does not have a Chair),");
-   	header.push("      then please remove that line from this spreadsheet.");
-	header.push("   3) If there is preexisting member data for a role it is added in below as a startint point.");
-	header.push("   4) Order is alphabetic by step name before substitution.");
-	header.push("   5) Roles below are a composite of all roles from workflows in: " + cims + ".");
-	header.push("   6) Any user accounts listed in the roles are expected to be pre-provisioned and will not be created by the load script.");
-	header.push("")
+	// header.push("Step Version:" + version);
+	// header.push("");
+	// header.push("Instructions -- Please read before completing, if you have questions please contact your Client Services Manager");
+	// header.push("   1 - Please provide information for only those roles that will actually be active in the workflow.");
+	// header.push("       If a role is not going to be used in the workflow then please DELETE the line from the spreadsheet.");
+	// header.push("")
+	// header.push("   2 - Role Members -- Userids should be seperated with commas, no blanks please.  If your institution uses user ID NUMBERS");
+	// header.push("       (UINs) as your login id then please specify the UIN for this data, failure to do so will result in a");
+	// header.push("       non-functional role.");
+	// header.push("")
+	// header.push("   3 - Email Override -- Note: This data field only applies to \'approver\' steps in the workflow, not \'fyi\' or \'fyiall\' steps.");
+	// header.push("       - Leave to blank to notify only the first indvidual in the userid list.");
+	// header.push("       - Set to \'all\' to notify all indviduals in the userid list.  Note if the role has an \'fyiall\' directive");
+	// header.push("         then please do not specify all here.");
+	// header.push("       - Set to \'none\' to send out no notifications.");
+	// header.push("       - Othewise the specified address will be used for emails for this role.  you only need to specify if you want");
+	// header.push("         Note: You should only need to specify if you want a different email than what would be normally used for the");
+	// header.push("         users in the role.  Please do not specify if you are NOT overriding the normal user email addresses.");
+	// header.push("")
+	// header.push("Notes:");
+	// header.push("   1) Data for college, department, and subject code values is pulled from the data provided in the CIM \'codes\' table.");
+ //  	header.push("   2) If any particular role is not going to be used (e.g. the department does not have a Chair),");
+ //   	header.push("      then please remove that line from this spreadsheet.");
+	// header.push("   3) If there is preexisting member data for a role it is added in below as a startint point.");
+	// header.push("   4) Order is alphabetic by step name before substitution.");
+	// header.push("   5) Roles below are a composite of all roles from workflows in: " + cims + ".");
+	// header.push("   6) Any user accounts listed in the roles are expected to be pre-provisioned and will not be created by the load script.");
+	// header.push("")
 	header.push("Role Name\tRole Members (Comma seperated userids)\tEmail Override (Please see above)\tSubstitution variables/values (FYI only, not used by workflow)");
 
 //============================================================================================================
@@ -166,9 +164,13 @@ var cimconfigData = load_tcf('/courseadmin/cimconfig.cfg');
 if (cimconfigData && cimconfigData.sisname) { sisName=cimconfigData.sisname[0] }
 if (debug) { wfDump("sisName",sisName); }
 
+// Add run info to the output
+	print_doc('\n' + myName + 'version: ' + version + '\n');
+	print_doc(new Date() + '\n');
+
 // Build a list of workflow steps from cims workflow.tcf files (see cims definition)
 	print_doc('\nEnvironment: ' + env + '\n');
- 	var idx, str, steps=[], conditionals=[], functions=[], tempArray=[], errorDetected=false, wfSubRulesHash=[];
+ 	var idx, str, steps=[], conditionals=[], functions=[], tempArray=[], errorDetected=false, wfSubRulesHash=[], stepsHash=[];
 	cims.forEach(function(cim) {
 		var workflowTcfData = load_tcf('/' + cim + '/workflow.tcf');
 		if (workflowTcfData) {
@@ -222,7 +224,7 @@ if (debug) { wfDump("sisName",sisName); }
 			}
 			// Loop through wfSubRules data
 			if (cimconfigTcfData) {
-				print_doc('\tProcessing wfSubRules\n' );
+				print_doc('\nProcessing wfSubRules\n' );
 				if (cimconfigTcfData.wfSubRule) {
 					//if (debug) { print_doc('cimconfigTcfData.wfSubRule >' + cimconfigTcfData.wfSubRule.toSource()  + '<\n') }
 					// wfSubRule:Col|SELECT code,name FROM codedesc WHERE setname="college" and rank >= 0 order by code  -or-
@@ -231,7 +233,7 @@ if (debug) { wfDump("sisName",sisName); }
 						var idx1=text.indexOf("|");
 						var subRuleName=text.substr(0,idx1);
 						var subRuleText=text.substr(idx1+1);
-						wfDump('\twfSubRule',text); wfDump('\t\tsubRuleName',subRuleName); wfDump('\t\tsubRuleText',subRuleText);
+						wfDump('\n\twfSubRule',text); wfDump('\t\tsubRuleName',subRuleName); wfDump('\t\tsubRuleText',subRuleText);
 
 						// If we have not already processed this rule then create a new hash table element for the rulename
 						if (wfSubRulesHash[subRuleName] == undefined) {
@@ -296,7 +298,7 @@ if (debug) { wfDump("sisName",sisName); }
 							// 	wfSubRulesHash[subRuleName].origCode=token.code;
 							// }
 
-							wfDump("\nwfSubRulesHash",wfSubRulesHash[subRuleName].toSource())
+							//wfDump("\n\t\twfSubRulesHash",wfSubRulesHash[subRuleName].toSource())
 					}); // wfSubRules
 				} else {
 					print_doc('\n\t* Warning * -- could not find any wfSubRules defined in ' + cim + ' cimconfig.cfg file.\n\tStopping\n\n');
@@ -307,12 +309,12 @@ if (debug) { wfDump("sisName",sisName); }
 				errorDetected=true;
 			}
 		}
-	}); //cims
+	}); //cims.forEach(function(cim)
 
 	if (debug) {
-		print_doc('\nFound ' + Object.keys(wfSubRulesHash).length + ' subRules...\n');
+		print_doc('\n\nFound ' + Object.keys(wfSubRulesHash).length + ' subRules...\n');
 		for (var key in wfSubRulesHash) {
-			wfDump("\twfSubRulesHash[" + key + "]",wfSubRulesHash[key].toSource())
+			wfDump("\n\twfSubRulesHash[" + key + "]",wfSubRulesHash[key].toSource())
 		}
 		wfDump('');
 	}
@@ -326,13 +328,18 @@ if (debug) { wfDump("sisName",sisName); }
 	conditionals.sort();
 	conditionals=RemoveDupes(conditionals);
 	conditionals.reverse();
-	if (debug) {print_doc('Found ' + conditionals.length + ' step attributes...\n'); }
+	if (debug) {
+		print_doc('Found ' + conditionals.length + ' step conditionals...\n'); 
+		conditionals.forEach(function(text) {
+			print_doc('\tconditional >' + text.toSource() + '<\n');
+		});//steps
+		print_doc('\n');
+	}
 
-	// Pre-process the steps array: 1) remove the conditionals strings from the steps, 2)remove the steps that are function calls; 3) remove dups
+	// Pre-process the steps array: 1) remove the conditionals strings from the steps, 2)remove the steps that are function calls, 3) Combine cimInstance data for duplicate steps, 4) remove dups
 		//wfDump("\nsteps before pre-processing:",steps.toSource())
 		steps.sort(compare);
 		for (var i=0,  tot=steps.length; i < tot; i++) {
-			// conditionals
 			var stepData=steps[i].stepData
 			conditionals.forEach(function(conditional) {
 				stepData=stepData.replace(conditional,'').trim();
@@ -346,14 +353,20 @@ if (debug) { wfDump("sisName",sisName); }
 				}
 			}
 		}
+
 		// Remove empty records and duplicates
-		var tmpArray=[], tmpStr1='', tmpStr2='';
+		var tmpArray=[], tmpStr1='', tmpStepPrev='', tmpInstancePrev='';
 		for (var i=0,  tot=steps.length; i < tot; i++) {
 			tmpStr1=steps[i].stepData
 			if (steps[i].stepData === '' && steps[i].cimInstance === '') continue;
-			if (tmpStr1 === tmpStr2) continue;
+			if (tmpStr1 === tmpStepPrev) {
+				if (steps[i].cimInstance != tmpInstancePrev)
+					tmpArray[tmpArray.length - 1].cimInstance=tmpArray[tmpArray.length - 1].cimInstance + ", " + steps[i].cimInstance;
+				continue;
+			}
 			tmpArray.push(steps[i]);
-			tmpStr2=tmpStr1;
+			tmpStepPrev=steps[i].stepData;
+			tmpInstancePrev=steps[i].cimInstance;
 		}
 		steps=tmpArray;
 		//wfDump("\nsteps after pre-processing:",steps.toSource())
@@ -364,6 +377,7 @@ if (debug) { wfDump("sisName",sisName); }
 			steps.forEach(function(step) {
 				print_doc('\tstep >' + step.toSource() + '<\n');
 			});//steps
+			print_doc('\n');
 		}
 
 //============================================================================================================
@@ -376,29 +390,29 @@ var rolesOut=[], expandedSteps=[], editString='';
 //i=0; while (true) {
 for (var i=0, tot=steps.length; i < tot; i++) {
 	editString=steps[i].stepData;
-	if (debug) { print_doc('editString 1 = >' + editString + '<\n'); }
+	if (debug) { print_doc('step = >' + editString + '<\n'); }
 	if (editString != '') {
 		//Loop through substituted variable names
 		var substitutionMade=false;
 		for (var key in wfSubRulesHash) {
 			subsFound=false;
 			re = new RegExp("\\b" + key + "\\b", "g");
-			if (debug) { print_doc("\tkey: '" + key + "'\tre: '" + re + "'\n") }
+			//if (debug) { print_doc("\tkey: '" + key + "'\tre: '" + re + "'\n") }
 			if (re.test(editString)) {
 				if (debug) { print_doc("\tSubstitute: '" + key + "' into '" + editString + "'\n"); }
 				subsFound=true;
-				rolesOut[i]='';
+				//rolesOut[i]='';
 				wfSubRulesHash[key].forEach(function(token) {
-if (debug) { print_doc("\ntoken: " + token.toSource() ) }
-					if (debug) { print_doc("\t\ttoken.code: " + token.code + ", token.name: " + token.name + "\n" ) }
+					//if (debug) { print_doc("\t\ttoken: " + token.toSource() ) ; print_doc("\t\ttoken.code: " + token.code + ", token.name: " + token.name + "\n" ) }
 					if (typeof token.code === 'undefined') { var repString=token.name; } else { var repString=token.code; }
 					// Make the strign substitution
 					var str=editString.replace(re,repString);
-					if (debug) { print_doc("\teditString (" + key + ") = " + str + "\n") }
+					//if (debug) { print_doc("\t\teditString (" + key + ") = " + str + "\n") }
+					if (debug) { print_doc("\t\t" + str + "\n") }
 
 					//If there are role members, then add to output string
 					if (rolesHash[str] != undefined ) {
-						if (debug) { print_doc('\t\t\trolesHash['+str+'] = >' + rolesHash[str].toSource() + '<\n'); }
+						//if (debug) { print_doc('\t\t\trolesHash['+str+'] = >' + rolesHash[str].toSource() + '<\n'); }
 						str=str + '\t' + rolesHash[str].members.toString() + '\t' + rolesHash[str].email.toString() + '\t';
 					} else {
 						if (str.indexOf("\t") < 0 ) { str=str + '\t\t\t' }
@@ -411,26 +425,24 @@ if (debug) { print_doc("\ntoken: " + token.toSource() ) }
 					}
 				}); //wfSubRulesHash[key].forEach
 				var substitutionMade=true;
+
 				break; //Stop processing wfSubRule -- only one at a time
 			} //(re.test(editString))
 		} //(key in wfSubRulesHash)
 	} //(editString != '')
-
-	//subsFound=false;
-	rolesOut.push(steps[i].stepData + "\t\t\t" + steps[i].cimInstance);
 } //(var i=0, tot=steps.length; i < tot; i++)
 
 //Write the putput to stdout
-// Header
-	print_doc('\n');
-	header.forEach(function(text) {
-		print_doc(text + '\n');
-	});
-// Roles
-	rolesOut=rolesOut.sort();
-	rolesOut.forEach(function(text) {
-		if (text != '') print_doc( text + '\n');
-	});
+	// Header
+		print_doc('\n');
+		header.forEach(function(text) {
+			print_doc(text + '\n');
+		});
+	// Roles
+		//rolesOut=rolesOut.sort();
+		rolesOut.forEach(function(text) {
+			if (text != '' ) print_doc(text + '\n');
+		});
 
 return;
 
