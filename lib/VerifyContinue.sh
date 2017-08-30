@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.13" # -- dscudiero -- Tue 04/25/2017 @  8:13:25.03
+# version="2.0.16" # -- dscudiero -- Wed 08/30/2017 @ 15:14:14.87
 #===================================================================================================
 ## Make sure the user really wants to do this
 ## If the first argument is 'loop' then loop back to self if user responds with 'n'
@@ -26,9 +26,10 @@ function VerifyContinue {
 		dots=$(PadChar '.' $maxArgWidth)
 		for arg in "${verifyArgs[@]}"; do
 			tempStr="$(echo $arg | cut -d':' -f1)"
+			[[ $(Lower "$tempStr") == 'warning' ]] && color='ColorW' || color='ColorK'
 			tempStr="${tempStr}${dots}"
 			tempStr=${tempStr:0:$maxArgWidth+3}
-			Msg2 '-,-,+1' "$(ColorK ${tempStr})$(echo $arg | cut -d':' -f2-)"
+			Msg2 '-,-,+1' "$(eval "$color \"${tempStr}\"")$(echo $arg | cut -d':' -f2-)"
 		done
 		[[ $testMode == true ]] && Msg2 '-,-,1' "$(ColorE "*** Running in Test Mode ***")"
 		[[ $informationOnlyMode == true ]] && Msg2 '-,-,1' "$(ColorE "*** Information only mode ***")"
@@ -58,3 +59,4 @@ export -f VerifyContinue
 ## Wed Jan  4 13:54:38 CST 2017 - dscudiero - General syncing of dev to prod
 ## 04-13-2017 @ 10.35.46 - ("2.0.12")  - dscudiero - Add ability to specify a default value
 ## 04-25-2017 @ 08.38.30 - ("2.0.13")  - dscudiero - Skip prompt if go=true
+## 08-30-2017 @ 15.15.40 - ("2.0.16")  - dscudiero - use ColorW for warning messages
