@@ -428,7 +428,7 @@ for (var i=0, tot=steps.length; i < tot; i++) {
 		} //(key in wfSubRulesHash)
 	} //(editString != '')
 	if (! substitutionMade)
-		rolesOut.push(steps[i].stepData);
+		rolesOut.push(steps[i].stepData + '\t\t\t(' + steps[i].cimInstance  + ')');
 } //(var i=0, tot=steps.length; i < tot; i++)
 
 //Write the putput to stdout
