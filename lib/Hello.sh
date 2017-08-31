@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.31" # -- dscudiero -- Fri 06/02/2017 @ 15:24:37.87
+# version="2.0.32" # -- dscudiero -- Thu 08/31/2017 @ 15:48:01.36
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -29,10 +29,10 @@ function Hello {
 	# echo "\$0 = $0"
 	# [[ ${0:0:6} == '/home/' ]] && Msg2 "$(ColorW "*** Running from a local directory")"
 
-	[[ $testMode == true ]] && Msg2 "$(ColorW "*** Running in Testmode")"
+	[[ $testMode == true ]] && Msg2 "$(ColorW "*** Running in Testmode ***")"
 	[[ "$DOIT" != ''  ]] && Msg2 "$(ColorW "*** The 'Doit' flag is turned off, changes not committed")"
 	[[ "$informationOnlyMode" == true  ]] && Msg2 "$(ColorW "*** The 'informationOnly' flag is set, changes not committed")"
-	[[ $userName != $checkName ]] && Msg2 "$(ColorW "*** Running as user $userName")"
+	[[ $userName != $checkName ]] && Msg2 "$(ColorW "*** Running as user $userName ***")"
 
 	echo
 
@@ -63,3 +63,4 @@ export -f Hello
 ## Wed Jan 11 07:51:01 CST 2017 - dscudiero - Switch to use ProcessLogger
 ## Fri Jan 20 13:20:56 CST 2017 - dscudiero - Do not show arguments if they are blank
 ## 06-02-2017 @ 15.24.54 - ("2.0.31")  - dscudiero - Remove the running local message
+## 08-31-2017 @ 15.48.35 - ("2.0.32")  - dscudiero - Tweak messaging
