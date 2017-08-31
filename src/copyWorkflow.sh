@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.75 # -- dscudiero -- Wed 08/30/2017 @ 15:07:44.93
+version=2.9.77 # -- dscudiero -- Thu 08/31/2017 @  7:52:21.61
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -334,6 +334,10 @@ Hello
 	[[ -r "$srcDir/web/courseleaf/cim/clver.txt" ]] && srcCimVer=$(cat "$srcDir/web/courseleaf/cim/clver.txt")
 	[[ -r "$tgtDir/web/courseleaf/clver.txt" ]] && tgtClVer=$(cat "$tgtDir/web/courseleaf/clver.txt")
 	[[ -r "$tgtDir/web/courseleaf/cim/clver.txt" ]] && tgtCimVer=$(cat "$tgtDir/web/courseleaf/cim/clver.txt")
+	[[ $srcClVer != $tgtClVer ]] && [[ $tgtEnv == 'next' ]] && \
+		Terminate "CourseLeaf version for source ($srcClVer) not the same as target ($tgtClVer)"
+	[[ $srcCimVer != $tgtCimVer ]] && [[ $tgtEnv == 'next' ]] && \
+		Terminate "CIM version for source ($srcCimVer) not the same as target ($tgtCimVer)"
 
 ## Verify continue
 	unset verifyArgs
@@ -571,3 +575,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 08-30-2017 @ 13.55.26 - (2.9.72)    - dscudiero - Add help text
 ## 08-30-2017 @ 14.07.46 - (2.9.73)    - dscudiero - move name and version to the Help file
 ## 08-30-2017 @ 15.16.12 - (2.9.75)    - dscudiero - Add a check to make sure the courseleaf or cim versions are the same from src to target
+## 08-31-2017 @ 07.54.14 - (2.9.77)    - dscudiero - If clver or cimver differ and target is next then terminaete
