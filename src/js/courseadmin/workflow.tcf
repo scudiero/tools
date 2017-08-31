@@ -1,55 +1,16 @@
 //======================================================================================================================
-// version:1.0.4 // -- dscudiero -- Mon 08/28/2017 @ 11:42:52.17
+// version:1.0.5 // -- dscudiero -- Thu 08/31/2017 @ 11:15:42.73
 //======================================================================================================================
 // ??/??/17 -- dgs -- initial -- ??
 //======================================================================================================================
-localsteps:Course Workflow Management|
-	groups|
-	workflow|
-	attributes=
-	isNew[New Course],
-	isNotNew[Not New],
-	isEdit[Course Change],
-	isNotEdit[Not Course Change],
-	isDelete[Course Delete],
-	isNotDelete[Not Course Delete],
-	fyi[FYI Only],
-	fyiall[FYI All],
-	todo[ToDo Item],
-	optional[If Role Exists];
-	buttonlabel=Save;
-	lookuptypes=user,
-	role,
-	workflow;
-	memberlabel=Step;
-
-
+localsteps:Course Workflow Management|groups|workflow|attributes=isUndergraduate[Is Undergraduate],isGraduate[Is Graduate],isGenEd[Is General Education],isNew[New Course],isNotNew[Not New],isEdit[Course Change],isNotEdit[Not Course Change],isDelete[Course Delete],isNotDelete[Not Course Delete],fyi[FYI Only],fyiall[FYI All],todo[ToDo Item],optional[If Role Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
 
 template:custom
 pageflags:autoapprove
 
+workflow:standard|TODO,Depts Chair,Cols Dean,Curriculum Committee fyiall, Curriculum Committee Chair,Registrar,AddSisStep
 
-workflow:standard|
-	TODO,
-	Depts Chair,
-	Cols Dean,
-	Curriculum Committee fyiall,
-	 Curriculum Committee Chair,
-	Registrar,
-	AddSisStep
-
-//workflow:standard|
-	START,
-	College: 'Col',
-	Department: 'Dept',
-	Subject: 'Subj',
-	[Is New] isNew,
-	[Not New] isNotNew,
-	[Course Change] isEdit,
-	[Not Course Change] isNotEdit,
-	[Course Delete] isDelete,
-	[Not Course Delete] isNotDelete,
-	END
+//workflow:standard|START,College: 'Col',Department: 'Dept',Subject: 'Subj',[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is General Education] isGenEd,[Is New] isNew,[Not New] isNotNew,[Course Change] isEdit,[Not Course Change] isNotEdit,[Course Delete] isDelete,[Not Course Delete] isNotDelete,END
 
 //======================================================================================================================
 // Check in log
@@ -59,5 +20,6 @@ workflow:standard|
 // 04-14-2017 @ 07.26.39 - (//)        - dscudiero - remove the's steps
 // 05-03-2017 @ 11.17.35 - (//)        - dscudiero - General syncing of dev to prod
 // 08-28-2017 @ 11.45.36 - (52.17)     - dscudiero - Add TODO step
-// 08-31-2017 @ 09.55.48 - (52.17)     - dscudiero - 
+// 08-31-2017 @ 09.55.48 - (52.17)     - dscudiero -
 // 08-31-2017 @ 09.56.02 - (52.17)     - dscudiero - General syncing of dev to prod
+// 08-31-2017 @ 11.16.47 - (42.73)     - dscudiero - Added undergraduat, graduate, and gened to the default setup
