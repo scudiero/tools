@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.92 # -- dscudiero -- Wed 08/30/2017 @ 16:25:29.16
+version=4.11.100 # -- dscudiero -- Thu 08/31/2017 @ 16:01:35.50
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -64,7 +64,19 @@ function parseArgs-copyEnv {
 }
 function Goodbye-copyEnv {
 	SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
+	return 0
 }
+
+function testMode-copyEnv  { # or testMode-local
+	[[ $hostName == 'mojave' ]] && client='worcester' || client='apus'
+	env='next'
+	srcDir="$HOME/testData/next"
+	srcEnv="next"
+	tgtDir="$HOME/testData/test"
+	tgtEnv="test"
+	return 0
+}
+
 
 #==================================================================================================
 # Declare local variables and constants
@@ -209,7 +221,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 	if [[ -d $tgtDir && $overlay == false  && $refresh == false ]]; then
 		Msg2
 		unset ans
-		WarningMsg "Target site ($tgtDir) already existes."
+		Warning "Target site ($tgtDir) already existes."
 		Prompt ans "Do you wish to $(ColorK 'overwrite') the existing site (Yes) or $(ColorK 'refresh') files in the existing sites site (No) ?" 'Yes No' 'Yes' ; ans=$(Lower ${ans:0:1})
 		[[ $ans == 'y' ]] && cloneMode='Replace' || cloneMode='Refresh'
 	fi
@@ -506,6 +518,10 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 	## touch clone data and source file in root
 		$DOIT rm -f $tgtDir/.clonedFrom-* > /dev/null 2>&1
 		$DOIT touch $tgtDir/.clonedFrom-$env
+
+	echo
+	Info "To act on private dev sites within the 'scripts' family of scripts you should specify 'pvt' as the environment name."
+	Info "Remember you can use the 'cleanDev' script to easily remove private dev sites."
 else
 	echo
 	Warning "Target of copy is '$tgtEnv', you should manually check the publising settings in $progDir.cfg"
@@ -528,11 +544,6 @@ fi
 
 #==================================================================================================
 ## Bye-bye
-#printf "0: noDbLog = '$noDbLog', myLogRecordIdx = '$myLogRecordIdx'\n" >> ~/stdout.txt
-#[[ $quiet == true || $quiet == 1 ]] && quiet=0 || Alert
-echo
-Info "To act on private dev sites within the 'scripts' family of scripts you should specify 'pvt' as the environment name."
-Info "Remember you can use the 'cleanDev' script to easily remove private dev sites."
 [[ -n $asSite ]] && msgText="$(ColorK "$(Upper $asSite)")" || msgText="$(ColorK "$(Upper $client)")"
 
 [[ $startWizdebug == true ]] && Call 'wizdebug' 'bash:sh' "$client" "-${tgtEnv}"
@@ -624,3 +635,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 08-30-2017 @ 13.53.18 - (4.11.90)   - dscudiero - Added help text
 ## 08-30-2017 @ 16.10.04 - (4.11.91)   - dscudiero - Send the rsync command to the logFile
 ## 08-30-2017 @ 16.26.18 - (4.11.92)   - dscudiero - Dump the rsyncCtrl file to the logFile
+## 08-31-2017 @ 16.04.18 - (4.11.100)  - dscudiero - Tweak messaging
