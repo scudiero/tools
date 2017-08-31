@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.79 # -- dscudiero -- Thu 08/31/2017 @  9:57:12.73
+version=2.9.80 # -- dscudiero -- Thu 08/31/2017 @ 10:03:15.46
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -295,6 +295,8 @@ scriptHelpDesc+=("\t\t- ifThenDelete: $(tr ',' ' ' <<< $ifThenDelete)")
 
 [[ $verbose == true ]] && verboseArg='-v' || unset verboseArg
 [[ $env != '' ]] && srcEnv=$env
+
+ParseArgsStd
 Hello
 
 # Initialize instance variables
@@ -577,3 +579,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 08-30-2017 @ 15.16.12 - (2.9.75)    - dscudiero - Add a check to make sure the courseleaf or cim versions are the same from src to target
 ## 08-31-2017 @ 07.54.14 - (2.9.77)    - dscudiero - If clver or cimver differ and target is next then terminaete
 ## 08-31-2017 @ 09.57.31 - (2.9.79)    - dscudiero - add -norefresh optiona
+## 08-31-2017 @ 10.06.22 - (2.9.80)    - dscudiero - remove debug stuff
