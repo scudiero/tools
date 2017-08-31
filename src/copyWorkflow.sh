@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.77 # -- dscudiero -- Thu 08/31/2017 @  7:52:21.61
+version=2.9.79 # -- dscudiero -- Thu 08/31/2017 @  9:57:12.73
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -26,6 +26,7 @@ scriptDescription="Copy workflow files"
 		argList+=(-jalot,3,option,jalot,,script,'Jalot task number')
 		argList+=(-comment,7,option,comment,,script,'Comment describing the reason for the update')
 		argList+=(-refresh,1,switch,refreshSystem,,script,'Refresh system files from the skeleton')
+		argList+=(-norefresh,3,switch,refreshSystem,refreshSystem=false,script,'Do not refresh system files from the skeleton')
 	}
 	function Goodbye-copyWorkflow  { # or Goodbye-local
 		rm -rf $tmpRoot > /dev/null 2>&1
@@ -292,7 +293,6 @@ scriptHelpDesc+=("\t5) Finally, any old files are moved to '$backupFolder")
 scriptHelpDesc+=("\t\t- ignoreList: $(tr ',' ' ' <<< $ignoreList)")
 scriptHelpDesc+=("\t\t- ifThenDelete: $(tr ',' ' ' <<< $ifThenDelete)")
 
-ParseArgsStd
 [[ $verbose == true ]] && verboseArg='-v' || unset verboseArg
 [[ $env != '' ]] && srcEnv=$env
 Hello
@@ -576,3 +576,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 08-30-2017 @ 14.07.46 - (2.9.73)    - dscudiero - move name and version to the Help file
 ## 08-30-2017 @ 15.16.12 - (2.9.75)    - dscudiero - Add a check to make sure the courseleaf or cim versions are the same from src to target
 ## 08-31-2017 @ 07.54.14 - (2.9.77)    - dscudiero - If clver or cimver differ and target is next then terminaete
+## 08-31-2017 @ 09.57.31 - (2.9.79)    - dscudiero - add -norefresh optiona
