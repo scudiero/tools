@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.75 # -- dscudiero -- Mon 08/28/2017 @  7:28:17.96
+version=2.2.76 # -- dscudiero -- Thu 08/31/2017 @  7:42:54.91
 #====================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye ParseCourseleafFile' #imports="$imports "
@@ -51,6 +51,7 @@ saveAll=false
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
+[[ $userName == 'dscudiero' ]] && Here SW0
 helpSet="client,env,script,cims"
 GetDefaultsData $myName
 ParseArgsStd
@@ -71,7 +72,9 @@ else
 	backupFolder="$tmpRoot/$myName/$client-$env-$BASHPID/$myName"
 fi
 
-#dump isMe daemon siteFile client env srcDir cimStr backupFolder
+[[ $userName == 'dscudiero' ]] && Here SW1
+dump isMe daemon siteFile client env srcDir cimStr backupFolder scriptData1 scriptData2 scriptData3 scriptData4
+
 dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 ## Get the files to act on from the database
 	unset requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles
@@ -114,6 +117,7 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 #==================================================================================================
 ## Backup the folders
 	echo
+[[ $userName == 'dscudiero' ]] && Here SW2
 	[[ -d $backupFolder ]] && rm -rf $backupFolder || mkdir -p "$backupFolder"
 	## Insance files
 		for dir in $(echo $cimStr | tr ',' ' '); do
@@ -126,6 +130,7 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 			done
 		done #CIMs
 
+[[ $userName == 'dscudiero' ]] && Here SW3
 	## Global files
 		Msg2 "Saving: System files"
 			for file in $(echo "$requiredGlobalFiles $optionalGlobalFiles" | tr ',' ' '); do
@@ -135,6 +140,8 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 				fi
 			done
 
+[[ $userName == 'dscudiero' ]] && Here SW4
+
 	## Tar up the workflow files
 	pushd "$backupFolder" >& /dev/null
 	numFiles=$(find .//. ! -name . -print | grep -c //)
@@ -142,6 +149,7 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 		tarDir=$localClientWorkFolder/$client/workflowBackups
 		[[ ! -d $tarDir ]] && mkdir -p "$tarDir"
 		tarFile="$tarDir/${env}--$backupSuffix.tar.gz"
+dump isMe tarFile
 		ProtectedCall "tar -cpzf \"$tarFile\" ./*"; rc=$?
 		[[ $rc -ne 0 ]] && Error "Non-zero return code from tar"
 		cd ..
@@ -150,6 +158,7 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 		Error "$myName: No files to save"
 	fi
 	popd >& /dev/null
+[[ $userName == 'dscudiero' ]] && Here SW5
 
 
 #==================================================================================================
@@ -178,3 +187,4 @@ Goodbye 0
 ## 06-13-2017 @ 08.50.14 - (2.2.73)    - dscudiero - Add debug statement
 ## 06-13-2017 @ 08.51.01 - (2.2.74)    - dscudiero - General syncing of dev to prod
 ## 08-28-2017 @ 07.28.29 - (2.2.75)    - dscudiero - turn off debug statement
+## 08-31-2017 @ 07.43.10 - (2.2.76)    - dscudiero - add debug stuff
