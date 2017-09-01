@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.95 # -- dscudiero -- Fri 09/01/2017 @  9:31:07.76
+version=2.9.97 # -- dscudiero -- Fri 09/01/2017 @  9:48:35.60
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -73,13 +73,6 @@ scriptDescription="Copy workflow files"
 		echo -e "\t\t- Sets the debug level to 0."
 		echo -e "\t\t- Checks for the presence of an active debug workflow (workflow:standard|START), if found the debug workflow is commented out."
 		echo -e "\t\t- Checks for the presence of a TODO step in any workflow, if found and the target is NEXT then the script terminates, otherwise a warning message is displayed."
-		(( bullet++ ))
-		if [[ -n "$ignoreList" ]]; then
-			echo -e "\t$bullet) Old files are moved to '$backupFolder"
-			for file in $(tr ',' ' ' <<< $ignoreList); do
-				echo -e "\t\t- $file"
-			done
-		fi
 		(( bullet++ ))
 		if [[ -n "$ifThenDelete" ]]; then
 			echo -e "\t$bullet) Deletes old files if present in target:"
@@ -258,32 +251,22 @@ function CheckFilesForCopy {
 #  Cleanup any old backup workflow files (xxxx.yyyy, xxxx-yyyy, or ' - Copy.') in the source or target
 #==============================================================================================
 function CleanupOldFiles {
-		local cpyFile="$1"
-		local tmpArray copyOfFile
-		## Get old file list
-			unset oldFiles
-			SetFileExpansion 'off'
-			## Files that contain cars in the igoreList
-			for token in $(tr ',' ' ' <<< $ignoreList); do
-				SetFileExpansion 'on'
-				unset tmpArray; tmpArray=($srcDir${cpyFile}${token})
-				[[ ${tmpArray[@]} != "$srcDir${cpyFile}${token}" ]] && oldFiles+=($srcDir${cpyFile}${token})
-				unset tmpArray; tmpArray=($tgtDir${cpyFile}${token})
-				[[ ${tmpArray[@]} != "$tgtDir${cpyFile}${token}" ]] && oldFiles+=($tgtDir${cpyFile}${token})
-				SetFileExpansion
-			done
-			## 'Copy of' files
-			SetFileExpansion
-			copyOfFile="$(dirname $cpyFile)/$(cut -d '.' -f1 <<< $(basename $cpyFile)) - Copy.$(cut -d '.' -f2- <<< $(basename $cpyFile))"
-			[[ -f "$srcDir${copyOfFile}" ]] && oldFiles+=("$srcDir${copyOfFile}")
-			[[ -f "$tgtDir${copyOfFile}" ]] && oldFiles+=("$tgtDir${copyOfFile}")
+	# local cpyFile="$1"
+	# local tmpArray copyOfFile
+	# ## Get old file list
+	# 	unset oldFiles
+	# 	## 'Copy of' files
+	# 	SetFileExpansion
+	# 	copyOfFile="$(dirname $cpyFile)/$(cut -d '.' -f1 <<< $(basename $cpyFile)) - Copy.$(cut -d '.' -f2- <<< $(basename $cpyFile))"
+	# 	[[ -f "$srcDir${copyOfFile}" ]] && oldFiles+=("$srcDir${copyOfFile}")
+	# 	[[ -f "$tgtDir${copyOfFile}" ]] && oldFiles+=("$tgtDir${copyOfFile}")
 
-		## Baclup/Delete Files
-			for ((i = 0; i < ${#oldFiles[@]}; i++)); do
-			    Msg2 "^^^Backing up & Removeing: ${oldFiles[$i]}"
-				$DOIT BackupCourseleafFile ${oldFiles[$i]}
-				$DOIT rm -f ${oldFiles[$i]}
-			done
+	# ## Baclup/Delete Files
+	# 	for ((i = 0; i < ${#oldFiles[@]}; i++)); do
+	# 	    Msg2 "^^^Backing up & Removeing: ${oldFiles[$i]}"
+	# 		$DOIT BackupCourseleafFile ${oldFiles[$i]}
+	# 		$DOIT rm -f ${oldFiles[$i]}
+	# 	done
 	return 0
 }
 
@@ -616,3 +599,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 08-31-2017 @ 10.06.22 - (2.9.80)    - dscudiero - remove debug stuff
 ## 09-01-2017 @ 09.28.41 - (2.9.93)    - dscudiero - g
 ## 09-01-2017 @ 09.33.30 - (2.9.95)    - dscudiero - move helpSet to new help function
+## 09-01-2017 @ 09.48.50 - (2.9.97)    - dscudiero - remove cleanoldfiles code
