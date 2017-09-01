@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.8 # -- dscudiero -- Fri 09/01/2017 @  9:23:18.74
+# version=2.0.9 # -- dscudiero -- Fri 09/01/2017 @  9:38:17.58
 #===================================================================================================
 # Display script help -- passed an array of argument definitinons, see ParseArg function
 #===================================================================================================
@@ -116,7 +116,7 @@ function Help {
 
 		notesAlways+=("All flags must be delimited from other flags by at lease one blank character.")
 		notesAlways+=("While all flags may be specified, not all of them may active.")
-		notesAlways+=("If a argument is an option with a value, and the value contains blanks/spaces, the argument value needs to be enclosed in single quotes which need to be escaped on the command line, e.g. -file \'This is a File Name\'")
+		notesAlways+=("If an argument is an option with a value, and the value contains blanks/spaces, the argument value needs to be enclosed in single quotes which need to be escaped on the command line, e.g. -file \'This is a File Name\'")
 
 		notes=("${notesAlways[@]}")
 		[[ $hasClient == true ]] && notes=("${notesClient[@]}" "${notes[@]}")
@@ -140,3 +140,4 @@ export -f Help
 ## 08-30-2017 @ 13.53.59 - (2.0.2)     - dscudiero - treat scriptHelpDescription as an array
 ## 08-30-2017 @ 14.07.33 - (2.0.6)     - dscudiero - Tweak output format
 ## 09-01-2017 @ 09.27.30 - (2.0.8)     - dscudiero - Add call myname-FUNCNAME function if found
+## 09-01-2017 @ 09.38.26 - (2.0.9)     - dscudiero - Fix spelling error
