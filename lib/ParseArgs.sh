@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.47" # -- dscudiero -- Tue 04/11/2017 @ 15:50:59.62
+# version="2.0.48" # -- dscudiero -- Fri 09/01/2017 @  9:25:55.90
 #===================================================================================================
 # Parse an argumenst string driven by an control array that is passed in
 # argList+=(argFlag,minLen,type,scriptVariable,extraToken/exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
@@ -123,8 +123,8 @@ function ParseArgs {
 	#===================================================================================================
 	## If testMode then run local customizations
 		[[ $testMode == true && $(Contains "$administrators" "$userName") != true ]] && Msg2 $T "You do not have sufficient permissions to run this script in 'testMode'"
-		[[ $testMode == true && -n "$(type -t testMode-$myName)"  && "$(type -t testMode-$myName)" = function ]] && testMode-$myName
-		[[ $testMode == true && -n "$(type -t testMode-local)"  && "$(type -t testMode-local)" = function ]] && testMode-local
+		[[ $testMode == true && -n "$(type -t testMode-$myName)" && "$(type -t testMode-$myName)" = function ]] && testMode-$myName
+		[[ $testMode == true && -n "$(type -t $myName-testMode)"  && "$(type -t $myName-testMode)" = function ]] && $myName-testMode
 
 	if [[ $verboseLevel -ge 3 ]]; then
 		local prevScriptVar
@@ -148,3 +148,4 @@ export -f ParseArgs
 ## 04-10-2017 @ 09.36.28 - ("2.0.45")  - dscudiero - Tweak messaging
 ## 04-10-2017 @ 09.39.06 - ("2.0.46")  - dscudiero - remove debug statements
 ## 04-12-2017 @ 08.11.01 - ("2.0.47")  - dscudiero - changed
+## 09-01-2017 @ 09.27.57 - ("2.0.48")  - dscudiero - Add call to myname-FUNCNAME if found
