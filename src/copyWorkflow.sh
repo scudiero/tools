@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.97 # -- dscudiero -- Fri 09/01/2017 @  9:48:35.60
+version=2.9.98 # -- dscudiero -- Fri 09/01/2017 @  9:59:36.36
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -250,25 +250,25 @@ function CheckFilesForCopy {
 #==============================================================================================
 #  Cleanup any old backup workflow files (xxxx.yyyy, xxxx-yyyy, or ' - Copy.') in the source or target
 #==============================================================================================
-function CleanupOldFiles {
-	# local cpyFile="$1"
-	# local tmpArray copyOfFile
-	# ## Get old file list
-	# 	unset oldFiles
-	# 	## 'Copy of' files
-	# 	SetFileExpansion
-	# 	copyOfFile="$(dirname $cpyFile)/$(cut -d '.' -f1 <<< $(basename $cpyFile)) - Copy.$(cut -d '.' -f2- <<< $(basename $cpyFile))"
-	# 	[[ -f "$srcDir${copyOfFile}" ]] && oldFiles+=("$srcDir${copyOfFile}")
-	# 	[[ -f "$tgtDir${copyOfFile}" ]] && oldFiles+=("$tgtDir${copyOfFile}")
+# function CleanupOldFiles {
+# 	local cpyFile="$1"
+# 	local tmpArray copyOfFile
+# 	## Get old file list
+# 		unset oldFiles
+# 		## 'Copy of' files
+# 		SetFileExpansion
+# 		copyOfFile="$(dirname $cpyFile)/$(cut -d '.' -f1 <<< $(basename $cpyFile)) - Copy.$(cut -d '.' -f2- <<< $(basename $cpyFile))"
+# 		[[ -f "$srcDir${copyOfFile}" ]] && oldFiles+=("$srcDir${copyOfFile}")
+# 		[[ -f "$tgtDir${copyOfFile}" ]] && oldFiles+=("$tgtDir${copyOfFile}")
 
-	# ## Baclup/Delete Files
-	# 	for ((i = 0; i < ${#oldFiles[@]}; i++)); do
-	# 	    Msg2 "^^^Backing up & Removeing: ${oldFiles[$i]}"
-	# 		$DOIT BackupCourseleafFile ${oldFiles[$i]}
-	# 		$DOIT rm -f ${oldFiles[$i]}
-	# 	done
-	return 0
-}
+# 	## Baclup/Delete Files
+# 		for ((i = 0; i < ${#oldFiles[@]}; i++)); do
+# 		    Msg2 "^^^Backing up & Removeing: ${oldFiles[$i]}"
+# 			$DOIT BackupCourseleafFile ${oldFiles[$i]}
+# 			$DOIT rm -f ${oldFiles[$i]}
+# 		done
+# 	return 0
+# }
 
 #====================================================================================================
 # Declare local variables and constants
@@ -403,7 +403,7 @@ Hello
 			fi
 			Msg2 "^^$file"
 			##  Cleanup any old backup workflow files (xxxx.yyyy, xxxx-yyyy, or ' - Copy.') in the source or target
-				[[ $srcEnv != 'pvt' && $srcEnv != 'dev' ]] && CleanupOldFiles "$cpyFile"
+				#[[ $srcEnv != 'pvt' && $srcEnv != 'dev' ]] && CleanupOldFiles "$cpyFile"
 			## Copy files
 				if [[ -f $srcDir/$cpyFile ]]; then
 					srcMd5=$(md5sum $srcDir/$cpyFile | cut -f1 -d" ")
@@ -424,7 +424,7 @@ Hello
 		Msg2 "^$file"
 		cpyFile="/web$file"
 		##  Cleanup any old backup workflow files (xxxx.yyyy, xxxx-yyyy, or ' - Copy.') in the source or target
-			[[ $srcEnv != 'pvt' && $srcEnv != 'dev' ]] && CleanupOldFiles "$cpyFile"
+			#[[ $srcEnv != 'pvt' && $srcEnv != 'dev' ]] && CleanupOldFiles "$cpyFile"
 
 		## Copy Files
 			[[ $refreshSystem == true ]] && srcDir="$skeletonRoot/release"
@@ -599,4 +599,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 08-31-2017 @ 10.06.22 - (2.9.80)    - dscudiero - remove debug stuff
 ## 09-01-2017 @ 09.28.41 - (2.9.93)    - dscudiero - g
 ## 09-01-2017 @ 09.33.30 - (2.9.95)    - dscudiero - move helpSet to new help function
-## 09-01-2017 @ 09.48.50 - (2.9.97)    - dscudiero - remove cleanoldfiles code
+## 09-01-2017 @ 10.00.11 - (2.9.98)    - dscudiero - Commented out CleanupOldFiles
