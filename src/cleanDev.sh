@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.7 # -- dscudiero -- Fri 09/01/2017 @  7:38:21.07
+version=3.5.8 # -- dscudiero -- Fri 09/01/2017 @ 10:09:48.42
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -233,7 +233,7 @@ if [[ -n $client ]]; then
 			if [[ $(Contains "$file" 'WithSave') == true ]]; then
 				Msg2 "^Deleting '$(basename $file)' with workflow save"
 				quiet=true
-[[ $userName == 'dscudiero ']] && echo "Call saveWorkflow -daemon -siteFile \"$file\" -all -suffix \"beforeDelete-$backupSuffix -quiet -nop\""
+[[ $userName == 'dscudiero ' ]] && echo "Call saveWorkflow -daemon -siteFile \"$file\" -all -suffix \"beforeDelete-$backupSuffix -quiet -nop\""
 				Call saveWorkflow -daemon -siteFile "$file" -all -suffix "beforeDelete-$backupSuffix -quiet -nop"
 				quiet=false
 				Msg2 "^^workflow saved"
@@ -299,3 +299,4 @@ Goodbye 0
 ## 08-29-2017 @ 08.19.43 - (3.5.5)     - dscudiero - Wrap the call to saveworkflow in quiet=true quiet=false
 ## 08-29-2017 @ 08.23.43 - (3.5.6)     - dscudiero - Add some debug messages
 ## 09-01-2017 @ 09.34.21 - (3.5.7)     - dscudiero - Change the way we find the delete sites for daemon calls
+## 09-01-2017 @ 10.10.32 - (3.5.8)     - dscudiero - Fix syntax problem
