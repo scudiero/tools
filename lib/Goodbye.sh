@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.137" # -- dscudiero -- Tue 08/01/2017 @  8:15:45.71
+# version="2.0.138" # -- dscudiero -- Fri 09/01/2017 @  9:24:05.38
 #===================================================================================================
 # Common script exit
 # args:
@@ -26,6 +26,7 @@ function Goodbye {
 
 	## Call script specific goodbye script if defined
 		[[ $(type -t $FUNCNAME-$myName) == 'function' ]] && $FUNCNAME-$myName "$exitCode"
+		[[ $(type -t $myName-$FUNCNAME) == 'function' ]] && $myName-$FUNCNAME "$exitCode"
 
 	## Cleanup temp files
 		[[ -n $tmpRoot ]] && SetFileExpansion 'on' && rm -rf $tmpRoot/${myName}* >& /dev/null && SetFileExpansion
@@ -166,3 +167,4 @@ export -f Goodbye
 ## 05-19-2017 @ 07.35.57 - ("2.0.132") - dscudiero - Remove all tmpfiles under the scripts name under tmproot
 ## 08-01-2017 @ 08.07.58 - ("2.0.136") - dscudiero - Add emailing to the foruser
 ## 08-01-2017 @ 08.16.00 - ("2.0.137") - dscudiero - General syncing of dev to prod
+## 09-01-2017 @ 09.27.18 - ("2.0.138") - dscudiero - Add call myname-FUNCNAME function if found
