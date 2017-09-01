@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.6 # -- dscudiero -- Tue 08/29/2017 @  8:23:29.97
+version=3.5.7 # -- dscudiero -- Fri 09/01/2017 @  7:38:21.07
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -106,11 +106,8 @@ scriptDescription="Cleanup private dev sites"
 
 		## Build the sites array
 		unset sites
-Dump siteIds
 		if [[ -n $siteIds ]]; then
 			for i in $(tr ',' ' ' <<< $siteIds); do
-Dump i
-echo "\${workFiles[$i]} = ${workFiles[$i]}"
 				sites+=("${workFiles[$i]}")
 			done
 		fi
@@ -230,13 +227,13 @@ searchStr="$userName"
 if [[ -n $client ]]; then
 	if [[ $client == 'daemon' ]]; then
 		Msg2 "Starting $myName in daemon mode..."
-		filePrefix="/mnt/dev*/web/*-$searchStr"
-		fileList="$(ProtectedCall "ls /mnt/dev*/web/*-$searchStr* | grep 'AutoDelete'")"
+		fileList="$(ls -d /mnt/dev*/web/*-$searchStr*--AutoDelete*/ 2> /dev/null || true)"
 		for file in $fileList; do
 			file=$(tr -d ':' <<< "$file")
 			if [[ $(Contains "$file" 'WithSave') == true ]]; then
 				Msg2 "^Deleting '$(basename $file)' with workflow save"
 				quiet=true
+[[ $userName == 'dscudiero ']] && echo "Call saveWorkflow -daemon -siteFile \"$file\" -all -suffix \"beforeDelete-$backupSuffix -quiet -nop\""
 				Call saveWorkflow -daemon -siteFile "$file" -all -suffix "beforeDelete-$backupSuffix -quiet -nop"
 				quiet=false
 				Msg2 "^^workflow saved"
@@ -301,3 +298,4 @@ Goodbye 0
 ## Tue Aug 29 08:15:20 CDT 2017 - dscudiero - -m sync
 ## 08-29-2017 @ 08.19.43 - (3.5.5)     - dscudiero - Wrap the call to saveworkflow in quiet=true quiet=false
 ## 08-29-2017 @ 08.23.43 - (3.5.6)     - dscudiero - Add some debug messages
+## 09-01-2017 @ 09.34.21 - (3.5.7)     - dscudiero - Change the way we find the delete sites for daemon calls
