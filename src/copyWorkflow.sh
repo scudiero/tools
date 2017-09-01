@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.3 # -- dscudiero -- Fri 09/01/2017 @ 13:35:29.86
+version=2.10.4 # -- dscudiero -- Fri 09/01/2017 @ 13:49:41.93
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -20,7 +20,6 @@ scriptDescription="Copy workflow files"
 # Standard call back functions
 #==================================================================================================
 	function copyWorkflow-ParseArgsStd  {
-Here 1
 		#argList+=(-optionArg,1,option,scriptVar,,script,'Help text')
 		#argList+=(-flagArg,2,switch,scriptVar,,script,'Help text')
 		argList+=(-allCims,3,switch,allCims,,script,'Process all CIM instances present')
@@ -604,3 +603,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 09-01-2017 @ 10.00.11 - (2.9.98)    - dscudiero - Commented out CleanupOldFiles
 ## 09-01-2017 @ 10.05.31 - (2.10.0)    - dscudiero - Change format of help
 ## 09-01-2017 @ 13.44.38 - (2.10.3)    - dscudiero - run the previously named local function if found
+## 09-01-2017 @ 14.12.22 - (2.10.4)    - dscudiero - put
