@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.76 # -- dscudiero -- Thu 08/31/2017 @  7:42:54.91
+version=2.2.79 # -- dscudiero -- Fri 09/01/2017 @  7:46:13.84
 #====================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye ParseCourseleafFile' #imports="$imports "
@@ -22,6 +22,7 @@ scriptDescription="Save workflow files"
 #==================================================================================================
 	#==================================================================================================
 	# parse script specific arguments
+	# Call saveWorkflow -daemon -siteFile "$file" -all -suffix "beforeDelete-$backupSuffix -quiet -nop"
 	#==================================================================================================
 	function parseArgs-saveWorkflow {
 		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
@@ -60,9 +61,10 @@ Hello
 if [[ $daemon == true ]]; then
 	[[ -z $siteFile ]] && Terminate "If the -daemon flag is specified you must also specify a siteFile name"
 	data="$(ParseCourseleafFile "$siteFile")"
-	client="$(cut -d ' ' -f1 <<< "$data")"
-	client="$(cut -d '-' -f1 <<< "$data")"
+	client="${data%% *}"
+	client="${client%%-*}"
 	env="$(cut -d ' ' -f2 <<< "$data")"
+	env="${data#* }" ; env="${env%% *}"
 	dump -1 userName siteFile data client env
 	allCims=true; GetCims  "$siteFile"
 	srcDir="$siteFile"
@@ -72,6 +74,7 @@ else
 	backupFolder="$tmpRoot/$myName/$client-$env-$BASHPID/$myName"
 fi
 
+##TODO
 [[ $userName == 'dscudiero' ]] && Here SW1
 dump isMe daemon siteFile client env srcDir cimStr backupFolder scriptData1 scriptData2 scriptData3 scriptData4
 
@@ -145,6 +148,7 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 	## Tar up the workflow files
 	pushd "$backupFolder" >& /dev/null
 	numFiles=$(find .//. ! -name . -print | grep -c //)
+dump ifMe numFiles
 	if [[ $numFiles -gt 0 ]]; then
 		tarDir=$localClientWorkFolder/$client/workflowBackups
 		[[ ! -d $tarDir ]] && mkdir -p "$tarDir"
@@ -158,12 +162,11 @@ dump isMe tarFile
 		Error "$myName: No files to save"
 	fi
 	popd >& /dev/null
-[[ $userName == 'dscudiero' ]] && Here SW5
-
 
 #==================================================================================================
 ## Done
 #==================================================================================================
+[[ $userName == 'dscudiero' ]] && Here SW5
 Goodbye 0
 #==================================================================================================
 ## Checkin log
@@ -188,3 +191,4 @@ Goodbye 0
 ## 06-13-2017 @ 08.51.01 - (2.2.74)    - dscudiero - General syncing of dev to prod
 ## 08-28-2017 @ 07.28.29 - (2.2.75)    - dscudiero - turn off debug statement
 ## 08-31-2017 @ 07.43.10 - (2.2.76)    - dscudiero - add debug stuff
+## 09-01-2017 @ 08.18.19 - (2.2.79)    - dscudiero - Add debug statements
