@@ -86,7 +86,8 @@ if not os.path.isfile(spreadsheetFile):
 	Msg("*Fatal Error* -- Could not locate the workbook file:\n\t\t'" + spreadsheetFile + "'")
 	Quit(-1)
 
-book = xlrd.open_workbook(spreadsheetFile, encoding_override='cp1252')
+#book = xlrd.open_workbook(spreadsheetFile, encoding_override='cp1252')
+book = xlrd.open_workbook(spreadsheetFile, encoding_override='cp1252', formatting_info=True)
 if verbosity > 0:
 	Msg("The number of worksheets is " + str(book.nsheets))
 	Msg("\nSpecified 'readSheet' = >" + readSheet + "<")
