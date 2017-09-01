@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.6 # -- dscudiero -- Wed 08/30/2017 @ 14:07:18.82
+# version=2.0.8 # -- dscudiero -- Fri 09/01/2017 @  9:23:18.74
 #===================================================================================================
 # Display script help -- passed an array of argument definitinons, see ParseArg function
 #===================================================================================================
@@ -30,6 +30,9 @@ function Help {
 				Msg2 "$text"
 			done
 			echo
+		else
+			[[ $(type -t $FUNCNAME-$myName) == 'function' ]] && $FUNCNAME-$myName
+			[[ $(type -t $myName-$FUNCNAME) == 'function' ]] && $myName-$FUNCNAME
 		fi
 		[[ $author != '' ]] && Msg2 "$(ColorK "Author:") $author"
 		[[ $supported != '' ]] && Msg2 "$(ColorK "Supported:") $supported"
@@ -136,3 +139,4 @@ export -f Help
 ## Wed Jan  4 13:53:41 CST 2017 - dscudiero - General syncing of dev to prod
 ## 08-30-2017 @ 13.53.59 - (2.0.2)     - dscudiero - treat scriptHelpDescription as an array
 ## 08-30-2017 @ 14.07.33 - (2.0.6)     - dscudiero - Tweak output format
+## 09-01-2017 @ 09.27.30 - (2.0.8)     - dscudiero - Add call myname-FUNCNAME function if found
