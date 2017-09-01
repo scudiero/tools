@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.26" # -- dscudiero -- Tue 04/25/2017 @  8:15:56.18
+# version="2.0.27" # -- dscudiero -- Fri 09/01/2017 @  9:26:45.89
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -16,7 +16,7 @@ function ParseArgsStd {
 	## If there is a local function defined to parse script specific arguments then call it
 		unset argList
 		[[ -n "$(type -t parseArgs-$myName)"  && "$(type -t parseArgs-$myName)" = function ]] && parseArgs-$myName
-		[[ -n "$(type -t parseArgs-local)"  && "$(type -t parseArgs-local)" = function ]] && parseArgs-local
+		[[ -n "$(type -t $myName-$parseArgs)"  && "$(type -t $myName-$parseArgs)" = function ]] && $myName-$parseArgs
 
 	## Help argument
 		help=false;
@@ -111,3 +111,4 @@ export -f ParseArgsStd
 ## Wed Feb 22 07:24:53 CST 2017 - dscudiero - Only check forUser value if forUser does not contain a '/'
 ## 04-10-2017 @ 09.36.37 - ("2.0.23")  - dscudiero - tweak messaging
 ## 04-25-2017 @ 08.38.13 - ("2.0.26")  - dscudiero - Added -go switch
+## 09-01-2017 @ 09.28.04 - ("2.0.27")  - dscudiero - Add call to myname-FUNCNAME if found
