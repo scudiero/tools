@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.98 # -- dscudiero -- Fri 09/01/2017 @  9:59:36.36
+version=2.10.0 # -- dscudiero -- Fri 09/01/2017 @ 10:04:22.71
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -75,9 +75,10 @@ scriptDescription="Copy workflow files"
 		echo -e "\t\t- Checks for the presence of a TODO step in any workflow, if found and the target is NEXT then the script terminates, otherwise a warning message is displayed."
 		(( bullet++ ))
 		if [[ -n "$ifThenDelete" ]]; then
-			echo -e "\t$bullet) Deletes old files if present in target:"
-			for file in $(tr ',' ' ' <<< $ifThenDelete); do
-				echo -e "\t\t- $file"
+			echo -e "\t$bullet) Deletes old structure files in the target if not present in the source"
+			for filePair in $ifThenDelete; do
+				checkSrcFile=$(cut -d ',' -f1 <<< $filePair); checkTgtFile=$(cut -d ',' -f2 <<< $filePair)
+				echo -e "\t\t- Delete file '$checkTgtFile' if found in target and '$checkSrcFile' exists in source"
 			done
 		fi
 		return 0
@@ -600,3 +601,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 09-01-2017 @ 09.28.41 - (2.9.93)    - dscudiero - g
 ## 09-01-2017 @ 09.33.30 - (2.9.95)    - dscudiero - move helpSet to new help function
 ## 09-01-2017 @ 10.00.11 - (2.9.98)    - dscudiero - Commented out CleanupOldFiles
+## 09-01-2017 @ 10.05.31 - (2.10.0)    - dscudiero - Change format of help
