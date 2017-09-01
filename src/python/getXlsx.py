@@ -1,5 +1,5 @@
 #!/bin/python
-# version=1.2.37 # -- dscudiero -- Thu 05/18/2017 @ 16:46:46.12
+# version=1.2.38 # -- dscudiero -- Fri 09/01/2017 @ 12:02:58.01
 #==================================================================================================
 # Reads a xlsx spreadsheet and returns a single columns worth of data
 # called as:
@@ -86,8 +86,7 @@ if not os.path.isfile(spreadsheetFile):
 	Msg("*Fatal Error* -- Could not locate the workbook file:\n\t\t'" + spreadsheetFile + "'")
 	Quit(-1)
 
-#book = xlrd.open_workbook(spreadsheetFile, encoding_override='cp1252')
-book = xlrd.open_workbook(spreadsheetFile, encoding_override='cp1252', formatting_info=True)
+book = xlrd.open_workbook(spreadsheetFile, encoding_override='cp1252')
 if verbosity > 0:
 	Msg("The number of worksheets is " + str(book.nsheets))
 	Msg("\nSpecified 'readSheet' = >" + readSheet + "<")
@@ -108,9 +107,6 @@ for i in range(book.nsheets):
 if readSheet.lower() == 'getsheets':
 	print(sheets.strip())
 	Quit()
-
-## Get the datemode for the spreadsheet
-
 
 found=False
 for i in range(book.nsheets):
