@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.80 # -- dscudiero -- Thu 08/31/2017 @ 10:03:15.46
+version=2.9.93 # -- dscudiero -- Fri 09/01/2017 @  9:22:11.89
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -39,6 +39,56 @@ scriptDescription="Copy workflow files"
 		scriptData4="optionalGlobalFiles:/courseleaf/locallibs/workflowLib.atj,/courseleaf/localsteps/workflowLib.atj"
 		return 0
 	}
+	function copyWorkflow-Help  { # or testMode-local
+		bullet=1
+		echo -e "This script can be used to copy workflow related files from one environment to another."
+		echo -e "The actions performed are:"
+		echo -e "\t$bullet) Copies CIM instance files:"
+		if [[ -n "$requiredInstanceFiles$optionalInstanceFiles" ]]; then
+			for file in $(tr ',' ' ' <<< $requiredInstanceFiles) $(tr ',' ' ' <<< $optionalInstanceFiles); do
+				echo -e "\t\t- $file"
+			done
+		fi
+		if [[ -n "$optionalGlobalFiles" ]]; then
+			(( bullet++ ))
+			echo -e "\t$bullet)  Copies CIM instance shared files: "
+			for file in $(tr ',' ' ' <<< $optionalGlobalFiles); do
+				echo -e "\t\t- $file"
+			done
+		fi
+		if [[ -n "$requiredGlobalFiles" ]]; then
+			(( bullet++ ))
+			echo -e "\t$bullet)  Copies/refreshes CourseLeaf core files: "
+			for file in $(tr ',' ' ' <<< $requiredGlobalFiles); do
+				echo -e "\t\t- $file"
+			done
+		fi
+		echo -e "\tEach source file is compared to the target file (using md5's) and if different the differences are displayed in a 'diff' format and the user is asked to confirm or reject the copy."
+		echo -e "\tAll copied files are backed up to '$backupFolder', an entry in the changelog.txt file is made what, why, when, and who."
+		(( bullet++ ))
+		echo -e "\t$bullet) Performs workflow data checks:"
+		(( bullet++ ))
+		echo -e "\t\t- Checks to see of the target file structure is old (just cimconfig.cfg etc.) and the source target file structure is new (workflow.cfg etc.) and if different then it comments out the 'old' workflow elements in the target before copying files."
+		echo -e "\t\t- Sets the debug level to 0."
+		echo -e "\t\t- Checks for the presence of an active debug workflow (workflow:standard|START), if found the debug workflow is commented out."
+		echo -e "\t\t- Checks for the presence of a TODO step in any workflow, if found and the target is NEXT then the script terminates, otherwise a warning message is displayed."
+		(( bullet++ ))
+		if [[ -n "$ignoreList" ]]; then
+			echo -e "\t$bullet) Old files are moved to '$backupFolder"
+			for file in $(tr ',' ' ' <<< $ignoreList); do
+				echo -e "\t\t- $file"
+			done
+		fi
+		(( bullet++ ))
+		if [[ -n "$ifThenDelete" ]]; then
+			echo -e "\t$bullet) Deletes old files if present in target:"
+			for file in $(tr ',' ' ' <<< $ifThenDelete); do
+				echo -e "\t\t- $file"
+			done
+		fi
+		return 0
+	}
+
 
 #==================================================================================================
 # Local Subs
@@ -277,21 +327,21 @@ GetDefaultsData $myName
 # Standard arg parsing and initialization
 #==================================================================================================
 helpSet='script,client,env'
-scriptHelpDesc+=("This script can be used to copy workflow related files from one environment to another.")
-scriptHelpDesc+=("The actions performed are:")
-scriptHelpDesc+=("\t1) Copies CIM instance files: $(tr ',' ' ' <<< $requiredInstanceFiles) $(tr ',' ' ' <<< $optionalInstanceFiles)")
-scriptHelpDesc+=("\t2) Copies CIM instance shared files: $(tr ',' ' ' <<< $optionalGlobalFiles)")
-scriptHelpDesc+=("\t3) Copies/refreshes CourseLeaf core files: $(tr ',' ' ' <<< $requiredGlobalFiles)")
-scriptHelpDesc+=("\tEach source file is compared to the target file (using md5's) and if different the differences are displayed in a 'diff' format and the user is asked to confirm or reject the copy.")
-scriptHelpDesc+=("\tAll copied files are backed up to '$backupFolder', an entry in the changelog.txt file is made what, why, when, and who.")
-scriptHelpDesc+=("\t4) Performs workflow data checks:")
-scriptHelpDesc+=("\t\t- Checks to see of the target file structure is old (just cimconfig.cfg etc.) and the source target file structure is new (workflow.cfg etc.) and if different then it comments out the 'old' workflow elements in the target before copying files.")
-scriptHelpDesc+=("\t\t- Sets the debug level to 0.")
-scriptHelpDesc+=("\t\t- Checks for the presence of an active debug workflow (workflow:standard|START), if found the debug workflow is commented out.")
-scriptHelpDesc+=("\t\t- Checks for the presence of a TODO step in any workflow, if found and the target is NEXT then the script terminates, otherwise a warning message is displayed.")
-scriptHelpDesc+=("\t5) Finally, any old files are moved to '$backupFolder")
-scriptHelpDesc+=("\t\t- ignoreList: $(tr ',' ' ' <<< $ignoreList)")
-scriptHelpDesc+=("\t\t- ifThenDelete: $(tr ',' ' ' <<< $ifThenDelete)")
+# scriptHelpDesc+=("This script can be used to copy workflow related files from one environment to another.")
+# scriptHelpDesc+=("The actions performed are:")
+# scriptHelpDesc+=("\t1) Copies CIM instance files: $(tr ',' ' ' <<< $requiredInstanceFiles) $(tr ',' ' ' <<< $optionalInstanceFiles)")
+# scriptHelpDesc+=("\t2) Copies CIM instance shared files: $(tr ',' ' ' <<< $optionalGlobalFiles)")
+# scriptHelpDesc+=("\t3) Copies/refreshes CourseLeaf core files: $(tr ',' ' ' <<< $requiredGlobalFiles)")
+# scriptHelpDesc+=("\tEach source file is compared to the target file (using md5's) and if different the differences are displayed in a 'diff' format and the user is asked to confirm or reject the copy.")
+# scriptHelpDesc+=("\tAll copied files are backed up to '$backupFolder', an entry in the changelog.txt file is made what, why, when, and who.")
+# scriptHelpDesc+=("\t4) Performs workflow data checks:")
+# scriptHelpDesc+=("\t\t- Checks to see of the target file structure is old (just cimconfig.cfg etc.) and the source target file structure is new (workflow.cfg etc.) and if different then it comments out the 'old' workflow elements in the target before copying files.")
+# scriptHelpDesc+=("\t\t- Sets the debug level to 0.")
+# scriptHelpDesc+=("\t\t- Checks for the presence of an active debug workflow (workflow:standard|START), if found the debug workflow is commented out.")
+# scriptHelpDesc+=("\t\t- Checks for the presence of a TODO step in any workflow, if found and the target is NEXT then the script terminates, otherwise a warning message is displayed.")
+# scriptHelpDesc+=("\t5) Finally, any old files are moved to '$backupFolder")
+# scriptHelpDesc+=("\t\t- ignoreList: $(tr ',' ' ' <<< $ignoreList)")
+# scriptHelpDesc+=("\t\t- ifThenDelete: $(tr ',' ' ' <<< $ifThenDelete)")
 
 [[ $verbose == true ]] && verboseArg='-v' || unset verboseArg
 [[ $env != '' ]] && srcEnv=$env
@@ -580,3 +630,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 08-31-2017 @ 07.54.14 - (2.9.77)    - dscudiero - If clver or cimver differ and target is next then terminaete
 ## 08-31-2017 @ 09.57.31 - (2.9.79)    - dscudiero - add -norefresh optiona
 ## 08-31-2017 @ 10.06.22 - (2.9.80)    - dscudiero - remove debug stuff
+## 09-01-2017 @ 09.28.41 - (2.9.93)    - dscudiero - g
