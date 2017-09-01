@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.9.93 # -- dscudiero -- Fri 09/01/2017 @  9:22:11.89
+version=2.9.95 # -- dscudiero -- Fri 09/01/2017 @  9:31:07.76
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -19,7 +19,7 @@ scriptDescription="Copy workflow files"
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-	function parseArgs-copyWorkflow  { # or parseArgs-local
+	function copyWorkflow-parseArgs  {
 		#argList+=(-optionArg,1,option,scriptVar,,script,'Help text')
 		#argList+=(-flagArg,2,switch,scriptVar,,script,'Help text')
 		argList+=(-allCims,3,switch,allCims,,script,'Process all CIM instances present')
@@ -28,18 +28,19 @@ scriptDescription="Copy workflow files"
 		argList+=(-refresh,1,switch,refreshSystem,,script,'Refresh system files from the skeleton')
 		argList+=(-norefresh,3,switch,refreshSystem,refreshSystem=false,script,'Do not refresh system files from the skeleton')
 	}
-	function Goodbye-copyWorkflow  { # or Goodbye-local
+	function copyWorkflow-Goodbye  {
 		rm -rf $tmpRoot > /dev/null 2>&1
 		return 0
 	}
-	function testMode-copyWorkflow  { # or testMode-local
+	function copyWorkflow-testMode  {
 		scriptData1="requiredInstanceFiles:workflow.tcf,cimconfig.cfg,custom.atj"
 		scriptData2="optionalInstanceFiles:workflow.cfg,workflowFuncs.atj,custom-workflow.atj,workflowFunctions.atj,workflowHelperFunctions.atj,triggers.atj"
 		scriptData3="requiredGlobalFiles:/courseleaf/cim/triggers.atj,/courseleaf/stdhtml/workflow.atj"
 		scriptData4="optionalGlobalFiles:/courseleaf/locallibs/workflowLib.atj,/courseleaf/localsteps/workflowLib.atj"
 		return 0
 	}
-	function copyWorkflow-Help  { # or testMode-local
+	function copyWorkflow-Help  {
+		helpSet='script,client,env'
 		bullet=1
 		echo -e "This script can be used to copy workflow related files from one environment to another."
 		echo -e "The actions performed are:"
@@ -326,23 +327,6 @@ GetDefaultsData $myName
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-helpSet='script,client,env'
-# scriptHelpDesc+=("This script can be used to copy workflow related files from one environment to another.")
-# scriptHelpDesc+=("The actions performed are:")
-# scriptHelpDesc+=("\t1) Copies CIM instance files: $(tr ',' ' ' <<< $requiredInstanceFiles) $(tr ',' ' ' <<< $optionalInstanceFiles)")
-# scriptHelpDesc+=("\t2) Copies CIM instance shared files: $(tr ',' ' ' <<< $optionalGlobalFiles)")
-# scriptHelpDesc+=("\t3) Copies/refreshes CourseLeaf core files: $(tr ',' ' ' <<< $requiredGlobalFiles)")
-# scriptHelpDesc+=("\tEach source file is compared to the target file (using md5's) and if different the differences are displayed in a 'diff' format and the user is asked to confirm or reject the copy.")
-# scriptHelpDesc+=("\tAll copied files are backed up to '$backupFolder', an entry in the changelog.txt file is made what, why, when, and who.")
-# scriptHelpDesc+=("\t4) Performs workflow data checks:")
-# scriptHelpDesc+=("\t\t- Checks to see of the target file structure is old (just cimconfig.cfg etc.) and the source target file structure is new (workflow.cfg etc.) and if different then it comments out the 'old' workflow elements in the target before copying files.")
-# scriptHelpDesc+=("\t\t- Sets the debug level to 0.")
-# scriptHelpDesc+=("\t\t- Checks for the presence of an active debug workflow (workflow:standard|START), if found the debug workflow is commented out.")
-# scriptHelpDesc+=("\t\t- Checks for the presence of a TODO step in any workflow, if found and the target is NEXT then the script terminates, otherwise a warning message is displayed.")
-# scriptHelpDesc+=("\t5) Finally, any old files are moved to '$backupFolder")
-# scriptHelpDesc+=("\t\t- ignoreList: $(tr ',' ' ' <<< $ignoreList)")
-# scriptHelpDesc+=("\t\t- ifThenDelete: $(tr ',' ' ' <<< $ifThenDelete)")
-
 [[ $verbose == true ]] && verboseArg='-v' || unset verboseArg
 [[ $env != '' ]] && srcEnv=$env
 
@@ -631,3 +615,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 08-31-2017 @ 09.57.31 - (2.9.79)    - dscudiero - add -norefresh optiona
 ## 08-31-2017 @ 10.06.22 - (2.9.80)    - dscudiero - remove debug stuff
 ## 09-01-2017 @ 09.28.41 - (2.9.93)    - dscudiero - g
+## 09-01-2017 @ 09.33.30 - (2.9.95)    - dscudiero - move helpSet to new help function
