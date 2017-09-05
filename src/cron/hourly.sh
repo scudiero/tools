@@ -1,14 +1,15 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.122 # -- dscudiero -- Fri 08/18/2017 @ 17:05:04.15
+version=2.1.123 # -- dscudiero -- Tue 09/05/2017 @  8:55:31.50
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
 # Copyright ©2015 David Scudiero -- all rights reserved.
-# 08-30-13 -- dgs - Initial coding
-# 07-23-15 -- dgs - Migrated to framework5
-# 12-18-15 -- dgs - New structure
+# 08-30-13 - dgs - Initial coding
+# 07-23-15 - dgs - Migrated to framework5
+# 12-18-15 - dgs - New structure
+# 09-05-17 - dgs - Added '--ignore-date' to rsyc options in SyncSkeleton
 #=======================================================================================================================
 TrapSigs 'on'
 Import FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql2 Msg2 Call GetPW
@@ -73,7 +74,7 @@ function SyncSkeleton {
 		printf "%s\n" '- *.old' >> $rsyncFilters
 
 	## sychronize master with shadow
-		rsyncOpts="-av --prune-empty-dirs $listOnly --include-from $rsyncFilters"
+		rsyncOpts="-av --prune-empty-dirs $listOnly --include-from --ignore-date $rsyncFilters"
 		rsync $rsyncOpts $srcDir/ $tgtDir > /dev/null 2>&1
 		chmod 750 $tgtDir
 		touch $tgtDir/.syncDate
@@ -248,3 +249,4 @@ return 0
 ## 05-19-2017 @ 11.21.55 - (2.1.120)   - dscudiero - add debug code to build7
 ## 05-19-2017 @ 12.25.58 - (2.1.121)   - dscudiero - added debug
 ## 08-18-2017 @ 17.06.16 - (2.1.122)   - dscudiero - Added call to backupData
+## 09-05-2017 @ 08.56.21 - (2.1.123)   - dscudiero - Added '--ignore-date' to rsync options for syncskeleton
