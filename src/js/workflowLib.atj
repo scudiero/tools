@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.79" // -- dscudiero -- Fri 09/01/2017 @ 13:23:40.90
+wfLibVersion="1.7.80" // -- dscudiero -- Tue 09/05/2017 @  8:27:43.52
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -46,6 +46,7 @@ wfLibVersion="1.7.79" // -- dscudiero -- Fri 09/01/2017 @ 13:23:40.90
 // 08/29/17 - dgs - GetRelated -- Remove duplicates when processing the final resultSet array
 // 08/30/17 - dgs - Updates GetAttr to allow for request to be passed in as an option
 // 09/01/17 - dgs - Related - Update code that detects if the related wfrulename was used 'bare' without any other qualifiers
+// 09/05/17 - dgs - Tweaked TODO to add prefix text and adjust spacing
 //======================================================================================================================
 
 // Make sure wffucs is defined
@@ -2220,15 +2221,19 @@ wffuncs.wfDumpVars = function(inval, wfrule, args) {
 // 		wfrules:TODO|function|TODO|<Message to display>; //Put a TODO message to the preview workflow screen
 //======================================================================================================================
 // 08-28-17 - dgs - Initial coding -
+// 09/05/17 - dgs - Added 'Workflow is not complete' prefex text and adjusted spacing
 //======================================================================================================================
 wffuncs.TODO = function(inval, wfrule, args) {
+	var indent='&nbsp;&nbsp;&nbsp;&nbsp;';
 	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
-	if (options === "" ) options="Workflow is not complete, waiting on further specifications"
-	var spaceing='&nbsp;&nbsp;&nbsp;&nbsp;';
-	print_doc(spaceing + '<strong>*Note*</strong> -- ' + options + ', please contact your CSM.</strong><br>');
+	if (options === "" ) {
+		options="Workflow is not complete, waiting on further specifications"
+	} else {
+		options="Workflow is not complete,<br>" + indent + indent + indent + indent + indent + "&nbsp;" + options;
+	}
+	print_doc(indent + '<strong>*Note*</strong> -- ' + options + ', please contact your CSM.</strong><br>');
 	return false;
 } //TODO
-
 
 //==================================================================================================
 // END
@@ -2275,3 +2280,4 @@ var wfLibLoaded=true;
 // 08-29-2017 @ 12.10.56 - ("1.7.75")  - dscudiero - Updated GetRelated to remove duplicates before returning data
 // 08-30-2017 @ 16.52.22 - ("1.7.76")  - dscudiero - Tweaked wfAttr / GetAttt to allow passing in the request type as a wfrule option
 // 09-01-2017 @ 13.45.06 - ("1.7.79")  - dscudiero - Update logic checking of steps has a value in Related
+// 09-05-2017 @ 08.27.57 - ("1.7.80")  - dscudiero - Tweaked TODO to add prefix text and adjust spacing
