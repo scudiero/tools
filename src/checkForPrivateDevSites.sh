@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.4.57 # -- dscudiero -- Tue 09/05/2017 @  8:39:12.98
+version=2.4.58 # -- dscudiero -- Tue 09/05/2017 @ 16:21:57.37
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -57,7 +57,7 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 		if [[ ${#dirsFound[@]} -gt 0 ]]; then
 			if [[ -f $tmpFile ]]; then rm $tmpFile; fi
 			foundFiles=true
-			Msg2 | tee -a $tmpFile
+			echo; echo > "$tmpFile"
 			Msg2 "^$myName found private dev sites on $(hostname)" | tee -a $tmpFile
 			Msg2 | tee -a $tmpFile
 			Msg2 "^The following private dev sites where found for userid: '$userId'" | tee -a $tmpFile
@@ -134,3 +134,4 @@ Goodbye 0
 ## 07-17-2017 @ 06.56.31 - (2.4.55)    - dscudiero - remove blank line
 ## 08-28-2017 @ 07.25.34 - (2.4.56)    - dscudiero - misc cleanup
 ## 09-05-2017 @ 08.56.58 - (2.4.57)    - dscudiero - g
+## 09-05-2017 @ 16.22.22 - (2.4.58)    - dscudiero - Make sure there is a tmpFile
