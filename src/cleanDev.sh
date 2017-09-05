@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.9 # -- dscudiero -- Tue 09/05/2017 @  7:09:38.62
+version=3.5.10 # -- dscudiero -- Tue 09/05/2017 @ 16:25:20.69
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -227,7 +227,7 @@ searchStr="$userName"
 if [[ -n $client ]]; then
 	if [[ $client == 'daemon' ]]; then
 		Msg2 "Starting $myName in daemon mode..."
-		fileList="$(ls -d /mnt/dev*/web/*-$searchStr*--AutoDelete*/ 2> /dev/null || true)"
+		fileList="$(ls -d /mnt/dev*/web/*-*--AutoDelete*/ 2> /dev/null || true)"
 		for file in $fileList; do
 			file=$(tr -d ':' <<< "$file")
 [[ $userName == 'dscudiero' ]] && echo "file = '$file'"
@@ -302,3 +302,4 @@ Goodbye 0
 ## 09-01-2017 @ 09.34.21 - (3.5.7)     - dscudiero - Change the way we find the delete sites for daemon calls
 ## 09-01-2017 @ 10.10.32 - (3.5.8)     - dscudiero - Fix syntax problem
 ## 09-05-2017 @ 07.09.49 - (3.5.9)     - dscudiero - more debug stuff
+## 09-05-2017 @ 16.25.44 - (3.5.10)    - dscudiero - Delete all dev sites that match pattern
