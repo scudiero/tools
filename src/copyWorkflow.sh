@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.4 # -- dscudiero -- Fri 09/01/2017 @ 13:49:41.93
+version=2.10.5 # -- dscudiero -- Tue 09/05/2017 @  8:51:01.02
 #====================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
@@ -235,7 +235,7 @@ function CheckFilesForCopy {
 			if [[ $(Contains "$cpyFile" 'workflow.tcf') == true ]]; then
 				unset grepStr; grepStr=$(ProtectedCall "grep 'TODO,' $srcFile")
 				[[ -n $grepStr && $tgtEnv == 'next' ]] && Terminate "Source 'workflow.tcf' file contained an 'TODO' step in the workflow definitions"
-				[[ -n $grepStr && $tgtEnv == 'test' ]] && Warning "Source 'workflow.tcf' file contained an 'TODO' step in the workflow definitions"
+				[[ -n $grepStr && $tgtEnv == 'test' ]] && Warning 0 1 "Source 'workflow.tcf' file contained an 'TODO' step in the workflow definitions"
 				unset grepStr; grepStr=$(ProtectedCall "grep '^workflow:standard|START' $srcFile")
 				if [[ -n $grepStr ]]; then
 					$DOIT sed -i s"_^workflow:standard|START_//workflow:standard|START_" $srcFile
@@ -604,3 +604,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 09-01-2017 @ 10.05.31 - (2.10.0)    - dscudiero - Change format of help
 ## 09-01-2017 @ 13.44.38 - (2.10.3)    - dscudiero - run the previously named local function if found
 ## 09-01-2017 @ 14.12.22 - (2.10.4)    - dscudiero - put
+## 09-05-2017 @ 08.56.49 - (2.10.5)    - dscudiero - Tweaked format of warning message
