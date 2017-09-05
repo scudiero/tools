@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.4.2 # -- dscudiero -- Mon 08/07/2017 @ 17:00:35.17
+version=5.4.4 # -- dscudiero -- Tue 09/05/2017 @  8:06:17.62
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -143,8 +143,8 @@ cwdStart="$(pwd)"
 			[[ $listOnly == true ]] && rsyncListonly="--dry-run" || unset rsyncListonly
 			rsyncFilters=$tmpRoot/$myName.$product.rsyncFilters
 			rsyncOut=$tmpRoot/$myName.$product.rsyncOut
-			rsyncOpts="-rptb$rsyncVerbose --backup-dir $rsyncBackup --prune-empty-dirs $rsyncListonly --include-from $rsyncFilters --links"
-			echo > $rsyncFilters
+			rsyncOpts="-rptb$rsyncVerbose --backup-dir $rsyncBackup --prune-empty-dirs --ignore-times$ rsyncListonly --include-from $rsyncFilters --links"
+			echo > $rsyncFilters 
 			SetFileExpansion 'off'
 			for token in $(tr '|' ' ' <<< "$rsyncIgnore"); do echo "- $token" > $rsyncFilters; done
 			echo '+ *.*' >> $rsyncFilters
@@ -202,7 +202,7 @@ cwdStart="$(pwd)"
 		echo "	## Set rsync options" >> $scriptFile
 		echo "		[[ ! -d \$rsyncBackup && \$rsyncBackup != '/dev/null' ]] && mkdir -p \$rsyncBackup" >> $scriptFile
 		echo "		rsyncFilters=\$tmpRoot.rsyncFilters" >> $scriptFile
-		echo "		rsyncOpts=\"-rptvb --backup-dir \$rsyncBackup --prune-empty-dirs --include-from \"\$rsyncFilters\" --links\"" >> $scriptFile
+		echo "		rsyncOpts=\"-rptvb --backup-dir \$rsyncBackup --prune-empty-dirs --ignore-times$ --include-from \"\$rsyncFilters\" --links\"" >> $scriptFile
 		echo "	echo > \"\$rsyncFilters\"" >> $scriptFile
 		echo "	set -f ## Set file expansion off" >> $scriptFile
 		echo "	for token in \$(tr '|' ' ' <<< \"\$rsyncIgnore\"); do" >> $scriptFile
@@ -1705,3 +1705,4 @@ Goodbye 0 "$text1" "$text2"
 ## 08-07-2017 @ 14.12.41 - (5.4.0)     - dscudiero - Add dscudiero to the allow list
 ## 08-07-2017 @ 15.52.39 - (5.4.1)     - dscudiero - Add checkProdEnv on the Init calls, verify the user can change a production env
 ## 08-07-2017 @ 17.00.43 - (5.4.2)     - dscudiero - remove debug code
+## 09-05-2017 @ 08.06.54 - (5.4.4)     - dscudiero - Added --ignore-times to the rsync options
