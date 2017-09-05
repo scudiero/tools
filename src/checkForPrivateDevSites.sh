@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.4.56 # -- dscudiero -- Mon 08/28/2017 @  7:23:26.17
+version=2.4.57 # -- dscudiero -- Tue 09/05/2017 @  8:39:12.98
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -93,7 +93,7 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 			Verbose 2 "$(dump foundFiles noEmails)"
 			if [[ $foundFiles == true && $noEmails != true ]]; then
 				Verbose "Emails sent to: $resultRec"
-				Msg2"\n*** Please do not respond to this email, it was sent by an automated process\n" | tee -a $tmpFile
+				Msg2 "\n*** Please do not respond to this email, it was sent by an automated process\n" | tee -a $tmpFile
 				$DOIT mutt -a "$tmpFile" -s "Private Dev Sites - $(date +"%m-%d-%Y")" -- $emailAddr < $tmpFile
 			fi
 		fi
@@ -133,3 +133,4 @@ Goodbye 0
 ## 06-23-2017 @ 09.26.40 - (2.4.54)    - dscudiero - Add 'do not respond' to the email
 ## 07-17-2017 @ 06.56.31 - (2.4.55)    - dscudiero - remove blank line
 ## 08-28-2017 @ 07.25.34 - (2.4.56)    - dscudiero - misc cleanup
+## 09-05-2017 @ 08.56.58 - (2.4.57)    - dscudiero - g
