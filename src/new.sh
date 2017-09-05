@@ -1,6 +1,6 @@
 #!/bin/bash
 #===================================================================================================
-version=1.2.22 # -- dscudiero -- 01/12/2017 @ 13:21:51.89
+version=1.2.24 # -- dscudiero -- Tue 09/05/2017 @ 10:03:52.64
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -44,22 +44,20 @@ function NewScript {
 		doCopy=true
 	## Check for existing files
 		[[ -f $localToolsDir/${linkFile}.${fileExt} ]] && Msg2 $T "File '$localToolsDir/${linkFile}.${fileExt}' already exists"
-		[[ ! -f $localToolsDir/test${fileExt}.${fileExt} ]] && Msg2 $T "Could not locate prototype file '$localToolsDir/test${fileExt}.${fileExt}'"
+		[[ ! -f $localToolsDir/src/test${fileExt}.${fileExt} ]] && Msg2 $T "Could not locate prototype file '$localToolsDir/src/test${fileExt}.${fileExt}'"
 		if [[ -h $TOOLSPATH/bin/$linkFile ]]; then
 			unset ans; Prompt ans "Found a pre-esiting file '$TOOLSPATH/bin/$linkFile, do you wish to overwrite" 'Yes No' 'No'; ans=$(Lower ${ans:0:1})
 			[[ $ans == 'n' ]] && doCopy=false
-
-
 			Msg2 $T "found pre-existing link file '$TOOLSPATH/bin/$linkFile'"
 		fi
 	## Copy file from prototype
 		if [[ $doCopy == true ]]; then
 			## Copy file from prototype
-			cp -fp $localToolsDir/test${fileExt}.${fileExt} $localToolsDir/${linkFile}.${fileExt}
+			cp -fp $localToolsDir/src/test${fileExt}.${fileExt} $localToolsDir/src/${linkFile}.${fileExt}
 			fromStr="test${fileExt}"
 			toStr="$(basename ${linkFile})"
-			sed -i s"_${fromStr}_${toStr}_g" $localToolsDir/${linkFile}.${fileExt}
-			Msg2 "^File '$file' -- copied from '$localToolsDir/test${fileExt}.${fileExt}'"
+			sed -i s"_${fromStr}_${toStr}_g" $localToolsDir/src/${linkFile}.${fileExt}
+			Msg2 "^File '$file' -- copied from '$localToolsDir/src/test${fileExt}.${fileExt}'"
 		fi
 
 	## Create link
@@ -395,3 +393,4 @@ Msg2; Msg2 "$objType object created"
 ## Fri Oct 21 13:43:48 CDT 2016 - dscudiero - Added libs data for scripts
 ## Thu Dec 29 16:50:57 CST 2016 - dscudiero - Updated creating a default to add the status column
 ## Wed Jan 11 16:41:31 CST 2017 - dscudiero - fixed import statements
+## 09-05-2017 @ 10.09.44 - (1.2.24)    - dscudiero - change location of testsh.sh
