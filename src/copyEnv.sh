@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.100 # -- dscudiero -- Thu 08/31/2017 @ 16:01:35.50
+version=4.11.101 # -- dscudiero -- Tue 09/05/2017 @ 12:09:16.42
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
@@ -414,7 +414,7 @@ dump -1 skipCim skipCat skipClss skipAlso
 
 	previousTrapERR=$(cut -d ' ' -f3- <<< $(trap -p ERR))
 	trap - ERR
-	Msg2 -l "\nrsync $rsyncOpts $srcDir/ $tgtDir\n"
+	Msg2 "\nrsync $rsyncOpts $srcDir/ $tgtDir\n" >> $logFile
 	cat "$rsyncFilters" >> "$logFile"
 	rsync $rsyncOpts $srcDir/ $tgtDir
 	eval "trap $previousTrapERR"
@@ -636,3 +636,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 08-30-2017 @ 16.10.04 - (4.11.91)   - dscudiero - Send the rsync command to the logFile
 ## 08-30-2017 @ 16.26.18 - (4.11.92)   - dscudiero - Dump the rsyncCtrl file to the logFile
 ## 08-31-2017 @ 16.04.18 - (4.11.100)  - dscudiero - Tweak messaging
+## 09-05-2017 @ 12.09.32 - (4.11.101)  - dscudiero - make sure the debug items go out to the logfile
