@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.10 # -- dscudiero -- Tue 09/05/2017 @ 16:25:20.69
+version=3.5.11 # -- dscudiero -- Wed 09/06/2017 @  7:19:27.17
 #==================================================================================================
 TrapSigs 'on'
 Import ParseArgs ParseArgsStd Hello Init Goodbye
@@ -224,10 +224,16 @@ validActions='Yes No Mark Unmark ResetDate Save -'
 [[ $userName == 'dscudiero' ]] && validActions="$validActions Workflow"
 searchStr="$userName"
 ## if client was passed in then just delete that site, otherwise if it is 'daemon' then process autodeletes
+[[ $userName == 'dscudiero' ]] && dump client
 if [[ -n $client ]]; then
+[[ $userName == 'dscudiero' ]] && Here 1
 	if [[ $client == 'daemon' ]]; then
+[[ $userName == 'dscudiero' ]] && Here 2
 		Msg2 "Starting $myName in daemon mode..."
+		SetFileExpansion 'on'
 		fileList="$(ls -d /mnt/dev*/web/*-*--AutoDelete*/ 2> /dev/null || true)"
+		SetFileExpansion
+[[ $userName == 'dscudiero' ]] && dump fileList
 		for file in $fileList; do
 			file=$(tr -d ':' <<< "$file")
 [[ $userName == 'dscudiero' ]] && echo "file = '$file'"
@@ -303,3 +309,4 @@ Goodbye 0
 ## 09-01-2017 @ 10.10.32 - (3.5.8)     - dscudiero - Fix syntax problem
 ## 09-05-2017 @ 07.09.49 - (3.5.9)     - dscudiero - more debug stuff
 ## 09-05-2017 @ 16.25.44 - (3.5.10)    - dscudiero - Delete all dev sites that match pattern
+## 09-06-2017 @ 07.19.45 - (3.5.11)    - dscudiero - Add debug statements
