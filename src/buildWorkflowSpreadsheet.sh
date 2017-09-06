@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.18 # -- dscudiero -- Thu 08/03/2017 @  9:55:24.96
+version=1.2.24 # -- dscudiero -- Wed 09/06/2017 @  8:10:48.92
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -87,6 +87,8 @@ scriptDescription="Build workflow spreadsheet from workflow file"
 		local rtype value tmpStr
 		dump -2 -t ruleName line description
 
+		[[ $(Contains ",${ignoreList}," ",${ruleName},") == true ]] && return 0
+
 		if [[ $(Contains "$line" '|attr|') == true || $(Contains "$line" '|function|wfAttr|') == true ]]; then
 			#line = >Col|attr|college_prog.code|; <
 			substitutionVars[$ruleName]="$description\t\tattr{$(cut -d'|' -f3 <<< "$line")}"
@@ -153,6 +155,8 @@ unset verifyArgs
 verifyArgs+=("Client:$client")
 verifyArgs+=("Env:$(TitleCase $env) ($srcDir)")
 verifyArgs+=("CIMs:$cimStr")
+verifyArgs+=("Ignorelist:$ignoreList")
+
 verifyArgs+=("Output File:$outFile")
 verifyContinueDefault='Yes'
 VerifyContinue "You are asking to generate a workflow spreadsheet for"
@@ -338,6 +342,7 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 					fi
 				done
 				step=$(Trim "$step");
+				[[ $step == 'TODO' ]] && continue
 				conditionals=$(Trim "$conditionals");
 				modifiers=$(sed s/'optional'/'(If Exists)'/g <<< $modifiers);
 				modifiers=$(echo $modifiers | tr -d '*');
@@ -372,3 +377,4 @@ Goodbye 0 #'alert'
 ## 05-16-2017 @ 13.05.44 - (1.2.2)     - dscudiero - Fix output format problem with wforders
 ## 05-24-2017 @ 13.43.28 - (1.2.17)    - dscudiero - General syncing of dev to prod
 ## 08-03-2017 @ 09.55.58 - (1.2.18)    - dscudiero - Fix problems with wforders
+## 09-06-2017 @ 08.34.43 - (1.2.24)    - dscudiero - Ignore standard functions and workflow steps
