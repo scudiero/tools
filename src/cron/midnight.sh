@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.5 # -- dscudiero -- Wed 08/30/2017 @ 12:44:40.21
+version=1.22.6 # -- dscudiero -- Wed 09/06/2017 @  7:09:26.86
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -265,7 +265,7 @@ case "$hostName" in
 			Call 'buildQaStatusTable' "$scriptArgs"
 
 		## Common Checks
-			Call 'checkCgiPermissions' "$scriptArgs"
+			Call 'checkCgiPermissions' "$scriptArgs -fix"
 			Call 'checkPublishSettings' "$scriptArgs"
 
 		## Update the defaults data for this host
@@ -459,3 +459,4 @@ return 0
 ## 05-26-2017 @ 06.40.50 - (1.22.3)    - dscudiero - add quiet to qaStatusShort call
 ## 05-31-2017 @ 07.59.47 - (1.22.4)    - dscudiero - call scriptsAndReports directly for reports
 ## 08-30-2017 @ 12.45.12 - (1.22.5)    - dscudiero - move cleanDev to the en
+## 09-06-2017 @ 07.20.12 - (1.22.6)    - dscudiero - add -fix to call to checkCgiPermissions
