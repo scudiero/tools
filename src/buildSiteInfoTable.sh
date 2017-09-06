@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.33 # -- dscudiero -- Mon 04/17/2017 @ 12:15:08.57
+version=4.3.34 # -- dscudiero -- Wed 09/06/2017 @  7:14:10.97
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -96,7 +96,7 @@ Msg2 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 		sqlStmt="select clientcode,clientkey from clients where is_active = \"Y\""
 		[[ $client != '' ]] && sqlStmt="$sqlStmt and clientcode=\"$client\"";
 		RunSql2 "$contactsSqliteFile" "$sqlStmt"
-		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No records returned from clientcode query"
+		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No records returned from clientcode query from: '$contactsSqliteFile'\n^$sqlStmt"
 		for result in ${resultSet[@]}; do
 			dbClients["${result%%|*}"]="${result##*|}"
 		done
@@ -230,3 +230,4 @@ Goodbye 0 'alert'
 ## 04-06-2017 @ 10.09.20 - (4.3.28)    - dscudiero - renamed RunCourseLeafCgi, use new name
 ## 04-17-2017 @ 12.31.07 - (4.3.33)    - dscudiero - run clientDirs in a ProtectedCall
 ## 07-31-2017 @ 07.25.07 - (4.3.33)    - dscudiero - add imports
+## 09-06-2017 @ 07.14.46 - (4.3.34)    - dscudiero - Tweak error messaging
