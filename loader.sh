@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.3.39" # -- dscudiero -- Fri 08/25/2017 @ 10:50:10.47
+version="1.3.40" # -- dscudiero -- Wed 09/06/2017 @ 16:32:40.00
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -269,6 +269,7 @@ sTime=$(date "+%s")
 		TrapSigs 'off'
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		[[ $(cut -d' ' -f1 <<< $(wc -l "$executeFile")) -eq 0 ]] && Terminate "Execution file ($executeFile) is empty"
+		unset SCRIPTBOM ; export SCRIPTBOM
 		source $executeFile $scriptArgs 2>&1 | tee -a $logFile; rc=$?
 
 ## Should never get here but just in case
@@ -1210,3 +1211,4 @@ sTime=$(date "+%s")
 ## 08-24-2017 @ 10.07.26 - ("1.3.37")  - dscudiero - General syncing of dev to prod
 ## 08-24-2017 @ 11.25.42 - ("1.3.38")  - dscudiero - Add SendEmail to import list
 ## 08-25-2017 @ 10.50.23 - ("1.3.39")  - dscudiero - Tweak messaging
+## 09-06-2017 @ 16.34.07 - ("1.3.40")  - dscudiero - Add SCRIPTBOM
