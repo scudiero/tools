@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.29" # -- dscudiero -- Fri 09/01/2017 @ 13:36:51.20
+# version="2.0.35" # -- dscudiero -- Thu 09/07/2017 @  7:55:11.39
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -15,7 +15,7 @@ function ParseArgsStd {
 	unset argList
 
 	## If there is a local function defined to parse script specific arguments then call it
-		[[ $(type -t $FUNCNAME-$myName) == 'function' ]] && parseArgs-$myName
+		[[ $(type -t parseArgs-$myName) == 'function' ]] && parseArgs-$myName
 		[[ $(type -t $FUNCNAME-$myName) == 'function' ]] && $FUNCNAME-$myName
 		[[ $(type -t $myName-$FUNCNAME) == 'function' ]] && $myName-$FUNCNAME
 
@@ -85,6 +85,12 @@ function ParseArgsStd {
 			IFS=$oldIFS
 		done
 
+	# echo;echo
+	# for ((i=0; i<${#argList[@]}; i++)); do
+	# 	echo "argList[$i] = >${argList[$i]}<"
+	# done
+	# Pause
+
 	## Call arg parser
 		ParseArgs $myArgs
 
@@ -114,3 +120,4 @@ export -f ParseArgsStd
 ## 04-25-2017 @ 08.38.13 - ("2.0.26")  - dscudiero - Added -go switch
 ## 09-01-2017 @ 09.28.04 - ("2.0.27")  - dscudiero - Add call to myname-FUNCNAME if found
 ## 09-01-2017 @ 13.44.46 - ("2.0.29")  - dscudiero - run the previously named local function if found
+## 09-07-2017 @ 07.56.18 - ("2.0.35")  - dscudiero - Move the parsing of the client name to the end if no other arg matches have been found
