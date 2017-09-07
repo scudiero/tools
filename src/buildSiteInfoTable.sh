@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.34 # -- dscudiero -- Wed 09/06/2017 @  7:14:10.97
+version=4.3.35 # -- dscudiero -- Thu 09/07/2017 @  7:40:19.44
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -72,11 +72,11 @@ Hello
 ## Which table to use
 	useSiteInfoTable="$siteInfoTable"
 	useSiteAdminsTable="$siteAdminsTable"
-	if [[ -n $tableName ]]; then
-		useSiteInfoTable="$tableName"
-		let tmpLen=${#tableName}-3
-		[[ ${tableName:$tmpLen:3} == 'New' ]] && useSiteAdminsTable="${siteAdminsTable}New"
-	fi
+	# if [[ -n $tableName ]]; then
+	# 	useSiteInfoTable="$tableName"
+	# 	let tmpLen=${#tableName}-3
+	# 	[[ ${tableName:$tmpLen:3} == 'New' ]] && useSiteAdminsTable="${siteAdminsTable}New"
+	# fi
 	sqlStmt="select count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA=\"$warehouseDb\") AND (TABLE_NAME=\"$useSiteInfoTable\")"
 	RunSql2 $sqlStmt
 	[[ ${resultSet[0]} -ne 1 ]] && Terminate "Could not locate the load table '$useSiteInfoTable'"
@@ -96,7 +96,7 @@ Msg2 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 		sqlStmt="select clientcode,clientkey from clients where is_active = \"Y\""
 		[[ $client != '' ]] && sqlStmt="$sqlStmt and clientcode=\"$client\"";
 		RunSql2 "$contactsSqliteFile" "$sqlStmt"
-		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No records returned from clientcode query from: '$contactsSqliteFile'\n^$sqlStmt"
+		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No records returned from clientcode query from:\n^$contactsSqliteFile\n^$sqlStmt"
 		for result in ${resultSet[@]}; do
 			dbClients["${result%%|*}"]="${result##*|}"
 		done
@@ -231,3 +231,4 @@ Goodbye 0 'alert'
 ## 04-17-2017 @ 12.31.07 - (4.3.33)    - dscudiero - run clientDirs in a ProtectedCall
 ## 07-31-2017 @ 07.25.07 - (4.3.33)    - dscudiero - add imports
 ## 09-06-2017 @ 07.14.46 - (4.3.34)    - dscudiero - Tweak error messaging
+## 09-07-2017 @ 07.40.55 - (4.3.35)    - dscudiero - Fix problem where the passed tableName was being picked up as a client name
