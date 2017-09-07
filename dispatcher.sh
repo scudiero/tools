@@ -31,6 +31,8 @@ export TOOLSWAREHOUSEDB="$warehouseDb"
 	fi
 	export LOADER="$loaderDir/loader.sh"
 
+[[ $LOGNAME == 'dscudiero' ]] && echo "loaderDir = '$loaderDir'"
+
 ## call script loader
 	if [[ $1 == '--viaCron' ]]; then
 		echo -e "\t-- $hostName - sourcing \"$loaderDir/loader.sh\" $(basename $0) --batchMode $*" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
@@ -68,3 +70,4 @@ exit
 ## 06-14-2017 @ 08.08.05 - dscudiero - Remove debug statements
 ## 06-26-2017 @ 07.50.30 - dscudiero - Add warhousedbHost, renamed warehousedb to warehousedbname
 ## 06-26-2017 @ 10.19.37 - dscudiero - set TOOLSWAREHOUSEDB
+## 09-07-2017 @ 07.15.08 - dscudiero - add debug statement
