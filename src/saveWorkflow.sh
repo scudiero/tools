@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.79 # -- dscudiero -- Fri 09/01/2017 @  7:46:13.84
+version=2.2.80 # -- dscudiero -- Thu 09/07/2017 @  8:02:26.84
 #====================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye ParseCourseleafFile' #imports="$imports "
@@ -61,10 +61,16 @@ Hello
 if [[ $daemon == true ]]; then
 	[[ -z $siteFile ]] && Terminate "If the -daemon flag is specified you must also specify a siteFile name"
 	data="$(ParseCourseleafFile "$siteFile")"
+[[ $userName == 'dscudiero' ]] && echo "data = '$data'"
 	client="${data%% *}"
+[[ $userName == 'dscudiero' ]] && echo "client 1 = '$client'"
 	client="${client%%-*}"
+[[ $userName == 'dscudiero' ]] && echo "client 2 = '$client'"
 	env="$(cut -d ' ' -f2 <<< "$data")"
+[[ $userName == 'dscudiero' ]] && echo "env 1 = '$env'"
 	env="${data#* }" ; env="${env%% *}"
+[[ $userName == 'dscudiero' ]] && echo "env 2 = '$env'"
+
 	dump -1 userName siteFile data client env
 	allCims=true; GetCims  "$siteFile"
 	srcDir="$siteFile"
@@ -192,3 +198,4 @@ Goodbye 0
 ## 08-28-2017 @ 07.28.29 - (2.2.75)    - dscudiero - turn off debug statement
 ## 08-31-2017 @ 07.43.10 - (2.2.76)    - dscudiero - add debug stuff
 ## 09-01-2017 @ 08.18.19 - (2.2.79)    - dscudiero - Add debug statements
+## 09-07-2017 @ 08.02.48 - (2.2.80)    - dscudiero - Add debug messages
