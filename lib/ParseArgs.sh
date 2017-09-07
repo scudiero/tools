@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.48" # -- dscudiero -- Fri 09/01/2017 @  9:25:55.90
+# version="2.0.49" # -- dscudiero -- Thu 09/07/2017 @  7:44:17.52
 #===================================================================================================
 # Parse an argumenst string driven by an control array that is passed in
 # argList+=(argFlag,minLen,type,scriptVariable,extraToken/exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
@@ -28,12 +28,12 @@ function ParseArgs {
 	## Loop through all of the tokens on the passed in argument list
 	until [[ -z "$*" ]]; do
 		origArgToken="$1"; shift || true
-		## If the token does not start with a '-' then set client variable if not already set
-		if [[ ${origArgToken:0:1} != '-' && -z $client ]]; then
-			Client=$origArgToken; client=$(Lower $origArgToken)
-			Msg2 $V3 "\t\t*** found client value = '$client'"
-			continue
-		fi
+		# ## If the token does not start with a '-' then set client variable if not already set
+		# if [[ ${origArgToken:0:1} != '-' && -z $client ]]; then
+		# 	Client=$origArgToken; client=$(Lower $origArgToken)
+		# 	Msg2 $V3 "\t\t*** found client value = '$client'"
+		# 	continue
+		# fi
 		Msg2 $V3 "\n\tProcessing input token: '$origArgToken'..."
 		## Loop through all defined arguments (argList)
 		foundArg=false
@@ -99,9 +99,16 @@ function ParseArgs {
 			Msg2 $V3 "^^*** found match for $argType: '$origArgName' specified as '$origArgToken', scriptVarName = $scriptVar, value = >${!scriptVar}<"
 			[[ $argType == 'option' ]] && tmpStr=${!scriptVar} && myArgStr="${myArgStr:${#tmpStr}+1}" ## Remove argument value
 		else
-			[[ $parseQuiet != true ]] && Msg2 $W "Argument token '$origArgToken' is not defined, it will be ignored"
-			badArgList="$badArgList, $origArgToken"
-			myArgStr="${myArgStr:${#origArgToken}+1}" ## Remove argument token
+			## If the token does not start with a '-' then set client variable if not already set
+			if [[ ${origArgToken:0:1} != '-' && -z $client ]]; then
+				Client=$origArgToken; client=$(Lower $origArgToken)
+				Msg2 $V3 "\t\t*** found client value = '$client'"
+				continue
+			else
+				[[ $parseQuiet != true ]] && Msg2 $W "Argument token '$origArgToken' is not defined, it will be ignored"
+				badArgList="$badArgList, $origArgToken"
+				myArgStr="${myArgStr:${#origArgToken}+1}" ## Remove argument token
+			fi
 		fi
 		Msg2 $V3 "^^After parse \$* = >$*<"
 	done ## tokens in the input string
@@ -149,3 +156,4 @@ export -f ParseArgs
 ## 04-10-2017 @ 09.39.06 - ("2.0.46")  - dscudiero - remove debug statements
 ## 04-12-2017 @ 08.11.01 - ("2.0.47")  - dscudiero - changed
 ## 09-01-2017 @ 09.27.57 - ("2.0.48")  - dscudiero - Add call to myname-FUNCNAME if found
+## 09-07-2017 @ 07.56.06 - ("2.0.49")  - dscudiero - Move the parsing of the client name to the end if no other arg matches have been found
