@@ -1,4 +1,6 @@
-
+#===================================================================================================
+# version=1.0.0 # -- dscudiero -- Thu 09/07/2017 @ 13:32:47.23
+#===================================================================================================
 export TOOLSDEVPATH="/home/dscudiero/tools"
 
 #warehouseDb="courseleafdatawarehouse"
@@ -10,6 +12,8 @@ warehouseDbHost=duro.inside.leepfrog.com
 
 adminUsers="dscudiero"
 setSemaphoreList='buildSiteInfoTable,buildClientInfoTable'
+
+javaResources='import org.apache.commons.cli.*;,import java.sql.*;,import java.util.logging.*;,import java.util.*;,import java.io.*;,import java.lang.Runtime'
 
 #===================================================================================================
 ## Check-in log
