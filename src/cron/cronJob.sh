@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.105 # -- dscudiero -- Mon 07/31/2017 @  7:24:21.97
+version=2.0.106 # -- dscudiero -- Thu 09/07/2017 @  8:06:18.14
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -71,7 +71,7 @@ originalArgStr="$*"
 						[[ ${line:0:1} == '*' ]] && echo >> $tmpFile2
 						echo -e "\t$line" >> $tmpFile2 ;
 					done < $tmpFile1;
-					mutt -s "($hostName) $callScriptName - Errors running script" -- $notifyAddrs < $tmpFile2;
+					mutt -s "($hostName) $callScriptName - Errors running script" -a "$logFile" -- $notifyAddrs < $tmpFile2;
 					break
 				fi
 			done
@@ -100,3 +100,4 @@ exit 0
 ## 06-08-2017 @ 12.21.30 - (2.0.101)   - dscudiero - add debug
 ## 06-08-2017 @ 14.13.19 - (2.0.104)   - dscudiero - General syncing of dev to prod
 ## 07-31-2017 @ 07.24.49 - (2.0.105)   - dscudiero - Add the name of the cron job called to the log
+## 09-07-2017 @ 08.06.49 - (2.0.106)   - dscudiero - Attach the log file to email if errors are detected
