@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.6 # -- dscudiero -- Wed 09/06/2017 @  7:09:26.86
+version=1.22.7 # -- dscudiero -- Thu 09/07/2017 @  7:41:34.70
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -255,7 +255,7 @@ case "$hostName" in
 				Error "Clients table is empty, skipping 'buildSiteInfoTable', semaphore kept in place"
 			else
 				## Build siteinfotabe and siteadmins table
-				Call 'buildSiteInfoTable' "-table ${siteInfoTable} $scriptArgs"
+				Call 'buildSiteInfoTable' "$scriptArgs"
 			fi
 
 		## Build employee table
@@ -460,3 +460,4 @@ return 0
 ## 05-31-2017 @ 07.59.47 - (1.22.4)    - dscudiero - call scriptsAndReports directly for reports
 ## 08-30-2017 @ 12.45.12 - (1.22.5)    - dscudiero - move cleanDev to the en
 ## 09-06-2017 @ 07.20.12 - (1.22.6)    - dscudiero - add -fix to call to checkCgiPermissions
+## 09-07-2017 @ 07.42.09 - (1.22.7)    - dscudiero - remove tablename from the buildsiteinfotable call
