@@ -40,6 +40,7 @@ export TOOLSWAREHOUSEDB="$warehouseDb"
 		echo -e "\t\t-- $hostName - back from loader" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 		return 0
 	else
+[[ $LOGNAME == 'dscudiero' ]] && echo "source \"$loaderDir/loader.sh\" $(basename $0) $*'"
 		source "$loaderDir/loader.sh" $(basename $0) $*
 	fi
 
@@ -71,3 +72,4 @@ exit
 ## 06-26-2017 @ 07.50.30 - dscudiero - Add warhousedbHost, renamed warehousedb to warehousedbname
 ## 06-26-2017 @ 10.19.37 - dscudiero - set TOOLSWAREHOUSEDB
 ## 09-07-2017 @ 07.15.08 - dscudiero - add debug statement
+## 09-07-2017 @ 08.11.55 - dscudiero - Add debug for me
