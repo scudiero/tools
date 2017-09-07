@@ -14,6 +14,8 @@ adminUsers="dscudiero"
 setSemaphoreList='buildSiteInfoTable,buildClientInfoTable'
 
 javaResources='org.apache.commons.cli.*,java.sql.*,java.util.logging.*,java.util.*,java.io.*,java.lang.Runtime'
+pythonResources='inspect,sys,traceback,os,argparse,xlrd,re,datetime,time,string,array'
+
 
 #===================================================================================================
 ## Check-in log
