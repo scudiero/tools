@@ -9,18 +9,17 @@
 ## Load boot data
 	[[ -r $(dirname $0)/bootData ]] && source "$(dirname $0)/bootData" || source "$TOOLSPATH/bootData"
 
-## Set global database variable
+## Set global variables
+	export TOOLSWAREHOUSEDB="$warehouseDb"
+	export TOOLSLIBPATH="$TOOLSPATH/lib"
+	export TOOLSSRCPATH="$TOOLSPATH/src"
+	export SCRIPTINCLUDES
+
 	[[ -n $TOOLSWAREHOUSEDBNAME ]] && warehouseDb="$TOOLSWAREHOUSEDBNAME"
 	export TOOLSWAREHOUSEDBNAME="$warehouseDbName"
 
-export TOOLSWAREHOUSEDB="$warehouseDb"
-
 	[[ -n $TOOLSWAREHOUSEDBHOST ]] && warehouseDbHost="$TOOLSWAREHOUSEDBHOST"
 	export TOOLSWAREHOUSEDBHOST="$warehouseDbHost"
-
-## Set global search variables
-	export TOOLSLIBPATH="$TOOLSPATH/lib"
-	export TOOLSSRCPATH="$TOOLSPATH/src"
 
 ## Find the loader
 	loaderDir="$TOOLSPATH"
@@ -31,8 +30,6 @@ export TOOLSWAREHOUSEDB="$warehouseDb"
 	fi
 	export LOADER="$loaderDir/loader.sh"
 
-[[ $LOGNAME == 'dscudiero' ]] && echo "loaderDir = '$loaderDir'"
-
 ## call script loader
 	if [[ $1 == '--viaCron' ]]; then
 		echo -e "\t-- $hostName - sourcing \"$loaderDir/loader.sh\" $(basename $0) --batchMode $*" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
@@ -40,7 +37,6 @@ export TOOLSWAREHOUSEDB="$warehouseDb"
 		echo -e "\t\t-- $hostName - back from loader" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 		return 0
 	else
-[[ $LOGNAME == 'dscudiero' ]] && echo "source \"$loaderDir/loader.sh\" $(basename $0) $*'"
 		source "$loaderDir/loader.sh" $(basename $0) $*
 	fi
 
@@ -73,3 +69,4 @@ exit
 ## 06-26-2017 @ 10.19.37 - dscudiero - set TOOLSWAREHOUSEDB
 ## 09-07-2017 @ 07.15.08 - dscudiero - add debug statement
 ## 09-07-2017 @ 08.11.55 - dscudiero - Add debug for me
+## 09-07-2017 @ 08.52.42 - dscudiero - add setting of SCRIPTINCLUDES
