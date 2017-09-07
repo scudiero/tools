@@ -13,7 +13,7 @@ warehouseDbHost=duro.inside.leepfrog.com
 adminUsers="dscudiero"
 setSemaphoreList='buildSiteInfoTable,buildClientInfoTable'
 
-javaResources='org.apache.commons.cli.*;,import java.sql.*;,import java.util.logging.*;,import java.util.*;,import java.io.*;,import java.lang.Runtime'
+javaResources='org.apache.commons.cli.*,java.sql.*,java.util.logging.*,java.util.*,java.io.*,java.lang.Runtime'
 
 #===================================================================================================
 ## Check-in log
