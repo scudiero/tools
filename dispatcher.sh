@@ -23,7 +23,7 @@
 
 ## Find the loader
 	loaderDir="$TOOLSPATH"
-	if [[ -r $HOME/tools/loader.sh ]]; then
+	if [[ $1 == '--useLocal' && -r $HOME/tools/loader.sh ]]; then
 		loaderDir="$HOME/tools"
 		[[ -d "$loaderDir/lib" ]] && export TOOLSLIBPATH="$loaderDir/lib:$TOOLSLIBPATH"
 		[[ -d "$loaderDir/src" ]] && export TOOLSSRCPATH="$loaderDir/src:$TOOLSSRCPATH"
@@ -70,3 +70,4 @@ exit
 ## 09-07-2017 @ 07.15.08 - dscudiero - add debug statement
 ## 09-07-2017 @ 08.11.55 - dscudiero - Add debug for me
 ## 09-07-2017 @ 08.52.42 - dscudiero - add setting of SCRIPTINCLUDES
+## 09-08-2017 @ 16.28.53 - dscudiero - Check for the --useLocal directive as the first token before using local loader
