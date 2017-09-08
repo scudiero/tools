@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.106 # -- dscudiero -- Thu 09/07/2017 @  8:06:18.14
+version=2.0.106 # -- dscudiero -- Fri 09/08/2017 @  6:42:50.73
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -31,6 +31,9 @@ originalArgStr="$*"
 	echo -e "\t-- $hostName - sourcing '$dispatcher'" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	source "$dispatcher" --viaCron ## Setup the environment
 	echo -e "\t\t-- $hostName - back from dispatcher" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
+
+	includes='Call'
+	Import "$includes"
 
 #=======================================================================================================================
 ## Log the cronJob
@@ -100,4 +103,4 @@ exit 0
 ## 06-08-2017 @ 12.21.30 - (2.0.101)   - dscudiero - add debug
 ## 06-08-2017 @ 14.13.19 - (2.0.104)   - dscudiero - General syncing of dev to prod
 ## 07-31-2017 @ 07.24.49 - (2.0.105)   - dscudiero - Add the name of the cron job called to the log
-## 09-07-2017 @ 08.06.49 - (2.0.106)   - dscudiero - Attach the log file to email if errors are detected
+## 09-08-2017 @ 08.11.18 - (2.0.106)   - dscudiero - Import the Call function before use
