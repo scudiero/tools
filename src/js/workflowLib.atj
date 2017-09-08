@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.80" // -- dscudiero -- Tue 09/05/2017 @  8:27:43.52
+wfLibVersion="1.7.82" // -- dscudiero -- Fri 09/08/2017 @  8:06:12.46
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -47,6 +47,7 @@ wfLibVersion="1.7.80" // -- dscudiero -- Tue 09/05/2017 @  8:27:43.52
 // 08/30/17 - dgs - Updates GetAttr to allow for request to be passed in as an option
 // 09/01/17 - dgs - Related - Update code that detects if the related wfrulename was used 'bare' without any other qualifiers
 // 09/05/17 - dgs - Tweaked TODO to add prefix text and adjust spacing
+// 09/08/17 - dgs - Fixed bug where related was not editing out the reference data if it was in the proposal data for depts
 //======================================================================================================================
 
 // Make sure wffucs is defined
@@ -771,6 +772,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 //==================================================================================================================
 // 08/23/17 - dgs - Initial
 // 08/29/17 - dgs - Remove duplicates when processing the final resultSet array
+// 09/08/17 - dgs - Fixed bug where related was not editing out the reference data if it was in the proposal data for depts
 //==================================================================================================================
 GetRelated = function(type,data) {
 	var myName="GetRelated"; wfDebug(1,"\n*** In " + myName + " ***");
@@ -898,6 +900,7 @@ GetRelated = function(type,data) {
 	refsArray.forEach(function(ref) {
 		wfDump(4,["\tref;"+ref.toSource()]);
 		var sqlStmt='', resultSet=[];
+		var refSkipped=false;
 		//Resolve the ref based on the substitution type
 			switch (type) {
   				case "subj":
@@ -906,9 +909,11 @@ GetRelated = function(type,data) {
   				case "subjects":
 					if (ref.format === "subj" ) {
 						var found=false;
-						proposalSubjs.some(function (objAttr) {
-							if (ref.data === objAttr) {
+						proposalSubjs.some(function (token) {
+							if (ref.data === token) {
 								found=true;
+								wfDebug(4,"\t\t\tskipping ref, code ("+ resultSet[ii] +") is in proposalSubjs ("+ proposalSubjs.toSource() +")");
+								refSkipped=true;
 								return true;
 							}
 						});
@@ -937,6 +942,7 @@ GetRelated = function(type,data) {
 									var newDataObj={}; newDataObj.data=resultSet[ii]; resultSet[ii]=newDataObj;
 								} else {
 									wfDebug(4,"\t\t\tskipping ref, code ("+ resultSet[ii] +") is in proposalDepts ("+ proposalDepts.toSource() +")");
+									refSkipped=true;
 								}
 							}
 						}
@@ -961,6 +967,7 @@ GetRelated = function(type,data) {
 									var newDataObj={}; newDataObj.data=resultSet[ii]; resultSet[ii]=newDataObj;
 								} else {
 									wfDebug(4,"\t\t\tskipping ref, code ("+ resultSet[ii] +") is in proposalCols ("+ proposalCols.toSource() +")");
+									refSkipped=true;
 								}
 							}
 						}
@@ -971,10 +978,22 @@ GetRelated = function(type,data) {
 				case "depts":
 				case "departments":
 				if (ref.format === "dept" ) {
-					retToken={};
-					retToken.data=ref.data;
-					retToken.source=ref.source;
-					resultSet.push(retToken);
+					//Check to see if the ref data is in the proposaDepts data
+					var found=false;
+					proposalDepts.some(function (token) {
+						if (ref.data === token) {
+							wfDebug(4,"\t\t\tskipping ref, code ("+ ref.data +") is in proposalDepts ("+ proposalDepts.toSource() +")");
+							refSkipped=true;
+							found=true;
+							return true;
+						}
+					});
+					if (! found) {
+						retToken={};
+						retToken.data=ref.data;
+						retToken.source=ref.source;
+						resultSet.push(retToken);
+					}
 				} else if (ref.format === "subj" ) {
 					if (wfCimInstance === 'courseadmin' && wfAllcodes)
 						resultSet=wffuncs.getDepartments([ref.data]).toString().split(",");
@@ -994,6 +1013,7 @@ GetRelated = function(type,data) {
 								var newDataObj={}; newDataObj.data=resultSet[ii]; resultSet[ii]=newDataObj;
 							} else {
 								wfDebug(4,"\t\t\tskipping ref, code ("+ resultSet[ii] +") is in proposalDepts ("+ proposalDepts.toSource() +")");
+								refSkipped=true;
 							}
 						}
 					}
@@ -1027,6 +1047,7 @@ GetRelated = function(type,data) {
 								var newDataObj={}; newDataObj.data=resultSet[ii]; resultSet[ii]=newDataObj;
 							} else {
 								wfDebug(4,"\t\t\tskipping ref, code ("+ resultSet[ii] +") is in proposalCols ("+ proposalCols.toSource() +")");
+								refSkipped=true;
 							}
 						}
 					}
@@ -1051,6 +1072,7 @@ GetRelated = function(type,data) {
 								var newDataObj={}; newDataObj.data=resultSet[ii]; resultSet[ii]=newDataObj;
 							} else {
 								wfDebug(4,"\t\t\tskipping ref, code ("+ resultSet[ii] +") is in proposalCols ("+ proposalCols.toSource() +")");
+								refSkipped=true;
 							}
 						}
 					}
@@ -1072,11 +1094,11 @@ GetRelated = function(type,data) {
 					retToken.source=ref.source;
 					if (Object.keys(retToken).length != 0 && typeof checkArray[retToken.data] === 'undefined') {
 						retArray.push(retToken); checkArray[retToken.data]=true;
-						wfDebug(4,"\t\t\t   returning ref data: " + retToken.toSource());
+						wfDebug(4,"\t\t\treturning ref data: " + retToken.toSource());
 					}
 				}
 			});
-		} else {
+		} else if (! refSkipped) {
 				wfDebug(4,"\t\t   *Warning* -- no data returned from ref lookup")
 		} //(resultSet)
 	}); //refsArray
@@ -2281,3 +2303,4 @@ var wfLibLoaded=true;
 // 08-30-2017 @ 16.52.22 - ("1.7.76")  - dscudiero - Tweaked wfAttr / GetAttt to allow passing in the request type as a wfrule option
 // 09-01-2017 @ 13.45.06 - ("1.7.79")  - dscudiero - Update logic checking of steps has a value in Related
 // 09-05-2017 @ 08.27.57 - ("1.7.80")  - dscudiero - Tweaked TODO to add prefix text and adjust spacing
+// 09-08-2017 @ 08.07.59 - ("1.7.82")  - dscudiero - Fixed bug where related was not editing out the reference data if it was in the proposal data for depts
