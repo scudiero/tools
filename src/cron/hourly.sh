@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.124 # -- dscudiero -- Fri 09/08/2017 @  6:45:13.11
+version=2.1.125 # -- dscudiero -- Fri 09/08/2017 @ 10:26:15.13
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -13,7 +13,7 @@ version=2.1.124 # -- dscudiero -- Fri 09/08/2017 @  6:45:13.11
 #=======================================================================================================================
 TrapSigs 'on'
 includes='FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql2 Msg2 Call GetPW SetFileExpansion'
-includes="$includes RunSql2"
+includes="$includes RunSql2 ProtectedCall"
 Import "$includes"
 
 originalArgStr="$*"
@@ -254,3 +254,4 @@ return 0
 ## 08-18-2017 @ 17.06.16 - (2.1.122)   - dscudiero - Added call to backupData
 ## 09-05-2017 @ 08.56.21 - (2.1.123)   - dscudiero - Added '--ignore-date' to rsync options for syncskeleton
 ## 09-08-2017 @ 08.11.31 - (2.1.124)   - dscudiero - Update imports
+## 09-08-2017 @ 11.26.25 - (2.1.125)   - dscudiero - add protectedcall to the list of includes
