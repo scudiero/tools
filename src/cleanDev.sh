@@ -1,10 +1,13 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.11 # -- dscudiero -- Wed 09/06/2017 @  7:19:27.17
+version=3.5.18 # -- dscudiero -- Mon 09/11/2017 @  7:08:05.71
 #==================================================================================================
 TrapSigs 'on'
-Import ParseArgs ParseArgsStd Hello Init Goodbye
+includes='GetDefaultsData ParseArgsStd Hello Init Goodbye ProtectedCall PadChar Prompt StringFunctions'
+includes="$includes Msg2 Dump RunSql2"
+Import "$includes"
+
 originalArgStr="$*"
 scriptDescription="Cleanup private dev sites"
 
@@ -16,22 +19,42 @@ scriptDescription="Cleanup private dev sites"
 # 07-17-15 --	dgs - Migrated to framework 5
 #==================================================================================================
 #==================================================================================================
-# local functions
+# Standard call back functions
 #==================================================================================================
-	#==================================================================================================
-	# parse script specific arguments
-	#==================================================================================================
-	function parseArgs-cleanDev {
+	function cleanDev-parseArgsStd {
 		# argList+=(argFlag,minLen,type,scriptVariable,extraToken/exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
 		argList+=(-mark,1,switch,mark,,'script',"Mark the site for deletion")
 		argList+=(-delete,3,switch,delete,,'script',"Delete the site")
 		argList+=(-unMark,1,switch,unMark,,'script',"Unmark the site")
 	}
-	function Goodbye-cleanDev  { # or Goodbye-local
+
+	function cleanDev-Goodbye  { # or Goodbye-local
 		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
 		return 0
 	}
 
+	function cleanDev-Help  {
+		helpSet='client,env' # can also include any of {env,cim,cat,clss}, 'script' and 'common' automatically addeed
+
+		[[ -z $* ]] && return 0
+		bullet=1
+		echo -e "This script can be used to cleanup private (pvt) development sites i.e. sites of the form '<client>-$userName'."
+		echo -e "\nThe actions performed are:"
+		echo -e "\t$bullet) Selected sites are processed based on the requested action:"
+		echo -e "\t\t- Marking a site for automatic deletion"
+		echo -e "\t\t- Holding a site so automatic delete will not process it"
+		echo -e "\t\t- Unmarking a site selected for automatic deletion"
+		echo -e "\t\t- Resting the time date stamp used for automatic deletion"
+		echo -e "\t\t- Removing the sit"
+		(( bullet++ ))
+		echo -e "\nTarget site data files potentially modified:"
+		echo -e "\tAs above"
+		return 0
+	}
+
+#==================================================================================================
+# Localfunctions
+#==================================================================================================
 	#==================================================================================================
 	# Get sites
 	#==================================================================================================
@@ -247,6 +270,7 @@ if [[ -n $client ]]; then
 			else
 				Msg2 "^Deleting '$(basename $file)'"
 			fi
+[[ $userName == 'dscudiero' ]] && echo "mv -f \"$file\" \"$file.BeingDeletedBy$(TitleCase \"$myName\")\""
 			mv -f "$file" "$file.BeingDeletedBy$(TitleCase "$myName")"
 			(nohup rm -rf "$file.BeingDeletedBy$(TitleCase "$myName")" &> /dev/null) &
 		done
@@ -310,3 +334,4 @@ Goodbye 0
 ## 09-05-2017 @ 07.09.49 - (3.5.9)     - dscudiero - more debug stuff
 ## 09-05-2017 @ 16.25.44 - (3.5.10)    - dscudiero - Delete all dev sites that match pattern
 ## 09-06-2017 @ 07.19.45 - (3.5.11)    - dscudiero - Add debug statements
+## 09-11-2017 @ 07.08.30 - (3.5.18)    - dscudiero - Add debug statements
