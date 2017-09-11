@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.82" // -- dscudiero -- Fri 09/08/2017 @  8:06:12.46
+wfLibVersion="1.7.84" // -- dscudiero -- Mon 09/11/2017 @  7:46:46.12
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -1264,16 +1264,17 @@ wffuncs.wfAttr = function(inval, wfrule, args) {
 // 		if options includes 'includeTCA' then you must also pass the tcadata object
 //		if options includes 'noMapValue' then the attribute will not be mapped through any existing mapping functions
 //=======================================================================================================================
-// 05/08/2017 - dgs - New
-// 05/09/2017 - dgs - Switched to use getTCFValue for tca data
-// 05/11/2017 - dgs - Added logic to look at request type and if it does not end in an "s" then return only the proposal
-//						tca data
-// 					- Switched data passing to object
-// 05/17/17 - dgs 	- Updated calls to GetAttrVal to add passing in the names of the form variables
-// 06/09/17 - dgs 	- Added variable value mapping with the option to turn off.
-// 07/18/17 - dgs 	- Modifed includeTCA setting, if option include OR request type ends in 's' then include tca data
-// 07/26/17 - dgs 	- Always do the lookups for subjects, departments, and colleges regardless of request type
-// 08/30/17 - dgs 	- The target attribute 'request' (above) can be passed in as an option on the wfrule,e.g. 'wfrules:Divs|function|wfAttr|Cols'
+// 05/08/17 - dgs - New
+// 05/09/17 - dgs - Switched to use getTCFValue for tca data
+// 05/11/17 - dgs - Added logic to look at request type and if it does not end in an "s" then return only the proposal
+//					tca data
+// 				  - Switched data passing to object
+// 05/17/17 - dgs - Updated calls to GetAttrVal to add passing in the names of the form variables
+// 06/09/17 - dgs - Added variable value mapping with the option to turn off.
+// 07/18/17 - dgs - Modifed includeTCA setting, if option include OR request type ends in 's' then include tca data
+// 07/26/17 - dgs - Always do the lookups for subjects, departments, and colleges regardless of request type
+// 08/30/17 - dgs - The target attribute 'request' (above) can be passed in as an option on the wfrule,e.g. 'wfrules:Divs|function|wfAttr|Cols'
+// 09/11/17 = dgs - Do not pull data from allcodes unless the cim instance is courseadmin
 //=======================================================================================================================
 GetAttrVal = function(data) {
 	wfDebug(5,"\t*** In GetAttrVal ***");
@@ -1306,7 +1307,7 @@ GetAttrVal = function(data) {
 
 	var subjects=[], departments=[], colleges=[];
 	// If the request ends in an "s" then get standard values using allcodes functions
-		if (reqType.slice(-1) === "s" && ! proposalOnly && wfAllcodes) {
+		if (reqType.slice(-1) === "s" && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
 			departments=wffuncs.getDepartments(subjects);
 
@@ -2304,3 +2305,4 @@ var wfLibLoaded=true;
 // 09-01-2017 @ 13.45.06 - ("1.7.79")  - dscudiero - Update logic checking of steps has a value in Related
 // 09-05-2017 @ 08.27.57 - ("1.7.80")  - dscudiero - Tweaked TODO to add prefix text and adjust spacing
 // 09-08-2017 @ 08.07.59 - ("1.7.82")  - dscudiero - Fixed bug where related was not editing out the reference data if it was in the proposal data for depts
+// 09-11-2017 @ 15.52.15 - ("1.7.84")  - dscudiero - General syncing of dev to prod
