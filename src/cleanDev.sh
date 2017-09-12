@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.18 # -- dscudiero -- Mon 09/11/2017 @  7:08:05.71
+version=3.5.20 # -- dscudiero -- Tue 09/12/2017 @  7:15:11.89
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgsStd Hello Init Goodbye ProtectedCall PadChar Prompt StringFunctions'
@@ -254,7 +254,7 @@ if [[ -n $client ]]; then
 [[ $userName == 'dscudiero' ]] && Here 2
 		Msg2 "Starting $myName in daemon mode..."
 		SetFileExpansion 'on'
-		fileList="$(ls -d /mnt/dev*/web/*-*--AutoDelete*/ 2> /dev/null || true)"
+		fileList="$(ls -d /mnt/dev*/web/*-*--AutoDelete* 2> /dev/null || true)"
 		SetFileExpansion
 [[ $userName == 'dscudiero' ]] && dump fileList
 		for file in $fileList; do
@@ -270,9 +270,10 @@ if [[ -n $client ]]; then
 			else
 				Msg2 "^Deleting '$(basename $file)'"
 			fi
-[[ $userName == 'dscudiero' ]] && echo "mv -f \"$file\" \"$file.BeingDeletedBy$(TitleCase \"$myName\")\""
-			mv -f "$file" "$file.BeingDeletedBy$(TitleCase "$myName")"
-			(nohup rm -rf "$file.BeingDeletedBy$(TitleCase "$myName")" &> /dev/null) &
+			fileRm="$(sed s"/AutoDeleteWithSave/BeingDeletedBy$(TitleCase $myName)/g" <<< "$file")"
+[[ $userName == 'dscudiero' ]] && echo "mv -f \"$file\" \"$fileRm\""
+			mv -f "$file" "$fileRm"
+			(nohup rm -rf "$fileRm" &> /dev/null) &
 		done
 		Msg2 "Ending $myName in daemon mode..."
 		Goodbye 0
@@ -335,3 +336,4 @@ Goodbye 0
 ## 09-05-2017 @ 16.25.44 - (3.5.10)    - dscudiero - Delete all dev sites that match pattern
 ## 09-06-2017 @ 07.19.45 - (3.5.11)    - dscudiero - Add debug statements
 ## 09-11-2017 @ 07.08.30 - (3.5.18)    - dscudiero - Add debug statements
+## 09-12-2017 @ 07.15.31 - (3.5.20)    - dscudiero - Change the way files are deleted
