@@ -1,10 +1,11 @@
 #!/bin/bash
 #==================================================================================================
-version=2.2.29 # -- dscudiero -- Fri 06/23/2017 @  9:17:15.91
+version=2.2.37 # -- dscudiero -- Tue 09/12/2017 @  7:34:15.11
 #==================================================================================================
 TrapSigs 'on'
-includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
+includes='GetDefaultsData ParseArgsStd Hello Init Goodbye Msg2 MkTmpFile'
 Import "$includes"
+
 originalArgStr="$*"
 scriptDescription="Check cgi file permissions"
 
@@ -19,23 +20,38 @@ scriptDescription="Check cgi file permissions"
 #==================================================================================================
 
 #==================================================================================================
-# local functions
+# Standard call back functions
 #==================================================================================================
-	#==================================================================================================
-	# parse script specific arguments
-	#==================================================================================================
-	function parseArgs-checkCgiPermissions {
+	function checkCgiPermissions-parseArgsStd {
 		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
 		argList+=(-fix,1,switch,fix,,script,'Fix the file permissions (chmod ug+rx)')
 	}
-	function Goodbye-checkCgiPermissions  {
-		:
+
+	function checkCgiPermissions-Goodbye {
+		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
+		return 0
+	}
+
+	function checkCgiPermissions-Help {
+		helpSet='' # can also include any of {env,cim,cat,clss}, 'script' and 'common' automatically addeed
+
+		[[ -z $* ]] && return 0
+		bullet=1
+		echo -e "This script can be used to check the courseleaf cgi unix file permissions are set correctly"
+		echo -e "\nThe actions performed are:"
+		echo -e "\t$bullet) Check the file permissions and compare to '$scriptData2' (from scriptData2), if different then report"
+		(( bullet++ ))
+		echo -e "\t$bullet) if the -fix flag was specified then the file permssions are set as above"
+		echo -e "\nTarget site data files potentially modified (from scriptData1):"
+		for file in $(tr ',' ' ' <<< $scriptData1); do
+			echo -e "\t- $file"
+		done
+		return 0
 	}
 
 #==================================================================================================
 # Declare local variables and constants
 #==================================================================================================
-
 sendMail=false
 fix=false
 printedHeader='false'
@@ -43,8 +59,6 @@ printedHeader='false'
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-helpSet='script'
-
 GetDefaultsData $myName
 ParseArgsStd
 Hello
@@ -53,8 +67,11 @@ tmpFile=$(MkTmpFile)
 #==================================================================================================
 ## main
 #==================================================================================================
+# web/courseleaf/courseleaf.cgi,web/ribbit/index.cgi
 checkFiles="$(tr ',' ' ' <<< $scriptData1)"
-checkPermissions="$scriptData2"
+# .rwxr.x...|.rwxr..r...
+checkPermissions1="${scriptData2%%,*}"
+checkPermissions2="${scriptData2##*,}"
 checkEnvs="$(tr ',' ' '<<< $scriptData3)"
 
 for searchSpec in $checkFiles; do
@@ -62,7 +79,8 @@ for searchSpec in $checkFiles; do
 	SetFileExpansion 'on'
 	unset files
 	for env in $checkEnvs; do
-		files+=( $(ls -l /mnt/*/*/$env/$searchSpec 2> /dev/null | grep -v ^'l' | grep -v ^"$checkPermissions" | awk 'BEGIN {FS=" "}{print $9}') )
+		#files+=( $(ls -l /mnt/*/*/$env/$searchSpec 2> /dev/null | grep -v ^'l' | grep -v ^"$checkPermissions" | awk 'BEGIN {FS=" "}{print $9}') )
+		files+=($(ls -l /mnt/*/*/$env/$searchSpec 2> /dev/null | grep -v ^'l' | grep -v ^"$checkPermissions1" | grep -v ^"$checkPermissions2" | awk 'BEGIN {FS=" "}{print $9}') )
 	done
 	SetFileExpansion
 
@@ -119,3 +137,4 @@ Goodbye 0
 ## Tue Feb  7 07:56:26 CST 2017 - dscudiero - Fix problem printing out file names
 ## Mon Feb 13 15:59:17 CST 2017 - dscudiero - Make sure we are using our own tmpFile
 ## 06-23-2017 @ 09.26.32 - (2.2.29)    - dscudiero - Add 'do not respond' to the email
+## 09-12-2017 @ 07.35.27 - (2.2.37)    - dscudiero - Check against two different permission templates
