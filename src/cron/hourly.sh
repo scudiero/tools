@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.125 # -- dscudiero -- Fri 09/08/2017 @ 10:26:15.13
+version=2.1.126 # -- dscudiero -- Tue 09/12/2017 @  7:42:26.23
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -206,7 +206,7 @@ case "$hostName" in
 		SyncSkeleton
 		## If noon then update the git repo shadows
 		[[ $(date "+%H") == 12 ]] && Call 'syncCourseleafGitRepos' 'master'
-		[[ $(date "+%H") == 22 ]] && Call 'backupData'
+		[[ $(date "+%H") == 22 ]] && USELOCAL=true && Call 'backupData'
 		;;
 	*)
 		sleep 60 ## Wait for perfTest on Mojave to set its semaphore
@@ -255,3 +255,4 @@ return 0
 ## 09-05-2017 @ 08.56.21 - (2.1.123)   - dscudiero - Added '--ignore-date' to rsync options for syncskeleton
 ## 09-08-2017 @ 08.11.31 - (2.1.124)   - dscudiero - Update imports
 ## 09-08-2017 @ 11.26.25 - (2.1.125)   - dscudiero - add protectedcall to the list of includes
+## 09-12-2017 @ 07.42.46 - (2.1.126)   - dscudiero - set USELOCAL before call of backupdata
