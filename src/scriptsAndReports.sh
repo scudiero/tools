@@ -1,12 +1,13 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.12.6 # -- dscudiero -- Mon 06/12/2017 @ 11:30:47.66
+version=3.12.11 # -- dscudiero -- Wed 09/13/2017 @  8:36:24.54
 #=======================================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
-imports="$imports Call SelectMenuNew"
-Import "$imports"
+includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
+includes="$includes Colors PushPop SetFileExpansion Call SelectMenuNew ProtectedCall"
+Import "$includes"
+
 originalArgStr="$*"
 scriptDescription="Script dispatcher"
 
@@ -42,7 +43,7 @@ function BuildMenuList {
 
 	## Get a list of scripts available to this user in the execution environment we are running in
 		unset whereClauseHost; unset whereClauseUser; unset whereClauseGroups
-		whereClauseActive="(active = \"Yes\" and name != \"$mode\")"
+		whereClauseActive="(active = \"Yes\" and showInScripts=\"Yes\" and name != \"$mode\")"
 		# If reports build the auth where clauses
 		if [[ $mode == 'scripts' ]]; then
 			whereClauseHost="and (os=\"$osName\" and (host = \"$hostName\" or host is null))"
@@ -258,7 +259,7 @@ mode=$(tr '[:upper:]' '[:lower:]' <<< "$1")
 	## Not a client name, look for report or script name
 	if [[ $count -eq 0 ]]; then
 		if [[ $mode == 'scripts' ]]; then
-			sqlStmt="select count(*) from $scriptsTable where LOWER(name)=\"$(Lower $1)\" and active=\"Yes\""
+			sqlStmt="select count(*) from $scriptsTable where LOWER(name)=\"$(Lower $1)\" and active=\"Yes\" and showInScripts=\"Yes\""
 			RunSql2 $sqlStmt
 			count=${resultSet[0]}
 			[[ $count -ne 0 ]] && script=$1 && shift && originalArgStr="$*"
@@ -506,3 +507,4 @@ Goodbye 0
 ## 06-12-2017 @ 11.28.20 - (3.12.4)    - dscudiero - Move the .bashrc check for the scrips alias before any other activities
 ## 06-12-2017 @ 11.29.13 - (3.12.5)    - dscudiero - Remove debug stateement
 ## 06-12-2017 @ 11.30.57 - (3.12.6)    - dscudiero - tweak messaging
+## 09-13-2017 @ 11.30.02 - (3.12.11)   - dscudiero - Update to just pull the scripts that have showinscripts=Yes
