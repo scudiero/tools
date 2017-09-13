@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.20 # -- dscudiero -- Tue 09/12/2017 @  7:15:11.89
+version=3.5.21 # -- dscudiero -- Wed 09/13/2017 @  6:57:59.82
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgsStd Hello Init Goodbye ProtectedCall PadChar Prompt StringFunctions'
@@ -244,26 +244,19 @@ elif [[ "$hostName" = 'build7' ]]; then share=dev7
 elif [[ "$hostName" = 'mojave' ]]; then share=dev6
 fi
 validActions='Yes No Mark Unmark ResetDate Save -'
-[[ $userName == 'dscudiero' ]] && validActions="$validActions Workflow"
 searchStr="$userName"
 ## if client was passed in then just delete that site, otherwise if it is 'daemon' then process autodeletes
-[[ $userName == 'dscudiero' ]] && dump client
 if [[ -n $client ]]; then
-[[ $userName == 'dscudiero' ]] && Here 1
 	if [[ $client == 'daemon' ]]; then
-[[ $userName == 'dscudiero' ]] && Here 2
 		Msg2 "Starting $myName in daemon mode..."
 		SetFileExpansion 'on'
 		fileList="$(ls -d /mnt/dev*/web/*-*--AutoDelete* 2> /dev/null || true)"
 		SetFileExpansion
-[[ $userName == 'dscudiero' ]] && dump fileList
 		for file in $fileList; do
 			file=$(tr -d ':' <<< "$file")
-[[ $userName == 'dscudiero' ]] && echo "file = '$file'"
 			if [[ $(Contains "$file" 'WithSave') == true ]]; then
 				Msg2 "^Deleting '$(basename $file)' with workflow save"
 				quiet=true
-[[ $userName == 'dscudiero' ]] && echo "Call saveWorkflow -daemon -siteFile \"$file\" -all -suffix \"beforeDelete-$backupSuffix -quiet -nop\""
 				Call saveWorkflow -daemon -siteFile "$file" -all -suffix "beforeDelete-$backupSuffix -quiet -nop"
 				quiet=false
 				Msg2 "^^workflow saved"
@@ -271,7 +264,6 @@ if [[ -n $client ]]; then
 				Msg2 "^Deleting '$(basename $file)'"
 			fi
 			fileRm="$(sed s"/AutoDeleteWithSave/BeingDeletedBy$(TitleCase $myName)/g" <<< "$file")"
-[[ $userName == 'dscudiero' ]] && echo "mv -f \"$file\" \"$fileRm\""
 			mv -f "$file" "$fileRm"
 			(nohup rm -rf "$fileRm" &> /dev/null) &
 		done
@@ -337,3 +329,4 @@ Goodbye 0
 ## 09-06-2017 @ 07.19.45 - (3.5.11)    - dscudiero - Add debug statements
 ## 09-11-2017 @ 07.08.30 - (3.5.18)    - dscudiero - Add debug statements
 ## 09-12-2017 @ 07.15.31 - (3.5.20)    - dscudiero - Change the way files are deleted
+## 09-13-2017 @ 06.59.23 - (3.5.21)    - dscudiero - remove debug statements
