@@ -59,11 +59,11 @@ Hello
 [[ $allCims == true ]] && allCims='allCims' || unset allCims
 if [[ $daemon == true ]]; then
 	[[ -z $siteFile ]] && Terminate "If the -daemon flag is specified you must also specify a siteFile name"
-	data="$(ParseCourseleafFile "$siteFile")"
+	data="$(ParseCourseleafFile "$siteDir")"
 	client="${data%% *}"
 	client="${client%%-*}"
-	env="$(cut -d ' ' -f2 <<< "$data")"
-	env="${data#* }" ; env="${env%% *}"
+	data="${data#* }"
+	env="${data%% *}" 
 
 	dump -1 userName siteFile data client env
 	allCims=true; GetCims  "$siteFile"
@@ -186,3 +186,4 @@ Goodbye 0
 ## 09-01-2017 @ 08.18.19 - (2.2.79)    - dscudiero - Add debug statements
 ## 09-07-2017 @ 08.02.48 - (2.2.80)    - dscudiero - Add debug messages
 ## 09-13-2017 @ 06.59.34 - (2.2.84)    - dscudiero - remove debug statements
+## 09-13-2017 @ 11.22.19 - (2.2.84)    - dscudiero - Change the parsing of the client and env for daemon mode
