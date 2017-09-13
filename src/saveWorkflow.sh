@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.80 # -- dscudiero -- Thu 09/07/2017 @  8:02:26.84
+version=2.2.84 # -- dscudiero -- Wed 09/13/2017 @  6:58:58.34
 #====================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye ParseCourseleafFile' #imports="$imports "
@@ -52,7 +52,6 @@ saveAll=false
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-[[ $userName == 'dscudiero' ]] && Here SW0
 helpSet="client,env,script,cims"
 GetDefaultsData $myName
 ParseArgsStd
@@ -61,15 +60,10 @@ Hello
 if [[ $daemon == true ]]; then
 	[[ -z $siteFile ]] && Terminate "If the -daemon flag is specified you must also specify a siteFile name"
 	data="$(ParseCourseleafFile "$siteFile")"
-[[ $userName == 'dscudiero' ]] && echo "data = '$data'"
 	client="${data%% *}"
-[[ $userName == 'dscudiero' ]] && echo "client 1 = '$client'"
 	client="${client%%-*}"
-[[ $userName == 'dscudiero' ]] && echo "client 2 = '$client'"
 	env="$(cut -d ' ' -f2 <<< "$data")"
-[[ $userName == 'dscudiero' ]] && echo "env 1 = '$env'"
 	env="${data#* }" ; env="${env%% *}"
-[[ $userName == 'dscudiero' ]] && echo "env 2 = '$env'"
 
 	dump -1 userName siteFile data client env
 	allCims=true; GetCims  "$siteFile"
@@ -81,7 +75,6 @@ else
 fi
 
 ##TODO
-[[ $userName == 'dscudiero' ]] && Here SW1
 dump isMe daemon siteFile client env srcDir cimStr backupFolder scriptData1 scriptData2 scriptData3 scriptData4
 
 dump -1 scriptData1 scriptData2 scriptData3 scriptData4
@@ -126,40 +119,34 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 #==================================================================================================
 ## Backup the folders
 	echo
-[[ $userName == 'dscudiero' ]] && Here SW2
 	[[ -d $backupFolder ]] && rm -rf $backupFolder || mkdir -p "$backupFolder"
-	## Insance files
-		for dir in $(echo $cimStr | tr ',' ' '); do
-			Msg2 "Saving: $dir"
-			for file in $(echo "$requiredInstanceFiles $optionalInstanceFiles" | tr ',' ' '); do
-				if [[ -f $srcDir/web/$dir/$file ]]; then
-					[[ ! -d $(dirname $backupFolder/web/$dir/$file) ]] && $DOIT mkdir -p "$(dirname $backupFolder/web/$dir/$file)"
-					$DOIT cp -rfp $srcDir/web/$dir/$file $backupFolder/web/$dir/$file
-				fi
-			done
-		done #CIMs
+## Insance files
+	for dir in $(echo $cimStr | tr ',' ' '); do
+		Msg2 "Saving: $dir"
+		for file in $(echo "$requiredInstanceFiles $optionalInstanceFiles" | tr ',' ' '); do
+			if [[ -f $srcDir/web/$dir/$file ]]; then
+				[[ ! -d $(dirname $backupFolder/web/$dir/$file) ]] && $DOIT mkdir -p "$(dirname $backupFolder/web/$dir/$file)"
+				$DOIT cp -rfp $srcDir/web/$dir/$file $backupFolder/web/$dir/$file
+			fi
+		done
+	done #CIMs
 
-[[ $userName == 'dscudiero' ]] && Here SW3
-	## Global files
-		Msg2 "Saving: System files"
-			for file in $(echo "$requiredGlobalFiles $optionalGlobalFiles" | tr ',' ' '); do
-				if [[ -f $srcDir/web$file ]]; then
-					[[ ! -d $(dirname $backupFolder/web$file) ]] && $DOIT mkdir -p "$(dirname $backupFolder/web$file)"
-					$DOIT cp -rfP $srcDir/web$file $backupFolder/web$file
-				fi
-			done
+## Global files
+	Msg2 "Saving: System files"
+		for file in $(echo "$requiredGlobalFiles $optionalGlobalFiles" | tr ',' ' '); do
+			if [[ -f $srcDir/web$file ]]; then
+				[[ ! -d $(dirname $backupFolder/web$file) ]] && $DOIT mkdir -p "$(dirname $backupFolder/web$file)"
+				$DOIT cp -rfP $srcDir/web$file $backupFolder/web$file
+			fi
+		done
 
-[[ $userName == 'dscudiero' ]] && Here SW4
-
-	## Tar up the workflow files
+## Tar up the workflow files
 	pushd "$backupFolder" >& /dev/null
 	numFiles=$(find .//. ! -name . -print | grep -c //)
-dump ifMe numFiles
 	if [[ $numFiles -gt 0 ]]; then
 		tarDir=$localClientWorkFolder/$client/workflowBackups
 		[[ ! -d $tarDir ]] && mkdir -p "$tarDir"
 		tarFile="$tarDir/${env}--$backupSuffix.tar.gz"
-dump isMe tarFile
 		ProtectedCall "tar -cpzf \"$tarFile\" ./*"; rc=$?
 		[[ $rc -ne 0 ]] && Error "Non-zero return code from tar"
 		cd ..
@@ -172,7 +159,6 @@ dump isMe tarFile
 #==================================================================================================
 ## Done
 #==================================================================================================
-[[ $userName == 'dscudiero' ]] && Here SW5
 Goodbye 0
 #==================================================================================================
 ## Checkin log
@@ -199,3 +185,4 @@ Goodbye 0
 ## 08-31-2017 @ 07.43.10 - (2.2.76)    - dscudiero - add debug stuff
 ## 09-01-2017 @ 08.18.19 - (2.2.79)    - dscudiero - Add debug statements
 ## 09-07-2017 @ 08.02.48 - (2.2.80)    - dscudiero - Add debug messages
+## 09-13-2017 @ 06.59.34 - (2.2.84)    - dscudiero - remove debug statements
