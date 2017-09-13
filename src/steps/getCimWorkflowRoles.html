@@ -11,6 +11,7 @@
 // 08/08/17 - dgs -	Add the cim instance name to the output, if the value was mapped also include the unmapped value.
 // 08/25/17 - dgs -	make sure that we add the real departement code to the subruleshash even if it is not mapped.
 // 08/30/17 - dgs -	Clean up debug messaging, fix problem adding the raw step text to the output array
+// 09/13/17 - dgs -	Added 'optional' flag on the reported instance name
 //============================================================================================================
 // Function wrapper
 (function getCimWorkflowRoles() {
@@ -35,7 +36,8 @@ var debug=false;
 		"crosslistedcolleges": true,
 		"associateddepts": true,
 		"associatedschools": true,
-		"associatedcolleges": true
+		"associatedcolleges": true,
+		"todo": true
 	}
 
 //============================================================================================================
@@ -175,7 +177,7 @@ if (debug) { wfDump("sisName",sisName); }
 		var workflowTcfData = load_tcf('/' + cim + '/workflow.tcf');
 		if (workflowTcfData) {
 
-			print_doc('Processing cim: ' + cim + '\n');
+			print_doc('\nProcessing cim: ' + cim);
 
 			//pull off list of conditional attributes from the localsteps data
 				str=workflowTcfData.localsteps[0].params.replace('attributes=','');
@@ -329,17 +331,25 @@ if (debug) { wfDump("sisName",sisName); }
 	conditionals=RemoveDupes(conditionals);
 	conditionals.reverse();
 	if (debug) {
+		print_doc('Found ' + steps.length + ' steps...\n'); 
+		steps.forEach(function(text) {
+			print_doc('\tstep >' + text.toSource() + '<\n');
+		});//steps
+		print_doc('\n');
 		print_doc('Found ' + conditionals.length + ' step conditionals...\n'); 
 		conditionals.forEach(function(text) {
 			print_doc('\tconditional >' + text.toSource() + '<\n');
-		});//steps
+		});//conditionals
 		print_doc('\n');
 	}
-
 	// Pre-process the steps array: 1) remove the conditionals strings from the steps, 2)remove the steps that are function calls, 3) Combine cimInstance data for duplicate steps, 4) remove dups
 		steps.sort(compare);
 		for (var i=0,  tot=steps.length; i < tot; i++) {
 			var stepData=steps[i].stepData
+			if (stepData.indexOf("optional") > 0) {
+				steps[i].optional=true;
+				steps[i].cimInstance=steps[i].cimInstance + "/optional";
+			}
 			conditionals.forEach(function(conditional) {
 				stepData=stepData.replace(conditional,'').trim();
 			});
@@ -352,25 +362,24 @@ if (debug) { wfDump("sisName",sisName); }
 				}
 			}
 		}
-
 		// Remove empty records and duplicates
-		var tmpArray=[], tmpStr1='', tmpStepPrev='', tmpInstancePrev='';
+		var tmpArray=[], tmpStepData='', tmpStepDataPrev='', tmpInstancePrev='';
 		for (var i=0,  tot=steps.length; i < tot; i++) {
-			tmpStr1=steps[i].stepData
-			if (steps[i].stepData === '' && steps[i].cimInstance === '') continue;
-			if (tmpStr1 === tmpStepPrev) {
-				if (steps[i].cimInstance != tmpInstancePrev)
-					tmpArray[tmpArray.length - 1].cimInstance=tmpArray[tmpArray.length - 1].cimInstance + ", " + steps[i].cimInstance;
+			tmpStepData=steps[i].stepData
+			if (steps[i].stepData === '') continue;
+			if (tmpStepData === tmpStepDataPrev) {
+				if (tmpArray[tmpArray.length - 1].cimInstance.indexOf(steps[i].cimInstance) < 0) {
+					tmpArray[tmpArray.length - 1].cimInstance=tmpArray[tmpArray.length - 1].cimInstance + ", " + steps[i].cimInstance
+				}
 				continue;
 			}
 			tmpArray.push(steps[i]);
-			tmpStepPrev=steps[i].stepData;
+			tmpStepDataPrev=steps[i].stepData;
 			tmpInstancePrev=steps[i].cimInstance;
 		}
 		steps=tmpArray;
-
 		if (debug) {
-			print_doc('\nFound ' + steps.length + ' steps...\n'); 
+			print_doc('\nFound ' + steps.length + ' steps...\n');
 			print_doc('\nSteps after pre-processing:\n');
 			steps.forEach(function(step) {
 				print_doc('\tstep >' + step.toSource() + '<\n');
