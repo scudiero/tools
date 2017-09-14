@@ -1,10 +1,11 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.31 # -- dscudiero -- 12/14/2016 @ 11:19:56.73
+version=1.0.33 # -- dscudiero -- Thu 09/14/2017 @ 14:31:51.28
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
-Import "$imports"
+includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye'
+includes="$includes StringFunctions ProtectedCall RunSql2"
+Import "$includes"
 originalArgStr="$*"
 scriptDescription="Scan workflow files for changed variable names"
 
@@ -36,8 +37,42 @@ function testMode-checkWorkflowFiles  { # or testMode-local
 #==================================================================================================
 # Declare local variables and constants
 #==================================================================================================
-searchFiles="$scriptData1"
-triggerText='IDs CHANGED ON FORM FOR REFRESH'
+	GetDefaultsData 'copyWorkflow'
+
+
+
+
+
+function workflowcorefiles {
+	local file srcFile tgtFile result changeLogRecs
+	Init 'getClient getEnv getDirs checkEnv'
+	echo
+
+	local sqlStmt="select scriptData3 from $scriptsTable where name=\"copyWorkflow\""
+	RunSql2 $sqlStmt
+	[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Could not retrieve workflow files data (scriptData1) from the $scriptsTable.";
+	local scriptData="$(cut -d':' -f2- <<< ${resultSet[0]})"
+
+	for file in $(tr ',' ' ' <<< $scriptData); do
+		[[ $file == 'roles.tcf' || ${file##*.} == 'plt' ]] && continue
+		srcFile="$skeletonRoot/release/web${file}"
+		tgtFile="$srcDir/web${file}"
+		## Copy file if changed
+			result=$(CopyFileWithCheck "$srcFile" "$tgtFile" 'backup')
+			if [[ $result == true ]]; then
+				changeLogRecs+=("Updated: $file")
+				WriteChangelogEntry 'changeLogRecs' "$srcDir/changelog.txt"
+				Msg2 "^'$file' copied"
+			elif [[ $result == 'same' ]]; then
+				Msg2 "^'$file' - md5's match, no changes made"
+			else
+				Msg2 $T "Error copying file:\n^$result"
+			fi
+	done
+	return 0
+}
+
+
 
 #==================================================================================================
 # Standard arg parsing and initialization
@@ -46,23 +81,32 @@ helpSet='script,client,env'
 scriptHelpDesc="This script will scan the common workflow files looking for variables who's name has changed due to the CIM refresh project.\
 \n\tThe script expectes to find a formatted comment block at the top of the custom.atj file."
 
-GetDefaultsData $myName
+GetDefaultsData 'copyWorkflow'
 ParseArgsStd
 Hello
 Init "getClient getEnv getDirs checkEnvs getCims"
 
-unset verifyArgs
-verifyArgs+=("Client:$client")
-verifyArgs+=("Env:$(TitleCase $env)")
-verifyArgs+=("CIMs:$cimStr")
-
-VerifyContinue "You are asking to scan workflow files for changed variable names"
 myData="Client: '$client', Env: '$env', Cims: '$cimStr' "
 [[ $logInDb != false && $myLogRecordIdx != "" ]] && dbLog 'data' $myLogRecordIdx "$myData"
 
 #===================================================================================================
 # Main
 #===================================================================================================
+unset requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles ifThenDelete
+[[ -z $scriptData1 ]] && Msg2 $T "'scriptData1 (requiredInstanceFiles)' is null, please check script configuration data"
+requiredInstanceFiles="$(cut -d':' -f2- <<< $scriptData1)"
+
+[[ -z $scriptData2 ]] && Msg2 $T "'scriptData2 (optionalInstanceFiles)' is null, please check script configuration data"
+optionalInstanceFiles="$(cut -d':' -f2- <<< $scriptData2)"
+
+[[ -z $scriptData3 ]] && Msg2 $T "'scriptData3 (requiredGlobalFiles)' is null, please check script configuration data"
+requiredGlobalFiles="$(cut -d':' -f2- <<< $scriptData3)"
+
+[[ -z $scriptData4 ]] && Msg2 $T "'scriptData4 (optionalGlobalFiles)' is null, please check script configuration data"
+optionalGlobalFiles="$(cut -d':' -f2- <<< $scriptData4)"
+
+srcDir=$skeletonRoot/release
+
 for cim in $(tr ',' ' ' <<< $cimStr); do
 	Msg2
 	Msg2 "Processing: $cim..."
