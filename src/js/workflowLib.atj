@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.7.84" // -- dscudiero -- Mon 09/11/2017 @  7:46:46.12
+wfLibVersion="1.7.76" // -- dscudiero -- Thu 09/14/2017 @  9:06:31.32
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -43,11 +43,8 @@ wfLibVersion="1.7.84" // -- dscudiero -- Mon 09/11/2017 @  7:46:46.12
 // 				  - Added GetRelated function.
 // 08/25/17 - dgs - Refactored Related to use the GetRelated function
 // 08/28/17 - dgs - Added 'TODO' step
-// 08/29/17 - dgs - GetRelated -- Remove duplicates when processing the final resultSet array
-// 08/30/17 - dgs - Updates GetAttr to allow for request to be passed in as an option
-// 09/01/17 - dgs - Related - Update code that detects if the related wfrulename was used 'bare' without any other qualifiers
-// 09/05/17 - dgs - Tweaked TODO to add prefix text and adjust spacing
-// 09/08/17 - dgs - Fixed bug where related was not editing out the reference data if it was in the proposal data for depts
+// 09/14/17 - dgs - Added wfSubjVarName, wfDeptVarName, wfColVarName globals set in workflow.cfg
+//					Updated GetAttrVal to use the above
 //======================================================================================================================
 
 // Make sure wffucs is defined
@@ -60,46 +57,58 @@ if (typeof wfLibLoaded === "undefined") {
 	var wfCimInstance=tcfdata.pagename[0].replace(/^\/([^\/]*)\/.*/, "/$1/");
 	wfCimInstance=wfCimInstance.replace(/\//g, "");
 
-	var host=getenv("HTTP_HOST").toLowerCase();
+	// Get/Set Global variables
+		var wfDebugLevel=0;
+		var	wfDebugEnvs='dev';
+		var	wfColVarName='college';
+		var	wfDeptVarName='department';
+		var	wfSubjVarName='subject';
 
-	// If wfDebugLevel is set in the config file then set as global
-	var wfDebugLevel=0;
-	if (tcfdata.wfDebugLevel && tcfdata.wfDebugLevel.length > 0)
-		wfDebugLevel=tcfdata.wfDebugLevel[0]
-	wfDebugEnvs='dev';
-	if (tcfdata.wfDebugEnvs && tcfdata.wfDebugEnvs.length > 0)
-		wfDebugEnvs=tcfdata.wfDebugEnvs[0]
+		var wfHost=getenv("HTTP_HOST").toLowerCase();
+
+		if (tcfdata.wfDebugLevel && tcfdata.wfDebugLevel.length > 0)
+			wfDebugLevel=tcfdata.wfDebugLevel[0]
+		if (tcfdata.wfDebugEnvs && tcfdata.wfDebugEnvs.length > 0)
+			wfDebugEnvs=tcfdata.wfDebugEnvs[0]
+		if (tcfdata.wfColVarName && tcfdata.wfColVarName.length > 0)
+			wfColVarName=tcfdata.wfColVarName[0]
+		if (tcfdata.wfDeptVarName && tcfdata.wfDeptVarName.length > 0)
+			wfDeptVarName=tcfdata.wfDeptVarName[0]
+		if (tcfdata.wfSubjVarName && tcfdata.wfSubjVarName.length > 0)
+			wfSubjVarName=tcfdata.wfSubjVarName[0]
 
 	// Debug environment, print info
-	wfDebugEnvs="," + wfDebugEnvs + ",";
-	var wfEnvIsDev=false;
-	var wfEnv = "*unknown*";
-	if (host.indexOf('.dev') > 0) {
-		var wfEnv  ="dev";
-		wfEnvIsDev=true;
-	} else if (host.indexOf('-test') > 0) {
-		var wfEnv = "test";
-	} else if (host.indexOf('-next') > 0) {
-		var wfEnv = "next";
-	}
+		wfDebugEnvs="," + wfDebugEnvs + ",";
+		var wfEnvIsDev=false;
+		var wfEnv = "*unknown*";
+		if (wfHost.indexOf('.dev') > 0) {
+			var wfEnv  ="dev";
+			wfEnvIsDev=true;
+		} else if (wfHost.indexOf('-test') > 0) {
+			var wfEnv = "test";
+		} else if (wfHost.indexOf('-next') > 0) {
+			var wfEnv = "next";
+		}
+
 	// If in a debug environment then print out stuff
-	var wfInDebugEnv=false
-	if (wfDebugEnvs.indexOf("," + wfEnv + ",") >= 0) {
-		wfInDebugEnv=true;
-		var wfProposalMode='EDIT'
-		if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
-			wfProposalMode='NEW'
-		if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
-			wfProposalMode='DELETE'
-		var d = new Date();
-		var prtStr="\n" + Array(40).join("=") + " " + d.toString() + " " + Array(40).join("=") +
-					"\n<<< Loading workflowFuncs.atj, proposal mode is " + wfProposalMode;
-		if ( wfDebugLevel > 0 ) print_debug(prtStr);
-	}
-	if (wfEnvIsDev) {
-		if (typeof wfDebug === 'function')
-			wfDebug(1,"\n*** Loading "+ wfLibName + ", version: " + wfLibVersion);
-	}
+		var wfInDebugEnv=false
+		if (wfDebugEnvs.indexOf("," + wfEnv + ",") >= 0) {
+			wfInDebugEnv=true;
+			var wfProposalMode='EDIT'
+			if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
+				wfProposalMode='NEW'
+			if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
+				wfProposalMode='DELETE'
+			var d = new Date();
+			var prtStr="\n" + Array(40).join("=") + " " + d.toString() + " " + Array(40).join("=") +
+						"\n<<< Loading workflowFuncs.atj, proposal mode is " + wfProposalMode;
+			if ( wfDebugLevel > 0 ) print_debug("\n\n\n\n\n\n\n\n" + prtStr);
+		}
+		if (wfEnvIsDev) {
+			if (typeof wfDebug === 'function')
+				wfDebug(1,"\n*** Loading "+ wfLibName + ", version: " + wfLibVersion);
+		}
+
 } //(typeof wfLibLoaded === "undefined")
 
 //======================================================================================================================
@@ -469,7 +478,6 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 // 07/20/17 - dgs - Fix problem with when using the GetXXX functions -- needed to map the output to the expected output format
 // 08/23/17 - dgs - Only display the debug messages from Related to the preview workflow if debug levels is >= 4
 // 08/25/17 - dgs - Refactored to use GetRelated
-// 09/01/17 - dgs - Update code that detects if the related wfrulename was used 'bare' without any other qualifiers
 //======================================================================================================================
 wffuncs.Related = function(inval, wfrule, args) {
 	var version='4.9.16'; var myName=wfrule.attrname
@@ -700,7 +708,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 			//if (!tokensDone[token.data]) {
 				// Do we have a full step name from the workflow or do we pull the step data from the config file
 				if (inval == wfrule.searchfor) {
-					if (typeof steps != 'undefined') {
+					if (steps.length > 0) {
 						// Get steps from the config file
 						steps.forEach(function(step) {
 							step=step.replace(searchString,token.data);
@@ -771,8 +779,6 @@ wffuncs.Related = function(inval, wfrule, args) {
 //		{data:"7", source:"formVar:equivalents"}
 //==================================================================================================================
 // 08/23/17 - dgs - Initial
-// 08/29/17 - dgs - Remove duplicates when processing the final resultSet array
-// 09/08/17 - dgs - Fixed bug where related was not editing out the reference data if it was in the proposal data for depts
 //==================================================================================================================
 GetRelated = function(type,data) {
 	var myName="GetRelated"; wfDebug(1,"\n*** In " + myName + " ***");
@@ -896,11 +902,9 @@ GetRelated = function(type,data) {
 
 	// map the related data to the requested data type (i.e. type)
 	wfDebug(4,"\tProcessing refs...");
-	var checkArray=[];
 	refsArray.forEach(function(ref) {
 		wfDump(4,["\tref;"+ref.toSource()]);
 		var sqlStmt='', resultSet=[];
-		var refSkipped=false;
 		//Resolve the ref based on the substitution type
 			switch (type) {
   				case "subj":
@@ -909,11 +913,9 @@ GetRelated = function(type,data) {
   				case "subjects":
 					if (ref.format === "subj" ) {
 						var found=false;
-						proposalSubjs.some(function (token) {
-							if (ref.data === token) {
+						proposalSubjs.some(function (objAttr) {
+							if (ref.data === objAttr) {
 								found=true;
-								wfDebug(4,"\t\t\tskipping ref, code ("+ resultSet[ii] +") is in proposalSubjs ("+ proposalSubjs.toSource() +")");
-								refSkipped=true;
 								return true;
 							}
 						});
@@ -942,7 +944,6 @@ GetRelated = function(type,data) {
 									var newDataObj={}; newDataObj.data=resultSet[ii]; resultSet[ii]=newDataObj;
 								} else {
 									wfDebug(4,"\t\t\tskipping ref, code ("+ resultSet[ii] +") is in proposalDepts ("+ proposalDepts.toSource() +")");
-									refSkipped=true;
 								}
 							}
 						}
@@ -967,7 +968,6 @@ GetRelated = function(type,data) {
 									var newDataObj={}; newDataObj.data=resultSet[ii]; resultSet[ii]=newDataObj;
 								} else {
 									wfDebug(4,"\t\t\tskipping ref, code ("+ resultSet[ii] +") is in proposalCols ("+ proposalCols.toSource() +")");
-									refSkipped=true;
 								}
 							}
 						}
@@ -978,22 +978,10 @@ GetRelated = function(type,data) {
 				case "depts":
 				case "departments":
 				if (ref.format === "dept" ) {
-					//Check to see if the ref data is in the proposaDepts data
-					var found=false;
-					proposalDepts.some(function (token) {
-						if (ref.data === token) {
-							wfDebug(4,"\t\t\tskipping ref, code ("+ ref.data +") is in proposalDepts ("+ proposalDepts.toSource() +")");
-							refSkipped=true;
-							found=true;
-							return true;
-						}
-					});
-					if (! found) {
-						retToken={};
-						retToken.data=ref.data;
-						retToken.source=ref.source;
-						resultSet.push(retToken);
-					}
+					retToken={};
+					retToken.data=ref.data;
+					retToken.source=ref.source;
+					resultSet.push(retToken);
 				} else if (ref.format === "subj" ) {
 					if (wfCimInstance === 'courseadmin' && wfAllcodes)
 						resultSet=wffuncs.getDepartments([ref.data]).toString().split(",");
@@ -1013,7 +1001,6 @@ GetRelated = function(type,data) {
 								var newDataObj={}; newDataObj.data=resultSet[ii]; resultSet[ii]=newDataObj;
 							} else {
 								wfDebug(4,"\t\t\tskipping ref, code ("+ resultSet[ii] +") is in proposalDepts ("+ proposalDepts.toSource() +")");
-								refSkipped=true;
 							}
 						}
 					}
@@ -1047,7 +1034,6 @@ GetRelated = function(type,data) {
 								var newDataObj={}; newDataObj.data=resultSet[ii]; resultSet[ii]=newDataObj;
 							} else {
 								wfDebug(4,"\t\t\tskipping ref, code ("+ resultSet[ii] +") is in proposalCols ("+ proposalCols.toSource() +")");
-								refSkipped=true;
 							}
 						}
 					}
@@ -1072,7 +1058,6 @@ GetRelated = function(type,data) {
 								var newDataObj={}; newDataObj.data=resultSet[ii]; resultSet[ii]=newDataObj;
 							} else {
 								wfDebug(4,"\t\t\tskipping ref, code ("+ resultSet[ii] +") is in proposalCols ("+ proposalCols.toSource() +")");
-								refSkipped=true;
 							}
 						}
 					}
@@ -1092,13 +1077,11 @@ GetRelated = function(type,data) {
 					retToken={};
 					retToken.data=result.data;
 					retToken.source=ref.source;
-					if (Object.keys(retToken).length != 0 && typeof checkArray[retToken.data] === 'undefined') {
-						retArray.push(retToken); checkArray[retToken.data]=true;
-						wfDebug(4,"\t\t\treturning ref data: " + retToken.toSource());
-					}
+					retArray.push(retToken);
+					wfDebug(4,"\t\t\t   returning ref data: " + retToken.toSource());
 				}
 			});
-		} else if (! refSkipped) {
+		} else {
 				wfDebug(4,"\t\t   *Warning* -- no data returned from ref lookup")
 		} //(resultSet)
 	}); //refsArray
@@ -1264,17 +1247,16 @@ wffuncs.wfAttr = function(inval, wfrule, args) {
 // 		if options includes 'includeTCA' then you must also pass the tcadata object
 //		if options includes 'noMapValue' then the attribute will not be mapped through any existing mapping functions
 //=======================================================================================================================
-// 05/08/17 - dgs - New
-// 05/09/17 - dgs - Switched to use getTCFValue for tca data
-// 05/11/17 - dgs - Added logic to look at request type and if it does not end in an "s" then return only the proposal
-//					tca data
-// 				  - Switched data passing to object
-// 05/17/17 - dgs - Updated calls to GetAttrVal to add passing in the names of the form variables
-// 06/09/17 - dgs - Added variable value mapping with the option to turn off.
-// 07/18/17 - dgs - Modifed includeTCA setting, if option include OR request type ends in 's' then include tca data
-// 07/26/17 - dgs - Always do the lookups for subjects, departments, and colleges regardless of request type
-// 08/30/17 - dgs - The target attribute 'request' (above) can be passed in as an option on the wfrule,e.g. 'wfrules:Divs|function|wfAttr|Cols'
-// 09/11/17 = dgs - Do not pull data from allcodes unless the cim instance is courseadmin
+// 05/08/2017 - dgs - New
+// 05/09/2017 - dgs - Switched to use getTCFValue for tca data
+// 05/11/2017 - dgs - Added logic to look at request type and if it does not end in an "s" then return only the proposal
+//						tca data
+// 					- Switched data passing to object
+// 05/17/17 - dgs 	- Updated calls to GetAttrVal to add passing in the names of the form variables
+// 06/09/17 - dgs 	- Added variable value mapping with the option to turn off.
+// 07/18/17 - dgs 	- Modifed includeTCA setting, if option include OR request type ends in 's' then include tca data
+// 07/26/17 - dgs 	- Always do the lookups for subjects, departments, and colleges regardless of request type
+// 09/14/17 - dgs 	- Use wfColVarName, wfDeptVarName, wfSubjVarName
 //=======================================================================================================================
 GetAttrVal = function(data) {
 	wfDebug(5,"\t*** In GetAttrVal ***");
@@ -1282,11 +1264,11 @@ GetAttrVal = function(data) {
 	var reqType=data.request;
 	var optionStr=data.options; 	if (optionStr === undefined) optionStr="";
 	optionStr=optionStr.toLowerCase();
-
 	var tcaData=data.tcadata; 		if (tcaData === undefined) tcaData="";
-	var subjVarName=data.subjVar; 	if (subjVarName === undefined || subjVarName === "") subjVarName="subject";
-	var deptVarName=data.deptVar; 	if (deptVarName === undefined || deptVarName === "") deptVarName="department";
-	var colVarName=data.colVar; 	if (colVarName === undefined || colVarName === "") colVarName="college";
+
+	var subjVarName=data.subjVar; 	if (subjVarName === undefined || subjVarName === "") subjVarName=wfSubjVarName;
+	var deptVarName=data.deptVar; 	if (deptVarName === undefined || deptVarName === "") deptVarName=wfDeptVarName;
+	var colVarName=data.colVar; 	if (colVarName === undefined || colVarName === "") colVarName=wfColVarName;
 	if (wffuncs.getAllCodes(tcfdata) === '') {var wfAllcodes=false} else {var wfAllcodes=true}
 
 	wfDump(5,["\t\treqType;"+reqType,"\t\toptionStr;"+optionStr,"\t\ttcaData;"+tcaData,"\t\tsubjVarName;"+subjVarName,
@@ -1307,49 +1289,45 @@ GetAttrVal = function(data) {
 
 	var subjects=[], departments=[], colleges=[];
 	// If the request ends in an "s" then get standard values using allcodes functions
-		if (reqType.slice(-1) === "s" && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
+		if (reqType.slice(-1) === "s" && ! proposalOnly && wfAllcodes) {
 			subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
 			departments=wffuncs.getDepartments(subjects);
-
 			colleges=wffuncs.getColleges(departments);
 			wfDebug(5,"\t\tFrom wffuncs.GetXXXX function calls:")
-			wfDump(5,["\t\tcolleges;"+colleges.toSource(),"\t\tdepartments;"+departments.toSource(),"\t\tsubjects;"+subjects.toSource()+"\n",]);
+			wfDump(5,["\t\tcolleges;"+colleges.toSource(),"\t\tdepartments;"+departments.toSource(),"\t\tsubjects;"+subjects.toSource(),]);
 		}
 
 	// If we did not find data above then see if there is any data in the tcf file
 		if (subjects.length === 0) {
-			wfDebug(5,"\t\twffuncs.getSubjects returned nothing, checking the '" + subjVarName + "' variable");
 			subjects=getTCFValue(subjVarName, { delimiter: "\n", retarray: true });
 			if (includeTCA)
-				subjects=subjects.concat(getTCFValue("subject", { data: tcaData, delimiter: "\n", retarray: true }));
+				subjects=subjects.concat(getTCFValue(subjVarName, { data: tcaData, delimiter: "\n", retarray: true }));
 		}
 		if (departments.length === 0) {
-			wfDebug(5,"\t\twffuncs.getDepartments returned nothing, checking the '" + deptVarName + "' variable");
 			departments=getTCFValue(deptVarName, { delimiter: "\n", retarray: true });
 			if (includeTCA)
-				departments=departments.concat(getTCFValue("department", { data: tcaData, delimiter: "\n", retarray: true }));
+				departments=departments.concat(getTCFValue(deptVarName, { data: tcaData, delimiter: "\n", retarray: true }));
 		}
 		if (colleges.length === 0) {
-			wfDebug(5,"\t\twffuncs.getColleges returned nothing, checking the '" + colVarName + "' variable");
 			colleges=getTCFValue(colVarName, { delimiter: "\n", retarray: true });
 			if(colleges.length === 0 && departments.length != 0) {
 				colleges=wffuncs.getColleges(departments)
 			}
 
 			if (includeTCA)
-				colleges=colleges.concat(getTCFValue("college", { data: tcaData, delimiter: "\n", retarray: true }));
+				colleges=colleges.concat(getTCFValue(colVarName, { data: tcaData, delimiter: "\n", retarray: true }));
 		}
 
-	wfDebug(5,"\n\t\tFinal:")
+	wfDebug(5,"\t\tFinal:")
 	wfDump(5,["\t\tcolleges;"+colleges.toSource(),"\t\tdepartments;"+departments.toSource(),"\t\tsubjects;"+subjects.toSource(),]);
 
 	// return data based on how we were called
 		var retArray=[];
-		if (reqType.indexOf("col") >= 0 || optionStr.indexOf("col") >= 0) {
+		if (reqType.indexOf("col") >= 0) {
 			retArray=colleges;
-		} else if (reqType.indexOf("dep") >= 0 || optionStr.indexOf("dep") >= 0) {
+		} else if (reqType.indexOf("dep") >= 0) {
 			retArray=departments;
-		} else if (reqType.indexOf("subj") >= 0 || optionStr.indexOf("subj") >= 0) {
+		} else if (reqType.indexOf("subj") >= 0) {
 			retArray=subjects;
 		}
 		retArray=RemoveDupes(retArray)
@@ -2244,19 +2222,15 @@ wffuncs.wfDumpVars = function(inval, wfrule, args) {
 // 		wfrules:TODO|function|TODO|<Message to display>; //Put a TODO message to the preview workflow screen
 //======================================================================================================================
 // 08-28-17 - dgs - Initial coding -
-// 09/05/17 - dgs - Added 'Workflow is not complete' prefex text and adjusted spacing
 //======================================================================================================================
 wffuncs.TODO = function(inval, wfrule, args) {
-	var indent='&nbsp;&nbsp;&nbsp;&nbsp;';
 	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
-	if (options === "" ) {
-		options="Workflow is not complete, waiting on further specifications"
-	} else {
-		options="Workflow is not complete,<br>" + indent + indent + indent + indent + indent + "&nbsp;" + options;
-	}
-	print_doc(indent + '<strong>*Note*</strong> -- ' + options + ', please contact your CSM.</strong><br>');
+	if (options === "" ) options="Workflow is not complete, waiting on further specifications"
+	var spaceing='&nbsp;&nbsp;&nbsp;&nbsp;';
+	print_doc(spaceing + '<strong>*Note*</strong> -- ' + options + ', please contact your CSM.</strong><br>');
 	return false;
 } //TODO
+
 
 //==================================================================================================
 // END
@@ -2300,9 +2274,4 @@ var wfLibLoaded=true;
 // 08-23-2017 @ 08.18.05 - ("1.7.70")  - dscudiero - Only include the debug messages from Related to the preview screen if debuglevel >= 4
 // 08-28-2017 @ 10.34.56 - ("1.7.73")  - dscudiero - Tweak the logic for products in support
 // 08-28-2017 @ 11.36.45 - ("1.7.74")  - dscudiero - Added TODO
-// 08-29-2017 @ 12.10.56 - ("1.7.75")  - dscudiero - Updated GetRelated to remove duplicates before returning data
-// 08-30-2017 @ 16.52.22 - ("1.7.76")  - dscudiero - Tweaked wfAttr / GetAttt to allow passing in the request type as a wfrule option
-// 09-01-2017 @ 13.45.06 - ("1.7.79")  - dscudiero - Update logic checking of steps has a value in Related
-// 09-05-2017 @ 08.27.57 - ("1.7.80")  - dscudiero - Tweaked TODO to add prefix text and adjust spacing
-// 09-08-2017 @ 08.07.59 - ("1.7.82")  - dscudiero - Fixed bug where related was not editing out the reference data if it was in the proposal data for depts
-// 09-11-2017 @ 15.52.15 - ("1.7.84")  - dscudiero - General syncing of dev to prod
+// 09-14-2017 @ 10.08.42 - ("1.7.76")  - dscudiero - Added wfxxxxVarName processing for GetAttrVal
