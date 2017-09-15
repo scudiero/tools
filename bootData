@@ -18,8 +18,7 @@ pythonResources='inspect,sys,traceback,os,argparse,xlrd,re,datetime,time,string,
 
 loaderIncludes='RunSql2 Semaphore FindExecutable PadChar Msg2 CheckRun CheckAuth SignalHandeler Alert TrapSigs'
 standardIncludes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye MkTmpFile'
-standardInteractiveIncludes='VerifyContinue'
-
+standardInteractiveIncludes="$standardIncludes Prompt VerifyContinue"
 
 #===================================================================================================
 ## Check-in log
