@@ -1,27 +1,30 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.35" # -- dscudiero -- Thu 09/07/2017 @  7:55:11.39
+# version="2.0.44" # -- dscudiero -- Fri 09/15/2017 @ 10:10:51.63
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-
 function ParseArgsStd {
+	includes="Msg2 StringFunctions ParseArgs"
+	Import "$includes"
+
 	Msg2 $V3 "*** $FUNCNAME -- Starting ***"
 	local myArgs="$*"
 	[[ -z $myArgs ]] && myArgs="$originalArgStr"
-	unset argList
 
+	unset argList
 	## If there is a local function defined to parse script specific arguments then call it
-		[[ $(type -t parseArgs-$myName) == 'function' ]] && parseArgs-$myName
+		[[ $(type -t parseArgs-$myName) == 'function' ]] && parseArgs-$myName ## Old way
 		[[ $(type -t $FUNCNAME-$myName) == 'function' ]] && $FUNCNAME-$myName
 		[[ $(type -t $myName-$FUNCNAME) == 'function' ]] && $myName-$FUNCNAME
 
 	## Help argument
 		help=false;
-		argList+=(-help,1,help,,,,"Display help text")
+		argList+=(-hh,2,helpExtended,,,common,"Display help expanded text")
+		argList+=(-help,1,help,,,common,"Display help text")
 
 	## process these before the regular envs, conflicts with names
 		argList+=(-envs,4,option,envs,,envs,"Environment or Environments (e.g. {$courseleafDevEnvs,$courseleafProdEnvs} or comma separated multiples 'test,next'")
@@ -49,28 +52,28 @@ function ParseArgsStd {
 		#local var; for var in $falseVars; do eval $var=false; done
 		#argList+=(argFlag,minLen,type,scriptVariable,extraToken/exCmd,helpSet,helpText)
 
-		argList+=(-batchMode,9,switch,batchMode,,script2,"Run in batch mode")
-		argList+=(-noClear,4,switch,noClear,,script2,"Do not clear the screen on script start")
-		argList+=(-noEmails,3,switch,noEmails,,script2,"Turn off emails")
-		argList+=(-noHeaders,3,switch,noHeaders,,script2,"Turn off Hello and Goodbye messaging")
-		argList+=(-noLog,3,switch,traceLog,,script2,"Turn off logging")
-		argList+=(-noNews,3,switch,noNews,,script2,"Do not display the news")
-		argList+=(-quiet,1,switch,quiet,,script2,"Turn off all status messages")
-	 	argList+=(-secondaryMessagesOnly,3,switch,secondaryMessagesOnly,,script2,'Only display secondary messages from child scripts.')
-		argList+=(-testMode,5,switch,testMode,,script2,"Test mode, use test data")
-		argList+=(-x,1,switch,DOIT,DOIT='echo',script2,"eXperimental mode - no data will be change/committed")
-		argList+=(-autoRemote,4,switch,autoRemote,,script2,"Automatically launch remote ssh session if the client is not hosted on the current host")
+		argList+=(-batchMode,9,switch,batchMode,,common,"Run in batch mode")
+		argList+=(-noClear,4,switch,noClear,,common,"Do not clear the screen on script start")
+		argList+=(-noEmails,3,switch,noEmails,,common,"Turn off emails")
+		argList+=(-noHeaders,3,switch,noHeaders,,common,"Turn off Hello and Goodbye messaging")
+		argList+=(-noLog,3,switch,traceLog,,common,"Turn off logging")
+		argList+=(-noNews,3,switch,noNews,,common,"Do not display the news")
+		argList+=(-quiet,1,switch,quiet,,common,"Turn off all status messages")
+	 	argList+=(-secondaryMessagesOnly,3,switch,secondaryMessagesOnly,,common,'Only display secondary messages from child scripts.')
+		argList+=(-testMode,5,switch,testMode,,common,"Test mode, use test data")
+		argList+=(-x,1,switch,DOIT,DOIT='echo',common,"eXperimental mode - no data will be change/committed")
+		argList+=(-autoRemote,4,switch,autoRemote,,common,"Automatically launch remote ssh session if the client is not hosted on the current host")
 
-		argList+=(-allItems,3,switch,allItems,,script,"Perform action on all items in the context of the script, e.g all envs")
-		argList+=(-force,5,switch,force,,script,"Perform action even if it has already been done on the site")
-		argList+=(-fork,4,switch,fork,,script,"Fork off sub-process if supported by script")
-		argList+=(-forUser,4,option,forUser,,script,'Run on behalf of another user (admins only)')
-	 	argList+=(-ignoreList,7,option,ignoreList,,script,'Comma seperated list if items to ignore, items are based on the script')
-	 	argList+=(-informationOnly,4,switch,informationOnlyMode,,script,'Only analyze data and print error messages, do not change any data')
-		argList+=(-noPrompt,3,switch,verify,"verify=false",script,"Turn off prompt mode, all data needs to be specified on command string")
-		argList+=(-noCheck,4,switch,noCheck,,script,"Do not validate the client data in the $warehouseDb.$clientInfoTable table")
-		argList+=(-verbose,1,switch#,verbose,verboseLevel,script,"Additional messaging, -V# sets verbosity level to #")
-		argList+=(-go,2,switch,go,,script,"Skip the verify continue y/n prompt")
+		argList+=(-allItems,3,switch,allItems,,common,"Perform action on all items in the context of the script, e.g all envs")
+		argList+=(-force,5,switch,force,,common,"Perform action even if it has already been done on the site")
+		argList+=(-fork,4,switch,fork,,common,"Fork off sub-process if supported by script")
+		argList+=(-forUser,4,option,forUser,,common,'Run on behalf of another user (admins only)')
+	 	argList+=(-ignoreList,7,option,ignoreList,,common,'Comma seperated list if items to ignore, items are based on the script')
+	 	argList+=(-informationOnly,4,switch,informationOnlyMode,,common,'Only analyze data and print error messages, do not change any data')
+		argList+=(-noPrompt,3,switch,verify,"verify=false",common,"Turn off prompt mode, all data needs to be specified on command string")
+		argList+=(-noCheck,4,switch,noCheck,,common,"Do not validate the client data in the $warehouseDb.$clientInfoTable table")
+		argList+=(-verbose,1,switch#,verbose,verboseLevel,common,"Additional messaging, -V# sets verbosity level to #")
+		argList+=(-go,2,switch,go,,common,"Skip the verify continue y/n prompt")
 
 	## Setup ENV arguments
 		local singleCharArgs="pvt dev test next curr"

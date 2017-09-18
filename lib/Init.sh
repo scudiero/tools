@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.6 # -- dscudiero -- Mon 08/28/2017 @ 11:14:47.36
+# version=2.1.7 # -- dscudiero -- Thu 09/14/2017 @ 15:32:23.55
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -160,7 +160,7 @@ function Init {
 			fi
 			unset defaultEnv
 			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false && $srcEnv != 'pvt' ]] && clientEnvs="pvt,$clientEnvs"
-			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt' || unset defaultEnv
+			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt'
 			Prompt srcEnv "What $(ColorK 'source') environment/site do you wish to use?" "$(tr ' ' ',' <<< $clientEnvs)" $defaultEnv; srcEnv=$(Lower $srcEnv)
 			clientEnvs="$clientEnvsSave"
 			[[ $checkProdEnv == true ]] && checkProdEnv=$srcEnv
@@ -178,7 +178,8 @@ function Init {
 			fi
 			unset defaultEnv
 			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false && $srcEnv != 'pvt' ]] && clientEnvs="pvt,$clientEnvs"
-			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt' || unset defaultEnv
+			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt'
+			[[ -z $defaultEnv && $(Contains "$clientEnvs" 'test') == true ]] && defaultEnv='test'
 			Prompt tgtEnv "What $(ColorK 'target') environment/site do you wish to use?" "$(tr ' ' ',' <<< $clientEnvs)" $defaultEnv; srcEnv=$(Lower $srcEnv)
 			[[ $checkProdEnv == true ]] && checkProdEnv=$tgtEnv
 		fi

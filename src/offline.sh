@@ -1,12 +1,12 @@
 #!/bin/bash
 #===================================================================================================
-version=1.0.11 # -- dscudiero -- 01/12/2017 @ 13:01:04.82
+version=1.0.12 # -- dscudiero -- Thu 09/14/2017 @ 12:24:59.05
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
 Import "$imports"
 originalArgStr="$*"
-scriptDescription=""
+scriptDescription="Take a tools script offline or display the current scripts offline"
 
 #===================================================================================================
 ## turn a script offline -- i.e. create an .offline file
@@ -18,7 +18,7 @@ ignoreScripts='patcher,setEdition,newNewsItem,callPgm,testsh,WorkWith'
 script=$client
 if [[ $script = '' ]]; then
 	Msg2 "Current offline scripts:"
-	sqlStmt="select name from $scriptsTable where active=\"No\""
+	sqlStmt="select name from $scriptsTable where active=\"Offline\""
 	RunSql2 $sqlStmt
 	for result in ${resultSet[@]}; do
 		[[ $(Contains ",$ignoreScripts," ",$result,") != true ]] && Msg2 "^$result"
@@ -28,7 +28,7 @@ else
 	Prompt script "Please specify the script to take offline" '*any*'
 
 	[[ ${script: (-3)} == '.sh' ]] && script="$(cut -d'.' -f1 <<< $script)"
-	sqlStmt="update $scriptsTable set active=\"No\" where name=\"$script\""
+	sqlStmt="update $scriptsTable set active=\"Offline\" where name=\"$script\""
 	RunSql2 $sqlStmt
 fi
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.12.11 # -- dscudiero -- Wed 09/13/2017 @  8:36:24.54
+version=3.12.19 # -- dscudiero -- Fri 09/15/2017 @ 11:41:57.42
 #=======================================================================================================================
 TrapSigs 'on'
 includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -43,7 +43,8 @@ function BuildMenuList {
 
 	## Get a list of scripts available to this user in the execution environment we are running in
 		unset whereClauseHost; unset whereClauseUser; unset whereClauseGroups
-		whereClauseActive="(active = \"Yes\" and showInScripts=\"Yes\" and name != \"$mode\")"
+		whereClauseActive="active = \"Yes\" and name != \"$mode\""
+		[[ $userName != 'dscudiero' ]] && whereClauseActive="$whereClauseActive and showInScripts=\"Yes\""
 		# If reports build the auth where clauses
 		if [[ $mode == 'scripts' ]]; then
 			whereClauseHost="and (os=\"$osName\" and (host = \"$hostName\" or host is null))"
@@ -60,14 +61,14 @@ function BuildMenuList {
 			fi
 		fi
 
-		fields="keyId,name,shortDescription,author,supported,edate"
+		fields="keyId,name,shortDescription,author,supported,edate,updatesClData"
 		unset $(tr ',' ' ' <<< "$fields")
 		sqlStmt="select $fields from $table where $whereClauseActive $whereClauseHost $whereClauseUser $whereClauseGroups order by name"
 		RunSql2 $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Sorry, you do not have access to any scripts.\n\tsqlStmt: $sqlStmt"
 
 		unset menuList
-		[[ $fullDisplay == true ]] && menuList+=('|Ordinal|Script Name|Description|Author|Supported') || menuList+=('|Ordinal|Script Name|Description')
+		menuList+=('|Ordinal|Script Name|Description')
 		newItem=false
 		for itemRec in "${resultSet[@]}"; do
 			itemRec=$(tr "\t" "|" <<< "$itemRec")
@@ -76,16 +77,10 @@ function BuildMenuList {
 			itemName=$(cut -d"|" -f2 <<< "$itemRec")
 			itemDesc=$(cut -d"|" -f3 <<< "$itemRec")
 			itemEdate=$(cut -d"|" -f6 <<< "$itemRec")
+			itemUpdates=$(cut -d"|" -f7 <<< "$itemRec")
 			#dump -n itemName itemEdate ${myName}LastRunEdate
 			[[ $itemEdate != 'NULL' && $itemEdate -gt ${myName}LastRunEdate ]] && itemName="${itemName}*" && newItem=true
-			if [[ $fullDisplay == true ]]; then
-				itemAuthor=$(cut -d"|" -f3 <<< "$itemRec")
-				itemAuthor="$(printf "%-$maxWidthAuthor"s "$itemAuthor")"
-				itemSupported=$(cut -d"|" -f4 <<< "$itemRec")
-				menuList+=("|$itemNum|$itemName|$itemDesc|$itemAuthor|$itemSupported")
-			else
-				menuList+=("|$itemNum|$itemName|$itemDesc")
-			fi
+			menuList+=("|$itemNum|$itemName|$itemDesc")
 		done
 	return 0
 } #BuildMenuList
@@ -243,7 +238,6 @@ function ExecReport {
 # Declare variables and constants, bring in includes file with subs
 #=======================================================================================================================
 tmpFile=$(mkTmpFile)
-fullDisplay=false
 askedDisplayWidthQuestion=false
 
 mode=$(tr '[:upper:]' '[:lower:]' <<< "$1")

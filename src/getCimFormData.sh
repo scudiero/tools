@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.5 # -- dscudiero -- 12/14/2016 @ 11:25:26.98
+version=1.2.6 # -- dscudiero -- Thu 09/14/2017 @ 15:52:22.51
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' 
@@ -30,19 +30,25 @@ GetDefaultsData $myName
 ParseArgsStd
 Hello
 Init 'getClient getEnv getDirs checkEnvs getCims'
+
+## Set outfile -- look for std locations
+if [[ -d $localClientWorkFolder ]]; then
+	if [[ ! -d $localClientWorkFolder/$client ]]; then mkdir -p $localClientWorkFolder/$client; fi
+	outFile=$localClientWorkFolder/$client/$client-$myName.txt
+else
+	outFile=/home/$userName/$client-$myName.txt
+fi
+
+verifyArgs+=("Client:$client")
+verifyArgs+=("Env:$(TitleCase $env)")
+verifyArgs+=("CIMs:$cimStr")
+verifyArgs+=("Output File:$outFile")
+verifyContinueDefault='Yes'
 VerifyContinue "You are asking to get CIM fields data for\n\tclient:$client\n\tEnv: $env\n\tCIMs: $cimStr"
 
 #==================================================================================================
 ## Main
 #==================================================================================================
-## Set outfile -- look for std locations
-	if [[ -d $localClientWorkFolder ]]; then
-		if [[ ! -d $localClientWorkFolder/$client ]]; then mkdir -p $localClientWorkFolder/$client; fi
-		outFile=$localClientWorkFolder/$client/$client-$myName.txt
-	else 
-		outFile=/home/$userName/$client-$myName.txt
-	fi
-
 ## Find the step file to run
 	FindExecutable "$step" 'std' 'steps:html' 'steps' ## Sets variable executeFile
 	srcStepFile=$executeFile

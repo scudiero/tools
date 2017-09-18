@@ -1,10 +1,11 @@
 #!/bin/bash
 #====================================================================================================
-version=1.0.2 # -- dscudiero -- 12/14/2016 @ 11:29:53.02
+version=1.0.5 # -- dscudiero -- Fri 09/08/2017 @ 12:16:56.80
 #====================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
-Import "$imports"
+includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue'
+Import "$includes"
+
 originalArgStr="$*"
 scriptDescription=""
 
@@ -23,6 +24,16 @@ scriptDescription=""
 #====================================================================================================
 # Standard arg parsing and initialization
 #====================================================================================================
+helpSet='client,env,cim' # can also include any of {env,src,tgt,prod,cim,cat,clss}, 'script' and 'common' automatically addeed
+scriptHelpDesc+=("This script can be used to clean one or more CIM instances in a client site, essentially after cleaning the CIM instance will look brand new.")
+scriptHelpDesc+=("The actions performed are:")
+scriptHelpDesc+=("^1) Empty the following tables in each CIM instance: <cimInstance>_status, xreffam, xreffamember")
+scriptHelpDesc+=("^2) Deletes all directories under the CIM instance directory (i.e. the proposals)")
+scriptHelpDesc+=("^3) Rebuilds the pages database")
+scriptHelpDesc+=("\nTarget site data files potentially modified:")
+scriptHelpDesc+=("^As above")
+
+
 GetDefaultsData $myName
 ParseArgsStd
 Hello

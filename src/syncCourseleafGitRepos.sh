@@ -1,12 +1,14 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.72 # -- dscudiero -- Tue 06/13/2017 @  8:35:30.92
+version=2.1.75 # -- dscudiero -- Fri 09/15/2017 @  9:00:40.16
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
-Import "$imports"
+
+myIncludes="FindExecutable"
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
-scriptDescription="Sync git shadow"
+scriptDescription="This script can be used to sync the master toolsprod shadow of the CourseLeaf git repositories"
 
 #==================================================================================================
 # Check f0r new courseleaf git git tags and download new ones
@@ -57,7 +59,7 @@ unset addedCalledScriptArgs
 [[ $fork == true ]] && forkStr='&' || unset forkStr
 
 Hello
-
+[[ $batchMode != true ]] && VerifyContinue "You are asking to sync the master toolsprod shadow of the CourseLeaf git repositories"
 #==================================================================================================
 # Main
 #==================================================================================================

@@ -1,20 +1,35 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.2.19 # -- dscudiero -- Wed 07/19/2017 @ 14:36:38.01
+version=1.2.29 # -- dscudiero -- Thu 09/14/2017 @ 11:55:43.76
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
 #==================================================================================================
 # Configure Custom emails on a Courseleaf site
 #==================================================================================================
+TrapSigs 'on'
 Import GetCims
 currentScript=$(cut -d'.' -f1 <<< $(basename ${BASH_SOURCE[0]}))
 parentScript=$(cut -d'.' -f1 <<< $(basename ${BASH_SOURCE[1]}))
 originalArgStr="$*"
-scriptDescription="Install Custom Workflow Emails (wfemail)"
-TrapSigs 'on'
-parentScript=$(cut -d'.' -f1 <<< $(basename ${BASH_SOURCE[0]}))
+
+#==================================================================================================
+# Data used by the parent with a setVarsOnly call
+#==================================================================================================
+eval "${BASH_SOURCE[0]%%.*}scriptDescription='Install The CourseLeaf tcf database (tcfdb)'"
+
+filesStr='/courseleaf.cfg;/web/courseleaf/courseleaf.cgi;/db/tcfdb.sqlite;/clienttransfers/tcfdb.sqlite'
+filesStr="$filesStr;/bin/daily.sh;/web/courseleaf/localsteps/default.tcf"
+eval "${BASH_SOURCE[0]%%.*}potentialChangedFiles=\"$filesStr\""
+
+actionsStr='1) Check to see if already installed'
+actionsStr="$actionsStr;2) Check cgi version to make sure tcfdb will run, if old then update"
+actionsStr="$actionsStr;3) Create the tcfdb database, copy to /clienttransfers"
+actionsStr="$actionsStr;4) Check for correct daily.sh setup, if not setup then setup"
+eval "${BASH_SOURCE[0]%%.*}actions=\"$actionsStr\""
+
+[[ $1 == 'setVarsOnly' ]] && return 0
 
 #==================================================================================================
 # functions

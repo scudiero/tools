@@ -1,14 +1,16 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.72" # -- dscudiero -- Thu 08/03/2017 @  7:35:21.60
+# version="2.0.75" # -- dscudiero -- Thu 09/14/2017 @ 16:53:40.55
 #===================================================================================================
 # Process interrupts
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-
 function SignalHandeler {
+    includes='Msg2 Goodbye GetCallStack PadChar' #includes="$includes "
+    Import "$includes"
+
     VerboseMsg 3 "*** Starting: $FUNCNAME ***"
 	local sig="$(Upper $1)"
     local errorLineNo="$2"

@@ -1,13 +1,14 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.13 # -- dscudiero -- 12/14/2016 @ 11:25:36.64
+version=2.1.15 # -- dscudiero -- Thu 09/14/2017 @ 16:06:02.82
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' 
-imports="$imports GetCourseleafPgm"
-Import "$imports"
+includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
+includes="$includes GetCourseleafPgm"
+Import "$includes"
+
 originalArgStr="$*"
-scriptDescription="Get catalog page data"
+scriptDescription="Get catalog page owner and workflow data in a format suitable to paste into a MS Excel workbook"
 
 #==================================================================================================
 ## dump out all of the pages ownership ad workflow data
@@ -30,12 +31,7 @@ ParseArgsStd
 Hello
 Msg2
 Init 'getClient getEnv checkEnv getDirs'
-verifyContinueDefault='Yes'
-VerifyContinue "You are asking to retrieve page data for\n\tclient:$client\n\tEnv: $env"
 
-#==================================================================================================
-# Main
-#==================================================================================================
 ## Set outfile -- look for std locations
 if [[ -d $localClientWorkFolder ]]; then
 	if [[ ! -d $localClientWorkFolder/$client ]]; then mkdir $localClientWorkFolder/$client; fi
@@ -44,6 +40,17 @@ else
 	outFile=/home/$userName/$client-$env-CatalogPageData.xls
 fi
 
+unset verifyArgs
+verifyArgs+=("Client:$client")
+verifyArgs+=("Env:$(TitleCase $env)")
+verifyArgs+=("Output File:$outFile")
+verifyContinueDefault='Yes'
+verifyContinueDefault='Yes'
+VerifyContinue "You are asking to retrieve page data for"
+
+#==================================================================================================
+# Main
+#==================================================================================================
 cd $srcDir
 ## Get the courseleaf pgmname and dir
 	courseLeafPgm=$(GetCourseleafPgm | cut -d' ' -f1)

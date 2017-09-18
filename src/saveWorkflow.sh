@@ -1,12 +1,14 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.84 # -- dscudiero -- Wed 09/13/2017 @  6:58:58.34
+version=2.2.87 # -- dscudiero -- Thu 09/14/2017 @ 16:35:45.62
 #====================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye ParseCourseleafFile' #imports="$imports "
-Import "$imports"
+includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
+includes="$includes RunSql2 ParseCourseleafFile"
+Import "$includes"
+
 originalArgStr="$*"
-scriptDescription="Save workflow files"
+scriptDescription="This script can be used to save workflow files to your personal Linux home directory space"
 
 #==================================================================================================
 # Save off workflow files for safe keeling
@@ -63,7 +65,7 @@ if [[ $daemon == true ]]; then
 	client="${data%% *}"
 	client="${client%%-*}"
 	data="${data#* }"
-	env="${data%% *}" 
+	env="${data%% *}"
 
 	dump -1 userName siteFile data client env
 	allCims=true; GetCims  "$siteFile"
@@ -72,11 +74,15 @@ if [[ $daemon == true ]]; then
 else
 	Init "getClient getEnv getDirs checkEnvs getCims $allCims noPreview noPublic"
 	backupFolder="$tmpRoot/$myName/$client-$env-$BASHPID/$myName"
+	unset verifyArgs
+	verifyArgs+=("Client:$client")
+	verifyArgs+=("Env:$(TitleCase $env)")
+	verifyArgs+=("CIMs:$cimStr")
+	verifyContinueDefault='Yes'
+	VerifyContinue "You are asking to save workflow files for"
 fi
 
-##TODO
-dump isMe daemon siteFile client env srcDir cimStr backupFolder scriptData1 scriptData2 scriptData3 scriptData4
-
+#dump isMe daemon siteFile client env srcDir cimStr backupFolder scriptData1 scriptData2 scriptData3 scriptData4
 dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 ## Get the files to act on from the database
 	unset requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles

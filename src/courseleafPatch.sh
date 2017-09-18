@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.4.5 # -- dscudiero -- Wed 09/06/2017 @ 13:24:01.02
+version=5.4.16 # -- dscudiero -- Thu 09/14/2017 @ 12:12:50.48
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -23,7 +23,7 @@ cwdStart="$(pwd)"
 #=======================================================================================================================
 # Standard call back functions
 #=======================================================================================================================
-	function parseArgs-courseleafPatch {
+	function courseleafPatch-parseArgsStd {
 		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help
 		argList+=(-advance,3,switch,catalogAdvance,,script,"Advance the catalog")
 		argList+=(-noAdvance,4,switch,catalogAdvance=false,"catalogAdvance=false",script,"Do not advance the catalog")
@@ -39,7 +39,8 @@ cwdStart="$(pwd)"
 		argList+=(-buildPatchPackage,5,switch,buildPatchPackage,,script,"Build the remote patching package for remote sites")
 		#argList+=(-offline,3,switch,offline,,script,"Take the target site offline during processing")
 	}
-	function Goodbye-courseleafPatch  {
+
+	function courseleafPatch-Goodbye  {
 		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
 		## If we took the site offline, then put it back online
 		if [[ $offline == true ]]; then
@@ -52,8 +53,8 @@ cwdStart="$(pwd)"
 			offline=false
 		fi
 	}
-	#export -f Goodbye-courseleafPatch
-	function testMode-courseleafPatch {
+
+	function courseleafPatch-testMode {
 		client='apus'
 		env='next'
 		siteDir="$HOME/testData/next"
@@ -67,6 +68,48 @@ cwdStart="$(pwd)"
 		catalogAudit=false
 		fullAdvance=true
 	}
+
+	function courseleafPatch-Help  {
+		helpSet='client,env' # can also include any of {env,cim,cat,clss}, 'script' and 'common' automatically addeed
+		[[ $1 == 'setVarsOnly' ]] && return 0
+
+		echo -e "This script can be used to refresh/patch a courseleaf site to the latest version of code for the patched products."
+		echo -e "\nThe actions performed are:"
+		bullet=1; echo -e "\t$bullet) If requested, backup the target site"
+		(( bullet++ )) ; echo -e "\t$bullet) If 'Advance' is requested then"
+		(( bullet++ )) ; bulletSave=$bullet ; bullet=1
+		echo -e "\t\t$bullet) Backup the curr site"
+		(( bullet++ )) ; echo -e "\t\t$bullet) Copy current NEXT site to new CURR site sans CIMs and CLSS"
+		(( bullet++ )) ; echo -e "\t\t$bullet) Update edition variable"
+		(( bullet++ )) ; echo -e "\t\t$bullet) Resets console statistics"
+		(( bullet++ )) ; echo -e "\t\t$bullet) Archives the request logs"
+		if [[ -n "$scriptData3$scriptData4" ]]; then
+			(( bullet++ )) ; echo -e "\t\t$bullet) Empty files and directories:"
+			for file in $(tr ',' ' ' <<< $scriptData3) $(tr ',' ' ' <<< $scriptData4); do
+				echo -e "\t\t\t- $file"
+			done
+		fi
+		bullet=$bulletSave
+		echo -e "\t$bullet) Patch the products as per defintions in the patch control file:"
+		echo -e "\t\t$courseleafPatchControlFile"
+		echo -e "\t$bullet) Perform cross product checks in local site"
+		(( bullet++ )) ; bulletSave=$bullet ; bullet=1
+		(( bullet++ )) ; echo -e "\t\t$bullet) Check for old formbuilder widgets"
+		(( bullet++ )) ; echo -e "\t\t$bullet) Warn if the target site ribbit/getcourse.rjs is different from the skeletion"
+		(( bullet++ )) ; echo -e "\t\t$bullet) Check the mapfile entries for fsinjector.sqlite"
+		(( bullet++ )) ; echo -e "\t\t$bullet) Remove any 'special' cgis in the courseleaf/tcfdb directory"
+		bullet=$bulletSave
+		echo -e "\t$bullet) If requested, generate a remote patch package"
+		echo -e "\nTarget site data files potentially modified:"
+		echo -e "\tAll CourseLeaf files, no client data files"
+
+		return 0
+	}
+
+	function testsh-testMode  { # or testMode-local
+		return 0
+	}
+
 
 #=======================================================================================================================
 # local functions
@@ -105,7 +148,7 @@ cwdStart="$(pwd)"
 	} #GetVersion
 
 	#=======================================================================================================================
-	# Check to see if a file is in the local git 
+	# Check to see if a file is in the local git
 	#=======================================================================================================================
 	function CheckIfFileInGit {
 		local gitRepo="$1"
@@ -143,8 +186,7 @@ cwdStart="$(pwd)"
 			[[ $listOnly == true ]] && rsyncListonly="--dry-run" || unset rsyncListonly
 			rsyncFilters=$tmpRoot/$myName.$product.rsyncFilters
 			rsyncOut=$tmpRoot/$myName.$product.rsyncOut
-			//rsyncOpts="-rptb$rsyncVerbose --backup-dir $rsyncBackup --prune-empty-dirs --ignore-times $rsyncListonly --include-from $rsyncFilters --links"
-			rsyncOpts="-rptb$rsyncVerbose --backup-dir $rsyncBackup --prune-empty-dirs $rsyncListonly --include-from $rsyncFilters --links"
+			rsyncOpts="-rptb$rsyncVerbose --backup-dir $rsyncBackup --prune-empty-dirs --checksum $rsyncListonly --include-from $rsyncFilters --links"
 			echo > $rsyncFilters 
 			SetFileExpansion 'off'
 			for token in $(tr '|' ' ' <<< "$rsyncIgnore"); do echo "- $token" > $rsyncFilters; done
@@ -203,7 +245,7 @@ cwdStart="$(pwd)"
 		echo "	## Set rsync options" >> $scriptFile
 		echo "		[[ ! -d \$rsyncBackup && \$rsyncBackup != '/dev/null' ]] && mkdir -p \$rsyncBackup" >> $scriptFile
 		echo "		rsyncFilters=\$tmpRoot.rsyncFilters" >> $scriptFile
-		echo "		rsyncOpts=\"-rptvb --backup-dir \$rsyncBackup --prune-empty-dirs --ignore-times$ --include-from \"\$rsyncFilters\" --links\"" >> $scriptFile
+		echo "		rsyncOpts=\"-rptvb --backup-dir \$rsyncBackup --prune-empty-dirs --checksum --include-from \"\$rsyncFilters\" --links\"" >> $scriptFile
 		echo "	echo > \"\$rsyncFilters\"" >> $scriptFile
 		echo "	set -f ## Set file expansion off" >> $scriptFile
 		echo "	for token in \$(tr '|' ' ' <<< \"\$rsyncIgnore\"); do" >> $scriptFile
@@ -605,10 +647,6 @@ removeGitReposFromNext=true
 #=======================================================================================================================
 # Standard argument parsing and initialization
 #=======================================================================================================================
-	helpSet='script,client,env'
-	helpNotes+=('For refreshVersion = "master" the source files are refreshed from the git repo at midnight and noon so the data may be as much as 12 hours old.' )
-	scriptHelpDesc="This script can be used to refresh a CourseLeaf product code/configuration files."
-
 	GetDefaultsData $myName
 	ParseArgsStd
 	displayGoodbyeSummaryMessages=true
@@ -1454,7 +1492,10 @@ Msg2 "\nCross product checks..."
 		fi
 	fi
 
-## Edit the console page, change title to 'CourseLeaf Console' (requested by Mike 02/09/17)
+## Edit the console page
+##	1) change title to 'CourseLeaf Console' (requested by Mike 02/09/17)
+## 	2) remove 'System Refresh' (requested by Mike Miller 09/13/17)
+## 	3) remove 'localsteps:links|links|links' (requested by Mike Miller 09/13/17)
 	editFile="$tgtDir/web/$courseleafProgDir/index.tcf"
 	if [[ -w "$editFile" ]]; then
 		fromStr='title:Catalog Console'
@@ -1466,8 +1507,30 @@ Msg2 "\nCross product checks..."
 			changeLogRecs+=("$updateFile updated to change title")
 			Msg2 "^Updated '$updateFile' to change 'title:Catalog Console' to 'title:CourseLeaf Console'"
 			rebuildConsole=true
+			filesEdited+=("$editFile")
 		fi
-		filesEdited+=("$editFile")
+		# fromStr='^navlinks:CAT|Refresh System|refreshsystem'
+		# toStr='// navlinks:CAT|Refresh System|refreshsystem'
+		# grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
+		# if [[ -n $grepStr ]]; then
+		# 	sed -i s"/^$fromStr/$toStr/" $editFile
+		# 	updateFile="/$courseleafProgDir/index.tcf"
+		# 	changeLogRecs+=("$updateFile updated to change title")
+		# 	Msg2 "^Updated '$updateFile' to remove 'Refresh System'"
+		# 	rebuildConsole=true
+		# 	filesEdited+=("$editFile")
+		# fi
+		# fromStr='^localsteps:links|links|links'
+		# toStr='// localsteps:links|links|links'
+		# grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
+		# if [[ -n $grepStr ]]; then
+		# 	sed -i s"/^$fromStr/$toStr/" $editFile
+		# 	updateFile="/$courseleafProgDir/index.tcf"
+		# 	changeLogRecs+=("$updateFile updated to change title")
+		# 	Msg2 "^Updated '$updateFile' to remove 'localsteps:links|links|links"
+		# 	rebuildConsole=true
+		# 	filesEdited+=("$editFile")
+		# fi
 	else
 		echo
 		Warning 0 2 "Could not locate '$editFile', please check the target site"

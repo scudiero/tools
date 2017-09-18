@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.56" # -- dscudiero -- Thu 08/03/2017 @  8:41:01.82
+# version="2.0.63" # -- dscudiero -- Fri 09/15/2017 @  7:15:14.71
 #===================================================================================================
 # Print/Log formatted messages
 #===================================================================================================
@@ -114,6 +114,9 @@ function SetIndent {
 ## Print / Log the message
 function Msg2 {
 	[[ $quiet == true ]] && return 0
+	includes="PushSettings PopSettings SetFileExpansion Colors MkTmpFile"
+	Import "$includes"
+	
 	PushSettings "$FUNCNAME"
 	set +xv # Turn off trace
 	SetFileExpansion 'off'

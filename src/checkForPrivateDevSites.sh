@@ -1,12 +1,14 @@
 #!/bin/bash
 #==================================================================================================
-version=2.4.58 # -- dscudiero -- Tue 09/05/2017 @ 16:21:57.37
+version=2.4.60 # -- dscudiero -- Fri 09/15/2017 @  8:34:03.76
 #==================================================================================================
 TrapSigs 'on'
-includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
-Import "$includes"
+
+myIncludes="RunSql2"
+Import "$standardIncludes $myIncludes"
+
 originalArgStr="$*"
-scriptDescription="Check age of private dev sites"
+scriptDescription="Check for private sites and notify the user owning the sites."
 
 #= Description +===================================================================================
 # Check to see if the user has any private dev sites

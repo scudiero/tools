@@ -1,12 +1,12 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.36 # -- dscudiero -- Thu 04/06/2017 @ 10:08:40.20
+version=1.0.38 # -- dscudiero -- Thu 09/14/2017 @ 14:47:46.25
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
-imports="$imports SelectMenuNew RunCourseLeafCgi"
-Import "$imports"
+includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
+includes="$includes RunSql2 SelectMenuNew RunCourseLeafCgi"
+Import "$includes"
 originalArgStr="$*"
 scriptDescription=""
 
@@ -54,7 +54,7 @@ roleMap['implementation']='csmRep'
 # Standard arg parsing and initialization
 #==================================================================================================
 helpSet='script,client'
-scriptHelpDesc="This script can be used to modify the warehouse data when a client is moved to a new server"
+scriptHelpDesc="This script can be used to update the warehouse data when a client is moved to a new server"
 
 GetDefaultsData $myName
 ParseArgsStd

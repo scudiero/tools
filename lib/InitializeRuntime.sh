@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.82" # -- dscudiero -- Thu 08/03/2017 @  7:13:20.59
+# version="2.0.96" # -- dscudiero -- Thu 09/07/2017 @ 11:26:44.08
 #===================================================================================================
 # Initialize the tools runtime environment
 #===================================================================================================
@@ -8,7 +8,10 @@
 # All rights reserved
 #===================================================================================================
 unset helpSet helpNotes warningMsgs errorMsgs summaryMsgs myRealPath myRealName changeLogRecs parsedArgStr
+includes="TrapSigs StringFunctions Msg2 Dump Quit GetDefaultsData SetFileExpansion"
+Import "$includes"
 
+TrapSigs 'on'
 ## Make sure we have avalue for TERM
 TERM=${TERM:-dumb}
 shopt -s checkwinsize
@@ -42,48 +45,6 @@ tabStr="$(PadChar ' ' 5)"
 		falseVars="$falseVars onlyCimsWithTestFile displayGoodbyeSummaryMessages autoRemote"
 		for var in $falseVars; do [[ -z $(eval echo \$$var) ]] && eval "$var=false"; done
 	fi
-	localVarList="$trueVars $falseVars"
-
-## Set default colors
-	if [[ $TERM != 'dumb' ]]; then
-		colorWhite='\e[97m'
-		colorBlack='\e[30m'
-		colorRed='\e[31m'
-		colorBlue='\e[34m'
-		colorGreen='\e[32m'
-		colorCyan='\e[36m'
-		colorMagenta='\e[35m'
-		colorPurple="$colorMagenta"
-		colorOrange='\e[33m'
-		colorGrey='\e[90m'
-		colorDefault='\e[0m'
-		#colorDefaultVal='\e[0;4;90m #0=normal, 4=bold,90=foreground
-		colorDefaultVal=$colorMagenta #0=normal, 4=bold,90=foreground
-		colorTerminate='\e[1;97;101m' #1=bold, 97=foreground, 41=background
-		colorFatalError="$colorTerminate"
-		#colorTerminate='\e[1;31m'
-
-		#backGroundColorRed='\e[41m'
-		#colorTerminate=${backGroundColorRed}${colorWhite}
-		colorError=$colorRed
-		colorWarn=$colorMagenta
-		colorKey=$colorGreen
-		#colorKey=$colorMagenta
-		colorWarning=$colorWarn
-		colorInfo=$colorGreen
-		colorNote=$colorGreen
-		colorVerbose=$colorGrey
-		colorMenu=$colorGreen
-	else
-		unset colorRed colorBlue colorGreen colorCyan colorMagenta colorOrange colorGrey colorDefault
-		unset colorTerminate colorError colorWarn colorWarning
-		noNews=true
-	fi
-
-	function ColorE { local string="$*"; echo "${colorError}${string}${colorDefault}"; }
-	function ColorI { local string="$*"; echo "${colorInfo}${string}${colorDefault}"; }
-	function ColorT { local string="$*"; echo "${colorTerminate}${string}${colorDefault}"; }
-	function ColorK { local string="$*"; echo "${colorKey}${string}${colorDefault}"; }
 
 ## Load defaults value
 	defaultsLoaded=false
@@ -112,12 +73,7 @@ tabStr="$(PadChar ' ' 5)"
 	function ColorT { local string="$*"; echo "${colorTerminate}${string}${colorDefault}"; }
 	function ColorV { local string="$*"; echo "${colorVerbose}${string}${colorDefault}"; }
 	function ColorM { local string="$*"; echo "${colorMenu}${string}${colorDefault}"; }
-
 	export -f ColorD ColorK ColorI ColorN ColorW ColorE ColorT ColorV ColorM
-	# for token in D K I N W E T V M; do
-	# 	#echo "\$(Color$token \"This is Color '$token'\")"
-	# 	eval "echo -e \"\t$(Color$token \"This is Color '$token'\")\""
-	# done
 
 ## Set forking limit
 	maxForkedProcesses=$maxForkedProcessesPrime

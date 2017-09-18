@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.49" # -- dscudiero -- Thu 09/07/2017 @  7:44:17.52
+# version="2.0.58" # -- dscudiero -- Fri 09/15/2017 @  9:13:51.06
 #===================================================================================================
 # Parse an argumenst string driven by an control array that is passed in
 # argList+=(argFlag,minLen,type,scriptVariable,extraToken/exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
@@ -18,6 +18,9 @@
 #===================================================================================================
 
 function ParseArgs {
+	includes='Msg2 Help Goodbye'
+	Import "$includes"
+
 #	verboseLevel=3
 	Msg2 $V3 "*** $FUNCNAME -- Starting ***"
 	local argToken foundArg parseStr argName minLen argType scriptVar exCmd argGroup helpText scriptVarVal badArgList token1 token2
@@ -66,7 +69,7 @@ function ParseArgs {
 					if [[ -n $scriptVar ]]; then eval $scriptVar=true; fi
 					break
 				elif [[ $argType == 'option' ]]; then
-					[[ ${1:0:1} == '-' ]] && Msg2 $W "Option flag '$origArgToken' specified with no value" && continue
+					[[ ${1:0:1} == '-' ]] && Warning "$myName: Option flag '$origArgToken' specified with no value" && continue
 					## Check for a quotes string, if found then pull whole string
 					if [[ ${1:0:1} == "'" || ${1:0:1} == '"' ]]; then
 						## Pull off the string to the trailing quote
@@ -88,8 +91,11 @@ function ParseArgs {
 						shift || true
 						break
 					fi
+				elif [[ $argType == 'helpextended' ]]; then
+					Help "-extended"
+					Goodbye 0
 				elif [[ $argType == 'help' ]]; then
-					Help "${argList[@]}"
+					Help
 					Goodbye 0
 				fi
 			fi ## token matched arg  def
@@ -105,7 +111,7 @@ function ParseArgs {
 				Msg2 $V3 "\t\t*** found client value = '$client'"
 				continue
 			else
-				[[ $parseQuiet != true ]] && Msg2 $W "Argument token '$origArgToken' is not defined, it will be ignored"
+				[[ $parseQuiet != true ]] && Warning "$myName: Argument token '$origArgToken' is not defined, it will be ignored"
 				badArgList="$badArgList, $origArgToken"
 				myArgStr="${myArgStr:${#origArgToken}+1}" ## Remove argument token
 			fi
@@ -129,7 +135,7 @@ function ParseArgs {
 
 	#===================================================================================================
 	## If testMode then run local customizations
-		[[ $testMode == true && $(Contains "$administrators" "$userName") != true ]] && Msg2 $T "You do not have sufficient permissions to run this script in 'testMode'"
+		[[ $testMode == true && $(Contains "$administrators" "$userName") != true ]] && Msg2 $T "$myName: You do not have sufficient permissions to run this script in 'testMode'"
 		[[ $testMode == true && -n "$(type -t testMode-$myName)" && "$(type -t testMode-$myName)" = function ]] && testMode-$myName
 		[[ $testMode == true && -n "$(type -t $myName-testMode)"  && "$(type -t $myName-testMode)" = function ]] && $myName-testMode
 

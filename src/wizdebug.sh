@@ -1,14 +1,14 @@
 #!/bin/bash
 #==================================================================================================
-version=2.6.62 # -- dscudiero -- Fri 09/08/2017 @  7:07:33.44
+version=2.6.64 # -- dscudiero -- Thu 09/14/2017 @ 16:50:51.25
 #==================================================================================================
 TrapSigs 'on'
-includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye'
+includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue' #includes="$includes xxx"
 includes="$includes GetCourseleafPgm PrintBanner"
 Import "$includes"
 
 originalArgStr="$*"
-scriptDescription="Tail a site wizdebug.out file"
+scriptDescription="Monitor the log messages (courseleaf/wizdebug.out) for a CourseLeaf site"
 
 #==================================================================================================
 ## Tail the wizdebug.out file for a site

@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.21 # -- dscudiero -- Wed 09/13/2017 @  6:57:59.82
+version=3.5.22 # -- dscudiero -- Thu 09/14/2017 @ 12:20:40.31
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgsStd Hello Init Goodbye ProtectedCall PadChar Prompt StringFunctions'
@@ -35,6 +35,7 @@ scriptDescription="Cleanup private dev sites"
 
 	function cleanDev-Help  {
 		helpSet='client,env' # can also include any of {env,cim,cat,clss}, 'script' and 'common' automatically addeed
+		[[ $1 == 'setVarsOnly' ]] && return 0
 
 		[[ -z $* ]] && return 0
 		bullet=1

@@ -1,12 +1,14 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.123 # -- dscudiero -- Fri 05/19/2017 @ 14:54:56.17
+version=1.1.124 # -- dscudiero -- Fri 09/15/2017 @  8:42:21.05
 #==================================================================================================
 TrapSigs 'on'
-imports='ParseCourseleafFile' #imports="$imports "
-Import "$imports"
+
+myIncludes="RunSql2 ParseCourseleafFile StringFunctions SetFileExpansion ProtectedCall"
+Import "$standardIncludes $myIncludes"
+
 originalArgStr="$*"
-scriptDescription="Create a record in the siteInfoTable"
+scriptDescription="Insert/Update a record into the '$siteInfoTable' and '$siteAdminsTable' tables in the data warehouse,\nThis script is not intended to be called stand alone."
 
 #= Description +===================================================================================
 # Create a record in the siteInfoTable, this is a helper script for 'buildSiteInfoTable' and is

@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.7 # -- dscudiero -- Thu 09/07/2017 @  7:41:34.70
+version=1.22.8 # -- dscudiero -- Fri 09/15/2017 @ 10:17:20.85
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -373,7 +373,8 @@ case "$hostName" in
 			Call 'buildSiteInfoTable' "-table ${siteInfoTable} $scriptArgs"
 
 		## Common Checks
-			Call 'checkCgiPermissions' "$scriptArgs"
+			Call 'checkCgiPermissions' "$scriptArgs -fix"
+			Call 'checkPublishSettings' "$scriptArgs"
 
 		## Update the defaults data for this host
 			Call 'updateDefaults' "$scriptArgs"

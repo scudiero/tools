@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.23" # -- dscudiero -- 02/14/2017 @ 10:33:00.69
+# version="2.0.24" # -- dscudiero -- Fri 09/15/2017 @  7:03:41.33
 #===================================================================================================
 # Process semaphores
 # Semaphore <mode> <key/name> <sleeptime>
@@ -13,7 +13,6 @@
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-
 function Semaphore {
 	local mode=${1:-'check'}
 	mode=$(Lower $mode)
@@ -70,6 +69,39 @@ function Semaphore {
 	return 0
 } #Semaphore
 export -f Semaphore
+
+function CheckSemaphore {
+	##==============================================================================================
+	local callPgmName=$1; shift
+	local waitOn=$1; shift
+	local lib=$1; shift
+	local okToRun okToRunWaiton semaphoreId
+	##==============================================================================================
+
+	unset okToRun okToRunWaiton
+	okToRun=$(Semaphore 'check' $callPgmName)
+	## Check to see if we are running or any waitOn process are running
+	[[ $okToRun == false && $(Contains ",$waitOn," ',self,') != true ]] && Msg2 $T "CallPgm: Another instance of this script ($callPgmName) is currently running.\n"
+	if [[ $waitOn != '' ]]; then
+		for pName in $(echo $waitOn | tr ',' ' '); do
+			waitonMode=$(cut -d':' -f2 <<< $pName)
+			pName=$(cut -d':' -f1 <<< $pName)
+			[[ $(Lower $waitonMode) == 'g' ]] && checkAllHosts='checkAllHosts' || unset checkAllHosts
+			okToRun=$(Semaphore 'check' $pName $checkAllHosts)
+			if [[ $okToRun == false ]]; then
+				[[ $batchMode != true ]] && Msg2 "CallPgm: Waiting for process '$pName' to finish..."
+				Semaphore 'waiton' "$pName" $checkAllHosts
+			fi
+		done
+	fi
+	## Set our semaphore
+	semaphoreId=$(Semaphore 'set')
+
+	echo $semaphoreId
+	return 0
+} #CheckSemaphore
+export -f CheckSemaphore
+
 
 #===================================================================================================
 # Check-in Log

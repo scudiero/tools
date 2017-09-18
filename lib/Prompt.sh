@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.17" # -- dscudiero -- Thu 08/24/2017 @ 16:31:25.41
+# version="2.1.18" # -- dscudiero -- Thu 09/14/2017 @ 16:16:21.92
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -9,8 +9,10 @@
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-
 function Prompt {
+	includes='Msg2 Dump VerifyPromptVal SelectClient'
+	Import "$includes"
+
 	declare promptVar=$1; shift || true
 	declare promptText=$1; shift || true
 	declare validateList=$1; shift || true

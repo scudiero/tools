@@ -1,12 +1,12 @@
 #!/bin/bash
 #==================================================================================================
-version=1.10.25 # -- dscudiero -- Mon 06/26/2017 @  7:49:52.23
+version=1.10.26 # -- dscudiero -- Thu 09/14/2017 @ 15:59:33.33
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
-Import "$imports"
+includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue'
+Import "$includes"
 originalArgStr="$*"
-scriptDescription=" Get CIM roles"
+scriptDescription="Build a list of all of the roles that are potentially use in CIM workflows"
 
 #= Description +===================================================================================
 # Get a list if CIM roles used in workflows

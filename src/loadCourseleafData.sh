@@ -1,13 +1,15 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.95 # -- dscudiero -- Mon 07/17/2017 @ 13:48:13.40
+version=3.8.118 # -- dscudiero -- Fri 09/15/2017 @  7:53:59.23
 #==================================================================================================
 TrapSigs 'on'
-imports='ParseArgs ParseArgsStd Hello Init Goodbye Prompt SelectFile InitializeInterpreterRuntime GetExcel'
-imports="$imports GetOutputFile BackupCourseleafFile ParseCourseleafFile GetCourseleafPgm RunCourseLeafCgi"
-imports="$imports WriteChangelogEntry"
-Import "$imports"
+includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye'
+includes="$includes Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel WriteChangelogEntry"
+includes="$includes GetOutputFile BackupCourseleafFile ParseCourseleafFile GetCourseleafPgm RunCourseLeafCgi"
+includes="$includes ProtectedCall PrintBanner"
+Import "$includes"
+
 originalArgStr="$*"
 scriptDescription="Load Courseleaf Data"
 
@@ -18,14 +20,12 @@ scriptDescription="Load Courseleaf Data"
 ## Copyright ©2014 David Scudiero -- all rights reserved.
 ## 06-17-15 -- 	dgs - Initial coding
 #==================================================================================================
-
-#==================================================================================================
-# local functions
+# Standard call back functions
 #==================================================================================================
 	#==============================================================================================
 	# parse script specific arguments
 	#==============================================================================================
-	function parseArgs-loadCourseleafData  {
+	function loadCourseleafData-parseArgsStd  {
 		argList+=(-workbookFile,1,option,workbookFile,,script,'The fully qualified spreadsheet file name')
 		argList+=(-skipNulls,2,switch,skipNulls,,script,'If a data field is null then do not write out that data to the page')
 		argList+=(-uinMap,3,switch,uinMap,,script,'Map role data UIDs to UINs even if the uses UIN flag is not set on the client record')
@@ -41,7 +41,7 @@ scriptDescription="Load Courseleaf Data"
 	#==============================================================================================
 	# Goodbye call back
 	#==============================================================================================
-	function Goodbye-loadCourseleafData  {
+	function loadCourseleafData-Goodbye  {
 		local exitCode="$1"
 		[[ $tmpWorkbookFile == true ]] && rm -f $workbookFile
 		[[ -f $stepFile ]] && rm -f $stepFile
@@ -58,7 +58,7 @@ scriptDescription="Load Courseleaf Data"
 	#==========================================F====================================================
 	# TestMode overrides
 	#==============================================================================================
-	function testMode-loadCourseleafData  {
+	function loadCourseleafData-testMode  {
 		client='dscudiero-test'
 		env='dev'
 		workbookFile='dave-CIMWorkflowM1.xlsm'
@@ -70,6 +70,35 @@ scriptDescription="Load Courseleaf Data"
 		return 0
 	}
 
+	function loadCourseleafData-Help {
+		helpSet='client,env'
+		[[ $1 == 'setVarsOnly' ]] && return 0
+
+		[[ -z $* ]] && return 0
+		echo -e "This script can be used to load data into a CourseLeaf site.  The data that can be loaded includes the followng:"
+		echo -e "\t- Catalog page owner and workflow data"
+		echo -e "\t- Role data"
+		echo -e "\t- User data"
+		echo -e "You can find the loadCourseleafData template Excel Workbook at:"
+		echo -e "\t$TOOLSPATH/workbooks/CourseleafData.xltm"
+		echo -e "\nThe output log is written to the $HOME/clientData/<client> directory, if the directory does exist one will be created."
+		echo -e "The output log file name is of the form '<clientCode>-<env>-$myName.log'"
+		echo -e "\nThe actions performed are:"
+		bullet=1; echo -e "\t$bullet) Read data from the supplied Microsoft Excel workbook"
+		(( bullet++ )); echo -e "\t$bullet) Read the courseleaf data from the target environment from it's source object"
+		(( bullet++ )); echo -e "\t$bullet) Compare the source data to the target data and merge/replace as requested"
+		(( bullet++ )); echo -e "\t$bullet) If changes found, then ask user to verify change and if yes then write data back to the target environment source object"
+		echo -e "\nTarget site data files potentially modified:"
+		echo -e "\t.../web/courseleaf/roles.tcf"
+		echo -e "\t.../db/clusers.sqlite"
+		echo -e "\tAll client pages in source if request includes updating catalog data"
+
+		return 0
+	}
+
+#==================================================================================================
+# local functions
+#==================================================================================================
 	#==================================================================================================
 	# Cleanup funtion, strip leadning blanks, tabs and commas
 	#==================================================================================================
@@ -285,7 +314,7 @@ scriptDescription="Load Courseleaf Data"
 				[[ $key == '' ]] && continue
 				key=$(cut -d'.' -f1 <<< $key)
 				if [[ ${usersFromSpreadsheet["$key"]+abc} ]]; then
-					if [[ ${usersFromSpreadsheet["$key"]} != $value ]]; then
+					if [[ -n $value && $value != '|' && ${usersFromSpreadsheet["$key"]} != $value ]]; then
 						Terminate "^The '$workbookSheet' tab in the workbook contains duplicate userid records \
 						\n^^UserId: '$key' with value '$value' is duplicate\n^previous value = '${usersFromSpreadsheet["$key"]}'"
 					fi
@@ -387,8 +416,8 @@ scriptDescription="Load Courseleaf Data"
 				[[ $key == '' ]] && continue
 				[[ $(IsNumeric ${value:0:1}) == true ]] && value=$(cut -d'.' -f1 <<< $value)
 				if [[ ${rolesFromSpreadsheet["$key"]+abc} ]]; then
-					if [[ ${rolesFromSpreadsheet["$key"]} != $value ]]; then
-						Terminate "^TThe '$workbookSheet' tab in the workbook contains duplicate role records \
+					if [[ -n $value && $value != '|' && ${rolesFromSpreadsheet["$key"]} != $value ]]; then
+						Terminate "^The '$workbookSheet' tab in the workbook contains duplicate role records \
 						\n^^Role '$key' with value '$value' is duplicate\n^previous value = '${rolesFromSpreadsheet["$key"]}'"
 					fi
 				else
@@ -529,7 +558,7 @@ scriptDescription="Load Courseleaf Data"
 				value=$(cut -d '|' -f $titleCol <<< "$line")'|'$(cut -d '|' -f $ownerCol <<< "$line")'|'$(cut -d '|' -f $workflowCol <<< "$line")
 				dump -2 -n line -t key value
 				if [[ ${workflowDataFromSpreadsheet["$key"]} != '' ]]; then
-					if [[ ${workflowDataFromSpreadsheet["$key"]} != $value ]]; then
+					if [[ -n $value && $value != '|' && ${workflowDataFromSpreadsheet["$key"]} != $value ]]; then
 						Terminate "^The '$workbookSheet' sheet in the workbook contains duplicate records with the same 'path' and differeing data\
 						\n^^Path/url: $key\n^^Previous Data: ${workflowDataFromSpreadsheet["$key"]}\n^^Current Data: $value"
 					fi
@@ -661,8 +690,6 @@ tmpFile=$(MkTmpFile)
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-helpSet='script,client,env'
-helpNotes+=("The output is written to the $HOME/clientData/<client> directory,\n\t   if the directory does exist one will be created.")
 GetDefaultsData $myName
 ParseArgsStd
 [[ $allItems == true ]] && processUserData=true && processRoleData=true && processPageData=true

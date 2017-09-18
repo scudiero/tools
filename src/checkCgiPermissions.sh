@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.2.37 # -- dscudiero -- Tue 09/12/2017 @  7:34:15.11
+version=2.2.39 # -- dscudiero -- Fri 09/15/2017 @ 10:15:45.12
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgsStd Hello Init Goodbye Msg2 MkTmpFile'
@@ -22,9 +22,9 @@ scriptDescription="Check cgi file permissions"
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-	function checkCgiPermissions-parseArgsStd {
+	function checkCgiPermissions-ParseArgsStd {
 		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
-		argList+=(-fix,1,switch,fix,,script,'Fix the file permissions (chmod ug+rx)')
+		argList+=(-fix,3,switch,fix,,script,'Fix the file permissions (chmod ug+rx)')
 	}
 
 	function checkCgiPermissions-Goodbye {
@@ -34,6 +34,7 @@ scriptDescription="Check cgi file permissions"
 
 	function checkCgiPermissions-Help {
 		helpSet='' # can also include any of {env,cim,cat,clss}, 'script' and 'common' automatically addeed
+		[[ $1 == 'setVarsOnly' ]] && return 0
 
 		[[ -z $* ]] && return 0
 		bullet=1

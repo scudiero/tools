@@ -1,17 +1,33 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.34 # -- dscudiero -- Thu 04/06/2017 @ 10:05:31.45
+version=1.0.42 # -- dscudiero -- Thu 09/14/2017 @ 11:48:28.40
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
 #==================================================================================================
 # Configure Custom emails on a Courseleaf site
 #==================================================================================================
+TrapSigs 'on'
 currentScript=$(cut -d'.' -f1 <<< $(basename ${BASH_SOURCE[0]}))
 parentScript=$(cut -d'.' -f1 <<< $(basename ${BASH_SOURCE[1]}))
 originalArgStr="$*"
-scriptDescription="Install Custom Workflow Emails (wfemail)"
+
+#==================================================================================================
+# Data used by the parent with a setVarsOnly call
+#==================================================================================================
+eval "${BASH_SOURCE[0]%%.*}scriptDescription='Install Custom Workflow emails (wfemail)'"
+
+filesStr='/email/sendnow.atj;/web/admin/wfemail;/web/<courseleafDir>/localsteps/default.tcf;/web/<courseleafDir>/index.tcf'
+eval "${BASH_SOURCE[0]%%.*}potentialChangedFiles=\"$filesStr\""
+
+actionsStr='1) Check to see if already installed'
+actionsStr="$actionsStr;2) Copy email '/email/sendnow.atj' and '/web/admin/wfemail' from the skeleton shadow"
+actionsStr="$actionsStr;3) Add 'wfemail_prefix:custom' to localsteps/default.tcf"
+actionsStr="$actionsStr;4) Insert the 'Workflow Email' action on the console"
+eval "${BASH_SOURCE[0]%%.*}actions=\"$actionsStr\""
+
+[[ $1 == 'setVarsOnly' ]] && return 0
 
 #==================================================================================================
 # functions

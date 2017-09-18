@@ -1,12 +1,14 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.66 # -- dscudiero -- Mon 04/17/2017 @ 10:15:30.12
+version=1.0.67 # -- dscudiero -- Thu 09/14/2017 @ 16:26:12.33
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
-Import "$imports"
+includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
+includes="$includes SelectMenuNew RunSql2 StringFunctions"
+Import "$includes"
+
 originalArgStr="$*"
-scriptDescription=""
+scriptDescription="This script can be used to monitor a file and be notified if that file changes"
 
 #= Description +===================================================================================
 # Create an entry in the mopnitorFile table to monitor changes to a file
@@ -43,7 +45,6 @@ unset userList newFile
 #==================================================================================================
 # Standard arg parsing
 #==================================================================================================
-Import 'SelectMenuNew'
 helpSet='script'
 GetDefaultsData $myName
 ParseArgsStd

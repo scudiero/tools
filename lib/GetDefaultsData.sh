@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.31" # -- dscudiero -- Fri 05/12/2017 @ 14:54:46.99
+# version="2.0.32" # -- dscudiero -- Thu 09/07/2017 @ 11:40:42.84
 #===================================================================================================
 # Get default variable values from the defaults database
 #===================================================================================================
@@ -45,7 +45,7 @@ function GetDefaultsData {
 		if [[ -n $scriptName ]]; then
 			Verbose 3 "Loading $scriptName defaults"
 			if [[ $table == $scriptsTable ]]; then
-				fields='scriptData1,scriptData2,scriptData3,scriptData4,scriptData5,ignoreList,allowList,emailAddrs'
+				fields='scriptData1,scriptData2,scriptData3,scriptData4,scriptData5,ignoreList,allowList,emailAddrs,updatesClData'
 			else
 				fields='ignoreList,allowList'
 			fi

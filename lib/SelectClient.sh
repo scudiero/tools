@@ -1,14 +1,16 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.5" # -- dscudiero -- 01/12/2017 @ 12:53:06.73
+# version="2.0.6" # -- dscudiero -- Thu 09/14/2017 @ 16:21:28.23
 #===================================================================================================
 # Display a selection list of clients, returns data in the client global variable
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-
 function SelectClient {
+	includes='SelectMenu'
+	Import "$includes"
+
 	local returnVarName=$1
 	local resultRec
 	local selectRespt

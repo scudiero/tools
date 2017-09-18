@@ -1,11 +1,15 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.79 # -- dscudiero -- Wed 05/03/2017 @  8:52:59.55
+version=2.3.80 # -- dscudiero -- Fri 09/15/2017 @  8:39:27.78
 #===================================================================================================
 TrapSigs 'on'
+
+myIncludes="RunSql2"
+Import "$standardIncludes $myIncludes"
+
 originalArgStr="$*"
-scriptDescription="Sync client warehouse and transactional tables"
+scriptDescription="Insert/Update a record into the '$clientInfoTable' table in the data warehouse,\nThis script is not intended to be called stand alone."
 
 #= Description +====================================================================================
 # Sync a record in the clientInfoTable, this is a helper script for 'syncClientInfoTable' and is

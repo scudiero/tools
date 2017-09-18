@@ -1,12 +1,13 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.77 # -- dscudiero -- 12/14/2016 @ 11:32:16.22
+version=1.0.78 # -- dscudiero -- Thu 09/14/2017 @ 16:48:38.06
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
-Import "$imports"
+includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile' #includes="$includes xxx"
+Import "$includes"
+
 originalArgStr="$*"
-scriptDescription="Run workflow automated test cases"
+scriptDescription="This script will run automated workflow test cases"
 
 #= Description +===================================================================================
 # Run automated test cases for workflow in a CIM insance

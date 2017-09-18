@@ -1,11 +1,12 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.99 # -- dscudiero -- Thu 04/06/2017 @ 10:07:13.85
+version=1.1.6 # -- dscudiero -- Thu 09/14/2017 @ 12:21:01.28
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
-imports="$imports WriteChangelogEntry"
-Import "$imports"
+includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye Prompt VerifyContinue'
+includes="$includes StringFunctions ProtectedCall SetFileExpansion RunCourseLeafCgi WriteChangelogEntry"
+Import "$includes"
+
 originalArgStr="$*"
 scriptDescription=""
 
@@ -16,17 +17,35 @@ scriptDescription=""
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function parseArgs-courseleafSyncClientFiles  { # or parseArgs-local
-	argList+=(-buildPages,5,switch,buildPages,,script,'Rebuild the pages database in line with script execution')
-	return 0
-}
-function Goodbye-courseleafSyncClientFiles  { # or Goodbye-local
-	rm -rf $tmpRoot > /dev/null 2>&1
-	return 0
-}
-function testMode-courseleafSyncClientFiles  { # or testMode-local
-	return 0
-}
+	function courseleafSyncClientFiles-parseArgsStd  { # or parseArgs-local
+		argList+=(-buildPages,5,switch,buildPages,,script,'Rebuild the pages database in line with script execution')
+		return 0
+	}
+
+	function courseleafSyncClientFiles-Goodbye  { # or Goodbye-local
+		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
+		return 0
+	}
+
+	function courseleafSyncClientFiles-testMode  { # or testMode-local
+		return 0
+	}
+
+	function courseleafSyncClientFiles-Help  {
+		helpSet='client,src,tgt' # can also include any of {env,cim,cat,clss}, 'script' and 'common' automatically addeed
+		[[ $1 == 'setVarsOnly' ]] && return 0
+
+		[[ -z $* ]] && return 0
+		bullet=1
+		echo -e "This script can be used to synchronize the client data files (under web) between two Courseleaf client environments."
+		echo -e "Only client data files will be effected, both CIM and CAT files will be synchronized, the cimcourses database will also be copied"
+		echo -e "\nThe actions performed are:"
+		echo -e "\t$bullet) Finds all directories under 'web' that do not exist in the skeleton, all directories are then copied from the source site to the target site"
+		echo -e "\nTarget site data files potentially modified:"
+		echo -e "\t- All client data files"
+		echo -e "\t- The cimcourses database file as defined in the mapfile in courseleaf.cfg"
+		return 0
+	}
 
 #==================================================================================================
 # local functions
@@ -111,12 +130,6 @@ copySkelDirs="$scriptData2"
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-helpSet='script,client,src,tgt'
-validArgs='-noPrompt,-verbose,-help,-srcEnv,-tgtEnv,-buildPages'
-scriptHelpDesc="This script can be used to synchronize the client data files under the web directory \
-between two Courseleaf client environments.  Only client data files will be effected, both CIM and CAT \
-files will be synchronized.  The cimcourses database will also be refreshed."
-
 GetDefaultsData $myName
 ParseArgsStd
 displayGoodbyeSummaryMessages=true

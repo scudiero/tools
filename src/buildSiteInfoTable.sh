@@ -1,15 +1,15 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.35 # -- dscudiero -- Thu 09/07/2017 @  7:40:19.44
+version=4.3.40 # -- dscudiero -- Fri 09/15/2017 @  8:53:08.34
 #=======================================================================================================================
 TrapSigs 'on'
 
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
-imports="$imports SetSiteDirs GetCims CheckSemaphore"
-Import "$imports"
+myIncludes="Call SetSiteDirs SetFileExpansion RunSql2 ProtectedCall"
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
-scriptDescription="Scratch build the warhouse 'sites' table"
+scriptDescription="Sync the data warehouse '$siteInfoTable' table with the transactional data from the contacts db data and the live site data"
 
 #=======================================================================================================================
 # Run nightly from cron
@@ -66,6 +66,8 @@ forkCntr=0; siteCntr=0; clientCntr=0;
 GetDefaultsData $myName
 ParseArgsStd
 Hello
+[[ $batchMode != true ]] && VerifyContinue "You are asking to re-generate the data warehouse '$siteInfoTable' and "$siteAdminsTable" table"
+
 [[ -n $env ]] && envList="$env" || envList="$courseleafDevEnvs $courseleafProdEnvs"
 [[ $fork == true ]] && forkStr='fork' || unset forkStr
 

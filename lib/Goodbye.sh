@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.138" # -- dscudiero -- Fri 09/01/2017 @  9:24:05.38
+# version="2.0.139" # -- dscudiero -- Thu 09/07/2017 @ 11:31:32.44
 #===================================================================================================
 # Common script exit
 # args:
@@ -11,6 +11,9 @@
 # All rights reserved
 #===================================================================================================
 function Goodbye {
+	includes="SetFileExpansion Msg2 Colors ProcessLogger PrintBanner Alert"
+	Import "$includes"
+
 	SetFileExpansion 'off'
 	Msg2 $V3 "*** Starting: $FUNCNAME ***"
 
@@ -123,6 +126,7 @@ function Goodbye {
 
 	## If running for another user, then send an email to that user
 	if [[ -n $forUser ]]; then
+		tmpFile=$(mkTmpFile)
 		Msg2 > $tmpFile
 		Msg2 "'$myName' was run in your behalf by $userName, the log is attached" >> $tmpFile
 		Msg2 >> $tmpFile
@@ -132,6 +136,7 @@ function Goodbye {
 		cat "$logFile" >> $tmpFile
 		Msg2 >> $tmpFile
 		$DOIT mutt -a "$logFile" -s "$myName '$client' site created - $(date +"%m-%d-%Y")" -- ${forUser}@leepfrog.com < $tmpFile
+		rm -f $tmpFile
 	fi
 
 	[[ $(IsNumeric $exitCode) != true ]] && exitCode=0

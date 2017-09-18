@@ -1,28 +1,52 @@
-## XO NOT AUTOVERSION
+## DO NOT AUTOVERSION
 #===================================================================================================
-# version=2.0.9 # -- dscudiero -- Fri 09/01/2017 @  9:38:17.58
+# version=2.1.-1 # -- dscudiero -- Fri 09/08/2017 @  9:28:25.55
 #===================================================================================================
 # Display script help -- passed an array of argument definitinons, see ParseArg function
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-
 function Help {
-	Msg2 $V3 "*** $FUNCNAME -- Starting ***"
-	local parseDefs=("$@")
-	local helpSet=$(echo $helpSet,script | tr ' ' ',')
+	mode="${1-normal}"
+
+	includes='Msg2 Dump StringFunctions Colors'
+	Import "$includes"
+
+	[[ $(type -t $FUNCNAME-$myName) == 'function' ]] && $FUNCNAME-$myName 'setVarsOnly'
+	[[ $(type -t $myName-$FUNCNAME) == 'function' ]] && $myName-$FUNCNAME 'setVarsOnly'
+
+	local myHelpSet="common,script,$(tr ' ' ',' <<< $helpSet)"
 	local tempStr="$(ColorK "Usage:") $myName"
+
+	includes='Msg2 Colors StringFunctions'
+	Import "$includes"
 
 	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
 	echo; echo
 	Msg2 "$myName version: $version"
+	[[ $updatesClData == 'Yes' ]] && Warning "This script updates client side data"
 	echo
-	[[ $(Contains ",$helpSet," ",client,") == true ]] && hasClient=true && tempStr="$tempStr [client]"
+
+	sqlStmt="select restrictToUsers,restrictToGroups from $scriptsTable where name=\"$myName\""
+	RunSql2 $sqlStmt
+	if [[ ${#resultSet[@]} -gt 0 ]]; then
+		result="${resultSet[0]}"
+		restrictToUsers=${result%%|*}
+		restrictToGroups=${result##*|}
+		[[ $restrictToUsers != 'NULL' ]] && Info "This script is restricted to users: $restrictToUsers"
+		[[ $restrictToGroups != 'NULL' ]] && Info "This script is restricted to groups: $restrictToGroups"
+		[[ $restrictToUsers == 'NULL' && $restrictToGroups == 'NULL' ]] && Info "This script is not restricted"
+		echo
+	fi
+
+
+	[[ $(Contains ",$myHelpSet," ",client,") == true ]] && hasClient=true && tempStr="$tempStr [client]"
 	tempStr="$tempStr [OPTIONS]"
 	Msg2 "$tempStr"
 	echo
 	## Print out header info
+		[[ $scriptDescription != '' ]] && Msg2 "$(ColorK "$scriptDescription.")"
 		[[ $shortDescription != '' ]] && Msg2 "$(ColorK "$shortDescription.")"
 		[[ $longDescription != '' ]] && echo && Msg2 "$longDescription" && echo
 		if [[ -n $scriptHelpDesc ]]; then
@@ -49,19 +73,21 @@ function Help {
 		(( maxWidthMin += 1 ))
 
 	echo
-	Msg2 "$(ColorK "[client]:")"
-	Msg2 "^This is the client code (abbreviation) for the client that you wish to work with."
-
+	if [[ $hasClient == true ]]; then
+		Msg2 "$(ColorK "[client]:")"
+		Msg2 "^This is the client code (abbreviation) for the client that you wish to work with."
+	fi
 
 	## print them out
-		#dump helpSet validArgs
-		local optionsArray switchesArray argGroup argName minLen argType tempStr1 tempStr2 helpText msgString
-		unset optionsArray switchesArray argGroup argName minLen argType tempStr1 tempStr2 helpText msgString
+		#dump myHelpSet validArgs
+		local scriptOptionsArray scriptSwitchesArray commonOptionsArray commonSwitchesArray
+		unset scriptOptionsArray scriptSwitchesArray commonOptionsArray commonSwitchesArray
+		local argGroup argName minLen argType tempStr1 tempStr2 helpText msgString
 		## seperate out options from flags
 		for parseStr in "${argList[@]}"; do
 			argGroup=$(Lower $(echo $parseStr | cut  -d ',' -f 6))
 			#dump parseStr -t argGroup
-			[[ $argGroup != '' && $(Contains ",$helpSet," ",$argGroup,") == false ]] && continue
+			[[ $argGroup != '' && $(Contains ",$myHelpSet," ",$argGroup,") == false ]] && continue
 			argName=$(echo $parseStr | cut  -d ',' -f 1)
 			#dump -t argName
 			if [[ $validArgs != '' ]]; then
@@ -75,61 +101,121 @@ function Help {
 			tempStr2="${argName:$minLen+1}$(PadChar ' ' $padLen)"
 			argName="${tempStr1}${tempStr2}"
 			msgString="^^$argName - $helpText"
-			[[ ${argType:0:6} == 'option' ]] && optionsArray+=("$msgString") || switchesArray+=("$msgString")
+			# dump parseStr -t argGroup
+			[[ -z $msgString ]] && continue
+			#dump msgString argGroup argType
+			if [[ $argGroup == 'common' ]]; then
+				[[ ${argType:0:6} == 'option' ]] && commonOptionsArray+=("$msgString") || commonSwitchesArray+=("$msgString")
+			else
+				[[ ${argType:0:6} == 'option' ]] && scriptOptionsArray+=("$msgString") || scriptSwitchesArray+=("$msgString")
+			fi
 		done
 
 	echo
-	Msg2 "$(ColorK "[OPTIONS]:")"
-	## Options
-		if [[ ${#optionsArray[@]} -gt 0 ]]; then
-			Msg2 "^$(ColorK "Arguments with values (i.e. a flag with value e.g. -flag value):")"
-			for msgString in "${optionsArray[@]}"; do
-				Msg2 "$msgString"
+	Msg2 "$(ColorK "[OPTIONS]")"
+	if [[ ${#scriptOptionsArray[@]} -gt 0 || ${#scriptSwitchesArray[@]} -gt 0  ]]; then
+		Msg2 "^$(ColorU "$(ColorK "Script specific options:")")"
+		## Script specific options
+		if [[ ${#scriptOptionsArray[@]} -gt 0 ]]; then
+			Msg2 "^^$(ColorK "Arguments with values (i.e. a flag with value e.g. -flag value):")"
+			for msgString in "${scriptOptionsArray[@]}"; do
+				Msg2 "^$msgString"
 			done
-		fi
-	## Switches
-		if [[ ${#switchesArray[@]} -gt 0 ]]; then
 			echo
-			Msg2 "^$(ColorK "Arguments without values (i.e. a flag e.g. -flag):")"
-			for msgString in "${switchesArray[@]}"; do
-				Msg2 "$msgString"
-			done
 		fi
-
-	## print out script specific help notes
-		if [[ ${#helpNotes[@]} -gt 0 ]]; then
+		## Script specific switches
+		if [[ ${#scriptSwitchesArray[@]} -gt 0 ]]; then
+			Msg2 "^^$(ColorK "Arguments without values (i.e. a flag e.g. -flag):")"
+			for msgString in "${scriptSwitchesArray[@]}"; do
+				Msg2 "^$msgString"
+			done
 			echo
-			Msg2 "$(ColorK "Script specific notes:")"
-			for ((cntr = 0 ; cntr < ${#helpNotes[@]} ; cntr++)); do
-				let idx=$cntr+1
-		 		Msg2 "^$idx) ${helpNotes[$cntr]}"
-			done
 		fi
+	fi
 
-	## General help notes for all scripts
-		echo
-		Msg2 "$(ColorK "General Notes:")"
-		local notesClient notesAlways notes
-		notesClient+=("The minimum abbreviations for argument flags are indicated in the $(ColorK highlight) color above.")
-		notesClient+=("A value of '.' may be specified for client to parse the client value from the current working directory.")
-		notesClient+=("A value of '?' may be specified for client to display a selection list of all clients.")
-
-		notesAlways+=("All flags must be delimited from other flags by at lease one blank character.")
-		notesAlways+=("While all flags may be specified, not all of them may active.")
-		notesAlways+=("If an argument is an option with a value, and the value contains blanks/spaces, the argument value needs to be enclosed in single quotes which need to be escaped on the command line, e.g. -file \'This is a File Name\'")
-
-		notes=("${notesAlways[@]}")
-		[[ $hasClient == true ]] && notes=("${notesClient[@]}" "${notes[@]}")
-
-		idx=1
-		for line in "${notes[@]}"; do
-			Msg2 ",,+1,,true" "$idx) $line"
-			((idx+=1))
+	Msg2 "^$(ColorU "$(ColorK "Tools common options:")") $(ColorW "(Note: While all options can be specified they may not have a meaning for the current script)")"
+	## Common specific options
+	if [[ ${#commonOptionsArray[@]} -gt 0 ]]; then
+		Msg2 "^^$(ColorK "Arguments with values (i.e. a flag with value e.g. -flag value):")"
+		for msgString in "${commonOptionsArray[@]}"; do
+			Msg2 "^$msgString"
 		done
 		echo
+	fi
+	## Common specific switches
+	if [[ ${#commonSwitchesArray[@]} -gt 0 ]]; then
+		Msg2 "^^$(ColorK "Arguments without values (i.e. a flag e.g. -flag):")"
+		for msgString in "${commonSwitchesArray[@]}"; do
+			Msg2 "^$msgString"
+		done
+		echo
+	fi
 
-		Msg2 $V3 "*** $FUNCNAME -- Completed ***"
-		return 0
+	## print out script specific help notes
+	if [[ ${#helpNotes[@]} -gt 0 ]]; then
+		Msg2 "$(ColorK "Script specific notes:")"
+		for ((cntr = 0 ; cntr < ${#helpNotes[@]} ; cntr++)); do
+			let idx=$cntr+1
+	 		Msg2 "^$idx) ${helpNotes[$cntr]}"
+		done
+		echo
+	fi
+
+	## General help notes for all scripts
+	echo
+	Msg2 "$(ColorK "General Notes:")"
+	local notesClient notesAlways notes
+	unset notesClient notesAlways notes
+	notesClient+=("A value of '.' may be specified for client to parse the client value from the current working directory.")
+	notesClient+=("A value of '?' may be specified for client to display a selection list of all clients.")
+
+	notesAlways+=("All flags/switches/options $(ColorB "must") be delimited from other flags by at lease one blank character.")
+	notesAlways+=("The minimum abbreviations for argument flags are indicated in the $(ColorK highlight) color above.")
+	notesAlways+=("If an argument is an option with a value, and the value contains blanks/spaces, the argument value needs to be enclosed in single quotes which need to be escaped on the command line, e.g. -file \'This is a File Name\'.")
+	notesAlways+=("To get additional help information on what is used by this script you can use the -hh option.")
+
+	notes=("${notesAlways[@]}")
+	[[ $hasClient == true ]] && notes=("${notesClient[@]}" "${notes[@]}")
+
+	idx=1
+	for line in "${notes[@]}"; do
+		Msg2 ",,+1,,true" "$idx) $line"
+		((idx+=1))
+	done
+	echo
+
+	[[ $mode != '-extended' ]] && return 0
+
+	## Extended help, print out dependencies
+	if [[ -n $SCRIPTINCLUDES ]]; then
+		## Scripts
+		local token
+		Msg2 "$(ColorK "Tools library modules used (via tools/lib):")"
+		for token in $(tr ',' ' ' <<< $SCRIPTINCLUDES); do
+			Msg2 "^$token"
+		done #| sort
+		echo
+		## Java
+		if [[ $(Contains "$SCRIPTINCLUDES" "RunSql2") == true && -n $javaResources ]]; then
+			local token
+			Msg2 "$(ColorK "Java resources used (via $TOOLSPATH/src/java/tools.jar):")"
+			for token in $(tr ',' ' ' <<< $javaResources); do
+				Msg2 "^$token"
+			done | sort
+			echo
+		fi
+		## Python
+		if [[ $(Contains "$SCRIPTINCLUDES" "GetExcel") == true && -n $pythonResources ]]; then
+			local token
+			Msg2 "$(ColorK "Python resources used:")"
+			for token in $(tr ',' ' ' <<< $pythonResources); do
+				Msg2 "^$token"
+			done | sort
+			echo
+		fi
+	fi
+
+	return 0
 } # Help
 export -f Help
 

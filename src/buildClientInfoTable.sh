@@ -1,13 +1,15 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.114 # -- dscudiero -- Tue 06/13/2017 @ 14:03:19.84
+version=2.3.121 # -- dscudiero -- Fri 09/15/2017 @  8:26:22.67
 #=======================================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
-Import "$imports"
+
+myIncludes="Call RunSql2 FindExecutable StringFunctions"
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
-scriptDescription="Sync client warehouse and transactional tables"
+scriptDescription="Sync the data warehouse '$clientInfoTable' table with the transactional data from the contacts db data"
 
 #=======================================================================================================================
 # Synchronize client data from the transactional sqlite db and the data warehouse
@@ -62,7 +64,7 @@ fi
 #=======================================================================================================================
 ParseArgsStd
 Hello
-
+[[ $batchMode != true ]] && VerifyContinue "You are asking to re-generate the data warehouse '$clientInfoTable' table"
 
 #=======================================================================================================================
 # Local Subs

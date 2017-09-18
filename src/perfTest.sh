@@ -8,6 +8,9 @@
 # 3) read the clients table ~900 records
 #=======================================================================================================================
 
+myIncludes="SetFileExpansion RunSql2"
+Import "$standardInteractiveIncludes $myIncludes"
+
 mode=${1-'test'}; shift || true
 count=${1-1000}; shift || true
 tmpFile="/tmp/$LOGNAME.perfTest.sh.out"

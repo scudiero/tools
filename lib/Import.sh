@@ -1,30 +1,55 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.16" # -- dscudiero -- 01/04/2017 @ 13:45:59.73
+# version="1.0.59" # -- dscudiero -- Thu 09/07/2017 @ 11:16:22.43
 #===================================================================================================
 # Import need functions into the runtime environment
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-
 function Import {
+	function MyContains {
+		[[ $# -lt 2 ]] && echo false && return 0
+		local string="$1"
+		local substring="$2"
+		local testStr=${string#*$substring}
+
+		[[ "$testStr" != "$string" ]] && echo true || echo false
+		return 0
+	} #MyContains
+
 	includeList="$*"
-	local searchDirs includeName found
+	[[ -z $includeList ]] && return 0
+	local searchDirs includeName found token
 
 	[[ $TOOLSLIBPATH == '' ]] && searchDirs="$TOOLSPATH/lib" || searchDirs="$( tr ':' ' ' <<< $TOOLSLIBPATH)"
 
+	#echo -e"\nincludeList = '$includeList'"
+	#echo -e"\tSCRIPTINCLUDES Initial = '$SCRIPTINCLUDES'"
 	## Search for the include file, load the first one
 	for includeName in $includeList; do
-		## Is the function already defined, if yes then skip
-		[[ $(type -t $myName) = function ]] && continue
+		#echo -e "\tincludeName = '$includeName'\t\t$SCRIPTINCLUDES"
+		[[ $(MyContains ",$SCRIPTINCLUDES," ",$includeName,") == true ]] && continue
 		found=false
 		for searchDir in $searchDirs; do
-			[[ -r ${searchDir}/${includeName}.sh ]] && source ${searchDir}/${includeName}.sh && found=true && break
+			if [[ -r ${searchDir}/${includeName}.sh ]]; then
+				unset includes imports
+				source ${searchDir}/${includeName}.sh
+				[[ -z $SCRIPTINCLUDES ]] && SCRIPTINCLUDES="$includeName" || SCRIPTINCLUDES="$SCRIPTINCLUDES,$includeName"
+				#echo -e "\t\tSCRIPTINCLUDES = '$SCRIPTINCLUDES'"
+				#echo -e "\t\${includes}\${imports}  = '${includes}${imports} '"
+				if [[ -n ${includes}${imports} ]]; then
+					for token in ${includes} ${imports}; do
+						[[ $(MyContains ",$SCRIPTINCLUDES," ",$token,") != true ]] && SCRIPTINCLUDES="$SCRIPTINCLUDES,$token"
+					done
+				fi
+				found=true
+			fi
+			[[ $found == true ]] && break ## searchDir
 		done
 		[[ $found != true ]] && echo -e "\n*** Error, Import function, cannot locate '$includeName' *** \n" && exit
 	done
-
+	#echo "SCRIPTINCLUDES Final = '$SCRIPTINCLUDES'";echo;echo
 	return 0
 } #Import
 export -f Import

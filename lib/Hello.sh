@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.32" # -- dscudiero -- Thu 08/31/2017 @ 15:48:01.36
+# version="2.0.33" # -- dscudiero -- Thu 09/07/2017 @ 10:10:30.84
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -11,6 +11,10 @@
 function Hello {
 	[[ $quiet == true || $noHeaders == true || $secondaryMessagesOnly == true ]] && return 0
 	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
+
+	includes="Msg2 Colors ProcessLogger DisplayNews"
+	Import "$includes"
+
 	echo
 	[[ $TERM == 'dumb' ]] && echo
 	Msg2 "$(PadChar)"

@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.5.69 # -- dscudiero -- Thu 04/06/2017 @ 10:07:01.27
+version=1.5.132 # -- dscudiero -- Thu 09/14/2017 @ 12:07:25.66
 #==================================================================================================
 # Install a courseleaf feature on a client site
 #==================================================================================================
@@ -10,48 +10,81 @@ version=1.5.69 # -- dscudiero -- Thu 04/06/2017 @ 10:07:01.27
 # 07-17-15 --	dgs - Migrated to framework 5
 #==================================================================================================
 TrapSigs 'on'
-includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry SelectMenuNew'
-includes="$includes EditTcfValue BackupCourseleafFile GetCourseleafPgm CopyFileWithCheck ParseCourseleafFile EditCourseleafConsole"
-includes="$includes InsertLineInFile EditCourseleafConsole"
+## Main script
+includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue'
+includes="$includes SetFileExpansion ProtectedCall Call PushPop SelectMenuNew"
+## Called scripts
+includes="$includes "
 Import "$includes"
+
 originalArgStr="$*"
 scriptDescription="Install a courseleaf feature - dispatcher"
 
 #==================================================================================================
+# Standard call back functions
+#==================================================================================================
+	function courseleafFeature-parseArgsStd {
+		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
+		argList+=(-feature,2,option,feature,,script,'The feature that you want to install')
+		argList+=(-force,2,switch,force,,script,'Install the feature even if it is already there, aka refresh')
+	}
+
+	function courseleafFeature-Goodbye  {
+		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
+		return 0
+	}
+
+	function courseleafFeature-Help  {
+		helpSet='script,client,env'
+		[[ $1 == 'setVarsOnly' ]] && return 0
+
+		echo -e "This script can be used to install a CourseLeaf feature into a site."
+		echo -e "\nThe following features can be installed:"
+		BuildFeaturesList
+		Pushd $myPath/features
+		for feature in "${features[@]}"; do
+			[[ $feature == '|Feature name|Description' ]] && continue
+			featureName="${feature%|*}"; featureName=${featureName:1}
+			featureDesc="${feature##*|}"; featureDesc="${featureDesc#* }";
+			echo -e "\t- ${featureDesc##*|}"
+			echo -e "\t\tActions:"
+			unset actions ${featureName}actions potentialChangedFiles ${featureName}potentialChangedFiles
+			source "${featureName}.sh" 'setVarsOnly'
+			varName=${featureName}actions;
+			IFS=';' read -r -a lines <<< "${!varName}"
+			for line in "${lines[@]}"; do
+				echo -e "\t\t\t$line"
+			done
+			echo -e "\t\tTarget site data files potentially modified:"
+			varName=${featureName}potentialChangedFiles;
+			IFS=';' read -r -a lines <<< "${!varName}"
+			for line in "${lines[@]}"; do
+				echo -e "\t\t\t$line"
+			done
+		done
+		Popd
+		return 0
+	}
+
+#==================================================================================================
 # local functions
 #==================================================================================================
-function parseArgs-local {
-	# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
-	argList+=(-feature,2,option,feature,,script,'The feature that you want to install')
-	argList+=(-force,2,switch,force,,script,'Install the feature even if it is already there, aka refresh')
-	:
-}
-function Goodbye-local {
-	:
-}
-
 function BuildFeaturesList {
 	unset features
 	features+=("|Feature name|Description")
 	SetFileExpansion 'on'
-	cwd=$(pwd)
+	Pushd $myPath/features
 	cd $myPath/features
 	files=($(ls *.sh))
 	SetFileExpansion
 	for file in ${files[@]}; do
-		grepStr="$(ProtectedCall "grep \"scriptDescription\" ./$file")"
-		if [[ $grepStr != '' ]]; then
-			name="$(cut -d'.' -f1 <<< $file)"
-			if [[ $(Contains "$installedFeatures" "$name") != true ]]; then
-				descript="$(cut -d'=' -f2 <<< $grepStr)"
-				descript=${descript:1:${#descript}-2}
-				features+=("|$name|$descript")
-				featursString="$featuresString,$name"
-			fi
-		fi
+		unset featureDesc ${file%%.*}scriptDescription ${file%%.*}potentialChangedFiles
+		source "$file" 'setVarsOnly'
+		featureName="${file%%.*}"
+		featureDesc=${file%%.*}scriptDescription; featureDesc="${!featureDesc}"
+		[[ $(Contains "$installedFeatures" "$featureName") != true ]] && features+=("|$featureName|$featureDesc")
 	done
-	featursString="${featursString:1}"
-	cd "$cwd"
+	Popd
 	#printf '%s\n' "${features[@]}"
 }
 

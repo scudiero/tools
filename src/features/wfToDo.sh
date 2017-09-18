@@ -1,25 +1,40 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.63 # -- dscudiero -- Thu 04/13/2017 @ 10:58:46.69
+version=1.0.87 # -- dscudiero -- Thu 09/14/2017 @ 11:45:29.36
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
 #==================================================================================================
 # Configure Custom emails on a Courseleaf site
 #==================================================================================================
+TrapSigs 'on'
 currentScript=$(cut -d'.' -f1 <<< $(basename ${BASH_SOURCE[0]}))
 parentScript=$(cut -d'.' -f1 <<< $(basename ${BASH_SOURCE[1]}))
 originalArgStr="$*"
-scriptDescription="Install workflow 'todo' on the CourseLeaf console & specific cims"
 TrapSigs 'on'
-parentScript=$(cut -d'.' -f1 <<< $(basename ${BASH_SOURCE[0]}))
+
+#==================================================================================================
+# Data used by the parent with a setVarsOnly call
+#==================================================================================================
+eval "${BASH_SOURCE[0]%%.*}scriptDescription='Install Workflow todo on the CourseLeaf console & specified CIMs'"
+
+filesStr='/web/courseleaf/index.tcf;/web/<cims>/workflow.tcf'
+eval "${BASH_SOURCE[0]%%.*}potentialChangedFiles=\"$filesStr\""
+
+actionsStr='1) Check to see if already installed'
+actionsStr="$actionsStr;2) Check the console navlinks for 'Administration', if found update to 'Courseleaf'"
+actionsStr="$actionsStr;3) Insert the 'To-Do List' action on the console"
+actionsStr="$actionsStr;4) Update user selected CIM instances to add to the selectable step modifiers"
+eval "${BASH_SOURCE[0]%%.*}actions=\"$actionsStr\""
+
+[[ $1 == 'setVarsOnly' ]] && return 0
 
 #==================================================================================================
 # functions
 #==================================================================================================
 
-#==================================================================================================
+#=========================Check=========================================================================
 # Declare variables and constants
 #==================================================================================================
 tgtDir=$siteDir
@@ -40,10 +55,10 @@ minClVer='3.5.9'
 		Terminate "Target site clver ($clVer) is less than the minimum required version for this feature ($minClVer)"
 
 ## set file to edit
-	editFile=$tgtDir/web/courseleaf/index.tcf
-	dump -1 tgtDir srcDir editFile
+	dump -1 tgtDir srcDir
 
 ## Check to see if it is already there
+	editFile=$tgtDir/web/courseleaf/index.tcf
 	checkStr='^navlinks.*wftodo'
 	grepStr="$(ProtectedCall "grep \"$checkStr\" $editFile")"
 	if [[ -n $grepStr ]]; then
@@ -57,6 +72,7 @@ minClVer='3.5.9'
 	fi
 
 ## Check to see if we need to update navlink names
+	editFile=$tgtDir/web/courseleaf/index.tcf
 	checkStr='^navlinks:Administration|'
 	grepStr="$(ProtectedCall "grep \"$checkStr\" $editFile")"
 	if [[ $grepStr != '' ]]; then
@@ -70,7 +86,7 @@ minClVer='3.5.9'
 		fi
 	fi
 
-## Edit console file - insert refresh system if not there
+## Edit console file - insert To-Do List if not there
 	displayedHeading=false
 	editFile="$tgtDir/web/courseleaf/index.tcf"
 	name='To-Do List'

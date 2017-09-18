@@ -1,10 +1,11 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.7 # -- dscudiero -- Mon 05/22/2017 @  8:27:23.17
+version=2.0.11 # -- dscudiero -- Fri 09/08/2017 @ 12:13:46.39
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
-Import "$imports"
+includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye'
+Import "$includes"
+
 originalArgStr="$*"
 scriptDescription="Update CIM status"
 
@@ -25,6 +26,13 @@ scriptDescription="Update CIM status"
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
+helpSet='client,env,cim' # can also include any of {env,src,tgt,prod,cim,cat,clss}, 'script' and 'common' automatically addeed
+scriptHelpDesc+=("This script can be used to rebuild the status for one or more CIM instances in a client site")
+scriptHelpDesc+=("The actions performed are:")
+scriptHelpDesc+=("^Run the 'rebuildstatus' on each CIM instance as requested")
+scriptHelpDesc+=("\nTarget site data files potentially modified:")
+scriptHelpDesc+=("^As above")
+
 GetDefaultsData $myName
 ParseArgsStd
 Hello

@@ -1,12 +1,12 @@
 #!/bin/bash
 #===================================================================================================
-version=1.0.5 # -- dscudiero -- 01/12/2017 @ 13:22:00.84
+version=1.0.10 # -- dscudiero -- Thu 09/14/2017 @ 12:42:23.27
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
 Import "$imports"
 originalArgStr="$*"
-scriptDescription=""
+scriptDescription="Bring a tools script online"
 
 #===================================================================================================
 ## turn a script offline -- i.e. create an .offline file

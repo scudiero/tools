@@ -1,12 +1,12 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.12 # -- dscudiero -- Thu 06/15/2017 @ 14:05:13.14
+version=1.0.14 # -- dscudiero -- Thu 09/14/2017 @ 15:40:55.77
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
-Import "$imports"
+includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye'
+Import "$includes"
 originalArgStr="$*"
-scriptDescription=""
+scriptDescription="Check the roles to ensure that all role members are in user provsioning"
 
 #==================================================================================================
 # Interogate the roles file and verify that all the users listed in roles are in provsioning
@@ -42,6 +42,19 @@ GetDefaultsData $myName
 ParseArgsStd
 Hello
 Init 'getClient getEnv getDirs checkEnvs'
+
+## Set outfile -- look for std locations
+outFileName=$client-$env-$myName.txt
+if [[ -d $localClientWorkFolder ]]; then
+	if [[ ! -d $localClientWorkFolder/$client ]]; then mkdir $localClientWorkFolder/$client; fi
+	outFile=$localClientWorkFolder/$client/$outFileName
+else
+	outFile=/home/$userName/$outFileName
+fi
+
+verifyArgs+=("Client:$client")
+verifyArgs+=("Env:$(TitleCase $env)")
+verifyArgs+=("Output File:$outFile")
 verifyContinueDefault='Yes'
 VerifyContinue "You are asking to check role data for client:$client\n\tEnv: $env\n"
 Msg2
@@ -49,15 +62,7 @@ Msg2
 #==================================================================================================
 ## Main
 #==================================================================================================
-
-## Set outfile -- look for std locations
-	outFileName=$client-$env-$myName.txt
-	if [[ -d $localClientWorkFolder ]]; then
-		if [[ ! -d $localClientWorkFolder/$client ]]; then mkdir $localClientWorkFolder/$client; fi
-		outFile=$localClientWorkFolder/$client/$outFileName
-	else
-		outFile=/home/$userName/$outFileName
-	fi
+## check outfile
 	if [[ -f $outFile ]]; then
 		Warning "Output file already exists, renaming to\n\t$outFile.$backupSuffix\n"
 		mv $outFile $outFile.$backupSuffix

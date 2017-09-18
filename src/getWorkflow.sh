@@ -1,13 +1,13 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.20 # -- dscudiero -- Thu 04/13/2017 @ 14:00:12.79
+version=1.0.25 # -- dscudiero -- Thu 09/14/2017 @ 16:12:19.82
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
-imports="$imports GetCims"
-Import "$imports"
+includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
+includes="$includes GetCims"
+Import "$includes"
 originalArgStr="$*"
-scriptDescription=""
+scriptDescription="This script can be used to retrieve the workflow generated for a CourseLeaf object"
 
 #= Description +===================================================================================
 #

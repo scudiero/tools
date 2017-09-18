@@ -1,10 +1,13 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.5 # -- dscudiero -- Tue 09/05/2017 @  8:51:01.02
+version=2.10.22 # -- dscudiero -- Thu 09/14/2017 @ 12:20:54.09
 #====================================================================================================
 TrapSigs 'on'
-Import ParseArgs ParseArgsStd Hello Init Goodbye BackupCourseleafFile ParseCourseleafFile WriteChangelogEntry
+includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye'
+includes="$includes StringFunctions Prompt VerifyContinue"
+includes="$includes ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile"
+Import "$includes"
 originalArgStr="$*"
 scriptDescription="Copy workflow files"
 
@@ -25,8 +28,8 @@ scriptDescription="Copy workflow files"
 		argList+=(-allCims,3,switch,allCims,,script,'Process all CIM instances present')
 		argList+=(-jalot,3,option,jalot,,script,'Jalot task number')
 		argList+=(-comment,7,option,comment,,script,'Comment describing the reason for the update')
-		argList+=(-refresh,1,switch,refreshSystem,,script,'Refresh system files from the skeleton')
-		argList+=(-norefresh,3,switch,refreshSystem,refreshSystem=false,script,'Do not refresh system files from the skeleton')
+		#argList+=(-refresh,1,switch,refreshSystem,,script,'Refresh system files from the skeleton')
+		#argList+=(-norefresh,3,switch,refreshSystem,refreshSystem=false,script,'Do not refresh system files from the skeleton')
 	}
 	function copyWorkflow-Goodbye  {
 		rm -rf $tmpRoot > /dev/null 2>&1
@@ -40,7 +43,10 @@ scriptDescription="Copy workflow files"
 		return 0
 	}
 	function copyWorkflow-Help  {
-		helpSet='script,client,env'
+		helpSet='client,src,tgt' # can also include any of {env,cim,cat,clss}, 'script' and 'common' automatically addeed
+		[[ $1 == 'setVarsOnly' ]] && return 0
+
+		[[ -z $* ]] && return 0
 		bullet=1
 		echo -e "This script can be used to copy workflow related files from one environment to another."
 		echo -e "The actions performed are:"
@@ -207,7 +213,7 @@ function CheckFilesForCopy {
 			printf '=%.0s' {1..120}
 			Msg2
 			ProtectedCall "colordiff $srcFile $tgtFile | Indent"
-			Msg2 "$colorDefault"
+			Msg2 "${colorDefault}"
 			printf '=%.0s' {1..120}
 			Msg2 "\n* * * DIFF Output end * * *\n\n"
 
@@ -234,12 +240,14 @@ function CheckFilesForCopy {
 			## If workflow.tcf then make sure the test workflow is commented out
 			if [[ $(Contains "$cpyFile" 'workflow.tcf') == true ]]; then
 				unset grepStr; grepStr=$(ProtectedCall "grep 'TODO,' $srcFile")
-				[[ -n $grepStr && $tgtEnv == 'next' ]] && Terminate "Source 'workflow.tcf' file contained an 'TODO' step in the workflow definitions"
-				[[ -n $grepStr && $tgtEnv == 'test' ]] && Warning 0 1 "Source 'workflow.tcf' file contained an 'TODO' step in the workflow definitions"
-				unset grepStr; grepStr=$(ProtectedCall "grep '^workflow:standard|START' $srcFile")
-				if [[ -n $grepStr ]]; then
-					$DOIT sed -i s"_^workflow:standard|START_//workflow:standard|START_" $srcFile
-					Warning "Workflow.tcf file contained an uncommented test workflow definition, it will be commented out"
+				if [[ ${grepStr:0:1} != '#' ]]; then
+					[[ -n $grepStr && $tgtEnv == 'next' ]] && Terminate "Source 'workflow.tcf' file contained an 'TODO' step in the workflow definitions"
+					[[ -n $grepStr && $tgtEnv == 'test' ]] && Warning 0 1 "Source 'workflow.tcf' file contained an 'TODO' step in the workflow definitions"
+					unset grepStr; grepStr=$(ProtectedCall "grep '^workflow:standard|START' $srcFile")
+					if [[ -n $grepStr ]]; then
+						$DOIT sed -i s"_^workflow:standard|START_//workflow:standard|START_" $srcFile
+						Warning "Workflow.tcf file contained an uncommented test workflow definition, it will be commented out"
+					fi
 				fi
 			fi
 			copyFileList+=("${srcFile}|${tgtFile}|${cpyFile}")

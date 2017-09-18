@@ -1,12 +1,12 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.11.101 # -- dscudiero -- Tue 09/05/2017 @ 12:09:16.42
+version=4.12.1 # -- dscudiero -- Fri 09/08/2017 @ 11:51:16.23
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #
-imports="$imports GetSiteDirNoCheck"
-Import "$imports"
+includes='GetDefaultsData ParseArgsStd Hello Init Goodbye GetSiteDirNoCheck ProtectedCall'
+Import "$includes"
+
 [[ $1 == $myName ]] && shift
 originalArgStr="$*"
 scriptDescription="Create a cloned private dev site"
@@ -40,43 +40,68 @@ scriptDescription="Create a cloned private dev site"
 # local functions
 #==================================================================================================
 #==================================================================================================
-# parse script specific arguments
+# Standard call back functions
 #==================================================================================================
-function parseArgs-copyEnv {
-	# argList+=(argFlag,minLen,type,scriptVariable,extraToken/exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
-	argList+=(-manifest,1,switch,manifest,true,'script',"Create a CourseLeaf Manifest after copies")
-	argList+=(-noManifest,3,switch,manifest,manifest=false,'script',"Do not create a CourseLeaf Manifest after copies")
-	argList+=(-overlay,5,switch,overlay,true,'script',"Overlay/Replace any existing target directories")
-	argList+=(-refresh,5,switch,refresh,true,'script',"Refresh any existing target directories")
-	argList+=(-overrideTarget,5,option,overrideTarget,,'script',"Override the default target location, full file spec to where the site root should be located. e.g. /mnt/dev7/web")
-	argList+=(-fullCopy,4,switch,fullCopy,,'script',"Do a full copy, including all log and request files")
-	argList+=(-lite,4,switch,lite,,'script',"Do a full copy without the archives and logs")
-	argList+=(-forUser,7,option,forUser,,'script',"Name the resulting site for the specified userid")
-	argList+=(-suffix,6,option,suffix,,'script',"Suffix text to be append to the resultant site name, e.g. -luc")
-	argList+=(-emailAddress,1,option,emailAddress,,'script',"The email address for CourseLeaf email notifications")
-	argList+=(-asSite,2,option,asSite,,script,'The name to give the new site)')
-	argList+=(-skipCat,6,switch,skipCat,,script,'Skip client CAT directories, i.e. web directories not in the skeleton)')
-	argList+=(-skipCim,6,switch,skipCim,,script,'Skip CIM and CIM instance files)')
-	argList+=(-skipClss,6,switch,skipClss,,script,'Skip CLASS instance files)')
-	argList+=(-skipWen,6,switch,skipClss,,script,'Skip CLASS instance files)')
-	argList+=(-skipAlso,6,option,skipAlso,,script,'Additional directories and or files to ignore, comma separated list)')
-	argList+=(-wizDebug,3,switch,startWizdebug,,script,'Automatically start a wizDebug session after the copy)')
-}
-function Goodbye-copyEnv {
-	SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
-	return 0
-}
+	function copyEnv-parseArgsStd {
+		# argList+=(argFlag,minLen,type,scriptVariable,extraToken/exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
+		argList+=(-manifest,1,switch,manifest,true,'script',"Create a CourseLeaf Manifest after copies")
+		argList+=(-noManifest,3,switch,manifest,manifest=false,'script',"Do not create a CourseLeaf Manifest after copies")
+		argList+=(-overlay,5,switch,overlay,true,'script',"Overlay/Replace any existing target directories")
+		argList+=(-refresh,5,switch,refresh,true,'script',"Refresh any existing target directories")
+		argList+=(-overrideTarget,5,option,overrideTarget,,'script',"Override the default target location, full file spec to where the site root should be located. e.g. /mnt/dev7/web")
+		argList+=(-fullCopy,4,switch,fullCopy,,'script',"Do a full copy, including all log and request files")
+		argList+=(-lite,4,switch,lite,,'script',"Do a full copy without the archives and logs")
+		argList+=(-forUser,7,option,forUser,,'script',"Name the resulting site for the specified userid")
+		argList+=(-suffix,6,option,suffix,,'script',"Suffix text to be append to the resultant site name, e.g. -luc")
+		argList+=(-emailAddress,1,option,emailAddress,,'script',"The email address for CourseLeaf email notifications")
+		argList+=(-asSite,2,option,asSite,,script,'The name to give the new site)')
+		argList+=(-skipCat,6,switch,skipCat,,script,'Skip client CAT directories, i.e. web directories not in the skeleton)')
+		argList+=(-skipCim,6,switch,skipCim,,script,'Skip CIM and CIM instance files)')
+		argList+=(-skipClss,6,switch,skipClss,,script,'Skip CLASS instance files)')
+		argList+=(-skipWen,6,switch,skipClss,,script,'Skip CLASS instance files)')
+		argList+=(-skipAlso,6,option,skipAlso,,script,'Additional directories and or files to ignore, comma separated list)')
+		argList+=(-wizDebug,3,switch,startWizdebug,,script,'Automatically start a wizDebug session after the copy)')
+	}
+	function copyEnv-Goodbye {
+		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
+		return 0
+	}
 
-function testMode-copyEnv  { # or testMode-local
-	[[ $hostName == 'mojave' ]] && client='worcester' || client='apus'
-	env='next'
-	srcDir="$HOME/testData/next"
-	srcEnv="next"
-	tgtDir="$HOME/testData/test"
-	tgtEnv="test"
-	return 0
-}
+	function copyEnv-testMode  { # or testMode-local
+		[[ $hostName == 'mojave' ]] && client='worcester' || client='apus'
+		env='next'
+		srcDir="$HOME/testData/next"
+		srcEnv="next"
+		tgtDir="$HOME/testData/test"
+		tgtEnv="test"
+		return 0
+	}
 
+	function copyEnv-Help  {
+		helpSet='client,src,tgt' # can also include any of {env,src,tgt,prod,cim,cat,clss}, 'script' and 'common' automatically addeed
+
+		[[ -z $* ]] && return 0
+		echo -e "This script can be used to refresh a CourseLeaf site from another one"
+		echo -e "\nThe actions performed are:"
+		bullet=1; echo -e "\t$bullet) Refreshes the target site from the source based on the options supplied by the user, if the target site already exists then the user is prompted to see if they want to refresh or overwrite"
+		(( bullet++ ))
+		echo -e "\nIf the target site is a 'dev' or 'pvt' site then the following modifications are done on the target site"
+
+		bullet=1; echo -e "\t$bullet) External authentication is turned off"
+		(( bullet++ )); echo -e "\t$bullet) Publishing is turned off"
+		(( bullet++ )); echo -e "\t$bullet) PDF Generation is turned off"
+		(( bullet++ )); echo -e "\t$bullet) A default 'leepfrog' admin account is created, a default user non-admin account is created with a name the same as the client code"
+		(( bullet++ )); echo -e "\t$bullet) The 'nexturl' tcfdata value is updates to point to the target instance"
+		(( bullet++ )); echo -e "\t$bullet) CourseLeaf emailing is overridden with a testaddder for '$userName'"
+		echo -e "\nTarget site data files potentially modified:"
+		echo -e "\t- All site files on the target site"
+		echo -e "\t If target is a dev or pvt site then specifically:"
+		echo -e "\t\t.../courseleaf.cfg"
+		echo -e "\t\t.../web/courseleaf/localsteps/defaults.tcf"
+		echo -e "\t\t.../web/admin/wfemail/index.tcf -- if new email"
+		echo -e "\t\t.../email/sendnow.atj -- if old email"
+		return 0
+	}
 
 #==================================================================================================
 # Declare local variables and constants
@@ -95,11 +120,6 @@ haveClss=false
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-helpSet='client,script,env'
-helpNotes+=("If only a single environment is specified (i.e. -t, -n, -c, ...) then the target environment will be set to 'pvt'")
-helpNotes+=("If target env is not 'pvt' or 'dev' then a full copy will be done and auth, publising and email will NOT be changed")
-helpNotes+=("The 'forUser' and 'suffix' options are mutually exclusive.")
-
 GetDefaultsData $myName
 ParseArgsStd
 
@@ -442,7 +462,7 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 			$DOIT sed -i s'_^logouturl:_//logouturl:_' $tgtDir/web/$progDir/$file
 		done
 
-	# Turn off PDF generationw
+	# Turn off PDF generation
 		Msg2 "Turn off PDF generation..."
 		$DOIT sed -i s'_^pdfeverypage:true$_//pdfeverypage:true_' $tgtDir/web/$progDir/localsteps/default.tcf
 

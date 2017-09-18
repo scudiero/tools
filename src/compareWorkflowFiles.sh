@@ -1,13 +1,13 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.38 # -- dscudiero -- 03/15/2017 @  9:59:22.54
+version=1.2.42 # -- dscudiero -- Thu 09/14/2017 @ 15:33:53.87
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
-imports="$imports GetCims"
-Import "$imports"
+includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue'
+includes="$includes GetCims"
+Import "$includes"
 originalArgStr="$*"
-scriptDescription="Compare workflow files"
+scriptDescription="Compare workflow related files between two environments"
 
 #==================================================================================================
 # Compare workflow files
@@ -59,13 +59,13 @@ Hello
 Init "getClient getSrcEnv getTgtEnv getDirs checkEnvs getCims $allCims noWarn"
 dump -1 requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles
 
-
 ## Verify continue
 unset verifyArgs
 verifyArgs+=("Client:$client")
 verifyArgs+=("Source Env:$(TitleCase $srcEnv) ($srcDir)")
 verifyArgs+=("Target Env:$(TitleCase $tgtEnv) ($tgtDir)")
 [[ $cimStr != '' ]] && verifyArgs+=("CIMs: $cimStr")
+verifyContinueDefault='Yes'
 VerifyContinue "You are comparing CIM workflow files for:"
 
 myData="Client: '$client', srcEnv: '$srcEnv', tgtEnv: '$tgtEnv'"
@@ -93,8 +93,8 @@ if [[ $cimStr != '' ]]; then
 	done
 fi
 
-Msg2 "\nComparing system files..."
-srcDir=$skeletonRoot/release
+Msg2 "\nComparing 'shared' files..."
+#srcDir=$skeletonRoot/release
 for file in  $(tr ',' ' ' <<< "$requiredGlobalFiles $optionalGlobalFiles"); do
 	srcFile=$srcDir/web${file}
 	tgtFile=$tgtDir/web${file}

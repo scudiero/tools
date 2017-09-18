@@ -1,13 +1,14 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.16" # -- dscudiero -- Wed 09/06/2017 @ 16:44:53.73
+# version="2.0.27" # -- dscudiero -- Fri 09/08/2017 @  9:51:11.61
 #===================================================================================================
 # Setup default colors functions and values
 #===================================================================================================
 # CopyrighFt 2017 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
+colorsLoaded=false
 function Colors {
 	unset colorRed colorBlue colorGreen colorCyan colorMagenta colorOrange colorGrey colorDefault
 	unset colorTerminate colorError colorWarn colorWarning
@@ -23,38 +24,49 @@ function Colors {
 		colorOrange='\e[33m'
 		colorGrey='\e[90m'
 		colorDefault='\e[0m'
-		#colorDefaultVal='\e[0;4;90m #0=normal, 4=bold,90=foreground
+
+		colorBold='\e[1m'
+		colorUnderline='\e[4m'
+
 		colorDefaultVal=$colorMagenta #0=normal, 4=bold,90=foreground
 		colorTerminate='\e[1;97;101m' #1=bold, 97=foreground, 41=background
 		colorFatalError="$colorTerminate"
-		#colorTerminate='\e[1;31m'
 
-		#backGroundColorRed='\e[41m'
-		#colorTerminate=${backGroundColorRed}${colorWhite}
 		colorError=$colorRed
 		colorWarn=$colorMagenta
 		colorKey=$colorGreen
-		#colorKey=$colorMagenta
 		colorWarning=$colorWarn
 		colorInfo=$colorGreen
 		colorNote=$colorGreen
 		colorVerbose=$colorGrey
 		colorMenu=$colorGreen
-	else
-		noNews=true
 	fi
 
-	function ColorE { local string="$*"; echo "${colorError}${string}${colorDefault}"; }
-	function ColorI { local string="$*"; echo "${colorInfo}${string}${colorDefault}"; }
-	function ColorT { local string="$*"; echo "${colorTerminate}${string}${colorDefault}"; }
-	function ColorK { local string="$*"; echo "${colorKey}${string}${colorDefault}"; }
+	# function ColorE { local string="$*"; echo "${colorError}${string}${colorDefault}"; }
+	# function ColorI { local string="$*"; echo "${colorInfo}${string}${colorDefault}"; }
+	# function ColorT { local string="$*"; echo "${colorTerminate}${string}${colorDefault}"; }
+	# function ColorK { local string="$*"; echo "${colorKey}${string}${colorDefault}"; }
+	colorsLoaded=true
 	return 0
 }
+[[ $colorsLoaded != true ]] && Colors
+function ColorE { local string="$*"; echo "${colorError}${string}${colorDefault}"; }
+function ColorI { local string="$*"; echo "${colorInfo}${string}${colorDefault}"; }
+function ColorT { local string="$*"; echo "${colorTerminate}${string}${colorDefault}"; }
+function ColorK { local string="$*"; echo "${colorKey}${string}${colorDefault}"; }
+function ColorV { local string="$*"; echo "${colorVerbose}${string}${colorDefault}"; }
+function ColorN { local string="$*"; echo "${colorNote}${string}${colorDefault}"; }
+function ColorU { local string="$*"; echo "${colorUnderline}${string}${colorDefault}"; }
+function ColorB { local string="$*"; echo "${colorBold}${string}${colorDefault}"; }
 export -f Colors
 export -f ColorE
 export -f ColorI
 export -f ColorT
 export -f ColorK
+export -f ColorV
+export -f ColorN
+export -f ColorU
+export -f ColorB
 
 #===================================================================================================
 ## Check-in log

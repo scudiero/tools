@@ -1,13 +1,15 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.37 # -- dscudiero -- Mon 06/19/2017 @  7:06:09.99
+version=1.2.43 # -- dscudiero -- Fri 09/15/2017 @  8:35:05.56
 #=======================================================================================================================
 TrapSigs 'on'
-includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye GetExcel'
-Import "$includes"
+
+myIncludes="GetExcel StringFunctions RunSql2 SetFileExpansion ProtectedCall"
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
-scriptDescription="Build the qsStatus table by parsing the workbook files (*.xlsm) found in: $qaTrackingWorkbooks"
+scriptDescription="Build the '$qaStatusTable' table by parsing the workbook files (*.xlsm) found in: $qaTrackingWorkbooks"
 
 #= Description +===================================================================================
 # Build the qsStatus table by parsing the workbook files (*.xlsm) found in: /steamboat/leepfrog/docs/QA
@@ -191,11 +193,11 @@ for var in $falseVars; do eval $var=false; done
 # Standard argument parsing and initialization
 #=======================================================================================================================
 helpSet='script,client,env'
-scriptHelpDesc="$scriptDescription"
 
 GetDefaultsData $myName
 ParseArgsStd
 Hello
+[[ $batchMode != true ]] && VerifyContinue "You are asking to re-generate the data warehouse '$qaStatusTable' table"
 
 myData="Client: '$client'"
 [[ $logInDb != false && $myLogRecordIdx != "" ]] && dbLog 'data' $myLogRecordIdx "$myData"

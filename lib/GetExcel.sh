@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.0.67" # -- dscudiero -- Thu 05/18/2017 @ 12:34:46.38
+# version="2.0.68" # -- dscudiero -- Fri 09/08/2017 @ 11:21:29.49
 #=======================================================================================================================
 # Retrieve data from a Excel xlsx spreadsheet
 # Usage: GetExcel <workBook> <workSheet>
@@ -11,33 +11,35 @@
 # All rights reserved
 #=======================================================================================================================
 function GetExcel {
-		local workBook="$1"; shift
-		local workSheet="$1"; shift
-		local delimiter=${1-|}
-		local tmpFile=$(MkTmpFile $FUNCNAME)
-		function GetExcelCleanup { SetFileExpansion 'on' ; rm -rf ${tmpFile}* >& /dev/null ; SetFileExpansion ; }
+	includes='StringFunctions Msg2 Goodbye Call'
+	Import "$includes"
+	local workBook="$1"; shift
+	local workSheet="$1"; shift
+	local delimiter=${1-|}
+	local tmpFile=$(MkTmpFile $FUNCNAME)
+	function GetExcelCleanup { SetFileExpansion 'on' ; rm -rf ${tmpFile}* >& /dev/null ; SetFileExpansion ; }
 
-		[[ ! -f $workBook ]] && Terminate "$FUNCNAME: Could not locate workbook file '$workBook'"
-		if [[ $(Contains "$workBook" ' ') == true ]]; then
-			cp -fp "$workBook" "$tmpFile.workbook"
-			workBook="$tmpFile.workbook"
-		fi
+	[[ ! -f $workBook ]] && Terminate "$FUNCNAME: Could not locate workbook file '$workBook'"
+	if [[ $(Contains "$workBook" ' ') == true ]]; then
+		cp -fp "$workBook" "$tmpFile.workbook"
+		workBook="$tmpFile.workbook"
+	fi
 
-		verboseLevelSave=$verboseLevel ; verboseLevel=0
-		Call 'getXlsx' 'utility' 'std' 'python:py' "$workBook" "$workSheet" "$delimiter" > $tmpFile 2>&1;
-		verboseLevel=$verboseLevelSave
-		local grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
-		[[ $grepStr == '' ]] && grepStr=$(ProtectedCall "grep '*Error*' $tmpFile")
-		if [[ $grepStr != '' || $(tail -n 1 $tmpFile) == '-1' ]]; then
-			Msg2 $E "Could not retrieve data from workbook, please see below"
-			tail -n 10 $tmpFile > $tmpFile.2
-			while read -r line; do echo -e "\t$line"; done < $tmpFile.2;
-			GetExcelCleanup
-			Msg2
-			Goodbye -1
-		fi
-		cat $tmpFile
+	verboseLevelSave=$verboseLevel ; verboseLevel=0
+	Call 'getXlsx' 'utility' 'std' 'python:py' "$workBook" "$workSheet" "$delimiter" > $tmpFile 2>&1;
+	verboseLevel=$verboseLevelSave
+	local grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
+	[[ $grepStr == '' ]] && grepStr=$(ProtectedCall "grep '*Error*' $tmpFile")
+	if [[ $grepStr != '' || $(tail -n 1 $tmpFile) == '-1' ]]; then
+		Msg2 $E "Could not retrieve data from workbook, please see below"
+		tail -n 10 $tmpFile > $tmpFile.2
+		while read -r line; do echo -e "\t$line"; done < $tmpFile.2;
 		GetExcelCleanup
+		Msg2
+		Goodbye -1
+	fi
+	cat $tmpFile
+	GetExcelCleanup
 
 	return 0
 } #GetExcel

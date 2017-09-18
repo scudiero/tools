@@ -1,13 +1,14 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.24 # -- dscudiero -- Wed 09/06/2017 @  8:10:48.92
+version=1.2.33 # -- dscudiero -- Thu 09/14/2017 @ 14:09:39.74
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
-imports="$imports GetOutputFile"
-Import "$imports"
+includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
+includes="$includes GetOutputFile ProtectedCall"
+Import "$includes"
+
 originalArgStr="$*"
-scriptDescription="Build workflow spreadsheet from workflow file"
+scriptDescription="Extracts workflow data in a format that facilitates pasteing into a MS Excel workbook"
 
 #==================================================================================================
 # Run hourly from cron
@@ -87,7 +88,7 @@ scriptDescription="Build workflow spreadsheet from workflow file"
 		local rtype value tmpStr
 		dump -2 -t ruleName line description
 
-		[[ $(Contains ",${ignoreList}," ",${ruleName},") == true ]] && return 0
+		[[ $(Contains ",${ignoreRules}," ",${ruleName},") == true ]] && return 0
 
 		if [[ $(Contains "$line" '|attr|') == true || $(Contains "$line" '|function|wfAttr|') == true ]]; then
 			#line = >Col|attr|college_prog.code|; <
@@ -151,11 +152,19 @@ else
 	[[ $workbookFile != '' ]] && outFile="$workbookFile" || outFile="$(GetOutputFile "$client" "$env" "$product")"
 fi
 
+unset ignoreRules ignoreSteps ignoreWorkflows
+ignoreRules="$(cut -d':' -f2- <<< $scriptData1)"
+ignoreSteps="$(cut -d':' -f2- <<< $scriptData2)"
+ignoreWorkflows="$(cut -d':' -f2- <<< $scriptData3)"
+modifiers="$(cut -d':' -f2- <<< $scriptData4)"
+
 unset verifyArgs
 verifyArgs+=("Client:$client")
 verifyArgs+=("Env:$(TitleCase $env) ($srcDir)")
 verifyArgs+=("CIMs:$cimStr")
-verifyArgs+=("Ignorelist:$ignoreList")
+verifyArgs+=("IgnoreRules:$ignoreRules")
+verifyArgs+=("IgnoreSteps:$ignoreSteps")
+verifyArgs+=("IgnoreWorkflows:$ignoreWorkflows")
 
 verifyArgs+=("Output File:$outFile")
 verifyContinueDefault='Yes'
@@ -179,151 +188,163 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 	Msg2 "<<< $(Upper "$cim") >>>" >> $outFile
 
 	## Read the workflow.cfg file for the cim
-	## Parse off the wfrules
-	unset substitutionVars wfrules wfrulesKeys substitutionVarsKeys esigsKeys wforders
-	declare -A wfrules ; declare -A esigs ; declare -A substitutionVars
-	Msg2 "^Parsing '$grepFile'"
-	[[ -f $tmpFile ]] && rm -f $tmpFile
-	\grep '^wfrules:\|^wforder:\|^esiglist:\|^voterules:' $grepFile >> $tmpFile
-	unset lines; while read line; do lines+=("$line"); done < $tmpFile; [[ -f $tmpFile ]] && rm -f $tmpFile
-	for line in "${lines[@]}"; do
-		dump -1 -n line
-		unset ruleType ruleName description
-		line="$(tr -d '\011\012\015' <<< $line)"
-		ruleType="$(cut -d':' -f1 <<< $line)"
-		line="$(cut -d':' -f2- <<< $line)"
-		ruleName="$(cut -d'|' -f1 <<< $line)"
-		description="${line##*//}"
-		line="${line%%//*}"
-		dump -1 -t ruleType ruleName description
+		## Get any special modifiers
+			specialModifiers=$(ProtectedCall grep 'wfSpecialModifiers:' $grepFile)
+			[[ -n $specialModifiers ]] && specialModifiers="${specialModifiers##*:}"
 
-		if [[ $ruleType == 'esiglist' ]]; then
-			ParseEsig "$ruleName" "$line" "$description"
-		elif [[ $ruleType == 'wfrules' ]]; then
-			ParseWfrule "$ruleName" "$line" "$description"
-		elif [[ $ruleType == 'wforder' ]]; then
-			wforders+=("$(cut -d':' -f2 <<< "$line")")
-		elif [[ $ruleType == 'voterules' ]]; then
-			voterules+=("$(cut -d':' -f2 <<< "$line")")
-		else
-			:
-		fi
-	done
+		## Parse off the wfrules
+		unset substitutionVars wfrules wfrulesKeys substitutionVarsKeys esigsKeys wforders
+		declare -A wfrules ; declare -A esigs ; declare -A substitutionVars
+		Msg2 "^Parsing '$grepFile'"
+		[[ -f $tmpFile ]] && rm -f $tmpFile
+		\grep '^wfrules:\|^wforder:\|^esiglist:\|^voterules:' $grepFile >> $tmpFile
+		unset lines; while read line; do lines+=("$line"); done < $tmpFile; [[ -f $tmpFile ]] && rm -f $tmpFile
+		for line in "${lines[@]}"; do
+			dump -1 -n line
+			unset ruleType ruleName description
+			line="$(tr -d '\011\012\015' <<< $line)"
+			ruleType="$(cut -d':' -f1 <<< $line)"
+			line="$(cut -d':' -f2- <<< $line)"
+			ruleName="$(cut -d'|' -f1 <<< $line)"
+			description="${line##*//}"
+			line="${line%%//*}"
+			dump -1 -t ruleType ruleName description
 
-	# ## Sort the hask keys arrays
-	# 	[[ -f $tmpFile ]] && rm $tmpFile
-	# 	for key in "${substitutionVarsKeys[@]}"; do echo "$key" >> $tmpFile; done ; sort $tmpFile -o $tmpFile
-	# 	unset substitutionVarsKeys; while read line; do substitutionVarsKeys+=("$line"); done < $tmpFile
-	# 	[[ -f $tmpFile ]] && rm $tmpFile
-	#
-	# 	for key in "${wfrulesKeys[@]}"; do echo "$key" >> $tmpFile; done ; sort $tmpFile -o $tmpFile
-	# 	unset wfrulesKeys; while read line; do wfrulesKeys+=("$line"); done < $tmpFile
-	# 	[[ -f $tmpFile ]] && rm $tmpFile
+			if [[ $ruleType == 'esiglist' ]]; then
+				ParseEsig "$ruleName" "$line" "$description"
+			elif [[ $ruleType == 'wfrules' ]]; then
+				ParseWfrule "$ruleName" "$line" "$description"
+			elif [[ $ruleType == 'wforder' ]]; then
+				wforders+=("$(cut -d':' -f2 <<< "$line")")
+			elif [[ $ruleType == 'voterules' ]]; then
+				voterules+=("$(cut -d':' -f2 <<< "$line")")
+			else
+				:
+			fi
+		done
 
-	## Debug info
-		if [[ $verboseLevel -ge 1 || $informationModeOnly == true ]]; then
-			Msg2 "^substitutionVars:"; for i in "${substitutionVarsKeys[@]}"; do echo -e "\t[$i] = >${substitutionVars[$i]}<"; done;
-			Msg2 "^esigs:"; for i in "${esigsKeys[@]}"; do echo -e "\t[$i] = >${esigs[$i]}<"; done;
-			Msg2 "^wfrules:"; for i in "${wfrulesKeys[@]}"; do echo -e "\t[$i] = >${wfrules[$i]}<"; done;
-			Msg2 "^wforders:"; for ((jj=0; jj<${#wforders[@]}; jj++)); do echo -e "\t[$jj] = >${wforders[$jj]}<"; done;
-			Msg2 "^voterules:"; for ((jj=0; jj<${#voterules[@]}; jj++)); do echo -e "\t[$jj] = >${voterules[$jj]}<"; done;
-		fi
+		# ## Sort the hask keys arrays
+		# 	[[ -f $tmpFile ]] && rm $tmpFile
+		# 	for key in "${substitutionVarsKeys[@]}"; do echo "$key" >> $tmpFile; done ; sort $tmpFile -o $tmpFile
+		# 	unset substitutionVarsKeys; while read line; do substitutionVarsKeys+=("$line"); done < $tmpFile
+		# 	[[ -f $tmpFile ]] && rm $tmpFile
+		#
+		# 	for key in "${wfrulesKeys[@]}"; do echo "$key" >> $tmpFile; done ; sort $tmpFile -o $tmpFile
+		# 	unset wfrulesKeys; while read line; do wfrulesKeys+=("$line"); done < $tmpFile
+		# 	[[ -f $tmpFile ]] && rm $tmpFile
 
-	## Write out 'Substitution Vars' data
-		if [[ ${#substitutionVarsKeys[@]} -gt 0 ]]; then
-			cntr=1
-			Msg2 "\n#\tVariable\tDescription\t\tImplementation / Comment" >> $outFile
-			for i in "${substitutionVarsKeys[@]}"; do
-				echo -e "$cntr\t$i\t${substitutionVars[$i]}" >> $outFile
-				(( cntr += 1 ))
-			done
-		fi
+		## Debug info
+			if [[ $verboseLevel -ge 1 || $informationModeOnly == true ]]; then
+				Msg2 "^substitutionVars:"; for i in "${substitutionVarsKeys[@]}"; do echo -e "\t[$i] = >${substitutionVars[$i]}<"; done;
+				Msg2 "^esigs:"; for i in "${esigsKeys[@]}"; do echo -e "\t[$i] = >${esigs[$i]}<"; done;
+				Msg2 "^wfrules:"; for i in "${wfrulesKeys[@]}"; do echo -e "\t[$i] = >${wfrules[$i]}<"; done;
+				Msg2 "^wforders:"; for ((jj=0; jj<${#wforders[@]}; jj++)); do echo -e "\t[$jj] = >${wforders[$jj]}<"; done;
+				Msg2 "^voterules:"; for ((jj=0; jj<${#voterules[@]}; jj++)); do echo -e "\t[$jj] = >${voterules[$jj]}<"; done;
+			fi
 
-	## Write out esigs data
-		if [[ ${#esigsKeys[@]} -gt 0 ]]; then
-			cntr=1
-			Msg2 "\n#\tStepPattern\tDescription\t\tImplementation / Comment" >> $outFile
-			for i in "${esigsKeys[@]}"; do
-				echo -e "$cntr\t$i\t${esigs[$i]}" >> $outFile
-				(( cntr += 1 ))
-			done
-			Msg2 "^^Found ${#esigsKeys[@]} Esig rules"
-		fi
+		## Write out 'Substitution Vars' data
+			if [[ ${#substitutionVarsKeys[@]} -gt 0 ]]; then
+				cntr=1
+				Msg2 "\n#\tVariable\tDescription\t\tImplementation / Comment" >> $outFile
+				for i in "${substitutionVarsKeys[@]}"; do
+					echo -e "$cntr\t$i\t${substitutionVars[$i]}" >> $outFile
+					(( cntr += 1 ))
+				done
+			fi
 
-	## Write out 'Conditionals' data
-		if [[ ${#wfrulesKeys[@]} -gt 0 ]]; then
-			cntr=1
-			Msg2 "\n#\tCondition\tDescription\t\tImplementation / Comment" >> $outFile
-			for i in "${wfrulesKeys[@]}"; do
-				echo -e "$cntr\t$i\t${wfrules[$i]}" >> $outFile
-				(( cntr += 1 ))
-			done
-			Msg2 "^^Found ${#wfrulesKeys[@]} Conditional rules"
-		fi
+		## Write out esigs data
+			if [[ ${#esigsKeys[@]} -gt 0 ]]; then
+				cntr=1
+				Msg2 "\n#\tStepPattern\tDescription\t\tImplementation / Comment" >> $outFile
+				for i in "${esigsKeys[@]}"; do
+					echo -e "$cntr\t$i\t${esigs[$i]}" >> $outFile
+					(( cntr += 1 ))
+				done
+				Msg2 "^^Found ${#esigsKeys[@]} Esig rules"
+			fi
 
-	## Write out 'wforder' data
-		if [[ ${#wforders[@]} -gt 0 ]]; then
-			Msg2 "\n#\tWorkflow\tComment" >> $outFile
-			for ((i=0; i<${#wforders[@]}; i++)); do
-				echo -e "$i\t${wforders[$i]}" >> $outFile
-			done
-			Msg2 "^^Found ${#wforders[@]} Workflow order rules"
-		fi
+		## Write out 'Conditionals' data
+			if [[ ${#wfrulesKeys[@]} -gt 0 ]]; then
+				cntr=1
+				Msg2 "\n#\tCondition\tDescription\t\tImplementation / Comment" >> $outFile
+				for i in "${wfrulesKeys[@]}"; do
+					echo -e "$cntr\t$i\t${wfrules[$i]}" >> $outFile
+					(( cntr += 1 ))
+				done
+				Msg2 "^^Found ${#wfrulesKeys[@]} Conditional rules"
+			fi
 
-	## Write out 'voterules' data
-		if [[ ${#voterules[@]} -gt 0 ]]; then
-			Msg2 "\n#\Vote Rule\t\t\tComments / Explanation" >> $outFile
-			for ((i=0; i<${#voterules[@]}; i++)); do
-				echo -e "$i\t${voterules[$i]}" >> $outFile
-			done
-			Msg2 "^^Found ${#voterules[@]} Vote rules"
-		fi
+		## Write out 'wforder' data
+			if [[ ${#wforders[@]} -gt 0 ]]; then
+				Msg2 "\n#\tWorkflow\tComment" >> $outFile
+				for ((i=0; i<${#wforders[@]}; i++)); do
+					echo -e "$i\t${wforders[$i]}" >> $outFile
+				done
+				Msg2 "^^Found ${#wforders[@]} Workflow order rules"
+			fi
+
+		## Write out 'voterules' data
+			if [[ ${#voterules[@]} -gt 0 ]]; then
+				Msg2 "\n#\Vote Rule\t\t\tComments / Explanation" >> $outFile
+				for ((i=0; i<${#voterules[@]}; i++)); do
+					echo -e "$i\t${voterules[$i]}" >> $outFile
+				done
+				Msg2 "^^Found ${#voterules[@]} Vote rules"
+			fi
 
 	## Read the workflow.tcf file for the cim
-	## Parse off the conditionals from the localsteps record
 		grepFile="$srcDir/web/$cim/workflow.tcf"
 		[[ ! -r $grepFile ]] && Msg2 E "Could not read '$grepFile', skipping $cim" && continue
 		Msg2 "^Parsing '$grepFile'"
-		localsteps=$(ProtectedCall grep 'localsteps:' $grepFile)
-		[[ -z $localsteps ]] && Msg2 E "Could not retrieve 'localsteps' record from $grepFile', skipping $cim" && continue
-		tokenStr=$(echo $localsteps | cut -d'|' -f4)
-		tokenStr=$(echo $tokenStr | cut -d'=' -f2)
-		tokenStr=$(echo $tokenStr | cut -d';' -f1)
-		unset tokens
-		ifs=$IFS; IFS=','; read -r -a tokens <<< "$tokenStr"; IFS=$ifs
 
-		declare -A modifiersRef
-		declare -A conditionalsRef
-		## Write out 'debug' workflow prefox
-			Msg2 "\nworkflow:<<< LEEPFROG TESTING >>>\t\t\t\t${myName} - $(date)" >> $outFile
-			Msg2 "#\tWorkflow Step\tStep Conditional(s)\tModifier(s)\tComments / Explanation" >> $outFile
-			Msg2 "^START" >> $outFile
-			Msg2 "^College 'Col'" >> $outFile
-			Msg2 "^Department 'Dept'" >> $outFile
-			Msg2 "^Subject 'Subj'" >> $outFile
+		## Parse off the conditionals from the localsteps record
+			localsteps=$(ProtectedCall grep 'localsteps:' $grepFile)
+			[[ -z $localsteps ]] && Msg2 E "Could not retrieve 'localsteps' record from $grepFile', skipping $cim" && continue
+			tokenStr=$(echo $localsteps | cut -d'|' -f4)
+			tokenStr=$(echo $tokenStr | cut -d'=' -f2)
+			tokenStr=$(echo $tokenStr | cut -d';' -f1)
+			unset tokens
+			ifs=$IFS; IFS=','; read -r -a tokens <<< "$tokenStr"; IFS=$ifs
 
-			## Parse out conditionals and modifiers from the localsteps string
-			for str in "${tokens[@]}"; do
-				[[ $str == 'optional' || $str == 'fyi' || $str  == 'fyiall' ]] && continue
-				str=$(echo $str | cut -d'[' -f1)
-				str2="[$(Upper "$(echo $str | cut -d'[' -f2)")]"
-				[[ $str == 'fyi' || $str == 'fyiall' || $str == 'optional' || $str == '***optional***' ]] && modifiersRef["$str"]=true || conditionalsRef["$str"]=true
-				## Write out 'debug' workflow record
-					Msg2 "^$str2\t$str" >> $outFile
-			done
-			if [[ $verboseLevel -ge 1 ]]; then Msg2 "^modifiersRef:"; for i in "${!modifiersRef[@]}"; do printf "\t\t[$i] = >${modifiersRef[$i]}<\n"; done; fi
-			if [[ $verboseLevel -ge 1 ]]; then Msg2 "^conditionalsRef:"; for i in "${!conditionalsRef[@]}"; do printf "\t\t[$i] = >${conditionalsRef[$i]}<\n"; done; fi
+			declare -A modifiersRef
+			declare -A conditionalsRef
+			## Write out a standard 'debug' workflow prefox
+				Msg2 "\nworkflow:<<< LEEPFROG TESTING >>>\t\t\t\t${myName} - $(date)" >> $outFile
+				Msg2 "#\tWorkflow Step\tStep Conditional(s)\tModifier(s)\tComments / Explanation" >> $outFile
+				Msg2 "^START" >> $outFile
+				Msg2 "^College 'Col'" >> $outFile
+				Msg2 "^Department 'Dept'" >> $outFile
+				Msg2 "^Subject 'Subj'" >> $outFile
 
-			## Write out 'debug' workflow suffix
-			Msg2 "^END" >> $outFile
+				## Parse out conditionals and modifiers from the localsteps string
+				for token in "${tokens[@]}"; do
+					keyword=${token%%[*}
+					[[ $(Contains ",$(Upper "${modifiers},${specialModifiers}")," ",$Upper($keyword),") == true ]] && continue
+					keywordDef=${token##*[}
+					keywordDef="$(Upper "[${keywordDef##*[}")"
 
+					if [[ $(Contains ",$(Upper "${modifiers},${specialModifiers},''***optional***'")," ",$Upper($keyword),") == true ]]; then
+						modifiersRef["$keyword"]=true
+					else
+						conditionalsRef["$keyword"]=true
+					fi
+					## Write out 'debug' workflow record
+					Msg2 "^$keywordDef\t$keyword" >> $outFile
+
+				done
+				if [[ $verboseLevel -ge 1 ]]; then Msg2 "^modifiersRef:"; for i in "${!modifiersRef[@]}"; do printf "\t\t[$i] = >${modifiersRef[$i]}<\n"; done; fi
+				if [[ $verboseLevel -ge 1 ]]; then Msg2 "^conditionalsRef:"; for i in "${!conditionalsRef[@]}"; do printf "\t\t[$i] = >${conditionalsRef[$i]}<\n"; done; fi
+
+				## Write out 'debug' workflow suffix
+				Msg2 "^END" >> $outFile
 
 	## Read the workflow.tcf file for the workflows
 		ProtectedCall grep '^workflow:' $grepFile > $tmpFile
 		while read -r line; do
 			dump -1 -n -t line
+			[[ ${line:0:23} == 'workflow:standard|START' ]] && continue
 			workflow=$(echo $line | cut -d'|' -f1)
-			[[ $workflow == 'workflow:<<< LEEPFROG TESTING >>>' ]] && continue
+			[[ $(Contains ",${ignoreWorkflows}," ",${workflow##*:},") == true ]] && continue
 			Msg2 "^^Parsing '$workflow'"
 			Msg2 "\n$workflow\t\t\t\t${myName} - $(date)" >> $outFile
 			echo -e "#\tWorkflow Step\tStep Conditional(s)\tModifier(s)\tComments / Explanation" >> $outFile
@@ -342,7 +363,7 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 					fi
 				done
 				step=$(Trim "$step");
-				[[ $step == 'TODO' ]] && continue
+				[[ $(Contains ",${ignoreSteps}," ",${step},") == true ]] && continue
 				conditionals=$(Trim "$conditionals");
 				modifiers=$(sed s/'optional'/'(If Exists)'/g <<< $modifiers);
 				modifiers=$(echo $modifiers | tr -d '*');

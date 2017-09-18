@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.17" # -- dscudiero -- Thu 04/13/2017 @ 11:43:41.89
+# version="2.0.18" # -- dscudiero -- Thu 09/14/2017 @ 15:27:55.65
 #===================================================================================================
 # Get CIMs
 #===================================================================================================
@@ -8,7 +8,9 @@
 # All rights reserved
 #===================================================================================================
 function GetCims {
-	Msg2 $V3 "*** $FUNCNAME -- Starting ***"
+	includes="Msg2 ProtectedCall"
+	Import "$includes"
+
 	local siteDir=$1 ; shift || true
 	local verb prefix
 
@@ -54,8 +56,6 @@ function GetCims {
 	fi
 	#[[ $products == '' ]] && products='cim' || products="$products,cim"
 	[[ $verbose == true && $verboseLevel -ge 2 ]] && dump cimStr
-
-	Msg2 $V3 "*** $FUNCNAME -- Completed ***"
 	return 0
 } #GetCims
 export -f GetCims
