@@ -1,12 +1,13 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.8 # -- dscudiero -- Fri 09/15/2017 @ 10:17:20.85
+version=1.22.9 # -- dscudiero -- Tue 09/19/2017 @  7:04:18.63
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
 TrapSigs 'on'
-Import FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql2 Msg2 Call RunCourseLeafCgi GetCourseleafPgm Semaphore
+myIncludes="Call RunCourseLeafCgi GetCourseleafPgm Semaphore FindExecutable ProtectedCall SetFileExpansion "
+Import "$standardIncludes $myIncludes"
 originalArgStr="$*";
 
 #=======================================================================================================================
@@ -462,3 +463,4 @@ return 0
 ## 08-30-2017 @ 12.45.12 - (1.22.5)    - dscudiero - move cleanDev to the en
 ## 09-06-2017 @ 07.20.12 - (1.22.6)    - dscudiero - add -fix to call to checkCgiPermissions
 ## 09-07-2017 @ 07.42.09 - (1.22.7)    - dscudiero - remove tablename from the buildsiteinfotable call
+## 09-19-2017 @ 07.04.32 - (1.22.9)    - dscudiero - General syncing of dev to prod
