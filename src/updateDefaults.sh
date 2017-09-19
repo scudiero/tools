@@ -1,10 +1,10 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.22 # -- dscudiero -- 01/12/2017 @ 13:17:10.68
+version=2.0.23 # -- dscudiero -- Tue 09/19/2017 @  6:56:05.69
 #==================================================================================================
 TrapSigs 'on'
-includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
-Import "$includes"
+myIncludes=""
+Import "$standardIncludes $myIncludes"
 originalArgStr="$*"
 scriptDescription="Sync warehouse defaults table"
 
@@ -115,3 +115,4 @@ Goodbye 0;
 ## Thu Oct  6 16:59:41 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Fri Oct  7 08:01:02 CDT 2016 - dscudiero - Take out the dbAcc switching logic, moved to framework RunSql
 ## Thu Jan  5 14:50:53 CST 2017 - dscudiero - Fix problem setting the shares ignore list
+## 09-19-2017 @ 06.56.27 - (2.0.23)    - dscudiero - redo imports
