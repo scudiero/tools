@@ -1,12 +1,11 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.12.19 # -- dscudiero -- Fri 09/15/2017 @ 11:41:57.42
+version=3.12.20 # -- dscudiero -- Tue 09/19/2017 @ 10:39:20.79
 #=======================================================================================================================
 TrapSigs 'on'
-includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
-includes="$includes Colors PushPop SetFileExpansion Call SelectMenuNew ProtectedCall"
-Import "$includes"
+myIncludes="Colors PushPop SetFileExpansion Call SelectMenuNew ProtectedCall Pause"
+Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="Script dispatcher"
@@ -502,3 +501,4 @@ Goodbye 0
 ## 06-12-2017 @ 11.29.13 - (3.12.5)    - dscudiero - Remove debug stateement
 ## 06-12-2017 @ 11.30.57 - (3.12.6)    - dscudiero - tweak messaging
 ## 09-13-2017 @ 11.30.02 - (3.12.11)   - dscudiero - Update to just pull the scripts that have showinscripts=Yes
+## 09-19-2017 @ 10.39.37 - (3.12.20)   - dscudiero - Add Pause to the includes list
