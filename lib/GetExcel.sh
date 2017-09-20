@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.0.68" # -- dscudiero -- Fri 09/08/2017 @ 11:21:29.49
+# version="2.0.69" # -- dscudiero -- Wed 09/20/2017 @ 12:09:37.41
 #=======================================================================================================================
 # Retrieve data from a Excel xlsx spreadsheet
 # Usage: GetExcel <workBook> <workSheet>
@@ -11,7 +11,7 @@
 # All rights reserved
 #=======================================================================================================================
 function GetExcel {
-	includes='StringFunctions Msg2 Goodbye Call'
+	includes='StringFunctions Msg2 Goodbye Call ProtectedCall'
 	Import "$includes"
 	local workBook="$1"; shift
 	local workSheet="$1"; shift
@@ -56,3 +56,4 @@ function GetExcel {
 ## 05-17-2017 @ 12.26.49 - ("2.0.64")  - dscudiero - Turn off messages when running the python procedure
 ## 05-18-2017 @ 12.13.01 - ("2.0.66")  - dscudiero - General syncing of dev to prod
 ## 05-18-2017 @ 12.35.13 - ("2.0.67")  - dscudiero - Remove the -vv from the call to getXlsx.py
+## 09-20-2017 @ 12.09.52 - ("2.0.69")  - dscudiero - Add protectedcall to includes list
