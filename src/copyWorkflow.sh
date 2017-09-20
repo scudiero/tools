@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.22 # -- dscudiero -- Thu 09/14/2017 @ 12:20:54.09
+version=2.10.25 # -- dscudiero -- Wed 09/20/2017 @ 15:00:32.69
 #====================================================================================================
 TrapSigs 'on'
 includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye'
@@ -362,10 +362,14 @@ Hello
 	[[ -r "$srcDir/web/courseleaf/cim/clver.txt" ]] && srcCimVer=$(cat "$srcDir/web/courseleaf/cim/clver.txt")
 	[[ -r "$tgtDir/web/courseleaf/clver.txt" ]] && tgtClVer=$(cat "$tgtDir/web/courseleaf/clver.txt")
 	[[ -r "$tgtDir/web/courseleaf/cim/clver.txt" ]] && tgtCimVer=$(cat "$tgtDir/web/courseleaf/cim/clver.txt")
-	[[ $srcClVer != $tgtClVer ]] && [[ $tgtEnv == 'next' ]] && \
-		Terminate "CourseLeaf version for source ($srcClVer) not the same as target ($tgtClVer)"
-	[[ $srcCimVer != $tgtCimVer ]] && [[ $tgtEnv == 'next' ]] && \
-		Terminate "CIM version for source ($srcCimVer) not the same as target ($tgtCimVer)"
+
+	if [[ $srcClVer != $tgtClVer || $srcCimVer != $tgtCimVer ]] && [[ $tgtEnv == 'next' ]]; then
+		verify=true;
+		[[ $srcClVer != $tgtClVer ]] && Warning "CourseLeaf version for source ($srcClVer) not the same as target ($tgtClVer)"
+		[[ $srcCimVer != $tgtCimVer ]] && [[ $tgtEnv == 'next' ]] && Warning "CIM version for source ($srcCimVer) not the same as target ($tgtCimVer)"
+		unset ans; Prompt ans "Do you wish to continue" "Yes No" "No"; ans="$(Lower ${ans:0:1})"
+		[[ $ans != 'y' ]] && Terminate "Stopping"
+	fi
 
 ## Verify continue
 	unset verifyArgs
@@ -613,3 +617,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 09-01-2017 @ 13.44.38 - (2.10.3)    - dscudiero - run the previously named local function if found
 ## 09-01-2017 @ 14.12.22 - (2.10.4)    - dscudiero - put
 ## 09-05-2017 @ 08.56.49 - (2.10.5)    - dscudiero - Tweaked format of warning message
+## 09-20-2017 @ 15.31.04 - (2.10.25)   - dscudiero - Updated how it handles the situation where cl or cim versions are different and copying to next
