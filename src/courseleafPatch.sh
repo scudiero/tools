@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.4.16 # -- dscudiero -- Thu 09/14/2017 @ 12:12:50.48
+version=5.4.17 # -- dscudiero -- Wed 09/20/2017 @ 12:07:54.98
 #=======================================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
@@ -1509,28 +1509,28 @@ Msg2 "\nCross product checks..."
 			rebuildConsole=true
 			filesEdited+=("$editFile")
 		fi
-		# fromStr='^navlinks:CAT|Refresh System|refreshsystem'
-		# toStr='// navlinks:CAT|Refresh System|refreshsystem'
-		# grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
-		# if [[ -n $grepStr ]]; then
-		# 	sed -i s"/^$fromStr/$toStr/" $editFile
-		# 	updateFile="/$courseleafProgDir/index.tcf"
-		# 	changeLogRecs+=("$updateFile updated to change title")
-		# 	Msg2 "^Updated '$updateFile' to remove 'Refresh System'"
-		# 	rebuildConsole=true
-		# 	filesEdited+=("$editFile")
-		# fi
-		# fromStr='^localsteps:links|links|links'
-		# toStr='// localsteps:links|links|links'
-		# grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
-		# if [[ -n $grepStr ]]; then
-		# 	sed -i s"/^$fromStr/$toStr/" $editFile
-		# 	updateFile="/$courseleafProgDir/index.tcf"
-		# 	changeLogRecs+=("$updateFile updated to change title")
-		# 	Msg2 "^Updated '$updateFile' to remove 'localsteps:links|links|links"
-		# 	rebuildConsole=true
-		# 	filesEdited+=("$editFile")
-		# fi
+		fromStr='^navlinks:CAT|Refresh System|refreshsystem'
+		toStr='// navlinks:CAT|Refresh System|refreshsystem'
+		grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
+		if [[ -n $grepStr ]]; then
+			sed -i s"/^$fromStr/$toStr/" $editFile
+			updateFile="/$courseleafProgDir/index.tcf"
+			changeLogRecs+=("$updateFile updated to change title")
+			Msg2 "^Updated '$updateFile' to remove 'Refresh System'"
+			rebuildConsole=true
+			filesEdited+=("$editFile")
+		fi
+		fromStr='^localsteps:links|links|links'
+		toStr='// localsteps:links|links|links'
+		grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
+		if [[ -n $grepStr ]]; then
+			sed -i s"/^$fromStr/$toStr/" $editFile
+			updateFile="/$courseleafProgDir/index.tcf"
+			changeLogRecs+=("$updateFile updated to change title")
+			Msg2 "^Updated '$updateFile' to remove 'localsteps:links|links|links"
+			rebuildConsole=true
+			filesEdited+=("$editFile")
+		fi
 	else
 		echo
 		Warning 0 2 "Could not locate '$editFile', please check the target site"
@@ -1771,3 +1771,4 @@ Goodbye 0 "$text1" "$text2"
 ## 08-07-2017 @ 17.00.43 - (5.4.2)     - dscudiero - remove debug code
 ## 09-05-2017 @ 08.06.54 - (5.4.4)     - dscudiero - Added --ignore-times to the rsync options
 ## 09-06-2017 @ 13.24.30 - (5.4.5)     - dscudiero - Remove ignore-times directive on rsync
+## 09-20-2017 @ 15.31.32 - (5.4.17)    - dscudiero - Released latest change to edit the console
