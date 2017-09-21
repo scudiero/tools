@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.15" # -- dscudiero -- Wed 05/24/2017 @ 13:30:04.97
+# version="2.0.30" # -- dscudiero -- Thu 09/21/2017 @  9:29:01.72
 #===================================================================================================
 # Write a 'standard' format courseleaf changelog.txt
 # args: "logFileName" ${lineArray[@]}
@@ -43,6 +43,11 @@ function WriteChangelogEntry {
 		echo -e "\tClient: $client, Environment: $env" | tee -a "$usersActivityLog" >> "$usersClientLogFile"
 		printf '\t%s\n' "${!ref}" | tee -a "$logFile" | tee -a "$usersActivityLog" >> "$usersClientLogFile"
 
+	## Check if the user has a local logit script in $HOME/bin, if found the call it.
+		logText=$(sed "s_'_\\\'_"g <<< "$logger: ${!ref[0]}")
+		logText=$(sed 's_\"_\\\"_'g <<< "$logText")
+		[[ -e $HOME/bin/logit ]] && $HOME/bin/logit "${client:--}" "${env:--}" "$logText"
+
 	return 0
 }
 export -f WriteChangelogEntry
@@ -57,3 +62,4 @@ export -f WriteChangelogEntry
 ## 05-09-2017 @ 11.55.51 - ("2.0.12")  - dscudiero - Refactored how logging is done, added an user activity log file
 ## 05-15-2017 @ 14.24.30 - ("2.0.14")  - dscudiero - log client and environment into the activity log
 ## 05-24-2017 @ 13.30.23 - ("2.0.15")  - dscudiero - Strip off the -test for test environments
+## 09-21-2017 @ 09.33.33 - ("2.0.30")  - dscudiero - Add call to users local logit script if it exists
