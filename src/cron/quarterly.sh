@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.43 # -- dscudiero -- Thu 09/21/2017 @  9:48:35.17
+version=2.1.44 # -- dscudiero -- Thu 09/21/2017 @ 10:14:48.14
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -78,7 +78,14 @@ function RollupProcessLog {
 		 	resultString=$result; resultString=$(tr "|" "\t" <<< $resultString)
 		 	echo "$resultString" >> $outFile
 		done
-		ProtectedCall "tar -cvzf \"$(date '+%m-%d-%y').processLog.tar\" $outFile --remove-files > /dev/null 2>&1"
+		case "$(date +"%m")" in
+			01|02|03) quarter=1 ;;
+			04|05|06) quarter=2 ;;
+			07|08|09) quarter=3 ;;
+			10|11|12) quarter=4 ;;
+		esac
+		quarter="${quarter}Q$(date +"%y")"
+		ProtectedCall "tar -cvzf \"$quarter.processLog.tar\" $outFile --remove-files > /dev/null 2>&1"
 	fi
 	sqlStmt="truncate $processLogTable"
 	RunSql2 $sqlStmt
@@ -125,3 +132,4 @@ return 0
 ## 07-17-2017 @ 08.08.58 - (2.1.38)    - dscudiero - move escrowClient functionality into script
 ## 07-17-2017 @ 14.00.52 - (2.1.42)    - dscudiero - Many updates
 ## 09-21-2017 @ 10.02.41 - (2.1.43)    - dscudiero - Add rollup of the processlog
+## 09-21-2017 @ 10.15.16 - (2.1.44)    - dscudiero - Change the name of the tar file to reflect the quarter number
