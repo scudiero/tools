@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.42 # -- dscudiero -- Mon 07/17/2017 @ 14:00:40.14
+version=2.1.43 # -- dscudiero -- Thu 09/21/2017 @  9:48:35.17
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -58,7 +58,33 @@ function EscrowSite {
 
 	[[ -f "$tmpFile" ]] && rm "$tmpFile"
 	return 0
-}
+} #EscrowSite
+
+function RollupProcessLog {
+	## Roll up the weeks processlog db table
+	Msg2 "\n*** Processlog rollup -- Starting ***"
+	cd $TOOLSPATH/Logs
+	outFile="$(date '+%m-%d-%y').processLog.xls"
+	## Get the column names
+	sqlStmt="select column_name from information_schema.columns where table_schema = \"$warehouseDb\" and table_name = \"$processLogTable\"";
+	RunSql2 $sqlStmt
+	resultString="${resultSet[@]}" ; resultString=$(tr " " "\t" <<< $resultString)
+	echo "$resultString" >> $outFile
+	SetFileExpansion 'off'
+	sqlStmt="select * from $processLogTable"
+	RunSql2 $sqlStmt
+	if [[ ${#resultSet[@]} -gt 0 ]]; then
+		for result in "${resultSet[@]}"; do
+		 	resultString=$result; resultString=$(tr "|" "\t" <<< $resultString)
+		 	echo "$resultString" >> $outFile
+		done
+		ProtectedCall "tar -cvzf \"$(date '+%m-%d-%y').processLog.tar\" $outFile --remove-files > /dev/null 2>&1"
+	fi
+	sqlStmt="truncate $processLogTable"
+	RunSql2 $sqlStmt
+	SetFileExpansion
+	Msg2 "*** Processlog rollup -- Completed ***"
+} #RollupProcessLog
 
 #=======================================================================================================================
 # Standard argument parsing and initialization
@@ -74,6 +100,7 @@ sendMail=true
 case "$hostName" in
 	mojave)
 			[[ -n $mojaveEscrowClients ]] && EscrowSite "$mojaveEscrowClients"
+			RollupProcessLog
 			;;
 	build5)
 			[[ -n $build5EscrowClients ]] && EscrowSite "$build5EscrowClients"
@@ -97,3 +124,4 @@ return 0
 ## 07-17-2017 @ 07.53.51 - (2.1.34)    - dscudiero - uncomment call to escrowClient
 ## 07-17-2017 @ 08.08.58 - (2.1.38)    - dscudiero - move escrowClient functionality into script
 ## 07-17-2017 @ 14.00.52 - (2.1.42)    - dscudiero - Many updates
+## 09-21-2017 @ 10.02.41 - (2.1.43)    - dscudiero - Add rollup of the processlog
