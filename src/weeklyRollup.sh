@@ -1,11 +1,11 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #===================================================================================================
-version=1.0.27 # -- dscudiero -- Mon 06/05/2017 @  8:15:31.69
+version=1.0.28 # -- dscudiero -- Thu 09/21/2017 @ 10:02:28.52
 #===================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
-Import "$imports"
+myIncludes=""
+Import "$standardIncludes $myIncludes"
 originalArgStr="$*"
 scriptDescription=""
 
@@ -16,16 +16,16 @@ scriptDescription=""
 #===================================================================================================
 # Standard call back functions
 #===================================================================================================
-function parseArgs-weeklyRollup  { # or parseArgs-local
+function weeklyRollup-ParseArgsStd  { # or parseArgs-local
 	#argList+=(-optionArg,1,option,scriptVar,,script,'Help text')
 	#argList+=(-flagArg,2,switch,scriptVar,,script,'Help text')
 	argList+=(-file,4,option,file,,script,'The file name relative to the root site directory')
 	return 0
 }
-function Goodbye-weeklyRollup  { # or Goodbye-local
+function weeklyRollup-Goodbye  { # or Goodbye-local
 	return 0
 }
-function testMode-weeklyRollup  { # or testMode-local
+function weeklyRollup-testMode  { # or testMode-local
 	[[ $userName != 'dscudiero' ]] && Terminate "You do not have sufficient permissions to run this script in 'testMode'"
 	return 0
 }
@@ -93,9 +93,10 @@ ParseArgsStd
 		done
 		ProtectedCall "tar -cvzf \"$(date '+%m-%d-%y').processLog.tar\" $outFile --remove-files > /dev/null 2>&1"
 	fi
-	sqlStmt="truncate $processLogTable"
-	RunSql2 $sqlStmt
-	SetFileExpansion
+	## Moved to quarterly
+	# sqlStmt="truncate $processLogTable"
+	# RunSql2 $sqlStmt
+	# SetFileExpansion
 	Msg2 "*** Processlog rollup -- Completed ***"
 
 ## Roll up the weeks log files
@@ -121,3 +122,4 @@ Goodbye 0 #'alert'
 ## Tue Jan 17 09:57:59 CST 2017 - dscudiero - Surround tar and find calls in a ProtectedCall
 ## Mon Feb 13 16:12:36 CST 2017 - dscudiero - make sure we have our own tmpFile
 ## 06-05-2017 @ 08.16.04 - (1.0.27)    - dscudiero - tweak messaging
+## 09-21-2017 @ 10.03.00 - (1.0.28)    - dscudiero - comment out the truncating of the processlog
