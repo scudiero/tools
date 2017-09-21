@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.12.1 # -- dscudiero -- Fri 09/08/2017 @ 11:51:16.23
+version=4.12.2 # -- dscudiero -- Thu 09/21/2017 @ 14:50:15.81
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgsStd Hello Init Goodbye GetSiteDirNoCheck ProtectedCall'
@@ -42,7 +42,7 @@ scriptDescription="Create a cloned private dev site"
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-	function copyEnv-parseArgsStd {
+	function copyEnv-ParseArgsStd {
 		# argList+=(argFlag,minLen,type,scriptVariable,extraToken/exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
 		argList+=(-manifest,1,switch,manifest,true,'script',"Create a CourseLeaf Manifest after copies")
 		argList+=(-noManifest,3,switch,manifest,manifest=false,'script',"Do not create a CourseLeaf Manifest after copies")
@@ -657,3 +657,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 08-30-2017 @ 16.26.18 - (4.11.92)   - dscudiero - Dump the rsyncCtrl file to the logFile
 ## 08-31-2017 @ 16.04.18 - (4.11.100)  - dscudiero - Tweak messaging
 ## 09-05-2017 @ 12.09.32 - (4.11.101)  - dscudiero - make sure the debug items go out to the logfile
+## 09-21-2017 @ 14.50.54 - (4.12.2)    - dscudiero - Fix bug where parseArgsStd was the wrong case
