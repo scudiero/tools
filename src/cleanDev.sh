@@ -1,11 +1,11 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.22 # -- dscudiero -- Thu 09/14/2017 @ 12:20:40.31
+version=3.5.23 # -- dscudiero -- Thu 09/21/2017 @ 14:46:54.35
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgsStd Hello Init Goodbye ProtectedCall PadChar Prompt StringFunctions'
-includes="$includes Msg2 Dump RunSql2"
+includes="$includes Msg2 Dump RunSql2 Call"
 Import "$includes"
 
 originalArgStr="$*"
@@ -245,6 +245,7 @@ elif [[ "$hostName" = 'build7' ]]; then share=dev7
 elif [[ "$hostName" = 'mojave' ]]; then share=dev6
 fi
 validActions='Yes No Mark Unmark ResetDate Save -'
+[[ $userName == 'dscudiero' ]] && validActions="$validActions WorkflowSave"
 searchStr="$userName"
 ## if client was passed in then just delete that site, otherwise if it is 'daemon' then process autodeletes
 if [[ -n $client ]]; then
@@ -331,3 +332,4 @@ Goodbye 0
 ## 09-11-2017 @ 07.08.30 - (3.5.18)    - dscudiero - Add debug statements
 ## 09-12-2017 @ 07.15.31 - (3.5.20)    - dscudiero - Change the way files are deleted
 ## 09-13-2017 @ 06.59.23 - (3.5.21)    - dscudiero - remove debug statements
+## 09-21-2017 @ 14.47.11 - (3.5.23)    - dscudiero - put the save workflow action back in
