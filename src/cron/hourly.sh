@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.126 # -- dscudiero -- Tue 09/12/2017 @  7:42:26.23
+version=2.1.127 # -- dscudiero -- Thu 09/21/2017 @  8:16:48.04
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -201,7 +201,7 @@ case "$hostName" in
 		fi
 		CheckMonitorFiles
 		SyncInternalDb
-		BuildToolsAuthTable
+		#BuildToolsAuthTable
 		SyncCourseleafCgis
 		SyncSkeleton
 		## If noon then update the git repo shadows
@@ -256,3 +256,4 @@ return 0
 ## 09-08-2017 @ 08.11.31 - (2.1.124)   - dscudiero - Update imports
 ## 09-08-2017 @ 11.26.25 - (2.1.125)   - dscudiero - add protectedcall to the list of includes
 ## 09-12-2017 @ 07.42.46 - (2.1.126)   - dscudiero - set USELOCAL before call of backupdata
+## 09-21-2017 @ 08.17.52 - (2.1.127)   - dscudiero - comment out updateauthtable
