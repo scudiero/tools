@@ -1,13 +1,13 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.4.17 # -- dscudiero -- Wed 09/20/2017 @ 12:07:54.98
+version=5.4.27 # -- dscudiero -- Wed 09/20/2017 @ 16:32:42.44
 #=======================================================================================================================
 TrapSigs 'on'
-includes='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck'
-includes="$includes GetExcel EditTcfValue BackupCourseleafFile ParseCourseleafFile GetCourseleafPgm CopyFileWithCheck"
-includes="$includes ArrayRef GitUtilities"
-Import "$includes"
+myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel EditTcfValue BackupCourseleafFile'
+myIncludes="$myIncludes ParseCourseleafFile GetCourseleafPgm CopyFileWithCheck ArrayRef GitUtilities"
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
 scriptDescription="Refresh a courseleaf product"
 cwdStart="$(pwd)"
@@ -23,8 +23,8 @@ cwdStart="$(pwd)"
 #=======================================================================================================================
 # Standard call back functions
 #=======================================================================================================================
-	function courseleafPatch-parseArgsStd {
-		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help
+	function courseleafPatch-ParseArgsStd {
+		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,helpswq
 		argList+=(-advance,3,switch,catalogAdvance,,script,"Advance the catalog")
 		argList+=(-noAdvance,4,switch,catalogAdvance=false,"catalogAdvance=false",script,"Do not advance the catalog")
 		argList+=(-fullAdvance,4,switch,fullAdvance,,script,"Do a full catalog advance")
@@ -1497,34 +1497,38 @@ Msg2 "\nCross product checks..."
 ## 	2) remove 'System Refresh' (requested by Mike Miller 09/13/17)
 ## 	3) remove 'localsteps:links|links|links' (requested by Mike Miller 09/13/17)
 	editFile="$tgtDir/web/$courseleafProgDir/index.tcf"
+[[ $userName == 'dscudiero' ]] && Dump editFile
 	if [[ -w "$editFile" ]]; then
 		fromStr='title:Catalog Console'
 		toStr='title:CourseLeaf Console'
 		grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
+[[ $userName == 'dscudiero' ]] && Dump grepStr
 		if [[ -n $grepStr ]]; then
-			sed -i s"/^$fromStr/$toStr/" $editFile
+			sed -i s"!^$fromStr!$toStr!" $editFile
 			updateFile="/$courseleafProgDir/index.tcf"
 			changeLogRecs+=("$updateFile updated to change title")
 			Msg2 "^Updated '$updateFile' to change 'title:Catalog Console' to 'title:CourseLeaf Console'"
 			rebuildConsole=true
 			filesEdited+=("$editFile")
 		fi
-		fromStr='^navlinks:CAT|Refresh System|refreshsystem'
+		fromStr='navlinks:CAT|Refresh System|refreshsystem'
 		toStr='// navlinks:CAT|Refresh System|refreshsystem'
 		grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
+[[ $userName == 'dscudiero' ]] && Dump grepStr
 		if [[ -n $grepStr ]]; then
-			sed -i s"/^$fromStr/$toStr/" $editFile
+			sed -i s"!^$fromStr!$toStr!" $editFile
 			updateFile="/$courseleafProgDir/index.tcf"
 			changeLogRecs+=("$updateFile updated to change title")
 			Msg2 "^Updated '$updateFile' to remove 'Refresh System'"
 			rebuildConsole=true
 			filesEdited+=("$editFile")
 		fi
-		fromStr='^localsteps:links|links|links'
+		fromStr='localsteps:links|links|links'
 		toStr='// localsteps:links|links|links'
 		grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
+[[ $userName == 'dscudiero' ]] && Dump grepStr
 		if [[ -n $grepStr ]]; then
-			sed -i s"/^$fromStr/$toStr/" $editFile
+			sed -i s"!^$fromStr!$toStr!" $editFile
 			updateFile="/$courseleafProgDir/index.tcf"
 			changeLogRecs+=("$updateFile updated to change title")
 			Msg2 "^Updated '$updateFile' to remove 'localsteps:links|links|links"
@@ -1772,3 +1776,4 @@ Goodbye 0 "$text1" "$text2"
 ## 09-05-2017 @ 08.06.54 - (5.4.4)     - dscudiero - Added --ignore-times to the rsync options
 ## 09-06-2017 @ 13.24.30 - (5.4.5)     - dscudiero - Remove ignore-times directive on rsync
 ## 09-20-2017 @ 15.31.32 - (5.4.17)    - dscudiero - Released latest change to edit the console
+## 09-21-2017 @ 07.06.18 - (5.4.27)    - dscudiero - Comment out the refresh of the auth table
