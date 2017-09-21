@@ -1,13 +1,12 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.25 # -- dscudiero -- Wed 09/20/2017 @ 15:00:32.69
+version=2.10.26 # -- dscudiero -- Thu 09/21/2017 @  8:35:05.71
 #====================================================================================================
 TrapSigs 'on'
-includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye'
-includes="$includes StringFunctions Prompt VerifyContinue"
-includes="$includes ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile"
-Import "$includes"
+myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile"
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
 scriptDescription="Copy workflow files"
 
@@ -618,3 +617,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 09-01-2017 @ 14.12.22 - (2.10.4)    - dscudiero - put
 ## 09-05-2017 @ 08.56.49 - (2.10.5)    - dscudiero - Tweaked format of warning message
 ## 09-20-2017 @ 15.31.04 - (2.10.25)   - dscudiero - Updated how it handles the situation where cl or cim versions are different and copying to next
+## 09-21-2017 @ 09.34.06 - (2.10.26)   - dscudiero - UPdated includes
