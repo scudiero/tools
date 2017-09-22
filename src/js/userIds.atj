@@ -1,0 +1,38 @@
+//======================================================================================================================
+// Return the userids, if the userid is provisioned then return the userid, otherwise return the email address specified
+//======================================================================================================================
+// 09-22-17 - dgs - Initial coding - georgetow-law
+//======================================================================================================================
+wffuncs.UserIds = function(inval, wfrule, args) {
+	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
+	var options=wfrule.options;	options=options.substring(0, options.indexOf(';'));
+	var retArray=[];
+
+	//Initial Checks
+	try {
+		InitialChecks(["wfrule","userid","prop_email"],args);
+	} //try
+	catch(err) { print_debug('\t' + myName + ": " + err + "\n") ; return false; }
+
+	// Main
+ 		var allowStep=false;
+ 		var userids=getTCFValue("userid", { delimiter: "\n", retarray: true });
+ 		var emails=getTCFValue("prop_email", { delimiter: "\n", retarray: true });
+ 		// lopp throuth the userids to see if they are provisioned
+ 		var sqlStmt="select count(*) from users where userid=?"
+		for (var i=0,  tot=userids.length; i < tot; i++) {
+			var resultSet=dbquery("clusers", sqlStmt,[userids[i]]);
+			if(resultSet[0] > 0) {
+				retArray.push(userids[i]);
+			} else {
+				retArray.push(emails[i]);
+			}
+		}
+
+	// Return results -- date
+		if(retArray.length > 0) {
+			wfDebug(1,"\t*** Returning " + retArray.toSource());
+			return retArray;
+		}
+		return false;
+
