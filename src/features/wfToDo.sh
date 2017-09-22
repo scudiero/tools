@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.87 # -- dscudiero -- Thu 09/14/2017 @ 11:45:29.36
+version=1.0.90 # -- dscudiero -- Fri 09/22/2017 @  7:35:01.37
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
@@ -9,6 +9,9 @@ version=1.0.87 # -- dscudiero -- Thu 09/14/2017 @ 11:45:29.36
 # Configure Custom emails on a Courseleaf site
 #==================================================================================================
 TrapSigs 'on'
+myIncludes="ProtectedCall EditCourseleafConsole Pause WriteChangelogEntry RunCourseLeafCgi"
+Import "$standardIncludes $myIncludes"
+
 currentScript=$(cut -d'.' -f1 <<< $(basename ${BASH_SOURCE[0]}))
 parentScript=$(cut -d'.' -f1 <<< $(basename ${BASH_SOURCE[1]}))
 originalArgStr="$*"
@@ -17,16 +20,16 @@ TrapSigs 'on'
 #==================================================================================================
 # Data used by the parent with a setVarsOnly call
 #==================================================================================================
-eval "${BASH_SOURCE[0]%%.*}scriptDescription='Install Workflow todo on the CourseLeaf console & specified CIMs'"
+eval "$(basename ${BASH_SOURCE[0]%%.*})scriptDescription='Install Workflow todo on the CourseLeaf console & specified CIMs'"
 
 filesStr='/web/courseleaf/index.tcf;/web/<cims>/workflow.tcf'
-eval "${BASH_SOURCE[0]%%.*}potentialChangedFiles=\"$filesStr\""
+eval "$(basename ${BASH_SOURCE[0]%%.*})potentialChangedFiles=\"$filesStr\""
 
 actionsStr='1) Check to see if already installed'
 actionsStr="$actionsStr;2) Check the console navlinks for 'Administration', if found update to 'Courseleaf'"
 actionsStr="$actionsStr;3) Insert the 'To-Do List' action on the console"
 actionsStr="$actionsStr;4) Update user selected CIM instances to add to the selectable step modifiers"
-eval "${BASH_SOURCE[0]%%.*}actions=\"$actionsStr\""
+eval "$(basename ${BASH_SOURCE[0]%%.*})actions=\"$actionsStr\""
 
 [[ $1 == 'setVarsOnly' ]] && return 0
 
@@ -132,3 +135,4 @@ return  ## We are called as a subprocess, just return to our parent
 ## Tue Mar 14 13:21:18 CDT 2017 - dscudiero - Check to make sure the user requests that the console definitions are updated to 'CourseLeaf'
 ## 04-06-2017 @ 10.10.14 - (1.0.62)    - dscudiero - renamed RunCourseLeafCgi, use new name
 ## 04-13-2017 @ 11.02.55 - (1.0.63)    - dscudiero - Fixed problem where we were only allowing the selection of a signel cim
+## 09-22-2017 @ 07.50.27 - (1.0.90)    - dscudiero - Add to imports
