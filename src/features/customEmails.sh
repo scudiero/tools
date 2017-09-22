@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.42 # -- dscudiero -- Thu 09/14/2017 @ 11:48:28.40
+version=1.0.45 # -- dscudiero -- Fri 09/22/2017 @  7:44:21.39
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
@@ -9,6 +9,9 @@ version=1.0.42 # -- dscudiero -- Thu 09/14/2017 @ 11:48:28.40
 # Configure Custom emails on a Courseleaf site
 #==================================================================================================
 TrapSigs 'on'
+myIncludes="SetFileExpansion ProtectedCall Pause WriteChangelogEntry GetCourseleafPgm CopyFileWithCheck EditTcfValue"
+Import "$standardIncludes $myIncludes"
+
 currentScript=$(cut -d'.' -f1 <<< $(basename ${BASH_SOURCE[0]}))
 parentScript=$(cut -d'.' -f1 <<< $(basename ${BASH_SOURCE[1]}))
 originalArgStr="$*"
@@ -16,16 +19,16 @@ originalArgStr="$*"
 #==================================================================================================
 # Data used by the parent with a setVarsOnly call
 #==================================================================================================
-eval "${BASH_SOURCE[0]%%.*}scriptDescription='Install Custom Workflow emails (wfemail)'"
+eval "$(basename ${BASH_SOURCE[0]%%.*})scriptDescription='Install Custom Workflow emails (wfemail)'"
 
 filesStr='/email/sendnow.atj;/web/admin/wfemail;/web/<courseleafDir>/localsteps/default.tcf;/web/<courseleafDir>/index.tcf'
-eval "${BASH_SOURCE[0]%%.*}potentialChangedFiles=\"$filesStr\""
+eval "$(basename ${BASH_SOURCE[0]%%.*})potentialChangedFiles=\"$filesStr\""
 
 actionsStr='1) Check to see if already installed'
 actionsStr="$actionsStr;2) Copy email '/email/sendnow.atj' and '/web/admin/wfemail' from the skeleton shadow"
 actionsStr="$actionsStr;3) Add 'wfemail_prefix:custom' to localsteps/default.tcf"
 actionsStr="$actionsStr;4) Insert the 'Workflow Email' action on the console"
-eval "${BASH_SOURCE[0]%%.*}actions=\"$actionsStr\""
+eval "$(basename ${BASH_SOURCE[0]%%.*})actions=\"$actionsStr\""
 
 [[ $1 == 'setVarsOnly' ]] && return 0
 
@@ -132,3 +135,4 @@ return  ## We are called as a subprocess, just return to our parent
 #==================================================================================================
 ## Change Log
 #==================================================================================================## 04-06-2017 @ 10.10.05 - (1.0.34)    - dscudiero - renamed RunCourseLeafCgi, use new name
+## 09-22-2017 @ 07.50.19 - (1.0.45)    - dscudiero - Add to imports
