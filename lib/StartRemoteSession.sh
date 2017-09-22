@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-#version="2.0.11" # -- dscudiero -- 01/04/2017 @ 13:50:01.62
+#version="2.0.12" # -- dscudiero -- Fri 09/22/2017 @ 12:14:15.32
 #===================================================================================================
 # Start a remote session via ssh
 # StartRemoteSession userid@domain [command]
@@ -10,6 +10,9 @@
 #===================================================================================================
 
 function StartRemoteSession {
+	myIncludes="ProtectedCall StringFunctions"
+	Import "$standardIncludes $myIncludes"
+
 	local remoteUserAtHost=$1; shift
 	local remoteCommand="$*"
 
@@ -45,3 +48,4 @@ export -f StartRemoteSession
 #===================================================================================================
 
 ## Wed Jan  4 13:54:32 CST 2017 - dscudiero - General syncing of dev to prod
+## 09-22-2017 @ 12.14.39 - ("2.0.12")  - dscudiero - Added to includes
