@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.21" # -- dscudiero -- Thu 05/25/2017 @ 13:25:32.27
+# version="2.0.22" # -- dscudiero -- Fri 09/22/2017 @  7:36:58.96
 #===================================================================================================
 # Run a courseleaf.cgi command, check outpout
 # Courseleaf.cgi $LINENO <siteDir> <command string>
@@ -9,6 +9,9 @@
 # All rights reserved
 #===================================================================================================
 function RunCourseLeafCgi {
+	myIncludes="GetCourseleafPgm ProtectedCall"
+	Import "$standardIncludes $myIncludes"
+
 	local siteDir="$1"; shift
 	local cgiCmd="$*"
 	local cgiOut="$(MkTmpFile "${FUNCNAME}.${BASHPID}")"
@@ -45,3 +48,4 @@ export -f RunCourseLeafCgi
 ## 04-07-2017 @ 08.46.26 - ("2.0.19")  - dscudiero - clean up how we process errors
 ## 05-04-2017 @ 13.18.23 - ("2.0.20")  - dscudiero - Restore from baclup
 ## 05-25-2017 @ 13.26.11 - ("2.0.21")  - dscudiero - Tweak how the tmpFile is assigned
+## 09-22-2017 @ 07.50.14 - ("2.0.22")  - dscudiero - Add to imports
