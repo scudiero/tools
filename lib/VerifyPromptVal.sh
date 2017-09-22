@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.52" # -- dscudiero -- Mon 05/22/2017 @  9:16:01.00
+# version="2.0.53" # -- dscudiero -- Fri 09/22/2017 @  7:17:35.42
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -9,6 +9,9 @@
 #===================================================================================================
 
 function VerifyPromptVal {
+	myIncludes="StartRemoteSession"
+	Import "$standardInteractiveIncludes $myIncludes"
+
 	local i
 	PushSettings "$FUNCNAME"
 	SetFileExpansion 'off'
@@ -227,3 +230,4 @@ export -f VerifyPromptVal
 ## 05-19-2017 @ 14.40.06 - ("2.0.50")  - dscudiero - General syncing of dev to prod
 ## 05-22-2017 @ 09.12.16 - ("2.0.51")  - dscudiero - Added isNumeric and isAlpha types
 ## 05-22-2017 @ 09.16.07 - ("2.0.52")  - dscudiero - General syncing of dev to prod
+## 09-22-2017 @ 07.18.50 - ("2.0.53")  - dscudiero - Include StartRemoteSession
