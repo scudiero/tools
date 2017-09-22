@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.2" // -- dscudiero -- Fri 09/22/2017 @  7:13:03.77
+wfLibVersion="1.8.4" // -- dscudiero -- Fri 09/22/2017 @ 11:27:25.88
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -50,6 +50,7 @@ wfLibVersion="1.8.2" // -- dscudiero -- Fri 09/22/2017 @  7:13:03.77
 // 09/08/17 - dgs - Fixed bug where related was not editing out the reference data if it was in the proposal data for depts
 // 09/14/17 - dgs - Added wfSubjVarName, wfDeptVarName, wfColVarName globals set in workflow.cfg
 //					Updated GetAttrVal to use the above
+// 09/22/17 - dgs - Added NoWorkflow function
 //======================================================================================================================
 
 // Make sure wffucs is defined
@@ -2278,6 +2279,23 @@ wffuncs.TODO = function(inval, wfrule, args) {
 	return false;
 } //TODO
 
+//======================================================================================================================
+// There was insufficient data on the for to calculate workflow
+//======================================================================================================================
+// 09-22-17 - dgs - Initial coding
+//======================================================================================================================
+wffuncs.NoWorkflow = function(inval, wfrule, args) {
+	var indent='&nbsp;&nbsp;&nbsp;&nbsp;';
+	var indent2='&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
+	if (options === "" ) {
+		options="There is insufficient data in the proposal to calculate workflow. <br>" + indent2 + "Please complete the required form fields and try again."
+	}
+	print_doc(indent + '<strong>*Note*</strong> -- ' + options);
+	print_doc('<br>' + indent2 + 'For additional information please contact your CourseLeaf administrator.</strong><br>');
+	return false;
+} //NoWorkflow
+
 //==================================================================================================
 // END
 //==================================================================================================
@@ -2328,3 +2346,4 @@ var wfLibLoaded=true;
 // 09-14-2017 @ 10.08.42 - ("1.7.76")  - dscudiero - Added wfxxxxVarName processing for GetAttrVal
 // 09-20-2017 @ 15.31.40 - ("1.8.1")   - dscudiero - General syncing of dev to prod
 // 09-22-2017 @ 07.19.12 - ("1.8.2")   - dscudiero - Update the way we do wfAllCodes
+// 09-22-2017 @ 11.28.28 - ("1.8.4")   - dscudiero - Added NoWorkflow function
