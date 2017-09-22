@@ -114,9 +114,10 @@ function SetIndent {
 ## Print / Log the message
 function Msg2 {
 	[[ $quiet == true ]] && return 0
+
 	includes="PushSettings PopSettings SetFileExpansion Colors MkTmpFile"
 	Import "$includes"
-	
+
 	PushSettings "$FUNCNAME"
 	set +xv # Turn off trace
 	SetFileExpansion 'off'
@@ -259,3 +260,4 @@ export -f Terminate Error Warning Info Note Verbose
 ## Mon Mar 20 08:07:34 CDT 2017 - dscudiero - Comment out Dump commands - trying to speed thing up
 ## 05-16-2017 @ 06.43.01 - ("2.0.55")  - dscudiero - Add script name to fatal error messages
 ## 08-03-2017 @ 08.47.54 - ("2.0.56")  - dscudiero - Add different alert counts based on message severity
+## 09-22-2017 @ 11.28.13 - ("2.0.63")  - dscudiero - skip
