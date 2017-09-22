@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.27" # -- dscudiero -- Fri 09/08/2017 @  9:51:11.61
+# version="2.0.28" # -- dscudiero -- Fri 09/22/2017 @  9:55:26.77
 #===================================================================================================
 # Setup default colors functions and values
 #===================================================================================================
@@ -50,12 +50,15 @@ function Colors {
 	return 0
 }
 [[ $colorsLoaded != true ]] && Colors
-function ColorE { local string="$*"; echo "${colorError}${string}${colorDefault}"; }
-function ColorI { local string="$*"; echo "${colorInfo}${string}${colorDefault}"; }
-function ColorT { local string="$*"; echo "${colorTerminate}${string}${colorDefault}"; }
-function ColorK { local string="$*"; echo "${colorKey}${string}${colorDefault}"; }
-function ColorV { local string="$*"; echo "${colorVerbose}${string}${colorDefault}"; }
 function ColorN { local string="$*"; echo "${colorNote}${string}${colorDefault}"; }
+function ColorI { local string="$*"; echo "${colorInfo}${string}${colorDefault}"; }
+function ColorW { local string="$*"; echo "${colorWarn}${string}${colorDefault}"; }
+function ColorE { local string="$*"; echo "${colorError}${string}${colorDefault}"; }
+function ColorT { local string="$*"; echo "${colorTerminate}${string}${colorDefault}"; }
+function ColorV { local string="$*"; echo "${colorVerbose}${string}${colorDefault}"; }
+
+function ColorK { local string="$*"; echo "${colorKey}${string}${colorDefault}"; }
+
 function ColorU { local string="$*"; echo "${colorUnderline}${string}${colorDefault}"; }
 function ColorB { local string="$*"; echo "${colorBold}${string}${colorDefault}"; }
 export -f Colors
@@ -78,3 +81,4 @@ export -f ColorB
 ## 05-09-2017 @ 11.55.51 - ("2.0.12")  - dscudiero - Refactored how logging is done, added an user activity log file
 ## 05-15-2017 @ 14.24.30 - ("2.0.14")  - dscudiero - log client and environment into the activity log
 ## 05-24-2017 @ 13.30.23 - ("2.0.15")  - dscudiero - Strip off the -test for test environments
+## 09-22-2017 @ 11.27.52 - ("2.0.28")  - dscudiero - Added ColorW
