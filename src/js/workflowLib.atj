@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.1" // -- dscudiero -- Tue 09/19/2017 @ 16:59:02.13
+wfLibVersion="1.8.2" // -- dscudiero -- Fri 09/22/2017 @  7:13:03.77
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -70,6 +70,11 @@ if (typeof wfLibLoaded === "undefined") {
 		var	wfSubjVarName='subject';
 
 		var wfHost=getenv("HTTP_HOST").toLowerCase();
+		var wfAllcodes=false;
+		if (typeof wffuncs.getAllCodes === "function") {
+			if (wffuncs.getAllCodes(tcfdata) != '')
+				wfAllcodes=false;
+		}
 
 		if (tcfdata.wfDebugLevel && tcfdata.wfDebugLevel.length > 0)
 			wfDebugLevel=tcfdata.wfDebugLevel[0]
@@ -532,8 +537,6 @@ wffuncs.Related = function(inval, wfrule, args) {
 			return 0;
 		}
 
-	if (wffuncs.getAllCodes(tcfdata) === '') {var wfAllcodes=false} else {var wfAllcodes=true}
-
 	wfDump(3,["calledAs;"+calledAs,"reqType;"+reqType,"notifyMode;"+notifyMode,"callOpts;"+callOpts,"substitutionType;"+substitutionType,"wfAllcodes;"+wfAllcodes]);
 
 	//Get the configuration/control data from the config file
@@ -824,7 +827,6 @@ GetRelated = function(type,data) {
 	} //ParseRelatedData
 	//==================================================================================================================
 
-	if (wffuncs.getAllCodes(tcfdata) === '') {var wfAllcodes=false} else {var wfAllcodes=true}
 	var includeEcoSystem=true;
 	if (data.hasOwnProperty("includeEcoSystem")) includeEcoSystem=data.includeEcoSystem;
 
@@ -1170,7 +1172,6 @@ function LookupCode(lookupType,givenType,givenData1,givenData2,exceptData,colCol
 	if (typeof colColumnName === 'undefined')  { colColumnName="college";}
 	if (typeof deptColumnName === 'undefined') { deptColumnName="department";}
 	if (typeof subjColumnName === 'undefined') { subjColumnName="subject";}
-	if (wffuncs.getAllCodes(tcfdata) === '') {var wfAllcodes=false} else {var wfAllcodes=true}
 
 	wfDump(myDebugLevel,["\tlookupType;"+lookupType,"\tgivenType;"+givenType,"\tgivenData1;"+givenData1,"\tgivenData2;"+givenData2,"\texceptData;"+exceptData,"\twfAllcodes;"+wfAllcodes])
 	wfDump(myDebugLevel,["\tcolColumnName;"+colColumnName,"\tdeptColumnName;"+deptColumnName,"\tsubjColumnName;"+subjColumnName])
@@ -1310,8 +1311,6 @@ GetAttrVal = function(data) {
 	var deptVarName=data.deptVar; 	if (deptVarName === undefined || deptVarName === "") deptVarName=wfDeptVarName;
 	var colVarName=data.colVar; 	if (colVarName === undefined || colVarName === "") colVarName=wfColVarName;
 
-	if (wffuncs.getAllCodes(tcfdata) === '') {var wfAllcodes=false} else {var wfAllcodes=true}
-
 	wfDump(5,["\t\treqType;"+reqType,"\t\toptionStr;"+optionStr,"\t\ttcaData;"+tcaData,"\t\tsubjVarName;"+subjVarName,
 		"\t\tdeptVarName;"+deptVarName,"\t\tcolVarName;"+colVarName,"\t\twfAllcodes;"+wfAllcodes]);
 
@@ -1437,8 +1436,6 @@ wffuncs.AttrIn = function(inval, wfrule, args) {
 				checkList=wfrule.searchfor.substring(reqType.indexOf("-")+1);
 				checkList=checkList.replace("-",',');
 			}
-
-		if (wffuncs.getAllCodes(tcfdata) === '') {var wfAllcodes=false} else {var wfAllcodes=true}
 
 		var notMode=reqType.indexOf("not")>0;
 		wfDump(1,["reqType;"+reqType,"checkAttr;"+checkAttr,"checkList;"+checkList,"notMode;"+notMode,"wfAllcodes;"+wfAllcodes]);
@@ -2330,3 +2327,4 @@ var wfLibLoaded=true;
 // 09-08-2017 @ 08.07.59 - ("1.7.82")  - dscudiero - Fixed bug where related was not editing out the reference data if it was in the proposal data for depts
 // 09-14-2017 @ 10.08.42 - ("1.7.76")  - dscudiero - Added wfxxxxVarName processing for GetAttrVal
 // 09-20-2017 @ 15.31.40 - ("1.8.1")   - dscudiero - General syncing of dev to prod
+// 09-22-2017 @ 07.19.12 - ("1.8.2")   - dscudiero - Update the way we do wfAllCodes
