@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.7" # -- dscudiero -- Mon 05/01/2017 @ 13:40:47.27
+# version="2.0.8" # -- dscudiero -- Fri 09/22/2017 @  7:42:06.34
 #===================================================================================================
 # Copy a file only if files are diffeent
 # copyIfDifferent <srcFile> <tgtFile> <backup {true:false}>
@@ -12,6 +12,9 @@
 
 function CopyFileWithCheck {
 	[[ $DOIT != '' || $listOnly == true || $informationOnlyMode == true ]] && echo true && return 0
+	myIncludes="BackupCourseleafFile"
+	Import "$standardIncludes $myIncludes"
+
 	local srcFile=$1
 	local tgtFile=$2
 	local backup=${3:false}
@@ -42,3 +45,4 @@ export -f CopyFileWithCheck
 ## Wed Jan  4 13:53:10 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Feb  9 08:06:10 CST 2017 - dscudiero - make sure we are using our own tmpFile
 ## 05-02-2017 @ 07.32.49 - ("2.0.7")   - dscudiero - cleanup tmp files
+## 09-22-2017 @ 07.50.10 - ("2.0.8")   - dscudiero - Add to imports
