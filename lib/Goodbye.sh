@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.140" # -- dscudiero -- Mon 09/25/2017 @  7:50:26.06
+# version="2.0.141" # -- dscudiero -- Mon 09/25/2017 @  7:57:41.43
 #===================================================================================================
 # Common script exit
 # args:
@@ -11,8 +11,6 @@
 # All rights reserved
 #===================================================================================================
 function Goodbye {
-
-
 	myIncludes="SetFileExpansion Colors ProcessLogger PrintBanner Alert PushPop"
 	Import "$standardIncludes $myIncludes"
 
@@ -176,3 +174,4 @@ export -f Goodbye
 ## 08-01-2017 @ 08.16.00 - ("2.0.137") - dscudiero - General syncing of dev to prod
 ## 09-01-2017 @ 09.27.18 - ("2.0.138") - dscudiero - Add call myname-FUNCNAME function if found
 ## 09-25-2017 @ 07.50.38 - ("2.0.140") - dscudiero - General syncing of dev to prod
+## 09-25-2017 @ 07.57.50 - ("2.0.141") - dscudiero - General syncing of dev to prod
