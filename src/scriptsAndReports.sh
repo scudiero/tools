@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.12.20 # -- dscudiero -- Tue 09/19/2017 @ 10:39:20.79
+version=3.12.29 # -- dscudiero -- Mon 09/25/2017 @  8:59:31.41
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="Colors PushPop SetFileExpansion Call SelectMenuNew ProtectedCall Pause"
@@ -37,6 +37,7 @@ function Goodbye-scriptsAndReports  { # or Goodbye-local
 ## Build the menu list from the database
 #==================================================================================================
 function BuildMenuList {
+	Msg3 "^Building script list..."
 	## Eliminate things that do not work on windows if running from windows
 		[[ $TERM == 'dumb' ]] && excludeWindowsStuff="and $scriptsTable.name not in (\"wizdebug\")" || unset excludeWindowsStuff
 
@@ -96,7 +97,7 @@ function ExecScript {
 		local fields="exec,lib,scriptArgs"
 		local sqlStmt="select $fields from $scriptsTable where lower(name) =\"$(Lower $name)\" "
 		RunSql2 $sqlStmt
-		[[ ${#resultSet[0]} -eq 0 ]] && Msg2 $T "Could not lookup script name ('$name') in the $mySqlDb.$scriptsTable"
+		[[ ${#resultSet[0]} -eq 0 ]] &&Terminate "Could not lookup script name ('$name') in the $mySqlDb.$scriptsTable"
 		resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString" )
 		local fieldCntr=1
 		for field in $(tr ',' ' ' <<< $fields); do
@@ -127,11 +128,11 @@ function ExecScript {
 			fi
 			touch "$logFile"
 			chmod ug+rwx "$logFile"
-			Msg2 "$(PadChar)" > $logFile
+			Msg3 "$(PadChar)" > $logFile
 			[[ -n $scriptArgs ]] && scriptArgsTxt=" $scriptArgs" || unset scriptArgsTxt
-			Msg2 "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}" >> $logFile
-			Msg2 "$(PadChar)" >> $logFile
-			Msg2 >> $logFile
+			Msg3 "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}" >> $logFile
+			Msg3 "$(PadChar)" >> $logFile
+			Msg3 >> $logFile
 		fi
 
 	## Call the script
@@ -155,7 +156,7 @@ function ExecReport {
 		local fields="shortDescription,type,header,db,dbType,sqlStmt,script,scriptArgs,ignoreList"
 		local sqlStmt="select $fields from $reportsTable where lower(name) =\"$(Lower $name)\" "
 		RunSql2 $sqlStmt
-		[[ ${#resultSet[0]} -eq 0 ]] && Msg2 $T "Could not lookup report name ('$name') in the $mySqlDb.$reportsTable"
+		[[ ${#resultSet[0]} -eq 0 ]] && Terminate "Could not lookup report name ('$name') in the $mySqlDb.$reportsTable"
 		myData="Name: '$name' "
 		[[ $logInDb != false && $myLogRecordIdx != "" ]] && dbLog 'Update' $myLogRecordIdx "$myData"
 		resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString" )
@@ -169,7 +170,7 @@ function ExecReport {
 		if [[ $scriptArgs == '<prompt>' ]]; then
 			unset scriptArgs;
 			if [[ $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true  && $quiet != true ]]; then
-				Msg2 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
+				Msg3 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
 				unset userArgs; Prompt userArgs "^Please specify parameters to be passed to '$itemName'" '*optional*' '' '4'
 			fi
 		fi
@@ -213,10 +214,10 @@ function ExecReport {
 
 		if [[ $(wc -l < "$tmpFile") -gt 1 ]]; then
 			if [[  $(Lower "$ignoreList") == 'returnsraw' ]]; then
-				echo | tee "$outFileXlsx" > "$outFileText"
-				echo "$name report run by $userName on $(date +"%m-%d-%Y") at $(date +"%H.%M.%S")" | tee -a "$outFileXlsx" >> "$outFileText"
-				echo "($shortDescription)" | tee -a "$outFileXlsx" >> "$outFileText"
-				echo  | tee -a "$outFileXlsx" >> "$outFileText"
+				Msg3 | tee "$outFileXlsx" > "$outFileText"
+				Msg3 "$name report run by $userName on $(date +"%m-%d-%Y") at $(date +"%H.%M.%S")" | tee -a "$outFileXlsx" >> "$outFileText"
+				Msg3 "($shortDescription)" | tee -a "$outFileXlsx" >> "$outFileText"
+				Msg3  | tee -a "$outFileXlsx" >> "$outFileText"
 				sed s"/|/\t/g" < "$tmpFile" >> "$outFileXlsx"
 				mapfile -t resultSet < "$tmpFile"
 				PrintColumnarData 'resultSet' '|' >> "$outFileText"
@@ -287,17 +288,18 @@ if [[ $batchMode != true ]]; then
 	grep -q 'scripts="$TOOLSPATH/bin/scripts"' $HOME/.bashrc ; rc=$?
 	[[ -n $previousTrapERR ]] && eval "trap $previousTrapERR"
 	if [[ $rc -gt 0 ]]; then
-		echo
-		Msg2 "Do you wish to add an alias to the scripts command to your .bashrc file (recommended) ?"
-		Msg2 "This will allow you to access the scripts command in the future by simply entering 'scripts' on the Linux command line."
-		echo
+		Msg3
+		Msg3 "Do you wish to add an alias to the scripts command to your .bashrc file (recommended) ?"
+		Msg3 "This will allow you to access the scripts command in the future by simply entering 'scripts' on the Linux command line."
+		Msg3
 		unset ans; Prompt ans "Yes to add, No to skip" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
 		if [[ $ans == 'y' ]]; then
 			echo '' >> $HOME/.bashrc
 			echo "export TOOLSPATH=\"$TOOLSPATH\" ## Added by' '$myName' on $(date)" >> $HOME/.bashrc
 			echo "alias scripts=\"\$TOOLSPATH/bin/scripts\" ## Added by' '$myName' on $(date)" >> $HOME/.bashrc
-			echo; Msg2 $I "An alias for the scripts command has been added to your '$HOME/.bashrc' file."
-			echo
+			Msg3
+			Info "An alias for the scripts command has been added to your '$HOME/.bashrc' file."
+			Msg3
 		fi
 	fi
 else
@@ -323,29 +325,6 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 #==================================================================================================
 ## Main
 #==================================================================================================
-## Check to see the user has access to the 'scripts' program, if not then add one to their .bashrc file
-	if [[ $batchMode != true ]]; then
-		previousTrapERR=$(trap -p ERR | cut -d ' ' -f3-) ; trap - ERR ; set +e
-		grep -q 'scripts="$TOOLSPATH/bin/scripts"' $HOME/.bashrc ; rc=$?
-		[[ -n $previousTrapERR ]] && eval "trap $previousTrapERR"
-		if [[ $rc -gt 0 ]]; then
-			echo
-			Msg2 "Do you wish to add an alias to the scripts command to your .bashrc file?"
-			Msg2 "This will allow you to access the scripts command in the future by simply entering 'scripts' on the Linux command line."
-			echo
-			unset ans; Prompt ans "Yes to add, No to skip" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
-			if [[ $ans == 'y' ]]; then
-				echo '' >> $HOME/.bashrc
-				echo "export TOOLSPATH=\"$TOOLSPATH\" ## Added by' '$myName' on $(date)" >> $HOME/.bashrc
-				echo "alias scripts=\"\$TOOLSPATH/bin/scripts\" ## Added by' '$myName' on $(date)" >> $HOME/.bashrc
-				echo; Msg2 $I "An alias for the scripts command has been added to your '$HOME/.bashrc' file."
-				echo
-			fi
-		fi
-	else
-		[[ -z ${script}${report} ]] && Terminate "Running in batchMode and no value specified for report/script"
-	fi
-
 ## If we do not have a report or script name then build & display the menu
 	## Check to see if we have TOOLSPATH/bin in the path, if not added it
 	unset pathSave
@@ -357,17 +336,17 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 			unset itemName
 			BuildMenuList
 			ProtectedCall "clear"
-			echo
-			Msg2 "^Please specify the $(ColorM '(ordinal)') number of the $itemType you wish to run, 'x' to quit."
-			[[ $newItem == true ]] && Msg2 $NT1 "Items with an '*' are new since the last time you ran '${itemType}s'"
-			echo
+			Msg3
+			Msg3 "\n^Please specify the $(ColorM '(ordinal)') number of the $itemType you wish to run, 'x' to quit."
+			[[ $newItem == true ]] && Note "0 1" "Items with an '*' are new since the last time you ran '${itemType}s'"
+			Msg3
 			#[[ $mode == 'scripts' && $client != '' ]] && clientStr=" (client: '$client')" || unset clientStr
 			SelectMenuNew 'menuList' 'itemName'
 			[[ -z $itemName ]] && Goodbye 'x'
 			itemName=$(cut -d ' ' -f1 <<< $itemName)
 			length=${#itemName}
 			[[ ${itemName:$length-1:1} == '*' ]] && itemName=${itemName:0:$length-1}
-			echo
+			Msg3
 			menuDisplayed=true
 		else
 			## Otherwise use the passed in script/report
@@ -378,29 +357,29 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 		[[ $itemName == 'REFRESHLIST' ]] && continue
 		unset userArgs;
 		if [[ $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true  && $quiet != true && $noArgs != true ]]; then
-			Msg2 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
-			unset userArgs; Prompt userArgs "^Please specify parameters to be passed to '$itemName'" '*optional*' '' '4'
+			Msg3 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
+			unset userArgs; Prompt userArgs "^Please specify parameters to be passed to '$itemName'" '*optional*' '' '3'
 			[[ -n $userArgs ]] && scriptArgs="$userArgs $scriptArgs"
 		fi
 
 		## call function to 'execute' the request
 		calledViaScripts=true
-		itemName="$(echo -e $itemName | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g")"
+		#itemName="$(echo -e $itemName | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g")"
 		#TrapSigs 'off'
 
 		sendMail=false
 		Exec$itemTypeCap "$itemName" "$scriptArgs" ; rc=$?
 		#TrapSigs 'on'
-		echo
-		# [[ $rc -eq 0 ]] && Msg2 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed successfully" || \
-		# 	Msg2 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed with errors (exit code = $rc) \
+		Msg3
+		# [[ $rc -eq 0 ]] && Msg3 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed successfully" || \
+		# 	Msg3 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed with errors (exit code = $rc) \
 		# 	\nPlease record any Messages and contact the $itemType owner\n"
-		[[ $batchMode != true && $quiet != true && $verify == true && $menuDisplayed == true ]] && Pause "Please press enter to go back to '${itemType}s'"
+		[[ $menuDisplayed == true ]] && Pause "Please press enter to go back to '${itemType}s'"
 		unset calledViaScripts
 
 		## Send out emails
 		if [[ -n $emailAddrs && $mode == 'reports' && $noEmails == false && $sendMail == true ]]; then
-			echo | tee -a $outFileText; Msg2 "Sending email(s) to: $emailAddrs" | tee -a $outFileText; echo | tee -a "$outFileText"
+			Msg3 | tee -a $outFileText; Msg3 "Sending email(s) to: $emailAddrs" | tee -a $outFileText; Msg3 | tee -a "$outFileText"
 			for addr in $(tr ',' ' ' <<< "$emailAddrs"); do
 				[[ $(Contains "$addr" '@') != true ]] && addr="$addr@leepfrog.com"
 				$DOIT mutt -a "$outFileXlsx" -s "$report report results: $(date +"%m-%d-%Y")" -- $addr < "$outFileText"
@@ -502,3 +481,4 @@ Goodbye 0
 ## 06-12-2017 @ 11.30.57 - (3.12.6)    - dscudiero - tweak messaging
 ## 09-13-2017 @ 11.30.02 - (3.12.11)   - dscudiero - Update to just pull the scripts that have showinscripts=Yes
 ## 09-19-2017 @ 10.39.37 - (3.12.20)   - dscudiero - Add Pause to the includes list
+## 09-25-2017 @ 09.01.59 - (3.12.29)   - dscudiero - Switch to Msg3
