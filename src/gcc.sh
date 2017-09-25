@@ -25,7 +25,7 @@ libraries=$(ls )
 	pushd "$cppSrc" &> /dev/null
 	moduleFile="${module}.cpp"
 	[[ ! -r $moduleFile ]] && echo -e "Error, could not locate module file '$moduleFile' in '$cppSrc'" && exit -3
-	$compiler -o "$HOME/bin/$module" $moduleFile ; rc=$?
+	$compiler -o "../../../bin/$module" $moduleFile ; rc=$?
 	echo -e "\t$module compiled, rc=$rc"
 	popd &> /dev/null
 
@@ -33,3 +33,4 @@ libraries=$(ls )
 	export LD_LIBRARY_PATH="$ldLibPathSave"
 
 exit 0
+## 09-25-2017 @ 15.49.50 - dscudiero - General syncing of dev to prod
