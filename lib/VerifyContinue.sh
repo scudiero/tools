@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.16" # -- dscudiero -- Wed 08/30/2017 @ 15:14:14.87
+# version="2.0.19" # -- dscudiero -- Mon 09/25/2017 @ 12:25:34.08
 #===================================================================================================
 ## Make sure the user really wants to do this
 ## If the first argument is 'loop' then loop back to self if user responds with 'n'
@@ -16,7 +16,7 @@ function VerifyContinue {
 	if [[ $verifyPrompt == '' ]]; then verifyPrompt="$mode"; mode='loop'; fi
 	local arg tempStr
 
-	Msg2; Msg2 "$verifyPrompt"
+	Msg3; Msg3 "$verifyPrompt"
 	if [[ ${#verifyArgs[@]} -gt 0 ]]; then
 		[[ $allItems == true ]] && verifyArgs+=("Auto process all items:$allItems")
 		[[ $force == true ]] && verifyArgs+=("Force execution:$force")
@@ -31,8 +31,8 @@ function VerifyContinue {
 			tempStr=${tempStr:0:$maxArgWidth+3}
 			Msg2 '-,-,+1' "$(eval "$color \"${tempStr}\"")$(echo $arg | cut -d':' -f2-)"
 		done
-		[[ $testMode == true ]] && Msg2 '-,-,1' "$(ColorE "*** Running in Test Mode ***")"
-		[[ $informationOnlyMode == true ]] && Msg2 '-,-,1' "$(ColorE "*** Information only mode ***")"
+		[[ $testMode == true ]] && Msg3 "^$(ColorE "*** Running in Test Mode ***")"
+		[[ $informationOnlyMode == true ]] && Msg3 "^$(ColorE "*** Information only mode, no data will be modified ***")"
 	fi
 
 	if [[ $verify == true && $quiet != true && $go != true ]]; then
@@ -46,9 +46,9 @@ function VerifyContinue {
 			Goodbye 'x'
 		fi
 	else
-		Msg2 "^$(ColorI "Info -- ")'NoPrompt' flag was set, continuing..."
+		Msg3 "^$(ColorI "Info -- ")'NoPrompt' flag was set, continuing..."
 	fi
-	Msg2
+	Msg3
 	return 0
 } #VerifyContinue
 export -f VerifyContinue
@@ -60,3 +60,4 @@ export -f VerifyContinue
 ## 04-13-2017 @ 10.35.46 - ("2.0.12")  - dscudiero - Add ability to specify a default value
 ## 04-25-2017 @ 08.38.30 - ("2.0.13")  - dscudiero - Skip prompt if go=true
 ## 08-30-2017 @ 15.15.40 - ("2.0.16")  - dscudiero - use ColorW for warning messages
+## 09-25-2017 @ 12.26.42 - ("2.0.19")  - dscudiero - Switch to use Msg3
