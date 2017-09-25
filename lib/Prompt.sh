@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.18" # -- dscudiero -- Thu 09/14/2017 @ 16:16:21.92
+# version="2.1.19" # -- dscudiero -- Mon 09/25/2017 @  8:41:32.96
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -84,7 +84,7 @@ function Prompt {
 					else
 						[[ -n $promptText ]] && echo -e "$promptText"
 						for ((tCntr=0; tCntr<$timeOut; tCntr++)); do
-							[[ -n $defaultVal ]] && echo -en "$timerPrompt $(ColorK "$((timeOut - tCntr))") seconds using a default value: $(ColorK "'$defaultVal'")\r" || \
+							[[ -n $defaultVal ]] && echo -en "$timerPrompt $(ColorK "$((timeOut - tCntr))") seconds using the default value: $(ColorK "'$defaultVal'")\r" || \
 													echo -en "$timerPrompt $(ColorK "$((timeOut - tCntr))") seconds\r"
 							read -t 1 response; rc=$?
 							if [[ $rc -eq 0 ]]; then
@@ -107,7 +107,7 @@ function Prompt {
 			[[ $(Lower ${response}) == 'x' ]] && Goodbye 'x'
 			if [[ -z $response && -n $defaultVal ]]; then
 				eval $promptVar=\"$defaultVal\"
-				[[ $defaultValueUseNotes == true ]] && Note 0 1 "Using default value of '$defaultVal' for '$promptVar'"
+				[[ $defaultValueUseNotes == true && -n $defaultVal ]] && Note 0 1 "Using default value of '$defaultVal' for '$promptVar'"
 				return 0
 			fi
 			[[ -n $response && $validateList == '*any*' ]] && eval $promptVar=\"$response\" && return 0
@@ -180,3 +180,4 @@ export -f Prompt
 ## 06-01-2017 @ 09.16.57 - ("2.1.12")  - dscudiero - Also check for TERM=screen
 ## 06-07-2017 @ 09.34.32 - ("2.1.16")  - dscudiero - Fix problem not getting primary prompt text in timed mode
 ## 08-24-2017 @ 16.32.08 - ("2.1.17")  - dscudiero - Change prompt text when a timed read times out
+## 09-25-2017 @ 08.42.47 - ("2.1.19")  - dscudiero - General syncing of dev to prod
