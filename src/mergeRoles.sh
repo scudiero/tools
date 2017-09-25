@@ -1,11 +1,11 @@
 #!/bin/bash
 #==================================================================================================
-version=2.2.22 # -- dscudiero -- Tue 06/06/2017 @ 13:54:05.34
+version=2.2.24 # -- dscudiero -- Mon 09/25/2017 @ 12:15:29.38
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
-imports="$imports GetOutputFile BackupCourseleafFile"
-Import "$imports"
+myIncludes="GetOutputFile BackupCourseleafFile"
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
 scriptDescription="Merge role data"
 
@@ -101,10 +101,10 @@ scriptDescription="Merge role data"
 		trap 'SignalHandler ERR ${LINENO} $? ${BASH_SOURCE[0]}' ERR
 		local rolesFile="$1"
 		#PushSettings; set +e; shift; PopSettings
-		[[ $useUINs == true && $processedUserData != true ]] && Msg2 $T "$FUNCNAME: Requesting UIN mapping but no userid sheet was provided"
-		Msg2 "\nParsing the roles.tcf file ($rolesFile) ..."
+		[[ $useUINs == true && $processedUserData != true ]] && Msg3 $T "$FUNCNAME: Requesting UIN mapping but no userid sheet was provided"
+		Msg3 "\nParsing the roles.tcf file ($rolesFile) ..."
 		## Get the roles data from the roles.tcf file
-			[[ ! -r $rolesFile ]] && Msg2 $T "Could not read the .../courseleaf/roles.tcf file"
+			[[ ! -r $rolesFile ]] && Terminate "Could not read the .../courseleaf/roles.tcf file"
 			while read line; do
 				if [[ ${line:0:5} == 'role:' ]]; then
 					key=$(echo $line | cut -d '|' -f 1 | cut -d ':' -f 2)
@@ -114,8 +114,8 @@ scriptDescription="Merge role data"
 		      	fi
 			done < $rolesFile
 
-			Msg2 "^Retrieved ${#rolesFromFile[@]} records"
-			if [[ $verboseLevel -ge 1 ]]; then Msg2 "\n^rolesFromFile: $roleFile"; for i in "${!rolesFromFile[@]}"; do printf "\t\t[$i] = >${rolesFromFile[$i]}<\n"; done; fi
+			Msg3 "^Retrieved ${#rolesFromFile[@]} records"
+			if [[ $verboseLevel -ge 1 ]]; then Msg3 "\n^rolesFromFile: $roleFile"; for i in "${!rolesFromFile[@]}"; do printf "\t\t[$i] = >${rolesFromFile[$i]}<\n"; done; fi
 		return 0
 	} #GetRolesDataFromFile
 
@@ -124,15 +124,15 @@ scriptDescription="Merge role data"
 	#==================================================================================================
 	function GetRolesDataFromSpreadsheet {
 		trap 'SignalHandler ERR ${LINENO} $? ${BASH_SOURCE[0]}' ERR
-		Msg2 "\nParsing the roles data from the workbook file ($workbookFile)..."
+		Msg3 "\nParsing the roles data from the workbook file ($workbookFile)..."
 		## Parse the role data from the spreadsheet
 			workbookSheet='roles'
 			getXlsx $USELOCAL --noLog --noLogInDb $workbookFile $workbookSheet \| > $tmpFile
 			grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
 			if [[ $grepStr != '' ]]; then
-				Msg2 $E "Could not retrieve data from workbook, please see below"
+				Errors "Could not retrieve data from workbook, please see below"
 				tail -n 6 $tmpFile 2>&1 | xargs -I{} printf "\\t%s\\n" "{}"
-				Msg2
+				Msg3
 				Goodbye -1
 			fi
 
@@ -144,7 +144,7 @@ scriptDescription="Merge role data"
 				[[ $line == '' ]] && continue
 				if [[ $(Lower ${line:0:7}) == '*start*' && $foundHeader == false ]]; then
 					read line
-					Msg2 $V1 'Parsing header record'
+					Msg3 $V1 'Parsing header record'
 					IFSave=$IFS; IFS=\|; sheetCols=($line); IFS=$IFSave;
 					findFields="role members email"
 					for field in $findFields; do
@@ -158,19 +158,18 @@ scriptDescription="Merge role data"
 					done
 					dump -2 roleCol membersCol emailCol
 					membersCol=$membersCol$userCol
-					[[ $roleCol == '' ]] && Msg2 $T "Could not find a 'RoleName' column in the 'RolesData' sheet"
-					[[ $membersCol == '' ]] && Msg2 $T "Could not find a 'MemberList or UserList' column in the 'RolesData' sheet"
-					[[ $emailCol == '' ]] && Msg2 $T "Could not find a 'Email or UserList' column in the 'RolesData' sheet"
+					[[ $roleCol == '' ]] && Terminate "Could not find a 'RoleName' column in the 'RolesData' sheet"
+					[[ $membersCol == '' ]] && Terminate "Could not find a 'MemberList or UserList' column in the 'RolesData' sheet"
+					[[ $emailCol == '' ]] && Terminate "Could not find a 'Email or UserList' column in the 'RolesData' sheet"
 					foundHeader=true
 				elif [[ $foundHeader == true ]]; then
-					Msg2 $V1 'Parsing data record'
 					key=$(echo $line | cut -d '|' -f $roleCol)
 					[[ $key == '' ]] && continue
 					value=$(echo $line | cut -d '|' -f $membersCol)'|'$(echo $line | cut -d '|' -f $emailCol)
 					dump -2 -n line -t key value
 					if [[ ${rolesFromSpreadsheet["$key"]+abc} ]]; then
 						if [[ ${rolesFromSpreadsheet["$key"]} != $value ]]; then
-							Msg2 $T "The '$workbookSheet' tab in the workbook contains duplicate role records \
+							Terminate "The '$workbookSheet' tab in the workbook contains duplicate role records \
 							\n\tRole '$key' with value '$value' is duplicate\n\tprevious value = '${rolesFromSpreadsheet["$key"]}'"
 						fi
 					else
@@ -179,11 +178,11 @@ scriptDescription="Merge role data"
 				fi
 		done < $tmpFile
 
-		[[ ${#rolesFromSpreadsheet[@]} -eq 0 ]] && Msg2 $T "Did not retrieve any records from the spreadsheet, \
+		[[ ${#rolesFromSpreadsheet[@]} -eq 0 ]] && Terminate "Did not retrieve any records from the spreadsheet, \
 													\n^most likely it is missing the '*start*' directive in \
 													\n^column 'A' just above the header record."
-		Msg2 "^Retrieved ${#rolesFromSpreadsheet[@]} records"
-		if [[ $verboseLevel -ge 1 ]]; then Msg2 "\n^rolesFromSpreadsheet: $roleFile"; for i in "${!rolesFromSpreadsheet[@]}"; do printf "\t\t[$i] = >${rolesFromSpreadsheet[$i]}<\n"; done; fi
+		Msg3 "^Retrieved ${#rolesFromSpreadsheet[@]} records"
+		if [[ $verboseLevel -ge 1 ]]; then Msg3 "\n^rolesFromSpreadsheet: $roleFile"; for i in "${!rolesFromSpreadsheet[@]}"; do printf "\t\t[$i] = >${rolesFromSpreadsheet[$i]}<\n"; done; fi
 
 		return 0
 
@@ -239,7 +238,7 @@ srcEnv="$(TitleCase "$srcEnv")"
 tgtEnv="$(TitleCase "$tgtEnv")"
 
 ## Information only mode
- 	[[ $informationOnlyMode == true ]] && Msg2 $W "'informationOnlyMode' flag is set, no data will be modified."
+ 	[[ $informationOnlyMode == true ]] && Warning "'informationOnlyMode' flag is set, no data will be modified."
 
 ## Set output file
 	outFile="$(GetOutputFile "$client" "$env" "$product")"
@@ -248,13 +247,13 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 	unset mergeMode
 	[[ $overlay == true ]] && mergeMode='overlay'
 	[[ $merge == true ]] && mergeMode='merge'
-	if [[ $mergeMode == '' ]]; then
+	if [[ $mergeMode == '' && $informationOnlyMode != true ]]; then
 		unset ans
-		Msg2 "\n Do you wish to merge data when roles are found in both source and target, or do you want to overlay the target data from the source"
+		Msg3 "\n Do you wish to merge data when roles are found in both source and target, or do you want to overlay the target data from the source"
 		Prompt ans "'Yes' = 'merge', 'No' = 'overlay'" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
 		[[ $ans == 'y' ]] && mergeMode='merge' || mergeMode='overlay'
 	else
-		Msg2 $N "Using specified value of '$mergeMode' for 'mergeMode'"
+		Note "Using specified value of '$mergeMode' for 'mergeMode'"
 	fi
 
 ## Find out if this client uses UINs
@@ -263,7 +262,7 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -ne 0 ]]; then
 				result="${resultSet[0]}"
-				[[ $result == 'Y' ]] && useUINs=true && Msg2
+				[[ $result == 'Y' ]] && useUINs=true && Msg3
 			fi
 	fi
 
@@ -272,7 +271,7 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 	if [[ $workbookFile == '' && $verify != false ]]; then
 		if [[ $verify != false ]]; then
 			unset ans
-			Msg2
+			Msg3
 			Prompt ans "Do you wish to merge in spreadsheet data" 'Yes No' 'No'; ans=$(Lower ${ans:0:1})
 			if [[ $ans == 'y' ]]; then
 				## Search for XLSx files in clientData and implimentation folders
@@ -304,15 +303,15 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 						[[ $selectResp == '' ]] && Goodbye 0
 						workbookFile="$(pwd)/$selectResp"
 					else
-						Msg2 $I "No .xlsx files found"
+						Info "No .xlsx files found"
 					fi
-				[[ $workbookFile == "" ]] && Msg2
+				[[ $workbookFile == "" ]] && Msg3
 				Prompt workbookFile 'Please specify the full path to the workbook file' '*file*'
 				fi
 			fi
 		fi
 	fi
-	[[ $workbookFile != '' && ! -f $workbookFile ]] && Msg2 $T "Could not locate the workbookFile:\n\t$workbookFile"
+	[[ $workbookFile != '' && ! -f $workbookFile ]] && Terminate "Could not locate the workbookFile:\n\t$workbookFile"
 
 	workbookFileStr='N/A'
 	if [[ $workbookFile != '' ]]; then
@@ -327,7 +326,7 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 			else
 				workbookFileStr="$workbookFile"
 			fi
-			[[ ! -r $workbookFile ]] && Msg2 $T "Could not locate file: '$workbookFile'"
+			[[ ! -r $workbookFile ]] && Terminate "Could not locate file: '$workbookFile'"
 	fi
 
 ## set default values
@@ -358,17 +357,17 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 			getXlsx $USELOCAL --noLog --noLogInDb "$workbookFile" 'GetSheets' \| -v > $tmpFile
 			grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
 			if [[ $grepStr != '' ]]; then
-				Msg2 $E "Could not retrieve data from workbook, please see below"
+				Error "Could not retrieve data from workbook, please see below"
 				tail -n 6 $tmpFile 2>&1 | xargs -I{} printf "\\t%s\\n" "{}"
-				Msg2
+				Msg3
 				Goodbye -1
 			fi
 			sheets=$(tail -n 1 $tmpFile)
 			dump -1 sheets
 		## Make sure we have a 'role' sheet
-			[[ $(Contains "$(Lower $sheets)" 'role') != true ]] && Msg2 $T "Could not locate a sheet with 'role' in its name in workbook:\n^$workbookFile"
+			[[ $(Contains "$(Lower $sheets)" 'role') != true ]] && Terminate"Could not locate a sheet with 'role' in its name in workbook:\n^$workbookFile"
 			GetRolesDataFromSpreadsheet
-			if [[ $verboseLevel -ge 1 ]]; then Msg2 "\n^rolesfromSpreadsheet:"; for i in "${!rolesFromSpreadsheet[@]}"; do printf "\t\t[$i] = >${rolesFromSpreadsheet[$i]}<\n"; done; fi
+			if [[ $verboseLevel -ge 1 ]]; then Msg3 "\n^rolesfromSpreadsheet:"; for i in "${!rolesFromSpreadsheet[@]}"; do printf "\t\t[$i] = >${rolesFromSpreadsheet[$i]}<\n"; done; fi
 	fi
 
 ## Process role.tcf files
@@ -385,16 +384,16 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 	unset rolesFromFile
 
 ## Merge role file data
-	Msg2 "\nMerging the '$srcEnv' roles into the '$tgtEnv' roles ..."
+	Msg3 "\nMerging the '$srcEnv' roles into the '$tgtEnv' roles ..."
 	unset numDifferentFromSrc addedFromSrc
 	## Prime roles out array with the tgt file data.
 	for key in "${!rolesFromTgtFile[@]}"; do rolesOut["$key"]="${rolesFromTgtFile["$key"]}"; done
 	for key in "${!rolesFromSrcFile[@]}"; do
 		if [[ ${rolesOut["$key"]+abc} ]]; then
 			if [[ ${rolesFromSrcFile["$key"]} != ${rolesOut["$key"]} ]]; then
-				Msg2 $WT1 "Role '$key' data in '$srcEnv' differs from '$tgtEnv'"
-				Msg2 "^^$srcEnv data: ${rolesFromSrcFile["$key"]}"
-				Msg2 "^^$tgtEnv data: ${rolesOut["$key"]}"
+				Warning  0 1 "Role '$key' data in '$srcEnv' differs from '$tgtEnv'"
+				Msg3 "^^$srcEnv data: ${rolesFromSrcFile["$key"]}"
+				Msg3 "^^$tgtEnv data: ${rolesOut["$key"]}"
 				if [[ $mergeMode == 'merge' ]]; then
 					unset members1 members2 email1 email2 mergedMembers mergedEmail fromEnv
 					rolesOut["//$key"]="${rolesFromSrcFile["$key"]}   <-- Pre-merge $srcEnv value"
@@ -407,45 +406,44 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 					if [[ $email1 != $email2 ]]; then
 						[[ $email1 != '' ]] && mergedEmail="$email1" && fromEnv="$srcEnv"
 						[[ $email2 != '' ]] && mergedEmail="$email2" && fromEnv="$tgtEnv"
-						Msg2 "^^Email data on the roles do not match, using: '$mergedEmail' from '$fromEnv'"
+						Msg3 "^^Email data on the roles do not match, using: '$mergedEmail' from '$fromEnv'"
 						#warningMsgs+=("\tEmail data on the roles do not match, using: '$mergedEmail' from '$fromEnv'")
 					else
 						mergedEmail="$email2"
 					fi
 					dump -1 -t -t members1 members2 mergedMembers email1 email2 mergedEmail
 					rolesOut["$key"]="$mergedMembers|$mergedEmail"
-					Msg2 "^^New $tgtEnv (merged) data: ${rolesOut["$key"]}"
+					Msg3 "^^New $tgtEnv (merged) data: ${rolesOut["$key"]}"
 					#warningMsgs+=("\tNew $tgtEnv (merged) data: ${rolesOut["$key"]}")
 				else
 					rolesOut["//$key"]="${rolesFromSrcFile["$key"]}   <-- Pre-merge $srcEnv value"
-					Msg2 "^^Keeping existing ($tgtEnv) data."
+					Msg3 "^^Keeping existing ($tgtEnv) data."
 				fi
 				(( numDifferentFromSrc += 1 ))
 			fi
 		else
-			Msg2 $V1  "^Role added from src: $key"
 			rolesOut["$key"]="${rolesFromSrcFile["$key"]}"
 			(( addedFromSrc += 1 ))
 		fi
 	done;
 
 	numRolesOut=${#rolesOut[@]}
-	Msg2 "^Merged roles out record count: ${numRolesOut}"
-	[[ $addedFromSrc -gt 0 ]] && Msg2 "^$addedFromSrc records added from '$srcEnv'"
-	[[ $numDifferentFromSrc -gt 0 ]] && Msg2 "^$numDifferentFromSrc records differed between '$srcEnv' and '$tgtEnv'"
+	Msg3 "^Merged roles out record count: ${numRolesOut}"
+	[[ $addedFromSrc -gt 0 ]] && Msg3 "^$addedFromSrc records added from '$srcEnv'"
+	[[ $numDifferentFromSrc -gt 0 ]] && Msg3 "^$numDifferentFromSrc records differed between '$srcEnv' and '$tgtEnv'"
 
-	if [[ $verboseLevel -ge 1 ]]; then Msg2 "\n^rolesOut: "; for i in "${!rolesOut[@]}"; do printf "\t\t[$i] = >${rolesOut[$i]}<\n"; done; fi
+	if [[ $verboseLevel -ge 1 ]]; then Msg3 "\n^rolesOut: "; for i in "${!rolesOut[@]}"; do printf "\t\t[$i] = >${rolesOut[$i]}<\n"; done; fi
 
 ## Merge role spreadsheet data
 	if [[ $workbookFile != '' ]]; then
 		unset numDifferentFromSpreadsheet addedFromSpreadsheet
-		Msg2 "\nMerging the spreadsheet role data into the '$tgtEnv' roles ..."
+		Msg3 "\nMerging the spreadsheet role data into the '$tgtEnv' roles ..."
 		for key in "${!rolesFromSpreadsheet[@]}"; do
 			if [[ ${rolesOut["$key"]+abc} ]]; then
 				if [[ ${rolesFromSpreadsheet["$key"]} != ${rolesOut["$key"]} ]]; then
-					Msg2 $WT1 "Role '$key' data in spreadsheet differs from '$tgtEnv'"
-					Msg2 "^^Spreadsheet data: ${rolesFromSpreadsheet["$key"]}"
-					Msg2 "^^$tgtEnv data: ${rolesOut["$key"]}"
+					Warning 0 1 "Role '$key' data in spreadsheet differs from '$tgtEnv'"
+					Msg3 "^^Spreadsheet data: ${rolesFromSpreadsheet["$key"]}"
+					Msg3 "^^$tgtEnv data: ${rolesOut["$key"]}"
 					if [[ $mergeMode == 'merge' ]]; then
 						unset members1 members2 email1 email2 mergedMembers mergedEmail
 						rolesOut["//$key"]="${rolesFromSpreadsheet["$key"]}   <-- Pre-merge spreadsheet value"
@@ -458,31 +456,30 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 						if [[ $email1 != $email2 ]]; then
 						[[ $email2 != '' ]] && mergedEmail="$email2" && fromEnv="$tgtEnv"
 						[[ $email1 != '' ]] && mergedEmail="$email1" && fromEnv="spreadsheet"
-						Msg2 "^^Email data on the roles do not match, using: '$mergedEmail' from '$fromEnv'"
+						Msg3 "^^Email data on the roles do not match, using: '$mergedEmail' from '$fromEnv'"
 						#warningMsgs+=("\tEmail data on the roles do not match, using: '$mergedEmail' from '$fromEnv'")
 						else
 							mergedEmail="$email2"
 						fi
 						dump -1 -t -t members1 members2 mergedMembers email1 email2 mergedEmail
 						rolesOut["$key"]="$mergedMembers|$mergedEmail"
-						Msg2 "^^New $tgtEnv (merged) data: ${rolesOut["$key"]}"
+						Msg3 "^^New $tgtEnv (merged) data: ${rolesOut["$key"]}"
 						#warningMsgs+=("^New $tgtEnv (merged) data: ${rolesOut["$key"]}")
 					else
 						rolesOut["//$key"]="${rolesFromSpreadsheet["$key"]}   <-- Pre-merge spreadsheet value"
-						Msg2 "^^Keeping existing ($tgtEnv) data."
+						Msg3 "^^Keeping existing ($tgtEnv) data."
 					fi
 					(( numDifferentFromSrc += 1 ))
 				fi
 			else
-				Msg2 $V1 "^Role added from src: $key"
 				rolesOut["$key"]="${rolesFromSpreadsheet["$key"]}"
 				(( addedFromSrc += 1 ))
 			fi
 		done
 
-		Msg2 "^Merged roles out record count: ${#rolesOut[@]}"
-		[[ $addedFromSpreadsheet -gt 0 ]] && Msg2 "^$addedFromSpreadsheet records added from the Spreadsheet"
-		[[ $numDifferentFromSpreadsheet -gt 0 ]] && Msg2 "^$numDifferentFromSpreadsheet records differed between Spreadsheet and '$tgtEnv'"
+		Msg3 "^Merged roles out record count: ${#rolesOut[@]}"
+		[[ $addedFromSpreadsheet -gt 0 ]] && Msg3 "^$addedFromSpreadsheet records added from the Spreadsheet"
+		[[ $numDifferentFromSpreadsheet -gt 0 ]] && Msg3 "^$numDifferentFromSpreadsheet records differed between Spreadsheet and '$tgtEnv'"
 	fi
 
 ## Write out file
@@ -490,13 +487,13 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 	if [[ $informationOnlyMode != true ]]; then
 		writeFile=true
 		if [[ ${#warningMsgs[@]} -gt 0 ]]; then
-			Msg2; unset ans
+			Msg3; unset ans
 			Prompt ans "Warning messages were issued, do you wish to write the role data out to '$tgtEnv'" "Yes No"; ans=$(Lower ${ans:0:1})
 			[[ $ans != 'y' ]] && writeFile=false
 		fi
 		if [[ $writeFile == true ]]; then
 			rolesFile=$tgtDir/web/courseleaf/roles.tcf
-			Msg2 "\nWriting out new roles.tcf file to '$tgtEnv' ($rolesFile)..."
+			Msg3 "\nWriting out new roles.tcf file to '$tgtEnv' ($rolesFile)..."
 			editFile=$rolesFile
 			BackupCourseleafFile $editFile
 			# Parse the target file to put source data in the correct location in target file.
@@ -520,12 +517,12 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 			## Swap the files
 				mv $editFile.new $editFile
 				[[ -f $topPart ]] && rm -f $topPart; [[ -f $bottomPart ]] && rm -f $bottomPart
-			Msg2 "^$editFile written to disk"
+			Msg3 "^$editFile written to disk"
 			summaryMsgs+=("$editFile written to disk")
 			## Write out change log entries
-				$DOIT Msg2 "\n$userName\t$(date) via '$myName' version: $version" >> $tgtDir/changelog.txt
-				$DOIT Msg2 "^Merged data from '$srcEnv'" >> $tgtDir/changelog.txt
-				[[ $workbookFile != '' ]] && $DOIT Msg2 "^Merged data from $realWorkbookFile" >> $tgtDir/changelog.txt
+				$DOIT Msg3 "\n$userName\t$(date) via '$myName' version: $version" >> $tgtDir/changelog.txt
+				$DOIT Msg3 "^Merged data from '$srcEnv'" >> $tgtDir/changelog.txt
+				[[ $workbookFile != '' ]] && $DOIT Msg3 "^Merged data from $realWorkbookFile" >> $tgtDir/changelog.txt
 		fi # writeFile
 	fi #not informationOnlyMode
 
@@ -562,3 +559,4 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 ## Tue Sep 20 12:34:42 CDT 2016 - dscudiero - Switched to use Msg2
 ## 05-26-2017 @ 12.49.39 - (2.2.21)    - dscudiero - Found an instance of Msg vs Msg2
 ## 06-07-2017 @ 07.44.14 - (2.2.22)    - dscudiero - Added BackupCourseleafFIle to the import list
+## 09-25-2017 @ 12.26.53 - (2.2.24)    - dscudiero - Switch to use Msg3
