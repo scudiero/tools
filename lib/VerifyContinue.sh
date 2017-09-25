@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.19" # -- dscudiero -- Mon 09/25/2017 @ 12:25:34.08
+# version="2.0.21" # -- dscudiero -- Mon 09/25/2017 @ 16:13:12.96
 #===================================================================================================
 ## Make sure the user really wants to do this
 ## If the first argument is 'loop' then loop back to self if user responds with 'n'
@@ -29,7 +29,7 @@ function VerifyContinue {
 			[[ $(Lower "$tempStr") == 'warning' ]] && color='ColorW' || color='ColorK'
 			tempStr="${tempStr}${dots}"
 			tempStr=${tempStr:0:$maxArgWidth+3}
-			Msg2 '-,-,+1' "$(eval "$color \"${tempStr}\"")$(echo $arg | cut -d':' -f2-)"
+			Msg3 Q 0 1 "$(eval "$color \"${tempStr}\"")$(echo $arg | cut -d':' -f2-)"
 		done
 		[[ $testMode == true ]] && Msg3 "^$(ColorE "*** Running in Test Mode ***")"
 		[[ $informationOnlyMode == true ]] && Msg3 "^$(ColorE "*** Information only mode, no data will be modified ***")"
@@ -61,3 +61,4 @@ export -f VerifyContinue
 ## 04-25-2017 @ 08.38.30 - ("2.0.13")  - dscudiero - Skip prompt if go=true
 ## 08-30-2017 @ 15.15.40 - ("2.0.16")  - dscudiero - use ColorW for warning messages
 ## 09-25-2017 @ 12.26.42 - ("2.0.19")  - dscudiero - Switch to use Msg3
+## 09-25-2017 @ 16.13.26 - ("2.0.21")  - dscudiero - use Msg3
