@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.4" // -- dscudiero -- Fri 09/22/2017 @ 11:27:25.88
+wfLibVersion="1.8.5" // -- dscudiero -- Mon 09/25/2017 @ 14:17:20.81
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -1769,7 +1769,7 @@ wffuncs.CheckChanged = function(inval, wfrule, args) {
 		var allowStep=CheckChanged({ mode: mode, checkFields: checkFieldsStr })
 
 	// Return results
-		if (notMode) allowStep=!allowStep;
+		if (notMode) { wfDebug(3,"\t\tNot mode is active, flipping allowStep value"); allowStep=!allowStep; }
 		if (allowStep) {
 			wfDebug(3,"\t*** Allowing step")
 			return [inval.replace(wfrule.ifregex,'')];
@@ -2347,3 +2347,4 @@ var wfLibLoaded=true;
 // 09-20-2017 @ 15.31.40 - ("1.8.1")   - dscudiero - General syncing of dev to prod
 // 09-22-2017 @ 07.19.12 - ("1.8.2")   - dscudiero - Update the way we do wfAllCodes
 // 09-22-2017 @ 11.28.28 - ("1.8.4")   - dscudiero - Added NoWorkflow function
+// 09-25-2017 @ 15.42.23 - ("1.8.5")   - dscudiero - Added a message if in not mode
