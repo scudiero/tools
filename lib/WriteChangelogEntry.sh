@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.32" # -- dscudiero -- Thu 09/21/2017 @ 12:40:37.15
+# version="2.0.33" # -- dscudiero -- Mon 09/25/2017 @ 16:01:21.05
 #===================================================================================================
 # Write a 'standard' format courseleaf changelog.txt
 # args: "logFileName" ${lineArray[@]}
@@ -46,6 +46,7 @@ function WriteChangelogEntry {
 	## Check if the user has a local logit script in $HOME/bin, if found the call it.
 		logText=$(sed "s_'_\\\'_"g <<< "$logger: ${!ref[0]}")
 		logText=$(sed 's_\"_\\\"_'g <<< "$logText")
+[[ $userName == 'dscudiero' ]] && echo "$HOME/bin/logit -cl \"${client:--}\" -e \"${env:--}\" \"$logText\""
 		[[ -x $HOME/bin/logit ]] && $HOME/bin/logit -cl "${client:--}" -e "${env:--}" "$logText"
 
 	return 0
@@ -65,3 +66,4 @@ export -f WriteChangelogEntry
 ## 09-21-2017 @ 09.33.33 - ("2.0.30")  - dscudiero - Add call to users local logit script if it exists
 ## 09-21-2017 @ 11.34.51 - ("2.0.31")  - dscudiero - Change the way logit is called
 ## 09-21-2017 @ 12.41.05 - ("2.0.32")  - dscudiero - change the if exists check for logit to if executable
+## 09-25-2017 @ 16.01.28 - ("2.0.33")  - dscudiero - add debug statement
