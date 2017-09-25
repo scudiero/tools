@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.141" # -- dscudiero -- Mon 09/25/2017 @  7:57:41.43
+# version="2.0.143" # -- dscudiero -- Mon 09/25/2017 @  8:59:55.31
 #===================================================================================================
 # Common script exit
 # args:
@@ -15,8 +15,6 @@ function Goodbye {
 	Import "$standardIncludes $myIncludes"
 
 	SetFileExpansion 'off'
-	Msg2 $V3 "*** Starting: $FUNCNAME ***"
-
 	local exitCode=$1; shift
 	local additionalText=$*
 	dump -3 exitCode additionalText
@@ -42,7 +40,7 @@ function Goodbye {
 			;;
 		quickquit|x)
 			[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Remove' $myLogRecordIdx
-			Msg2 "\n*** $myName: Stopping at user's request ***"
+			Msg3 "\n*** $myName: Stopping at user's request ***"
 			[[ $$ -ne $BASHPID ]] && kill -1 $BASHPID  ## If the BASHPID != the current processid then we are in a subshell, send a HangUP signel to the subshell
 			;;
 		return|r)
@@ -51,11 +49,11 @@ function Goodbye {
 		*)
 			## If there are any forked process, then wait on them
 				if [[ ${#forkedProcesses[@]} -gt 0  && $waitOnForkedProcess == true ]]; then
-					Msg2; Msg2 "*** Waiting for ${#forkedProcesses[@]} forked processes to complete ***"
+					Msg3; Msg3 "*** Waiting for ${#forkedProcesses[@]} forked processes to complete ***"
 					for pid in ${forkedProcesses[@]}; do
 						wait $pid;
 					done;
-					Msg2 '*** All forked process have completed ***'
+					Msg3 '*** All forked process have completed ***'
 				fi
 
 			## calculate epapsed time
@@ -80,42 +78,42 @@ function Goodbye {
 						local numMsgs=0
 						Alert 'off'
 						if [[ ${#summaryMsgs[@]} -gt 0 && $displayGoodbyeSummaryMessages == true ]]; then
-							echo
+							Msg3
 							PrintBanner "Processing Summary"
-							echo
-							for msg in "${summaryMsgs[@]}"; do Msg2 "^$msg"; done
+							Msg3
+							for msg in "${summaryMsgs[@]}"; do Msg3 "^$msg"; done
 							let numMsgs=$numMsgs+${#summaryMsgs[@]}
 						fi
 						if [[ ${#warningMsgs[@]} -gt 0 && $displayGoodbyeSummaryMessages == true ]]; then
-							echo
+							Msg3
 							PrintBanner "${#warningMsgs[@]} warning message(s) were issued during processing"
-							echo
-							for msg in "${warningMsgs[@]}"; do Msg2 "^$msg"; done
+							Msg3
+							for msg in "${warningMsgs[@]}"; do Msg3 "^$msg"; done
 							let numMsgs=$numMsgs+${#warningMsgs[@]}
 						fi
 						if [[ ${#errorMsgs[@]} -gt 0 && $displayGoodbyeSummaryMessages == true ]]; then
-							echo
+							Msg3
 							PrintBanner "${#errorMsgs[@]} error message(s) were issued during processing"
-							echo
-							for msg in "${errorMsgs[@]}"; do Msg2 "^$msg"; done
+							Msg3
+							for msg in "${errorMsgs[@]}"; do Msg3 "^$msg"; done
 							let numMsgs=$numMsgs+${#errorMsgs[@]}
 						fi
 						[[ $numMsgs -gt 0 ]] && printf "\n$(PadChar)\n"
 						Alert 'on'
-						echo
+						Msg3
 
 					fi
-					[[ $DOIT != '' ]] && Msg2 "$(ColorE "*** The 'DOIT' flag is turned off, changes not committed ***")"
-					[[ $informationOnlyMode == true ]] && Msg2 "$(ColorE "*** Information only mode, no data updated ***")"
+					[[ $DOIT != '' ]] && Msg3 "$(ColorE "*** The 'DOIT' flag is turned off, changes not committed ***")"
+					[[ $informationOnlyMode == true ]] && Msg3 "$(ColorE "*** Information only mode, no data updated ***")"
 					if [[ $exitCode -eq 0 ]]; then
-						Msg2 "$(ColorK "${myName}") $(ColorI " -- $additionalText completed successfully.")"
+						Msg3 "$(ColorK "${myName}") $(ColorI " -- $additionalText completed successfully.")"
 					else
-						Msg2 "$(ColorK "${myName}") $(ColorE " -- $additionalText completed with errors, exit code = $exitCode")\a"
+						Msg3 "$(ColorK "${myName}") $(ColorE " -- $additionalText completed with errors, exit code = $exitCode")\a"
 					fi
-					[[ $logFile != '/dev/null' ]] && Msg2 "Additional details may be found in:\n^'$logFile'"
-					Msg2 "$date (Elapsed time: $elapTime)"
+					[[ $logFile != '/dev/null' ]] && Msg3 "Additional details may be found in:\n^'$logFile'"
+					Msg3 "$date (Elapsed time: $elapTime)"
 					[[ $TERM == 'dumb' ]] && echo
-					Msg2 "$(PadChar)"
+					Msg3 "$(PadChar)"
 				fi #not quiet noHeaders secondaryMessagesOnly
 			[[ $alert == true ]] && Alert
 	esac
@@ -127,14 +125,14 @@ function Goodbye {
 	## If running for another user, then send an email to that user
 	if [[ -n $forUser ]]; then
 		tmpFile=$(mkTmpFile)
-		Msg2 > $tmpFile
-		Msg2 "'$myName' was run in your behalf by $userName, the log is attached" >> $tmpFile
-		Msg2 >> $tmpFile
-		Msg2 "\n*** Running on behalf of user: ${forUser}, an email was sent to: ${forUser}@leepfrog.com\n"
-		Msg2 "$(PadChar)" >> $tmpFile
-		Msg2 >> $tmpFile
+		Msg3 > $tmpFile
+		Msg3 "'$myName' was run in your behalf by $userName, the log is attached" >> $tmpFile
+		Msg3 >> $tmpFile
+		Msg3 "\n*** Running on behalf of user: ${forUser}, an email was sent to: ${forUser}@leepfrog.com\n"
+		Msg3 "$(PadChar)" >> $tmpFile
+		Msg3 >> $tmpFile
 		cat "$logFile" >> $tmpFile
-		Msg2 >> $tmpFile
+		Msg3 >> $tmpFile
 		$DOIT mutt -a "$logFile" -s "$myName '$client' site created - $(date +"%m-%d-%Y")" -- ${forUser}@leepfrog.com < $tmpFile
 		rm -f $tmpFile
 	fi
@@ -175,3 +173,4 @@ export -f Goodbye
 ## 09-01-2017 @ 09.27.18 - ("2.0.138") - dscudiero - Add call myname-FUNCNAME function if found
 ## 09-25-2017 @ 07.50.38 - ("2.0.140") - dscudiero - General syncing of dev to prod
 ## 09-25-2017 @ 07.57.50 - ("2.0.141") - dscudiero - General syncing of dev to prod
+## 09-25-2017 @ 09.01.41 - ("2.0.143") - dscudiero - Switch to Msg3
