@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.2" # -- dscudiero -- Mon 09/25/2017 @  8:05:51.36
+# version="1.0.4" # -- dscudiero -- Mon 09/25/2017 @  8:09:26.92
 #===================================================================================================
 # Usage: Msg3 <msgType> <msgLevel> <indentLevel> msgText
 # 	msgType: [N,I,W,E,T]
@@ -72,5 +72,11 @@ function Terminate { Msg3 "T" $* ; return 0; }
 function Verbose { Msg3 "V" $* ; return 0; }
 function Quick { Msg3 "Q" $* ; return 0; }
 function Log { Msg3 "L" $* ; return 0; }
-export -f Msg Info Note Warning Error Terminate Verbose Quick Log## 09-25-2017 @ 08.03.42 - ("1.0.1")   - dscudiero - General syncing of dev to prod
+export -f Msg Info Note Warning Error Terminate Verbose Quick Log
+
+#===================================================================================================
+## check-in log
+#===================================================================================================
+## 09-25-2017 @ 08.03.42 - ("1.0.1")   - dscudiero - General syncing of dev to prod
 ## 09-25-2017 @ 08.06.13 - ("1.0.2")   - dscudiero - General syncing of dev to prod
+## 09-25-2017 @ 08.09.54 - ("1.0.4")   - dscudiero - General syncing of dev to prod
