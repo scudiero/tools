@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.0" # -- dscudiero -- Fri 09/22/2017 @ 12:56:27.63
+# version="1.0.1" # -- dscudiero -- Mon 09/25/2017 @  8:03:29.98
 #===================================================================================================
 # Usage: Msg3 <msgType> <msgLevel> <indentLevel> msgText
 # 	msgType: [N,I,W,E,T]
@@ -31,7 +31,6 @@ function Msg3 {
 
 			## Format message
 			msgText="$*"
-			[[ ]]
 			case $msgType in
 				q|Q) echo -e "$msgText" && return 0 ;;
 				n|N) msgText="$(ColorN "*Note*") -- $msgText" ;;
@@ -71,4 +70,4 @@ function Terminate { Msg3 "T" $* ; return 0; }
 function Verbose { Msg3 "V" $* ; return 0; }
 function Quick { Msg3 "Q" $* ; return 0; }
 function Log { Msg3 "L" $* ; return 0; }
-export -f Msg Info Note Warning Error Terminate Verbose Quick Log
+export -f Msg Info Note Warning Error Terminate Verbose Quick Log## 09-25-2017 @ 08.03.42 - ("1.0.1")   - dscudiero - General syncing of dev to prod
