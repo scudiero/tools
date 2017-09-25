@@ -10,7 +10,7 @@
 function Help {
 	mode="${1-normal}"
 
-	includes='Msg2 Dump StringFunctions Colors'
+	includes='Msg3 Dump StringFunctions Colors'
 	Import "$includes"
 
 	[[ $(type -t $FUNCNAME-$myName) == 'function' ]] && $FUNCNAME-$myName 'setVarsOnly'
@@ -19,12 +19,12 @@ function Help {
 	local myHelpSet="common,script,$(tr ' ' ',' <<< $helpSet)"
 	local tempStr="$(ColorK "Usage:") $myName"
 
-	includes='Msg2 Colors StringFunctions'
+	includes='Msg3 Colors StringFunctions'
 	Import "$includes"
 
 	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
 	echo; echo
-	Msg2 "$myName version: $version"
+	Msg3 "$myName version: $version"
 	[[ $updatesClData == 'Yes' ]] && Warning "This script updates client side data"
 	echo
 
@@ -43,23 +43,23 @@ function Help {
 
 	[[ $(Contains ",$myHelpSet," ",client,") == true ]] && hasClient=true && tempStr="$tempStr [client]"
 	tempStr="$tempStr [OPTIONS]"
-	Msg2 "$tempStr"
+	Msg3 "$tempStr"
 	echo
 	## Print out header info
-		[[ $scriptDescription != '' ]] && Msg2 "$(ColorK "$scriptDescription.")"
-		[[ $shortDescription != '' ]] && Msg2 "$(ColorK "$shortDescription.")"
-		[[ $longDescription != '' ]] && echo && Msg2 "$longDescription" && echo
+		[[ $scriptDescription != '' ]] && Msg3 "$(ColorK "$scriptDescription.")"
+		[[ $shortDescription != '' ]] && Msg3 "$(ColorK "$shortDescription.")"
+		[[ $longDescription != '' ]] && echo && Msg3 "$longDescription" && echo
 		if [[ -n $scriptHelpDesc ]]; then
 			for text in "${scriptHelpDesc[@]}"; do
-				Msg2 "$text"
+				Msg3 "$text"
 			done
 			echo
 		else
 			[[ $(type -t $FUNCNAME-$myName) == 'function' ]] && $FUNCNAME-$myName
 			[[ $(type -t $myName-$FUNCNAME) == 'function' ]] && $myName-$FUNCNAME
 		fi
-		[[ $author != '' ]] && Msg2 "$(ColorK "Author:") $author"
-		[[ $supported != '' ]] && Msg2 "$(ColorK "Supported:") $supported"
+		[[ $author != '' ]] && Msg3 "$(ColorK "Author:") $author"
+		[[ $supported != '' ]] && Msg3 "$(ColorK "Supported:") $supported"
 
 	## Loop through them and find the max widths for the name and min name
 		local maxWidthMin=0
@@ -74,8 +74,8 @@ function Help {
 
 	echo
 	if [[ $hasClient == true ]]; then
-		Msg2 "$(ColorK "[client]:")"
-		Msg2 "^This is the client code (abbreviation) for the client that you wish to work with."
+		Msg3 "$(ColorK "[client]:")"
+		Msg3 "^This is the client code (abbreviation) for the client that you wish to work with."
 	fi
 
 	## print them out
@@ -112,58 +112,58 @@ function Help {
 		done
 
 	echo
-	Msg2 "$(ColorK "[OPTIONS]")"
+	Msg3 "$(ColorK "[OPTIONS]")"
 	if [[ ${#scriptOptionsArray[@]} -gt 0 || ${#scriptSwitchesArray[@]} -gt 0  ]]; then
-		Msg2 "^$(ColorU "$(ColorK "Script specific options:")")"
+		Msg3 "^$(ColorU "$(ColorK "Script specific options:")")"
 		## Script specific options
 		if [[ ${#scriptOptionsArray[@]} -gt 0 ]]; then
-			Msg2 "^^$(ColorK "Arguments with values (i.e. a flag with value e.g. -flag value):")"
+			Msg3 "^^$(ColorK "Arguments with values (i.e. a flag with value e.g. -flag value):")"
 			for msgString in "${scriptOptionsArray[@]}"; do
-				Msg2 "^$msgString"
+				Msg3 "^$msgString"
 			done
 			echo
 		fi
 		## Script specific switches
 		if [[ ${#scriptSwitchesArray[@]} -gt 0 ]]; then
-			Msg2 "^^$(ColorK "Arguments without values (i.e. a flag e.g. -flag):")"
+			Msg3 "^^$(ColorK "Arguments without values (i.e. a flag e.g. -flag):")"
 			for msgString in "${scriptSwitchesArray[@]}"; do
-				Msg2 "^$msgString"
+				Msg3 "^$msgString"
 			done
 			echo
 		fi
 	fi
 
-	Msg2 "^$(ColorU "$(ColorK "Tools common options:")") $(ColorW "(Note: While all options can be specified they may not have a meaning for the current script)")"
+	Msg3 "^$(ColorU "$(ColorK "Tools common options:")") $(ColorW "(Note: While all options can be specified they may not have a meaning for the current script)")"
 	## Common specific options
 	if [[ ${#commonOptionsArray[@]} -gt 0 ]]; then
-		Msg2 "^^$(ColorK "Arguments with values (i.e. a flag with value e.g. -flag value):")"
+		Msg3 "^^$(ColorK "Arguments with values (i.e. a flag with value e.g. -flag value):")"
 		for msgString in "${commonOptionsArray[@]}"; do
-			Msg2 "^$msgString"
+			Msg3 "^$msgString"
 		done
 		echo
 	fi
 	## Common specific switches
 	if [[ ${#commonSwitchesArray[@]} -gt 0 ]]; then
-		Msg2 "^^$(ColorK "Arguments without values (i.e. a flag e.g. -flag):")"
+		Msg3 "^^$(ColorK "Arguments without values (i.e. a flag e.g. -flag):")"
 		for msgString in "${commonSwitchesArray[@]}"; do
-			Msg2 "^$msgString"
+			Msg3 "^$msgString"
 		done
 		echo
 	fi
 
 	## print out script specific help notes
 	if [[ ${#helpNotes[@]} -gt 0 ]]; then
-		Msg2 "$(ColorK "Script specific notes:")"
+		Msg3 "$(ColorK "Script specific notes:")"
 		for ((cntr = 0 ; cntr < ${#helpNotes[@]} ; cntr++)); do
 			let idx=$cntr+1
-	 		Msg2 "^$idx) ${helpNotes[$cntr]}"
+	 		Msg3 "^$idx) ${helpNotes[$cntr]}"
 		done
 		echo
 	fi
 
 	## General help notes for all scripts
 	echo
-	Msg2 "$(ColorK "General Notes:")"
+	Msg3 "$(ColorK "General Notes:")"
 	local notesClient notesAlways notes
 	unset notesClient notesAlways notes
 	notesClient+=("A value of '.' may be specified for client to parse the client value from the current working directory.")
@@ -171,7 +171,7 @@ function Help {
 
 	notesAlways+=("All flags/switches/options $(ColorB "must") be delimited from other flags by at lease one blank character.")
 	notesAlways+=("The minimum abbreviations for argument flags are indicated in the $(ColorK highlight) color above.")
-	notesAlways+=("If an argument is an option with a value, and the value contains blanks/spaces, the argument value needs to be enclosed in single quotes which need to be escaped on the command line, e.g. -file \'This is a File Name\'.")
+	notesAlways+=("If an argument is an option with a value, and the value contains blanks/spaces, the argument value needs\n^   to be enclosed in single quotes which need to be escaped on the command line, e.g. -file \'This is a File Name\'.")
 	notesAlways+=("To get additional help information on what is used by this script you can use the -hh option.")
 
 	notes=("${notesAlways[@]}")
@@ -179,7 +179,7 @@ function Help {
 
 	idx=1
 	for line in "${notes[@]}"; do
-		Msg2 ",,+1,,true" "$idx) $line"
+		Msg3  "^$idx) $line"
 		((idx+=1))
 	done
 	echo
@@ -190,26 +190,26 @@ function Help {
 	if [[ -n $SCRIPTINCLUDES ]]; then
 		## Scripts
 		local token
-		Msg2 "$(ColorK "Tools library modules used (via tools/lib):")"
+		Msg3 "$(ColorK "Tools library modules used (via tools/lib):")"
 		for token in $(tr ',' ' ' <<< $SCRIPTINCLUDES); do
-			Msg2 "^$token"
+			Msg3 "^$token"
 		done #| sort
 		echo
 		## Java
 		if [[ $(Contains "$SCRIPTINCLUDES" "RunSql2") == true && -n $javaResources ]]; then
 			local token
-			Msg2 "$(ColorK "Java resources used (via $TOOLSPATH/src/java/tools.jar):")"
+			Msg3 "$(ColorK "Java resources used (via $TOOLSPATH/src/java/tools.jar):")"
 			for token in $(tr ',' ' ' <<< $javaResources); do
-				Msg2 "^$token"
+				Msg3 "^$token"
 			done | sort
 			echo
 		fi
 		## Python
 		if [[ $(Contains "$SCRIPTINCLUDES" "GetExcel") == true && -n $pythonResources ]]; then
 			local token
-			Msg2 "$(ColorK "Python resources used:")"
+			Msg3 "$(ColorK "Python resources used:")"
 			for token in $(tr ',' ' ' <<< $pythonResources); do
-				Msg2 "^$token"
+				Msg3 "^$token"
 			done | sort
 			echo
 		fi
@@ -227,3 +227,4 @@ export -f Help
 ## 08-30-2017 @ 14.07.33 - (2.0.6)     - dscudiero - Tweak output format
 ## 09-01-2017 @ 09.27.30 - (2.0.8)     - dscudiero - Add call myname-FUNCNAME function if found
 ## 09-01-2017 @ 09.38.26 - (2.0.9)     - dscudiero - Fix spelling error
+## 09-25-2017 @ 08.14.09 - (2.1.-1)    - dscudiero - Use Msg3
