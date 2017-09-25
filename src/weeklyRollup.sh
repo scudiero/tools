@@ -1,10 +1,10 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #===================================================================================================
-version=1.0.28 # -- dscudiero -- Thu 09/21/2017 @ 10:02:28.52
+version=1.0.29 # -- dscudiero -- Mon 09/25/2017 @  7:57:23.40
 #===================================================================================================
 TrapSigs 'on'
-myIncludes=""
+myIncludes="ProtectedCall RunSql2 SetFileExpansion"
 Import "$standardIncludes $myIncludes"
 originalArgStr="$*"
 scriptDescription=""
@@ -123,3 +123,4 @@ Goodbye 0 #'alert'
 ## Mon Feb 13 16:12:36 CST 2017 - dscudiero - make sure we have our own tmpFile
 ## 06-05-2017 @ 08.16.04 - (1.0.27)    - dscudiero - tweak messaging
 ## 09-21-2017 @ 10.03.00 - (1.0.28)    - dscudiero - comment out the truncating of the processlog
+## 09-25-2017 @ 07.57.52 - (1.0.29)    - dscudiero - General syncing of dev to prod
