@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.19" # -- dscudiero -- Mon 09/25/2017 @  8:41:32.96
+# version="2.1.21" # -- dscudiero -- Mon 09/25/2017 @  8:46:06.65
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -99,7 +99,11 @@ function Prompt {
 							fi
 							[[ $rc -gt 0 && $tCntr -ge $maxReadTimeout ]] && echo && Terminate "Read operation timed out after the maximum time of $maxReadTimeout seconds" && exit
 						done ; echo
-						[[ -z $response ]] && Note 0 1 "Read timed out, using default value '$defaultVal' for '$promptVar'" && eval $promptVar=\"$defaultVal\" && return 0
+						if [[ -z $response ]]; then
+							[[ -n $defaultVal ]] && Note 0 1 "Read timed out, using default value '$defaultVal' for '$promptVar'"
+							eval $promptVar=\"$defaultVal\"
+							return 0
+						fi
 					fi
 			else
 				[[ -n "$defaultVal" ]] && response="$defaultVal" || Terminate "No Prompt is active and no default value specified for '$promptVar'"
@@ -181,3 +185,4 @@ export -f Prompt
 ## 06-07-2017 @ 09.34.32 - ("2.1.16")  - dscudiero - Fix problem not getting primary prompt text in timed mode
 ## 08-24-2017 @ 16.32.08 - ("2.1.17")  - dscudiero - Change prompt text when a timed read times out
 ## 09-25-2017 @ 08.42.47 - ("2.1.19")  - dscudiero - General syncing of dev to prod
+## 09-25-2017 @ 09.01.55 - ("2.1.21")  - dscudiero - Switch to Msg3
