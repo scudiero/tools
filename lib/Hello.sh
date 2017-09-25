@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.33" # -- dscudiero -- Thu 09/07/2017 @ 10:10:30.84
+# version="2.0.34" # -- dscudiero -- Mon 09/25/2017 @  8:17:45.94
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -12,31 +12,31 @@ function Hello {
 	[[ $quiet == true || $noHeaders == true || $secondaryMessagesOnly == true ]] && return 0
 	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
 
-	includes="Msg2 Colors ProcessLogger DisplayNews"
+	includes="Msg3 Colors ProcessLogger DisplayNews"
 	Import "$includes"
 
 	echo
 	[[ $TERM == 'dumb' ]] && echo
-	Msg2 "$(PadChar)"
+	Msg3 "$(PadChar)"
 	date=$(date)
 
 	local checkName=$(logname 2>&1); rc=$?
 	[[ $rc -gt 0 ]] && checkName="$LOGNAME"
 
 	[[ "$version" = "" ]] && version=1.0.0
-	Msg2 "${myName} ($version) -- Date: $(date +"%a") $(date +"%m-%d-%Y @ %H.%M.%S")"
-	[[ "$myDescription" != "" ]] && Msg2 && Msg2 "$myDescription"
+	Msg3 "${myName} ($version) -- Date: $(date +"%a") $(date +"%m-%d-%Y @ %H.%M.%S")"
+	[[ "$myDescription" != "" ]] && Msg3 && Msg3 "$myDescription"
 	[[ $checkName != $userName ]] && userStr="Real user $checkName, Tools user: $userName" || userStr="Tools user: $userName"
-	Msg2 "$userStr, Host: $hostName, Database: $warehouseDb, PID: $$, PPID: $PPID"
-	[[ -n $(Trim "$originalArgStr") ]] && Msg2 "Arg String: '$originalArgStr'"
+	Msg3 "$userStr, Host: $hostName, Database: $warehouseDb, PID: $$, PPID: $PPID"
+	[[ -n $(Trim "$originalArgStr") ]] && Msg3 "Arg String: '$originalArgStr'"
 
 	# echo "\$0 = $0"
-	# [[ ${0:0:6} == '/home/' ]] && Msg2 "$(ColorW "*** Running from a local directory")"
+	# [[ ${0:0:6} == '/home/' ]] && Msg3 "$(ColorW "*** Running from a local directory")"
 
-	[[ $testMode == true ]] && Msg2 "$(ColorW "*** Running in Testmode ***")"
-	[[ "$DOIT" != ''  ]] && Msg2 "$(ColorW "*** The 'Doit' flag is turned off, changes not committed")"
-	[[ "$informationOnlyMode" == true  ]] && Msg2 "$(ColorW "*** The 'informationOnly' flag is set, changes not committed")"
-	[[ $userName != $checkName ]] && Msg2 "$(ColorW "*** Running as user $userName ***")"
+	[[ $testMode == true ]] && Msg3 "$(ColorW "*** Running in Testmode ***")"
+	[[ "$DOIT" != ''  ]] && Msg3 "$(ColorW "*** The 'Doit' flag is turned off, changes not committed")"
+	[[ "$informationOnlyMode" == true  ]] && Msg3 "$(ColorW "*** The 'informationOnly' flag is set, changes not committed")"
+	[[ $userName != $checkName ]] && Msg3 "$(ColorW "*** Running as user $userName ***")"
 
 	echo
 
@@ -68,3 +68,4 @@ export -f Hello
 ## Fri Jan 20 13:20:56 CST 2017 - dscudiero - Do not show arguments if they are blank
 ## 06-02-2017 @ 15.24.54 - ("2.0.31")  - dscudiero - Remove the running local message
 ## 08-31-2017 @ 15.48.35 - ("2.0.32")  - dscudiero - Tweak messaging
+## 09-25-2017 @ 09.01.51 - ("2.0.34")  - dscudiero - Switch to Msg3
