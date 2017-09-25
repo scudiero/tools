@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.4" # -- dscudiero -- Mon 09/25/2017 @  8:09:26.92
+# version="1.0.5" # -- dscudiero -- Mon 09/25/2017 @  8:28:48.03
 #===================================================================================================
 # Usage: Msg3 <msgType> <msgLevel> <indentLevel> msgText
 # 	msgType: [N,I,W,E,T]
@@ -9,6 +9,7 @@
 #===================================================================================================
 function Msg3 {
 	[[ $quiet == true ]] && return 0
+	[[ $# -eq 0 ]] && echo && return 0
 	## First token is a type identifier?
 		local msgType msgLevel indentLevel msgText
 		unset msgType msgLevel indentLevel msgText
@@ -80,3 +81,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 09-25-2017 @ 08.03.42 - ("1.0.1")   - dscudiero - General syncing of dev to prod
 ## 09-25-2017 @ 08.06.13 - ("1.0.2")   - dscudiero - General syncing of dev to prod
 ## 09-25-2017 @ 08.09.54 - ("1.0.4")   - dscudiero - General syncing of dev to prod
+## 09-25-2017 @ 08.29.25 - ("1.0.5")   - dscudiero - Quick processing if no arguments passed, just echo and return
