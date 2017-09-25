@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.139" # -- dscudiero -- Thu 09/07/2017 @ 11:31:32.44
+# version="2.0.140" # -- dscudiero -- Mon 09/25/2017 @  7:50:26.06
 #===================================================================================================
 # Common script exit
 # args:
@@ -11,8 +11,10 @@
 # All rights reserved
 #===================================================================================================
 function Goodbye {
-	includes="SetFileExpansion Msg2 Colors ProcessLogger PrintBanner Alert"
-	Import "$includes"
+
+
+	myIncludes="SetFileExpansion Colors ProcessLogger PrintBanner Alert PushPop"
+	Import "$standardIncludes $myIncludes"
 
 	SetFileExpansion 'off'
 	Msg2 $V3 "*** Starting: $FUNCNAME ***"
@@ -173,3 +175,4 @@ export -f Goodbye
 ## 08-01-2017 @ 08.07.58 - ("2.0.136") - dscudiero - Add emailing to the foruser
 ## 08-01-2017 @ 08.16.00 - ("2.0.137") - dscudiero - General syncing of dev to prod
 ## 09-01-2017 @ 09.27.18 - ("2.0.138") - dscudiero - Add call myname-FUNCNAME function if found
+## 09-25-2017 @ 07.50.38 - ("2.0.140") - dscudiero - General syncing of dev to prod
