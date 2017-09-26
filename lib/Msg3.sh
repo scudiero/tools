@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.5" # -- dscudiero -- Mon 09/25/2017 @  8:28:48.03
+# version="1.0.6" # -- dscudiero -- Tue 09/26/2017 @  7:55:32.64
 #===================================================================================================
 # Usage: Msg3 <msgType> <msgLevel> <indentLevel> msgText
 # 	msgType: [N,I,W,E,T]
@@ -14,6 +14,7 @@ function Msg3 {
 		local msgType msgLevel indentLevel msgText
 		unset msgType msgLevel indentLevel msgText
 		if [[ $# -gt 1 ]]; then
+			[[ $1 = 'Q' || $1 = 'q' ]] && echo -e "$msgText" && return 0
 			local re='^[q,Q,n,N,i,I,w,W,e,E,t,T,v,V,l,L]$'
 			[[ $1 =~ $re ]] && msgType="$1" && shift 1 || true
 			if [[ -n $msgType ]]; then
@@ -33,7 +34,6 @@ function Msg3 {
 			## Format message
 			msgText="$*"
 			case $msgType in
-				q|Q) echo -e "$msgText" && return 0 ;;
 				n|N) msgText="$(ColorN "*Note*") -- $msgText" ;;
 				i|I) msgText="$(ColorI "*Info*") -- $msgText" ;;
 				w|W) msgText="$(ColorW "*Warning*") -- $msgText\a" ;;
@@ -82,3 +82,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 09-25-2017 @ 08.06.13 - ("1.0.2")   - dscudiero - General syncing of dev to prod
 ## 09-25-2017 @ 08.09.54 - ("1.0.4")   - dscudiero - General syncing of dev to prod
 ## 09-25-2017 @ 08.29.25 - ("1.0.5")   - dscudiero - Quick processing if no arguments passed, just echo and return
+## 09-26-2017 @ 07.55.52 - ("1.0.6")   - dscudiero - Move the Quick directive earlier
