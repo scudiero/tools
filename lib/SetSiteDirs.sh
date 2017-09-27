@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.21" # -- dscudiero -- Wed 09/27/2017 @  7:52:01.01
+# version="2.0.22" # -- dscudiero -- Wed 09/27/2017 @ 10:58:47.04
 #===================================================================================================
 # Set Directories based on the current hostName name and school name
 # Sets globals: devDir, nextDir, previewDir, publicDir, upgradeDir
@@ -9,21 +9,26 @@
 # All rights reserved
 #===================================================================================================
 function SetSiteDirs {
+	[[ -z $client ]] && Terminate "SetSiteDirs: No value for client"
 	myIncludes="RunSql2"
 	Import "$standardInteractiveIncludes $myIncludes"
 
-	local mode="${1:-setDefault}"; shift || true
+	local mode="$1"; shift || true
 	[[ $mode == 'check' ]] && local checkEnv="$2"
-	[[ -z $client ]] && Terminate "SetSiteDirs: No value for client"
-	local server env checkDir
+	local server env
 
 	## Find dev directories
-	unset pvtDir devDir
 	for server in $(tr ',' ' ' <<< "$devServers"); do
 		for env in $(tr ',' ' ' <<< "$courseleafDevEnvs"); do
-			unset ${chkenv}Dir
-			[[ $env == pvt && -d /mnt/$server/web/$client-$userName ]] && eval pvtDir="/mnt/$server/web/$client-$userName"
-			[[ $env == dev && -d /mnt/$server/web/$client ]] && eval devDir="/mnt/$server/web/$client"
+			[[ $mode == 'setDefault' ]] && unset ${env}Dir
+			if [[ $env == pvt ]]; then
+				[[ -z $pvtDir && $mode == 'setDefault' ]] && pvtDir="/mnt/$server/web/$client-$userName"
+				[[ $mode != 'setDefault' && -d "/mnt/$server/web/$client-$userName" ]] && pvtDir="/mnt/$server/web/$client-$userName"
+			fi
+			if [[ $env == dev ]]; then
+				[[ -z $devDir && $mode == 'setDefault' ]] && devDir="/mnt/$server/web/$client"
+				[[ $mode != 'setDefault' && -d "/mnt/$server/web/$client" ]] && devDir="/mnt/$server/web/$client"
+			fi
 		done
 		[[ -n $pvtDir && -n $devDir ]] && break
 	done
@@ -33,11 +38,14 @@ function SetSiteDirs {
 	unset testDir currDir previewDir publicDir priorDir
 	for server in $(tr ',' ' ' <<< "$prodServers"); do
 		for env in $(tr ',' ' ' <<< "$courseleafProdEnvs"); do
-			if [[ $env == 'test' ]]; then
-				[[ -d /mnt/$server/$client-$env/$env && -z $testDir ]] && testDir="/mnt/$server/$client-$env/$env"
+			[[ $mode == 'setDefault' ]] && unset ${env}Dir
+			if [[ $env == test ]]; then
+				[[ -z $testDir && $mode == 'setDefault' ]] && testDir="/mnt/$server/$client-$env/$env"
+				[[ $mode != 'setDefault' && -d "/mnt/$server/$client-$env/$env" ]] && testDir="/mnt/$server/$client-$env/$env"
 			else
 				local token="${env}Dir"
-				[[ -d /mnt/$server/$client/$env && -z ${!token} ]] && eval $token="/mnt/$server/$client/$env"
+				[[ -z ${!token} && $mode == 'setDefault' ]] && eval $token="/mnt/$server/$client/$env"
+				[[ $mode != 'setDefault' && -d "/mnt/$server/$client/$env" ]] && eval $token="/mnt/$server/$client/$env"
 			fi
 		done
 		[[ -n $testDir && -n $currDir && -n $previewDir && -n $publicDir && -n $priorDir ]] && break
@@ -64,3 +72,4 @@ export -f SetSiteDirs
 ## Fri Jan  6 14:39:27 CST 2017 - dscudiero - General cleanup , swithch to use -z and -n
 ## 09-27-2017 @ 07.51.27 - ("2.0.20")  - dscudiero - refactored
 ## 09-27-2017 @ 07.52.22 - ("2.0.21")  - dscudiero - General syncing of dev to prod
+## 09-27-2017 @ 10.59.03 - ("2.0.22")  - dscudiero - Fix problem with setDefault
