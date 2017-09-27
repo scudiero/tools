@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.26 # -- dscudiero -- Thu 09/21/2017 @  8:35:05.71
+version=2.10.27 # -- dscudiero -- Wed 09/27/2017 @ 14:18:25.27
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile"
@@ -98,13 +98,12 @@ scriptDescription="Copy workflow files"
 #==============================================================================================
 function EditCimconfigCfg {
 	[[ $informationOnly == true ]] && return 0
-	Msg2 $V1 "*** Starting $FUNCNAME ***"
 	local editFile="$1"
 	local searchStr grepStr fromStr toStr
 	[[ ! -f "$editFile" ]] && Error "Edit file '$editFile' not found, skipping" && return 0
 
 	BackupCourseleafFile $editFile
-	Msg2 $I "Converting 'cimconfig.cfg' file structure to match the source file structure"
+	Info "Converting 'cimconfig.cfg' file structure to match the source file structure"
 
 	fromStr='wfrules:'
 	toStr='// Moved to ./workflow.cfg -- wfrules:'
@@ -138,13 +137,12 @@ function EditCimconfigCfg {
 #==============================================================================================
 function EditCustomAtj {
 	[[ $informationOnly == true ]] && return 0
-	Msg2 $V1 "*** Starting $FUNCNAME ***"
 	local editFile="$1"
 	local searchStr grepStr fromStr toStr
 	[[ ! -f "$editFile" ]] && Error "Edit file '$editFile' not found, skipping" && return 0
 
 	BackupCourseleafFile $editFile
-	Msg2 $I "Converting 'custom.atj' file structure to match the source file structure"
+	Info "Converting 'custom.atj' file structure to match the source file structure"
 
 	searchStr="%import /$(basename $tgtDir)/workflowFunctions.atj:atj"
 	unset grepStr; grepStr=$(grep "^$searchStr" $editFile)
@@ -201,20 +199,20 @@ function CheckFilesForCopy {
 		[[ $(Contains "$ignoreList" "$cpyFile") == true ]] && return 0
 		if [[ ! -f $tgtFile ]]; then
 			copyFileList+=("${srcFile}|${tgtFile}|${cpyFile}")
-			Msg2 "^^Target file does not exist, it will be copied"
+			Msg3 "^^Target file does not exist, it will be copied"
 		else
 			[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
-			Msg2
-			Msg2 "$(ColorK "Target File: $tgtFile")"
-			Msg2 "\n\n* * * DIFF Output start * * *"
-			Msg2 "${colorRed}< is ${srcFile}${colorDefault}"
-			Msg2 "${colorBlue}> is ${tgtFile}${colorDefault}"
+			Msg3
+			Msg3 "$(ColorK "Target File: $tgtFile")"
+			Msg3 "\n\n* * * DIFF Output start * * *"
+			Msg3 "${colorRed}< is ${srcFile}${colorDefault}"
+			Msg3 "${colorBlue}> is ${tgtFile}${colorDefault}"
 			printf '=%.0s' {1..120}
-			Msg2
+			Msg3
 			ProtectedCall "colordiff $srcFile $tgtFile | Indent"
-			Msg2 "${colorDefault}"
+			Msg3 "${colorDefault}"
 			printf '=%.0s' {1..120}
-			Msg2 "\n* * * DIFF Output end * * *\n\n"
+			Msg3 "\n* * * DIFF Output end * * *\n\n"
 
 			[[ $(Contains ",$setDefaultYesFiles," ",$(basename $cpyFile),") == true ]] && defVals='Yes' || defVals='No'
 			unset ans; Prompt ans "Yes to copy $cpyFile, eXit to stop" 'Yes No' "$defVals"; ans=$(Lower ${ans:0:1});
@@ -271,7 +269,7 @@ function CheckFilesForCopy {
 
 # 	## Baclup/Delete Files
 # 		for ((i = 0; i < ${#oldFiles[@]}; i++)); do
-# 		    Msg2 "^^^Backing up & Removeing: ${oldFiles[$i]}"
+# 		    Msg3 "^^^Backing up & Removeing: ${oldFiles[$i]}"
 # 			$DOIT BackupCourseleafFile ${oldFiles[$i]}
 # 			$DOIT rm -f ${oldFiles[$i]}
 # 		done
@@ -289,16 +287,16 @@ GetDefaultsData $myName
 
 ## Get the files to act on from the database
 	unset requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles ifThenDelete
-	[[ -z $scriptData1 ]] && Msg2 $T "'scriptData1 (requiredInstanceFiles)' is null, please check script configuration data"
+	[[ -z $scriptData1 ]] && Terminate "'scriptData1 (requiredInstanceFiles)' is null, please check script configuration data"
 	requiredInstanceFiles="$(cut -d':' -f2- <<< $scriptData1)"
 
-	[[ -z $scriptData2 ]] && Msg2 $T "'scriptData2 (optionalInstanceFiles)' is null, please check script configuration data"
+	[[ -z $scriptData2 ]] && Terminate "'scriptData2 (optionalInstanceFiles)' is null, please check script configuration data"
 	optionalInstanceFiles="$(cut -d':' -f2- <<< $scriptData2)"
 
-	[[ -z $scriptData3 ]] && Msg2 $T "'scriptData3 (requiredGlobalFiles)' is null, please check script configuration data"
+	[[ -z $scriptData3 ]] && Terminate "'scriptData3 (requiredGlobalFiles)' is null, please check script configuration data"
 	requiredGlobalFiles="$(cut -d':' -f2- <<< $scriptData3)"
 
-	[[ -z $scriptData4 ]] && Msg2 $T "'scriptData4 (optionalGlobalFiles)' is null, please check script configuration data"
+	[[ -z $scriptData4 ]] && Terminate "'scriptData4 (optionalGlobalFiles)' is null, please check script configuration data"
 	optionalGlobalFiles="$(cut -d':' -f2- <<< $scriptData4)"
 
 	if [[ -n $scriptData5 ]]; then
@@ -331,8 +329,8 @@ Hello
 ## If pvtDir exists and src is not pvt make sure that this is what the user really wants to to
 	if [[ -d "$pvtDir" && $srcEnv != 'pvt' && $tgtEnv != 'pvt' ]]; then
 		verify=true
-		Msg2
-		Msg2 $W "You are asking to source the copy from the $(ColorW $(Upper $srcEnv)) environment but a private site ($client-$userName) was detected"
+		Msg3
+		Warning "You are asking to source the copy from the $(ColorW $(Upper $srcEnv)) environment but a private site ($client-$userName) was detected"
 		unset ans; Prompt ans "Are you sure" "Yes No";
 		ans=$(Lower ${ans:0:1})
 		[[ $ans != 'y' ]] && Goodbye -1
@@ -349,7 +347,7 @@ Hello
 	if [[ -z $refreshSystem && -n "$requiredGlobalFiles" ]]; then
 		[[ $verify == true ]] && echo
 		defVals='Yes'
-		Msg2 "Do you wish to refresh the system level files from the skeleton or use those found in the source"
+		Msg3 "Do you wish to refresh the system level files from the skeleton or use those found in the source"
 		unset ans ; Prompt ans "'Yes' to refresh, 'No' to use those from the source" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
 		unset defVals
 		[[ $ans == 'y' ]] && refreshSystem=true || refreshSystem=false
@@ -394,15 +392,15 @@ Hello
 	[[ $informationOnly == true ]] && DOIT='echo'
 	## Force verify to on
 	verify=true
- 	Msg2 "Checking CIM instances ..."
+ 	Msg3 "Checking CIM instances ..."
 	for cim in $(echo $cimStr | tr ',' ' '); do
-		Msg2 "^$cim:"
-		[[ ! -d $tgtDir/web/$cim ]] && Msg2 "^Target CIM instance ($cim) does not exist, skipping" && continue
+		Msg3 "^$cim:"
+		[[ ! -d $tgtDir/web/$cim ]] && Msg3 "^Target CIM instance ($cim) does not exist, skipping" && continue
 
 		## Determin what structure the src and tgt have
 		[[ -f $srcDir/web/$cim/$checkFileNew ]] && srcStructure='new' || srcStructure='old'
 		[[ -f $tgtDir/web/$cim/$checkFileNew ]] && tgtStructure='new' || tgtStructure='old'
-		[[ $srcStructure == old && $tgtStructure == new ]] && Msg2 $T "The source file structure is OLD and the target structure is NEW, cannot continue"
+		[[ $srcStructure == old && $tgtStructure == new ]] && Terminate "The source file structure is OLD and the target structure is NEW, cannot continue"
 		dump -1 -t srcStructure tgtStructure
 
 		## Loop through the instance files
@@ -410,10 +408,10 @@ Hello
 			cpyFile=/web/$cim/$file
 			dump -1 -t -t -t file cpyFile
 			if [[ ! -f $srcDir/$cpyFile ]]; then
-				[[ $(Contains "$requiredInstanceFiles" "$file") == true ]] && Msg2 $T "Could not locate required source file: '$srcDir/$cpyFile'"
+				[[ $(Contains "$requiredInstanceFiles" "$file") == true ]] && Terminate "Could not locate required source file: '$srcDir/$cpyFile'"
 				continue
 			fi
-			Msg2 "^^$file"
+			Msg3 "^^$file"
 			##  Cleanup any old backup workflow files (xxxx.yyyy, xxxx-yyyy, or ' - Copy.') in the source or target
 				#[[ $srcEnv != 'pvt' && $srcEnv != 'dev' ]] && CleanupOldFiles "$cpyFile"
 			## Copy files
@@ -424,16 +422,16 @@ Hello
 					if [[ $srcMd5 != $tgtMd5 ]]; then
 						$DOIT CheckFilesForCopy $file $cpyFile $srcDir $srcStructure $tgtDir $tgtStructure
 					else
-						Msg2 "^^^File MD5's match"
+						Msg3 "^^^File MD5's match"
 					fi
 				fi
 		done #file
 	done #Cims
 
 ## Global files
-	echo; Msg2 "Checking global/system workflow files..."
+	echo; Msg3 "Checking global/system workflow files..."
 	for file in $(echo "$requiredGlobalFiles $optionalGlobalFiles" | tr ',' ' '); do
-		Msg2 "^$file"
+		Msg3 "^$file"
 		cpyFile="/web$file"
 		##  Cleanup any old backup workflow files (xxxx.yyyy, xxxx-yyyy, or ' - Copy.') in the source or target
 			#[[ $srcEnv != 'pvt' && $srcEnv != 'dev' ]] && CleanupOldFiles "$cpyFile"
@@ -446,23 +444,23 @@ Hello
 				if [[ $srcMd5 != $tgtMd5 ]]; then
 					$DOIT CheckFilesForCopy $file $cpyFile $srcDir 'n/a' $tgtDir 'n/a';
 				else
-					Msg2 "^^File MD5's match"
+					Msg3 "^^File MD5's match"
 				fi
 			fi
 	done #System files
 
 [[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
-Msg2
+Msg3
 ## Copy the files
 	## If some files were not selected for update then as the user if they really want to copy the files
 	if [[ ${#filesNotCopied[@]} -gt 0 ]]; then
-		Msg2 $W "You asked that some changed files NOT be updated: "
+		Warning "You asked that some changed files NOT be updated: "
 		for file in "${filesNotCopied[@]}"; do
-			Msg2 "^$file"
+			Msg3 "^$file"
 		done
-		Msg2
+		Msg3
 		unset ans defVals; Prompt ans "Do you wish to perform a partial update to the site" 'Yes No' 'No'; ans=$(Lower ${ans:0:1});
-		[[ $ans != 'y' ]] && Msg2 $W "No files have been updated" && Goodbye 1
+		[[ $ans != 'y' ]] && Warning "No files have been updated" && Goodbye 1
 	fi
 
 	if [[ ${#copyFileList[@]} -gt 0 ]]; then
@@ -472,7 +470,7 @@ Msg2
 		$DOIT mkdir -p $backupFolder/beforeCopy
 		$DOIT mkdir -p $backupFolder/afterCopy
 		## Copy files
-		Msg2 "\nUpdating files:"
+		Msg3 "\nUpdating files:"
 		for fileSpec in "${copyFileList[@]}"; do
 			srcFile="$(cut -d'|' -f1 <<< $fileSpec)"
 			tgtFile="$(cut -d'|' -f2 <<< $fileSpec)"
@@ -483,7 +481,7 @@ Msg2
 			[[ -f "$tgtFile" ]] && cp -fp "$tgtFile" "$backupFolder/beforeCopy${cpyFile}"
 			$DOIT cp -fp "$srcFile" "$backupFolder/afterCopy${cpyFile}"
 			## Copy
-			Msg2 "^$(basename $(dirname $srcFile))/$(basename $srcFile)"
+			Msg3 "^$(basename $(dirname $srcFile))/$(basename $srcFile)"
 			[[ -f $tgtFile ]] && BackupCourseleafFile $tgtFile && $DOIT rm -f $tgtFile
 			[[ ! -d $(dirname "$tgtFile") ]] && $DOIT mkdir -p "$(dirname "$tgtFile")"
 			$DOIT cp -fp $srcFile $tgtFile
@@ -502,13 +500,13 @@ Msg2
 		popd >& /dev/null
 	else
 		## Nothing to do
-		echo; Msg2 $WT1 "No files required updating, nothing changed"
+		echo; Msg3 W 0 1 "No files required updating, nothing changed"
 	fi
 
 	if [[ ${#filesNotCopied[@]} -gt 0 ]]; then
-		echo; Msg2 $W "The following changed files were NOT updated:"
+		echo; Warning "The following changed files were NOT updated:"
 		for file in "${filesNotCopied[@]}"; do
-			Msg2 "^$file"
+			Msg3 "^$file"
 		done
 	fi
 
@@ -519,7 +517,7 @@ Msg2
 			[[ ${checkSrcFile:0:1} == '/' ]] && checkSrcFile="$srcDir/web${checkSrcFile}" || checkSrcFile="$srcDir/web/$cim/${checkSrcFile}"
 			[[ ${checkTgtFile:0:1} == '/' ]] && checkTgtFile="$tgtDir/web${checkTgtFile}" || checkTgtFile="$tgtDir/web/$cim/${checkTgtFile}"
 			if [[ -f $checkSrcFile && -f $checkTgtFile ]]; then
-				Msg2 "^^^Backing up & Removeing: $checkTgtFile"
+				Msg3 "^^^Backing up & Removeing: $checkTgtFile"
 				$DOIT BackupCourseleafFile $checkTgtFile
 				$DOIT rm -f $checkTgtFile
 			fi
@@ -618,3 +616,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 09-05-2017 @ 08.56.49 - (2.10.5)    - dscudiero - Tweaked format of warning message
 ## 09-20-2017 @ 15.31.04 - (2.10.25)   - dscudiero - Updated how it handles the situation where cl or cim versions are different and copying to next
 ## 09-21-2017 @ 09.34.06 - (2.10.26)   - dscudiero - UPdated includes
+## 09-27-2017 @ 14.21.34 - (2.10.27)   - dscudiero - Switch to Msg3
