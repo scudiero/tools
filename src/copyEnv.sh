@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.12.2 # -- dscudiero -- Thu 09/21/2017 @ 14:50:15.81
+version=4.12.3 # -- dscudiero -- Wed 09/27/2017 @ 14:20:56.83
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgsStd Hello Init Goodbye GetSiteDirNoCheck ProtectedCall'
@@ -219,11 +219,11 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 
 	if [[ -n $overrideTarget ]]; then
 		[[ ${overrideTarget:(-1)} == '/' ]] && overrideTarget="${overrideTarget:0:${#overrideTarget}-1}"
-		[[ ! -d $overrideTarget ]] && Msg2 && Terminate "Could not locate override target diectory: '$overrideTarget'"
+		[[ ! -d $overrideTarget ]] && Msg3 && Terminate "Could not locate override target diectory: '$overrideTarget'"
 		tgtDir="$overrideTarget/$client-$userName"
 	fi
 	if [[ -n $forUser ]]; then
-		[[ -n $suffix ]] && Msg2 && Terminate "Cannot specify both 'forUser' and 'suffix'."
+		[[ -n $suffix ]] && Msg3 && Terminate "Cannot specify both 'forUser' and 'suffix'."
 		userAccount="${forUser%%/*}"
 		userPassword="${forUser##*/}"
 		[[ -z $asSite ]] && tgtDir=$(sed "s/$userName/$forUser/g" <<< $tgtDir)
@@ -239,7 +239,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 ## Check to see if all dirs exist
 	[[ -z $srcDir ]] && Terminate "No Source directory was specified"
 	if [[ -d $tgtDir && $overlay == false  && $refresh == false ]]; then
-		Msg2
+		Msg3
 		unset ans
 		Warning "Target site ($tgtDir) already existes."
 		Prompt ans "Do you wish to $(ColorK 'overwrite') the existing site (Yes) or $(ColorK 'refresh') files in the existing sites site (No) ?" 'Yes No' 'Yes' ; ans=$(Lower ${ans:0:1})
@@ -285,9 +285,9 @@ if [[ $verify == true ]]; then
 		unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') additional directories/files from the copy operation" 'No,Yes' 'No' '6'; ans="$(Lower "${ans:0:1}")"
 		if [[ $ans == 'y' ]]; then
 			SetFileExpansion 'off'
-			Msg2 "^Please specify the directories/files you wish to exclude, use '*' as a the wild card,"
-			Msg2 "^specifications are relative to siteDir, e.g. '/web/wen' without the quotes."
-			Msg2 "^To stop the prompt loop, just enter no data"
+			Msg3 "^Please specify the directories/files you wish to exclude, use '*' as a the wild card,"
+			Msg3 "^specifications are relative to siteDir, e.g. '/web/wen' without the quotes."
+			Msg3 "^To stop the prompt loop, just enter no data"
 			while true; do
 				MsgNoCRLF "^^==> "
 				read ignore
@@ -372,7 +372,7 @@ dump -1 skipCim skipCat skipClss skipAlso
 #==================================================================================================
 ## Check to see if the source is readable
 	if [[ $client == 'internal' && ! -r $srcDir/pagewiz.cfg ]] || [[ $client != 'internal' && ! -r $srcDir/courseleaf.cfg ]]; then
-		Msg2 $T "Sorry you do not have read access to the source ($srcDir), please contact system admins"
+		Terminate "Sorry you do not have read access to the source ($srcDir), please contact system admins"
 	fi
 
 #==================================================================================================
@@ -384,7 +384,7 @@ dump -1 skipCim skipCat skipClss skipAlso
 			forkedProcesses+=($!)
 		else
 			mv -f $tgtDir $tgtDir.bak
-			[[ -d $tgtDir.bak ]] && Msg2 "Old target directory renamed to $tgtDir.bak" || Msg2 $T "Target directory exists and could not be renamed"
+			[[ -d $tgtDir.bak ]] && Msg3 "Old target directory renamed to $tgtDir.bak" || Terminate "Target directory exists and could not be renamed"
 		fi
 	fi
 
@@ -414,27 +414,27 @@ dump -1 skipCim skipCat skipClss skipAlso
 	[[ $quiet == true || $quiet == 1 ]] && rsyncVerbose='' || rsyncVerbose='vh'
 	if [[ $fullCopy == true && $lite != true ]]; then
 		rsyncOpts="-a$rsyncVerbose $listOnly"
-		Msg2 "Performing a FULL copy..."
+		Msg3 "Performing a FULL copy..."
 	else
 		rsyncOpts="-a$rsyncVerbose --prune-empty-dirs $listOnly --include-from $rsyncFilters"
-		# Msg2 "Excluding the following from the copy:"
+		# Msg3 "Excluding the following from the copy:"
 		# oldIFS=$IFS; IFS='';
 		# SetIndent '+1';
-		# while read line; do Msg2 "^$line"; done < $rsyncFilters
+		# while read line; do Msg3 "^$line"; done < $rsyncFilters
 		# SetIndent '-1'
 		# IFS=$oldIFS;
 		# printf "\n"
 	fi
 	if [[ $remoteCopy == true ]]; then
-		Msg2 "Calling rsync to copy the files, when prompted for password, please enter your password on '$clientHost' ..."
+		Msg3 "Calling rsync to copy the files, when prompted for password, please enter your password on '$clientHost' ..."
 		rsyncOpts="${rsyncOpts} -e"
 	else
-		Msg2 "Calling rsync to copy the files ..."
+		Msg3 "Calling rsync to copy the files ..."
 	fi
 
 	previousTrapERR=$(cut -d ' ' -f3- <<< $(trap -p ERR))
 	trap - ERR
-	Msg2 "\nrsync $rsyncOpts $srcDir/ $tgtDir\n" >> $logFile
+	Msg3 "\nrsync $rsyncOpts $srcDir/ $tgtDir\n" >> $logFile
 	cat "$rsyncFilters" >> "$logFile"
 	rsync $rsyncOpts $srcDir/ $tgtDir
 	eval "trap $previousTrapERR"
@@ -443,7 +443,7 @@ dump -1 skipCim skipCat skipClss skipAlso
 
 if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 	# Turn off publishing
-		Msg2 "\nTurn off Publishing..."
+		Msg3 "\nTurn off Publishing..."
 		editFile="$tgtDir/$progDir.cfg"
 		$DOIT sed -i s'_^mapfile:production_//mapfile:production_'g "$editFile"
 		$DOIT sed -i s'_^mapfile:/navbar/production_//mapfile:/navbar/production_'g "$editFile"
@@ -453,7 +453,7 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		[[ -z $grepStr ]] && Warning "Could not locate a publishing mapfile record pointing to /dev/null, publising may still be active, please check before using clone site"
 
 	# Turn off remote authenticaton
-		Msg2 "Turn off Authentication..."
+		Msg3 "Turn off Authentication..."
 		$DOIT sed -i s'_^authuser:true_//authuser:true_' $tgtDir/$progDir.cfg
 		for file in default.tcf localsteps/default.tcf; do
 			$DOIT sed -i s'_^authuser:true_//authuser:true_' $tgtDir/web/$progDir/$file
@@ -463,21 +463,21 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		done
 
 	# Turn off PDF generation
-		Msg2 "Turn off PDF generation..."
+		Msg3 "Turn off PDF generation..."
 		$DOIT sed -i s'_^pdfeverypage:true$_//pdfeverypage:true_' $tgtDir/web/$progDir/localsteps/default.tcf
 
 	# leepfrog user account
-		Msg2 "Adding user-ids to $progDir.cfg file..."
+		Msg3 "Adding user-ids to $progDir.cfg file..."
 		$DOIT echo "user:$leepfrogUserId|$leepfrogPw||admin" >> $tgtDir/$progDir.cfg
-		Msg2 "^'$leepfrogUserId' added as an admin with pw: '<normal pw>'"
+		Msg3 "^'$leepfrogUserId' added as an admin with pw: '<normal pw>'"
 		$DOIT echo "user:test|test||" >> $tgtDir/$progDir.cfg
-		Msg2 "^'test' added as a normal user with pw: 'test'"
+		Msg3 "^'test' added as a normal user with pw: 'test'"
 		[[ $(Lower "${client:0:5}") != 'luc20' ]] && $DOIT echo "user:$client|$client||admin" >> $tgtDir/$progDir.cfg
 		$DOIT echo "user:$client|$client||admin" >> $tgtDir/$progDir.cfg
 		[[ -n $forUser ]] && $DOIT echo "user:$userAccount|$userPassword||admin" >> $tgtDir/$progDir.cfg
 
 	# Set nexturl so wf emails point to local instance
-		Msg2 "Changing 'nexturl' to point to local instance..."
+		Msg3 "Changing 'nexturl' to point to local instance..."
 		editFile="$tgtDir/web/courseleaf/localsteps/default.tcf"
 		clientToken=$(cut -d'/' -f5 <<< $tgtDir)
 		toStr="nexturl:https://$clientToken/$(cut -d '/' -f3 <<< $tgtDir).leepfrog.com"
@@ -485,11 +485,11 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		if [[ -z $grepStr ]]; then
 			unset fromStr; fromStr=$(ProtectedCall "grep '^nexturl:' $editFile")
 			fromStr=$(CleanString "$fromStr")
-			[[ -n $fromStr ]] && $DOIT sed -i s"!${fromStr}!${toStr}!" $editFile || Msg2 $WT1 "Could not set nexturl"
+			[[ -n $fromStr ]] && $DOIT sed -i s"!${fromStr}!${toStr}!" $editFile || Msg3 $WT1 "Could not set nexturl"
 		fi
 
 	## email override
-		Msg2 "Override email routing..."
+		Msg3 "Override email routing..."
 		[[ -z $emailAddress ]] && emailAddress=$userName@leepfrog.com
 		editFile=$tgtDir/email/sendnow.atj
 		unset grepStr; grepStr=$(ProtectedCall "grep ^'// DO NOT MODIFY THIS FILE' $editFile");
@@ -658,3 +658,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 08-31-2017 @ 16.04.18 - (4.11.100)  - dscudiero - Tweak messaging
 ## 09-05-2017 @ 12.09.32 - (4.11.101)  - dscudiero - make sure the debug items go out to the logfile
 ## 09-21-2017 @ 14.50.54 - (4.12.2)    - dscudiero - Fix bug where parseArgsStd was the wrong case
+## 09-27-2017 @ 14.21.20 - (4.12.3)    - dscudiero - Switch to Msg3
