@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.47" # -- dscudiero -- Fri 06/23/2017 @  8:29:38.71
+# version="2.0.49" # -- dscudiero -- Wed 09/27/2017 @  7:45:11.40
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -94,7 +94,7 @@ function Dump {
 		local lineNo="$(basename $(cut -d' ' -f2 <<< $callerData))/$(cut -d' ' -f1 <<< $callerData)"
 		if [[ $singleLine == true ]]; then vName=''; writeIt; fi
 		[[ $quit == true ]] && Quit
-		[[ $pause == true ]] && Msg2 && Pause '*** Dump paused script execution at $lineNo, press enter to continue ***'
+		[[ $pause == true ]] && Msg3 && Pause '*** Dump paused script execution at $lineNo, press enter to continue ***'
 
 
 	PopSettings "$FUNCNAME"
@@ -103,8 +103,7 @@ function Dump {
 } #Dump
 
 function dump { Dump $* ; }
-export -f Dump
-export -f dump
+export -f Dump dump
 
 #===================================================================================================
 # TODO tick marks
@@ -184,6 +183,17 @@ function DumpMap {
 
 	return 0
 } #DumpMap
+
+function dumpq {
+	local token;
+	for token in $*; do
+		[[ $token == '-t' ]] && echo -e -n "\t" && continue
+		[[ $token == '-n' ]] && echo -e -n "\n" && continue
+		echo "$token = >${!token}<";
+	done }
+function Dumpq { dumpq $*; };
+export -f Dumpq dumpq
+
 export -f DumpMap
 function dumpmap { DumpMap $* ; }
 export -f dumpmap
@@ -210,3 +220,4 @@ export -f dumphash
 ## 05-24-2017 @ 08.22.16 - ("2.0.45")  - dscudiero - Added isMe
 ## 06-09-2017 @ 08.16.14 - ("2.0.46")  - dscudiero - lower case the first token before checking for special tokens
 ## 06-23-2017 @ 09.26.13 - ("2.0.47")  - dscudiero - Add caller information if calling pause
+## 09-27-2017 @ 07.51.19 - ("2.0.49")  - dscudiero - added dumq
