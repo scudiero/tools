@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.51" # -- dscudiero -- Wed 09/27/2017 @ 10:08:40.15
+# version="2.0.53" # -- dscudiero -- Wed 09/27/2017 @ 10:50:24.41
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -131,8 +131,7 @@ function DumpS {
 	return 0
 
 } #DumpS
-
-function DumpS { DumpS $* ; }
+function dumps { DumpS $* ; }
 export -f DumpS dumps
 
 #===================================================================================================
@@ -235,3 +234,4 @@ export -f DumpMap dumpmap dumphash
 ## 06-23-2017 @ 09.26.13 - ("2.0.47")  - dscudiero - Add caller information if calling pause
 ## 09-27-2017 @ 07.51.19 - ("2.0.49")  - dscudiero - added dumq
 ## 09-27-2017 @ 10.08.47 - ("2.0.51")  - dscudiero - General syncing of dev to prod
+## 09-27-2017 @ 10.50.51 - ("2.0.53")  - dscudiero - fix error exporting dumps
