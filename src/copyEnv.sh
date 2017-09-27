@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.12.3 # -- dscudiero -- Wed 09/27/2017 @ 14:20:56.83
+version=4.12.10 # -- dscudiero -- Wed 09/27/2017 @ 14:52:46.74
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgsStd Hello Init Goodbye GetSiteDirNoCheck ProtectedCall'
@@ -267,35 +267,38 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 ## See if there are any additional directories the user wants to skip
 if [[ $verify == true ]]; then
 	echo
-	if [[ -z $skipCat ]]; then
-		unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') Client CAT files" 'No,Yes,Select' 'No' '6'; ans="$(Lower "${ans:0:1}")"
-		[[ $ans == 'y' || $ans == 's' ]] && skipCat=true
-	fi
-	if [[ -z $skipCim && $haveCims == true ]]; then
-		unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CIM & CIM instances" 'No,Yes,Select' 'No' '6'; ans="$(Lower "${ans:0:1}")"
-		[[ $ans == 'y' || $ans == 's' ]] && skipCim=true
-	fi
-	if [[ -z $skipClss && $haveClss == true ]]; then
-		unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CLSS/WEN" 'No,Yes' 'No' '6'; ans="$(Lower "${ans:0:1}")"
-		[[ $ans == 'y' || $ans == 's' ]] && skipClss=true
-	fi
+	unset ans; Prompt ans "Do you wish to specify which file sets to EXCLUDE" 'No Yes' 'No'; ans="$(Lower "${ans:0:1}")"
+	if [[ $ans == 'y' ]]; then
+		if [[ -z $skipCat ]]; then
+			unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') Client CAT files" 'No,Yes' 'No' '3'; ans="$(Lower "${ans:0:1}")"
+			[[ $ans == 'y' ]] && skipCat=true
+		fi
+		if [[ -z $skipCim && $haveCims == true ]]; then
+			unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CIM & CIM instances" 'No,Yes' 'No' '3'; ans="$(Lower "${ans:0:1}")"
+			[[ $ans == 'y' ]] && skipCim=true
+		fi
+		if [[ -z $skipClss && $haveClss == true ]]; then
+			unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CLSS/WEN" 'No,Yes' 'No' '3'; ans="$(Lower "${ans:0:1}")"
+			[[ $ans == 'y' ]] && skipClss=true
+		fi
 
-	if [[ -z $skipAlso && $cat != true && $cim != true && $clss != true ]]; then
-		echo
-		unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') additional directories/files from the copy operation" 'No,Yes' 'No' '6'; ans="$(Lower "${ans:0:1}")"
-		if [[ $ans == 'y' ]]; then
-			SetFileExpansion 'off'
-			Msg3 "^Please specify the directories/files you wish to exclude, use '*' as a the wild card,"
-			Msg3 "^specifications are relative to siteDir, e.g. '/web/wen' without the quotes."
-			Msg3 "^To stop the prompt loop, just enter no data"
-			while true; do
-				MsgNoCRLF "^^==> "
-				read ignore
-				[[ -z $ignore || $(Lower "$ignore") == 'x' ]] && break
-				ignoreList="$ignoreList,$ignore"
-				unset ignore
-			done
-			SetFileExpansion
+		if [[ -z $skipAlso && $cat != true && $cim != true && $clss != true ]]; then
+			echo
+			unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') additional directories/files from the copy operation" 'No,Yes' 'No' '3'; ans="$(Lower "${ans:0:1}")"
+			if [[ $ans == 'y' ]]; then
+				SetFileExpansion 'off'
+				Msg3 "^Please specify the directories/files you wish to exclude, use '*' as a the wild card,"
+				Msg3 "^specifications are relative to siteDir, e.g. '/web/wen' without the quotes."
+				Msg3 "^To stop the prompt loop, just enter no data"
+				while true; do
+					MsgNoCRLF "^^==> "
+					read ignore
+					[[ -z $ignore || $(Lower "$ignore") == 'x' ]] && break
+					ignoreList="$ignoreList,$ignore"
+					unset ignore
+				done
+				SetFileExpansion
+			fi
 		fi
 	fi
 fi
@@ -355,8 +358,8 @@ dump -1 skipCim skipCat skipClss skipAlso
 ## Make sure the user really wants to do this
 	unset verifyArgs
 	verifyArgs+=("Client:$client")
-	verifyArgs+=("Source Env:$(TitleCase $srcEnv)\t($srcDir)")
-	verifyArgs+=("Target Env:$(TitleCase $tgtEnv)\t($tgtDir)")
+	verifyArgs+=("Source Env:$(TitleCase $srcEnv)   $(ColorV "($srcDir)")")
+	verifyArgs+=("Target Env:$(TitleCase $tgtEnv)   $(ColorV "($tgtDir)")")
 	tmpStr=$(sed "s/,/, /g" <<< $ignoreList)
 	[[ -n $forUser ]] && verifyArgs+=("For User:$forUser")
 	[[ $skipCat == true && $fullCopy != true ]] && verifyArgs+=("Skip Cat:$skipCat")
@@ -659,3 +662,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 09-05-2017 @ 12.09.32 - (4.11.101)  - dscudiero - make sure the debug items go out to the logfile
 ## 09-21-2017 @ 14.50.54 - (4.12.2)    - dscudiero - Fix bug where parseArgsStd was the wrong case
 ## 09-27-2017 @ 14.21.20 - (4.12.3)    - dscudiero - Switch to Msg3
+## 09-27-2017 @ 14.53.58 - (4.12.10)   - dscudiero - Tweak messaging
