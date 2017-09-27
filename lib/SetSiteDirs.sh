@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.20" # -- dscudiero -- Wed 09/27/2017 @  7:43:54.97
+# version="2.0.21" # -- dscudiero -- Wed 09/27/2017 @  7:52:01.01
 #===================================================================================================
 # Set Directories based on the current hostName name and school name
 # Sets globals: devDir, nextDir, previewDir, publicDir, upgradeDir
@@ -27,7 +27,6 @@ function SetSiteDirs {
 		done
 		[[ -n $pvtDir && -n $devDir ]] && break
 	done
-	[[ -n $devDir ]] && devSiteDir="$devDir" || unset devSiteDir
 	#dump server pvtDir devDir devSiteDir
 
 	## Find production directories
@@ -43,7 +42,6 @@ function SetSiteDirs {
 		done
 		[[ -n $testDir && -n $currDir && -n $previewDir && -n $publicDir && -n $priorDir ]] && break
 	done
-	[[ -n $nextDir ]] && prodSiteDir=$(dirname $nextDir) || unset prodSiteDir
 	#dump server testDir currDir previewDir publicDir priorDir prodSiteDir
 
 	## If check mode, make sure the indicated environment diretory exists
@@ -65,3 +63,4 @@ export -f SetSiteDirs
 ## Thu Jan  5 14:53:53 CST 2017 - dscudiero - refactored checking for test site
 ## Fri Jan  6 14:39:27 CST 2017 - dscudiero - General cleanup , swithch to use -z and -n
 ## 09-27-2017 @ 07.51.27 - ("2.0.20")  - dscudiero - refactored
+## 09-27-2017 @ 07.52.22 - ("2.0.21")  - dscudiero - General syncing of dev to prod
