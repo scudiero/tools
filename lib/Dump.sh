@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.53" # -- dscudiero -- Wed 09/27/2017 @ 10:50:24.41
+# version="2.0.54" # -- dscudiero -- Wed 09/27/2017 @ 12:22:30.66
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -9,12 +9,17 @@
 #==================================================================================================
 dumpFirstWrite=true
 function dump {
-	local token tabCnt re='^[0-9]$' logOnly=false out='/dev/tty'
+	local token tabCnt re='^-{0,1}[0-9]$' logOnly=false out='/dev/tty'
 	local caller=${FUNCNAME[1]}
-	[[ $(Lower $caller) == 'dump' ]] && caller=${FUNCNAME[2]}
+	[[ $caller == 'dump' || $caller == 'Dump' ]] && caller=${FUNCNAME[2]}
 
 	for token in $*; do
-		[[ $token =~ $re ]] && { [[ $token -gt $verboseLevel ]] && return 0; shift; continue; }
+		if [[ $token =~ $re ]]; then
+			[[ ${token:0:1} == '-' ]] && token="${token:1}"
+			[[ $token -gt $verboseLevel ]] && return 0
+			shift
+			continue
+		fi
 		[[ ${token:0:2} == '-t' ]] && { tabCnt=${token:2}; tabCnt=${tabCnt:-1}; continue; }
 		[[ $token == '-n' ]] && { echo -e -n "\n"; continue; }
 		[[ $token == '-l' ]] && { logOnly=true; shift; continue; }
@@ -34,8 +39,6 @@ function dump {
 
 	return 0
 }
-function Dump { dump $*; };
-export -f Dump dump
 
 dumpFirstWrite=true
 function DumpS {
@@ -235,3 +238,4 @@ export -f DumpMap dumpmap dumphash
 ## 09-27-2017 @ 07.51.19 - ("2.0.49")  - dscudiero - added dumq
 ## 09-27-2017 @ 10.08.47 - ("2.0.51")  - dscudiero - General syncing of dev to prod
 ## 09-27-2017 @ 10.50.51 - ("2.0.53")  - dscudiero - fix error exporting dumps
+## 09-27-2017 @ 12.22.47 - ("2.0.54")  - dscudiero - Fix problem parsing -2 msg level designators
