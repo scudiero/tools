@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.49" # -- dscudiero -- Wed 09/27/2017 @  7:45:11.40
+# version="2.0.51" # -- dscudiero -- Wed 09/27/2017 @ 10:08:40.15
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -8,7 +8,37 @@
 # All rights reserved
 #==================================================================================================
 dumpFirstWrite=true
-function Dump {
+function dump {
+	local token tabCnt re='^[0-9]$' logOnly=false out='/dev/tty'
+	local caller=${FUNCNAME[1]}
+	[[ $(Lower $caller) == 'dump' ]] && caller=${FUNCNAME[2]}
+
+	for token in $*; do
+		[[ $token =~ $re ]] && { [[ $token -gt $verboseLevel ]] && return 0; shift; continue; }
+		[[ ${token:0:2} == '-t' ]] && { tabCnt=${token:2}; tabCnt=${tabCnt:-1}; continue; }
+		[[ $token == '-n' ]] && { echo -e -n "\n"; continue; }
+		[[ $token == '-l' ]] && { logOnly=true; shift; continue; }
+
+		if [[ -n $tabCnt ]]; then
+			for ((i=0; i<$tabCnt; i++)); do
+				[[ -z $tabStr ]] && echo -e -n "\t" || echo -e -n "$tabStr"
+			done
+		fi
+		if [[ $logOnly == true && -n $logFile ]]; then
+			[[ $dumpFirstWrite == true ]] && { echo -e "\n\n$(head -c 100 < /dev/zero | tr '\0' '=')" >> $logFile; echo "$(date)" >> $logFile;  dumpFirstWrite=false; }
+			echo -e "${caller}.$token = >${!token}<" >> "$logFile"
+		else
+			echo -e "${colorVerbose}${caller}${colorDefault}.$token = >${!token}<"
+		fi
+	done
+
+	return 0
+}
+function Dump { dump $*; };
+export -f Dump dump
+
+dumpFirstWrite=true
+function DumpS {
 	declare lowervName
 	local singleLine=false quit=false pause=false logit=false tabs='' dumpLogFile=$HOME/stdout.txt vName vVal prefix token
 
@@ -100,21 +130,21 @@ function Dump {
 	PopSettings "$FUNCNAME"
 	return 0
 
-} #Dump
+} #DumpS
 
-function dump { Dump $* ; }
-export -f Dump dump
+function DumpS { DumpS $* ; }
+export -f DumpS dumps
 
 #===================================================================================================
 # TODO tick marks
 #===================================================================================================
-function ToDo { 
+function ToDo {
 	echo -e "\n*** TODO ($myName) ***"
 	[[ -n $* ]] && echo -e "\t$*"
 	echo
 } #ToDo
-function TODO { ToDo $* ; } ; function todo { ToDo $* ; } ; function Todo { ToDo $* ; }
-export -f ToDo ; export -f todo ; export -f Todo ; export -f TODO ;
+function TODO { ToDo $* ; }
+export -f TODO ;
 
 #===================================================================================================
 ## Dump an array, pass in the name of the array as follows
@@ -141,11 +171,9 @@ function DumpArray {
 	done
 	return 0
 } # DumpArray
-export -f DumpArray
 function dumparray { DumpArray $* ; }
-export -f dumparray
 function dumpArray { DumpArray $* ; }
-export -f dumpArray
+export -f DumpArray dumparray dumpArray
 
 #==================================================================================================
 # Dump an hash table
@@ -183,24 +211,9 @@ function DumpMap {
 
 	return 0
 } #DumpMap
-
-function dumpq {
-	local token;
-	for token in $*; do
-		[[ $token == '-t' ]] && echo -e -n "\t" && continue
-		[[ $token == '-n' ]] && echo -e -n "\n" && continue
-		echo "$token = >${!token}<";
-	done }
-function Dumpq { dumpq $*; };
-export -f Dumpq dumpq
-
-export -f DumpMap
 function dumpmap { DumpMap $* ; }
-export -f dumpmap
-function DumpHash { DumpMap $* ; }
-export -f DumpHash
 function dumphash { DumpMap $* ; }
-export -f dumphash
+export -f DumpMap dumpmap dumphash
 
 #===================================================================================================
 # Checkin Log
@@ -221,3 +234,4 @@ export -f dumphash
 ## 06-09-2017 @ 08.16.14 - ("2.0.46")  - dscudiero - lower case the first token before checking for special tokens
 ## 06-23-2017 @ 09.26.13 - ("2.0.47")  - dscudiero - Add caller information if calling pause
 ## 09-27-2017 @ 07.51.19 - ("2.0.49")  - dscudiero - added dumq
+## 09-27-2017 @ 10.08.47 - ("2.0.51")  - dscudiero - General syncing of dev to prod
