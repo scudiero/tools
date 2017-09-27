@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.32" # -- dscudiero -- Thu 09/07/2017 @ 11:40:42.84
+# version="2.0.34" # -- dscudiero -- Wed 09/27/2017 @ 10:47:39.95
 #===================================================================================================
 # Get default variable values from the defaults database
 #===================================================================================================
@@ -9,6 +9,9 @@
 #===================================================================================================
 
 function GetDefaultsData {
+
+	myIncludes="RunSql2"
+	Import "$myIncludes"
 	local scriptName="$1" ; shift || true
 	local table="${1:-$scriptsTable}"
 	local sqlStmt fields field fieldCntr varName whereClause
@@ -76,3 +79,4 @@ export -f GetDefaultsData
 ## Fri Jan 13 15:21:55 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Jan 13 15:33:12 CST 2017 - dscudiero - remove debug code
 ## 05-12-2017 @ 14.58.13 - ("2.0.31")  - dscudiero - misc changes to speed up
+## 09-27-2017 @ 10.51.02 - ("2.0.34")  - dscudiero - Add imports
