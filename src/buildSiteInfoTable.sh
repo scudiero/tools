@@ -1,13 +1,9 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.40 # -- dscudiero -- Fri 09/15/2017 @  8:53:08.34
+version=4.3.67 # -- dscudiero -- Wed 09/27/2017 @ 16:46:46.54
 #=======================================================================================================================
 TrapSigs 'on'
-
-myIncludes="Call SetSiteDirs SetFileExpansion RunSql2 ProtectedCall"
-Import "$standardInteractiveIncludes $myIncludes"
-
 originalArgStr="$*"
 scriptDescription="Sync the data warehouse '$siteInfoTable' table with the transactional data from the contacts db data and the live site data"
 
@@ -26,7 +22,7 @@ scriptDescription="Sync the data warehouse '$siteInfoTable' table with the trans
 #=======================================================================================================================
 # Standard call back functions
 #=======================================================================================================================
-	function parseArgs-buildSiteInfoTable {
+	function buildSiteInfoTable-ParseArgsStd {
 		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
 		noNameCheck=false
 		quick=false
@@ -34,10 +30,8 @@ scriptDescription="Sync the data warehouse '$siteInfoTable' table with the trans
 		argList+=(-quick,3,switch,quick,,script,"Do Quickly, skip processing the admins information")
 		argList+=(-tableName,5,option,tableName,,script,"The name of the 'sites' table to load")
 	}
-	function Goodbye-buildSiteInfoTable  { # or Goodbye-$myName
-		SetFileExpansion 'on'
-		rm -rf $tmpRoot > /dev/null 2>&1
-		SetFileExpansion
+	function buildSiteInfoTable-Goodbye  { # or Goodbye-$myName
+		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
 		return 0
 	}
 
@@ -63,10 +57,19 @@ forkCntr=0; siteCntr=0; clientCntr=0;
 #=======================================================================================================================
 # Standard arg parsing and initialization
 #=======================================================================================================================
-GetDefaultsData $myName
-ParseArgsStd
 Hello
-[[ $batchMode != true ]] && VerifyContinue "You are asking to re-generate the data warehouse '$siteInfoTable' and "$siteAdminsTable" table"
+Info "Loading includes..."
+myIncludes="Call SetSiteDirs SetFileExpansion RunSql2 ProtectedCall"
+Import "$standardInteractiveIncludes $myIncludes"
+Info "Loading script defaults..."
+GetDefaultsData $myName
+Info "Parsing arguments..."
+ParseArgsStd
+if [[ $batchMode != true ]]; then
+	verifyMsg="You are asking to re-generate the data warehouse '$siteInfoTable' and "$siteAdminsTable" table"
+	[[ -n $client ]] && verifyMsg="$verifyMsg record(s) for client '$client'"
+	VerifyContinue "$verifyMsg"
+fi
 
 [[ -n $env ]] && envList="$env" || envList="$courseleafDevEnvs $courseleafProdEnvs"
 [[ $fork == true ]] && forkStr='fork' || unset forkStr
@@ -84,7 +87,7 @@ Hello
 	[[ ${resultSet[0]} -ne 1 ]] && Terminate "Could not locate the load table '$useSiteInfoTable'"
 
 
-Msg2 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
+Msg3 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 
 #=======================================================================================================================
 # Main
@@ -102,6 +105,7 @@ Msg2 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 		for result in ${resultSet[@]}; do
 			dbClients["${result%%|*}"]="${result##*|}"
 		done
+		numClients=${#resultSet[@]}
 
 	## Get the list of actual clients on this server
 		if [[ -z $client ]]; then
@@ -112,54 +116,56 @@ Msg2 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 		fi
 		if [[ $verboseLevel -ge 1 ]]; then
 			echo
-			Msg2 "dbClients:"; for i in "${!dbClients[@]}"; do printf "\t\t[$i] = >${dbClients[$i]}<\n"; done; echo
-			Msg2 "clientDirs:"; for i in "${!clientDirs[@]}"; do printf "\t\t[$i] = >${clientDirs[$i]}<\n"; done; echo
+			Msg3 "dbClients:"; for i in "${!dbClients[@]}"; do printf "\t[$i] = >${dbClients[$i]}<\n"; done; echo
+			Msg3 "clientDirs:"; for i in "${!clientDirs[@]}"; do printf "\t[$i] = >${clientDirs[$i]}<\n"; done; echo
 		fi
 
 	## Loop through actual clientDirs
 		for clientDir in ${clientDirs[@]}; do
+dump clientDir
 			if [[ ${dbClients[$(basename $clientDir)]+abc} ]]; then
 				(( clientCntr+=1 ))
 				client="$(basename $clientDir)"
 				clientId=${dbClients[$client]}
-				## Get directories, if none found then skip this directory
-				unset devDir testDir nextDir currDir priorDir previewDir publicDir
-				SetSiteDirs
-				[[ -z ${devDir}${testDir}${nextDir}${currDir}${priorDir}${previewDir}${publicDir} ]] && continue
+dump -t client clientId
+				## Get the envDirs, make sure we have some
+					for env in $(tr ',' ' ' <<< "$envList"); do unset ${env}Dir ; done
+					SetSiteDirs 'set'
+for env in $(tr ',' ' ' <<< "$envList"); do dump -t2 ${env}Dir ; done
+					haveDir=false;
+					for env in $(tr ',' ' ' <<< "$envList"); do token="${env}Dir"; [[ -n ${!token} ]] && haveDir=true && break; done
+dump haveDir
+					[[ $haveDir == false ]] && continue
 
-				[[ $batchMode != true ]] && Msg2 "Processing: $client -- $clientId (~$clientCntr/$numClients)..."
-
+				[[ $batchMode != true ]] && Msg3 "Processing: $client -- $clientId (~$clientCntr/$numClients)..."
 				## Loop through envs and process the site env directory
 				for env in $(tr ',' ' ' <<< "$envList"); do
 					[[ $env == 'pvt' ]] && continue
-					eval envDir=\$${env}Dir
+					token="${env}Dir" ; envDir="${!token}"
 					[[ -z $envDir ]] && continue
 					if [[ -d $envDir/web ]]; then
-						Call "$workerScriptFile" "$forkStr" "$envDir" "$clientId" "-tableName $useSiteInfoTable"
+						$DOIT Call "$workerScriptFile" "$forkStr" "$envDir" "$clientId" "-tableName $useSiteInfoTable"
 						(( forkCntr+=1 )) ; (( siteCntr+=1 ))
 					fi
 					if [[ $fork == true && $((forkCntr%$maxForkedProcesses)) -eq 0 ]]; then
-						[[ $batchMode != true ]] && Msg2 "^Waiting on forked processes...\n"
+						[[ $batchMode != true ]] && Msg3 "^Waiting on forked processes...\n"
 						wait
 					fi
 				done
-				if [[ $fork == true ]]; then
-					[[ $batchMode != true ]] && Msg2 "^Waiting on forked processes...\n"
-					wait
-				fi
+				[[ $fork == true && $batchMode != true ]] && Msg3 "^Waiting on forked processes...\n" && wait
 			fi #[[ ${dbClients[$(basename $clientDir)]+abc} ]]
 		done #clientDir in ${clientDirs[@]}
 
 ## Wait for all the forked tasks to stop
 	if [[ $fork == true ]]; then
-		[[ $batchMode != true ]] && Msg2 "Waiting for all forked processes to complete..."
+		[[ $batchMode != true ]] && Msg3 "Waiting for all forked processes to complete..."
 		wait
 	fi
 
 ## Processing summary
-	Msg2
-	Msg2 "Processed $siteCntr Courseleaf site directories"
-	Msg2
+	Msg3
+	Msg3 "Processed $siteCntr Courseleaf site directories"
+	Msg3
 	sqlStmt="select count(*) from $useSiteInfoTable where host=\"$hostName\"";
 	RunSql2 "$sqlStmt"
 	if [[ ${resultSet[0]} -eq 0 ]]; then
@@ -234,3 +240,4 @@ Goodbye 0 'alert'
 ## 07-31-2017 @ 07.25.07 - (4.3.33)    - dscudiero - add imports
 ## 09-06-2017 @ 07.14.46 - (4.3.34)    - dscudiero - Tweak error messaging
 ## 09-07-2017 @ 07.40.55 - (4.3.35)    - dscudiero - Fix problem where the passed tableName was being picked up as a client name
+## 09-27-2017 @ 16.50.50 - (4.3.67)    - dscudiero - Refasctored messaging
