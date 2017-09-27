@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.124 # -- dscudiero -- Fri 09/15/2017 @  8:42:21.05
+version=1.1.125 # -- dscudiero -- Wed 09/27/2017 @ 16:45:28.32
 #==================================================================================================
 TrapSigs 'on'
 
@@ -62,6 +62,7 @@ dump -2 -n -t siteDir share shareType client env clientId
 #===================================================================================================
 # Main
 #===================================================================================================
+[[ $verboseLevel -gt 0 ]] && echo -e "\t\t*** $myName - Starting ***"
 [[ $DOIT != '' || $informationOnlyMode == true ]] && echo
 Verbose 1 "^$env ($siteDir)"
 
@@ -400,3 +401,4 @@ return 0
 ## 03-27-2017 @ 13.30.29 - (1.1.121)   - dscudiero - General syncing of dev to prod
 ## 04-28-2017 @ 08.26.26 - (1.1.122)   - dscudiero - use Goodbye 'return'
 ## 05-19-2017 @ 15.13.04 - (1.1.123)   - dscudiero - Added siteDir to the sites record
+## 09-27-2017 @ 16.51.07 - (1.1.125)   - dscudiero - Added starting message
