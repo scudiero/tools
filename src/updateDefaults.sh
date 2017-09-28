@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.32 # -- dscudiero -- Thu 09/28/2017 @ 10:43:50.48
+version=2.0.33 # -- dscudiero -- Thu 09/28/2017 @ 10:45:26.54
 #==================================================================================================
 TrapSigs 'on'
 myIncludes=""
@@ -104,7 +104,7 @@ mode="$1" ; shift || true
 		sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and status=\"A\" order by name"
 		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
-			echo "## DO NOT EDIT VALUES IN THIS FILE, IT IS GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
+			echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
 			for ((ii=0; ii<${#resultSet[@]}; ii++)); do
 				result="${resultSet[$ii]}"
 				name=${result%%|*}
@@ -128,7 +128,7 @@ mode="$1" ; shift || true
 				name=${result%%|*}
 				[[ ${name:0:1} == '_' ]] && continue
 				defaultsFile="$TOOLSDEFAULTSPATH/$name"
-				echo "## DO NOT EDIT VALUES IN THIS FILE, IT IS GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
+				echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
 				for ((ij=2; ij<${#fieldsArray[@]}; ij++)); do
 					field=${fieldsArray[$ij]}
 					value="$(cut -d'|' -f$ij <<< "$result")"
@@ -144,7 +144,7 @@ mode="$1" ; shift || true
 	sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and host=\"$hostName\" and status=\"A\" order by name"
 	RunSql2 $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
-		echo "## DO NOT EDIT VALUES IN THIS FILE, IT IS GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
+		echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
 		for ((ii=0; ii<${#resultSet[@]}; ii++)); do
 			result="${resultSet[$ii]}"
 			name=${result%%|*}
@@ -175,3 +175,4 @@ Goodbye 0;
 ## 09-28-2017 @ 09.16.34 - (2.0.28)    - dscudiero - General syncing of dev to prod
 ## 09-28-2017 @ 09.23.24 - (2.0.30)    - dscudiero - Add warning messages if we cannot get data from the warehouse
 ## 09-28-2017 @ 10.44.11 - (2.0.32)    - dscudiero - Add scripts defaults file generation
+## 09-28-2017 @ 10.45.34 - (2.0.33)    - dscudiero - tweak messaging
