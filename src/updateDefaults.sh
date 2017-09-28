@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.27 # -- dscudiero -- Thu 09/28/2017 @  8:47:12.74
+version=2.0.28 # -- dscudiero -- Thu 09/28/2017 @  9:16:27.55
 #==================================================================================================
 TrapSigs 'on'
 myIncludes=""
@@ -28,7 +28,7 @@ ParseArgsStd
 Hello
 
 #==================================================================================================
-## Main
+## Maine
 #==================================================================================================
 ## Load default settings
 GetDefaultsData #'buildSiteInfoTable'
@@ -140,3 +140,4 @@ Goodbye 0;
 ## Thu Jan  5 14:50:53 CST 2017 - dscudiero - Fix problem setting the shares ignore list
 ## 09-19-2017 @ 06.56.27 - (2.0.23)    - dscudiero - redo imports
 ## 09-28-2017 @ 08.50.05 - (2.0.27)    - dscudiero - Added updating the defaults files
+## 09-28-2017 @ 09.16.34 - (2.0.28)    - dscudiero - General syncing of dev to prod
