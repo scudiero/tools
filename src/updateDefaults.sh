@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.23 # -- dscudiero -- Tue 09/19/2017 @  6:56:05.69
+version=2.0.27 # -- dscudiero -- Thu 09/28/2017 @  8:47:12.74
 #==================================================================================================
 TrapSigs 'on'
 myIncludes=""
@@ -31,8 +31,10 @@ Hello
 ## Main
 #==================================================================================================
 ## Load default settings
-GetDefaultsData 'buildSiteInfoTable'
+GetDefaultsData #'buildSiteInfoTable'
 ignoreList="${ignoreList##*ignoreShares:}" ; ignoreList="${ignoreList%% *}"
+
+mode="$1" ; shift || true
 
 ## DEV servers
 	unset newServers
@@ -77,7 +79,6 @@ ignoreList="${ignoreList##*ignoreShares:}" ; ignoreList="${ignoreList%% *}"
 		dump -1 -t sqlStmt
 		RunSql2 $sqlStmt
 
-
 ## Update rhel version.
 	rhel="$(cat /etc/redhat-release | cut -d" " -f3 | cut -d '.' -f1)"
 	[[ $(IsNumeric ${rhel:0:1}) != true ]] && rhel=$(cat /etc/redhat-release | cut -d" " -f4 | cut -d '.' -f1)
@@ -97,8 +98,30 @@ ignoreList="${ignoreList##*ignoreShares:}" ; ignoreList="${ignoreList%% *}"
 		Msg2 "Could not read file: '$skeletonRoot/release/web/courseleaf/clver.txt'"
 	fi
 
-#==================================================================================================
-## Update servers in the default.ini file
+## Write out the defaults files
+	if [[ $mode == 'all' || $mode == 'common' ]]; then
+		defaultsFile="$defaultsShadow/common"
+		sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and status=\"A\" order by name"
+		RunSql2 $sqlStmt
+		[[ ${#resultSet[@]} -gt 0 ]] && rm -f "$defaultsFile >& /dev/null"
+		for ((ii=0; ii<${#resultSet[@]}; ii++)); do
+			result="${resultSet[$ii]}"
+			name=${result%%|*}
+			value=${result##*|}
+			echo "$name=\"$value\"" >> "$defaultsFile"
+		done
+	fi
+
+	defaultsFile="$defaultsShadow/$hostName"
+	sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and host=\"$hostName\" and status=\"A\" order by name"
+	RunSql2 $sqlStmt
+	[[ ${#resultSet[@]} -gt 0 ]] && rm -f "$defaultsFile >& /dev/null"
+	for ((ii=0; ii<${#resultSet[@]}; ii++)); do
+		result="${resultSet[$ii]}"
+		name=${result%%|*}
+		value=${result##*|}
+		echo "$name=\"$value\"" >> "$defaultsFile"
+	done
 
 Goodbye 0;
 #==================================================================================================
@@ -116,3 +139,4 @@ Goodbye 0;
 ## Fri Oct  7 08:01:02 CDT 2016 - dscudiero - Take out the dbAcc switching logic, moved to framework RunSql
 ## Thu Jan  5 14:50:53 CST 2017 - dscudiero - Fix problem setting the shares ignore list
 ## 09-19-2017 @ 06.56.27 - (2.0.23)    - dscudiero - redo imports
+## 09-28-2017 @ 08.50.05 - (2.0.27)    - dscudiero - Added updating the defaults files
