@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.9 # -- dscudiero -- Thu 09/28/2017 @  7:52:25.14
+# version=2.1.10 # -- dscudiero -- Thu 09/28/2017 @  8:32:15.01
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -281,6 +281,7 @@ function Init {
 	if [[ $getDirs == true ]]; then
 		SetSiteDirs #'setDefault'
 		[[ -z $pvtDir && -n $devDir ]] && pvtDir="$(sed s/$client/$client-$userName/g <<< $devDir)"
+		[[ -z $pvtDir ]] && pvtDir="/mnt/$defaultDevServer/web/$client-$userName"
 	fi
 	[[ -n $env ]] && eval siteDir="\$${env}Dir" || unset siteDir
 	dump -3 env pvtDir devDir testDir nextDir currDir previewDir publicDir skelDir siteDir checkEnvs
@@ -373,3 +374,4 @@ export -f Init
 ## 09-01-2017 @ 13.44.07 - (2.1.6)     - dscudiero - Tweak messaging format
 ## 09-28-2017 @ 07.42.51 - (2.1.8)     - dscudiero - Remove the 'setDefaults' from the SetSiteDirs call for getEnvs
 ## 09-28-2017 @ 07.57.54 - (2.1.9)     - dscudiero - set pvtDir if getDirs
+## 09-28-2017 @ 08.32.48 - (2.1.10)    - dscudiero - Make sure in getEnv that pvtDir has a value even if devDir is not found
