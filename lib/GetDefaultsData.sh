@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.64" # -- dscudiero -- Thu 09/28/2017 @ 12:52:22.21
+# version="2.1.0" # -- dscudiero -- Thu 09/28/2017 @ 16:02:50.46
 #===================================================================================================
 # Get default variable values from the defaults database
 #===================================================================================================
@@ -110,3 +110,4 @@ export -f GetDefaultsData
 ## 05-12-2017 @ 14.58.13 - ("2.0.31")  - dscudiero - misc changes to speed up
 ## 09-27-2017 @ 10.51.02 - ("2.0.34")  - dscudiero - Add imports
 ## 09-28-2017 @ 13.03.23 - ("2.0.64")  - dscudiero - Add the abilty to set defaults from the file shadows
+## 09-28-2017 @ 16.03.08 - ("2.1.0")   - dscudiero - General syncing of dev to prod
