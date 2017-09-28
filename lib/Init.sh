@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.7 # -- dscudiero -- Thu 09/14/2017 @ 15:32:23.55
+# version=2.1.8 # -- dscudiero -- Thu 09/28/2017 @  7:42:20.26
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -270,7 +270,7 @@ function Init {
 			Msg2 $NT1 "Only one value valid for '$prodVar', using '$validProducts'"
 			eval $prodVar=$(Lower $validProducts)
 		fi
-	fi
+	fi # getProducts
 
 	## If all clients then split
 	[[ $client == '*' || $client == 'all' || $client == '.' ]] && PopSettings "$FUNCNAME" && return 0
@@ -278,7 +278,7 @@ function Init {
 	#===================================================================================================
 	## Set Directories based on the current host name and client name
 	# Set src and tgt directories based on client and env
-	[[ $getDirs == true ]] && SetSiteDirs 'setDefault'
+	[[ $getDirs == true ]] && SetSiteDirs #'setDefault'
 	[[ -n $env ]] && eval siteDir="\$${env}Dir" || unset siteDir
 	dump -3 env pvtDir devDir testDir nextDir currDir previewDir publicDir skelDir siteDir checkEnvs
 
@@ -368,3 +368,4 @@ export -f Init
 ## 08-28-2017 @ 10.34.36 - (2.1.5)     - dscudiero - g
 ## 08-28-2017 @ 11.14.59 - (2.1.6)     - dscudiero - fix syntax error
 ## 09-01-2017 @ 13.44.07 - (2.1.6)     - dscudiero - Tweak messaging format
+## 09-28-2017 @ 07.42.51 - (2.1.8)     - dscudiero - Remove the 'setDefaults' from the SetSiteDirs call for getEnvs
