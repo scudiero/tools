@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.33 # -- dscudiero -- Thu 09/28/2017 @ 10:45:26.54
+version=2.0.34 # -- dscudiero -- Thu 09/28/2017 @ 10:47:45.35
 #==================================================================================================
 TrapSigs 'on'
 myIncludes=""
@@ -111,6 +111,8 @@ mode="$1" ; shift || true
 				value=${result##*|}
 				echo "$name=\"$value\"" >> "$defaultsFile"
 			done
+			chgrp 'leepfrog' "$defaultsFile"
+			chown 760 "$defaultsFile"
 		else
 			Warning "Could not retrieve defaults data for 'common' from the data warehouse\n$sqlStmt"
 		fi
@@ -135,6 +137,8 @@ mode="$1" ; shift || true
 					[[ $value == 'NULL' ]] && echo "unset $field" >> "$defaultsFile" || echo "$field=\"$(cut -d'|' -f$ij <<< "$result")\"" >> "$defaultsFile"
 				done
 			done
+			chgrp 'leepfrog' "$defaultsFile"
+			chown 760 "$defaultsFile"
 		else
 			Warning "Could not retrieve defaults data for 'scripts' from the data warehouse\n$sqlStmt"
 		fi
@@ -151,6 +155,8 @@ mode="$1" ; shift || true
 			value=${result##*|}
 			echo "$name=\"$value\"" >> "$defaultsFile"
 		done
+		chgrp 'leepfrog' "$defaultsFile"
+		chown 760 "$defaultsFile"
 	else
 		Warning "Could not retrieve defaults data for '$hostName' from the data warehouse\n$sqlStmt"
 	fi
@@ -176,3 +182,4 @@ Goodbye 0;
 ## 09-28-2017 @ 09.23.24 - (2.0.30)    - dscudiero - Add warning messages if we cannot get data from the warehouse
 ## 09-28-2017 @ 10.44.11 - (2.0.32)    - dscudiero - Add scripts defaults file generation
 ## 09-28-2017 @ 10.45.34 - (2.0.33)    - dscudiero - tweak messaging
+## 09-28-2017 @ 10.48.13 - (2.0.34)    - dscudiero - Change group and permissions on the defaults files
