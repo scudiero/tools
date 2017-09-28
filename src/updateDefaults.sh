@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.35 # -- dscudiero -- Thu 09/28/2017 @ 10:52:09.55
+version=2.0.36 # -- dscudiero -- Thu 09/28/2017 @ 11:07:35.09
 #==================================================================================================
 TrapSigs 'on'
 myIncludes=""
@@ -121,7 +121,7 @@ mode="$1" ; shift || true
 		fields="name,scriptArgs,ignoreList,allowList,emailAddrs,scriptData1,scriptData2,scriptData3,scriptData4,scriptData5,setSemaphore,waitOn"
 		IFS=',' read -r -a fieldsArray <<< "$fields"
 		where="where active not in (\"No\",\"Old\")"
-		sqlStmt="select $fields from $scriptInfoTable $where order by name"
+		sqlStmt="select $fields from scripts $where order by name"
 		RunSql2 $sqlStmt
 		[[ ${#resultSet[@]} -gt 0 ]] && rm -f "$defaultsFile >& /dev/null"
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
@@ -185,3 +185,4 @@ Goodbye 0;
 ## 09-28-2017 @ 10.48.13 - (2.0.34)    - dscudiero - Change group and permissions on the defaults files
 ## 09-28-2017 @ 10.50.44 - dscudiero - General syncing of dev to prod
 ## 09-28-2017 @ 10.52.36 - (2.0.35)    - dscudiero - General syncing of dev to prod
+## 09-28-2017 @ 11.07.59 - (2.0.36)    - dscudiero - Hard code the scripts table name
