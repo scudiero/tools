@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.21" # -- dscudiero -- Mon 09/25/2017 @  8:46:06.65
+# version="2.1.22" # -- dscudiero -- Thu 09/28/2017 @  8:21:55.56
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -92,9 +92,8 @@ function Prompt {
 									echo -en "$timerInterruptPrompt > "
 									read response
 								else
-									[[ $response = 'x' ]] && unset response && Here -l P1a && break
+									[[ $response = 'x' ]] && unset response && break
 								fi
-								Here -l P1b
 								break
 							fi
 							[[ $rc -gt 0 && $tCntr -ge $maxReadTimeout ]] && echo && Terminate "Read operation timed out after the maximum time of $maxReadTimeout seconds" && exit
@@ -186,3 +185,4 @@ export -f Prompt
 ## 08-24-2017 @ 16.32.08 - ("2.1.17")  - dscudiero - Change prompt text when a timed read times out
 ## 09-25-2017 @ 08.42.47 - ("2.1.19")  - dscudiero - General syncing of dev to prod
 ## 09-25-2017 @ 09.01.55 - ("2.1.21")  - dscudiero - Switch to Msg3
+## 09-28-2017 @ 08.22.09 - ("2.1.22")  - dscudiero - Remove the debug stuss
