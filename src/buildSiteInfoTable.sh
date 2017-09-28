@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.67 # -- dscudiero -- Wed 09/27/2017 @ 16:46:46.54
+version=4.3.68 # -- dscudiero -- Thu 09/28/2017 @  6:50:49.06
 #=======================================================================================================================
 TrapSigs 'on'
 originalArgStr="$*"
@@ -122,19 +122,15 @@ Msg3 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 
 	## Loop through actual clientDirs
 		for clientDir in ${clientDirs[@]}; do
-dump clientDir
 			if [[ ${dbClients[$(basename $clientDir)]+abc} ]]; then
 				(( clientCntr+=1 ))
 				client="$(basename $clientDir)"
 				clientId=${dbClients[$client]}
-dump -t client clientId
 				## Get the envDirs, make sure we have some
 					for env in $(tr ',' ' ' <<< "$envList"); do unset ${env}Dir ; done
 					SetSiteDirs 'set'
-for env in $(tr ',' ' ' <<< "$envList"); do dump -t2 ${env}Dir ; done
 					haveDir=false;
 					for env in $(tr ',' ' ' <<< "$envList"); do token="${env}Dir"; [[ -n ${!token} ]] && haveDir=true && break; done
-dump haveDir
 					[[ $haveDir == false ]] && continue
 
 				[[ $batchMode != true ]] && Msg3 "Processing: $client -- $clientId (~$clientCntr/$numClients)..."
@@ -241,3 +237,4 @@ Goodbye 0 'alert'
 ## 09-06-2017 @ 07.14.46 - (4.3.34)    - dscudiero - Tweak error messaging
 ## 09-07-2017 @ 07.40.55 - (4.3.35)    - dscudiero - Fix problem where the passed tableName was being picked up as a client name
 ## 09-27-2017 @ 16.50.50 - (4.3.67)    - dscudiero - Refasctored messaging
+## 09-28-2017 @ 06.52.04 - (4.3.68)    - dscudiero - Remove debug statements
