@@ -1,23 +1,52 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.34" # -- dscudiero -- Wed 09/27/2017 @ 10:47:39.95
+# version="2.0.64" # -- dscudiero -- Thu 09/28/2017 @ 12:52:22.21
 #===================================================================================================
 # Get default variable values from the defaults database
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-
 function GetDefaultsData {
 
-	myIncludes="RunSql2"
-	Import "$myIncludes"
-	local scriptName="$1" ; shift || true
-	local table="${1:-$scriptsTable}"
-	local sqlStmt fields field fieldCntr varName whereClause
+	## Defaults ====================================================================================
+	local mode='fromDb'
+	local table='scripts'
+	local scripts; unset scripts
 
-	## Set myPath based on if the current file has been sourced
-		[[ -d $(dirname ${BASH_SOURCE[0]}) ]] && myPath=$(dirname ${BASH_SOURCE[0]})
+	## Parse arguments =============================================================================
+	## '-f'		- pull data from defaults files
+	## '-d'		- pull date from the warehouse (this is the default)
+	## other parameters as below
+	while [[ $# -gt 0 ]]; do
+	    [[ $1 =~ ^-m|--mode$ ]] && { mode="'$2'"; shift 2; continue; }
+	    [[ $1 =~ ^-f|--fromFiles$ ]] && { mode='fromFiles'; shift 1; continue; }
+	    [[ $1 =~ ^-d|--Db$ ]] && { mode='fromDb'; shift 1; continue; }
+	    [[ $1 =~ ^-r|--reports$ ]] && { table='reports'; shift 2; continue; }
+	    [[ $1 =~ ^-s|--scripts$ ]] && { table='scripts'; shift 2; continue; }
+	    scripts="$scripts $1"
+	    shift 1 || true
+	done
+	 scripts="${scripts:1}"
+
+	## MAIN ========================================================================================
+
+	## If mode is fromFiles then just source the defaults files from the shadows
+	if [[ $mode == 'fromFiles' ]]; then
+		[[ -f "$TOOLSDEFAULTSPATH/common" ]] && source "$TOOLSDEFAULTSPATH/common"
+		[[ -f "$TOOLSDEFAULTSPATH/$hostName" ]] && source "$TOOLSDEFAULTSPATH/$hostName"
+		if [[ -n $scripts ]]; then
+			for scriptName in $scripts; do
+				[[ -f "$TOOLSDEFAULTSPATH/$scriptName" ]] && source "$TOOLSDEFAULTSPATH/$scriptName"
+			done
+		fi
+		return 0
+	fi
+
+	## Pull the data from the Db
+	Import "RunSql2"
+	local sqlStmt fields field fieldCntr varName whereClause
+	scriptName="$scripts"
 
 	## Load common default values
 		if [[ $defaultsLoaded != true ]]; then
@@ -80,3 +109,4 @@ export -f GetDefaultsData
 ## Fri Jan 13 15:33:12 CST 2017 - dscudiero - remove debug code
 ## 05-12-2017 @ 14.58.13 - ("2.0.31")  - dscudiero - misc changes to speed up
 ## 09-27-2017 @ 10.51.02 - ("2.0.34")  - dscudiero - Add imports
+## 09-28-2017 @ 13.03.23 - ("2.0.64")  - dscudiero - Add the abilty to set defaults from the file shadows
