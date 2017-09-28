@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.23" # -- dscudiero -- Wed 09/27/2017 @ 11:50:14.23
+# version="2.0.26" # -- dscudiero -- Thu 09/28/2017 @  7:37:25.40
 #===================================================================================================
 # Set Directories based on the current hostName name and school name
 # Sets globals: devDir, nextDir, previewDir, publicDir, upgradeDir
@@ -51,8 +51,7 @@ function SetSiteDirs {
 	## Find production directories
 		unset testDir currDir previewDir publicDir priorDir
 		for server in $(tr ',' ' ' <<< "$prodServers"); do
-			[[ ! -d "/mnt/$server/$client-$env" && ! -d "/mnt/$server/$client" ]] && continue
-
+			[[ ! -d "/mnt/$server/$client-test" && ! -d "/mnt/$server/$client" ]] && continue
 			for env in $(tr ',' ' ' <<< "$courseleafProdEnvs"); do
 				token="${env}Dir"
 				if [[ $env == 'test' && -z ${!token} ]]; then
@@ -80,6 +79,7 @@ function SetSiteDirs {
 			[[ -d ${!checkDir} ]] && echo true || echo false
 		fi
 
+	[[ $verboseLevel -ge 3 ]] && { Msg3 "SetSiteDirs:"; for env in $(tr ',' ' ' <<< "$courseleafDevEnvs $courseleafProdEnvs"); do dump -t ${env}Dir; done; }
 	return 0
 } #SetSiteDirs
 
@@ -96,3 +96,4 @@ export -f SetSiteDirs
 ## 09-27-2017 @ 07.52.22 - ("2.0.21")  - dscudiero - General syncing of dev to prod
 ## 09-27-2017 @ 10.59.03 - ("2.0.22")  - dscudiero - Fix problem with setDefault
 ## 09-27-2017 @ 11.50.43 - ("2.0.23")  - dscudiero - tweak logic
+## 09-28-2017 @ 07.39.47 - ("2.0.26")  - dscudiero - fix bug in setting product dirs
