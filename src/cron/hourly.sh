@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.127 # -- dscudiero -- Thu 09/21/2017 @  8:16:48.04
+version=2.1.129 # -- dscudiero -- Thu 09/28/2017 @  8:48:14.85
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -199,6 +199,7 @@ case "$hostName" in
 			RunSql2 $sqlStmt
 			[[ ${#resultSet[@]} -gt 0 ]] && Call 'perfTest'
 		fi
+		Call 'updateDefaults' 'all'
 		CheckMonitorFiles
 		SyncInternalDb
 		#BuildToolsAuthTable
@@ -217,6 +218,7 @@ case "$hostName" in
 			RunSql2 $sqlStmt
 			[[ ${#resultSet[@]} -gt 0 ]] && Semaphore 'waiton' 'perfTest' && Call 'perfTest' && Call 'perfTest' 'summary'
 		fi
+		Call 'updateDefaults'
 		CheckMonitorFiles
 		;;
 esac
@@ -257,3 +259,4 @@ return 0
 ## 09-08-2017 @ 11.26.25 - (2.1.125)   - dscudiero - add protectedcall to the list of includes
 ## 09-12-2017 @ 07.42.46 - (2.1.126)   - dscudiero - set USELOCAL before call of backupdata
 ## 09-21-2017 @ 08.17.52 - (2.1.127)   - dscudiero - comment out updateauthtable
+## 09-28-2017 @ 08.49.42 - (2.1.129)   - dscudiero - Modify calls to updateDefaults to add mode
