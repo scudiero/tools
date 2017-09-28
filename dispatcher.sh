@@ -21,6 +21,8 @@
 	[[ -n $TOOLSWAREHOUSEDBHOST ]] && warehouseDbHost="$TOOLSWAREHOUSEDBHOST"
 	export TOOLSWAREHOUSEDBHOST="$warehouseDbHost"
 
+	export TOOLSDEFAULTSPATH="$TOOLSPATH/shadows/toolsDefaults"
+
 ## Find the loader
 	loaderDir="$TOOLSPATH"
 	if [[ $1 == '--useLocal' && -r $HOME/tools/loader.sh ]]; then
@@ -71,3 +73,4 @@ exit
 ## 09-07-2017 @ 08.11.55 - dscudiero - Add debug for me
 ## 09-07-2017 @ 08.52.42 - dscudiero - add setting of SCRIPTINCLUDES
 ## 09-08-2017 @ 16.28.53 - dscudiero - Check for the --useLocal directive as the first token before using local loader
+## 09-28-2017 @ 09.02.58 - dscudiero - Add setting of TOOLSDEFAULTSPATH
