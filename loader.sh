@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.3.56" # -- dscudiero -- Fri 09/15/2017 @  8:16:43.61
+version="1.3.57" # -- dscudiero -- Thu 09/28/2017 @ 13:01:10.50
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -134,7 +134,7 @@ statusLine="Loader ($version): "
 	fi
 
 ## Overrides
-	[[ ${callPgmName:0:4} == 'test' ]] && noLog=true && noLogInDb=true && useLocal=true
+	[[ ${callPgmName:0:4} == 'test' ]] && noLog=true && noLogInDb=true && useLocal=true && export USELOCAL=true
 	[[ $useLocal == true ]] && export USELOCAL=true
 	if [[ $useDev == true ]]; then
 		export USEDEV=true 
@@ -388,3 +388,4 @@ sTime=$(date "+%s")
 ## 08-01-2017 @ 13.21.58 - ("1.3.24")  - dscudiero - Tweak messages
 ## 08-07-2017 @ 15.49.31 - ("1.3.36")  - dscudiero - Set the UserAuthGroups global variable
 ## 08-24-2017 @ 10.06.49 - dscudiero - Add SendEmail to default import list
+## 09-28-2017 @ 13.01.36 - ("1.3.57")  - dscudiero - Set globel USELOCAL if script begins with 'test'
