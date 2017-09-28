@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.8 # -- dscudiero -- Thu 09/28/2017 @  7:42:20.26
+# version=2.1.9 # -- dscudiero -- Thu 09/28/2017 @  7:52:25.14
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -278,7 +278,10 @@ function Init {
 	#===================================================================================================
 	## Set Directories based on the current host name and client name
 	# Set src and tgt directories based on client and env
-	[[ $getDirs == true ]] && SetSiteDirs #'setDefault'
+	if [[ $getDirs == true ]]; then
+		SetSiteDirs #'setDefault'
+		[[ -z $pvtDir && -n $devDir ]] && pvtDir="$(sed s/$client/$client-$userName/g <<< $devDir)"
+	fi
 	[[ -n $env ]] && eval siteDir="\$${env}Dir" || unset siteDir
 	dump -3 env pvtDir devDir testDir nextDir currDir previewDir publicDir skelDir siteDir checkEnvs
 
@@ -369,3 +372,4 @@ export -f Init
 ## 08-28-2017 @ 11.14.59 - (2.1.6)     - dscudiero - fix syntax error
 ## 09-01-2017 @ 13.44.07 - (2.1.6)     - dscudiero - Tweak messaging format
 ## 09-28-2017 @ 07.42.51 - (2.1.8)     - dscudiero - Remove the 'setDefaults' from the SetSiteDirs call for getEnvs
+## 09-28-2017 @ 07.57.54 - (2.1.9)     - dscudiero - set pvtDir if getDirs
