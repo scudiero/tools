@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.28 # -- dscudiero -- Thu 09/28/2017 @  9:16:27.55
+version=2.0.30 # -- dscudiero -- Thu 09/28/2017 @  9:22:59.74
 #==================================================================================================
 TrapSigs 'on'
 myIncludes=""
@@ -95,7 +95,7 @@ mode="$1" ; shift || true
 		sqlStmt="update defaults set value=\"$defaultClVer\" where name=\"defaultClVer\""
 		RunSql2 $sqlStmt
 	else
-		Msg2 "Could not read file: '$skeletonRoot/release/web/courseleaf/clver.txt'"
+		Warning "Could not read file: '$skeletonRoot/release/web/courseleaf/clver.txt'"
 	fi
 
 ## Write out the defaults files
@@ -103,25 +103,33 @@ mode="$1" ; shift || true
 		defaultsFile="$defaultsShadow/common"
 		sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and status=\"A\" order by name"
 		RunSql2 $sqlStmt
-		[[ ${#resultSet[@]} -gt 0 ]] && rm -f "$defaultsFile >& /dev/null"
+		if [[ ${#resultSet[@]} -gt 0 ]]; then
+			echo "## DO NOT EDIT VALUES IN THIS FILE, IT IS GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
+			for ((ii=0; ii<${#resultSet[@]}; ii++)); do
+				result="${resultSet[$ii]}"
+				name=${result%%|*}
+				value=${result##*|}
+				echo "$name=\"$value\"" >> "$defaultsFile"
+			done
+		else
+			Warning "Could not retrieve defaults data for 'common' from the data warehouse\n$sqlStmt"
+		fi
+	fi
+
+	defaultsFile="$defaultsShadow/$hostName"
+	sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and host=\"$hostName\" and status=\"A\" order by name"
+	RunSql2 $sqlStmt
+	if [[ ${#resultSet[@]} -gt 0 ]]; then
+		echo "## DO NOT EDIT VALUES IN THIS FILE, IT IS GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
 		for ((ii=0; ii<${#resultSet[@]}; ii++)); do
 			result="${resultSet[$ii]}"
 			name=${result%%|*}
 			value=${result##*|}
 			echo "$name=\"$value\"" >> "$defaultsFile"
 		done
+	else
+		Warning "Could not retrieve defaults data for '$hostName' from the data warehouse\n$sqlStmt"
 	fi
-
-	defaultsFile="$defaultsShadow/$hostName"
-	sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and host=\"$hostName\" and status=\"A\" order by name"
-	RunSql2 $sqlStmt
-	[[ ${#resultSet[@]} -gt 0 ]] && rm -f "$defaultsFile >& /dev/null"
-	for ((ii=0; ii<${#resultSet[@]}; ii++)); do
-		result="${resultSet[$ii]}"
-		name=${result%%|*}
-		value=${result##*|}
-		echo "$name=\"$value\"" >> "$defaultsFile"
-	done
 
 Goodbye 0;
 #==================================================================================================
@@ -141,3 +149,4 @@ Goodbye 0;
 ## 09-19-2017 @ 06.56.27 - (2.0.23)    - dscudiero - redo imports
 ## 09-28-2017 @ 08.50.05 - (2.0.27)    - dscudiero - Added updating the defaults files
 ## 09-28-2017 @ 09.16.34 - (2.0.28)    - dscudiero - General syncing of dev to prod
+## 09-28-2017 @ 09.23.24 - (2.0.30)    - dscudiero - Add warning messages if we cannot get data from the warehouse
