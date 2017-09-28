@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.9 # -- dscudiero -- Tue 09/19/2017 @  7:04:18.63
+version=1.22.10 # -- dscudiero -- Thu 09/28/2017 @  8:49:01.04
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -270,7 +270,7 @@ case "$hostName" in
 			Call 'checkPublishSettings' "$scriptArgs"
 
 		## Update the defaults data for this host
-			Call 'updateDefaults' "$scriptArgs"
+			Call 'updateDefaults' "all $scriptArgs"
 
 		## Scratch copy the skeleton shadow
 			Msg2 "Scratch copying the skeleton shadow..."
@@ -464,3 +464,4 @@ return 0
 ## 09-06-2017 @ 07.20.12 - (1.22.6)    - dscudiero - add -fix to call to checkCgiPermissions
 ## 09-07-2017 @ 07.42.09 - (1.22.7)    - dscudiero - remove tablename from the buildsiteinfotable call
 ## 09-19-2017 @ 07.04.32 - (1.22.9)    - dscudiero - General syncing of dev to prod
+## 09-28-2017 @ 08.49.49 - (1.22.10)   - dscudiero - Modify calls to updateDefaults to add mode
