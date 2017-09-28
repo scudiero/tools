@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.30 # -- dscudiero -- Thu 09/28/2017 @  9:22:59.74
+version=2.0.32 # -- dscudiero -- Thu 09/28/2017 @ 10:43:50.48
 #==================================================================================================
 TrapSigs 'on'
 myIncludes=""
@@ -100,7 +100,7 @@ mode="$1" ; shift || true
 
 ## Write out the defaults files
 	if [[ $mode == 'all' || $mode == 'common' ]]; then
-		defaultsFile="$defaultsShadow/common"
+		defaultsFile="$TOOLSDEFAULTSPATH/common"
 		sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and status=\"A\" order by name"
 		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
@@ -114,9 +114,33 @@ mode="$1" ; shift || true
 		else
 			Warning "Could not retrieve defaults data for 'common' from the data warehouse\n$sqlStmt"
 		fi
+
+		## Get script defaults data
+		fields="name,scriptArgs,ignoreList,allowList,emailAddrs,scriptData1,scriptData2,scriptData3,scriptData4,scriptData5,setSemaphore,waitOn"
+		IFS=',' read -r -a fieldsArray <<< "$fields"
+		where="where active not in (\"No\",\"Old\")"
+		sqlStmt="select $fields from $scriptInfoTable $where order by name"
+		RunSql2 $sqlStmt
+		[[ ${#resultSet[@]} -gt 0 ]] && rm -f "$defaultsFile >& /dev/null"
+		if [[ ${#resultSet[@]} -gt 0 ]]; then
+			for ((ii=0; ii<${#resultSet[@]}; ii++)); do
+				result="${resultSet[$ii]}"
+				name=${result%%|*}
+				[[ ${name:0:1} == '_' ]] && continue
+				defaultsFile="$TOOLSDEFAULTSPATH/$name"
+				echo "## DO NOT EDIT VALUES IN THIS FILE, IT IS GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
+				for ((ij=2; ij<${#fieldsArray[@]}; ij++)); do
+					field=${fieldsArray[$ij]}
+					value="$(cut -d'|' -f$ij <<< "$result")"
+					[[ $value == 'NULL' ]] && echo "unset $field" >> "$defaultsFile" || echo "$field=\"$(cut -d'|' -f$ij <<< "$result")\"" >> "$defaultsFile"
+				done
+			done
+		else
+			Warning "Could not retrieve defaults data for 'scripts' from the data warehouse\n$sqlStmt"
+		fi
 	fi
 
-	defaultsFile="$defaultsShadow/$hostName"
+	defaultsFile="$TOOLSDEFAULTSPATH/$hostName"
 	sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and host=\"$hostName\" and status=\"A\" order by name"
 	RunSql2 $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
@@ -150,3 +174,4 @@ Goodbye 0;
 ## 09-28-2017 @ 08.50.05 - (2.0.27)    - dscudiero - Added updating the defaults files
 ## 09-28-2017 @ 09.16.34 - (2.0.28)    - dscudiero - General syncing of dev to prod
 ## 09-28-2017 @ 09.23.24 - (2.0.30)    - dscudiero - Add warning messages if we cannot get data from the warehouse
+## 09-28-2017 @ 10.44.11 - (2.0.32)    - dscudiero - Add scripts defaults file generation
