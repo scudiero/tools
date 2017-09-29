@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.6 # -- dscudiero -- Thu 09/14/2017 @ 15:52:22.51
+version=1.2.8 # -- dscudiero -- Fri 09/29/2017 @ 10:06:50.69
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' 
@@ -50,8 +50,8 @@ VerifyContinue "You are asking to get CIM fields data for\n\tclient:$client\n\tE
 ## Main
 #==================================================================================================
 ## Find the step file to run
-	FindExecutable "$step" 'std' 'steps:html' 'steps' ## Sets variable executeFile
-	srcStepFile=$executeFile
+	srcStepFile="$(FindExecutable -step "$step")"
+	[[ -z $srcStepFile ]] && Terminate "Could find the step file ('$step')"
 	Msg2 "Using step file: $srcStepFile"
 
 ## Run the step
@@ -71,3 +71,4 @@ VerifyContinue "You are asking to get CIM fields data for\n\tclient:$client\n\tE
 #==================================================================================================
 #Alert
 Goodbye 0
+## 09-29-2017 @ 10.14.10 - (1.2.8)     - dscudiero - Update FindExcecutable call for new syntax
