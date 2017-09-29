@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.0.128" # -- dscudiero -- Fri 06/09/2017 @  8:18:51.46
+# version="1.2.0" # -- dscudiero -- Fri 09/29/2017 @  9:57:51.70
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -17,111 +17,52 @@
 # All rights reserved
 #=======================================================================================================================
 function FindExecutable {
-	local callPgmName=$1; shift
-	local searchMode=${1:-std}; shift
-	local srcTypes="$1"; shift
-	local srcLibs="$1"; shift
-	local searchDirs searchMode srcTypes typeDir typeExt srcLibs localMd5 prodMd5 prodFile ans found searchDir type lib callPgmAlias
-	local useLocal=$USELOCAL
-	local useDev=$USEDEV
+	#Import 'Msg3'; Verbose 3 -l "$FUNCNAME: Starting"
+	## Defaults ====================================================================================
+	local mode='source' file='' token type ext found=false searchTokens checkFile searchRoot=''
+	local useLocal=$USELOCAL useDev=$USEDEV
 
-	if [[ $srcTypes == '' || $srcTypes == 'search' || $srcLibs == '' ]]; then
-		sqlStmt="select scriptData1,scriptData2 from $scriptsTable where name =\"dispatcher\" "
-		RunSql2 $sqlStmt
-	 	resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString")
-		local dbSrcTypes="$(cut -d'|' -f1 <<< "$resultString")"
-		local dbSrcLibs="$(cut -d'|' -f2 <<< "$resultString")"
-	fi
-	[[ $srcTypes == '' || $srcTypes == 'search' ]] && srcTypes="$dbSrcTypes"
-	[[ $srcLibs == '' ]] && srcLibs="$dbSrcLibs"
+	## Parse arguments =============================================================================
+	while [[ $# -gt 0 ]]; do
+	    [[ $1 =~ ^-fi|--file$ ]] && { file="'$2'"; shift 2; continue; }
+	    [[ $1 =~ ^-m|--mode$ ]] && { mode="'$2'"; shift 2; continue; }
+	    [[ $1 =~ ^-sr|-so|--src$|--source$ ]] && { mode='src'; shift 1; continue; }
+	    [[ $1 =~ ^-l|--lib$ ]] && { mode='lib'; shift 1; continue; }
+	    [[ $1 =~ ^-p|--patch$ ]] && { mode='patch'; searchRoot="${mode}s"; shift 1; continue; }
+	    [[ $1 =~ ^-fe|--feature$ ]] && { mode='feature'; searchRoot="${mode}s"; shift 1; continue; }
+	    [[ $1 =~ ^-st|--step$ ]] && { mode='step'; searchRoot="${mode}s"; shift 1; continue; }
+	    [[ $1 =~ ^-r|--report$ ]] && { mode='report'; searchRoot="${mode}s"; shift 1; continue; }
+	    [[ -z $file ]] && file="$1"
+	    shift 1 || true
+	done
+	#Dump 3 -l -t file mode searchRoot
 
-	## Search for the file scanning TOOLSSRC, TOOSSRCLIBS
-		searchDirs="$TOOLSPATH/src"
-		[[ $useDev == true && -d "$TOOLSDEVPATH/src" ]] && searchDirs="$TOOLSDEVPATH/src $searchDirs"
+	## Search for the file
+	if [[ $mode != 'lib' ]]; then
+		[[ -n $TOOLSSRCPATH ]] && searchDirs="$(tr ':' ' ' <<< $TOOLSSRCPATH)" || searchDirs="$TOOLSPATH/src"
+		[[ $useDev == true && -n $TOOLSDEVPATH && -d "$TOOLSDEVPATH/src" ]] && searchDirs="$TOOLSDEVPATH/src $searchDirs"
 		[[ $useLocal == true && -d "$HOME/tools/src" ]] && searchDirs="$HOME/tools/src $searchDirs"
-		[[ $TOOLSSRCPATH != '' && $searchMode != 'fast' ]] && searchDirs="$searchDirs $( tr ':' ' ' <<< $TOOLSSRCPATH)"
+		searchTokens="bash:sh python:py java:class steps:html report:sh"
+	else
+		[[ -n $TOOLSLIBPATH ]] && searchDirs="$(tr ':' ' ' <<< $TOOLSLIBPATH)" || searchDirs="$TOOLSPATH/lib"
+		[[ $useDev == true && -n $TOOLSDEVPATH && -d "$TOOLSDEVPATH/lib" ]] && searchDirs="$TOOLSDEVPATH/lib $searchDirs"
+		[[ $useLocal == true && -d "$HOME/tools/lib" ]] && searchDirs="$HOME/tools/lib $searchDirs"
+		searchTokens="bash:sh cpp:cpp"
+	fi
+	#Dump 3 -l -t file mode searchRootsearchTokens
 
-	## Check db to see if there is a script name override
-		unset callPgmAlias
-		sqlStmt="select exec from $scriptsTable where name =\"$callPgmName\" "
-		RunSql2 $sqlStmt
-		if [[ ${#resultSet[0]} -gt 0 && ${resultSet[0]} != 'NULL' ]]; then
-			callPgmName="$(cut -d' ' -f1 <<< ${resultSet[0]})"
-			callPgmAlias="$(cut -d' ' -f2 <<< ${resultSet[0]})"
-		fi
-		[[ $callPgmAlias != '' ]] && executeAlias="$callPgmAlias"
-
-	## Search for execution file
-		found=false;
-	    for searchDir in $searchDirs ; do
-	    	[[ ! -d $searchDir ]] && continue
-	    	## Look for the '.sh' file in the root src directory, if found then use it
-	    	executeFile="$searchDir/${callPgmName}.sh"
-			if [[ -r "$executeFile" ]]; then
-				found=true
-				break
-			else
-				unset executeFile
-			fi
-			## Loop through library directories
-	 	    for lib in $(tr ',' ' ' <<< $srcLibs); do
-				## Look for the '.sh' file in the root lib directory, if found then use it
-				executeFile="$searchDir/$lib/${callPgmName}.sh"
-				if [[ -r "$executeFile" ]]; then
-					found=true
-					break
-				else
-					unset executeFile
-				fi
-				## Loop through the types
-	 	    	for type in $(tr ',' ' ' <<< $srcTypes); do
-					typeDir=$(cut -d':' -f1 <<< $type)
-					typeExt=$(cut -d':' -f2 <<< $type)
-	 	    		## Look for the '.sh' file in the root src directory, if found then use it
-					executeFile="$searchDir/$typeDir/${callPgmName}.${typeExt}"
-					if [[ -r "$executeFile" ]]; then
-						found=true
-						break
-					else
-						unset executeFile
-					fi
-				done ## types
-				[[ $found == true ]] && break
-	 	    done ## libs
-			[[ $found == true ]] && break
-	 	done  ## searchDirs
-
-	    if [[ $found == false ]]; then
-	    	ErrorMsg "($FUNCNAME) Could not resolve the script source file for '$callPgmName'"
-	    	Msg2 "^searchMode: '$searchMode'"
-	    	Msg2 "^searchDirs: '$searchDirs'"
-	    	Msg2 "^srcTypes: '$srcTypes'"
-	    	Msg2 "^srcLibs: '$srcLibs'"
-	    	Goodbye -1
-	    fi
-
-	## Check to see if file was found in directory other than $TOOLSPATH
-		if [[ $(dirname $executeFile) != $TOOLSPATH ]]; then
-			localMd5=$(cut -d' ' -f1 <<< $(md5sum $executeFile))
-			prodFile=$TOOLSPATH/src/$(basename $executeFile)
-			unset prodMd5
-			## If we have a prod file then see if the local file is different
-			if [[ -x $prodFile ]]; then
-				prodMd5=$(cut -d' ' -f1 <<< $(md5sum $prodFile))
-				## Check md5's to see if different from production file
-				if [[ $prodMd5 != $localMd5 ]]; then
-					unset ans
-					if [[ $useLocal != true && $useDev != true && $batchMode != true ]]; then
-						Msg2 $N "\aFound a copy of '$callPgmName' in a local directory: '$(dirname $executeFile)'"
-						unset ans && Prompt ans "'Yes' to use the local copy, 'No' to use production version" 'Yes No' 'Yes' '4' && ans=$(Lower ${ans:0:1})
-					else
-						ans='y'
-					fi
-					[[ $ans != 'y' ]] && executeFile=$prodFile || USELOCAL=true
-				fi
-			fi
-		fi
-
+	for dir in $searchDirs; do
+		#Dump 3 -l -t dir
+		for token in $(tr ',' ' ' <<< "$searchTokens"); do
+			type="${token%%:*}"; ext="${token##*:}"
+			[[ -n $searchRoot ]] && checkFile="$dir/$searchRoot/${file}.${ext}" || checkFile="$dir/${file}.${ext}"
+			Dump 3 -l -t2 checkFile
+			[[ -r "$checkFile" ]] && { found=true; break; } || unset checkFile
+		done
+		[[ $found == true ]] && break
+	done
+	#Verbose "$FUNCNAME: Ending"
+	echo "$checkFile"
 	return 0
 } ##FindExecutable
 export -f FindExecutable
@@ -138,3 +79,4 @@ export -f FindExecutable
 ## 06-09-2017 @ 08.13.33 - ("1.0.126") - dscudiero - add debug code
 ## 06-09-2017 @ 08.17.34 - ("1.0.127") - dscudiero - General syncing of dev to prod
 ## 06-09-2017 @ 08.19.10 - ("1.0.128") - dscudiero - remove debug statements
+## 09-29-2017 @ 10.13.30 - ("1.2.0")   - dscudiero - Refactored for performance
