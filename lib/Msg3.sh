@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.7" # -- dscudiero -- Tue 09/26/2017 @ 15:35:14.18
+# version="1.0.8" # -- dscudiero -- Fri 09/29/2017 @  6:42:36.71
 #===================================================================================================
 # Usage: Msg3 <msgType> <msgLevel> <indentLevel> msgText
 # 	msgType: [N,I,W,E,T]
@@ -10,6 +10,7 @@
 function Msg3 {
 	[[ $quiet == true ]] && return 0
 	[[ $# -eq 0 ]] && echo && return 0
+	Import "Colors"
 	## First token is a type identifier?
 		local msgType msgLevel indentLevel msgText
 		unset msgType msgLevel indentLevel msgText
@@ -84,3 +85,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 09-25-2017 @ 08.29.25 - ("1.0.5")   - dscudiero - Quick processing if no arguments passed, just echo and return
 ## 09-26-2017 @ 07.55.52 - ("1.0.6")   - dscudiero - Move the Quick directive earlier
 ## 09-26-2017 @ 15.35.34 - ("1.0.7")   - dscudiero - Fix bug with the quick options
+## 09-29-2017 @ 06.46.13 - ("1.0.8")   - dscudiero - General syncing of dev to prod
