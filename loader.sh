@@ -251,7 +251,7 @@ sTime=$(date "+%s")
 		TrapSigs 'off'
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		[[ $(cut -d' ' -f1 <<< $(wc -l "$executeFile")) -eq 0 ]] && Terminate "Execution file ($executeFile) is empty"
-[[ $userName == 'dscudiero' ]] && dump executeFile
+[[ $userName == 'dscudiero' ]] && echo && echo "HERE" && echo "executeFile = '$executeFile'"
 		source $executeFile $scriptArgs 2>&1 | tee -a $logFile; rc=$?
 
 ## Should never get here but just in case
@@ -377,3 +377,4 @@ sTime=$(date "+%s")
 ## 09-28-2017 @ 13.01.36 - ("1.3.57")  - dscudiero - Set globel USELOCAL if script begins with 'test'
 ## 09-29-2017 @ 13.25.00 - ("1.3.95")  - dscudiero - General syncing of dev to prod
 ## 09-29-2017 @ 15.14.55 - ("1.4.-1")  - dscudiero - add debug
+## 09-29-2017 @ 15.16.39 - ("1.4.-1")  - dscudiero - General syncing of dev to prod
