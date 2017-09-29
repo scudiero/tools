@@ -1,9 +1,11 @@
 ##  #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.1 # -- dscudiero -- Thu 09/07/2017 @ 14:49:54.65
+version=1.0.2 # -- dscudiero -- Fri 09/29/2017 @ 15:26:07.42
 #==================================================================================================
 # Quick call to scriptsAndReports
 #==================================================================================================
-Import 'Call'
-Call copyEnv -tgtEnv pvt $*
+Import 'FindExecutable'
+[[ -z $executeFile ]] && executeFile=$(FindExecutable 'copyEnv')
+source $executeFile -tgtEnv pvt $scriptArgs
+## 09-29-2017 @ 15.26.27 - (1.0.2)     - dscudiero - General syncing of dev to prod
