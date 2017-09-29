@@ -3,13 +3,9 @@
 #==================================================================================================
 version=4.12.10 # -- dscudiero -- Fri 09/29/2017 @ 13:37:02.61
 #==================================================================================================
-[[ $userName == 'dscudiero' ]] && Here CE0
-
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall"
 Import "$standardInteractiveIncludes $myIncludes"
-
-[[ $userName == 'dscudiero' ]] && Here CE0A
 
 [[ $1 == $myName ]] && shift
 originalArgStr="$*"
@@ -124,12 +120,8 @@ haveClss=false
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-[[ $userName == 'dscudiero' ]] && Here CE1
-[[ $userName == 'dscudiero' ]] && echo "myName = '$myName'"
 GetDefaultsData "$myName"
-[[ $userName == 'dscudiero' ]] && Here CE2
 ParseArgsStd
-[[ $userName == 'dscudiero' ]] && Here CE3
 
 [[ -n $env && -z $srcEnv ]] && srcEnv="$env"
 
@@ -675,3 +667,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 09-29-2017 @ 14.27.45 - (4.12.10)   - dscudiero - Add debug statements
 ## 09-29-2017 @ 15.22.30 - (4.12.10)   - dscudiero - General syncing of dev to prod
 ## 09-29-2017 @ 15.30.15 - (4.12.10)   - dscudiero - Add debug stuff
+## 09-29-2017 @ 15.35.35 - (4.12.10)   - dscudiero - remove debug stuff
