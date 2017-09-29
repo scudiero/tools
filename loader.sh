@@ -1,7 +1,7 @@
 #!/bin/bash
-## XO NOT AUTOVERSION
+## DO NOT AUTOVERSION
 #===================================================================================================
-version="1.3.95" # -- dscudiero -- Fri 09/29/2017 @ 13:24:47.12
+version="1.4.-1" # -- dscudiero -- Fri 09/29/2017 @ 13:36:08.27
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -242,7 +242,6 @@ sTime=$(date "+%s")
 
 	prtStatus ", logFile"
 	sTime=$(date "+%s")
-
 	## Call program function
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
@@ -252,6 +251,7 @@ sTime=$(date "+%s")
 		TrapSigs 'off'
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		[[ $(cut -d' ' -f1 <<< $(wc -l "$executeFile")) -eq 0 ]] && Terminate "Execution file ($executeFile) is empty"
+[[ $userName == 'dscudiero' ]] && dump executeFile
 		source $executeFile $scriptArgs 2>&1 | tee -a $logFile; rc=$?
 
 ## Should never get here but just in case
@@ -376,3 +376,4 @@ sTime=$(date "+%s")
 ## 08-24-2017 @ 10.06.49 - dscudiero - Add SendEmail to default import list
 ## 09-28-2017 @ 13.01.36 - ("1.3.57")  - dscudiero - Set globel USELOCAL if script begins with 'test'
 ## 09-29-2017 @ 13.25.00 - ("1.3.95")  - dscudiero - General syncing of dev to prod
+## 09-29-2017 @ 15.14.55 - ("1.4.-1")  - dscudiero - add debug
