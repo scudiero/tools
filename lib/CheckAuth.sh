@@ -2,7 +2,7 @@
 
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.20" # -- dscudiero -- Fri 05/19/2017 @ 11:14:31.76
+# version="2.0.21" # -- dscudiero -- Fri 09/29/2017 @ 13:29:15.71
 #===================================================================================================
 # Check to see if the logged user can run this script
 # Returns true if user is authorized, otherwise it returns a message
@@ -12,6 +12,7 @@
 # All rights reserved
 #===================================================================================================
 function CheckAuth {
+	Include 'RunSql2'
 	local sqlStmt author scriptUsers
 	local scriptName=${1-$myName}
 
@@ -56,3 +57,4 @@ export -f CheckAuth
 ## 05-19-2017 @ 11.06.08 - ("2.0.16")  - dscudiero - send debug stuff to stdout
 ## 05-19-2017 @ 11.12.37 - ("2.0.18")  - dscudiero - General syncing of dev to prod
 ## 05-19-2017 @ 11.14.50 - ("2.0.20")  - dscudiero - remove debug stuff
+## 09-29-2017 @ 13.29.37 - ("2.0.21")  - dscudiero - Include RunSql2
