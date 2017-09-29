@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.5" // -- dscudiero -- Mon 09/25/2017 @ 14:17:20.81
+wfLibVersion="1.8.6" // -- dscudiero -- Fri 09/29/2017 @ 12:29:57.96
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -74,7 +74,7 @@ if (typeof wfLibLoaded === "undefined") {
 		var wfAllcodes=false;
 		if (typeof wffuncs.getAllCodes === "function") {
 			if (wffuncs.getAllCodes(tcfdata) != '')
-				wfAllcodes=false;
+				wfAllcodes=true;
 		}
 
 		if (tcfdata.wfDebugLevel && tcfdata.wfDebugLevel.length > 0)
@@ -2348,3 +2348,4 @@ var wfLibLoaded=true;
 // 09-22-2017 @ 07.19.12 - ("1.8.2")   - dscudiero - Update the way we do wfAllCodes
 // 09-22-2017 @ 11.28.28 - ("1.8.4")   - dscudiero - Added NoWorkflow function
 // 09-25-2017 @ 15.42.23 - ("1.8.5")   - dscudiero - Added a message if in not mode
+// 09-29-2017 @ 12.57.06 - ("1.8.6")   - dscudiero - Fix problem setting wfAllcodes
