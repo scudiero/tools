@@ -1,15 +1,14 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.53" # -- dscudiero -- Fri 09/22/2017 @  7:17:35.42
+# version="2.0.54" # -- dscudiero -- Fri 09/29/2017 @ 16:07:53.75
 #===================================================================================================
 # Verify result value
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-
 function VerifyPromptVal {
-	myIncludes="StartRemoteSession"
+	myIncludes="RunSql2 StartRemoteSession"
 	Import "$standardInteractiveIncludes $myIncludes"
 
 	local i
@@ -231,3 +230,4 @@ export -f VerifyPromptVal
 ## 05-22-2017 @ 09.12.16 - ("2.0.51")  - dscudiero - Added isNumeric and isAlpha types
 ## 05-22-2017 @ 09.16.07 - ("2.0.52")  - dscudiero - General syncing of dev to prod
 ## 09-22-2017 @ 07.18.50 - ("2.0.53")  - dscudiero - Include StartRemoteSession
+## 09-29-2017 @ 16.09.19 - ("2.0.54")  - dscudiero - Add RunSql2 to includes
