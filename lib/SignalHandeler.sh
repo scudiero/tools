@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.76" # -- dscudiero -- Wed 09/27/2017 @ 12:40:50.82
+# version="2.0.77" # -- dscudiero -- Fri 09/29/2017 @ 10:36:21.71
 #===================================================================================================
 # Process interrupts
 #===================================================================================================
@@ -11,7 +11,7 @@ function SignalHandeler {
     includes='Msg3 Goodbye GetCallStack PadChar' #includes="$includes "
     Import "$includes"
 
-    VerboseMsg 3 "*** Starting: $FUNCNAME ***"
+    Verbose 3 "*** Starting: $FUNCNAME ***"
 	local sig="$(Upper $1)"
     local errorLineNo="$2"
     local errorCode="${3-3}"
@@ -71,3 +71,4 @@ export -f SignalHandeler
 ## 08-03-2017 @ 07.27.40 - ("2.0.71")  - dscudiero - reformat messages
 ## 08-03-2017 @ 07.35.29 - ("2.0.72")  - dscudiero - General syncing of dev to prod
 ## 09-27-2017 @ 12.41.00 - ("2.0.76")  - dscudiero - Switch to Msg3
+## 09-29-2017 @ 12.58.39 - ("2.0.77")  - dscudiero - Change verboseMsg to Verbose
