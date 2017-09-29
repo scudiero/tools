@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.68 # -- dscudiero -- Thu 09/28/2017 @  6:50:49.06
+version=4.3.69 # -- dscudiero -- Fri 09/29/2017 @ 10:07:55.83
 #=======================================================================================================================
 TrapSigs 'on'
 originalArgStr="$*"
@@ -47,9 +47,9 @@ fork=false
 addedCalledScriptArgs="-secondaryMessagesOnly"
 
 ## Find the location of the worker script, speeds up subsequent calls
-	workerScript='insertSiteInfoTableRecord'; useLocal=true
-	FindExecutable "$workerScript" 'std' 'bash:sh' ## Sets variable executeFile
-	workerScriptFile="$executeFile"
+	workerScript='insertSiteInfoTableRecord'
+	workerScriptFile="$(FindExecutable "$workerScript")"
+	[[ -z $workerScriptFile ]] && Terminate "Could find the workerScriptFile file ('$workerScript')"
 
 forkCntr=0; siteCntr=0; clientCntr=0;
 [[ $testMode == true ]] && export warehousedb="$warehouseDev"
@@ -238,3 +238,4 @@ Goodbye 0 'alert'
 ## 09-07-2017 @ 07.40.55 - (4.3.35)    - dscudiero - Fix problem where the passed tableName was being picked up as a client name
 ## 09-27-2017 @ 16.50.50 - (4.3.67)    - dscudiero - Refasctored messaging
 ## 09-28-2017 @ 06.52.04 - (4.3.68)    - dscudiero - Remove debug statements
+## 09-29-2017 @ 10.14.44 - (4.3.69)    - dscudiero - Update FindExcecutable call for new syntax
