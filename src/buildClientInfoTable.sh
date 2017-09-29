@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.121 # -- dscudiero -- Fri 09/15/2017 @  8:26:22.67
+version=2.3.122 # -- dscudiero -- Fri 09/29/2017 @ 10:13:03.03
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -39,9 +39,10 @@ forkCntr=0; cntr=0;
 [[ $fork == true ]] && forkStr='fork' || unset forkStr
 
 ## Find the helper script location
-workerScript='insertClientInfoRec'; useLocal=true
-FindExecutable "$workerScript" 'std' 'bash:sh' ## Sets variable executeFile
-workerScriptFile="$executeFile"
+	workerScript='insertClientInfoRec'
+	workerScriptFile="$(FindExecutable "$workerScript")"
+	[[ -z $workerScriptFile ]] && Terminate "Could find the workerScriptFile file ('$workerScript')"
+
 addedCalledScriptArgs="-secondaryMessagesOnly"
 
 ## Local variable initialization
@@ -188,3 +189,4 @@ Goodbye 0 'alert'
 ## 04-17-2017 @ 12.30.14 - (2.3.112)   - dscudiero - modify logic for what database to use if a client was passed in
 ## 05-03-2017 @ 11.41.51 - (2.3.113)   - dscudiero - Order the client list by name
 ## 06-13-2017 @ 14.03.50 - (2.3.114)   - dscudiero - Change to use -n and -z notation
+## 09-29-2017 @ 10.14.32 - (2.3.122)   - dscudiero - Update FindExcecutable call for new syntax
