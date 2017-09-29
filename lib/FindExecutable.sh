@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.0" # -- dscudiero -- Fri 09/29/2017 @  9:57:51.70
+# version="1.2.3" # -- dscudiero -- Fri 09/29/2017 @ 13:02:39.94
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -17,7 +17,7 @@
 # All rights reserved
 #=======================================================================================================================
 function FindExecutable {
-	#Import 'Msg3'; Verbose 3 -l "$FUNCNAME: Starting"
+	#Import 'Dump,Msg3'; Verbose 3 -l "$FUNCNAME: Starting"
 	## Defaults ====================================================================================
 	local mode='source' file='' token type ext found=false searchTokens checkFile searchRoot=''
 	local useLocal=$USELOCAL useDev=$USEDEV
@@ -56,7 +56,7 @@ function FindExecutable {
 		for token in $(tr ',' ' ' <<< "$searchTokens"); do
 			type="${token%%:*}"; ext="${token##*:}"
 			[[ -n $searchRoot ]] && checkFile="$dir/$searchRoot/${file}.${ext}" || checkFile="$dir/${file}.${ext}"
-			Dump 3 -l -t2 checkFile
+			#Dump 3 -l -t2 checkFile
 			[[ -r "$checkFile" ]] && { found=true; break; } || unset checkFile
 		done
 		[[ $found == true ]] && break
@@ -80,3 +80,4 @@ export -f FindExecutable
 ## 06-09-2017 @ 08.17.34 - ("1.0.127") - dscudiero - General syncing of dev to prod
 ## 06-09-2017 @ 08.19.10 - ("1.0.128") - dscudiero - remove debug statements
 ## 09-29-2017 @ 10.13.30 - ("1.2.0")   - dscudiero - Refactored for performance
+## 09-29-2017 @ 13.03.09 - ("1.2.3")   - dscudiero - remove debug code
