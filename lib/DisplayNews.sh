@@ -1,17 +1,17 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.6" # -- dscudiero -- 01/12/2017 @ 12:51:03.87
+# version="2.0.7" # -- dscudiero -- Fri 09/29/2017 @ 16:07:10.37
 #===================================================================================================
 # Display News
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-
 function DisplayNews {
 	local lastViewedDate lastViewedEdate displayedHeader itemNum msgText
 	newsDisplayed=false
 	[[ $noNews == true ]] && return 0
+	Import 'RunSql2'
 
 	## Loop through news types
 		for newsType in tools $(tr -d '-' <<< $myName); do
@@ -39,13 +39,13 @@ function DisplayNews {
 					if [[ $displayedHeader == false ]]; then
 						msgText="\n$(ColorK "'$newsType'") news items"
 						[[ $lastViewedDate != '' ]] && msgText="$msgText since the last time you ran this script/report ($(cut -d ' ' -f1 <<< $lastViewedDate))"
-						Msg2 $I "$msgText:\a"
+						Info "$msgText:\a"
 						displayedHeader=true
 					fi
 					item=$(cut -d'|' -f1 <<< $result)
 					date=$(cut -d'|' -f2 <<< $result)
 					ProtectedCall "((itemNum++))"
-					Msg2 "\t   $itemNum) $item"
+					msg3 "^$itemNum) $item"
 					newsDisplayed=true
 				done
 			## Set the last read date on the database
@@ -56,7 +56,7 @@ function DisplayNews {
 				fi
 				RunSql2 $sqlStmt
 		done
-			[[ $newsDisplayed == true ]] && Msg2
+			[[ $newsDisplayed == true ]] && Msg3
 	return 0
 } #DisplayNews
 export -f DisplayNews
@@ -66,3 +66,4 @@ export -f DisplayNews
 #===================================================================================================
 
 ## Wed Jan  4 13:53:15 CST 2017 - dscudiero - General syncing of dev to prod
+## 09-29-2017 @ 16.09.23 - ("2.0.7")   - dscudiero - Add RunSql2 to includes
