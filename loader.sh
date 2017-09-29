@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.3.57" # -- dscudiero -- Thu 09/28/2017 @ 13:01:10.50
+version="1.3.81" # -- dscudiero -- Fri 09/29/2017 @  7:55:10.94
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -177,6 +177,8 @@ sTime=$(date "+%s")
 
 ## Import thins we need to continue
 	sTime=$(date "+%s")
+verboseLevel=1
+[[ $userName == 'dscudiero' ]] && echo && echo "loaderIncludes = '$loaderIncludes'"
 	Import "$loaderIncludes"
 	prtStatus ", imports"
 	sTime=$(date "+%s")
@@ -198,40 +200,55 @@ sTime=$(date "+%s")
 		callPgmName=$(cut -d'.' -f1 <<< $callPgmName)
 	fi ## [[ ${callPgmName:0:1} == '\' ]]
 	## Check to make sure we can run
+echo "HERE L0"
 		checkMsg=$(CheckRun $callPgmName)
+echo "CheckRun checkMsg: $checkMsg"
 		if [[ $checkMsg != true ]]; then
 			[[ $(Contains ",$administrators," ",$userName,") != true ]] && echo && echo && Terminate "$checkMsg"
 			[[ $callPgmName != 'testsh' ]] && echo && echo -e "$(ColorW "*** $checkMsg ***")"
 		fi
+echo "HERE L1"
 	## Check to make sure we are authorized
 		checkMsg=$(CheckAuth $callPgmName)
+echo "CheckAuth checkMsg: $checkMsg"
 		[[ $checkMsg != true ]] && echo && echo && Terminate "$checkMsg"
 
 		prtStatus ", check run"
 		sTime=$(date "+%s")
+echo "HERE L2"
 
-	## What auth groups is this user in
-		sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\""
-		RunSql2 $sqlStmt
-		unset UsersAuthGroups
-		if [[ ${#resultSet[@]} -ne 0 ]]; then
-			for ((i=0; i<${#resultSet[@]}; i++)); do
-				UsersAuthGroups="$UsersAuthGroups,${resultSet[$i]}"
-			done
-			UsersAuthGroups=${UsersAuthGroups:1}
-		fi
-		export UsersAuthGroups
+	# ## What auth groups is this user in
+	# 	unset UsersAuthGroups
+	# 	sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\""
+	# 	RunSql2 $sqlStmt
+
+	# 	if [[ ${#resultSet[@]} -ne 0 ]]; then
+	# 		for ((i=0; i<${#resultSet[@]}; i++)); do
+	# 			UsersAuthGroups="$UsersAuthGroups,${resultSet[$i]}"
+	# 		done
+	# 		UsersAuthGroups=${UsersAuthGroups:1}
+	# 	fi
+	# 	export UsersAuthGroups
+echo "HERE L3"
 
 	## Check semaphore
 		[[ $(Contains ",$setSemaphoreList," ",$callPgmName," ) == true ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
 
+echo "HERE L4"
 	## Resolve the executable file
-		[[ -z $executeFile ]] && FindExecutable "$callPgmName"  ## Sets variable executeFile
+echo "executeFile 1 ='$executeFile'"
+echo "callPgmName 1 ='$callPgmName'"
+echo "FindExecutable ='$(which FindExecutable)'"
+
+		[[ -z $executeFile ]] && echo "HERE L4A" && FindExecutable "$callPgmName"  ## Sets variable executeFile
 		prtStatus ", find file"
 		sTime=$(date "+%s")
+echo "executeFile 2 ='$executeFile'"
+
 	## Do we have a viable script
 		[[ ! -r $executeFile ]] && echo && echo && Terminate "callPgm.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"
 
+echo "HERE L5"
 ## Call the script
 	## Initialize the log file
 		sTime=$(date "+%s")
@@ -256,6 +273,7 @@ sTime=$(date "+%s")
 	prtStatus ", logFile"
 	sTime=$(date "+%s")
 
+echo "HERE L6"
 	## Call program function
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
@@ -389,3 +407,4 @@ sTime=$(date "+%s")
 ## 08-07-2017 @ 15.49.31 - ("1.3.36")  - dscudiero - Set the UserAuthGroups global variable
 ## 08-24-2017 @ 10.06.49 - dscudiero - Add SendEmail to default import list
 ## 09-28-2017 @ 13.01.36 - ("1.3.57")  - dscudiero - Set globel USELOCAL if script begins with 'test'
+## 09-29-2017 @ 08.03.04 - ("1.3.81")  - dscudiero - remove debug statements
