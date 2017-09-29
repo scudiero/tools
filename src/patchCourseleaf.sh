@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.7.68 # -- dscudiero -- 01/12/2017 @ 13:22:18.73
+version=1.7.70 # -- dscudiero -- Fri 09/29/2017 @ 10:06:57.96
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye SelectMenuNew ParseCourseleafFile'
@@ -165,7 +165,8 @@ dump -1 patchId
 	Msg2
 	unset patchedSiteDirs
 	## Get the executable
-	FindExecutable "$patchScript" "std" 'Bash:sh' 'patches' ## Sets variable executeFile
+	executeFile="$(FindExecutable "$patchScript")"
+	[[ -z $executeFile ]] && Terminate "Could find the patch file ('$executeFile')"
 
 	## Run the patch script on each system
 	source $executeFile "$client" "$envs" "$patchId" $addedCalledScriptArgs
@@ -252,3 +253,4 @@ Goodbye 0 #'alert'
 ## Thu Aug  4 11:01:11 CDT 2016 - dscudiero - Added displayGoodbyeSummaryMessages=true
 ## Tue Aug 23 11:21:53 CDT 2016 - dscudiero - Updated to correctly parse output of selectMenuNew
 ## Fri Oct 14 13:41:28 CDT 2016 - dscudiero - General syncing of dev to prod
+## 09-29-2017 @ 10.15.09 - (1.7.70)    - dscudiero - Update FindExcecutable call for new syntax
