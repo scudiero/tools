@@ -122,12 +122,12 @@ haveClss=false
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-Here 1
-dump myName
+[[ $userName == 'dscudiero' ]] && Here CE1
+[[ $userName == 'dscudiero' ]] && echo "myName = '$myName'"
 GetDefaultsData "$myName"
-Here 1
+[[ $userName == 'dscudiero' ]] && Here CE2
 ParseArgsStd
-Here 2
+[[ $userName == 'dscudiero' ]] && Here CE3
 
 [[ -n $env && -z $srcEnv ]] && srcEnv="$env"
 
@@ -671,3 +671,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 09-27-2017 @ 14.53.58 - (4.12.10)   - dscudiero - Tweak messaging
 ## 09-29-2017 @ 12.57.50 - (4.12.19)   - dscudiero - update imports
 ## 09-29-2017 @ 14.27.45 - (4.12.10)   - dscudiero - Add debug statements
+## 09-29-2017 @ 15.22.30 - (4.12.10)   - dscudiero - General syncing of dev to prod
