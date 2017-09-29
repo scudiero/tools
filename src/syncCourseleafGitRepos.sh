@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.75 # -- dscudiero -- Fri 09/15/2017 @  9:00:40.16
+version=2.1.76 # -- dscudiero -- Fri 09/29/2017 @ 10:12:07.82
 #==================================================================================================
 TrapSigs 'on'
 
@@ -42,9 +42,10 @@ scriptDescription="This script can be used to sync the master toolsprod shadow o
 sendMail=false
 unset newReleases
 ## Find the helper script location
-workerScript='cloneGitRepo'; useLocal=true
-FindExecutable "$workerScript" 'std' 'bash:sh' ## Sets variable executeFile
-workerScriptFile="$executeFile"
+	workerScript='cloneGitRepo'
+	workerScriptFile="$(FindExecutable "$workerScript")"
+	[[ -z $workerScriptFile ]] && Terminate "Could find the workerScriptFile file ('$workerScript')"
+
 addedCalledScriptArgs="-secondaryMessagesOnly"
 tmpFile=$(MkTmpFile)
 
@@ -158,3 +159,4 @@ Goodbye 0 'alert'
 ## 05-05-2017 @ 07.15.26 - (2.1.70)    - dscudiero - Fix problem of sending emails when no named releases were created
 ## 05-16-2017 @ 13.13.03 - (2.1.71)    - dscudiero - Add debug statements
 ## 06-13-2017 @ 08.36.40 - (2.1.72)    - dscudiero - Remove debug code
+## 09-29-2017 @ 10.15.14 - (2.1.76)    - dscudiero - Update FindExcecutable call for new syntax
