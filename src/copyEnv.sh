@@ -1,11 +1,11 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #==================================================================================================
-version=4.12.10 # -- dscudiero -- Wed 09/27/2017 @ 14:52:46.74
+version=4.12.19 # -- dscudiero -- Fri 09/29/2017 @ 12:56:06.62
 #==================================================================================================
 TrapSigs 'on'
-includes='GetDefaultsData ParseArgsStd Hello Init Goodbye GetSiteDirNoCheck ProtectedCall'
-Import "$includes"
+myIncludes="GetSiteDirNoCheck ProtectedCall"
+Import "$standardInteractiveIncludes $myIncludes"
 
 [[ $1 == $myName ]] && shift
 originalArgStr="$*"
@@ -120,7 +120,7 @@ haveClss=false
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-GetDefaultsData $myName
+GetDefaultsData "$myName"
 ParseArgsStd
 
 [[ -n $env && -z $srcEnv ]] && srcEnv="$env"
@@ -663,3 +663,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 09-21-2017 @ 14.50.54 - (4.12.2)    - dscudiero - Fix bug where parseArgsStd was the wrong case
 ## 09-27-2017 @ 14.21.20 - (4.12.3)    - dscudiero - Switch to Msg3
 ## 09-27-2017 @ 14.53.58 - (4.12.10)   - dscudiero - Tweak messaging
+## 09-29-2017 @ 12.57.50 - (4.12.19)   - dscudiero - update imports
