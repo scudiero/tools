@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.15 # -- dscudiero -- Thu 09/14/2017 @ 16:06:02.82
+version=2.1.17 # -- dscudiero -- Fri 09/29/2017 @ 10:06:48.02
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -68,8 +68,8 @@ cd $srcDir
 	fi
 
 ## Find the step file to run
-	FindExecutable "$step" 'std' 'steps:html' 'steps' ## Sets variable executeFile
-	srcStepFile=$executeFile
+	srcStepFile="$(FindExecutable -step "$step")"
+	[[ -z $srcStepFile ]] && Terminate "Could find the step file ('$step')"
 	Msg2 "Using step file: $srcStepFile"
 
 ## Copy step file to localsteps
@@ -92,3 +92,4 @@ Goodbye 0 'alert'
 ## Tue Oct 18 07:56:54 CDT 2016 - dscudiero - Switch output file type to .xls
 ## Tue Oct 18 07:58:39 CDT 2016 - dscudiero - Add ENV to the output file name
 ## 04-13-2017 @ 14.01.07 - (2.1.13)    - dscudiero - Add a default for VerifyContinue
+## 09-29-2017 @ 10.14.57 - (2.1.17)    - dscudiero - Update FindExcecutable call for new syntax
