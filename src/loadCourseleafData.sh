@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.118 # -- dscudiero -- Fri 09/15/2017 @  7:53:59.23
+version=3.8.119 # -- dscudiero -- Fri 09/29/2017 @ 10:09:30.33
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye'
@@ -583,8 +583,8 @@ scriptDescription="Load Courseleaf Data"
 
 			## Find the step file to run
 				if [[ $informationOnlyMode != true ]]; then
-					FindExecutable "$step" 'step:html'
-					srcStepFile="$executeFile"
+					srcStepFile="$(FindExecutable -step "$step")"
+					[[ -z $srcStepFile ]] && Terminate "Could find the step file ('$step')"
 					Info 0 1 "Using step file: $srcStepFile"
 					## Copy step file to localsteps
 					cp -fP $srcStepFile $stepFile
@@ -1039,3 +1039,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## 04-17-2017 @ 12.30.27 - (3.8.91)    - dscudiero - skip
 ## 05-15-2017 @ 14.27.49 - (3.8.94)    - dscudiero - Tweek changelog messages
 ## 07-17-2017 @ 13.48.41 - (3.8.95)    - dscudiero - Single quote strings to ParseWorksheetHeader function
+## 09-29-2017 @ 10.15.03 - (3.8.119)   - dscudiero - Update FindExcecutable call for new syntax
