@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.41" # -- dscudiero -- Fri 09/29/2017 @  7:50:15.64
+# version="1.0.42" # -- dscudiero -- Fri 09/29/2017 @  8:02:50.74
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -14,7 +14,6 @@
 # All rights reserved
 #===================================================================================================
 function RunSql2 {
-echo "HERE RS0"
 	if [[ ${1:0:1} == '/' ]]; then
 		local dbFile="$1" && shift
 		local dbType='sqlite3'
@@ -23,7 +22,6 @@ echo "HERE RS0"
 	fi
 	local sqlStmt="$*"
 	unset resultSet
-echo "sqlStmt = '$sqlStmt'"
 
 	[[ -z $sqlStmt ]] && return 0
 	local sqlAction="${sqlStmt%% *}"
@@ -175,3 +173,4 @@ export -f RunSql2
 ## 03-30-2017 @ 08.40.53 - ("1.0.20")  - dscudiero - Do not add trailing ';' if the sql action is mysql*
 ## 06-26-2017 @ 10.13.49 - ("1.0.36")  - dscudiero - Add additional error checking for VM errors
 ## 09-29-2017 @ 08.02.15 - ("1.0.41")  - dscudiero - add debug statements
+## 09-29-2017 @ 08.03.35 - ("1.0.42")  - dscudiero - General syncing of dev to prod
