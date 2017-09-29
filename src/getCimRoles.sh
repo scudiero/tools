@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.10.26 # -- dscudiero -- Thu 09/14/2017 @ 15:59:33.33
+version=1.10.28 # -- dscudiero -- Fri 09/29/2017 @ 10:02:46.49
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue'
@@ -76,12 +76,8 @@ fi
 cimStr=$(echo $cimStr | tr -d ' ' )
 cimStr=\"$(sed 's|,|","|g' <<< $cimStr)\"
 #= Run the step
-	FindExecutable "$step" 'std' 'steps:html' 'steps' ## Sets variable executeFile
-	srcStepFile=$executeFile
-
-	if [[ -f /home/$userName/clientData/$client/$step.html ]]; then
-		srcStepFile=/home/$userName/clientData/$client/$step.html
-	fi
+	srcStepFile="$(FindExecutable -step "$step")"
+	[[ -z $srcStepFile ]] && Terminate "Could find the step file ('$step')"
 
 	Msg2 "Using step file: $srcStepFile\n"
 	[[ -f $siteDir/web/courseleaf/localsteps/$step.html ]] && mv -f $siteDir/web/courseleaf/localsteps/$step.html $siteDir/web/courseleaf/localsteps/$step.html.bak
@@ -112,3 +108,4 @@ Goodbye 0
 ## 06-08-2017 @ 11.39.13 - (1.10.23)   - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 11.55.25 - (1.10.24)   - dscudiero - General syncing of dev to prod
 ## 06-26-2017 @ 07.51.04 - (1.10.25)   - dscudiero - change cleanup to not remove the entier tmp directory
+## 09-29-2017 @ 10.14.49 - (1.10.28)   - dscudiero - Update FindExcecutable call for new syntax
