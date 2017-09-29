@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.43 # -- dscudiero -- Fri 09/15/2017 @  8:35:05.56
+version=1.2.45 # -- dscudiero -- Fri 09/29/2017 @ 10:07:07.12
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -132,9 +132,9 @@ for var in $falseVars; do eval $var=false; done
 	cimTester='Scotta'
 
 ## Find the helper script location
-	workerScript='insertTestingDetailRecord'; useLocal=true
-	FindExecutable "$workerScript" 'full' 'Bash:sh' ## Sets variable executeFile
-	workerScriptFile="$executeFile"
+	workerScript='insertTestingDetailRecord'
+	workerScriptFile="$(FindExecutable "$workerScript")"
+	[[ -z $workerScriptFile ]] && Terminate "Could find the workerScriptFile file ('$workerScript')"
 
 ## Declare the mapping table from the spreadsheet 'name' and the database column name
 	declare -A variableMap
@@ -430,3 +430,4 @@ Goodbye 0 #'alert'
 ## 05-25-2017 @ 06.46.23 - (1.2.35)    - dscudiero - Remove jalot task number
 ## 06-05-2017 @ 12.53.26 - (1.2.36)    - dscudiero - Add parsing for 'Next' in the cell to trigger move to next
 ## 06-19-2017 @ 07.06.59 - (1.2.37)    - dscudiero - tweak formatting
+## 09-29-2017 @ 10.14.39 - (1.2.45)    - dscudiero - Update FindExcecutable call for new syntax
