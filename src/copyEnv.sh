@@ -3,11 +3,13 @@
 #==================================================================================================
 version=4.12.10 # -- dscudiero -- Fri 09/29/2017 @ 13:37:02.61
 #==================================================================================================
+[[ $userName == 'dscudiero' ]] && Here CE0
+
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall"
 Import "$standardInteractiveIncludes $myIncludes"
 
-[[ $userName == 'dscudiero' ]] && Here CE0
+[[ $userName == 'dscudiero' ]] && Here CE0A
 
 [[ $1 == $myName ]] && shift
 originalArgStr="$*"
@@ -672,3 +674,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 09-29-2017 @ 12.57.50 - (4.12.19)   - dscudiero - update imports
 ## 09-29-2017 @ 14.27.45 - (4.12.10)   - dscudiero - Add debug statements
 ## 09-29-2017 @ 15.22.30 - (4.12.10)   - dscudiero - General syncing of dev to prod
+## 09-29-2017 @ 15.30.15 - (4.12.10)   - dscudiero - Add debug stuff
