@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.54" # -- dscudiero -- Wed 09/27/2017 @ 12:22:30.66
+# version="2.0.55" # -- dscudiero -- Mon 10/02/2017 @ 17:05:53.50
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -8,7 +8,7 @@
 # All rights reserved
 #==================================================================================================
 dumpFirstWrite=true
-function dump {
+function Dump {
 	local token tabCnt re='^-{0,1}[0-9]$' logOnly=false out='/dev/tty'
 	local caller=${FUNCNAME[1]}
 	[[ $caller == 'dump' || $caller == 'Dump' ]] && caller=${FUNCNAME[2]}
@@ -38,7 +38,7 @@ function dump {
 	done
 
 	return 0
-}
+} ## Dump
 
 dumpFirstWrite=true
 function DumpS {
@@ -134,8 +134,8 @@ function DumpS {
 	return 0
 
 } #DumpS
-function dumps { DumpS $* ; }
-export -f DumpS dumps
+function dump { Dump $* ; }
+export -f Dump dump
 
 #===================================================================================================
 # TODO tick marks
@@ -239,3 +239,4 @@ export -f DumpMap dumpmap dumphash
 ## 09-27-2017 @ 10.08.47 - ("2.0.51")  - dscudiero - General syncing of dev to prod
 ## 09-27-2017 @ 10.50.51 - ("2.0.53")  - dscudiero - fix error exporting dumps
 ## 09-27-2017 @ 12.22.47 - ("2.0.54")  - dscudiero - Fix problem parsing -2 msg level designators
+## 10-02-2017 @ 17.07.04 - ("2.0.55")  - dscudiero - add dump alias
