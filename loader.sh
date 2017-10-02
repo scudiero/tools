@@ -252,6 +252,7 @@ sTime=$(date "+%s")
 		TrapSigs 'off'
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		[[ $(cut -d' ' -f1 <<< $(wc -l "$executeFile")) -eq 0 ]] && Terminate "Execution file ($executeFile) is empty"
+[[ $userName == 'dscudiero' ]] && echo "HERE  HERE  HERE 0"
 		source $executeFile $scriptArgs 2>&1 | tee -a $logFile; rc=$?
 
 ## Should never get here but just in case
@@ -381,3 +382,4 @@ sTime=$(date "+%s")
 ## 09-29-2017 @ 15.30.02 - ("1.4.-1")  - dscudiero - Add debug stuff
 ## 10-02-2017 @ 12.44.30 - ("1.4.-1")  - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 13.00.33 - ("1.4.-1")  - dscudiero - General syncing of dev to prod
+## 10-02-2017 @ 13.10.08 - ("1.4.-1")  - dscudiero - General syncing of dev to prod
