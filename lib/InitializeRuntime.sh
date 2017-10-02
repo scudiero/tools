@@ -1,15 +1,14 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.96" # -- dscudiero -- Thu 09/07/2017 @ 11:26:44.08
+# version="2.1.0" # -- dscudiero -- Mon 10/02/2017 @ 13:06:55.98
 #===================================================================================================
 # Initialize the tools runtime environment
 #===================================================================================================
 # CopyrighFt 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-unset helpSet helpNotes warningMsgs errorMsgs summaryMsgs myRealPath myRealName changeLogRecs parsedArgStr
-includes="TrapSigs StringFunctions Msg2 Dump Quit GetDefaultsData SetFileExpansion"
-Import "$includes"
+myIncludes="TrapSigs Msg3 GetDefaultsData SetFileExpansion StringFunctions"
+Import "$myIncludes"
 
 TrapSigs 'on'
 ## Make sure we have avalue for TERM
@@ -18,62 +17,65 @@ shopt -s checkwinsize
 set -e  # Turn ON Exit immediately
 #set +e  # Turn OFF Exit immediately
 
-#echo "In framework. indentLevel = >$indentLevel<"
+tabStr='    '
 [[ -z $indentLevel ]] && indentLevel=0 && export indentLevel=$indentLevel
 [[ -z $verboseLevel ]] && verboseLevel=0 && export verboseLevel=$verboseLevel
 epochStime=$(date +%s)
-hostName=$(hostname)
-hostName="$(echo $hostName | cut -d"." -f1)"
-osType="$(echo `uname -m`)" # x86_64 or i686
+
+hostName=$(hostname); hostName=${hostName%%.*}
+osType="$(uname -m)" # x86_64 or i686
 osName='linux'
-osVer=$(uname -m)
-if [[ ${osVer:0:1} = 'x' ]]; then osVer=64; else osVer=32; fi
+[[ ${osType:0:1} = 'x' ]] && osVer=64 || osVer=32
+
 myRhel=$(cat /etc/redhat-release | cut -d" " -f3)
-[[ $(IsNumeric ${myRhel:0:1}) != true ]] && myRhel=$(cat /etc/redhat-release | cut -d" " -f4)
+[[ $myRhel == 'release' ]] && myRhel=$(cat /etc/redhat-release | cut -d" " -f4)
 
 [[ $_ != $0 ]] && sourcePath=$(dirname ${BASH_SOURCE[0]}) || unset sourcePath
-
-tabStr="$(PadChar ' ' 5)"
 
 ## set default values
 	if [[ $myName != 'bashShell' ]]; then
 		trueVars="verify traceLog trapExceptions logInDb allowAlerts waitOnForkedProcess defaultValueUseNotes"
-		for var in $trueVars; do [[ -z $(eval echo \$$var) ]] && eval "$var=true"; done
 
 		falseVars="testMode noEmails noHeaders noCheck noLog verbose quiet warningMsgsIssued errorMsgsIssued noClear"
 		falseVars="$falseVars force newsDisplayed noNews informationOnlyMode secondaryMessagesOnly changesMade fork"
 		falseVars="$falseVars onlyCimsWithTestFile displayGoodbyeSummaryMessages autoRemote"
-		for var in $falseVars; do [[ -z $(eval echo \$$var) ]] && eval "$var=false"; done
+
+		clearVars="helpSet helpNotes warningMsgs errorMsgs summaryMsgs myRealPath myRealName changeLogRecs parsedArgStr"
+
+		for var in $trueVars;  do [[ -z ${!var} ]] && eval "$var=true"; done
+		for var in $falseVars; do [[ -z ${!var} ]] && eval "$var=false"; done
+		for var in $clearVars; do unset $var; done
 	fi
 
 ## Load defaults value
 	defaultsLoaded=false
-	GetDefaultsData
+	GetDefaultsData "$myName" -fromFiles
 	SetFileExpansion
 
-## If the user has a .tools file then read the values into a hash table
-	if [[ -r "$HOME/tools.cfg" && ${myRhel:0:1} -gt 5 ]]; then
-		ifs="$IFS"; IFS=$'\n'; while read -r line; do
-			line=$(tr -d '\011\012\015' <<< "$line")
-			[[ -z $line || ${line:0:1} == '#' ]] && continue
-			vName=$(cut -d'=' -f1 <<< "$line"); [[ -z $vName ]] && $(cut -d':' -f1 <<< "$line")
-			[[ $(Contains ",${allowedUserVars}," ",${vName},") == false ]] && Msg2 $E "Variable '$vName' not allowed in tools.cfg file, setting will be ignored" && continue
-			vValue=$(cut -d'=' -f2 <<< "$line"); [[ -z $vName ]] && $(cut -d':' -f2 <<< "$line")
-			eval $vName=\"$vValue\"
-		done < "$HOME/tools.cfg"
-		IFS="$ifs"
-	fi
+	[[ $userName == 'dscudiero' ]] && autoRemote=true
 
-	function ColorD { local string="$*"; echo "${colorDefaultVal}${string}${colorDefault}"; }
-	function ColorK { local string="$*"; echo "${colorKey}${string}${colorDefault}"; }
-	function ColorI { local string="$*"; echo "${colorInfo}${string}${colorDefault}"; }
-	function ColorN { local string="$*"; echo "${colorNote}${string}${colorDefault}"; }
-	function ColorW { local string="$*"; echo "${colorWarn}${string}${colorDefault}"; }
-	function ColorE { local string="$*"; echo "${colorError}${string}${colorDefault}"; }
-	function ColorT { local string="$*"; echo "${colorTerminate}${string}${colorDefault}"; }
-	function ColorV { local string="$*"; echo "${colorVerbose}${string}${colorDefault}"; }
-	function ColorM { local string="$*"; echo "${colorMenu}${string}${colorDefault}"; }
-	export -f ColorD ColorK ColorI ColorN ColorW ColorE ColorT ColorV ColorM
+## If the user has a .tools file then read the values into a hash table
+	# if [[ -r "$HOME/tools.cfg" ]]; then
+	# 	ifs="$IFS"; IFS=$'\n'; while read -r line; do
+	# 		line=$(tr -d '\011\012\015' <<< "$line")
+	# 		[[ -z $line || ${line:0:1} == '#' ]] && continue
+	# 		vName=$(cut -d'=' -f1 <<< "$line"); [[ -z $vName ]] && $(cut -d':' -f1 <<< "$line")
+	# 		[[ $(Contains ",${allowedUserVars}," ",${vName},") == false ]] && Error "Variable '$vName' not allowed in tools.cfg file, setting will be ignored" && continue
+	# 		vValue=$(cut -d'=' -f2 <<< "$line"); [[ -z $vName ]] && $(cut -d':' -f2 <<< "$line")
+	# 		eval $vName=\"$vValue\"
+	# 	done < "$HOME/tools.cfg"
+	# fi
+
+	# function ColorD { local string="$*"; echo "${colorDefaultVal}${string}${colorDefault}"; }
+	# function ColorK { local string="$*"; echo "${colorKey}${string}${colorDefault}"; }
+	# function ColorI { local string="$*"; echo "${colorInfo}${string}${colorDefault}"; }
+	# function ColorN { local string="$*"; echo "${colorNote}${string}${colorDefault}"; }
+	# function ColorW { local string="$*"; echo "${colorWarn}${string}${colorDefault}"; }
+	# function ColorE { local string="$*"; echo "${colorError}${string}${colorDefault}"; }
+	# function ColorT { local string="$*"; echo "${colorTerminate}${string}${colorDefault}"; }
+	# function ColorV { local string="$*"; echo "${colorVerbose}${string}${colorDefault}"; }
+	# function ColorM { local string="$*"; echo "${colorMenu}${string}${colorDefault}"; }
+	# export -f ColorD ColorK ColorI ColorN ColorW ColorE ColorT ColorV ColorM
 
 ## Set forking limit
 	maxForkedProcesses=$maxForkedProcessesPrime
@@ -104,3 +106,4 @@ export FRAMEWORKLOADED=true
 ## 05-10-2017 @ 09.42.22 - ("2.0.79")  - dscudiero - Move TrapSigs to dispatcher
 ## 05-31-2017 @ 07.26.21 - ("2.0.81")  - dscudiero - Make sure TERM has a value , if not set then set to dumb
 ## 08-03-2017 @ 07.13.29 - ("2.0.82")  - dscudiero - General syncing of dev to prod
+## 10-02-2017 @ 13.07.57 - ("2.1.0")   - dscudiero - General syncing of dev to prod
