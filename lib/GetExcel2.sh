@@ -1,7 +1,7 @@
 #!/bin/bash
-## XO NOT AUTOVERSION
+## DO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.0.119" # -- dscudiero -- Mon 10/02/2017 @ 12:34:58.30
+# version="2.1.0" # -- dscudiero -- Mon 10/02/2017 @ 16:41:42.92
 #=======================================================================================================================
 # Retrieve data from a Excel xlsx spreadsheet
 # Usage: GetExcel <workBook> <workSheet>
@@ -11,12 +11,12 @@
 # All rights reserved
 #=======================================================================================================================
 function GetExcel2 {
-	myIncludes="SetFileExpansion StringFunctions FindExecutable ProtectedCall InitializeInterpreterRuntime"
+	myIncludes="SetFileExpansion StringFunctions FindExecutable ProtectedCall InitializeInterpreterRuntime Msg3 Goodbye"
 	Import "$standardIncludes $myIncludes"
 
 	local workBook workSheet delimiter='|'
 	local tmpFile=$(MkTmpFile $FUNCNAME)
-	local verboseLevelSave=$verboseLevel ; verboseLevel=0
+	local verboseLevelSave=$verboseLevel;
 	while [[ $# -gt 0 ]]; do
 	    [[ $1 =~ ^-wb|--workbook$ ]] && { workBook="$2"; shift 2; continue; }
 	    [[ $1 =~ ^-ws|--workSheet$ ]] && { workSheet="$2"; shift 2; continue; }
@@ -34,10 +34,9 @@ function GetExcel2 {
 		cp -fp "$workBook" "$tmpFile.workbook"
 		workBook="$tmpFile.workbook"
 	fi
-	#dump workSheet workBook delimiter
 
 	## Resolve the executable file"
-	[[ -z $executeFile ]] && executeFile=$(FindExecutable '-python' 'getXlsx')
+	executeFile=$(FindExecutable '-python' 'getXlsx')
 	[[ -z $executeFile ]] && Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"
 
 	## Call the 'real' program to parse the spreadsheet
@@ -45,24 +44,25 @@ function GetExcel2 {
 	export PYDIR="$PYDIR"
 	pathSave="$PATH"
 	export PATH="$PYDIR:$PATH"
-	cmdStr="$PYDIR/bin/python -u $executeFile "$workBook" "$workSheet" '|'"
+	verboseLevel=0
+	cmdStr="$PYDIR/bin/python -u $executeFile "$workBook" "$workSheet" |"
  	$cmdStr > "$tmpFile"
+ 	verboseLevel=$verboseLevelSave
 	export PATH="$pathSave"
-	verboseLevel=$verboseLevelSave
 
 	local grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
 	[[ $grepStr == '' ]] && grepStr=$(ProtectedCall "grep '*Error*' $tmpFile")
 	if [[ $grepStr != '' || $(tail -n 1 $tmpFile) == '-1' ]]; then
-		Msg2 $E "Could not retrieve data from workbook, please see below"
+		Error "Could not retrieve data from workbook, please see below"
 		tail -n 10 $tmpFile > $tmpFile.2
 		while read -r line; do echo -e "\t$line"; done < $tmpFile.2;
 		GetExcelCleanup
-		Msg2
-		Goodbye -1
+		Msg3
+		Goodbye 1
 	fi
-	cat $tmpFile
 
 	## Set output to an array
+	unset resultSet
 	IFS=$'\n' read -rd '' -a resultSet < "$tmpFile"
 	GetExcelCleanup
 	return 0
@@ -82,3 +82,4 @@ export -f GetExcel2
 ## 05-18-2017 @ 12.13.01 - ("2.0.66")  - dscudiero - General syncing of dev to prod
 ## 05-18-2017 @ 12.35.13 - ("2.0.67")  - dscudiero - Remove the -vv from the call to getXlsx.py
 ## 09-20-2017 @ 12.09.52 - ("2.0.69")  - dscudiero - Add protectedcall to includes list
+## 10-02-2017 @ 17.07.34 - ("2.1.0")   - dscudiero - Return a bad condition code if data retrieval fails
