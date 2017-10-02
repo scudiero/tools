@@ -9,7 +9,7 @@
 #===================================================================================================
 function GetDefaultsData {
 	## Defaults ====================================================================================
-	local mode='fromDb'
+	local mode='fromFiles'
 	local table='scripts'
 	local scripts; unset scripts
 
@@ -108,3 +108,4 @@ export -f GetDefaultsData
 ## 09-28-2017 @ 13.03.23 - ("2.0.64")  - dscudiero - Add the abilty to set defaults from the file shadows
 ## 09-28-2017 @ 16.03.08 - ("2.1.0")   - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 13.07.54 - ("2.1.-1")  - dscudiero - General syncing of dev to prod
+## 10-02-2017 @ 14.22.28 - ("2.1.-1")  - dscudiero - Change default to -fromFile
