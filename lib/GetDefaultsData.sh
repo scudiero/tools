@@ -1,6 +1,6 @@
-## XO NOT AUTOVERSION
+## DO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.0" # -- dscudiero -- Thu 09/28/2017 @ 16:02:50.46
+# version="2.1.-1" # -- dscudiero -- Fri 09/29/2017 @ 13:43:00.02
 #===================================================================================================
 # Get default variable values from the defaults database
 #===================================================================================================
@@ -8,7 +8,6 @@
 # All rights reserved
 #===================================================================================================
 function GetDefaultsData {
-
 	## Defaults ====================================================================================
 	local mode='fromDb'
 	local table='scripts'
@@ -27,10 +26,9 @@ function GetDefaultsData {
 	    scripts="$scripts $1"
 	    shift 1 || true
 	done
-	 scripts="${scripts:1}"
+	scripts="${scripts:1}"
 
 	## MAIN ========================================================================================
-
 	## If mode is fromFiles then just source the defaults files from the shadows
 	if [[ $mode == 'fromFiles' ]]; then
 		[[ -f "$TOOLSDEFAULTSPATH/common" ]] && source "$TOOLSDEFAULTSPATH/common"
@@ -50,12 +48,11 @@ function GetDefaultsData {
 
 	## Load common default values
 		if [[ $defaultsLoaded != true ]]; then
-			Verbose 3 "$FUNCNAME: Loading common values..."
 			whereClause="(os=\"$osName\" or os is null) and (host=\"$hostName\" or host is null) and status=\"A\""
-			sqlStmt="select name,value from defaults where $whereClause order by name,host"
+			sqlStmt="select name,value from defaults where $whereClause"
 			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -eq 0 ]]; then
-				Msg2 $T "Could not retrieve common defaults data from the $mySqlDb.defaults table."
+				Terminate "Could not retrieve common defaults data from the $warehouseDb.defaults table."
 			else
 				recCntr=0
 				while [[ $recCntr -lt ${#resultSet[@]} ]]; do
@@ -75,7 +72,6 @@ function GetDefaultsData {
 
 	## If scriptname was passed in then get script specific data from the script record in the scripts database
 		if [[ -n $scriptName ]]; then
-			Verbose 3 "Loading $scriptName defaults"
 			if [[ $table == $scriptsTable ]]; then
 				fields='scriptData1,scriptData2,scriptData3,scriptData4,scriptData5,ignoreList,allowList,emailAddrs,updatesClData'
 			else
@@ -111,3 +107,4 @@ export -f GetDefaultsData
 ## 09-27-2017 @ 10.51.02 - ("2.0.34")  - dscudiero - Add imports
 ## 09-28-2017 @ 13.03.23 - ("2.0.64")  - dscudiero - Add the abilty to set defaults from the file shadows
 ## 09-28-2017 @ 16.03.08 - ("2.1.0")   - dscudiero - General syncing of dev to prod
+## 10-02-2017 @ 13.07.54 - ("2.1.-1")  - dscudiero - General syncing of dev to prod
