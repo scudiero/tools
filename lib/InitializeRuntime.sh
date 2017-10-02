@@ -1,13 +1,13 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.0" # -- dscudiero -- Mon 10/02/2017 @ 13:06:55.98
+# version="2.1.1" # -- dscudiero -- Mon 10/02/2017 @ 14:42:44.87
 #===================================================================================================
 # Initialize the tools runtime environment
 #===================================================================================================
 # CopyrighFt 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-myIncludes="TrapSigs Msg3 GetDefaultsData SetFileExpansion StringFunctions"
+myIncludes="GetDefaultsData SetFileExpansion StringFunctions"
 Import "$myIncludes"
 
 TrapSigs 'on'
@@ -107,3 +107,4 @@ export FRAMEWORKLOADED=true
 ## 05-31-2017 @ 07.26.21 - ("2.0.81")  - dscudiero - Make sure TERM has a value , if not set then set to dumb
 ## 08-03-2017 @ 07.13.29 - ("2.0.82")  - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 13.07.57 - ("2.1.0")   - dscudiero - General syncing of dev to prod
+## 10-02-2017 @ 14.44.35 - ("2.1.1")   - dscudiero - Tweak includes
