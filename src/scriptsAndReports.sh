@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.18 # -- dscudiero -- Mon 10/02/2017 @ 14:21:29.75
+version=3.13.19 # -- dscudiero -- Mon 10/02/2017 @ 14:47:49.46
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -43,7 +43,8 @@ function BuildMenuList {
 
 	## Get a list of scripts available to this user in the execution environment we are running in
 		unset whereClauseHost; unset whereClauseUser; unset whereClauseGroups
-		whereClauseActive="active = \"Yes\" and name != \"$mode\" and showInScripts=\"Yes\""
+		whereClauseActive="active = \"Yes\" and name != \"$mode\""
+		[[ $userName != 'dscudiero' ]] && whereClauseActive="$whereClauseActive and showInScripts=\"Yes\""
 		# If reports build the auth where clauses
 		if [[ $mode == 'scripts' ]]; then
 			whereClauseHost="and (os=\"$osName\" and (host = \"$hostName\" or host is null))"
@@ -493,3 +494,4 @@ Goodbye 0
 ## 10-02-2017 @ 13.52.59 - (3.13.12)   - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 14.07.11 - (3.13.14)   - dscudiero - Check to make sure the executeFile has a value and is readable
 ## 10-02-2017 @ 14.22.44 - (3.13.18)   - dscudiero - remove debug
+## 10-02-2017 @ 15.32.13 - (3.13.19)   - dscudiero - General syncing of dev to prod
