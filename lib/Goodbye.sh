@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.143" # -- dscudiero -- Mon 09/25/2017 @  8:59:55.31
+# version="2.0.144" # -- dscudiero -- Mon 10/02/2017 @ 16:24:17.91
 #===================================================================================================
 # Common script exit
 # args:
@@ -11,7 +11,7 @@
 # All rights reserved
 #===================================================================================================
 function Goodbye {
-	myIncludes="SetFileExpansion Colors ProcessLogger PrintBanner Alert PushPop"
+	myIncludes="SetFileExpansion Colors ProcessLogger PadChar PrintBanner Alert PushPop"
 	Import "$standardIncludes $myIncludes"
 
 	SetFileExpansion 'off'
@@ -174,3 +174,4 @@ export -f Goodbye
 ## 09-25-2017 @ 07.50.38 - ("2.0.140") - dscudiero - General syncing of dev to prod
 ## 09-25-2017 @ 07.57.50 - ("2.0.141") - dscudiero - General syncing of dev to prod
 ## 09-25-2017 @ 09.01.41 - ("2.0.143") - dscudiero - Switch to Msg3
+## 10-02-2017 @ 16.24.58 - ("2.0.144") - dscudiero - Add PadChar to the includes list
