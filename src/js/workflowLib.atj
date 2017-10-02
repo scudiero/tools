@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.6" // -- dscudiero -- Fri 09/29/2017 @ 12:29:57.96
+wfLibVersion="1.8.8" // -- dscudiero -- Mon 10/02/2017 @  7:44:37.68
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -51,6 +51,7 @@ wfLibVersion="1.8.6" // -- dscudiero -- Fri 09/29/2017 @ 12:29:57.96
 // 09/14/17 - dgs - Added wfSubjVarName, wfDeptVarName, wfColVarName globals set in workflow.cfg
 //					Updated GetAttrVal to use the above
 // 09/22/17 - dgs - Added NoWorkflow function
+// 10/02/17 - dgs - Fixed problem in GettAttrVal building the call string for the value mapper callback
 //======================================================================================================================
 
 // Make sure wffucs is defined
@@ -1299,6 +1300,7 @@ wffuncs.wfAttr = function(inval, wfrule, args) {
 // 08/30/17 - dgs - The target attribute 'request' (above) can be passed in as an option on the wfrule,e.g. 'wfrules:Divs|function|wfAttr|Cols'
 // 09/11/17 = dgs - Do not pull data from allcodes unless the cim instance is courseadmin
 // 09/14/17 - dgs 	- Use wfColVarName, wfDeptVarName, wfSubjVarName
+// 10/02/17 - dgs - Fixed problem with mapper callback function
 //=======================================================================================================================
 GetAttrVal = function(data) {
 	wfDebug(5,"\t*** In GetAttrVal ***");
@@ -1385,7 +1387,7 @@ GetAttrVal = function(data) {
 			if (eval("typeof " + attrFunctionName) === "function") {
 				wfDebug(5,"\t\tFound an attribute 'Map' function: " + attrFunctionName);
 				for (var ii=0,  totII=retArray.length; ii < totII; ii++) {
-				 	eval("retArray[" + ii + "]=" + attrFunctionName + "('" + retArray[ii] + "')");
+				 	eval("retArray[" + ii + "]=" + attrFunctionName + "('" + reqType + "','" + retArray[ii] + "')");
 				}
 			}
 		}
@@ -2349,3 +2351,4 @@ var wfLibLoaded=true;
 // 09-22-2017 @ 11.28.28 - ("1.8.4")   - dscudiero - Added NoWorkflow function
 // 09-25-2017 @ 15.42.23 - ("1.8.5")   - dscudiero - Added a message if in not mode
 // 09-29-2017 @ 12.57.06 - ("1.8.6")   - dscudiero - Fix problem setting wfAllcodes
+// 10-02-2017 @ 13.47.09 - ("1.8.8")   - dscudiero - General syncing of dev to prod
