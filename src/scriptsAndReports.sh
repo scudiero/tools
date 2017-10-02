@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.12.33 # -- dscudiero -- Mon 10/02/2017 @ 13:16:07.45
+version=3.13.7 # -- dscudiero -- Mon 10/02/2017 @ 13:38:14.02
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion Call SelectMenuNew ProtectedCall Pause"
@@ -13,8 +13,8 @@ scriptDescription="Script dispatcher"
 #=======================================================================================================================
 # Tools scripts selection front end
 #=======================================================================================================================
-# 05-28-14 -- 	dgs - Initial coding
-# 07-17-15 --	dgs - Migrated to framework 5
+# 05-28-14 - dgs - Initial coding
+# 07-17-15 - dgs - Migrated to framework 5
 #=======================================================================================================================
 #=======================================================================================================================
 # Standard call back functions
@@ -43,8 +43,7 @@ function BuildMenuList {
 
 	## Get a list of scripts available to this user in the execution environment we are running in
 		unset whereClauseHost; unset whereClauseUser; unset whereClauseGroups
-		whereClauseActive="active = \"Yes\" and name != \"$mode\""
-		[[ $userName != 'dscudiero' ]] && whereClauseActive="$whereClauseActive and showInScripts=\"Yes\""
+		whereClauseActive="active = \"Yes\" and name != \"$mode\" and showInScripts=\"Yes\""
 		# If reports build the auth where clauses
 		if [[ $mode == 'scripts' ]]; then
 			whereClauseHost="and (os=\"$osName\" and (host = \"$hostName\" or host is null))"
@@ -65,7 +64,7 @@ function BuildMenuList {
 		unset $(tr ',' ' ' <<< "$fields")
 		sqlStmt="select $fields from $table where $whereClauseActive $whereClauseHost $whereClauseUser $whereClauseGroups order by name"
 		RunSql2 $sqlStmt
-		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Sorry, you do not have access to any scripts.\n\tsqlStmt: $sqlStmt"
+		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Sorry, either no scripts are active or you do not have access to any scripts."
 
 		unset menuList
 		menuList+=('|Ordinal|Script Name|Description')
@@ -247,24 +246,24 @@ mode=$(tr '[:upper:]' '[:lower:]' <<< "$1")
 
 ## Check to see if the first argument is a report name
 	## Is it a client name?
-	sqlStmt="select count(*) from $clientInfoTable where LOWER(name)=\"$(Lower $1)\" and recordStatus=\"A\""
-	RunSql2 $sqlStmt
-	count=${resultSet[0]}
-	## Not a client name, look for report or script name
-	if [[ $count -eq 0 ]]; then
-		if [[ $mode == 'scripts' ]]; then
-			sqlStmt="select count(*) from $scriptsTable where LOWER(name)=\"$(Lower $1)\" and active=\"Yes\" and showInScripts=\"Yes\""
-			RunSql2 $sqlStmt
-			count=${resultSet[0]}
-			[[ $count -ne 0 ]] && script=$1 && shift && originalArgStr="$*"
-		elif [[ $mode == 'reports' ]]; then
-			unset report
-			sqlStmt="select count(*) from $reportsTable where LOWER(name)=\"$(Lower $1)\" and active=\"Yes\""
-			RunSql2 $sqlStmt
-			count=${resultSet[0]}
-			[[ $count -ne 0 ]] && report=$1 && shift && originalArgStr="$*"
-		fi
-	fi
+	# sqlStmt="select count(*) from $clientInfoTable where LOWER(name)=\"$(Lower $1)\" and recordStatus=\"A\""
+	# RunSql2 $sqlStmt
+	# count=${resultSet[0]}
+	# ## Not a client name, look for report or script name
+	# if [[ $count -eq 0 ]]; then
+	# 	if [[ $mode == 'scripts' ]]; then
+	# 		sqlStmt="select count(*) from $scriptsTable where LOWER(name)=\"$(Lower $1)\" and active=\"Yes\" and showInScripts=\"Yes\""
+	# 		RunSql2 $sqlStmt
+	# 		count=${resultSet[0]}
+	# 		[[ $count -ne 0 ]] && script=$1 && shift && originalArgStr="$*"
+	# 	elif [[ $mode == 'reports' ]]; then
+	# 		unset report
+	# 		sqlStmt="select count(*) from $reportsTable where LOWER(name)=\"$(Lower $1)\" and active=\"Yes\""
+	# 		RunSql2 $sqlStmt
+	# 		count=${resultSet[0]}
+	# 		[[ $count -ne 0 ]] && report=$1 && shift && originalArgStr="$*"
+	# 	fi
+	# fi
 
 ## Set tables based on mode
 	if [[ $mode == 'scripts' ]]; then
@@ -311,7 +310,7 @@ fi
 #=======================================================================================================================
 helpSet='script,client'
 parseQuiet=true
-GetDefaultsData $myName
+GetDefaultsData $myName -fromFiles
 ParseArgsStd
 Hello
 
@@ -485,3 +484,4 @@ Goodbye 0
 ## 10-02-2017 @ 12.47.55 - (3.12.30)   - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 12.49.57 - (3.12.32)   - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 13.17.11 - (3.12.33)   - dscudiero - General syncing of dev to prod
+## 10-02-2017 @ 13.41.37 - (3.13.7)    - dscudiero - General syncing of dev to prod
