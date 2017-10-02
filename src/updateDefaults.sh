@@ -1,9 +1,9 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.36 # -- dscudiero -- Thu 09/28/2017 @ 11:07:35.09
+version=2.0.51 # -- dscudiero -- Mon 10/02/2017 @ 15:30:50.65
 #==================================================================================================
 TrapSigs 'on'
-myIncludes=""
+myIncludes="ProtectedCall"
 Import "$standardIncludes $myIncludes"
 originalArgStr="$*"
 scriptDescription="Sync warehouse defaults table"
@@ -35,6 +35,7 @@ GetDefaultsData #'buildSiteInfoTable'
 ignoreList="${ignoreList##*ignoreShares:}" ; ignoreList="${ignoreList%% *}"
 
 mode="$1" ; shift || true
+Verbose "mode = '$mode'"
 
 ## DEV servers
 	unset newServers
@@ -86,6 +87,8 @@ mode="$1" ; shift || true
 	dump -1 rhel
 	sqlStmt="update defaults set value=\"$rhel\" where name=\"rhel\" and host=\"$hostName\" and os=\"linux\""
 	RunSql2 $sqlStmt
+	Verbose "rhel = '$rhel'"
+
 
 ## Default CL version from the 'release' directory in the skeleton
 	unset defaultClVer
@@ -97,10 +100,13 @@ mode="$1" ; shift || true
 	else
 		Warning "Could not read file: '$skeletonRoot/release/web/courseleaf/clver.txt'"
 	fi
+	Verbose "defaultClVer = '$defaultClVer'"
 
+Verbose "mode = '$mode'"
 ## Write out the defaults files
 	if [[ $mode == 'all' || $mode == 'common' ]]; then
 		defaultsFile="$TOOLSDEFAULTSPATH/common"
+		Verbose "\ndefaultsFile = '$defaultsFile'"
 		sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and status=\"A\" order by name"
 		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
@@ -116,7 +122,9 @@ mode="$1" ; shift || true
 		else
 			Warning "Could not retrieve defaults data for 'common' from the data warehouse\n$sqlStmt"
 		fi
+	fi
 
+	if [[ $mode == 'all' ]]; then
 		## Get script defaults data
 		fields="name,scriptArgs,ignoreList,allowList,emailAddrs,scriptData1,scriptData2,scriptData3,scriptData4,scriptData5,setSemaphore,waitOn"
 		IFS=',' read -r -a fieldsArray <<< "$fields"
@@ -126,15 +134,19 @@ mode="$1" ; shift || true
 		[[ ${#resultSet[@]} -gt 0 ]] && rm -f "$defaultsFile >& /dev/null"
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
 			for ((ii=0; ii<${#resultSet[@]}; ii++)); do
+				unset result
 				result="${resultSet[$ii]}"
 				name=${result%%|*}
 				[[ ${name:0:1} == '_' ]] && continue
 				defaultsFile="$TOOLSDEFAULTSPATH/$name"
+				Verbose "defaultsFile = '$defaultsFile'"
 				echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
-				for ((ij=2; ij<${#fieldsArray[@]}; ij++)); do
+				fieldCntr=1
+				for ((ij=1; ij<${#fieldsArray[@]}; ij++)); do
 					field=${fieldsArray[$ij]}
-					value="$(cut -d'|' -f$ij <<< "$result")"
-					[[ $value == 'NULL' ]] && echo "unset $field" >> "$defaultsFile" || echo "$field=\"$(cut -d'|' -f$ij <<< "$result")\"" >> "$defaultsFile"
+					(( fieldCntr++ ))
+					value="$(cut -d'|' -f$fieldCntr <<< "$result")"
+					[[ $value == 'NULL' || $value == '' ]] && echo "unset $field" >> "$defaultsFile" || echo "$field=\"$value\"" >> "$defaultsFile"
 				done
 			done
 			chgrp 'leepfrog' "$defaultsFile"
@@ -144,21 +156,24 @@ mode="$1" ; shift || true
 		fi
 	fi
 
-	defaultsFile="$TOOLSDEFAULTSPATH/$hostName"
-	sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and host=\"$hostName\" and status=\"A\" order by name"
-	RunSql2 $sqlStmt
-	if [[ ${#resultSet[@]} -gt 0 ]]; then
-		echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
-		for ((ii=0; ii<${#resultSet[@]}; ii++)); do
-			result="${resultSet[$ii]}"
-			name=${result%%|*}
-			value=${result##*|}
-			echo "$name=\"$value\"" >> "$defaultsFile"
-		done
-		chgrp 'leepfrog' "$defaultsFile"
-		chmod 750 "$defaultsFile"
-	else
-		Warning "Could not retrieve defaults data for '$hostName' from the data warehouse\n$sqlStmt"
+	if [[ $mode == 'all' || $mode == 'common' ]]; then
+		defaultsFile="$TOOLSDEFAULTSPATH/$hostName"
+		Verbose "\ndefaultsFile = '$defaultsFile'"
+		sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and host=\"$hostName\" and status=\"A\" order by name"
+		RunSql2 $sqlStmt
+		if [[ ${#resultSet[@]} -gt 0 ]]; then
+			echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
+			for ((ii=0; ii<${#resultSet[@]}; ii++)); do
+				result="${resultSet[$ii]}"
+				name=${result%%|*}
+				value=${result##*|}
+				echo "$name=\"$value\"" >> "$defaultsFile"
+			done
+			chgrp 'leepfrog' "$defaultsFile"
+			chmod 750 "$defaultsFile"
+		else
+			Warning "Could not retrieve defaults data for '$hostName' from the data warehouse\n$sqlStmt"
+		fi
 	fi
 
 Goodbye 0;
@@ -186,3 +201,4 @@ Goodbye 0;
 ## 09-28-2017 @ 10.50.44 - dscudiero - General syncing of dev to prod
 ## 09-28-2017 @ 10.52.36 - (2.0.35)    - dscudiero - General syncing of dev to prod
 ## 09-28-2017 @ 11.07.59 - (2.0.36)    - dscudiero - Hard code the scripts table name
+## 10-02-2017 @ 15.31.24 - (2.0.51)    - dscudiero - fix problem with field index numbers writing out the script specific defaults
