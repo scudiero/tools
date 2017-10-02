@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.3" # -- dscudiero -- Fri 09/29/2017 @ 13:02:39.94
+# version="1.2.20" # -- dscudiero -- Mon 10/02/2017 @ 11:36:26.86
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -21,21 +21,24 @@ function FindExecutable {
 	## Defaults ====================================================================================
 	local mode='source' file='' token type ext found=false searchTokens checkFile searchRoot=''
 	local useLocal=$USELOCAL useDev=$USEDEV
-
 	## Parse arguments =============================================================================
 	while [[ $# -gt 0 ]]; do
 	    [[ $1 =~ ^-fi|--file$ ]] && { file="'$2'"; shift 2; continue; }
 	    [[ $1 =~ ^-m|--mode$ ]] && { mode="'$2'"; shift 2; continue; }
 	    [[ $1 =~ ^-sr|-so|--src$|--source$ ]] && { mode='src'; shift 1; continue; }
 	    [[ $1 =~ ^-l|--lib$ ]] && { mode='lib'; shift 1; continue; }
-	    [[ $1 =~ ^-p|--patch$ ]] && { mode='patch'; searchRoot="${mode}s"; shift 1; continue; }
+	    [[ $1 =~ ^-py|--python$ ]] && { mode='python'; searchRoot="${mode}"; shift 1; continue; }
+	    [[ $1 =~ ^-cp|--cpp$ ]] && { mode='cpp'; searchRoot="${mode}"; shift 1; continue; }
+	    [[ $1 =~ ^-cr|--cron$ ]] && { mode='cron'; searchRoot="${mode}"; shift 1; continue; }
+	    [[ $1 =~ ^-j|--java$ ]] && { mode='java'; searchRoot="${mode}"; shift 1; continue; }
+
+	    [[ $1 =~ ^-pa|--patch$ ]] && { mode='patch'; searchRoot="${mode}s"; shift 1; continue; }
 	    [[ $1 =~ ^-fe|--feature$ ]] && { mode='feature'; searchRoot="${mode}s"; shift 1; continue; }
 	    [[ $1 =~ ^-st|--step$ ]] && { mode='step'; searchRoot="${mode}s"; shift 1; continue; }
 	    [[ $1 =~ ^-r|--report$ ]] && { mode='report'; searchRoot="${mode}s"; shift 1; continue; }
 	    [[ -z $file ]] && file="$1"
 	    shift 1 || true
 	done
-	#Dump 3 -l -t file mode searchRoot
 
 	## Search for the file
 	if [[ $mode != 'lib' ]]; then
@@ -49,14 +52,15 @@ function FindExecutable {
 		[[ $useLocal == true && -d "$HOME/tools/lib" ]] && searchDirs="$HOME/tools/lib $searchDirs"
 		searchTokens="bash:sh cpp:cpp"
 	fi
-	#Dump 3 -l -t file mode searchRootsearchTokens
+	#Dump -t file mode searchRoot searchTokens -n
 
 	for dir in $searchDirs; do
-		#Dump 3 -l -t dir
+		#Dump -t dir
 		for token in $(tr ',' ' ' <<< "$searchTokens"); do
 			type="${token%%:*}"; ext="${token##*:}"
+			#Dump -t2 type ext
 			[[ -n $searchRoot ]] && checkFile="$dir/$searchRoot/${file}.${ext}" || checkFile="$dir/${file}.${ext}"
-			#Dump 3 -l -t2 checkFile
+			#Dump -t3 checkFile
 			[[ -r "$checkFile" ]] && { found=true; break; } || unset checkFile
 		done
 		[[ $found == true ]] && break
@@ -81,3 +85,4 @@ export -f FindExecutable
 ## 06-09-2017 @ 08.19.10 - ("1.0.128") - dscudiero - remove debug statements
 ## 09-29-2017 @ 10.13.30 - ("1.2.0")   - dscudiero - Refactored for performance
 ## 09-29-2017 @ 13.03.09 - ("1.2.3")   - dscudiero - remove debug code
+## 10-02-2017 @ 11.37.34 - ("1.2.20")  - dscudiero - Add -python, -java, -cpp
