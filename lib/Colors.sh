@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.28" # -- dscudiero -- Fri 09/22/2017 @  9:55:26.77
+# version="2.0.29" # -- dscudiero -- Mon 10/02/2017 @ 13:28:39.07
 #===================================================================================================
 # Setup default colors functions and values
 #===================================================================================================
@@ -58,18 +58,12 @@ function ColorT { local string="$*"; echo "${colorTerminate}${string}${colorDefa
 function ColorV { local string="$*"; echo "${colorVerbose}${string}${colorDefault}"; }
 
 function ColorK { local string="$*"; echo "${colorKey}${string}${colorDefault}"; }
+function ColorM { local string="$*"; echo "${colorMenu}${string}${colorDefault}"; }
 
 function ColorU { local string="$*"; echo "${colorUnderline}${string}${colorDefault}"; }
 function ColorB { local string="$*"; echo "${colorBold}${string}${colorDefault}"; }
-export -f Colors
-export -f ColorE
-export -f ColorI
-export -f ColorT
-export -f ColorK
-export -f ColorV
-export -f ColorN
-export -f ColorU
-export -f ColorB
+
+export -f Colors ColorE ColorI ColorT ColorK ColorV ColorN ColorU ColorB
 
 #===================================================================================================
 ## Check-in log
@@ -82,3 +76,4 @@ export -f ColorB
 ## 05-15-2017 @ 14.24.30 - ("2.0.14")  - dscudiero - log client and environment into the activity log
 ## 05-24-2017 @ 13.30.23 - ("2.0.15")  - dscudiero - Strip off the -test for test environments
 ## 09-22-2017 @ 11.27.52 - ("2.0.28")  - dscudiero - Added ColorW
+## 10-02-2017 @ 13.46.26 - ("2.0.29")  - dscudiero - General syncing of dev to prod
