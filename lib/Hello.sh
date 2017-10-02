@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.34" # -- dscudiero -- Mon 09/25/2017 @  8:17:45.94
+# version="2.0.38" # -- dscudiero -- Mon 10/02/2017 @ 15:29:13.79
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -12,9 +12,10 @@ function Hello {
 	[[ $quiet == true || $noHeaders == true || $secondaryMessagesOnly == true ]] && return 0
 	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
 
-	includes="Msg3 Colors ProcessLogger DisplayNews"
+	includes="ProcessLogger DisplayNews"
 	Import "$includes"
 
+echo "HELLO HELLO 1"
 	echo
 	[[ $TERM == 'dumb' ]] && echo
 	Msg3 "$(PadChar)"
@@ -39,7 +40,6 @@ function Hello {
 	[[ $userName != $checkName ]] && Msg3 "$(ColorW "*** Running as user $userName ***")"
 
 	echo
-
 	## Log Start in process log database
 		if [[ $noLogInDb != true ]]; then
 			myLogRecordIdx=$(ProcessLogger 'Start' "$myName")
@@ -47,7 +47,7 @@ function Hello {
 		fi
 
 	## Display script and tools news
-		DisplayNews
+		#DisplayNews
 
 	## If verbose level is 99 then show everything
 		[[ $verboseLevel -eq 99 ]] && set -v
@@ -69,3 +69,4 @@ export -f Hello
 ## 06-02-2017 @ 15.24.54 - ("2.0.31")  - dscudiero - Remove the running local message
 ## 08-31-2017 @ 15.48.35 - ("2.0.32")  - dscudiero - Tweak messaging
 ## 09-25-2017 @ 09.01.51 - ("2.0.34")  - dscudiero - Switch to Msg3
+## 10-02-2017 @ 15.31.43 - ("2.0.38")  - dscudiero - commento out DisplayNews
