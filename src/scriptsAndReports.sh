@@ -1,12 +1,13 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.7 # -- dscudiero -- Mon 10/02/2017 @ 13:38:14.02
+version=3.13.9 # -- dscudiero -- Mon 10/02/2017 @ 13:45:55.93
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion Call SelectMenuNew ProtectedCall Pause"
 Import "$standardInteractiveIncludes $myIncludes"
 
+echo "HERE HERE HERE 0"
 originalArgStr="$*"
 scriptDescription="Script dispatcher"
 
@@ -485,3 +486,4 @@ Goodbye 0
 ## 10-02-2017 @ 12.49.57 - (3.12.32)   - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 13.17.11 - (3.12.33)   - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 13.41.37 - (3.13.7)    - dscudiero - General syncing of dev to prod
+## 10-02-2017 @ 13.46.05 - (3.13.9)    - dscudiero - General syncing of dev to prod
