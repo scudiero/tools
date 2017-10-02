@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.14 # -- dscudiero -- Mon 10/02/2017 @ 14:03:16.72
+version=3.13.18 # -- dscudiero -- Mon 10/02/2017 @ 14:21:29.75
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -92,7 +92,6 @@ function ExecScript {
 	local userArgs="$1"
 	local field fieldVal tmpStr
 
-Here 1
 	## Lookup detailed script info from db
 		local fields="exec,lib,scriptArgs"
 		local sqlStmt="select $fields from $scriptsTable where lower(name) =\"$(Lower $name)\" "
@@ -109,14 +108,13 @@ Here 1
 		done
 		[[ -n $scriptArgs ]] && scriptArgs="$scriptArgs $userArgs" || scriptArgs="$userArgs"
 
-Here 2
 	## Parse the exec string for overrides, <scriptName> <scriptArgs>
 		if [[ -n $exec ]]; then
 			name=$(cut -d' ' -f1 <<< "$exec")
 			local tmpStr="$(cut -d' ' -f2- <<< "$exec")"
 			[[ -n $tmpStr ]] && scriptArgs="$tmpStr $scriptArgs"
 		fi
-Here 3
+
 	## Override the log file
 		logFileSave="$logFile"
 		logFile=/dev/null
@@ -136,11 +134,9 @@ Here 3
 			Msg3 >> $logFile
 		fi
 
-Here 4
 	## Call the script
-		executeFile=$(FindExecutable '-source' '$name')
-dump name executeFile
-Pause
+		executeFile=$(FindExecutable '-source' "$name")
+		[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
 		source $executeFile "$scriptArgs"
@@ -496,3 +492,4 @@ Goodbye 0
 ## 10-02-2017 @ 13.46.05 - (3.13.9)    - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 13.52.59 - (3.13.12)   - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 14.07.11 - (3.13.14)   - dscudiero - Check to make sure the executeFile has a value and is readable
+## 10-02-2017 @ 14.22.44 - (3.13.18)   - dscudiero - remove debug
