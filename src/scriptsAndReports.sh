@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.12 # -- dscudiero -- Mon 10/02/2017 @ 13:52:42.41
+version=3.13.14 # -- dscudiero -- Mon 10/02/2017 @ 14:03:16.72
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -92,6 +92,7 @@ function ExecScript {
 	local userArgs="$1"
 	local field fieldVal tmpStr
 
+Here 1
 	## Lookup detailed script info from db
 		local fields="exec,lib,scriptArgs"
 		local sqlStmt="select $fields from $scriptsTable where lower(name) =\"$(Lower $name)\" "
@@ -108,13 +109,14 @@ function ExecScript {
 		done
 		[[ -n $scriptArgs ]] && scriptArgs="$scriptArgs $userArgs" || scriptArgs="$userArgs"
 
+Here 2
 	## Parse the exec string for overrides, <scriptName> <scriptArgs>
 		if [[ -n $exec ]]; then
 			name=$(cut -d' ' -f1 <<< "$exec")
 			local tmpStr="$(cut -d' ' -f2- <<< "$exec")"
 			[[ -n $tmpStr ]] && scriptArgs="$tmpStr $scriptArgs"
 		fi
-
+Here 3
 	## Override the log file
 		logFileSave="$logFile"
 		logFile=/dev/null
@@ -134,8 +136,11 @@ function ExecScript {
 			Msg3 >> $logFile
 		fi
 
+Here 4
 	## Call the script
 		executeFile=$(FindExecutable '-source' '$name')
+dump name executeFile
+Pause
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
 		source $executeFile "$scriptArgs"
@@ -490,3 +495,4 @@ Goodbye 0
 ## 10-02-2017 @ 13.41.37 - (3.13.7)    - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 13.46.05 - (3.13.9)    - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 13.52.59 - (3.13.12)   - dscudiero - General syncing of dev to prod
+## 10-02-2017 @ 14.07.11 - (3.13.14)   - dscudiero - Check to make sure the executeFile has a value and is readable
