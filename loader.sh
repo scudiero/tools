@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.2" # -- dscudiero -- Mon 10/02/2017 @ 13:16:29.09
+version="1.4.3" # -- dscudiero -- Mon 10/02/2017 @ 14:14:51.26
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -215,7 +215,7 @@ sTime=$(date "+%s")
 
 	## Resolve the executable file"
 		[[ -z $executeFile ]] && executeFile=$(FindExecutable "$callPgmName")
-		[[ -z $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
+		[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
 		prtStatus ", find file"
 		sTime=$(date "+%s")
 
@@ -383,3 +383,4 @@ sTime=$(date "+%s")
 ## 10-02-2017 @ 13.10.08 - ("1.4.-1")  - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 13.12.23 - ("1.4.0")   - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 13.16.37 - ("1.4.2")   - dscudiero - General syncing of dev to prod
+## 10-02-2017 @ 14.22.06 - ("1.4.3")   - dscudiero - General syncing of dev to prod
