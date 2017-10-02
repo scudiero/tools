@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.44" # -- dscudiero -- Fri 09/15/2017 @ 10:10:51.63
+# version="2.0.45" # -- dscudiero -- Fri 09/29/2017 @ 12:44:47.72
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -8,10 +8,9 @@
 # All rights reserved
 #===================================================================================================
 function ParseArgsStd {
-	includes="Msg2 StringFunctions ParseArgs"
-	Import "$includes"
+	myIncludes="StringFunctions ParseArgs"
+	Import "$myIncludes"
 
-	Msg2 $V3 "*** $FUNCNAME -- Starting ***"
 	local myArgs="$*"
 	[[ -z $myArgs ]] && myArgs="$originalArgStr"
 
@@ -105,7 +104,6 @@ function ParseArgsStd {
 			fi
 		fi
 
-	Msg2 $V3 "*** $FUNCNAME -- Completed ***"
 	return 0
 } #ParseArgsStd
 export -f ParseArgsStd
@@ -124,3 +122,4 @@ export -f ParseArgsStd
 ## 09-01-2017 @ 09.28.04 - ("2.0.27")  - dscudiero - Add call to myname-FUNCNAME if found
 ## 09-01-2017 @ 13.44.46 - ("2.0.29")  - dscudiero - run the previously named local function if found
 ## 09-07-2017 @ 07.56.18 - ("2.0.35")  - dscudiero - Move the parsing of the client name to the end if no other arg matches have been found
+## 10-02-2017 @ 13.46.58 - ("2.0.45")  - dscudiero - General syncing of dev to prod
