@@ -1,10 +1,10 @@
 #!/bin/bash
-# XO NOT AUTOVERSION
+# DO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.4.30 # -- dscudiero -- Mon 09/25/2017 @  9:48:26.01
+version=5.5.0 # -- dscudiero -- Fri 09/29/2017 @ 16:20:20.74
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel EditTcfValue BackupCourseleafFile'
+myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel2 EditTcfValue BackupCourseleafFile'
 myIncludes="$myIncludes ParseCourseleafFile GetCourseleafPgm CopyFileWithCheck ArrayRef GitUtilities"
 Import "$standardInteractiveIncludes $myIncludes"
 
@@ -647,10 +647,11 @@ removeGitReposFromNext=true
 #=======================================================================================================================
 # Standard argument parsing and initialization
 #=======================================================================================================================
-	GetDefaultsData $myName
-	ParseArgsStd
-	displayGoodbyeSummaryMessages=true
 	Hello
+	[[ $userName == 'dscudiero' && $useLocal == true ]] && GetDefaultsData "$myName" -fromFiles || GetDefaultsData "$myName"
+	ParseArgsStd
+
+	displayGoodbyeSummaryMessages=true
 
 	cleanDirs="${scriptData3##*:}"
 	cleanFiles="${scriptData4##*:}"
@@ -691,26 +692,27 @@ removeGitReposFromNext=true
 	[[ -r $workbookFile ]] && Note 0 1 "Using workbook: '$workbookFile'" || workbookFile="$courseleafPatchControlFile"
 	## Get the list of sheets in the workbook
 		Note 0 1 "Parsing: '$workbookFile' ($(tr ' ' '@' <<< $(cut -d'.' -f1 <<< $(stat -c "%y" $workbookFile))))..."
-		GetExcel "$workbookFile" 'GetSheets' > $tmpFile
-		sheets=$(tail -n 1 $tmpFile | tr '|' ' ')
-		#dump -t sheets
+		GetExcel2 -wb "$workbookFile" -ws 'GetSheets'
+		[[ ${#resultSet[@]} -le 0 ]] && Terminate "Could not retrieve the patcher control data from:\n'$workbookFile'"
+		sheets="${resultSet[0]}"
 
 	## Read in the data for each product into a hash table
 		unset productList
-		for sheet in $sheets; do
+		for sheet in $(tr '|' ' ' <<< "$sheets"); do
 			sheet=$(Lower "$sheet")
 			[[ ${sheet:0:1} == '-' ]] && continue
-			GetExcel "$workbookFile" "$sheet" > $tmpFile
+			GetExcel2 -wb "$workbookFile" -ws "$sheet"
+			[[ ${#resultSet[@]} -le 0 ]] && Terminate "Could not retrieve the patcher control data from:\n'$workbookFile'"
 			arrayName="$(tr -d '-' <<< $sheet)"
 			unset $arrayName ## Unset the sheet array
 			[[ $sheet != 'all' ]] && productList="$productList,$sheet"
-			while read line; do
-				[[ -z $line || $line == '|||' ]] && continue
-				token="$(Lower "$(cut -d'|' -f1 <<< "$line")")"
+			for ((i=0; i<${#resultSet[@]}; i++)); do
+				[[ -z ${resultSet[$i]}|| ${resultSet[$i]} == '|||' ]] && continue
+				token="$(Lower "$(cut -d'|' -f1 <<< "${resultSet[$i]}")")"
 				[[ $token == '' || $token == 'source' || $token == 'note:' || ${token:0:1} == '#' || ${token:0:2} == '//' ]] && continue
 				dump -2 -t -t line
-				eval "$arrayName+=(\"$line\")"
-			done < "$tmpFile"
+				eval "$arrayName+=(\"${resultSet[$i]}\")"
+			done
 			#tmpArrayName="$arrayName[@]" ; tmpArray=("${!tmpArrayName}"); for ((jj=0; jj<${#tmpArray[@]}; jj++)); do echo -e "\t $arrayName [$jj] = >${tmpArray[$jj]}<"; done
 		done
 		productList="${productList:1}"
@@ -1497,7 +1499,6 @@ Msg3 "\nCross product checks..."
 ## 	2) remove 'System Refresh' (requested by Mike Miller 09/13/17)
 ## 	3) remove 'localsteps:links|links|links' (requested by Mike Miller 09/13/17)
 	editFile="$tgtDir/web/$courseleafProgDir/index.tcf"
-[[ $userName == 'dscudiero' ]] && Dump editFile
 	if [[ -w "$editFile" ]]; then
 		fromStr='title:Catalog Console'
 		toStr='title:CourseLeaf Console'
@@ -1775,3 +1776,4 @@ Goodbye 0 "$text1" "$text2"
 ## 09-20-2017 @ 15.31.32 - (5.4.17)    - dscudiero - Released latest change to edit the console
 ## 09-21-2017 @ 07.06.18 - (5.4.27)    - dscudiero - Comment out the refresh of the auth table
 ## 09-25-2017 @ 09.48.48 - (5.4.30)    - dscudiero - Switch to Msg3
+## 10-02-2017 @ 17.07.54 - (5.5.0)     - dscudiero - Switch to GetExcel2
