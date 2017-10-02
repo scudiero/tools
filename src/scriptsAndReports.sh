@@ -1,10 +1,12 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.12.30 # -- dscudiero -- Mon 10/02/2017 @ 12:47:45.34
+version=3.12.32 # -- dscudiero -- Mon 10/02/2017 @ 12:49:31.76
 #=======================================================================================================================
+[[ $userName == 'dscudiero' ]] && echo "HERE  HERE  HERE 1"
 TrapSigs 'on'
-myIncludes="Colors PushPop SetFileExpansion Call SelectMenuNew ProtectedCall Pause"
+[[ $userName == 'dscudiero' ]] && echo "HERE  HERE  HERE 2"
+myIncludes="RunSql2 Colors PushPop SetFileExpansion Call SelectMenuNew ProtectedCall Pause"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -485,3 +487,4 @@ Goodbye 0
 ## 09-19-2017 @ 10.39.37 - (3.12.20)   - dscudiero - Add Pause to the includes list
 ## 09-25-2017 @ 09.01.59 - (3.12.29)   - dscudiero - Switch to Msg3
 ## 10-02-2017 @ 12.47.55 - (3.12.30)   - dscudiero - General syncing of dev to prod
+## 10-02-2017 @ 12.49.57 - (3.12.32)   - dscudiero - General syncing of dev to prod
