@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.12.29 # -- dscudiero -- Mon 09/25/2017 @  8:59:31.41
+version=3.12.30 # -- dscudiero -- Mon 10/02/2017 @ 12:47:45.34
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="Colors PushPop SetFileExpansion Call SelectMenuNew ProtectedCall Pause"
@@ -9,6 +9,8 @@ Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="Script dispatcher"
+
+[[ $userName == 'dscudiero' ]] && echo "HERE  HERE  HERE"
 
 #=======================================================================================================================
 # Tools scripts selection front end
@@ -482,3 +484,4 @@ Goodbye 0
 ## 09-13-2017 @ 11.30.02 - (3.12.11)   - dscudiero - Update to just pull the scripts that have showinscripts=Yes
 ## 09-19-2017 @ 10.39.37 - (3.12.20)   - dscudiero - Add Pause to the includes list
 ## 09-25-2017 @ 09.01.59 - (3.12.29)   - dscudiero - Switch to Msg3
+## 10-02-2017 @ 12.47.55 - (3.12.30)   - dscudiero - General syncing of dev to prod
