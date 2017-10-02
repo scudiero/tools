@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.0" # -- dscudiero -- Mon 10/02/2017 @ 13:12:15.61
+version="1.4.2" # -- dscudiero -- Mon 10/02/2017 @ 13:16:29.09
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -183,7 +183,6 @@ sTime=$(date "+%s")
 
 ## Source the init script
 	TrapSigs 'on'
-[[ $userName == 'dscudiero' ]] && echo && echo "initFile = '$initFile'"
 	source $initFile
 	prtStatus ", load initFile"
 	sTime=$(date "+%s")
@@ -252,8 +251,6 @@ sTime=$(date "+%s")
 		TrapSigs 'off'
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		[[ $(cut -d' ' -f1 <<< $(wc -l "$executeFile")) -eq 0 ]] && Terminate "Execution file ($executeFile) is empty"
-[[ $userName == 'dscudiero' ]] && echo "HERE  HERE  HERE 0"
-[[ $userName == 'dscudiero' ]] && echo "\$executeFile = '$executeFile $scriptArgs '"
 		source $executeFile $scriptArgs 2>&1 | tee -a $logFile; rc=$?
 
 ## Should never get here but just in case
@@ -385,3 +382,4 @@ sTime=$(date "+%s")
 ## 10-02-2017 @ 13.00.33 - ("1.4.-1")  - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 13.10.08 - ("1.4.-1")  - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 13.12.23 - ("1.4.0")   - dscudiero - General syncing of dev to prod
+## 10-02-2017 @ 13.16.37 - ("1.4.2")   - dscudiero - General syncing of dev to prod
