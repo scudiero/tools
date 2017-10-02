@@ -1,13 +1,12 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.9 # -- dscudiero -- Mon 10/02/2017 @ 13:45:55.93
+version=3.13.12 # -- dscudiero -- Mon 10/02/2017 @ 13:52:42.41
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes="RunSql2 Colors PushPop SetFileExpansion Call SelectMenuNew ProtectedCall Pause"
+myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
 Import "$standardInteractiveIncludes $myIncludes"
 
-echo "HERE HERE HERE 0"
 originalArgStr="$*"
 scriptDescription="Script dispatcher"
 
@@ -136,7 +135,10 @@ function ExecScript {
 		fi
 
 	## Call the script
-		Call "$name" 'bash:sh' "$lib" "$scriptArgs" 2>&1 | tee -a $logFile; rc=$?
+		executeFile=$(FindExecutable '-source' '$name')
+		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
+		myPath="$(dirname $executeFile)"
+		source $executeFile "$scriptArgs"
 		logFile="$logFileSave"
 
 	return $?
@@ -309,11 +311,11 @@ fi
 #=======================================================================================================================
 ## parse arguments
 #=======================================================================================================================
+Hello
 helpSet='script,client'
 parseQuiet=true
 GetDefaultsData $myName -fromFiles
 ParseArgsStd
-Hello
 
 [[ $newsDisplayed == true ]] && Pause "\nNews was displayed, please review and press any key to continue"
 [[ $mode == 'scripts' && -n $client ]] && Init 'getClient'
@@ -487,3 +489,4 @@ Goodbye 0
 ## 10-02-2017 @ 13.17.11 - (3.12.33)   - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 13.41.37 - (3.13.7)    - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 13.46.05 - (3.13.9)    - dscudiero - General syncing of dev to prod
+## 10-02-2017 @ 13.52.59 - (3.13.12)   - dscudiero - General syncing of dev to prod
