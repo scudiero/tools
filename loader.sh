@@ -183,7 +183,7 @@ sTime=$(date "+%s")
 
 ## Source the init script
 	TrapSigs 'on'
-[[ $userName == 'dscudiero']] && echo && echo "initFile = '$initFile'"
+[[ $userName == 'dscudiero' ]] && echo && echo "initFile = '$initFile'"
 	source $initFile
 	prtStatus ", load initFile"
 	sTime=$(date "+%s")
