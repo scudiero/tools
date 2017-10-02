@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.20" # -- dscudiero -- Mon 10/02/2017 @ 11:36:26.86
+# version="1.2.21" # -- dscudiero -- Mon 10/02/2017 @ 12:00:21.66
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -23,8 +23,8 @@ function FindExecutable {
 	local useLocal=$USELOCAL useDev=$USEDEV
 	## Parse arguments =============================================================================
 	while [[ $# -gt 0 ]]; do
-	    [[ $1 =~ ^-fi|--file$ ]] && { file="'$2'"; shift 2; continue; }
-	    [[ $1 =~ ^-m|--mode$ ]] && { mode="'$2'"; shift 2; continue; }
+	    [[ $1 =~ ^-fi|--file$ ]] && { file="$2"; shift 2; continue; }
+	    [[ $1 =~ ^-m|--mode$ ]] && { mode="$2"; shift 2; continue; }
 	    [[ $1 =~ ^-sr|-so|--src$|--source$ ]] && { mode='src'; shift 1; continue; }
 	    [[ $1 =~ ^-l|--lib$ ]] && { mode='lib'; shift 1; continue; }
 	    [[ $1 =~ ^-py|--python$ ]] && { mode='python'; searchRoot="${mode}"; shift 1; continue; }
@@ -86,3 +86,4 @@ export -f FindExecutable
 ## 09-29-2017 @ 10.13.30 - ("1.2.0")   - dscudiero - Refactored for performance
 ## 09-29-2017 @ 13.03.09 - ("1.2.3")   - dscudiero - remove debug code
 ## 10-02-2017 @ 11.37.34 - ("1.2.20")  - dscudiero - Add -python, -java, -cpp
+## 10-02-2017 @ 12.36.17 - ("1.2.21")  - dscudiero - General syncing of dev to prod
