@@ -1,18 +1,14 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.12.32 # -- dscudiero -- Mon 10/02/2017 @ 12:49:31.76
+version=3.12.33 # -- dscudiero -- Mon 10/02/2017 @ 13:16:07.45
 #=======================================================================================================================
-[[ $userName == 'dscudiero' ]] && echo "HERE  HERE  HERE 1"
 TrapSigs 'on'
-[[ $userName == 'dscudiero' ]] && echo "HERE  HERE  HERE 2"
 myIncludes="RunSql2 Colors PushPop SetFileExpansion Call SelectMenuNew ProtectedCall Pause"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="Script dispatcher"
-
-[[ $userName == 'dscudiero' ]] && echo "HERE  HERE  HERE"
 
 #=======================================================================================================================
 # Tools scripts selection front end
@@ -488,3 +484,4 @@ Goodbye 0
 ## 09-25-2017 @ 09.01.59 - (3.12.29)   - dscudiero - Switch to Msg3
 ## 10-02-2017 @ 12.47.55 - (3.12.30)   - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 12.49.57 - (3.12.32)   - dscudiero - General syncing of dev to prod
+## 10-02-2017 @ 13.17.11 - (3.12.33)   - dscudiero - General syncing of dev to prod
