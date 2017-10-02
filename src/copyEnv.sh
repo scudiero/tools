@@ -120,6 +120,7 @@ haveClss=false
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
+Hello
 [[ $userName == 'dscudiero' && $useLocal == true ]] && GetDefaultsData "$myName" -fromFiles || GetDefaultsData "$myName"
 ParseArgsStd
 
@@ -128,7 +129,6 @@ ParseArgsStd
 [[ $allItems == true || $fullCopy == true ]] && cim='Yes' && overlay=false && manifest=false
 dump -2 -n client env cim cat clss fullCopy manifest overlay suffix emailAddress
 
-Hello
 addPvt=true
 [[ $cat == true ]] && skipCat=false && skipCim=true && skipClss=true && unset skipAlso
 [[ $cim == true ]] && skipCat=true && skipCim=false && skipClss=true && unset skipAlso
@@ -669,3 +669,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 09-29-2017 @ 15.30.15 - (4.12.10)   - dscudiero - Add debug stuff
 ## 09-29-2017 @ 15.35.35 - (4.12.10)   - dscudiero - remove debug stuff
 ## 09-29-2017 @ 16.18.38 - (4.12.10)   - dscudiero - Use GatDefaults -fromFile if useLocal and me
+## 10-02-2017 @ 14.22.11 - (4.12.10)   - dscudiero - General syncing of dev to prod
