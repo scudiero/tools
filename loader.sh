@@ -183,6 +183,7 @@ sTime=$(date "+%s")
 
 ## Source the init script
 	TrapSigs 'on'
+[[ $userName == 'dscudiero']] && echo && echo "initFile = '$initFile'"
 	source $initFile
 	prtStatus ", load initFile"
 	sTime=$(date "+%s")
@@ -379,3 +380,4 @@ sTime=$(date "+%s")
 ## 09-29-2017 @ 15.16.39 - ("1.4.-1")  - dscudiero - General syncing of dev to prod
 ## 09-29-2017 @ 15.30.02 - ("1.4.-1")  - dscudiero - Add debug stuff
 ## 10-02-2017 @ 12.44.30 - ("1.4.-1")  - dscudiero - General syncing of dev to prod
+## 10-02-2017 @ 13.00.33 - ("1.4.-1")  - dscudiero - General syncing of dev to prod
