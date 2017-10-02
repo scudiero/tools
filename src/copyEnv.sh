@@ -121,8 +121,15 @@ haveClss=false
 # Standard arg parsing and initialization
 #==================================================================================================
 Hello
-[[ $userName == 'dscudiero' && $useLocal == true ]] && GetDefaultsData "$myName" -fromFiles || GetDefaultsData "$myName"
-ParseArgsStd
+echo "HERE HERE HERE"
+dump myName
+GetDefaultsData "$myName" -fromFiles
+echo "HERE HERE HERE"
+ParseArgsStd 
+echo "HERE HERE HERE"
+
+dump ignoreList allowList
+Pause
 
 [[ -n $env && -z $srcEnv ]] && srcEnv="$env"
 
@@ -670,3 +677,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 09-29-2017 @ 15.35.35 - (4.12.10)   - dscudiero - remove debug stuff
 ## 09-29-2017 @ 16.18.38 - (4.12.10)   - dscudiero - Use GatDefaults -fromFile if useLocal and me
 ## 10-02-2017 @ 14.22.11 - (4.12.10)   - dscudiero - General syncing of dev to prod
+## 10-02-2017 @ 15.32.10 - (4.12.10)   - dscudiero - General syncing of dev to prod
