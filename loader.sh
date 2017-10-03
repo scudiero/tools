@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.7" # -- dscudiero -- Tue 10/03/2017 @ 14:42:14.65
+version="1.4.10" # -- dscudiero -- Tue 10/03/2017 @ 14:57:09.72
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -208,21 +208,19 @@ sTime=$(date "+%s")
 		[[ $checkMsg != true ]] && Terminate "$checkMsg"
 
 	## Get the users auth groups
-		sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\""
-[[ $userName == 'dscudiero' ]] && echo " HERE 0" > $stdout
-		RunSql2 $sqlStmt
-[[ $userName == 'dscudiero' ]] && echo " HERE 1" > $stdout
-		unset UsersAuthGroups
-		if [[ ${#resultSet[@]} -ne 0 ]]; then
-[[ $userName == 'dscudiero' ]] && echo " HERE 2" > $stdout
-			for ((i=0; i<${#resultSet[@]}; i++)); do
-				echo "resultSet[$i] = >${resultSet[$i]}<" >> $stdout
-				UsersAuthGroups="$UsersAuthGroups,${resultSet[$i]}"
-			done
-			UsersAuthGroups="${UsersAuthGroups:1}"
-		fi
-
-[[ $userName == 'dscudiero' ]] && echo "UsersAuthGroups = '$UsersAuthGroups'"
+# 		sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\""
+# 		RunSql2 $sqlStmt
+# [[ $userName == 'dscudiero' ]] && echo " HERE 1"
+# 		unset UsersAuthGroups
+# 		if [[ ${#resultSet[@]} -ne 0 ]]; then
+# [[ $userName == 'dscudiero' ]] && echo " HERE 2"
+# 			for ((i=0; i<${#resultSet[@]}; i++)); do
+# 				echo "resultSet[$i] = >${resultSet[$i]}<"
+# 				UsersAuthGroups="$UsersAuthGroups,${resultSet[$i]}"
+# 			done
+# 			UsersAuthGroups="${UsersAuthGroups:1}"
+# 		fi
+# [[ $userName == 'dscudiero' ]] && echo "UsersAuthGroups = '$UsersAuthGroups'"
 
 		prtStatus ", check run/auth"
 		sTime=$(date "+%s")
@@ -405,3 +403,4 @@ sTime=$(date "+%s")
 ## 10-03-2017 @ 14.36.28 - ("1.4.5")   - dscudiero - Add setting UserAuthGroups
 ## 10-03-2017 @ 14.39.42 - ("1.4.6")   - dscudiero - General syncing of dev to prod
 ## 10-03-2017 @ 14.42.23 - ("1.4.7")   - dscudiero - General syncing of dev to prod
+## 10-03-2017 @ 14.59.39 - ("1.4.10")  - dscudiero - Comment out the UserAuthGroup stuff
