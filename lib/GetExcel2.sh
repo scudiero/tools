@@ -69,6 +69,12 @@ function GetExcel2 {
 	## Set output to an array
 		unset resultSet
 		IFS=$'\n' read -rd '' -a resultSet < "$tmpFile"
+		if [[ ${#resultSet[@]} -le 0 ]]; then
+			Terminate "Could not retrieve data for the '$workSheet' worksheet\n\tin the '$workBook' workbook."
+			GetExcelCleanup
+			Msg3
+			Goodbye 1
+		fi
 
 	GetExcelCleanup
 	return 0
@@ -90,3 +96,4 @@ export -f GetExcel2
 ## 09-20-2017 @ 12.09.52 - ("2.0.69")  - dscudiero - Add protectedcall to includes list
 ## 10-02-2017 @ 17.07.34 - ("2.1.0")   - dscudiero - Return a bad condition code if data retrieval fails
 ## 10-03-2017 @ 07.06.23 - ("2.1.0")   - dscudiero - REformat comments
+## 10-03-2017 @ 13.50.36 - ("2.1.0")   - dscudiero - Added code to check to see if results were returned, if not terminate
