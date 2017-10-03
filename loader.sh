@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.10" # -- dscudiero -- Tue 10/03/2017 @ 14:57:09.72
+version="1.4.26" # -- dscudiero -- Tue 10/03/2017 @ 15:41:03.83
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -161,31 +161,70 @@ sTime=$(date "+%s")
 	done
 	export CLASSPATH="$CLASSPATH"
 
-## Look for the Initialization and Import function in the library path
-	sTime=$(date "+%s")
-	unset initFile importFile;
-	[[ -z $TOOLSLIBPATH ]] && searchDirs="$TOOLSPATH/lib" || searchDirs="$( tr ':' ' ' <<< $TOOLSLIBPATH)"
-	[[ $USEDEV == true && -d "$TOOLSDEVPATH/lib" ]] && searchDirs="$TOOLSDEVPATH/lib"
-	for searchDir in $searchDirs; do
-		[[ -r ${searchDir}/InitializeRuntime.sh ]] && initFile="${searchDir}/InitializeRuntime.sh"
-		[[ -r ${searchDir}/Import.sh ]] && importFile="${searchDir}/Import.sh" && source $importFile
-		[[ -n $initFile && -n $importFile ]] && break
-	done
+# ## Look for the Initialization and Import function in the library path
+# 	sTime=$(date "+%s")
+# 	unset importFile;
+# 	[[ -z $TOOLSLIBPATH ]] && searchDirs="$TOOLSPATH/lib" || searchDirs="$( tr ':' ' ' <<< $TOOLSLIBPATH)"
+# 	[[ $USEDEV == true && -d "$TOOLSDEVPATH/lib" ]] && searchDirs="$TOOLSDEVPATH/lib"
+# 	for searchDir in $searchDirs; do
+# 		[[ -r ${searchDir}/Import.sh ]] && importFile="${searchDir}/Import.sh" && source $importFile
+# 		[[ -n $initFile && -n $importFile ]] && break
+# 	done
+
+# ## Initialize the runtime environment
+# 	[[ -z $initFile ]] && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
 
 ## Initialize the runtime environment
-	[[ -z $initFile ]] && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
+	TERM=${TERM:-dumb}
+	shopt -s checkwinsize
+	set -e  # Turn ON Exit immediately
+	#set +e  # Turn OFF Exit immediately
 
-## Import thins we need to continue
+	tabStr='    '
+	[[ -z $indentLevel ]] && indentLevel=0 && export indentLevel=$indentLevel
+	[[ -z $verboseLevel ]] && verboseLevel=0 && export verboseLevel=$verboseLevel
+	epochStime=$(date +%s)
+
+	hostName=$(hostname); hostName=${hostName%%.*}
+	osType="$(uname -m)" # x86_64 or i686
+	osName='linux'
+	[[ ${osType:0:1} = 'x' ]] && osVer=64 || osVer=32
+
+	myRhel=$(cat /etc/redhat-release | cut -d" " -f3)
+	[[ $myRhel == 'release' ]] && myRhel=$(cat /etc/redhat-release | cut -d" " -f4)
+	## set default values for common variables
+		if [[ $myName != 'bashShell' ]]; then
+			trueVars="verify traceLog trapExceptions logInDb allowAlerts waitOnForkedProcess defaultValueUseNotes autoRemote"
+
+			falseVars="testMode noEmails noHeaders noCheck noLog verbose quiet warningMsgsIssued errorMsgsIssued noClear"
+			falseVars="$falseVars force newsDisplayed noNews informationOnlyMode secondaryMessagesOnly changesMade fork"
+			falseVars="$falseVars onlyCimsWithTestFile displayGoodbyeSummaryMessages autoRemote"
+
+			clearVars="helpSet helpNotes warningMsgs errorMsgs summaryMsgs myRealPath myRealName changeLogRecs parsedArgStr"
+
+			for var in $trueVars;  do [[ -z ${!var} ]] && eval "$var=true"; done
+			for var in $falseVars; do [[ -z ${!var} ]] && eval "$var=false"; done
+			for var in $clearVars; do unset $var; done
+		fi
+
+## Import things we need to continue
+	source "$TOOLSPATH/lib/Import.sh"
 	sTime=$(date "+%s")
 	Import "$loaderIncludes"
 	prtStatus ", imports"
 	sTime=$(date "+%s")
+	SetFileExpansion
 
-## Source the init script
-	TrapSigs 'on'
-	source $initFile
-	prtStatus ", load initFile"
-	sTime=$(date "+%s")
+## Load tools defaults value
+	defaultsLoaded=false
+	GetDefaultsData "$myName" -fromFiles
+
+## Set forking limit
+	maxForkedProcesses=$maxForkedProcessesPrime
+	[[ -n $scriptData3 && $(IsNumeric $scriptData3) == true ]] && maxForkedProcesses=$scriptData3
+	hour=$(date +%H); hour=${hour#0}
+	[[ $hour -ge 20 && $maxForkedProcessesAfterHours -gt $maxForkedProcesses ]] && maxForkedProcesses=$maxForkedProcessesAfterHours
+	[[ -z $maxForkedProcesses ]] && maxForkedProcesses=3
 
 ## If sourced then just return
 	[[ $viaCron == true ]] && return 0
@@ -208,19 +247,15 @@ sTime=$(date "+%s")
 		[[ $checkMsg != true ]] && Terminate "$checkMsg"
 
 	## Get the users auth groups
-# 		sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\""
-# 		RunSql2 $sqlStmt
-# [[ $userName == 'dscudiero' ]] && echo " HERE 1"
-# 		unset UsersAuthGroups
-# 		if [[ ${#resultSet[@]} -ne 0 ]]; then
-# [[ $userName == 'dscudiero' ]] && echo " HERE 2"
-# 			for ((i=0; i<${#resultSet[@]}; i++)); do
-# 				echo "resultSet[$i] = >${resultSet[$i]}<"
-# 				UsersAuthGroups="$UsersAuthGroups,${resultSet[$i]}"
-# 			done
-# 			UsersAuthGroups="${UsersAuthGroups:1}"
-# 		fi
-# [[ $userName == 'dscudiero' ]] && echo "UsersAuthGroups = '$UsersAuthGroups'"
+		sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\""
+		RunSql2 $sqlStmt
+		unset UsersAuthGroups
+		if [[ ${#resultSet[@]} -ne 0 ]]; then
+			for ((i=0; i<${#resultSet[@]}; i++)); do
+				UsersAuthGroups="$UsersAuthGroups,${resultSet[$i]}"
+			done
+			UsersAuthGroups="${UsersAuthGroups:1}"
+		fi
 
 		prtStatus ", check run/auth"
 		sTime=$(date "+%s")
@@ -404,3 +439,4 @@ sTime=$(date "+%s")
 ## 10-03-2017 @ 14.39.42 - ("1.4.6")   - dscudiero - General syncing of dev to prod
 ## 10-03-2017 @ 14.42.23 - ("1.4.7")   - dscudiero - General syncing of dev to prod
 ## 10-03-2017 @ 14.59.39 - ("1.4.10")  - dscudiero - Comment out the UserAuthGroup stuff
+## 10-03-2017 @ 15.46.56 - ("1.4.26")  - dscudiero - Uncomment the UserAuthGroups data
