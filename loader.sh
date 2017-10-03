@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.4" # -- dscudiero -- Tue 10/03/2017 @ 14:25:44.65
+version="1.4.5" # -- dscudiero -- Tue 10/03/2017 @ 14:35:44.43
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -207,6 +207,21 @@ sTime=$(date "+%s")
 		checkMsg=$(CheckAuth $callPgmName)
 		[[ $checkMsg != true ]] && Terminate "$checkMsg"
 
+	## Get the users auth groups
+
+		sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\""
+		RunSql2 $sqlStmt
+[[ $userName == 'dscudiero' ]] && echo " HERE 0" > $stdout
+		unset UsersAuthGroups
+		if [[ ${#resultSet[@]} -ne 0 ]]; then
+[[ $userName == 'dscudiero' ]] && echo " HERE 1" > $stdout
+			for ((i=0; i<${#resultSet[@]}; i++)); do
+				echo "resultSet[$i] = >${resultSet[$i]}<" >> $stdout
+				UsersAuthGroups="$UsersAuthGroups,${resultSet[$i]}"
+			done
+			UsersAuthGroups="${UsersAuthGroups:1}"
+		fi
+
 [[ $userName == 'dscudiero' ]] && echo "UsersAuthGroups = '$UsersAuthGroups'"
 
 		prtStatus ", check run/auth"
@@ -387,3 +402,4 @@ sTime=$(date "+%s")
 ## 10-02-2017 @ 13.16.37 - ("1.4.2")   - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 14.22.06 - ("1.4.3")   - dscudiero - General syncing of dev to prod
 ## 10-03-2017 @ 14.27.27 - ("1.4.4")   - dscudiero - add debug statement
+## 10-03-2017 @ 14.36.28 - ("1.4.5")   - dscudiero - Add setting UserAuthGroups
