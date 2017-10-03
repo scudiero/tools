@@ -15,6 +15,7 @@ function GetExcel2 {
 	Import "$standardIncludes $myIncludes"
 
 	function GetExcelCleanup { SetFileExpansion 'on' ; rm -rf ${tmpFile}* >& /dev/null ; SetFileExpansion ; }
+	function MyContains { local string="$1" ; local subStr="$2" ; [[ "${string#*$subStr}" != "$string" ]] && echo true || echo false ; return 0; }
 
 	## Local defaults
 		local workBook workSheet delimiter='|'
@@ -49,28 +50,23 @@ function GetExcel2 {
 		pathSave="$PATH"
 		export PATH="$PYDIR:$PATH"
 		verboseLevel=0
-		cmdStr="$PYDIR/bin/python -u $executeFile "$workBook" "$workSheet" |"
-	 	$cmdStr > "$tmpFile"
+			cmdStr="$PYDIR/bin/python -u $executeFile "$workBook" "$workSheet" |"
+		 	#$cmdStr > "$tmpFile"
+		 	local resultStr="$($cmdStr)"
 	 	verboseLevel=$verboseLevelSave
 		export PATH="$pathSave"
+		[[ -z $resultStr ]] && { GetExcelCleanup; Terminate "$FUNCNAME: Could not retrieve data for the '$workSheet' worksheet\n\tin the '$workBook' workbook."; }
 
 	## Check for errors
-		local grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
-		[[ $grepStr == '' ]] && grepStr=$(ProtectedCall "grep '*Error*' $tmpFile")
-		if [[ $grepStr != '' || $(tail -n 1 $tmpFile) == '-1' ]]; then
-			tail -n 10 $tmpFile > $tmpFile.2
-			while read -r line; do echo -e "\t$line"; done < $tmpFile.2;
+		if [[ $(MyContains "resultStr" "*Fatal Error*") == true ]]; then
 			GetExcelCleanup
-			Terminate "$FUNCNAME: Could not retrieve data for the '$workSheet' worksheet\n\tin the '$workBook' workbook."
+			Terminate "$FUNCNAME: Could not retrieve data for the '$workSheet' worksheet\n\tin the '$workBook' workbook.\n\n$resultStr" }
 		fi
 
 	## Set output to an array
 		unset resultSet
-		IFS=$'\n' read -rd '' -a resultSet < "$tmpFile"
-		if [[ ${#resultSet[@]} -le 0 ]]; then
-			GetExcelCleanup
-			Terminate "$FUNCNAME: Could not retrieve data for the '$workSheet' worksheet\n\tin the '$workBook' workbook."
-		fi
+		resultStr="$(sed 's/\r$//' <<< $resultStr)" ## Remove the new line chars
+		[[ -n $resultStr ]] && read -rd $'\n' -a resultSet <<< "$resultStr"
 
 	GetExcelCleanup
 	return 0
@@ -94,3 +90,4 @@ export -f GetExcel2
 ## 10-03-2017 @ 07.06.23 - ("2.1.0")   - dscudiero - REformat comments
 ## 10-03-2017 @ 13.50.36 - ("2.1.0")   - dscudiero - Added code to check to see if results were returned, if not terminate
 ## 10-03-2017 @ 13.52.12 - ("2.1.0")   - dscudiero - General syncing of dev to prod
+## 10-03-2017 @ 16.06.00 - ("2.1.0")   - dscudiero - Eliminated the use of a temporary file for data retrieval
