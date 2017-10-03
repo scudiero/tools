@@ -63,14 +63,8 @@ function RunSql2 {
 
 	## Write output to an array
 		unset resultSet
-	[[ $userName == 'dscudiero' ]] && echo " HERE RS3" >> $stdout
 		#[[ -n $resultStr ]] && IFS=$'\n' read -rd '' -a resultSet <<< "$resultStr"
 		[[ -n $resultStr ]] && IFS=$'\n' read -r -a sheetCols <<< "$resultStr"
-
-
-
-
-	[[ $userName == 'dscudiero' ]] && echo " HERE RS4" >> $stdout
 
 	return 0
 } #RunMySql
@@ -93,3 +87,4 @@ export -f RunSql2
 ## 10-03-2017 @ 14.45.06 - ("1.1.-1")  - dscudiero - General syncing of dev to prod
 ## 10-03-2017 @ 14.46.58 - ("1.1.-1")  - dscudiero - General syncing of dev to prod
 ## 10-03-2017 @ 14.50.14 - ("1.1.-1")  - dscudiero - General syncing of dev to prod
+## 10-03-2017 @ 14.51.22 - ("1.1.-1")  - dscudiero - General syncing of dev to prod
