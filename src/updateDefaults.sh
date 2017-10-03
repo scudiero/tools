@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.52 # -- dscudiero -- Tue 10/03/2017 @ 11:20:20.94
+version=2.0.56 # -- dscudiero -- Tue 10/03/2017 @ 11:29:32.73
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -203,3 +203,4 @@ Goodbye 0;
 ## 09-28-2017 @ 11.07.59 - (2.0.36)    - dscudiero - Hard code the scripts table name
 ## 10-02-2017 @ 15.31.24 - (2.0.51)    - dscudiero - fix problem with field index numbers writing out the script specific defaults
 ## 10-03-2017 @ 11.23.16 - (2.0.52)    - dscudiero - Do not set scriptArgs
+## 10-03-2017 @ 11.31.05 - (2.0.56)    - dscudiero - General syncing of dev to prod
