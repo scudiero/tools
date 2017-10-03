@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.10.28 # -- dscudiero -- Fri 09/29/2017 @ 10:02:46.49
+version=1.10.32 # -- dscudiero -- Tue 10/03/2017 @ 10:31:06.94
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue'
@@ -75,6 +75,7 @@ fi
 #===================================================================================================
 cimStr=$(echo $cimStr | tr -d ' ' )
 cimStr=\"$(sed 's|,|","|g' <<< $cimStr)\"
+
 #= Run the step
 	srcStepFile="$(FindExecutable -step "$step")"
 	[[ -z $srcStepFile ]] && Terminate "Could find the step file ('$step')"
@@ -109,3 +110,4 @@ Goodbye 0
 ## 06-08-2017 @ 11.55.25 - (1.10.24)   - dscudiero - General syncing of dev to prod
 ## 06-26-2017 @ 07.51.04 - (1.10.25)   - dscudiero - change cleanup to not remove the entier tmp directory
 ## 09-29-2017 @ 10.14.49 - (1.10.28)   - dscudiero - Update FindExcecutable call for new syntax
+## 10-03-2017 @ 11.02.00 - (1.10.32)   - dscudiero - General syncing of dev to prod
