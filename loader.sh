@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.6" # -- dscudiero -- Tue 10/03/2017 @ 14:39:32.83
+version="1.4.7" # -- dscudiero -- Tue 10/03/2017 @ 14:42:14.65
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -208,13 +208,13 @@ sTime=$(date "+%s")
 		[[ $checkMsg != true ]] && Terminate "$checkMsg"
 
 	## Get the users auth groups
-[[ $userName == 'dscudiero' ]] && echo "authGroupsTable = '$authGroupsTable'"
 		sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\""
-		RunSql2 $sqlStmt
 [[ $userName == 'dscudiero' ]] && echo " HERE 0" > $stdout
+		RunSql2 $sqlStmt
+[[ $userName == 'dscudiero' ]] && echo " HERE 1" > $stdout
 		unset UsersAuthGroups
 		if [[ ${#resultSet[@]} -ne 0 ]]; then
-[[ $userName == 'dscudiero' ]] && echo " HERE 1" > $stdout
+[[ $userName == 'dscudiero' ]] && echo " HERE 2" > $stdout
 			for ((i=0; i<${#resultSet[@]}; i++)); do
 				echo "resultSet[$i] = >${resultSet[$i]}<" >> $stdout
 				UsersAuthGroups="$UsersAuthGroups,${resultSet[$i]}"
@@ -404,3 +404,4 @@ sTime=$(date "+%s")
 ## 10-03-2017 @ 14.27.27 - ("1.4.4")   - dscudiero - add debug statement
 ## 10-03-2017 @ 14.36.28 - ("1.4.5")   - dscudiero - Add setting UserAuthGroups
 ## 10-03-2017 @ 14.39.42 - ("1.4.6")   - dscudiero - General syncing of dev to prod
+## 10-03-2017 @ 14.42.23 - ("1.4.7")   - dscudiero - General syncing of dev to prod
