@@ -1,9 +1,9 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.33 # -- dscudiero -- Thu 09/14/2017 @ 14:09:39.74
+version=1.2.36 # -- dscudiero -- Tue 10/03/2017 @ 10:10:04.12
 #==================================================================================================
 TrapSigs 'on'
-includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
+includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
 includes="$includes GetOutputFile ProtectedCall"
 Import "$includes"
 
@@ -54,7 +54,7 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 	# Parse an esig record
 	#==============================================================================================
 	function ParseEsig  {
-		Msg2 $V2 "*** Starting $FUNCNAME ***"
+		Msg3 $V2 "*** Starting $FUNCNAME ***"
 		local ruleName="$1"; shift
 		local line="$1"; shift
 		local description="$*"
@@ -73,7 +73,7 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 			esigsKeys+=("$stepName")
 		fi
 
-		Msg2 $V2 "*** Ending $FUNCNAME ***"
+		Msg3 $V2 "*** Ending $FUNCNAME ***"
 		return 0
 	} ## ParseEsig
 
@@ -81,7 +81,7 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 	# Parse an wfrules record
 	#==============================================================================================
 	function ParseWfrule  {
-		Msg2 $V2 "*** Starting $FUNCNAME ***"
+		Msg3 $V2 "*** Starting $FUNCNAME ***"
 		local ruleName="$1"; shift
 		local line="$1"; shift
 		local description="$*"
@@ -105,7 +105,7 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 				value="$(cut -d'|' -f3- <<< "$line")"
 				value=$(tr -d ';' <<< "$value")
 			else
-				Msg2 $W "Unknown rule type: '$line'"
+				Msg3 $W "Unknown rule type: '$line'"
 				continue
 			fi
 			dump -2 -t rtype value
@@ -118,7 +118,7 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 			fi
 		fi
 
-		Msg2 $V2 "*** Ending $FUNCNAME ***"
+		Msg3 $V2 "*** Ending $FUNCNAME ***"
 		return 0
 	} ## ParseWfrule
 
@@ -139,11 +139,11 @@ tmpFile=$(MkTmpFile)
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
+Hello
 scriptNews+=("11/01/2016 - New")
 helpSet='script,client,env'
 GetDefaultsData $myName
 ParseArgsStd
-Hello
 [[ $allItems == true ]] && allCims='allCims' || unset allCims
 Init "getClient getEnv getDirs checkEnvs getCims $allCims"
 if [[ $informationModeOnly == true ]]; then
@@ -180,12 +180,12 @@ myData="Client: '$client', Env: '$env', Cims: '$cimStr' "
 
 ## Loop through CIMs
 for cim in $(echo $cimStr | tr ',' ' '); do
-	Msg2
-	Msg2 "Processing CIM instance: '$cim'"
+	Msg3
+	Msg3 "Processing CIM instance: '$cim'"
 	grepFile="$srcDir/web/$cim/workflow.cfg"
-	[[ ! -f $grepFile ]] && Msg2 $E1 "Could not locate file $grepFile" && continue
-	Msg2 '-,-,-,-,false' "\n$(PadChar)" >> $outFile
-	Msg2 "<<< $(Upper "$cim") >>>" >> $outFile
+	[[ ! -f $grepFile ]] && Msg3 $E1 "Could not locate file $grepFile" && continue
+	Msg3 '-,-,-,-,false' "\n$(PadChar)" >> $outFile
+	Msg3 "<<< $(Upper "$cim") >>>" >> $outFile
 
 	## Read the workflow.cfg file for the cim
 		## Get any special modifiers
@@ -195,7 +195,7 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 		## Parse off the wfrules
 		unset substitutionVars wfrules wfrulesKeys substitutionVarsKeys esigsKeys wforders
 		declare -A wfrules ; declare -A esigs ; declare -A substitutionVars
-		Msg2 "^Parsing '$grepFile'"
+		Msg3 "^Parsing '$grepFile'"
 		[[ -f $tmpFile ]] && rm -f $tmpFile
 		\grep '^wfrules:\|^wforder:\|^esiglist:\|^voterules:' $grepFile >> $tmpFile
 		unset lines; while read line; do lines+=("$line"); done < $tmpFile; [[ -f $tmpFile ]] && rm -f $tmpFile
@@ -235,17 +235,17 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 
 		## Debug info
 			if [[ $verboseLevel -ge 1 || $informationModeOnly == true ]]; then
-				Msg2 "^substitutionVars:"; for i in "${substitutionVarsKeys[@]}"; do echo -e "\t[$i] = >${substitutionVars[$i]}<"; done;
-				Msg2 "^esigs:"; for i in "${esigsKeys[@]}"; do echo -e "\t[$i] = >${esigs[$i]}<"; done;
-				Msg2 "^wfrules:"; for i in "${wfrulesKeys[@]}"; do echo -e "\t[$i] = >${wfrules[$i]}<"; done;
-				Msg2 "^wforders:"; for ((jj=0; jj<${#wforders[@]}; jj++)); do echo -e "\t[$jj] = >${wforders[$jj]}<"; done;
-				Msg2 "^voterules:"; for ((jj=0; jj<${#voterules[@]}; jj++)); do echo -e "\t[$jj] = >${voterules[$jj]}<"; done;
+				Msg3 "^substitutionVars:"; for i in "${substitutionVarsKeys[@]}"; do echo -e "\t[$i] = >${substitutionVars[$i]}<"; done;
+				Msg3 "^esigs:"; for i in "${esigsKeys[@]}"; do echo -e "\t[$i] = >${esigs[$i]}<"; done;
+				Msg3 "^wfrules:"; for i in "${wfrulesKeys[@]}"; do echo -e "\t[$i] = >${wfrules[$i]}<"; done;
+				Msg3 "^wforders:"; for ((jj=0; jj<${#wforders[@]}; jj++)); do echo -e "\t[$jj] = >${wforders[$jj]}<"; done;
+				Msg3 "^voterules:"; for ((jj=0; jj<${#voterules[@]}; jj++)); do echo -e "\t[$jj] = >${voterules[$jj]}<"; done;
 			fi
 
 		## Write out 'Substitution Vars' data
 			if [[ ${#substitutionVarsKeys[@]} -gt 0 ]]; then
 				cntr=1
-				Msg2 "\n#\tVariable\tDescription\t\tImplementation / Comment" >> $outFile
+				Msg3 "\n#\tVariable\tDescription\t\tImplementation / Comment" >> $outFile
 				for i in "${substitutionVarsKeys[@]}"; do
 					echo -e "$cntr\t$i\t${substitutionVars[$i]}" >> $outFile
 					(( cntr += 1 ))
@@ -255,51 +255,51 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 		## Write out esigs data
 			if [[ ${#esigsKeys[@]} -gt 0 ]]; then
 				cntr=1
-				Msg2 "\n#\tStepPattern\tDescription\t\tImplementation / Comment" >> $outFile
+				Msg3 "\n#\tStepPattern\tDescription\t\tImplementation / Comment" >> $outFile
 				for i in "${esigsKeys[@]}"; do
 					echo -e "$cntr\t$i\t${esigs[$i]}" >> $outFile
 					(( cntr += 1 ))
 				done
-				Msg2 "^^Found ${#esigsKeys[@]} Esig rules"
+				Msg3 "^^Found ${#esigsKeys[@]} Esig rules"
 			fi
 
 		## Write out 'Conditionals' data
 			if [[ ${#wfrulesKeys[@]} -gt 0 ]]; then
 				cntr=1
-				Msg2 "\n#\tCondition\tDescription\t\tImplementation / Comment" >> $outFile
+				Msg3 "\n#\tCondition\tDescription\t\tImplementation / Comment" >> $outFile
 				for i in "${wfrulesKeys[@]}"; do
 					echo -e "$cntr\t$i\t${wfrules[$i]}" >> $outFile
 					(( cntr += 1 ))
 				done
-				Msg2 "^^Found ${#wfrulesKeys[@]} Conditional rules"
+				Msg3 "^^Found ${#wfrulesKeys[@]} Conditional rules"
 			fi
 
 		## Write out 'wforder' data
 			if [[ ${#wforders[@]} -gt 0 ]]; then
-				Msg2 "\n#\tWorkflow\tComment" >> $outFile
+				Msg3 "\n#\tWorkflow\tComment" >> $outFile
 				for ((i=0; i<${#wforders[@]}; i++)); do
 					echo -e "$i\t${wforders[$i]}" >> $outFile
 				done
-				Msg2 "^^Found ${#wforders[@]} Workflow order rules"
+				Msg3 "^^Found ${#wforders[@]} Workflow order rules"
 			fi
 
 		## Write out 'voterules' data
 			if [[ ${#voterules[@]} -gt 0 ]]; then
-				Msg2 "\n#\Vote Rule\t\t\tComments / Explanation" >> $outFile
+				Msg3 "\n#\Vote Rule\t\t\tComments / Explanation" >> $outFile
 				for ((i=0; i<${#voterules[@]}; i++)); do
 					echo -e "$i\t${voterules[$i]}" >> $outFile
 				done
-				Msg2 "^^Found ${#voterules[@]} Vote rules"
+				Msg3 "^^Found ${#voterules[@]} Vote rules"
 			fi
 
 	## Read the workflow.tcf file for the cim
 		grepFile="$srcDir/web/$cim/workflow.tcf"
-		[[ ! -r $grepFile ]] && Msg2 E "Could not read '$grepFile', skipping $cim" && continue
-		Msg2 "^Parsing '$grepFile'"
+		[[ ! -r $grepFile ]] && Msg3 E "Could not read '$grepFile', skipping $cim" && continue
+		Msg3 "^Parsing '$grepFile'"
 
 		## Parse off the conditionals from the localsteps record
 			localsteps=$(ProtectedCall grep 'localsteps:' $grepFile)
-			[[ -z $localsteps ]] && Msg2 E "Could not retrieve 'localsteps' record from $grepFile', skipping $cim" && continue
+			[[ -z $localsteps ]] && Msg3 E "Could not retrieve 'localsteps' record from $grepFile', skipping $cim" && continue
 			tokenStr=$(echo $localsteps | cut -d'|' -f4)
 			tokenStr=$(echo $tokenStr | cut -d'=' -f2)
 			tokenStr=$(echo $tokenStr | cut -d';' -f1)
@@ -309,12 +309,12 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 			declare -A modifiersRef
 			declare -A conditionalsRef
 			## Write out a standard 'debug' workflow prefox
-				Msg2 "\nworkflow:<<< LEEPFROG TESTING >>>\t\t\t\t${myName} - $(date)" >> $outFile
-				Msg2 "#\tWorkflow Step\tStep Conditional(s)\tModifier(s)\tComments / Explanation" >> $outFile
-				Msg2 "^START" >> $outFile
-				Msg2 "^College 'Col'" >> $outFile
-				Msg2 "^Department 'Dept'" >> $outFile
-				Msg2 "^Subject 'Subj'" >> $outFile
+				Msg3 "\nworkflow:<<< LEEPFROG TESTING >>>\t\t\t\t${myName} - $(date)" >> $outFile
+				Msg3 "#\tWorkflow Step\tStep Conditional(s)\tModifier(s)\tComments / Explanation" >> $outFile
+				Msg3 "^START" >> $outFile
+				Msg3 "^College 'Col'" >> $outFile
+				Msg3 "^Department 'Dept'" >> $outFile
+				Msg3 "^Subject 'Subj'" >> $outFile
 
 				## Parse out conditionals and modifiers from the localsteps string
 				for token in "${tokens[@]}"; do
@@ -329,14 +329,14 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 						conditionalsRef["$keyword"]=true
 					fi
 					## Write out 'debug' workflow record
-					Msg2 "^$keywordDef\t$keyword" >> $outFile
+					Msg3 "^$keywordDef\t$keyword" >> $outFile
 
 				done
-				if [[ $verboseLevel -ge 1 ]]; then Msg2 "^modifiersRef:"; for i in "${!modifiersRef[@]}"; do printf "\t\t[$i] = >${modifiersRef[$i]}<\n"; done; fi
-				if [[ $verboseLevel -ge 1 ]]; then Msg2 "^conditionalsRef:"; for i in "${!conditionalsRef[@]}"; do printf "\t\t[$i] = >${conditionalsRef[$i]}<\n"; done; fi
+				if [[ $verboseLevel -ge 1 ]]; then Msg3 "^modifiersRef:"; for i in "${!modifiersRef[@]}"; do printf "\t\t[$i] = >${modifiersRef[$i]}<\n"; done; fi
+				if [[ $verboseLevel -ge 1 ]]; then Msg3 "^conditionalsRef:"; for i in "${!conditionalsRef[@]}"; do printf "\t\t[$i] = >${conditionalsRef[$i]}<\n"; done; fi
 
 				## Write out 'debug' workflow suffix
-				Msg2 "^END" >> $outFile
+				Msg3 "^END" >> $outFile
 
 	## Read the workflow.tcf file for the workflows
 		ProtectedCall grep '^workflow:' $grepFile > $tmpFile
@@ -345,8 +345,8 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 			[[ ${line:0:23} == 'workflow:standard|START' ]] && continue
 			workflow=$(echo $line | cut -d'|' -f1)
 			[[ $(Contains ",${ignoreWorkflows}," ",${workflow##*:},") == true ]] && continue
-			Msg2 "^^Parsing '$workflow'"
-			Msg2 "\n$workflow\t\t\t\t${myName} - $(date)" >> $outFile
+			Msg3 "^^Parsing '$workflow'"
+			Msg3 "\n$workflow\t\t\t\t${myName} - $(date)" >> $outFile
 			echo -e "#\tWorkflow Step\tStep Conditional(s)\tModifier(s)\tComments / Explanation" >> $outFile
 			line=$(echo $line | cut -d'|' -f2)
 			IFSSave=$IFS; IFS=','; read -r -a wfsteps <<< "$line"; IFS=$IFSSave
@@ -370,12 +370,12 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 				echo -e "$stepCntr\t$step\t$conditionals\t$modifiers" >> $outFile
 				(( stepCntr += 1 ))
 			done
-			Msg2 "^^^Found $stepCntr steps"
+			Msg3 "^^^Found $stepCntr steps"
 		done < $tmpFile
 done # cims
-Msg2
-Msg2 "Processed CIMs: $cimStr"
-[[ $informationOnlyMode != true ]] && Msg2 "Output written to: $outFile"
+Msg3
+Msg3 "Processed CIMs: $cimStr"
+[[ $informationOnlyMode != true ]] && Msg3 "Output written to: $outFile"
 [[ -f "$tmpFile" ]] && rm "$tmpFile"
 
 #==================================================================================================
@@ -399,3 +399,4 @@ Goodbye 0 #'alert'
 ## 05-24-2017 @ 13.43.28 - (1.2.17)    - dscudiero - General syncing of dev to prod
 ## 08-03-2017 @ 09.55.58 - (1.2.18)    - dscudiero - Fix problems with wforders
 ## 09-06-2017 @ 08.34.43 - (1.2.24)    - dscudiero - Ignore standard functions and workflow steps
+## 10-03-2017 @ 11.02.07 - (1.2.36)    - dscudiero - General syncing of dev to prod
