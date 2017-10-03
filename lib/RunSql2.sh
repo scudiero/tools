@@ -63,8 +63,8 @@ function RunSql2 {
 
 	## Write output to an array
 		unset resultSet
-		#[[ -n $resultStr ]] && IFS=$'\n' read -rd '' -a resultSet <<< "$resultStr"
-		[[ -n $resultStr ]] && IFS=$'\n' read -r -a sheetCols <<< "$resultStr"
+		[[ -n $resultStr ]] && IFS=$'\n' read -rd '' -a resultSet <<< "$resultStr"
+		#[[ -n $resultStr ]] && IFS=$'\n' read -r -a sheetCols <<< "$resultStr"
 
 	return 0
 } #RunMySql
@@ -88,3 +88,4 @@ export -f RunSql2
 ## 10-03-2017 @ 14.46.58 - ("1.1.-1")  - dscudiero - General syncing of dev to prod
 ## 10-03-2017 @ 14.50.14 - ("1.1.-1")  - dscudiero - General syncing of dev to prod
 ## 10-03-2017 @ 14.51.22 - ("1.1.-1")  - dscudiero - General syncing of dev to prod
+## 10-03-2017 @ 14.56.04 - ("1.1.-1")  - dscudiero - General syncing of dev to prod
