@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.11 # -- dscudiero -- Tue 10/03/2017 @ 14:58:43.01
+# version=2.1.17 # -- dscudiero -- Tue 10/03/2017 @ 15:45:43.77
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -223,8 +223,8 @@ function Init {
 		 		RunSql2 $sqlStmt
 				[[ ${resultSet[0]} != 'NULL' ]] && productsinsupport="${resultSet[0]}"
 				## If client has products in support and the user is not in the support group then quit
-				# [[ -n $productsinsupport && $(Contains ",$UsersAuthGroups," 'support') != true ]] && \
-		 		# 		Terminate "You do not have authority to modify the $env environment, please contact the support person assigned to this client"
+				[[ -n $productsinsupport && $(Contains ",$UsersAuthGroups," ',support,') != true ]] && \
+		 				Terminate "You do not have authority to modify the $env environment, please contact the support person assigned to this client"
 		 		[[ -n productsinsupport ]] && Info 0 1 "FYI, the client has the following products in production: '${resultSet[0]}'"
 				unset ans; Prompt ans "Are you sure" "Yes No";
 				ans=$(Lower ${ans:0:1})
@@ -376,3 +376,4 @@ export -f Init
 ## 09-28-2017 @ 07.57.54 - (2.1.9)     - dscudiero - set pvtDir if getDirs
 ## 09-28-2017 @ 08.32.48 - (2.1.10)    - dscudiero - Make sure in getEnv that pvtDir has a value even if devDir is not found
 ## 10-03-2017 @ 14.59.00 - (2.1.11)    - dscudiero - Commented out the auth check for now
+## 10-03-2017 @ 15.46.33 - (2.1.17)    - dscudiero - Uncomment auth check for updating next sites
