@@ -5,7 +5,7 @@ version=5.5.0 # -- dscudiero -- Fri 09/29/2017 @ 16:20:20.74
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel2 EditTcfValue BackupCourseleafFile'
-myIncludes="$myIncludes ParseCourseleafFile GetCourseleafPgm CopyFileWithCheck ArrayRef GitUtilities"
+myIncludes="$myIncludes ParseCourseleafFile GetCourseleafPgm CopyFileWithCheck ArrayRef GitUtilities Alert"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -1777,3 +1777,4 @@ Goodbye 0 "$text1" "$text2"
 ## 09-21-2017 @ 07.06.18 - (5.4.27)    - dscudiero - Comment out the refresh of the auth table
 ## 09-25-2017 @ 09.48.48 - (5.4.30)    - dscudiero - Switch to Msg3
 ## 10-02-2017 @ 17.07.54 - (5.5.0)     - dscudiero - Switch to GetExcel2
+## 10-03-2017 @ 07.14.03 - (5.5.0)     - dscudiero - Add Alert to include list
