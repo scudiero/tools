@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.57" # -- dscudiero -- Tue 10/03/2017 @ 10:06:52.62
+# version="2.0.58" # -- dscudiero -- Tue 10/03/2017 @ 10:19:27.11
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -9,7 +9,7 @@
 #==================================================================================================
 dumpFirstWrite=true
 function Dump {
-	local token tabCnt re='^-{0,1}[0-9]$' logOnly=false out='/dev/tty'
+	local token tabCnt re='^-{0,1}[0-9]$' logOnly=false out='/dev/tty' pause=false
 	local caller=${FUNCNAME[1]}
 	[[ $caller == 'dump' || $caller == 'Dump' ]] && caller=${FUNCNAME[2]}
 
@@ -23,7 +23,7 @@ function Dump {
 		[[ ${token:0:2} == '-t' ]] && { tabCnt=${token:2}; tabCnt=${tabCnt:-1}; continue; }
 		[[ $token == '-n' ]] && { echo -e -n "\n"; continue; }
 		[[ $token == '-l' ]] && { logOnly=true; shift; continue; }
-		[[ $token == '-p' ]] && { Pause "Pause.$FUNCNAME.${caller}"; continue; }
+		[[ $token == '-p' ]] && { pause=true; continue; }
 
 		if [[ -n $tabCnt ]]; then
 			for ((i=0; i<$tabCnt; i++)); do
@@ -38,6 +38,7 @@ function Dump {
 		fi
 	done
 
+	[[ $pause == true ]] && { Pause "*** Pause.$FUNCNAME.${caller} ***"; }
 	return 0
 } ## Dump
 function dump { Dump $* ; }
@@ -243,3 +244,4 @@ export -f DumpMap dumpmap dumphash
 ## 09-27-2017 @ 12.22.47 - ("2.0.54")  - dscudiero - Fix problem parsing -2 msg level designators
 ## 10-02-2017 @ 17.07.04 - ("2.0.55")  - dscudiero - add dump alias
 ## 10-03-2017 @ 10.07.07 - ("2.0.57")  - dscudiero - Add -p option to pause execution
+## 10-03-2017 @ 10.19.47 - ("2.0.58")  - dscudiero - If -p specifed the pause after all output generated
