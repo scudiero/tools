@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.48" # -- dscudiero -- Fri 09/29/2017 @ 16:07:59.70
+# version="1.0.49" # -- dscudiero -- Tue 10/03/2017 @ 16:24:13.70
 #===================================================================================================
 # Write out / update a start record into the process log database
 # Called as 'mode' 'token' 'data'
@@ -15,7 +15,7 @@ function ProcessLogger {
 	[[ $logInDb == false ]] && return 0
 	local mode="$1"; shift || true
 	local myName argString epochTime sqlStmt epochTime epochStime epochEtime eHr eMin eSec elapSeconds elapTime
-	Import 'RunSql2'
+	Import 'RunSql2 StringFunctions'
 
 	case $(Lower ${mode:0:1}) in
 	    s)	# START
@@ -84,3 +84,4 @@ export -f ProcessLogger
 ## 06-23-2017 @ 16.05.51 - ("1.0.28")  - dscudiero - add debug statements
 ## 06-26-2017 @ 10.13.31 - ("1.0.47")  - dscudiero - Set startTime and startEtime
 ## 09-29-2017 @ 16.09.03 - ("1.0.48")  - dscudiero - Add RunSql2 to includes
+## 10-03-2017 @ 16.24.29 - ("1.0.49")  - dscudiero - Add StringFunctions to includes list
