@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.51 # -- dscudiero -- Mon 10/02/2017 @ 15:30:50.65
+version=2.0.52 # -- dscudiero -- Tue 10/03/2017 @ 11:20:20.94
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -126,7 +126,7 @@ Verbose "mode = '$mode'"
 
 	if [[ $mode == 'all' ]]; then
 		## Get script defaults data
-		fields="name,scriptArgs,ignoreList,allowList,emailAddrs,scriptData1,scriptData2,scriptData3,scriptData4,scriptData5,setSemaphore,waitOn"
+		fields="name,ignoreList,allowList,emailAddrs,scriptData1,scriptData2,scriptData3,scriptData4,scriptData5,setSemaphore,waitOn"
 		IFS=',' read -r -a fieldsArray <<< "$fields"
 		where="where active not in (\"No\",\"Old\")"
 		sqlStmt="select $fields from scripts $where order by name"
@@ -202,3 +202,4 @@ Goodbye 0;
 ## 09-28-2017 @ 10.52.36 - (2.0.35)    - dscudiero - General syncing of dev to prod
 ## 09-28-2017 @ 11.07.59 - (2.0.36)    - dscudiero - Hard code the scripts table name
 ## 10-02-2017 @ 15.31.24 - (2.0.51)    - dscudiero - fix problem with field index numbers writing out the script specific defaults
+## 10-03-2017 @ 11.23.16 - (2.0.52)    - dscudiero - Do not set scriptArgs
