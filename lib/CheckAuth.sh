@@ -2,7 +2,7 @@
 
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.22" # -- dscudiero -- Fri 09/29/2017 @ 13:30:25.19
+# version="2.0.23" # -- dscudiero -- Tue 10/03/2017 @ 14:26:47.58
 #===================================================================================================
 # Check to see if the logged user can run this script
 # Returns true if user is authorized, otherwise it returns a message
@@ -35,7 +35,14 @@ function CheckAuth {
 		scriptGroups="\"$(sed 's/,/","/g' <<< "$scriptGroups")\""
 		sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\" and code in ($scriptGroups)"
 		RunSql2 $sqlStmt
-		[[ ${#resultSet[@]} -ne 0 ]] && echo true && return 0
+		if [[ ${#resultSet[@]} -ne 0 ]]; then
+			for ((i=0; i<${#resultSet[@]}; i++)); do
+				UsersAuthGroups="$UsersAuthGroups,${resultSet[$i]}"
+			done
+			UsersAuthGroups="${UsersAuthGroups:1}"
+			echo true
+			return 0
+		fi
 	fi
 
 	## User does not have access
@@ -58,3 +65,4 @@ export -f CheckAuth
 ## 05-19-2017 @ 11.12.37 - ("2.0.18")  - dscudiero - General syncing of dev to prod
 ## 05-19-2017 @ 11.14.50 - ("2.0.20")  - dscudiero - remove debug stuff
 ## 09-29-2017 @ 13.30.34 - ("2.0.22")  - dscudiero - General syncing of dev to prod
+## 10-03-2017 @ 14.27.10 - ("2.0.23")  - dscudiero - Save the users auth groups
