@@ -239,7 +239,7 @@ if (debug) { wfDump("sisName",sisName); }
 
 						// If we have not already processed this rule then create a new hash table element for the rulename
 						if (wfSubRulesHash[subRuleName] == undefined) {
-							print_doc('\t\t' + subRuleName + " : " + subRuleText + '\n' );
+							print_doc('\t\t' + subRuleName + " : " + subRuleText + '\n');
 							// If rule is an enumeration then parse off and create an object array
 							if (subRuleText.substr(0,1) === "[" ) {
 								var tmpHashArray=[];
@@ -263,8 +263,8 @@ if (debug) { wfDump("sisName",sisName); }
 							} else {
 								wfSubRulesHash[subRuleName]=dbquery('cimcourses',text.substr(idx1+1));
 								}
-							} else
-								print_doc('\t\t' + subRuleName + ' already included above\n' );
+							} else {
+								print_doc('\t\t' + subRuleName + ' already included above\n');
 							}
 
 							// See if we have a mapper function for this variable
