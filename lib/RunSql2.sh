@@ -41,11 +41,13 @@ function RunSql2 {
 
 	## Run the query
 		set -f
+	[[ $userName == 'dscudiero' ]] && echo " HERE RS0" >> $stdout
 		if [[ $dbType == 'mysql' ]]; then
 			resultStr=$(java runMySql $sqlStmt 2>&1)
 		else
 			resultStr=$(sqlite3 $dbFile "$sqlStmt" 2>&1 | tr "\t" '|')
 		fi
+	[[ $userName == 'dscudiero' ]] && echo " HERE RS1" >> $stdout
 		[[ $prevGlob == 'on' ]] && set +f
 		## Check for errors
 		if [[ $(Contains "$resultStr" 'SEVERE:') == true || \
@@ -83,3 +85,4 @@ export -f RunSql2
 ## 03-30-2017 @ 08.40.53 - ("1.0.20")  - dscudiero - Do not add trailing ';' if the sql action is mysql*
 ## 06-26-2017 @ 10.13.49 - ("1.0.36")  - dscudiero - Add additional error checking for VM errors
 ## 10-02-2017 @ 17.06.49 - ("1.1.-1")  - dscudiero - Check results after call pf python pgm
+## 10-03-2017 @ 14.45.06 - ("1.1.-1")  - dscudiero - General syncing of dev to prod
