@@ -14,7 +14,7 @@ setSemaphoreList='buildSiteInfoTable,buildClientInfoTable'
 javaResources='org.apache.commons.cli.*,java.sql.*,java.util.logging.*,java.util.*,java.io.*,java.lang.Runtime'
 pythonResources='inspect,sys,traceback,os,argparse,xlrd,re,datetime,time,string,array'
 
-loaderIncludes='Here Dump Pause Msg3 Semaphore FindExecutable PadChar CheckRun CheckAuth SignalHandeler TrapSigs RunSql2'
+loaderIncludes='Here Dump Pause Msg3 Semaphore FindExecutable PadChar CheckRun CheckAuth SignalHandeler TrapSigs RunSql2 SetFileExpansion'
 standardIncludes='GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye MkTmpFile'
 standardInteractiveIncludes="$standardIncludes Prompt VerifyContinue"
 
