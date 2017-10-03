@@ -1,10 +1,11 @@
 #!/bin/bash
 #===================================================================================================
-version=1.0.12 # -- dscudiero -- Thu 09/14/2017 @ 12:24:59.05
+version=1.0.17 # -- dscudiero -- Tue 10/03/2017 @ 16:12:41.81
 #===================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
-Import "$imports"
+myIncludes="RunSql2"
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
 scriptDescription="Take a tools script offline or display the current scripts offline"
 
@@ -12,26 +13,25 @@ scriptDescription="Take a tools script offline or display the current scripts of
 ## turn a script offline -- i.e. create an .offline file
 #===================================================================================================
 GetDefaultsData $myName
-ParseArgsStd
 
-ignoreScripts='patcher,setEdition,newNewsItem,callPgm,testsh,WorkWith'
-script=$client
-if [[ $script = '' ]]; then
-	Msg2 "Current offline scripts:"
-	sqlStmt="select name from $scriptsTable where active=\"Offline\""
-	RunSql2 $sqlStmt
-	for result in ${resultSet[@]}; do
-		[[ $(Contains ",$ignoreScripts," ",$result,") != true ]] && Msg2 "^$result"
+if [[ -n $originalArgStr ]]; then
+	for script in $originalArgStr; do
+		[[ ${script: (-3)} == '.sh' ]] && script="$(cut -d'.' -f1 <<< $script)"
+		sqlStmt="update $scriptsTable set active=\"Offline\" where name=\"$script\""
+		RunSql2 $sqlStmt
+		Msg3 "^$script is now online"
 	done
-	Msg2
 else
-	Prompt script "Please specify the script to take offline" '*any*'
-
-	[[ ${script: (-3)} == '.sh' ]] && script="$(cut -d'.' -f1 <<< $script)"
-	sqlStmt="update $scriptsTable set active=\"Offline\" where name=\"$script\""
+	Msg3 "Current offline scripts:"
+	sqlStmt="select name,showInScripts from $scriptsTable where active=\"Offline\" order by showInScripts,name"
 	RunSql2 $sqlStmt
+	for result in ${resultSet[@]}; do 
+		Msg3 "^${result%%|*}^${result##*|}"
+	done
+	Msg3
 fi
 
+Goodbye
 #===================================================================================================
 ## Check-in log
 #===================================================================================================
@@ -39,3 +39,4 @@ fi
 ## Thu May  5 09:20:53 CDT 2016 - dscudiero - Switch to set offline in the database
 ## Fri Jul 15 13:22:44 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Wed Jul 27 12:41:23 CDT 2016 - dscudiero - Fix problem where it was picking up N/A scripts
+## 10-03-2017 @ 16.13.44 - (1.0.17)    - dscudiero - Refactored to allow report on all offline scripts
