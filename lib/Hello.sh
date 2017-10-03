@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.38" # -- dscudiero -- Mon 10/02/2017 @ 15:29:13.79
+# version="2.0.39" # -- dscudiero -- Tue 10/03/2017 @ 13:40:03.49
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -14,8 +14,7 @@ function Hello {
 
 	includes="ProcessLogger DisplayNews"
 	Import "$includes"
-
-echo "HELLO HELLO 1"
+	
 	echo
 	[[ $TERM == 'dumb' ]] && echo
 	Msg3 "$(PadChar)"
@@ -70,3 +69,4 @@ export -f Hello
 ## 08-31-2017 @ 15.48.35 - ("2.0.32")  - dscudiero - Tweak messaging
 ## 09-25-2017 @ 09.01.51 - ("2.0.34")  - dscudiero - Switch to Msg3
 ## 10-02-2017 @ 15.31.43 - ("2.0.38")  - dscudiero - commento out DisplayNews
+## 10-03-2017 @ 13.40.27 - ("2.0.39")  - dscudiero - remove debug stuff
