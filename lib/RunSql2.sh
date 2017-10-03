@@ -61,10 +61,13 @@ function RunSql2 {
 			exit -1
 		fi
 
+		resultStr="$(sed 's/\r$//' <<< $resultStr)"
+
 	## Write output to an array
 		unset resultSet
-		[[ -n $resultStr ]] && IFS=$'\n' read -rd '' -a resultSet <<< "$resultStr"
-		#[[ -n $resultStr ]] && IFS=$'\n' read -r -a sheetCols <<< "$resultStr"
+		#[[ -n $resultStr ]] && IFS=$'\n' read -rd '' -a resultSet <<< "$resultStr"
+		resultStr="$(sed 's/\r$//' <<< $resultStr)" ## Remove the new line chars
+		[[ -n $resultStr ]] && read -rd $'\n' -a resultSet <<< "$resultStr"
 
 	return 0
 } #RunMySql
@@ -89,3 +92,4 @@ export -f RunSql2
 ## 10-03-2017 @ 14.50.14 - ("1.1.-1")  - dscudiero - General syncing of dev to prod
 ## 10-03-2017 @ 14.51.22 - ("1.1.-1")  - dscudiero - General syncing of dev to prod
 ## 10-03-2017 @ 14.56.04 - ("1.1.-1")  - dscudiero - General syncing of dev to prod
+## 10-03-2017 @ 15.46.14 - ("1.1.-1")  - dscudiero - Update how we set the return array
