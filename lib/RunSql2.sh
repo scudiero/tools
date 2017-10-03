@@ -54,6 +54,7 @@ function RunSql2 {
 			$(Contains "$resultStr" 'ERROR') == true || \
 			$(Contains "$resultStr" '\*Error\*') == true || \
 			$(Contains "$resultStr" 'Error occurred during initialization of VM') == true ]]; then
+	[[ $userName == 'dscudiero' ]] && echo " HERE RS2" >> $stdout
 			local callerData="$(caller)"
 			local lineNo="$(basename $(cut -d' ' -f2 <<< $callerData))/$(cut -d' ' -f1 <<< $callerData)"
 			msg="$FUNCNAME: Error reported from $dbType"
@@ -63,9 +64,11 @@ function RunSql2 {
 			exit -1
 		fi
 
+	[[ $userName == 'dscudiero' ]] && echo " HERE RS3" >> $stdout
 	## Write output to an array
 		unset resultSet
 		[[ -n $resultStr ]] && IFS=$'\n' read -rd '' -a resultSet <<< "$resultStr"
+	[[ $userName == 'dscudiero' ]] && echo " HERE RS4" >> $stdout
 
 	return 0
 } #RunMySql
@@ -86,3 +89,4 @@ export -f RunSql2
 ## 06-26-2017 @ 10.13.49 - ("1.0.36")  - dscudiero - Add additional error checking for VM errors
 ## 10-02-2017 @ 17.06.49 - ("1.1.-1")  - dscudiero - Check results after call pf python pgm
 ## 10-03-2017 @ 14.45.06 - ("1.1.-1")  - dscudiero - General syncing of dev to prod
+## 10-03-2017 @ 14.46.58 - ("1.1.-1")  - dscudiero - General syncing of dev to prod
