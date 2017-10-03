@@ -58,22 +58,18 @@ function GetExcel2 {
 		local grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
 		[[ $grepStr == '' ]] && grepStr=$(ProtectedCall "grep '*Error*' $tmpFile")
 		if [[ $grepStr != '' || $(tail -n 1 $tmpFile) == '-1' ]]; then
-			Error "Could not retrieve data from workbook, please see below"
 			tail -n 10 $tmpFile > $tmpFile.2
 			while read -r line; do echo -e "\t$line"; done < $tmpFile.2;
 			GetExcelCleanup
-			Msg3
-			Goodbye 1
+			Terminate "$FUNCNAME: Could not retrieve data for the '$workSheet' worksheet\n\tin the '$workBook' workbook."
 		fi
 
 	## Set output to an array
 		unset resultSet
 		IFS=$'\n' read -rd '' -a resultSet < "$tmpFile"
 		if [[ ${#resultSet[@]} -le 0 ]]; then
-			Terminate "Could not retrieve data for the '$workSheet' worksheet\n\tin the '$workBook' workbook."
 			GetExcelCleanup
-			Msg3
-			Goodbye 1
+			Terminate "$FUNCNAME: Could not retrieve data for the '$workSheet' worksheet\n\tin the '$workBook' workbook."
 		fi
 
 	GetExcelCleanup
@@ -97,3 +93,4 @@ export -f GetExcel2
 ## 10-02-2017 @ 17.07.34 - ("2.1.0")   - dscudiero - Return a bad condition code if data retrieval fails
 ## 10-03-2017 @ 07.06.23 - ("2.1.0")   - dscudiero - REformat comments
 ## 10-03-2017 @ 13.50.36 - ("2.1.0")   - dscudiero - Added code to check to see if results were returned, if not terminate
+## 10-03-2017 @ 13.52.12 - ("2.1.0")   - dscudiero - General syncing of dev to prod
