@@ -65,8 +65,10 @@ function GetExcel2 {
 
 	## Set output to an array
 		unset resultSet
-		resultStr="$(sed 's/\r$//' <<< $resultStr)" ## Remove the new line chars
-		[[ -n $resultStr ]] && read -rd $'\n' -a resultSet <<< "$resultStr"
+		[[ $resultStr != '' ]] && IFS=$'\n' read -rd '' -a resultSet <<<"$resultStr"
+
+		#resultStr="$(sed 's/\r$//' <<< $resultStr)" ## Remove the new line chars
+		#[[ -n $resultStr ]] && read -rd $'\n' -a resultSet <<< "$resultStr"
 
 	GetExcelCleanup
 	return 0
@@ -91,3 +93,4 @@ export -f GetExcel2
 ## 10-03-2017 @ 13.50.36 - ("2.1.0")   - dscudiero - Added code to check to see if results were returned, if not terminate
 ## 10-03-2017 @ 13.52.12 - ("2.1.0")   - dscudiero - General syncing of dev to prod
 ## 10-03-2017 @ 16.06.00 - ("2.1.0")   - dscudiero - Eliminated the use of a temporary file for data retrieval
+## 10-04-2017 @ 13.09.39 - ("2.1.0")   - dscudiero - Regress the parsing for resultSet
