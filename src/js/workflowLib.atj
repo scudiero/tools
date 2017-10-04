@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.8" // -- dscudiero -- Mon 10/02/2017 @  7:44:37.68
+wfLibVersion="1.8.9" // -- dscudiero -- Wed 10/04/2017 @ 10:37:23.90
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -52,6 +52,7 @@ wfLibVersion="1.8.8" // -- dscudiero -- Mon 10/02/2017 @  7:44:37.68
 //					Updated GetAttrVal to use the above
 // 09/22/17 - dgs - Added NoWorkflow function
 // 10/02/17 - dgs - Fixed problem in GettAttrVal building the call string for the value mapper callback
+// 10/03/17 - dgs - Misc non-functional cosmetic changes
 //======================================================================================================================
 
 // Make sure wffucs is defined
@@ -788,7 +789,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 //							Only applies to courseadmin
 // Returns:
 // 		An array of objects of the form:
-//			{data: data, source: soruce}
+//			{data: data, source: source}
 //	Where
 //		data 	The result data from the lookup of the source data, e.g. the department code
 //		source 	location<:variable>, location is 'eco' or 'formVar', if 'formVar' then the variable name is appended
@@ -1287,6 +1288,8 @@ wffuncs.wfAttr = function(inval, wfrule, args) {
 // 	options is one or more in {'includeTCA', 'noMapValue'}
 // 		if options includes 'includeTCA' then you must also pass the tcadata object
 //		if options includes 'noMapValue' then the attribute will not be mapped through any existing mapping functions
+// e.g.
+// 		var cols=GetAttrVal({request:"cols", options:"includetca", tcadata: tcadata});
 //=======================================================================================================================
 // 05/08/17 - dgs - New
 // 05/09/17 - dgs - Switched to use getTCFValue for tca data
@@ -1335,7 +1338,6 @@ GetAttrVal = function(data) {
 		if (reqType.slice(-1) === "s" && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
 			departments=wffuncs.getDepartments(subjects);
-
 			colleges=wffuncs.getColleges(departments);
 			wfDebug(5,"\t\tFrom wffuncs.GetXXXX function calls:")
 			wfDump(5,["\t\tcolleges;"+colleges.toSource(),"\t\tdepartments;"+departments.toSource(),"\t\tsubjects;"+subjects.toSource()+"\n",]);
@@ -1365,17 +1367,14 @@ GetAttrVal = function(data) {
 				colleges=colleges.concat(getTCFValue("college", { data: tcaData, delimiter: "\n", retarray: true }));
 		}
 
-	wfDebug(5,"\n\t\tFinal:")
-	wfDump(5,["\t\tcolleges;"+colleges.toSource(),"\t\tdepartments;"+departments.toSource(),"\t\tsubjects;"+subjects.toSource(),]);
-
 	// return data based on how we were called
 		var retArray=[];
 		if (reqType.indexOf("col") >= 0 || optionStr.indexOf("col") >= 0) {
-			retArray=colleges;
+			retArray=colleges.slice(0)
 		} else if (reqType.indexOf("dep") >= 0 || optionStr.indexOf("dep") >= 0) {
-			retArray=departments;
+			retArray=departments.slice(0)
 		} else if (reqType.indexOf("subj") >= 0 || optionStr.indexOf("subj") >= 0) {
-			retArray=subjects;
+			retArray=subjects.slice(0)
 		}
 		retArray=RemoveDupes(retArray)
 
@@ -1731,6 +1730,7 @@ wffuncs.CheckChanged = function(inval, wfrule, args) {
 		var tmpArray1=options.split(" ");
 		tmpArray1.forEach(function(text) {
 			tmpArray2=text.split(':');
+			if (tmpArray2.length <= 0) tmpArray2=text.split('=');
 			switch(tmpArray2[0].toLowerCase()) {
 			    case "mode":
 			    	mode=tmpArray2[1];
@@ -1745,7 +1745,6 @@ wffuncs.CheckChanged = function(inval, wfrule, args) {
 			        unknownOpts=unknownOpts + text;
 			}
 		});
-		wfDump(3,["reqType;"+reqType,"mode;"+mode,"checkFields in;"+checkFieldsStr,"notMode;"+notMode,"unknownOpts;"+unknownOpts]);
 
 	// If the checkfields were not passed in the options record then check the tcfdata for a variable called "wfCheckChangedFields" 
 	// or <calledAs>_wfCheckChangedFields
@@ -1765,7 +1764,7 @@ wffuncs.CheckChanged = function(inval, wfrule, args) {
 			wfDebug(3,"\t*Error* -- Call to wffuncs.CheckChanged and could not resolve the list of fields to check");
 			return false;
 		}
-		wfDump(3,["checkFieldsStr;"+checkFieldsStr]);
+		wfDump(3,["reqType;"+reqType,"mode;"+mode,"checkFields in;"+checkFieldsStr,"notMode;"+notMode,"unknownOpts;"+unknownOpts]);
 
 	// Call the real function to evaluate the data
 		var allowStep=CheckChanged({ mode: mode, checkFields: checkFieldsStr })
@@ -2187,8 +2186,7 @@ function RemoveDupes(arr,exclude) {
     exclude=' ' + exclude + ' ';
     arr=arr.sort();
     arr.forEach(function(value) {
-		//if (typeof(Dump) == "function") { var num=noDupes.indexOf(value); Dump('\t\tIn Remove Dupes, index of ' + value + ' in input array',num); }
-        if ( noDupes.indexOf(value) == -1 && exclude.indexOf(' '+value+' ') < 0 ) {
+        if ( noDupes.indexOf(value) < 0 && exclude.indexOf(' '+value+' ') < 0 ) {
             noDupes.push(value);
         }
     });
@@ -2352,3 +2350,4 @@ var wfLibLoaded=true;
 // 09-25-2017 @ 15.42.23 - ("1.8.5")   - dscudiero - Added a message if in not mode
 // 09-29-2017 @ 12.57.06 - ("1.8.6")   - dscudiero - Fix problem setting wfAllcodes
 // 10-02-2017 @ 13.47.09 - ("1.8.8")   - dscudiero - General syncing of dev to prod
+// 10-04-2017 @ 13.28.38 - ("1.8.9")   - dscudiero - General syncing of dev to prod
