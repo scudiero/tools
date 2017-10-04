@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.28 # -- dscudiero -- Wed 10/04/2017 @ 11:28:52.57
+version=2.10.29 # -- dscudiero -- Wed 10/04/2017 @ 16:12:09.66
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile"
@@ -479,8 +479,8 @@ Msg3
 			## Make a copy of the before and after in the temp area
 			$DOIT mkdir -p "$backupFolder/beforeCopy$(dirname $cpyFile)"
 			$DOIT mkdir -p "$backupFolder/afterCopy$(dirname $cpyFile)"
-			[[ -f "$tgtFile" ]] && cp -fp "$tgtFile" "$backupFolder/beforeCopy${cpyFile}"
-			$DOIT cp -fp "$srcFile" "$backupFolder/afterCopy${cpyFile}"
+			[[ -f "$tgtFile" ]] && cp -fp "$tgtFile" "$backupFolder/${tgtEnv}BeforeCopy${cpyFile}"
+			$DOIT cp -fp "$srcFile" "$backupFolder/${tgtEnv}AfterCopy${cpyFile}"
 			## Copy
 			Msg3 "^$(basename $(dirname $srcFile))/$(basename $srcFile)"
 			[[ -f $tgtFile ]] && BackupCourseleafFile $tgtFile && $DOIT rm -f $tgtFile
@@ -619,3 +619,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 09-21-2017 @ 09.34.06 - (2.10.26)   - dscudiero - UPdated includes
 ## 09-27-2017 @ 14.21.34 - (2.10.27)   - dscudiero - Switch to Msg3
 ## 10-04-2017 @ 11.29.57 - (2.10.28)   - dscudiero - Do not update target file stuctures if different from source, just print a message
+## 10-04-2017 @ 16.12.32 - (2.10.29)   - dscudiero - Tweak the names of the workflow backup files
