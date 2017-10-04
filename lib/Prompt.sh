@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.22" # -- dscudiero -- Thu 09/28/2017 @  8:21:55.56
+# version="2.1.23" # -- dscudiero -- Wed 10/04/2017 @ 16:25:56.64
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -10,7 +10,7 @@
 # All rights reserved
 #===================================================================================================
 function Prompt {
-	includes='Msg2 Dump VerifyPromptVal SelectClient'
+	includes='Msg3 Dump VerifyPromptVal SelectClient'
 	Import "$includes"
 
 	declare promptVar=$1; shift || true
@@ -123,7 +123,7 @@ function Prompt {
 		if [[ "$promptVar" == 'client' && $response == '?' ]]; then
 			Info 0 1 "Gathering data..."
 			SelectClient 'response'
-			[[ $secondaryMessagesOnly != true && $defaultValueUseNotes == true ]] && Msg2 && Note 0 1 "Using selected value of '$selectResp' for 'client'"
+			[[ $secondaryMessagesOnly != true && $defaultValueUseNotes == true ]] && Msg3 && Note 0 1 "Using selected value of '$selectResp' for 'client'"
 			eval $promptVar=\"$response\"
 			loop=false
 
@@ -164,7 +164,7 @@ function Prompt {
 			fi
 		fi #[[  "$promptVar" == 'client' && $response == '?' ]]
 	done
-	[[ $hadValue != true && -n $logFile ]] && Msg2 "\n^$FUNCNAME: Using specified value of '$response' for '$promptVar'" >> $logFile
+	[[ $hadValue != true && -n $logFile ]] && Msg3 "\n^$FUNCNAME: Using specified value of '$response' for '$promptVar'" >> $logFile
 	return 0
 } #Prompt
 export -f Prompt
@@ -186,3 +186,4 @@ export -f Prompt
 ## 09-25-2017 @ 08.42.47 - ("2.1.19")  - dscudiero - General syncing of dev to prod
 ## 09-25-2017 @ 09.01.55 - ("2.1.21")  - dscudiero - Switch to Msg3
 ## 09-28-2017 @ 08.22.09 - ("2.1.22")  - dscudiero - Remove the debug stuss
+## 10-04-2017 @ 16.26.10 - ("2.1.23")  - dscudiero - Switch to use Msg3
