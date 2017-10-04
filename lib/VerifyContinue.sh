@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.22" # -- dscudiero -- Tue 09/26/2017 @ 15:36:34.94
+# version="2.0.23" # -- dscudiero -- Wed 10/04/2017 @ 16:56:22.85
 #===================================================================================================
 ## Make sure the user really wants to do this
 ## If the first argument is 'loop' then loop back to self if user responds with 'n'
@@ -38,6 +38,7 @@ function VerifyContinue {
 	if [[ $verify == true && $quiet != true && $go != true ]]; then
 		unset ans
 		inVerifyContinue=true
+		[[ $informationOnlyMode == true ]] && verifyContinueDefault='Yes'
 		Prompt ans "\n'Yes' to continue, 'No' to exit" 'Yes No' "$verifyContinueDefault"; ans=$(Lower ${ans:0:1})
 		inVerifyContinue=false
 		if [[ $ans == "i" ]]; then
@@ -63,3 +64,4 @@ export -f VerifyContinue
 ## 09-25-2017 @ 12.26.42 - ("2.0.19")  - dscudiero - Switch to use Msg3
 ## 09-25-2017 @ 16.13.26 - ("2.0.21")  - dscudiero - use Msg3
 ## 09-26-2017 @ 15.36.58 - ("2.0.22")  - dscudiero - Fix problem displaying the information lines
+## 10-04-2017 @ 16.56.48 - ("2.0.23")  - dscudiero - If informationOnly mode then set default answer to yes
