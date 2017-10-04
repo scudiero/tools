@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.27 # -- dscudiero -- Wed 09/27/2017 @ 14:18:25.27
+version=2.10.28 # -- dscudiero -- Wed 10/04/2017 @ 11:28:52.57
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile"
@@ -187,13 +187,13 @@ function CheckFilesForCopy {
 	#dump -p cpyFile srcEnv srcDir srcDirStruct srcFile tgtEnv tgtDir tgtDirStruct  tgtFile
 
 	## Check the file structure of the target file, update if necessary
-		[[ $(basename $cpyFile) == cimconfig.cfg && $srcDirStruct == new && $tgtDirStruct == old ]] && $DOIT EditCimconfigCfg "$tgtFile"
-		[[ $(basename $cpyFile) == custom.atj && $srcDirStruct == new && $tgtDirStruct == old ]] && $DOIT EditCustomAtj "$tgtFile"
-		if [[ $(basename $cpyFile) == workflow.cfg && $tgtEnv == 'next' ]]; then
-			fromStr='wfStatus:has not been signed off yet'
-			toStr="wfStatus:Released to next via $myName by $userName on $(date)"
-			$DOIT sed -i s"_^${fromStr}_${toStr}_" $srcFile
-		fi
+		# [[ $(basename $cpyFile) == cimconfig.cfg && $srcDirStruct == new && $tgtDirStruct == old ]] && $DOIT EditCimconfigCfg "$tgtFile"
+		# [[ $(basename $cpyFile) == custom.atj && $srcDirStruct == new && $tgtDirStruct == old ]] && $DOIT EditCustomAtj "$tgtFile"
+		# if [[ $(basename $cpyFile) == workflow.cfg && $tgtEnv == 'next' ]]; then
+		# 	fromStr='wfStatus:has not been signed off yet'
+		# 	toStr="wfStatus:Released to next via $myName by $userName on $(date)"
+		# 	$DOIT sed -i s"_^${fromStr}_${toStr}_" $srcFile
+		# fi
 
 	## If the target file does not exist then do not prompt, otherwise do diff and prompt
 		[[ $(Contains "$ignoreList" "$cpyFile") == true ]] && return 0
@@ -400,7 +400,8 @@ Hello
 		## Determin what structure the src and tgt have
 		[[ -f $srcDir/web/$cim/$checkFileNew ]] && srcStructure='new' || srcStructure='old'
 		[[ -f $tgtDir/web/$cim/$checkFileNew ]] && tgtStructure='new' || tgtStructure='old'
-		[[ $srcStructure == old && $tgtStructure == new ]] && Terminate "The source file structure is OLD and the target structure is NEW, cannot continue"
+		[[ $srcStructure == 'old' && $tgtStructure == 'new' ]] && Terminate "The source file structure is OLD and the target structure is NEW, cannot continue"
+		[[ $srcStructure == 'new' && $tgtStructure == 'old' ]] && Warning "The source file structure is NEW and the target structure is OLD, manual intervantion will probably be required"
 		dump -1 -t srcStructure tgtStructure
 
 		## Loop through the instance files
@@ -617,3 +618,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 09-20-2017 @ 15.31.04 - (2.10.25)   - dscudiero - Updated how it handles the situation where cl or cim versions are different and copying to next
 ## 09-21-2017 @ 09.34.06 - (2.10.26)   - dscudiero - UPdated includes
 ## 09-27-2017 @ 14.21.34 - (2.10.27)   - dscudiero - Switch to Msg3
+## 10-04-2017 @ 11.29.57 - (2.10.28)   - dscudiero - Do not update target file stuctures if different from source, just print a message
