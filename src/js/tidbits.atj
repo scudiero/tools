@@ -43,7 +43,6 @@ checkFieldsStr.split(',').every(function (field) {
 		return false;
 	}
 });
--or-
 
 
 ============================================================================================================================================================================
@@ -336,3 +335,4 @@ attributes.forEach(function(attr) {
 // 08-08-2017 @ 16.31.29 - dscudiero - misc updates
 // 08-22-2017 @ 14.16.21 - dscudiero - Add examples of getTCFValue calls
 // 08-24-2017 @ 14.19.28 - dscudiero - Added get tca data example
+// 10-04-2017 @ 07.47.38 - dscudiero - General syncing of dev to prod
