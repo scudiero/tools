@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.6.64 # -- dscudiero -- Thu 09/14/2017 @ 16:50:51.25
+version=2.6.65 # -- dscudiero -- Wed 10/04/2017 @ 13:48:10.44
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue' #includes="$includes xxx"
@@ -27,10 +27,12 @@ unset client env srcEnv tgtEnv srcDir tgtDir siteDir pvtDir devDir testDir currD
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-helpSet='script,client,env'
-GetDefaultsData $myName
-ParseArgsStd
 Hello
+helpSet='script,client,env'
+echo "Getting defaults..."
+GetDefaultsData $myName
+echo "Parsing arguments..."
+ParseArgsStd
 
 Init 'getClient getEnv getDirs checkEnvs noPreview noPublic'
 
@@ -66,3 +68,4 @@ Goodbye 0
 ## 06-09-2017 @ 08.19.24 - (2.6.60)    - dscudiero - Fix problem clearing the env variable
 ## 06-12-2017 @ 07.18.27 - (2.6.61)    - dscudiero - General syncing of dev to prod
 ## 09-11-2017 @ 15.52.47 - (2.6.62)    - dscudiero - x
+## 10-04-2017 @ 13.49.10 - (2.6.65)    - dscudiero - Tweak startup messaging
