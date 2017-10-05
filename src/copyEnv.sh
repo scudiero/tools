@@ -121,7 +121,6 @@ haveClss=false
 # Standard arg parsing and initialization
 #==================================================================================================
 Hello
-dump myName
 GetDefaultsData "$myName" -fromFiles
 ParseArgsStd 
 
@@ -673,3 +672,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 10-02-2017 @ 14.22.11 - (4.12.10)   - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 15.32.10 - (4.12.10)   - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 16.25.05 - (4.12.10)   - dscudiero - General syncing of dev to prod
+## 10-05-2017 @ 07.15.23 - (4.12.10)   - dscudiero - Remove debug statements
