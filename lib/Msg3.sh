@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.8" # -- dscudiero -- Fri 09/29/2017 @  6:42:36.71
+# version="1.0.14" # -- dscudiero -- Thu 10/05/2017 @  9:05:24.98
 #===================================================================================================
 # Usage: Msg3 <msgType> <msgLevel> <indentLevel> msgText
 # 	msgType: [N,I,W,E,T]
@@ -55,9 +55,12 @@ function Msg3 {
 		fi
 
 	## print message
-		## If the string has '^'s then expand them
-		[[ "${msgText#*\^}" != "$msgText" ]] && msgText="$(sed s"/\^/$tabStr/g" <<< "$msgText")"
+		#[[ "${msgText#*\^}" != "$msgText" ]] && msgText="$(sed s"/\^/$tabStr/g" <<< "$msgText")"
+		[[ -z $tabStr ]] && tabStr='     '
+		[[ "${msgText#*\^}" != "$msgText" ]] && msgText="${msgText//^/$tabStr}" ## Expand tab chars
+
 		echo -e "$msgText"
+		[[ $msgType == 'T' ]] && echo "HERE 99" && Goodbye 3
 
 	return 0
 }
@@ -86,3 +89,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 09-26-2017 @ 07.55.52 - ("1.0.6")   - dscudiero - Move the Quick directive earlier
 ## 09-26-2017 @ 15.35.34 - ("1.0.7")   - dscudiero - Fix bug with the quick options
 ## 09-29-2017 @ 06.46.13 - ("1.0.8")   - dscudiero - General syncing of dev to prod
+## 10-05-2017 @ 09.06.01 - ("1.0.14")  - dscudiero - switch how we expand tabs to use bash native command
