@@ -53,7 +53,7 @@ function GetExcel2 {
 		verboseLevel=0
 			cmdStr="$PYDIR/bin/python -u $executeFile "$workBook" "$workSheet" |"
 			[[ $(basename $executeFile) == 'getXlsx2' ]] && cmdStr="$PYDIR/bin/python -u $executeFile -wb "$workBook" -ws "$workSheet""
-		 	#$cmdStr > "$tmpFile"
+		 	$cmdStr > "$tmpFile"
 		 	local resultStr="$($cmdStr)"
 	 	verboseLevel=$verboseLevelSave
 		export PATH="$pathSave"
@@ -98,3 +98,4 @@ export -f GetExcel2
 ## 10-04-2017 @ 13.09.39 - ("2.1.0")   - dscudiero - Regress the parsing for resultSet
 ## 10-05-2017 @ 12.08.27 - ("2.1.0")   - dscudiero - use getXlsx2 if it is there
 ## 10-05-2017 @ 12.12.30 - ("2.1.0")   - dscudiero - Cosmetic change or general syncing of dev to prod
+## 10-05-2017 @ 12.25.38 - ("2.1.0")   - dscudiero - Cosmetic/minor change
