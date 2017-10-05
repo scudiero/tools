@@ -41,7 +41,8 @@ function GetExcel2 {
 	fi
 
 	## Resolve the executable file"
-	executeFile=$(FindExecutable '-python' 'getXlsx')
+	executeFile=$(FindExecutable '-python' 'getXlsx2')
+	[[ -z $executeFile ]] && executeFile=$(FindExecutable '-python' 'getXlsx')
 	[[ -z $executeFile ]] && Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"
 
 	## Call the 'real' program to parse the spreadsheet
@@ -94,3 +95,4 @@ export -f GetExcel2
 ## 10-03-2017 @ 13.52.12 - ("2.1.0")   - dscudiero - General syncing of dev to prod
 ## 10-03-2017 @ 16.06.00 - ("2.1.0")   - dscudiero - Eliminated the use of a temporary file for data retrieval
 ## 10-04-2017 @ 13.09.39 - ("2.1.0")   - dscudiero - Regress the parsing for resultSet
+## 10-05-2017 @ 12.08.27 - ("2.1.0")   - dscudiero - use getXlsx2 if it is there
