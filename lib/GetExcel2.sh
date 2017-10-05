@@ -42,7 +42,6 @@ function GetExcel2 {
 
 	## Resolve the executable file"
 	executeFile=$(FindExecutable '-python' 'getXlsx2')
-	[[ -z $executeFile ]] && executeFile=$(FindExecutable '-python' 'getXlsx')
 	[[ -z $executeFile ]] && Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"
 
 	## Call the 'real' program to parse the spreadsheet
@@ -51,8 +50,7 @@ function GetExcel2 {
 		pathSave="$PATH"
 		export PATH="$PYDIR:$PATH"
 		verboseLevel=0
-			cmdStr="$PYDIR/bin/python -u $executeFile "$workBook" "$workSheet" |"
-			[[ $(basename $executeFile) == 'getXlsx2' ]] && cmdStr="$PYDIR/bin/python -u $executeFile -wb "$workBook" -ws "$workSheet""
+			cmdStr="$PYDIR/bin/python -u $executeFile -wb "$workBook" -ws "$workSheet""
 		 	$cmdStr > "$tmpFile"
 		 	local resultStr="$($cmdStr)"
 	 	verboseLevel=$verboseLevelSave
@@ -99,3 +97,4 @@ export -f GetExcel2
 ## 10-05-2017 @ 12.08.27 - ("2.1.0")   - dscudiero - use getXlsx2 if it is there
 ## 10-05-2017 @ 12.12.30 - ("2.1.0")   - dscudiero - Cosmetic change or general syncing of dev to prod
 ## 10-05-2017 @ 12.25.38 - ("2.1.0")   - dscudiero - Cosmetic/minor change
+## 10-05-2017 @ 12.26.43 - ("2.1.0")   - dscudiero - Cosmetic/minor change
