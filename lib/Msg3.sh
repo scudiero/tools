@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.14" # -- dscudiero -- Thu 10/05/2017 @  9:05:24.98
+# version="1.0.18" # -- dscudiero -- Thu 10/05/2017 @  9:42:11.21
 #===================================================================================================
 # Usage: Msg3 <msgType> <msgLevel> <indentLevel> msgText
 # 	msgType: [N,I,W,E,T]
@@ -60,7 +60,7 @@ function Msg3 {
 		[[ "${msgText#*\^}" != "$msgText" ]] && msgText="${msgText//^/$tabStr}" ## Expand tab chars
 
 		echo -e "$msgText"
-		[[ $msgType == 'T' ]] && echo "HERE 99" && Goodbye 3
+		[[ $msgType == 'T' ]] && Goodbye 3
 
 	return 0
 }
@@ -90,3 +90,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 09-26-2017 @ 15.35.34 - ("1.0.7")   - dscudiero - Fix bug with the quick options
 ## 09-29-2017 @ 06.46.13 - ("1.0.8")   - dscudiero - General syncing of dev to prod
 ## 10-05-2017 @ 09.06.01 - ("1.0.14")  - dscudiero - switch how we expand tabs to use bash native command
+## 10-05-2017 @ 09.42.12 - ("1.0.18")  - dscudiero - General syncing of dev to prod
