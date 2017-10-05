@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.18 # -- dscudiero -- Wed 10/04/2017 @ 12:46:50.88
+# version=2.1.19 # -- dscudiero -- Thu 10/05/2017 @  9:40:22.13
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -19,7 +19,6 @@ Import Prompt VerifyPromptVal SetSiteDirs GetCims VerifyContinue
 function Init {
 	PushSettings "$FUNCNAME"
 	SetFileExpansion 'off'
-	Msg2 $V3 "*** Starting: $FUNCNAME ***"
 
 	local trueVars='noPreview noPublic'
 	local falseVars='getClient anyClient getProducts getCims getEnv getSrcEnv getTgtEnv getDirs checkEnvs'
@@ -61,7 +60,7 @@ function Init {
 	if [[ $getClient == true ]]; then
 		local checkClient; unset checkClient
 		if [[ $noCheck == true ]]; then
-			[[ $testMode != true ]] && Msg2 $W "Requiring a client value and 'noCheck' flag was set"
+			[[ $testMode != true ]] && Warning "Requiring a client value and 'noCheck' flag was set"
 			checkClient='noCheck';
 		fi
 		Prompt client 'What client do you wish to work with?' "$checkClient";
@@ -83,7 +82,7 @@ function Init {
 	## Special processing for the 'internal' site
 	if [[ $getEnv == true && $client == 'internal' ]]; then
 		srcDir=/mnt/internal/site/stage
-		[[ ! -d "$srcDir" ]] && Msg2 $T "Client = 'internal' but could not locate source directory:\n\t$srcDir"
+		[[ ! -d "$srcDir" ]] && Terminate "Client = 'internal' but could not locate source directory:\n\t$srcDir"
 		nextDir="/mnt/internal/site/stage"
 		pvtDir=/mnt/dev11/web/internal-$userName
 		[[ -z $env ]] && env='next'
@@ -101,7 +100,7 @@ function Init {
 			unset tmpStr
 			[[ $getSrcEnv == true ]] && tmpStr="$(ColorK 'Source')"
 			[[ $getTgtEnv == true ]] && tmpStr="$(ColorK 'Target')"
-			Msg2 $W "Requiring a environment value and 'noCheck' flag was set"
+			Warning "Requiring a environment value and 'noCheck' flag was set"
 			clientEnvs="$courseleafDevEnvs,$courseleafProdEnvs"
 			[[ $noPreview == true ]] && clientEnvs=$(sed s"/,preview//"g <<< $clientEnvs)
 			[[ $noPublic == true ]] && clientEnvs=$(sed s"/,public//"g <<< $clientEnvs)
@@ -267,7 +266,7 @@ function Init {
 			eval $prodVar=$(Lower \$$prodVar)
 			[[ $prodVar == 'all' ]] && eval $prodVar=$validProducts
 		else
-			Msg2 $NT1 "Only one value valid for '$prodVar', using '$validProducts'"
+			Note 0 1 "Only one value valid for '$prodVar', using '$validProducts'"
 			eval $prodVar=$(Lower $validProducts)
 		fi
 	fi # getProducts
@@ -295,7 +294,7 @@ function Init {
 		for i in $(echo "$courseleafDevEnvs $courseleafProdEnvs" | tr ',' ' ') skel; do
 			if [[ $srcEnv == $i ]]; then
 				chkDirName="${i}Dir"; chkDir="${!chkDirName}"
-				[[ ! -d $chkDir && $checkEnvs == true && $noCheck != true ]] && Msg2 $T "Env is '$(TitleCase $i)' and directory '$chkDir' not found\nProcess stopping."
+				[[ ! -d $chkDir && $checkEnvs == true && $noCheck != true ]] && Terminate "Env is '$(TitleCase $i)' and directory '$chkDir' not found\nProcess stopping."
 				srcDir=$chkDir
 				break
 			fi
@@ -312,7 +311,7 @@ function Init {
 		for i in $(echo "$courseleafDevEnvs $courseleafProdEnvs" | tr ',' ' '); do
 			if [[ $tgtEnv == $i ]]; then
 				chkDirName="${i}Dir"; chkDir="${!chkDirName}"
-				[[ ! -d $chkDir && $checkEnvs == true && $noCheck != true ]] && Msg2 $T "Env is '$(TitleCase $i)' and directory '$chkDir' not found\nProcess stopping."
+				[[ ! -d $chkDir && $checkEnvs == true && $noCheck != true ]] && Terminate "Env is '$(TitleCase $i)' and directory '$chkDir' not found\nProcess stopping."
 				tgtDir=$chkDir
 				break
 			fi
@@ -338,7 +337,6 @@ function Init {
 		fi
 
 	PopSettings "$FUNCNAME"
-	Msg2 $V3 "*** Ending: $FUNCNAME ***"
 
 	return 0
 } #Init
@@ -378,3 +376,4 @@ export -f Init
 ## 10-03-2017 @ 14.59.00 - (2.1.11)    - dscudiero - Commented out the auth check for now
 ## 10-03-2017 @ 15.46.33 - (2.1.17)    - dscudiero - Uncomment auth check for updating next sites
 ## 10-04-2017 @ 13.09.46 - (2.1.18)    - dscudiero - General syncing of dev to prod
+## 10-05-2017 @ 09.41.42 - (2.1.19)    - dscudiero - Switch to use Msg3
