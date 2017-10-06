@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.37 # -- dscudiero -- Fri 10/06/2017 @  9:43:37.49
+version=1.2.38 # -- dscudiero -- Fri 10/06/2017 @  9:46:57.98
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -54,7 +54,6 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 	# Parse an esig record
 	#==============================================================================================
 	function ParseEsig  {
-		Msg3 $V2 "*** Starting $FUNCNAME ***"
 		local ruleName="$1"; shift
 		local line="$1"; shift
 		local description="$*"
@@ -73,7 +72,6 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 			esigsKeys+=("$stepName")
 		fi
 
-		Msg3 $V2 "*** Ending $FUNCNAME ***"
 		return 0
 	} ## ParseEsig
 
@@ -398,3 +396,4 @@ Goodbye 0 #'alert'
 ## 09-06-2017 @ 08.34.43 - (1.2.24)    - dscudiero - Ignore standard functions and workflow steps
 ## 10-03-2017 @ 11.02.07 - (1.2.36)    - dscudiero - General syncing of dev to prod
 ## 10-06-2017 @ 09.44.03 - (1.2.37)    - dscudiero - Remove verbose calls in functions
+## 10-06-2017 @ 09.47.26 - (1.2.38)    - dscudiero - remove other verbose statements
