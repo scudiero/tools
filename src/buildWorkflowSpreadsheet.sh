@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.36 # -- dscudiero -- Tue 10/03/2017 @ 10:10:04.12
+version=1.2.37 # -- dscudiero -- Fri 10/06/2017 @  9:43:37.49
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -81,7 +81,6 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 	# Parse an wfrules record
 	#==============================================================================================
 	function ParseWfrule  {
-		Msg3 $V2 "*** Starting $FUNCNAME ***"
 		local ruleName="$1"; shift
 		local line="$1"; shift
 		local description="$*"
@@ -117,8 +116,6 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 				wfrulesKeys+=($ruleName)
 			fi
 		fi
-
-		Msg3 $V2 "*** Ending $FUNCNAME ***"
 		return 0
 	} ## ParseWfrule
 
@@ -400,3 +397,4 @@ Goodbye 0 #'alert'
 ## 08-03-2017 @ 09.55.58 - (1.2.18)    - dscudiero - Fix problems with wforders
 ## 09-06-2017 @ 08.34.43 - (1.2.24)    - dscudiero - Ignore standard functions and workflow steps
 ## 10-03-2017 @ 11.02.07 - (1.2.36)    - dscudiero - General syncing of dev to prod
+## 10-06-2017 @ 09.44.03 - (1.2.37)    - dscudiero - Remove verbose calls in functions
