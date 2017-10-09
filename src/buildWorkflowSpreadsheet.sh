@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.38 # -- dscudiero -- Fri 10/06/2017 @  9:46:57.98
+version=1.2.39 # -- dscudiero -- Fri 10/06/2017 @ 10:06:22.71
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -179,7 +179,7 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 	Msg3 "Processing CIM instance: '$cim'"
 	grepFile="$srcDir/web/$cim/workflow.cfg"
 	[[ ! -f $grepFile ]] && Msg3 $E1 "Could not locate file $grepFile" && continue
-	Msg3 '-,-,-,-,false' "\n$(PadChar)" >> $outFile
+	Msg3 "\n$(PadChar)" >> $outFile
 	Msg3 "<<< $(Upper "$cim") >>>" >> $outFile
 
 	## Read the workflow.cfg file for the cim
@@ -397,3 +397,4 @@ Goodbye 0 #'alert'
 ## 10-03-2017 @ 11.02.07 - (1.2.36)    - dscudiero - General syncing of dev to prod
 ## 10-06-2017 @ 09.44.03 - (1.2.37)    - dscudiero - Remove verbose calls in functions
 ## 10-06-2017 @ 09.47.26 - (1.2.38)    - dscudiero - remove other verbose statements
+## 10-09-2017 @ 16.54.59 - (1.2.39)    - dscudiero - Cosmetic/minor change
