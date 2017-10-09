@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.29 # -- dscudiero -- Wed 10/04/2017 @ 16:12:09.66
+version=2.10.34 # -- dscudiero -- Mon 10/09/2017 @ 15:05:31.15
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile"
@@ -31,7 +31,7 @@ scriptDescription="Copy workflow files"
 		#argList+=(-norefresh,3,switch,refreshSystem,refreshSystem=false,script,'Do not refresh system files from the skeleton')
 	}
 	function copyWorkflow-Goodbye  {
-		rm -rf $tmpRoot > /dev/null 2>&1
+		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
 		return 0
 	}
 	function copyWorkflow-testMode  {
@@ -468,8 +468,8 @@ Msg3
 		## Save old workflow files
 		backupFolder=$tmpRoot/$myName-$client-$tgtEnv
 		[[ -d $backupFolder ]] && $DOIT rm -rf $backupFolder
-		$DOIT mkdir -p $backupFolder/beforeCopy
-		$DOIT mkdir -p $backupFolder/afterCopy
+		$DOIT mkdir -p ${backupFolder}/${tgtEnv}BeforeCopy
+		$DOIT mkdir -p ${backupFolder}/${tgtEnv}AfterCopy
 		## Copy files
 		Msg3 "\nUpdating files:"
 		for fileSpec in "${copyFileList[@]}"; do
@@ -477,8 +477,8 @@ Msg3
 			tgtFile="$(cut -d'|' -f2 <<< $fileSpec)"
 			cpyFile="$(cut -d'|' -f3 <<< $fileSpec)"
 			## Make a copy of the before and after in the temp area
-			$DOIT mkdir -p "$backupFolder/beforeCopy$(dirname $cpyFile)"
-			$DOIT mkdir -p "$backupFolder/afterCopy$(dirname $cpyFile)"
+			$DOIT mkdir -p "$backupFolder/${tgtEnv}BeforeCopy$(dirname $cpyFile)"
+			$DOIT mkdir -p "$backupFolder/${tgtEnv}AfterCopy$(dirname $cpyFile)"
 			[[ -f "$tgtFile" ]] && cp -fp "$tgtFile" "$backupFolder/${tgtEnv}BeforeCopy${cpyFile}"
 			$DOIT cp -fp "$srcFile" "$backupFolder/${tgtEnv}AfterCopy${cpyFile}"
 			## Copy
@@ -620,3 +620,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 09-27-2017 @ 14.21.34 - (2.10.27)   - dscudiero - Switch to Msg3
 ## 10-04-2017 @ 11.29.57 - (2.10.28)   - dscudiero - Do not update target file stuctures if different from source, just print a message
 ## 10-04-2017 @ 16.12.32 - (2.10.29)   - dscudiero - Tweak the names of the workflow backup files
+## 10-09-2017 @ 16.53.42 - (2.10.34)   - dscudiero - Fix problem setting backup directory names
