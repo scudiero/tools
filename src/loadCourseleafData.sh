@@ -1,14 +1,13 @@
 #!/bin/bash
-# XO NOT AUTOVERSION
+# DO NOT AUTOVERSION
 #==================================================================================================
-version=3.8.119 # -- dscudiero -- Fri 09/29/2017 @ 10:09:30.33
+version=3.9.9 # -- dscudiero -- Wed 10/04/2017 @ 16:24:16.40
 #==================================================================================================
 TrapSigs 'on'
-includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye'
-includes="$includes Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel WriteChangelogEntry"
-includes="$includes GetOutputFile BackupCourseleafFile ParseCourseleafFile GetCourseleafPgm RunCourseLeafCgi"
-includes="$includes ProtectedCall PrintBanner"
-Import "$includes"
+myIncludes='DbLog Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel2 WriteChangelogEntry'
+myIncludes="$myIncludes GetOutputFile BackupCourseleafFile ParseCourseleafFile GetCourseleafPgm RunCourseLeafCgi"
+myIncludes="$myIncludes MkTmpFile ProtectedCall PrintBanner"
+Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="Load Courseleaf Data"
@@ -25,7 +24,7 @@ scriptDescription="Load Courseleaf Data"
 	#==============================================================================================
 	# parse script specific arguments
 	#==============================================================================================
-	function loadCourseleafData-parseArgsStd  {
+	function loadCourseleafData-ParseArgsStd  {
 		argList+=(-workbookFile,1,option,workbookFile,,script,'The fully qualified spreadsheet file name')
 		argList+=(-skipNulls,2,switch,skipNulls,,script,'If a data field is null then do not write out that data to the page')
 		argList+=(-uinMap,3,switch,uinMap,,script,'Map role data UIDs to UINs even if the uses UIN flag is not set on the client record')
@@ -50,7 +49,7 @@ scriptDescription="Load Courseleaf Data"
 
 		if [[ -f $logFile && $outFile != '' ]]; then
 			cat $logFile | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" > $outFile
-			echo; Msg2 $I "The output can be found in '$outFile'"
+			echo; Info "The output can be found in '$outFile'"
 		fi
 		return 0
 	}
@@ -127,7 +126,7 @@ scriptDescription="Load Courseleaf Data"
 	function GetUsersDataFromDB {
 		dbFile=$srcDir/db/clusers.sqlite
 		[[ ! -r $dbFile ]] && Terminate "Could not read the clusers database file:\n\t$dbFile"
-		Msg2 "Reading the user data from the clusers database ..."
+		Msg3 "Reading the user data from the clusers database ..."
 
 		sqlLiteFields="userid,lname,fname,email"
 		sqlStmt="select $sqlLiteFields FROM users"
@@ -143,8 +142,8 @@ scriptDescription="Load Courseleaf Data"
 			done
 		fi
 		numUsersfromDb=${#usersFromDb[@]}
-		Msg2 "^Retrieved $numUsersfromDb records from the 'clusers' database"
-		if [[ $verboseLevel -ge 1 ]]; then Msg2 "usersFromDb:"; for i in "${!usersFromDb[@]}"; do printf "\t\t[$i] = >${usersFromDb[$i]}<\n"; done; fi
+		Msg3 "^Retrieved $numUsersfromDb records from the 'clusers' database"
+		if [[ $verboseLevel -ge 1 ]]; then Msg3 "usersFromDb:"; for i in "${!usersFromDb[@]}"; do printf "\t\t[$i] = >${usersFromDb[$i]}<\n"; done; fi
 		return 0
 	} #GetUsersDataFromDB
 
@@ -153,7 +152,7 @@ scriptDescription="Load Courseleaf Data"
 	#==================================================================================================
 	function GetRolesDataFromFile {
 		[[ $useUINs == true && $processedUserData != true ]] && Terminate "$FUNCNAME: Requesting UIN mapping but no userid sheet was provided"
-		Msg2 "Reading the roles.tcf file ..."
+		Msg3 "Reading the roles.tcf file ..."
 		## Get the roles data from the roles.tcf file
 			file=$rolesFile
 			[[ ! -r $file ]] && Terminate "Could not read the roles file: '$file'"
@@ -168,8 +167,8 @@ scriptDescription="Load Courseleaf Data"
 		      	fi
 			done < $file
 			numRolesFromFile=${#rolesFromFile[@]}
-			Msg2 "^Retrieved $numRolesFromFile records"
-			if [[ $verboseLevel -ge 1 ]]; then Msg2 "\trolesFromFile:"; for i in "${!rolesFromFile[@]}"; do printf "\t\t[$i] = >${rolesFromFile[$i]}<\n"; done; fi
+			Msg3 "^Retrieved $numRolesFromFile records"
+			if [[ $verboseLevel -ge 1 ]]; then Msg3 "\trolesFromFile:"; for i in "${!rolesFromFile[@]}"; do printf "\t\t[$i] = >${rolesFromFile[$i]}<\n"; done; fi
 		return 0
 	} #GetRolesDataFromFile
 
@@ -178,7 +177,7 @@ scriptDescription="Load Courseleaf Data"
 	#==================================================================================================
 	function GetWorkflowDataFromFile {
 		[[ $useUINs == true && $processedUserData != true ]] && Terminate "$FUNCNAME: Requesting UIN mapping but no userid sheet was provided"
-		Msg2 "Reading the workflow.tcf file ..."
+		Msg3 "Reading the workflow.tcf file ..."
 		## Get the roles data from the roles.tcf file
 			file=$srcDir/web/$courseleafProgDir/workflows.tcf
 			[[ ! -r $file ]] && Terminate "Could not read the '$file' file"
@@ -190,75 +189,67 @@ scriptDescription="Load Courseleaf Data"
 		      	fi
 			done < $file
 			numWorkflowsFromFile=${#workflowsFromFile[@]}
-			Msg2 "^Retrieved $numWorkflowsFromFile records"
-			if [[ $verboseLevel -ge 1 ]]; then Msg2 "\tworkflowsFromFile:"; for i in "${!workflowsFromFile[@]}"; do printf "\t\t[$i] = >${workflowsFromFile[$i]}<\n"; done; fi
+			Msg3 "^Retrieved $numWorkflowsFromFile records"
+			if [[ $verboseLevel -ge 1 ]]; then Msg3 "\tworkflowsFromFile:"; for i in "${!workflowsFromFile[@]}"; do printf "\t\t[$i] = >${workflowsFromFile[$i]}<\n"; done; fi
 			echo
 		return 0
 	} #GetWorkflowDataFromFile
 
 	#==================================================================================================
-	# ParseWorksheetHeader "sheetName" "fields" "dataFileName"
-	#
-	# Parse the worksheet header record, scans file looking for the headerRowIndicator, if fouund
-	# parsez record and sets variables of the form <fieldName>Col with the column number (starting at 1)
-	# of the column in the spreadsheet data
-	# Also sets 'startReadingAt' to be the record number of the first row of actual data
-	#
-	# e.g. ParseWorksheetHeader "$tmpFile" "$workbookSheet" "name members email"
-	#
+	# Parse the worksheet header record, returning the column nubers for each column requrested
 	#==================================================================================================
 	function ParseWorksheetHeader {
-		VerboseMsg 2 "<==== Starting: $FUNCNAME ====>"
-		local dataFile="$1"
-		local sheetName="$2"
-		local requiredFields="$3"
-		local optionalFields="$4"
-		dump -2 -t sheetName requiredFields optionalFields dataFile
-		[[ ! -r $dataFile ]] && Terminate "($FUNCNAME) Could not read file: '$dataFile' "
+		local sheetName="$1"; shift || true
+		local requiredFields="$1"; shift || true
+		local optionalFields="$1"; shift || true
+		local headerIndicator=${headerRowIndicator:-***}
+		dump 2 -t sheetName requiredFields optionalFields headerRowIndicator headerIndicator
+		[[ ${#resultSet[@]} -le 0 ]] && Terminate "($FUNCNAME) No date in the workbook worksheet '$sheetName'"
 
 		## Scan returned data looking for the 'headerRowIndicator'
-			startReadingAt=0
-			local headerRow
-			while read line; do
-				dump -2 -t -t line
-				[[ ${line:0:${#headerRowIndicator}} == "$headerRowIndicator" ]] && read headerRow && break
-				let startReadingAt=$startReadingAt+1
-			done < $dataFile
-			if [[ $headerRow == '' ]]; then
-				Info 0 1 "Could not locate the header row indicator in the '$2' worksheet, using the first row as the header data"
-				read headerRow < $dataFile
-				startReadingAt=2
+			local result foundHeader=false i
+			for ((i=0; i<${#resultSet[@]}; i++)); do
+				result="${resultSet[$i]}"
+				[[ ${result:0:${#headerIndicator}} == "$headerIndicator" ]] && { foundHeader=true; break; }
+			done
+			if [[ $foundHeader == true ]]; then
+				(( i++ ))
+				headerRow="${resultSet[$i]}"
+				(( i++ ))
+				resultSet=("${resultSet[@]:$i}")
 			else
-				let startReadingAt=$startReadingAt+3
+				Info 0 1 "Could not locate the header row indicator in the '$2' worksheet, using the first row as the header data"
+				headerRow="${resultSet[0]}"
+				resultSet=("${resultSet[@]:1}")
 			fi
-			dump -2 -t headerRow startReadingAt
+			headerRow="$(Lower "$headerRow")"
 
 		# Parse the header record, getting the column numbers of the fields
-			IFSave=$IFS; IFS=\|; sheetCols=($headerRow); IFS=$IFSave;
+			IFS='|' read -r -a sheetCols <<< "$headerRow"
+			local field colVar fieldCntr subField 
 			for field in $requiredFields $optionalFields; do
-				unset fieldCntr $(cut -d'|' -f1 <<< $field)Col
+				colVar="${field%%|*}Col"
+				unset fieldCntr $colVar
 				for sheetCol in "${sheetCols[@]}"; do
 					(( fieldCntr += 1 ))
 					for subField in $(tr '|' ' ' <<< $field); do
-						if [[ $(Contains "$(Lower $sheetCol)" "$subField") == true ]]; then
-							unset chkVal; eval chkVal=\$$(cut -d'|' -f1 <<< $field)Col
-							[[ $chkVal != '' ]] && Terminate "Found duplicate '$field' fields in the worksheet header:\n^$headerRow"
-							eval "$(cut -d'|' -f1 <<< $field)Col=$fieldCntr"
+						if [[ $(Contains "$sheetCol" "$subField") == true ]]; then
+							[[ -n ${!colVar} ]] && Terminate "Found duplicate '$field' fields in the worksheet header row:\n\t'$headerRow'"
+							eval "$colVar=$fieldCntr"
 						fi
 					done
 				done
-				colVar="$(cut -d'|' -f1 <<< $field)Col"
-				dump -2 -t -t colVar field
-				if [[ ${!colVar} == '' && $(Contains "$requiredFields" "$(cut -d'|' -f1 <<< $field)") == true ]]; then
-					Terminate "^Could not locate required column, '$(cut -d'|' -f1 <<< $field)', in the '$sheetName' worksheet"
-				fi
-				dump -2 -t field -t $(cut -d'|' -f1 <<< $field)Col
+				dump -2 -t field -t $colVar
 			done
 
-		VerboseMsg 2 "<==== Ending: $FUNCNAME ====>"
+			## Make sure we found all the required fields
+			for field in $requiredFields; do
+				colVar="${field%%|*}Col"
+				[[ -z ${!colVar} ]] && Terminate "Could not locate required column, '$colVar', in the '$sheetName' worksheet"
+			done
+
 		return 0
 	} # ParseWorksheetHeader
-
 
 	#==================================================================================================
 	# Map UIDs to UINs in role members
@@ -283,50 +274,43 @@ scriptDescription="Load Courseleaf Data"
 	#==================================================================================================
 	function ProcessUserData {
 		local workbookSheet="$1"
-		local tmpFile=$(MkTmpFile $FUNCNAME)
-		Msg2 "Parsing the 'user' data from the '$workbookSheet' worksheet ..."
 
+		## See if this client has special case handling for usernames
+			sqlStmt="select useridCase from $clientInfoTable where name=\"$client\""
+			RunSql2 $sqlStmt
+			useridCase=$(Upper ${resultSet[0]:0:1}) || useridCase='M'
+
+		Msg3 "Parsing the 'user' data from the '$workbookSheet' worksheet ..."
 		## Get the user data from the spreadsheet
-			GetExcel "$workbookFile" "$workbookSheet" > $tmpFile
-			#echo; echo $tmpFile; cat $tmpFile; Pause
-
+			GetExcel2 -wb "$workbookFile" -ws "$workbookSheet"
 			## Read the header record, look for the specific columns to determine how to parse subsequent records
-				ParseWorksheetHeader "$tmpFile" "$workbookSheet" 'userid first last email' 'uin'
-				dump -1 startReadingAt
-				for field in userid first last email uin ; do dump -1 field ${field}Col; done
+			ParseWorksheetHeader "$workbookSheet" 'userid first last email' 'uin'
+			[[ $verboseLevel -ge 1 ]] && { for field in userid first last email uin; do dump ${field}Col; done; }
 			## If useUINs is set and there is no uin column in the user data then error
-				[[ $useUINs == true && -z $uinCol ]] && Terminate "Use UINs was set and no 'UIN' column was found in the user data"
-
-			## See if this client has special case handling for usernames
-				sqlStmt="select useridCase from $clientInfoTable where name=\"$client\""
-				RunSql2 $sqlStmt
-				useridCase=$(Upper ${resultSet[0]:0:1}) || useridCase='M'
-
-			## Read/Parse the data rows into hash table
-			while read line; do
-				[[ $line == '' ]] && continue
-				key=$(cut -d '|' -f $useridCol <<< "$line")
+			[[ $useUINs == true && -z $uinCol ]] && Terminate "Use UINs was set and no 'UIN' column was found in the user data"
+			## Parse the data rows into hash table
+			for ((ii=0; ii<${#resultSet[@]}; ii++)); do
+				result="${resultSet[$ii]}"
+				[[ -z $(tr -d '|' <<< "$result" ) ]] && continue
+				key=$(cut -d '|' -f $useridCol <<< "$result")
+				[[ -z $key ]] && continue
 				[[ $useridCase == 'U' ]] && key=$(Upper $key)
 				[[ $useridCase == 'L' ]] && key=$(Lower $key)
-				[[ $uinCol == '' ]] && value=$(cut -d '|' -f $lastCol <<< "$line")'|'$(cut -d '|' -f $firstCol <<< "$line")'|'$(cut -d '|' -f $emailCol <<< "$line") || \
-									value=$(cut -d '|' -f $lastCol <<< "$line")'|'$(cut -d '|' -f $firstCol <<< "$line")'|'$(cut -d '|' -f $emailCol <<< "$line")'|'$(cut -d '|' -f $uinCol <<< "$line")
-				dump -2 -n line -t key value
-				[[ $key == '' ]] && continue
-				key=$(cut -d'.' -f1 <<< $key)
+				value=$(cut -d '|' -f $lastCol <<< "$result")'|'$(cut -d '|' -f $firstCol <<< "$result")'|'$(cut -d '|' -f $emailCol <<< "$result")
+				[[ -n $uinCol ]] && value="$value'|'$(cut -d '|' -f $uinCol <<< "$result")"
+				dump -2 -n result -t key value
 				if [[ ${usersFromSpreadsheet["$key"]+abc} ]]; then
 					if [[ -n $value && $value != '|' && ${usersFromSpreadsheet["$key"]} != $value ]]; then
-						Terminate "^The '$workbookSheet' tab in the workbook contains duplicate userid records \
-						\n^^UserId: '$key' with value '$value' is duplicate\n^previous value = '${usersFromSpreadsheet["$key"]}'"
+						Terminate "The '$workbookSheet' sheet contains duplicate records for userid '$key'\
+						\n^current value: '$value'\n^previous value = '${usersFromSpreadsheet["$key"]}'"
 					fi
 				else
 					usersFromSpreadsheet["$key"]="$value"
 				fi
-			done < <(tail -n "+$startReadingAt" $tmpFile)
-
+			done
 			numUsersfromSpreadsheet=${#usersFromSpreadsheet[@]}
-			Msg2 "^Retrieved $numUsersfromSpreadsheet records from the '$workbookSheet' sheet"
-			if [[ $verboseLevel -ge 1 ]]; then Msg2 "\tusersFromSpreadsheet:"; for i in "${!usersFromSpreadsheet[@]}"; do \
-				printf "\t\t[$i] = >${usersFromSpreadsheet[$i]}<\n"; done; fi
+			Msg3 "^Retrieved $numUsersfromSpreadsheet records from the '$workbookSheet' sheet"
+			[[ $verboseLevel -ge 1 ]] && { Msg3 "^usersFromSpreadsheet:" ; for i in "${!usersFromSpreadsheet[@]}"; do Msg3 "^^[$i] = >${usersFromSpreadsheet[$i]}<"; done; }
 
 		## Get the user data from the clusers database
 			GetUsersDataFromDB
@@ -335,11 +319,12 @@ scriptDescription="Load Courseleaf Data"
 			numNewUsers=0
 			numModifiedUsers=0
 			[[ $informationOnlyMode != true ]] && verb='Merging' || verb='Checking'
-			Msg2 "$verb User data..."
+			Msg3 "$verb User data..."
 
 			dbFile=$srcDir/db/clusers.sqlite
 			BackupCourseleafFile $dbFile
 			local procesingCntr=0
+			sTime=$(date "+%s")
 			for key in "${!usersFromSpreadsheet[@]}"; do
 				[[ $verboseLevel -ge 1 ]] && echo -e "\t\${usersFromSpreadsheet["$key"]} = '${usersFromSpreadsheet["$key"]}'"
 				unset lname fname email
@@ -355,18 +340,18 @@ scriptDescription="Load Courseleaf Data"
 					[[ ${newData:(-1)} == '|' ]] && newData=${newData:0:${#newData}-1}
 					if [[ $oldData != $newData ]]; then
 						WarningMsg 0 1 "Found User '$key' in the clusers database file but data is different, using new data"
-						Msg2 "^^New Data: $newData"
-						Msg2 "^^Old Data: $oldData"
+						Msg3 "^^New Data: $newData"
+						Msg3 "^^Old Data: $oldData"
 						sqlStmt="UPDATE users set lname=\"$lname\", fname=\"$fname\", email=\"$email\" where userid=\"$key\" "
 						[[ $informationOnlyMode == false ]] && $DOIT RunSql2 "$dbFile" "$sqlStmt"
 						(( numModifiedUsers += 1 ))
 					fi
 				else
-					VerboseMsg 1 "Adding new user: $key"
+					Verbose 1 "Adding new user: $key"
 					sqlStmt="INSERT into users values(NULL,\"$key\",\"$lname\",\"$fname\",\"$email\") "
 					[[ $informationOnlyMode == false ]] && $DOIT RunSql2 "$dbFile" "$sqlStmt"
 					usersFromDb["$key"]="${usersFromSpreadsheet["$key"]}"
-					VerboseMsg 1 2 "User added: $key"
+					Verbose 1 2 "User added: $key"
 					(( numNewUsers += 1 ))
 				fi
 				# If useUINs is active then build userid to uin map from the email information
@@ -374,10 +359,14 @@ scriptDescription="Load Courseleaf Data"
 					uid=$(cut -d'|' -f 3 <<< $string | cut -d'@' -f1)
 					uidUinHash["$uid"]="$key"
 				fi
-				[[ $procesingCntr -ne 0 && $(($procesingCntr % 100)) -eq 0 ]] && Msg2 "^Processed $procesingCntr out of $numUsersfromSpreadsheet..."
+				if [[ $procesingCntr -ne 0 && $(($procesingCntr % $notifyThreshold)) -eq 0 ]]; then
+					elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1
+					sTime=$(date "+%s")
+					Msg3 "^Processed $procesingCntr out of $numUsersfromSpreadsheet (${elapTime}s)..."
+				fi
 				let procesingCntr=$procesingCntr+1
 			done
-			if [[ $verboseLevel -ge 1 ]]; then Msg2 "\tMerged User list:"; for i in "${!usersFromDb[@]}"; do printf "\t\t[$i] = >${usersFromDb[$i]}<\n"; done; fi
+			if [[ $verboseLevel -ge 1 ]]; then Msg3 "\tMerged User list:"; for i in "${!usersFromDb[@]}"; do printf "\t\t[$i] = >${usersFromDb[$i]}<\n"; done; fi
 
 		## Rebuild the appache-group file
 			if [[ $informationOnlyMode == false ]]; then
@@ -385,7 +374,6 @@ scriptDescription="Load Courseleaf Data"
 			fi
 			echo
 
-		[[ -f "$tmpFile" ]] && rm "$tmpFile"
 		return 0
 	} #ProcessUserData
 
@@ -394,50 +382,47 @@ scriptDescription="Load Courseleaf Data"
 	#==================================================================================================
 	function ProcessRoleData {
 		local workbookSheet="$1"
-		local tmpFile=$(MkTmpFile $FUNCNAME)
-		Msg2 "Parsing the 'roles' data from the '$workbookSheet' worksheet ..."
-
-		## Get the page data from the spreadsheet
-			GetExcel "$workbookFile" "$workbookSheet" > $tmpFile
-			#echo $tmpFile; cat $tmpFile; Pause
-
+		Msg3 "Parsing the 'roles' data from the '$workbookSheet' worksheet ..."
+		## Get the role data from the spreadsheet
+			GetExcel2 -wb "$workbookFile" -ws "$workbookSheet"
 			## Read the header record, look for the specific columns to determin how to parse subsequent records
-				ParseWorksheetHeader "$tmpFile" "$workbookSheet" 'name members|userlist email'
-				dump -1 startReadingAt
-				for field in name members email; do dump -1 ${field}Col; done
-
+			ParseWorksheetHeader "$workbookSheet" 'name members|userlist email'
+			[[ $verboseLevel -ge 1 ]] && { for field in name members email; do dump ${field}Col; done; }
 			## Read/Parse the data rows into hash table
-			while read line; do
-				[[ $line == '' ]] && continue
-				key=$(cut -d '|' -f $nameCol <<< $line)
-				value=$(cut -d '|' -f $membersCol <<< "$line")'|'$(cut -d '|' -f $emailCol <<< "$line")
+			for ((ii=0; ii<${#resultSet[@]}; ii++)); do
+				result="${resultSet[$ii]}"
+				[[ -z $(tr -d '|' <<< "$result" ) ]] && continue
+				key=$(cut -d '|' -f $nameCol <<< $result)
+				[[ -z $key ]] && continue
+				value=$(cut -d '|' -f $membersCol <<< "$result")'|'$(cut -d '|' -f $emailCol <<< "$result")
 				value=$(tr -d ' ' <<< $value)
-				dump -2  -n line -t key value
-				[[ $key == '' ]] && continue
+				dump -2  -n result -t key value
 				[[ $(IsNumeric ${value:0:1}) == true ]] && value=$(cut -d'.' -f1 <<< $value)
 				if [[ ${rolesFromSpreadsheet["$key"]+abc} ]]; then
-					if [[ -n $value && $value != '|' && ${rolesFromSpreadsheet["$key"]} != $value ]]; then
-						Terminate "^The '$workbookSheet' tab in the workbook contains duplicate role records \
-						\n^^Role '$key' with value '$value' is duplicate\n^previous value = '${rolesFromSpreadsheet["$key"]}'"
+					if [[ -n $value && $value != '|' && ${usersFromSpreadsheet["$key"]} != $value ]]; then
+						Terminate "The '$workbookSheet' sheet contains duplicate records for role '$key'\
+						\n^current value: '$value'\n^previous value = '${rolesFromSpreadsheet["$key"]}'"
 					fi
 				else
 					rolesFromSpreadsheet["$key"]="$value"
 				fi
-			done < <(tail -n "+$startReadingAt" $tmpFile)
+			done
 			numRolesfromSpreadsheet=${#rolesFromSpreadsheet[@]}
-			Msg2 "^Retrieved $numRolesfromSpreadsheet records from the '$workbookSheet' sheet"
-			if [[ $verboseLevel -ge 1 ]]; then Msg2 "\trolesfromSpreadsheet:"; for i in "${!rolesFromSpreadsheet[@]}"; do printf "\t\t[$i] = >${rolesFromSpreadsheet[$i]}<\n"; done; fi
+			Msg3 "^Retrieved $numRolesfromSpreadsheet records from the '$workbookSheet' sheet"
+			if [[ $verboseLevel -ge 1 ]]; then Msg3 "\trolesfromSpreadsheet:"; for i in "${!rolesFromSpreadsheet[@]}"; do printf "\t\t[$i] = >${rolesFromSpreadsheet[$i]}<\n"; done; fi
 
 		## Merge the spreadsheet data and the file data
 			GetRolesDataFromFile #Also sets rolesOut
 
-			if [[ $verboseLevel -ge 1 ]]; then Msg2 "\trolesOut:"; for i in "${!rolesOut[@]}"; do printf "\t\t[$i] = >${rolesOut[$i]}<\n"; done; fi
+			if [[ $verboseLevel -ge 1 ]]; then Msg3 "\trolesOut:"; for i in "${!rolesOut[@]}"; do printf "\t\t[$i] = >${rolesOut[$i]}<\n"; done; fi
 			numNewRoles=0
 			numModifiedRoles=0
 			numRoleMembersMappedToUIN=0
 
-			Msg2 "Merging Role data..."
+			[[ $informationOnlyMode != true ]] && verb='Updating' || verb='Checking'
+			Msg3 "$verb Role data..."
 			local procesingCntr=0
+			sTime=$(date "+%s")
 			for key in "${!rolesFromSpreadsheet[@]}"; do
 				## Edit role data if useUINs is on
 					memberData="$(cut -d'|' -f 1 <<< "${rolesFromSpreadsheet["$key"]}")"
@@ -445,7 +430,7 @@ scriptDescription="Load Courseleaf Data"
 					newMemberData="$(EditRoleMembers "$memberData")"
 					if [[ $memberData != $newMemberData ]]; then
 						rolesFromSpreadsheet["$key"]="$newMemberData|$emailData"
-						Msg2 $NT1 "Role: '$key' -- UIDs mapped to UINs"
+						Note  "Role: '$key' -- UIDs mapped to UINs"
 						(( numRoleMembersMappedToUIN +=1 ))
 					fi
 
@@ -454,21 +439,25 @@ scriptDescription="Load Courseleaf Data"
 						if [[ ${rolesFromSpreadsheet["$key"]} != ${rolesOut["$key"]} ]]; then
 							if [[ $oldData != '' ]]; then
 								WarningMsg 0 1 "Found Role '$key' in the roles file but data is different, using new data"
-								Msg2 "^^New Data: ${rolesFromSpreadsheet["$key"]}"
+								Msg3 "^^New Data: ${rolesFromSpreadsheet["$key"]}"
 								unset oldData;  oldData="${usersFromDb["$key"]}"
 								[[ ${oldData:(-1)} == '|' ]] && oldData=${oldData:0:${#oldData}-1}
-								Msg2 "^^Old Data: $oldData"
+								Msg3 "^^Old Data: $oldData"
 							fi
-							Msg2 $IT1 "Found Role '$key' in the roles file, old data is null, using new data"
+							Info 0 1 "Found Role '$key' in the roles file, old data is null, using new data"
 							rolesOut["$key"]="${rolesFromSpreadsheet["$key"]}"
 							(( numModifiedRoles += 1 ))
 						fi
 					else
-						VerboseMsg 1 2 "New role added: $key"
+						Verbose 1 2 "New role added: $key"
 						rolesOut["$key"]="${rolesFromSpreadsheet["$key"]}"
 						(( numNewRoles += 1 ))
 					fi
-				[[ $procesingCntr -ne 0 && $(($procesingCntr % 100)) -eq 0 ]] && Msg2 "^Processed $procesingCntr out of $numRolesfromSpreadsheet..."
+				if [[ $procesingCntr -ne 0 && $(($procesingCntr % $notifyThreshold)) -eq 0 ]]; then
+					elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1
+					sTime=$(date "+%s")
+					Msg3 "^Processed $procesingCntr out of $numRolesfromSpreadsheet (${elapTime}s)..."
+				fi
 				let procesingCntr=$procesingCntr+1
 			done
 
@@ -476,7 +465,7 @@ scriptDescription="Load Courseleaf Data"
 		## Write out the role data to the role file
 			if [[ $informationOnlyMode == false ]]; then
 				if [[ $numModifiedRoles -gt 0 || $numNewRoles -gt 0 ]]; then
-					Msg2 "Writing out new roles.tcf file..."
+					Msg3 "Writing out new roles.tcf file..."
 					editFile=$rolesFile
 					BackupCourseleafFile $editFile
 					# Parse the target file to put source data in the correct location in target file.
@@ -500,14 +489,14 @@ scriptDescription="Load Courseleaf Data"
 					## Swap the files
 					mv $editFile.new $editFile
 					[[ -f $topPart ]] && rm -f $topPart; [[ -f $bottomPart ]] && rm -f $bottomPart
-					Msg2 "^$editFile written to disk"
+					Msg3 "^$editFile written to disk"
 				fi
 			fi
 
 		## Check the members against the user data
 			if [[ $processUserData == true ]]; then
 				numRoleMembersNotProvisoned=0
-				Msg2 "Checking Role members..."
+				Msg3 "Checking Role members..."
 				for key in "${!rolesOut[@]}"; do
 					members=$(cut -d '|' -f1 <<< "${rolesOut["$key"]}")
 					#IFSsave=$IFS; IFS=','
@@ -521,8 +510,6 @@ scriptDescription="Load Courseleaf Data"
 				done
 			fi
 			echo
-
-		[[ -f "$tmpFile" ]] && rm "$tmpFile"
 		return 0
 	} #ProcessRoleData
 
@@ -530,46 +517,41 @@ scriptDescription="Load Courseleaf Data"
 	# Process WORKFLOW records
 	#==================================================================================================
 	function ProcessCatalogPageData {
+		local workbookSheet="$1"
 		[[ $useUINs == true && $processedUserData != true ]] && Terminate "$FUNCNAME: Requesting UIN mapping but no userid sheet was provided"
-		local tmpFile=$(MkTmpFile $FUNCNAME)
 		## Get the user data from the spreadsheet
-			unset workbookSheet
-			[[ $(Contains "$(Lower $sheets)" 'page') == true ]] && workbookSheet='page'
-			[[ $(Contains "$(Lower $sheets)" 'workflow') == true ]] && workbookSheet='workflow'
-			Msg2 "Parsing the 'catalog page' data from the '$workbookSheet' worksheet ..."
-			GetExcel "$workbookFile" "$workbookSheet" > $tmpFile
-			#echo $tmpFile; cat $tmpFile; Pause
+			Msg3 "Parsing the 'catalog page' data from the '$workbookSheet' worksheet ..."
+			GetExcel2 -wb "$workbookFile" -ws "$workbookSheet"
+			## Read the header record, look for the specific columns to determin how to parse subsequent records
+			ParseWorksheetHeader "$workbookSheet" 'path title owner workflow'
+			[[ $verboseLevel -ge 1 ]] && { for field in path title owner workflow; do dump ${field}Col; done; }
 
-		## Read the header record, look for the specific columns to determin how to parse subsequent records
-			ParseWorksheetHeader "$tmpFile" "$workbookSheet" 'path title owner workflow'
-			dump -1 startReadingAt
-			for field in path title owner workflow; do dump -1 ${field}Col; done
 			## Read/Parse the data rows into hash table
 			numPagesNotFound=0
-			while read line; do
-				[[ -z $line || $line == '|||' ]] && continue
-				key=$(cut -d '|' -f $pathCol <<< "$line")
-				[[ -z $key ]] && WarningMsg 0 1 "Work Sheet record:\n^^$line\n\tDoes not contain any path/url data, skipping" && continue
+			for ((ii=0; ii<${#resultSet[@]}; ii++)); do
+				result="${resultSet[$ii]}"
+				key=$(cut -d '|' -f $pathCol <<< "$result")
+				[[ -z $key ]] && WarningMsg 0 1 "Work Sheet record:\n^^$result\n\tDoes not contain any path/url data, skipping" && continue
 				if [[ $key != '/' && ! -d $(dirname $srcDir/web/$key) ]]; then
 					[[ $ignoreMissingPages != true ]] && WarningMsg 0 1 "Page: '$key' Not found"
 					((numPagesNotFound += 1))
 					continue
 				fi
-				value=$(cut -d '|' -f $titleCol <<< "$line")'|'$(cut -d '|' -f $ownerCol <<< "$line")'|'$(cut -d '|' -f $workflowCol <<< "$line")
-				dump -2 -n line -t key value
+				value=$(cut -d '|' -f $titleCol <<< "$result")'|'$(cut -d '|' -f $ownerCol <<< "$result")'|'$(cut -d '|' -f $workflowCol <<< "$result")
+				dump -2 -n result -t key value
 				if [[ ${workflowDataFromSpreadsheet["$key"]} != '' ]]; then
 					if [[ -n $value && $value != '|' && ${workflowDataFromSpreadsheet["$key"]} != $value ]]; then
-						Terminate "^The '$workbookSheet' sheet in the workbook contains duplicate records with the same 'path' and differeing data\
+						Terminate "^The '$workbookSheet' sheet contains duplicate records with the same 'path' and differeing data\
 						\n^^Path/url: $key\n^^Previous Data: ${workflowDataFromSpreadsheet["$key"]}\n^^Current Data: $value"
 					fi
 				else
 					workflowDataFromSpreadsheet["$key"]="$value"
 				fi
-			done < <(tail -n "+$startReadingAt" $tmpFile)
+			done
 
 			numWorkflowDataFromSpreadsheet=${#workflowDataFromSpreadsheet[@]}
-			Msg2 "^Retrieved $numWorkflowDataFromSpreadsheet records from the '$workbookSheet' sheet"
-			if [[ $verboseLevel -ge 1 ]]; then Msg2 "\tworkflowDataFromSpreadsheet:"; for i in "${!workflowDataFromSpreadsheet[@]}"; do printf "\t\t[$i] = >${workflowDataFromSpreadsheet[$i]}<\n"; done; fi
+			Msg3 "^Retrieved $numWorkflowDataFromSpreadsheet records from the '$workbookSheet' sheet"
+			if [[ $verboseLevel -ge 1 ]]; then Msg3 "\tworkflowDataFromSpreadsheet:"; for i in "${!workflowDataFromSpreadsheet[@]}"; do printf "\t\t[$i] = >${workflowDataFromSpreadsheet[$i]}<\n"; done; fi
 
 			## Get the courseleaf pgmname and dir
 				cd $srcDir
@@ -594,8 +576,9 @@ scriptDescription="Load Courseleaf Data"
 			numPagesUpdated=0
 			numMembersMappedToUIN=0
 			[[ $informationOnlyMode != true ]] && verb='Updating' || verb='Checking'
-			Msg2 "^$verb catalog page data (this takes a while)..."
+			Msg3 "^$verb catalog page data (this takes a while)..."
 			local procesingCntr=0
+			sTime=$(date "+%s")
 			for key in "${!workflowDataFromSpreadsheet[@]}"; do
 				tmpData="${workflowDataFromSpreadsheet[$key]}"
 				pageTitle="$(cut -d'|' -f1 <<< "$tmpData")"
@@ -615,14 +598,14 @@ scriptDescription="Load Courseleaf Data"
 						pageWorkflowNew="$(EditRoleMembers "$pageWorkflow")"
 							if [[ $pageWorkflowNew != $pageWorkflow ]]; then
 								pageWorkflow="$pageWorkflowNew"
-								Msg2 $NT1 "Page: '$key' -- Workflow UIDs mapped to UINs"
+								Note "Page: '$key' -- Workflow UIDs mapped to UINs"
 								((numMembersMappedToUIN +=1))
 							fi
 						fi
 						pageOwnerNew="$(EditRoleMembers "$pageOwner")"
 						if [[ $pageOwnerNew != $pageOwner ]]; then
 							pageOwner="$pageOwnerNew"
-							Msg2 $NT1 "Page: '$key' -- Owner UIDs mapped to UINs"
+							Note "Page: '$key' -- Owner UIDs mapped to UINs"
 							((numMembersMappedToUIN +=1))
 						fi
 					fi
@@ -657,11 +640,14 @@ scriptDescription="Load Courseleaf Data"
 							((numPagesUpdated +=1))
 						fi
 					fi
-					[[ $procesingCntr -ne 0 && $(($procesingCntr % 100)) -eq 0 ]] && Msg2 "^Processed $procesingCntr out of $numWorkflowDataFromSpreadsheet..."
+					if [[ $procesingCntr -ne 0 && $(($procesingCntr % $notifyThreshold)) -eq 0 ]]; then
+						elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1
+						sTime=$(date "+%s")
+						Msg3 "^Processed $procesingCntr out of $numWorkflowDataFromSpreadsheet (${elapTime}s)..."
+					fi
 					let procesingCntr=$procesingCntr+1
 			done
-			Msg2 "^$numWorkflowDataFromSpreadsheet out of $numWorkflowDataFromSpreadsheet processed"
-	[[ -f "$tmpFile" ]] && rm "$tmpFile"
+			Msg3 "^$numWorkflowDataFromSpreadsheet out of $numWorkflowDataFromSpreadsheet processed"
 	return 0
 } #ProcessCatalogPageData
 
@@ -690,18 +676,20 @@ tmpFile=$(MkTmpFile)
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
+Hello
+echo "Getting defaults..."
 GetDefaultsData $myName
+echo "Parsing arguments..."
 ParseArgsStd
 [[ $allItems == true ]] && processUserData=true && processRoleData=true && processPageData=true
 [[ $product != '' ]] && product=$(Lower $product)
 
-Hello
+[[ $hostName == 'build7' ]] && notifyThreshold=50 || notifyThreshold=100
 displayGoodbyeSummaryMessages=true
+echo "Calling Init"
 Init 'getClient getEnv getDirs checkEnvs checkProdEnv'
 dump -1 processUserData processRoleData processPageData informationOnlyMode ignoreMissingPages
-
-## Information only mode
- 	#[[ $informationOnlyMode == true ]] && WarningMsg "'informationOnlyMode' flag is set, no data will be modified."
+echo "Back from Init"
 
 ## Find out if this client uses UINs
 	if [[ $noUinMap == false ]]; then
@@ -719,27 +707,27 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 
 ## Get workflow file
 	tmpWorkbookFile=false
-	unset workbookFileIn workflowSearchDir
+	unset workbookFileIn workbookSearchDir
 	if [[ $workbookFile == '' ]]; then
 		[[ $verify != true ]] && Terminate "^No value specified for workbook file and verify is off"
 		## Search for XLSx files in clientData and implimentation folders
 		if [[ -d "$localClientWorkFolder/$client" ]]; then
-			workflowSearchDir="$localClientWorkFolder/$client"
+			workbookSearchDir="$localClientWorkFolder/$client"
 		else
 			## Find out if user wants to load cat data or cim data
 			Prompt product 'Are you loading CAT or CIM data' 'cat cim' 'cat';
 			product=$(Upper $product)
 			implimentationRoot="/steamboat/leepfrog/docs/Clients/$client/Implementation"
-			if   [[ -d "$implimentationRoot/Attachments/$product/Workflow" ]]; then workflowSearchDir="$implimentationRoot/Attachments/$product/Workflow"
-			elif [[ -d "$implimentationRoot/Attachments/$product" ]]; then workflowSearchDir="$implimentationRoot/Attachments/$product"
-			elif [[ -d "$implimentationRoot/$product/Workflow" ]]; then workflowSearchDir="$implimentationRoot/$product/Workflow"
-			elif [[ -d "$implimentationRoot/$product" ]]; then workflowSearchDir="$implimentationRoot/$product"
+			if   [[ -d "$implimentationRoot/Attachments/$product/Workflow" ]]; then workbookSearchDir="$implimentationRoot/Attachments/$product/Workflow"
+			elif [[ -d "$implimentationRoot/Attachments/$product" ]]; then workbookSearchDir="$implimentationRoot/Attachments/$product"
+			elif [[ -d "$implimentationRoot/$product/Workflow" ]]; then workbookSearchDir="$implimentationRoot/$product/Workflow"
+			elif [[ -d "$implimentationRoot/$product" ]]; then workbookSearchDir="$implimentationRoot/$product"
 			fi
 		fi
-		if [[ $workflowSearchDir != '' ]]; then
-			SelectFile $workflowSearchDir 'workbookFile' '*.xls*' "\nPlease specify the $(ColorK '(ordinal)') number of the Excel workbook you wish to load data from:\
-				\n(*/.xls* files found in '$(ColorK $workflowSearchDir)')\n(sorted ordered newest to oldest)\n\n"
-			workbookFile="$workflowSearchDir/$workbookFile"
+		if [[ $workbookSearchDir != '' ]]; then
+			SelectFile $workbookSearchDir 'workbookFile' '*.xls*' "\nPlease specify the $(ColorK '(ordinal)') number of the Excel workbook you wish to load data from:\
+				\n(*/.xls* files found in '$(ColorK $workbookSearchDir)')\n(sorted ordered newest to oldest)\n\n"
+			workbookFile="$workbookSearchDir/$workbookFile"
 		fi
 	else
 		[[ ${workbookFile:0:1} != '/' ]] && workbookFile=$localClientWorkFolder/$client/$workbookFile
@@ -764,41 +752,49 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 	echo
 
 ## Get the list of sheets in the workbook
-	GetExcel "$workbookFile" 'GetSheets' > $tmpFile
-	sheets=$(tail -n 1 $tmpFile | tr '|' ',')
-	dump -1 sheets
+	Msg3 "^Parsing workbook..."
+	GetExcel2 -wb "$workbookFile" -ws 'GetSheets'
+	IFS='|' read -ra sheets <<< "${resultSet[0]}"
+	unset usersSheet rolesSheet pagesSheet
+	for sheet in "${sheets[@]}"; do
+		[[ $(Contains "$(Lower $sheet)" 'user') == true ]] && usersSheet="$sheet"
+		[[ $(Contains "$(Lower $sheet)" 'role') == true ]] && rolesSheet="$sheet"
+		[[ $(Contains "$(Lower $sheet)" 'workflow') == true ]] && pagesSheet="$sheet"
+	done
 
+[[ $processUserData == true || $processRoleData == true || $processPageData == true ]] && dataArgSpecified=true || dataArgSpecified=false
 ## What data should we load
-	if [[ $verify == true && $processUserData != true && $(Contains "$(Lower $sheets)" 'user') == true ]]; then
-		unset ans; Prompt ans 'Found a user data spreadsheet, do you wish to process user data' 'Yes No All'; ans=$(Lower ${ans:0:1})
+	if [[ $verify == true && $processUserData != true && -n $usersSheet ]]; then
+		unset ans; Prompt ans "Found a 'user' data worksheet ($usersSheet), do you wish to process that data" 'Yes No All'; ans=$(Lower ${ans:0:1})
 		[[ $ans == 'y' ]] && processUserData=true
 		[[ $ans == 'a' ]] && processUserData=true && processRoleData=true && processPageData=true
 	else
-		[[ $(Contains "$(Lower $sheets)" 'user') == true ]] && processUserData=true
+		[[ $dataArgSpecified == false && -n $usersSheet ]] && processUserData=true
 	fi
 
-	if [[ $verify == true && $processRoleData != true && $(Contains "$(Lower $sheets)" 'role') == true ]]; then
-		unset ans; Prompt ans 'Found a roles data spreadsheet, do you wish to process role data' 'Yes No'; ans=$(Lower ${ans:0:1})
+	if [[ $verify == true && $processRoleData != true && -n $rolesSheet ]]; then
+		unset ans; Prompt ans "Found a 'roles' data worksheet ($rolesSheet), do you wish to process that data" 'Yes No All'; ans=$(Lower ${ans:0:1})
 		[[ $ans == 'y' ]] && processRoleData=true
 		[[ $ans == 'a' ]] && processUserData=true && processRoleData=true && processPageData=true
 	else
-		[[ $(Contains "$(Lower $sheets)" 'role') == true ]] && processRoleData=true
+		[[ $dataArgSpecified == false && -n $rolesSheet ]] && processRoleData=true
 	fi
 
-	if [[ $verify == true && $processPageData != true ]]; then
-		if [[ $(Contains "$(Lower $sheets)" 'workflow') == true || $(Contains "$(Lower $sheets)" 'page') == true ]]; then
-			unset ans; Prompt ans 'Found a catalog page data spreadsheet, do you wish to process page data' 'Yes No'; ans=$(Lower ${ans:0:1})
-			[[ $ans == 'y' ]] && processPageData=true
-			[[ $ans == 'a' ]] && processUserData=true && processRoleData=true && processPageData=true
-		fi
+	if [[ $verify == true && $processPageData != true && -n $pagesSheet ]]; then
+		unset ans; Prompt ans "Found a 'catalog page data' worksheet ($rolesSheet), do you wish to process that data" 'Yes No All'; ans=$(Lower ${ans:0:1})
+		[[ $ans == 'y' ]] && processPageData=true
+		[[ $ans == 'a' ]] && processUserData=true && processRoleData=true && processPageData=true
 	else
-		[[ $(Contains "$(Lower $sheets)" 'workflow') == true || $(Contains "$(Lower $sheets)" 'page') == true ]] && processPageData=true
+		[[ $dataArgSpecified == false && -n $pagesSheet ]] && processPageData=true
 	fi
 
 ## Do we have anything to do
 	[[ $processUserData != true && $processRoleData != true && $processPageData != true ]] && Terminate "No load actions are avaiable given the data provided"
 
 ## Additional parms for page data
+skipNulls=true
+ignoreMissingPages=true
+
 	if [[ $processPageData == true ]]; then
 		if [[ $skipNulls == '' ]]; then
 			if [[ $verify == true ]]; then
@@ -828,9 +824,9 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 	verifyArgs+=("Env:$(TitleCase $env) ($srcDir)")
 	[[ $tmpWorkbookFile == true ]] && verifyArgs+=("Input File:'$workbookFileIn' as '$workbookFile'") || verifyArgs+=("Input File:'$workbookFile'")
 	#verifyArgs+=("Input workbook:'$workbookFileIn'")
-	verifyArgs+=("Process user data:$processUserData")
-	verifyArgs+=("Process role data:$processRoleData")
-	verifyArgs+=("Process page data:$processPageData")
+	[[ $processUserData == true ]] && verifyArgs+=("Process user sheet:$usersSheet")
+	[[ $processRoleData == true ]] && verifyArgs+=("Process role sheet:$rolesSheet")
+	[[ $processPageData == true ]] && verifyArgs+=("Process page sheet:$pagesSheet")
 	verifyArgs+=("Skip null values:$skipNulls")
 	verifyArgs+=("Ignore missing pages:$ignoreMissingPages")
 	verifyArgs+=("Map UIDs to UINs:$useUINs")
@@ -851,111 +847,96 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 	dump -1 processUserData processRoleData processedPageData sheets
 	## Get process the sheets as directed
 		if [[ $processUserData == true ]]; then
-			if [[ $(Contains "$(Lower $sheets)" 'user') == true ]]; then
-				## find the 'users' sheet
-				unset usersSheet
-				for sheet in $(tr ',' ' ' <<< $sheets); do
-					[[ $(Contains "$(Lower "$sheet")" 'user') == true ]] && usersSheet="$sheet" && break
-				done
-				[[ $usersSheet == '' ]] && Terminate "Could not locate a 'Users' worksheet in the workbook."
-				ProcessUserData "$usersSheet"
-				processedUserData=true
-			else
-				WarningMsg 0 1 "No user data sheet found in workbook, sheets found: '$sheets', Skipping user data"
-			fi
+			[[ -z $usersSheet ]] && Terminate "Could not locate a 'Users' worksheet in the workbook."
+			ProcessUserData "$usersSheet"
+			processedUserData=true
 		fi
 
 		if [[ $processRoleData == true ]]; then
-			if [[ $(Contains "$(Lower $sheets)" 'role') == true ]]; then
-				[[ $processUserData != true && -z numUsersfromDb ]] && GetUsersDataFromDB
-				## find the 'roles' sheet
-				unset rolesSheet
-				for sheet in $(tr ',' ' ' <<< $sheets); do
-					[[ $(Contains "$(Lower "$sheet")" 'role') == true ]] && rolesSheet="$sheet" && break
-				done
-				[[ $rolesSheet == '' ]] && Terminate "Could not locate a 'Roles' worksheet in the workbook."
-				ProcessRoleData "$rolesSheet"
-				processedRoleData=true
-			else
-				WarningMsg 0 1 "No role data sheet found in workbook, sheets found: '$sheets', skipping role data"
-			fi
+			[[ -z $rolesSheet ]] && Terminate "Could not locate a 'Roles' worksheet in the workbook."
+			[[ $processUserData != true && -z numUsersfromDb ]] && GetUsersDataFromDB
+			ProcessRoleData "$rolesSheet"
+			processedRoleData=true
 		fi
 
 		if [[ $processPageData == true ]]; then
-			if [[ $(Contains "$(Lower $sheets)" 'workflow') == true || $(Contains "$(Lower $sheets)" 'page') == true ]]; then
-				[[ $processUserData != true  && -z numUsersfromDb ]] && GetUsersDataFromDB
-				[[ $processRoleData != true ]] && GetRolesDataFromFile && rolesOut=${rolesFromFile[@]}
-				GetWorkflowDataFromFile
-				ProcessCatalogPageData
-				processedPageData=true
-			else
-				WarningMsg 0 1 "No page data sheet ('workflow' or 'page') found in workbook, sheets found: '$sheets', skipping page data"
-			fi
+			[[ -z $pagesSheet ]] && Terminate "Could not locate a 'Page data' worksheet in the workbook."
+			[[ $processUserData != true  && -z numUsersfromDb ]] && GetUsersDataFromDB
+			[[ $processRoleData != true ]] && GetRolesDataFromFile && rolesOut=${rolesFromFile[@]}
+			GetWorkflowDataFromFile
+			ProcessCatalogPageData "$pagesSheet"
+			processedPageData=true
 		fi
 
 ## Processing summary
 	unset changeLogLines
 	echo
 	PrintBanner "Processing Summary"
-	[[ $informationOnlyMode == true ]] && echo "" && Msg2 ">>> The Information Only flag was set, no data has been updated <<<" && echo
+	[[ $informationOnlyMode == true ]] && echo "" && Msg3 ">>> The Information Only flag was set, no data has been updated <<<" && echo
 
 	if [[ $processedUserData == true ]]; then
-		Msg2 "User data:"
-		Msg2 "^Retrieved $numUsersfromDb records from the clusers database"
-		Msg2 "^Retrieved $numUsersfromSpreadsheet records from $workbookFileIn"
+		Msg3 "User data:"
+		Msg3 "^Retrieved $numUsersfromDb records from the clusers database"
+		Msg3 "^Retrieved $numUsersfromSpreadsheet records from $workbookFileIn"
 		string="Added $numNewUsers new users"
 		[[ $informationOnlyMode == true ]] && string="$string $(ColorK "(Information Only flag was set)")"
-		Msg2 "^$string"
+		Msg3 "^$string"
 		[[ $numNewUsers -gt 0 ]] && changeLogLines+=("$string")
 		string="Modified $numModifiedUsers existing users"
 		[[ $informationOnlyMode == true ]] && string="$string $(ColorK "(Information Only flag was set)")"
-		Msg2 "^$string"
+		Msg3 "^$string"
 		[[ $numModifiedUsers -gt 0 ]] && changeLogLines+=("$string")
 	fi
 
 	[[ $processedUserData == true ]] && echo
 	if [[ $processedRoleData == true ]]; then
-		Msg2 "Role data:"
-		Msg2 "^Retrieved $numRolesFromFile records from the roles.tcf file"
-		Msg2 "^Retrieved $numRolesfromSpreadsheet records from $workbookFileIn"
+		Msg3 "Role data:"
+		Msg3 "^Retrieved $numRolesFromFile records from the roles.tcf file"
+		Msg3 "^Retrieved $numRolesfromSpreadsheet records from $workbookFileIn"
+
 		string="Added $numNewRoles new roles"
-		[[ $informationOnlyMode == true ]] && string="$string $(ColorK "(Information Only flag was set)")"
-		Msg2 "^$string"
+		[[ $informationOnlyMode != true ]] && string="Added $numNewRoles new roles" && string="Would add $numNewRoles new roles"
+		Msg3 "^$string"
 		[[ $numNewRoles -gt 0 ]] && changeLogLines+=("$string")
-		[[ $informationOnlyMode == true ]] && string="$string $(ColorK "(Information Only flag was set)")"
-		string="Modified $numModifiedRoles existing roles"
-		Msg2 "^$string"
+
+		[[ $informationOnlyMode != true ]] && string="Modified $numModifiedRoles existing roles" || string="Would modify $numModifiedRoles existing roles"
+		Msg3 "^$string"
 		[[ $numModifiedRoles -gt 0 ]] && changeLogLines+=("$string")
+
 		string="Mapped $numRoleMembersMappedToUIN role members from UID to UIN"
-		[[ $numRoleMembersMappedToUIN -gt 0 ]] && Msg2 "^$string" && changeLogLines+=("$string")
+		[[ $numRoleMembersMappedToUIN -gt 0 ]] && Msg3 "^$string" && changeLogLines+=("$string")
+
 		string="Found $numRoleMembersNotProvisoned role members not in user provisioning"
-		[[ $numRoleMembersNotProvisoned -gt 0 ]] && Msg2 "^$string" && changeLogLines+=("$string")
+		[[ $numRoleMembersNotProvisoned -gt 0 ]] && Msg3 "^$string" && changeLogLines+=("$string")
 	fi
 
 	[[ $processedUserData == true || $processedRoleData == true ]] && echo
 	if [[ $processedPageData == true ]]; then
-		Msg2 "Page data:"
-		Msg2 "^Retrieved $numWorkflowDataFromSpreadsheet records from $workbookFileIn"
-		string="Updated $numPagesUpdated pages"
-		[[ $informationOnlyMode == true ]] && string="$string $(ColorK "(Information Only flag was set)")"
-		Msg2 "^$string"
+		Msg3 "Page data:"
+		Msg3 "^Retrieved $numWorkflowDataFromSpreadsheet records from $workbookFileIn"
+
+		[[ $informationOnlyMode != true ]] && string="Updated $numPagesUpdated pages" || string="Would update $numPagesUpdated pages"
+		Msg3 "^$string"
 		[[ $numPagesUpdated -gt 0 ]] && changeLogLines+=("$string")
+
 		string="Mapped $numMembersMappedToUIN role members from UID to UIN"
-		[[ $numMembersMappedToUIN -gt 0 ]] && Msg2 "^$string" && changeLogLines+=("$string")
+		[[ $numMembersMappedToUIN -gt 0 ]] && Msg3 "^$string" && changeLogLines+=("$string")
+
 		string="$numPagesNotFound pages not found"
-		[[ $numPagesNotFound -gt 0 ]] && Msg2 "^$string" && changeLogLines+=("$string")
+		[[ $numPagesNotFound -gt 0 ]] && Msg3 "^$string" && changeLogLines+=("$string")
+
 		string="Pages had errors in their owner/workflow data, see below for detailed information"
-		[[ ${#membersErrors[@]} -gt 0 ]] && Msg2 "^$string" && changeLogLines+=("$string")
+		[[ ${#membersErrors[@]} -gt 0 ]] && Msg3 "^$string" && changeLogLines+=("$string")
 
 		## Member lookup errors
 		if [[ ${#membersErrors[@]} -gt 0 ]]; then
 			echo
 			WarningMsg 0 1 "Found page owner or workflow data without a defined userid or role:"
 			for key in "${!membersErrors[@]}"; do
-				Msg2 "^$(ColorW "*Warning*") -- Workflow/Owner member: '$key' not defined and used on the following pages:"
+				Msg3 "^$(ColorW "*Warning*") -- Workflow/Owner member: '$key' not defined and used on the following pages:"
 				IFSsave=$IFS; IFS='|' read -a pages <<< "${membersErrors["$key"]}"; IFS=$IFSsave
 				for page in "${pages[@]}"; do
-					Msg2 "^^'$page'"
+					Msg3 "^^'$page'"
 				done
 				echo
 			done
@@ -1040,3 +1021,4 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 ## 05-15-2017 @ 14.27.49 - (3.8.94)    - dscudiero - Tweek changelog messages
 ## 07-17-2017 @ 13.48.41 - (3.8.95)    - dscudiero - Single quote strings to ParseWorksheetHeader function
 ## 09-29-2017 @ 10.15.03 - (3.8.119)   - dscudiero - Update FindExcecutable call for new syntax
+## 10-09-2017 @ 16.54.07 - (3.9.9)     - dscudiero - Fixed problems with the conversion to getExecl2
