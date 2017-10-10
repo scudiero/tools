@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.129 # -- dscudiero -- Thu 09/28/2017 @  8:48:14.85
+version=2.1.131 # -- dscudiero -- Tue 10/10/2017 @ 16:20:16.23
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -12,7 +12,7 @@ version=2.1.129 # -- dscudiero -- Thu 09/28/2017 @  8:48:14.85
 # 09-05-17 - dgs - Added '--ignore-date' to rsyc options in SyncSkeleton
 #=======================================================================================================================
 TrapSigs 'on'
-includes='FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql2 Msg2 Call GetPW SetFileExpansion'
+includes='FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql2 GetPW SetFileExpansion'
 includes="$includes RunSql2 ProtectedCall"
 Import "$includes"
 
@@ -30,7 +30,7 @@ scriptArgs="$*"
 #=======================================================================================================================
 # Synchronize the internal database shadow with master
 function SyncInternalDb {
-	echo; Msg2 "*** $FUNCNAME -- Starting ***"
+	echo; Msg3 "*** $FUNCNAME -- Starting ***"
 	srcDir=$clientsTransactionalDb
 	tgtDir=$internalContactsDbShadow
 	SetFileExpansion 'on'
@@ -40,14 +40,14 @@ function SyncInternalDb {
 	touch $tgtDir/.syncDate
 	cwd=$(pwd); cd $tgtDir; chgrp -R leepfrog *; chgrp leepfrog .*; cd "$cwd"
 	SetFileExpansion
-	Msg2 "*** $FUNCNAME -- Completed ***"
+	Msg3 "*** $FUNCNAME -- Completed ***"
 	return 0
 }
 
 #=======================================================================================================================
 # Synchronize the courseleaf cgi's  shadow with master
 function SyncCourseleafCgis {
-	echo; Msg2 "*** $FUNCNAME -- Starting ***"
+	echo; Msg3 "*** $FUNCNAME -- Starting ***"
 	srcDir=/mnt/dev6/web/cgi
 	tgtDir=$cgisRoot
 	rsync -aq $srcDir/ $tgtDir 2>&1
@@ -56,14 +56,14 @@ function SyncCourseleafCgis {
 	SetFileExpansion 'on'
 	cwd=$(pwd); cd $tgtDir; chgrp -R leepfrog *; chgrp leepfrog .*; cd "$cwd"
 	SetFileExpansion
-	Msg2 "*** $FUNCNAME -- Completed ***"
+	Msg3 "*** $FUNCNAME -- Completed ***"
 	return 0
 }
 
 #=======================================================================================================================
 # Synchronize the skeleton shadow with master
 function SyncSkeleton {
-	echo; Msg2 "*** $FUNCNAME -- Starting ***"
+	echo; Msg3 "*** $FUNCNAME -- Starting ***"
 	srcDir=/mnt/dev6/web/_skeleton
 	tgtDir=$skeletonRoot
 
@@ -87,14 +87,14 @@ function SyncSkeleton {
 		SetFileExpansion
 
 	[[ -f "$tmpFile" ]] && rm "$tmpFile"
-	Msg2 "*** $FUNCNAME -- Completed ***"
+	Msg3 "*** $FUNCNAME -- Completed ***"
 	return 0
 } #SyncSkeleton
 
 #=======================================================================================================================
 # Check Monitored files for changes
 function CheckMonitorFiles {
-	echo; Msg2 "*** $FUNCNAME -- Starting ***"
+	echo; Msg3 "*** $FUNCNAME -- Starting ***"
 	local tmpFile=$(MkTmpFile $FUNCNAME)
 
 	declare -A userNotifies
@@ -142,18 +142,18 @@ function CheckMonitorFiles {
 		done;
 
 	[[ -f "$tmpFile" ]] && rm "$tmpFile"
-	Msg2 "*** $FUNCNAME -- Completed ***"
+	Msg3 "*** $FUNCNAME -- Completed ***"
 	return 0
 } #CheckMonitorFiles
 
 #=======================================================================================================================
 function BuildToolsAuthTable() {
 	local tmpFile=$(MkTmpFile $FUNCNAME)
-	echo; Msg2 "*** $FUNCNAME -- Starting ***"
+	echo; Msg3 "*** $FUNCNAME -- Starting ***"
 
 	## Build the toolsgroups table from the role data from the stage-internal site
 		pw=$(GetPW 'stage-internal')
-		[[ $pw == '' ]] && Msg2 "T Could not lookup password for 'stage-internal' in password file.\n"
+		[[ $pw == '' ]] && Msg3 "T Could not lookup password for 'stage-internal' in password file.\n"
 		rolesFileURL="https://stage-internal.leepfrog.com/pagewiz/roles.tcf"
 		curl -u $userName:$pw $rolesFileURL 2>/dev/null | grep '^role:' | cut -d ":" -f 2 > $tmpFile
 		if [[ ${myRhel:0:1} -ge 6 ]]; then
@@ -179,11 +179,11 @@ function BuildToolsAuthTable() {
 					(( i+=1 ))
 				done
 		else
-			Msg2 "W No roles recovered from $rolesFileURL"
+			Msg3 "W No roles recovered from $rolesFileURL"
 		fi
 
 		[[ -f "$tmpFile" ]] && rm "$tmpFile"
-		Msg2 "*** $FUNCNAME -- Completed ***"
+		Msg3 "*** $FUNCNAME -- Completed ***"
 	return 0
 } #BuildToolsAuthTable
 
@@ -197,17 +197,30 @@ case "$hostName" in
 			## Make sure we have a sites table before running perfTest
 			sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
 			RunSql2 $sqlStmt
-			[[ ${#resultSet[@]} -gt 0 ]] && Call 'perfTest'
+			if [[ ${#resultSet[@]} -gt 0 ]]; then
+				executeFile=$(FindExecutable "perfTest" "-sh")
+				[[ -z $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
+				source $executeFile
+			fi
 		fi
-		Call 'updateDefaults' 'all'
+		executeFile=$(FindExecutable "updateDefaults" "-sh")
+		[[ -z $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
+		source $executeFile "all"
 		CheckMonitorFiles
 		SyncInternalDb
 		#BuildToolsAuthTable
 		SyncCourseleafCgis
 		SyncSkeleton
 		## If noon then update the git repo shadows
-		[[ $(date "+%H") == 12 ]] && Call 'syncCourseleafGitRepos' 'master'
-		[[ $(date "+%H") == 22 ]] && USELOCAL=true && Call 'backupData'
+		if [[ $(date "+%H") == 12 ]]; then
+			executeFile=$(FindExecutable "syncCourseleafGitRepos" "-sh")
+			source $executeFile 'master'
+		fi
+		if [[ $(date "+%H") == 22 ]]; then
+			USELOCAL=true
+			executeFile=$(FindExecutable "backupData" "-sh")
+			source $executeFile
+		fi
 		;;
 	*)
 		sleep 60 ## Wait for perfTest on Mojave to set its semaphore
@@ -216,9 +229,17 @@ case "$hostName" in
 			## Make sure we have a sites table before running perfTest
 			sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
 			RunSql2 $sqlStmt
-			[[ ${#resultSet[@]} -gt 0 ]] && Semaphore 'waiton' 'perfTest' && Call 'perfTest' && Call 'perfTest' 'summary'
+			if [[ ${#resultSet[@]} -gt 0 ]]; then
+				Semaphore 'waiton' 'perfTest'
+				executeFile=$(FindExecutable "perfTest" "-sh")
+				[[ -z $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
+				source $executeFile
+				source $executeFile 'summary'
+			fi
 		fi
-		Call 'updateDefaults'
+		executeFile=$(FindExecutable "updateDefaults" "-sh")
+		[[ -z $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
+		source $executeFile
 		CheckMonitorFiles
 		;;
 esac
@@ -239,7 +260,7 @@ return 0
 ## Fri Jan 27 08:00:12 CST 2017 - dscudiero - Add perftest
 ## Fri Jan 27 14:21:16 CST 2017 - dscudiero - Add perftest summary record generation
 ## Fri Jan 27 14:29:55 CST 2017 - dscudiero - General syncing of dev to prod
-## Fri Feb  3 11:28:29 CST 2017 - dscudiero - Change Msg2; Msg2 to echo; Msg2
+## Fri Feb  3 11:28:29 CST 2017 - dscudiero - Change Msg2; Msg3 to echo; Msg2
 ## Mon Feb  6 09:19:58 CST 2017 - dscudiero - Remove debug message
 ## Tue Feb  7 15:15:13 CST 2017 - dscudiero - allow file expansion for the chgrp in syncskeleton
 ## Thu Feb  9 08:07:08 CST 2017 - dscudiero - Check to make sure there is a sites table before running perftest
@@ -260,3 +281,4 @@ return 0
 ## 09-12-2017 @ 07.42.46 - (2.1.126)   - dscudiero - set USELOCAL before call of backupdata
 ## 09-21-2017 @ 08.17.52 - (2.1.127)   - dscudiero - comment out updateauthtable
 ## 09-28-2017 @ 08.49.42 - (2.1.129)   - dscudiero - Modify calls to updateDefaults to add mode
+## 10-10-2017 @ 16.20.35 - (2.1.131)   - dscudiero - Swap out usage of Call
