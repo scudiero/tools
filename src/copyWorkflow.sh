@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.35 # -- dscudiero -- Tue 10/10/2017 @ 13:33:07.85
+version=2.10.36 # -- dscudiero -- Tue 10/10/2017 @ 13:36:14.62
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile"
@@ -331,7 +331,7 @@ Hello
 		verify=true
 		Msg3
 		Warning "You are asking to source the copy from the $(ColorW $(Upper $srcEnv)) environment but a private site ($client-$userName) was detected"
-		unset ans; Prompt ans "Are you sure" "Yes No";
+		unset ans; Prompt ans "Are you sure" "Yes No" "Yes";
 		ans=$(Lower ${ans:0:1})
 		[[ $ans != 'y' ]] && Goodbye -1
 	fi
@@ -622,3 +622,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 10-04-2017 @ 16.12.32 - (2.10.29)   - dscudiero - Tweak the names of the workflow backup files
 ## 10-09-2017 @ 16.53.42 - (2.10.34)   - dscudiero - Fix problem setting backup directory names
 ## 10-10-2017 @ 13.33.45 - (2.10.35)   - dscudiero - Take the restriction for the jalot data to be only numeric away
+## 10-10-2017 @ 13.44.43 - (2.10.36)   - dscudiero - Add default values for some questions
