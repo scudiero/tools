@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.109 # -- dscudiero -- Tue 10/10/2017 @ 14:08:57.84
+version=2.0.110 # -- dscudiero -- Tue 10/10/2017 @ 15:52:36.44
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -50,7 +50,7 @@ originalArgStr="$*"
 #=======================================================================================================================
 ## Run the executable(s)
 	useLocal=true
-	echo -e "\n$(date) -- Calling script/n" > "$logFile" 2>&1
+	echo -e "\n$(date) -- Calling script $executeFile $callScriptArgs\n" > "$logFile" 2>&1
 	source $executeFile $scriptArgs "$callScriptArgs" >> "$logFile" 2>&1
 	echo -e "\t-- $hostName - $callScriptName done" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 
@@ -105,3 +105,4 @@ exit 0
 ## 09-08-2017 @ 08.11.18 - (2.0.106)   - dscudiero - Import the Call function before use
 ## 10-10-2017 @ 13.28.06 - (2.0.107)   - dscudiero - Switch from Call to FindExecutableFile
 ## 10-10-2017 @ 14.09.18 - (2.0.109)   - dscudiero - add --cron flag on findExcutable call
+## 10-10-2017 @ 15.52.43 - (2.0.110)   - dscudiero - Cosmetic/minor change
