@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.107 # -- dscudiero -- Tue 10/10/2017 @ 13:27:33.58
+version=2.0.109 # -- dscudiero -- Tue 10/10/2017 @ 14:08:57.84
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -32,8 +32,8 @@ originalArgStr="$*"
 	source "$dispatcher" --viaCron ## Setup the environment
 	echo -e "\t\t-- $hostName - back from dispatcher" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 
-	executeFile=$(FindExecutable "$callScriptName")
-	[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
+	executeFile=$(FindExecutable "$callScriptName" "--cron")
+	[[ -z $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
 
 #=======================================================================================================================
 ## Log the cronJob
@@ -104,3 +104,4 @@ exit 0
 ## 07-31-2017 @ 07.24.49 - (2.0.105)   - dscudiero - Add the name of the cron job called to the log
 ## 09-08-2017 @ 08.11.18 - (2.0.106)   - dscudiero - Import the Call function before use
 ## 10-10-2017 @ 13.28.06 - (2.0.107)   - dscudiero - Switch from Call to FindExecutableFile
+## 10-10-2017 @ 14.09.18 - (2.0.109)   - dscudiero - add --cron flag on findExcutable call
