@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.34 # -- dscudiero -- Mon 10/09/2017 @ 15:05:31.15
+version=2.10.35 # -- dscudiero -- Tue 10/10/2017 @ 13:33:07.85
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile"
@@ -338,7 +338,7 @@ Hello
 
 ## Get update comment
 	[[ $verify == true ]] && echo
-	Prompt jalot "Please enter the jalot task number:" "*isNumeric*"
+	Prompt jalot "Please enter the jalot task number:" "*any*"
 	Prompt comment "Please enter the business reason for making this update:\n^" "*any*"
 	[[ $jalot -eq 0 ]] && jalot='N/A'
 	comment="(Task:$jalot) $comment"
@@ -621,3 +621,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 10-04-2017 @ 11.29.57 - (2.10.28)   - dscudiero - Do not update target file stuctures if different from source, just print a message
 ## 10-04-2017 @ 16.12.32 - (2.10.29)   - dscudiero - Tweak the names of the workflow backup files
 ## 10-09-2017 @ 16.53.42 - (2.10.34)   - dscudiero - Fix problem setting backup directory names
+## 10-10-2017 @ 13.33.45 - (2.10.35)   - dscudiero - Take the restriction for the jalot data to be only numeric away
