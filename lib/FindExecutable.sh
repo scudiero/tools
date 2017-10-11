@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.23" # -- dscudiero -- Wed 10/11/2017 @  7:27:57.98
+# version="1.2.24" # -- dscudiero -- Wed 10/11/2017 @  7:31:35.32
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -88,4 +88,5 @@ export -f FindExecutable
 ## 09-29-2017 @ 13.03.09 - ("1.2.3")   - dscudiero - remove debug code
 ## 10-02-2017 @ 11.37.34 - ("1.2.20")  - dscudiero - Add -python, -java, -cpp
 ## 10-02-2017 @ 12.36.17 - ("1.2.21")  - dscudiero - General syncing of dev to prod
-## 10-11-2017 @ 07.30.52 - ("1.2.23")  - dscudiero - Tweak how we call the script
+## 10-11-2017 @ 07.30.52 - ("1.2.23")  - dscudiero - Added -run option
+## 10-11-2017 @ 07.31.46 - ("1.2.24")  - dscudiero - Cosmetic/minor change
