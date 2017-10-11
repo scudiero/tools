@@ -14,6 +14,14 @@
 # All rights reserved
 #===================================================================================================
 function RunSql2 {
+
+	function MyContains {
+		local string="$1"
+		local subStr="$2"
+		[[ "${string#*$subStr}" != "$string" ]] && echo true || echo false
+		return 0
+	}
+
 	if [[ ${1:0:1} == '/' ]]; then
 		local dbFile="$1" && shift
 		local dbType='sqlite3'
@@ -41,32 +49,23 @@ function RunSql2 {
 
 	## Run the query
 		set -f
-		if [[ $dbType == 'mysql' ]]; then
-			resultStr=$(java runMySql $sqlStmt 2>&1)
-		else
-			resultStr=$(sqlite3 $dbFile "$sqlStmt" 2>&1 | tr "\t" '|')
-		fi
-		[[ $prevGlob == 'on' ]] && set +f
-		## Check for errors
-		if [[ $(Contains "$resultStr" 'SEVERE:') == true || \
-			$(Contains "$resultStr" 'ERROR') == true || \
-			$(Contains "$resultStr" '\*Error\*') == true || \
-			$(Contains "$resultStr" 'Error occurred during initialization of VM') == true ]]; then
+		[[ $dbType == 'mysql' ]] && resultStr="$(java runMySql $sqlStmt 2>&1)" || resultStr="$(sqlite3 $dbFile "$sqlStmt" 2>&1 | tr "\t" '|')"
+ 		[[ $prevGlob == 'on' ]] && set +f
+ 		## Check for errors
+ 		local tmpStr="$(tr '[:upper:]' '[:lower:]' <<< "$resultStr")" 
+		if [[ $(MyContains "$tmpStr" 'sever:') == true || $(MyContains "$tmpStr" 'error' == true) == true ]]; then
 			local callerData="$(caller)"
 			local lineNo="$(basename $(cut -d' ' -f2 <<< $callerData))/$(cut -d' ' -f1 <<< $callerData)"
 			msg="$FUNCNAME: Error reported from $dbType"
 			[[ $dbType == 'sqlite3' ]] && msg="$msg\n\tFile: $dbFile"
 			msg="$msg\n\tsqlStmt: $sqlStmt\n\n\t$resultStr"
 			echo -e "$(ColorT "*Fatal Error*") -- ($lineNo) $msg"
-			exit -1
+			return -3
 		fi
-
-	## Write output to an array
+ 	## Write output to an array
 		unset resultSet
-		[[ $resultStr != '' ]] && IFS=$'\n' read -rd '' -a resultSet <<<"$resultStr"
-		#resultStr="${resultStr//$'\n'/x'00'}" ## Remove the carriage return chars
-		#[[ -n $resultStr ]] && read -rd x'00' -a resultSet <<< "$resultStr" ## Parse on the new line char
-
+		[[ $resultStr != '' ]] && IFS=$'\n' read -rd '' -a resultSet <<< "$resultStr"
+		readarray -t resultSet <<< "${resultStr}"
 	return 0
 } #RunMySql
 export -f RunSql2
@@ -92,3 +91,4 @@ export -f RunSql2
 ## 10-03-2017 @ 14.56.04 - ("1.1.-1")  - dscudiero - General syncing of dev to prod
 ## 10-03-2017 @ 15.46.14 - ("1.1.-1")  - dscudiero - Update how we set the return array
 ## 10-04-2017 @ 12.47.32 - ("1.1.-1")  - dscudiero - Regress to the old parsing method
+## 10-11-2017 @ 09.32.00 - ("1.1.-1")  - dscudiero - Update to use readarrau to parse output string to resutSet array
