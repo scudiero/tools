@@ -1,12 +1,12 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.45 # -- dscudiero -- Wed 09/27/2017 @  7:32:59.54
+version=2.1.46 # -- dscudiero -- Wed 10/11/2017 @ 10:36:50.01
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes="SetSiteDirs ProtectedCall SetFileExpansion RunSql2"
+myIncludes="SetSiteDirs ProtectedCall SetFileExpansion RunSql2 Msg3"
 Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -136,3 +136,4 @@ return 0
 ## 09-21-2017 @ 10.02.41 - (2.1.43)    - dscudiero - Add rollup of the processlog
 ## 09-21-2017 @ 10.15.16 - (2.1.44)    - dscudiero - Change the name of the tar file to reflect the quarter number
 ## 09-27-2017 @ 07.52.12 - (2.1.45)    - dscudiero - Switched to msg3
+## 10-11-2017 @ 10.37.49 - (2.1.46)    - dscudiero - Switch to use FindExecutable -run
