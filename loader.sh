@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.28" # -- dscudiero -- Wed 10/11/2017 @  9:45:31.34
+version="1.4.30" # -- dscudiero -- Wed 10/11/2017 @  9:49:50.87
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -218,6 +218,8 @@ sTime=$(date "+%s")
 ## Load tools defaults value
 	defaultsLoaded=false
 	GetDefaultsData "$myName" -fromFiles
+	prtStatus ", getdefaults"
+	sTime=$(date "+%s")
 
 ## Set forking limit
 	maxForkedProcesses=$maxForkedProcessesPrime
@@ -257,8 +259,8 @@ sTime=$(date "+%s")
 		# 	UsersAuthGroups="${UsersAuthGroups:1}"
 		# fi
 
-		# prtStatus ", check run/auth"
-		# sTime=$(date "+%s")
+		prtStatus ", check run/auth"
+		sTime=$(date "+%s")
 
 	## Check semaphore
 		[[ $(Contains ",$setSemaphoreList," ",$callPgmName," ) == true ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
@@ -889,3 +891,4 @@ fi
 ## 10-04-2017 @ 12.47.15 - ("1.4.27")  - dscudiero - Comment out the UserAuthGroups stuff
 ## 10-11-2017 @ 09.44.36 - ("1.4.28")  - dscudiero - Add Debug statements
 ## 10-11-2017 @ 09.45.43 - ("1.4.28")  - dscudiero - Remove debug statements
+## 10-11-2017 @ 09.55.24 - ("1.4.30")  - dscudiero - Remove debug
