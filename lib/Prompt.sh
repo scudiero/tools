@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.24" # -- dscudiero -- Wed 10/11/2017 @ 11:27:50.76
+# version="2.1.37" # -- dscudiero -- Wed 10/11/2017 @ 12:41:53.45
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -12,7 +12,8 @@
 function Prompt {
 	includes='Msg3 Dump VerifyPromptVal SelectClient'
 	Import "$includes"
-
+	function logResponse { echo -e "\n\tPrompt -- Using specified value of '${!promptVar}' for '$promptVar'" >> "$logFile"; }
+	
 	declare promptVar=$1; shift || true
 	declare promptText=$1; shift || true
 	declare validateList=$1; shift || true
@@ -32,6 +33,7 @@ function Prompt {
 		else
 			eval $promptVar=\"$defaultVal\"
 			Note 0 1 "'batchMode is set, using selected value of '$defaultVal' for 'client'"
+			logResponse
 			return 0
 		fi
 	fi
@@ -99,8 +101,9 @@ function Prompt {
 							[[ $rc -gt 0 && $tCntr -ge $maxReadTimeout ]] && echo && Terminate "Read operation timed out after the maximum time of $maxReadTimeout seconds" && exit
 						done ; echo
 						if [[ -z $response ]]; then
-							[[ -n $defaultVal ]] && Note 0 1 "Read timed out, using default value '$defaultVal' for '$promptVar'"
+							[[ -n $defaultVal ]] && { echo >> "$logFile"; Note 0 1 "Read timed out, using default value '$defaultVal' for '$promptVar'"; }
 							eval $promptVar=\"$defaultVal\"
+							logResponse
 							return 0
 						fi
 					fi
@@ -110,20 +113,21 @@ function Prompt {
 			[[ $(Lower ${response}) == 'x' ]] && Goodbye 'x'
 			if [[ -z $response && -n $defaultVal ]]; then
 				eval $promptVar=\"$defaultVal\"
-				[[ $defaultValueUseNotes == true && -n $defaultVal ]] && Note 0 1 "Using default value of '$defaultVal' for '$promptVar'"
+				[[ $defaultValueUseNotes == true && -n $defaultVal ]] && { echo >> "$logFile"; Note 0 1 "Using default value of '$defaultVal' for '$promptVar'"; }
+				logResponse
 				return 0
 			fi
-			[[ -n $response && $validateList == '*any*' ]] && eval $promptVar=\"$response\" && return 0
-			[[ $validateList == '*optional*' ]] && eval $promptVar=\"$response\" && return 0
-			[[ -z $response && $validateList == '*optional*' ]] && eval unset $promptVar && return 0
-			[[ -n $response && $noCheck == true ]] && eval $promptVar=\"$response\" && return 0
+			[[ -n $response && $validateList == '*any*' ]] && { eval $promptVar=\"$response\"; logResponse; return 0; }
+			[[ $validateList == '*optional*' ]] && { eval $promptVar=\"$response\"; logResponse; return 0; }
+			[[ -z $response && $validateList == '*optional*' ]] && { eval unset $promptVar; logResponse; return 0; }
+			[[ -n $response && $noCheck == true ]] && { eval $promptVar=\"$response\"; logResponse; return 0; }
 		done
 		dump -2 -l response
 
 		if [[ "$promptVar" == 'client' && $response == '?' ]]; then
 			Info 0 1 "Gathering data..."
 			SelectClient 'response'
-			[[ $secondaryMessagesOnly != true && $defaultValueUseNotes == true ]] && Msg3 && Note 0 1 "Using selected value of '$selectResp' for 'client'"
+			[[ $secondaryMessagesOnly != true && $defaultValueUseNotes == true ]] && { echo >> "$logFile"; Note 0 1 "Using selected value of '$selectResp' for 'client'"; }
 			eval $promptVar=\"$response\"
 			loop=false
 
@@ -159,12 +163,14 @@ function Prompt {
 					done
 				fi
 				eval $promptVar=\"$response\"
-				[[ $hadValue == true && $secondaryMessagesOnly != true && $defaultValueUseNotes == true ]] && Note 0 1 "Using specified value of '$response' for '$promptVar'"
+				[[ $hadValue == true && $secondaryMessagesOnly != true && $defaultValueUseNotes == true ]] && \
+							{ echo >> "$logFile"; Note 0 1 "Using specified value of '$response' for '$promptVar'"; }
 				loop=false
 			fi
 		fi #[[  "$promptVar" == 'client' && $response == '?' ]]
 	done
-	[[ $hadValue != true && -n $logFile ]] && echo -e "\n^$FUNCNAME: Using specified value of '$response' for '$promptVar'" >> $logFile
+	#[[ $hadValue != true && -n $logFile ]] && echo -e "\n^$FUNCNAME: Using specified value of '$response' for '$promptVar'" >> $logFile
+	logResponse
 	return 0
 } #Prompt
 export -f Prompt
@@ -188,3 +194,4 @@ export -f Prompt
 ## 09-28-2017 @ 08.22.09 - ("2.1.22")  - dscudiero - Remove the debug stuss
 ## 10-04-2017 @ 16.26.10 - ("2.1.23")  - dscudiero - Switch to use Msg3
 ## 10-11-2017 @ 11.28.21 - ("2.1.24")  - dscudiero - Fix bug logging default value selection to the log file
+## 10-11-2017 @ 12.50.55 - ("2.1.37")  - dscudiero - Tweak how we add output to the log file
