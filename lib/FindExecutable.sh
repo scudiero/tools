@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.21" # -- dscudiero -- Mon 10/02/2017 @ 12:00:21.66
+# version="1.2.23" # -- dscudiero -- Wed 10/11/2017 @  7:27:57.98
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -20,7 +20,7 @@ function FindExecutable {
 	#Import 'Dump,Msg3'; Verbose 3 -l "$FUNCNAME: Starting"
 	## Defaults ====================================================================================
 	local mode='source' file='' token type ext found=false searchTokens checkFile searchRoot=''
-	local useLocal=$USELOCAL useDev=$USEDEV
+	local useLocal=$USELOCAL useDev=$USEDEV runScript=false scriptArgs=''
 	## Parse arguments =============================================================================
 	while [[ $# -gt 0 ]]; do
 	    [[ $1 =~ ^-fi|--file$ ]] && { file="$2"; shift 2; continue; }
@@ -35,8 +35,9 @@ function FindExecutable {
 	    [[ $1 =~ ^-pa|--patch$ ]] && { mode='patch'; searchRoot="${mode}s"; shift 1; continue; }
 	    [[ $1 =~ ^-fe|--feature$ ]] && { mode='feature'; searchRoot="${mode}s"; shift 1; continue; }
 	    [[ $1 =~ ^-st|--step$ ]] && { mode='step'; searchRoot="${mode}s"; shift 1; continue; }
-	    [[ $1 =~ ^-r|--report$ ]] && { mode='report'; searchRoot="${mode}s"; shift 1; continue; }
-	    [[ -z $file ]] && file="$1"
+	    [[ $1 =~ ^-re|--report$ ]] && { mode='report'; searchRoot="${mode}s"; shift 1; continue; }
+	    [[ $1 =~ ^-ru|--run$ ]] && { runScript=true; shift 1; continue; }
+	    [[ -z $file ]] && file="$1" || scriptArgs="$scriptArgs $1"
 	    shift 1 || true
 	done
 
@@ -65,8 +66,8 @@ function FindExecutable {
 		done
 		[[ $found == true ]] && break
 	done
-	#Verbose "$FUNCNAME: Ending"
-	echo "$checkFile"
+
+	[[ $runScript == true ]] && source $executeFile $scriptArgs || echo "$checkFile"
 	return 0
 } ##FindExecutable
 export -f FindExecutable
@@ -87,3 +88,4 @@ export -f FindExecutable
 ## 09-29-2017 @ 13.03.09 - ("1.2.3")   - dscudiero - remove debug code
 ## 10-02-2017 @ 11.37.34 - ("1.2.20")  - dscudiero - Add -python, -java, -cpp
 ## 10-02-2017 @ 12.36.17 - ("1.2.21")  - dscudiero - General syncing of dev to prod
+## 10-11-2017 @ 07.30.52 - ("1.2.23")  - dscudiero - Tweak how we call the script
