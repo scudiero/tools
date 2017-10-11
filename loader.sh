@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.40" # -- dscudiero -- Wed 10/11/2017 @ 11:48:36.49
+version="1.4.41" # -- dscudiero -- Wed 10/11/2017 @ 12:46:20.73
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -276,7 +276,7 @@ sTime=$(date "+%s")
 	## Initialize the log file
 		sTime=$(date "+%s")
 		logFile=/dev/null
-		if [[ $noLog != true ]]; then
+		if [[ $noLog != true ]] && [[ $callPgmName != "scripts" || $callPgmName != "reports" ]]; then
 			logFile=${logsRoot}${callPgmName}/$userName--$backupSuffix.log
 			[[ -e "$logFile" ]] && rm -f "$logFile"
 			if [[ ! -d $(dirname $logFile) ]]; then
@@ -894,3 +894,4 @@ fi
 ## 10-11-2017 @ 10.58.36 - ("1.4.33")  - dscudiero - Cosmetic/minor change
 ## 10-11-2017 @ 11.26.38 - ("1.4.35")  - dscudiero - Send the startup message to the logFile only
 ## 10-11-2017 @ 11.50.27 - ("1.4.40")  - dscudiero - Cleanup logfile initialization
+## 10-11-2017 @ 12.51.16 - ("1.4.41")  - dscudiero - If calling scripts or reports then do not build a log file
