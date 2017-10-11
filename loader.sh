@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.27" # -- dscudiero -- Wed 10/04/2017 @ 12:45:08.01
+version="1.4.28" # -- dscudiero -- Wed 10/11/2017 @  9:44:26.24
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -247,15 +247,18 @@ sTime=$(date "+%s")
 		[[ $checkMsg != true ]] && Terminate "$checkMsg"
 
 	## Get the users auth groups
-		# sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\""
-		# RunSql2 $sqlStmt
-		# unset UsersAuthGroups
-		# if [[ ${#resultSet[@]} -ne 0 ]]; then
-		# 	for ((i=0; i<${#resultSet[@]}; i++)); do
-		# 		UsersAuthGroups="$UsersAuthGroups,${resultSet[$i]}"
-		# 	done
-		# 	UsersAuthGroups="${UsersAuthGroups:1}"
-		# fi
+if [[ $userName = dscudiero ]]; then
+		sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\""
+		RunSql2 $sqlStmt
+		unset UsersAuthGroups
+		if [[ ${#resultSet[@]} -ne 0 ]]; then
+			for ((i=0; i<${#resultSet[@]}; i++)); do
+				UsersAuthGroups="$UsersAuthGroups,${resultSet[$i]}"
+			done
+			UsersAuthGroups="${UsersAuthGroups:1}"
+		fi
+dump UsersAuthGroups
+fi
 
 		# prtStatus ", check run/auth"
 		# sTime=$(date "+%s")
@@ -441,3 +444,4 @@ sTime=$(date "+%s")
 ## 10-03-2017 @ 14.59.39 - ("1.4.10")  - dscudiero - Comment out the UserAuthGroup stuff
 ## 10-03-2017 @ 15.46.56 - ("1.4.26")  - dscudiero - Uncomment the UserAuthGroups data
 ## 10-04-2017 @ 12.47.15 - ("1.4.27")  - dscudiero - Comment out the UserAuthGroups stuff
+## 10-11-2017 @ 09.44.36 - ("1.4.28")  - dscudiero - Add Debug statements
