@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.56 # -- dscudiero -- Tue 10/03/2017 @ 11:29:32.73
+version=2.0.57 # -- dscudiero -- Wed 10/11/2017 @  7:35:29.68
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -55,7 +55,7 @@ Verbose "mode = '$mode'"
 		else
 			sqlStmt="update defaults set value=\"$newServers\",updatedOn=Now(),updatedBy=\"$userName\" where name=\"devServers\" and host=\"$hostName\" and os=\"linux\""
 		fi
-		dump -1 -t sqlStmt
+		dump 1 -t sqlStmt
 		RunSql2 $sqlStmt
 
 ## PROD servers
@@ -77,14 +77,14 @@ Verbose "mode = '$mode'"
 		else
 			sqlStmt="update defaults set value=\"$newServers\",updatedOn=Now(),updatedBy=\"$userName\" where name=\"prodServers\" and host=\"$hostName\" and os=\"linux\""
 		fi
-		dump -1 -t sqlStmt
+		dump 1 -t sqlStmt
 		RunSql2 $sqlStmt
 
 ## Update rhel version.
 	rhel="$(cat /etc/redhat-release | cut -d" " -f3 | cut -d '.' -f1)"
 	[[ $(IsNumeric ${rhel:0:1}) != true ]] && rhel=$(cat /etc/redhat-release | cut -d" " -f4 | cut -d '.' -f1)
 	rhel='rhel'$rhel
-	dump -1 rhel
+	dump 1 rhel
 	sqlStmt="update defaults set value=\"$rhel\" where name=\"rhel\" and host=\"$hostName\" and os=\"linux\""
 	RunSql2 $sqlStmt
 	Verbose "rhel = '$rhel'"
@@ -94,7 +94,7 @@ Verbose "mode = '$mode'"
 	unset defaultClVer
 	if [[ -r $skeletonRoot/release/web/courseleaf/clver.txt ]]; then
 		defaultClVer="$(cat $skeletonRoot/release/web/courseleaf/clver.txt)"
-		dump -1 defaultClVer
+		dump 1 defaultClVer
 		sqlStmt="update defaults set value=\"$defaultClVer\" where name=\"defaultClVer\""
 		RunSql2 $sqlStmt
 	else
@@ -204,3 +204,4 @@ Goodbye 0;
 ## 10-02-2017 @ 15.31.24 - (2.0.51)    - dscudiero - fix problem with field index numbers writing out the script specific defaults
 ## 10-03-2017 @ 11.23.16 - (2.0.52)    - dscudiero - Do not set scriptArgs
 ## 10-03-2017 @ 11.31.05 - (2.0.56)    - dscudiero - General syncing of dev to prod
+## 10-11-2017 @ 07.42.28 - (2.0.57)    - dscudiero - Update debug statements
