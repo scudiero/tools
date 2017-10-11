@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.23" # -- dscudiero -- Wed 10/04/2017 @ 16:25:56.64
+# version="2.1.24" # -- dscudiero -- Wed 10/11/2017 @ 11:27:50.76
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -164,7 +164,7 @@ function Prompt {
 			fi
 		fi #[[  "$promptVar" == 'client' && $response == '?' ]]
 	done
-	[[ $hadValue != true && -n $logFile ]] && Msg3 "\n^$FUNCNAME: Using specified value of '$response' for '$promptVar'" >> $logFile
+	[[ $hadValue != true && -n $logFile ]] && echo -e "\n^$FUNCNAME: Using specified value of '$response' for '$promptVar'" >> $logFile
 	return 0
 } #Prompt
 export -f Prompt
@@ -187,3 +187,4 @@ export -f Prompt
 ## 09-25-2017 @ 09.01.55 - ("2.1.21")  - dscudiero - Switch to Msg3
 ## 09-28-2017 @ 08.22.09 - ("2.1.22")  - dscudiero - Remove the debug stuss
 ## 10-04-2017 @ 16.26.10 - ("2.1.23")  - dscudiero - Switch to use Msg3
+## 10-11-2017 @ 11.28.21 - ("2.1.24")  - dscudiero - Fix bug logging default value selection to the log file
