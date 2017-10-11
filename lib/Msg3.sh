@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.20" # -- dscudiero -- Wed 10/11/2017 @ 10:44:20.78
+# version="1.0.21" # -- dscudiero -- Wed 10/11/2017 @ 10:49:09.01
 #===================================================================================================
 # Usage: Msg3 <msgType> <msgLevel> <indentLevel> msgText
 # 	msgType: [N,I,W,E,T]
@@ -60,7 +60,7 @@ function Msg3 {
 		[[ "${msgText#*\^}" != "$msgText" ]] && msgText="${msgText//^/$tabStr}" ## Expand tab chars
 
 		echo -e "$msgText"
-		echo -e "$msgText" >> "$logFile"&
+		[[ -n $loadFile && -w $logFile ]] && echo -e "$msgText" >> "$logFile"&
 		[[ $msgType == 'T' ]] && Goodbye 3
 
 	return 0
@@ -94,3 +94,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 10-05-2017 @ 09.42.12 - ("1.0.18")  - dscudiero - General syncing of dev to prod
 ## 10-11-2017 @ 10.43.22 - ("1.0.19")  - dscudiero - Write message out to the logFile also
 ## 10-11-2017 @ 10.44.29 - ("1.0.20")  - dscudiero - Cosmetic/minor change
+## 10-11-2017 @ 10.49.36 - ("1.0.21")  - dscudiero - check to make sure logFile exists and is writeable before writing
