@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.30" # -- dscudiero -- Wed 10/11/2017 @  9:49:50.87
+version="1.4.32" # -- dscudiero -- Wed 10/11/2017 @ 10:51:27.06
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -282,13 +282,13 @@ sTime=$(date "+%s")
 				chown -R "$userName:leepfrog" "$(dirname $logFile)"
 				chmod -R ug+rwx "$(dirname $logFile)"
 			fi
-			touch "$logFile"
+			echo > "$logFile"
 			chmod ug+rwx "$logFile"
 			chown "$userName:leepfrog" "$logFile"
-			Msg3 "$(PadChar)" > $logFile
+			Msg3 "$(PadChar)"
 			[[ -n $scriptArgs ]] && scriptArgsTxt=" $scriptArgs" || unset scriptArgsTxt
-			Msg3 "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}" >> $logFile
-			Msg3 "$(PadChar)" >> $logFile
+			Msg3 "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}"
+			Msg3 "$(PadChar)"
 			Msg3 >> $logFile
 		fi
 
@@ -892,3 +892,4 @@ fi
 ## 10-11-2017 @ 09.44.36 - ("1.4.28")  - dscudiero - Add Debug statements
 ## 10-11-2017 @ 09.45.43 - ("1.4.28")  - dscudiero - Remove debug statements
 ## 10-11-2017 @ 09.55.24 - ("1.4.30")  - dscudiero - Remove debug
+## 10-11-2017 @ 10.52.27 - ("1.4.32")  - dscudiero - change how log file is created
