@@ -16,7 +16,7 @@ count=${1-1000}; shift || true
 tmpFile="/tmp/$LOGNAME.perfTest.sh.out"
 [[ ${mode:0:1} == '-' ]] && mode="${mode:1}"
 #echo "mode = '$mode'"
-Msg2 "$myName starting, mode=$mode, count=$count"
+Msg3 "$myName starting, mode=$mode, count=$count"
 if [[ $mode == 'summary' ]]; then
         SetFileExpansion 'off'
         sqlStmt="select * from perftest where date like \"%$(date "+%m-%d-%y %H")%\" order by idx"
@@ -135,7 +135,7 @@ else
         [[ -f "/steamboat/leepfrog/docs/tools/perfTest" ]] && rm -rf "/steamboat/leepfrog/docs/tools/perfTest"
         [[ -f "$tmpFile" ]] && rm -f "$tmpFile"
 fi
-Msg2 "$myName done"
+Msg3 "$myName done"
 
 
 ## Thu Jan  5 16:36:09 CST 2017 - dscudiero - Add time stamp to the date field
@@ -151,3 +151,4 @@ Msg2 "$myName done"
 ## Fri Feb 24 08:32:06 CST 2017 - dscudiero - more debug stuff
 ## Fri Feb 24 09:47:44 CST 2017 - dscudiero - remove debug statements
 ## 07-18-2017 @ 13.16.11 - dscudiero - Add start/end messages
+## 10-11-2017 @ 10.38.57 - dscudiero - switch Msg2 for Msg3
