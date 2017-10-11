@@ -570,7 +570,7 @@ fi
 ## Bye-bye
 [[ -n $asSite ]] && msgText="$(ColorK "$(Upper $asSite)")" || msgText="$(ColorK "$(Upper $client)")"
 
-[[ $startWizdebug == true ]] && Call 'wizdebug' 'bash:sh' "$client" "-${tgtEnv}"
+[[ $startWizdebug == true ]] && FindExecutable -sh -run wizdebug $client -${tgtEnv}
 
 Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 
@@ -675,3 +675,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 10-02-2017 @ 16.25.05 - (4.12.10)   - dscudiero - General syncing of dev to prod
 ## 10-05-2017 @ 07.15.23 - (4.12.10)   - dscudiero - Remove debug statements
 ## 10-11-2017 @ 12.51.54 - (4.12.10)   - dscudiero - Add -debug option
+## 10-11-2017 @ 13.05.41 - (4.12.10)   - dscudiero - Fix usage of Call to be FindExecutabl
