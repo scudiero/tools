@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.131 # -- dscudiero -- Tue 10/10/2017 @ 16:20:16.23
+version=2.1.133 # -- dscudiero -- Wed 10/11/2017 @  7:41:46.58
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -197,30 +197,17 @@ case "$hostName" in
 			## Make sure we have a sites table before running perfTest
 			sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
 			RunSql2 $sqlStmt
-			if [[ ${#resultSet[@]} -gt 0 ]]; then
-				executeFile=$(FindExecutable "perfTest" "-sh")
-				[[ -z $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
-				source $executeFile
-			fi
+			[[ ${#resultSet[@]} -gt 0 ]] && FindExecutable -sh -run perfTest
 		fi
-		executeFile=$(FindExecutable "updateDefaults" "-sh")
-		[[ -z $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
-		source $executeFile "all"
+		FindExecutable -sh -run updateDefaults all
 		CheckMonitorFiles
 		SyncInternalDb
 		#BuildToolsAuthTable
 		SyncCourseleafCgis
 		SyncSkeleton
 		## If noon then update the git repo shadows
-		if [[ $(date "+%H") == 12 ]]; then
-			executeFile=$(FindExecutable "syncCourseleafGitRepos" "-sh")
-			source $executeFile 'master'
-		fi
-		if [[ $(date "+%H") == 22 ]]; then
-			USELOCAL=true
-			executeFile=$(FindExecutable "backupData" "-sh")
-			source $executeFile
-		fi
+		[[ $(date "+%H") == 12 ]] && FindExecutable -sh -run syncCourseleafGitRepos master)
+		[[ $(date "+%H") == 22 ]] && FindExecutable -sh -uselocal -run backupData
 		;;
 	*)
 		sleep 60 ## Wait for perfTest on Mojave to set its semaphore
@@ -231,15 +218,11 @@ case "$hostName" in
 			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -gt 0 ]]; then
 				Semaphore 'waiton' 'perfTest'
-				executeFile=$(FindExecutable "perfTest" "-sh")
-				[[ -z $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
-				source $executeFile
-				source $executeFile 'summary'
+				FindExecutable -sh -run perfTest
+				FindExecutable -sh -run perfTest summary
 			fi
 		fi
-		executeFile=$(FindExecutable "updateDefaults" "-sh")
-		[[ -z $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
-		source $executeFile
+		FindExecutable -sh -run updateDefaults
 		CheckMonitorFiles
 		;;
 esac
@@ -282,3 +265,4 @@ return 0
 ## 09-21-2017 @ 08.17.52 - (2.1.127)   - dscudiero - comment out updateauthtable
 ## 09-28-2017 @ 08.49.42 - (2.1.129)   - dscudiero - Modify calls to updateDefaults to add mode
 ## 10-10-2017 @ 16.20.35 - (2.1.131)   - dscudiero - Swap out usage of Call
+## 10-11-2017 @ 07.42.13 - (2.1.133)   - dscudiero - Update to use FindExecutable with the -run option
