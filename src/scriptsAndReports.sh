@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.19 # -- dscudiero -- Mon 10/02/2017 @ 14:47:49.46
+version=3.13.21 # -- dscudiero -- Wed 10/11/2017 @ 11:26:24.29
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -116,11 +116,16 @@ function ExecScript {
 			[[ -n $tmpStr ]] && scriptArgs="$tmpStr $scriptArgs"
 		fi
 
+	## Find the exedcutable
+		executeFile=$(FindExecutable '-source' "$name")
+		[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
+
 	## Override the log file
 		logFileSave="$logFile"
 		logFile=/dev/null
 		if [[ $noLog != true ]]; then
-			logFile=$logsRoot$name/$userName--$backupSuffix.log
+			logFile=${logsRoot}${name}/$userName--$backupSuffix.log
+			[[ -e $logFile ]] && rm -f "$logFile"
 			if [[ ! -d $(dirname $logFile) ]]; then
 				mkdir -p "$(dirname $logFile)"
 				chown -R "$userName:leepfrog" "$(dirname $logFile)"
@@ -128,16 +133,14 @@ function ExecScript {
 			fi
 			touch "$logFile"
 			chmod ug+rwx "$logFile"
-			Msg3 "$(PadChar)" > $logFile
+			echo -e "$(PadChar)" > $logFile
 			[[ -n $scriptArgs ]] && scriptArgsTxt=" $scriptArgs" || unset scriptArgsTxt
-			Msg3 "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}" >> $logFile
-			Msg3 "$(PadChar)" >> $logFile
-			Msg3 >> $logFile
+			echo -e "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}" >> $logFile
+			echo -e "$(PadChar)" >> $logFile
+			echo >> $logFile
 		fi
 
 	## Call the script
-		executeFile=$(FindExecutable '-source' "$name")
-		[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
 		source $executeFile "$scriptArgs"
@@ -495,3 +498,4 @@ Goodbye 0
 ## 10-02-2017 @ 14.07.11 - (3.13.14)   - dscudiero - Check to make sure the executeFile has a value and is readable
 ## 10-02-2017 @ 14.22.44 - (3.13.18)   - dscudiero - remove debug
 ## 10-02-2017 @ 15.32.13 - (3.13.19)   - dscudiero - General syncing of dev to prod
+## 10-11-2017 @ 11.28.50 - (3.13.21)   - dscudiero - Write startup messages to log only
