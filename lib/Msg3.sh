@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.19" # -- dscudiero -- Wed 10/11/2017 @ 10:42:55.96
+# version="1.0.20" # -- dscudiero -- Wed 10/11/2017 @ 10:44:20.78
 #===================================================================================================
 # Usage: Msg3 <msgType> <msgLevel> <indentLevel> msgText
 # 	msgType: [N,I,W,E,T]
@@ -59,7 +59,7 @@ function Msg3 {
 		[[ -z $tabStr ]] && tabStr='     '
 		[[ "${msgText#*\^}" != "$msgText" ]] && msgText="${msgText//^/$tabStr}" ## Expand tab chars
 
-		echo -e "$msgText" tee -a "$logFile"
+		echo -e "$msgText"
 		echo -e "$msgText" >> "$logFile"&
 		[[ $msgType == 'T' ]] && Goodbye 3
 
@@ -93,3 +93,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 10-05-2017 @ 09.06.01 - ("1.0.14")  - dscudiero - switch how we expand tabs to use bash native command
 ## 10-05-2017 @ 09.42.12 - ("1.0.18")  - dscudiero - General syncing of dev to prod
 ## 10-11-2017 @ 10.43.22 - ("1.0.19")  - dscudiero - Write message out to the logFile also
+## 10-11-2017 @ 10.44.29 - ("1.0.20")  - dscudiero - Cosmetic/minor change
