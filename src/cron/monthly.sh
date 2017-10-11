@@ -1,12 +1,12 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.8 # -- dscudiero -- 01/05/2017 @ 14:47:58.21
+version=2.1.9 # -- dscudiero -- Wed 10/11/2017 @ 10:36:17.76
 #=======================================================================================================================
 # Run once a week from cron
 #=======================================================================================================================
 TrapSigs 'on'
-Import GetDefaultsData ParseArgsStd ParseArgs Msg2
+Import GetDefaultsData ParseArgsStd ParseArgs Msg3
 originalArgStr="$*"
 
 #=======================================================================================================================
@@ -27,13 +27,13 @@ case "$hostName" in
 	mojave)
 			## Roll up the weekly log archives
 				[[ $verbose == true ]] && printf "\n$(PadChar '-')\n" && printf "*** Log file roll up ***\n"
-				Msg2 "\n*** Logs rollup -- Starting ***"
+				Msg3 "\n*** Logs rollup -- Starting ***"
 				lastMonthNum=$(date --date="$(date +%Y-%m-15) -1 month" +'%m')
 				lastMonthAbbrev=$(date --date="$(date +%Y-%m-15) -1 month" +'%b')
 				cd $TOOLSPATH/Logs
 				[[ -d ./cronJobs ]] && rm -rf ./cronJobs
 				tar -cvzf "${lastMonthAbbrev}-$(date '+%Y').tar.gz" $lastMonthNum-* --remove-files
-				Msg2 "\n*** Logs rollup -- Completed ***"
+				Msg3 "\n*** Logs rollup -- Completed ***"
 			;;
 	build5)
 			;;
@@ -50,3 +50,4 @@ return 0
 # Change Log
 #========================================================================================================================
 ## Thu Jan  5 14:50:06 CST 2017 - dscudiero - Switch to use RunSql2
+## 10-11-2017 @ 10.37.45 - (2.1.9)     - dscudiero - Switch to use FindExecutable -run
