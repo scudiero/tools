@@ -61,6 +61,7 @@ scriptDescription="Create a cloned private dev site"
 		argList+=(-skipWen,6,switch,skipClss,,script,'Skip CLASS instance files)')
 		argList+=(-skipAlso,6,option,skipAlso,,script,'Additional directories and or files to ignore, comma separated list)')
 		argList+=(-wizDebug,3,switch,startWizdebug,,script,'Automatically start a wizDebug session after the copy)')
+		argList+=(-debug,3,switch,startWizdebug,,script,'Automatically start a wizDebug session after the copy)')
 	}
 	function copyEnv-Goodbye {
 		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
@@ -673,3 +674,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 10-02-2017 @ 15.32.10 - (4.12.10)   - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 16.25.05 - (4.12.10)   - dscudiero - General syncing of dev to prod
 ## 10-05-2017 @ 07.15.23 - (4.12.10)   - dscudiero - Remove debug statements
+## 10-11-2017 @ 12.51.54 - (4.12.10)   - dscudiero - Add -debug option
