@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.35" # -- dscudiero -- Wed 10/11/2017 @ 11:26:20.42
+version="1.4.40" # -- dscudiero -- Wed 10/11/2017 @ 11:48:36.49
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -268,6 +268,7 @@ sTime=$(date "+%s")
 	## Resolve the executable file"
 		[[ -z $executeFile ]] && executeFile=$(FindExecutable "$callPgmName")
 		[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
+		[[ $(cut -d' ' -f1 <<< $(wc -l "$executeFile")) -eq 0 ]] && Terminate "Execution file ($executeFile) is empty"
 		prtStatus ", find file"
 		sTime=$(date "+%s")
 
@@ -286,25 +287,21 @@ sTime=$(date "+%s")
 			touch "$logFile"
 			chmod ug+rwx "$logFile"
 			chown "$userName:leepfrog" "$logFile"
-			echo -e  "$(PadChar)" > $logFile
 			[[ -n $scriptArgs ]] && scriptArgsTxt=" $scriptArgs" || unset scriptArgsTxt
-			echo -e  "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}" >> $logFile
-			echo -e  "$(PadChar)" >> $logFile
-			echo  >> $logFile
+			echo -e  "$myName: $(date) loading $executeFile as '${callPgmName}${scriptArgsTxt}'\n" > $logFile
 		fi
 
 	prtStatus ", logFile"
 	sTime=$(date "+%s")
-	## Call program function
+	## Call the script
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
-		#(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile; rc=$?
 		prtStatus ", calling"
 		[[ $batchMode != true && $myQuiet != true ]] && echo
 		TrapSigs 'off'
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
-		[[ $(cut -d' ' -f1 <<< $(wc -l "$executeFile")) -eq 0 ]] && Terminate "Execution file ($executeFile) is empty"
-		source $executeFile $scriptArgs 2>&1 | tee -a $logFile; rc=$?
+		(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile
+		rc=$?
 
 ## Should never get here but just in case
 	CleanUp $rc
@@ -896,3 +893,4 @@ fi
 ## 10-11-2017 @ 10.52.27 - ("1.4.32")  - dscudiero - change how log file is created
 ## 10-11-2017 @ 10.58.36 - ("1.4.33")  - dscudiero - Cosmetic/minor change
 ## 10-11-2017 @ 11.26.38 - ("1.4.35")  - dscudiero - Send the startup message to the logFile only
+## 10-11-2017 @ 11.50.27 - ("1.4.40")  - dscudiero - Cleanup logfile initialization
