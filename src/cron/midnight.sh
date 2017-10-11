@@ -1,12 +1,12 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.12 # -- dscudiero -- Wed 10/11/2017 @  8:05:02.27
+version=1.22.14 # -- dscudiero -- Wed 10/11/2017 @ 10:35:19.61
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes="Call RunCourseLeafCgi GetCourseleafPgm Semaphore FindExecutable ProtectedCall SetFileExpansion "
+myIncludes="RunCourseLeafCgi GetCourseleafPgm Semaphore FindExecutable ProtectedCall SetFileExpansion "
 Import "$standardIncludes $myIncludes"
 originalArgStr="$*";
 
@@ -234,7 +234,7 @@ case "$hostName" in
 
 		## Performance test
 			Msg3 "Running perfTest..."
-			Call 'perfTest'
+			FindExecutable -sh -run perfTest
 
 		## Compare number of clients in the warehouse vs the transactional if more in transactional then runClientListReport=true
 			#runClientListReport=$(CheckClientCount)
@@ -247,7 +247,7 @@ case "$hostName" in
 
 		## Build the clientInfoTable
 			Msg3 "Running BuildClientInfoTable..."
-			Call 'buildClientInfoTable' "$scriptArgs"
+			FindExecutable -sh -run buildClientInfoTable $scriptArgs
 			Msg3 "^...(Running BuildClientInfoTable) done"
 
 		## Check to see of clients table has data
@@ -257,21 +257,22 @@ case "$hostName" in
 				Error "Clients table is empty, skipping 'buildSiteInfoTable', semaphore kept in place"
 			else
 				## Build siteinfotabe and siteadmins table
-				Call 'buildSiteInfoTable' "$scriptArgs"
+				FindExecutable -sh -run buildSiteInfoTable $scriptArgs
 			fi
 
 		## Build employee table
 			BuildEmployeeTable
 
 		## Build the qaStatus table
-			Call 'buildQaStatusTable' "$scriptArgs"
+			FindExecutable -sh -run buildQaStatusTable $scriptArgs
+
 
 		## Common Checks
-			Call 'checkCgiPermissions' "$scriptArgs -fix"
-			Call 'checkPublishSettings' "$scriptArgs"
+			FindExecutable -sh -run checkCgiPermissions $scriptArgs
+			FindExecutable -sh -run checkPublishSettings -fix $scriptArgs
 
 		## Update the defaults data for this host
-			Call 'updateDefaults' "all $scriptArgs"
+			FindExecutable -sh -run updateDefaults all $scriptArgs
 
 		## Scratch copy the skeleton shadow
 			Msg3 "Scratch copying the skeleton shadow..."
@@ -288,7 +289,7 @@ case "$hostName" in
 			#CleanToolsBin
 
 		## Sync GIT Shadow
-			Call 'syncCourseleafGitRepos' "$scriptArgs"
+			FindExecutable -sh -run syncCourseleafGitRepos $scriptArgs
 
 		## Build the courseleafData table
 			BuildCourseleafDataTable
@@ -318,13 +319,13 @@ case "$hostName" in
 
 		## Reports
 			qaEmails='sjones@leepfrog.com,mbruening@leepfrog.com,jlindeman@leepfrog.com'
-			Call 'scriptsAndReports' 'reports' "qaStatusShort -quiet -email \"$qaEmails\" $scriptArgs"
+			FindExecutable -sh -run reports qaStatusShort -quiet -email \"$qaEmails\" $scriptArgs
 
 			## Build a list of clients and contact info for Shelia
 			#[[ $runClientListReport == true ]] && Call 'reports' "clientList -quiet -email 'dscudiero@leepfrog.com,sfrickson@leepfrog.com' $scriptArgs"
 
 			tzEmails='dscudiero@leepfrog.com,jlindeman@leepfrog.com'
-			[[ $(date +%d -d tomorrow) == '01' ]] && Call 'scriptsAndReports' 'reports' "clientTimezone -quiet -email \"$tzEmails\" $scriptArgs"
+			[[ $(date +%d -d tomorrow) == '01' ]] && FindExecutable -sh -run reports clientTimezone -quiet -email \"$tzEmails\" $scriptArgs
 
 		## On the last day of the month roll-up the log files
 		  	if [[ $(date +"%d") == $(date -d "$(date +"%m")/1 + 1 month - 1 day" "+%d") ]]; then
@@ -354,7 +355,7 @@ case "$hostName" in
 			[[ $errorDetected == true ]] && Terminate 'One or more of the database load procedures failed, please review messages'
 
 		## Remove private dev sites marked for auto deletion
-			Call 'cleanDev' 'daemon' "$scriptArgs"
+			FindExecutable -sh -run cleanDev daemon $scriptArgs
 
 		;; ## mojave
 
@@ -368,21 +369,21 @@ case "$hostName" in
 			Msg3 "Waiting on 'perftest'..."
 			Semaphore 'waiton' 'perftest'
 			Msg3 "^'perftest' completed, continuing..."
-			Call 'perfTest'
-			Call 'perfTest' 'summary'
+			FindExecutable -sh -run perfTest
+			FindExecutable -sh -run perfTest summary
 
 		## Build sites and siteadmins table
-			Call 'buildSiteInfoTable' "-table ${siteInfoTable} $scriptArgs"
+			FindExecutable -sh -run buildSiteInfoTable -table ${siteInfoTable} $scriptArgs
 
 		## Common Checks
-			Call 'checkCgiPermissions' "$scriptArgs -fix"
-			Call 'checkPublishSettings' "$scriptArgs"
+			FindExecutable -sh -run checkCgiPermissions -fix $scriptArgs
+			FindExecutable -sh -run checkPublishSettings $scriptArgs
 
 		## Update the defaults data for this host
-			Call 'updateDefaults' "$scriptArgs"
+			FindExecutable -sh -run updateDefaults $scriptArgs
 
 		## Remove private dev sites marked for auto deletion
-			Call 'cleanDev' 'daemon' "$scriptArgs"
+			FindExecutable -sh -run  cleanDev daemon $scriptArgs
 		;;
 esac
 
@@ -467,3 +468,4 @@ return 0
 ## 09-19-2017 @ 07.04.32 - (1.22.9)    - dscudiero - General syncing of dev to prod
 ## 09-28-2017 @ 08.49.49 - (1.22.10)   - dscudiero - Modify calls to updateDefaults to add mode
 ## 10-11-2017 @ 09.32.39 - (1.22.12)   - dscudiero - Add setting of userid in BuildEmployeeTable
+## 10-11-2017 @ 10.37.40 - (1.22.14)   - dscudiero - Switch to use FindExecutable -run
