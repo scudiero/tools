@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.33" # -- dscudiero -- Wed 10/11/2017 @ 10:58:25.90
+version="1.4.35" # -- dscudiero -- Wed 10/11/2017 @ 11:26:20.42
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -276,21 +276,21 @@ sTime=$(date "+%s")
 		sTime=$(date "+%s")
 		logFile=/dev/null
 		if [[ $noLog != true ]]; then
-			logFile=$logsRoot$callPgmName/$userName--$backupSuffix.log
+			logFile=${logsRoot}${callPgmName}/$userName--$backupSuffix.log
+			[[ -e "$logFile" ]] && rm -f "$logFile"
 			if [[ ! -d $(dirname $logFile) ]]; then
 				mkdir -p "$(dirname $logFile)"
 				chown -R "$userName:leepfrog" "$(dirname $logFile)"
 				chmod -R ug+rwx "$(dirname $logFile)"
 			fi
-			[[ -e "$logFile" ]] && rm -f "$logFile"
 			touch "$logFile"
 			chmod ug+rwx "$logFile"
 			chown "$userName:leepfrog" "$logFile"
-			Msg3 "$(PadChar)"
+			echo -e  "$(PadChar)" > $logFile
 			[[ -n $scriptArgs ]] && scriptArgsTxt=" $scriptArgs" || unset scriptArgsTxt
-			Msg3 "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}"
-			Msg3 "$(PadChar)"
-			Msg3
+			echo -e  "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}" >> $logFile
+			echo -e  "$(PadChar)" >> $logFile
+			echo  >> $logFile
 		fi
 
 	prtStatus ", logFile"
@@ -895,3 +895,4 @@ fi
 ## 10-11-2017 @ 09.55.24 - ("1.4.30")  - dscudiero - Remove debug
 ## 10-11-2017 @ 10.52.27 - ("1.4.32")  - dscudiero - change how log file is created
 ## 10-11-2017 @ 10.58.36 - ("1.4.33")  - dscudiero - Cosmetic/minor change
+## 10-11-2017 @ 11.26.38 - ("1.4.35")  - dscudiero - Send the startup message to the logFile only
