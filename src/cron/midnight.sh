@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.10 # -- dscudiero -- Thu 09/28/2017 @  8:49:01.04
+version=1.22.12 # -- dscudiero -- Wed 10/11/2017 @  8:05:02.27
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -29,34 +29,34 @@ function Goodbye-midnight  { # or Goodbye-$myName
 
 #=======================================================================================================================
 function CleanToolsBin {
-	Msg2 $V3 "*** $FUNCNAME -- Starting ***"
+	Msg3 $V3 "*** $FUNCNAME -- Starting ***"
 
 	## Setup lower case 'aliases' for the TOOLSPATH/bin commands, remove any links in bin that do not have a source in src
-	Msg2; Msg2 "Processing $TOOLSPATH/bin..."
+	Msg2; Msg3 "Processing $TOOLSPATH/bin..."
 	ignoreFiles=",scripts,reports,"
 	cwd=$(pwd)
 	cd $TOOLSPATH/bin
 	files=$(find . -mindepth 1 -maxdepth 1 -type l -printf "%f ")
 	for file in $files; do
 		[[ $(Contains "$ignoreFiles" "$file") == true ]] && continue
-		[[ ! -f $TOOLSPATH/src/${file}.sh && ! -f $TOOLSPATH/src/${file}.py && ! -f $TOOLSPATH/src/${file}.pl ]] && Msg2 $WT1 "Removing: $file" && rm ../src/$file && continue
-		[[ $file != $(Lower "$file") ]] && Msg2 "^Makeing link: $(Lower "$file")" && ln -s ./$file ./$(Lower "$file")
+		[[ ! -f $TOOLSPATH/src/${file}.sh && ! -f $TOOLSPATH/src/${file}.py && ! -f $TOOLSPATH/src/${file}.pl ]] && Msg3 $WT1 "Removing: $file" && rm ../src/$file && continue
+		[[ $file != $(Lower "$file") ]] && Msg3 "^Makeing link: $(Lower "$file")" && ln -s ./$file ./$(Lower "$file")
 	done
 	cd "$cwd"
 
-	Msg2 $V3 "*** $FUNCNAME -- Completed ***"
+	Msg3 $V3 "*** $FUNCNAME -- Completed ***"
 	return 0
 } #CleanToolsBin
 
 #=======================================================================================================================
 function CheckClientCount {
-	Msg2 $V3 "*** $FUNCNAME -- Starting ***"
+	Msg3 $V3 "*** $FUNCNAME -- Starting ***"
 	## Get number of clients in transactional
 	SetFileExpansion 'off'
 	sqlStmt="select count(*) from clients where is_active=\"Y\""
 	RunSql2 "$contactsSqliteFile" $sqlStmt
 	if [[ ${#resultSet[@]} -le 0 ]]; then
-		Msg2 $T "Could not retrieve clients data from '$contactsSqliteFile'"
+		Msg3 $T "Could not retrieve clients data from '$contactsSqliteFile'"
 	else
 		tCount=${resultSet[0]}
 	fi
@@ -64,7 +64,7 @@ function CheckClientCount {
 	sqlStmt="select count(*) from $clientInfoTable where recordstatus=\"A\""
 	RunSql2 $sqlStmt
 	if [[ ${#resultSet[@]} -le 0 ]]; then
-		Msg2 $T "Could not retrieve clients count data from '$warehouseDb.$clientInfoTable'"
+		Msg3 $T "Could not retrieve clients count data from '$warehouseDb.$clientInfoTable'"
 	else
 		wCount=${resultSet[0]}
 	fi
@@ -72,14 +72,14 @@ function CheckClientCount {
 	sqlStmt="select ignoreList from $scriptsTable where name=\"buildClientInfoTable\""
 	RunSql2 $sqlStmt
 	if [[ ${#resultSet[@]} -le 0 ]]; then
-		Msg2 $T "Could not retrieve clients count data from '$warehouseDb.$clientInfoTable'"
+		Msg3 $T "Could not retrieve clients count data from '$warehouseDb.$clientInfoTable'"
 	else
 		let numIgnore=$(grep -o "," <<< "${resultSet[0]}r" | wc -l)+1
 		let tCount=$tCount-$numIgnore
 	fi
 	SetFileExpansion
 	if [[ $tCount -gt $wCount ]]; then
-		Msg2 "$FUNCNAME: New clients found in the transactional clients table, running 'clientList' report..."
+		Msg3 "$FUNCNAME: New clients found in the transactional clients table, running 'clientList' report..."
 		echo true
 	else
 		echo false
@@ -89,7 +89,7 @@ function CheckClientCount {
 
 #=======================================================================================================================
 function BuildEmployeeTable {
-	Msg2 "$FUNCNAME -- Starting"
+	Msg3 "$FUNCNAME -- Starting"
 
 	### Get the list of columns in the transactional employees table
 		sqlStmt="pragma table_info(employees)"
@@ -107,30 +107,31 @@ function BuildEmployeeTable {
 		RunSql2 $sqlStmt
 
 	### Get the transactonal values, loop through them and  write out the warehouse record
-		sqlStmt="select $transactionalColumns from employees where db_isactive in (\"Y\",\"L\") order  by db_employeekey"
+		sqlStmt="select $transactionalColumns from employees where db_isactive in (\"Y\",\"L\") order by db_employeekey"
 		RunSql2 "$contactsSqliteFile" $sqlStmt
 		for resultRec in "${resultSet[@]}"; do
-			fieldCntr=1; unset valuesString
+			fieldCntr=1; unset valuesString userid
 			for field in $(tr ',' ' ' <<< $transactionalFields); do
 				column=$(cut -d'|' -f1 <<< $field)
 				columnType=$(cut -d'|' -f2 <<< $field)
 				eval "unset $column"
 				eval "$column=\"$(cut -d '|' -f $fieldCntr <<< $resultRec)\""
+				[[ ${column%%@leepfrog.com} != $column ]] && userid="${column%%@leepfrog.com}"
 				[[ $columnType == 'INTEGER' ]] && valuesString="$valuesString,${!column}" || valuesString="$valuesString,\"${!column}\""
 				(( fieldCntr += 1 ))
 			done
-			valuesString=${valuesString:1}
+			valuesString="${valuesString:1},userid=\"$userid\""
 			sqlStmt="insert into ${employeeTable} values($valuesString)"
 			RunSql2 $sqlStmt
 		done
 
-	Msg2 "$FUNCNAME -- Completed"
+	Msg3 "$FUNCNAME -- Completed"
 	return 0
 } #BuildEmployeeTable
 
 #=======================================================================================================================
 function BuildCourseleafDataTable {
-	Msg2 "$FUNCNAME -- Starting"
+	Msg3 "$FUNCNAME -- Starting"
 
 	## Clean out the existing data
 	sqlStmt="truncate $courseleafDataTable"
@@ -191,7 +192,7 @@ function BuildCourseleafDataTable {
 		$DOIT ./pagewiz.cgi -r /support/courseleafData
 		cd $cwd
 
-	Msg2 "$FUNCNAME -- Completed"
+	Msg3 "$FUNCNAME -- Completed"
 	return 0
 } #BuildCourseleafDataTable
 
@@ -218,7 +219,7 @@ case "$hostName" in
 			## Backup database tables
 			echo
 			for table in $clientInfoTable $siteInfoTable $siteAdminsTable $employeeTable ; do
-				Msg2 "Backing up '$table'..."
+				Msg3 "Backing up '$table'..."
 				sqlStmt="drop table if exists ${table}Bak"
 				RunSql2 $sqlStmt
 				sqlStmt="create table ${table}Bak like ${table}"
@@ -232,22 +233,22 @@ case "$hostName" in
 			Semaphore 'clear' $mySemaphoreId
 
 		## Performance test
-			Msg2 "Running perfTest..."
+			Msg3 "Running perfTest..."
 			Call 'perfTest'
 
 		## Compare number of clients in the warehouse vs the transactional if more in transactional then runClientListReport=true
 			#runClientListReport=$(CheckClientCount)
 
 		## Copy the contacts db from internal
-			Msg2 "Copying contacts.sqlite files to $contactsSqliteFile..."
+			Msg3 "Copying contacts.sqlite files to $contactsSqliteFile..."
 			cp $clientsTransactionalDb/contacts.sqlite $contactsSqliteFile
 			touch $(dirname $contactsSqliteFile)/contacts.syncDate
-			Msg2 "^...done"
+			Msg3 "^...done"
 
 		## Build the clientInfoTable
-			Msg2 "Running BuildClientInfoTable..."
+			Msg3 "Running BuildClientInfoTable..."
 			Call 'buildClientInfoTable' "$scriptArgs"
-			Msg2 "^...(Running BuildClientInfoTable) done"
+			Msg3 "^...(Running BuildClientInfoTable) done"
 
 		## Check to see of clients table has data
 			sqlStmt="select count(*) from $clientInfoTable"
@@ -273,7 +274,7 @@ case "$hostName" in
 			Call 'updateDefaults' "all $scriptArgs"
 
 		## Scratch copy the skeleton shadow
-			Msg2 "Scratch copying the skeleton shadow..."
+			Msg3 "Scratch copying the skeleton shadow..."
 			chmod u+wx $skeletonRoot
 			SetFileExpansion 'on'
 			rm -rf $skeletonRoot/*
@@ -281,7 +282,7 @@ case "$hostName" in
 			rsync $rsyncOpts /mnt/dev6/web/_skeleton/* $skeletonRoot
 			SetFileExpansion
 			touch $skeletonRoot/.syncDate
-			Msg2 "^...done"
+			Msg3 "^...done"
 
 		## Clean up the tools bin directory.
 			#CleanToolsBin
@@ -294,18 +295,18 @@ case "$hostName" in
 
 		## Rebuild Internal pages to pickup any new database information
 			## Wait for all of the buildSiteInfoTable process to finish
-			Msg2 "\nWaiting on 'buildSiteInfoTable'..."
+			Msg3 "\nWaiting on 'buildSiteInfoTable'..."
 			Semaphore 'waiton' 'buildSiteInfoTable' 'true'
-			Msg2 "^'buildSiteInfoTable' completed, continuing..."
+			Msg3 "^'buildSiteInfoTable' completed, continuing..."
 
-			Msg2 "Rebuilding Internal pages"
+			Msg3 "Rebuilding Internal pages"
 			RunCourseLeafCgi "$stageInternal" "-r /clients"
 			RunCourseLeafCgi "$stageInternal" "-r /support/tools"
 			RunCourseLeafCgi "$stageInternal" "-r /support/qa"
-			Msg2 "^buildClientInfoTable & buildSiteInfoTable Done"
+			Msg3 "^buildClientInfoTable & buildSiteInfoTable Done"
 
 		# ## Create a clone of the warehouse db
-		# 	Msg2 "Creating '$warehouseDev' database..."
+		# 	Msg3 "Creating '$warehouseDev' database..."
 		# 	tmpConnectString=$(sed "s/Read/Admin/" <<< ${mySqlConnectString% *})
 
 		# 	mysqldump $tmpConnectString $warehouseProd > /tmp/warehouse.sql;
@@ -327,7 +328,7 @@ case "$hostName" in
 
 		## On the last day of the month roll-up the log files
 		  	if [[ $(date +"%d") == $(date -d "$(date +"%m")/1 + 1 month - 1 day" "+%d") ]]; then
-		  		Msg2 "Rolling up monthly log files"
+		  		Msg3 "Rolling up monthly log files"
 				cd $TOOLSPATH/Logs
 				SetFileExpansion 'on'
 				tar -cvzf "$(date '+%b-%Y').tar.gz" $(date +"%m")-* --remove-files > /dev/null 2>&1
@@ -359,14 +360,14 @@ case "$hostName" in
 
 	*) ## build7
 		## Wait until processing is release by the master process on mojave
-			Msg2 "Waiting on '$myName'..."
+			Msg3 "Waiting on '$myName'..."
 			Semaphore 'waiton' "$myName"
-			Msg2 "^'$myName' completed, continuing..."
+			Msg3 "^'$myName' completed, continuing..."
 
 		## Wait for the perftest process on mojave to complete
-			Msg2 "Waiting on 'perftest'..."
+			Msg3 "Waiting on 'perftest'..."
 			Semaphore 'waiton' 'perftest'
-			Msg2 "^'perftest' completed, continuing..."
+			Msg3 "^'perftest' completed, continuing..."
 			Call 'perfTest'
 			Call 'perfTest' 'summary'
 
@@ -388,7 +389,7 @@ esac
 #=======================================================================================================================
 ## Bye-bye
 [[ $fork == true ]] && wait
-Msg2 "\n$myName: Done\n"
+Msg3 "\n$myName: Done\n"
 return 0
 
 #=======================================================================================================================
@@ -465,3 +466,4 @@ return 0
 ## 09-07-2017 @ 07.42.09 - (1.22.7)    - dscudiero - remove tablename from the buildsiteinfotable call
 ## 09-19-2017 @ 07.04.32 - (1.22.9)    - dscudiero - General syncing of dev to prod
 ## 09-28-2017 @ 08.49.49 - (1.22.10)   - dscudiero - Modify calls to updateDefaults to add mode
+## 10-11-2017 @ 09.32.39 - (1.22.12)   - dscudiero - Add setting of userid in BuildEmployeeTable
