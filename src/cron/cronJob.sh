@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.0.110 # -- dscudiero -- Tue 10/10/2017 @ 15:52:36.44
+version=2.0.111 # -- dscudiero -- Wed 10/11/2017 @  7:30:15.52
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -32,9 +32,6 @@ originalArgStr="$*"
 	source "$dispatcher" --viaCron ## Setup the environment
 	echo -e "\t\t-- $hostName - back from dispatcher" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 
-	executeFile=$(FindExecutable "$callScriptName" "--cron")
-	[[ -z $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
-
 #=======================================================================================================================
 ## Log the cronJob
 	echo -e "\t-- $hostName - Starting $callScriptName" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
@@ -50,8 +47,8 @@ originalArgStr="$*"
 #=======================================================================================================================
 ## Run the executable(s)
 	useLocal=true
-	echo -e "\n$(date) -- Calling script $executeFile $callScriptArgs\n" > "$logFile" 2>&1
-	source $executeFile $scriptArgs "$callScriptArgs" >> "$logFile" 2>&1
+	echo -e "\n$(date) -- Calling script\n\t$executeFile $callScriptArgs\n" > "$logFile" 2>&1
+	FindExecutable "$callScriptName --cron -run $scriptArgs $callScriptArgs" >> "$logFile" 2>&1
 	echo -e "\t-- $hostName - $callScriptName done" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 
 #=======================================================================================================================
@@ -106,3 +103,4 @@ exit 0
 ## 10-10-2017 @ 13.28.06 - (2.0.107)   - dscudiero - Switch from Call to FindExecutableFile
 ## 10-10-2017 @ 14.09.18 - (2.0.109)   - dscudiero - add --cron flag on findExcutable call
 ## 10-10-2017 @ 15.52.43 - (2.0.110)   - dscudiero - Cosmetic/minor change
+## 10-11-2017 @ 07.31.15 - (2.0.111)   - dscudiero - Cosmetic/minor change
