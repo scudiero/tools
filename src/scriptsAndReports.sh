@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.21 # -- dscudiero -- Wed 10/11/2017 @ 11:26:24.29
+version=3.13.23 # -- dscudiero -- Wed 10/11/2017 @ 12:43:37.33
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -143,7 +143,7 @@ function ExecScript {
 	## Call the script
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
-		source $executeFile "$scriptArgs"
+		(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile
 		logFile="$logFileSave"
 
 	return $?
@@ -499,3 +499,4 @@ Goodbye 0
 ## 10-02-2017 @ 14.22.44 - (3.13.18)   - dscudiero - remove debug
 ## 10-02-2017 @ 15.32.13 - (3.13.19)   - dscudiero - General syncing of dev to prod
 ## 10-11-2017 @ 11.28.50 - (3.13.21)   - dscudiero - Write startup messages to log only
+## 10-11-2017 @ 12.51.42 - (3.13.23)   - dscudiero - Add parents arround script call
