@@ -1,13 +1,13 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.23 # -- dscudiero -- Wed 04/05/2017 @  7:05:15.54
+version=2.1.25 # -- dscudiero -- Wed 10/11/2017 @ 10:35:57.16
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
 TrapSigs 'on'
-Import GetDefaultsData ParseArgsStd ParseArgs Msg2 FindExecutable Call
-originalArgStr="$*"
+Import GetDefaultsData ParseArgsStd ParseArgs Msg3 FindExecutable
+originalArgStr=$*
 
 #=======================================================================================================================
 # Declare local variables and constants
@@ -18,34 +18,34 @@ originalArgStr="$*"
 #=======================================================================================================================
 GetDefaultsData $myName
 ParseArgsStd
-scriptArgs="$*"
+scriptArgs=$*
 
 #========================================================================================================================
 # Main
 #========================================================================================================================
-case "$hostName" in
+case $hostName in
 	mojave)
 
 		## Checks
-			Call 'checkForPrivateDevSites' "$scriptArgs"
+			FindExecutable -sh -run checkForPrivateDevSites $scriptArgs
 
 		## Weekly reports
-			Msg2 "\n Publishing Report..."
-			Call 'reports' "publishing -email 'froggersupport@leepfrog.com' $scriptArgs"
+			Msg3 \n Publishing Report...
+			FindExecutable -sh -run reports publishing -email froggersupport@leepfrog.com $scriptArgs
 
-			Msg2 "\n Client 2 Day Summaries Report..."
-			Call 'reports' "client2DaySummaries -role 'support' -email 'froggersupport@leepfrog.com' $scriptArg"
+			Msg3 \n Client 2 Day Summaries Report...
+			FindExecutable -sh -run reports client2DaySummaries -role support -email froggersupport@leepfrog.com $scriptArg
 
-			Msg2 "\n QA Waiting Report..."
-			Call 'reports' "qaWaiting -email 'sjones@leepfrog.com,mbruening@leepfrog.com,dscudiero@leepfrog.com' $scriptArgs"
+			Msg3 \n QA Waiting Report...
+			FindExecutable -sh -run reports qaWaiting -email sjones@leepfrog.com,mbruening@leepfrog.com,dscudiero@leepfrog.com $scriptArgs
 
-			Msg2 "\n Tools Usage Report..."
-			Call 'reports' "toolsUsage -email 'dscudiero@leepfrog.com' $scriptArgs"
+			Msg3 \n Tools Usage Report...
+			FindExecutable -sh -run reports toolsUsage -email dscudiero@leepfrog.com $scriptArgs
 
-			Msg2 "\n*** Reports -- Completed ***"
+			Msg3 \n*** Reports -- Completed ***
 
 		## Rollup logs
-			Call 'weeklyRollup' "$scriptArgs"
+			FindExecutable -sh -run 'weeklyRollup' $scriptArgs
 			;;
 	build5)
 			;;
@@ -67,3 +67,4 @@ return 0
 ## Thu Mar  9 07:52:54 CST 2017 - dscudiero - send the 2 day summary report to froggersupport
 ## Fri Mar 17 11:23:42 CDT 2017 - dscudiero - Added qaWaiting report
 ## 04-05-2017 @ 07.06.09 - (2.1.23)    - dscudiero - Add checkForPrivateDevSites
+## 10-11-2017 @ 10.37.52 - (2.1.25)    - dscudiero - Switch to use FindExecutable -run
