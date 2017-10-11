@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.24" # -- dscudiero -- Wed 10/11/2017 @  7:31:35.32
+# version="1.2.26" # -- dscudiero -- Wed 10/11/2017 @  7:45:00.82
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -37,6 +37,7 @@ function FindExecutable {
 	    [[ $1 =~ ^-st|--step$ ]] && { mode='step'; searchRoot="${mode}s"; shift 1; continue; }
 	    [[ $1 =~ ^-re|--report$ ]] && { mode='report'; searchRoot="${mode}s"; shift 1; continue; }
 	    [[ $1 =~ ^-ru|--run$ ]] && { runScript=true; shift 1; continue; }
+	    [[ $1 =~ ^-use|--uselocal$ ]] && { useLocal=true; shift 1; continue; }
 	    [[ -z $file ]] && file="$1" || scriptArgs="$scriptArgs $1"
 	    shift 1 || true
 	done
@@ -67,7 +68,9 @@ function FindExecutable {
 		[[ $found == true ]] && break
 	done
 
-	[[ $runScript == true ]] && source $executeFile $scriptArgs || echo "$checkFile"
+	executeFile="$checkFile"
+	[[ -z "$executeFile" || ! -r "$executeFile" ]] && return 0
+	[[ $runScript == true ]] && source "$executeFile" $scriptArgs || echo "$executeFile"
 	return 0
 } ##FindExecutable
 export -f FindExecutable
