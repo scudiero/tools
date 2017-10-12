@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.12" // -- dscudiero -- Tue 10/10/2017 @  8:45:34.48
+wfLibVersion="1.8.13" // -- dscudiero -- Thu 10/12/2017 @  8:51:47.25
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -56,6 +56,8 @@ wfLibVersion="1.8.12" // -- dscudiero -- Tue 10/10/2017 @  8:45:34.48
 // 10/06/17 - dgs - Fixed bug in GetRelated where if the lookup type was subject we were returnging department data
 // 10/09/17 - dgs - Reactored GetRelated and LookupValue, renamed to xxx2
 // 10/10/17 - dgs - Updated GetEcoSystemData to accept an array of codes and departments, renamed to xxx2
+// 10/12/17 - dgs - Updated Related, GetRelated, and GetEcoSystemData2 to streamline and allow passing of ecosystem path and types
+//					to GetEcoSystemData2
 //======================================================================================================================
 
 // Make sure wffucs is defined
@@ -502,6 +504,7 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 // 08/23/17 - dgs - Only display the debug messages from Related to the preview workflow if debug levels is >= 4
 // 08/25/17 - dgs - Refactored to use GetRelated
 // 09/01/17 - dgs - Update code that detects if the related wfrulename was used 'bare' without any other qualifiers
+// 10/12/17 - dgs - Refactored to cleanup logic
 //======================================================================================================================
 wffuncs.Related = function(inval, wfrule, args) {
 	var version='4.9.16'; var myName=wfrule.attrname
@@ -537,9 +540,9 @@ wffuncs.Related = function(inval, wfrule, args) {
 
 		if (substitutionType === "") {
   			print_debug(3,"\n\n*** Error in '" + myName + "' function in " + wfLibName +
-  				" , invalid value for substitutionType ('" + substitutionType + "') *** \n\n")
+  				" , invalid value for substitutionType ('" + substitutionType + "') *** \n\n");
 			print_doc(3,"<br>*** Error in " + myName + " function in " + wfLibName +
-				",<br> *** invalid value for substitutionType ('" + substitutionType + "') *** <br> ")
+				",<br> *** invalid value for substitutionType ('" + substitutionType + "') *** <br> ");
 			return 0;
 		}
 
@@ -547,107 +550,36 @@ wffuncs.Related = function(inval, wfrule, args) {
 
 	//Get the configuration/control data from the config file
 		// Get variables that are boolean
-		var varList=["checkChanged","ecoSystemData"];
-		varList.forEach(function(name) {
-			eval (name + "=true")
-			varName=calledAs + "_" + name;
-			if (getTCFValue(varName) === "")
-				varName=myName + "_" + name;
-			if (getTCFValue(varName) != "true") {eval (name+ "=false")}
-		});
+			var checkChanged=getTCFValue(calledAs + "_checkChanged");
+			if (checkChanged === "") checkChanged=getTCFValue(myName + "_checkChanged");
+			if (checkChanged === "true") { checkChanged=true; } else { checkChanged=false; }
+
+			var includeEcoSystemData=getTCFValue(calledAs + "_includeEcoSystemData");
+			if (includeEcoSystemData === "") includeEcoSystemData=getTCFValue(myName + "_includeEcoSystemData");
+			if (includeEcoSystemData === "true") { includeEcoSystemData=true; } else { includeEcoSystemData=false; }
+
+			var ecoSystemDataFyi=getTCFValue(calledAs + "_ecoSystemDataFyi");
+			if (ecoSystemDataFyi === "") ecoSystemDataFyi=getTCFValue(myName + "_includeEcoSystemData");
+			if (ecoSystemDataFyi === "true") { ecoSystemDataFyi=true; } else { ecoSystemDataFyi=false; }
 
 		// Get variables that have data values
-		var varList=["ecoSystemDataFyi","ecoSystemType","dataMapper"];
-		varList.forEach(function(name) {
-			eval (name + "=''")
-			varName=calledAs + "_" + name;
-			if (getTCFValue(varName) === "")
-			 	varName=myName + "_" + name;
-			tmpVal=getTCFValue(varName);
-			if (tmpVal != "")
-				eval(name + "= '" + tmpVal +"'");
-				//Dump(name,eval(name))
-		});
+			var ecoSystemDataTypes=getTCFValue(calledAs + "_ecoSystemDataTypes");
+			if (ecoSystemDataTypes === "") ecoSystemDataTypes=getTCFValue(myName + "_ecoSystemDataTypes");
 
-		// Build ecoSystem query string
-		var ecoSystemTypeStr='';
-		if (ecoSystemType != "" ){
-			var ecoSystemTypeStr='';
-			var tempArray = ecoSystemTypeStr.split(",");
-			tempArray.forEach(function(type) {
-				ecoSystemTypeStr=ecoSystemTypeStr + ",'" + type + "'";
-			});
-			ecoSystemTypeStr='(' + ecoSystemTypeStr.substring(1) + ')';
-		}
+			var ecoSystemDataPaths=getTCFValue(calledAs + "_ecoSystemDataPaths");
+			if (ecoSystemDataPaths === "") ecoSystemDataPaths=getTCFValue(myName + "_ecoSystemDataPaths");
 
-		// Set the tcfdata variable names for the proposal data
-		var varList=["code","college","department","subject"];
-		varList.forEach(function(name) {
-			varName=name + "VarName";
-			eval (varName + "= '" + name + "'");
-			var tcfValue=getTCFValue(calledAs + "_" + varName);
-			if (tcfValue === "" )
-				tcfValue=getTCFValue(myName + "_" + varName)
-			if (tcfValue != "" ) {
-				eval(varName + "= '" + tcfValue + "'");
-			}
-		});
+			var dataMapper=getTCFValue(calledAs + "_dataMapper");
+			if (dataMapper === "") dataMapper=getTCFValue(myName + "_dataMapper");
 
 		// Get the form field variables data, parse off to an array if found
-		var formFieldVars=[];
-		var formFieldVarsStr="";
-		varName=calledAs + "_" + "formFieldVars"
-		if (getTCFValue(varName) === '' )
-			varName=myName + "_" + "formFieldVars"
-		if (getTCFValue(varName) != '') {
-			formFieldVarsStr=getTCFValue(varName).toString();
-			formFieldVars=formFieldVarsStr.split(",");
-		}
-
-	// Set internal variables for the proposal data, check we have what we need
-		var proposalCode=null, proposalSubj=null, proposalDept=null, proposalCol=null;
-		try {
-			// initial checks
-				if (args && args.context && args.context != "wfrule")
-					throw "Failed 'rule type' check";
-
-				var reqData={ request: "", subjVar: subjectVarName , deptVar: departmentVarName , colVar: collegeVarName };
-				if (wfCimInstance === "courseadmin") {
-					proposalCode=getTCFValue(codeVarName)
-					if (proposalCode === "")
-						throw "Failed, code tcf variable '" + codeVarName + "' not null check"
-					reqData.request="subjs";
-					reqData.options="noMapValue";
-					proposalSubj=GetAttrVal(reqData);
-
-					if (proposalSubj === "" && substitutionType === 'subj')
-						throw "Failed, subject tcf variable '" + subjectVarName + "' not null check"
-				}
-
-				reqData.request="cols";
-				reqData.options="noMapValue";
-				proposalCol=GetAttrVal(reqData);
-				if (proposalCol === "" && substitutionType === 'college')
-					throw "Failed, college tcf variable: '" + collegeVarName + "' not null check"
-				reqData.request="depts";
-				reqData.options="noMapValue";
-				proposalDept=GetAttrVal(reqData);
-				if (proposalDept === "" && (substitutionType === 'dept' || substitutionType === 'college'))
-					throw "Failed, department tcf variable '" + departmentVarName + "' not null check"
-
-		} //try
-		//Catch block for errors thrown in above try block
-		catch(err) { wfDebug(1,"\t*Error* -- " + myName + ": " + err + "\n"); return false; }
+			var formFieldVars=[];
+			formFieldVars=getTCFValue(calledAs + "_formFieldVars", { delimiter: "\n", retarray: true });
+			if (formFieldVars.length === 0 ) formFieldVars=getTCFValue(myName + "_formFieldVars", { delimiter: "\n", retarray: true });
 
 		// Set the substitution string
-			var searchString=""
-			varName="searchString";
-			var tcfValue=getTCFValue(calledAs + "_searchString");
-			if (tcfValue === "" )
-				tcfValue=getTCFValue(myName + "_searchString")
-			if (tcfValue != "" ) {
-				eval(varName + "= '" + tcfValue + "'");
-			}
+			var searchString=getTCFValue(calledAs + "_searchString");
+			if (searchString === "") searchString=getTCFValue(myName + "_searchString");
 			if (searchString === "") {
 				if (substitutionType.substr(0,3) === 'col') {
 					searchString="Col"
@@ -659,22 +591,21 @@ wffuncs.Related = function(inval, wfrule, args) {
 			}
 
 		// Print debug info
-			wfDump(3,["\n\tproposalCode;"+proposalCode,"proposalSubj;"+proposalSubj,"proposalDept;"+proposalDept,"proposalCol;"+proposalCol,
-					"\n\tcheckChanged;"+checkChanged,"ecoSystemData;"+ecoSystemData,"ecoSystemType;"+ecoSystemType,
-					"ecoSystemDataFyi;"+ecoSystemDataFyi,"formFieldVars;"+formFieldVars.toSource(),"searchString;"+searchString.toSource(),
-					"codeVarName;"+codeVarName,"collegeVarName;"+collegeVarName,"departmentVarName;"+departmentVarName,"subjectVarName;"+subjectVarName,
-					"dataMapper;"+dataMapper]);
+			wfDump(3,[
+					"\n\tcheckChanged;"+checkChanged,"includeEcoSystemData;"+includeEcoSystemData,"ecoSystemDataTypes;"+ecoSystemDataTypes,
+					"ecoSystemDataPaths;"+ecoSystemDataPaths,"ecoSystemDataFyi;"+ecoSystemDataFyi,"formFieldVars;"+formFieldVars.toSource(),
+					"searchString;"+searchString.toSource(),"dataMapper;"+dataMapper]);
 
 	//==================================================================================================================
 	// MAIN
 	//==================================================================================================================
-	if (proposalCode === undefined || proposalDept === undefined) {
-		wfDebug(3,"\tproposalCode (" + proposalCode + ") or proposalDept (" + proposalDept + ") is undefined, skipping Eco System data")
-		ecoSystemData=false;
-	}
-
 	// Get a list of the related departments
-	var relatedData=GetRelated2(substitutionType,{includeEcoSystem: ecoSystemData, formDataVars: formFieldVars});
+		var dataObj={};
+		dataObj.includeEcoSystemData=includeEcoSystemData;
+		dataObj.ecoSystemDataTypes=ecoSystemDataTypes;
+		dataObj.ecoSystemDataPaths=ecoSystemDataPaths;
+		dataObj.formDataVars=formFieldVars;
+		var relatedData=GetRelated2(substitutionType,dataObj);
 
 	// Output the steps
 		var retArray=[], tokensDone=[];
@@ -759,6 +690,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 //		{data:"7", source:"formVar:equivalents"}
 //==================================================================================================================
 // 10/09/17 - dgs - Initial - refactored from GetRelated
+// 10/12/17 - dgs - Refactored call to GetEcoSystemData2 to pass data object
 //==================================================================================================================
 GetRelated2 = function(type,data) {
 	var myName="GetRelated2"; var myDebugLevel=6; wfDebug(myDebugLevel,"\n*** In " + myName + " ***");
@@ -797,28 +729,35 @@ GetRelated2 = function(type,data) {
 	var refsArray=[], refsLookup={}, ref={}, formVar, formVarFormat, dataAttributeName;
 
 	// Get proposal data
-		var proposalCode=getTCFValue("code");
-		proposalCodes=RemoveDupes([proposalCode].concat(getTCFValue("code", { delimiter: "\n", retarray: true , data: tcadata })));
-		proposalCodesStr="," + proposalCodes.join(",") + ",";
+		try {
+			var proposalCode=getTCFValue("code");
+			proposalCodes=RemoveDupes([proposalCode].concat(getTCFValue("code", { delimiter: "\n", retarray: true , data: tcadata })));
+			if (proposalCodes.length === 0) throw "Failed, code tcf variable 'proposalCodes' not null check"
+			proposalCodesStr="," + proposalCodes.join(",") + ",";
 
-		var proposalSubjs=getTCFValue(wfSubjVarName, { delimiter: "\n", retarray: true });
-		proposalSubjs=RemoveDupes(proposalSubjs.concat(getTCFValue(wfSubjVarName, { delimiter: "\n", retarray: true , data: tcadata })));
-		proposalSubjsStr="," + proposalSubjs.join(",") + ",";
+			var proposalSubjs=getTCFValue(wfSubjVarName, { delimiter: "\n", retarray: true });
+			proposalSubjs=RemoveDupes(proposalSubjs.concat(getTCFValue(wfSubjVarName, { delimiter: "\n", retarray: true , data: tcadata })));
+			if (proposalSubjs.length === 0) throw "Failed, code tcf variable 'proposalSubjs' not null check"
+			proposalSubjsStr="," + proposalSubjs.join(",") + ",";
 
-		var proposalDepts=getTCFValue(wfDeptVarName, { delimiter: "\n", retarray: true });
-		proposalDepts=RemoveDupes(proposalDepts.concat(getTCFValue(wfDeptVarName, { delimiter: "\n", retarray: true , data: tcadata })));
-		proposalDeptsStr="," + proposalDepts.join(",") + ",";
+			var proposalDepts=getTCFValue(wfDeptVarName, { delimiter: "\n", retarray: true });
+			proposalDepts=RemoveDupes(proposalDepts.concat(getTCFValue(wfDeptVarName, { delimiter: "\n", retarray: true , data: tcadata })));
+			if (proposalDepts.length === 0) throw "Failed, code tcf variable 'proposalDepts' not null check"
+			proposalDeptsStr="," + proposalDepts.join(",") + ",";
 
-		var proposalCols=getTCFValue(wfColVarName, { delimiter: "\n", retarray: true });
-		proposalCols=RemoveDupes(proposalCols.concat(getTCFValue(wfColVarName, { delimiter: "\n", retarray: true , data: tcadata })));
-		proposalColsStr="," + proposalCols.join(",") + ",";
+			var proposalCols=getTCFValue(wfColVarName, { delimiter: "\n", retarray: true });
+			proposalCols=RemoveDupes(proposalCols.concat(getTCFValue(wfColVarName, { delimiter: "\n", retarray: true , data: tcadata })));
+			if (proposalCols.length === 0) throw "Failed, code tcf variable 'proposalCols' not null check"
+			proposalColsStr="," + proposalCols.join(",") + ",";
+		} //try
+		catch(err) { wfDebug(1,"\t*Error* -- " + myName + ": " + err + "\n"); return false; }
 
 		wfDump(5,["includeEcoSystem;"+includeEcoSystem,"proposalCode;"+proposalCode,"proposalCodes;"+proposalCodes,
 			"proposalSubjs;"+proposalSubjs.toSource(),"proposalDepts;"+proposalDepts.toSource(),"proposalCols;"+proposalCols.toSource()]);
 
 	// Process the argument list
 		var includeEcoSystem=false;
-		if (data.hasOwnProperty("includeEcoSystem")) includeEcoSystem=data.includeEcoSystem;
+		if (data.hasOwnProperty("includeEcoSystemData")) includeEcoSystemData=data.includeEcoSystemData;
 		var tcaData={}
 		if (data.hasOwnProperty("tcadata")) tcaData=data.tcadata;
 
@@ -874,9 +813,9 @@ GetRelated2 = function(type,data) {
 			}); //data.formDataVars
 			wfDebug(myDebugLevel,"\t\tFound " + refsArray.length + " references from form field data");
 
-		// If includeEcoSystem, then get data from the CourseLeaf eco system
-			if (includeEcoSystem && wfCimInstance === "courseadmin") {
-				var tempArray=(GetEcoSystemData2(proposalCodes,proposalDepts))
+		// If includeEcoSystemData, then get data from the CourseLeaf eco system
+			if (includeEcoSystemData && wfCimInstance === "courseadmin") {
+				var tempArray=(GetEcoSystemData2(proposalCodes,proposalDepts,data))
 				if (tempArray.length > 0)
 					refsArray=refsArray.concat(tempArray);
 				wfDebug(myDebugLevel,"\t\tFound " + tempArray.length + " references from the Eco system");
@@ -908,20 +847,20 @@ GetRelated2 = function(type,data) {
 							retToken.source=ref.source;
 							resultSet.push(retToken);
 						}
-						break
+						break;
 					case "dep":
 						resultSet=LookupCode2("colCode","deptCode",[ref.data],proposalCols);
-						break
+						break;
 					case "sub":
 						resultSet=LookupCode2("colCode","subjCode",[ref.data],proposalCols);
-						break
+						break;
 				} // end switch (ref.format.substr(0,3))
-				break
+				break;
 			case "dep": //Looking to return department values
 				switch (ref.format.substr(0,3)) {
 					case "col":
 						resultSet=LookupCode2("deptCode","colCode",[ref.data],proposalDepts);
-						break
+						break;
 					case "dep":
 						if (proposalDeptsStr.indexOf(ref.data) >= 0) {
 							wfDebug(myDebugLevel,"\t\tskipping ref, code ("+ ref.data +") is in proposalDepts("+ proposalDepts.toSource() +")");
@@ -934,16 +873,17 @@ GetRelated2 = function(type,data) {
 						break
 					case "sub":
 						resultSet=LookupCode2("deptCode","subjCode",[ref.data],proposalDepts);
-						break
+						break;
 				} // end switch (ref.format.substr(0,3))
+				break;
 			case "sub": //Looking to return subject values
 				switch (ref.format.substr(0,3)) {
 					case "col":
 						resultSet=LookupCode2("subjCode","colCode",[ref.data],proposalSubjs);
-						break
+						break;
 					case "dep":
 						resultSet=LookupCode2("subjCode","deptCode",[ref.data],proposalSubjs);
-						break
+						break;
 					case "sub":
 						if (proposalSubjsStr.indexOf(ref.data) >= 0) {
 							wfDebug(myDebugLevel,"\t\tskipping ref, code ("+ ref.data +") is in proposalSubjs("+ proposalSubjs.toSource() +")");
@@ -953,9 +893,9 @@ GetRelated2 = function(type,data) {
 							retToken.source=ref.source;
 							resultSet.push(retToken);
 						}
-						break
+						break;
 				} // end switch (ref.format.substr(0,3))
-				break
+				break;
 		} // end switch (type.substr(0,3))
 
 		// Process resultSet data (if any) to match the data expected by caller, i.e. just a simple array of tokens
@@ -975,6 +915,7 @@ GetRelated2 = function(type,data) {
 			} else if (! refSkipped) {
 					wfDebug(myDebugLevel,"\t\t   *Warning* -- no data returned from ref lookup")
 			} //(resultSet)
+		wfDebug(myDebugLevel,"");
 	}); //refsArray
 
 	wfDebug(myDebugLevel,"")
@@ -1095,12 +1036,15 @@ function LookupCode2(lookupType,givenType,givenData,excludeData) {
 
 //==================================================================================================
 // Return data from the eco system for this course
-// Called like 'GetEcoSystemData(proposalCodes,proposalDepts,ecoSystemTypeStr)'
-//	parentCodes is an array of code values from the proposal
+// Called like 'GetEcoSystemData2(proposalCodes,proposalDepts,ecoSystemTypeStr)'
+//	proposalCodes is an array of code values from the proposal
 //	proposalDepts is an array of department values from the proposal
-//	'ecoSystemTypeStr' is a comma a string of comma separated 'type' values to compare against the data
-// in the type field in the courseref table
-//
+//	data is an object with the following attributes:
+//		types: This is an array of data to check against the 'type' field in the courseref table, if not
+//				specified then all types will be considered
+//		paths: This is an string that may contain tokens in the set {'course','program','catalog'}, if
+//				specified then only references of those paths will be included in the results, if not
+//				specified then all will be considered.
 // Returns an array of reference objects, each reference object is of the form:
 // {ref:data ref:dept ref:format}
 // format is in {'subj','dept','path'}
@@ -1110,29 +1054,31 @@ function LookupCode2(lookupType,givenType,givenData,excludeData) {
 // 07/18/17 - dgs - Changed the printing of the refs to wfDump level 4
 // 09/22/17 - dgs - Deal with the fact that the proposal department code may be an array.
 // 10/10/17 - dgs - Updated to accept an array of codes and departments
+// 10/12/17 - dgs - Switch the'ecosystemtype' to be a data object to include the path and types data
 //==================================================================================================
-function GetEcoSystemData2(proposalCodes,proposalDepts,ecoSystemTypeStr) {
+function GetEcoSystemData2(proposalCodes,proposalDepts,data) {
 	var version="1.0.2";
 	var myName="GetEcoSystemData"; wfDebug(4,'\n\t*** In '+ myName + "(" + version + ") ***");
 	if (proposalCodes.length === 0 || proposalDepts.length === 0) return false;
+	wfDump(5,["\tproposalCodes;"+proposalCodes.toSource(),"\tdata;"+data.toSource()]);
+
 	// var proposalCodesStr="," + proposalCodes.join(",") + ",";
 
 	var deptsString="", proposalSubjs=[];
 	proposalCodes.forEach(function(code) {
 		proposalSubjs.push(code.split(' ')[0]);
 	});
-	wfDump(5,["\tproposalCodes;"+proposalCodes.toSource(),"\tproposalDepts;"+proposalDepts.toSource(),"\tproposalSubjs;"+proposalSubjs.toSource()]);
+	var types=[], paths=",course,program,catalog,";
+	if (data.hasOwnProperty("ecoSystemDataTypes")) types=data.ecoSystemDataTypes;
+	if (data.hasOwnProperty("ecoSystemDataPaths")) paths="," + data.ecoSystemDataPaths + ",";
+
+	wfDump(5,["\tproposalSubjs;"+proposalSubjs.toSource(),"\ttypes;"+types.toSource(),"\tpaths;"+paths.toSource()]);
 
 	var refsArray=[];
 	//Check for any cross references data for this course in the crossref table (eco system)
-		wfDump(5,['\tdeptsString;'+deptsString.toSource()]);
 		var sqlStmt="SELECT DISTINCT path,dept,type FROM courseref WHERE code in (\"" + proposalCodes.join('","') + 
-					"\") and dept not in (\"" + proposalDepts.join('","') + "\")  AND dept <> ''";
-		if (typeof(ecoSystemTypeStr) != 'undefined'  ) {
-			if (ecoSystemTypeStr != false || ecoSystemTypeStr != "") {
-				sqlStmt=sqlStmt + ' AND type IN ' + ecoSystemTypeStr
-			}
-		}
+					"\") and dept not in (\"" + proposalDepts.join('","') + "\") and dept <> ''";
+		if (types.length > 0) sqlStmt=sqlStmt + " and type in in (\"" + types.join('","') + "\")";
 
 		wfDump(5,['\tsqlStmt;'+sqlStmt]);
 		var resultSet=dbquery("courseref",sqlStmt);
@@ -1142,21 +1088,21 @@ function GetEcoSystemData2(proposalCodes,proposalDepts,ecoSystemTypeStr) {
 		var proposalSubjsStr="," + proposalSubjs.join(",") + ",";
 		resultSet.forEach(function(result) {
 			var ref={};
-			if (result.path.substr(0,1) === '/') {
+			if (result.path.substr(0,1) === '/' && paths.indexOf(",catalog,") >= 0) {
 				if (proposalDeptsStr.indexOf(result.dept) < 0) {
 					ref.source='eco-cat';
 					ref.data=result.dept;
 					ref.format='dept';
 					ref.type=result.type;
 				}
-			} else if (result.path.substr(0,12) === 'programcode:') {
+			} else if (result.path.substr(0,12) === 'programcode:' && paths.indexOf(",program,") >= 0) {
 				if (proposalDeptsStr.indexOf(result.dept) < 0) {
 					ref.source='eco-program';
 					ref.data=result.dept;
 					ref.format='dept';
 					ref.type=result.type;
 				}
-			} else if (result.path.substr(0,5) === 'code:') {
+			} else if (result.path.substr(0,5) === 'code:' && paths.indexOf(",course,") >= 0) {
 				if (proposalSubjsStr.indexOf(result.dept) < 0) {
 					ref.source='eco-course';
 					ref.data=result.dept;
@@ -2198,4 +2144,4 @@ var wfLibLoaded=true;
 // 10-02-2017 @ 13.47.09 - ("1.8.8")   - dscudiero - General syncing of dev to prod
 // 10-04-2017 @ 13.28.38 - ("1.8.9")   - dscudiero - General syncing of dev to prod
 // 10-09-2017 @ 16.55.35 - ("1.8.11")  - dscudiero - Major refactoreing of GetRelated and LookupCode
-// 10-10-2017 @ 13.29.57 - ("1.8.12")  - dscudiero - Updates to Updated GetEcoSystemData to accept an array of codes and departments
+// 10-12-2017 @ 08.54.10 - ("1.8.13")  - dscudiero - Updated Related, GetRelated, and GetEcoSystemData2 to streamline and allow passing of ecosystem path and types
