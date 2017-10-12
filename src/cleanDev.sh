@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.24 # -- dscudiero -- Thu 10/12/2017 @ 15:07:44.73
+version=3.5.25 # -- dscudiero -- Thu 10/12/2017 @ 15:10:42.89
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall StringFunctions"
@@ -145,7 +145,7 @@ scriptDescription="Cleanup private dev sites"
 		local type="$1"
 		local file="/mnt/$share/web/$2"
 		local processClient=$(cut -d'-' -f1 <<< $2)
-		dump -1 -p processClient requestType file
+		dump 1 -p processClient requestType file
 
 		case "$requestType" in
 			m*)
@@ -208,7 +208,7 @@ RunSql2 $sqlStmt
 #==================================================================================================
 Hello
 ParseArgsStd 
-dump -1 mark delete unMark client
+dump 1 mark delete unMark client
 
 ## Get the workflow files
 GetDefaultsData 'copyWorkflow'
@@ -233,7 +233,7 @@ GetDefaultsData 'copyWorkflow'
 		deleteThenIf=$(tr ';' ' ' <<< $deleteThenIf)
 	fi
 
-	dump -2 requiredInstanceFiles requiredGlobalFiles optionalInstanceFiles optionalGlobalFiles
+	dump 2 requiredInstanceFiles requiredGlobalFiles optionalInstanceFiles optionalGlobalFiles
 
 #==================================================================================================
 # Main
@@ -333,3 +333,4 @@ Goodbye 0
 ## 09-13-2017 @ 06.59.23 - (3.5.21)    - dscudiero - remove debug statements
 ## 09-21-2017 @ 14.47.11 - (3.5.23)    - dscudiero - put the save workflow action back in
 ## 10-12-2017 @ 15.09.49 - (3.5.24)    - dscudiero - Updated includes list
+## 10-12-2017 @ 15.10.51 - (3.5.25)    - dscudiero - fix dump statements
