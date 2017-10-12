@@ -25,9 +25,6 @@ GetDefaultsData $myName
 ParseArgsStd
 scriptArgs="$*"
 
-echo "HERE HERE HERE HERE"
-echo "HERE 2 HERE 3 HERE 3 HERE"
-
 #=======================================================================================================================
 # local functions
 #=======================================================================================================================
@@ -272,3 +269,4 @@ return 0
 ## 10-11-2017 @ 09.55.29 - (2.1.134)   - dscudiero - Cosmetic/minor change
 ## 10-11-2017 @ 10.21.34 - (2.1.135)   - dscudiero - Add HERE statement
 ## 10-11-2017 @ 10.37.31 - (2.1.137)   - dscudiero - Switch to use FindExecutable -run
+## 10-12-2017 @ 14.43.02 - (2.1.137)   - dscudiero - Cosmetic/minor change
