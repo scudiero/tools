@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.23 # -- dscudiero -- Wed 10/11/2017 @ 12:43:37.33
+version=3.13.24 # -- dscudiero -- Thu 10/12/2017 @ 14:30:34.68
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -44,7 +44,7 @@ function BuildMenuList {
 	## Get a list of scripts available to this user in the execution environment we are running in
 		unset whereClauseHost; unset whereClauseUser; unset whereClauseGroups
 		whereClauseActive="active = \"Yes\" and name != \"$mode\""
-		[[ $userName != 'dscudiero' ]] && whereClauseActive="$whereClauseActive and showInScripts=\"Yes\""
+		whereClauseActive="$whereClauseActive and showInScripts=\"Yes\""
 		# If reports build the auth where clauses
 		if [[ $mode == 'scripts' ]]; then
 			whereClauseHost="and (os=\"$osName\" and (host = \"$hostName\" or host is null))"
@@ -500,3 +500,4 @@ Goodbye 0
 ## 10-02-2017 @ 15.32.13 - (3.13.19)   - dscudiero - General syncing of dev to prod
 ## 10-11-2017 @ 11.28.50 - (3.13.21)   - dscudiero - Write startup messages to log only
 ## 10-11-2017 @ 12.51.42 - (3.13.23)   - dscudiero - Add parents arround script call
+## 10-12-2017 @ 14.30.48 - (3.13.24)   - dscudiero - Remove special code for dscudiero
