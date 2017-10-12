@@ -1,6 +1,6 @@
-## DO NOT AUTOVERSION
+## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.1.-1" # -- dscudiero -- Fri 09/29/2017 @ 14:09:53.03
+# version="1.1.0" # -- dscudiero -- Thu 10/12/2017 @ 14:25:27.31
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -64,8 +64,9 @@ function RunSql2 {
 		fi
  	## Write output to an array
 		unset resultSet
-		[[ $resultStr != '' ]] && IFS=$'\n' read -rd '' -a resultSet <<< "$resultStr"
-		readarray -t resultSet <<< "${resultStr}"
+		#[[ $resultStr != '' ]] && IFS=$'\n' read -rd '' -a resultSet <<< "$resultStr"
+		[[ $resultStr != '' ]] && readarray -t resultSet <<< "${resultStr}"
+
 	return 0
 } #RunMySql
 export -f RunSql2
@@ -92,3 +93,4 @@ export -f RunSql2
 ## 10-03-2017 @ 15.46.14 - ("1.1.-1")  - dscudiero - Update how we set the return array
 ## 10-04-2017 @ 12.47.32 - ("1.1.-1")  - dscudiero - Regress to the old parsing method
 ## 10-11-2017 @ 09.32.00 - ("1.1.-1")  - dscudiero - Update to use readarrau to parse output string to resutSet array
+## 10-12-2017 @ 14.26.05 - ("1.1.0")   - dscudiero - Use readarray to build the resultSet array
