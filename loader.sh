@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.41" # -- dscudiero -- Wed 10/11/2017 @ 12:46:20.73
+version="1.4.43" # -- dscudiero -- Thu 10/12/2017 @ 14:51:18.51
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -249,15 +249,15 @@ sTime=$(date "+%s")
 		[[ $checkMsg != true ]] && Terminate "$checkMsg"
 
 	## Get the users auth groups
-		# sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\""
-		# RunSql2 $sqlStmt
-		# unset UsersAuthGroups
-		# if [[ ${#resultSet[@]} -ne 0 ]]; then
-		# 	for ((i=0; i<${#resultSet[@]}; i++)); do
-		# 		UsersAuthGroups="$UsersAuthGroups,${resultSet[$i]}"
-		# 	done
-		# 	UsersAuthGroups="${UsersAuthGroups:1}"
-		# fi
+		sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\""
+		RunSql2 $sqlStmt
+		unset UsersAuthGroups
+		if [[ ${#resultSet[@]} -ne 0 ]]; then
+			for ((i=0; i<${#resultSet[@]}; i++)); do
+				UsersAuthGroups="$UsersAuthGroups,${resultSet[$i]}"
+			done
+			UsersAuthGroups="${UsersAuthGroups:1}"
+		fi
 
 		prtStatus ", check run/auth"
 		sTime=$(date "+%s")
@@ -895,3 +895,4 @@ fi
 ## 10-11-2017 @ 11.26.38 - ("1.4.35")  - dscudiero - Send the startup message to the logFile only
 ## 10-11-2017 @ 11.50.27 - ("1.4.40")  - dscudiero - Cleanup logfile initialization
 ## 10-11-2017 @ 12.51.16 - ("1.4.41")  - dscudiero - If calling scripts or reports then do not build a log file
+## 10-12-2017 @ 14.51.44 - ("1.4.43")  - dscudiero - Pull the users auth groups and put in a variable
