@@ -53,14 +53,24 @@ for (var key in hash) {
 
 ============================================================================================================================================================================
 //getTCFValue
-var tcfValue=getTCFValue('someVariable');
+var tcfValue=getTCFValue("someVariable");
 var tcfValue=getTCFValue("someVariable", { delimiter: "\n", retarray: true });
 var tcaValue=getTCFValue("someVariable", { data: tcadata });
 var tcaValue=getTCFValue("someVariable", { delimiter: "\n", retarray: true, data: tcadata });
 
-
 if definition is <variable>:id|<attr1>|<attr2>|<attr3>
 var competency=getTCFValue("<variable>.<attr1>", { delimiter: "\n", retarray: true });
+
+both tcf and tca data
+var values=getTCFValue("someVariable", { delimiter: "\n", retarray: true });
+values=RemoveDupes(proposalCols.concat(getTCFValue("someVariable", { delimiter: "\n", retarray: true , data: tcadata })));
+
+============================================================================================================================================================================
+CheckChanged
+wfrules:isMinorChange|function|CheckChanged|mode:only fields:<comma seperatered list of field>; // Minor change
+-or-
+<callName>_wfCheckChangedFields: <comma seperatered list of field>
+wfrules:isMinorChange|function|CheckChanged|mode:only
 
 ============================================================================================================================================================================
 //Parse an option list 
@@ -336,3 +346,4 @@ attributes.forEach(function(attr) {
 // 08-22-2017 @ 14.16.21 - dscudiero - Add examples of getTCFValue calls
 // 08-24-2017 @ 14.19.28 - dscudiero - Added get tca data example
 // 10-04-2017 @ 07.47.38 - dscudiero - General syncing of dev to prod
+// 10-12-2017 @ 14.21.39 - dscudiero - Add example of checkchanges call
