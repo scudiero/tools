@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.13" // -- dscudiero -- Thu 10/12/2017 @  8:51:47.25
+wfLibVersion="1.8.14" // -- dscudiero -- Thu 10/12/2017 @  8:56:24.70
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -2145,3 +2145,4 @@ var wfLibLoaded=true;
 // 10-04-2017 @ 13.28.38 - ("1.8.9")   - dscudiero - General syncing of dev to prod
 // 10-09-2017 @ 16.55.35 - ("1.8.11")  - dscudiero - Major refactoreing of GetRelated and LookupCode
 // 10-12-2017 @ 08.54.10 - ("1.8.13")  - dscudiero - Updated Related, GetRelated, and GetEcoSystemData2 to streamline and allow passing of ecosystem path and types
+// 10-12-2017 @ 08.56.51 - ("1.8.14")  - dscudiero - sync
