@@ -1,7 +1,7 @@
 #!/bin/bash
-## DO NOT AUTOVERSION
+## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.1.0" # -- dscudiero -- Mon 10/02/2017 @ 16:41:42.92
+# version="2.1.1" # -- dscudiero -- Thu 10/12/2017 @ 14:25:38.42
 #=======================================================================================================================
 # Retrieve data from a Excel xlsx spreadsheet
 # Usage: GetExcel <workBook> <workSheet>
@@ -65,10 +65,8 @@ function GetExcel2 {
 
 	## Set output to an array
 		unset resultSet
-		[[ $resultStr != '' ]] && IFS=$'\n' read -rd '' -a resultSet <<<"$resultStr"
-
-		#resultStr="$(sed 's/\r$//' <<< $resultStr)" ## Remove the new line chars
-		#[[ -n $resultStr ]] && read -rd $'\n' -a resultSet <<< "$resultStr"
+		#[[ $resultStr != '' ]] && IFS=$'\n' read -rd '' -a resultSet <<< "$resultStr"
+		[[ $resultStr != '' ]] && readarray -t resultSet <<< "${resultStr}"
 
 	GetExcelCleanup
 	return 0
@@ -98,3 +96,4 @@ export -f GetExcel2
 ## 10-05-2017 @ 12.12.30 - ("2.1.0")   - dscudiero - Cosmetic change or general syncing of dev to prod
 ## 10-05-2017 @ 12.25.38 - ("2.1.0")   - dscudiero - Cosmetic/minor change
 ## 10-05-2017 @ 12.26.43 - ("2.1.0")   - dscudiero - Cosmetic/minor change
+## 10-12-2017 @ 14.25.59 - ("2.1.1")   - dscudiero - Use readarray to build the resultSet array
