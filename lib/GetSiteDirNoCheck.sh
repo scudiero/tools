@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.44" # -- dscudiero -- Fri 04/07/2017 @ 14:49:13.93
+# version="1.0.45" # -- dscudiero -- Thu 10/12/2017 @ 16:49:57.31
 #===================================================================================================
 # Resolve a clients siteDir without using the database
 # Sets global variable: siteDir
@@ -15,7 +15,7 @@
 #===================================================================================================
 
 function GetSiteDirNoCheck {
-	Import 'SelectMenuNew'
+	Import 'SelectMenuNew ProtectedCall'
 	local client="$1"; shift || true
 	[[ -z $client ]] && return 0
 	local promptStr=${1:-"Do you wish to work with a 'development' or 'production' environment"}
@@ -103,3 +103,4 @@ export -f GetSiteDirNoCheck
 ## Mon Mar  6 14:39:13 CST 2017 - dscudiero - x
 ## Mon Mar  6 15:56:21 CST 2017 - dscudiero - Tweak parsing results from menuSelect
 ## 04-07-2017 @ 14.50.29 - ("1.0.44")  - dscudiero - default directory if in test mode
+## 10-12-2017 @ 16.51.29 - ("1.0.45")  - dscudiero - Add protectedCall to import list
