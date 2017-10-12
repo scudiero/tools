@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.24 # -- dscudiero -- Thu 10/12/2017 @ 14:30:34.68
+version=3.13.25 # -- dscudiero -- Thu 10/12/2017 @ 14:33:27.10
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -341,7 +341,7 @@ dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDa
 	while [[ $loop == true ]]; do
 		if [[ -z ${report}${script} ]]; then
 			unset itemName
-			BuildMenuList
+			[[ ${#menuList[@]} -eq 0 ]] && BuildMenuList
 			ProtectedCall "clear"
 			Msg3
 			Msg3 "\n^Please specify the $(ColorM '(ordinal)') number of the $itemType you wish to run, 'x' to quit."
@@ -501,3 +501,4 @@ Goodbye 0
 ## 10-11-2017 @ 11.28.50 - (3.13.21)   - dscudiero - Write startup messages to log only
 ## 10-11-2017 @ 12.51.42 - (3.13.23)   - dscudiero - Add parents arround script call
 ## 10-12-2017 @ 14.30.48 - (3.13.24)   - dscudiero - Remove special code for dscudiero
+## 10-12-2017 @ 14.43.31 - (3.13.25)   - dscudiero - Do not rebuild the menu list on re-display
