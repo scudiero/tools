@@ -1,12 +1,11 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.23 # -- dscudiero -- Thu 09/21/2017 @ 14:46:54.35
+version=3.5.24 # -- dscudiero -- Thu 10/12/2017 @ 15:07:44.73
 #==================================================================================================
 TrapSigs 'on'
-includes='GetDefaultsData ParseArgsStd Hello Init Goodbye ProtectedCall PadChar Prompt StringFunctions'
-includes="$includes Msg2 Dump RunSql2 Call"
-Import "$includes"
+myIncludes="ProtectedCall StringFunctions"
+Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="Cleanup private dev sites"
@@ -79,7 +78,7 @@ scriptDescription="Cleanup private dev sites"
 			if [[ ${#workFiles[@]} -gt 0 ]]; then
 				[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
 				[[ ${#workFiles[@]} -eq 1 ]] && echo && Info "Only a single site was found (${workFiles[0]})" && sites=("${workFiles[0]}") && return 0
-				Msg2; Msg2; Msg2 "The following private dev sites were found for you on this host:"
+				Msg3; Msg3; Msg3 "The following private dev sites were found for you on this host:"
 				for file in "${workFiles[@]}"; do
 					[[ ${#file} -gt $maxLen ]] && maxLen=${#file}
 				done
@@ -150,35 +149,35 @@ scriptDescription="Cleanup private dev sites"
 
 		case "$requestType" in
 			m*)
-				echo; Msg2 "Marking '$file' for automatic deletion in $deleteLimitDays days..."
+				echo; Msg3 "Marking '$file' for automatic deletion in $deleteLimitDays days..."
 				$DOIT mv "$file" "$file".AutoDeleteNoSave
 				$DOIT touch "$file".AutoDeleteNoSave/.AutoDeleteNoSave
 				;;
 			s*)
-				echo; Msg2 "Holding '$file' as '$file'.save..."
+				echo; Msg3 "Holding '$file' as '$file'.save..."
 				$DOIT mv "$file" "$file".save
 				;;
 			u*)
-				echo; Msg2 "UnMarking '$file'..."
+				echo; Msg3 "UnMarking '$file'..."
 				newFileName=$(sed 's|.AutoDeleteNoSave||g' <<< ${workFiles[$siteId]})
 				$DOIT mv "$file" /mnt/$share/web/$newFileName
 				$DOIT rm /mnt/$share/web/$newFileName/.AutoDeleteNoSave
 				;;
 			r*)
-				echo; Msg2 "Reseting 'marked' date for '$file'..."
+				echo; Msg3 "Reseting 'marked' date for '$file'..."
 				$DOIT touch "$file"/.clonedFrom*
 				;;
 			y*)
 				if [[ $userName = 'dscudiero' ]]; then
 					unset ans; Prompt ans "^Do you wish to save the workflow files" 'Yes No' 'Yes' ; ans=$(Lower "${ans:0:1}")
-					[[ $ans == 'y' ]] && Msg2 "Saving workflow..." && Call saveWorkflow $processClient -p -all -suffix "beforeDelete-$backupSuffix" -nop #-quiet
+					[[ $ans == 'y' ]] && Msg3 "Saving workflow..." && Call saveWorkflow $processClient -p -all -suffix "beforeDelete-$backupSuffix" -nop #-quiet
 				fi
-				echo; Msg2 "Removing '$file' offline..."
+				echo; Msg3 "Removing '$file' offline..."
 				if [[ $DOIT == '' ]]; then
 					mv -f "$file" "$file".BeingDeletedBy$(TitleCase "$myName")
 					(nohup rm -rf "$file".BeingDeletedBy$(TitleCase "$myName") &> /dev/null) &
 				else
-					Msg2 "*** DOIT flag is off, skipping delete ***"
+					Msg3 "*** DOIT flag is off, skipping delete ***"
 				fi
 				;;
 			w*)
@@ -207,24 +206,24 @@ RunSql2 $sqlStmt
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-ParseArgsStd
-dump -1 mark delete unMark client
 Hello
+ParseArgsStd 
+dump -1 mark delete unMark client
 
 ## Get the workflow files
 GetDefaultsData 'copyWorkflow'
 ## Get the workflow files to check from the database
 	unset requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles ifThenDelete
-	[[ $scriptData1 == '' ]] && Msg2 $T "'scriptData1 (requiredInstanceFiles)' is null, please check script configuration data"
+	[[ $scriptData1 == '' ]] && Msg3 $T "'scriptData1 (requiredInstanceFiles)' is null, please check script configuration data"
 	requiredInstanceFiles="$(cut -d':' -f2- <<< $scriptData1)"
 
-	[[ $scriptData2 == '' ]] && Msg2 $T "'scriptData2 (optionalInstanceFiles)' is null, please check script configuration data"
+	[[ $scriptData2 == '' ]] && Msg3 $T "'scriptData2 (optionalInstanceFiles)' is null, please check script configuration data"
 	optionalInstanceFiles="$(cut -d':' -f2- <<< $scriptData2)"
 
-	[[ $scriptData3 == '' ]] && Msg2 $T "'scriptData3 (requiredGlobalFiles)' is null, please check script configuration data"
+	[[ $scriptData3 == '' ]] && Msg3 $T "'scriptData3 (requiredGlobalFiles)' is null, please check script configuration data"
 	requiredGlobalFiles="$(cut -d':' -f2- <<< $scriptData3)"
 
-	[[ $scriptData4 == '' ]] && Msg2 $T "'scriptData4 (optionalGlobalFiles)' is null, please check script configuration data"
+	[[ $scriptData4 == '' ]] && Msg3 $T "'scriptData4 (optionalGlobalFiles)' is null, please check script configuration data"
 	optionalGlobalFiles="$(cut -d':' -f2- <<< $scriptData4)"
 
 	if [[ $scriptData5 ]]; then
@@ -250,26 +249,26 @@ searchStr="$userName"
 ## if client was passed in then just delete that site, otherwise if it is 'daemon' then process autodeletes
 if [[ -n $client ]]; then
 	if [[ $client == 'daemon' ]]; then
-		Msg2 "Starting $myName in daemon mode..."
+		Msg3 "Starting $myName in daemon mode..."
 		SetFileExpansion 'on'
 		fileList="$(ls -d /mnt/dev*/web/*-*--AutoDelete* 2> /dev/null || true)"
 		SetFileExpansion
 		for file in $fileList; do
 			file=$(tr -d ':' <<< "$file")
 			if [[ $(Contains "$file" 'WithSave') == true ]]; then
-				Msg2 "^Deleting '$(basename $file)' with workflow save"
+				Msg3 "^Deleting '$(basename $file)' with workflow save"
 				quiet=true
 				Call saveWorkflow -daemon -siteFile "$file" -all -suffix "beforeDelete-$backupSuffix -quiet -nop"
 				quiet=false
-				Msg2 "^^workflow saved"
+				Msg3 "^^workflow saved"
 			else
-				Msg2 "^Deleting '$(basename $file)'"
+				Msg3 "^Deleting '$(basename $file)'"
 			fi
 			fileRm="$(sed s"/AutoDeleteWithSave/BeingDeletedBy$(TitleCase $myName)/g" <<< "$file")"
 			mv -f "$file" "$fileRm"
 			(nohup rm -rf "$fileRm" &> /dev/null) &
 		done
-		Msg2 "Ending $myName in daemon mode..."
+		Msg3 "Ending $myName in daemon mode..."
 		Goodbye 0
 	else
 		searchStr="$client-$searchStr"
@@ -281,8 +280,8 @@ while [ true == true ]; do
 	GetSites "$searchStr"
 	[[ ${#sites[@]} -eq 0 ]] && echo && Info "No files found for user: '$userName'" && break
 	for site in ${sites[@]}; do
-		[[ $site == '' ]] && Msg2 "No sites found or all sites have been processed" && Goodbye 0
-		echo; Msg2  "You are asking to process site: '$site', are you sure?"
+		[[ $site == '' ]] && Msg3 "No sites found or all sites have been processed" && Goodbye 0
+		echo; Msg3  "You are asking to process site: '$site', are you sure?"
 		unset ans; Prompt ans " " "$validActions"; requestType=$(Lower ${ans:0:2})
 		ProcessRequest "$requestType" "$site"
 	done
@@ -333,3 +332,4 @@ Goodbye 0
 ## 09-12-2017 @ 07.15.31 - (3.5.20)    - dscudiero - Change the way files are deleted
 ## 09-13-2017 @ 06.59.23 - (3.5.21)    - dscudiero - remove debug statements
 ## 09-21-2017 @ 14.47.11 - (3.5.23)    - dscudiero - put the save workflow action back in
+## 10-12-2017 @ 15.09.49 - (3.5.24)    - dscudiero - Updated includes list
