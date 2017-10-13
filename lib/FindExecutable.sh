@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.28" # -- dscudiero -- Fri 10/13/2017 @ 14:36:20.61
+# version="1.2.29" # -- dscudiero -- Fri 10/13/2017 @ 14:40:22.35
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -18,9 +18,6 @@
 #=======================================================================================================================
 function FindExecutable {
 	#Import 'Dump,Msg3'; Verbose 3 -l "$FUNCNAME: Starting"
-
-[[ $userName == 'dscudiero' ]] && echo -e "\n HERE FE0\n"
-
 	## Defaults ====================================================================================
 	local mode='source' file='' token type ext found=false searchTokens checkFile searchRoot=''
 	local useLocal=$USELOCAL useDev=$USEDEV runScript=false scriptArgs=''
@@ -97,3 +94,4 @@ export -f FindExecutable
 ## 10-11-2017 @ 07.30.52 - ("1.2.23")  - dscudiero - Added -run option
 ## 10-11-2017 @ 07.31.46 - ("1.2.24")  - dscudiero - Cosmetic/minor change
 ## 10-13-2017 @ 14.36.46 - ("1.2.28")  - dscudiero - Add debug stuff
+## 10-13-2017 @ 14.40.35 - ("1.2.29")  - dscudiero - remove debug stuff
