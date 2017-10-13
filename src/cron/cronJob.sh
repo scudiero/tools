@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.0 # -- dscudiero -- Thu 10/12/2017 @ 14:44:00.64
+version=2.1.1 # -- dscudiero -- Fri 10/13/2017 @ 14:36:25.30
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -48,11 +48,11 @@ originalArgStr="$*"
 ## Run the executable(s)
 	useLocal=true
 	echo -e "\n$(date) -- Calling script\n\t$executeFile $callScriptArgs\n" > "$logFile" 2>&1
-	(FindExecutable "$callScriptName --cron -run $scriptArgs $callScriptArgs") >> "$logFile" 2>&1
+	(FindExecutable "$callScriptName -cron -run $scriptArgs $callScriptArgs") >> "$logFile" 2>&1
 	echo -e "\t-- $hostName - $callScriptName done" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 
 #=======================================================================================================================
-## Post process the logFile
+## Scan the logFile looking for errors
 	## Turn off error traps
 	set +eE ; trap - ERR
 	## If logFile is empty then just remove it, otherwise scan for errors
@@ -105,3 +105,4 @@ exit 0
 ## 10-10-2017 @ 15.52.43 - (2.0.110)   - dscudiero - Cosmetic/minor change
 ## 10-11-2017 @ 07.31.15 - (2.0.111)   - dscudiero - Cosmetic/minor change
 ## 10-12-2017 @ 14.44.23 - (2.1.0)     - dscudiero - Cosmetic/minor change
+## 10-13-2017 @ 14.37.01 - (2.1.1)     - dscudiero - Add debug stuff
