@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.0" # -- dscudiero -- Mon 10/16/2017 @ 12:00:34.25
+# version="2.1.1" # -- dscudiero -- Mon 10/16/2017 @ 14:01:17.63
 #===================================================================================================
 # Common script exit
 # args:
@@ -138,7 +138,7 @@ function Goodbye {
 	fi
 
 	[[ $(IsNumeric $exitCode) != true ]] && exitCode=0
-	if [[ $secondaryMessagesOnly == true ]]; then
+	if [[ $secondaryMessagesOnly == true || $batchMode == true ]]; then
 		secondaryMessagesOnly=false
 		return 0
 	else
@@ -176,3 +176,4 @@ export -f Goodbye
 ## 09-25-2017 @ 09.01.41 - ("2.0.143") - dscudiero - Switch to Msg3
 ## 10-02-2017 @ 16.24.58 - ("2.0.144") - dscudiero - Add PadChar to the includes list
 ## 10-16-2017 @ 12.36.07 - ("2.1.0")   - dscudiero - Add StringFunctions to includes
+## 10-16-2017 @ 14.01.40 - ("2.1.1")   - dscudiero - If in batchmode then return vs exit
