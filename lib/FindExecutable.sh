@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.29" # -- dscudiero -- Fri 10/13/2017 @ 14:40:22.35
+# version="1.2.30" # -- dscudiero -- Mon 10/16/2017 @ 12:50:42.66
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -23,6 +23,7 @@ function FindExecutable {
 	local useLocal=$USELOCAL useDev=$USEDEV runScript=false scriptArgs=''
 	## Parse arguments =============================================================================
 	while [[ $# -gt 0 ]]; do
+		#echo "\$1 = '$1'"
 	    [[ $1 =~ ^-fi|--file$ ]] && { file="$2"; shift 2; continue; }
 	    [[ $1 =~ ^-m|--mode$ ]] && { mode="$2"; shift 2; continue; }
 	    [[ $1 =~ ^-sr|-so|--src$|--source$ ]] && { mode='src'; shift 1; continue; }
@@ -43,18 +44,18 @@ function FindExecutable {
 	done
 
 	## Search for the file
-	if [[ $mode != 'lib' ]]; then
-		[[ -n $TOOLSSRCPATH ]] && searchDirs="$(tr ':' ' ' <<< $TOOLSSRCPATH)" || searchDirs="$TOOLSPATH/src"
-		[[ $useDev == true && -n $TOOLSDEVPATH && -d "$TOOLSDEVPATH/src" ]] && searchDirs="$TOOLSDEVPATH/src $searchDirs"
-		[[ $useLocal == true && -d "$HOME/tools/src" ]] && searchDirs="$HOME/tools/src $searchDirs"
-		searchTokens="bash:sh python:py java:class steps:html report:sh"
-	else
+	if [[ $mode == 'lib' ]]; then
 		[[ -n $TOOLSLIBPATH ]] && searchDirs="$(tr ':' ' ' <<< $TOOLSLIBPATH)" || searchDirs="$TOOLSPATH/lib"
 		[[ $useDev == true && -n $TOOLSDEVPATH && -d "$TOOLSDEVPATH/lib" ]] && searchDirs="$TOOLSDEVPATH/lib $searchDirs"
 		[[ $useLocal == true && -d "$HOME/tools/lib" ]] && searchDirs="$HOME/tools/lib $searchDirs"
 		searchTokens="bash:sh cpp:cpp"
+	else
+		[[ -n $TOOLSSRCPATH ]] && searchDirs="$(tr ':' ' ' <<< $TOOLSSRCPATH)" || searchDirs="$TOOLSPATH/src"
+		[[ $useDev == true && -n $TOOLSDEVPATH && -d "$TOOLSDEVPATH/src" ]] && searchDirs="$TOOLSDEVPATH/src $searchDirs"
+		[[ $useLocal == true && -d "$HOME/tools/src" ]] && searchDirs="$HOME/tools/src $searchDirs"
+		searchTokens="bash:sh python:py java:class steps:html report:sh cron:sh"
 	fi
-	#Dump -t file mode searchRoot searchTokens -n
+	#Dump -t mode searchRoot searchTokens searchDirs
 
 	for dir in $searchDirs; do
 		#Dump -t dir
@@ -95,3 +96,4 @@ export -f FindExecutable
 ## 10-11-2017 @ 07.31.46 - ("1.2.24")  - dscudiero - Cosmetic/minor change
 ## 10-13-2017 @ 14.36.46 - ("1.2.28")  - dscudiero - Add debug stuff
 ## 10-13-2017 @ 14.40.35 - ("1.2.29")  - dscudiero - remove debug stuff
+## 10-16-2017 @ 12.50.59 - ("1.2.30")  - dscudiero - Fix problem resolving -cron files
