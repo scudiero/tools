@@ -1,9 +1,9 @@
 #!/bin/bash
 #==================================================================================================
-version=2.2.24 # -- dscudiero -- Mon 09/25/2017 @ 12:15:29.38
+version=2.2.45 # -- dscudiero -- Mon 10/16/2017 @  9:04:32.94
 #==================================================================================================
 TrapSigs 'on'
-myIncludes="GetOutputFile BackupCourseleafFile"
+myIncludes="GetOutputFile BackupCourseleafFile ProtectedCall SelectMenu GetExcel2 SetFileExpansion"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -109,7 +109,7 @@ scriptDescription="Merge role data"
 				if [[ ${line:0:5} == 'role:' ]]; then
 					key=$(echo $line | cut -d '|' -f 1 | cut -d ':' -f 2)
 					data=$(Trim $(echo $line | cut -d '|' -f 2-))
-					dump -2 -n line key data
+					dump 2 -n line key data
 						rolesFromFile["$key"]="$data"
 		      	fi
 			done < $rolesFile
@@ -127,46 +127,41 @@ scriptDescription="Merge role data"
 		Msg3 "\nParsing the roles data from the workbook file ($workbookFile)..."
 		## Parse the role data from the spreadsheet
 			workbookSheet='roles'
-			getXlsx $USELOCAL --noLog --noLogInDb $workbookFile $workbookSheet \| > $tmpFile
-			grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
-			if [[ $grepStr != '' ]]; then
-				Errors "Could not retrieve data from workbook, please see below"
-				tail -n 6 $tmpFile 2>&1 | xargs -I{} printf "\\t%s\\n" "{}"
-				Msg3
-				Goodbye -1
-			fi
-
-		## Read the getXlsx output file
-			#unset rolesFromSpreadsheet
+			GetExcel2 -wb "$workbookFile" -ws "$workbookSheet"
+		## Parse the output array
 			foundHeader=false; foundData=false
-			while read line; do
-				dump -2 line
-				[[ $line == '' ]] && continue
-				if [[ $(Lower ${line:0:7}) == '*start*' && $foundHeader == false ]]; then
-					read line
+			for ((ii=0; ii<${#resultSet[@]}; ii++)); do
+				result="${resultSet[$ii]}"
+				dump 2 -n result
+				[[ $result == '' || $result = '|||' ]] && continue
+				SetFileExpansion 'off'
+				if [[ $(Lower ${result:0:7}) == '*start*' || $(Lower ${result:0:3}) == '***' ]] && [[ $foundHeader == false ]]; then
+					(( ii++ ))
+					result="${resultSet[$ii]}"
+					SetFileExpansion
 					Msg3 $V1 'Parsing header record'
-					IFSave=$IFS; IFS=\|; sheetCols=($line); IFS=$IFSave;
+					IFSave=$IFS; IFS=\|; sheetCols=($result); IFS=$IFSave;
 					findFields="role members email"
 					for field in $findFields; do
-						dump -2 -n field
+						dump 2 -n field
 						unset fieldCntr
 						for sheetCol in "${sheetCols[@]}"; do
 							(( fieldCntr += 1 ))
-							dump -2 -t sheetCol fieldCntr
+							dump 2 -t sheetCol fieldCntr
 							[[ $(Contains "$(Lower $sheetCol)" "$field") == true ]] && eval "${field}Col=$fieldCntr" && break
 						done
 					done
-					dump -2 roleCol membersCol emailCol
+					dump 2 roleCol membersCol emailCol
 					membersCol=$membersCol$userCol
 					[[ $roleCol == '' ]] && Terminate "Could not find a 'RoleName' column in the 'RolesData' sheet"
 					[[ $membersCol == '' ]] && Terminate "Could not find a 'MemberList or UserList' column in the 'RolesData' sheet"
 					[[ $emailCol == '' ]] && Terminate "Could not find a 'Email or UserList' column in the 'RolesData' sheet"
 					foundHeader=true
 				elif [[ $foundHeader == true ]]; then
-					key=$(echo $line | cut -d '|' -f $roleCol)
+					key=$(echo $result | cut -d '|' -f $roleCol)
 					[[ $key == '' ]] && continue
-					value=$(echo $line | cut -d '|' -f $membersCol)'|'$(echo $line | cut -d '|' -f $emailCol)
-					dump -2 -n line -t key value
+					value=$(echo $result | cut -d '|' -f $membersCol)'|'$(echo $result | cut -d '|' -f $emailCol)
+					dump 2 -n result -t key value
 					if [[ ${rolesFromSpreadsheet["$key"]+abc} ]]; then
 						if [[ ${rolesFromSpreadsheet["$key"]} != $value ]]; then
 							Terminate "The '$workbookSheet' tab in the workbook contains duplicate role records \
@@ -176,11 +171,10 @@ scriptDescription="Merge role data"
 						rolesFromSpreadsheet["$key"]="$value"
 					fi
 				fi
-		done < $tmpFile
+			done
 
 		[[ ${#rolesFromSpreadsheet[@]} -eq 0 ]] && Terminate "Did not retrieve any records from the spreadsheet, \
-													\n^most likely it is missing the '*start*' directive in \
-													\n^column 'A' just above the header record."
+					\n^most likely it is missing the 'start' directive ('*start*' or '***') in column 'A' just above the header record."
 		Msg3 "^Retrieved ${#rolesFromSpreadsheet[@]} records"
 		if [[ $verboseLevel -ge 1 ]]; then Msg3 "\n^rolesFromSpreadsheet: $roleFile"; for i in "${!rolesFromSpreadsheet[@]}"; do printf "\t\t[$i] = >${rolesFromSpreadsheet[$i]}<\n"; done; fi
 
@@ -229,10 +223,10 @@ declare -A membersErrors
 #==================================================================================================
 helpSet='script,client,env'
 helpNotes+=("The output is written to the $HOME/clientData/<client> directory,\n\t   if the directory does exist one will be created.")
+Hello
 GetDefaultsData $myName
 ParseArgsStd
 displayGoodbyeSummaryMessages=true
-Hello
 Init 'getClient getSrcEnv getTgtEnv getDirs checkEnvs'
 srcEnv="$(TitleCase "$srcEnv")"
 tgtEnv="$(TitleCase "$tgtEnv")"
@@ -354,15 +348,8 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 ## Process spreadsheet
 	if [[ $workbookFile != '' ]]; then
 		## Get the list of sheets in the workbook
-			getXlsx $USELOCAL --noLog --noLogInDb "$workbookFile" 'GetSheets' \| -v > $tmpFile
-			grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
-			if [[ $grepStr != '' ]]; then
-				Error "Could not retrieve data from workbook, please see below"
-				tail -n 6 $tmpFile 2>&1 | xargs -I{} printf "\\t%s\\n" "{}"
-				Msg3
-				Goodbye -1
-			fi
-			sheets=$(tail -n 1 $tmpFile)
+			GetExcel2 -wb "$workbookFile" -ws 'GetSheets'
+			sheets="${resultSet[0]}"
 			dump -1 sheets
 		## Make sure we have a 'role' sheet
 			[[ $(Contains "$(Lower $sheets)" 'role') != true ]] && Terminate"Could not locate a sheet with 'role' in its name in workbook:\n^$workbookFile"
@@ -560,3 +547,4 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 ## 05-26-2017 @ 12.49.39 - (2.2.21)    - dscudiero - Found an instance of Msg vs Msg2
 ## 06-07-2017 @ 07.44.14 - (2.2.22)    - dscudiero - Added BackupCourseleafFIle to the import list
 ## 09-25-2017 @ 12.26.53 - (2.2.24)    - dscudiero - Switch to use Msg3
+## 10-16-2017 @ 09.06.27 - (2.2.45)    - dscudiero - Updated to use GetExcel2
