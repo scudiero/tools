@@ -4,7 +4,7 @@
 version=4.12.10 # -- dscudiero -- Fri 09/29/2017 @ 13:37:02.61
 #==================================================================================================
 TrapSigs 'on'
-myIncludes="GetSiteDirNoCheck ProtectedCall"
+myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi"
 Import "$standardInteractiveIncludes $myIncludes"
 
 [[ $1 == $myName ]] && shift
@@ -62,6 +62,7 @@ scriptDescription="Create a cloned private dev site"
 		argList+=(-skipAlso,6,option,skipAlso,,script,'Additional directories and or files to ignore, comma separated list)')
 		argList+=(-wizDebug,3,switch,startWizdebug,,script,'Automatically start a wizDebug session after the copy)')
 		argList+=(-debug,3,switch,startWizdebug,,script,'Automatically start a wizDebug session after the copy)')
+		argList+=(-lock,4,switch,lockWorkflow,,script,'Lock workflow in the targt environment)')
 	}
 	function copyEnv-Goodbye {
 		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
@@ -117,6 +118,7 @@ unset suffix emailAddress clientHost remoteCopy
 progDir='courseleaf'
 haveCims=false
 haveClss=false
+lockWorkflow=false
 
 #==================================================================================================
 # Standard arg parsing and initialization
@@ -367,6 +369,7 @@ dump -1 skipCim skipCat skipClss skipAlso
 	[[ $skipCim == true && $fullCopy != true ]] && verifyArgs+=("Skip CIM:$skipCim")
 	[[ $skipClss == true && $fullCopy != true ]] && verifyArgs+=("Skip CLSS:$skipClss")
 	[[ $fullCopy != true ]] && verifyArgs+=("Exclude List:$tmpStr")
+	[[ $lockWorkflow == true  ]] && verifyArgs+=("Lock workflow in target:$lockWorkflow")
 	[[ $startWizdebug == true  ]] && verifyArgs+=("Auto start wizDebug:$startWizdebug")
 	[[ -z $onlyProduct ]] && verifyArgs+=("Full Copy:$fullCopy")
 
@@ -566,6 +569,21 @@ fi
 		done
 	fi
 
+## If we have cims and user is 'dscudiero' and env = 'pvt' and onlyProduct='cim' then turn on debugging
+	if [[ $tgtEnv == 'next' || $tgtEnv == 'test' ]] && [[ $lockWorkflow == true && onlyProduct == 'cim' ]]; then
+		Warning "Disabling workflow modifications in the '$(Upper "$tgtEnv")' environment"
+		editFile="$tgtDir/web/courseleaf/index.tcf"
+		for cim in $(tr ',' ' ' <<< "$cimStr"); do
+			unset grepStr; grepStr=$(ProtectedCall "grep "/$cim/workflow.html" "$editFile"")
+			if [[ -n $grepStr  && ${grepStr:0:2} != '//' ]]; then
+				fromStr="$grepStr"
+				toStr="//$grepStr"
+				$DOIT sed -i s"_^${fromStr}_${toStr}_" $editFile
+			fi
+		done
+		RunCourseLeafCgi "$trgDir" "-r /courseleaf/index.tcf"
+	fi
+
 #==================================================================================================
 ## Bye-bye
 [[ -n $asSite ]] && msgText="$(ColorK "$(Upper $asSite)")" || msgText="$(ColorK "$(Upper $client)")"
@@ -676,3 +694,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 10-05-2017 @ 07.15.23 - (4.12.10)   - dscudiero - Remove debug statements
 ## 10-11-2017 @ 12.51.54 - (4.12.10)   - dscudiero - Add -debug option
 ## 10-11-2017 @ 13.05.41 - (4.12.10)   - dscudiero - Fix usage of Call to be FindExecutabl
+## 10-16-2017 @ 12.57.09 - (4.12.10)   - dscudiero - Add -lock option to lock workflow files
