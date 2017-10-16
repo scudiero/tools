@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.1.2" # -- dscudiero -- Mon 10/16/2017 @ 13:33:06.46
+# version="1.1.4" # -- dscudiero -- Mon 10/16/2017 @ 13:39:34.50
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -54,14 +54,15 @@ function RunSql2 {
  		## Check for errors
  		##local tmpStr="$(tr '[:upper:]' '[:lower:]' <<< "$resultStr")" 
 		if [[ $(MyContains "$resultStr" 'sever:') == true || $(MyContains "$resultStr" 'ERROR' == true) == true || \
-			  $(MyContains "$resultStr" '\*Error\*') == true || $(MyContains "$resultStr" 'Error' == true) == true ]]; then
+			  $(MyContains "$resultStr" '\*Error\*') == true || \
+			  $(MyContains "$resultStr" 'Error occurred during initialization of VM' == true) == true ]]; then
 			local callerData="$(caller)"
 			local lineNo="$(basename $(cut -d' ' -f2 <<< $callerData))/$(cut -d' ' -f1 <<< $callerData)"
 			msg="$FUNCNAME: Error reported from $dbType"
 			[[ $dbType == 'sqlite3' ]] && msg="$msg\n\tFile: $dbFile"
 			msg="$msg\n\tsqlStmt: $sqlStmt\n\n\t$resultStr"
 			echo -e "$(ColorT "*Fatal Error*") -- ($lineNo) $msg"
-			return -3
+			return 3
 		fi
  	## Write output to an array
 		unset resultSet
@@ -96,3 +97,4 @@ export -f RunSql2
 ## 10-11-2017 @ 09.32.00 - ("1.1.-1")  - dscudiero - Update to use readarrau to parse output string to resutSet array
 ## 10-12-2017 @ 14.26.05 - ("1.1.0")   - dscudiero - Use readarray to build the resultSet array
 ## 10-16-2017 @ 13.33.30 - ("1.1.2")   - dscudiero - Update the error detection code to be a bit less sensitive
+## 10-16-2017 @ 13.39.46 - ("1.1.4")   - dscudiero - Tweak error dtection
