@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.58 # -- dscudiero -- Mon 10/16/2017 @ 13:42:21.78
+version=2.0.59 # -- dscudiero -- Mon 10/16/2017 @ 13:58:10.11
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -100,9 +100,8 @@ Verbose 1 "mode = '$mode'"
 	else
 		Warning "Could not read file: '$skeletonRoot/release/web/courseleaf/clver.txt'"
 	fi
-	Verbose "defaultClVer = '$defaultClVer'"
+	Verbose 1 "defaultClVer = '$defaultClVer'"
 
-Verbose 1 "mode = '$mode'"
 ## Write out the defaults files
 	if [[ $mode == 'all' || $mode == 'common' ]]; then
 		defaultsFile="$TOOLSDEFAULTSPATH/common"
@@ -206,3 +205,4 @@ Goodbye 0;
 ## 10-03-2017 @ 11.31.05 - (2.0.56)    - dscudiero - General syncing of dev to prod
 ## 10-11-2017 @ 07.42.28 - (2.0.57)    - dscudiero - Update debug statements
 ## 10-16-2017 @ 13.42.45 - (2.0.58)    - dscudiero - Add a level to the verbose statements
+## 10-16-2017 @ 13.58.23 - (2.0.59)    - dscudiero - Cosmetic/minor change
