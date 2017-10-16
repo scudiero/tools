@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.25 # -- dscudiero -- Wed 10/11/2017 @ 10:35:57.16
+version=2.1.26 # -- dscudiero -- Mon 10/16/2017 @ 13:14:10.34
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -45,7 +45,7 @@ case $hostName in
 			Msg3 \n*** Reports -- Completed ***
 
 		## Rollup logs
-			FindExecutable -sh -run 'weeklyRollup' $scriptArgs
+			FindExecutable -sh -run weeklyRollup $scriptArgs
 			;;
 	build5)
 			;;
@@ -68,3 +68,4 @@ return 0
 ## Fri Mar 17 11:23:42 CDT 2017 - dscudiero - Added qaWaiting report
 ## 04-05-2017 @ 07.06.09 - (2.1.23)    - dscudiero - Add checkForPrivateDevSites
 ## 10-11-2017 @ 10.37.52 - (2.1.25)    - dscudiero - Switch to use FindExecutable -run
+## 10-16-2017 @ 13.14.42 - (2.1.26)    - dscudiero - Tweak call to weekelyRollup
