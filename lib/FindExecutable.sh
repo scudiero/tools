@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.30" # -- dscudiero -- Mon 10/16/2017 @ 12:50:42.66
+# version="1.2.31" # -- dscudiero -- Mon 10/16/2017 @ 12:54:25.75
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -55,7 +55,7 @@ function FindExecutable {
 		[[ $useLocal == true && -d "$HOME/tools/src" ]] && searchDirs="$HOME/tools/src $searchDirs"
 		searchTokens="bash:sh python:py java:class steps:html report:sh cron:sh"
 	fi
-	#Dump -t mode searchRoot searchTokens searchDirs
+	#Dump -t file mode searchRoot searchTokens searchDirs
 
 	for dir in $searchDirs; do
 		#Dump -t dir
@@ -69,9 +69,14 @@ function FindExecutable {
 		[[ $found == true ]] && break
 	done
 
-	executeFile="$checkFile"
-	[[ -z "$executeFile" || ! -r "$executeFile" ]] && return 0
-	[[ $runScript == true ]] && source "$executeFile" $scriptArgs || echo "$executeFile"
+	executeFile="$checkFile" 
+	if [[ $runScript == true ]]; then
+		[[ -z "$executeFile" || ! -r "$executeFile" ]] && Terminate "$FUNCNAME: Run options active and could not find execution file, file='$file'"
+		source "$executeFile" $scriptArgs || echo "$executeFile"
+	else
+		[[ -z "$executeFile" || ! -r "$executeFile" ]] && return 0
+		echo "$executeFile"
+	fi
 	return 0
 } ##FindExecutable
 export -f FindExecutable
@@ -97,3 +102,4 @@ export -f FindExecutable
 ## 10-13-2017 @ 14.36.46 - ("1.2.28")  - dscudiero - Add debug stuff
 ## 10-13-2017 @ 14.40.35 - ("1.2.29")  - dscudiero - remove debug stuff
 ## 10-16-2017 @ 12.50.59 - ("1.2.30")  - dscudiero - Fix problem resolving -cron files
+## 10-16-2017 @ 12.54.54 - ("1.2.31")  - dscudiero - Throw an error run is active and cannot find execution file
