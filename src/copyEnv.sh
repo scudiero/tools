@@ -570,9 +570,9 @@ fi
 	fi
 
 ## If we have cims and user is 'dscudiero' and env = 'pvt' and onlyProduct='cim' then turn on debugging
-	if [[ $tgtEnv == 'next' || $tgtEnv == 'test' ]] && [[ $lockWorkflow == true && onlyProduct == 'cim' ]]; then
-		Warning "Disabling workflow modifications in the '$(Upper "$tgtEnv")' environment"
-		editFile="$tgtDir/web/courseleaf/index.tcf"
+	if [[ $srcEnv == 'next' || $srcEnv == 'test' ]] && [[ $lockWorkflow == true && onlyProduct == 'cim' ]]; then
+		Warning "Disabling workflow modifications in the '$(Upper "$srcEnv")' environment"
+		editFile="$srcEnv/web/courseleaf/index.tcf"
 		for cim in $(tr ',' ' ' <<< "$cimStr"); do
 			unset grepStr; grepStr=$(ProtectedCall "grep "/$cim/workflow.html" "$editFile"")
 			if [[ -n $grepStr  && ${grepStr:0:2} != '//' ]]; then
@@ -581,7 +581,7 @@ fi
 				$DOIT sed -i s"_^${fromStr}_${toStr}_" $editFile
 			fi
 		done
-		RunCourseLeafCgi "$trgDir" "-r /courseleaf/index.tcf"
+		RunCourseLeafCgi "$srcEnv" "-r /courseleaf/index.tcf"
 	fi
 
 #==================================================================================================
@@ -695,3 +695,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 10-11-2017 @ 12.51.54 - (4.12.10)   - dscudiero - Add -debug option
 ## 10-11-2017 @ 13.05.41 - (4.12.10)   - dscudiero - Fix usage of Call to be FindExecutabl
 ## 10-16-2017 @ 12.57.09 - (4.12.10)   - dscudiero - Add -lock option to lock workflow files
+## 10-16-2017 @ 14.17.22 - (4.12.10)   - dscudiero - fix locking code
