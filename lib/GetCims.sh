@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.18" # -- dscudiero -- Thu 09/14/2017 @ 15:27:55.65
+# version="2.0.19" # -- dscudiero -- Mon 10/16/2017 @ 11:59:17.62
 #===================================================================================================
 # Get CIMs
 #===================================================================================================
@@ -8,8 +8,8 @@
 # All rights reserved
 #===================================================================================================
 function GetCims {
-	includes="Msg2 ProtectedCall"
-	Import "$includes"
+	myIncludes="ProtectedCall"
+	Import "$standardInteractiveIncludes $myIncludes"
 
 	local siteDir=$1 ; shift || true
 	local verb prefix
@@ -72,3 +72,4 @@ export -f GetCims
 ## 04-10-2017 @ 14.37.46 - ("2.0.14")  - dscudiero - tweak argument parsing
 ## 04-13-2017 @ 10.59.23 - ("2.0.16")  - dscudiero - s
 ## 04-13-2017 @ 11.43.55 - ("2.0.17")  - dscudiero - remove debug stuff
+## 10-16-2017 @ 12.35.41 - ("2.0.19")  - dscudiero - Refactor includes
