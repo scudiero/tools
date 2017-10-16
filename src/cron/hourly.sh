@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.2 # -- dscudiero -- Mon 10/16/2017 @ 13:15:59.84
+version=2.2.3 # -- dscudiero -- Mon 10/16/2017 @ 13:16:37.95
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -11,9 +11,6 @@ version=2.2.2 # -- dscudiero -- Mon 10/16/2017 @ 13:15:59.84
 # 12-18-15 - dgs - New structure
 # 09-05-17 - dgs - Added '--ignore-date' to rsyc options in SyncSkeleton
 #=======================================================================================================================
-
-echo -e "\n\nHERE HERE $(date) HERE HERE\n\n"
-
 TrapSigs 'on'
 includes='FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql2 GetPW SetFileExpansion'
 includes="$includes RunSql2 ProtectedCall"
@@ -276,3 +273,4 @@ return 0
 ## 10-12-2017 @ 14.44.26 - (2.2.0)     - dscudiero - Cosmetic/minor change
 ## 10-13-2017 @ 14.37.27 - (2.2.1)     - dscudiero - Add debug stuff
 ## 10-16-2017 @ 13.16.18 - (2.2.2)     - dscudiero - Fix syntax error
+## 10-16-2017 @ 13.16.46 - (2.2.3)     - dscudiero - remove debug statements
