@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.1.0" # -- dscudiero -- Thu 10/12/2017 @ 14:25:27.31
+# version="1.1.2" # -- dscudiero -- Mon 10/16/2017 @ 13:33:06.46
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -52,8 +52,9 @@ function RunSql2 {
 		[[ $dbType == 'mysql' ]] && resultStr="$(java runMySql $sqlStmt 2>&1)" || resultStr="$(sqlite3 $dbFile "$sqlStmt" 2>&1 | tr "\t" '|')"
  		[[ $prevGlob == 'on' ]] && set +f
  		## Check for errors
- 		local tmpStr="$(tr '[:upper:]' '[:lower:]' <<< "$resultStr")" 
-		if [[ $(MyContains "$tmpStr" 'sever:') == true || $(MyContains "$tmpStr" 'error' == true) == true ]]; then
+ 		##local tmpStr="$(tr '[:upper:]' '[:lower:]' <<< "$resultStr")" 
+		if [[ $(MyContains "$resultStr" 'sever:') == true || $(MyContains "$resultStr" 'ERROR' == true) == true || \
+			  $(MyContains "$resultStr" '\*Error\*') == true || $(MyContains "$resultStr" 'Error' == true) == true ]]; then
 			local callerData="$(caller)"
 			local lineNo="$(basename $(cut -d' ' -f2 <<< $callerData))/$(cut -d' ' -f1 <<< $callerData)"
 			msg="$FUNCNAME: Error reported from $dbType"
@@ -94,3 +95,4 @@ export -f RunSql2
 ## 10-04-2017 @ 12.47.32 - ("1.1.-1")  - dscudiero - Regress to the old parsing method
 ## 10-11-2017 @ 09.32.00 - ("1.1.-1")  - dscudiero - Update to use readarrau to parse output string to resutSet array
 ## 10-12-2017 @ 14.26.05 - ("1.1.0")   - dscudiero - Use readarray to build the resultSet array
+## 10-16-2017 @ 13.33.30 - ("1.1.2")   - dscudiero - Update the error detection code to be a bit less sensitive
