@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.22" # -- dscudiero -- Fri 09/22/2017 @  7:36:58.96
+# version="2.0.23" # -- dscudiero -- Mon 10/16/2017 @ 15:33:45.71
 #===================================================================================================
 # Run a courseleaf.cgi command, check outpout
 # Courseleaf.cgi $LINENO <siteDir> <command string>
@@ -9,7 +9,7 @@
 # All rights reserved
 #===================================================================================================
 function RunCourseLeafCgi {
-	myIncludes="GetCourseleafPgm ProtectedCall"
+	myIncludes="GetCourseleafPgm ProtectedCall PushPop"
 	Import "$standardIncludes $myIncludes"
 
 	local siteDir="$1"; shift
@@ -49,3 +49,4 @@ export -f RunCourseLeafCgi
 ## 05-04-2017 @ 13.18.23 - ("2.0.20")  - dscudiero - Restore from baclup
 ## 05-25-2017 @ 13.26.11 - ("2.0.21")  - dscudiero - Tweak how the tmpFile is assigned
 ## 09-22-2017 @ 07.50.14 - ("2.0.22")  - dscudiero - Add to imports
+## 10-16-2017 @ 16.40.22 - ("2.0.23")  - dscudiero - Add PushPop to the includes list
