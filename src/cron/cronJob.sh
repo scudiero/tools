@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.7 # -- dscudiero -- Mon 10/16/2017 @ 13:06:18.60
+version=2.1.9 # -- dscudiero -- Mon 10/16/2017 @ 15:05:38.91
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -28,9 +28,9 @@ originalArgStr="$*"
 
 #=======================================================================================================================
 ## Initialize the runtime env
-	echo -e "\t-- $hostName - sourcing '$dispatcher'" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
+	##echo -e "\t-- $hostName - sourcing '$dispatcher'" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	source "$dispatcher" --viaCron ## Setup the environment
-	echo -e "\t\t-- $hostName - back from dispatcher" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
+	#3echo -e "\t\t-- $hostName - back from dispatcher" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 
 #=======================================================================================================================
 ## Set the jobs the log file
@@ -48,7 +48,7 @@ originalArgStr="$*"
 
 	echo -e "\t-- $hostName - Starting $callScriptName from '$executeFile', Args: $scriptArgs $callScriptArgs" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	echo -e "\n$(date) -- Calling script '$callScriptName':\n\t$executeFile $callScriptArgs\n" > "$logFile" 2>&1
-	(source $executeFile $scriptArgs $callScriptArgs) 2>&1 >> "$logFile"
+	source $executeFile $scriptArgs $callScriptArgs 2>&1 >> "$logFile"
 	echo -e "\t-- $hostName - $callScriptName done" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 
 #=======================================================================================================================
@@ -109,3 +109,4 @@ exit 0
 ## 10-16-2017 @ 12.38.52 - (2.1.5)     - dscudiero - Tweak how we call the script
 ## 10-16-2017 @ 12.56.41 - (2.1.6)     - dscudiero - Cosmetic/minor change
 ## 10-16-2017 @ 13.06.35 - (2.1.7)     - dscudiero - Fix call to FindExecutable
+## 10-16-2017 @ 15.06.11 - (2.1.9)     - dscudiero - Remove the subshell parens arround the script source stmt
