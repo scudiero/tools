@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.1 # -- dscudiero -- Fri 10/13/2017 @  7:21:37.74
+version=2.2.2 # -- dscudiero -- Mon 10/16/2017 @ 13:15:59.84
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -209,7 +209,7 @@ case "$hostName" in
 		SyncCourseleafCgis
 		SyncSkeleton
 		## If noon then update the git repo shadows
-		[[ $(date "+%H") == 12 ]] && FindExecutable -sh -run syncCourseleafGitRepos master)
+		[[ $(date "+%H") == 12 ]] && FindExecutable -sh -run syncCourseleafGitRepos master
 		[[ $(date "+%H") == 22 ]] && FindExecutable -sh -uselocal -run backupData
 		;;
 	*)
@@ -275,3 +275,4 @@ return 0
 ## 10-12-2017 @ 14.43.02 - (2.1.137)   - dscudiero - Cosmetic/minor change
 ## 10-12-2017 @ 14.44.26 - (2.2.0)     - dscudiero - Cosmetic/minor change
 ## 10-13-2017 @ 14.37.27 - (2.2.1)     - dscudiero - Add debug stuff
+## 10-16-2017 @ 13.16.18 - (2.2.2)     - dscudiero - Fix syntax error
