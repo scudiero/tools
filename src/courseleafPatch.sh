@@ -986,7 +986,7 @@ if [[ $targetHasGit == true ]]; then
 		newGitFiles="${gitFiles%%;*}"
 		changedGitFiles="${gitFiles##*;}"
 		if [[ $hasChangedGitFiles == true && -n $changedGitFiles ]]; then
-			Error 0 1 "The $token environment has the non-committed files..."
+			Error 0 1 "The $token environment has the following non-committed files:"
 			Pushd "$gitDir"
 			for file in $(tr ',' ' ' <<< "$changedGitFiles"); do
 				Msg3 "^^$file"
@@ -994,7 +994,7 @@ if [[ $targetHasGit == true ]]; then
 			hasNonCommittedFiles=true
 			Popd
 		fi
-		if [[  $hasChangedGitFiles == true && -n $newGitFiles ]]; then
+		if [[ $hasChangedGitFiles == true && -n $newGitFiles ]]; then
 			Warning 0 1 "The $token environment has the non-tracked files, they will be ignored..."
 			for file in $(tr ',' ' ' <<< "$newGitFiles"); do
 				Msg3 "^^$file"
@@ -1778,3 +1778,4 @@ Goodbye 0 "$text1" "$text2"
 ## 09-25-2017 @ 09.48.48 - (5.4.30)    - dscudiero - Switch to Msg3
 ## 10-02-2017 @ 17.07.54 - (5.5.0)     - dscudiero - Switch to GetExcel2
 ## 10-03-2017 @ 07.14.03 - (5.5.0)     - dscudiero - Add Alert to include list
+## 10-16-2017 @ 16.40.53 - (5.5.0)     - dscudiero - Tweak messaging when reporting the uncommitte git files
