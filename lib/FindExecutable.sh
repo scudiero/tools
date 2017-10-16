@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.31" # -- dscudiero -- Mon 10/16/2017 @ 12:54:25.75
+# version="1.2.32" # -- dscudiero -- Mon 10/16/2017 @ 13:10:34.49
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -26,7 +26,7 @@ function FindExecutable {
 		#echo "\$1 = '$1'"
 	    [[ $1 =~ ^-fi|--file$ ]] && { file="$2"; shift 2; continue; }
 	    [[ $1 =~ ^-m|--mode$ ]] && { mode="$2"; shift 2; continue; }
-	    [[ $1 =~ ^-sr|-so|--src$|--source$ ]] && { mode='src'; shift 1; continue; }
+	    [[ $1 =~ ^-sr|-so|-sh|--src$|--source$ ]] && { mode='src'; shift 1; continue; }
 	    [[ $1 =~ ^-l|--lib$ ]] && { mode='lib'; shift 1; continue; }
 	    [[ $1 =~ ^-py|--python$ ]] && { mode='python'; searchRoot="${mode}"; shift 1; continue; }
 	    [[ $1 =~ ^-cp|--cpp$ ]] && { mode='cpp'; searchRoot="${mode}"; shift 1; continue; }
@@ -103,3 +103,4 @@ export -f FindExecutable
 ## 10-13-2017 @ 14.40.35 - ("1.2.29")  - dscudiero - remove debug stuff
 ## 10-16-2017 @ 12.50.59 - ("1.2.30")  - dscudiero - Fix problem resolving -cron files
 ## 10-16-2017 @ 12.54.54 - ("1.2.31")  - dscudiero - Throw an error run is active and cannot find execution file
+## 10-16-2017 @ 13.10.49 - ("1.2.32")  - dscudiero - Add -sh flag
