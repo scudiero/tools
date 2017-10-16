@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.16" // -- dscudiero -- Thu 10/12/2017 @ 13:45:11.52
+wfLibVersion="1.8.17" // -- dscudiero -- Mon 10/16/2017 @ 10:25:29.21
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -59,6 +59,7 @@ wfLibVersion="1.8.16" // -- dscudiero -- Thu 10/12/2017 @ 13:45:11.52
 // 10/12/17 - dgs - Updated Related, GetRelated, and GetEcoSystemData2 to streamline and allow passing of ecosystem path and types
 //					to GetEcoSystemData2
 // 10/12/17 - dgs - Fix bug in wffuncs.CheckChanged detecting not mode if 'not' is at the begining of the string
+// 10/16/17 - dgs - Fixed problem where 'getSubjects' function was returning the entire course code as returned by getAllcodes.
 //======================================================================================================================
 
 // Make sure wffucs is defined
@@ -1208,7 +1209,11 @@ GetAttrVal = function(data) {
 	var subjects=[], departments=[], colleges=[];
 	// If the request ends in an "s" then get standard values using allcodes functions
 		if (reqType.slice(-1) === "s" && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
-			subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
+			var subjects=[];
+			wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata)).forEach(function(subj) {
+				subjects.push(subj.split(" ")[0]);
+			});
+
 			departments=wffuncs.getDepartments(subjects);
 			colleges=wffuncs.getColleges(departments);
 			wfDebug(5,"\t\tFrom wffuncs.GetXXXX function calls:")
@@ -1317,7 +1322,10 @@ wffuncs.AttrIn = function(inval, wfrule, args) {
 
 		// Get standard values
 		if (wfAllcodes && wfCimInstance === 'courseadmin') {
-			var subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
+			var subjects=[];
+			wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata)).forEach(function(subj) {
+				subjects.push(subj.split(" ")[0]);
+			});
 			var departments=wffuncs.getDepartments(subjects);
 			var colleges=wffuncs.getColleges(departments);
 		} else {
@@ -2046,7 +2054,10 @@ wffuncs.wfDumpVars = function(inval, wfrule, args) {
 	} else {
 			Dump('\tgetAllCodes(tcfdata)',wffuncs.getAllCodes(tcfdata).toSource());
 
-			subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
+			var subjects=[];
+			wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata)).forEach(function(subj) {
+				subjects.push(subj.split(" ")[0]);
+			});
 			Dump('\twffuncs.GetSubjects',subjects.toSource());
 
 			departments=wffuncs.getDepartments(subjects);
@@ -2155,3 +2166,4 @@ var wfLibLoaded=true;
 // 10-12-2017 @ 08.54.10 - ("1.8.13")  - dscudiero - Updated Related, GetRelated, and GetEcoSystemData2 to streamline and allow passing of ecosystem path and types
 // 10-12-2017 @ 08.56.51 - ("1.8.14")  - dscudiero - sync
 // 10-12-2017 @ 14.22.08 - ("1.8.16")  - dscudiero - Fix problem with checkchanged when there is only one changed field and only one checkfield
+// 10-16-2017 @ 12.36.44 - ("1.8.17")  - dscudiero - Update how subjects is determined if allcodes
