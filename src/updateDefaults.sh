@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.57 # -- dscudiero -- Wed 10/11/2017 @  7:35:29.68
+version=2.0.58 # -- dscudiero -- Mon 10/16/2017 @ 13:42:21.78
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -35,7 +35,7 @@ GetDefaultsData #'buildSiteInfoTable'
 ignoreList="${ignoreList##*ignoreShares:}" ; ignoreList="${ignoreList%% *}"
 
 mode="$1" ; shift || true
-Verbose "mode = '$mode'"
+Verbose 1 "mode = '$mode'"
 
 ## DEV servers
 	unset newServers
@@ -46,7 +46,7 @@ Verbose "mode = '$mode'"
 		newServers="$newServers,$server"
 	done
 	newServers=${newServers:1}
-	Verbose "devServers = '$newServers'"
+	Verbose 1 "devServers = '$newServers'"
 	## Check to see if record exists
 		sqlStmt="select count(*) from defaults where name=\"devServers\" and host=\"$hostName\" and os=\"linux\""
 		RunSql2 $sqlStmt; count=${resultSet[0]}
@@ -68,7 +68,7 @@ Verbose "mode = '$mode'"
 		newServers="$newServers,$server"
 	done
 	newServers=${newServers:1}
-	Verbose "prodServers = '$newServers'"
+	Verbose 1 "prodServers = '$newServers'"
 	## Check to see if record exists
 		sqlStmt="select count(*) from defaults where name=\"prodServers\" and host=\"$hostName\" and os=\"linux\""
 		RunSql2 $sqlStmt; count=${resultSet[0]}
@@ -87,7 +87,7 @@ Verbose "mode = '$mode'"
 	dump 1 rhel
 	sqlStmt="update defaults set value=\"$rhel\" where name=\"rhel\" and host=\"$hostName\" and os=\"linux\""
 	RunSql2 $sqlStmt
-	Verbose "rhel = '$rhel'"
+	Verbose 1 "rhel = '$rhel'"
 
 
 ## Default CL version from the 'release' directory in the skeleton
@@ -102,11 +102,11 @@ Verbose "mode = '$mode'"
 	fi
 	Verbose "defaultClVer = '$defaultClVer'"
 
-Verbose "mode = '$mode'"
+Verbose 1 "mode = '$mode'"
 ## Write out the defaults files
 	if [[ $mode == 'all' || $mode == 'common' ]]; then
 		defaultsFile="$TOOLSDEFAULTSPATH/common"
-		Verbose "\ndefaultsFile = '$defaultsFile'"
+		Verbose 1 "\ndefaultsFile = '$defaultsFile'"
 		sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and status=\"A\" order by name"
 		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
@@ -139,7 +139,7 @@ Verbose "mode = '$mode'"
 				name=${result%%|*}
 				[[ ${name:0:1} == '_' ]] && continue
 				defaultsFile="$TOOLSDEFAULTSPATH/$name"
-				Verbose "defaultsFile = '$defaultsFile'"
+				Verbose 1 "defaultsFile = '$defaultsFile'"
 				echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
 				fieldCntr=1
 				for ((ij=1; ij<${#fieldsArray[@]}; ij++)); do
@@ -158,7 +158,7 @@ Verbose "mode = '$mode'"
 
 	if [[ $mode == 'all' || $mode == 'common' ]]; then
 		defaultsFile="$TOOLSDEFAULTSPATH/$hostName"
-		Verbose "\ndefaultsFile = '$defaultsFile'"
+		Verbose 1 "\ndefaultsFile = '$defaultsFile'"
 		sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and host=\"$hostName\" and status=\"A\" order by name"
 		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
@@ -205,3 +205,4 @@ Goodbye 0;
 ## 10-03-2017 @ 11.23.16 - (2.0.52)    - dscudiero - Do not set scriptArgs
 ## 10-03-2017 @ 11.31.05 - (2.0.56)    - dscudiero - General syncing of dev to prod
 ## 10-11-2017 @ 07.42.28 - (2.0.57)    - dscudiero - Update debug statements
+## 10-16-2017 @ 13.42.45 - (2.0.58)    - dscudiero - Add a level to the verbose statements
