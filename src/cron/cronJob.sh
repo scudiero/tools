@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.1 # -- dscudiero -- Fri 10/13/2017 @ 14:36:25.30
+version=2.1.5 # -- dscudiero -- Mon 10/16/2017 @ 11:38:45.76
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -33,9 +33,6 @@ originalArgStr="$*"
 	echo -e "\t\t-- $hostName - back from dispatcher" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 
 #=======================================================================================================================
-## Log the cronJob
-	echo -e "\t-- $hostName - Starting $callScriptName" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
-
 ## Set the jobs the log file
 	#if [[ $callScriptName != 'hourly' ]]; then
 		[[ ! -d $TOOLSPATH/Logs/cronJobs/$callScriptName ]] && mkdir -p $TOOLSPATH/Logs/cronJobs/$callScriptName
@@ -47,8 +44,10 @@ originalArgStr="$*"
 #=======================================================================================================================
 ## Run the executable(s)
 	useLocal=true
-	echo -e "\n$(date) -- Calling script\n\t$executeFile $callScriptArgs\n" > "$logFile" 2>&1
-	(FindExecutable "$callScriptName -cron -run $scriptArgs $callScriptArgs") >> "$logFile" 2>&1
+	executeFile=$(FindExecutable "$callScriptName -cron")
+	echo -e "\t-- $hostName - Starting $callScriptName from '$executeFile', Args: $scriptArgs $callScriptArgs" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
+	echo -e "\n$(date) -- Calling script '$callScriptName':\n\t$executeFile $callScriptArgs\n" > "$logFile" 2>&1
+	(source $executeFile $scriptArgs $callScriptArgs) 2>&1 >> "$logFile"
 	echo -e "\t-- $hostName - $callScriptName done" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 
 #=======================================================================================================================
@@ -106,3 +105,4 @@ exit 0
 ## 10-11-2017 @ 07.31.15 - (2.0.111)   - dscudiero - Cosmetic/minor change
 ## 10-12-2017 @ 14.44.23 - (2.1.0)     - dscudiero - Cosmetic/minor change
 ## 10-13-2017 @ 14.37.01 - (2.1.1)     - dscudiero - Add debug stuff
+## 10-16-2017 @ 12.38.52 - (2.1.5)     - dscudiero - Tweak how we call the script
