@@ -34,9 +34,9 @@
 
 ## call script loader
 	if [[ $1 == '--viaCron' ]]; then
-		echo -e "\t-- $hostName - sourcing \"$loaderDir/loader.sh\" $(basename $0) --batchMode $*" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
+		#echo -e "\t-- $hostName - sourcing \"$loaderDir/loader.sh\" $(basename $0) --batchMode $*" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 		source "$loaderDir/loader.sh" $(basename $0) --batchMode $*
-		echo -e "\t\t-- $hostName - back from loader" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
+		#echo -e "\t\t-- $hostName - back from loader" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 		return 0
 	else
 		source "$loaderDir/loader.sh" $(basename $0) $*
@@ -74,3 +74,4 @@ exit
 ## 09-07-2017 @ 08.52.42 - dscudiero - add setting of SCRIPTINCLUDES
 ## 09-08-2017 @ 16.28.53 - dscudiero - Check for the --useLocal directive as the first token before using local loader
 ## 09-28-2017 @ 09.02.58 - dscudiero - Add setting of TOOLSDEFAULTSPATH
+## 10-16-2017 @ 13.56.18 - dscudiero - Comment out loader log statements
