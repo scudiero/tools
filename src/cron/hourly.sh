@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.4 # -- dscudiero -- Mon 10/16/2017 @ 13:18:27.96
+version=2.2.5 # -- dscudiero -- Mon 10/16/2017 @ 13:45:53.83
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -199,8 +199,11 @@ case "$hostName" in
 			RunSql2 $sqlStmt
 			[[ ${#resultSet[@]} -gt 0 ]] && FindExecutable -sh -run perfTest
 		fi
+Here 1
 		FindExecutable -sh -run updateDefaults all
+Here 2
 		CheckMonitorFiles
+Here 3
 		SyncInternalDb
 		#BuildToolsAuthTable
 		SyncCourseleafCgis
@@ -275,3 +278,4 @@ return 0
 ## 10-16-2017 @ 13.16.18 - (2.2.2)     - dscudiero - Fix syntax error
 ## 10-16-2017 @ 13.16.46 - (2.2.3)     - dscudiero - remove debug statements
 ## 10-16-2017 @ 13.18.32 - (2.2.4)     - dscudiero - Cosmetic/minor change
+## 10-16-2017 @ 13.46.10 - (2.2.5)     - dscudiero - Add debug
