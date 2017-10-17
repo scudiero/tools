@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.17" // -- dscudiero -- Mon 10/16/2017 @ 10:25:29.21
+wfLibVersion="1.8.18" // -- dscudiero -- Tue 10/17/2017 @ 13:13:11.77
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -60,6 +60,7 @@ wfLibVersion="1.8.17" // -- dscudiero -- Mon 10/16/2017 @ 10:25:29.21
 //					to GetEcoSystemData2
 // 10/12/17 - dgs - Fix bug in wffuncs.CheckChanged detecting not mode if 'not' is at the begining of the string
 // 10/16/17 - dgs - Fixed problem where 'getSubjects' function was returning the entire course code as returned by getAllcodes.
+// 10/16/17 - dgs - Fixed problem when gGetRelated was called standalone
 //======================================================================================================================
 
 // Make sure wffucs is defined
@@ -693,6 +694,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 //==================================================================================================================
 // 10/09/17 - dgs - Initial - refactored from GetRelated
 // 10/12/17 - dgs - Refactored call to GetEcoSystemData2 to pass data object
+// 10/16/17 - dgs - Fixed problem with setting default value for 'includeEcoSystemData' when GetRelated was called standalone
 //==================================================================================================================
 GetRelated2 = function(type,data) {
 	var myName="GetRelated2"; var myDebugLevel=6; wfDebug(myDebugLevel,"\n*** In " + myName + " ***");
@@ -754,11 +756,11 @@ GetRelated2 = function(type,data) {
 		} //try
 		catch(err) { wfDebug(1,"\t*Error* -- " + myName + ": " + err + "\n"); return false; }
 
-		wfDump(5,["includeEcoSystem;"+includeEcoSystem,"proposalCode;"+proposalCode,"proposalCodes;"+proposalCodes,
+		wfDump(5,["proposalCode;"+proposalCode,"proposalCodes;"+proposalCodes,
 			"proposalSubjs;"+proposalSubjs.toSource(),"proposalDepts;"+proposalDepts.toSource(),"proposalCols;"+proposalCols.toSource()]);
 
 	// Process the argument list
-		var includeEcoSystem=false;
+		var includeEcoSystemData=false;
 		if (data.hasOwnProperty("includeEcoSystemData")) includeEcoSystemData=data.includeEcoSystemData;
 		var tcaData={}
 		if (data.hasOwnProperty("tcadata")) tcaData=data.tcadata;
@@ -2167,3 +2169,4 @@ var wfLibLoaded=true;
 // 10-12-2017 @ 08.56.51 - ("1.8.14")  - dscudiero - sync
 // 10-12-2017 @ 14.22.08 - ("1.8.16")  - dscudiero - Fix problem with checkchanged when there is only one changed field and only one checkfield
 // 10-16-2017 @ 12.36.44 - ("1.8.17")  - dscudiero - Update how subjects is determined if allcodes
+// 10-17-2017 @ 14.07.27 - ("1.8.18")  - dscudiero - Fixed problem with setting default value for 'includeEcoSystemData' when GetRelated was called standalone
