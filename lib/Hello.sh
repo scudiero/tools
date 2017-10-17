@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.39" # -- dscudiero -- Tue 10/03/2017 @ 13:40:03.49
+# version="2.0.40" # -- dscudiero -- Tue 10/17/2017 @ 14:04:57.15
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -17,7 +17,7 @@ function Hello {
 	
 	echo
 	[[ $TERM == 'dumb' ]] && echo
-	Msg3 "$(PadChar)"
+	[[ $shortHello != true ]] && Msg3 "$(PadChar)"
 	date=$(date)
 
 	local checkName=$(logname 2>&1); rc=$?
@@ -25,9 +25,9 @@ function Hello {
 
 	[[ "$version" = "" ]] && version=1.0.0
 	Msg3 "${myName} ($version) -- Date: $(date +"%a") $(date +"%m-%d-%Y @ %H.%M.%S")"
-	[[ "$myDescription" != "" ]] && Msg3 && Msg3 "$myDescription"
+	[[ $shortHello != true && "$myDescription" != "" ]] && Msg3 && Msg3 "$myDescription"
 	[[ $checkName != $userName ]] && userStr="Real user $checkName, Tools user: $userName" || userStr="Tools user: $userName"
-	Msg3 "$userStr, Host: $hostName, Database: $warehouseDb, PID: $$, PPID: $PPID"
+	[[ $shortHello != true ]] && Msg3 "$userStr, Host: $hostName, Database: $warehouseDb, PID: $$, PPID: $PPID"
 	[[ -n $(Trim "$originalArgStr") ]] && Msg3 "Arg String: '$originalArgStr'"
 
 	# echo "\$0 = $0"
@@ -70,3 +70,4 @@ export -f Hello
 ## 09-25-2017 @ 09.01.51 - ("2.0.34")  - dscudiero - Switch to Msg3
 ## 10-02-2017 @ 15.31.43 - ("2.0.38")  - dscudiero - commento out DisplayNews
 ## 10-03-2017 @ 13.40.27 - ("2.0.39")  - dscudiero - remove debug stuff
+## 10-17-2017 @ 14.08.11 - ("2.0.40")  - dscudiero - Added shortHello option to streamline output in batch
