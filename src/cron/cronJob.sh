@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.9 # -- dscudiero -- Mon 10/16/2017 @ 15:05:38.91
+version=2.1.10 # -- dscudiero -- Tue 10/17/2017 @ 14:00:57.29
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -48,8 +48,13 @@ originalArgStr="$*"
 
 	echo -e "\t-- $hostName - Starting $callScriptName from '$executeFile', Args: $scriptArgs $callScriptArgs" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	echo -e "\n$(date) -- Calling script '$callScriptName':\n\t$executeFile $callScriptArgs\n" > "$logFile" 2>&1
+
+	myNameSave="$myName"; myPathSave="$myPath"
+	myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
+	myPath="$(dirname $executeFile)"
 	source $executeFile $scriptArgs $callScriptArgs 2>&1 >> "$logFile"
 	echo -e "\t-- $hostName - $callScriptName done" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
+	myName="$myNameSave"; myPath="$myPathSave"
 
 #=======================================================================================================================
 ## Scan the logFile looking for errors
@@ -110,3 +115,4 @@ exit 0
 ## 10-16-2017 @ 12.56.41 - (2.1.6)     - dscudiero - Cosmetic/minor change
 ## 10-16-2017 @ 13.06.35 - (2.1.7)     - dscudiero - Fix call to FindExecutable
 ## 10-16-2017 @ 15.06.11 - (2.1.9)     - dscudiero - Remove the subshell parens arround the script source stmt
+## 10-17-2017 @ 14.07.48 - (2.1.10)    - dscudiero - Make sure myName is set correctly
