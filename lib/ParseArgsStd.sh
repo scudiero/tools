@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.45" # -- dscudiero -- Fri 09/29/2017 @ 12:44:47.72
+# version="2.0.46" # -- dscudiero -- Tue 10/17/2017 @ 14:06:14.34
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -73,6 +73,7 @@ function ParseArgsStd {
 		argList+=(-noCheck,4,switch,noCheck,,common,"Do not validate the client data in the $warehouseDb.$clientInfoTable table")
 		argList+=(-verbose,1,switch#,verbose,verboseLevel,common,"Additional messaging, -V# sets verbosity level to #")
 		argList+=(-go,2,switch,go,,common,"Skip the verify continue y/n prompt")
+		argList+=(-shortHello,10,switch,shortHello,,common,"Abbreviated messaging from Hello")
 
 	## Setup ENV arguments
 		local singleCharArgs="pvt dev test next curr"
@@ -123,3 +124,4 @@ export -f ParseArgsStd
 ## 09-01-2017 @ 13.44.46 - ("2.0.29")  - dscudiero - run the previously named local function if found
 ## 09-07-2017 @ 07.56.18 - ("2.0.35")  - dscudiero - Move the parsing of the client name to the end if no other arg matches have been found
 ## 10-02-2017 @ 13.46.58 - ("2.0.45")  - dscudiero - General syncing of dev to prod
+## 10-17-2017 @ 14.08.19 - ("2.0.46")  - dscudiero - Added shortHello option to streamline output in batch
