@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.14 # -- dscudiero -- Wed 10/11/2017 @ 10:35:19.61
+version=1.22.16 # -- dscudiero -- Tue 10/17/2017 @ 16:53:37.32
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -263,30 +263,30 @@ case "$hostName" in
 		## Build employee table
 			BuildEmployeeTable
 
-		## Build the qaStatus table
-			FindExecutable -sh -run buildQaStatusTable $scriptArgs
+		# ## Build the qaStatus table
+		# 	FindExecutable -sh -run buildQaStatusTable $scriptArgs
 
 
-		## Common Checks
-			FindExecutable -sh -run checkCgiPermissions $scriptArgs
-			FindExecutable -sh -run checkPublishSettings -fix $scriptArgs
+		# ## Common Checks
+		# 	FindExecutable -sh -run checkCgiPermissions $scriptArgs
+		# 	FindExecutable -sh -run checkPublishSettings -fix $scriptArgs
 
-		## Update the defaults data for this host
-			FindExecutable -sh -run updateDefaults all $scriptArgs
+		# ## Update the defaults data for this host
+		# 	FindExecutable -sh -run updateDefaults all $scriptArgs
 
-		## Scratch copy the skeleton shadow
-			Msg3 "Scratch copying the skeleton shadow..."
-			chmod u+wx $skeletonRoot
-			SetFileExpansion 'on'
-			rm -rf $skeletonRoot/*
-			rsyncOpts="-a --prune-empty-dirs"
-			rsync $rsyncOpts /mnt/dev6/web/_skeleton/* $skeletonRoot
-			SetFileExpansion
-			touch $skeletonRoot/.syncDate
-			Msg3 "^...done"
+		# ## Scratch copy the skeleton shadow
+		# 	Msg3 "Scratch copying the skeleton shadow..."
+		# 	chmod u+wx $skeletonRoot
+		# 	SetFileExpansion 'on'
+		# 	rm -rf $skeletonRoot/*
+		# 	rsyncOpts="-a --prune-empty-dirs"
+		# 	rsync $rsyncOpts /mnt/dev6/web/_skeleton/* $skeletonRoot
+		# 	SetFileExpansion
+		# 	touch $skeletonRoot/.syncDate
+		# 	Msg3 "^...done"
 
-		## Clean up the tools bin directory.
-			#CleanToolsBin
+		# ## Clean up the tools bin directory.
+		# 	#CleanToolsBin
 
 		## Sync GIT Shadow
 			FindExecutable -sh -run syncCourseleafGitRepos $scriptArgs
@@ -317,24 +317,24 @@ case "$hostName" in
 		# 	mysql $tmpConnectString $warehouseDev < /tmp/warehouse.sql
 		# 	[[ -f /tmp/warehouse.sql ]] && rm -f /tmp/warehouse.sql
 
-		## Reports
-			qaEmails='sjones@leepfrog.com,mbruening@leepfrog.com,jlindeman@leepfrog.com'
-			FindExecutable -sh -run reports qaStatusShort -quiet -email \"$qaEmails\" $scriptArgs
+		# ## Reports
+		# 	qaEmails='sjones@leepfrog.com,mbruening@leepfrog.com,jlindeman@leepfrog.com'
+		# 	FindExecutable -sh -run reports qaStatusShort -quiet -email \"$qaEmails\" $scriptArgs
 
-			## Build a list of clients and contact info for Shelia
-			#[[ $runClientListReport == true ]] && Call 'reports' "clientList -quiet -email 'dscudiero@leepfrog.com,sfrickson@leepfrog.com' $scriptArgs"
+		# 	## Build a list of clients and contact info for Shelia
+		# 	#[[ $runClientListReport == true ]] && Call 'reports' "clientList -quiet -email 'dscudiero@leepfrog.com,sfrickson@leepfrog.com' $scriptArgs"
 
-			tzEmails='dscudiero@leepfrog.com,jlindeman@leepfrog.com'
-			[[ $(date +%d -d tomorrow) == '01' ]] && FindExecutable -sh -run reports clientTimezone -quiet -email \"$tzEmails\" $scriptArgs
+		# 	tzEmails='dscudiero@leepfrog.com,jlindeman@leepfrog.com'
+		# 	[[ $(date +%d -d tomorrow) == '01' ]] && FindExecutable -sh -run reports clientTimezone -quiet -email \"$tzEmails\" $scriptArgs
 
-		## On the last day of the month roll-up the log files
-		  	if [[ $(date +"%d") == $(date -d "$(date +"%m")/1 + 1 month - 1 day" "+%d") ]]; then
-		  		Msg3 "Rolling up monthly log files"
-				cd $TOOLSPATH/Logs
-				SetFileExpansion 'on'
-				tar -cvzf "$(date '+%b-%Y').tar.gz" $(date +"%m")-* --remove-files > /dev/null 2>&1
-				SetFileExpansion
-		  	fi
+		# ## On the last day of the month roll-up the log files
+		#   	if [[ $(date +"%d") == $(date -d "$(date +"%m")/1 + 1 month - 1 day" "+%d") ]]; then
+		#   		Msg3 "Rolling up monthly log files"
+		# 		cd $TOOLSPATH/Logs
+		# 		SetFileExpansion 'on'
+		# 		tar -cvzf "$(date '+%b-%Y').tar.gz" $(date +"%m")-* --remove-files > /dev/null 2>&1
+		# 		SetFileExpansion
+		#   	fi
 
 		 ## Check that all things ran properly, otherwise revert the databases
 			Semaphore 'waiton' "buildClientInfoTable"
@@ -375,9 +375,9 @@ case "$hostName" in
 		## Build sites and siteadmins table
 			FindExecutable -sh -run buildSiteInfoTable -table ${siteInfoTable} $scriptArgs
 
-		## Common Checks
-			FindExecutable -sh -run checkCgiPermissions -fix $scriptArgs
-			FindExecutable -sh -run checkPublishSettings $scriptArgs
+		# ## Common Checks
+		# 	FindExecutable -sh -run checkCgiPermissions -fix $scriptArgs
+		# 	FindExecutable -sh -run checkPublishSettings $scriptArgs
 
 		## Update the defaults data for this host
 			FindExecutable -sh -run updateDefaults $scriptArgs
@@ -469,3 +469,4 @@ return 0
 ## 09-28-2017 @ 08.49.49 - (1.22.10)   - dscudiero - Modify calls to updateDefaults to add mode
 ## 10-11-2017 @ 09.32.39 - (1.22.12)   - dscudiero - Add setting of userid in BuildEmployeeTable
 ## 10-11-2017 @ 10.37.40 - (1.22.14)   - dscudiero - Switch to use FindExecutable -run
+## 10-17-2017 @ 16.54.01 - (1.22.16)   - dscudiero - Comment out stuff, only run core
