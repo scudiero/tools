@@ -62,7 +62,7 @@ scriptDescription="Create a cloned private dev site"
 		argList+=(-skipAlso,6,option,skipAlso,,script,'Additional directories and or files to ignore, comma separated list)')
 		argList+=(-wizDebug,3,switch,startWizdebug,,script,'Automatically start a wizDebug session after the copy)')
 		argList+=(-debug,3,switch,startWizdebug,,script,'Automatically start a wizDebug session after the copy)')
-		argList+=(-lock,4,switch,lockWorkflow,,script,'Lock workflow in the targt environment)')
+		argList+=(-lock,4,option,lockWorkflows,,script,'Lock the specified workflow(s) in the source environment)')
 	}
 	function copyEnv-Goodbye {
 		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
@@ -369,9 +369,8 @@ dump -1 skipCim skipCat skipClss skipAlso
 	[[ $skipCim == true && $fullCopy != true ]] && verifyArgs+=("Skip CIM:$skipCim")
 	[[ $skipClss == true && $fullCopy != true ]] && verifyArgs+=("Skip CLSS:$skipClss")
 	[[ $fullCopy != true ]] && verifyArgs+=("Exclude List:$tmpStr")
-	[[ $lockWorkflow == true  ]] && verifyArgs+=("Lock workflow in target:$lockWorkflow")
+	[[ -n $lockWorkflows ]] && verifyArgs+=("Lock workflow in target:$lockWorkflows")
 	[[ $startWizdebug == true  ]] && verifyArgs+=("Auto start wizDebug:$startWizdebug")
-	[[ -z $onlyProduct ]] && verifyArgs+=("Full Copy:$fullCopy")
 
 	[[ $manifest == true ]] && verifyArgs+=("Courseleaf manifest:$manifest")
 	VerifyContinue "You are asking to clone/copy a CourseLeaf site:"
@@ -556,7 +555,7 @@ else
 fi
 
 ## If we have cims and user is 'dscudiero' and env = 'pvt' and onlyProduct='cim' then turn on debugging
-	if [[  -n $cimStr && $userName == 'dscudiero' && $tgtEnv == 'pvt' &&  onlyProduct == 'cim' ]]; then
+	if [[  -n $cimStr && $userName == 'dscudiero' && $tgtEnv == 'pvt' && $skipCat == true && $skipClss == true ]]; then
 		for cim in $(tr ',' ' ' <<< "$cimStr"); do
 			editFile="$tgtDir/web/$cim/workflow.cfg"
 			[[ ! -f $editFile ]] && continue
@@ -569,16 +568,18 @@ fi
 		done
 	fi
 
-## If we have cims and user is 'dscudiero' and env = 'pvt' and onlyProduct='cim' then turn on debugging
-	if [[ $srcEnv == 'next' || $srcEnv == 'test' ]] && [[ $lockWorkflow == true && onlyProduct == 'cim' ]]; then
+## If we have cims and copying from test or next and lock is on then comment out workflow mgmt records on the console
+	if [[ $srcEnv == 'next' || $srcEnv == 'test' ]] && [[ -n $lockWorkflows ]]; then
 		Warning "Disabling workflow modifications in the '$(Upper "$srcEnv")' environment"
-		editFile="$srcEnv/web/courseleaf/index.tcf"
-		for cim in $(tr ',' ' ' <<< "$cimStr"); do
+		editFile="$srcDir/web/courseleaf/index.tcf"
+		for cim in $(tr ',' ' ' <<< "$lockWorkflows"); do
+			[[ $(Contains "$cim" 'admin') != true ]] && cim="${cim}admin"
 			unset grepStr; grepStr=$(ProtectedCall "grep "/$cim/workflow.html" "$editFile"")
 			if [[ -n $grepStr  && ${grepStr:0:2} != '//' ]]; then
 				fromStr="$grepStr"
 				toStr="//$grepStr"
 				$DOIT sed -i s"_^${fromStr}_${toStr}_" $editFile
+				Msg3 "^CIM instance '$cim' Workflow Management record commented out"
 			fi
 		done
 		RunCourseLeafCgi "$srcEnv" "-r /courseleaf/index.tcf"
@@ -696,3 +697,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 10-11-2017 @ 13.05.41 - (4.12.10)   - dscudiero - Fix usage of Call to be FindExecutabl
 ## 10-16-2017 @ 12.57.09 - (4.12.10)   - dscudiero - Add -lock option to lock workflow files
 ## 10-16-2017 @ 14.17.22 - (4.12.10)   - dscudiero - fix locking code
+## 10-17-2017 @ 14.08.56 - (4.12.10)   - dscudiero - Added -lock option
