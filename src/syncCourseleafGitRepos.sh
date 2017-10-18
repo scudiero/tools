@@ -1,10 +1,10 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.76 # -- dscudiero -- Fri 09/29/2017 @ 10:12:07.82
+version=2.1.80 # -- dscudiero -- Wed 10/18/2017 @ 14:07:35.79
 #==================================================================================================
 TrapSigs 'on'
 
-myIncludes="FindExecutable"
+myIncludes="FindExecutable ProtectedCall"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -43,7 +43,7 @@ sendMail=false
 unset newReleases
 ## Find the helper script location
 	workerScript='cloneGitRepo'
-	workerScriptFile="$(FindExecutable "$workerScript")"
+	workerScriptFile="$(FindExecutable -sh $workerScript)"
 	[[ -z $workerScriptFile ]] && Terminate "Could find the workerScriptFile file ('$workerScript')"
 
 addedCalledScriptArgs="-secondaryMessagesOnly"
@@ -52,6 +52,7 @@ tmpFile=$(MkTmpFile)
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
+Hello
 GetDefaultsData $myName
 ParseArgsStd
 unset addedCalledScriptArgs
@@ -59,7 +60,6 @@ unset addedCalledScriptArgs
 [[ $batchMode == true ]] && addedCalledScriptArgs="$addedCalledScriptArgs -batchMode"
 [[ $fork == true ]] && forkStr='&' || unset forkStr
 
-Hello
 [[ $batchMode != true ]] && VerifyContinue "You are asking to sync the master toolsprod shadow of the CourseLeaf git repositories"
 #==================================================================================================
 # Main
@@ -87,9 +87,9 @@ for repo in $repos; do
 				[[ $batchMode != true ]] && Msg2  "^^New shadow repo already exists, skipping"
 			else
 				if [[ $fork == true ]]; then
-					Call "$workerScriptFile" "$repo" "$tag" "$gitRepoRoot/${repo}.git" "$relDir" "$addedCalledScriptArgs" &
+					source "$workerScriptFile" "$repo" "$tag" "$gitRepoRoot/${repo}.git" "$relDir" "$addedCalledScriptArgs" &
 				else
-					Call "$workerScriptFile" "$repo" "$tag" "$gitRepoRoot/${repo}.git" "$relDir" "$addedCalledScriptArgs"
+					source "$workerScriptFile" "$repo" "$tag" "$gitRepoRoot/${repo}.git" "$relDir" "$addedCalledScriptArgs"
 				fi
 				[[ $tag != 'master' ]] && newReleases+=("$repo/$tag") && sendMail=true
 			fi
@@ -160,3 +160,4 @@ Goodbye 0 'alert'
 ## 05-16-2017 @ 13.13.03 - (2.1.71)    - dscudiero - Add debug statements
 ## 06-13-2017 @ 08.36.40 - (2.1.72)    - dscudiero - Remove debug code
 ## 09-29-2017 @ 10.15.14 - (2.1.76)    - dscudiero - Update FindExcecutable call for new syntax
+## 10-18-2017 @ 14.18.08 - (2.1.80)    - dscudiero - Update includes list
