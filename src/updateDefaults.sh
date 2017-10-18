@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.59 # -- dscudiero -- Mon 10/16/2017 @ 13:58:10.11
+version=2.0.60 # -- dscudiero -- Wed 10/18/2017 @ 15:14:52.25
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -174,6 +174,7 @@ Verbose 1 "mode = '$mode'"
 			Warning "Could not retrieve defaults data for '$hostName' from the data warehouse\n$sqlStmt"
 		fi
 	fi
+	touch "$TOOLSDEFAULTSPATH"
 
 Goodbye 0;
 #==================================================================================================
@@ -206,3 +207,4 @@ Goodbye 0;
 ## 10-11-2017 @ 07.42.28 - (2.0.57)    - dscudiero - Update debug statements
 ## 10-16-2017 @ 13.42.45 - (2.0.58)    - dscudiero - Add a level to the verbose statements
 ## 10-16-2017 @ 13.58.23 - (2.0.59)    - dscudiero - Cosmetic/minor change
+## 10-18-2017 @ 15.15.05 - (2.0.60)    - dscudiero - touch the directory to update time date
