@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #==================================================================================================
-version=1.0.112 # -- dscudiero -- Wed 10/18/2017 @ 14:20:33.44
+version=1.0.113 # -- dscudiero -- Wed 10/18/2017 @ 14:30:03.96
 #==================================================================================================
 TrapSigs 'on'
 originalArgStr="$*"
@@ -10,8 +10,8 @@ scriptDescription=""
 #= Description +===================================================================================
 # NOT MEANT TO BE CALLED STAND ALONE
 #==================================================================================================
-checkParent="buildqastatustable.sh"; found=false
-for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ ${BASH_SOURCE[$i]} == $checkParent ]] && found=true; done
+checkParent="buildqastatustable"; found=false
+for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ "$(basename "${BASH_SOURCE[$i]}")" == "${checkParent}.sh" ]] && found=true; done
 [[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent',\nCurrent call parent: '$calledFrom'"
 
 #==================================================================================================
@@ -193,3 +193,4 @@ dump -2 workbookFile -t clientCode product project instance env
 ## 05-19-2017 @ 16.02.26 - (1.0.110)   - dscudiero - Remove dependence on jalot number
 ## 10-18-2017 @ 14.16.30 - (1.0.111)   - dscudiero - Make the 'called from' logic more robust
 ## 10-18-2017 @ 14.20.55 - (1.0.112)   - dscudiero - Cosmetic/minor change
+## 10-18-2017 @ 14.30.38 - (1.0.113)   - dscudiero - Fix who called check
