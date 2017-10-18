@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.18 # -- dscudiero -- Wed 10/18/2017 @ 13:47:48.47
+version=1.22.19 # -- dscudiero -- Wed 10/18/2017 @ 15:40:22.84
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -383,7 +383,7 @@ case "$hostName" in
 			FindExecutable -sh -run updateDefaults $scriptArgs
 
 		## Remove private dev sites marked for auto deletion
-			FindExecutable -sh -run  cleanDev daemon $scriptArgs
+			FindExecutable -sh -run cleanDev -daemon $scriptArgs
 		;;
 esac
 
@@ -471,3 +471,4 @@ return 0
 ## 10-11-2017 @ 10.37.40 - (1.22.14)   - dscudiero - Switch to use FindExecutable -run
 ## 10-17-2017 @ 16.54.01 - (1.22.16)   - dscudiero - Comment out stuff, only run core
 ## 10-18-2017 @ 13.48.43 - (1.22.18)   - dscudiero - Pipe output of run scripts through Indent
+## 10-18-2017 @ 15.41.22 - (1.22.19)   - dscudiero - Change call string for cleanDevs to use -daemon switch
