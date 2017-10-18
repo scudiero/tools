@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.46 # -- dscudiero -- Wed 10/18/2017 @ 14:28:36.43
+version=1.0.47 # -- dscudiero -- Wed 10/18/2017 @ 15:30:50.67
 #==================================================================================================
 #= Description +===================================================================================
 # Clone a Courseleaf git repository
@@ -12,10 +12,7 @@ originalArgStr="$*"
 scriptDescription="Clone a Courseleaf git repository"
 
 checkParent="syncCourseleafGitRepos"; found=false
-for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do 
-	echo "\$(basename "${BASH_SOURCE[$i]}") = '"$(basename "${BASH_SOURCE[$i]}").sh"'"
-	[[ "$(basename "${BASH_SOURCE[$i]}")" == "${checkParent}.sh" ]] && found=true; 
-done
+for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ "$(basename "${BASH_SOURCE[$i]}")" == "${checkParent}.sh" ]] && found=true; done
 [[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent',\nCurrent call parent: '$calledFrom'"
 
 #==================================================================================================
@@ -61,7 +58,9 @@ dump -2 -t originalArgStr repo tag srcDir tgtDir
 #===================================================================================================
 # Main
 #===================================================================================================
-[[ $tag != 'master' ]] && tgtDir=${tgtDir}-new || rm -rf $tgtDir
+tgtDirReal="$tgtDir"
+tgtDir=${tgtDir}-new
+[[ -d $tgtDir ]] && Terminate "Target directory ($tgtDir) already exists"
 mkdir -p ${tgtDir}/${repo}
 chmod gu+w ${tgtDir}/${repo}
 cd $tgtDir
@@ -146,6 +145,11 @@ cd $tgtDir
 	SetFileExpansion 'on'
 	cwd=$(pwd); cd $tgtDir; chgrp -R leepfrog *; chgrp leepfrog .*; cd "$cwd"
 	SetFileExpansion 'off'
+
+## Swap the temp directory for the real one
+	[[ -d $tgtDirReal ]] && mv -f "$tgtDirReal" "${tgtDirReal}.bak"
+	mv -f "$tgtDir" "$tgtDirReal"
+	rm -rf "${tgtDirReal}.bak" &
 
 #==================================================================================================
 ## Done
@@ -359,3 +363,4 @@ return 0
 ## 10-18-2017 @ 14.23.38 - (1.0.44)    - dscudiero - Cosmetic/minor change
 ## 10-18-2017 @ 14.25.08 - (1.0.45)    - dscudiero - Cosmetic/minor change
 ## 10-18-2017 @ 14.27.31 - (1.0.45)    - dscudiero - Cosmetic/minor change
+## 10-18-2017 @ 15.31.00 - (1.0.47)    - dscudiero - Cosmetic/minor change
