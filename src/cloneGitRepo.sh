@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.48 # -- dscudiero -- Wed 10/18/2017 @ 15:34:46.61
+version=1.0.49 # -- dscudiero -- Wed 10/18/2017 @ 16:05:00.99
 #==================================================================================================
 #= Description +===================================================================================
 # Clone a Courseleaf git repository
@@ -72,7 +72,7 @@ cd $tgtDir
 	ProtectedCall "$gitCmd" 1> $stdOut 2> $stdErr
 	unset grepStr; [[ -f $stdErr ]] && grepStr=$(ProtectedCall "grep Fatal: $stdErr")
 	[[ $grepStr != '' ]] && Terminate 0 1 "git command failed:\n\t\t\tCmd: '$gitCmd'\n$(cat $stdErr | xargs -I {} echo -e "\t\t\t{}")"
-	[[ -f $stdOut && $batchMode != true ]] && cat $stdOut | xargs -I {} echo -e  "\t\t\t{}"
+	[[ -f $stdOut && $batchMode != true ]] && cat $stdOut | Indent
 
 ## Overlay the specific tagged files
 	if [[ $tag  != 'master' ]]; then
@@ -83,7 +83,7 @@ cd $tgtDir
 		ProtectedCall "$gitCmd" 1> $stdOut 2> $stdErr
 		unset grepStr; [[ -f $stdErr ]] && grepStr=$(ProtectedCall "grep Fatal: $stdErr")
 		[[ $grepStr != '' ]] && Terminate 0 1 "git command failed:\n\t\t\tCmd: '$gitCmd'\n$(cat $stdErr | xargs -I {} echo -e "\t\t\t{}")"
-		[[ -f $stdOut && $batchMode != true ]] && cat $stdOut | xargs -I {} echo -e  "\t\t\t{}"
+		[[ -f $stdOut && $batchMode != true ]] && cat $stdOut | Indent
 	fi
 
 ## git cleanup
@@ -94,7 +94,7 @@ cd $tgtDir
 	ProtectedCall "$gitCmd" 1> $stdOut 2> $stdErr
 	unset grepStr; [[ -f $stdErr ]] && grepStr=$(ProtectedCall "grep Fatal: $stdErr")
 	[[ $grepStr != '' ]] && Terminate 0 1 "git command failed:\n\t\t\tCmd: '$gitCmd'\n$(cat $stdErr | xargs -I {} echo -e "\t\t\t{}")"
-	[[ -f $stdOut && $batchMode != true ]] && cat $stdOut | xargs -I {} echo -e  "\t\t\t{}"
+	[[ -f $stdOut && $batchMode != true ]] && cat $stdOut | Indent
 
 ## set the time-date stamp on the extracted files
 	if [[ $tag  == 'master' ]]; then
