@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.81 # -- dscudiero -- Wed 10/18/2017 @ 14:15:05.64
+version=2.3.82 # -- dscudiero -- Wed 10/18/2017 @ 14:20:36.94
 #===================================================================================================
 TrapSigs 'on'
 
@@ -17,7 +17,7 @@ scriptDescription="Insert/Update a record into the '$clientInfoTable' table in t
 # insertClientInfoRec <client>
 #===================================================================================================
 checkParent="buildclientinfotable.sh"; found=false
-for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ BASH_SOURCE[$i] == $checkParent ]] && found=true; done
+for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ ${BASH_SOURCE[$i]} == $checkParent ]] && found=true; done
 [[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent',\nCurrent call parent: '$calledFrom'"
 
 #===================================================================================================
@@ -217,3 +217,4 @@ return 0
 ## 04-28-2017 @ 08.26.21 - (2.3.73)    - dscudiero - use Goodbye 'return'
 ## 05-03-2017 @ 11.40.59 - (2.3.79)    - dscudiero - Refactore parsing of the fields from the transactional database
 ## 10-18-2017 @ 14.16.20 - (2.3.81)    - dscudiero - Make the 'called from' logic more robust
+## 10-18-2017 @ 14.20.50 - (2.3.82)    - dscudiero - Cosmetic/minor change
