@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.45 # -- dscudiero -- Wed 10/18/2017 @ 14:27:23.78
+version=1.0.46 # -- dscudiero -- Wed 10/18/2017 @ 14:28:36.43
 #==================================================================================================
 #= Description +===================================================================================
 # Clone a Courseleaf git repository
@@ -13,8 +13,8 @@ scriptDescription="Clone a Courseleaf git repository"
 
 checkParent="syncCourseleafGitRepos"; found=false
 for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do 
-	echo "\$(basename "${BASH_SOURCE[$i]}").sh = '"$(basename "${BASH_SOURCE[$i]}").sh"'"
-	[[ "$(basename "${BASH_SOURCE[$i]}").sh" == $checkParent ]] && found=true; 
+	echo "\$(basename "${BASH_SOURCE[$i]}") = '"$(basename "${BASH_SOURCE[$i]}").sh"'"
+	[[ "$(basename "${BASH_SOURCE[$i]}")" == "${checkParent}.sh" ]] && found=true; 
 done
 [[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent',\nCurrent call parent: '$calledFrom'"
 
