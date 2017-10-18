@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.44 # -- dscudiero -- Wed 10/18/2017 @ 14:23:23.45
+version=1.0.45 # -- dscudiero -- Wed 10/18/2017 @ 14:25:02.15
 #==================================================================================================
 #= Description +===================================================================================
 # Clone a Courseleaf git repository
@@ -11,8 +11,8 @@ TrapSigs 'on'
 originalArgStr="$*"
 scriptDescription="Clone a Courseleaf git repository"
 
-checkParent="syncCourseleafGitRepos.sh"; found=false
-for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do echo "\${BASH_SOURCE[$i]} = '${BASH_SOURCE[$i]}'";  [[ ${BASH_SOURCE[$i]} == $checkParent ]] && found=true; done
+checkParent="syncCourseleafGitRepos"; found=false
+for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ $(basename "${BASH_SOURCE[$i]}").sh == $checkParent ]] && found=true; done
 [[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent',\nCurrent call parent: '$calledFrom'"
 
 #==================================================================================================
@@ -176,3 +176,4 @@ return 0
 ## 10-18-2017 @ 14.20.46 - (1.0.42)    - dscudiero - Cosmetic/minor change
 ## 10-18-2017 @ 14.22.25 - (1.0.43)    - dscudiero - Cosmetic/minor change
 ## 10-18-2017 @ 14.23.38 - (1.0.44)    - dscudiero - Cosmetic/minor change
+## 10-18-2017 @ 14.25.08 - (1.0.45)    - dscudiero - Cosmetic/minor change
