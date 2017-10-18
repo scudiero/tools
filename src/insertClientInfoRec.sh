@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.80 # -- dscudiero -- Fri 09/15/2017 @  8:39:27.78
+version=2.3.81 # -- dscudiero -- Wed 10/18/2017 @ 14:15:05.64
 #===================================================================================================
 TrapSigs 'on'
 
@@ -16,8 +16,9 @@ scriptDescription="Insert/Update a record into the '$clientInfoTable' table in t
 # NOT MEANT TO BE CALLED STAND ALONE
 # insertClientInfoRec <client>
 #===================================================================================================
-checkParent="buildclientinfotable.sh"; calledFrom="$(Lower "$(basename "${BASH_SOURCE[2]}")")"
-[[ $(Lower $calledFrom) != $(Lower $checkParent)  ]] && Terminate "Sorry, this script can only be called from '$checkParent', \nCurrent call parent: '$calledFrom'"
+checkParent="buildclientinfotable.sh"; found=false
+for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ BASH_SOURCE[$i] == $checkParent ]] && found=true; done
+[[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent',\nCurrent call parent: '$calledFrom'"
 
 #===================================================================================================
 # Copyright ©2014 David Scudiero -- all rights reserved.
@@ -215,3 +216,4 @@ return 0
 ## Tue Feb 14 13:19:17 CST 2017 - dscudiero - Refactored to delete the client records before inserting a new one
 ## 04-28-2017 @ 08.26.21 - (2.3.73)    - dscudiero - use Goodbye 'return'
 ## 05-03-2017 @ 11.40.59 - (2.3.79)    - dscudiero - Refactore parsing of the fields from the transactional database
+## 10-18-2017 @ 14.16.20 - (2.3.81)    - dscudiero - Make the 'called from' logic more robust
