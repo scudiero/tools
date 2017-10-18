@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.125 # -- dscudiero -- Wed 09/27/2017 @ 16:45:28.32
+version=1.1.126 # -- dscudiero -- Wed 10/18/2017 @ 14:14:53.52
 #==================================================================================================
 TrapSigs 'on'
 
@@ -15,8 +15,9 @@ scriptDescription="Insert/Update a record into the '$siteInfoTable' and '$siteAd
 # NOT MEANT TO BE CALLED STAND ALONE
 # insertSiteInfoTableRecord $siteDir -clientId $clientId
 #==================================================================================================
-checkParent='buildsiteinfotable.sh'; calledFrom="$(Lower "$(basename "${BASH_SOURCE[2]}")")"
-[[ $(Lower $calledFrom) != $(Lower $checkParent)  ]] && Terminate "Sorry, this script can only be called from '$checkParent', \nCurrent call parent: '$calledFrom' \nCall Stack: $(GetCallStack)"
+checkParent='buildsiteinfotable.sh'; found=false
+for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ BASH_SOURCE[$i] == $checkParent ]] && found=true; done
+[[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent',\nCurrent call parent: '$calledFrom'"
 
 #==================================================================================================
 # Standard call back functions
@@ -402,3 +403,4 @@ return 0
 ## 04-28-2017 @ 08.26.26 - (1.1.122)   - dscudiero - use Goodbye 'return'
 ## 05-19-2017 @ 15.13.04 - (1.1.123)   - dscudiero - Added siteDir to the sites record
 ## 09-27-2017 @ 16.51.07 - (1.1.125)   - dscudiero - Added starting message
+## 10-18-2017 @ 14.16.26 - (1.1.126)   - dscudiero - Make the 'called from' logic more robust
