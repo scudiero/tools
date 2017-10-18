@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.42 # -- dscudiero -- Wed 10/18/2017 @ 14:20:05.82
+version=1.0.43 # -- dscudiero -- Wed 10/18/2017 @ 14:22:19.46
 #==================================================================================================
 #= Description +===================================================================================
 # Clone a Courseleaf git repository
@@ -12,7 +12,7 @@ originalArgStr="$*"
 scriptDescription="Clone a Courseleaf git repository"
 
 checkParent="syncCourseleafGitRepos.sh"; found=false
-for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ ${BASH_SOURCE[$i]} == $checkParent ]] && found=true; done
+for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ echo "\${BASH_SOURCE[$i]} = '${BASH_SOURCE[$i]}'"; ${BASH_SOURCE[$i]} == $checkParent ]] && found=true; done
 [[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent',\nCurrent call parent: '$calledFrom'"
 
 #==================================================================================================
@@ -174,3 +174,4 @@ return 0
 ## 06-13-2017 @ 08.36.22 - (1.0.38)    - dscudiero - Remove debug code
 ## 10-18-2017 @ 14.16.09 - (1.0.41)    - dscudiero - Make the 'called from' logic more robust
 ## 10-18-2017 @ 14.20.46 - (1.0.42)    - dscudiero - Cosmetic/minor change
+## 10-18-2017 @ 14.22.25 - (1.0.43)    - dscudiero - Cosmetic/minor change
