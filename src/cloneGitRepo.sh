@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.38 # -- dscudiero -- Tue 06/13/2017 @  8:36:03.66
+version=1.0.41 # -- dscudiero -- Wed 10/18/2017 @ 14:14:12.15
 #==================================================================================================
 #= Description +===================================================================================
 # Clone a Courseleaf git repository
@@ -11,8 +11,9 @@ TrapSigs 'on'
 originalArgStr="$*"
 scriptDescription="Clone a Courseleaf git repository"
 
-checkParent="syncCourseleafGitRepos.sh"; calledFrom="$(Lower "$(basename "${BASH_SOURCE[2]}")")"
-[[ $(Lower $calledFrom) != $(Lower $checkParent) ]] && Terminate "Sorry, this script can only be called from '$checkParent',\nCurrent call parent: '$calledFrom'"
+checkParent="syncCourseleafGitRepos.sh"; found=false
+for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ BASH_SOURCE[$i] == $checkParent ]] && found=true; done
+[[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent',\nCurrent call parent: '$calledFrom'"
 
 #==================================================================================================
 # Standard call back functions
@@ -171,3 +172,4 @@ return 0
 ## 05-31-2017 @ 12.32.11 - (1.0.35)    - dscudiero - Misc cleanup
 ## 05-31-2017 @ 12.35.33 - (1.0.37)    - dscudiero - General syncing of dev to prod
 ## 06-13-2017 @ 08.36.22 - (1.0.38)    - dscudiero - Remove debug code
+## 10-18-2017 @ 14.16.09 - (1.0.41)    - dscudiero - Make the 'called from' logic more robust
