@@ -1,12 +1,12 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.16 # -- dscudiero -- Tue 10/17/2017 @ 16:53:37.32
+version=1.22.18 # -- dscudiero -- Wed 10/18/2017 @ 13:47:48.47
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes="RunCourseLeafCgi GetCourseleafPgm Semaphore FindExecutable ProtectedCall SetFileExpansion "
+myIncludes="RunCourseLeafCgi GetCourseleafPgm Semaphore FindExecutable ProtectedCall SetFileExpansion StringFunctions"
 Import "$standardIncludes $myIncludes"
 originalArgStr="$*";
 
@@ -205,7 +205,7 @@ function BuildCourseleafDataTable {
 #=======================================================================================================================
 GetDefaultsData $myName
 ParseArgsStd
-scriptArgs="$*"
+scriptArgs="$* -shortHello"
 logInDb=false
 
 #=======================================================================================================================
@@ -247,8 +247,8 @@ case "$hostName" in
 
 		## Build the clientInfoTable
 			Msg3 "Running BuildClientInfoTable..."
-			FindExecutable -sh -run buildClientInfoTable $scriptArgs
-			Msg3 "^...(Running BuildClientInfoTable) done"
+			FindExecutable -sh -run buildClientInfoTable $scriptArgs | Indent
+			Msg3 "Running BuildClientInfoTable) done"
 
 		## Check to see of clients table has data
 			sqlStmt="select count(*) from $clientInfoTable"
@@ -257,11 +257,11 @@ case "$hostName" in
 				Error "Clients table is empty, skipping 'buildSiteInfoTable', semaphore kept in place"
 			else
 				## Build siteinfotabe and siteadmins table
-				FindExecutable -sh -run buildSiteInfoTable $scriptArgs
+				FindExecutable -sh -run buildSiteInfoTable $scriptArgs | Indent
 			fi
 
 		## Build employee table
-			BuildEmployeeTable
+			BuildEmployeeTable | Indent
 
 		# ## Build the qaStatus table
 		# 	FindExecutable -sh -run buildQaStatusTable $scriptArgs
@@ -289,10 +289,10 @@ case "$hostName" in
 		# 	#CleanToolsBin
 
 		## Sync GIT Shadow
-			FindExecutable -sh -run syncCourseleafGitRepos $scriptArgs
+			FindExecutable -sh -run syncCourseleafGitRepos $scriptArgs | Indent
 
 		## Build the courseleafData table
-			BuildCourseleafDataTable
+			BuildCourseleafDataTable | Indent
 
 		## Rebuild Internal pages to pickup any new database information
 			## Wait for all of the buildSiteInfoTable process to finish
@@ -470,3 +470,4 @@ return 0
 ## 10-11-2017 @ 09.32.39 - (1.22.12)   - dscudiero - Add setting of userid in BuildEmployeeTable
 ## 10-11-2017 @ 10.37.40 - (1.22.14)   - dscudiero - Switch to use FindExecutable -run
 ## 10-17-2017 @ 16.54.01 - (1.22.16)   - dscudiero - Comment out stuff, only run core
+## 10-18-2017 @ 13.48.43 - (1.22.18)   - dscudiero - Pipe output of run scripts through Indent
