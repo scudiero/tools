@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.127 # -- dscudiero -- Wed 10/18/2017 @ 14:20:40.40
+version=1.1.128 # -- dscudiero -- Wed 10/18/2017 @ 14:29:42.82
 #==================================================================================================
 TrapSigs 'on'
 
@@ -15,8 +15,8 @@ scriptDescription="Insert/Update a record into the '$siteInfoTable' and '$siteAd
 # NOT MEANT TO BE CALLED STAND ALONE
 # insertSiteInfoTableRecord $siteDir -clientId $clientId
 #==================================================================================================
-checkParent='buildsiteinfotable.sh'; found=false
-for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ ${BASH_SOURCE[$i]} == $checkParent ]] && found=true; done
+checkParent='buildsiteinfotable'; found=false
+for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ "$(basename "${BASH_SOURCE[$i]}")" == "${checkParent}.sh" ]] && found=true; done
 [[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent',\nCurrent call parent: '$calledFrom'"
 
 #==================================================================================================
@@ -405,3 +405,4 @@ return 0
 ## 09-27-2017 @ 16.51.07 - (1.1.125)   - dscudiero - Added starting message
 ## 10-18-2017 @ 14.16.26 - (1.1.126)   - dscudiero - Make the 'called from' logic more robust
 ## 10-18-2017 @ 14.20.52 - (1.1.127)   - dscudiero - Cosmetic/minor change
+## 10-18-2017 @ 14.30.33 - (1.1.128)   - dscudiero - Fix who called check
