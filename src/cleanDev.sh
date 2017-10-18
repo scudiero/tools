@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.25 # -- dscudiero -- Thu 10/12/2017 @ 15:10:42.89
+version=3.5.26 # -- dscudiero -- Wed 10/18/2017 @ 15:40:12.35
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall StringFunctions"
@@ -25,6 +25,7 @@ scriptDescription="Cleanup private dev sites"
 		argList+=(-mark,1,switch,mark,,'script',"Mark the site for deletion")
 		argList+=(-delete,3,switch,delete,,'script',"Delete the site")
 		argList+=(-unMark,1,switch,unMark,,'script',"Unmark the site")
+		argList+=(-daemon,1,switch,daemonMode,,'script',"Run in daemon mode")
 	}
 
 	function cleanDev-Goodbye  { # or Goodbye-local
@@ -246,35 +247,34 @@ fi
 validActions='Yes No Mark Unmark ResetDate Save -'
 [[ $userName == 'dscudiero' ]] && validActions="$validActions WorkflowSave"
 searchStr="$userName"
-## if client was passed in then just delete that site, otherwise if it is 'daemon' then process autodeletes
-if [[ -n $client ]]; then
-	if [[ $client == 'daemon' ]]; then
-		Msg3 "Starting $myName in daemon mode..."
-		SetFileExpansion 'on'
-		fileList="$(ls -d /mnt/dev*/web/*-*--AutoDelete* 2> /dev/null || true)"
-		SetFileExpansion
-		for file in $fileList; do
-			file=$(tr -d ':' <<< "$file")
-			if [[ $(Contains "$file" 'WithSave') == true ]]; then
-				Msg3 "^Deleting '$(basename $file)' with workflow save"
-				quiet=true
-				Call saveWorkflow -daemon -siteFile "$file" -all -suffix "beforeDelete-$backupSuffix -quiet -nop"
-				quiet=false
-				Msg3 "^^workflow saved"
-			else
-				Msg3 "^Deleting '$(basename $file)'"
-			fi
-			fileRm="$(sed s"/AutoDeleteWithSave/BeingDeletedBy$(TitleCase $myName)/g" <<< "$file")"
-			mv -f "$file" "$fileRm"
-			(nohup rm -rf "$fileRm" &> /dev/null) &
-		done
-		Msg3 "Ending $myName in daemon mode..."
-		Goodbye 0
-	else
-		searchStr="$client-$searchStr"
-	fi
+
+if [[ $daemonMode == true ]]; then
+	Msg3 "Starting $myName in daemon mode..."
+	SetFileExpansion 'on'
+	fileList="$(ls -d /mnt/dev*/web/*-*--AutoDelete* 2> /dev/null || true)"
+	SetFileExpansion
+	for file in $fileList; do
+		file=$(tr -d ':' <<< "$file")
+		if [[ $(Contains "$file" 'WithSave') == true ]]; then
+			Msg3 "^Deleting '$(basename $file)' with workflow save"
+			quiet=true
+			Call saveWorkflow -daemon -siteFile "$file" -all -suffix "beforeDelete-$backupSuffix -quiet -nop"
+			quiet=false
+			Msg3 "^^workflow saved"
+		else
+			Msg3 "^Deleting '$(basename $file)'"
+		fi
+		fileRm="$(sed s"/AutoDeleteWithSave/BeingDeletedBy$(TitleCase $myName)/g" <<< "$file")"
+		mv -f "$file" "$fileRm"
+		(nohup rm -rf "$fileRm" &> /dev/null) &
+	done
+	Msg3 "Ending $myName in daemon mode..."
+	Goodbye 0
 fi
 
+
+## if client was passed in then just delete that site, otherwise if it is 'daemon' then process autodeletes
+[[ -n $client ]] && searchStr="$client-$searchStr"
 while [ true == true ]; do
 	unset site requestType
 	GetSites "$searchStr"
@@ -334,3 +334,4 @@ Goodbye 0
 ## 09-21-2017 @ 14.47.11 - (3.5.23)    - dscudiero - put the save workflow action back in
 ## 10-12-2017 @ 15.09.49 - (3.5.24)    - dscudiero - Updated includes list
 ## 10-12-2017 @ 15.10.51 - (3.5.25)    - dscudiero - fix dump statements
+## 10-18-2017 @ 15.40.57 - (3.5.26)    - dscudiero - Change the way we determin if we shold run in daemon mode, add -daemon as a flag
