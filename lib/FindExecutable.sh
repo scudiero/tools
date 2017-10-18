@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.32" # -- dscudiero -- Mon 10/16/2017 @ 13:10:34.49
+# version="1.2.33" # -- dscudiero -- Wed 10/18/2017 @ 13:43:31.37
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -72,7 +72,11 @@ function FindExecutable {
 	executeFile="$checkFile" 
 	if [[ $runScript == true ]]; then
 		[[ -z "$executeFile" || ! -r "$executeFile" ]] && Terminate "$FUNCNAME: Run options active and could not find execution file, file='$file'"
+		myNameSave="$myName"; myPathSave="$myPath"
+		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
+		myPath="$(dirname $executeFile)"
 		source "$executeFile" $scriptArgs || echo "$executeFile"
+		myName="$myNameSave"; myPath="$myPathSave"
 	else
 		[[ -z "$executeFile" || ! -r "$executeFile" ]] && return 0
 		echo "$executeFile"
@@ -104,3 +108,4 @@ export -f FindExecutable
 ## 10-16-2017 @ 12.50.59 - ("1.2.30")  - dscudiero - Fix problem resolving -cron files
 ## 10-16-2017 @ 12.54.54 - ("1.2.31")  - dscudiero - Throw an error run is active and cannot find execution file
 ## 10-16-2017 @ 13.10.49 - ("1.2.32")  - dscudiero - Add -sh flag
+## 10-18-2017 @ 13.48.16 - ("1.2.33")  - dscudiero - Set myName and myPath if running a the found file
