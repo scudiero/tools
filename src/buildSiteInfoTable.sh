@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.69 # -- dscudiero -- Fri 09/29/2017 @ 10:07:55.83
+version=4.3.70 # -- dscudiero -- Wed 10/18/2017 @ 13:56:13.08
 #=======================================================================================================================
 TrapSigs 'on'
 originalArgStr="$*"
@@ -113,19 +113,20 @@ Msg3 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 		else
 			# clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep $client))
 			clientDirs+=($(ProtectedCall "find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep $client"))
-		fi
-		if [[ $verboseLevel -ge 1 ]]; then
-			echo
-			Msg3 "dbClients:"; for i in "${!dbClients[@]}"; do printf "\t[$i] = >${dbClients[$i]}<\n"; done; echo
-			Msg3 "clientDirs:"; for i in "${!clientDirs[@]}"; do printf "\t[$i] = >${clientDirs[$i]}<\n"; done; echo
-		fi
+#if [[ $verboseLevel -ge 1 ]]; then
+	echo
+	Msg3 "dbClients:"; for i in "${!dbClients[@]}"; do printf "\t[$i] = >${dbClients[$i]}<\n"; done; echo
+	Msg3 "clientDirs:"; for i in "${!clientDirs[@]}"; do printf "\t[$i] = >${clientDirs[$i]}<\n"; done; echo
+#fi
 
 	## Loop through actual clientDirs
 		for clientDir in ${clientDirs[@]}; do
+dump -n clientDir
 			if [[ ${dbClients[$(basename $clientDir)]+abc} ]]; then
 				(( clientCntr+=1 ))
 				client="$(basename $clientDir)"
 				clientId=${dbClients[$client]}
+dump -t client clientId envList
 				## Get the envDirs, make sure we have some
 					for env in $(tr ',' ' ' <<< "$envList"); do unset ${env}Dir ; done
 					SetSiteDirs 'set'
@@ -140,6 +141,7 @@ Msg3 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 					token="${env}Dir" ; envDir="${!token}"
 					[[ -z $envDir ]] && continue
 					if [[ -d $envDir/web ]]; then
+echo -e "\tCall \"$workerScriptFile\" \"$forkStr\" \"$envDir\" \"$clientId\" \"-tableName $useSiteInfoTable\""
 						$DOIT Call "$workerScriptFile" "$forkStr" "$envDir" "$clientId" "-tableName $useSiteInfoTable"
 						(( forkCntr+=1 )) ; (( siteCntr+=1 ))
 					fi
@@ -239,3 +241,4 @@ Goodbye 0 'alert'
 ## 09-27-2017 @ 16.50.50 - (4.3.67)    - dscudiero - Refasctored messaging
 ## 09-28-2017 @ 06.52.04 - (4.3.68)    - dscudiero - Remove debug statements
 ## 09-29-2017 @ 10.14.44 - (4.3.69)    - dscudiero - Update FindExcecutable call for new syntax
+## 10-18-2017 @ 13.56.37 - (4.3.70)    - dscudiero - Add debug statements
