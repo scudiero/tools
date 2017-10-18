@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.126 # -- dscudiero -- Wed 10/18/2017 @ 14:14:53.52
+version=1.1.127 # -- dscudiero -- Wed 10/18/2017 @ 14:20:40.40
 #==================================================================================================
 TrapSigs 'on'
 
@@ -16,7 +16,7 @@ scriptDescription="Insert/Update a record into the '$siteInfoTable' and '$siteAd
 # insertSiteInfoTableRecord $siteDir -clientId $clientId
 #==================================================================================================
 checkParent='buildsiteinfotable.sh'; found=false
-for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ BASH_SOURCE[$i] == $checkParent ]] && found=true; done
+for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ ${BASH_SOURCE[$i]} == $checkParent ]] && found=true; done
 [[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent',\nCurrent call parent: '$calledFrom'"
 
 #==================================================================================================
@@ -404,3 +404,4 @@ return 0
 ## 05-19-2017 @ 15.13.04 - (1.1.123)   - dscudiero - Added siteDir to the sites record
 ## 09-27-2017 @ 16.51.07 - (1.1.125)   - dscudiero - Added starting message
 ## 10-18-2017 @ 14.16.26 - (1.1.126)   - dscudiero - Make the 'called from' logic more robust
+## 10-18-2017 @ 14.20.52 - (1.1.127)   - dscudiero - Cosmetic/minor change
