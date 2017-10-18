@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.18" // -- dscudiero -- Tue 10/17/2017 @ 13:13:11.77
+wfLibVersion="1.8.22" // -- dscudiero -- Wed 10/18/2017 @ 10:27:36.09
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -61,6 +61,7 @@ wfLibVersion="1.8.18" // -- dscudiero -- Tue 10/17/2017 @ 13:13:11.77
 // 10/12/17 - dgs - Fix bug in wffuncs.CheckChanged detecting not mode if 'not' is at the begining of the string
 // 10/16/17 - dgs - Fixed problem where 'getSubjects' function was returning the entire course code as returned by getAllcodes.
 // 10/16/17 - dgs - Fixed problem when gGetRelated was called standalone
+// 10/18/17 - dgs - Updated LookupCode
 //======================================================================================================================
 
 // Make sure wffucs is defined
@@ -664,7 +665,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 	}
 
 	// if debug envronent then add delimter lines to output
-	if (wfEnvIsDev && wfInDebugEnv && wfDebugLevel >= 4) {
+	if (wfEnvIsDev && wfInDebugEnv && wfDebugLevel > 2) {
 		retArray.unshift("*** Start of  ' " + inval.toLowerCase().replace('optional','') + " ' output ***");
 		retArray.push("*** End of  ' " + inval.toLowerCase().replace('optional','') + " ' output ***");
 	}
@@ -697,13 +698,13 @@ wffuncs.Related = function(inval, wfrule, args) {
 // 10/16/17 - dgs - Fixed problem with setting default value for 'includeEcoSystemData' when GetRelated was called standalone
 //==================================================================================================================
 GetRelated2 = function(type,data) {
-	var myName="GetRelated2"; var myDebugLevel=6; wfDebug(myDebugLevel,"\n*** In " + myName + " ***");
-	wfDump(myDebugLevel,["type;"+type.toSource(),"data;"+data.toSource()]);
+	var myName="GetRelated2"; var myDebugLevel=6; var myIndent="\t\t"; wfDebug(myDebugLevel,"\n" + myIndent +"*** In " + myName + " ***");
+	wfDump(myDebugLevel,[myIndent +"type;"+type.toSource(),myIndent +"data;"+data.toSource()]);
 	type=type.toLowerCase();
 	var retArray=[];
 
 	if (! data.hasOwnProperty("includeEcoSystem") && ! data.hasOwnProperty("formDataVars")) {
-		wfDebug(myDebugLevel,"\t*Error* -- You must specify one of both of 'includeEcoSystem' or 'formFields'")
+		wfDebug(myDebugLevel,myIndent + myName + ": *Error* -- You must specify one of both of 'includeEcoSystem' or 'formFields'")
 		return false;
 	}
 
@@ -736,28 +737,29 @@ GetRelated2 = function(type,data) {
 		try {
 			var proposalCode=getTCFValue("code");
 			proposalCodes=RemoveDupes([proposalCode].concat(getTCFValue("code", { delimiter: "\n", retarray: true , data: tcadata })));
-			if (proposalCodes.length === 0) throw "Failed, code tcf variable 'proposalCodes' not null check"
+			//if (proposalCodes.length === 0) throw "Failed, code tcf variable 'proposalCodes' not null check"
 			proposalCodesStr="," + proposalCodes.join(",") + ",";
 
 			var proposalSubjs=getTCFValue(wfSubjVarName, { delimiter: "\n", retarray: true });
 			proposalSubjs=RemoveDupes(proposalSubjs.concat(getTCFValue(wfSubjVarName, { delimiter: "\n", retarray: true , data: tcadata })));
-			if (proposalSubjs.length === 0) throw "Failed, code tcf variable 'proposalSubjs' not null check"
+			//if (proposalSubjs.length === 0) throw "Failed, code tcf variable 'proposalSubjs' not null check"
 			proposalSubjsStr="," + proposalSubjs.join(",") + ",";
 
 			var proposalDepts=getTCFValue(wfDeptVarName, { delimiter: "\n", retarray: true });
 			proposalDepts=RemoveDupes(proposalDepts.concat(getTCFValue(wfDeptVarName, { delimiter: "\n", retarray: true , data: tcadata })));
-			if (proposalDepts.length === 0) throw "Failed, code tcf variable 'proposalDepts' not null check"
+			//if (proposalDepts.length === 0) throw "Failed, code tcf variable 'proposalDepts' not null check"
 			proposalDeptsStr="," + proposalDepts.join(",") + ",";
 
 			var proposalCols=getTCFValue(wfColVarName, { delimiter: "\n", retarray: true });
 			proposalCols=RemoveDupes(proposalCols.concat(getTCFValue(wfColVarName, { delimiter: "\n", retarray: true , data: tcadata })));
-			if (proposalCols.length === 0) throw "Failed, code tcf variable 'proposalCols' not null check"
+			//if (proposalCols.length === 0) throw "Failed, code tcf variable 'proposalCols' not null check"
 			proposalColsStr="," + proposalCols.join(",") + ",";
 		} //try
 		catch(err) { wfDebug(1,"\t*Error* -- " + myName + ": " + err + "\n"); return false; }
 
-		wfDump(5,["proposalCode;"+proposalCode,"proposalCodes;"+proposalCodes,
-			"proposalSubjs;"+proposalSubjs.toSource(),"proposalDepts;"+proposalDepts.toSource(),"proposalCols;"+proposalCols.toSource()]);
+		wfDump(myDebugLevel,[myIndent +"proposalCode;"+proposalCode,myIndent +"proposalCodes;"+proposalCodes,
+			myIndent +"proposalSubjs;"+proposalSubjs.toSource(),myIndent +"proposalDepts;"+proposalDepts.toSource(),
+			myIndent +"proposalCols;"+proposalCols.toSource()]);
 
 	// Process the argument list
 		var includeEcoSystemData=false;
@@ -776,13 +778,13 @@ GetRelated2 = function(type,data) {
 				if (tmpArray.length > 2)
 					dataAttributeName=tmpArray[2];
 
-				wfDebug(myDebugLevel,"\tProcessing form variable: '" + formVar + "'");
-				wfDump(4,["\tformVarFormat;"+formVarFormat,"\tdataAttributeName;"+dataAttributeName,])
+				wfDebug(myDebugLevel,myIndent +"\tProcessing form variable: '" + formVar + "'");
+				wfDump(myDebugLevel,[myIndent +"\tformVarFormat;"+formVarFormat,myIndent +"\tdataAttributeName;"+dataAttributeName,])
 
 				// Get the tcf data -- cannot use getTCFValue since we want an full array back
 				var tcfValue=[];
 				if (typeof eval("tcfdata."+formVar) === "undefined" ) {
-					wfDebug(myDebugLevel,'\t\t*** Variable ' + formVar + ' is not defined in the tcf file, skipping');
+					wfDebug(myDebugLevel,myIndent +"\t\t*** Variable " + formVar + " is not defined in the tcf file, skipping");
 					return;
 				}
 				eval ("tcfValue=tcfdata."+formVar); // jshint ignore:line
@@ -799,7 +801,7 @@ GetRelated2 = function(type,data) {
 				if (tcaData != {}) {
 					var tcaValue=[];
 					if (typeof eval("tcadata."+formVar) === "undefined" ) {
-						wfDebug(myDebugLevel,'\t\t*** Variable ' + formVar + ' is not defined in the tca file, skipping');
+						wfDebug(myDebugLevel,myIndent +"\t\t*** Variable " + formVar + " is not defined in the tcf file, skipping");
 						return;
 					}
 					eval ("tcaValue=tcadata."+formVar); // jshint ignore:line
@@ -815,90 +817,106 @@ GetRelated2 = function(type,data) {
 				}
 
 			}); //data.formDataVars
-			wfDebug(myDebugLevel,"\t\tFound " + refsArray.length + " references from form field data");
+			wfDebug(myDebugLevel,myIndent +"\t\tFound " + refsArray.length + " references from form field data");
 
 		// If includeEcoSystemData, then get data from the CourseLeaf eco system
 			if (includeEcoSystemData && wfCimInstance === "courseadmin") {
-				var tempArray=(GetEcoSystemData2(proposalCodes,proposalDepts,data))
-				if (tempArray.length > 0)
-					refsArray=refsArray.concat(tempArray);
-				wfDebug(myDebugLevel,"\t\tFound " + tempArray.length + " references from the Eco system");
+				if (proposalDepts.length != 0) {
+					var tempArray=(GetEcoSystemData2(proposalCodes,proposalDepts,data))
+					if (tempArray.length > 0)
+						refsArray=refsArray.concat(tempArray);
+					wfDebug(myDebugLevel,myIndent +"\t\tFound " + tempArray.length + " references from the Eco system");
+				} else {
+					wfDebug(myDebugLevel,myIndent +"\t\t" + myName + " *Warning* -- Requested eco system data but proposalDepts is null, skipping eco system");
+				}
 			}
 
 	// Do we have anything to do?
 		if (refsArray.length <= 0) {
-			wfDebug(myDebugLevel,"\t*** No references found in the data")
+			wfDebug(myDebugLevel,myIndent +"\t\t*** No references found in the data")
 			return false;
 		}
-		refsArray.forEach(function(ref) { wfDump(myDebugLevel,["\t\tref;'"+ref.toSource()]); }); wfDebug(myDebugLevel,"");
+		refsArray.forEach(function(ref) { wfDump(myDebugLevel,[myIndent +"\t\t\tref;'"+ref.toSource()]); }); wfDebug(myDebugLevel,"");
 
 	// map the related data to the requested data type (i.e. type), build an intmediate resultSet array to collect the data
-	wfDebug(myDebugLevel,"\tProcessing refs...");
+	wfDebug(myDebugLevel,myIndent +"\tProcessing refs...");
 	var checkArray=[];
 	refsArray.forEach(function(ref) {
-		wfDump(4,["\tref;"+ref.toSource()]);
+		wfDump(myDebugLevel,[myIndent +"\t\tref (" + myName + ");"+ref.toSource()]);
 		var sqlStmt='', resultSet=[];
 		var refSkipped=false;
 		switch (type.substr(0,3)) {
 			case "col": //Looking to return college values
-				switch (ref.format.substr(0,3)) {
-					case "col":
-						if (proposalColsStr.indexOf(ref.data) >= 0) {
-							wfDebug(myDebugLevel,"\t\tskipping ref, code ("+ ref.data +") is in proposalSubjs ("+ proposalSubjs.toSource() +")");
-						} else {
-							retToken={}
-							retToken.data=ref.data;
-							retToken.source=ref.source;
-							resultSet.push(retToken);
-						}
-						break;
-					case "dep":
-						resultSet=LookupCode2("colCode","deptCode",[ref.data],proposalCols);
-						break;
-					case "sub":
-						resultSet=LookupCode2("colCode","subjCode",[ref.data],proposalCols);
-						break;
-				} // end switch (ref.format.substr(0,3))
+				if (proposalColsStr.length != 0 ) {
+					switch (ref.format.substr(0,3)) {
+						case "col":
+							if (proposalColsStr.indexOf(ref.data) >= 0) {
+								wfDebug(myDebugLevel,myIndent +"\tskipping ref, code ("+ ref.data +") is in proposalColsStr ("+ proposalColsStr.toSource() +")");
+							} else {
+								retToken={}
+								retToken.data=ref.data;
+								retToken.source=ref.source;
+								resultSet.push(retToken);
+							}
+							break;
+						case "dep":
+							resultSet=LookupCode2("colCode","deptCode",[ref.data],proposalCols);
+							break;
+						case "sub":
+							resultSet=LookupCode2("colCode","subjCode",[ref.data],proposalCols);
+							break;
+					} // end switch (ref.format.substr(0,3))
+				} else {
+					wfDebug(myDebugLevel,myIndent +"\t" + myName + " *Warning* -- Requested lookup of cols data but proposalColsStr is null, skipping eco system");
+				}
 				break;
 			case "dep": //Looking to return department values
-				switch (ref.format.substr(0,3)) {
-					case "col":
-						resultSet=LookupCode2("deptCode","colCode",[ref.data],proposalDepts);
-						break;
-					case "dep":
-						if (proposalDeptsStr.indexOf(ref.data) >= 0) {
-							wfDebug(myDebugLevel,"\t\tskipping ref, code ("+ ref.data +") is in proposalDepts("+ proposalDepts.toSource() +")");
-						} else {
-							retToken={}
-							retToken.data=ref.data;
-							retToken.source=ref.source;
-							resultSet.push(retToken);
-						}
-						break
-					case "sub":
-						resultSet=LookupCode2("deptCode","subjCode",[ref.data],proposalDepts);
-						break;
-				} // end switch (ref.format.substr(0,3))
+				if (proposalDepts.length != 0 ) {
+					switch (ref.format.substr(0,3)) {
+						case "col":
+							resultSet=LookupCode2("deptCode","colCode",[ref.data],proposalDepts);
+							break;
+						case "dep":
+							if (proposalDeptsStr.indexOf(ref.data) >= 0) {
+								wfDebug(myDebugLevel,myIndent +"\tskipping ref, code ("+ ref.data +") is in proposalDepts("+ proposalDepts.toSource() +")");
+							} else {
+								retToken={}
+								retToken.data=ref.data;
+								retToken.source=ref.source;
+								resultSet.push(retToken);
+							}
+							break
+						case "sub":
+							resultSet=LookupCode2("deptCode","subjCode",[ref.data],proposalDepts);
+							break;
+					} // end switch (ref.format.substr(0,3))
+				} else {
+					wfDebug(myDebugLevel,myIndent +"\t" + myName + " *Warning* -- Requested lookup of depts data but proposalDepts is null, skipping eco system");
+				}
 				break;
 			case "sub": //Looking to return subject values
-				switch (ref.format.substr(0,3)) {
-					case "col":
-						resultSet=LookupCode2("subjCode","colCode",[ref.data],proposalSubjs);
-						break;
-					case "dep":
-						resultSet=LookupCode2("subjCode","deptCode",[ref.data],proposalSubjs);
-						break;
-					case "sub":
-						if (proposalSubjsStr.indexOf(ref.data) >= 0) {
-							wfDebug(myDebugLevel,"\t\tskipping ref, code ("+ ref.data +") is in proposalSubjs("+ proposalSubjs.toSource() +")");
-						} else {
-							retToken={}
-							retToken.data=ref.data;
-							retToken.source=ref.source;
-							resultSet.push(retToken);
-						}
-						break;
-				} // end switch (ref.format.substr(0,3))
+				if (proposalSubjs.length != 0 ) {
+					switch (ref.format.substr(0,3)) {
+						case "col":
+							resultSet=LookupCode2("subjCode","colCode",[ref.data],proposalSubjs);
+							break;
+						case "dep":
+							resultSet=LookupCode2("subjCode","deptCode",[ref.data],proposalSubjs);
+							break;
+						case "sub":
+							if (proposalSubjsStr.indexOf(ref.data) >= 0) {
+								wfDebug(myDebugLevel,myIndent +"\tskipping ref, code ("+ ref.data +") is in proposalSubjs("+ proposalSubjs.toSource() +")");
+							} else {
+								retToken={}
+								retToken.data=ref.data;
+								retToken.source=ref.source;
+								resultSet.push(retToken);
+							}
+							break;
+					} // end switch (ref.format.substr(0,3))
+				} else {
+					wfDebug(myDebugLevel,myIndent +"\t" + myName + " *Warning* -- Requested lookup of subjs data but proposalSubjs is null, skipping eco system");
+				}
 				break;
 		} // end switch (type.substr(0,3))
 
@@ -912,15 +930,17 @@ GetRelated2 = function(type,data) {
 						retToken.source=ref.source;
 						if (Object.keys(retToken).length != 0 && typeof checkArray[retToken.data] === 'undefined') {
 							retArray.push(retToken); checkArray[retToken.data]=true;
-							wfDebug(myDebugLevel,"\t\t\treturning ref data: " + retToken.toSource());
 						}
 					}
 				});
 			} else if (! refSkipped) {
-					wfDebug(myDebugLevel,"\t\t   *Warning* -- no data returned from ref lookup")
+					wfDebug(myDebugLevel,myIndent + "*** " + myName + ": *Warning* -- no data returned from ref lookup")
 			} //(resultSet)
 		wfDebug(myDebugLevel,"");
 	}); //refsArray
+	if (retArray.length > 0) {
+		wfDebug(myDebugLevel,myIndent + "*** " + myName + ": Returning: " + retArray.toSource());
+	}
 
 	wfDebug(myDebugLevel,"")
 	return retArray;
@@ -947,16 +967,16 @@ GetRelated2 = function(type,data) {
 //======================================================================================================================
 function LookupCode2(lookupType,givenType,givenData,excludeData) {
 	var version='2.0.0'; var myName=arguments.callee.toString().match(/function ([^\(]+)/)[1];
-	var myDebugLevel=6; wfDebug(myDebugLevel,"\n\t*** In "+ myName + " (" + version +") ***")
-	wfDump(myDebugLevel,["lookupType;"+lookupType,"givenType;"+givenType,"givenData;"+givenData.toSource()]);
+	var myDebugLevel=6; var myIndent="\t\t"; wfDebug(myDebugLevel,"\n" + myIndent + "*** In "+ myName + " (" + version +") ***")
+	wfDump(myDebugLevel,[myIndent + "lookupType;"+lookupType,myIndent + "givenType;"+givenType,myIndent + "givenData;"+givenData.toSource()]);
 	var excludeDataStr="";
 	if (typeof excludeData != 'undefined') { 
 		excludeDataStr="," + excludeData.join(",") + ",";
-		wfDump(myDebugLevel,["excludeData;"+excludeData.toSource()]); 
+		wfDump(myDebugLevel,[myIndent + "excludeData;"+excludeData.toSource()]); 
 	}
 
 	if (givenData.length <= 0) {
-		wfDebug(6,"\t*** No lookup data provided, returning false");
+		wfDebug(myDebugLevel,myIndent + "\t*** No lookup data provided, returning false");
 		return false;
 	}
 
@@ -966,7 +986,7 @@ function LookupCode2(lookupType,givenType,givenData,excludeData) {
 			//Given type...
 			switch (givenType.toLowerCase().substr(0,3)) {
 				case "col": //Given college codes
-					wfDebug(6,"\t*** lookup type and give data type the same, returning false");
+					wfDebug(myDebugLevel,myIndent + "*** lookup type and give data type the same, returning false");
 					return false;
 				break;
 				case "dep": //Given department codes, lookup colleges in cimlookup for the departments
@@ -984,7 +1004,7 @@ function LookupCode2(lookupType,givenType,givenData,excludeData) {
 					sqlStmt="select distinct " + wfDeptVarName + " as data from cimlookup where " + wfColVarName + " in (\"" + givenData.join('","') + "\")"
 				break;
 				case "dep":
-					wfDebug(6,"\t*** lookup type and give data type the same, returning false");
+					wfDebug(myDebugLevel,myIndent + "*** lookup type and give data type the same, returning false");
 					return false;
 				break;
 				case "sub": //Given subject codes, lookup colleges in cimlookup by joining on the department field
@@ -1003,18 +1023,17 @@ function LookupCode2(lookupType,givenType,givenData,excludeData) {
 					sqlStmt="select distinct " + wfSubjVarName + " as data from cimlookup where " + wfDeptVarName + " in (\"" + givenData.join('","') + "\")"
 				break;
 				case "sub":
-					wfDebug(6,"\t*** lookup type and give data type the same, returning false");
+					wfDebug(myDebugLevel,myIndent + "*** lookup type and give data type the same, returning false");
 					return false;
 			} // (givenType.toLowerCase().substr(0,3)) switch
 			break
 	} //End switch lookupType.toLowerCase().substr(0,3)
 
 	// Run the sql query
-	wfDump(myDebugLevel,["sqlStmt;"+sqlStmt]);
 	resultSet=dbquery(tcfdata.dbname[0],sqlStmt);
-	wfDump(myDebugLevel,["resultSet;"+resultSet.toSource()]);
+	wfDump(myDebugLevel+1,[myIndent + "\tsqlStmt;"+sqlStmt,myIndent + "\tresultSet;"+resultSet.toSource()]);
 	if (resultSet.length <= 0) {
-		wfDebug(6,"\t*** No data returned from sql query, returning false");
+		wfDebug(6,myIndent + "*** No data returned from sql query, returning false");
 		return false;
 	}
 
@@ -1023,7 +1042,7 @@ function LookupCode2(lookupType,givenType,givenData,excludeData) {
 	resultSet.forEach(function(result) {
 		if (result.data === "") return;
 		if (excludeDataStr != "" && excludeDataStr.indexOf("," + result.data + ",") >= 0) {
-			wfDebug(6,"\t result (" + result.data + ") is on the excludeData list, Skipping");
+			wfDebug(myDebugLevel,myIndent + "result (" + result.data + ") is on the excludeData list, Skipping");
 			return;
 		}
 		retArray.push(result);
@@ -1031,7 +1050,7 @@ function LookupCode2(lookupType,givenType,givenData,excludeData) {
 
 	// Return results -- date
 	if(retArray.length > 0) {
-		wfDebug(1,"\t*** " + myName + ": Returning: " + retArray.toSource());
+		wfDebug(1,myIndent + "*** " + myName + ": Returning: " + retArray.toSource() + "\n");
 		return retArray;
 	}
 	return false;
@@ -1059,11 +1078,12 @@ function LookupCode2(lookupType,givenType,givenData,excludeData) {
 // 09/22/17 - dgs - Deal with the fact that the proposal department code may be an array.
 // 10/10/17 - dgs - Updated to accept an array of codes and departments
 // 10/12/17 - dgs - Switch the'ecosystemtype' to be a data object to include the path and types data
+// 10/18/17 - dgs - Allow proposalDept to be null
 //==================================================================================================
 function GetEcoSystemData2(proposalCodes,proposalDepts,data) {
 	var version="1.0.2";
-	var myName="GetEcoSystemData"; wfDebug(4,'\n\t*** In '+ myName + "(" + version + ") ***");
-	if (proposalCodes.length === 0 || proposalDepts.length === 0) return false;
+	var myName="GetEcoSystemData2"; wfDebug(4,'\n\t*** In '+ myName + "(" + version + ") ***");
+	if (proposalCodes.length === 0) return false;
 	wfDump(5,["\tproposalCodes;"+proposalCodes.toSource(),"\tdata;"+data.toSource()]);
 
 	// var proposalCodesStr="," + proposalCodes.join(",") + ",";
@@ -1179,6 +1199,7 @@ wffuncs.wfAttr = function(inval, wfrule, args) {
 // 09/11/17 = dgs - Do not pull data from allcodes unless the cim instance is courseadmin
 // 09/14/17 - dgs 	- Use wfColVarName, wfDeptVarName, wfSubjVarName
 // 10/02/17 - dgs - Fixed problem with mapper callback function
+// 10/18/17 - dgs - Use LookupCode to resolve the department / college data if no other data is found
 //=======================================================================================================================
 GetAttrVal = function(data) {
 	wfDebug(5,"\t*** In GetAttrVal ***");
@@ -1206,16 +1227,13 @@ GetAttrVal = function(data) {
 	var proposalOnly=false;
 	if (optionStr.indexOf("proposalonly") >= 0)
 		var proposalOnly=true;
-	wfDump(5,["\t\tincludeTCA;"+includeTCA,"\t\tmapValue;"+mapValue,"\t\tproposalOnly;"+proposalOnly]);
+	wfDump(5,["\t\tincludeTCA;"+includeTCA,"\t\tmapValue;"+mapValue]);
+	wfDump(5,["\t\twfAllcodes;"+wfAllcodes,"\t\twfCimInstance;"+wfCimInstance,"\t\tproposalOnly;"+proposalOnly]);
 
 	var subjects=[], departments=[], colleges=[];
 	// If the request ends in an "s" then get standard values using allcodes functions
 		if (reqType.slice(-1) === "s" && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
-			var subjects=[];
-			wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata)).forEach(function(subj) {
-				subjects.push(subj.split(" ")[0]);
-			});
-
+			subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
 			departments=wffuncs.getDepartments(subjects);
 			colleges=wffuncs.getColleges(departments);
 			wfDebug(5,"\t\tFrom wffuncs.GetXXXX function calls:")
@@ -1228,22 +1246,34 @@ GetAttrVal = function(data) {
 			subjects=getTCFValue(subjVarName, { delimiter: "\n", retarray: true });
 			if (includeTCA)
 				subjects=subjects.concat(getTCFValue("subject", { data: tcaData, delimiter: "\n", retarray: true }));
+			wfDump(0,["\t\t" + subjVarName+";"+subjects.toSource()])
 		}
 		if (departments.length === 0) {
 			wfDebug(5,"\t\twffuncs.getDepartments returned nothing, checking the '" + deptVarName + "' variable");
 			departments=getTCFValue(deptVarName, { delimiter: "\n", retarray: true });
 			if (includeTCA)
 				departments=departments.concat(getTCFValue("department", { data: tcaData, delimiter: "\n", retarray: true }));
+			if (departments.length === 0 && subjects.length > 0) {
+				resultSet=LookupCode2("dept","subj",subjects);
+				resultSet.forEach(function(result) {
+					departments.push(result.data);
+				});
+			}
+			wfDump(0,["\t\t" + deptVarName+";"+departments.toSource()])
 		}
 		if (colleges.length === 0) {
 			wfDebug(5,"\t\twffuncs.getColleges returned nothing, checking the '" + colVarName + "' variable");
 			colleges=getTCFValue(colVarName, { delimiter: "\n", retarray: true });
-			if(colleges.length === 0 && departments.length != 0) {
-				colleges=wffuncs.getColleges(departments)
-			}
-
 			if (includeTCA)
 				colleges=colleges.concat(getTCFValue("college", { data: tcaData, delimiter: "\n", retarray: true }));
+			if(colleges.length === 0 && subjects.length != 0) {
+				resultSet=LookupCode2("cols","subj",subjects);
+				resultSet.forEach(function(result) {
+					colleges.push(result.data);
+				});
+			}
+			wfDump(0,["\t\tresultSet;"+resultSet.toSource()])
+			wfDump(0,["\t\t" + colVarName+";"+colleges.toSource()])
 		}
 
 	// return data based on how we were called
@@ -1276,7 +1306,6 @@ GetAttrVal = function(data) {
 			return retArray;
 			return false
 }; //GetAttrVal
-
 //======================================================================================================================
 // Check to see if a proposal attribute is in a specified list of values
 // the attribute is determined by looking at the workflow rule name:
@@ -2170,3 +2199,4 @@ var wfLibLoaded=true;
 // 10-12-2017 @ 14.22.08 - ("1.8.16")  - dscudiero - Fix problem with checkchanged when there is only one changed field and only one checkfield
 // 10-16-2017 @ 12.36.44 - ("1.8.17")  - dscudiero - Update how subjects is determined if allcodes
 // 10-17-2017 @ 14.07.27 - ("1.8.18")  - dscudiero - Fixed problem with setting default value for 'includeEcoSystemData' when GetRelated was called standalone
+// 10-18-2017 @ 10.50.17 - ("1.8.22")  - dscudiero - Many updates, check comments
