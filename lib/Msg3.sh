@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.32" # -- dscudiero -- Thu 10/19/2017 @  8:57:22.44
+# version="1.0.33" # -- dscudiero -- Thu 10/19/2017 @ 10:35:25.16
 #===================================================================================================
 # Usage: Msg3 <msgType> <msgLevel> <indentLevel> msgText
 # 	msgType: [N,I,W,E,T]
@@ -32,7 +32,7 @@ function Msg3 {
 				re='^[0-9]+$'
 				[[ $1 =~ $re ]] && indentLevel="$1" && shift 1 || true
 			fi
-dump msgType msgLevel indentLevel
+			#dump msgType msgLevel indentLevel
 
 			## Format message
 			msgText="$*"
@@ -102,3 +102,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 10-19-2017 @ 07.52.56 - ("1.0.24")  - dscudiero - Fix seting of message level
 ## 10-19-2017 @ 08.20.48 - ("1.0.31")  - dscudiero - c
 ## 10-19-2017 @ 09.01.09 - ("1.0.32")  - dscudiero - s
+## 10-19-2017 @ 10.35.36 - ("1.0.33")  - dscudiero - Remove debug statements
