@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.54" # -- dscudiero -- Fri 09/29/2017 @ 16:07:53.75
+# version="2.0.55" # -- dscudiero -- Thu 10/19/2017 @ 16:21:36.36
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -49,7 +49,7 @@ function VerifyPromptVal {
 			local sqlStmt="select * from $clientInfoTable where name=\"$response\" "
 			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -eq 0 ]]; then
-				verifyMsg="$(Msg2 $E "Client value of '$response' not found in $warehouseDb.$clientInfoTable")"
+				verifyMsg="$(Error "Client value of '$response' not found in $warehouseDb.$clientInfoTable")"
 			else
 				ClientData="${resultSet[0]}"
 			fi
@@ -59,7 +59,7 @@ function VerifyPromptVal {
 				if [[ $anyClient != 'true' ]]; then
 					sqlStmt="select host from $siteInfoTable where name=\"$response\""
 					RunSql2 $sqlStmt
-					[[ ${#resultSet[0]} -eq 0 ]] && verifyMsg="$(Msg2 $E "Could not retrieve any records for '$response' in the $warehouseDb.$siteInfoTable")"
+					[[ ${#resultSet[0]} -eq 0 ]] && verifyMsg="$(Error "Could not retrieve any records for '$response' in the $warehouseDb.$siteInfoTable")"
 					if [[ $verifyMsg == "" ]]; then
 						hostedOn="${resultSet[0]}"
 						if [[ $hostedOn != $hostName ]]; then
@@ -72,16 +72,16 @@ function VerifyPromptVal {
 									ans='y'
 								fi
 								if [[ $ans == 'y' ]]; then
-									Msg2; Msg2 $I "Starting ssh session to host '$hostedOn', enter credentials and then 'exit' to return to '$hostName'...";
+									Msg3; Info "Starting ssh session to host '$hostedOn', enter credentials and then 'exit' to return to '$hostName'...";
 									[[ $(Contains "$originalArgStr" "$response") == false ]] && commandStr="$response $originalArgStr" || commandStr="$originalArgStr"
 									StartRemoteSession "${userName}@${hostedOn}" $myName $commandStr
-									Msg2; Msg2 $I "Back from remote ssh session"; Msg2
+									Msg3; Info "Back from remote ssh session\n"
 									Goodbye 0
 								fi ## [[ $ans == 'y' ]]
 							else
 								ans='n'
 							fi
-							[[ $ans != 'y' ]] && verifyMsg="$(Msg2 $E "Client value of '$response' is not valid on this host ('$hostName') it is hosted on '$hostedOn' ")"
+							[[ $ans != 'y' ]] && verifyMsg="$(Error "Client value of '$response' is not valid on this host ('$hostName') it is hosted on '$hostedOn' ")"
 						fi ## [[ $hostedOn != $hostName ]]
 					fi ## [[ $verifyMsg == "" ]]
 				fi ## [[ $anyClient != 'true' ]]
@@ -94,7 +94,7 @@ function VerifyPromptVal {
 	if [[ $${promptVar:0:3} == 'env' && $verifyMsg == '' ]]; then
 		local answer=$(Lower $response)
 		if [[ $allowMultiple != true && $(Contains "$answer" ",") == true ]]; then
-			verifyMsg=$(Msg2 $E "$promptVar' does not allow for multiple values, valid values is one in {$validateList}")
+			verifyMsg=$(Error "$promptVar' does not allow for multiple values, valid values is one in {$validateList}")
 		else
 			local i j found foundAll=true badList
 			for i in $(tr ',' ' ' <<< $answer); do
@@ -109,7 +109,7 @@ function VerifyPromptVal {
 			done
 			if [[ $foundAll == false ]]; then
 				[[ $badList != '' ]] && badList=${badList:1}
-				verifyMsg=$(Msg2 $E "Value of '$(ColorE "$badList")' not valid for '$promptVar', valid values in $(ColorK "{$validateList}")")
+				verifyMsg=$(Error "Value of '$(ColorE "$badList")' not valid for '$promptVar', valid values in $(ColorK "{$validateList}")")
 			fi
 		fi
 		[[ $verifyMsg == '' ]] && verifyMsg=true
@@ -126,7 +126,7 @@ function VerifyPromptVal {
 
 		local ans=$(Lower $response)
 		if [[ $allowMultiple != true && $(Contains "$ans" ",") == true ]]; then
-			verifyMsg=$(Msg2 $E "$promptVar' does not allow for multiple values, valid values is one in {$validProducts}")
+			verifyMsg=$(Error "$promptVar' does not allow for multiple values, valid values is one in {$validProducts}")
 		else
 			[[ $ans == 'all' ]] && ans="$validProducts" && response="$ans"
 			local i j found foundAll=false
@@ -146,32 +146,32 @@ function VerifyPromptVal {
 					[[ $ans == 'y' ]] && foundAll=true
 				fi
 			fi
-			[[ $foundAll == false ]] && verifyMsg=$(Msg2 $E "Value of '$response' not valid for '$promptVar', valid values in {$validProducts}")
+			[[ $foundAll == false ]] && verifyMsg=$(Error "Value of '$response' not valid for '$promptVar', valid values in {$validProducts}")
 		fi
 		[[ $verifyMsg == '' ]] && verifyMsg=true
 	fi ## Product(s)
 
 	## File
 	if [[ $(Contains "$validateListString" '*file*') == true && $verifyMsg == '' ]]; then
-		[[ ! -r $response ]] && verifyMsg=$(Msg2 $E "File '$response' does not exist") || unset validateListString
+		[[ ! -r $response ]] && verifyMsg=$(Error "File '$response' does not exist") || unset validateListString
 		[[ $verifyMsg == '' ]] && verifyMsg=true
 	fi ## File
 
 	## Dir
 	if [[ $(Contains "$validateListString" '*dir*') == true && $verifyMsg == '' ]]; then
-		[[ ! -d $response ]] && verifyMsg=$(Msg2 $E "Directory '$response' does not exist") || unset validateListString
+		[[ ! -d $response ]] && verifyMsg=$(Error "Directory '$response' does not exist") || unset validateListString
 		[[ $verifyMsg == '' ]] && verifyMsg=true
 	fi ## Dir
 
 	## isNumeric
 	if [[ $(Contains "$validateListString" '*isNumeric*') == true && $verifyMsg == '' ]]; then
-		[[ $(IsNumeric "$response") != true ]] && verifyMsg=$(Msg2 $E "Response must be numeric characters") || unset validateListString
+		[[ $(IsNumeric "$response") != true ]] && verifyMsg=$(Error "Response must be numeric characters") || unset validateListString
 		[[ $verifyMsg == '' ]] && verifyMsg=true
 	fi ## isNumeric
 
 	## isAlpha
 	if [[ $(Contains "$validateListString" '*isAlpha*') == true && $verifyMsg == '' ]]; then
-		[[ $(IsAlpha "$response") != true ]] && verifyMsg=$(Msg2 $E "Response must be alpahbetic characters") || unset validateListString
+		[[ $(IsAlpha "$response") != true ]] && verifyMsg=$(Error "Response must be alpahbetic characters") || unset validateListString
 		[[ $verifyMsg == '' ]] && verifyMsg=true
 	fi ## isAlpha
 
@@ -204,7 +204,7 @@ function VerifyPromptVal {
 					[[ $answer == $checkStr ]] && PopSettings && verifyMsg=true && SetFileExpansion && return 0
 				done
 			fi
-			verifyMsg=$(Msg2 $E "Value of '$response' not valid for '$promptVar', valid values in {$validateListString}")
+			verifyMsg=$(Error "Value of '$response' not valid for '$promptVar', valid values in {$validateListString}")
 		fi
 		processedRequest=true
 	fi ## Everything else
@@ -231,3 +231,4 @@ export -f VerifyPromptVal
 ## 05-22-2017 @ 09.16.07 - ("2.0.52")  - dscudiero - General syncing of dev to prod
 ## 09-22-2017 @ 07.18.50 - ("2.0.53")  - dscudiero - Include StartRemoteSession
 ## 09-29-2017 @ 16.09.19 - ("2.0.54")  - dscudiero - Add RunSql2 to includes
+## 10-19-2017 @ 16.21.56 - ("2.0.55")  - dscudiero - Replace Msg2 with Msg3
