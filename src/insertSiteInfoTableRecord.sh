@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.128 # -- dscudiero -- Wed 10/18/2017 @ 14:29:42.82
+version=1.1.129 # -- dscudiero -- Thu 10/19/2017 @  9:42:17.16
 #==================================================================================================
 TrapSigs 'on'
 
@@ -16,8 +16,12 @@ scriptDescription="Insert/Update a record into the '$siteInfoTable' and '$siteAd
 # insertSiteInfoTableRecord $siteDir -clientId $clientId
 #==================================================================================================
 checkParent='buildsiteinfotable'; found=false
-for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ "$(basename "${BASH_SOURCE[$i]}")" == "${checkParent}.sh" ]] && found=true; done
-[[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent',\nCurrent call parent: '$calledFrom'"
+for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do 
+	echo "\$(basename \"${BASH_SOURCE[$i]}\") = '$(basename \"${BASH_SOURCE[$i]}\")'"
+	[[ "$(basename "${BASH_SOURCE[$i]}")" == "${checkParent}.sh" ]] && found=true; 
+done
+dump found
+#[[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent'"
 
 #==================================================================================================
 # Standard call back functions
@@ -406,3 +410,4 @@ return 0
 ## 10-18-2017 @ 14.16.26 - (1.1.126)   - dscudiero - Make the 'called from' logic more robust
 ## 10-18-2017 @ 14.20.52 - (1.1.127)   - dscudiero - Cosmetic/minor change
 ## 10-18-2017 @ 14.30.33 - (1.1.128)   - dscudiero - Fix who called check
+## 10-19-2017 @ 09.42.44 - (1.1.129)   - dscudiero - Added debug arround caller check code
