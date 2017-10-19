@@ -4,7 +4,7 @@
 version=4.12.10 # -- dscudiero -- Fri 09/29/2017 @ 13:37:02.61
 #==================================================================================================
 TrapSigs 'on'
-myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi"
+myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop"
 Import "$standardInteractiveIncludes $myIncludes"
 
 [[ $1 == $myName ]] && shift
@@ -698,3 +698,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 10-16-2017 @ 12.57.09 - (4.12.10)   - dscudiero - Add -lock option to lock workflow files
 ## 10-16-2017 @ 14.17.22 - (4.12.10)   - dscudiero - fix locking code
 ## 10-17-2017 @ 14.08.56 - (4.12.10)   - dscudiero - Added -lock option
+## 10-19-2017 @ 10.34.19 - (4.12.10)   - dscudiero - Add PushPop to the include list
