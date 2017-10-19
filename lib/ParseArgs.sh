@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.58" # -- dscudiero -- Fri 09/15/2017 @  9:13:51.06
+# version="2.0.65" # -- dscudiero -- Thu 10/19/2017 @  9:00:24.77
 #===================================================================================================
 # Parse an argumenst string driven by an control array that is passed in
 # argList+=(argFlag,minLen,type,scriptVariable,extraToken/exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
@@ -18,26 +18,25 @@
 #===================================================================================================
 
 function ParseArgs {
-	includes='Msg2 Help Goodbye'
+	includes='Msg3 Help Goodbye'
 	Import "$includes"
-
-#	verboseLevel=3
-	Msg2 $V3 "*** $FUNCNAME -- Starting ***"
+	
+	Verbose 3 "*** $FUNCNAME -- Starting ***"
 	local argToken foundArg parseStr argName minLen argType scriptVar exCmd argGroup helpText scriptVarVal badArgList token1 token2
 	[[ -z "$*" ]] && return 0
 	local tmpStr
 
-	Msg2 $V3 "\tInitial ArgStr = >$*<"
+	Verbose 3 "\tInitial ArgStr = >$*<"
 	## Loop through all of the tokens on the passed in argument list
 	until [[ -z "$*" ]]; do
 		origArgToken="$1"; shift || true
 		# ## If the token does not start with a '-' then set client variable if not already set
 		# if [[ ${origArgToken:0:1} != '-' && -z $client ]]; then
 		# 	Client=$origArgToken; client=$(Lower $origArgToken)
-		# 	Msg2 $V3 "\t\t*** found client value = '$client'"
+		# 	Verbose 3 "\t\t*** found client value = '$client'"
 		# 	continue
 		# fi
-		Msg2 $V3 "\n\tProcessing input token: '$origArgToken'..."
+		Verbose 3 "\n\tProcessing input token: '$origArgToken'..."
 		## Loop through all defined arguments (argList)
 		foundArg=false
 		for argDef in "${argList[@]}"; do
@@ -102,13 +101,13 @@ function ParseArgs {
 		done ## arg definition array
 
 		if [[ $foundArg == true ]]; then
-			Msg2 $V3 "^^*** found match for $argType: '$origArgName' specified as '$origArgToken', scriptVarName = $scriptVar, value = >${!scriptVar}<"
+			Verbose 3 "^^*** found match for $argType: '$origArgName' specified as '$origArgToken', scriptVarName = $scriptVar, value = >${!scriptVar}<"
 			[[ $argType == 'option' ]] && tmpStr=${!scriptVar} && myArgStr="${myArgStr:${#tmpStr}+1}" ## Remove argument value
 		else
 			## If the token does not start with a '-' then set client variable if not already set
 			if [[ ${origArgToken:0:1} != '-' && -z $client ]]; then
 				Client=$origArgToken; client=$(Lower $origArgToken)
-				Msg2 $V3 "\t\t*** found client value = '$client'"
+				Verbose 3 "\t\t*** found client value = '$client'"
 				continue
 			else
 				[[ $parseQuiet != true ]] && Warning "$myName: Argument token '$origArgToken' is not defined, it will be ignored"
@@ -116,12 +115,12 @@ function ParseArgs {
 				myArgStr="${myArgStr:${#origArgToken}+1}" ## Remove argument token
 			fi
 		fi
-		Msg2 $V3 "^^After parse \$* = >$*<"
+		Verbose 3 "^^After parse \$* = >$*<"
 	done ## tokens in the input string
 
 	unset parsedArgStr
 	if [[ -n $badArgList ]]; then
-		Msg2 $V3 "\tSurviving Arguments = >$*<"
+		Verbose 3 "\tSurviving Arguments = >$*<"
 		badArgList="${badArgList:1}"
 		parsedArgStr="$badArgList"
 	fi
@@ -135,7 +134,8 @@ function ParseArgs {
 
 	#===================================================================================================
 	## If testMode then run local customizations
-		[[ $testMode == true && $(Contains "$administrators" "$userName") != true ]] && Msg2 $T "$myName: You do not have sufficient permissions to run this script in 'testMode'"
+		[[ $testMode == true && $(Contains "$administrators" "$userName") != true ]] && \
+				Terminate "$myName: You do not have sufficient permissions to run this script in 'testMode'"
 		[[ $testMode == true && -n "$(type -t testMode-$myName)" && "$(type -t testMode-$myName)" = function ]] && testMode-$myName
 		[[ $testMode == true && -n "$(type -t $myName-testMode)"  && "$(type -t $myName-testMode)" = function ]] && $myName-testMode
 
@@ -163,3 +163,4 @@ export -f ParseArgs
 ## 04-12-2017 @ 08.11.01 - ("2.0.47")  - dscudiero - changed
 ## 09-01-2017 @ 09.27.57 - ("2.0.48")  - dscudiero - Add call to myname-FUNCNAME if found
 ## 09-07-2017 @ 07.56.06 - ("2.0.49")  - dscudiero - Move the parsing of the client name to the end if no other arg matches have been found
+## 10-19-2017 @ 09.01.25 - ("2.0.65")  - dscudiero - Cosmetic/minor change
