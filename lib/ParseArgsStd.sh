@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.46" # -- dscudiero -- Tue 10/17/2017 @ 14:06:14.34
+# version="2.0.48" # -- dscudiero -- Thu 10/19/2017 @  7:56:16.17
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -125,3 +125,4 @@ export -f ParseArgsStd
 ## 09-07-2017 @ 07.56.18 - ("2.0.35")  - dscudiero - Move the parsing of the client name to the end if no other arg matches have been found
 ## 10-02-2017 @ 13.46.58 - ("2.0.45")  - dscudiero - General syncing of dev to prod
 ## 10-17-2017 @ 14.08.19 - ("2.0.46")  - dscudiero - Added shortHello option to streamline output in batch
+## 10-19-2017 @ 09.06.31 - ("2.0.48")  - dscudiero - Switch to Msg3
