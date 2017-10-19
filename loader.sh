@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.43" # -- dscudiero -- Thu 10/12/2017 @ 14:51:18.51
+version="1.4.44" # -- dscudiero -- Thu 10/19/2017 @ 12:18:03.11
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -748,6 +748,7 @@ fi
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		[[ $(cut -d' ' -f1 <<< $(wc -l "$executeFile")) -eq 0 ]] && Terminate "Execution file ($executeFile) is empty"
 		source $executeFile $scriptArgs 2>&1 | tee -a $logFile; rc=$?
+		touch "$(dirname $logFile)"
 
 ## Should never get here but just in case
 	CleanUp $rc
@@ -896,3 +897,4 @@ fi
 ## 10-11-2017 @ 11.50.27 - ("1.4.40")  - dscudiero - Cleanup logfile initialization
 ## 10-11-2017 @ 12.51.16 - ("1.4.41")  - dscudiero - If calling scripts or reports then do not build a log file
 ## 10-12-2017 @ 14.51.44 - ("1.4.43")  - dscudiero - Pull the users auth groups and put in a variable
+## 10-19-2017 @ 12.19.26 - ("1.4.44")  - dscudiero - touch the logFile upon return to set time date stamp
