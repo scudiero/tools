@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.23" # -- dscudiero -- Wed 10/11/2017 @ 11:49:48.58
+# version="1.0.24" # -- dscudiero -- Thu 10/19/2017 @  7:52:31.63
 #===================================================================================================
 # Usage: Msg3 <msgType> <msgLevel> <indentLevel> msgText
 # 	msgType: [N,I,W,E,T]
@@ -18,7 +18,7 @@ function Msg3 {
 			[[ $1 = 'Q' || $1 = 'q' ]] && shift && echo -e "$*" && return 0
 			local re='^[q,Q,n,N,i,I,w,W,e,E,t,T,v,V,l,L]$'
 			[[ $1 =~ $re ]] && msgType="$1" && shift 1 || true
-			if [[ -n $msgType ]]; then
+			if [[ -n $msgLevel ]]; then
 				## First/Next token is a msg level?
 				re='^[0-9]+$'
 				if [[ $1 =~ $re ]]; then
@@ -97,3 +97,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 10-11-2017 @ 10.49.36 - ("1.0.21")  - dscudiero - check to make sure logFile exists and is writeable before writing
 ## 10-11-2017 @ 11.11.04 - ("1.0.22")  - dscudiero - Cosmetic/minor change
 ## 10-11-2017 @ 11.50.11 - ("1.0.23")  - dscudiero - Remove logging to logFile, getting duplicates
+## 10-19-2017 @ 07.52.56 - ("1.0.24")  - dscudiero - Fix seting of message level
