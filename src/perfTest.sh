@@ -33,12 +33,11 @@ if [[ $mode == 'summary' ]]; then
                         unset int1 int2 real1 real2 percent
                         real1="$(cut -d'|' -f$i <<< ${resultSet[0]})"
                         int1="$(tr -d '.' <<< $real1)"  ## Remove decimal point
-                        int1=$(sed 's/^0//' <<< $int1)  ## Remove leading zeros
+                        shopt -s extglob; int1=${int1##+(0)}; shopt -u extglob
                         real2="$(cut -d'|' -f$i <<< ${resultSet[1]})"
                         int2="$(tr -d '.' <<< $real2)"  ## Remove decimal point
-                        int2=$(sed 's/^0//' <<< $int2)  ## Remove leading zeros
+                        shopt -s extglob; int2=${int2##+(0)}; shopt -u extglob
                         let delta=$int2-$int1
-                        #percent=$((200*$delta/$int2 % 2 + 100*$delta/$int2))
                         percent=$((200*$delta/$int1 % 2 + 100*$delta/$int1))
                         #dump -n field -t real1 int1 real2 int2 delta percent
                         valuesStr="$valuesStr,\"${percent}%\""
@@ -152,3 +151,4 @@ Msg3 "$myName done"
 ## Fri Feb 24 09:47:44 CST 2017 - dscudiero - remove debug statements
 ## 07-18-2017 @ 13.16.11 - dscudiero - Add start/end messages
 ## 10-11-2017 @ 10.38.57 - dscudiero - switch Msg2 for Msg3
+## 10-19-2017 @ 10.32.43 - dscudiero - Change the way we strip off leading zeros from the int strings
