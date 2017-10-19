@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.48" # -- dscudiero -- Thu 10/19/2017 @  7:56:16.17
+# version="2.0.49" # -- dscudiero -- Thu 10/19/2017 @  9:12:18.93
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -52,6 +52,7 @@ function ParseArgsStd {
 		#argList+=(argFlag,minLen,type,scriptVariable,extraToken/exCmd,helpSet,helpText)
 
 		argList+=(-batchMode,9,switch,batchMode,,common,"Run in batch mode")
+		argList+=(-noBanners,3,switch,noBanners,,common,"Abbreviated messaging from Hello")
 		argList+=(-noClear,4,switch,noClear,,common,"Do not clear the screen on script start")
 		argList+=(-noEmails,3,switch,noEmails,,common,"Turn off emails")
 		argList+=(-noHeaders,3,switch,noHeaders,,common,"Turn off Hello and Goodbye messaging")
@@ -73,7 +74,6 @@ function ParseArgsStd {
 		argList+=(-noCheck,4,switch,noCheck,,common,"Do not validate the client data in the $warehouseDb.$clientInfoTable table")
 		argList+=(-verbose,1,switch#,verbose,verboseLevel,common,"Additional messaging, -V# sets verbosity level to #")
 		argList+=(-go,2,switch,go,,common,"Skip the verify continue y/n prompt")
-		argList+=(-shortHello,10,switch,shortHello,,common,"Abbreviated messaging from Hello")
 
 	## Setup ENV arguments
 		local singleCharArgs="pvt dev test next curr"
@@ -126,3 +126,4 @@ export -f ParseArgsStd
 ## 10-02-2017 @ 13.46.58 - ("2.0.45")  - dscudiero - General syncing of dev to prod
 ## 10-17-2017 @ 14.08.19 - ("2.0.46")  - dscudiero - Added shortHello option to streamline output in batch
 ## 10-19-2017 @ 09.06.31 - ("2.0.48")  - dscudiero - Switch to Msg3
+## 10-19-2017 @ 09.39.23 - ("2.0.49")  - dscudiero - Replaced -shortHello with -noBanners
