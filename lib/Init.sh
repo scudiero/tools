@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.19 # -- dscudiero -- Thu 10/05/2017 @  9:40:22.13
+# version=2.1.20 # -- dscudiero -- Thu 10/19/2017 @ 16:05:01.12
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -14,9 +14,10 @@
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-
-Import Prompt VerifyPromptVal SetSiteDirs GetCims VerifyContinue
 function Init {
+	myIncludes="Msg RunSql2 SetSiteDirs GetCims PushPop SetFileExpansion Prompt"
+	Import "$standardInteractiveIncludes $myIncludes"
+
 	PushSettings "$FUNCNAME"
 	SetFileExpansion 'off'
 
@@ -377,3 +378,4 @@ export -f Init
 ## 10-03-2017 @ 15.46.33 - (2.1.17)    - dscudiero - Uncomment auth check for updating next sites
 ## 10-04-2017 @ 13.09.46 - (2.1.18)    - dscudiero - General syncing of dev to prod
 ## 10-05-2017 @ 09.41.42 - (2.1.19)    - dscudiero - Switch to use Msg3
+## 10-19-2017 @ 16.05.16 - (2.1.20)    - dscudiero - Add to include list
