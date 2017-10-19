@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.20 # -- dscudiero -- Thu 10/19/2017 @ 16:05:01.12
+# version=2.1.21 # -- dscudiero -- Thu 10/19/2017 @ 16:07:54.05
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -15,7 +15,7 @@
 # All rights reserved
 #===================================================================================================
 function Init {
-	myIncludes="Msg RunSql2 SetSiteDirs GetCims PushPop SetFileExpansion Prompt"
+	myIncludes="Msg3 RunSql2 SetSiteDirs GetCims PushPop SetFileExpansion Prompt"
 	Import "$standardInteractiveIncludes $myIncludes"
 
 	PushSettings "$FUNCNAME"
