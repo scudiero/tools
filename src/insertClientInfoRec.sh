@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.83 # -- dscudiero -- Wed 10/18/2017 @ 14:29:54.56
+version=2.3.84 # -- dscudiero -- Thu 10/19/2017 @  7:31:46.94
 #===================================================================================================
 TrapSigs 'on'
 
@@ -17,7 +17,11 @@ scriptDescription="Insert/Update a record into the '$clientInfoTable' table in t
 # insertClientInfoRec <client>
 #===================================================================================================
 checkParent="buildclientinfotable"; found=false
-for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ "$(basename "${BASH_SOURCE[$i]}")" == "${checkParent}.sh" ]] && found=true; done
+for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do 
+	echo "\$(basename \"${BASH_SOURCE[$i]}\") = '$(basename \"${BASH_SOURCE[$i]}\")'"
+	[[ "$(basename "${BASH_SOURCE[$i]}")" == "${checkParent}.sh" ]] && found=true; 
+done
+dump found
 [[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent',\nCurrent call parent: '$calledFrom'"
 
 #===================================================================================================
@@ -219,3 +223,4 @@ return 0
 ## 10-18-2017 @ 14.16.20 - (2.3.81)    - dscudiero - Make the 'called from' logic more robust
 ## 10-18-2017 @ 14.20.50 - (2.3.82)    - dscudiero - Cosmetic/minor change
 ## 10-18-2017 @ 14.30.29 - (2.3.83)    - dscudiero - Fix who called check
+## 10-19-2017 @ 07.32.06 - (2.3.84)    - dscudiero - Add debug state,=ments
