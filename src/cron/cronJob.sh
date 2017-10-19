@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.10 # -- dscudiero -- Tue 10/17/2017 @ 14:00:57.29
+version=2.1.11 # -- dscudiero -- Thu 10/19/2017 @ 12:17:33.65
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -54,6 +54,7 @@ originalArgStr="$*"
 	myPath="$(dirname $executeFile)"
 	source $executeFile $scriptArgs $callScriptArgs 2>&1 >> "$logFile"
 	echo -e "\t-- $hostName - $callScriptName done" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
+	touch "$(dirname $logFile)"
 	myName="$myNameSave"; myPath="$myPathSave"
 
 #=======================================================================================================================
@@ -116,3 +117,4 @@ exit 0
 ## 10-16-2017 @ 13.06.35 - (2.1.7)     - dscudiero - Fix call to FindExecutable
 ## 10-16-2017 @ 15.06.11 - (2.1.9)     - dscudiero - Remove the subshell parens arround the script source stmt
 ## 10-17-2017 @ 14.07.48 - (2.1.10)    - dscudiero - Make sure myName is set correctly
+## 10-19-2017 @ 12.19.35 - (2.1.11)    - dscudiero - touch the logFile upon return to set time date stamp
