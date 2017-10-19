@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.3" # -- dscudiero -- Thu 10/19/2017 @  9:37:45.17
+# version="2.1.6" # -- dscudiero -- Thu 10/19/2017 @ 16:15:20.98
 #===================================================================================================
 # Common script exit
 # args:
@@ -72,7 +72,7 @@ function Goodbye {
 			## print goodbye message
 				date=$(date)
 				#dump quiet noHeaders secondaryMessagesOnly exitCode
-				if [[ $quiet != true && $noHeaders != true && $secondaryMessagesOnly != true && $noBanners ]]; then
+				if [[ $quiet != true && $noHeaders != true && $secondaryMessagesOnly != true ]]; then
 					if [[ $exitCode -ne -1 ]]; then
 						## Standard messages
 						local numMsgs=0
@@ -178,3 +178,4 @@ export -f Goodbye
 ## 10-16-2017 @ 12.36.07 - ("2.1.0")   - dscudiero - Add StringFunctions to includes
 ## 10-16-2017 @ 14.01.40 - ("2.1.1")   - dscudiero - If in batchmode then return vs exit
 ## 10-19-2017 @ 09.38.28 - ("2.1.3")   - dscudiero - Added -noBanner option to limit outout
+## 10-19-2017 @ 16.15.42 - ("2.1.6")   - dscudiero - Fix problem where we were not printing banners
