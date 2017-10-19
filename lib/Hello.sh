@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.41" # -- dscudiero -- Thu 10/19/2017 @  9:36:39.56
+# version="2.0.42" # -- dscudiero -- Thu 10/19/2017 @ 12:45:00.93
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -9,6 +9,10 @@
 #===================================================================================================
 
 function Hello {
+	myIncludes="StringFunctions"
+	Import "$standardIncludes $myIncludes"
+
+
 	[[ $quiet == true || $noHeaders == true || $secondaryMessagesOnly == true ]] && return 0
 	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
 
@@ -72,3 +76,4 @@ export -f Hello
 ## 10-03-2017 @ 13.40.27 - ("2.0.39")  - dscudiero - remove debug stuff
 ## 10-17-2017 @ 14.08.11 - ("2.0.40")  - dscudiero - Added noBanners option to streamline output in batch
 ## 10-19-2017 @ 09.38.34 - ("2.0.41")  - dscudiero - Added -noBanner option to limit outout
+## 10-19-2017 @ 12.45.29 - ("2.0.42")  - dscudiero - Add StringFunctions to the includes slist
