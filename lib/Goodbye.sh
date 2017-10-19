@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.1" # -- dscudiero -- Mon 10/16/2017 @ 14:01:17.63
+# version="2.1.3" # -- dscudiero -- Thu 10/19/2017 @  9:37:45.17
 #===================================================================================================
 # Common script exit
 # args:
@@ -72,7 +72,7 @@ function Goodbye {
 			## print goodbye message
 				date=$(date)
 				#dump quiet noHeaders secondaryMessagesOnly exitCode
-				if [[ $quiet != true && $noHeaders != true && $secondaryMessagesOnly != true ]]; then
+				if [[ $quiet != true && $noHeaders != true && $secondaryMessagesOnly != true && $noBanners ]]; then
 					if [[ $exitCode -ne -1 ]]; then
 						## Standard messages
 						local numMsgs=0
@@ -110,10 +110,10 @@ function Goodbye {
 					else
 						Msg3 "$(ColorK "${myName}") $(ColorE " -- $additionalText completed with errors, exit code = $exitCode")\a"
 					fi
-					[[ $logFile != '/dev/null' ]] && Msg3 "Additional details may be found in:\n^'$logFile'"
-					Msg3 "$date (Elapsed time: $elapTime)"
-					[[ $TERM == 'dumb' ]] && echo
-					Msg3 "$(PadChar)"
+					[[ $logFile != '/dev/null' && $noBanners != true ]] && Msg3 "Additional details may be found in:\n^'$logFile'"
+					[[ $noBanners != true ]] && Msg3 "$date (Elapsed time: $elapTime)"
+					[[ $TERM == 'dumb' && $noBanners != true ]] && echo
+					[[ $noBanners != true ]] &&  Msg3 "$(PadChar)"
 				fi #not quiet noHeaders secondaryMessagesOnly
 			[[ $alert == true ]] && Alert
 	esac
@@ -177,3 +177,4 @@ export -f Goodbye
 ## 10-02-2017 @ 16.24.58 - ("2.0.144") - dscudiero - Add PadChar to the includes list
 ## 10-16-2017 @ 12.36.07 - ("2.1.0")   - dscudiero - Add StringFunctions to includes
 ## 10-16-2017 @ 14.01.40 - ("2.1.1")   - dscudiero - If in batchmode then return vs exit
+## 10-19-2017 @ 09.38.28 - ("2.1.3")   - dscudiero - Added -noBanner option to limit outout
