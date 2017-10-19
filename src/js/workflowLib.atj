@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.22" // -- dscudiero -- Wed 10/18/2017 @ 10:27:36.09
+wfLibVersion="1.8.24" // -- dscudiero -- Thu 10/19/2017 @ 11:46:12.40
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -1200,6 +1200,7 @@ wffuncs.wfAttr = function(inval, wfrule, args) {
 // 09/14/17 - dgs 	- Use wfColVarName, wfDeptVarName, wfSubjVarName
 // 10/02/17 - dgs - Fixed problem with mapper callback function
 // 10/18/17 - dgs - Use LookupCode to resolve the department / college data if no other data is found
+// 10/19/17 - dgs - Fix bug if resultSet is not an array
 //=======================================================================================================================
 GetAttrVal = function(data) {
 	wfDebug(5,"\t*** In GetAttrVal ***");
@@ -1255,9 +1256,11 @@ GetAttrVal = function(data) {
 				departments=departments.concat(getTCFValue("department", { data: tcaData, delimiter: "\n", retarray: true }));
 			if (departments.length === 0 && subjects.length > 0) {
 				resultSet=LookupCode2("dept","subj",subjects);
-				resultSet.forEach(function(result) {
-					departments.push(result.data);
-				});
+				if (resultSet.length > 0) {
+					resultSet.forEach(function(result) {
+						departments.push(result.data);
+					});
+				}
 			}
 			wfDump(0,["\t\t" + deptVarName+";"+departments.toSource()])
 		}
@@ -1268,9 +1271,11 @@ GetAttrVal = function(data) {
 				colleges=colleges.concat(getTCFValue("college", { data: tcaData, delimiter: "\n", retarray: true }));
 			if(colleges.length === 0 && subjects.length != 0) {
 				resultSet=LookupCode2("cols","subj",subjects);
-				resultSet.forEach(function(result) {
-					colleges.push(result.data);
-				});
+				if (resultSet.length > 0) {
+					resultSet.forEach(function(result) {
+						colleges.push(result.data);
+					});
+				}
 			}
 			wfDump(0,["\t\tresultSet;"+resultSet.toSource()])
 			wfDump(0,["\t\t" + colVarName+";"+colleges.toSource()])
@@ -2200,3 +2205,4 @@ var wfLibLoaded=true;
 // 10-16-2017 @ 12.36.44 - ("1.8.17")  - dscudiero - Update how subjects is determined if allcodes
 // 10-17-2017 @ 14.07.27 - ("1.8.18")  - dscudiero - Fixed problem with setting default value for 'includeEcoSystemData' when GetRelated was called standalone
 // 10-18-2017 @ 10.50.17 - ("1.8.22")  - dscudiero - Many updates, check comments
+// 10-19-2017 @ 12.21.48 - ("1.8.24")  - dscudiero - Fix problem in GetRelated if the resultSet from the lookcode calls is empty
