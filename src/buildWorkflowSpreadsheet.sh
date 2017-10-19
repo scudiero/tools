@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.39 # -- dscudiero -- Fri 10/06/2017 @ 10:06:22.71
+version=1.2.43 # -- dscudiero -- Thu 10/19/2017 @ 16:39:11.89
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -102,7 +102,7 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 				value="$(cut -d'|' -f3- <<< "$line")"
 				value=$(tr -d ';' <<< "$value")
 			else
-				Msg3 $W "Unknown rule type: '$line'"
+				Warning "Unknown rule type: '$line'"
 				continue
 			fi
 			dump -2 -t rtype value
@@ -178,7 +178,11 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 	Msg3
 	Msg3 "Processing CIM instance: '$cim'"
 	grepFile="$srcDir/web/$cim/workflow.cfg"
-	[[ ! -f $grepFile ]] && Msg3 $E1 "Could not locate file $grepFile" && continue
+	if [[ ! -f $grepFile ]]; then
+		Warning "Could not locate file $(basename $grepFile), trying cimconfig.cfg"
+		grepFile="$srcDir/web/$cim/cimconfig.cfg"
+		[[ ! -f $grepFile ]] && Terminate "Could not locate file $grepFile"
+	fi
 	Msg3 "\n$(PadChar)" >> $outFile
 	Msg3 "<<< $(Upper "$cim") >>>" >> $outFile
 
@@ -398,3 +402,4 @@ Goodbye 0 #'alert'
 ## 10-06-2017 @ 09.44.03 - (1.2.37)    - dscudiero - Remove verbose calls in functions
 ## 10-06-2017 @ 09.47.26 - (1.2.38)    - dscudiero - remove other verbose statements
 ## 10-09-2017 @ 16.54.59 - (1.2.39)    - dscudiero - Cosmetic/minor change
+## 10-19-2017 @ 16.56.15 - (1.2.43)    - dscudiero - Read the cimconfig.cfg file if we cannot find the workflow.cfg file
