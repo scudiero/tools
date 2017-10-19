@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.85 # -- dscudiero -- Thu 10/19/2017 @  7:32:29.78
+version=2.3.86 # -- dscudiero -- Thu 10/19/2017 @  7:33:27.57
 #===================================================================================================
 TrapSigs 'on'
 
@@ -22,7 +22,7 @@ for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do
 	[[ "$(basename "${BASH_SOURCE[$i]}")" == "${checkParent}.sh" ]] && found=true; 
 done
 dump found
-#[[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent',\nCurrent call parent: '$calledFrom'"
+#[[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent'"
 
 #===================================================================================================
 # Copyright ©2014 David Scudiero -- all rights reserved.
@@ -224,3 +224,4 @@ return 0
 ## 10-18-2017 @ 14.20.50 - (2.3.82)    - dscudiero - Cosmetic/minor change
 ## 10-18-2017 @ 14.30.29 - (2.3.83)    - dscudiero - Fix who called check
 ## 10-19-2017 @ 07.32.06 - (2.3.84)    - dscudiero - Add debug state,=ments
+## 10-19-2017 @ 07.53.54 - (2.3.86)    - dscudiero - Comment out caller check
