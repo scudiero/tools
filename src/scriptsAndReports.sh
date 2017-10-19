@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.27 # -- dscudiero -- Thu 10/19/2017 @ 12:18:46.33
+version=3.13.28 # -- dscudiero -- Thu 10/19/2017 @ 15:07:11.53
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -144,7 +144,10 @@ function ExecScript {
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
 		(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile
-		touch "$(dirname $logFile)"
+		mv $logFile $logFile.bak
+	 	cat $logFile.bak | sed "s/\x1B\[[0-9;]*[a-zA-Z]//g" | tr -d '\007' > $logFile
+		chmod ug+rwx "$logFile"
+	 	rm $logFile.bak
 		logFile="$logFileSave"
 
 	return $?
@@ -505,3 +508,4 @@ Goodbye 0
 ## 10-12-2017 @ 14.43.31 - (3.13.25)   - dscudiero - Do not rebuild the menu list on re-display
 ## 10-13-2017 @ 14.39.30 - (3.13.26)   - dscudiero - swap out Call in reports
 ## 10-19-2017 @ 12.19.40 - (3.13.27)   - dscudiero - touch the logFile upon return to set time date stamp
+## 10-19-2017 @ 15.09.39 - (3.13.28)   - dscudiero - Cleanup the logFile when done calling the script
