@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.28 # -- dscudiero -- Thu 10/19/2017 @ 15:07:11.53
+version=3.13.29 # -- dscudiero -- Thu 10/19/2017 @ 15:12:04.60
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -148,6 +148,7 @@ function ExecScript {
 	 	cat $logFile.bak | sed "s/\x1B\[[0-9;]*[a-zA-Z]//g" | tr -d '\007' > $logFile
 		chmod ug+rwx "$logFile"
 	 	rm $logFile.bak
+	 	touch "$(dirname $logFile)"
 		logFile="$logFileSave"
 
 	return $?
@@ -509,3 +510,4 @@ Goodbye 0
 ## 10-13-2017 @ 14.39.30 - (3.13.26)   - dscudiero - swap out Call in reports
 ## 10-19-2017 @ 12.19.40 - (3.13.27)   - dscudiero - touch the logFile upon return to set time date stamp
 ## 10-19-2017 @ 15.09.39 - (3.13.28)   - dscudiero - Cleanup the logFile when done calling the script
+## 10-19-2017 @ 15.12.58 - (3.13.29)   - dscudiero - Cleanup the logFile from called task
