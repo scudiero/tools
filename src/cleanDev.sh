@@ -1,10 +1,10 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.26 # -- dscudiero -- Wed 10/18/2017 @ 15:40:12.35
+version=3.5.27 # -- dscudiero -- Fri 10/20/2017 @ 13:20:04.70
 #==================================================================================================
 TrapSigs 'on'
-myIncludes="ProtectedCall StringFunctions"
+myIncludes="ProtectedCall StringFunctions PushPop"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -335,3 +335,4 @@ Goodbye 0
 ## 10-12-2017 @ 15.09.49 - (3.5.24)    - dscudiero - Updated includes list
 ## 10-12-2017 @ 15.10.51 - (3.5.25)    - dscudiero - fix dump statements
 ## 10-18-2017 @ 15.40.57 - (3.5.26)    - dscudiero - Change the way we determin if we shold run in daemon mode, add -daemon as a flag
+## 10-20-2017 @ 13.20.21 - (3.5.27)    - dscudiero - Add PushPop to the include list
