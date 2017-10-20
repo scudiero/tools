@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.45" # -- dscudiero -- Fri 10/20/2017 @ 16:54:50.58
+version="1.4.46" # -- dscudiero -- Fri 10/20/2017 @ 16:56:38.43
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -223,7 +223,6 @@ sTime=$(date "+%s")
 
 ## Load argument parse definitions
 	if [[ ${#argDefs} -eq 0 ]]; then
-		Here 1
 		sqlStmt="select shortName,longName,type,scriptvariable,scriptcommand,helpgroup,helptext from argdefs where status=\"active\" order by seqorder ASC"
 		RunSql2 $sqlStmt
 		for ((argDefCntr=0; argDefCntr<${#resultSet[@]}; argDefCntr++)); do
@@ -910,3 +909,4 @@ fi
 ## 10-12-2017 @ 14.51.44 - ("1.4.43")  - dscudiero - Pull the users auth groups and put in a variable
 ## 10-19-2017 @ 12.19.26 - ("1.4.44")  - dscudiero - touch the logFile upon return to set time date stamp
 ## 10-20-2017 @ 16.55.59 - ("1.4.45")  - dscudiero - Add loading of the argDefs array
+## 10-20-2017 @ 16.56.45 - ("1.4.46")  - dscudiero - remove debug line
