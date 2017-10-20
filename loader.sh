@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.44" # -- dscudiero -- Thu 10/19/2017 @ 12:18:03.11
+version="1.4.45" # -- dscudiero -- Fri 10/20/2017 @ 16:54:50.58
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -220,6 +220,17 @@ sTime=$(date "+%s")
 	GetDefaultsData "$myName" -fromFiles
 	prtStatus ", getdefaults"
 	sTime=$(date "+%s")
+
+## Load argument parse definitions
+	if [[ ${#argDefs} -eq 0 ]]; then
+		Here 1
+		sqlStmt="select shortName,longName,type,scriptvariable,scriptcommand,helpgroup,helptext from argdefs where status=\"active\" order by seqorder ASC"
+		RunSql2 $sqlStmt
+		for ((argDefCntr=0; argDefCntr<${#resultSet[@]}; argDefCntr++)); do
+			tmpStr="${resultSet[$argDefCntr]}"
+			argDefs+=("${tmpStr//|/,}")
+		done
+	fi
 
 ## Set forking limit
 	maxForkedProcesses=$maxForkedProcessesPrime
@@ -898,3 +909,4 @@ fi
 ## 10-11-2017 @ 12.51.16 - ("1.4.41")  - dscudiero - If calling scripts or reports then do not build a log file
 ## 10-12-2017 @ 14.51.44 - ("1.4.43")  - dscudiero - Pull the users auth groups and put in a variable
 ## 10-19-2017 @ 12.19.26 - ("1.4.44")  - dscudiero - touch the logFile upon return to set time date stamp
+## 10-20-2017 @ 16.55.59 - ("1.4.45")  - dscudiero - Add loading of the argDefs array
