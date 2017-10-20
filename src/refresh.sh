@@ -1,9 +1,9 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.121 # -- dscudiero -- Wed 07/19/2017 @ 15:28:47.50
+version=1.3.123 # -- dscudiero -- Fri 10/20/2017 @ 13:57:53.40
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
+imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye PushPop'
 imports="$imports SelectMenu CopyFileWithCheck BackupCourseleafFile WriteChangelogEntry"
 Import "$imports"
 originalArgStr="$*"
@@ -40,7 +40,6 @@ refreshObjs+=('WorkflowCoreFiles')
 refreshObjs+=('internalContacts-dbShadow')
 refreshObjs+=('clientData')
 
-
 #==================================================================================================
 # Map specified refreshObj to the function name
 #==================================================================================================
@@ -59,7 +58,7 @@ function mapRefreshObj {
 # WorkWith
 #==============================================================================================
 function vba {
-	[[ $userName != 'dscudiero' ]] && Msg2 $T "Sorry you cannot refresh objects of type $refreshObj"
+	[[ $userName != 'dscudiero' ]] && Terminate "Sorry you cannot refresh objects of type $refreshObj"
 	## Get the list of vba applications
 		srcDir="/home/dscudiero/windowsStuff/documents/Visual Studio 2015/Projects"
 		cwd=$(pwd)
@@ -70,7 +69,7 @@ function vba {
 		for project in $projectDirs; do
 			projects+=($project)
 		done
-		Msg2 "Please specify the ordinal number of the source project\n"
+		Msg3 "Please specify the ordinal number of the source project\n"
 		SelectMenu 'projects' 'project' '\nRefresh object ordinal(or 'x' to quit) > '
 		[[ $project == '' ]] && Goodbye 0
 
@@ -83,7 +82,7 @@ function vba {
 		verifyArgs+=("Target Application:$app")
 		VerifyContinue "You are asking to refresh an vba application:"
 
-	Msg2 "Refreshing '$app' from $project..."
+	Msg3 "Refreshing '$app' from $project..."
 	## Copy the application files
 		srcDir="$HOME/windowsStuff/documents/Visual Studio 2015/Projects/$project/$project/bin/Release"
 		tgtDir=$TOOLSPATH/bin
@@ -108,7 +107,7 @@ function vba {
 		[[ -d $tgtDir/$app ]] && mv $tgtDir/$app $tgtDir/archive/$app-$(date +"%H%M%S")
 		mv -f $tgtDir/$app-new $tgtDir/$app
 	cd "$cwd"
-	Msg2 "Production '$app' refreshed from $project"
+	Msg3 "Production '$app' refreshed from $project"
 	return 0
 }
 
@@ -118,11 +117,11 @@ function vba {
 function wharehousesqliteshadow {
 	if [[ ${myRhen:0:1} -gt 5 ]]; then
 		buildWarehouseSqlite
-		Msg2 "You need to copy the workflow.sqlite file\n\t$HOME/warehouse.sqlite\ne"
-		Msg2 "to the internal-stage location:\n\t$HOME/internal/stage/db/warehouse.sqlite"
-		Msg2 "From BUILD5"
+		Msg3 "You need to copy the workflow.sqlite file\n\t$HOME/warehouse.sqlite\ne"
+		Msg3 "to the internal-stage location:\n\t$HOME/internal/stage/db/warehouse.sqlite"
+		Msg3 "From BUILD5"
 	else
-		Msg2 $T "This process can only be run from an rhel6 or better system"
+		Terminate "This process can only be run from an rhel6 or better system"
 	fi
 	return 0
 }
@@ -174,18 +173,18 @@ function cgis {
 
 		result=$(CopyFileWithCheck "$courseleafCgiSourceFile" "${siteDir}/web/courseleaf/courseleaf.cgi" 'courseleaf')
 		if [[ $result == true ]]; then
-			Msg2 "^^Updated: '/courseleaf/courseleaf.cgi' to version $courseleafCgiVer"
+			Msg3 "^^Updated: '/courseleaf/courseleaf.cgi' to version $courseleafCgiVer"
 		elif [[ $result == same ]]; then
-			Msg2 "^^'/courseleaf/courseleaf.cgi' is current (version: $courseleafCgiVer)"
+			Msg3 "^^'/courseleaf/courseleaf.cgi' is current (version: $courseleafCgiVer)"
 		else
 			Error 0 2 "Could not copy '/courseleaf/courseleaf.cgi',\n^^$result"
 		fi
 
 		result=$(CopyFileWithCheck "$ribbigCgiSourceFile" "${siteDir}/web/ribbit/index.cgi" 'courseleaf')
 		if [[ $result == true ]]; then
-			Msg2 "^^Updated: '/ribbit/index.cgi' to version $ribbitCgiVer"
+			Msg3 "^^Updated: '/ribbit/index.cgi' to version $ribbitCgiVer"
 		elif [[ $result == same ]]; then
-			Msg2 "^^'/ribbit/index.cgi' is current (version: $ribbitCgiVer)"
+			Msg3 "^^'/ribbit/index.cgi' is current (version: $ribbitCgiVer)"
 		else
 			Error 0 2 "Could not copy '/ribbit/index.cgi',\n^^$result"
 		fi
@@ -198,9 +197,9 @@ function cgis {
 				if [[ -n $grepStr ]]; then
 					result=$(CopyFileWithCheck "$ribbigCgiSourceFile" "${siteDir}/web/search/index.cgi" 'courseleaf')
 					if [[ $result == true ]]; then
-						Msg2 "^^Updated: '/ribbit/index.cgi' to version $ribbitCgiVer"
+						Msg3 "^^Updated: '/ribbit/index.cgi' to version $ribbitCgiVer"
 					elif [[ $result == same ]]; then
-						Msg2 "^^'/search/index.cgi' is current (version: $ribbitCgiVer)"
+						Msg3 "^^'/search/index.cgi' is current (version: $ribbitCgiVer)"
 					else
 						Error 0 2 "Could not copy '/search/index.cgi',\n^^$result"
 					fi
@@ -233,11 +232,11 @@ function workflowcorefiles {
 			if [[ $result == true ]]; then
 				changeLogRecs+=("Updated: $file")
 				WriteChangelogEntry 'changeLogRecs' "$srcDir/changelog.txt"
-				Msg2 "^'$file' copied"
+				Msg3 "^'$file' copied"
 			elif [[ $result == 'same' ]]; then
-				Msg2 "^'$file' - md5's match, no changes made"
+				Msg3 "^'$file' - md5's match, no changes made"
 			else
-				Msg2 $T "Error copying file:\n^$result"
+				Terminate "Error copying file:\n^$result"
 			fi
 	done
 	return 0
@@ -256,7 +255,7 @@ function internalcontacts-dbshadow {
 		$DOIT chmod 770 $tgtDir/*
 		$DOIT touch $tgtDir/.syncDate
 	else
-		Msg2 "${colorWarning}This action must be run on the build5 server, starting an ssh session${colorDefault}"
+		Msg3 "${colorWarning}This action must be run on the build5 server, starting an ssh session${colorDefault}"
 		$DOIT ssh $userName@build5.leepfrog.com $myPath/$myName $refreshObj
 	fi
 	return 0
@@ -266,7 +265,7 @@ function internalcontacts-dbshadow {
 # wharehousesqliteshadow
 #==============================================================================================
 function clientData {
-	echo; Msg2 "*** $FUNCNAME -- Starting ***"
+	echo; Msg3 "*** $FUNCNAME -- Starting ***"
 	srcDir=$clientsTransactionalDb
 	tgtDir=$internalContactsDbShadow
 	SetFileExpansion 'on'
@@ -298,7 +297,7 @@ echo
 if [[ $refreshObj == '' ]]; then
 	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
 	echo
-	Msg2 "Please specify the ordinal number of the object type you wish to refresh\n"
+	Msg3 "Please specify the ordinal number of the object type you wish to refresh\n"
 	SelectMenu 'refreshObjs' 'refreshObj' '\nRefresh object ordinal(or 'x' to quit) > '
 	[[ $refreshObj == '' ]] && Goodbye 0
 fi
@@ -309,7 +308,7 @@ fi
 ## call function to refresh the object
 	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear && echo
 	echo
-	Msg2 "Starting $(mapRefreshObj "$refreshObj")..."
+	Msg3 "Starting $(mapRefreshObj "$refreshObj")..."
 	echo
 	eval $(mapRefreshObj "$refreshObj")
 
@@ -352,3 +351,4 @@ Goodbye 0
 ## 07-19-2017 @ 15.24.06 - (1.3.117)   - dscudiero - Add cgis action
 ## 07-19-2017 @ 15.26.58 - (1.3.119)   - dscudiero - add -action flag
 ## 07-19-2017 @ 15.28.53 - (1.3.121)   - dscudiero - General syncing of dev to prod
+## 10-20-2017 @ 13.59.37 - (1.3.123)   - dscudiero - Add PushPop to the includes list
