@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.36 # -- dscudiero -- Tue 10/10/2017 @ 13:36:14.62
+version=2.10.40 # -- dscudiero -- Fri 10/20/2017 @ 16:32:30.45
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile"
@@ -499,6 +499,28 @@ Msg3
 		cd ..
 		$DOIT rm -rf "/${backupFolder#*/}"
 		popd >& /dev/null
+
+		## Make sure that we have workflow management on the console
+		if [[ $tgtEnv == 'next' || $tgtEnv == 'test' ]]; then
+			updatedFile=false
+			Msg3 "Checking console workflow management entries"
+			editFile="$tgtDir/web/courseleaf/index.tcf"
+			for cim in $(tr ',' ' ' <<< "$cimStr"); do
+				unset grepStr; grepStr=$(ProtectedCall "grep "/$cim/workflow.html" "$editFile"")
+				if [[ -n $grepStr ]]; then
+					if [[ ${grepStr:0:2} == '//' ]]; then
+						fromStr="$grepStr"
+						toStr="${grepStr:2}"
+						$DOIT sed -i s"_^${fromStr}_${toStr}_" $editFile
+						Msg3 "^Activating Workflow Manatement for '$cim'"
+						updatedFile=true
+					fi
+				else
+					Warning "Could not locate the 'workflow management' record for '$cim'"
+				fi
+			done
+			[[ $updatedFile == true ]] && RunCourseLeafCgi "$tgtDir" "-r /courseleaf/index.tcf"
+		fi
 	else
 		## Nothing to do
 		echo; Msg3 W 0 1 "No files required updating, nothing changed"
@@ -623,3 +645,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 10-09-2017 @ 16.53.42 - (2.10.34)   - dscudiero - Fix problem setting backup directory names
 ## 10-10-2017 @ 13.33.45 - (2.10.35)   - dscudiero - Take the restriction for the jalot data to be only numeric away
 ## 10-10-2017 @ 13.44.43 - (2.10.36)   - dscudiero - Add default values for some questions
+## 10-20-2017 @ 16.33.02 - (2.10.40)   - dscudiero - Added code to check to make sure there is a workflow management record for the cim instance
