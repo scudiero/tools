@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.129 # -- dscudiero -- Thu 10/19/2017 @  9:42:17.16
+version=1.1.130 # -- dscudiero -- Fri 10/20/2017 @  9:01:20.89
 #==================================================================================================
 TrapSigs 'on'
 
@@ -15,13 +15,9 @@ scriptDescription="Insert/Update a record into the '$siteInfoTable' and '$siteAd
 # NOT MEANT TO BE CALLED STAND ALONE
 # insertSiteInfoTableRecord $siteDir -clientId $clientId
 #==================================================================================================
-checkParent='buildsiteinfotable'; found=false
-for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do 
-	echo "\$(basename \"${BASH_SOURCE[$i]}\") = '$(basename \"${BASH_SOURCE[$i]}\")'"
-	[[ "$(basename "${BASH_SOURCE[$i]}")" == "${checkParent}.sh" ]] && found=true; 
-done
-dump found
-#[[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent'"
+checkParent='buildSiteInfoTable'; found=false
+for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ "$(basename "${BASH_SOURCE[$i]}")" == "${checkParent}.sh" ]] && found=true; done
+[[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent'"
 
 #==================================================================================================
 # Standard call back functions
@@ -411,3 +407,4 @@ return 0
 ## 10-18-2017 @ 14.20.52 - (1.1.127)   - dscudiero - Cosmetic/minor change
 ## 10-18-2017 @ 14.30.33 - (1.1.128)   - dscudiero - Fix who called check
 ## 10-19-2017 @ 09.42.44 - (1.1.129)   - dscudiero - Added debug arround caller check code
+## 10-20-2017 @ 09.01.54 - (1.1.130)   - dscudiero - Fix problem in the caller check code
