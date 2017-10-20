@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.29 # -- dscudiero -- Fri 10/20/2017 @ 15:39:20.33
+version=3.5.30 # -- dscudiero -- Fri 10/20/2017 @ 15:48:36.75
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall StringFunctions PushPop"
@@ -244,7 +244,7 @@ if [[ "$hostName" = 'build5' ]]; then share=dev9
 elif [[ "$hostName" = 'build7' ]]; then share=dev7
 elif [[ "$hostName" = 'mojave' ]]; then share=dev6
 fi
-validActions='Yes No Mark Unmark ResetDate Save -'
+validActions='Yes No Mark Unmark ResetDate Save'
 [[ $userName == 'dscudiero' ]] && validActions="$validActions WorkflowSave"
 searchStr="$userName"
 
@@ -337,3 +337,4 @@ Goodbye 0
 ## 10-18-2017 @ 15.40.57 - (3.5.26)    - dscudiero - Change the way we determin if we shold run in daemon mode, add -daemon as a flag
 ## 10-20-2017 @ 13.20.21 - (3.5.27)    - dscudiero - Add PushPop to the include list
 ## 10-20-2017 @ 13.26.50 - (3.5.28)    - dscudiero - Add a default selection for the site to delete
+## 10-20-2017 @ 15.49.14 - (3.5.30)    - dscudiero - Misc cleanup
