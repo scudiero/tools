@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.24" # -- dscudiero -- Fri 09/15/2017 @  7:03:41.33
+# version="2.0.25" # -- dscudiero -- Fri 10/20/2017 @ 12:41:53.17
 #===================================================================================================
 # Process semaphores
 # Semaphore <mode> <key/name> <sleeptime>
@@ -14,6 +14,9 @@
 # All rights reserved
 #===================================================================================================
 function Semaphore {
+	myIncludes="StringFunctions RunSql2"
+	Import "$myIncludes"
+
 	local mode=${1:-'check'}
 	mode=$(Lower $mode)
 	local keyId=$2
@@ -110,3 +113,4 @@ export -f CheckSemaphore
 ## Wed Jan  4 13:54:24 CST 2017 - dscudiero - General syncing of dev to prod
 ## Tue Feb 14 09:44:10 CST 2017 - dscudiero - Added 'getKey' action to retrieve keys
 ## Tue Feb 14 10:47:30 CST 2017 - dscudiero - Added time out counter for waiton action
+## 10-20-2017 @ 12.42.16 - ("2.0.25")  - dscudiero - Add StringFunctions to the included list
