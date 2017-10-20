@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #==================================================================================================
-version=1.0.114 # -- dscudiero -- Thu 10/19/2017 @  9:42:13.57
+version=1.0.115 # -- dscudiero -- Fri 10/20/2017 @  9:01:16.50
 #==================================================================================================
 TrapSigs 'on'
 originalArgStr="$*"
@@ -10,13 +10,9 @@ scriptDescription=""
 #= Description +===================================================================================
 # NOT MEANT TO BE CALLED STAND ALONE
 #==================================================================================================
-checkParent="buildqastatustable"; found=false
-for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do 
-	echo "\$(basename \"${BASH_SOURCE[$i]}\") = '$(basename \"${BASH_SOURCE[$i]}\")'"
-	[[ "$(basename "${BASH_SOURCE[$i]}")" == "${checkParent}.sh" ]] && found=true; 
-done
-dump found
-#[[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent'"
+checkParent="buildQaStatusTable"; found=false
+for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ "$(basename "${BASH_SOURCE[$i]}")" == "${checkParent}.sh" ]] && found=true; done
+[[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent'"
 
 #==================================================================================================
 # Standard call back functions
@@ -199,3 +195,4 @@ dump -2 workbookFile -t clientCode product project instance env
 ## 10-18-2017 @ 14.20.55 - (1.0.112)   - dscudiero - Cosmetic/minor change
 ## 10-18-2017 @ 14.30.38 - (1.0.113)   - dscudiero - Fix who called check
 ## 10-19-2017 @ 09.42.47 - (1.0.114)   - dscudiero - Added debug arround caller check code
+## 10-20-2017 @ 09.01.58 - (1.0.115)   - dscudiero - Fix problem in the caller check code
