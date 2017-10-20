@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.86 # -- dscudiero -- Thu 10/19/2017 @  7:33:27.57
+version=2.3.87 # -- dscudiero -- Fri 10/20/2017 @  9:00:16.44
 #===================================================================================================
 TrapSigs 'on'
 
@@ -16,13 +16,9 @@ scriptDescription="Insert/Update a record into the '$clientInfoTable' table in t
 # NOT MEANT TO BE CALLED STAND ALONE
 # insertClientInfoRec <client>
 #===================================================================================================
-checkParent="buildclientinfotable"; found=false
-for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do 
-	echo "\$(basename \"${BASH_SOURCE[$i]}\") = '$(basename \"${BASH_SOURCE[$i]}\")'"
-	[[ "$(basename "${BASH_SOURCE[$i]}")" == "${checkParent}.sh" ]] && found=true; 
-done
-dump found
-#[[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent'"
+checkParent="buildClientInfoTable"; found=false
+for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ "$(basename "${BASH_SOURCE[$i]}")" == "${checkParent}.sh" ]] && found=true; done
+[[ $found != true ]] && Terminate "Sorry, this script can only be called from '$checkParent'"
 
 #===================================================================================================
 # Copyright ©2014 David Scudiero -- all rights reserved.
@@ -225,3 +221,4 @@ return 0
 ## 10-18-2017 @ 14.30.29 - (2.3.83)    - dscudiero - Fix who called check
 ## 10-19-2017 @ 07.32.06 - (2.3.84)    - dscudiero - Add debug state,=ments
 ## 10-19-2017 @ 07.53.54 - (2.3.86)    - dscudiero - Comment out caller check
+## 10-20-2017 @ 09.01.51 - (2.3.87)    - dscudiero - Fix problem in the caller check code
