@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.6" # -- dscudiero -- 03/24/2017 @ 10:54:31.51
+# version="2.0.7" # -- dscudiero -- Fri 10/20/2017 @  8:18:51.80
 #===================================================================================================
 # Set the standard output file name
 # args <client> <env> <product>
@@ -11,11 +11,12 @@
 #===================================================================================================
 #===================================================================================================
 function GetOutputFile {
-	local client="$1"
-	local env="$2"
-	local product="$3"
+	local client="$1"; shift || true
+	local env="$1"; shift || true
+	local product="$1"; shift || true
+	local extension="${1-log}"
 	local outDir outFile outFileName
-	outFileName=$myName.log
+	outFileName=${myName}.${extension}
 	[[ $client == 'all' || $client == '*' ]] && client='allClients'
 	[[ $env == 'all' || $env == '*' ]] && env='allClients'
 	[[ $product == 'all' || $product == '*' ]] && product='allClients'
@@ -50,3 +51,4 @@ export -f GetOutputFile
 #===================================================================================================
 ## Wed Jan  4 13:53:37 CST 2017 - dscudiero - General syncing of dev to prod
 ## 03-24-2017 @ 10.55.10 - ("2.0.6")   - dscudiero - Change the output file extension to .log
+## 10-20-2017 @ 08.19.21 - ("2.0.7")   - dscudiero - Add ability to pass in the desired file extension
