@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.28 # -- dscudiero -- Fri 10/20/2017 @ 13:26:30.64
+version=3.5.29 # -- dscudiero -- Fri 10/20/2017 @ 15:39:20.33
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall StringFunctions PushPop"
@@ -103,7 +103,7 @@ scriptDescription="Cleanup private dev sites"
 				  	[[ "$validSiteIds" = '' ]] && validSiteIds="$i" || validSiteIds="$validSiteIds $i"
 				done
 				unset siteIds
-				Prompt siteIds "\nPlease enter the ordinal number(s) of the site you wish to Process.\nMay be comma seperated or n-m notation or any combination there of, \nor 'All', or 'X' to quit" '0' "*any*"
+				Prompt siteIds "\nPlease enter the ordinal number(s) of the site you wish to Process.\nMay be comma seperated or n-m notation or any combination there of, \nor 'All', or 'X' to quit" "*any*"
 				[[ $(Lower ${siteIds:0:1}) == 'r' ]] && loop=true && continue
 				[[ $(Lower ${siteIds:0:1}) == 'a' ]] && siteIds="$(tr ' ' ',' <<< $validSiteIds)" && break
 				if [[ $(Contains "$siteIds" '-') == true ]]; then
