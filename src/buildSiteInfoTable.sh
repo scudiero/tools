@@ -1,9 +1,12 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.70 # -- dscudiero -- Wed 10/18/2017 @ 13:56:13.08
+version=4.3.79 # -- dscudiero -- Fri 10/20/2017 @ 13:09:30.82
 #=======================================================================================================================
 TrapSigs 'on'
+myIncludes="Call SetSiteDirs SetFileExpansion RunSql2 StringFunctions ProtectedCall FindExecutable PushPop"
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
 scriptDescription="Sync the data warehouse '$siteInfoTable' table with the transactional data from the contacts db data and the live site data"
 
@@ -58,9 +61,6 @@ forkCntr=0; siteCntr=0; clientCntr=0;
 # Standard arg parsing and initialization
 #=======================================================================================================================
 Hello
-Info "Loading includes..."
-myIncludes="Call SetSiteDirs SetFileExpansion RunSql2 ProtectedCall"
-Import "$standardInteractiveIncludes $myIncludes"
 Info "Loading script defaults..."
 GetDefaultsData $myName
 Info "Parsing arguments..."
@@ -72,7 +72,7 @@ if [[ $batchMode != true ]]; then
 fi
 
 [[ -n $env ]] && envList="$env" || envList="$courseleafDevEnvs $courseleafProdEnvs"
-[[ $fork == true ]] && forkStr='fork' || unset forkStr
+[[ $fork == true ]] && forkStr='-fork' || unset forkStr
 
 ## Which table to use
 	useSiteInfoTable="$siteInfoTable"
@@ -113,20 +113,18 @@ Msg3 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 		else
 			# clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep $client))
 			clientDirs+=($(ProtectedCall "find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep $client"))
-#if [[ $verboseLevel -ge 1 ]]; then
+		fi
+if [[ $verboseLevel -ge 1 ]]; then
 	echo
 	Msg3 "dbClients:"; for i in "${!dbClients[@]}"; do printf "\t[$i] = >${dbClients[$i]}<\n"; done; echo
 	Msg3 "clientDirs:"; for i in "${!clientDirs[@]}"; do printf "\t[$i] = >${clientDirs[$i]}<\n"; done; echo
-#fi
-
+fi
 	## Loop through actual clientDirs
 		for clientDir in ${clientDirs[@]}; do
-dump -n clientDir
 			if [[ ${dbClients[$(basename $clientDir)]+abc} ]]; then
 				(( clientCntr+=1 ))
 				client="$(basename $clientDir)"
 				clientId=${dbClients[$client]}
-dump -t client clientId envList
 				## Get the envDirs, make sure we have some
 					for env in $(tr ',' ' ' <<< "$envList"); do unset ${env}Dir ; done
 					SetSiteDirs 'set'
@@ -141,8 +139,7 @@ dump -t client clientId envList
 					token="${env}Dir" ; envDir="${!token}"
 					[[ -z $envDir ]] && continue
 					if [[ -d $envDir/web ]]; then
-echo -e "\tCall \"$workerScriptFile\" \"$forkStr\" \"$envDir\" \"$clientId\" \"-tableName $useSiteInfoTable\""
-						$DOIT Call "$workerScriptFile" "$forkStr" "$envDir" "$clientId" "-tableName $useSiteInfoTable"
+						$DOIT source "$workerScriptFile" "$envDir" "$clientId" "$forkStr -tableName $useSiteInfoTable"
 						(( forkCntr+=1 )) ; (( siteCntr+=1 ))
 					fi
 					if [[ $fork == true && $((forkCntr%$maxForkedProcesses)) -eq 0 ]]; then
@@ -242,3 +239,4 @@ Goodbye 0 'alert'
 ## 09-28-2017 @ 06.52.04 - (4.3.68)    - dscudiero - Remove debug statements
 ## 09-29-2017 @ 10.14.44 - (4.3.69)    - dscudiero - Update FindExcecutable call for new syntax
 ## 10-18-2017 @ 13.56.37 - (4.3.70)    - dscudiero - Add debug statements
+## 10-20-2017 @ 13.11.25 - (4.3.79)    - dscudiero - Fix problem with a missing fi
