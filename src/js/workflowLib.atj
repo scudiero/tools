@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.24" // -- dscudiero -- Thu 10/19/2017 @ 11:46:12.40
+wfLibVersion="1.8.26" // -- dscudiero -- Fri 10/20/2017 @  6:58:59.60
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -62,6 +62,7 @@ wfLibVersion="1.8.24" // -- dscudiero -- Thu 10/19/2017 @ 11:46:12.40
 // 10/16/17 - dgs - Fixed problem where 'getSubjects' function was returning the entire course code as returned by getAllcodes.
 // 10/16/17 - dgs - Fixed problem when gGetRelated was called standalone
 // 10/18/17 - dgs - Updated LookupCode
+// 10/19/17 - dgs - Updated getAttrVal to allow for instances where the 'college' is not the variable the client uses
 //======================================================================================================================
 
 // Make sure wffucs is defined
@@ -1214,9 +1215,6 @@ GetAttrVal = function(data) {
 	var deptVarName=data.deptVar; 	if (deptVarName === undefined || deptVarName === "") deptVarName=wfDeptVarName;
 	var colVarName=data.colVar; 	if (colVarName === undefined || colVarName === "") colVarName=wfColVarName;
 
-	wfDump(5,["\t\treqType;"+reqType,"\t\toptionStr;"+optionStr,"\t\ttcaData;"+tcaData,"\t\tsubjVarName;"+subjVarName,
-		"\t\tdeptVarName;"+deptVarName,"\t\tcolVarName;"+colVarName,"\t\twfAllcodes;"+wfAllcodes]);
-
 	var includeTCA=false;
 	if (optionStr.indexOf("includetca") >= 0 && typeof(tcaData) != "undefined" && tcaData)
 		var includeTCA=true;
@@ -1228,8 +1226,12 @@ GetAttrVal = function(data) {
 	var proposalOnly=false;
 	if (optionStr.indexOf("proposalonly") >= 0)
 		var proposalOnly=true;
-	wfDump(5,["\t\tincludeTCA;"+includeTCA,"\t\tmapValue;"+mapValue]);
-	wfDump(5,["\t\twfAllcodes;"+wfAllcodes,"\t\twfCimInstance;"+wfCimInstance,"\t\tproposalOnly;"+proposalOnly]);
+	if (optionStr.indexOf("type=") >= 0)
+		reqType=optionStr.split("=")[1];
+
+	wfDump(5,["\t\treqType;"+reqType,"\t\toptionStr;"+optionStr,"\t\ttcaData;"+tcaData,"\t\tsubjVarName;"+subjVarName,
+		"\t\tdeptVarName;"+deptVarName,"\t\tcolVarName;"+colVarName,"\t\twfAllcodes;"+wfAllcodes,"\t\tincludeTCA;"+includeTCA,
+		"\t\tmapValue;"+mapValue,"\t\twfAllcodes;"+wfAllcodes,"\t\twfCimInstance;"+wfCimInstance,"\t\tproposalOnly;"+proposalOnly]);
 
 	var subjects=[], departments=[], colleges=[];
 	// If the request ends in an "s" then get standard values using allcodes functions
@@ -1270,7 +1272,17 @@ GetAttrVal = function(data) {
 			if (includeTCA)
 				colleges=colleges.concat(getTCFValue("college", { data: tcaData, delimiter: "\n", retarray: true }));
 			if(colleges.length === 0 && subjects.length != 0) {
+Here(1)
 				resultSet=LookupCode2("cols","subj",subjects);
+				if (resultSet.length > 0) {
+					resultSet.forEach(function(result) {
+						colleges.push(result.data);
+					});
+				}
+			}
+			if(colleges.length === 0 && departments.length != 0) {
+Here(2)
+				resultSet=LookupCode2("cols","dept",departments);
 				if (resultSet.length > 0) {
 					resultSet.forEach(function(result) {
 						colleges.push(result.data);
@@ -1709,7 +1721,7 @@ CheckChanged = function(data) {
 			allowStep=true;
 		if (mode === 'any' && oneInList === true)
 			allowStep=true;
-		wfDump(3,["\t*** allowStep;"+ allowStep])
+		wfDump(3,["\t*** CheckChanged: allowStep;"+ allowStep])
 
 	return allowStep;
 
@@ -2205,4 +2217,4 @@ var wfLibLoaded=true;
 // 10-16-2017 @ 12.36.44 - ("1.8.17")  - dscudiero - Update how subjects is determined if allcodes
 // 10-17-2017 @ 14.07.27 - ("1.8.18")  - dscudiero - Fixed problem with setting default value for 'includeEcoSystemData' when GetRelated was called standalone
 // 10-18-2017 @ 10.50.17 - ("1.8.22")  - dscudiero - Many updates, check comments
-// 10-19-2017 @ 12.21.48 - ("1.8.24")  - dscudiero - Fix problem in GetRelated if the resultSet from the lookcode calls is empty
+// 10-20-2017 @ 08.20.19 - ("1.8.26")  - dscudiero - Updates to getAttrVal to taken into account that the client may use a different variable for 'college'
