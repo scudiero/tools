@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #==================================================================================================
-version=1.0.115 # -- dscudiero -- Fri 10/20/2017 @  9:01:16.50
+version=1.0.116 # -- dscudiero -- Fri 10/20/2017 @ 13:13:32.89
 #==================================================================================================
 TrapSigs 'on'
 originalArgStr="$*"
@@ -17,12 +17,6 @@ for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ "$(basename "${BASH_SOURCE[$i]}")"
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function parseArgs-insertTestingDetailRecord  { # or parseArgs-local
-	#argList+=(-optionArg,1,option,scriptVar,,script,'Help text')
-	#argList+=(-flagArg,2,switch,scriptVar,,script,'Help text')
-	argList+=(-file,4,option,file,,script,'The file name relative to the root site directory')
-	return 0
-}
 function Goodbye-insertTestingDetailRecord  { # or Goodbye-local
 	[[ -f tmpFile ]] && rm -f $tmpFile
 	return 0
