@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.133 # -- dscudiero -- Fri 10/20/2017 @ 13:07:58.05
+version=1.1.134 # -- dscudiero -- Fri 10/20/2017 @ 13:13:52.37
 #==================================================================================================
 TrapSigs 'on'
 
@@ -8,8 +8,6 @@ myIncludes="RunSql2 ParseCourseleafFile StringFunctions SetFileExpansion Protect
 Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*"
-dump originalArgStr
-
 scriptDescription="Insert/Update a record into the '$siteInfoTable' and '$siteAdminsTable' tables in the data warehouse,\nThis script is not intended to be called stand alone."
 
 #= Description +===================================================================================
