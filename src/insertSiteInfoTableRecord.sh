@@ -1,13 +1,15 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.130 # -- dscudiero -- Fri 10/20/2017 @  9:01:20.89
+version=1.1.133 # -- dscudiero -- Fri 10/20/2017 @ 13:07:58.05
 #==================================================================================================
 TrapSigs 'on'
 
-myIncludes="RunSql2 ParseCourseleafFile StringFunctions SetFileExpansion ProtectedCall"
+myIncludes="RunSql2 ParseCourseleafFile StringFunctions SetFileExpansion ProtectedCall GetCims"
 Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*"
+dump originalArgStr
+
 scriptDescription="Insert/Update a record into the '$siteInfoTable' and '$siteAdminsTable' tables in the data warehouse,\nThis script is not intended to be called stand alone."
 
 #= Description +===================================================================================
@@ -38,7 +40,7 @@ for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ "$(basename "${BASH_SOURCE[$i]}")"
 siteDir="$1" ; shift
 clientId="$1"; shift
 originalArgStr="$*"
-ParseArgsStd "$*"
+#ParseArgsStd "$*"
 
 #==================================================================================================
 # Declare local variables and constants
@@ -408,3 +410,4 @@ return 0
 ## 10-18-2017 @ 14.30.33 - (1.1.128)   - dscudiero - Fix who called check
 ## 10-19-2017 @ 09.42.44 - (1.1.129)   - dscudiero - Added debug arround caller check code
 ## 10-20-2017 @ 09.01.54 - (1.1.130)   - dscudiero - Fix problem in the caller check code
+## 10-20-2017 @ 13.11.51 - (1.1.133)   - dscudiero - comment out the parseargsstd call
