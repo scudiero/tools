@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.137 # -- dscudiero -- Mon 10/23/2017 @  7:21:43.33
+version=1.1.138 # -- dscudiero -- Mon 10/23/2017 @  7:22:33.37
 #==================================================================================================
 TrapSigs 'on'
 
@@ -60,7 +60,7 @@ dump -2 -n -t siteDir share shareType client env clientId
 	fi
 	[[ $WAREHOUSEDB == '$warehouseDev' ]] && useSiteInfoTable="${siteInfoTable}New" && useSiteAdminsTable="${siteAdminsTable}New"
 
-dump siteInfoTable seSiteInfoTable tableName
+dump siteInfoTable useSiteInfoTable tableName
 exit
 
 
