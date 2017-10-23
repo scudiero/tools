@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.48" # -- dscudiero -- Mon 10/23/2017 @ 16:15:40.90
+version="1.4.49" # -- dscudiero -- Mon 10/23/2017 @ 16:28:10.93
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -489,7 +489,8 @@ function CleanUp {
 			mv $logFile $logFile.bak
 		 	#cat $logFile.bak | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" | tr -d '\007' > $logFile
 		 	cat $logFile.bak | sed "s/\x1B\[[0-9;]*[a-zA-Z]//g" | tr -d '\007' > $logFile
-			chmod 664 "$logFile"
+			chown -R "$userName:leepfrog" "$logFile"
+			chmod 660 "$logFile"
 		 	rm $logFile.bak
 		fi
 
@@ -734,10 +735,10 @@ fi
 			if [[ ! -d $(dirname $logFile) ]]; then
 				mkdir -p "$(dirname $logFile)"
 				chown -R "$userName:leepfrog" "$(dirname $logFile)"
-				chmod -R 644 "$(dirname $logFile)"
+				chmod -R 775 "$(dirname $logFile)"
 			fi
 			touch "$logFile"
-			chmod 644 "$logFile"
+			chmod 660 "$logFile"
 			chown "$userName:leepfrog" "$logFile"
 			Msg3 "$(PadChar)" > $logFile
 			[[ -n $scriptArgs ]] && scriptArgsTxt=" $scriptArgs" || unset scriptArgsTxt
@@ -912,3 +913,4 @@ fi
 ## 10-20-2017 @ 16.56.45 - ("1.4.46")  - dscudiero - remove debug line
 ## 10-23-2017 @ 11.03.47 - ("1.4.47")  - dscudiero - Make sure the permissions of the log files is 644
 ## 10-23-2017 @ 16.21.45 - ("1.4.48")  - dscudiero - Make sure we can list the log directories
+## 10-23-2017 @ 16.28.49 - ("1.4.49")  - dscudiero - Cosmetic/minor change
