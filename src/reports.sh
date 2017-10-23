@@ -1,17 +1,12 @@
 ##  #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.16 # -- dscudiero -- Mon 10/23/2017 @  8:39:18.08
+version=1.0.17 # -- dscudiero -- Mon 10/23/2017 @  8:40:34.40
 #==================================================================================================
 # Quick call to scriptsAndReports
 #==================================================================================================
 Import 'FindExecutable'
-
-dump USELOCAL
-
 executeFile=$(FindExecutable 'scriptsAndReports')
-dump executeFile
-
 [[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
 myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 myPath="$(dirname $executeFile)"
@@ -30,3 +25,4 @@ source $executeFile reports $*
 ## 05-31-2017 @ 07.57.33 - (1.0.12)    - dscudiero - quote scriptAndReports
 ## 09-13-2017 @ 08.32.07 - (1.0.13)    - dscudiero - Import the Call procedure before use
 ## 10-02-2017 @ 14.07.08 - (1.0.14)    - dscudiero - Check to make sure the executeFile has a value and is readable
+## 10-23-2017 @ 08.41.20 - (1.0.17)    - dscudiero - remove ddebug stuff
