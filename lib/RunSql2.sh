@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.1.4" # -- dscudiero -- Mon 10/16/2017 @ 13:39:34.50
+# version="1.1.5" # -- dscudiero -- Mon 10/23/2017 @ 16:02:38.84
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -30,6 +30,7 @@ function RunSql2 {
 	fi
 	local sqlStmt="$*"
 	unset resultSet
+	local javaPgm=${runMySqlJavaPgmName:-runMySql}
 
 	[[ -z $sqlStmt ]] && return 0
 	local sqlAction="${sqlStmt%% *}"
@@ -49,7 +50,7 @@ function RunSql2 {
 
 	## Run the query
 		set -f
-		[[ $dbType == 'mysql' ]] && resultStr="$(java runMySql $sqlStmt 2>&1)" || resultStr="$(sqlite3 $dbFile "$sqlStmt" 2>&1 | tr "\t" '|')"
+		[[ $dbType == 'mysql' ]] && resultStr="$(java $javaPgm $sqlStmt 2>&1)" || resultStr="$(sqlite3 $dbFile "$sqlStmt" 2>&1 | tr "\t" '|')"
  		[[ $prevGlob == 'on' ]] && set +f
  		## Check for errors
  		##local tmpStr="$(tr '[:upper:]' '[:lower:]' <<< "$resultStr")" 
@@ -98,3 +99,4 @@ export -f RunSql2
 ## 10-12-2017 @ 14.26.05 - ("1.1.0")   - dscudiero - Use readarray to build the resultSet array
 ## 10-16-2017 @ 13.33.30 - ("1.1.2")   - dscudiero - Update the error detection code to be a bit less sensitive
 ## 10-16-2017 @ 13.39.46 - ("1.1.4")   - dscudiero - Tweak error dtection
+## 10-23-2017 @ 16.04.00 - ("1.1.5")   - dscudiero - Make the name of the java program for mysql a variable, set by default from bootdata
