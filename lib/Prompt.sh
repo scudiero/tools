@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.37" # -- dscudiero -- Wed 10/11/2017 @ 12:41:53.45
+# version="2.1.41" # -- dscudiero -- Mon 10/23/2017 @  9:39:53.77
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -99,7 +99,8 @@ function Prompt {
 								break
 							fi
 							[[ $rc -gt 0 && $tCntr -ge $maxReadTimeout ]] && echo && Terminate "Read operation timed out after the maximum time of $maxReadTimeout seconds" && exit
-						done ; echo
+						done
+						echo >> "$logFile"; echo -en "$timerPrompt $(ColorK "0") seconds\r"; echo
 						if [[ -z $response ]]; then
 							[[ -n $defaultVal ]] && { echo >> "$logFile"; Note 0 1 "Read timed out, using default value '$defaultVal' for '$promptVar'"; }
 							eval $promptVar=\"$defaultVal\"
