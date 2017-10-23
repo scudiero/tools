@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.29 # -- dscudiero -- Thu 10/19/2017 @ 15:12:04.60
+version=3.13.31 # -- dscudiero -- Mon 10/23/2017 @  8:35:53.78
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -9,6 +9,8 @@ Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="Script dispatcher"
+
+dump originalArgStr
 
 #=======================================================================================================================
 # Tools scripts selection front end
@@ -216,9 +218,9 @@ function ExecReport {
 			## Call script
 			scriptArgs="-reportName $name -noHeaders"
 			if [[ $(Lower "$reportIgnoreList") == 'standalone' ]]; then
-				FindExecutable -report $reportScript $originalArgStr $reportArgs $scriptArgs | tee "$tmpFile"
+				FindExecutable $reportScript -report $originalArgStr $reportArgs $scriptArgs | tee "$tmpFile"
 			else
-				FindExecutable -report $reportScript $originalArgStr $reportArgs $scriptArgs > "$tmpFile"
+				FindExecutable $reportScript -report $originalArgStr $reportArgs $scriptArgs > "$tmpFile"
 			fi
 		else
 			Terminate "Report type of '$type' not supported at this time"
@@ -511,3 +513,4 @@ Goodbye 0
 ## 10-19-2017 @ 12.19.40 - (3.13.27)   - dscudiero - touch the logFile upon return to set time date stamp
 ## 10-19-2017 @ 15.09.39 - (3.13.28)   - dscudiero - Cleanup the logFile when done calling the script
 ## 10-19-2017 @ 15.12.58 - (3.13.29)   - dscudiero - Cleanup the logFile from called task
+## 10-23-2017 @ 08.40.51 - (3.13.31)   - dscudiero - remove debug stuff
