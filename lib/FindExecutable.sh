@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.35" # -- dscudiero -- Mon 10/23/2017 @ 10:18:08.11
+# version="1.2.36" # -- dscudiero -- Mon 10/23/2017 @ 10:19:52.40
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -71,7 +71,7 @@ function FindExecutable {
 
 	executeFile="$checkFile" 
 	if [[ $runScript == true ]]; then
-		#Dump -t scriptArgs
+Dump -ifme -t executeFile scriptArgs
 		[[ -z "$executeFile" || ! -r "$executeFile" ]] && Terminate "$FUNCNAME: Run options active and could not find execution file, fileName='$fileName'"
 		myNameSave="$myName"; myPathSave="$myPath"
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
