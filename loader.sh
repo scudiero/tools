@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.46" # -- dscudiero -- Fri 10/20/2017 @ 16:56:38.43
+version="1.4.47" # -- dscudiero -- Mon 10/23/2017 @ 11:03:05.80
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -36,7 +36,7 @@ function CleanUp {
 			mv $logFile $logFile.bak
 		 	#cat $logFile.bak | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" | tr -d '\007' > $logFile
 		 	cat $logFile.bak | sed "s/\x1B\[[0-9;]*[a-zA-Z]//g" | tr -d '\007' > $logFile
-			chmod ug+rwx "$logFile"
+			chmod 644 "$logFile"
 		 	rm $logFile.bak
 		fi
 
@@ -292,10 +292,10 @@ sTime=$(date "+%s")
 			if [[ ! -d $(dirname $logFile) ]]; then
 				mkdir -p "$(dirname $logFile)"
 				chown -R "$userName:leepfrog" "$(dirname $logFile)"
-				chmod -R ug+rwx "$(dirname $logFile)"
+				chmod -R 644 "$(dirname $logFile)"
 			fi
 			touch "$logFile"
-			chmod ug+rwx "$logFile"
+			chmod 644 "$logFile"
 			chown "$userName:leepfrog" "$logFile"
 			[[ -n $scriptArgs ]] && scriptArgsTxt=" $scriptArgs" || unset scriptArgsTxt
 			echo -e  "$myName: $(date) loading $executeFile as '${callPgmName}${scriptArgsTxt}'\n" > $logFile
@@ -489,7 +489,7 @@ function CleanUp {
 			mv $logFile $logFile.bak
 		 	#cat $logFile.bak | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" | tr -d '\007' > $logFile
 		 	cat $logFile.bak | sed "s/\x1B\[[0-9;]*[a-zA-Z]//g" | tr -d '\007' > $logFile
-			chmod ug+rwx "$logFile"
+			chmod 644 "$logFile"
 		 	rm $logFile.bak
 		fi
 
@@ -734,10 +734,10 @@ fi
 			if [[ ! -d $(dirname $logFile) ]]; then
 				mkdir -p "$(dirname $logFile)"
 				chown -R "$userName:leepfrog" "$(dirname $logFile)"
-				chmod -R ug+rwx "$(dirname $logFile)"
+				chmod -R 644 "$(dirname $logFile)"
 			fi
 			touch "$logFile"
-			chmod ug+rwx "$logFile"
+			chmod 644 "$logFile"
 			chown "$userName:leepfrog" "$logFile"
 			Msg3 "$(PadChar)" > $logFile
 			[[ -n $scriptArgs ]] && scriptArgsTxt=" $scriptArgs" || unset scriptArgsTxt
@@ -910,3 +910,4 @@ fi
 ## 10-19-2017 @ 12.19.26 - ("1.4.44")  - dscudiero - touch the logFile upon return to set time date stamp
 ## 10-20-2017 @ 16.55.59 - ("1.4.45")  - dscudiero - Add loading of the argDefs array
 ## 10-20-2017 @ 16.56.45 - ("1.4.46")  - dscudiero - remove debug line
+## 10-23-2017 @ 11.03.47 - ("1.4.47")  - dscudiero - Make sure the permissions of the log files is 644
