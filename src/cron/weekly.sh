@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.34 # -- dscudiero -- Mon 10/23/2017 @ 11:41:48.02
+version=2.1.35 # -- dscudiero -- Mon 10/23/2017 @ 11:42:11.03
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -29,7 +29,7 @@ case "$hostName" in
 		## Checks
 			Msg3 "Starting Checks"
 			(( indentLevel++ )) || true
-			#FindExecutable -sh -run checkForPrivateDevSites $scriptArgs | Indent
+			FindExecutable -sh -run checkForPrivateDevSites $scriptArgs | Indent
 			(( indentLevel-- )) || true
 			Msg3 "Checks Completed"
 		## Weekly reports
@@ -96,3 +96,4 @@ return 0
 ## 10-23-2017 @ 10.44.28 - (2.1.29)    - dscudiero - Refactor all calls
 ## 10-23-2017 @ 11.41.15 - (2.1.33)    - dscudiero - Fix problem incrementing indentLevel
 ## 10-23-2017 @ 11.41.52 - (2.1.34)    - dscudiero - Cosmetic/minor change
+## 10-23-2017 @ 11.42.15 - (2.1.35)    - dscudiero - Cosmetic/minor change
