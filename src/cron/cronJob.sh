@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.13 # -- dscudiero -- Mon 10/23/2017 @ 11:00:23.78
+version=2.1.14 # -- dscudiero -- Mon 10/23/2017 @ 16:21:23.53
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -56,9 +56,9 @@ originalArgStr="$*"
 	echo -e "\t-- $hostName - $callScriptName done" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	mv $logFile $logFile.bak
  	cat $logFile.bak | sed "s/\x1B\[[0-9;]*[a-zA-Z]//g" | tr -d '\007' > $logFile
-	chmod 644 "$logFile"
+	chmod 660 "$logFile"
  	rm $logFile.bak
-	touch "$(dirname $logFile)"
+	[[ ! -d $(dirname $logFile) ]] && {touch "$(dirname $logFile)"; chmod 770 "$(dirname $logFile)" ;}
 	myName="$myNameSave"; myPath="$myPathSave"
 
 #=======================================================================================================================
@@ -124,3 +124,4 @@ exit 0
 ## 10-19-2017 @ 12.19.35 - (2.1.11)    - dscudiero - touch the logFile upon return to set time date stamp
 ## 10-19-2017 @ 15.12.53 - (2.1.12)    - dscudiero - Cleanup the logFile from called task
 ## 10-23-2017 @ 11.03.55 - (2.1.13)    - dscudiero - Make sure the permissions of the log files is 644
+## 10-23-2017 @ 16.21.52 - (2.1.14)    - dscudiero - Make sure we can list the log directories
