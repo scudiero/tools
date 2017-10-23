@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.33" # -- dscudiero -- Wed 10/18/2017 @ 13:43:31.37
+# version="1.2.34" # -- dscudiero -- Mon 10/23/2017 @  7:55:16.41
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -23,23 +23,23 @@ function FindExecutable {
 	local useLocal=$USELOCAL useDev=$USEDEV runScript=false scriptArgs=''
 	## Parse arguments =============================================================================
 	while [[ $# -gt 0 ]]; do
-		#echo "\$1 = '$1'"
-	    [[ $1 =~ ^-fi|--file$ ]] && { file="$2"; shift 2; continue; }
-	    [[ $1 =~ ^-m|--mode$ ]] && { mode="$2"; shift 2; continue; }
-	    [[ $1 =~ ^-sr|-so|-sh|--src$|--source$ ]] && { mode='src'; shift 1; continue; }
-	    [[ $1 =~ ^-l|--lib$ ]] && { mode='lib'; shift 1; continue; }
-	    [[ $1 =~ ^-py|--python$ ]] && { mode='python'; searchRoot="${mode}"; shift 1; continue; }
-	    [[ $1 =~ ^-cp|--cpp$ ]] && { mode='cpp'; searchRoot="${mode}"; shift 1; continue; }
-	    [[ $1 =~ ^-cr|--cron$ ]] && { mode='cron'; searchRoot="${mode}"; shift 1; continue; }
-	    [[ $1 =~ ^-j|--java$ ]] && { mode='java'; searchRoot="${mode}"; shift 1; continue; }
+		#echo "\$1 = '$1', \$# = '$#', \$* = '$*'"
+	    [[ $1 =~ ^-file|--filename$ ]] && { fileName="$2"; shift 2 || true; continue; }
+	    [[ $1 =~ ^-m|--mode$ ]] && { mode="$2"; shift 2 || true; continue; }
+	    [[ $1 =~ ^-sr|-so|-sh|--src$|--source$ ]] && { mode='src'; shift 1 || true; continue; }
+	    [[ $1 =~ ^-l|--lib$ ]] && { mode='lib'; shift 1 || true; continue; }
+	    [[ $1 =~ ^-py|--python$ ]] && { mode='python'; searchRoot="${mode}"; shift 1 || true; continue; }
+	    [[ $1 =~ ^-cp|--cpp$ ]] && { mode='cpp'; searchRoot="${mode}"; shift 1 || true; continue; }
+	    [[ $1 =~ ^-cr|--cron$ ]] && { mode='cron'; searchRoot="${mode}"; shift 1 || true; continue; }
+	    [[ $1 =~ ^-j|--java$ ]] && { mode='java'; searchRoot="${mode}"; shift 1 || true; continue; }
 
-	    [[ $1 =~ ^-pa|--patch$ ]] && { mode='patch'; searchRoot="${mode}s"; shift 1; continue; }
-	    [[ $1 =~ ^-fe|--feature$ ]] && { mode='feature'; searchRoot="${mode}s"; shift 1; continue; }
-	    [[ $1 =~ ^-st|--step$ ]] && { mode='step'; searchRoot="${mode}s"; shift 1; continue; }
-	    [[ $1 =~ ^-re|--report$ ]] && { mode='report'; searchRoot="${mode}s"; shift 1; continue; }
-	    [[ $1 =~ ^-ru|--run$ ]] && { runScript=true; shift 1; continue; }
-	    [[ $1 =~ ^-use|--uselocal$ ]] && { useLocal=true; shift 1; continue; }
-	    [[ -z $file ]] && file="$1" || scriptArgs="$scriptArgs $1"
+	    [[ $1 =~ ^-pa|--patch$ ]] && { mode='patch'; searchRoot="${mode}s"; shift 1 || true; continue; }
+	    [[ $1 =~ ^-fe|--feature$ ]] && { mode='feature'; searchRoot="${mode}s"; shift 1 || true; continue; }
+	    [[ $1 =~ ^-st|--step$ ]] && { mode='step'; searchRoot="${mode}s"; shift 1 || true; continue; }
+	    [[ $1 =~ ^-re|--report$ ]] && { mode='report'; searchRoot="${mode}s"; shift 1 || true; continue; }
+	    [[ $1 =~ ^-ru|--run$ ]] && { runScript=true; shift 1 || true; continue; }
+	    [[ $1 =~ ^-use|--uselocal$ ]] && { useLocal=true; shift 1 || true; continue; }
+	    [[ -z $fileName && ${1:0:1} != '-' ]] && fileName="$1" || scriptArgs="$scriptArgs $1"
 	    shift 1 || true
 	done
 
@@ -55,14 +55,14 @@ function FindExecutable {
 		[[ $useLocal == true && -d "$HOME/tools/src" ]] && searchDirs="$HOME/tools/src $searchDirs"
 		searchTokens="bash:sh python:py java:class steps:html report:sh cron:sh"
 	fi
-	#Dump -t file mode searchRoot searchTokens searchDirs
+	#Dump -t fileName mode searchRoot searchTokens searchDirs scriptArgs
 
 	for dir in $searchDirs; do
 		#Dump -t dir
 		for token in $(tr ',' ' ' <<< "$searchTokens"); do
 			type="${token%%:*}"; ext="${token##*:}"
 			#Dump -t2 type ext
-			[[ -n $searchRoot ]] && checkFile="$dir/$searchRoot/${file}.${ext}" || checkFile="$dir/${file}.${ext}"
+			[[ -n $searchRoot ]] && checkFile="$dir/$searchRoot/${fileName}.${ext}" || checkFile="$dir/${fileName}.${ext}"
 			#Dump -t3 checkFile
 			[[ -r "$checkFile" ]] && { found=true; break; } || unset checkFile
 		done
@@ -71,7 +71,8 @@ function FindExecutable {
 
 	executeFile="$checkFile" 
 	if [[ $runScript == true ]]; then
-		[[ -z "$executeFile" || ! -r "$executeFile" ]] && Terminate "$FUNCNAME: Run options active and could not find execution file, file='$file'"
+		#Dump -t scriptArgs
+		[[ -z "$executeFile" || ! -r "$executeFile" ]] && Terminate "$FUNCNAME: Run options active and could not find execution file, fileName='$fileName'"
 		myNameSave="$myName"; myPathSave="$myPath"
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
@@ -109,3 +110,4 @@ export -f FindExecutable
 ## 10-16-2017 @ 12.54.54 - ("1.2.31")  - dscudiero - Throw an error run is active and cannot find execution file
 ## 10-16-2017 @ 13.10.49 - ("1.2.32")  - dscudiero - Add -sh flag
 ## 10-18-2017 @ 13.48.16 - ("1.2.33")  - dscudiero - Set myName and myPath if running a the found file
+## 10-23-2017 @ 07.56.04 - ("1.2.34")  - dscudiero - change the min abbreviation for file to be -file
