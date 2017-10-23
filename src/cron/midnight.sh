@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.24 # -- dscudiero -- Mon 10/23/2017 @ 11:49:35.08
+version=1.22.25 # -- dscudiero -- Mon 10/23/2017 @ 13:54:33.25
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -273,16 +273,16 @@ case "$hostName" in
 		## Update the defaults data for this host
 			FindExecutable updateDefaults -sh -run all $scriptArgs
 
-		# ## Scratch copy the skeleton shadow
-		# 	Msg3 "Scratch copying the skeleton shadow..."
-		# 	chmod u+wx $skeletonRoot
-		# 	SetFileExpansion 'on'
-		# 	rm -rf $skeletonRoot/*
-		# 	rsyncOpts="-a --prune-empty-dirs"
-		# 	rsync $rsyncOpts /mnt/dev6/web/_skeleton/* $skeletonRoot
-		# 	SetFileExpansion
-		# 	touch $skeletonRoot/.syncDate
-		# 	Msg3 "^...done"
+		## Scratch copy the skeleton shadow
+			Msg3 "Scratch copying the skeleton shadow..."
+			chmod u+wx $skeletonRoot
+			SetFileExpansion 'on'
+			rm -rf $skeletonRoot/*
+			rsyncOpts="-a --prune-empty-dirs"
+			rsync $rsyncOpts /mnt/dev6/web/_skeleton/* $skeletonRoot | Indent
+			SetFileExpansion
+			touch $skeletonRoot/.syncDate
+			Msg3 "^...done"
 
 		# ## Clean up the tools bin directory.
 		# 	#CleanToolsBin
@@ -476,3 +476,4 @@ return 0
 ## 10-19-2017 @ 09.40.30 - (1.22.22)   - dscudiero - Switch -shortHello with -noBanners
 ## 10-20-2017 @ 08.20.40 - (1.22.23)   - dscudiero - s
 ## 10-23-2017 @ 11.50.03 - (1.22.24)   - dscudiero - Uncommented the report calls
+## 10-23-2017 @ 13.54.41 - (1.22.25)   - dscudiero - Cosmetic/minor change
