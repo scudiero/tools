@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.33 # -- dscudiero -- Mon 10/23/2017 @ 11:39:57.06
+version=2.1.34 # -- dscudiero -- Mon 10/23/2017 @ 11:41:48.02
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -21,23 +21,17 @@ GetDefaultsData $myName
 ParseArgsStd
 scriptArgs=$*
 
-Here 0
-
 #========================================================================================================================
 # Main
 #========================================================================================================================
 case "$hostName" in
 	mojave)
 		## Checks
-Here 10
-Pause
-Here 20
 			Msg3 "Starting Checks"
 			(( indentLevel++ )) || true
 			#FindExecutable -sh -run checkForPrivateDevSites $scriptArgs | Indent
 			(( indentLevel-- )) || true
 			Msg3 "Checks Completed"
-Pause
 		## Weekly reports
 			Msg3 "Starting Reports"
 			(( indentLevel++ )) || true
@@ -101,3 +95,4 @@ return 0
 ## 10-16-2017 @ 13.14.42 - (2.1.26)    - dscudiero - Tweak call to weekelyRollup
 ## 10-23-2017 @ 10.44.28 - (2.1.29)    - dscudiero - Refactor all calls
 ## 10-23-2017 @ 11.41.15 - (2.1.33)    - dscudiero - Fix problem incrementing indentLevel
+## 10-23-2017 @ 11.41.52 - (2.1.34)    - dscudiero - Cosmetic/minor change
