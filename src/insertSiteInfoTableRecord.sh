@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.138 # -- dscudiero -- Mon 10/23/2017 @  7:22:33.37
+version=1.1.139 # -- dscudiero -- Mon 10/23/2017 @  7:23:22.25
 #==================================================================================================
 TrapSigs 'on'
 
@@ -53,7 +53,7 @@ dump -2 -n -t siteDir share shareType client env clientId
 ## Which table to use
 	useSiteInfoTable="$siteInfoTable"
 	useSiteAdminsTable="$siteAdminsTable"
-	if [[ -n tableName ]]; then
+	if [[ -n $tableName ]]; then
 		useSiteInfoTable="$tableName"
 		let tmpLen=${#tableName}-3
 		[[ ${tableName:$tmpLen:3} == 'New' ]] && useSiteAdminsTable="${siteAdminsTable}New"
