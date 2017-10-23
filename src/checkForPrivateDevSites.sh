@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.4.61 # -- dscudiero -- Mon 10/23/2017 @  8:10:25.05
+version=2.4.64 # -- dscudiero -- Mon 10/23/2017 @ 11:57:30.39
 #==================================================================================================
 TrapSigs 'on'
 
@@ -60,7 +60,6 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 			if [[ -f $tmpFile ]]; then rm $tmpFile; fi
 			foundFiles=true
 			echo; echo > "$tmpFile"
-			Msg3 "^$myName found private dev sites on $(hostname)" | tee -a $tmpFile
 			Msg3 | tee -a $tmpFile
 			Msg3 "^The following private dev sites where found for userid: '$userId'" | tee -a $tmpFile
 			Msg3 | tee -a $tmpFile
@@ -85,7 +84,7 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 				# 		Msg3 "^$dir - Was marked for deleteion and is over the threshold ($accDaysOld > $deleteLimitDays), it was deleted" | tee -a $tmpFile
 				# 	fi
 				# else
-					Msg3 "^$(basename $dir) - Last modified $modDaysOld day(s) ago and last accessed $accDaysOld day(s) ago" | tee -a $tmpFile
+					Msg3 "^^$(basename $dir) - Last modified $modDaysOld day(s) ago and last accessed $accDaysOld day(s) ago" | tee -a $tmpFile
 				# f
 				popd >& /dev/null
 			done
@@ -95,7 +94,7 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 			Verbose 2 "$(dump foundFiles noEmails)"
 			if [[ $foundFiles == true && $noEmails != true ]]; then
 				Verbose "Emails sent to: $resultRec"
-				Msg3 "\n*** Please do not respond to this email, it was sent by an automated process\n" | tee -a $tmpFile
+				Msg3 "\n*** Please do not respond to this email, it was sent by an automated process\n" >> $tmpFile
 				$DOIT mutt -a "$tmpFile" -s "Private Dev Sites - $(date +"%m-%d-%Y")" -- $emailAddr < $tmpFile
 			fi
 		fi
@@ -138,3 +137,4 @@ Goodbye 0
 ## 09-05-2017 @ 08.56.58 - (2.4.57)    - dscudiero - g
 ## 09-05-2017 @ 16.22.22 - (2.4.58)    - dscudiero - Make sure there is a tmpFile
 ## 10-23-2017 @ 08.10.36 - (2.4.61)    - dscudiero - Switch to Msg3
+## 10-23-2017 @ 11.57.55 - (2.4.64)    - dscudiero - Reformatted messaging
