@@ -1,12 +1,13 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.26 # -- dscudiero -- Mon 10/16/2017 @ 13:14:10.34
+version=2.1.29 # -- dscudiero -- Mon 10/23/2017 @ 10:42:05.80
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
 TrapSigs 'on'
-Import GetDefaultsData ParseArgsStd ParseArgs Msg3 FindExecutable
+myIncludes="ParseArgsStd FindExecutable StringFunctions"
+Import "$standardIncludes $myIncludes"
 originalArgStr=$*
 
 #=======================================================================================================================
@@ -25,31 +26,56 @@ scriptArgs=$*
 #========================================================================================================================
 case $hostName in
 	mojave)
-
 		## Checks
-			FindExecutable -sh -run checkForPrivateDevSites $scriptArgs
+			Msg3 "Starting Checks"
+			(( indentLevel++ ))
+			FindExecutable -sh -run checkForPrivateDevSites $scriptArgs | Indent
+			(( indentLevel-- ))
+			Msg3 "Checks Completed"
+
 
 		## Weekly reports
-			Msg3 \n Publishing Report...
-			FindExecutable -sh -run reports publishing -email froggersupport@leepfrog.com $scriptArgs
+			Msg3 "Starting Reports"
+			(( indentLevel++ ))
 
-			Msg3 \n Client 2 Day Summaries Report...
-			FindExecutable -sh -run reports client2DaySummaries -role support -email froggersupport@leepfrog.com $scriptArg
+			Msg3 "^Publishing Report..."
+			(( indentLevel++ ))
+			FindExecutable scriptsAndReports -sh -run reports publishing -email froggersupport@leepfrog.com $scriptArgs | Indent
+			(( indentLevel-- ))
 
-			Msg3 \n QA Waiting Report...
-			FindExecutable -sh -run reports qaWaiting -email sjones@leepfrog.com,mbruening@leepfrog.com,dscudiero@leepfrog.com $scriptArgs
+			Msg3 "^Client 2 Day Summaries Report..."
+			(( indentLevel++ ))
+			FindExecutable scriptsAndReports -sh -run reports client2DaySummaries -role support -email froggersupport@leepfrog.com $scriptArg | Indent
+			(( indentLevel-- ))
 
-			Msg3 \n Tools Usage Report...
-			FindExecutable -sh -run reports toolsUsage -email dscudiero@leepfrog.com $scriptArgs
+			Msg3 "^QA Waiting Report..."
+			(( indentLevel++ ))
+			FindExecutable scriptsAndReports -sh -run reports qaWaiting -email sjones@leepfrog.com,mbruening@leepfrog.com,dscudiero@leepfrog.com $scriptArgs | Indent
+			(( indentLevel-- ))
 
-			Msg3 \n*** Reports -- Completed ***
+			Msg3 "^Tools Usage Report..."
+			(( indentLevel++ ))
+			FindExecutable scriptsAndReports -sh -run reports toolsUsage -email dscudiero@leepfrog.com $scriptArgs | Indent
+			(( indentLevel-- ))
+
+			Msg3 "^Reports Completed"
 
 		## Rollup logs
-			FindExecutable -sh -run weeklyRollup $scriptArgs
+			Msg3 "Starting Scripts"
+			(( indentLevel++ ))
+			FindExecutable weeklyRollup -sh -run $scriptArgs | Indent
+			(( indentLevel-- ))
+			Msg3 "Starting Scripts"
 			;;
 	build5)
 			;;
 	build7)
+		## Checks
+			Msg3 "Starting Checks"
+			(( indentLevel++ ))
+			FindExecutable -sh -run checkForPrivateDevSites $scriptArgs | Indent
+			(( indentLevel-- ))
+			Msg3 "Checks Completed"	
 			;;
 esac
 
@@ -69,3 +95,4 @@ return 0
 ## 04-05-2017 @ 07.06.09 - (2.1.23)    - dscudiero - Add checkForPrivateDevSites
 ## 10-11-2017 @ 10.37.52 - (2.1.25)    - dscudiero - Switch to use FindExecutable -run
 ## 10-16-2017 @ 13.14.42 - (2.1.26)    - dscudiero - Tweak call to weekelyRollup
+## 10-23-2017 @ 10.44.28 - (2.1.29)    - dscudiero - Refactor all calls
