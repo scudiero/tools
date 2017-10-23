@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.1.13" # -- dscudiero -- Fri 09/29/2017 @ 12:55:16.27
+# version="1.1.14" # -- dscudiero -- Mon 10/23/2017 @  8:13:25.05
 #===================================================================================================
 # Import need functions into the runtime environment
 #===================================================================================================
@@ -23,14 +23,14 @@ function Import {
 	[[ -z $TOOLSLIBPATH ]] && searchDirs="$TOOLSPATH/lib" || searchDirs="$( tr ':' ' ' <<< $TOOLSLIBPATH)"
 
 	## Search for the include file, load the first one
-	[[ $verboseLevel -ge 1 ]] && echo -e "$caller/$FUNCNAME: includeList= '$includeList'"
+	[[ $verboseLevel -ge 2 ]] && echo -e "$caller/$FUNCNAME: includeList= '$includeList'"
 	for includeName in $includeList; do
 		[[ $(MyContains ",$SCRIPTINCLUDES," ",$includeName,") == true ]] && continue
 		#[[ "${SCRIPTINCLUDES#*$includeName,}" != "$SCRIPTINCLUDES" ]] && continue  ## i.e. SCRIPTINCLUDES contains includeName
 		found=false
 		for searchDir in $searchDirs; do
 			if [[ -r ${searchDir}/${includeName}.sh ]]; then
-				[[ $verboseLevel -ge 1 ]] && echo -e "\tImporting: '$includeName' from ${searchDir}"
+				[[ $verboseLevel -ge 2 ]] && echo -e "\tImporting: '$includeName' from ${searchDir}"
 				source ${searchDir}/${includeName}.sh
 				SCRIPTINCLUDES="$SCRIPTINCLUDES,$includeName"
 				found=true
@@ -50,3 +50,4 @@ export -f Import
 ## Wed Jan  4 13:53:44 CST 2017 - dscudiero - General syncing of dev to prod
 ## 09-28-2017 @ 13.45.08 - ("1.1.0")   - dscudiero - Performance tweaks
 ## 09-29-2017 @ 12.56.43 - ("1.1.13")  - dscudiero - Fix bug checking to see if the import was already done for this name
+## 10-23-2017 @ 08.30.48 - ("1.1.14")  - dscudiero - Change verbose level for messages
