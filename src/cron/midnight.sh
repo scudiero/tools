@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.23 # -- dscudiero -- Fri 10/20/2017 @  8:05:02.15
+version=1.22.24 # -- dscudiero -- Mon 10/23/2017 @ 11:49:35.08
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -263,9 +263,8 @@ case "$hostName" in
 		## Build employee table
 			BuildEmployeeTable | Indent
 
-		# ## Build the qaStatus table
-		# 	FindExecutable buildQaStatusTable -sh -run $scriptArgs
-
+		## Build the qaStatus table
+			FindExecutable buildQaStatusTable -sh -run $scriptArgs | Indent
 
 		## Common Checks
 			FindExecutable checkCgiPermissions -sh -run $scriptArgs
@@ -317,24 +316,26 @@ case "$hostName" in
 		# 	mysql $tmpConnectString $warehouseDev < /tmp/warehouse.sql
 		# 	[[ -f /tmp/warehouse.sql ]] && rm -f /tmp/warehouse.sql
 
-		# ## Reports
-		# 	qaEmails='sjones@leepfrog.com,mbruening@leepfrog.com,jlindeman@leepfrog.com'
-		# 	FindExecutable qaStatusShort -sh -run reports -quiet -email \"$qaEmails\" $scriptArgs
+		## Reports
+			qaEmails='sjones@leepfrog.com,mbruening@leepfrog.com,jlindeman@leepfrog.com'
+			FindExecutable scriptsAndReports -sh -run reports qaStatusShort -quiet -email \"$qaEmails\" $scriptArgs | Indent
 
-		# 	## Build a list of clients and contact info for Shelia
-		# 	#[[ $runClientListReport == true ]] && Call 'reports' "clientList -quiet -email 'dscudiero@leepfrog.com,sfrickson@leepfrog.com' $scriptArgs"
 
-		# 	tzEmails='dscudiero@leepfrog.com,jlindeman@leepfrog.com'
-		# 	[[ $(date +%d -d tomorrow) == '01' ]] && FindExecutable clientTimezone -sh -run reports -quiet -email \"$tzEmails\" $scriptArgs
+			## Build a list of clients and contact info for Shelia
+			#[[ $runClientListReport == true ]] && Call 'reports' "clientList -quiet -email 'dscudiero@leepfrog.com,sfrickson@leepfrog.com' $scriptArgs"
 
-		# ## On the last day of the month roll-up the log files
-		#   	if [[ $(date +"%d") == $(date -d "$(date +"%m")/1 + 1 month - 1 day" "+%d") ]]; then
-		#   		Msg3 "Rolling up monthly log files"
-		# 		cd $TOOLSPATH/Logs
-		# 		SetFileExpansion 'on'
-		# 		tar -cvzf "$(date '+%b-%Y').tar.gz" $(date +"%m")-* --remove-files > /dev/null 2>&1
-		# 		SetFileExpansion
-		#   	fi
+			tzEmails='dscudiero@leepfrog.com,jlindeman@leepfrog.com'
+			[[ $(date +%d -d tomorrow) == '01' ]] && FindExecutable scriptsAndReports -sh -run reports clientTimezone -quiet -email \"$tzEmails\" $scriptArgs | Indent
+
+
+		## On the last day of the month roll-up the log files
+		  	if [[ $(date +"%d") == $(date -d "$(date +"%m")/1 + 1 month - 1 day" "+%d") ]]; then
+		  		Msg3 "Rolling up monthly log files"
+				cd $TOOLSPATH/Logs
+				SetFileExpansion 'on'
+				tar -cvzf "$(date '+%b-%Y').tar.gz" $(date +"%m")-* --remove-files > /dev/null 2>&1
+				SetFileExpansion
+		  	fi
 
 		 ## Check that all things ran properly, otherwise revert the databases
 			Semaphore 'waiton' "buildClientInfoTable"
@@ -474,3 +475,4 @@ return 0
 ## 10-18-2017 @ 15.41.22 - (1.22.19)   - dscudiero - Change call string for cleanDevs to use -daemon switch
 ## 10-19-2017 @ 09.40.30 - (1.22.22)   - dscudiero - Switch -shortHello with -noBanners
 ## 10-20-2017 @ 08.20.40 - (1.22.23)   - dscudiero - s
+## 10-23-2017 @ 11.50.03 - (1.22.24)   - dscudiero - Uncommented the report calls
