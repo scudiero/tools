@@ -17,8 +17,7 @@ module=$1; shift
 	export CLASSPATH="$CLASSPATH"
 
 ## Compile the module
-	cwd="$(pwd)"
-	cd $HOME/tools/src/java
+	pushd $HOME/tools/src/java >& /dev/null
 	[[ -f $module.class ]] & rm -f $module.class
 	javaFile="$module"
 	[[ ! -f $javaFile ]] && javaFile="$javaFile.java"
@@ -30,6 +29,6 @@ module=$1; shift
 
 ## Cleanup
 	export CLASSPATH="$classPathSave"
-	cd "$cwd"
-
+	popd >& /dev/null
 exit
+## 10-23-2017 @ 16.07.08 - dscudiero - misc cleanup
