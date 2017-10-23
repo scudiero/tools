@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.32 # -- dscudiero -- Mon 10/23/2017 @  8:41:51.88
+version=3.13.42 # -- dscudiero -- Mon 10/23/2017 @ 10:14:06.42
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -9,6 +9,8 @@ Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="Script dispatcher"
+
+dump -ifme -p originalArgStr
 
 #=======================================================================================================================
 # Tools scripts selection front end
@@ -37,7 +39,7 @@ function Goodbye-scriptsAndReports  { # or Goodbye-local
 ## Build the menu list from the database
 #==================================================================================================
 function BuildMenuList {
-	Msg3 "^Building script list..."
+	Msg3 "^Building ${itemType}s list..."
 	## Eliminate things that do not work on windows if running from windows
 		[[ $TERM == 'dumb' ]] && excludeWindowsStuff="and $scriptsTable.name not in (\"wizdebug\")" || unset excludeWindowsStuff
 
@@ -59,27 +61,30 @@ function BuildMenuList {
 				done
 				whereClauseGroups="and ($whereClauseGroups or restrictToGroups is null)"
 			fi
+			fields="keyId,name,shortDescription" #,author,supported,edate"
+		else
+			fields="keyId,name,shortDescription" #,author,supported,edate,updatesClData"
 		fi
 
-		fields="keyId,name,shortDescription,author,supported,edate,updatesClData"
 		unset $(tr ',' ' ' <<< "$fields")
 		sqlStmt="select $fields from $table where $whereClauseActive $whereClauseHost $whereClauseUser $whereClauseGroups order by name"
+		dump -1 -p sqlStmt
 		RunSql2 $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Sorry, either no scripts are active or you do not have access to any scripts."
 
 		unset menuList
-		menuList+=('|Ordinal|Script Name|Description')
+		menuList+=("|Ordinal|$itemTypeCap Name|Description")
 		newItem=false
 		for itemRec in "${resultSet[@]}"; do
 			itemRec=$(tr "\t" "|" <<< "$itemRec")
-			unset itemNum itemName itemDesc itemAuthor itemSupported itemEdate
+			unset itemNum itemName itemDesc #itemAuthor itemSupported itemEdate
 			itemNum=$(cut -d"|" -f1 <<< "$itemRec")
 			itemName=$(cut -d"|" -f2 <<< "$itemRec")
 			itemDesc=$(cut -d"|" -f3 <<< "$itemRec")
-			itemEdate=$(cut -d"|" -f6 <<< "$itemRec")
-			itemUpdates=$(cut -d"|" -f7 <<< "$itemRec")
+			#itemEdate=$(cut -d"|" -f6 <<< "$itemRec")
+			#itemUpdates=$(cut -d"|" -f7 <<< "$itemRec")
 			#dump -n itemName itemEdate ${myName}LastRunEdate
-			[[ $itemEdate != 'NULL' && $itemEdate -gt ${myName}LastRunEdate ]] && itemName="${itemName}*" && newItem=true
+			#[[ $itemEdate != 'NULL' && $itemEdate -gt ${myName}LastRunEdate ]] && itemName="${itemName}*" && newItem=true
 			menuList+=("|$itemNum|$itemName|$itemDesc")
 		done
 	return 0
@@ -253,9 +258,11 @@ tmpFile=$(mkTmpFile)
 askedDisplayWidthQuestion=false
 
 mode=$(tr '[:upper:]' '[:lower:]' <<< "$1")
+dump ifme mode
 [[ $mode == 'reports' || $mode == 'scripts' ]] && shift && originalArgStr="$*"
 [[ -z $mode ]] && mode='scripts'
 [[ $mode != 'scripts' && $mode != 'reports' ]] && Terminate "Invalid mode ($mode) specified on call"
+dump -1 -p -ifme originalArgStr
 
 ## Check to see if the first argument is a report name
 	## Is it a client name?
@@ -332,7 +339,7 @@ ParseArgsStd
 #[[ $mode == 'reports' && $client != '' ]] && report="$client"
 
 dump -1 mode report script originalArgStr itemType itemTypeCap table
-dump -1 client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDate
+dump -1 -p client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDate
 
 #==================================================================================================
 ## Main
