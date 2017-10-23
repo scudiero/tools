@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.135 # -- dscudiero -- Mon 10/23/2017 @  7:16:57.45
+version=1.1.136 # -- dscudiero -- Mon 10/23/2017 @  7:20:27.24
 #==================================================================================================
 TrapSigs 'on'
 
@@ -39,6 +39,9 @@ siteDir="$1" ; shift
 clientId="$1"; shift
 originalArgStr="$*"
 #ParseArgsStd "$*"
+
+dump siteInfoTable
+exit
 
 #==================================================================================================
 # Declare local variables and constants
@@ -410,3 +413,4 @@ return 0
 ## 10-20-2017 @ 09.01.54 - (1.1.130)   - dscudiero - Fix problem in the caller check code
 ## 10-20-2017 @ 13.11.51 - (1.1.133)   - dscudiero - comment out the parseargsstd call
 ## 10-23-2017 @ 07.17.15 - (1.1.135)   - dscudiero - add debug statement
+## 10-23-2017 @ 07.20.36 - (1.1.136)   - dscudiero - add debig
