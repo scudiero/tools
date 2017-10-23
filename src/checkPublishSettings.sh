@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.3.20 # -- dscudiero -- Thu 09/14/2017 @ 14:02:23.31
+version=2.3.21 # -- dscudiero -- Mon 10/23/2017 @  7:35:52.91
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye MkTmpFile'
@@ -25,9 +25,9 @@ sendMail=false
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
+Hello
 GetDefaultsData $myName
 ParseArgsStd
-Hello
 tmpFile=$(MkTmpFile)
 
 #==================================================================================================
@@ -78,3 +78,4 @@ Goodbye 0
 ## Mon Oct  3 07:06:17 CDT 2016 - dscudiero - Wrap clear statement with protection
 ## Mon Jan 23 12:26:59 CST 2017 - dscudiero - Fix problem using Msg not Msg2
 ## Mon Feb 13 15:59:27 CST 2017 - dscudiero - Make sure we are using our own tmpFile
+## 10-23-2017 @ 07.36.07 - (2.3.21)    - dscudiero - Tweak messaging
