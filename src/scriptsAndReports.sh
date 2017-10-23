@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.43 # -- dscudiero -- Mon 10/23/2017 @ 10:24:15.74
+version=3.13.44 # -- dscudiero -- Mon 10/23/2017 @ 11:01:23.28
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -137,7 +137,7 @@ function ExecScript {
 				chmod -R ug+rwx "$(dirname $logFile)"
 			fi
 			touch "$logFile"
-			chmod ug+rwx "$logFile"
+			chmod 644 "$logFile"
 			echo -e "$(PadChar)" > $logFile
 			[[ -n $scriptArgs ]] && scriptArgsTxt=" $scriptArgs" || unset scriptArgsTxt
 			echo -e "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}" >> $logFile
@@ -151,7 +151,7 @@ function ExecScript {
 		(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile
 		mv $logFile $logFile.bak
 	 	cat $logFile.bak | sed "s/\x1B\[[0-9;]*[a-zA-Z]//g" | tr -d '\007' > $logFile
-		chmod ug+rwx "$logFile"
+		chmod 644 "$logFile"
 	 	rm $logFile.bak
 	 	touch "$(dirname $logFile)"
 		logFile="$logFileSave"
@@ -521,3 +521,4 @@ Goodbye 0
 ## 10-23-2017 @ 08.40.51 - (3.13.31)   - dscudiero - remove debug stuff
 ## 10-23-2017 @ 08.42.03 - (3.13.32)   - dscudiero - remove debug stuff
 ## 10-23-2017 @ 10.44.41 - (3.13.43)   - dscudiero - remove debug
+## 10-23-2017 @ 11.04.00 - (3.13.44)   - dscudiero - Make sure the permissions of the log files is 644
