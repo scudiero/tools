@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #===================================================================================================
-version=1.0.29 # -- dscudiero -- Mon 09/25/2017 @  7:57:23.40
+version=1.0.32 # -- dscudiero -- Mon 10/23/2017 @  8:30:32.86
 #===================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall RunSql2 SetFileExpansion"
@@ -45,6 +45,7 @@ for var in $falseVars; do eval $var=false; done
 #===================================================================================================
 # Standard arg parsing and initialization
 #===================================================================================================
+Hello
 GetDefaultsData $myName
 ParseArgsStd
 
@@ -52,7 +53,7 @@ ParseArgsStd
 # Main
 #===================================================================================================
 ## Update process counts
-	Msg2 "\n*** Update script usage counts -- Starting ***"
+	Msg3;Msg3 "^Update script usage counts -- Starting"
 	## Get the aggregated processLog data and update counts in the scripts table.
 	sql="select name,count(*) from $processLogTable group by name order by name"
 	RunSql2 $sql
@@ -60,22 +61,22 @@ ParseArgsStd
 	for pLogRec in ${pLogRecs[@]}; do
 		pName=$(cut -d'|' -f1 <<< $pLogRec)
 		pCount=$(cut -d'|' -f2 <<< $pLogRec)
-		dump -1 -t pName pCount
+		dump 1 -t pName pCount
 		## Get the current count from the script record in the scripts table
 			sql="select usageCount from scripts where name=\"$pName\""
 			RunSql2 $sql
 			usageCount=${resultSet[0]}
-			dump -1 -t usageCount
+			dump 1 -t usageCount
 		## Update usage count
 			let newCount=$usageCount+$pCount
-			dump -1 -t newCount
+			dump 1 -t newCount
 			sql="update $scriptsTable set usageCount=$newCount where name=\"$pName\""
 			RunSql2 $sql
 	done
-	Msg2 "*** Update script usage counts -- Completed ***"
+	Msg3 "^Update script usage counts -- Completed"
 
 ## Roll up the weeks processlog db table
-	Msg2 "\n*** Processlog rollup -- Starting ***"
+	Msg3;Msg3 "^Processlog rollup -- Starting"
 	cd $TOOLSPATH/Logs
 	outFile="$(date '+%m-%d-%y').processLog.xls"
 	## Get the column names
@@ -93,20 +94,16 @@ ParseArgsStd
 		done
 		ProtectedCall "tar -cvzf \"$(date '+%m-%d-%y').processLog.tar\" $outFile --remove-files > /dev/null 2>&1"
 	fi
-	## Moved to quarterly
-	# sqlStmt="truncate $processLogTable"
-	# RunSql2 $sqlStmt
-	# SetFileExpansion
-	Msg2 "*** Processlog rollup -- Completed ***"
+	Msg3 "^Processlog rollup -- Completed"
 
 ## Roll up the weeks log files
-	Msg2 "\n*** Rollup weekly Logs -- Starting ***"
+	Msg3;Msg3 "^Rollup weekly Logs -- Starting"
 	cd $TOOLSPATH/Logs
 	[[ -d ./cronJobs ]] && ProtectedCall "rm -rf ./cronJobs"
 	ProtectedCall "tar -czf \"$(date '+%m-%d-%y').tar.gz\" * --exclude '*.gz' --exclude \"$myName*\"" #-remove-files
 	ProtectedCall "find . -maxdepth 1 -mindepth 1 -type d -exec rm -rf {} \; > /dev/null 2>&1"
 	ProtectedCall "find . -maxdepth 1 -mindepth 1 -type f -name '*.tar' -exec rm -rf {} \; > /dev/null 2>&1"
-	Msg2 "*** Logs rollup -- Completed ***"
+	Msg3 "^Logs rollup -- Completed"
 
 
 #===================================================================================================
@@ -124,3 +121,4 @@ Goodbye 0 #'alert'
 ## 06-05-2017 @ 08.16.04 - (1.0.27)    - dscudiero - tweak messaging
 ## 09-21-2017 @ 10.03.00 - (1.0.28)    - dscudiero - comment out the truncating of the processlog
 ## 09-25-2017 @ 07.57.52 - (1.0.29)    - dscudiero - General syncing of dev to prod
+## 10-23-2017 @ 08.30.56 - (1.0.32)    - dscudiero - Switch to Msg3
