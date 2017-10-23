@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.139 # -- dscudiero -- Mon 10/23/2017 @  7:23:22.25
+version=1.1.141 # -- dscudiero -- Mon 10/23/2017 @  7:24:24.52
 #==================================================================================================
 TrapSigs 'on'
 
@@ -48,7 +48,7 @@ client=$(cut -d' ' -f1 <<< $(ParseCourseleafFile "$siteDir"))
 
 shareType='prod'; suffix='/'; env=${siteDir##*/}
 [[ ${share:0:3} == 'dev' ]] && shareType='dev' && suffix='/web/' && env='dev'
-dump -2 -n -t siteDir share shareType client env clientId
+dump 2 -n -t siteDir share shareType client env clientId
 
 ## Which table to use
 	useSiteInfoTable="$siteInfoTable"
@@ -59,17 +59,14 @@ dump -2 -n -t siteDir share shareType client env clientId
 		[[ ${tableName:$tmpLen:3} == 'New' ]] && useSiteAdminsTable="${siteAdminsTable}New"
 	fi
 	[[ $WAREHOUSEDB == '$warehouseDev' ]] && useSiteInfoTable="${siteInfoTable}New" && useSiteAdminsTable="${siteAdminsTable}New"
-
-dump siteInfoTable useSiteInfoTable tableName
-exit
-
+	dump 1 siteInfoTable useSiteInfoTable tableName
 
 #===================================================================================================
 # Main
 #===================================================================================================
 [[ $verboseLevel -gt 0 ]] && echo -e "\t\t*** $myName - Starting ***"
 [[ $DOIT != '' || $informationOnlyMode == true ]] && echo
-Verbose "^$env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
+Verbose 1 "^$env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 
 ## Remove any existing records for this client/env
 	sqlStmt="delete from $useSiteInfoTable where clientId =\"$clientId\" and env=\"$env\""
