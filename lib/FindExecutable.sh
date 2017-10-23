@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.34" # -- dscudiero -- Mon 10/23/2017 @  7:55:16.41
+# version="1.2.35" # -- dscudiero -- Mon 10/23/2017 @ 10:18:08.11
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -111,3 +111,4 @@ export -f FindExecutable
 ## 10-16-2017 @ 13.10.49 - ("1.2.32")  - dscudiero - Add -sh flag
 ## 10-18-2017 @ 13.48.16 - ("1.2.33")  - dscudiero - Set myName and myPath if running a the found file
 ## 10-23-2017 @ 07.56.04 - ("1.2.34")  - dscudiero - change the min abbreviation for file to be -file
+## 10-23-2017 @ 10.18.19 - ("1.2.35")  - dscudiero - Cosmetic/minor change
