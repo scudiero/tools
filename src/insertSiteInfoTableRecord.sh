@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.141 # -- dscudiero -- Mon 10/23/2017 @  7:24:24.52
+version=1.1.142 # -- dscudiero -- Mon 10/23/2017 @ 16:51:54.14
 #==================================================================================================
 TrapSigs 'on'
 
@@ -170,9 +170,10 @@ Verbose 1 "^$env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 
 ## Get CIMS
 	allCims=true
+	unset cimStr
 	GetCims $siteDir
 	unset allCims
-	[[ -n $cimStr ]] && cimStr=\"$(tr -d ' ' <<< $cimStr)\" || cimStr=NULL
+	[[ -n $cimStr ]] && cimStr=\"${cimStr// /}\" || cimStr=NULL
 	dump -2 -t cimStr
 
 ## Get the cimVer
@@ -412,3 +413,4 @@ return 0
 ## 10-20-2017 @ 13.11.51 - (1.1.133)   - dscudiero - comment out the parseargsstd call
 ## 10-23-2017 @ 07.17.15 - (1.1.135)   - dscudiero - add debug statement
 ## 10-23-2017 @ 07.20.36 - (1.1.136)   - dscudiero - add debig
+## 10-23-2017 @ 16.52.19 - (1.1.142)   - dscudiero - Fix problem with tons of quotes arround cims
