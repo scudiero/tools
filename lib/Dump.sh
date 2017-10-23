@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.58" # -- dscudiero -- Tue 10/03/2017 @ 10:19:27.11
+# version="2.0.59" # -- dscudiero -- Mon 10/23/2017 @  8:49:17.72
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -24,6 +24,7 @@ function Dump {
 		[[ $token == '-n' ]] && { echo -e -n "\n"; continue; }
 		[[ $token == '-l' ]] && { logOnly=true; shift; continue; }
 		[[ $token == '-p' ]] && { pause=true; continue; }
+		[[ $token == '-ifme' ]] && { [[ $userName != dscudiero ]] && return 0; }
 
 		if [[ -n $tabCnt ]]; then
 			for ((i=0; i<$tabCnt; i++)); do
@@ -245,3 +246,4 @@ export -f DumpMap dumpmap dumphash
 ## 10-02-2017 @ 17.07.04 - ("2.0.55")  - dscudiero - add dump alias
 ## 10-03-2017 @ 10.07.07 - ("2.0.57")  - dscudiero - Add -p option to pause execution
 ## 10-03-2017 @ 10.19.47 - ("2.0.58")  - dscudiero - If -p specifed the pause after all output generated
+## 10-23-2017 @ 08.49.28 - ("2.0.59")  - dscudiero - Add ifme flag
