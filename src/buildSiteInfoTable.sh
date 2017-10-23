@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.79 # -- dscudiero -- Fri 10/20/2017 @ 13:09:30.82
+version=4.3.80 # -- dscudiero -- Mon 10/23/2017 @  7:30:27.76
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="Call SetSiteDirs SetFileExpansion RunSql2 StringFunctions ProtectedCall FindExecutable PushPop"
@@ -143,11 +143,11 @@ fi
 						(( forkCntr+=1 )) ; (( siteCntr+=1 ))
 					fi
 					if [[ $fork == true && $((forkCntr%$maxForkedProcesses)) -eq 0 ]]; then
-						[[ $batchMode != true ]] && Msg3 "^Waiting on forked processes...\n"
+						[[ $batchMode != true ]] && Msg3 "^Waiting on forked processes..."
 						wait
 					fi
 				done
-				[[ $fork == true && $batchMode != true ]] && Msg3 "^Waiting on forked processes...\n" && wait
+				[[ $fork == true && $batchMode != true ]] && Msg3 "^Waiting on forked processes..." && wait
 			fi #[[ ${dbClients[$(basename $clientDir)]+abc} ]]
 		done #clientDir in ${clientDirs[@]}
 
@@ -164,7 +164,7 @@ fi
 	sqlStmt="select count(*) from $useSiteInfoTable where host=\"$hostName\"";
 	RunSql2 "$sqlStmt"
 	if [[ ${resultSet[0]} -eq 0 ]]; then
-		Error "No records were inserted into in the $warehouseDb.$useSiteInfoTable table on host '$hostName'"
+		Error "No records were inserted into in the ${warehouseDb}.${useSiteInfoTable} table on host '$hostName'"
 		sendMail=true
 	fi
 
@@ -240,3 +240,4 @@ Goodbye 0 'alert'
 ## 09-29-2017 @ 10.14.44 - (4.3.69)    - dscudiero - Update FindExcecutable call for new syntax
 ## 10-18-2017 @ 13.56.37 - (4.3.70)    - dscudiero - Add debug statements
 ## 10-20-2017 @ 13.11.25 - (4.3.79)    - dscudiero - Fix problem with a missing fi
+## 10-23-2017 @ 07.30.44 - (4.3.80)    - dscudiero - Tweak messaging
