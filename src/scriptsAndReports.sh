@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.42 # -- dscudiero -- Mon 10/23/2017 @ 10:14:06.42
+version=3.13.43 # -- dscudiero -- Mon 10/23/2017 @ 10:24:15.74
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -336,7 +336,7 @@ ParseArgsStd
 
 [[ $newsDisplayed == true ]] && Pause "\nNews was displayed, please review and press any key to continue"
 [[ $mode == 'scripts' && -n $client ]] && Init 'getClient'
-#[[ $mode == 'reports' && $client != '' ]] && report="$client"
+[[ $mode == 'reports' && $client != '' ]] && report="$client"
 
 dump -1 mode report script originalArgStr itemType itemTypeCap table
 dump -1 -p client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDate
@@ -520,3 +520,4 @@ Goodbye 0
 ## 10-19-2017 @ 15.12.58 - (3.13.29)   - dscudiero - Cleanup the logFile from called task
 ## 10-23-2017 @ 08.40.51 - (3.13.31)   - dscudiero - remove debug stuff
 ## 10-23-2017 @ 08.42.03 - (3.13.32)   - dscudiero - remove debug stuff
+## 10-23-2017 @ 10.44.41 - (3.13.43)   - dscudiero - remove debug
