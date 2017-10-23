@@ -1,10 +1,10 @@
 #!/bin/bash
 #==================================================================================================
-version=2.4.60 # -- dscudiero -- Fri 09/15/2017 @  8:34:03.76
+version=2.4.61 # -- dscudiero -- Mon 10/23/2017 @  8:10:25.05
 #==================================================================================================
 TrapSigs 'on'
 
-myIncludes="RunSql2"
+myIncludes="RunSql2 ProtectedCall StringFunctions"
 Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -21,9 +21,9 @@ scriptDescription="Check for private sites and notify the user owning the sites.
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
+Hello
 GetDefaultsData $myName
 ParseArgsStd
-Hello
 tmpFile=$(MkTmpFile)
 
 #==================================================================================================
@@ -39,12 +39,12 @@ dump -2 deleteLimitDays
 ## Get the list of userids from the employee table
 	userId=$client
 	if [[ $userId == '' ]]; then
-		Msg2 $V1 "Pulling employee userid data from $contactsSqliteFile...\n"
+		Verbose 1 "Pulling employee userid data from $contactsSqliteFile...\n"
 		sqlStmt="SELECT db_email FROM employees WHERE db_isactive=\"Y\""
 		RunSql2 "$contactsSqliteFile" "$sqlStmt"
 	else
 		unset resultSet
-		Msg2 $V1 "Note: Using userid passed in: $userId\n"
+		Verbose 1 "Note: Using userid passed in: $userId\n"
 		resultSet+=($userId)
 	fi
 
@@ -60,10 +60,10 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 			if [[ -f $tmpFile ]]; then rm $tmpFile; fi
 			foundFiles=true
 			echo; echo > "$tmpFile"
-			Msg2 "^$myName found private dev sites on $(hostname)" | tee -a $tmpFile
-			Msg2 | tee -a $tmpFile
-			Msg2 "^The following private dev sites where found for userid: '$userId'" | tee -a $tmpFile
-			Msg2 | tee -a $tmpFile
+			Msg3 "^$myName found private dev sites on $(hostname)" | tee -a $tmpFile
+			Msg3 | tee -a $tmpFile
+			Msg3 "^The following private dev sites where found for userid: '$userId'" | tee -a $tmpFile
+			Msg3 | tee -a $tmpFile
 			for dir in "${dirsFound[@]}"; do
 				## Get the newest last modified date for the site
 				pushd "${dir%%:*}" >& /dev/null
@@ -82,26 +82,26 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 				# 		[[ $userName = 'dscudiero' ]] && saveWorkflow $client -p -all -suffix "beforeDelete-$fileSuffix" -nop -quiet
 				# 		mv $dir $dir.DELETE
 				# 		$DOIT rm -rf $dir.DELETE &
-				# 		Msg2 "^$dir - Was marked for deleteion and is over the threshold ($accDaysOld > $deleteLimitDays), it was deleted" | tee -a $tmpFile
+				# 		Msg3 "^$dir - Was marked for deleteion and is over the threshold ($accDaysOld > $deleteLimitDays), it was deleted" | tee -a $tmpFile
 				# 	fi
 				# else
-					Msg2 "^$(basename $dir) - Last modified $modDaysOld day(s) ago and last accessed $accDaysOld day(s) ago" | tee -a $tmpFile
+					Msg3 "^$(basename $dir) - Last modified $modDaysOld day(s) ago and last accessed $accDaysOld day(s) ago" | tee -a $tmpFile
 				# f
 				popd >& /dev/null
 			done
 
-			Msg2 "\nRemember, you can use the 'cleanDev' script to easily remove any sites that are no longer needed." >> $tmpFile
-			Msg2 "^See https://internal.leepfrog.com/support/tools/ for additional informaton." >> $tmpFile
+			Msg3 "\nRemember, you can use the 'cleanDev' script to easily remove any sites that are no longer needed." >> $tmpFile
+			Msg3 "^See https://internal.leepfrog.com/support/tools/ for additional informaton." >> $tmpFile
 			Verbose 2 "$(dump foundFiles noEmails)"
 			if [[ $foundFiles == true && $noEmails != true ]]; then
 				Verbose "Emails sent to: $resultRec"
-				Msg2 "\n*** Please do not respond to this email, it was sent by an automated process\n" | tee -a $tmpFile
+				Msg3 "\n*** Please do not respond to this email, it was sent by an automated process\n" | tee -a $tmpFile
 				$DOIT mutt -a "$tmpFile" -s "Private Dev Sites - $(date +"%m-%d-%Y")" -- $emailAddr < $tmpFile
 			fi
 		fi
 	done
 else
-	Msg2 $W "Could not retrieve employee informaton from $contactsSqliteFile"
+	Warning "Could not retrieve employee informaton from $contactsSqliteFile"
 fi
 
 if [[ -f $tmpFile ]]; then rm $tmpFile; fi
@@ -137,3 +137,4 @@ Goodbye 0
 ## 08-28-2017 @ 07.25.34 - (2.4.56)    - dscudiero - misc cleanup
 ## 09-05-2017 @ 08.56.58 - (2.4.57)    - dscudiero - g
 ## 09-05-2017 @ 16.22.22 - (2.4.58)    - dscudiero - Make sure there is a tmpFile
+## 10-23-2017 @ 08.10.36 - (2.4.61)    - dscudiero - Switch to Msg3
