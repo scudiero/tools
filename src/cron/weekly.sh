@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.30 # -- dscudiero -- Mon 10/23/2017 @ 11:28:12.32
+version=2.1.33 # -- dscudiero -- Mon 10/23/2017 @ 11:39:57.06
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -21,49 +21,54 @@ GetDefaultsData $myName
 ParseArgsStd
 scriptArgs=$*
 
+Here 0
+
 #========================================================================================================================
 # Main
 #========================================================================================================================
 case "$hostName" in
 	mojave)
 		## Checks
+Here 10
+Pause
+Here 20
 			Msg3 "Starting Checks"
-			(( indentLevel++ ))
-			FindExecutable -sh -run checkForPrivateDevSites $scriptArgs | Indent
-			(( indentLevel-- ))
+			(( indentLevel++ )) || true
+			#FindExecutable -sh -run checkForPrivateDevSites $scriptArgs | Indent
+			(( indentLevel-- )) || true
 			Msg3 "Checks Completed"
-
+Pause
 		## Weekly reports
 			Msg3 "Starting Reports"
-			(( indentLevel++ ))
+			(( indentLevel++ )) || true
 
 			Msg3 "^Publishing Report..."
-			(( indentLevel++ ))
+			(( indentLevel++ )) || true
 			FindExecutable scriptsAndReports -sh -run reports publishing -email froggersupport@leepfrog.com $scriptArgs | Indent
-			(( indentLevel-- ))
+			(( indentLevel-- )) || true
 
 			Msg3 "^Client 2 Day Summaries Report..."
-			(( indentLevel++ ))
+			(( indentLevel++ )) || true
 			FindExecutable scriptsAndReports -sh -run reports client2DaySummaries -role support -email froggersupport@leepfrog.com $scriptArg | Indent
-			(( indentLevel-- ))
+			(( indentLevel-- )) || true
 
 			Msg3 "^QA Waiting Report..."
-			(( indentLevel++ ))
+			(( indentLevel++ )) || true
 			FindExecutable scriptsAndReports -sh -run reports qaWaiting -email sjones@leepfrog.com,mbruening@leepfrog.com,dscudiero@leepfrog.com $scriptArgs | Indent
-			(( indentLevel-- ))
+			(( indentLevel-- )) || true
 
 			Msg3 "^Tools Usage Report..."
-			(( indentLevel++ ))
+			(( indentLevel++ )) || true
 			FindExecutable scriptsAndReports -sh -run reports toolsUsage -email dscudiero@leepfrog.com $scriptArgs | Indent
-			(( indentLevel-- ))
+			(( indentLevel-- )) || true
 
 			Msg3 "^Reports Completed"
 
 		## Rollup logs
 			Msg3 "Starting Scripts"
-			(( indentLevel++ ))
+			(( indentLevel++ )) || true
 			FindExecutable weeklyRollup -sh -run $scriptArgs | Indent
-			(( indentLevel-- ))
+			(( indentLevel-- )) || true
 			Msg3 "Starting Scripts"
 			;;
 	build5)
@@ -71,9 +76,9 @@ case "$hostName" in
 	build7)
 		## Checks
 			Msg3 "Starting Checks"
-			(( indentLevel++ ))
+			(( indentLevel++ )) || true
 			FindExecutable -sh -run checkForPrivateDevSites $scriptArgs | Indent
-			(( indentLevel-- ))
+			(( indentLevel-- )) || true
 			Msg3 "Checks Completed"	
 			;;
 esac
@@ -95,3 +100,4 @@ return 0
 ## 10-11-2017 @ 10.37.52 - (2.1.25)    - dscudiero - Switch to use FindExecutable -run
 ## 10-16-2017 @ 13.14.42 - (2.1.26)    - dscudiero - Tweak call to weekelyRollup
 ## 10-23-2017 @ 10.44.28 - (2.1.29)    - dscudiero - Refactor all calls
+## 10-23-2017 @ 11.41.15 - (2.1.33)    - dscudiero - Fix problem incrementing indentLevel
