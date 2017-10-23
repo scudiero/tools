@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.134 # -- dscudiero -- Fri 10/20/2017 @ 13:13:52.37
+version=1.1.135 # -- dscudiero -- Mon 10/23/2017 @  7:16:57.45
 #==================================================================================================
 TrapSigs 'on'
 
@@ -65,7 +65,7 @@ dump -2 -n -t siteDir share shareType client env clientId
 #===================================================================================================
 [[ $verboseLevel -gt 0 ]] && echo -e "\t\t*** $myName - Starting ***"
 [[ $DOIT != '' || $informationOnlyMode == true ]] && echo
-Verbose 1 "^$env ($siteDir)"
+Verbose "^$env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 
 ## Remove any existing records for this client/env
 	sqlStmt="delete from $useSiteInfoTable where clientId =\"$clientId\" and env=\"$env\""
@@ -409,3 +409,4 @@ return 0
 ## 10-19-2017 @ 09.42.44 - (1.1.129)   - dscudiero - Added debug arround caller check code
 ## 10-20-2017 @ 09.01.54 - (1.1.130)   - dscudiero - Fix problem in the caller check code
 ## 10-20-2017 @ 13.11.51 - (1.1.133)   - dscudiero - comment out the parseargsstd call
+## 10-23-2017 @ 07.17.15 - (1.1.135)   - dscudiero - add debug statement
