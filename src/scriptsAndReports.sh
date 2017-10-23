@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.46 # -- dscudiero -- Mon 10/23/2017 @ 16:17:34.12
+version=3.13.47 # -- dscudiero -- Mon 10/23/2017 @ 16:28:32.40
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -134,9 +134,10 @@ function ExecScript {
 			if [[ ! -d $(dirname $logFile) ]]; then
 				mkdir -p "$(dirname $logFile)"
 				chown -R "$userName:leepfrog" "$(dirname $logFile)"
-				chmod -R 770 "$(dirname $logFile)"
+				chmod -R 775 "$(dirname $logFile)"
 			fi
 			touch "$logFile"
+			chown -R "$userName:leepfrog" "$logFile"
 			chmod 660 "$logFile"
 			echo -e "$(PadChar)" > $logFile
 			[[ -n $scriptArgs ]] && scriptArgsTxt=" $scriptArgs" || unset scriptArgsTxt
@@ -151,6 +152,7 @@ function ExecScript {
 		(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile
 		mv $logFile $logFile.bak
 	 	cat $logFile.bak | sed "s/\x1B\[[0-9;]*[a-zA-Z]//g" | tr -d '\007' > $logFile
+		chown -R "$userName:leepfrog" "$logFile"
 		chmod 660 "$logFile"
 	 	rm $logFile.bak
 	 	touch "$(dirname $logFile)"
@@ -523,3 +525,4 @@ Goodbye 0
 ## 10-23-2017 @ 10.44.41 - (3.13.43)   - dscudiero - remove debug
 ## 10-23-2017 @ 11.04.00 - (3.13.44)   - dscudiero - Make sure the permissions of the log files is 644
 ## 10-23-2017 @ 16.21.56 - (3.13.46)   - dscudiero - Make sure we can list the log directories
+## 10-23-2017 @ 16.28.51 - (3.13.47)   - dscudiero - Cosmetic/minor change
