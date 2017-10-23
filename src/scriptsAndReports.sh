@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.31 # -- dscudiero -- Mon 10/23/2017 @  8:35:53.78
+version=3.13.32 # -- dscudiero -- Mon 10/23/2017 @  8:41:51.88
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -9,8 +9,6 @@ Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="Script dispatcher"
-
-dump originalArgStr
 
 #=======================================================================================================================
 # Tools scripts selection front end
@@ -514,3 +512,4 @@ Goodbye 0
 ## 10-19-2017 @ 15.09.39 - (3.13.28)   - dscudiero - Cleanup the logFile when done calling the script
 ## 10-19-2017 @ 15.12.58 - (3.13.29)   - dscudiero - Cleanup the logFile from called task
 ## 10-23-2017 @ 08.40.51 - (3.13.31)   - dscudiero - remove debug stuff
+## 10-23-2017 @ 08.42.03 - (3.13.32)   - dscudiero - remove debug stuff
