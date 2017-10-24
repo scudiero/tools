@@ -1,14 +1,15 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.11" # -- dscudiero -- Fri 06/23/2017 @  7:04:46.10
+# version="2.0.13" # -- dscudiero -- Tue 10/24/2017 @  8:50:43.24
 #===================================================================================================
 # Pause execution
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-
 function Pause {
+	myIncludes="StringFunctions"
+	Import "$myIncludes"
 	local ans
 	local callerData="$(caller)"
 	local lineNo="$(basename $(cut -d' ' -f2 <<< $callerData))/$(cut -d' ' -f1 <<< $callerData)"

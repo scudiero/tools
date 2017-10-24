@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.50" # -- dscudiero -- Tue 10/24/2017 @  7:57:35.29
+version="1.4.51" # -- dscudiero -- Tue 10/24/2017 @  8:06:34.30
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -289,7 +289,7 @@ sTime=$(date "+%s")
 		if [[ $noLog != true ]] && [[ $callPgmName != "scripts" || $callPgmName != "reports" ]]; then
 			logFile=${logsRoot}${callPgmName}/$userName--$backupSuffix.log
 			[[ -e "$logFile" ]] && rm -f "$logFile"
-			[[ ! -d $(dirname $logFile) ]] && {mkdir -p "$(dirname $logFile)"; chown -R "$userName:leepfrog" "$(dirname $logFile)"; chmod -R 770 "$(dirname $logFile)";}
+			[[ ! -d $(dirname $logFile) ]] && { mkdir -p "$(dirname $logFile)"; chown -R "$userName:leepfrog" "$(dirname $logFile)"; chmod -R 770 "$(dirname $logFile)"; }
 			touch "$logFile"
 			chmod 660 "$logFile"
 			chown "$userName:leepfrog" "$logFile"
