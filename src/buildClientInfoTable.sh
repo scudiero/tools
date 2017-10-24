@@ -1,11 +1,11 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.123 # -- dscudiero -- Fri 10/20/2017 @  8:56:45.03
+version=2.3.124 # -- dscudiero -- Tue 10/24/2017 @  7:27:49.14
 #=======================================================================================================================
 TrapSigs 'on'
 
-myIncludes="Msg3 RunSql2 FindExecutable StringFunctions"
+myIncludes="Msg3 RunSql2 FindExecutable StringFunctions PushPop"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -191,3 +191,4 @@ Goodbye 0 'alert'
 ## 06-13-2017 @ 14.03.50 - (2.3.114)   - dscudiero - Change to use -n and -z notation
 ## 09-29-2017 @ 10.14.32 - (2.3.122)   - dscudiero - Update FindExcecutable call for new syntax
 ## 10-20-2017 @ 08.58.06 - (2.3.123)   - dscudiero - Replace Call by source
+## 10-24-2017 @ 07.28.11 - (2.3.124)   - dscudiero - Added PushPop to the import list
