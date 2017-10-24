@@ -130,7 +130,6 @@ else
         done < $tmpFile;
 
         ## Cleanup
-        echo
         [[ -f "/steamboat/leepfrog/docs/tools/perfTest" ]] && rm -rf "/steamboat/leepfrog/docs/tools/perfTest"
         [[ -f "$tmpFile" ]] && rm -f "$tmpFile"
 fi
@@ -152,3 +151,4 @@ Msg3 "$myName done"
 ## 07-18-2017 @ 13.16.11 - dscudiero - Add start/end messages
 ## 10-11-2017 @ 10.38.57 - dscudiero - switch Msg2 for Msg3
 ## 10-19-2017 @ 10.32.43 - dscudiero - Change the way we strip off leading zeros from the int strings
+## 10-24-2017 @ 10.58.43 - dscudiero - Remove extra blank line in outout
