@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.26" // -- dscudiero -- Fri 10/20/2017 @  6:58:59.60
+wfLibVersion="1.8.27" // -- dscudiero -- Tue 10/24/2017 @ 13:38:33.92
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -63,6 +63,7 @@ wfLibVersion="1.8.26" // -- dscudiero -- Fri 10/20/2017 @  6:58:59.60
 // 10/16/17 - dgs - Fixed problem when gGetRelated was called standalone
 // 10/18/17 - dgs - Updated LookupCode
 // 10/19/17 - dgs - Updated getAttrVal to allow for instances where the 'college' is not the variable the client uses
+// 10/24/17 - dgs - Removed debug statements from getAttrVal
 //======================================================================================================================
 
 // Make sure wffucs is defined
@@ -1249,7 +1250,7 @@ GetAttrVal = function(data) {
 			subjects=getTCFValue(subjVarName, { delimiter: "\n", retarray: true });
 			if (includeTCA)
 				subjects=subjects.concat(getTCFValue("subject", { data: tcaData, delimiter: "\n", retarray: true }));
-			wfDump(0,["\t\t" + subjVarName+";"+subjects.toSource()])
+			wfDump(0,["\t\t" + subjVarName+" from tcfdata;"+subjects.toSource()])
 		}
 		if (departments.length === 0) {
 			wfDebug(5,"\t\twffuncs.getDepartments returned nothing, checking the '" + deptVarName + "' variable");
@@ -1264,7 +1265,7 @@ GetAttrVal = function(data) {
 					});
 				}
 			}
-			wfDump(0,["\t\t" + deptVarName+";"+departments.toSource()])
+			wfDump(0,["\t\t" + deptVarName+" from tcfdata;"+departments.toSource()])
 		}
 		if (colleges.length === 0) {
 			wfDebug(5,"\t\twffuncs.getColleges returned nothing, checking the '" + colVarName + "' variable");
@@ -1272,7 +1273,6 @@ GetAttrVal = function(data) {
 			if (includeTCA)
 				colleges=colleges.concat(getTCFValue("college", { data: tcaData, delimiter: "\n", retarray: true }));
 			if(colleges.length === 0 && subjects.length != 0) {
-Here(1)
 				resultSet=LookupCode2("cols","subj",subjects);
 				if (resultSet.length > 0) {
 					resultSet.forEach(function(result) {
@@ -1281,7 +1281,6 @@ Here(1)
 				}
 			}
 			if(colleges.length === 0 && departments.length != 0) {
-Here(2)
 				resultSet=LookupCode2("cols","dept",departments);
 				if (resultSet.length > 0) {
 					resultSet.forEach(function(result) {
@@ -1289,8 +1288,7 @@ Here(2)
 					});
 				}
 			}
-			wfDump(0,["\t\tresultSet;"+resultSet.toSource()])
-			wfDump(0,["\t\t" + colVarName+";"+colleges.toSource()])
+			wfDump(0,["\t\t" + colVarName+" from tcfdata;"+colleges.toSource()])
 		}
 
 	// return data based on how we were called
@@ -2218,3 +2216,4 @@ var wfLibLoaded=true;
 // 10-17-2017 @ 14.07.27 - ("1.8.18")  - dscudiero - Fixed problem with setting default value for 'includeEcoSystemData' when GetRelated was called standalone
 // 10-18-2017 @ 10.50.17 - ("1.8.22")  - dscudiero - Many updates, check comments
 // 10-20-2017 @ 08.20.19 - ("1.8.26")  - dscudiero - Updates to getAttrVal to taken into account that the client may use a different variable for 'college'
+// 10-24-2017 @ 13.53.44 - ("1.8.27")  - dscudiero - Remove debug statements from getAttrVal
