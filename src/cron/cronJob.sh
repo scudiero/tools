@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.16 # -- dscudiero -- Tue 10/24/2017 @  8:01:54.39
+version=2.1.17 # -- dscudiero -- Tue 10/24/2017 @  9:15:39.77
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -58,7 +58,7 @@ originalArgStr="$*"
  	cat $logFile.bak | sed "s/\x1B\[[0-9;]*[a-zA-Z]//g" | tr -d '\007' > $logFile
 	chmod 660 "$logFile"
  	rm $logFile.bak
-	[[ ! -d $(dirname $logFile) ]] && {touch "$(dirname $logFile)"; chmod 770 "$(dirname $logFile)" ;}
+	[[ ! -d $(dirname $logFile) ]] && { touch "$(dirname $logFile)"; chmod 770 "$(dirname $logFile)"; }
 	myName="$myNameSave"; myPath="$myPathSave"
 
 #=======================================================================================================================
@@ -127,3 +127,4 @@ exit 0
 ## 10-23-2017 @ 16.21.52 - (2.1.14)    - dscudiero - Make sure we can list the log directories
 ## 10-24-2017 @ 07.10.35 - (2.1.15)    - dscudiero - Cosmetic/minor change
 ## 10-24-2017 @ 08.02.04 - (2.1.16)    - dscudiero - Cosmetic/minor change
+## 10-24-2017 @ 09.15.44 - (2.1.17)    - dscudiero - Cosmetic/minor change
