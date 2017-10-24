@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.87 # -- dscudiero -- Fri 10/20/2017 @  9:00:16.44
+version=2.3.91 # -- dscudiero -- Tue 10/24/2017 @ 10:08:20.33
 #===================================================================================================
 TrapSigs 'on'
 
@@ -52,13 +52,14 @@ function MapTtoW {
 # Main
 #===================================================================================================
 ## Get the list of fields in the transactional db
-	Msg2 $V1 ""
+	Verbose 1
 	SetFileExpansion 'off'
 	sqlStmt="select * from sqlite_master where type=\"table\" and name=\"clients\""
+	SetFileExpansion
 	RunSql2 "$contactsSqliteFile" $sqlStmt
-	[[ ${#resultSet[@]} -le 0 ]] && Msg2 $T "Could not retrieve clients table definition data from '$contactsSqliteFile'"
+	[[ ${#resultSet[@]} -le 0 ]] && Terminate "Could not retrieve clients table definition data from '$contactsSqliteFile'"
 	unset tFields
-	tData="$(cut -d '(' -f2 <<< ${resultSet[0]})"; tData="$(cut -d ')' -f1 <<< $tData)"
+	tData="${resultSet[0]#*(}"; tData="${tData%)*}"
 	ifsSave="$IFS"; IFS=',' read -ra tmpArray <<< "$tData"
 	for token in "${tmpArray[@]}"; do
 		[[ ${token:0:1} == ' ' ]] && token="${token:1}"
@@ -70,11 +71,11 @@ function MapTtoW {
 	dump -1 numTFields tFields
 
 ## Get the transactional data
-	Msg2 $V1 ""
+	Verbose 1
 	sql="select $tFields from clients where clientcode=\"$client\" and is_active=\"Y\""
 	RunSql2 "$contactsSqliteFile" $sql
 	if [[ ${#resultSet[@]} -le 0 ]]; then
-		Msg2 $T "Could not retrieve clients data from '$contactsSqliteFile'"
+		Terminate "Could not retrieve clients data from '$contactsSqliteFile'"
 	else
 		result="${resultSet[0]}"
 		dump -1 result
@@ -101,87 +102,74 @@ function MapTtoW {
 	fi
 
 ## Get the URL data from the transactional db
-	Msg2 $V1 ""
+	Verbose 1
 	envs="dev,qa,test,next,curr,prior,preview,public"
-	for env in $(tr ',' ' '<<< $envs); do
-		unset ${env}URL ${env}InternalURL
-		sqlStmt="select domain,internal from clientsites where clientkey=$idx and type=\"$env\""
-		RunSql2 "$contactsSqliteFile" $sqlStmt
-		if [[ ${#resultSet[@]} -gt 0 ]]; then
-			for result in "${resultSet[@]}"; do
-				domain=$(cut -d'|' -f1 <<< $result)
-				internal=$(cut -d'|' -f2 <<< $result)
-				#dump -n env domain internal
-				if [[ $internal == 'Y' ]]; then
-					eval ${env}InternalURL="$domain"
-				else
-					eval ${env}URL="$domain"
-				fi
-			done
-		else
-			[[ $env == 'test' || $env == 'next' || $env == 'curr' ]] && eval ${env}InternalURL="https://${client}-${env}.editcl.com/"
-		fi
-		dump -1 -t ${env}URL ${env}InternalURL
-	done
+	for env in $(tr ',' ' '<<< $envs); do unset ${env}url ${env}internalurl; done
+	sqlStmt=" select type,domain,internal from clientsites where clientkey=$idx"
+	RunSql2 "$contactsSqliteFile" $sqlStmt
+	if [[ ${#resultSet[@]} -gt 0 ]]; then
+		for ((ij=0; ij<${#resultSet[@]}; ij++)); do
+			result="${resultSet[$ij]}"
+			#dump result
+			env="${result%%|*}"; result="${result#*|}"
+			domain="${result%%|*}"; result="${result#*|}"
+			#dump -t env domain result 
+			[[ $result == 'Y' ]] && eval ${env}internalurl="$domain" || eval ${env}url="$domain"
+			fi
+		done
+	fi
 
 ## Get the Rep data from the transactional db
-	Msg2 $V1 ""
-	reps="support,catCsm,cimCsm,clssCsm,,salesRep,catEditor,catdev,cimdev,clssdev,trainer,pilotRep"
-	for rep in $(tr ',' ' '<<< $reps); do
-		unset $rep
-		sqlStmt="select employees.db_firstname,employees.db_lastname,employees.db_email from clientroles,employees where clientroles.clientkey=$idx and role=\"$rep\" and clientroles.employeekey=employees.db_employeekey"
-		RunSql2 "$contactsSqliteFile" $sqlStmt
-		if [[ ${#resultSet[@]} -gt 0 ]]; then
-			firstName=$(cut -d'|' -f1 <<< ${resultSet[0]})
-			lastName=$(cut -d'|' -f2 <<< ${resultSet[0]})
-			email=$(cut -d'|' -f3 <<< ${resultSet[0]})
-			eval $rep=\"$firstName $lastName/$email\"
-		fi
-		dump -1 -t $rep
-	done
+	reps="support,catcsm,cimcsm,clsscsm,salesrep,cateditor,catdev,cimdev,clssdev,trainer,pilotrep"
+	for rep in $(tr ',' ' '<<< $reps); do unset $rep; done
+	fields="LOWER(clientroles.role),employees.db_firstname || ' ' || employees.db_lastname || '/' || employees.db_email"
+	dbs="clientroles,employees"
+	whereClause="clientroles.employeekey=employees.db_employeekey and clientroles.clientkey=$idx"
+	sqlStmt="select $fields from $dbs where $whereClause"
+	RunSql2 "$contactsSqliteFile" $sqlStmt
+	if [[ ${#resultSet[@]} -gt 0 ]]; then
+		for ((ij=0; ij<${#resultSet[@]}; ij++)); do
+			echo "resultSet[$ij] = >${resultSet[$ij]}<"
+			repName="${resultSet[$ij]%%|*}"
+			repVal="${resultSet[$ij]##*|}"
+			eval $repName=\"$repVal\"
+		done
+	fi
 
 ## Build insert record
-	Msg2 $V1 ""
-	#sql="select column_name from information_schema.columns where table_name =\"$clientInfoTable\""
-	sqlStmt="show columns from $useClientInfoTable"
+	Verbose 1
+	sqlStmt="select lower(column_name),lower(column_type) from information_schema.columns where table_name=\"$useClientInfoTable\""
 	RunSql2 $sqlStmt
 	unset wFields insertVals
 	for result in "${resultSet[@]}"; do
-		field=$(cut -d'|' -f1 <<< $result)
-		fieldType=$(cut -d'|' -f2 <<< $result)
+		#dump -n result
+		field="${result%%|*}"
+		fieldType="${result##*|}"
 		wFields="$wFields,$field"
-		fVal="${!field}"
-		if [[ $field == 'recordstatus' ]]; then
-			[[ $fVal == 'Y' ]] && fVal="\"A\"" || fVal="\"D\""
-		elif [[ $field == 'createdBy' ]]; then fVal="\"$userName\""
-		elif [[ $field == 'createdOn' ]]; then fVal='NOW()'
-		elif [[ $(Trim $fVal) == '' ]]; then fVal='NULL'
+		fieldVal="${!field}"
+		#dump -t field fieldType fieldVal wFields
+		if [[ $field == 'recordstatus' ]]; 	then [[ $fieldVal == 'Y' ]] && fieldVal="\"A\"" || fieldVal="\"D\""
+		elif [[ $field == 'createdby' ]]; 	then fieldVal="\"$userName\""
+		elif [[ $field == 'createdon' ]]; 	then fieldVal='NOW()'
+		elif [[ $(Trim $fieldVal) == '' ]]; then fieldVal='NULL'
 		else
-			[[ ${fieldType:0:1} == 'v' ]] && fVal="\"$fVal\""
-			[[ ${fieldType:0:1} == 's' ]] && fVal="\"$fVal\""
+			[[ ${fieldType:0:1} == 'v' ]] && fieldVal="\"$fieldVal\""
+			[[ ${fieldType:0:1} == 's' ]] && fieldVal="\"$fieldVal\""
 		fi
-		insertVals="$insertVals,$fVal"
-		#dump field fVal
+		#dump -t fieldVal
+		insertVals="$insertVals,$fieldVal"
 	done
-	wFields=${wFields:1}
-	insertVals=${insertVals:1}
-	dump -1 -n wFields -n insertVals -n useClientInfoTable client ; dump -2 -p
+	#dump -n insertVals
 
 ## Insert record
+		Verbose 1
 	## Delete old data
-		Msg2 $V1 ""
 		sqlStmt="delete from $useClientInfoTable where name=\"$client\""
 		RunSql2 $sqlStmt
 	## Insert new data
-		Msg2 $V1 ""
 		sqlStmt="insert into $useClientInfoTable ($wFields) values($insertVals)"
 		dump -1 sqlStmt -n
-		if [[ $DOIT != '' || $informationOnlyMode == true ]]; then
-			echo -e "\t\tsqlStmt = '>'$sqlStmt'<'"
-		else
-			RunSql2 $sqlStmt
-			#echo "resultSet[0] = ' ${resultSet[0]}'"
-		fi
+		[[ $DOIT != '' || $informationOnlyMode == true ]] && Dump sqlStmt || RunSql2 $sqlStmt
 
 #===================================================================================================
 # Done
@@ -222,3 +210,4 @@ return 0
 ## 10-19-2017 @ 07.32.06 - (2.3.84)    - dscudiero - Add debug state,=ments
 ## 10-19-2017 @ 07.53.54 - (2.3.86)    - dscudiero - Comment out caller check
 ## 10-20-2017 @ 09.01.51 - (2.3.87)    - dscudiero - Fix problem in the caller check code
+## 10-24-2017 @ 10.08.54 - (2.3.91)    - dscudiero - Refactord most sections to make more efficient
