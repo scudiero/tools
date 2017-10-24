@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.125 # -- dscudiero -- Tue 10/24/2017 @  7:29:51.49
+version=2.4.0 # -- dscudiero -- Tue 10/24/2017 @  7:42:26.82
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -74,9 +74,6 @@ ParseArgsStd
 #=======================================================================================================================
 # Main
 #=======================================================================================================================
-Msg3 "Database: $warehouseDb"
-Msg3 "Table: $useClientInfoTable"
-
 ## Get list of clients from the transactional system
 	if [[ -n $client ]]; then
 		clients+=($client);
@@ -91,6 +88,8 @@ Msg3 "Table: $useClientInfoTable"
 			clients+=($result)
 		done
 	fi
+	Msg3 "Database: $warehouseDb"
+	Msg3 "Table: $useClientInfoTable"
 
 ## Table management
 	if [[ $inPlace != true && -z $client ]]; then
@@ -194,3 +193,4 @@ Goodbye 0 'alert'
 ## 10-20-2017 @ 08.58.06 - (2.3.123)   - dscudiero - Replace Call by source
 ## 10-24-2017 @ 07.28.11 - (2.3.124)   - dscudiero - Added PushPop to the import list
 ## 10-24-2017 @ 07.30.01 - (2.3.125)   - dscudiero - Cosmetic/minor change
+## 10-24-2017 @ 07.42.43 - (2.4.0)     - dscudiero - set version
