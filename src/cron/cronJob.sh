@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.17 # -- dscudiero -- Tue 10/24/2017 @  9:15:39.77
+version=2.1.18 # -- dscudiero -- Tue 10/24/2017 @ 13:52:37.19
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -23,7 +23,11 @@ originalArgStr="$*"
 
 #=======================================================================================================================
 ## Log the cronJob
-	[[ ! -d "$TOOLSPATH/Logs/cronJobs"  ]] && { touch "$TOOLSPATH/Logs/cronJobs"; chown -R "$userName:leepfrog" "$TOOLSPATH/Logs/cronJobs"; chmod 770 "$TOOLSPATH/Logs/cronJobs"; }
+	if [[ ! -d "$TOOLSPATH/Logs/cronJobs"  ]]; then 
+		mkdir -p "$TOOLSPATH/Logs/cronJobs"
+		chown -R "$userName:leepfrog" "$TOOLSPATH/Logs/cronJobs"
+		chmod 770 "$TOOLSPATH/Logs/cronJobs"
+	fi
 	echo "$hostName - $(date +'%m-%d-%Y @ %H.%M.%S') -- Starting $callScriptName" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 
 #=======================================================================================================================
@@ -128,3 +132,4 @@ exit 0
 ## 10-24-2017 @ 07.10.35 - (2.1.15)    - dscudiero - Cosmetic/minor change
 ## 10-24-2017 @ 08.02.04 - (2.1.16)    - dscudiero - Cosmetic/minor change
 ## 10-24-2017 @ 09.15.44 - (2.1.17)    - dscudiero - Cosmetic/minor change
+## 10-24-2017 @ 13.52.52 - (2.1.18)    - dscudiero - Fix log directory creation
