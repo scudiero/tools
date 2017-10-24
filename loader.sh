@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.49" # -- dscudiero -- Mon 10/23/2017 @ 16:28:10.93
+version="1.4.50" # -- dscudiero -- Tue 10/24/2017 @  7:57:35.29
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -289,11 +289,7 @@ sTime=$(date "+%s")
 		if [[ $noLog != true ]] && [[ $callPgmName != "scripts" || $callPgmName != "reports" ]]; then
 			logFile=${logsRoot}${callPgmName}/$userName--$backupSuffix.log
 			[[ -e "$logFile" ]] && rm -f "$logFile"
-			if [[ ! -d $(dirname $logFile) ]]; then
-				mkdir -p "$(dirname $logFile)"
-				chown -R "$userName:leepfrog" "$(dirname $logFile)"
-				chmod -R 770 "$(dirname $logFile)"
-			fi
+			[[ ! -d $(dirname $logFile) ]] && {mkdir -p "$(dirname $logFile)"; chown -R "$userName:leepfrog" "$(dirname $logFile)"; chmod -R 770 "$(dirname $logFile)";}
 			touch "$logFile"
 			chmod 660 "$logFile"
 			chown "$userName:leepfrog" "$logFile"
@@ -914,3 +910,4 @@ fi
 ## 10-23-2017 @ 11.03.47 - ("1.4.47")  - dscudiero - Make sure the permissions of the log files is 644
 ## 10-23-2017 @ 16.21.45 - ("1.4.48")  - dscudiero - Make sure we can list the log directories
 ## 10-23-2017 @ 16.28.49 - ("1.4.49")  - dscudiero - Cosmetic/minor change
+## 10-24-2017 @ 07.57.46 - ("1.4.50")  - dscudiero - Cosmetic/minor change
