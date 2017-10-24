@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.15 # -- dscudiero -- Tue 10/24/2017 @  7:10:29.23
+version=2.1.16 # -- dscudiero -- Tue 10/24/2017 @  8:01:54.39
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -23,7 +23,7 @@ originalArgStr="$*"
 
 #=======================================================================================================================
 ## Log the cronJob
-	[[ ! -d "$TOOLSPATH/Logs/cronJobs"  ]] && {touch "$TOOLSPATH/Logs/cronJobs";  chown -R "$userName:leepfrog" "$TOOLSPATH/Logs/cronJobs"; chmod 770 "$TOOLSPATH/Logs/cronJobs" ;}
+	[[ ! -d "$TOOLSPATH/Logs/cronJobs"  ]] && { touch "$TOOLSPATH/Logs/cronJobs"; chown -R "$userName:leepfrog" "$TOOLSPATH/Logs/cronJobs"; chmod 770 "$TOOLSPATH/Logs/cronJobs"; }
 	echo "$hostName - $(date +'%m-%d-%Y @ %H.%M.%S') -- Starting $callScriptName" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 
 #=======================================================================================================================
@@ -126,3 +126,4 @@ exit 0
 ## 10-23-2017 @ 11.03.55 - (2.1.13)    - dscudiero - Make sure the permissions of the log files is 644
 ## 10-23-2017 @ 16.21.52 - (2.1.14)    - dscudiero - Make sure we can list the log directories
 ## 10-24-2017 @ 07.10.35 - (2.1.15)    - dscudiero - Cosmetic/minor change
+## 10-24-2017 @ 08.02.04 - (2.1.16)    - dscudiero - Cosmetic/minor change
