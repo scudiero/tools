@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.3.124 # -- dscudiero -- Tue 10/24/2017 @  7:27:49.14
+version=2.3.125 # -- dscudiero -- Tue 10/24/2017 @  7:29:51.49
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -63,8 +63,8 @@ fi
 #=======================================================================================================================
 # Standard argument parsing and initialization
 #=======================================================================================================================
-ParseArgsStd
 Hello
+ParseArgsStd
 [[ $batchMode != true ]] && VerifyContinue "You are asking to re-generate the data warehouse '$clientInfoTable' table"
 
 #=======================================================================================================================
@@ -74,6 +74,9 @@ Hello
 #=======================================================================================================================
 # Main
 #=======================================================================================================================
+Msg3 "Database: $warehouseDb"
+Msg3 "Table: $useClientInfoTable"
+
 ## Get list of clients from the transactional system
 	if [[ -n $client ]]; then
 		clients+=($client);
@@ -88,13 +91,11 @@ Hello
 			clients+=($result)
 		done
 	fi
-Msg2 "Database: $warehouseDb"
-Msg2 "Table: $useClientInfoTable"
 
 ## Table management
 	if [[ $inPlace != true && -z $client ]]; then
 		## Create a temporary copy of the clients table, load new data to that table
-		[[ $batchMode != true ]] && Msg2 "^Creating work table '$useClientInfoTable'..."
+		[[ $batchMode != true ]] && Msg3 "^Creating work table '$useClientInfoTable'..."
 		sqlStmt="drop table if exists ${clientInfoTable}Bak"
 		RunSql2 $sqlStmt
 		sqlStmt="drop table if exists $useClientInfoTable"
@@ -106,37 +107,37 @@ Msg2 "Table: $useClientInfoTable"
 ## Loop through clients
 	clientCntr=0
 	numClients=${#clients[@]}
-	Msg2 "Found $numClients clients..."
+	Msg3 "Found $numClients clients..."
 	forkCntr=1;
 	for client in "${clients[@]}"; do
 		(( clientCntr += 1 ))
 		if [[ $(Contains ",$ignoreList," ",$client,") == true ]]; then
-			[[ $batchMode != true ]] && Msg2 "^Skipping '$client' is in the ignore list."
+			[[ $batchMode != true ]] && Msg3 "^Skipping '$client' is in the ignore list."
 			continue
 		fi
 		unset msgPrefix
 		[[ $fork == true ]] && msgPrefix='Forking off' || msgPrefix='Processing'
-		[[ $batchMode != true ]] && Msg2 "^$msgPrefix $client ($clientCntr / ${#clients[@]})..."
+		[[ $batchMode != true ]] && Msg3 "^$msgPrefix $client ($clientCntr / ${#clients[@]})..."
 		source "$workerScriptFile" "$forkStr" "$addedCalledScriptArgs"
 		rc=$?
 		(( forkCntr+=1 ))
 		## Wait for forked process to finish, only run maxForkedProcesses at a time
 		if [[ $fork == true && $((forkCntr%$maxForkedProcesses)) -eq 0 ]]; then
-			[[ $batchMode != true ]] && Msg2 "^Waiting on forked processes...\n"
+			[[ $batchMode != true ]] && Msg3 "^Waiting on forked processes...\n"
 			wait
 		fi
-		[[ $fork != true && $(($clientCntr % processNotify)) -eq 0 ]] && Msg2 "\n^*** Processed $clientCntr out of $numClients\n"
+		[[ $fork != true && $(($clientCntr % processNotify)) -eq 0 ]] && Msg3 "\n^*** Processed $clientCntr out of $numClients\n"
 	done
 
 ## Wait for all the forked tasks to stop
 	if [[ $fork == true ]]; then
-		[[ $batchMode != true ]] && Msg2 "^Waiting for all forked processes to complete..."
+		[[ $batchMode != true ]] && Msg3 "^Waiting for all forked processes to complete..."
 		wait
 	fi
 
 ## Swap client tables
 	if [[ $inPlace != true ]]; then
-		[[ $batchMode != true ]] && Msg2 "^Swapping databases ..."
+		[[ $batchMode != true ]] && Msg3 "^Swapping databases ..."
 		sqlStmt="select count(*) from ${clientInfoTable}New"
 		RunSql2 $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "New clients table has zero rows, keeping original"
@@ -144,19 +145,19 @@ Msg2 "Table: $useClientInfoTable"
 		sqlStmt="select count(*) from ${clientInfoTable}New"
 		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -ne 0 ]]; then
-			[[ $batchMode != true ]] && Msg2 "^^$clientInfoTable --> ${clientInfoTable}Bak"
+			[[ $batchMode != true ]] && Msg3 "^^$clientInfoTable --> ${clientInfoTable}Bak"
 			sqlStmt="rename table $clientInfoTable to ${clientInfoTable}Bak"
 			RunSql2 $sqlStmt
 		fi
 
-		[[ $batchMode != true ]] && Msg2 "^^${clientInfoTable}New --> $clientInfoTable"
+		[[ $batchMode != true ]] && Msg3 "^^${clientInfoTable}New --> $clientInfoTable"
 		sqlStmt="rename table ${clientInfoTable}New to $clientInfoTable"
 		RunSql2 $sqlStmt
 	fi
 
 	sqlStmt="select count(*) from $clientInfoTable"
 	RunSql2 $sqlStmt
-	Msg2 "\nInserted ${resultSet[0]} records into $clientInfoTable"
+	Msg3 "\nInserted ${resultSet[0]} records into $clientInfoTable"
 
 
 #=======================================================================================================================
@@ -192,3 +193,4 @@ Goodbye 0 'alert'
 ## 09-29-2017 @ 10.14.32 - (2.3.122)   - dscudiero - Update FindExcecutable call for new syntax
 ## 10-20-2017 @ 08.58.06 - (2.3.123)   - dscudiero - Replace Call by source
 ## 10-24-2017 @ 07.28.11 - (2.3.124)   - dscudiero - Added PushPop to the import list
+## 10-24-2017 @ 07.30.01 - (2.3.125)   - dscudiero - Cosmetic/minor change
