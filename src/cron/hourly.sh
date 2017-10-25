@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.7 # -- dscudiero -- Wed 10/25/2017 @  9:14:16.36
+version=2.2.8 # -- dscudiero -- Wed 10/25/2017 @ 11:05:10.98
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -12,9 +12,8 @@ version=2.2.7 # -- dscudiero -- Wed 10/25/2017 @  9:14:16.36
 # 09-05-17 - dgs - Added '--ignore-date' to rsyc options in SyncSkeleton
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes='FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql2 GetPW SetFileExpansion'
-myIncludes="$myIncludes RunSql2 ProtectedCall"
-Import "$myIncludes"
+myIncludes='FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql2 GetPW SetFileExpansion RunSql2 ProtectedCall'
+Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*"
 
@@ -296,3 +295,4 @@ return 0
 ## 10-16-2017 @ 13.46.10 - (2.2.5)     - dscudiero - Add debug
 ## 10-16-2017 @ 15.03.55 - (2.2.6)     - dscudiero - Remove debug statements
 ## 10-25-2017 @ 09.14.38 - (2.2.7)     - dscudiero - Refactored to new structure
+## 10-25-2017 @ 11.05.31 - (2.2.8)     - dscudiero - Add standardIncludes to the includes list
