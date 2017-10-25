@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.27" // -- dscudiero -- Tue 10/24/2017 @ 13:38:33.92
+wfLibVersion="1.8.31" // -- dscudiero -- Wed 10/25/2017 @ 16:43:47.83
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -64,6 +64,8 @@ wfLibVersion="1.8.27" // -- dscudiero -- Tue 10/24/2017 @ 13:38:33.92
 // 10/18/17 - dgs - Updated LookupCode
 // 10/19/17 - dgs - Updated getAttrVal to allow for instances where the 'college' is not the variable the client uses
 // 10/24/17 - dgs - Removed debug statements from getAttrVal
+// 10/25/17 - dgs - Updated getAttrVal to first check the tcf data and then if no data is found use the getxxx functions (UWPLATT)
+// 10/25/17 - dgs - Fixed an issue where GetEcoSystemData2 was not setting path variable
 //======================================================================================================================
 
 // Make sure wffucs is defined
@@ -418,42 +420,42 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 //======================================================================================================================
 //
 // Global switches/flags/data:
-//		_checkChanged 		Check to see if the proposal values for the substitution type have
-//							changed and if change detected then add original values to the output
-//							default: true
+//		_checkChanged 			Check to see if the proposal values for the substitution type have
+//								changed and if change detected then add original values to the output
+//								default: true
 //
-//		_ecoSystemData 		Included data from the Eco system in the results
+//		_includeEcoSystemData 	Included data from the Eco system in the results
 //
-//		_ecoSystemType 		If retrieving data from the eco system you may define which references types to use
-//							This is used to match against the type field in the echo system record, if not specified
-//							all reference types are considered valid.
-//							e.g. 	Related_ecoSystemType:equiv
+//		_ecoSystemType 			If retrieving data from the eco system you may define which references types to use
+//								This is used to match against the type field in the echo system record, if not specified
+//								all reference types are considered valid.
+//								e.g. 	Related_ecoSystemType:equiv
 //
-//		_ecoSystemDataFyi	If retrieving data from the eco system, should the steps be added as fyi steps.
-//							The value must be in the set {"fyi","fyiall"} and the token is tacked on to the
-//							end of the generated steps.
-//							e.g. 	Related_ecoSystemTypeFyi:equiv
+//		_ecoSystemDataFyi		If retrieving data from the eco system, should the steps be added as fyi steps.
+//								The value must be in the set {"fyi","fyiall"} and the token is tacked on to the
+//								end of the generated steps.
+//								e.g. 	Related_ecoSystemTypeFyi:equiv
 //
-//		_formFieldVars		The form fields that contain 'related/crosslisted/associated/consultant' data.
-//							The formate is name[|format][|dataAttributeName] where :
-//							format is one item in the set {courseCode,colCode,deptCode,subjCode}, the default is 'code'
-//							dataAttributeName is the name of the object attribute that contains the data for the reference, default is 'data'
-//							May be repeated as necessary.
-//							e.g. 	Related_formFieldVars:crosslisted|code; 	//Applies to all Related wfrule
-//									Related_formFieldVars:slashlisted|code; 	//Applies to all Related wfrule
+//		_formFieldVars			The form fields that contain 'related/crosslisted/associated/consultant' data.
+//								The formate is name[|format][|dataAttributeName] where :
+//								format is one item in the set {courseCode,colCode,deptCode,subjCode}, the default is 'code'
+//								dataAttributeName is the name of the object attribute that contains the data for the reference, default is 'data'
+//								May be repeated as necessary.
+//								e.g. 	Related_formFieldVars:crosslisted|code; 	//Applies to all Related wfrule
+//										Related_formFieldVars:slashlisted|code; 	//Applies to all Related wfrule
 //
-//		_codeVarName		The name of the form variable containing the 'code' data, defaults to 'code'
-//		_collegeVarName		The name of the form variable containing the 'college' data, defaults to 'college'
-//		_departmentVarName	The name of the form variable containing the 'department' data, defaults to 'department'
-//		_subjectVarName		The name of the form variable containing the 'subject' data, defaults to 'subject'
+//		_codeVarName			The name of the form variable containing the 'code' data, defaults to 'code'
+//		_collegeVarName			The name of the form variable containing the 'college' data, defaults to 'college'
+//		_departmentVarName		The name of the form variable containing the 'department' data, defaults to 'department'
+//		_subjectVarName			The name of the form variable containing the 'subject' data, defaults to 'subject'
 //
-//		_searchString		The string to replace with the resolved values
+//		_searchString			The string to replace with the resolved values
 //
-//		_dataMapper			Then name of a function that will be used to map the normally returned data to a new
-//							value.  Is passed two arguments:
-//							type 	- The 'searchString', aka in the set {'Col','Dept','Subj'}
-//							data 	- The data value to map
-//							expects a string back.
+//		_dataMapper				Then name of a function that will be used to map the normally returned data to a new
+//								value.  Is passed two arguments:
+//								type 	- The 'searchString', aka in the set {'Col','Dept','Subj'}
+//								data 	- The data value to map
+//								expects a string back.
 //
 //=================================================================================================
 // Notes:
@@ -478,14 +480,14 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 // Examples
 //======================================================================================================================
 // wfrules:RelatedCrosslistedSlashlistedDepts|function|Related|;
-// RelatedCrosslistedSlashlistedDepts_ecoSystemData:true
+// RelatedCrosslistedSlashlistedDepts_includeEcoSystemData:true
 // RelatedCrosslistedSlashlistedDepts_ecoSystemDataFyi:false
 // RelatedCrosslistedSlashlistedDepts_formFieldVars:crosslisted|courseCode|code
 // RelatedCrosslistedSlashlistedDepts_formFieldVars:slashlisted|courseCode|code
 // RelatedCrosslistedSlashlistedDepts_datamapper:WfDataMapper
 //
 // wfrules:RelatedCrosslistedSlashlistedCols|function|Related|;
-// RelatedCrosslistedSlashlistedCols_ecoSystemData:true
+// RelatedCrosslistedSlashlistedCols_includeEcoSystemData:true
 // RelatedCrosslistedSlashlistedCols_ecoSystemDataFyi:false
 // RelatedCrosslistedSlashlistedCols_formFieldVars:crosslisted|courseCode|code
 // RelatedCrosslistedSlashlistedCols_formFieldVars:slashlisted|courseCode|code
@@ -494,7 +496,7 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 // - OR  - (yields the same results)
 //
 // wfrules:RelatedCrosslistedSlashlistedDepts|function|Related|;
-// Related_ecoSystemData:true
+// Related_includeEcoSystemData:true
 // Related_ecoSystemDataFyi:fyi
 // Related_formFieldVars:crosslisted|courseCode|code
 // Related_formFieldVars:slashlisted|courseCode|code
@@ -565,7 +567,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 			if (includeEcoSystemData === "true") { includeEcoSystemData=true; } else { includeEcoSystemData=false; }
 
 			var ecoSystemDataFyi=getTCFValue(calledAs + "_ecoSystemDataFyi");
-			if (ecoSystemDataFyi === "") ecoSystemDataFyi=getTCFValue(myName + "_includeEcoSystemData");
+			if (ecoSystemDataFyi === "") ecoSystemDataFyi=getTCFValue(myName + "_ecoSystemDataFyi");
 			if (ecoSystemDataFyi === "true") { ecoSystemDataFyi=true; } else { ecoSystemDataFyi=false; }
 
 		// Get variables that have data values
@@ -1084,7 +1086,7 @@ function LookupCode2(lookupType,givenType,givenData,excludeData) {
 //==================================================================================================
 function GetEcoSystemData2(proposalCodes,proposalDepts,data) {
 	var version="1.0.2";
-	var myName="GetEcoSystemData2"; wfDebug(4,'\n\t*** In '+ myName + "(" + version + ") ***");
+	var myName="GetEcoSystemData2"; wfDebug(4,'\n\t*** In '+ myName + " (" + version + ") ***");
 	if (proposalCodes.length === 0) return false;
 	wfDump(5,["\tproposalCodes;"+proposalCodes.toSource(),"\tdata;"+data.toSource()]);
 
@@ -1096,7 +1098,10 @@ function GetEcoSystemData2(proposalCodes,proposalDepts,data) {
 	});
 	var types=[], paths=",course,program,catalog,";
 	if (data.hasOwnProperty("ecoSystemDataTypes")) types=data.ecoSystemDataTypes;
-	if (data.hasOwnProperty("ecoSystemDataPaths")) paths="," + data.ecoSystemDataPaths + ",";
+	if (data.hasOwnProperty("ecoSystemDataPaths")) {
+		if (data.ecoSystemDataPaths !== "")
+			paths="," + data.ecoSystemDataPaths + ",";
+	}
 
 	wfDump(5,["\tproposalSubjs;"+proposalSubjs.toSource(),"\ttypes;"+types.toSource(),"\tpaths;"+paths.toSource()]);
 
@@ -1206,7 +1211,7 @@ wffuncs.wfAttr = function(inval, wfrule, args) {
 //=======================================================================================================================
 GetAttrVal = function(data) {
 	wfDebug(5,"\t*** In GetAttrVal ***");
-	wfDump(5,["\tdata;"+data.toSource()]);
+	wfDump(6,["\tdata;"+data.toSource()]);
 	var reqType=data.request;
 	var optionStr=data.options; 	if (optionStr === undefined) optionStr="";
 	optionStr=optionStr.toLowerCase();
@@ -1235,61 +1240,112 @@ GetAttrVal = function(data) {
 		"\t\tmapValue;"+mapValue,"\t\twfAllcodes;"+wfAllcodes,"\t\twfCimInstance;"+wfCimInstance,"\t\tproposalOnly;"+proposalOnly]);
 
 	var subjects=[], departments=[], colleges=[];
-	// If the request ends in an "s" then get standard values using allcodes functions
-		if (reqType.slice(-1) === "s" && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
+
+	// Look to see if we have tcfdata values for subjects, departments, colleges, if not the the lookup the values
+		subjects=getTCFValue(subjVarName, { delimiter: "\n", retarray: true });
+		if (includeTCA)
+			subjects=subjects.concat(getTCFValue("subject", { data: tcaData, delimiter: "\n", retarray: true }));
+		wfDump(0,["\t\t" + subjVarName+" from tcfdata;"+subjects.toSource()])
+		if (subjects.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
-			departments=wffuncs.getDepartments(subjects);
-			colleges=wffuncs.getColleges(departments);
-			wfDebug(5,"\t\tFrom wffuncs.GetXXXX function calls:")
-			wfDump(5,["\t\tcolleges;"+colleges.toSource(),"\t\tdepartments;"+departments.toSource(),"\t\tsubjects;"+subjects.toSource()+"\n",]);
 		}
 
-	// If we did not find data above then see if there is any data in the tcf file
-		if (subjects.length === 0) {
-			wfDebug(5,"\t\twffuncs.getSubjects returned nothing, checking the '" + subjVarName + "' variable");
-			subjects=getTCFValue(subjVarName, { delimiter: "\n", retarray: true });
-			if (includeTCA)
-				subjects=subjects.concat(getTCFValue("subject", { data: tcaData, delimiter: "\n", retarray: true }));
-			wfDump(0,["\t\t" + subjVarName+" from tcfdata;"+subjects.toSource()])
-		}
-		if (departments.length === 0) {
-			wfDebug(5,"\t\twffuncs.getDepartments returned nothing, checking the '" + deptVarName + "' variable");
-			departments=getTCFValue(deptVarName, { delimiter: "\n", retarray: true });
-			if (includeTCA)
-				departments=departments.concat(getTCFValue("department", { data: tcaData, delimiter: "\n", retarray: true }));
-			if (departments.length === 0 && subjects.length > 0) {
-				resultSet=LookupCode2("dept","subj",subjects);
-				if (resultSet.length > 0) {
-					resultSet.forEach(function(result) {
-						departments.push(result.data);
-					});
-				}
+		departments=getTCFValue(deptVarName, { delimiter: "\n", retarray: true });
+		if (includeTCA)
+			departments=departments.concat(getTCFValue("department", { data: tcaData, delimiter: "\n", retarray: true }));
+		if (departments.length === 0 && subjects.length > 0) {
+			resultSet=LookupCode2("dept","subj",subjects);
+			if (resultSet.length > 0) {
+				resultSet.forEach(function(result) {
+					departments.push(result.data);
+				});
 			}
-			wfDump(0,["\t\t" + deptVarName+" from tcfdata;"+departments.toSource()])
 		}
-		if (colleges.length === 0) {
-			wfDebug(5,"\t\twffuncs.getColleges returned nothing, checking the '" + colVarName + "' variable");
-			colleges=getTCFValue(colVarName, { delimiter: "\n", retarray: true });
-			if (includeTCA)
-				colleges=colleges.concat(getTCFValue("college", { data: tcaData, delimiter: "\n", retarray: true }));
-			if(colleges.length === 0 && subjects.length != 0) {
-				resultSet=LookupCode2("cols","subj",subjects);
-				if (resultSet.length > 0) {
-					resultSet.forEach(function(result) {
-						colleges.push(result.data);
-					});
-				}
-			}
-			if(colleges.length === 0 && departments.length != 0) {
-				resultSet=LookupCode2("cols","dept",departments);
-				if (resultSet.length > 0) {
-					resultSet.forEach(function(result) {
-						colleges.push(result.data);
-					});
-				}
-			}
-			wfDump(0,["\t\t" + colVarName+" from tcfdata;"+colleges.toSource()])
+		wfDump(0,["\t\t" + deptVarName+" from tcfdata;"+departments.toSource()])
+		if (departments.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
+			departments=wffuncs.getDepartments(subjects);
 		}
+
+		colleges=getTCFValue(colVarName, { delimiter: "\n", retarray: true });
+		if (includeTCA)
+			colleges=colleges.concat(getTCFValue("college", { data: tcaData, delimiter: "\n", retarray: true }));
+		if(colleges.length === 0 && subjects.length != 0) {
+			resultSet=LookupCode2("cols","subj",subjects);
+			if (resultSet.length > 0) {
+				resultSet.forEach(function(result) {
+					colleges.push(result.data);
+				});
+			}
+		}
+		if(colleges.length === 0 && departments.length != 0) {
+			resultSet=LookupCode2("cols","dept",departments);
+			if (resultSet.length > 0) {
+				resultSet.forEach(function(result) {
+					colleges.push(result.data);
+				});
+			}
+		}
+		wfDump(0,["\t\t" + colVarName+" from tcfdata;"+colleges.toSource()])
+		if (colleges.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
+			colleges=wffuncs.getColleges(departments);
+		}
+
+
+	// // If the request ends in an "s" then get standard values using allcodes functions
+	// 	if (reqType.slice(-1) === "s" && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
+	// 		subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
+	// 		departments=wffuncs.getDepartments(subjects);
+	// 		colleges=wffuncs.getColleges(departments);
+	// 		wfDebug(5,"\t\tFrom wffuncs.GetXXXX function calls:")
+	// 		wfDump(5,["\t\tcolleges;"+colleges.toSource(),"\t\tdepartments;"+departments.toSource(),"\t\tsubjects;"+subjects.toSource()+"\n",]);
+	// 	}
+
+	// // If we did not find data above then see if there is any data in the tcf file
+	// 	if (subjects.length === 0) {
+	// 		wfDebug(5,"\t\twffuncs.getSubjects returned nothing, checking the '" + subjVarName + "' variable");
+	// 		subjects=getTCFValue(subjVarName, { delimiter: "\n", retarray: true });
+	// 		if (includeTCA)
+	// 			subjects=subjects.concat(getTCFValue("subject", { data: tcaData, delimiter: "\n", retarray: true }));
+	// 		wfDump(0,["\t\t" + subjVarName+" from tcfdata;"+subjects.toSource()])
+	// 	}
+	// 	if (departments.length === 0) {
+	// 		wfDebug(5,"\t\twffuncs.getDepartments returned nothing, checking the '" + deptVarName + "' variable");
+	// 		departments=getTCFValue(deptVarName, { delimiter: "\n", retarray: true });
+	// 		if (includeTCA)
+	// 			departments=departments.concat(getTCFValue("department", { data: tcaData, delimiter: "\n", retarray: true }));
+	// 		if (departments.length === 0 && subjects.length > 0) {
+	// 			resultSet=LookupCode2("dept","subj",subjects);
+	// 			if (resultSet.length > 0) {
+	// 				resultSet.forEach(function(result) {
+	// 					departments.push(result.data);
+	// 				});
+	// 			}
+	// 		}
+	// 		wfDump(0,["\t\t" + deptVarName+" from tcfdata;"+departments.toSource()])
+	// 	}
+	// 	if (colleges.length === 0) {
+	// 		wfDebug(5,"\t\twffuncs.getColleges returned nothing, checking the '" + colVarName + "' variable");
+	// 		colleges=getTCFValue(colVarName, { delimiter: "\n", retarray: true });
+	// 		if (includeTCA)
+	// 			colleges=colleges.concat(getTCFValue("college", { data: tcaData, delimiter: "\n", retarray: true }));
+	// 		if(colleges.length === 0 && subjects.length != 0) {
+	// 			resultSet=LookupCode2("cols","subj",subjects);
+	// 			if (resultSet.length > 0) {
+	// 				resultSet.forEach(function(result) {
+	// 					colleges.push(result.data);
+	// 				});
+	// 			}
+	// 		}
+	// 		if(colleges.length === 0 && departments.length != 0) {
+	// 			resultSet=LookupCode2("cols","dept",departments);
+	// 			if (resultSet.length > 0) {
+	// 				resultSet.forEach(function(result) {
+	// 					colleges.push(result.data);
+	// 				});
+	// 			}
+	// 		}
+	// 		wfDump(0,["\t\t" + colVarName+" from tcfdata;"+colleges.toSource()])
+	// 	}
 
 	// return data based on how we were called
 		var retArray=[];
@@ -2217,3 +2273,4 @@ var wfLibLoaded=true;
 // 10-18-2017 @ 10.50.17 - ("1.8.22")  - dscudiero - Many updates, check comments
 // 10-20-2017 @ 08.20.19 - ("1.8.26")  - dscudiero - Updates to getAttrVal to taken into account that the client may use a different variable for 'college'
 // 10-24-2017 @ 13.53.44 - ("1.8.27")  - dscudiero - Remove debug statements from getAttrVal
+// 10-25-2017 @ 16.44.52 - ("1.8.31")  - dscudiero - Updated GetAttrVal to look at the tcf/tca data first
