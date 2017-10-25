@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.80 # -- dscudiero -- Mon 10/23/2017 @  7:30:27.76
+version=4.3.81 # -- dscudiero -- Wed 10/25/2017 @  8:20:05.76
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="Call SetSiteDirs SetFileExpansion RunSql2 StringFunctions ProtectedCall FindExecutable PushPop"
@@ -85,9 +85,7 @@ fi
 	sqlStmt="select count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA=\"$warehouseDb\") AND (TABLE_NAME=\"$useSiteInfoTable\")"
 	RunSql2 $sqlStmt
 	[[ ${resultSet[0]} -ne 1 ]] && Terminate "Could not locate the load table '$useSiteInfoTable'"
-
-
-Msg3 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
+	Msg3 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 
 #=======================================================================================================================
 # Main
@@ -96,7 +94,7 @@ Msg3 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 	declare -A dbClients
 	unset clientDirs
 
-	## Get clients from the clients transactional table, build a hash table with the clientInfoTable key for each client
+	## Get clients from the clients transactional table, build a hash table with the client key for each client
 		declare -A dbClients
 		sqlStmt="select clientcode,clientkey from clients where is_active = \"Y\""
 		[[ $client != '' ]] && sqlStmt="$sqlStmt and clientcode=\"$client\"";
@@ -241,3 +239,4 @@ Goodbye 0 'alert'
 ## 10-18-2017 @ 13.56.37 - (4.3.70)    - dscudiero - Add debug statements
 ## 10-20-2017 @ 13.11.25 - (4.3.79)    - dscudiero - Fix problem with a missing fi
 ## 10-23-2017 @ 07.30.44 - (4.3.80)    - dscudiero - Tweak messaging
+## 10-25-2017 @ 08.40.03 - (4.3.81)    - dscudiero - Cosmetic/minor change
