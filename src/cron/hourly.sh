@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.6 # -- dscudiero -- Mon 10/16/2017 @ 15:03:26.47
+version=2.2.7 # -- dscudiero -- Wed 10/25/2017 @  9:14:16.36
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -199,15 +199,22 @@ case "$hostName" in
 			RunSql2 $sqlStmt
 			[[ ${#resultSet[@]} -gt 0 ]] && FindExecutable -sh -run perfTest
 		fi
-		FindExecutable -sh -run updateDefaults all
-		CheckMonitorFiles
-		SyncInternalDb
-		#BuildToolsAuthTable
-		SyncCourseleafCgis
-		SyncSkeleton
-		## If noon then update the git repo shadows
-		[[ $(date "+%H") == 12 ]] && FindExecutable -sh -run syncCourseleafGitRepos master
-		[[ $(date "+%H") == 22 ]] && FindExecutable -sh -uselocal -run backupData
+
+		## Run programs/functions
+			pgms=("updateDefaults all" CheckMonitorFiles SyncInternalDb SyncCourseleafCgis SyncSkeleton)
+			for ((i=0; i<${#pgms[@]}; i++)); do
+				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
+				Msg3 "$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
+				sTime=$(date "+%s")
+				TrapSigs 'off'
+				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
+				TrapSigs 'on'
+				Semaphore 'waiton' "$pgmName" 'true'
+				elapTime=$(( $(date "+%s") - $sTime ))
+				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
+			done
+			[[ $(date "+%H") == 12 ]] && FindExecutable -sh -run syncCourseleafGitRepos master
+			[[ $(date "+%H") == 22 ]] && FindExecutable -sh -uselocal -run backupData
 		;;
 	*)
 		sleep 60 ## Wait for perfTest on Mojave to set its semaphore
@@ -222,8 +229,19 @@ case "$hostName" in
 				FindExecutable -sh -run perfTest summary
 			fi
 		fi
-		FindExecutable -sh -run updateDefaults
-		CheckMonitorFiles
+		## Run programs/functions
+			pgms=("updateDefaults" CheckMonitorFiles)
+			for ((i=0; i<${#pgms[@]}; i++)); do
+				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
+				Msg3 "$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
+				sTime=$(date "+%s")
+				TrapSigs 'off'
+				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
+				TrapSigs 'on'
+				Semaphore 'waiton' "$pgmName" 'true'
+				elapTime=$(( $(date "+%s") - $sTime ))
+				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
+			done
 		;;
 esac
 
@@ -277,3 +295,4 @@ return 0
 ## 10-16-2017 @ 13.18.32 - (2.2.4)     - dscudiero - Cosmetic/minor change
 ## 10-16-2017 @ 13.46.10 - (2.2.5)     - dscudiero - Add debug
 ## 10-16-2017 @ 15.03.55 - (2.2.6)     - dscudiero - Remove debug statements
+## 10-25-2017 @ 09.14.38 - (2.2.7)     - dscudiero - Refactored to new structure
