@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.25 # -- dscudiero -- Mon 10/23/2017 @ 13:54:33.25
+version=1.22.30 # -- dscudiero -- Thu 10/26/2017 @  7:42:26.26
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -213,13 +213,12 @@ logInDb=false
 #=======================================================================================================================
 case "$hostName" in
 	mojave)
-
 		## Processing that we want to completed before any cron tasks on other systems have started
+			Msg3; Msg3 "Backing up database tables in $warehouseDb..."
 			mySemaphoreId=$(Semaphore 'set' $myName)
 			## Backup database tables
-			echo
 			for table in $clientInfoTable $siteInfoTable $siteAdminsTable $employeeTable ; do
-				Msg3 "Backing up '$table'..."
+				Msg3 "^$table..."
 				sqlStmt="drop table if exists ${table}Bak"
 				RunSql2 $sqlStmt
 				sqlStmt="create table ${table}Bak like ${table}"
@@ -231,47 +230,24 @@ case "$hostName" in
 			done
 			echo
 			Semaphore 'clear' $mySemaphoreId
+			Msg3 "...done"
 
 		## Performance test
-			Msg3 "Running perfTest..."
-			FindExecutable perfTest -sh -run
-
-		## Compare number of clients in the warehouse vs the transactional if more in transactional then runClientListReport=true
-			#runClientListReport=$(CheckClientCount)
+			## Make sure we have a sites table before running perfTest
+			sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
+			RunSql2 $sqlStmt
+			if [[ ${#resultSet[@]} -gt 0 ]]; then
+				pgm="perfTest"
+				Msg3 "Running $pgm..."
+				FindExecutable perfTest -sh -run
+				Msg3 "...$pgm done"
+			fi
 
 		## Copy the contacts db from internal
 			Msg3 "Copying contacts.sqlite files to $contactsSqliteFile..."
 			cp $clientsTransactionalDb/contacts.sqlite $contactsSqliteFile
 			touch $(dirname $contactsSqliteFile)/contacts.syncDate
-			Msg3 "^...done"
-
-		## Build the clientInfoTable
-			Msg3 "Running BuildClientInfoTable..."
-			FindExecutable buildClientInfoTable -sh -run $scriptArgs | Indent
-			Msg3 "Running BuildClientInfoTable) done"
-
-		## Check to see of clients table has data
-			sqlStmt="select count(*) from $clientInfoTable"
-			RunSql2 $sqlStmt
-			if [[ ${#resultSet[@]} -eq 0 ]]; then
-				Error "Clients table is empty, skipping 'buildSiteInfoTable', semaphore kept in place"
-			else
-				## Build siteinfotabe and siteadmins table
-				FindExecutable buildSiteInfoTable -sh -run $scriptArgs | Indent
-			fi
-
-		## Build employee table
-			BuildEmployeeTable | Indent
-
-		## Build the qaStatus table
-			FindExecutable buildQaStatusTable -sh -run $scriptArgs | Indent
-
-		## Common Checks
-			FindExecutable checkCgiPermissions -sh -run $scriptArgs
-			FindExecutable checkPublishSettings -sh -run -fix $scriptArgs
-
-		## Update the defaults data for this host
-			FindExecutable updateDefaults -sh -run all $scriptArgs
+			Msg3 "...done"
 
 		## Scratch copy the skeleton shadow
 			Msg3 "Scratch copying the skeleton shadow..."
@@ -284,57 +260,51 @@ case "$hostName" in
 			touch $skeletonRoot/.syncDate
 			Msg3 "^...done"
 
-		# ## Clean up the tools bin directory.
-		# 	#CleanToolsBin
+		## Run programs/functions
+			pgms=(buildClientInfoTable buildSiteInfoTable BuildEmployeeTable buildQaStatusTable checkCgiPermissions checkPublishSettings)
+			pgms+=(updateDefaults syncCourseleafGitRepos BuildCourseleafDataTable "cleanDev -daemon")
+			for ((i=0; i<${#pgms[@]}; i++)); do
+				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
+				Msg3 "$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
+				sTime=$(date "+%s")
+				TrapSigs 'off'
+				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
+				TrapSigs 'on'
+				Semaphore 'waiton' "$pgmName" 'true'
+				elapTime=$(( $(date "+%s") - $sTime ))
+				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
+			done
 
-		## Sync GIT Shadow
-			FindExecutable syncCourseleafGitRepos -sh -run $scriptArgs | Indent
-
-		## Build the courseleafData table
-			BuildCourseleafDataTable | Indent
-
-		## Rebuild Internal pages to pickup any new database information
-			## Wait for all of the buildSiteInfoTable process to finish
-			Msg3 "\nWaiting on 'buildSiteInfoTable'..."
-			Semaphore 'waiton' 'buildSiteInfoTable' 'true'
-			Msg3 "^'buildSiteInfoTable' completed, continuing..."
-
+		## Rebuild the internal site pages 
 			Msg3 "Rebuilding Internal pages"
 			RunCourseLeafCgi "$stageInternal" "-r /clients"
 			RunCourseLeafCgi "$stageInternal" "-r /support/tools"
 			RunCourseLeafCgi "$stageInternal" "-r /support/qa"
-			Msg3 "^buildClientInfoTable & buildSiteInfoTable Done"
 
-		# ## Create a clone of the warehouse db
-		# 	Msg3 "Creating '$warehouseDev' database..."
-		# 	tmpConnectString=$(sed "s/Read/Admin/" <<< ${mySqlConnectString% *})
-
-		# 	mysqldump $tmpConnectString $warehouseProd > /tmp/warehouse.sql;
-		# 	mysql $tmpConnectString -e "drop database if exists $warehouseDev"
-		# 	mysqladmin $tmpConnectString create $warehouseDev
-
-		# 	mysql $tmpConnectString $warehouseDev < /tmp/warehouse.sql
-		# 	[[ -f /tmp/warehouse.sql ]] && rm -f /tmp/warehouse.sql
-
-		## Reports
-			qaEmails='sjones@leepfrog.com,mbruening@leepfrog.com,jlindeman@leepfrog.com'
-			FindExecutable scriptsAndReports -sh -run reports qaStatusShort -quiet -email \"$qaEmails\" $scriptArgs | Indent
-
-
-			## Build a list of clients and contact info for Shelia
-			#[[ $runClientListReport == true ]] && Call 'reports' "clientList -quiet -email 'dscudiero@leepfrog.com,sfrickson@leepfrog.com' $scriptArgs"
-
-			tzEmails='dscudiero@leepfrog.com,jlindeman@leepfrog.com'
-			[[ $(date +%d -d tomorrow) == '01' ]] && FindExecutable scriptsAndReports -sh -run reports clientTimezone -quiet -email \"$tzEmails\" $scriptArgs | Indent
-
+		## Run Reports
+			qaStatusShortEmails='sjones@leepfrog.com,mbruening@leepfrog.com,jlindeman@leepfrog.com'
+			clientTimezoneEmails='dscudiero@leepfrog.com,jlindeman@leepfrog.com'
+			reports=("qaStatusShort -email \"$qaStatusShortEmails\"" "clientTimezone -email \"$clientTimezoneEmails\"")
+			for ((i=0; i<${#reports[@]}; i++)); do
+				report="${reports[$i]}"; reportName="${report%% *}"; reportArgs="${report##* }"; [[ $reportName == $reportArgs ]] && unset reportArgs
+				Msg3 "$(date +"%m/%d@%H:%M") - Running $reportName $reportArgs..."
+				sTime=$(date "+%s")
+				TrapSigs 'off'
+				"FindExecutable scriptsAndReports -sh -run reports $report -quiet $reportArgs $scriptArgs" | Indent
+				TrapSigs 'on'
+				Semaphore 'waiton' "$reportName" 'true'
+				elapTime=$(( $(date "+%s") - $sTime ))
+				Msg3 "...$reportName done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
+			done
 
 		## On the last day of the month roll-up the log files
 		  	if [[ $(date +"%d") == $(date -d "$(date +"%m")/1 + 1 month - 1 day" "+%d") ]]; then
 		  		Msg3 "Rolling up monthly log files"
-				cd $TOOLSPATH/Logs
+				pushd $TOOLSPATH/Logs >& /dev/null
 				SetFileExpansion 'on'
 				tar -cvzf "$(date '+%b-%Y').tar.gz" $(date +"%m")-* --remove-files > /dev/null 2>&1
 				SetFileExpansion
+				popd  >& /dev/null
 		  	fi
 
 		 ## Check that all things ran properly, otherwise revert the databases
@@ -355,9 +325,6 @@ case "$hostName" in
 			done
 			[[ $errorDetected == true ]] && Terminate 'One or more of the database load procedures failed, please review messages'
 
-		## Remove private dev sites marked for auto deletion
-			FindExecutable cleanDev -sh -run daemon $scriptArgs
-
 		;; ## mojave
 
 	*) ## build7
@@ -367,21 +334,27 @@ case "$hostName" in
 			Msg3 "^'$myName' completed, continuing..."
 
 		## Wait for the perftest process on mojave to complete
-			Msg3 "Waiting on 'perftest'..."
-			Semaphore 'waiton' 'perftest'
-			Msg3 "^'perftest' completed, continuing..."
-			FindExecutable perfTest -sh -run
-			FindExecutable perfTest -sh -run summary
+			## Make sure we have a sites table before running perfTest
+			sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
+			RunSql2 $sqlStmt
+			if [[ ${#resultSet[@]} -gt 0 ]]; then
+				Semaphore 'waiton' 'perftest'
+				FindExecutable perfTest -sh -run
+				FindExecutable perfTest -sh -run summary
+			fi
 
-		## Build sites and siteadmins table
-			FindExecutable buildSiteInfoTable -sh -run -table ${siteInfoTable} $scriptArgs
-
-		## Common Checks
-			FindExecutable checkCgiPermissions -sh-run -fix $scriptArgs
-			FindExecutable checkPublishSettings -sh -run  $scriptArgs
-
-		## Update the defaults data for this host
-			FindExecutable updateDefaults -sh -run  $scriptArgs
+		## Run programs/functions
+			pgms="buildSiteInfoTable checkCgiPermissions checkPublishSettings updateDefaults"
+			for pgm in $pgms; do
+				Msg3 "Running $pgm..."
+				sTime=$(date "+%s")
+				TrapSigs 'off'
+				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgm | Indent; } || { FindExecutable $pgm -sh -run $scriptArgs | Indent; }
+				TrapSigs 'on'
+				Semaphore 'waiton' "$pgm" 'true'
+				elapTime=$(( $(date "+%s") - $sTime ))
+				Msg3 "...$pgm done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
+			done
 
 		## Remove private dev sites marked for auto deletion
 			FindExecutable cleanDev -sh -run -daemon $scriptArgs
@@ -477,3 +450,4 @@ return 0
 ## 10-20-2017 @ 08.20.40 - (1.22.23)   - dscudiero - s
 ## 10-23-2017 @ 11.50.03 - (1.22.24)   - dscudiero - Uncommented the report calls
 ## 10-23-2017 @ 13.54.41 - (1.22.25)   - dscudiero - Cosmetic/minor change
+## 10-26-2017 @ 07.42.51 - (1.22.30)   - dscudiero - Refactored how we call scripts
