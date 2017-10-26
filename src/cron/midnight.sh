@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.30 # -- dscudiero -- Thu 10/26/2017 @  7:42:26.26
+version=1.22.31 # -- dscudiero -- Thu 10/26/2017 @ 12:16:35.63
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -265,7 +265,7 @@ case "$hostName" in
 			pgms+=(updateDefaults syncCourseleafGitRepos BuildCourseleafDataTable "cleanDev -daemon")
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
-				Msg3 "$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
+				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
 				sTime=$(date "+%s")
 				TrapSigs 'off'
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
@@ -287,7 +287,7 @@ case "$hostName" in
 			reports=("qaStatusShort -email \"$qaStatusShortEmails\"" "clientTimezone -email \"$clientTimezoneEmails\"")
 			for ((i=0; i<${#reports[@]}; i++)); do
 				report="${reports[$i]}"; reportName="${report%% *}"; reportArgs="${report##* }"; [[ $reportName == $reportArgs ]] && unset reportArgs
-				Msg3 "$(date +"%m/%d@%H:%M") - Running $reportName $reportArgs..."
+				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $reportName $reportArgs..."
 				sTime=$(date "+%s")
 				TrapSigs 'off'
 				"FindExecutable scriptsAndReports -sh -run reports $report -quiet $reportArgs $scriptArgs" | Indent
@@ -344,20 +344,18 @@ case "$hostName" in
 			fi
 
 		## Run programs/functions
-			pgms="buildSiteInfoTable checkCgiPermissions checkPublishSettings updateDefaults"
-			for pgm in $pgms; do
-				Msg3 "Running $pgm..."
+			pgms=(buildSiteInfoTable checkCgiPermissions checkPublishSettings updateDefaults "cleanDev -daemon")
+			for ((i=0; i<${#pgms[@]}; i++)); do
+				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
+				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
 				sTime=$(date "+%s")
 				TrapSigs 'off'
-				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgm | Indent; } || { FindExecutable $pgm -sh -run $scriptArgs | Indent; }
+				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
 				TrapSigs 'on'
-				Semaphore 'waiton' "$pgm" 'true'
+				Semaphore 'waiton' "$pgmName" 'true'
 				elapTime=$(( $(date "+%s") - $sTime ))
-				Msg3 "...$pgm done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
+				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
 			done
-
-		## Remove private dev sites marked for auto deletion
-			FindExecutable cleanDev -sh -run -daemon $scriptArgs
 		;;
 esac
 
@@ -451,3 +449,4 @@ return 0
 ## 10-23-2017 @ 11.50.03 - (1.22.24)   - dscudiero - Uncommented the report calls
 ## 10-23-2017 @ 13.54.41 - (1.22.25)   - dscudiero - Cosmetic/minor change
 ## 10-26-2017 @ 07.42.51 - (1.22.30)   - dscudiero - Refactored how we call scripts
+## 10-26-2017 @ 12.16.58 - (1.22.31)   - dscudiero - Tweak messaging
