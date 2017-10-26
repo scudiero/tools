@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.52" # -- dscudiero -- Thu 10/26/2017 @  8:02:49.74
+version="1.4.52" # -- dscudiero -- Thu 10/26/2017 @  8:07:28.06
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -306,7 +306,7 @@ sTime=$(date "+%s")
 		[[ $batchMode != true && $myQuiet != true ]] && echo
 		TrapSigs 'off'
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
-		(source $executeFile $scriptArgs) >& | tee -a $logFile
+		(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile
 		rc=$?
 
 ## Should never get here but just in case
@@ -911,4 +911,4 @@ fi
 ## 10-23-2017 @ 16.21.45 - ("1.4.48")  - dscudiero - Make sure we can list the log directories
 ## 10-23-2017 @ 16.28.49 - ("1.4.49")  - dscudiero - Cosmetic/minor change
 ## 10-24-2017 @ 07.57.46 - ("1.4.50")  - dscudiero - Cosmetic/minor change
-## 10-26-2017 @ 08.03.02 - ("1.4.52")  - dscudiero - Tewak log file redirection
+## 10-26-2017 @ 08.07.31 - ("1.4.52")  - dscudiero - Cosmetic/minor change
