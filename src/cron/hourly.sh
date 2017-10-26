@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.10 # -- dscudiero -- Thu 10/26/2017 @ 12:14:11.51
+version=2.2.12 # -- dscudiero -- Thu 10/26/2017 @ 16:02:27.02
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -199,11 +199,26 @@ case "$hostName" in
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
 				TrapSigs 'on'
 				Semaphore 'waiton' "$pgmName" 'true'
-				elapTime=$(( $(date "+%s") - $sTime ))
+				elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
 				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
 			done
-			[[ $(date "+%H") == 12 ]] && FindExecutable -sh -run syncCourseleafGitRepos master
-			[[ $(date "+%H") == 22 ]] && FindExecutable -sh -uselocal -run backupData
+
+			if [[ $(date "+%H") == 12 ||  $(date "+%H") == 22 ]]; then
+				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
+				TrapSigs 'off'
+				if [[ $(date "+%H") == 12 ]]; then 
+					{ Msg3 "\n$(date +"%m/%d@%H:%M") - Running syncCourseleafGitRepos master..."
+					FindExecutable -sh -run syncCourseleafGitRepos master
+					elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
+					Msg3 "...syncCourseleafGitRepos done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
+				fi
+				if [[ $(date "+%H") == 22 ]]; then 
+					{ Msg3 "\n$(date +"%m/%d@%H:%M") - Running syncCourseleafGitRepos master..."
+					FindExecutable -sh -uselocal -run backupData
+					elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
+					Msg3 "...backupData done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
+				fi
+			fi
 		;;
 	*)
 		sleep 60 ## Wait for perfTest on Mojave to set its semaphore
@@ -228,7 +243,7 @@ case "$hostName" in
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
 				TrapSigs 'on'
 				Semaphore 'waiton' "$pgmName" 'true'
-				elapTime=$(( $(date "+%s") - $sTime ))
+				elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1
 				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
 			done
 		;;
@@ -288,3 +303,4 @@ return 0
 ## 10-25-2017 @ 11.05.31 - (2.2.8)     - dscudiero - Add standardIncludes to the includes list
 ## 10-26-2017 @ 11.13.14 - (2.2.9)     - dscudiero - Remove extra 'starting' messages from the functions
 ## 10-26-2017 @ 12.16.52 - (2.2.10)    - dscudiero - Tweak messaging
+## 10-26-2017 @ 16.03.14 - (2.2.12)    - dscudiero - add messaging arround the 12 noon and 22 hour calls
