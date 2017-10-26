@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.8 # -- dscudiero -- Wed 10/25/2017 @ 11:05:10.98
+version=2.2.9 # -- dscudiero -- Thu 10/26/2017 @ 11:12:54.49
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -29,7 +29,6 @@ scriptArgs="$*"
 #=======================================================================================================================
 # Synchronize the internal database shadow with master
 function SyncInternalDb {
-	echo; Msg3 "*** $FUNCNAME -- Starting ***"
 	srcDir=$clientsTransactionalDb
 	tgtDir=$internalContactsDbShadow
 	SetFileExpansion 'on'
@@ -39,14 +38,12 @@ function SyncInternalDb {
 	touch $tgtDir/.syncDate
 	cwd=$(pwd); cd $tgtDir; chgrp -R leepfrog *; chgrp leepfrog .*; cd "$cwd"
 	SetFileExpansion
-	Msg3 "*** $FUNCNAME -- Completed ***"
 	return 0
 }
 
 #=======================================================================================================================
 # Synchronize the courseleaf cgi's  shadow with master
 function SyncCourseleafCgis {
-	echo; Msg3 "*** $FUNCNAME -- Starting ***"
 	srcDir=/mnt/dev6/web/cgi
 	tgtDir=$cgisRoot
 	rsync -aq $srcDir/ $tgtDir 2>&1
@@ -55,14 +52,12 @@ function SyncCourseleafCgis {
 	SetFileExpansion 'on'
 	cwd=$(pwd); cd $tgtDir; chgrp -R leepfrog *; chgrp leepfrog .*; cd "$cwd"
 	SetFileExpansion
-	Msg3 "*** $FUNCNAME -- Completed ***"
 	return 0
 }
 
 #=======================================================================================================================
 # Synchronize the skeleton shadow with master
 function SyncSkeleton {
-	echo; Msg3 "*** $FUNCNAME -- Starting ***"
 	srcDir=/mnt/dev6/web/_skeleton
 	tgtDir=$skeletonRoot
 
@@ -86,14 +81,12 @@ function SyncSkeleton {
 		SetFileExpansion
 
 	[[ -f "$tmpFile" ]] && rm "$tmpFile"
-	Msg3 "*** $FUNCNAME -- Completed ***"
 	return 0
 } #SyncSkeleton
 
 #=======================================================================================================================
 # Check Monitored files for changes
 function CheckMonitorFiles {
-	echo; Msg3 "*** $FUNCNAME -- Starting ***"
 	local tmpFile=$(MkTmpFile $FUNCNAME)
 
 	declare -A userNotifies
@@ -141,14 +134,12 @@ function CheckMonitorFiles {
 		done;
 
 	[[ -f "$tmpFile" ]] && rm "$tmpFile"
-	Msg3 "*** $FUNCNAME -- Completed ***"
 	return 0
 } #CheckMonitorFiles
 
 #=======================================================================================================================
 function BuildToolsAuthTable() {
 	local tmpFile=$(MkTmpFile $FUNCNAME)
-	echo; Msg3 "*** $FUNCNAME -- Starting ***"
 
 	## Build the toolsgroups table from the role data from the stage-internal site
 		pw=$(GetPW 'stage-internal')
@@ -182,7 +173,6 @@ function BuildToolsAuthTable() {
 		fi
 
 		[[ -f "$tmpFile" ]] && rm "$tmpFile"
-		Msg3 "*** $FUNCNAME -- Completed ***"
 	return 0
 } #BuildToolsAuthTable
 
@@ -296,3 +286,4 @@ return 0
 ## 10-16-2017 @ 15.03.55 - (2.2.6)     - dscudiero - Remove debug statements
 ## 10-25-2017 @ 09.14.38 - (2.2.7)     - dscudiero - Refactored to new structure
 ## 10-25-2017 @ 11.05.31 - (2.2.8)     - dscudiero - Add standardIncludes to the includes list
+## 10-26-2017 @ 11.13.14 - (2.2.9)     - dscudiero - Remove extra 'starting' messages from the functions
