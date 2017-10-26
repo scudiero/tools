@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.9 # -- dscudiero -- Thu 10/26/2017 @ 11:12:54.49
+version=2.2.10 # -- dscudiero -- Thu 10/26/2017 @ 12:14:11.51
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -193,7 +193,7 @@ case "$hostName" in
 			pgms=("updateDefaults all" CheckMonitorFiles SyncInternalDb SyncCourseleafCgis SyncSkeleton)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
-				Msg3 "$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
+				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
 				sTime=$(date "+%s")
 				TrapSigs 'off'
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
@@ -222,7 +222,7 @@ case "$hostName" in
 			pgms=("updateDefaults" CheckMonitorFiles)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
-				Msg3 "$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
+				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
 				sTime=$(date "+%s")
 				TrapSigs 'off'
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
@@ -287,3 +287,4 @@ return 0
 ## 10-25-2017 @ 09.14.38 - (2.2.7)     - dscudiero - Refactored to new structure
 ## 10-25-2017 @ 11.05.31 - (2.2.8)     - dscudiero - Add standardIncludes to the includes list
 ## 10-26-2017 @ 11.13.14 - (2.2.9)     - dscudiero - Remove extra 'starting' messages from the functions
+## 10-26-2017 @ 12.16.52 - (2.2.10)    - dscudiero - Tweak messaging
