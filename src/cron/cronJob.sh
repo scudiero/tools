@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.18 # -- dscudiero -- Tue 10/24/2017 @ 13:52:37.19
+version=2.1.19 # -- dscudiero -- Thu 10/26/2017 @  7:57:07.13
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -51,12 +51,12 @@ originalArgStr="$*"
 	executeFile=$(FindExecutable "$callScriptName" '-cron')
 
 	echo -e "\t-- $hostName - Starting $callScriptName from '$executeFile', Args: $scriptArgs $callScriptArgs" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
-	echo -e "\n$(date) -- Calling script '$callScriptName':\n\t$executeFile $callScriptArgs\n" > "$logFile" 2>&1
+	echo -e "\n$(date) -- Calling script '$callScriptName':\n\t$executeFile $callScriptArgs\n" > "$logFile"
 
 	myNameSave="$myName"; myPathSave="$myPath"
 	myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 	myPath="$(dirname $executeFile)"
-	source $executeFile $scriptArgs $callScriptArgs 2>&1 >> "$logFile"
+	source $executeFile $scriptArgs $callScriptArgs >> "$logFile"  2>&1
 	echo -e "\t-- $hostName - $callScriptName done" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	mv $logFile $logFile.bak
  	cat $logFile.bak | sed "s/\x1B\[[0-9;]*[a-zA-Z]//g" | tr -d '\007' > $logFile
@@ -133,3 +133,4 @@ exit 0
 ## 10-24-2017 @ 08.02.04 - (2.1.16)    - dscudiero - Cosmetic/minor change
 ## 10-24-2017 @ 09.15.44 - (2.1.17)    - dscudiero - Cosmetic/minor change
 ## 10-24-2017 @ 13.52.52 - (2.1.18)    - dscudiero - Fix log directory creation
+## 10-26-2017 @ 07.59.35 - (2.1.19)    - dscudiero - tweak log file redirects
