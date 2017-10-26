@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.50 # -- dscudiero -- Thu 10/26/2017 @  8:09:26.06
+version=3.13.52 # -- dscudiero -- Thu 10/26/2017 @  8:12:10.72
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -9,8 +9,6 @@ Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="Script dispatcher"
-
-dump -ifme -p originalArgStr
 
 #=======================================================================================================================
 # Tools scripts selection front end
@@ -264,7 +262,6 @@ dump ifme mode
 [[ $mode == 'reports' || $mode == 'scripts' ]] && shift && originalArgStr="$*"
 [[ -z $mode ]] && mode='scripts'
 [[ $mode != 'scripts' && $mode != 'reports' ]] && Terminate "Invalid mode ($mode) specified on call"
-dump -1 -p -ifme originalArgStr
 
 ## Check to see if the first argument is a report name
 	## Is it a client name?
@@ -331,8 +328,7 @@ fi
 ## parse arguments
 #=======================================================================================================================
 Hello
-Msg3 "^Your authorization groups: $(sed -i "/,/, /g" <<< $UsersAuthGroups)"
-
+Msg3 "^Your authorization groups: $(sed 's/,/, /g' <<< \"$UsersAuthGroups\")"
 helpSet='script,client'
 parseQuiet=true
 GetDefaultsData $myName -fromFiles
@@ -530,3 +526,4 @@ Goodbye 0
 ## 10-23-2017 @ 16.28.51 - (3.13.47)   - dscudiero - Cosmetic/minor change
 ## 10-26-2017 @ 08.05.37 - (3.13.48)   - dscudiero - display the users authorization groups
 ## 10-26-2017 @ 08.09.32 - (3.13.50)   - dscudiero - Cosmetic/minor change
+## 10-26-2017 @ 08.13.21 - (3.13.52)   - dscudiero - tweak the authorization groups output
