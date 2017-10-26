@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.48 # -- dscudiero -- Thu 10/26/2017 @  8:05:18.87
+version=3.13.50 # -- dscudiero -- Thu 10/26/2017 @  8:09:26.06
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -331,7 +331,7 @@ fi
 ## parse arguments
 #=======================================================================================================================
 Hello
-Msg3 "Your authorization groups: $UsersAuthGroups"
+Msg3 "^Your authorization groups: $(sed -i "/,/, /g" <<< $UsersAuthGroups)"
 
 helpSet='script,client'
 parseQuiet=true
@@ -529,3 +529,4 @@ Goodbye 0
 ## 10-23-2017 @ 16.21.56 - (3.13.46)   - dscudiero - Make sure we can list the log directories
 ## 10-23-2017 @ 16.28.51 - (3.13.47)   - dscudiero - Cosmetic/minor change
 ## 10-26-2017 @ 08.05.37 - (3.13.48)   - dscudiero - display the users authorization groups
+## 10-26-2017 @ 08.09.32 - (3.13.50)   - dscudiero - Cosmetic/minor change
