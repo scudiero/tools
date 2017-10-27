@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.9 # -- dscudiero -- Fri 10/27/2017 @ 10:20:50.04
+version=2.4.12 # -- dscudiero -- Fri 10/27/2017 @ 10:33:26.63
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -15,7 +15,6 @@ echo;
 echo "$myName (buildClientInfoTable) starting"; 
 echo "\$originalArgStr = '$originalArgStr'"; 
 echo
-exit
 
 #=======================================================================================================================
 # Synchronize client data from the transactional sqlite db and the data warehouse
@@ -42,7 +41,6 @@ function parseArgs-buildClientInfoTable  { # or parseArgs-local
 fork=false
 processNotify=30
 forkCntr=0; cntr=0;
-[[ $fork == true ]] && forkStr='fork' || unset forkStr
 
 ## Find the helper script location
 	workerScript='insertClientInfoRec'
@@ -64,8 +62,6 @@ if [[ -n $ignoreList ]]; then
 	done
 fi
 
-[[ $testMode == true ]] && export warehousedb='warehouseDev'
-
 #=======================================================================================================================
 # Standard argument parsing and initialization
 #=======================================================================================================================
@@ -80,6 +76,9 @@ ParseArgsStd
 #=======================================================================================================================
 # Main
 #=======================================================================================================================
+[[ $fork == true ]] && forkStr='&' || unset forkStr
+[[ $testMode == true ]] && export warehousedb='warehouseDev'
+
 ## Get list of clients from the transactional system
 	if [[ -n $client ]]; then
 		clients+=($client);
@@ -123,7 +122,7 @@ ParseArgsStd
 		unset msgPrefix
 		[[ $fork == true ]] && msgPrefix='Forking off' || msgPrefix='Processing'
 		[[ $batchMode != true ]] && Msg3 "^$msgPrefix $client ($clientCntr / ${#clients[@]})..."
-		source "$workerScriptFile" "$forkStr" "$addedCalledScriptArgs"
+		source "$workerScriptFile" "$addedCalledScriptArgs"  "$forkStr" 
 		rc=$?
 		(( forkCntr+=1 ))
 		## Wait for forked process to finish, only run maxForkedProcesses at a time
