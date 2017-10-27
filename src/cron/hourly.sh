@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.14 # -- dscudiero -- Fri 10/27/2017 @  7:11:19.63
+version=2.2.15 # -- dscudiero -- Fri 10/27/2017 @  7:29:36.64
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -212,10 +212,14 @@ case "$hostName" in
 					Msg3 "...syncCourseleafGitRepos done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
 				fi
 				if [[ $(date "+%H") == 22 ]]; then 
-					Msg3 "\n$(date +"%m/%d@%H:%M") - Running syncCourseleafGitRepos master..."
+					Msg3 "\n$(date +"%m/%d@%H:%M") - Running backupData master..."
 					TrapSigs 'off'; FindExecutable -sh -uselocal -run backupData; TrapSigs 'on'
 					elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
 					Msg3 "...backupData done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
+					## Remove all hourly log files older than 24 hrs
+					pushd "$(dirname "$logFile")" >& /dev/null
+					find . -mtime +0 -exec rm -f '{}' \;
+					popd >& /dev/null
 				fi
 			fi
 		;;
@@ -304,3 +308,4 @@ return 0
 ## 10-26-2017 @ 16.03.14 - (2.2.12)    - dscudiero - add messaging arround the 12 noon and 22 hour calls
 ## 10-27-2017 @ 07.02.09 - (2.2.13)    - dscudiero - Fix syntax error introduced with last update
 ## 10-27-2017 @ 07.15.15 - (2.2.14)    - dscudiero - Misc cleanup
+## 10-27-2017 @ 07.30.18 - (2.2.15)    - dscudiero - Cleanup old log files every night
