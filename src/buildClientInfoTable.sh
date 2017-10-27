@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.27 # -- dscudiero -- Fri 10/27/2017 @ 12:26:04.26
+version=2.4.28 # -- dscudiero -- Fri 10/27/2017 @ 12:40:49.77
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -41,15 +41,16 @@ forkCntr=0; cntr=0;
 
 echo; 
 echo "$myName (buildClientInfoTable) starting"; 
+echo "\$userName = '$userName'"; 
 echo "\$originalArgStr = '$originalArgStr'"; 
 echo
-echo "HERE HERE HERE";
+echo "HERE 1 HERE 1 HERE";
 	workerScript='insertClientInfoRec'
 echo "\$workerScript = '$workerScript'"; 
 	# workerScriptFile="$(FindExecutable $workerScript -sh)"
 FindExecutable $workerScript -sh
 
-echo "HERE HERE HERE";
+echo "HERE 2 HERE 2 HERE";
 echo "\$workerScriptFile = '$workerScriptFile'"; 
 exit
 
