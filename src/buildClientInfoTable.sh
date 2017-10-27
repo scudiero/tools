@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.31 # -- dscudiero -- Fri 10/27/2017 @ 13:31:29.74
+version=2.4.32 # -- dscudiero -- Fri 10/27/2017 @ 13:33:31.76
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -36,29 +36,25 @@ function parseArgs-buildClientInfoTable  { # or parseArgs-local
 fork=false
 processNotify=30
 forkCntr=0; cntr=0;
+addedCalledScriptArgs="-secondaryMessagesOnly"
 
 ## Find the helper script location
 	workerScript='insertClientInfoRec'
 	workerScriptFile="$(FindExecutable $workerScript -sh)"
-echo "\$workerScriptFile = '$workerScriptFile'"; 
-exit
-
 	[[ -z $workerScriptFile ]] && Terminate "Could find the workerScriptFile file ('$workerScript')"
 
-addedCalledScriptArgs="-secondaryMessagesOnly"
-
 ## Local variable initialization
-GetDefaultsData $myName
-unset tokens ignoreShares ignoreSites
-if [[ -n $ignoreList ]]; then
-	tokens+=("$(cut -d' ' -f1 <<< $ignoreList)")
-	#tokens+=("$(cut -d' ' -f2 <<< $ignoreList)")
-	for token in "${tokens[@]}"; do
-		tokenVar=$(cut -d ':' -f1 <<< $token)
-		tokenVal=$(cut -d ':' -f2- <<< $token)
-		eval $tokenVar="$tokenVal"
-	done
-fi
+	GetDefaultsData $myName
+	unset tokens ignoreShares ignoreSites
+	if [[ -n $ignoreList ]]; then
+		tokens+=("$(cut -d' ' -f1 <<< $ignoreList)")
+		#tokens+=("$(cut -d' ' -f2 <<< $ignoreList)")
+		for token in "${tokens[@]}"; do
+			tokenVar=$(cut -d ':' -f1 <<< $token)
+			tokenVal=$(cut -d ':' -f2- <<< $token)
+			eval $tokenVar="$tokenVal"
+		done
+	fi
 
 #=======================================================================================================================
 # Standard argument parsing and initialization
