@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.4 # -- dscudiero -- Fri 10/27/2017 @  9:26:16.73
+version=2.4.6 # -- dscudiero -- Fri 10/27/2017 @  9:53:33.12
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -95,8 +95,6 @@ ParseArgsStd
 	Msg3 "Database: $warehouseDb"
 	Msg3 "Table: $useClientInfoTable"
 
-exit
-
 ## Table management
 	if [[ $inPlace != true && -z $client ]]; then
 		## Create a temporary copy of the clients table, load new data to that table
@@ -139,6 +137,9 @@ exit
 	fi
 
 ## Swap client tables
+echo; echo "done done done"; echo
+Goodbye 0
+
 	if [[ $inPlace != true ]]; then
 		[[ $batchMode != true ]] && Msg3 "^Swapping databases ..."
 		sqlStmt="select count(*) from ${clientInfoTable}New"
