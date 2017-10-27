@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.12 # -- dscudiero -- Fri 10/27/2017 @ 10:33:26.63
+version=2.4.15 # -- dscudiero -- Fri 10/27/2017 @ 11:02:43.45
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -46,6 +46,10 @@ forkCntr=0; cntr=0;
 	workerScript='insertClientInfoRec'
 	workerScriptFile="$(FindExecutable $workerScript -sh)"
 	[[ -z $workerScriptFile ]] && Terminate "Could find the workerScriptFile file ('$workerScript')"
+
+echo "\$workerScript = '$workerScript'"; 
+echo "\$workerScriptFile = '$workerScriptFile'"; 
+exit
 
 addedCalledScriptArgs="-secondaryMessagesOnly"
 
@@ -122,7 +126,9 @@ ParseArgsStd
 		unset msgPrefix
 		[[ $fork == true ]] && msgPrefix='Forking off' || msgPrefix='Processing'
 		[[ $batchMode != true ]] && Msg3 "^$msgPrefix $client ($clientCntr / ${#clients[@]})..."
-		source "$workerScriptFile" "$addedCalledScriptArgs"  "$forkStr" 
+echo; echo source "$workerScriptFile" "$addedCalledScriptArgs"  "$forkStr"; echo
+exit
+		source "$workerScriptFile" "$addedCalledScriptArgs"  "$forkStr"
 		rc=$?
 		(( forkCntr+=1 ))
 		## Wait for forked process to finish, only run maxForkedProcesses at a time
