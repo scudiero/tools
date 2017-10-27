@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.114 # -- dscudiero -- Fri 10/27/2017 @ 16:00:55.71
+version=2.3.115 # -- dscudiero -- Fri 10/27/2017 @ 16:13:01.38
 #===================================================================================================
 TrapSigs 'on'
 
@@ -125,7 +125,7 @@ Dump -1 -n client
 	for rep in $(tr ',' ' '<<< $reps); do unset $rep; done
 	fields="LOWER(clientroles.role),employees.db_firstname || ' ' || employees.db_lastname || '/' || employees.db_email"
 	dbs="clientroles,employees"
-	whereClause="clientroles.employeekey=employees.db_employeekey and clientroles.clientkey=$idx"
+	whereClause="clientroles.role <> '' and clientroles.employeekey=employees.db_employeekey and clientroles.clientkey=$idx"
 	sqlStmt="select $fields from $dbs where $whereClause"
 	RunSql2 "$contactsSqliteFile" $sqlStmt
 verboseLevel=2
@@ -219,3 +219,4 @@ return 0
 ## 10-27-2017 @ 15.28.58 - (2.3.105)   - dscudiero - Cosmetic/minor change
 ## 10-27-2017 @ 15.56.02 - (2.3.112)   - dscudiero - reformat verbose statements
 ## 10-27-2017 @ 16.01.00 - (2.3.114)   - dscudiero - Cosmetic/minor change
+## 10-27-2017 @ 16.13.19 - (2.3.115)   - dscudiero - Make sure there is a client role for each reps'
