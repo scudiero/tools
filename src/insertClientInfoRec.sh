@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.110 # -- dscudiero -- Fri 10/27/2017 @ 15:50:55.73
+version=2.3.111 # -- dscudiero -- Fri 10/27/2017 @ 15:53:26.04
 #===================================================================================================
 TrapSigs 'on'
 
@@ -130,7 +130,7 @@ Dump -1 -n client
 	RunSql2 "$contactsSqliteFile" $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		for ((cntr=0; cntr<${#resultSet[@]}; cntr++)); do
-			[[ $verboseLevel -gt 0 ]] && echo "resultSet[$ij] = >${resultSet[$ij]}<"
+			[[ $verboseLevel -gt 1 ]] && echo "resultSet[$ij] = >${resultSet[$ij]}<"
 			repName="${resultSet[$cntr]%%|*}"
 			repVal="${resultSet[$cntr]##*|}"
 			Dump -2 -t2 repName repVal
