@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.1.14" # -- dscudiero -- Mon 10/23/2017 @  8:13:25.05
+# version="1.1.15" # -- dscudiero -- Fri 10/27/2017 @ 12:58:39.63
 #===================================================================================================
 # Import need functions into the runtime environment
 #===================================================================================================
@@ -21,6 +21,7 @@ function Import {
 	}
 
 	[[ -z $TOOLSLIBPATH ]] && searchDirs="$TOOLSPATH/lib" || searchDirs="$( tr ':' ' ' <<< $TOOLSLIBPATH)"
+	[[ $USELOCAL == true && -d "$HOME/tools/lib" ]] && searchDirs="$HOME/tools/lib $searchDirs"
 
 	## Search for the include file, load the first one
 	[[ $verboseLevel -ge 2 ]] && echo -e "$caller/$FUNCNAME: includeList= '$includeList'"
@@ -51,3 +52,4 @@ export -f Import
 ## 09-28-2017 @ 13.45.08 - ("1.1.0")   - dscudiero - Performance tweaks
 ## 09-29-2017 @ 12.56.43 - ("1.1.13")  - dscudiero - Fix bug checking to see if the import was already done for this name
 ## 10-23-2017 @ 08.30.48 - ("1.1.14")  - dscudiero - Change verbose level for messages
+## 10-27-2017 @ 12.58.57 - ("1.1.15")  - dscudiero - Add local library if USELOCAL is truen
