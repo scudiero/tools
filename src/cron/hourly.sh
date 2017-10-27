@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.12 # -- dscudiero -- Thu 10/26/2017 @ 16:02:27.02
+version=2.2.13 # -- dscudiero -- Fri 10/27/2017 @  7:01:40.17
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -207,13 +207,13 @@ case "$hostName" in
 				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
 				TrapSigs 'off'
 				if [[ $(date "+%H") == 12 ]]; then 
-					{ Msg3 "\n$(date +"%m/%d@%H:%M") - Running syncCourseleafGitRepos master..."
+					Msg3 "\n$(date +"%m/%d@%H:%M") - Running syncCourseleafGitRepos master..."
 					FindExecutable -sh -run syncCourseleafGitRepos master
 					elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
 					Msg3 "...syncCourseleafGitRepos done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
 				fi
 				if [[ $(date "+%H") == 22 ]]; then 
-					{ Msg3 "\n$(date +"%m/%d@%H:%M") - Running syncCourseleafGitRepos master..."
+					Msg3 "\n$(date +"%m/%d@%H:%M") - Running syncCourseleafGitRepos master..."
 					FindExecutable -sh -uselocal -run backupData
 					elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
 					Msg3 "...backupData done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
@@ -304,3 +304,4 @@ return 0
 ## 10-26-2017 @ 11.13.14 - (2.2.9)     - dscudiero - Remove extra 'starting' messages from the functions
 ## 10-26-2017 @ 12.16.52 - (2.2.10)    - dscudiero - Tweak messaging
 ## 10-26-2017 @ 16.03.14 - (2.2.12)    - dscudiero - add messaging arround the 12 noon and 22 hour calls
+## 10-27-2017 @ 07.02.09 - (2.2.13)    - dscudiero - Fix syntax error introduced with last update
