@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.14" # -- dscudiero -- Thu 09/28/2017 @ 15:19:50.74
+# version="2.0.15" # -- dscudiero -- Fri 10/27/2017 @ 14:42:07.41
 #===================================================================================================
 # Set the noglob value
 #===================================================================================================
@@ -8,21 +8,22 @@
 # All rights reserved
 #===================================================================================================
 function SetFileExpansion {
-	local mode=$1
+	local mode=$1 lastVal
 
-	if [[ -z $mode ]]; then
-		if [[ ${#previousFileExpansionSettings[@]} -eq 0 ]]; then
-			[[ -z ${-//[^f]/} ]] && previousFileExpansionSettings+=('on') || previousFileExpansionSettings+=('off')
-		else
-			local prev=${previousFileExpansionSettings[${#previousFileExpansionSettings[@]}-1]}
-			unset previousFileExpansionSettings[${#previousFileExpansionSettings[@]}-1]
-			[[ $prev == 'on' ]] && set -o noglob || set +o noglob
-		fi
+	if [[ $mode == 'on' ]]; then
+		previousFileExpansionSettings+=('on')
+	elif [[ $mode == 'off' ]]; then
+		previousFileExpansionSettings+=('off')
 	else
-		[[ -z ${-//[^f]/} ]] && previousFileExpansionSettings+=('on') || previousFileExpansionSettings+=('off')
-		[[ $mode == 'on' || $mode == 'ON' || $mode == 'On' ]] && set +o noglob || set -o noglob
+		if [[ ${#previousFileExpansionSettings[@]} -eq 0 ]]; then
+			previousFileExpansionSettings+=("$(set -o | grep noglob | cut -d' ' -f3)")
+		else
+			lastVal=${previousFileExpansionSettings[-1]}
+			unset 'previousFileExpansionSettings[${#previousFileExpansionSettings[@]}-1]'
+			[[ $lastVal == 'on' ]] && set +o noglob || set -o noglob
+		fi
 	fi
-	#echo ${previousFileExpansionSettings[*]}
+echo ${previousFileExpansionSettings[*]}
 	return 0
 } #SetFileExpansion
 export -f SetFileExpansion
@@ -34,3 +35,4 @@ export -f SetFileExpansion
 ## Wed Jan  4 13:54:25 CST 2017 - dscudiero - General syncing of dev to prod
 ## 05-18-2017 @ 09.31.34 - ("2.0.7")   - dscudiero - Switch to use set -o for clarification
 ## 09-28-2017 @ 16.03.22 - ("2.0.14")  - dscudiero - Performance tweaks
+## 10-27-2017 @ 14.42.40 - ("2.0.15")  - dscudiero - Refactor to make simpler
