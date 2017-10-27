@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.101 # -- dscudiero -- Fri 10/27/2017 @ 14:09:31.39
+version=2.3.102 # -- dscudiero -- Fri 10/27/2017 @ 14:19:22.51
 #===================================================================================================
 TrapSigs 'on'
 
@@ -55,9 +55,12 @@ Dump -n client
 #===================================================================================================
 ## Get the list of fields in the transactional db
 echo "HERE 0"
+echo $(set -o | grep noglob)
 	SetFileExpansion 'off'
+echo $(set -o | grep noglob)
 	sqlStmt="select * from sqlite_master where type=\"table\" and name=\"clients\""
 	SetFileExpansion
+echo $(set -o | grep noglob)
 	RunSql2 "$contactsSqliteFile" $sqlStmt
 	[[ ${#resultSet[@]} -le 0 ]] && Terminate "Could not retrieve clients table definition data from '$contactsSqliteFile'"
 	unset tFields
