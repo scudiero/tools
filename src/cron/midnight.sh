@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.31 # -- dscudiero -- Thu 10/26/2017 @ 12:16:35.63
+version=1.22.34 # -- dscudiero -- Fri 10/27/2017 @  7:14:48.49
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -89,8 +89,6 @@ function CheckClientCount {
 
 #=======================================================================================================================
 function BuildEmployeeTable {
-	Msg3 "$FUNCNAME -- Starting"
-
 	### Get the list of columns in the transactional employees table
 		sqlStmt="pragma table_info(employees)"
 		RunSql2 "$contactsSqliteFile" $sqlStmt
@@ -124,15 +122,11 @@ function BuildEmployeeTable {
 			sqlStmt="insert into ${employeeTable} values($valuesString)"
 			RunSql2 $sqlStmt
 		done
-
-	Msg3 "$FUNCNAME -- Completed"
 	return 0
 } #BuildEmployeeTable
 
 #=======================================================================================================================
 function BuildCourseleafDataTable {
-	Msg3 "$FUNCNAME -- Starting"
-
 	## Clean out the existing data
 	sqlStmt="truncate $courseleafDataTable"
 	RunSql2 $sqlStmt
@@ -191,8 +185,6 @@ function BuildCourseleafDataTable {
 		cd /mnt/internal/site/stage/web/pagewiz
 		$DOIT ./pagewiz.cgi -r /support/courseleafData
 		cd $cwd
-
-	Msg3 "$FUNCNAME -- Completed"
 	return 0
 } #BuildCourseleafDataTable
 
@@ -237,20 +229,21 @@ case "$hostName" in
 			sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
 			RunSql2 $sqlStmt
 			if [[ ${#resultSet[@]} -gt 0 ]]; then
-				pgm="perfTest"
-				Msg3 "Running $pgm..."
-				FindExecutable perfTest -sh -run
-				Msg3 "...$pgm done"
+				pgmName="perfTest"
+				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName..."; sTime=$(date "+%s")
+				TrapSigs 'off'; FindExecutable perfTest -sh -run; TrapSigs 'on'
+				elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
+				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
 			fi
 
 		## Copy the contacts db from internal
-			Msg3 "Copying contacts.sqlite files to $contactsSqliteFile..."
+			Msg3 "\nCopying contacts.sqlite files to $contactsSqliteFile..."
 			cp $clientsTransactionalDb/contacts.sqlite $contactsSqliteFile
 			touch $(dirname $contactsSqliteFile)/contacts.syncDate
 			Msg3 "...done"
 
 		## Scratch copy the skeleton shadow
-			Msg3 "Scratch copying the skeleton shadow..."
+			Msg3 "\nScratch copying the skeleton shadow..."
 			chmod u+wx $skeletonRoot
 			SetFileExpansion 'on'
 			rm -rf $skeletonRoot/*
@@ -265,18 +258,17 @@ case "$hostName" in
 			pgms+=(updateDefaults syncCourseleafGitRepos BuildCourseleafDataTable "cleanDev -daemon")
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
-				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
-				sTime=$(date "+%s")
+				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
 				TrapSigs 'off'
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
 				TrapSigs 'on'
 				Semaphore 'waiton' "$pgmName" 'true'
-				elapTime=$(( $(date "+%s") - $sTime ))
+				elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
 				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
 			done
 
 		## Rebuild the internal site pages 
-			Msg3 "Rebuilding Internal pages"
+			Msg3 "\nRebuilding Internal pages"
 			RunCourseLeafCgi "$stageInternal" "-r /clients"
 			RunCourseLeafCgi "$stageInternal" "-r /support/tools"
 			RunCourseLeafCgi "$stageInternal" "-r /support/qa"
@@ -287,24 +279,23 @@ case "$hostName" in
 			reports=("qaStatusShort -email \"$qaStatusShortEmails\"" "clientTimezone -email \"$clientTimezoneEmails\"")
 			for ((i=0; i<${#reports[@]}; i++)); do
 				report="${reports[$i]}"; reportName="${report%% *}"; reportArgs="${report##* }"; [[ $reportName == $reportArgs ]] && unset reportArgs
-				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $reportName $reportArgs..."
-				sTime=$(date "+%s")
-				TrapSigs 'off'
-				"FindExecutable scriptsAndReports -sh -run reports $report -quiet $reportArgs $scriptArgs" | Indent
-				TrapSigs 'on'
+				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $reportName $reportArgs..."; sTime=$(date "+%s")
+				TrapSigs 'off'; FindExecutable scriptsAndReports -sh -run reports $report -quiet $reportArgs $scriptArgs | Indent; TrapSigs 'on'
 				Semaphore 'waiton' "$reportName" 'true'
-				elapTime=$(( $(date "+%s") - $sTime ))
+				elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
 				Msg3 "...$reportName done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
 			done
 
 		## On the last day of the month roll-up the log files
 		  	if [[ $(date +"%d") == $(date -d "$(date +"%m")/1 + 1 month - 1 day" "+%d") ]]; then
-		  		Msg3 "Rolling up monthly log files"
+		  		Msg3 "\n$(date +"%m/%d@%H:%M") - Rolling up monthly log files"; sTime=$(date "+%s")
 				pushd $TOOLSPATH/Logs >& /dev/null
 				SetFileExpansion 'on'
 				tar -cvzf "$(date '+%b-%Y').tar.gz" $(date +"%m")-* --remove-files > /dev/null 2>&1
 				SetFileExpansion
 				popd  >& /dev/null
+				elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
+				Msg3 "... done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
 		  	fi
 
 		 ## Check that all things ran properly, otherwise revert the databases
@@ -347,13 +338,12 @@ case "$hostName" in
 			pgms=(buildSiteInfoTable checkCgiPermissions checkPublishSettings updateDefaults "cleanDev -daemon")
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
-				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
-				sTime=$(date "+%s")
+				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
 				TrapSigs 'off'
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
 				TrapSigs 'on'
 				Semaphore 'waiton' "$pgmName" 'true'
-				elapTime=$(( $(date "+%s") - $sTime ))
+				elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
 				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
 			done
 		;;
@@ -450,3 +440,4 @@ return 0
 ## 10-23-2017 @ 13.54.41 - (1.22.25)   - dscudiero - Cosmetic/minor change
 ## 10-26-2017 @ 07.42.51 - (1.22.30)   - dscudiero - Refactored how we call scripts
 ## 10-26-2017 @ 12.16.58 - (1.22.31)   - dscudiero - Tweak messaging
+## 10-27-2017 @ 07.15.19 - (1.22.34)   - dscudiero - Misc cleanup
