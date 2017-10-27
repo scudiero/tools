@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.19" # -- dscudiero -- Fri 10/27/2017 @ 14:51:14.11
+# version="2.0.28" # -- dscudiero -- Fri 10/27/2017 @ 15:19:40.28
 #===================================================================================================
 # Set the noglob value
 #===================================================================================================
@@ -11,12 +11,15 @@ function SetFileExpansion {
 	local mode=$1
 
 	if [[ $mode == 'on' ]]; then
+		set +o noglob
 		previousFileExpansionSettings+=('on')
 	elif [[ $mode == 'off' ]]; then
+		set -o noglob
 		previousFileExpansionSettings+=('off')
 	else
 		if [[ ${#previousFileExpansionSettings[@]} -eq 0 ]]; then
-			previousFileExpansionSettings+=("$(set -o | grep noglob | cut -d' ' -f3)")
+			local current=$(set -o | grep noglob)
+			[[ $(Trim "${current##* }") == 'on' ]] && previousFileExpansionSettings+=('off') || previousFileExpansionSettings+=('on')
 		else
 			[[ ${previousFileExpansionSettings[@]:(-1)} == 'on' ]] && set +o noglob || set -o noglob
 			unset 'previousFileExpansionSettings[${#previousFileExpansionSettings[@]}-1]'
