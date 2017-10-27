@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.95 # -- dscudiero -- Fri 10/27/2017 @ 13:51:33.05
+version=2.3.98 # -- dscudiero -- Fri 10/27/2017 @ 13:57:11.84
 #===================================================================================================
 TrapSigs 'on'
 
@@ -10,6 +10,8 @@ Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="Insert/Update a record into the '$clientInfoTable' table in the data warehouse,\nThis script is not intended to be called stand alone."
+
+dump verboseLevel
 
 #= Description +====================================================================================
 # Sync a record in the clientInfoTable, this is a helper script for 'syncClientInfoTable' and is
@@ -48,6 +50,7 @@ function MapTtoW {
 #===================================================================================================
 ## Variables inherited from parent: client
 
+verboseLevel=1
 #===================================================================================================
 # Main
 #===================================================================================================
@@ -70,6 +73,7 @@ function MapTtoW {
 	dump -1 numTFields tFields
 
 ## Get the transactional data
+echo "HERE 1"
 	sql="select $tFields from clients where clientcode=\"$client\" and is_active=\"Y\""
 	RunSql2 "$contactsSqliteFile" $sql
 	if [[ ${#resultSet[@]} -le 0 ]]; then
@@ -88,6 +92,7 @@ function MapTtoW {
 	fi
 
 ## If the primary contact field is blank, then build the data from the transactional db clients table data
+echo "HERE 2"
 	if [[ $primarycontact == '' ]]; then
 		fields='contactrole,firstname,lastname,title,workphone,cell,fax,email'
 		sqlStmt="select $fields from contacts where clientkey=\"$idx\" and contactrole like \"%primary%\" order by contactrole,lastname"
@@ -101,6 +106,7 @@ function MapTtoW {
 	fi
 
 ## Get the URL data from the transactional db
+echo "HERE 3"
 	envs="dev,qa,test,next,curr,prior,preview,public"
 	for env in $(tr ',' ' '<<< $envs); do unset ${env}url ${env}internalurl; done
 	sqlStmt=" select type,domain,internal from clientsites where clientkey=$idx"
@@ -117,6 +123,7 @@ function MapTtoW {
 	fi
 
 ## Get the Rep data from the transactional db
+echo "HERE 4"
 	reps="support,catcsm,cimcsm,clsscsm,salesrep,cateditor,catdev,cimdev,clssdev,trainer,pilotrep"
 	for rep in $(tr ',' ' '<<< $reps); do unset $rep; done
 	fields="LOWER(clientroles.role),employees.db_firstname || ' ' || employees.db_lastname || '/' || employees.db_email"
@@ -135,7 +142,7 @@ Dump -1 repName repVal
 	fi
 
 ## Build insert record
-	Verbose 1
+echo "HERE 5"
 	sqlStmt="select lower(column_name),lower(column_type) from information_schema.columns where table_name=\"$useClientInfoTable\""
 	RunSql2 $sqlStmt
 	unset wFields insertVals
@@ -160,7 +167,7 @@ Dump -1 repName repVal
 	#dump -n insertVals
 
 ## Insert record
-		Verbose 1
+echo "HERE 6"
 	## Delete old data
 		sqlStmt="delete from $useClientInfoTable where name=\"$client\""
 		RunSql2 $sqlStmt
