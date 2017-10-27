@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.13 # -- dscudiero -- Fri 10/27/2017 @  7:01:40.17
+version=2.2.14 # -- dscudiero -- Fri 10/27/2017 @  7:11:19.63
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -193,13 +193,12 @@ case "$hostName" in
 			pgms=("updateDefaults all" CheckMonitorFiles SyncInternalDb SyncCourseleafCgis SyncSkeleton)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
-				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
-				sTime=$(date "+%s")
+				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
 				TrapSigs 'off'
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
 				TrapSigs 'on'
 				Semaphore 'waiton' "$pgmName" 'true'
-				elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
+				elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1; 
 				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
 			done
 
@@ -208,13 +207,13 @@ case "$hostName" in
 				TrapSigs 'off'
 				if [[ $(date "+%H") == 12 ]]; then 
 					Msg3 "\n$(date +"%m/%d@%H:%M") - Running syncCourseleafGitRepos master..."
-					FindExecutable -sh -run syncCourseleafGitRepos master
+					TrapSigs 'off'; FindExecutable -sh -run syncCourseleafGitRepos master; TrapSigs 'on'
 					elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
 					Msg3 "...syncCourseleafGitRepos done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
 				fi
 				if [[ $(date "+%H") == 22 ]]; then 
 					Msg3 "\n$(date +"%m/%d@%H:%M") - Running syncCourseleafGitRepos master..."
-					FindExecutable -sh -uselocal -run backupData
+					TrapSigs 'off'; FindExecutable -sh -uselocal -run backupData; TrapSigs 'on'
 					elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
 					Msg3 "...backupData done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
 				fi
@@ -237,8 +236,7 @@ case "$hostName" in
 			pgms=("updateDefaults" CheckMonitorFiles)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
-				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
-				sTime=$(date "+%s")
+				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
 				TrapSigs 'off'
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
 				TrapSigs 'on'
@@ -305,3 +303,4 @@ return 0
 ## 10-26-2017 @ 12.16.52 - (2.2.10)    - dscudiero - Tweak messaging
 ## 10-26-2017 @ 16.03.14 - (2.2.12)    - dscudiero - add messaging arround the 12 noon and 22 hour calls
 ## 10-27-2017 @ 07.02.09 - (2.2.13)    - dscudiero - Fix syntax error introduced with last update
+## 10-27-2017 @ 07.15.15 - (2.2.14)    - dscudiero - Misc cleanup
