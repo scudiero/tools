@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.35 # -- dscudiero -- Fri 10/27/2017 @ 15:54:42.60
+version=2.4.36 # -- dscudiero -- Fri 10/27/2017 @ 16:24:37.50
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -116,9 +116,7 @@ ParseArgsStd
 		unset msgPrefix
 		[[ $fork == true ]] && msgPrefix='Forking off' || msgPrefix='Processing'
 		[[ $batchMode != true ]] && Msg3 "^$msgPrefix $client ($clientCntr / ${#clients[@]})..."
-verboseLevel=1
 		source "$workerScriptFile" "$addedCalledScriptArgs"  "$forkStr"
-verboseLevel=0
 		rc=$?
 		(( forkCntr+=1 ))
 		## Wait for forked process to finish, only run maxForkedProcesses at a time
@@ -136,7 +134,6 @@ verboseLevel=0
 	fi
 
 ## Swap client tables
-
 	if [[ $inPlace != true ]]; then
 		[[ $batchMode != true ]] && Msg3 "^Swapping databases ..."
 		sqlStmt="select count(*) from ${clientInfoTable}New"
