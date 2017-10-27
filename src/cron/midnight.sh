@@ -1,12 +1,13 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.34 # -- dscudiero -- Fri 10/27/2017 @  7:14:48.49
+version=1.22.35 # -- dscudiero -- Fri 10/27/2017 @  8:10:08.64
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunCourseLeafCgi GetCourseleafPgm Semaphore FindExecutable ProtectedCall SetFileExpansion StringFunctions"
+myIncludes="$myIncludes CalcElapsed"
 Import "$standardIncludes $myIncludes"
 originalArgStr="$*";
 
@@ -232,8 +233,7 @@ case "$hostName" in
 				pgmName="perfTest"
 				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName..."; sTime=$(date "+%s")
 				TrapSigs 'off'; FindExecutable perfTest -sh -run; TrapSigs 'on'
-				elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
-				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
+				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			fi
 
 		## Copy the contacts db from internal
@@ -263,8 +263,7 @@ case "$hostName" in
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
 				TrapSigs 'on'
 				Semaphore 'waiton' "$pgmName" 'true'
-				elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
-				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
+				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
 
 		## Rebuild the internal site pages 
@@ -282,8 +281,7 @@ case "$hostName" in
 				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $reportName $reportArgs..."; sTime=$(date "+%s")
 				TrapSigs 'off'; FindExecutable scriptsAndReports -sh -run reports $report -quiet $reportArgs $scriptArgs | Indent; TrapSigs 'on'
 				Semaphore 'waiton' "$reportName" 'true'
-				elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
-				Msg3 "...$reportName done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
+				Msg3 "...$reportName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
 
 		## On the last day of the month roll-up the log files
@@ -294,8 +292,7 @@ case "$hostName" in
 				tar -cvzf "$(date '+%b-%Y').tar.gz" $(date +"%m")-* --remove-files > /dev/null 2>&1
 				SetFileExpansion
 				popd  >& /dev/null
-				elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
-				Msg3 "... done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
+				Msg3 "... done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 		  	fi
 
 		 ## Check that all things ran properly, otherwise revert the databases
@@ -343,8 +340,7 @@ case "$hostName" in
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
 				TrapSigs 'on'
 				Semaphore 'waiton' "$pgmName" 'true'
-				elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
-				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
+				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
 		;;
 esac
@@ -441,3 +437,4 @@ return 0
 ## 10-26-2017 @ 07.42.51 - (1.22.30)   - dscudiero - Refactored how we call scripts
 ## 10-26-2017 @ 12.16.58 - (1.22.31)   - dscudiero - Tweak messaging
 ## 10-27-2017 @ 07.15.19 - (1.22.34)   - dscudiero - Misc cleanup
+## 10-27-2017 @ 08.10.29 - (1.22.35)   - dscudiero - Use CalcElapsed function to calculate elapsed times
