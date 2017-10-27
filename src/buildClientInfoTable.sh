@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.6 # -- dscudiero -- Fri 10/27/2017 @  9:53:33.12
+version=2.4.8 # -- dscudiero -- Fri 10/27/2017 @ 10:18:51.62
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -11,7 +11,11 @@ Import "$standardInteractiveIncludes $myIncludes"
 originalArgStr="$*"
 scriptDescription="Sync the data warehouse '$clientInfoTable' table with the transactional data from the contacts db data"
 
-echo; echo "$myName (buildClientInfoTable) starting"; echo
+echo; 
+echo "$myName (buildClientInfoTable) starting"; 
+echo "\$originalArgStr = 'originalArgStr'"; 
+echo
+exit
 
 #=======================================================================================================================
 # Synchronize client data from the transactional sqlite db and the data warehouse
