@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.116 # -- dscudiero -- Fri 10/27/2017 @ 16:20:54.99
+version=2.3.117 # -- dscudiero -- Fri 10/27/2017 @ 16:32:46.53
 #===================================================================================================
 TrapSigs 'on'
 
@@ -102,7 +102,7 @@ Dump -1 -n client
 		primarycontact=$(tr "'" '"' <<< $primarycontact)
 		primarycontact=$(sed s'/"/\\"/'g <<< $primarycontact)
 	fi
-
+verboseLevel=2
 ## Get the URL data from the transactional db
 	Verbose 1 2 "^Getting url data"
 	envs="dev,qa,test,next,curr,prior,preview,public"
