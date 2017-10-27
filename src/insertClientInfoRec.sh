@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.104 # -- dscudiero -- Fri 10/27/2017 @ 15:24:54.57
+version=2.3.105 # -- dscudiero -- Fri 10/27/2017 @ 15:28:05.48
 #===================================================================================================
 TrapSigs 'on'
 
@@ -123,7 +123,7 @@ echo "HERE 3"
 			env="${result%%|*}"; result="${result#*|}"
 			domain="${result%%|*}"; result="${result#*|}"
 dump -t env domain result
-			[[ $result == 'Y' ]] && eval ${env}internalurl="$domain" || eval ${env}url="$domain"
+			[[ $result == 'Y' ]] && eval ${env}internalurl="${domain// /}" || eval ${env}url="${domain// /}" 
 		done
 	fi
 
@@ -222,3 +222,4 @@ return 0
 ## 10-20-2017 @ 09.01.51 - (2.3.87)    - dscudiero - Fix problem in the caller check code
 ## 10-24-2017 @ 10.08.54 - (2.3.91)    - dscudiero - Refactord most sections to make more efficient
 ## 10-27-2017 @ 13.37.44 - (2.3.92)    - dscudiero - Remove errant fi statement
+## 10-27-2017 @ 15.28.58 - (2.3.105)   - dscudiero - Cosmetic/minor change
