@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.32 # -- dscudiero -- Fri 10/27/2017 @ 13:33:31.76
+version=2.4.33 # -- dscudiero -- Fri 10/27/2017 @ 13:35:02.31
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -116,8 +116,6 @@ ParseArgsStd
 		unset msgPrefix
 		[[ $fork == true ]] && msgPrefix='Forking off' || msgPrefix='Processing'
 		[[ $batchMode != true ]] && Msg3 "^$msgPrefix $client ($clientCntr / ${#clients[@]})..."
-echo; echo source "$workerScriptFile" "$addedCalledScriptArgs"  "$forkStr"; echo
-exit
 		source "$workerScriptFile" "$addedCalledScriptArgs"  "$forkStr"
 		rc=$?
 		(( forkCntr+=1 ))
@@ -199,3 +197,4 @@ Goodbye 0 'alert'
 ## 10-24-2017 @ 07.30.01 - (2.3.125)   - dscudiero - Cosmetic/minor change
 ## 10-24-2017 @ 07.42.43 - (2.4.0)     - dscudiero - set version
 ## 10-27-2017 @ 07.52.38 - (2.4.1)     - dscudiero - Add debug statements
+## 10-27-2017 @ 13.35.11 - (2.4.33)    - dscudiero - Cosmetic/minor change
