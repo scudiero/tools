@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.21 # -- dscudiero -- Fri 10/27/2017 @ 11:54:46.72
+version=2.4.27 # -- dscudiero -- Fri 10/27/2017 @ 12:26:04.26
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -10,11 +10,6 @@ Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="Sync the data warehouse '$clientInfoTable' table with the transactional data from the contacts db data"
-
-echo; 
-echo "$myName (buildClientInfoTable) starting"; 
-echo "\$originalArgStr = '$originalArgStr'"; 
-echo
 
 #=======================================================================================================================
 # Synchronize client data from the transactional sqlite db and the data warehouse
@@ -43,16 +38,22 @@ processNotify=30
 forkCntr=0; cntr=0;
 
 ## Find the helper script location
-echo; echo "HERE HERE HERE";
+
+echo; 
+echo "$myName (buildClientInfoTable) starting"; 
+echo "\$originalArgStr = '$originalArgStr'"; 
+echo
+echo "HERE HERE HERE";
 	workerScript='insertClientInfoRec'
-	#workerScriptFile="$(FindExecutable $workerScript -sh)"
-verboseLevel=1
+echo "\$workerScript = '$workerScript'"; 
+	# workerScriptFile="$(FindExecutable $workerScript -sh)"
 FindExecutable $workerScript -sh
 
-	[[ -z $workerScriptFile ]] && Terminate "Could find the workerScriptFile file ('$workerScript')"
-echo "\$workerScript = '$workerScript'"; 
+echo "HERE HERE HERE";
 echo "\$workerScriptFile = '$workerScriptFile'"; 
 exit
+
+	[[ -z $workerScriptFile ]] && Terminate "Could find the workerScriptFile file ('$workerScript')"
 
 addedCalledScriptArgs="-secondaryMessagesOnly"
 
