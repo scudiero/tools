@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.20 # -- dscudiero -- Fri 10/27/2017 @  8:18:29.98
+version=2.1.21 # -- dscudiero -- Fri 10/27/2017 @  9:32:58.95
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -49,7 +49,9 @@ originalArgStr="$*"
 ## Run the executable(s)
 	useLocal=true
 	executeFile=$(FindExecutable "$callScriptName" '-cron')
-
+echo; echo "executeFile = '$executeFile'"; echo
+[[ -z $findExcutable ]] && exit
+ 
 	echo -e "\t-- $hostName - Starting $callScriptName from '$executeFile', Args: $scriptArgs $callScriptArgs" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	echo -e "\n$(date) -- Calling script '$callScriptName':\n\t$executeFile $callScriptArgs\n" > "$logFile"
 
