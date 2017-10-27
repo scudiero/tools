@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.113 # -- dscudiero -- Fri 10/27/2017 @ 16:00:09.02
+version=2.3.114 # -- dscudiero -- Fri 10/27/2017 @ 16:00:55.71
 #===================================================================================================
 TrapSigs 'on'
 
@@ -131,7 +131,7 @@ Dump -1 -n client
 verboseLevel=2
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		for ((cntr=0; cntr<${#resultSet[@]}; cntr++)); do
-			[[ $verboseLevel -gt 1 ]] && echo "resultSet[$ij] = >${resultSet[$ij]}<"
+			[[ $verboseLevel -gt 1 ]] && echo "resultSet[$cntr] = >${resultSet[$cntr]}<"
 			repName="${resultSet[$cntr]%%|*}"
 			repVal="${resultSet[$cntr]##*|}"
 			Dump -2 -t2 repName repVal
@@ -218,3 +218,4 @@ return 0
 ## 10-27-2017 @ 13.37.44 - (2.3.92)    - dscudiero - Remove errant fi statement
 ## 10-27-2017 @ 15.28.58 - (2.3.105)   - dscudiero - Cosmetic/minor change
 ## 10-27-2017 @ 15.56.02 - (2.3.112)   - dscudiero - reformat verbose statements
+## 10-27-2017 @ 16.01.00 - (2.3.114)   - dscudiero - Cosmetic/minor change
