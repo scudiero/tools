@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.43" # -- dscudiero -- Fri 10/27/2017 @ 12:50:19.72
+# version="1.2.45" # -- dscudiero -- Fri 10/27/2017 @ 13:13:28.16
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -18,11 +18,10 @@
 #=======================================================================================================================
 function FindExecutable {
 	## Defaults ====================================================================================
-	local mode='source' file='' token type ext found=false searchTokens checkFile searchRoot=''
+	local mode='source' fileName='' token type ext found=false searchTokens checkFile searchRoot=''
 	local useLocal=$USELOCAL useDev=$USEDEV runScript=false scriptArgs=''
 #echo "HERE 3 HERE 3 HERE";
 
-[[ $userName == 'dscudiero' ]] && echo "\$* = '$*'"
 	## Parse arguments =============================================================================
 	while [[ $# -gt 0 ]]; do
  	    [[ $1 =~ ^-file|--filename$ ]] && { fileName="$2"; shift 2 || true; continue; }
@@ -58,33 +57,20 @@ function FindExecutable {
 	fi
 	#Dump -t fileName mode searchRoot searchTokens searchDirs scriptArgs
 
-[[ $userName == 'dscudiero' ]] && echo "\$fileName = '$fileName'"
-[[ $userName == 'dscudiero' ]] && echo "\$mode = '$mode'"
-[[ $userName == 'dscudiero' ]] && echo "\$searchRoot = '$searchRoot'"
-[[ $userName == 'dscudiero' ]] && echo "\$searchTokens = '$searchTokens'"
-[[ $userName == 'dscudiero' ]] && echo "\$searchDirs = '$searchDirs'"
-[[ $userName == 'dscudiero' ]] && echo "\$scriptArgs = '$scriptArgs'"
-
 	for dir in $searchDirs; do
 		#Dump -t dir
 		for token in $(tr ',' ' ' <<< "$searchTokens"); do
 			type="${token%%:*}"; ext="${token##*:}"
-			#Dump -1 -t2 type ext
-[[ $userName == 'dscudiero' ]] && echo -e "\t\t\$type= '$type'\n\t\t\$ext= '$ext'"
-
+			#Dump -t2 type ext
 			[[ -n $searchRoot ]] && checkFile="$dir/$searchRoot/${fileName}.${ext}" || checkFile="$dir/${fileName}.${ext}"
 			#Dump -t3 checkFile
-[[ $userName == 'dscudiero' ]] && echo -e "\t\t\t\$checkFile= '$checkFile'"
-
 			[[ -r "$checkFile" ]] && { found=true; break; } || unset checkFile
 		done
 		[[ $found == true ]] && break
 	done
 
 	executeFile="$checkFile" 
-	#Dump -1 -t executeFile >> $stdout
-[[ $userName == 'dscudiero' ]] && echo "\$found = '$found'"
-[[ $userName == 'dscudiero' ]] && echo "\$executeFile = '$executeFile'"
+	#Dump -t executeFile >> $stdout
 
 	if [[ $runScript == true ]]; then
 		#Dump -t scriptArgs
@@ -243,3 +229,4 @@ export -f FindExecutable
 ## 10-23-2017 @ 07.56.04 - ("1.2.34")  - dscudiero - change the min abbreviation for file to be -file
 ## 10-23-2017 @ 10.18.19 - ("1.2.35")  - dscudiero - Cosmetic/minor change
 ## 10-23-2017 @ 10.44.06 - ("1.2.35")  - dscudiero - Cosmetic/minor change
+## 10-27-2017 @ 13.13.46 - ("1.2.45")  - dscudiero - Unset filename before use
