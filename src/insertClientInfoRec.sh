@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.105 # -- dscudiero -- Fri 10/27/2017 @ 15:28:05.48
+version=2.3.106 # -- dscudiero -- Fri 10/27/2017 @ 15:34:44.96
 #===================================================================================================
 TrapSigs 'on'
 
@@ -47,26 +47,18 @@ function MapTtoW {
 # Declare local variables and constants
 #===================================================================================================
 ## Variables inherited from parent: client
+Dump -1 -n client
 
-verboseLevel=1
-Dump -n client
 #===================================================================================================
 # Main
 #===================================================================================================
 ## Get the list of fields in the transactional db
-echo "HERE 0"
-echo $(set -o | grep noglob)
 	SetFileExpansion 'off'
-echo $(set -o | grep noglob)
 	sqlStmt="select * from sqlite_master where type=\"table\" and name=\"clients\""
 	SetFileExpansion
-echo $(set -o | grep noglob)
 	RunSql2 "$contactsSqliteFile" $sqlStmt
 	[[ ${#resultSet[@]} -le 0 ]] && Terminate "Could not retrieve clients table definition data from '$contactsSqliteFile'"
 	unset tFields
-
-echo "${resultSet[0]} = '${resultSet[0]}'"
-
 	tData="${resultSet[0]#*(}"; tData="${tData%)*}"
 	ifsSave="$IFS"; IFS=',' read -ra tmpArray <<< "$tData"
 	for token in "${tmpArray[@]}"; do
@@ -76,10 +68,9 @@ echo "${resultSet[0]} = '${resultSet[0]}'"
 	tFields=${tFields:1}
 	numTFields=${#tmpArray[@]}
 	IFS="$ifsSave"; unset tmpArray
-	dump -1 numTFields tFields
+	Dump -1 numTFields tFields
 
 ## Get the transactional data
-echo "HERE 1"
 	sql="select $tFields from clients where clientcode=\"$client\" and is_active=\"Y\""
 	RunSql2 "$contactsSqliteFile" $sql
 	if [[ ${#resultSet[@]} -le 0 ]]; then
@@ -98,7 +89,6 @@ echo "HERE 1"
 	fi
 
 ## If the primary contact field is blank, then build the data from the transactional db clients table data
-echo "HERE 2"
 	if [[ $primarycontact == '' ]]; then
 		fields='contactrole,firstname,lastname,title,workphone,cell,fax,email'
 		sqlStmt="select $fields from contacts where clientkey=\"$idx\" and contactrole like \"%primary%\" order by contactrole,lastname"
@@ -112,7 +102,6 @@ echo "HERE 2"
 	fi
 
 ## Get the URL data from the transactional db
-echo "HERE 3"
 	envs="dev,qa,test,next,curr,prior,preview,public"
 	for env in $(tr ',' ' '<<< $envs); do unset ${env}url ${env}internalurl; done
 	sqlStmt=" select type,domain,internal from clientsites where clientkey=$idx"
@@ -122,13 +111,12 @@ echo "HERE 3"
 			result="${resultSet[$cntr]}"
 			env="${result%%|*}"; result="${result#*|}"
 			domain="${result%%|*}"; result="${result#*|}"
-dump -t env domain result
+			Dump -1 -t env domain result
 			[[ $result == 'Y' ]] && eval ${env}internalurl="${domain// /}" || eval ${env}url="${domain// /}" 
 		done
 	fi
 
 ## Get the Rep data from the transactional db
-echo "HERE 4"
 	reps="support,catcsm,cimcsm,clsscsm,salesrep,cateditor,catdev,cimdev,clssdev,trainer,pilotrep"
 	for rep in $(tr ',' ' '<<< $reps); do unset $rep; done
 	fields="LOWER(clientroles.role),employees.db_firstname || ' ' || employees.db_lastname || '/' || employees.db_email"
@@ -138,16 +126,15 @@ echo "HERE 4"
 	RunSql2 "$contactsSqliteFile" $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		for ((cntr=0; cntr<${#resultSet[@]}; cntr++)); do
-echo "resultSet[$ij] = >${resultSet[$ij]}<"
+			[[ $verboseLevel -gt 0 ]] && echo "resultSet[$ij] = >${resultSet[$ij]}<"
 			repName="${resultSet[$cntr]%%|*}"
 			repVal="${resultSet[$cntr]##*|}"
-Dump -1 repName repVal
+			Dump -1 repName repVal
 			eval $repName=\"$repVal\"
 		done
 	fi
 
 ## Build insert record
-echo "HERE 5"
 	sqlStmt="select lower(column_name),lower(column_type) from information_schema.columns where table_name=\"$useClientInfoTable\""
 	RunSql2 $sqlStmt
 	unset wFields insertVals
@@ -172,7 +159,6 @@ echo "HERE 5"
 	#dump -n insertVals
 
 ## Insert record
-echo "HERE 6"
 	## Delete old data
 		sqlStmt="delete from $useClientInfoTable where name=\"$client\""
 		RunSql2 $sqlStmt
