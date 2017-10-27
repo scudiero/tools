@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.40" # -- dscudiero -- Fri 10/27/2017 @ 11:57:03.53
+# version="1.2.41" # -- dscudiero -- Fri 10/27/2017 @ 12:13:39.49
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -21,6 +21,7 @@ function FindExecutable {
 	local mode='source' file='' token type ext found=false searchTokens checkFile searchRoot=''
 	local useLocal=$USELOCAL useDev=$USEDEV runScript=false scriptArgs=''
 
+[[ $userName == 'dscudiero' ]] && echo "\$* = '$*'"
 	## Parse arguments =============================================================================
 	while [[ $# -gt 0 ]]; do
 		#echo "\$1 = '$1', \$# = '$#', \$* = '$*'"
@@ -55,23 +56,36 @@ function FindExecutable {
 		[[ $useLocal == true && -d "$HOME/tools/src" ]] && searchDirs="$HOME/tools/src $searchDirs"
 		searchTokens="bash:sh python:py java:class steps:html report:sh cron:sh"
 	fi
-	Dump -1 -t fileName mode searchRoot searchTokens searchDirs scriptArgs
+	#Dump -t fileName mode searchRoot searchTokens searchDirs scriptArgs
+
+[[ $userName == 'dscudiero' ]] && echo "\$fileName = '$fileName'"
+[[ $userName == 'dscudiero' ]] && echo "\$mode = '$mode'"
+[[ $userName == 'dscudiero' ]] && echo "\$searchRoot = '$searchRoot'"
+[[ $userName == 'dscudiero' ]] && echo "\$searchTokens = '$searchTokens'"
+[[ $userName == 'dscudiero' ]] && echo "\$searchDirs = '$searchDirs'"
+[[ $userName == 'dscudiero' ]] && echo "\$scriptArgs = '$scriptArgs'"
 
 	for dir in $searchDirs; do
 		#Dump -t dir
 		for token in $(tr ',' ' ' <<< "$searchTokens"); do
 			type="${token%%:*}"; ext="${token##*:}"
-		Dump -1 -t2 type ext >> $stdout
+			#Dump -1 -t2 type ext
+[[ $userName == 'dscudiero' ]] && echo -e "\t\t\$type= '$type'\n\t\t\$ext= '$ext'"
+
 			[[ -n $searchRoot ]] && checkFile="$dir/$searchRoot/${fileName}.${ext}" || checkFile="$dir/${fileName}.${ext}"
-			-1 Dump -t3 checkFile >> $stdout
+			#Dump -t3 checkFile
+[[ $userName == 'dscudiero' ]] && echo -e "\t\t\t\$checkFile= '$checkFile'"
+
 			[[ -r "$checkFile" ]] && { found=true; break; } || unset checkFile
 		done
 		[[ $found == true ]] && break
 	done
-	Dump -1 -t found >> $stdout
 
 	executeFile="$checkFile" 
-	Dump -1 -t executeFile >> $stdout
+	#Dump -1 -t executeFile >> $stdout
+[[ $userName == 'dscudiero' ]] && echo "\$found = '$found'"
+[[ $userName == 'dscudiero' ]] && echo "\$executeFile = '$executeFile'"
+
 	if [[ $runScript == true ]]; then
 		#Dump -t scriptArgs
 		[[ -z "$executeFile" || ! -r "$executeFile" ]] && Terminate "$FUNCNAME: Run options active and could not find execution file, fileName='$fileName'"
