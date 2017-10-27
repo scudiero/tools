@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.18 # -- dscudiero -- Fri 10/27/2017 @ 11:49:41.73
+version=2.4.19 # -- dscudiero -- Fri 10/27/2017 @ 11:53:07.38
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -43,10 +43,10 @@ processNotify=30
 forkCntr=0; cntr=0;
 
 ## Find the helper script location
+echo; echo "HERE HERE HERE";
 	workerScript='insertClientInfoRec'
 	workerScriptFile="$(FindExecutable $workerScript -sh)"
 	[[ -z $workerScriptFile ]] && Terminate "Could find the workerScriptFile file ('$workerScript')"
-
 echo "\$workerScript = '$workerScript'"; 
 echo "\$workerScriptFile = '$workerScriptFile'"; 
 exit
