@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.22 # -- dscudiero -- Fri 10/27/2017 @  9:36:35.10
+version=2.1.23 # -- dscudiero -- Fri 10/27/2017 @  9:41:06.71
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -49,9 +49,6 @@ originalArgStr="$*"
 ## Run the executable(s)
 	export USELOCAL=true
 	executeFile=$(FindExecutable "$callScriptName" '-cron')
-echo; echo "executeFile = '$executeFile'"; echo
-[[ -z $findExcutable ]] && exit
- 
 	echo -e "\t-- $hostName - Starting $callScriptName from '$executeFile', Args: $scriptArgs $callScriptArgs" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	echo -e "\n$(date) -- Calling script '$callScriptName':\n\t$executeFile $callScriptArgs\n" > "$logFile"
 
@@ -145,3 +142,4 @@ exit 0
 ## 10-26-2017 @ 07.59.35 - (2.1.19)    - dscudiero - tweak log file redirects
 ## 10-27-2017 @ 08.18.56 - (2.1.20)    - dscudiero - Add cleanup code to keep the cronjob.log a reasonable size
 ## 10-27-2017 @ 09.36.59 - (2.1.22)    - dscudiero - Set USELOCAL before resolving sript file
+## 10-27-2017 @ 09.41.18 - (2.1.23)    - dscudiero - Remove debug stuff
