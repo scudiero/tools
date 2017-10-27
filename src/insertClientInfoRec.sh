@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.102 # -- dscudiero -- Fri 10/27/2017 @ 14:19:22.51
+version=2.3.104 # -- dscudiero -- Fri 10/27/2017 @ 15:24:54.57
 #===================================================================================================
 TrapSigs 'on'
 
@@ -90,9 +90,9 @@ echo "HERE 1"
 		for ((cntr = 1 ; cntr < $numTFields+1 ; cntr++)); do
 			field=$(cut -d',' -f$cntr <<< $tFields)
 			fVal=$(cut -d'|' -f$cntr <<< $result)
-			dump -1 -t2 cntr field fVal
+			#dump -1 -t2 cntr field fVal
 			[[ $(IsNumeric "$fVal") == false ]] && fVal="\"$fVal\""
-			dump -1 -t $(MapTtoW "$field")
+			#dump -1 -t $(MapTtoW "$field")
 			eval $(MapTtoW "$field")="$fVal"
 		done
 	fi
@@ -122,7 +122,7 @@ echo "HERE 3"
 			result="${resultSet[$cntr]}"
 			env="${result%%|*}"; result="${result#*|}"
 			domain="${result%%|*}"; result="${result#*|}"
-			#dump -t env domain result
+dump -t env domain result
 			[[ $result == 'Y' ]] && eval ${env}internalurl="$domain" || eval ${env}url="$domain"
 		done
 	fi
