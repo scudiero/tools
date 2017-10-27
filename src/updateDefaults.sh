@@ -1,12 +1,15 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.60 # -- dscudiero -- Wed 10/18/2017 @ 15:14:52.25
+version=2.0.61 # -- dscudiero -- Fri 10/27/2017 @  8:12:59.70
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
 Import "$standardIncludes $myIncludes"
 originalArgStr="$*"
 scriptDescription="Sync warehouse defaults table"
+
+echo; echo "$myName (updateDefaults) starting"; echo
+
 
 #==================================================================================================
 #
@@ -208,3 +211,4 @@ Goodbye 0;
 ## 10-16-2017 @ 13.42.45 - (2.0.58)    - dscudiero - Add a level to the verbose statements
 ## 10-16-2017 @ 13.58.23 - (2.0.59)    - dscudiero - Cosmetic/minor change
 ## 10-18-2017 @ 15.15.05 - (2.0.60)    - dscudiero - touch the directory to update time date
+## 10-27-2017 @ 08.13.09 - (2.0.61)    - dscudiero - Added debug statements
