@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.41" # -- dscudiero -- Fri 10/27/2017 @ 12:13:39.49
+# version="1.2.42" # -- dscudiero -- Fri 10/27/2017 @ 12:46:34.25
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -20,12 +20,12 @@ function FindExecutable {
 	## Defaults ====================================================================================
 	local mode='source' file='' token type ext found=false searchTokens checkFile searchRoot=''
 	local useLocal=$USELOCAL useDev=$USEDEV runScript=false scriptArgs=''
+echo "HERE 3 HERE 3 HERE";
 
 [[ $userName == 'dscudiero' ]] && echo "\$* = '$*'"
 	## Parse arguments =============================================================================
 	while [[ $# -gt 0 ]]; do
-		#echo "\$1 = '$1', \$# = '$#', \$* = '$*'"
-	    [[ $1 =~ ^-file|--filename$ ]] && { fileName="$2"; shift 2 || true; continue; }
+ 	    [[ $1 =~ ^-file|--filename$ ]] && { fileName="$2"; shift 2 || true; continue; }
 	    [[ $1 =~ ^-m|--mode$ ]] && { mode="$2"; shift 2 || true; continue; }
 	    [[ $1 =~ ^-sr|-so|-sh|--src$|--source$ ]] && { mode='src'; shift 1 || true; continue; }
 	    [[ $1 =~ ^-l|--lib$ ]] && { mode='lib'; shift 1 || true; continue; }
