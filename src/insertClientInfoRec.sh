@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.94 # -- dscudiero -- Fri 10/27/2017 @ 13:42:22.78
+version=2.3.95 # -- dscudiero -- Fri 10/27/2017 @ 13:51:33.05
 #===================================================================================================
 TrapSigs 'on'
 
@@ -52,7 +52,6 @@ function MapTtoW {
 # Main
 #===================================================================================================
 ## Get the list of fields in the transactional db
-	Verbose 1
 	SetFileExpansion 'off'
 	sqlStmt="select * from sqlite_master where type=\"table\" and name=\"clients\""
 	SetFileExpansion
@@ -102,7 +101,6 @@ function MapTtoW {
 	fi
 
 ## Get the URL data from the transactional db
-	Verbose 1
 	envs="dev,qa,test,next,curr,prior,preview,public"
 	for env in $(tr ',' ' '<<< $envs); do unset ${env}url ${env}internalurl; done
 	sqlStmt=" select type,domain,internal from clientsites where clientkey=$idx"
@@ -128,9 +126,10 @@ function MapTtoW {
 	RunSql2 "$contactsSqliteFile" $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		for ((ij=0; ij<${#resultSet[@]}; ij++)); do
-			echo "resultSet[$ij] = >${resultSet[$ij]}<"
+echo "resultSet[$ij] = >${resultSet[$ij]}<"
 			repName="${resultSet[$ij]%%|*}"
 			repVal="${resultSet[$ij]##*|}"
+Dump -1 repName repVal
 			eval $repName=\"$repVal\"
 		done
 	fi
