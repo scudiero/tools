@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.111 # -- dscudiero -- Fri 10/27/2017 @ 15:53:26.04
+version=2.3.112 # -- dscudiero -- Fri 10/27/2017 @ 15:55:52.59
 #===================================================================================================
 TrapSigs 'on'
 
@@ -53,7 +53,7 @@ Dump -1 -n client
 # Main
 #===================================================================================================
 ## Get the list of fields in the transactional db
-	Verbose 1 "^Getting transactional field names"
+	Verbose 1 2 "^Getting transactional field names"
 	SetFileExpansion 'off'
 	sqlStmt="select * from sqlite_master where type=\"table\" and name=\"clients\""
 	SetFileExpansion
@@ -72,7 +72,7 @@ Dump -1 -n client
 	Dump -2 numTFields tFields
 
 ## Get the transactional data
-	Verbose 1 "^Getting transactional data"
+	Verbose 1 2 "^Getting transactional data"
 	sql="select $tFields from clients where clientcode=\"$client\" and is_active=\"Y\""
 	RunSql2 "$contactsSqliteFile" $sql
 	if [[ ${#resultSet[@]} -le 0 ]]; then
@@ -104,7 +104,7 @@ Dump -1 -n client
 	fi
 
 ## Get the URL data from the transactional db
-	Verbose 1 "^Getting url data"
+	Verbose 1 2 "^Getting url data"
 	envs="dev,qa,test,next,curr,prior,preview,public"
 	for env in $(tr ',' ' '<<< $envs); do unset ${env}url ${env}internalurl; done
 	sqlStmt=" select type,domain,internal from clientsites where clientkey=$idx"
@@ -120,7 +120,7 @@ Dump -1 -n client
 	fi
 
 ## Get the Rep data from the transactional db
-	Verbose 1 "^Getting reps data"
+	Verbose 1 2 "^Getting reps data"
 	reps="support,catcsm,cimcsm,clsscsm,salesrep,cateditor,catdev,cimdev,clssdev,trainer,pilotrep"
 	for rep in $(tr ',' ' '<<< $reps); do unset $rep; done
 	fields="LOWER(clientroles.role),employees.db_firstname || ' ' || employees.db_lastname || '/' || employees.db_email"
@@ -139,7 +139,7 @@ Dump -1 -n client
 	fi
 
 ## Build insert record
-	Verbose 1 "^Building sql statement"
+	Verbose 1 2 "^Building sql statement"
 	sqlStmt="select lower(column_name),lower(column_type) from information_schema.columns where table_name=\"$useClientInfoTable\""
 	RunSql2 $sqlStmt
 	unset wFields insertVals
@@ -164,7 +164,7 @@ Dump -1 -n client
 	#dump -n insertVals
 
 ## Insert record
-	Verbose 1 "^Inserting data"
+	Verbose 1 2 "^Inserting data"
 	## Delete old data
 		sqlStmt="delete from $useClientInfoTable where name=\"$client\""
 		RunSql2 $sqlStmt
@@ -215,3 +215,4 @@ return 0
 ## 10-24-2017 @ 10.08.54 - (2.3.91)    - dscudiero - Refactord most sections to make more efficient
 ## 10-27-2017 @ 13.37.44 - (2.3.92)    - dscudiero - Remove errant fi statement
 ## 10-27-2017 @ 15.28.58 - (2.3.105)   - dscudiero - Cosmetic/minor change
+## 10-27-2017 @ 15.56.02 - (2.3.112)   - dscudiero - reformat verbose statements
