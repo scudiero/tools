@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.8 # -- dscudiero -- Fri 10/27/2017 @ 10:18:51.62
+version=2.4.9 # -- dscudiero -- Fri 10/27/2017 @ 10:20:50.04
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -13,7 +13,7 @@ scriptDescription="Sync the data warehouse '$clientInfoTable' table with the tra
 
 echo; 
 echo "$myName (buildClientInfoTable) starting"; 
-echo "\$originalArgStr = 'originalArgStr'"; 
+echo "\$originalArgStr = '$originalArgStr'"; 
 echo
 exit
 
