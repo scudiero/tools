@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.91 # -- dscudiero -- Tue 10/24/2017 @ 10:08:20.33
+version=2.3.92 # -- dscudiero -- Fri 10/27/2017 @ 13:37:25.58
 #===================================================================================================
 TrapSigs 'on'
 
@@ -115,7 +115,6 @@ function MapTtoW {
 			domain="${result%%|*}"; result="${result#*|}"
 			#dump -t env domain result 
 			[[ $result == 'Y' ]] && eval ${env}internalurl="$domain" || eval ${env}url="$domain"
-			fi
 		done
 	fi
 
@@ -211,3 +210,4 @@ return 0
 ## 10-19-2017 @ 07.53.54 - (2.3.86)    - dscudiero - Comment out caller check
 ## 10-20-2017 @ 09.01.51 - (2.3.87)    - dscudiero - Fix problem in the caller check code
 ## 10-24-2017 @ 10.08.54 - (2.3.91)    - dscudiero - Refactord most sections to make more efficient
+## 10-27-2017 @ 13.37.44 - (2.3.92)    - dscudiero - Remove errant fi statement
