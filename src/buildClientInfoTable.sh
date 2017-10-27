@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.34 # -- dscudiero -- Fri 10/27/2017 @ 15:47:53.06
+version=2.4.35 # -- dscudiero -- Fri 10/27/2017 @ 15:54:42.60
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -136,8 +136,6 @@ verboseLevel=0
 	fi
 
 ## Swap client tables
-echo; echo "done done done"; echo
-Goodbye 0
 
 	if [[ $inPlace != true ]]; then
 		[[ $batchMode != true ]] && Msg3 "^Swapping databases ..."
