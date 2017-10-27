@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.37" # -- dscudiero -- Fri 10/27/2017 @ 11:43:42.46
+# version="1.2.40" # -- dscudiero -- Fri 10/27/2017 @ 11:57:03.53
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -20,8 +20,7 @@ function FindExecutable {
 	## Defaults ====================================================================================
 	local mode='source' file='' token type ext found=false searchTokens checkFile searchRoot=''
 	local useLocal=$USELOCAL useDev=$USEDEV runScript=false scriptArgs=''
-stdout="$HOME/stdout.txt"
-echo "\$* = '$*'" > $stdout
+
 	## Parse arguments =============================================================================
 	while [[ $# -gt 0 ]]; do
 		#echo "\$1 = '$1', \$# = '$#', \$* = '$*'"
@@ -56,23 +55,23 @@ echo "\$* = '$*'" > $stdout
 		[[ $useLocal == true && -d "$HOME/tools/src" ]] && searchDirs="$HOME/tools/src $searchDirs"
 		searchTokens="bash:sh python:py java:class steps:html report:sh cron:sh"
 	fi
-Dump -t fileName mode searchRoot searchTokens searchDirs scriptArgs >> $stdout
+	Dump -1 -t fileName mode searchRoot searchTokens searchDirs scriptArgs
 
 	for dir in $searchDirs; do
 		#Dump -t dir
 		for token in $(tr ',' ' ' <<< "$searchTokens"); do
 			type="${token%%:*}"; ext="${token##*:}"
-Dump -t2 type ext >> $stdout
+		Dump -1 -t2 type ext >> $stdout
 			[[ -n $searchRoot ]] && checkFile="$dir/$searchRoot/${fileName}.${ext}" || checkFile="$dir/${fileName}.${ext}"
-Dump -t3 checkFile >> $stdout
+			-1 Dump -t3 checkFile >> $stdout
 			[[ -r "$checkFile" ]] && { found=true; break; } || unset checkFile
 		done
 		[[ $found == true ]] && break
 	done
-Dump -t found >> $stdout
+	Dump -1 -t found >> $stdout
 
 	executeFile="$checkFile" 
-Dump -t executeFile >> $stdout
+	Dump -1 -t executeFile >> $stdout
 	if [[ $runScript == true ]]; then
 		#Dump -t scriptArgs
 		[[ -z "$executeFile" || ! -r "$executeFile" ]] && Terminate "$FUNCNAME: Run options active and could not find execution file, fileName='$fileName'"
@@ -82,7 +81,8 @@ Dump -t executeFile >> $stdout
 		source "$executeFile" $scriptArgs || echo "$executeFile"
 		myName="$myNameSave"; myPath="$myPathSave"
 	else
-		[[ -z "$executeFile" || ! -r "$executeFile" ]] && return 0
+		[[ -z "$executeFile" ]] && return 0
+		[[ ! -r "$executeFile" ]] && unset executeFile && return 0
 		echo "$executeFile"
 	fi
 	return 0
