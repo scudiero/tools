@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.92 # -- dscudiero -- Fri 10/27/2017 @ 13:37:25.58
+version=2.3.94 # -- dscudiero -- Fri 10/27/2017 @ 13:42:22.78
 #===================================================================================================
 TrapSigs 'on'
 
@@ -71,7 +71,6 @@ function MapTtoW {
 	dump -1 numTFields tFields
 
 ## Get the transactional data
-	Verbose 1
 	sql="select $tFields from clients where clientcode=\"$client\" and is_active=\"Y\""
 	RunSql2 "$contactsSqliteFile" $sql
 	if [[ ${#resultSet[@]} -le 0 ]]; then
@@ -82,9 +81,10 @@ function MapTtoW {
 		for ((i = 1 ; i < $numTFields+1 ; i++)); do
 			field=$(cut -d',' -f$i <<< $tFields)
 			fVal=$(cut -d'|' -f$i <<< $result)
+			dump -1 -t2 i field fVal
 			[[ $(IsNumeric "$fVal") == false ]] && fVal="\"$fVal\""
-			eval $(MapTtoW "$field")="$fVal"
 			dump -1 -t $(MapTtoW "$field")
+			eval $(MapTtoW "$field")="$fVal"
 		done
 	fi
 
