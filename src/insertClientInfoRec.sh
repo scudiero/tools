@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.106 # -- dscudiero -- Fri 10/27/2017 @ 15:34:44.96
+version=2.3.110 # -- dscudiero -- Fri 10/27/2017 @ 15:50:55.73
 #===================================================================================================
 TrapSigs 'on'
 
@@ -53,6 +53,7 @@ Dump -1 -n client
 # Main
 #===================================================================================================
 ## Get the list of fields in the transactional db
+	Verbose 1 "^Getting transactional field names"
 	SetFileExpansion 'off'
 	sqlStmt="select * from sqlite_master where type=\"table\" and name=\"clients\""
 	SetFileExpansion
@@ -68,22 +69,23 @@ Dump -1 -n client
 	tFields=${tFields:1}
 	numTFields=${#tmpArray[@]}
 	IFS="$ifsSave"; unset tmpArray
-	Dump -1 numTFields tFields
+	Dump -2 numTFields tFields
 
 ## Get the transactional data
+	Verbose 1 "^Getting transactional data"
 	sql="select $tFields from clients where clientcode=\"$client\" and is_active=\"Y\""
 	RunSql2 "$contactsSqliteFile" $sql
 	if [[ ${#resultSet[@]} -le 0 ]]; then
 		Terminate "Could not retrieve clients data from '$contactsSqliteFile'"
 	else
 		result="${resultSet[0]}"
-		dump -1 result
+		Dump -2 result
 		for ((cntr = 1 ; cntr < $numTFields+1 ; cntr++)); do
 			field=$(cut -d',' -f$cntr <<< $tFields)
 			fVal=$(cut -d'|' -f$cntr <<< $result)
-			#dump -1 -t2 cntr field fVal
+			#Dump -2 -t2 cntr field fVal
 			[[ $(IsNumeric "$fVal") == false ]] && fVal="\"$fVal\""
-			#dump -1 -t $(MapTtoW "$field")
+			#Dump -2 -t2 $(MapTtoW "$field")
 			eval $(MapTtoW "$field")="$fVal"
 		done
 	fi
@@ -102,6 +104,7 @@ Dump -1 -n client
 	fi
 
 ## Get the URL data from the transactional db
+	Verbose 1 "^Getting url data"
 	envs="dev,qa,test,next,curr,prior,preview,public"
 	for env in $(tr ',' ' '<<< $envs); do unset ${env}url ${env}internalurl; done
 	sqlStmt=" select type,domain,internal from clientsites where clientkey=$idx"
@@ -111,12 +114,13 @@ Dump -1 -n client
 			result="${resultSet[$cntr]}"
 			env="${result%%|*}"; result="${result#*|}"
 			domain="${result%%|*}"; result="${result#*|}"
-			Dump -1 -t env domain result
+			Dump -2 -t2 env domain result
 			[[ $result == 'Y' ]] && eval ${env}internalurl="${domain// /}" || eval ${env}url="${domain// /}" 
 		done
 	fi
 
 ## Get the Rep data from the transactional db
+	Verbose 1 "^Getting reps data"
 	reps="support,catcsm,cimcsm,clsscsm,salesrep,cateditor,catdev,cimdev,clssdev,trainer,pilotrep"
 	for rep in $(tr ',' ' '<<< $reps); do unset $rep; done
 	fields="LOWER(clientroles.role),employees.db_firstname || ' ' || employees.db_lastname || '/' || employees.db_email"
@@ -129,12 +133,13 @@ Dump -1 -n client
 			[[ $verboseLevel -gt 0 ]] && echo "resultSet[$ij] = >${resultSet[$ij]}<"
 			repName="${resultSet[$cntr]%%|*}"
 			repVal="${resultSet[$cntr]##*|}"
-			Dump -1 repName repVal
+			Dump -2 -t2 repName repVal
 			eval $repName=\"$repVal\"
 		done
 	fi
 
 ## Build insert record
+	Verbose 1 "^Building sql statement"
 	sqlStmt="select lower(column_name),lower(column_type) from information_schema.columns where table_name=\"$useClientInfoTable\""
 	RunSql2 $sqlStmt
 	unset wFields insertVals
@@ -159,12 +164,13 @@ Dump -1 -n client
 	#dump -n insertVals
 
 ## Insert record
+	Verbose 1 "^Inserting data"
 	## Delete old data
 		sqlStmt="delete from $useClientInfoTable where name=\"$client\""
 		RunSql2 $sqlStmt
 	## Insert new data
 		sqlStmt="insert into $useClientInfoTable ($wFields) values($insertVals)"
-		dump -1 sqlStmt -n
+		Dump -2 -t2 sqlStmt -n
 		[[ $DOIT != '' || $informationOnlyMode == true ]] && Dump sqlStmt || RunSql2 $sqlStmt
 
 #===================================================================================================
