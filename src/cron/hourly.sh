@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.15 # -- dscudiero -- Fri 10/27/2017 @  7:29:36.64
+version=2.2.16 # -- dscudiero -- Fri 10/27/2017 @  8:07:39.77
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -13,6 +13,7 @@ version=2.2.15 # -- dscudiero -- Fri 10/27/2017 @  7:29:36.64
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql2 GetPW SetFileExpansion RunSql2 ProtectedCall'
+myIncludes="$myIncludes CalcElapsed"
 Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -198,8 +199,7 @@ case "$hostName" in
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
 				TrapSigs 'on'
 				Semaphore 'waiton' "$pgmName" 'true'
-				elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1; 
-				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
+				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
 
 			if [[ $(date "+%H") == 12 ||  $(date "+%H") == 22 ]]; then
@@ -208,14 +208,12 @@ case "$hostName" in
 				if [[ $(date "+%H") == 12 ]]; then 
 					Msg3 "\n$(date +"%m/%d@%H:%M") - Running syncCourseleafGitRepos master..."
 					TrapSigs 'off'; FindExecutable -sh -run syncCourseleafGitRepos master; TrapSigs 'on'
-					elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
-					Msg3 "...syncCourseleafGitRepos done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
+					Msg3 "...syncCourseleafGitRepos done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 				fi
 				if [[ $(date "+%H") == 22 ]]; then 
 					Msg3 "\n$(date +"%m/%d@%H:%M") - Running backupData master..."
 					TrapSigs 'off'; FindExecutable -sh -uselocal -run backupData; TrapSigs 'on'
-					elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1;
-					Msg3 "...backupData done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
+					Msg3 "...backupData done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 					## Remove all hourly log files older than 24 hrs
 					pushd "$(dirname "$logFile")" >& /dev/null
 					find . -mtime +0 -exec rm -f '{}' \;
@@ -245,8 +243,7 @@ case "$hostName" in
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
 				TrapSigs 'on'
 				Semaphore 'waiton' "$pgmName" 'true'
-				elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1
-				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($elapTime seconds)"
+				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
 		;;
 esac
@@ -309,3 +306,4 @@ return 0
 ## 10-27-2017 @ 07.02.09 - (2.2.13)    - dscudiero - Fix syntax error introduced with last update
 ## 10-27-2017 @ 07.15.15 - (2.2.14)    - dscudiero - Misc cleanup
 ## 10-27-2017 @ 07.30.18 - (2.2.15)    - dscudiero - Cleanup old log files every night
+## 10-27-2017 @ 08.08.03 - (2.2.16)    - dscudiero - Use CalcElapsed function to calculate elapsed times
