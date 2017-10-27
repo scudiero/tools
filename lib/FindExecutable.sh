@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.42" # -- dscudiero -- Fri 10/27/2017 @ 12:46:34.25
+# version="1.2.43" # -- dscudiero -- Fri 10/27/2017 @ 12:50:19.72
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -20,7 +20,7 @@ function FindExecutable {
 	## Defaults ====================================================================================
 	local mode='source' file='' token type ext found=false searchTokens checkFile searchRoot=''
 	local useLocal=$USELOCAL useDev=$USEDEV runScript=false scriptArgs=''
-echo "HERE 3 HERE 3 HERE";
+#echo "HERE 3 HERE 3 HERE";
 
 [[ $userName == 'dscudiero' ]] && echo "\$* = '$*'"
 	## Parse arguments =============================================================================
