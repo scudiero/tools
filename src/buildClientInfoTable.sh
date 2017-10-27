@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.1 # -- dscudiero -- Fri 10/27/2017 @  7:52:29.61
+version=2.4.4 # -- dscudiero -- Fri 10/27/2017 @  9:26:16.73
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -85,13 +85,17 @@ ParseArgsStd
 		[[ $inPlace == true ]] && useClientInfoTable="$clientInfoTable" || useClientInfoTable="${clientInfoTable}New"
 		sqlStmt="select clientcode from clients where is_active = \"Y\" order by clientcode"
 		RunSql2 "$contactsSqliteFile" "$sqlStmt"
-		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No records returned from clientcode query"
+		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No records returned from clientcode query from '$contactsSqliteFile'"
 		for result in "${resultSet[@]}"; do
 			clients+=($result)
 		done
 	fi
+	numClients=${#clients[@]}
+	Msg3 "Found $numClients clients in transactional 'clients' table..."
 	Msg3 "Database: $warehouseDb"
 	Msg3 "Table: $useClientInfoTable"
+
+exit
 
 ## Table management
 	if [[ $inPlace != true && -z $client ]]; then
@@ -107,8 +111,6 @@ ParseArgsStd
 
 ## Loop through clients
 	clientCntr=0
-	numClients=${#clients[@]}
-	Msg3 "Found $numClients clients..."
 	forkCntr=1;
 	for client in "${clients[@]}"; do
 		(( clientCntr += 1 ))
