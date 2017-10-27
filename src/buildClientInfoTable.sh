@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.29 # -- dscudiero -- Fri 10/27/2017 @ 12:52:39.81
+version=2.4.30 # -- dscudiero -- Fri 10/27/2017 @ 13:12:19.39
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -48,9 +48,8 @@ echo "HERE 1 HERE 1 HERE";
 	workerScript='insertClientInfoRec'
 echo "\$workerScript = '$workerScript'"; 
 	# workerScriptFile="$(FindExecutable $workerScript -sh)"
-USELOCAL=true
-Import "FindExecutable2"
-FindExecutable2 $workerScript -sh
+
+FindExecutable $workerScript -sh
 
 echo "HERE 2 HERE 2 HERE";
 echo "\$workerScriptFile = '$workerScriptFile'"; 
