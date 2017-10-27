@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.99 # -- dscudiero -- Fri 10/27/2017 @ 14:02:41.08
+version=2.3.101 # -- dscudiero -- Fri 10/27/2017 @ 14:09:31.39
 #===================================================================================================
 TrapSigs 'on'
 
@@ -10,8 +10,6 @@ Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="Insert/Update a record into the '$clientInfoTable' table in the data warehouse,\nThis script is not intended to be called stand alone."
-
-dump verboseLevel
 
 #= Description +====================================================================================
 # Sync a record in the clientInfoTable, this is a helper script for 'syncClientInfoTable' and is
@@ -51,16 +49,21 @@ function MapTtoW {
 ## Variables inherited from parent: client
 
 verboseLevel=1
+Dump -n client
 #===================================================================================================
 # Main
 #===================================================================================================
 ## Get the list of fields in the transactional db
+echo "HERE 0"
 	SetFileExpansion 'off'
 	sqlStmt="select * from sqlite_master where type=\"table\" and name=\"clients\""
 	SetFileExpansion
 	RunSql2 "$contactsSqliteFile" $sqlStmt
 	[[ ${#resultSet[@]} -le 0 ]] && Terminate "Could not retrieve clients table definition data from '$contactsSqliteFile'"
 	unset tFields
+
+echo "${resultSet[0]} = '${resultSet[0]}'"
+
 	tData="${resultSet[0]#*(}"; tData="${tData%)*}"
 	ifsSave="$IFS"; IFS=',' read -ra tmpArray <<< "$tData"
 	for token in "${tmpArray[@]}"; do
