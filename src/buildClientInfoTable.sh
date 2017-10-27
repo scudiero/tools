@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.0 # -- dscudiero -- Tue 10/24/2017 @  7:42:26.82
+version=2.4.1 # -- dscudiero -- Fri 10/27/2017 @  7:52:29.61
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -10,6 +10,8 @@ Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="Sync the data warehouse '$clientInfoTable' table with the transactional data from the contacts db data"
+
+echo; echo "$myName (buildClientInfoTable) starting"; echo
 
 #=======================================================================================================================
 # Synchronize client data from the transactional sqlite db and the data warehouse
@@ -194,3 +196,4 @@ Goodbye 0 'alert'
 ## 10-24-2017 @ 07.28.11 - (2.3.124)   - dscudiero - Added PushPop to the import list
 ## 10-24-2017 @ 07.30.01 - (2.3.125)   - dscudiero - Cosmetic/minor change
 ## 10-24-2017 @ 07.42.43 - (2.4.0)     - dscudiero - set version
+## 10-27-2017 @ 07.52.38 - (2.4.1)     - dscudiero - Add debug statements
