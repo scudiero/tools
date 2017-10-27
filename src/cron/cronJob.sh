@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.19 # -- dscudiero -- Thu 10/26/2017 @  7:57:07.13
+version=2.1.20 # -- dscudiero -- Fri 10/27/2017 @  8:18:29.98
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -93,6 +93,13 @@ originalArgStr="$*"
 		fi
 	fi
 
+	## Trim the cronJob log file
+	if [[ $(date "+%H") == 22 ]]; then 
+		tail -n 25 "$TOOLSPATH/Logs/cronJobs/cronJobs.log" > "/tmp/cronJobs.log"
+		cp -f "/tmp/cronJobs.log" "$TOOLSPATH/Logs/cronJobs/cronJobs.log"
+		rm -f "/tmp/cronJobs.log"
+	fi
+
 #=======================================================================================================================
 exit 0
 #=======================================================================================================================
@@ -134,3 +141,4 @@ exit 0
 ## 10-24-2017 @ 09.15.44 - (2.1.17)    - dscudiero - Cosmetic/minor change
 ## 10-24-2017 @ 13.52.52 - (2.1.18)    - dscudiero - Fix log directory creation
 ## 10-26-2017 @ 07.59.35 - (2.1.19)    - dscudiero - tweak log file redirects
+## 10-27-2017 @ 08.18.56 - (2.1.20)    - dscudiero - Add cleanup code to keep the cronjob.log a reasonable size
