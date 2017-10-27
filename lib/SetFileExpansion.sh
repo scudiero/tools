@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.28" # -- dscudiero -- Fri 10/27/2017 @ 15:19:40.28
+# version="2.0.29" # -- dscudiero -- Fri 10/27/2017 @ 16:54:01.58
 #===================================================================================================
 # Set the noglob value
 #===================================================================================================
@@ -8,6 +8,7 @@
 # All rights reserved
 #===================================================================================================
 function SetFileExpansion {
+	Import "StringFunctions"
 	local mode=$1
 
 	if [[ $mode == 'on' ]]; then
@@ -38,3 +39,4 @@ export -f SetFileExpansion
 ## 09-28-2017 @ 16.03.22 - ("2.0.14")  - dscudiero - Performance tweaks
 ## 10-27-2017 @ 14.42.40 - ("2.0.15")  - dscudiero - Refactor to make simpler
 ## 10-27-2017 @ 14.51.19 - ("2.0.19")  - dscudiero - Cosmetic/minor change
+## 10-27-2017 @ 16.54.24 - ("2.0.29")  - dscudiero - Add StringFunctions to import list
