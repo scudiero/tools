@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.33 # -- dscudiero -- Fri 10/27/2017 @ 13:35:02.31
+version=2.4.34 # -- dscudiero -- Fri 10/27/2017 @ 15:47:53.06
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -116,7 +116,9 @@ ParseArgsStd
 		unset msgPrefix
 		[[ $fork == true ]] && msgPrefix='Forking off' || msgPrefix='Processing'
 		[[ $batchMode != true ]] && Msg3 "^$msgPrefix $client ($clientCntr / ${#clients[@]})..."
+verboseLevel=1
 		source "$workerScriptFile" "$addedCalledScriptArgs"  "$forkStr"
+verboseLevel=0
 		rc=$?
 		(( forkCntr+=1 ))
 		## Wait for forked process to finish, only run maxForkedProcesses at a time
