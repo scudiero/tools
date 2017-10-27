@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.142 # -- dscudiero -- Mon 10/23/2017 @ 16:51:54.14
+version=1.1.143 # -- dscudiero -- Fri 10/27/2017 @  8:25:02.95
 #==================================================================================================
 TrapSigs 'on'
 
@@ -64,9 +64,8 @@ dump 2 -n -t siteDir share shareType client env clientId
 #===================================================================================================
 # Main
 #===================================================================================================
-[[ $verboseLevel -gt 0 ]] && echo -e "\t\t*** $myName - Starting ***"
 [[ $DOIT != '' || $informationOnlyMode == true ]] && echo
-Verbose 1 "^$env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
+Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 
 ## Remove any existing records for this client/env
 	sqlStmt="delete from $useSiteInfoTable where clientId =\"$clientId\" and env=\"$env\""
@@ -80,13 +79,13 @@ Verbose 1 "^$env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 	else
 		host=$hostName
 	fi
-	valueStr="NULL,\"$client\",\"$clientId\",\"$env\",\"$host\",\"$share\",\"$myRhel\",now(),\"$userName\""
+	valueStr="NULL,\"$client\",\"$clientId\",\"$env\",\"$host\",\"$share\",\"$myRhel\",NOW(),\"$userName\""
 	sqlStmt="insert into $useSiteInfoTable ($fields) values($valueStr)"
 	RunSql2 $sqlStmt
 	## Get newly inserted siteid
 	[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Could not insert seed record into $useSiteInfoTable"
 	siteId=${resultSet[0]}
-	Msg2 $V2 "\tSiteId for $client is '$siteId'"
+	Verbose 1 "\tSiteId for $client is '$siteId'"
 
 ## lookup urls from the clients table
 	if [[ $env == 'test' || $env == 'next' || $env == 'curr' ]]; then
@@ -342,13 +341,12 @@ Verbose 1 "^$env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 	setStr="$setStr,CIMs=$cimStr,url=$url,internalUrl=$internalUrl,siteDir=\"$siteDir\",archives=$archives,googleType=$googleType"
 	setStr="$setStr,CATedition=$catEdition,publishing=$publishTarget,degreeWorks=$degreeWorks"
 	sqlStmt="update $useSiteInfoTable set $setStr where siteId=\"$siteId\""
-	[[ $verboseLevel -ge 2 ]] && echo && echo "setStr = >$setStr<" && echo && echo "sqlStmt = >$sqlStmt<" && echo
+	[[ $verboseLevel -gt 0 ]] && echo && echo "setStr = >$setStr<" && echo && echo "sqlStmt = >$sqlStmt<" && echo
 	RunSql2 $sqlStmt
 
 #==================================================================================================
 ## Done
 #==================================================================================================
-[[ $verboseLevel -gt 0 ]] && echo -e "\t\t*** $myName - Ending ***"
 Goodbye 'Return'
 return 0
 
@@ -414,3 +412,4 @@ return 0
 ## 10-23-2017 @ 07.17.15 - (1.1.135)   - dscudiero - add debug statement
 ## 10-23-2017 @ 07.20.36 - (1.1.136)   - dscudiero - add debig
 ## 10-23-2017 @ 16.52.19 - (1.1.142)   - dscudiero - Fix problem with tons of quotes arround cims
+## 10-27-2017 @ 08.25.20 - (1.1.143)   - dscudiero - Switch to use Verbose
