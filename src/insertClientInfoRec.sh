@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.112 # -- dscudiero -- Fri 10/27/2017 @ 15:55:52.59
+version=2.3.113 # -- dscudiero -- Fri 10/27/2017 @ 16:00:09.02
 #===================================================================================================
 TrapSigs 'on'
 
@@ -128,6 +128,7 @@ Dump -1 -n client
 	whereClause="clientroles.employeekey=employees.db_employeekey and clientroles.clientkey=$idx"
 	sqlStmt="select $fields from $dbs where $whereClause"
 	RunSql2 "$contactsSqliteFile" $sqlStmt
+verboseLevel=2
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		for ((cntr=0; cntr<${#resultSet[@]}; cntr++)); do
 			[[ $verboseLevel -gt 1 ]] && echo "resultSet[$ij] = >${resultSet[$ij]}<"
@@ -137,6 +138,7 @@ Dump -1 -n client
 			eval $repName=\"$repVal\"
 		done
 	fi
+verboseLevel=1
 
 ## Build insert record
 	Verbose 1 2 "^Building sql statement"
