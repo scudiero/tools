@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.98 # -- dscudiero -- Fri 10/27/2017 @ 13:57:11.84
+version=2.3.99 # -- dscudiero -- Fri 10/27/2017 @ 14:02:41.08
 #===================================================================================================
 TrapSigs 'on'
 
@@ -81,10 +81,10 @@ echo "HERE 1"
 	else
 		result="${resultSet[0]}"
 		dump -1 result
-		for ((i = 1 ; i < $numTFields+1 ; i++)); do
-			field=$(cut -d',' -f$i <<< $tFields)
-			fVal=$(cut -d'|' -f$i <<< $result)
-			dump -1 -t2 i field fVal
+		for ((cntr = 1 ; cntr < $numTFields+1 ; cntr++)); do
+			field=$(cut -d',' -f$cntr <<< $tFields)
+			fVal=$(cut -d'|' -f$cntr <<< $result)
+			dump -1 -t2 cntr field fVal
 			[[ $(IsNumeric "$fVal") == false ]] && fVal="\"$fVal\""
 			dump -1 -t $(MapTtoW "$field")
 			eval $(MapTtoW "$field")="$fVal"
@@ -112,12 +112,11 @@ echo "HERE 3"
 	sqlStmt=" select type,domain,internal from clientsites where clientkey=$idx"
 	RunSql2 "$contactsSqliteFile" $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
-		for ((ij=0; ij<${#resultSet[@]}; ij++)); do
-			result="${resultSet[$ij]}"
-			#dump result
+		for ((cntr=0; cntr<${#resultSet[@]}; cntr++)); do
+			result="${resultSet[$cntr]}"
 			env="${result%%|*}"; result="${result#*|}"
 			domain="${result%%|*}"; result="${result#*|}"
-			#dump -t env domain result 
+			#dump -t env domain result
 			[[ $result == 'Y' ]] && eval ${env}internalurl="$domain" || eval ${env}url="$domain"
 		done
 	fi
@@ -132,10 +131,10 @@ echo "HERE 4"
 	sqlStmt="select $fields from $dbs where $whereClause"
 	RunSql2 "$contactsSqliteFile" $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
-		for ((ij=0; ij<${#resultSet[@]}; ij++)); do
+		for ((cntr=0; cntr<${#resultSet[@]}; cntr++)); do
 echo "resultSet[$ij] = >${resultSet[$ij]}<"
-			repName="${resultSet[$ij]%%|*}"
-			repVal="${resultSet[$ij]##*|}"
+			repName="${resultSet[$cntr]%%|*}"
+			repVal="${resultSet[$cntr]##*|}"
 Dump -1 repName repVal
 			eval $repName=\"$repVal\"
 		done
