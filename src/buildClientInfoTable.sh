@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.30 # -- dscudiero -- Fri 10/27/2017 @ 13:18:48.70
+version=2.4.31 # -- dscudiero -- Fri 10/27/2017 @ 13:31:29.74
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -38,21 +38,8 @@ processNotify=30
 forkCntr=0; cntr=0;
 
 ## Find the helper script location
-
-echo; 
-echo "$myName (buildClientInfoTable) starting"; 
-echo "\$userName = '$userName'"; 
-echo "\$originalArgStr = '$originalArgStr'"; 
-echo
-echo "HERE 1 HERE 1 HERE";
 	workerScript='insertClientInfoRec'
-echo "\$workerScript = '$workerScript'"; 
-	# workerScriptFile="$(FindExecutable $workerScript -sh)"
-USELOCAL=true
-Import "FindExecutable2"
-FindExecutable2 $workerScript -sh
-
-echo "HERE 2 HERE 2 HERE";
+	workerScriptFile="$(FindExecutable $workerScript -sh)"
 echo "\$workerScriptFile = '$workerScriptFile'"; 
 exit
 
