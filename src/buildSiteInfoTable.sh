@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.81 # -- dscudiero -- Wed 10/25/2017 @  8:20:05.76
+version=4.3.84 # -- dscudiero -- Mon 10/30/2017 @  8:45:35.91
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="Call SetSiteDirs SetFileExpansion RunSql2 StringFunctions ProtectedCall FindExecutable PushPop"
@@ -103,15 +103,15 @@ fi
 		for result in ${resultSet[@]}; do
 			dbClients["${result%%|*}"]="${result##*|}"
 		done
-		numClients=${#resultSet[@]}
 
 	## Get the list of actual clients on this server
 		if [[ -z $client ]]; then
-			clientDirs=($(find /mnt -maxdepth 2 -mindepth 1 -type d 2> /dev/null | grep -v '^/mnt/dev'))
+			clientDirs=($(find /mnt/* -maxdepth 1 -mindepth 1 2>/dev/null | grep -v '\-test$' | grep -v '^/mnt/dev'))
 		else
-			# clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep $client))
-			clientDirs+=($(ProtectedCall "find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep $client"))
+			clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep -v '\-test$' | grep $client))
 		fi
+		numClients=${#clientDirs[@]}
+
 if [[ $verboseLevel -ge 1 ]]; then
 	echo
 	Msg3 "dbClients:"; for i in "${!dbClients[@]}"; do printf "\t[$i] = >${dbClients[$i]}<\n"; done; echo
@@ -240,3 +240,4 @@ Goodbye 0 'alert'
 ## 10-20-2017 @ 13.11.25 - (4.3.79)    - dscudiero - Fix problem with a missing fi
 ## 10-23-2017 @ 07.30.44 - (4.3.80)    - dscudiero - Tweak messaging
 ## 10-25-2017 @ 08.40.03 - (4.3.81)    - dscudiero - Cosmetic/minor change
+## 10-30-2017 @ 08.50.42 - (4.3.84)    - dscudiero - Filter out '-test' from the clientDirs
