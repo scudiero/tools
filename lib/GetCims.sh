@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.19" # -- dscudiero -- Mon 10/16/2017 @ 11:59:17.62
+# version="2.0.22" # -- dscudiero -- Mon 10/30/2017 @  9:25:06.64
 #===================================================================================================
 # Get CIMs
 #===================================================================================================
@@ -39,7 +39,7 @@ function GetCims {
 			if [[ $verify == true && $allCims != true ]]; then
 				unset ans
 				Prompt ans "${prefix}Found CIM Instance '$(ColorK $dir)' in source instance,\n${prefix}\tdo you wish to $verb it? (y to use$suffix)? >"\
-			 			"$validVals"; ans=$(Lower ${ans:0:1});
+			 			"$validVals"; ans=${ans,,[a-z]} ans=${ans:0:1};
 				[[ $ans == 'a' ]] && cims=(${adminDirs[@]}) && break
 				if [[ $ans == 'y' ]]; then
 					cims+=($dir);
@@ -50,7 +50,7 @@ function GetCims {
 			fi
 		fi
 	done
-	if [[ $cimStr == '' ]]; then
+	if [[ -z $cimStr ]]; then
 		cimStr=$(printf -- "%s, " "${cims[@]}")
 		cimStr=${cimStr:0:${#cimStr}-2}
 	fi
@@ -73,3 +73,4 @@ export -f GetCims
 ## 04-13-2017 @ 10.59.23 - ("2.0.16")  - dscudiero - s
 ## 04-13-2017 @ 11.43.55 - ("2.0.17")  - dscudiero - remove debug stuff
 ## 10-16-2017 @ 12.35.41 - ("2.0.19")  - dscudiero - Refactor includes
+## 10-30-2017 @ 09.34.23 - ("2.0.22")  - dscudiero - Switch lower caseing of ans to use variable substitution
