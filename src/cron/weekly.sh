@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.36 # -- dscudiero -- Mon 10/23/2017 @ 11:56:10.98
+version=2.1.37 # -- dscudiero -- Mon 10/30/2017 @  7:39:42.41
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -26,54 +26,48 @@ scriptArgs="$* -noBanners"
 #========================================================================================================================
 case "$hostName" in
 	mojave)
-		## Checks
-			Msg3 "Starting Checks"
-			(( indentLevel++ )) || true
-			FindExecutable -sh -run checkForPrivateDevSites $scriptArgs | Indent
-			(( indentLevel-- )) || true
-			Msg3 "Checks Completed"
-		## Weekly reports
-			Msg3 "Starting Reports"
-			(( indentLevel++ )) || true
+		## Run programs/functions
+			pgms=(checkForPrivateDevSites weeklyRollup)
+			for ((i=0; i<${#pgms[@]}; i++)); do
+				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
+				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
+				TrapSigs 'off'
+				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
+				TrapSigs 'on'
+				Semaphore 'waiton' "$pgmName" 'true'
+				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+			done
 
-			Msg3 "^Publishing Report..."
-			(( indentLevel++ )) || true
-			FindExecutable scriptsAndReports -sh -run reports publishing -email froggersupport@leepfrog.com $scriptArgs | Indent
-			(( indentLevel-- )) || true
+		## Run Reports
+			publishingEmails='froggersupport@leepfrog.com'
+			client2DaySummariesEmails='froggersupport@leepfrog.com'
+			qaWaitingEmails='sjones@leepfrog.com,mbruening@leepfrog.com,dscudiero@leepfrog.com'
+			toolsUsageEmails='dscudiero@leepfrog.com,jlindeman@leepfrog.com'
 
-			Msg3 "^Client 2 Day Summaries Report..."
-			(( indentLevel++ )) || true
-			FindExecutable scriptsAndReports -sh -run reports client2DaySummaries -role support -email froggersupport@leepfrog.com $scriptArg | Indent
-			(( indentLevel-- )) || true
+			reports=("publishing -email \"$publishingEmails\"" "client2DaySummaries -email \"$client2DaySummariesEmails\"")
+			reports+=("qaWaiting -email \"$qaWaitingEmails\"" "toolsUsage -email \"$toolsUsageEmails\"")
 
-			Msg3 "^QA Waiting Report..."
-			(( indentLevel++ )) || true
-			FindExecutable scriptsAndReports -sh -run reports qaWaiting -email sjones@leepfrog.com,mbruening@leepfrog.com,dscudiero@leepfrog.com $scriptArgs | Indent
-			(( indentLevel-- )) || true
-
-			Msg3 "^Tools Usage Report..."
-			(( indentLevel++ )) || true
-			FindExecutable scriptsAndReports -sh -run reports toolsUsage -email dscudiero@leepfrog.com $scriptArgs | Indent
-			(( indentLevel-- )) || true
-
-			Msg3 "^Reports Completed"
-
-		## Rollup logs
-			Msg3 "Starting Scripts"
-			(( indentLevel++ )) || true
-			FindExecutable weeklyRollup -sh -run $scriptArgs | Indent
-			(( indentLevel-- )) || true
-			Msg3 "Starting Scripts"
-			;;
+			for ((i=0; i<${#reports[@]}; i++)); do
+				report="${reports[$i]}"; reportName="${report%% *}"; reportArgs="${report##* }"; [[ $reportName == $reportArgs ]] && unset reportArgs
+				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $reportName $reportArgs..."; sTime=$(date "+%s")
+				TrapSigs 'off'; FindExecutable scriptsAndReports -sh -run reports $report -quiet $reportArgs $scriptArgs | Indent; TrapSigs 'on'
+				Semaphore 'waiton' "$reportName" 'true'
+				Msg3 "...$reportName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+			done
 	build5)
 			;;
 	build7)
-		## Checks
-			Msg3 "Starting Checks"
-			(( indentLevel++ )) || true
-			FindExecutable -sh -run checkForPrivateDevSites $scriptArgs | Indent
-			(( indentLevel-- )) || true
-			Msg3 "Checks Completed"	
+		## Run programs/functions
+			pgms=(checkForPrivateDevSites)
+			for ((i=0; i<${#pgms[@]}; i++)); do
+				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
+				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
+				TrapSigs 'off'
+				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
+				TrapSigs 'on'
+				Semaphore 'waiton' "$pgmName" 'true'
+				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+			done
 			;;
 esac
 
@@ -98,3 +92,4 @@ return 0
 ## 10-23-2017 @ 11.41.52 - (2.1.34)    - dscudiero - Cosmetic/minor change
 ## 10-23-2017 @ 11.42.15 - (2.1.35)    - dscudiero - Cosmetic/minor change
 ## 10-23-2017 @ 11.58.31 - (2.1.36)    - dscudiero - Added -noBanners flag to the called scripts
+## 10-30-2017 @ 07.44.10 - (2.1.37)    - dscudiero - Refactored to use common launcing code
