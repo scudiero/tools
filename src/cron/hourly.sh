@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.16 # -- dscudiero -- Fri 10/27/2017 @  8:07:39.77
+version=2.2.17 # -- dscudiero -- Mon 10/30/2017 @  7:23:55.09
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -211,7 +211,7 @@ case "$hostName" in
 					Msg3 "...syncCourseleafGitRepos done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 				fi
 				if [[ $(date "+%H") == 22 ]]; then 
-					Msg3 "\n$(date +"%m/%d@%H:%M") - Running backupData master..."
+					Msg3 "\n$(date +"%m/%d@%H:%M") - Running backupData ..."
 					TrapSigs 'off'; FindExecutable -sh -uselocal -run backupData; TrapSigs 'on'
 					Msg3 "...backupData done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 					## Remove all hourly log files older than 24 hrs
@@ -307,3 +307,4 @@ return 0
 ## 10-27-2017 @ 07.15.15 - (2.2.14)    - dscudiero - Misc cleanup
 ## 10-27-2017 @ 07.30.18 - (2.2.15)    - dscudiero - Cleanup old log files every night
 ## 10-27-2017 @ 08.08.03 - (2.2.16)    - dscudiero - Use CalcElapsed function to calculate elapsed times
+## 10-30-2017 @ 07.43.44 - (2.2.17)    - dscudiero - Tweak messaging
