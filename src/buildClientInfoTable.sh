@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.36 # -- dscudiero -- Fri 10/27/2017 @ 16:24:37.50
+version=2.4.37 # -- dscudiero -- Mon 10/30/2017 @  8:19:14.29
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -98,10 +98,15 @@ ParseArgsStd
 		[[ $batchMode != true ]] && Msg3 "^Creating work table '$useClientInfoTable'..."
 		sqlStmt="drop table if exists ${clientInfoTable}Bak"
 		RunSql2 $sqlStmt
-		sqlStmt="drop table if exists $useClientInfoTable"
-		RunSql2 $sqlStmt
-		sqlStmt="create table $useClientInfoTable like ${clientInfoTable}"
-		RunSql2 $sqlStmt
+		if [[ $useClientInfoTable != $clientInfoTable ]]; then
+			sqlStmt="drop table if exists $useClientInfoTable"
+			RunSql2 $sqlStmt
+			sqlStmt="create table $useClientInfoTable like $clientInfoTable"
+			RunSql2 $sqlStmt
+		else 
+			sqlStmt="truncate $useClientInfoTable"
+			RunSql2 $sqlStmt
+		fi
 	fi
 
 ## Loop through clients
@@ -195,3 +200,4 @@ Goodbye 0 'alert'
 ## 10-24-2017 @ 07.42.43 - (2.4.0)     - dscudiero - set version
 ## 10-27-2017 @ 07.52.38 - (2.4.1)     - dscudiero - Add debug statements
 ## 10-27-2017 @ 13.35.11 - (2.4.33)    - dscudiero - Cosmetic/minor change
+## 10-30-2017 @ 08.29.24 - (2.4.37)    - dscudiero - if the target table == source table then do not drop the table
