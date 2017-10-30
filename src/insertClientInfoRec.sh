@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.118 # -- dscudiero -- Fri 10/27/2017 @ 16:50:21.77
+version=2.3.123 # -- dscudiero -- Mon 10/30/2017 @  8:26:58.98
 #===================================================================================================
 TrapSigs 'on'
 
@@ -160,6 +160,8 @@ Dump -1 -n client
 		#dump -t fieldVal
 		insertVals="$insertVals,$fieldVal"
 	done
+	wFields="${wFields:1}"
+	insertVals="${insertVals:1}"
 	#dump -n insertVals
 
 ## Insert record
@@ -169,7 +171,6 @@ Dump -1 -n client
 		RunSql2 $sqlStmt
 	## Insert new data
 		sqlStmt="insert into $useClientInfoTable ($wFields) values($insertVals)"
-		Dump -2 -t2 sqlStmt -n
 		[[ $DOIT != '' || $informationOnlyMode == true ]] && Dump sqlStmt || RunSql2 $sqlStmt
 
 #===================================================================================================
