@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.143 # -- dscudiero -- Fri 10/27/2017 @  8:25:02.95
+version=1.1.144 # -- dscudiero -- Mon 10/30/2017 @  9:33:32.06
 #==================================================================================================
 TrapSigs 'on'
 
@@ -168,8 +168,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 	archives=NULL
 
 ## Get CIMS
-	allCims=true
-	unset cimStr
+	allCims=true; unset cimStr cims
 	GetCims $siteDir
 	unset allCims
 	[[ -n $cimStr ]] && cimStr=\"${cimStr// /}\" || cimStr=NULL
@@ -413,3 +412,4 @@ return 0
 ## 10-23-2017 @ 07.20.36 - (1.1.136)   - dscudiero - add debig
 ## 10-23-2017 @ 16.52.19 - (1.1.142)   - dscudiero - Fix problem with tons of quotes arround cims
 ## 10-27-2017 @ 08.25.20 - (1.1.143)   - dscudiero - Switch to use Verbose
+## 10-30-2017 @ 09.34.52 - (1.1.144)   - dscudiero - Fix problem getting the cims not clearing cims array before calling GetCims
