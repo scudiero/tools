@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.123 # -- dscudiero -- Mon 10/30/2017 @  8:26:58.98
+version=2.3.125 # -- dscudiero -- Mon 10/30/2017 @  9:00:51.68
 #===================================================================================================
 TrapSigs 'on'
 
@@ -111,7 +111,7 @@ Dump -1 -n client
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		for ((cntr=0; cntr<${#resultSet[@]}; cntr++)); do
 			result="${resultSet[$cntr]}"
-			env="${result%%|*}"; result="${result#*|}"
+			env="${result%%|*}"; env="${env//-/_}"; result="${result#*|}"
 			domain="${result%%|*}"; result="${result#*|}"
 			Dump -2 -t2 env domain result
 			[[ $result == 'Y' ]] && eval ${env}internalurl="${domain// /}" || eval ${env}url="${domain// /}" 
@@ -218,3 +218,4 @@ return 0
 ## 10-27-2017 @ 15.56.02 - (2.3.112)   - dscudiero - reformat verbose statements
 ## 10-27-2017 @ 16.01.00 - (2.3.114)   - dscudiero - Cosmetic/minor change
 ## 10-27-2017 @ 16.13.19 - (2.3.115)   - dscudiero - Make sure there is a client role for each reps'
+## 10-30-2017 @ 09.04.39 - (2.3.125)   - dscudiero - Make sure that the url type data does not contain any special chars
