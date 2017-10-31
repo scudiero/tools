@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.125 # -- dscudiero -- Mon 10/30/2017 @  9:00:51.68
+version=2.3.129 # -- dscudiero -- Tue 10/31/2017 @ 11:17:16.07
 #===================================================================================================
 TrapSigs 'on'
 
@@ -31,7 +31,7 @@ for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ "$(basename "${BASH_SOURCE[$i]}")"
 function MapTtoW {
 	local tName="$1"
 	if [[ $tName == 'clientkey' ]]; then echo 'idx'
-	elif [[ $tName == 'name' ]]; then echo 'longName'
+	elif [[ $tName == 'name' ]]; then echo 'longname'
 	elif [[ $tName == 'is_private' ]]; then echo 'private'
 	elif [[ $tName == 'clientcode' ]]; then echo 'name'
 	elif [[ $tName == 'is_active' ]]; then echo 'recordstatus'
@@ -83,9 +83,9 @@ Dump -1 -n client
 		for ((cntr = 1 ; cntr < $numTFields+1 ; cntr++)); do
 			field=$(cut -d',' -f$cntr <<< $tFields)
 			fVal=$(cut -d'|' -f$cntr <<< $result)
-			#Dump -2 -t2 cntr field fVal
+			Dump -2 -t2 cntr field fVal
 			[[ $(IsNumeric "$fVal") == false ]] && fVal="\"$fVal\""
-			#Dump -2 -t2 $(MapTtoW "$field")
+			Dump -2 -t2 $(MapTtoW "$field")
 			eval $(MapTtoW "$field")="$fVal"
 		done
 	fi
@@ -143,12 +143,12 @@ Dump -1 -n client
 	RunSql2 $sqlStmt
 	unset wFields insertVals
 	for result in "${resultSet[@]}"; do
-		#dump -n result
+		dump 1 -n result
 		field="${result%%|*}"
 		fieldType="${result##*|}"
 		wFields="$wFields,$field"
 		fieldVal="${!field}"
-		#dump -t field fieldType fieldVal wFields
+		dump 1 -t field fieldType fieldVal wFields
 		if [[ $field == 'recordstatus' ]]; 	then [[ $fieldVal == 'Y' ]] && fieldVal="\"A\"" || fieldVal="\"D\""
 		elif [[ $field == 'createdby' ]]; 	then fieldVal="\"$userName\""
 		elif [[ $field == 'createdon' ]]; 	then fieldVal='NOW()'
@@ -157,7 +157,7 @@ Dump -1 -n client
 			[[ ${fieldType:0:1} == 'v' ]] && fieldVal="\"$fieldVal\""
 			[[ ${fieldType:0:1} == 's' ]] && fieldVal="\"$fieldVal\""
 		fi
-		#dump -t fieldVal
+		dump 1 -t fieldVal
 		insertVals="$insertVals,$fieldVal"
 	done
 	wFields="${wFields:1}"
@@ -171,6 +171,7 @@ Dump -1 -n client
 		RunSql2 $sqlStmt
 	## Insert new data
 		sqlStmt="insert into $useClientInfoTable ($wFields) values($insertVals)"
+		dump 1 -n wFields -n insertVals
 		[[ $DOIT != '' || $informationOnlyMode == true ]] && Dump sqlStmt || RunSql2 $sqlStmt
 
 #===================================================================================================
@@ -219,3 +220,4 @@ return 0
 ## 10-27-2017 @ 16.01.00 - (2.3.114)   - dscudiero - Cosmetic/minor change
 ## 10-27-2017 @ 16.13.19 - (2.3.115)   - dscudiero - Make sure there is a client role for each reps'
 ## 10-30-2017 @ 09.04.39 - (2.3.125)   - dscudiero - Make sure that the url type data does not contain any special chars
+## 10-31-2017 @ 11.21.08 - (2.3.129)   - dscudiero - Fix problem setting longName
