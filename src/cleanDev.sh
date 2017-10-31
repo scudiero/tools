@@ -1,8 +1,9 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.47 # -- dscudiero -- Tue 10/31/2017 @  8:40:53.90
+version=3.5.48 # -- dscudiero -- Tue 10/31/2017 @  8:43:56.84
 #==================================================================================================
+Here CD0
 TrapSigs 'on'
 myIncludes="ProtectedCall StringFunctions PushPop"
 Import "$standardInteractiveIncludes $myIncludes"
