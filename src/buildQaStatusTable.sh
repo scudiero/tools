@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.52 # -- dscudiero -- Tue 10/31/2017 @ 10:51:38.90
+version=1.2.53 # -- dscudiero -- Tue 10/31/2017 @ 10:58:05.01
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -424,4 +424,5 @@ Goodbye 0 #'alert'
 ## 06-05-2017 @ 12.53.26 - (1.2.36)    - dscudiero - Add parsing for 'Next' in the cell to trigger move to next
 ## 06-19-2017 @ 07.06.59 - (1.2.37)    - dscudiero - tweak formatting
 ## 09-29-2017 @ 10.14.39 - (1.2.45)    - dscudiero - Update FindExcecutable call for new syntax
-## 10-31-2017 @ 10.57.06 - (1.2.52)    - dscudiero - Switch to Msg3
+## 10-31-2017 @ 10.57.06 - (1.2.52)    - dscudiero - Switch to GetExcel2 and Msg3
+## 10-31-2017 @ 10.58.10 - (1.2.53)    - dscudiero - Cosmetic/minor change
