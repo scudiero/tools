@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.23 # -- dscudiero -- Fri 10/27/2017 @  9:41:06.71
+version=2.1.24 # -- dscudiero -- Tue 10/31/2017 @  8:30:55.33
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -30,11 +30,13 @@ originalArgStr="$*"
 	fi
 	echo "$hostName - $(date +'%m-%d-%Y @ %H.%M.%S') -- Starting $callScriptName" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 
+Here 0A; dump verboseLevel
 #=======================================================================================================================
 ## Initialize the runtime env
 	##echo -e "\t-- $hostName - sourcing '$dispatcher'" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	source "$dispatcher" --viaCron ## Setup the environment
 	#3echo -e "\t\t-- $hostName - back from dispatcher" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
+Here 0B; dump verboseLevel
 
 #=======================================================================================================================
 ## Set the jobs the log file
@@ -49,6 +51,7 @@ originalArgStr="$*"
 ## Run the executable(s)
 	export USELOCAL=true
 	executeFile=$(FindExecutable "$callScriptName" '-cron')
+Here 0C; dump verboseLevel
 	echo -e "\t-- $hostName - Starting $callScriptName from '$executeFile', Args: $scriptArgs $callScriptArgs" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	echo -e "\n$(date) -- Calling script '$callScriptName':\n\t$executeFile $callScriptArgs\n" > "$logFile"
 
