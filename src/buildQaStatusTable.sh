@@ -1,11 +1,11 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.45 # -- dscudiero -- Fri 09/29/2017 @ 10:07:07.12
+version=1.2.52 # -- dscudiero -- Tue 10/31/2017 @ 10:51:38.90
 #=======================================================================================================================
 TrapSigs 'on'
 
-myIncludes="GetExcel StringFunctions RunSql2 SetFileExpansion ProtectedCall"
+myIncludes="GetExcel2 StringFunctions RunSql2 SetFileExpansion ProtectedCall PushPop"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -57,21 +57,11 @@ function testMode-buildQaStatusTable  { # or testMode-local
 		dump -2 product workBook workSheet findColText
 
 		## Read the Worksheet data
-			GetExcel "$workBook" "$workSheet" > $tmpFile 2>&1
-			local grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
-			if [[ $grepStr != '' || $(tail -n 1 $tmpFile) == '-1' ]]; then
-				Msg2 $E "Could not retrieve data from workbook, please see below"
-				tail -n 25 $tmpFile > $tmpFile.2
-				while read -r line; do echo -e "\t$line"; done < $tmpFile.2;
-				[[ -f $tmpFile.2 ]] && rm -f $tmpFile.2
-				Msg2; Goodbye -1
-			fi
-
-		## Read the output into an array, look for the header record
-			while read line; do lines+=("$line"); done < $tmpFile
-			[[ $(Contains "$(Lower "${lines[0]}")" "$findColText") != true ]] && Terminate "$FUNCNAME: First record:\n\t'${lines[0]}'\nof the file did not contain '$findColText'"
+			GetExcel2 -wb "$workBook" -ws "$workSheet"
+			[[ ${#resultSet[@]} -le 0 ]] && Terminate "$FUNCNAME: Could not retrieve data from workbook\n$workBook / $workSheet"
 
 		# Parse the header record, getting the column numbers of the fields
+			[[ $(Contains "$(Lower "${resultSet[0]}")" "$findColText") != true ]] && Terminate "$FUNCNAME: First record:\n\t'${resultSet[0]}'\nof the worksheet did not contain '$findColText'"
 			IFSave=$IFS; IFS=\|; sheetCols=(${lines[0]}); IFS=$IFSave;
 			for sheetCol in "${sheetCols[@]}"; do
 				(( fieldCntr += 1 ))
@@ -82,13 +72,13 @@ function testMode-buildQaStatusTable  { # or testMode-local
 			itemHrsCol=$((itemCol+1))
 			dump -2 itemCol itemHrsCol
 
-		## Loop throug spreadsheet lines getting data
-			priorityWeek=$(cut -d'|' -f $itemCol <<< ${lines[1]})
+		## Loop throug spreadsheet records getting data
+			priorityWeek=$(cut -d'|' -f $itemCol <<< ${resultSet[1]})
 			priorityWeek=${priorityWeek##* }
 			dump -2 priorityWeek
-			for ((jj=2; jj<${#lines[@]}; jj++)); do
-				item="$(Lower "$(cut -d'|' -f $itemCol <<< ${lines[$jj]})")"
-				itemHrs="$(cut -d'|' -f $itemHrsCol <<< ${lines[$jj]})"
+			for ((jj=2; jj<${#resultSet[@]}; jj++)); do
+				item="$(Lower "$(cut -d'|' -f $itemCol <<< ${resultSet[$jj]})")"
+				itemHrs="$(cut -d'|' -f $itemHrsCol <<< ${resultSet[$jj]})"
 				[[ -z ${item}${itemHrs} ]] && continue
 				[[ $item == 'meetings (hrs)' ]] && break
 				ctClient="$(cut -f1 -d' ' <<< "$item")"
@@ -207,7 +197,7 @@ DumpMap 2 "$(declare -p variableMap)"
 #================================================================================================================================================================
 # Main
 #================================================================================================================================================================
-Msg2; Msg2 "Retrieveing Implementation Team data from '$(basename "$cimTrackingWorkBook")/$cimTrackingWorkbookSheet'"
+Msg3; Msg3 "Retrieveing Implementation Team data from '$(basename "$cimTrackingWorkBook")/$cimTrackingWorkbookSheet'"
 GetCimPriorityData 'cimTrackingHash' "$cimTrackingWorkBook" "$cimTrackingWorkbookSheet" "$cimTester"
 if [[ $verboseLevel -ge 1 ]]; then
 	dump -t priorityWeek
@@ -217,10 +207,10 @@ if [[ $verboseLevel -ge 1 ]]; then
 	done;
 fi
 
-Msg2; Msg2 "QA Tracking Root directory = '$qaTrackingRoot'"
+Msg3; Msg3 "QA Tracking Root directory = '$qaTrackingRoot'"
 unset numTokens clientCode product project instance
 ## Loop through workbooks
-Msg2 "Scanning the directory..."
+Msg3 "Scanning the directory..."
 SetFileExpansion 'off'
 [[ $client != "" ]] && fileSpec="$client-*.xlsm" || fileSpec='*.xlsm'
 SetFileExpansion
@@ -235,22 +225,25 @@ for workbook in "${workbooks[@]}"; do
 	fileName=$(basename $workbook)
 	[[ ${fileName:0:1} == '~' ]] && continue
 	[[ $(Contains "$workbook" 'old') == true || $(Contains "$workbook" 'bak') == true ]] && continue
-	Msg2 $V1 "^Checking File: $workbook"
+	Msg3 $V1 "^Checking File: $workbook"
 	## Get the list of worksheets in the workbook
-		GetExcel "$workbook" 'GetSheets' > $tmpFile
-		sheets=$(tail -n 1 $tmpFile)
+		GetExcel2 -wb "$workbook" -ws 'GetSheets'
+		sheets="${resultSet[0]}"
+
 	[[ $(Contains "|${sheets}|" '|ProjectSummary|') != true ]] && continue
-	Msg2 "^Processing File: '$(basename $workbook)' ($fileCntr of ${#workbooks[@]})"
+	Msg3 "^Processing File: '$(basename $workbook)' ($fileCntr of ${#workbooks[@]})"
 
 	## Read the Project summary data
 		workSheet='ProjectSummary'
-		Msg2 $V1 "^^Parsing '$workSheet'..."
-		GetExcel "$workbook" "$workSheet" > $tmpFile
+		Msg3 $V1 "^^Parsing '$workSheet'..."
+		GetExcel2 -wb "$workbook" -ws "$workSheet"
 
 	## Parse sheet data --  the variable names MUST match the data base column names
 		unset $(tr ',' ' ' <<< $insertFields)
 		foundFailed=false; foundWaiting=false; foundNotes=false
-		while read line; do
+
+		for ((i=0; i<${#resultSet[@]}; i++)); do
+			line="${resultSet[$i]}"
 			dump -2 -n -t line
 			[[ $(tr -d '|' <<< $line) == '' ]] && continue
 			recType=$(Trim "$(cut -d'|' -f2 <<< $line)")
@@ -297,15 +290,15 @@ for workbook in "${workbooks[@]}"; do
 					eval $var=\"$val\"
 					dump -2 -t $var
 				fi
-		done < $tmpFile
+		done
 		if [[ $verboseLevel -ge 2 ]]; then echo -e "\nFields:";for field in $(tr ',' ' ' <<< $insertFields); do echo -e "\t$field = ${!field}"; done; echo; fi
 
 	## Do we have the data necessary to continue
-		Msg2 $V1 "^^Checking data..."
+		Msg3 $V1 "^^Checking data..."
 		if [[ $clientCode == '' || $env == '' || $product == '' || $project == '' || $instance == '' ]]; then
-			Msg2 $WT1 "File '$workbook'\nhas insufficient data to uniquely identify QA project"
+			Msg3 $WT1 "File '$workbook'\nhas insufficient data to uniquely identify QA project"
 			dump -t -t clientCode env product project instance
-			Msg2 "^^Skipping file"
+			Msg3 "^^Skipping file"
 			continue
 		fi
 
@@ -367,15 +360,15 @@ for workbook in "${workbooks[@]}"; do
 	## Build & run sqlStmt
 		sqlStmt="$sqlAction $qaStatusTable $setClause $whereClause"
 		RunSql2 $sqlStmt
-		Msg2 $V1 "^^${sqlAction} of record completed"
+		Msg3 $V1 "^^${sqlAction} of record completed"
 
 	## Populate the testing detains table if workbook is finalized
 		## Check to see if the workbook is finalized
 		if [[ $(Contains "|${sheets}|" '|TestingDetailFinal|') == true ]]; then
 			## Process the testing details records
-			Msg2 "^^Processing Testing Details data via '$workerScript'..."
+			Msg3 "^^Processing Testing Details data via '$workerScript'..."
 			ProtectedCall "Call "$workerScriptFile" "$workbook" 'TestingDetailFinal'"
-			[[ $rc -ge 2 ]] && Msg2 $T "Processing the Testing Detail data, please review messages"
+			[[ $rc -ge 2 ]] && Msg3 $T "Processing the Testing Detail data, please review messages"
 			if [[ $(Contains "$workbook" 'archive') == false ]]; then
 				pushd $(dirname $workbook) >& /dev/null
 				$DOIT mv -f $workbook "$qaTrackingRoot/Archive/"
@@ -431,3 +424,4 @@ Goodbye 0 #'alert'
 ## 06-05-2017 @ 12.53.26 - (1.2.36)    - dscudiero - Add parsing for 'Next' in the cell to trigger move to next
 ## 06-19-2017 @ 07.06.59 - (1.2.37)    - dscudiero - tweak formatting
 ## 09-29-2017 @ 10.14.39 - (1.2.45)    - dscudiero - Update FindExcecutable call for new syntax
+## 10-31-2017 @ 10.57.06 - (1.2.52)    - dscudiero - Switch to Msg3
