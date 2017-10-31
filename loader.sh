@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.52" # -- dscudiero -- Thu 10/26/2017 @  8:07:28.06
+version="1.4.54" # -- dscudiero -- Tue 10/31/2017 @ 10:41:15.84
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -208,7 +208,9 @@ sTime=$(date "+%s")
 		fi
 
 ## Import things we need to continue
-	source "$TOOLSPATH/lib/Import.sh"
+	importFile="$TOOLSPATH/lib/Import.sh"
+	[[ -r $HOME/tools/lib/Import.sh && $useLocal == true ]] && importFile="$HOME/tools/lib/Import.sh"
+	source "$importFile"
 	sTime=$(date "+%s")
 	Import "$loaderIncludes"
 	prtStatus ", imports"
@@ -912,3 +914,4 @@ fi
 ## 10-23-2017 @ 16.28.49 - ("1.4.49")  - dscudiero - Cosmetic/minor change
 ## 10-24-2017 @ 07.57.46 - ("1.4.50")  - dscudiero - Cosmetic/minor change
 ## 10-26-2017 @ 08.07.31 - ("1.4.52")  - dscudiero - Cosmetic/minor change
+## 10-31-2017 @ 10.41.31 - ("1.4.54")  - dscudiero - Cosmetic/minor change
