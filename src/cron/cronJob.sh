@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.27 # -- dscudiero -- Tue 10/31/2017 @  8:50:13.52
+version=2.1.28 # -- dscudiero -- Tue 10/31/2017 @ 10:06:50.16
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -35,7 +35,6 @@ originalArgStr="$*"
 	##echo -e "\t-- $hostName - sourcing '$dispatcher'" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	source "$dispatcher" --viaCron ## Setup the environment
 	#3echo -e "\t\t-- $hostName - back from dispatcher" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
-Here 0B; dump verboseLevel
 
 #=======================================================================================================================
 ## Set the jobs the log file
