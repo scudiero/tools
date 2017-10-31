@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.55" # -- dscudiero -- Tue 10/31/2017 @ 15:29:56.92
+version="1.4.56" # -- dscudiero -- Tue 10/31/2017 @ 15:32:19.58
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -228,7 +228,7 @@ sTime=$(date "+%s")
 		sqlStmt="select shortName,longName,type,scriptvariable,scriptcommand,helpgroup,helptext from argdefs where status=\"active\" order by seqorder ASC"
 		RunSql2 $sqlStmt
 		for ((argDefCntr=0; argDefCntr<${#resultSet[@]}; argDefCntr++)); do
-			argDefs+=("${resultSet[$iii]}")
+			argDefs+=("${resultSet[$argDefCntr]}")
 		done
 	fi
 
@@ -915,3 +915,4 @@ fi
 ## 10-26-2017 @ 08.07.31 - ("1.4.52")  - dscudiero - Cosmetic/minor change
 ## 10-31-2017 @ 10.41.31 - ("1.4.54")  - dscudiero - Cosmetic/minor change
 ## 10-31-2017 @ 15.30.53 - ("1.4.55")  - dscudiero - Use | as seperator in argDefs
+## 10-31-2017 @ 15.32.39 - ("1.4.56")  - dscudiero - Cosmetic/minor change
