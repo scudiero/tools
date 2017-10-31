@@ -1,12 +1,13 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.48 # -- dscudiero -- Tue 10/31/2017 @  8:43:56.84
+version=3.5.49 # -- dscudiero -- Tue 10/31/2017 @  8:47:41.71
 #==================================================================================================
-Here CD0
+Here CD0; Dump verboseLevel
 TrapSigs 'on'
 myIncludes="ProtectedCall StringFunctions PushPop"
 Import "$standardInteractiveIncludes $myIncludes"
+Here CD1; Dump verboseLevel
 
 originalArgStr="$*"
 scriptDescription="Cleanup private dev sites"
@@ -205,13 +206,15 @@ deleteLimitDays=7
 sqlStmt="select scriptData1 from $scriptsTable where name=\"checkForPrivateDevSites\""
 RunSql2 $sqlStmt
 [[ ${#resultSet[@]} -ne 0 ]] && deleteLimitDays=${resultSet[0]}
+Here CD2; Dump verboseLevel
 
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
 Hello
+Here CD3; Dump verboseLevel
 ParseArgsStd
-dump 1 mark delete unMark client daemonMode
+dump 1 verboseLevel mark delete unMark client daemonMode
 
 ## Get the workflow files
 GetDefaultsData 'copyWorkflow'
