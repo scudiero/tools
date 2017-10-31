@@ -17,7 +17,7 @@ pythonResources='inspect,sys,traceback,os,argparse,xlrd,re,datetime,time,string,
 
 loaderIncludes='Here Dump Pause Msg2 Msg3 Semaphore FindExecutable PadChar CheckRun CheckAuth SignalHandeler'
 loaderIncludes="$loaderIncludes TrapSigs RunSql2 SetFileExpansion GetDefaultsData"
-standardIncludes='ParseArgsStd Hello DbLog Init Goodbye MkTmpFile'
+standardIncludes='ParseArgsStd ParseArgsStd2 Hello DbLog Init Goodbye MkTmpFile'
 standardInteractiveIncludes="$standardIncludes Prompt VerifyContinue"
 
 #===================================================================================================
