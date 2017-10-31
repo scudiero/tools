@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.43 # -- dscudiero -- Tue 10/31/2017 @  8:14:46.89
+version=3.5.47 # -- dscudiero -- Tue 10/31/2017 @  8:40:53.90
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall StringFunctions PushPop"
@@ -209,7 +209,7 @@ RunSql2 $sqlStmt
 # Standard arg parsing and initialization
 #==================================================================================================
 Hello
-ParseArgsStd 
+ParseArgsStd
 dump 1 mark delete unMark client daemonMode
 
 ## Get the workflow files
