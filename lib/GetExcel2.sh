@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.1.1" # -- dscudiero -- Thu 10/12/2017 @ 14:25:38.42
+# version="2.1.5" # -- dscudiero -- Tue 10/31/2017 @ 10:47:15.89
 #=======================================================================================================================
 # Retrieve data from a Excel xlsx spreadsheet
 # Usage: GetExcel <workBook> <workSheet>
@@ -11,7 +11,7 @@
 # All rights reserved
 #=======================================================================================================================
 function GetExcel2 {
-	myIncludes="SetFileExpansion StringFunctions FindExecutable ProtectedCall InitializeInterpreterRuntime Msg3 Goodbye"
+	myIncludes="SetFileExpansion FindExecutable"
 	Import "$standardIncludes $myIncludes"
 
 	function GetExcelCleanup { SetFileExpansion 'on' ; rm -rf ${tmpFile}* >& /dev/null ; SetFileExpansion ; }
@@ -33,7 +33,6 @@ function GetExcel2 {
 		done
 		[[ ${workSheet:0:1} == ' ' ]] && workSheet="${workSheet:1}"
 
-
 	[[ -z $workBook || ! -f $workBook ]] && Terminate "$FUNCNAME: Could not locate workbook file '$workBook'"
 	if [[ $(Contains "$workBook" ' ') == true ]]; then
 		cp -fp "$workBook" "$tmpFile.workbook"
@@ -51,7 +50,6 @@ function GetExcel2 {
 		export PATH="$PYDIR:$PATH"
 		verboseLevel=0
 			cmdStr="$PYDIR/bin/python -u $executeFile -wb "$workBook" -ws "$workSheet""
-		 	$cmdStr > "$tmpFile"
 		 	local resultStr="$($cmdStr)"
 	 	verboseLevel=$verboseLevelSave
 		export PATH="$pathSave"
@@ -97,3 +95,4 @@ export -f GetExcel2
 ## 10-05-2017 @ 12.25.38 - ("2.1.0")   - dscudiero - Cosmetic/minor change
 ## 10-05-2017 @ 12.26.43 - ("2.1.0")   - dscudiero - Cosmetic/minor change
 ## 10-12-2017 @ 14.25.59 - ("2.1.1")   - dscudiero - Use readarray to build the resultSet array
+## 10-31-2017 @ 10.57.27 - ("2.1.5")   - dscudiero - Cleanup includes list
