@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.25 # -- dscudiero -- Tue 10/31/2017 @  8:40:01.59
+version=2.1.26 # -- dscudiero -- Tue 10/31/2017 @  8:43:07.09
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -50,14 +50,13 @@ Here 0B; dump verboseLevel
 ## Run the executable(s)
 	export USELOCAL=true
 	executeFile=$(FindExecutable "$callScriptName" '-cron')
-Here 0C; dump verboseLevel
 	echo -e "\t-- $hostName - Starting $callScriptName from '$executeFile', Args: $scriptArgs $callScriptArgs" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	echo -e "\n$(date) -- Calling script '$callScriptName':\n\t$executeFile $callScriptArgs\n" > "$logFile"
 
 	myNameSave="$myName"; myPathSave="$myPath"
 	myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 	myPath="$(dirname $executeFile)"
-Here 0D; dump verboseLevel
+Here 0D; dump verboseLevel executeFile
 	source $executeFile $scriptArgs $callScriptArgs >> "$logFile"  2>&1
 Here 0E; dump verboseLevel
 	echo -e "\t-- $hostName - $callScriptName done" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
