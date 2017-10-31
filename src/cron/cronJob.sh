@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.26 # -- dscudiero -- Tue 10/31/2017 @  8:43:07.09
+version=2.1.27 # -- dscudiero -- Tue 10/31/2017 @  8:50:13.52
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -56,9 +56,7 @@ Here 0B; dump verboseLevel
 	myNameSave="$myName"; myPathSave="$myPath"
 	myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 	myPath="$(dirname $executeFile)"
-Here 0D; dump verboseLevel executeFile
 	source $executeFile $scriptArgs $callScriptArgs >> "$logFile"  2>&1
-Here 0E; dump verboseLevel
 	echo -e "\t-- $hostName - $callScriptName done" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	mv $logFile $logFile.bak
  	cat $logFile.bak | sed "s/\x1B\[[0-9;]*[a-zA-Z]//g" | tr -d '\007' > $logFile
