@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.24 # -- dscudiero -- Tue 10/31/2017 @  8:30:55.33
+version=2.1.25 # -- dscudiero -- Tue 10/31/2017 @  8:40:01.59
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -30,7 +30,6 @@ originalArgStr="$*"
 	fi
 	echo "$hostName - $(date +'%m-%d-%Y @ %H.%M.%S') -- Starting $callScriptName" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 
-Here 0A; dump verboseLevel
 #=======================================================================================================================
 ## Initialize the runtime env
 	##echo -e "\t-- $hostName - sourcing '$dispatcher'" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
@@ -58,7 +57,9 @@ Here 0C; dump verboseLevel
 	myNameSave="$myName"; myPathSave="$myPath"
 	myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 	myPath="$(dirname $executeFile)"
+Here 0D; dump verboseLevel
 	source $executeFile $scriptArgs $callScriptArgs >> "$logFile"  2>&1
+Here 0E; dump verboseLevel
 	echo -e "\t-- $hostName - $callScriptName done" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	mv $logFile $logFile.bak
  	cat $logFile.bak | sed "s/\x1B\[[0-9;]*[a-zA-Z]//g" | tr -d '\007' > $logFile
