@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.84 # -- dscudiero -- Mon 10/30/2017 @  8:45:35.91
+version=4.3.85 # -- dscudiero -- Tue 10/31/2017 @  7:38:56.83
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="Call SetSiteDirs SetFileExpansion RunSql2 StringFunctions ProtectedCall FindExecutable PushPop"
@@ -106,9 +106,9 @@ fi
 
 	## Get the list of actual clients on this server
 		if [[ -z $client ]]; then
-			clientDirs=($(find /mnt/* -maxdepth 1 -mindepth 1 2>/dev/null | grep -v '\-test$' | grep -v '^/mnt/dev'))
+			clientDirs=($(ProtectedCall "find /mnt/* -maxdepth 1 -mindepth 1 2>/dev/null | grep -v '\-test$' | grep -v '^/mnt/dev'"))
 		else
-			clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep -v '\-test$' | grep $client))
+			clientDirs+=($(ProtectedCall "find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep -v '\-test$' | grep $client"))
 		fi
 		numClients=${#clientDirs[@]}
 
@@ -241,3 +241,4 @@ Goodbye 0 'alert'
 ## 10-23-2017 @ 07.30.44 - (4.3.80)    - dscudiero - Tweak messaging
 ## 10-25-2017 @ 08.40.03 - (4.3.81)    - dscudiero - Cosmetic/minor change
 ## 10-30-2017 @ 08.50.42 - (4.3.84)    - dscudiero - Filter out '-test' from the clientDirs
+## 10-31-2017 @ 08.51.21 - (4.3.85)    - dscudiero - Wrap the grep calls in a ProtectedCall
