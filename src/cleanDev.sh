@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.41 # -- dscudiero -- Tue 10/31/2017 @  8:06:57.29
+version=3.5.42 # -- dscudiero -- Tue 10/31/2017 @  8:11:56.86
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall StringFunctions PushPop"
@@ -29,7 +29,6 @@ scriptDescription="Cleanup private dev sites"
 	}
 
 	function Goodbye-cleanDev  { # or Goodbye-local
-Here 1
 		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
 		return 0
 	}
@@ -210,7 +209,7 @@ RunSql2 $sqlStmt
 #==================================================================================================
 Hello
 ParseArgsStd 
-dump -1 mark delete unMark client daemonMode
+dump 1 mark delete unMark client daemonMode
 
 ## Get the workflow files
 GetDefaultsData 'copyWorkflow'
