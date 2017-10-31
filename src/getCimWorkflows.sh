@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.60 # -- dscudiero -- Fri 10/20/2017 @  8:48:52.86
+version=1.2.62 # -- dscudiero -- Tue 10/31/2017 @  9:08:32.12
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -24,7 +24,7 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 	#==============================================================================================
 	# parse script specific arguments
 	#==============================================================================================
-	function parseArgs-makeWorkflowSpreadsheet  {
+	function ParseArgsStd-getCimWorkflows {
 		argList+=(-workbookFile,1,option,workbookFile,,script,'The fully qualified spreadsheet file name')
 		argList+=(-doNotLoadNulls,2,switch,doNotLoadNulls,,script,'If a data field is null then do not write out that data to the page')
 		return 0
@@ -33,7 +33,7 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 	#==============================================================================================
 	# Goodbye call back
 	#==============================================================================================
-	function Goodbye-makeWorkflowSpreadsheet  {
+	function Goodbye-getCimWorkflows {
 		eval $errSigOn
 		if [[ -f $stepFile ]]; then echo rm stepFile; rm -f $stepFile; fi
 		if [[ -f $backupStepFile ]]; then mv -f $backupStepFile $stepFile; fi
@@ -44,7 +44,7 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 	#==============================================================================================
 	# TestMode overrides
 	#==============================================================================================
-	function testMode-makeWorkflowSpreadsheet  {
+	function testMode-getCimWorkflows {
 		env='dev'
 		srcDir=~/testData/dev
 		return 0
@@ -53,7 +53,7 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 	#==============================================================================================
 	# Parse an esig record
 	#==============================================================================================
-	function ParseEsig  {
+	function ParseEsig {
 		local ruleName="$1"; shift
 		local line="$1"; shift
 		local description="$*"
@@ -78,7 +78,7 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 	#==============================================================================================
 	# Parse an wfrules record
 	#==============================================================================================
-	function ParseWfrule  {
+	function ParseWfrule {
 		local ruleName="$1"; shift
 		local line="$1"; shift
 		local description="$*"
@@ -144,7 +144,7 @@ Init "getClient getEnv getDirs checkEnvs getCims $allCims"
 if [[ $informationModeOnly == true ]]; then
 	outFile='/dev/null'
 else
-	[[ $workbookFile != '' ]] && outFile="$workbookFile" || outFile="$(GetOutputFile "$client" "$env" "$product" "xls")"
+	[[ -n $workbookFile ]] && outFile="$workbookFile" || outFile="$(GetOutputFile "$client" "$env" "$product" "xls")"
 fi
 
 unset ignoreRules ignoreSteps ignoreWorkflows
@@ -432,3 +432,4 @@ Goodbye 0 #'alert'
 ## 10-09-2017 @ 16.54.59 - (1.2.39)    - dscudiero - Cosmetic/minor change
 ## 10-19-2017 @ 16.56.15 - (1.2.43)    - dscudiero - Read the cimconfig.cfg file if we cannot find the workflow.cfg file
 ## 10-20-2017 @ 08.50.19 - (1.2.60)    - dscudiero - Fix problem detectiong modifiers, reformatted output
+## 10-31-2017 @ 10.15.04 - (1.2.62)    - dscudiero - Fixed setup of the callback functions
