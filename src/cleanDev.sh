@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.42 # -- dscudiero -- Tue 10/31/2017 @  8:11:56.86
+version=3.5.43 # -- dscudiero -- Tue 10/31/2017 @  8:14:46.89
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall StringFunctions PushPop"
@@ -60,6 +60,7 @@ scriptDescription="Cleanup private dev sites"
 	# Get sites
 	#==================================================================================================
 	function GetSites {
+		[[ $batchMode == true ]] && Terminate "Cannot runn '$FUNCNAME' in batch mode"
 		local searchStr="$1"
 		local file tempStr printedSep sepLen sep i siteId loop=true
 		local maxLen=0
@@ -340,3 +341,4 @@ Goodbye 0
 ## 10-20-2017 @ 13.26.50 - (3.5.28)    - dscudiero - Add a default selection for the site to delete
 ## 10-20-2017 @ 15.49.14 - (3.5.30)    - dscudiero - Misc cleanup
 ## 10-31-2017 @ 08.10.14 - (3.5.41)    - dscudiero - If running in daemon mode the exit
+## 10-31-2017 @ 08.15.29 - (3.5.43)    - dscudiero - Put a check in to make sure we do not run the GetSites function in batch mode
