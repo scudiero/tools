@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.30 # -- dscudiero -- Fri 10/20/2017 @ 15:48:36.75
+version=3.5.41 # -- dscudiero -- Tue 10/31/2017 @  8:06:57.29
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall StringFunctions PushPop"
@@ -20,7 +20,7 @@ scriptDescription="Cleanup private dev sites"
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-	function cleanDev-parseArgsStd {
+	function ParseArgsStd-cleanDev {
 		# argList+=(argFlag,minLen,type,scriptVariable,extraToken/exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
 		argList+=(-mark,1,switch,mark,,'script',"Mark the site for deletion")
 		argList+=(-delete,3,switch,delete,,'script',"Delete the site")
@@ -28,12 +28,13 @@ scriptDescription="Cleanup private dev sites"
 		argList+=(-daemon,1,switch,daemonMode,,'script',"Run in daemon mode")
 	}
 
-	function cleanDev-Goodbye  { # or Goodbye-local
+	function Goodbye-cleanDev  { # or Goodbye-local
+Here 1
 		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
 		return 0
 	}
 
-	function cleanDev-Help  {
+	function Help-cleanDev  {
 		helpSet='client,env' # can also include any of {env,cim,cat,clss}, 'script' and 'common' automatically addeed
 		[[ $1 == 'setVarsOnly' ]] && return 0
 
@@ -209,7 +210,7 @@ RunSql2 $sqlStmt
 #==================================================================================================
 Hello
 ParseArgsStd 
-dump 1 mark delete unMark client
+dump -1 mark delete unMark client daemonMode
 
 ## Get the workflow files
 GetDefaultsData 'copyWorkflow'
@@ -270,6 +271,7 @@ if [[ $daemonMode == true ]]; then
 	done
 	Msg3 "Ending $myName in daemon mode..."
 	Goodbye 0
+	exit 0
 fi
 
 
@@ -338,3 +340,4 @@ Goodbye 0
 ## 10-20-2017 @ 13.20.21 - (3.5.27)    - dscudiero - Add PushPop to the include list
 ## 10-20-2017 @ 13.26.50 - (3.5.28)    - dscudiero - Add a default selection for the site to delete
 ## 10-20-2017 @ 15.49.14 - (3.5.30)    - dscudiero - Misc cleanup
+## 10-31-2017 @ 08.10.14 - (3.5.41)    - dscudiero - If running in daemon mode the exit
