@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.37 # -- dscudiero -- Mon 10/30/2017 @  8:19:14.29
+version=2.4.39 # -- dscudiero -- Tue 10/31/2017 @ 11:19:51.81
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -158,10 +158,7 @@ ParseArgsStd
 		RunSql2 $sqlStmt
 	fi
 
-	sqlStmt="select count(*) from $clientInfoTable"
-	RunSql2 $sqlStmt
-	Msg3 "\nInserted ${resultSet[0]} records into $clientInfoTable"
-
+	Msg3 "\nInserted $clientCntr records into $clientInfoTable"
 
 #=======================================================================================================================
 # Done
@@ -201,3 +198,4 @@ Goodbye 0 'alert'
 ## 10-27-2017 @ 07.52.38 - (2.4.1)     - dscudiero - Add debug statements
 ## 10-27-2017 @ 13.35.11 - (2.4.33)    - dscudiero - Cosmetic/minor change
 ## 10-30-2017 @ 08.29.24 - (2.4.37)    - dscudiero - if the target table == source table then do not drop the table
+## 10-31-2017 @ 11.20.47 - (2.4.39)    - dscudiero - Fix reported inserted client records
