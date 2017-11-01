@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.53 # -- dscudiero -- Wed 11/01/2017 @  7:44:45.29
+version=3.13.54 # -- dscudiero -- Wed 11/01/2017 @  8:02:56.96
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -327,7 +327,7 @@ fi
 ## parse arguments
 #=======================================================================================================================
 Hello
-Msg3 "^Your authorization groups: $(sed 's/,/, /g' <<< \"$UsersAuthGroups\")"
+[[ -n $UsersAuthGroups ]] && Msg3 "^Your authorization groups: $(sed 's/,/, /g' <<< \"$UsersAuthGroups\")"
 helpSet='script,client'
 parseQuiet=true
 GetDefaultsData $myName -fromFiles
@@ -526,3 +526,4 @@ Goodbye 0
 ## 10-26-2017 @ 08.05.37 - (3.13.48)   - dscudiero - display the users authorization groups
 ## 10-26-2017 @ 08.09.32 - (3.13.50)   - dscudiero - Cosmetic/minor change
 ## 10-26-2017 @ 08.13.21 - (3.13.52)   - dscudiero - tweak the authorization groups output
+## 11-01-2017 @ 08.03.05 - (3.13.54)   - dscudiero - Cosmetic/minor change
