@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.80 # -- dscudiero -- Wed 11/01/2017 @ 12:36:56.14
+version=2.0.81 # -- dscudiero -- Wed 11/01/2017 @ 16:48:58.69
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -24,16 +24,12 @@ scriptDescription="Sync warehouse defaults table"
 # Standard arg parsing and initialization
 #==================================================================================================
 GetDefaultsData $myName
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 Hello
 
 #==================================================================================================
 ## Maine
 #==================================================================================================
-## Load default settings
-GetDefaultsData #'buildSiteInfoTable'
-ParseArgsStd2
-
 ignoreList="${ignoreList##*ignoreShares:}" ; ignoreList="${ignoreList%% *}"
 mode="$client"
 
@@ -212,3 +208,4 @@ Goodbye 0;
 ## 10-27-2017 @ 08.13.09 - (2.0.61)    - dscudiero - Added debug statements
 ## 10-27-2017 @ 09.18.20 - (2.0.62)    - dscudiero - Remove debug statements
 ## 11-01-2017 @ 12.37.43 - (2.0.80)    - dscudiero - Fixed an issue with the ignoreList
+## 11-01-2017 @ 16.49.38 - (2.0.81)    - dscudiero - Switch to ParseArgsStd2
