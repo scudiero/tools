@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.54 # -- dscudiero -- Wed 11/01/2017 @  7:41:45.78
+version=1.2.55 # -- dscudiero -- Wed 11/01/2017 @ 15:49:38.44
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -17,18 +17,16 @@ scriptDescription="Build the '$qaStatusTable' table by parsing the workbook file
 #=======================================================================================================================
 # Standard call back functions
 #=======================================================================================================================
-function parseArgs-buildQaStatusTable  { # or parseArgs-local
-	#argList+=(-optionArg,1,option,scriptVar,,script,'Help text')
-	#argList+=(-flagArg,2,switch,scriptVar,,script,'Help text')
-	argList+=(-file,4,option,file,,script,'The file name relative to the root site directory')
+function buildQaStatusTable-parseArgsStd2  { # or parseArgs-local
+	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 	return 0
 }
-function Goodbye-buildQaStatusTable  { # or Goodbye-local
+function buildQaStatusTable-Goodbye  { # or Goodbye-local
 	rm -rf $tmpRoot > /dev/null 2>&1
 	[[ $savePath != '' ]] && export PATH="$savePath"
 	return 0
 }
-function testMode-buildQaStatusTable  { # or testMode-local
+function buildQaStatusTable-testMode  { # or testMode-local
 	cimTrackingWorkBook="$HOME/CIM - Multiweek - INTERNAL.xlsx"
 	logInDb=false
 	return 0
@@ -124,7 +122,7 @@ for var in $falseVars; do eval $var=false; done
 ## Find the helper script location
 	workerScript='insertTestingDetailRecord'
 	workerScriptFile="$(FindExecutable "$workerScript")"
-	[[ -z $workerScriptFile ]] && Terminate "Could find the workerScriptFile file ('$workerScript')"
+	[[ -z $workerScriptFile ]] && Terminate "Could find the workerScriptFile ('$workerScript')"
 
 ## Declare the mapping table from the spreadsheet 'name' and the database column name
 	declare -A variableMap
@@ -184,9 +182,10 @@ for var in $falseVars; do eval $var=false; done
 #=======================================================================================================================
 helpSet='script,client,env'
 
-GetDefaultsData $myName
-ParseArgsStd
 Hello
+GetDefaultsData $myName
+ParseArgsStd2 $originalArgStr
+
 [[ $batchMode != true ]] && VerifyContinue "You are asking to re-generate the data warehouse '$qaStatusTable' table"
 
 myData="Client: '$client'"
@@ -427,3 +426,4 @@ Goodbye 0 #'alert'
 ## 10-31-2017 @ 10.57.06 - (1.2.52)    - dscudiero - Switch to GetExcel2 and Msg3
 ## 10-31-2017 @ 10.58.10 - (1.2.53)    - dscudiero - Cosmetic/minor change
 ## 11-01-2017 @ 07.42.19 - (1.2.54)    - dscudiero - Updated how the helper script is called
+## 11-01-2017 @ 15.50.22 - (1.2.55)    - dscudiero - Switch to use ParseArgsStd2
