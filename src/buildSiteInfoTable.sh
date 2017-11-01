@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.98 # -- dscudiero -- Wed 11/01/2017 @ 15:04:04.23
+version=4.3.99 # -- dscudiero -- Wed 11/01/2017 @ 15:45:20.03
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql2 StringFunctions ProtectedCall FindExecutable PushPop"
@@ -26,12 +26,10 @@ scriptDescription="Sync the data warehouse '$siteInfoTable' table with the trans
 # Standard call back functions
 #=======================================================================================================================
 	function buildSiteInfoTable-ParseArgsStd2 {
-		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
-		noNameCheck=false
+		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 		quick=false
-		argList+=(-noNameCheck,3,switch,noNameCheck,,script,"Do not check site names for syntax - only valid with -x and when a site name is specified")
-		argList+=(-quick,3,switch,quick,,script,"Do Quickly, skip processing the admins information")
-		argList+=(-tableName,5,option,tableName,,script,"The name of the 'sites' table to load")
+		myArgs+=("quick|quick|switch|quick||script|Do quickly, skip processing the admins information")
+		myArgs+=("table|tableName|option|tableName||script|The name of the database table to load")
 	}
 	function buildSiteInfoTable-Goodbye  { # or Goodbye-$myName
 		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
@@ -241,3 +239,4 @@ Goodbye 0 'alert'
 ## 10-30-2017 @ 08.50.42 - (4.3.84)    - dscudiero - Filter out '-test' from the clientDirs
 ## 10-31-2017 @ 08.51.21 - (4.3.85)    - dscudiero - Wrap the grep calls in a ProtectedCall
 ## 11-01-2017 @ 15.24.36 - (4.3.98)    - dscudiero - Updated client directory selection to use only server directories in the prodServer or devServers lists
+## 11-01-2017 @ 15.50.25 - (4.3.99)    - dscudiero - Switch to use ParseArgsStd2
