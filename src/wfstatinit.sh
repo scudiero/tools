@@ -1,6 +1,6 @@
 #!/bin/bash
 #===================================================================================================
-version=2.0.4 # -- dscudiero -- 12/14/2016 @ 11:32:07.80
+version=2.0.5 # -- dscudiero -- Wed 11/01/2017 @ 16:50:36.51
 #===================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
@@ -22,17 +22,17 @@ scriptDescription="Rebuild workflow stats"
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-GetDefaultsData $myName
-ParseArgsStd
 Hello
-Msg2
+GetDefaultsData $myName
+ParseArgsStd2 $originalArgStr
+Msg3
 Init 'getClient getEnv getDirs checkEnvs'
 VerifyContinue "You are asking to reset workflow statistics for\n\tclient:$client\n\tEnv:$env ($siteDir)"
 
 #===================================================================================================
 #= Main
 #===================================================================================================
-Msg2 "Running wfstatinit & wfstatbuild...."
+Msg3 "Running wfstatinit & wfstatbuild...."
 cd $siteDir/web/courseleaf
 $DOIT ./courseleaf.cgi wfstatinit /index.html 2>&1 | xargs -I{} printf "\\t%s\\n" "{}"
 $DOIT ./courseleaf.cgi -e wfstatbuild / 2>&1 | xargs -I{} printf "\\t%s\\n" "{}"
@@ -46,3 +46,4 @@ Goodbye 0
 #= Check-in Log
 #===================================================================================================
 ## Tue Aug 16 07:18:23 CDT 2016 - dscudiero - fix problem usning tgtDir when not set
+## 11-01-2017 @ 16.51.03 - (2.0.5)     - dscudiero - Switch to ParseArgStd2 and Msg3
