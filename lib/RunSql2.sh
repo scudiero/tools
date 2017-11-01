@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.1.5" # -- dscudiero -- Mon 10/23/2017 @ 16:02:38.84
+# version="1.1.23" # -- dscudiero -- Wed 11/01/2017 @ 15:23:34.45
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -14,13 +14,8 @@
 # All rights reserved
 #===================================================================================================
 function RunSql2 {
-
-	function MyContains {
-		local string="$1"
-		local subStr="$2"
-		[[ "${string#*$subStr}" != "$string" ]] && echo true || echo false
-		return 0
-	}
+	Import SetFileExpansion
+	function MyContains { local string="$1"; local subStr="$2"; [[ "${string#*$subStr}" != "$string" ]] && echo true || echo false; return 0; }
 
 	if [[ ${1:0:1} == '/' ]]; then
 		local dbFile="$1" && shift
@@ -29,18 +24,17 @@ function RunSql2 {
 		local dbType='mysql'
 	fi
 	local sqlStmt="$*"
+	[[ -z $sqlStmt ]] && return 0
 	unset resultSet
 	local javaPgm=${runMySqlJavaPgmName:-runMySql}
 
-	[[ -z $sqlStmt ]] && return 0
 	local sqlAction="${sqlStmt%% *}"
 	[[ ${sqlAction:0:5} != 'mysql' && ${sqlStmt:${#sqlStmt}:1} != ';' ]] && sqlStmt="$sqlStmt;"
-	local stmtType=$(tr '[:lower:]' '[:upper:]' <<< "${sqlStmt%% *}")
+	local stmtType="${sqlStmt%% *}"; stmtType="${stmtType^^[a-z]}"
 
 	local calledBy=$(caller 0 | cut -d' ' -f2)
 	[[ -n $DOIT || $informationOnlyMode == true ]] && [[ $stmtType != 'SELECT' && $calledBy != 'ProcessLogger' ]] && return 0
 
-	local prevGlob=$(set -o | grep noglob | tr "\t" ' ' | tr -s ' ' | cut -d' ' -f2)
 	local resultStr msg tmpStr
 	if [[ ! -d $(pwd) ]]; then
 		msg="$msg\n\tsqlStmt: $sqlStmt\n\n\tCurrent working directory does not exist, cannot execute sql statement"
@@ -48,12 +42,11 @@ function RunSql2 {
 		exit -1
 	fi
 
-	## Run the query
-		set -f
-		[[ $dbType == 'mysql' ]] && resultStr="$(java $javaPgm $sqlStmt 2>&1)" || resultStr="$(sqlite3 $dbFile "$sqlStmt" 2>&1 | tr "\t" '|')"
- 		[[ $prevGlob == 'on' ]] && set +f
+	# ## Run the query
+		SetFileExpansion 'off'
+	 	[[ $dbType == 'mysql' ]] && resultStr="$(java $javaPgm $sqlStmt 2>&1)" || resultStr="$(sqlite3 $dbFile "$sqlStmt" 2>&1 | tr "\t" '|')"
+		SetFileExpansion
  		## Check for errors
- 		##local tmpStr="$(tr '[:upper:]' '[:lower:]' <<< "$resultStr")" 
 		if [[ $(MyContains "$resultStr" 'sever:') == true || $(MyContains "$resultStr" 'ERROR' == true) == true || \
 			  $(MyContains "$resultStr" '\*Error\*') == true || \
 			  $(MyContains "$resultStr" 'Error occurred during initialization of VM' == true) == true ]]; then
@@ -65,9 +58,9 @@ function RunSql2 {
 			echo -e "$(ColorT "*Fatal Error*") -- ($lineNo) $msg"
 			return 3
 		fi
+	
  	## Write output to an array
 		unset resultSet
-		#[[ $resultStr != '' ]] && IFS=$'\n' read -rd '' -a resultSet <<< "$resultStr"
 		[[ $resultStr != '' ]] && readarray -t resultSet <<< "${resultStr}"
 
 	return 0
@@ -100,3 +93,4 @@ export -f RunSql2
 ## 10-16-2017 @ 13.33.30 - ("1.1.2")   - dscudiero - Update the error detection code to be a bit less sensitive
 ## 10-16-2017 @ 13.39.46 - ("1.1.4")   - dscudiero - Tweak error dtection
 ## 10-23-2017 @ 16.04.00 - ("1.1.5")   - dscudiero - Make the name of the java program for mysql a variable, set by default from bootdata
+## 11-01-2017 @ 15.23.36 - ("1.1.23")  - dscudiero - Use SetFileExpansion function1
