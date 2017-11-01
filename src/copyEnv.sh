@@ -1,7 +1,7 @@
 #!/bin/bash
 # DO NOT AUTOVERSION
 #==================================================================================================
-version=4.12.10 # -- dscudiero -- Fri 09/29/2017 @ 13:37:02.61
+version=4.13.-1 # -- dscudiero -- Fri 09/29/2017 @ 13:37:02.61
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop"
@@ -42,28 +42,23 @@ scriptDescription="Create a cloned private dev site"
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-	function copyEnv-ParseArgsStd {
-		# argList+=(argFlag,minLen,type,scriptVariable,extraToken/exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
-		argList+=(-manifest,1,switch,manifest,true,'script',"Create a CourseLeaf Manifest after copies")
-		argList+=(-noManifest,3,switch,manifest,manifest=false,'script',"Do not create a CourseLeaf Manifest after copies")
-		argList+=(-overlay,5,switch,overlay,true,'script',"Overlay/Replace any existing target directories")
-		argList+=(-refresh,5,switch,refresh,true,'script',"Refresh any existing target directories")
-		argList+=(-overrideTarget,5,option,overrideTarget,,'script',"Override the default target location, full file spec to where the site root should be located. e.g. /mnt/dev7/web")
-		argList+=(-fullCopy,4,switch,fullCopy,,'script',"Do a full copy, including all log and request files")
-		argList+=(-lite,4,switch,lite,,'script',"Do a full copy without the archives and logs")
-		argList+=(-forUser,7,option,forUser,,'script',"Name the resulting site for the specified userid")
-		argList+=(-suffix,6,option,suffix,,'script',"Suffix text to be append to the resultant site name, e.g. -luc")
-		argList+=(-emailAddress,1,option,emailAddress,,'script',"The email address for CourseLeaf email notifications")
-		argList+=(-asSite,2,option,asSite,,script,'The name to give the new site)')
-		argList+=(-skipCat,6,switch,skipCat,,script,'Skip client CAT directories, i.e. web directories not in the skeleton)')
-		argList+=(-skipCim,6,switch,skipCim,,script,'Skip CIM and CIM instance files)')
-		argList+=(-skipClss,6,switch,skipClss,,script,'Skip CLASS instance files)')
-		argList+=(-skipWen,6,switch,skipClss,,script,'Skip CLASS instance files)')
-		argList+=(-skipAlso,6,option,skipAlso,,script,'Additional directories and or files to ignore, comma separated list)')
-		argList+=(-wizDebug,3,switch,startWizdebug,,script,'Automatically start a wizDebug session after the copy)')
-		argList+=(-debug,3,switch,startWizdebug,,script,'Automatically start a wizDebug session after the copy)')
-		argList+=(-lock,4,option,lockWorkflows,,script,'Lock the specified workflow(s) in the source environment)')
+	function copyEnv-ParseArgsStd2 {
+		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+		myArgs+=('overl|overlay|switch|overlay||script|Overlay/Replace any existing target directories')
+		myArgs+=('refre|refresh|switch|refresh||script|Refresh any existing target directories')
+		myArgs+=('overr|overrideTarget|option|overrideTarget||script|Override the default target location, full file spec to where the site root should be located. e.g. /mnt/dev7/web')
+		myArgs+=('full|fullcopy|switch|fullCopy||script|Do a full copy, including all log and request files')
+		myArgs+=('suffix|suffix|option|suffix||script|Suffix text to be append to the resultant site name, e.g. -lu')
+		myArgs+=('skipca|skipcat|switch|skipCat||script|Skip clients CAT directories, i.e. web directories not in the skeleton')
+		myArgs+=('skipci|skipcim|switch|skipCim||script|Skip CIM and CIM instance files')
+		myArgs+=('skipcl|skipclss|switch|skipClss||script|Skip CLSS/WEN instance files')
+		myArgs+=('skipwe|skipwen|switch|skipClss||script|Skip CLSS/WEN instance files')
+		myArgs+=('skipal|skipalso|switch|skipClss||script|Additional directories and or files to ignore| comma separated list')
+		myArgs+=('deb|debug|switch|startWizdebug||script|Automatically start a wizDebug session after the copy')
+		myArgs+=('lock|lock|option|lockWorkflows||script|Lock the specified workflow(s) in the source environment')
+		myArgs+=('as|asSite|option|asSite||script|The name to give the new site, i.e. tgtDir-asSite')
 	}
+
 	function copyEnv-Goodbye {
 		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
 		return 0
@@ -109,12 +104,11 @@ scriptDescription="Create a cloned private dev site"
 # Declare local variables and constants
 #==================================================================================================
 rsyncFilters=$(mkTmpFile 'rsyncFilters')
-manifest=false
 refresh=false
 overlay=false
 specialSource=false
 fullCopy=false
-unset suffix emailAddress clientHost remoteCopy
+unset suffix email clientHost remoteCopy
 progDir='courseleaf'
 haveCims=false
 haveClss=false
@@ -125,18 +119,18 @@ lockWorkflow=false
 #==================================================================================================
 Hello
 GetDefaultsData "$myName" -fromFiles
-ParseArgsStd 
+ParseArgsStd2 $originalArgStr
+[[ -n $envs && -z $srcEnv ]] && srcEnv="$env"
 
-[[ -n $env && -z $srcEnv ]] && srcEnv="$env"
-
-[[ $allItems == true || $fullCopy == true ]] && cim='Yes' && overlay=false && manifest=false
-dump -2 -n client env cim cat clss fullCopy manifest overlay suffix emailAddress
+[[ $allItems == true || $fullCopy == true ]] && cim='Yes' && overlay=false
+dump -2 -n client envs products fullCopy overlay suffix email
 
 addPvt=true
-[[ $cat == true ]] && skipCat=false && skipCim=true && skipClss=true && unset skipAlso
-[[ $cim == true ]] && skipCat=true && skipCim=false && skipClss=true && unset skipAlso
-[[ $clss == true ]] && skipCat=true && skipCim=true && skipClss=false && unset skipAlso
-[[ $fullCopy == true && $lite == true ]] && Terminate "The -fullCopy and -lite flags cannot both be specified on a invocation"
+if [[ -n products ]]; then
+	[[ $(Contains "products" 'cat') == true ]] && skipCat=false && skipCim=true && skipClss=true && unset skipAlso
+	[[ $(Contains "products" 'cim') == true ]] && skipCat=true && skipCim=false && skipClss=true && unset skipAlso
+	[[ $(Contains "products" 'clss') == true ]] && skipCat=true && skipCim=true && skipClss=false && unset skipAlso
+fi
 
 ## Resolve data based on passed in client, handle special cases
 	if [[ $(Lower "${client:0:5}") == 'luc20' && ${srcEnv:0:1} == 'p' && ${tgtEnv:0:1} == 'p' ]]; then
@@ -146,13 +140,13 @@ addPvt=true
 		tgtEnv='pvt'
 		tgtDir="/mnt/dev7/web/luc$(date "+%Y")"
 		[[ -n $asSite ]] && tgtDir="$tgtDir-$asSite"
-		emailAddress='disabled'
+		email='disabled'
 	elif [[ $client == 'lilypadu' ]]; then
 		srcEnv='next'
 		srcDir='/mnt/lilypadu/site/next'
 		tgtEnv='pvt'
 		tgtDir="/mnt/dev7/web/lilypadu-$userName"
-		emailAddress='disabled'
+		email='disabled'
 	elif [[ $client == 'internal' ]]; then
 		srcEnv='next'
 		srcDir='/mnt/internal/site/stage'
@@ -259,7 +253,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 	[[ -d $srcDir/web/wen ]] && haveClss=true
 
 ## If full copy then skip all of the product prompts
- if [[ $fullCopy == true || $lite == true ]]; then
+ if [[ $fullCopy == true ]]; then
 	skipCim=false
 	skipCat=false
 	skipClss=false
@@ -372,7 +366,6 @@ dump -1 skipCim skipCat skipClss skipAlso
 	[[ -n $lockWorkflows ]] && verifyArgs+=("Lock workflow in target:$lockWorkflows")
 	[[ $startWizdebug == true  ]] && verifyArgs+=("Auto start wizDebug:$startWizdebug")
 
-	[[ $manifest == true ]] && verifyArgs+=("Courseleaf manifest:$manifest")
 	VerifyContinue "You are asking to clone/copy a CourseLeaf site:"
 
 #==================================================================================================
@@ -418,18 +411,11 @@ dump -1 skipCim skipCat skipClss skipAlso
 	[[ $remoteCopy != true ]] && cd $srcDir
 	[[ -z $DOIT ]] && listOnly='' || listOnly='--list-only'
 	[[ $quiet == true || $quiet == 1 ]] && rsyncVerbose='' || rsyncVerbose='vh'
-	if [[ $fullCopy == true && $lite != true ]]; then
+	if [[ $fullCopy == true ]]; then
 		rsyncOpts="-a$rsyncVerbose $listOnly"
 		Msg3 "Performing a FULL copy..."
 	else
 		rsyncOpts="-a$rsyncVerbose --prune-empty-dirs $listOnly --include-from $rsyncFilters"
-		# Msg3 "Excluding the following from the copy:"
-		# oldIFS=$IFS; IFS='';
-		# SetIndent '+1';
-		# while read line; do Msg3 "^$line"; done < $rsyncFilters
-		# SetIndent '-1'
-		# IFS=$oldIFS;
-		# printf "\n"
 	fi
 	if [[ $remoteCopy == true ]]; then
 		Msg3 "Calling rsync to copy the files, when prompted for password, please enter your password on '$clientHost' ..."
@@ -496,7 +482,7 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 
 	## email override
 		Msg3 "Override email routing..."
-		[[ -z $emailAddress ]] && emailAddress=$userName@leepfrog.com
+		[[ -z $email ]] && email=$userName@leepfrog.com
 		editFile=$tgtDir/email/sendnow.atj
 		unset grepStr; grepStr=$(ProtectedCall "grep ^'// DO NOT MODIFY THIS FILE' $editFile");
 		if [[ -n $grepStr ]]; then
@@ -506,7 +492,7 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 			else
 				editFile=$tgtDir/web/$progDir/localsteps/default.tcf
 			fi
-			toStr="wfemail_testaddress:$emailAddress"
+			toStr="wfemail_testaddress:$email"
 			unset fromStr; fromStr=$(ProtectedCall "grep ^'wfemail_testaddress:' $editFile")
 			## Do we have multiples?
 			if [[ -z $fromStr ]]; then
@@ -517,20 +503,13 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 			fi
 		else
 			## old format file
-			toStr="var testaddress = \"$emailAddress\""
+			toStr="var testaddress = \"$email\""
 			unset grepStr; grepStr=$(ProtectedCall "grep '"$toStr"' $editFile")
 			if [[ -z $grepStr ]]; then
 				unset checkStr; checkStr=$(ProtectedCall "grep 'var type = \"cat\";' $editFile")
 				fromStr=$checkStr
 				$DOIT sed -i s"!${fromStr}!${toStr}\n\n${fromStr}!" $editFile
 			fi
-		fi
-
-	## generate a manifest
-		if [[ "$manifest" == true ]]; then
-			if [[ $quiet != true ]]; then Msg2 "Creating manifest..."; fi
-			cd $tgtDir/web/$progDir
-			./$progDir.cgi --manifest
 		fi
 
 	## Make sure we have the required directories and files
@@ -699,3 +678,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 10-16-2017 @ 14.17.22 - (4.12.10)   - dscudiero - fix locking code
 ## 10-17-2017 @ 14.08.56 - (4.12.10)   - dscudiero - Added -lock option
 ## 10-19-2017 @ 10.34.19 - (4.12.10)   - dscudiero - Add PushPop to the include list
+## 11-01-2017 @ 09.55.06 - (4.13.-1)   - dscudiero - Switched to ParseArgsStd2
