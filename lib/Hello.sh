@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.42" # -- dscudiero -- Thu 10/19/2017 @ 12:45:00.93
+# version="2.0.43" # -- dscudiero -- Wed 11/01/2017 @  8:02:33.74
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -19,7 +19,7 @@ function Hello {
 	includes="ProcessLogger DisplayNews"
 	Import "$includes"
 	
-	echo
+	[[ $batchMode != true ]] && echo
 	[[ $TERM == 'dumb' ]] && echo
 	[[ $noBanners != true ]] && Msg3 "$(PadChar)"
 	date=$(date)
@@ -77,3 +77,4 @@ export -f Hello
 ## 10-17-2017 @ 14.08.11 - ("2.0.40")  - dscudiero - Added noBanners option to streamline output in batch
 ## 10-19-2017 @ 09.38.34 - ("2.0.41")  - dscudiero - Added -noBanner option to limit outout
 ## 10-19-2017 @ 12.45.29 - ("2.0.42")  - dscudiero - Add StringFunctions to the includes slist
+## 11-01-2017 @ 08.02.37 - ("2.0.43")  - dscudiero - Cosmetic/minor change
