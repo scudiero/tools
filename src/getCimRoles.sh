@@ -1,10 +1,11 @@
 #!/bin/bash
 #==================================================================================================
-version=1.10.32 # -- dscudiero -- Tue 10/03/2017 @ 10:31:06.94
+version=1.10.39 # -- dscudiero -- Wed 11/01/2017 @  9:27:39.14
 #==================================================================================================
 TrapSigs 'on'
-includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue'
-Import "$includes"
+myIncludes=""
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
 scriptDescription="Build a list of all of the roles that are potentially use in CIM workflows"
 
@@ -17,17 +18,15 @@ scriptDescription="Build a list of all of the roles that are potentially use in 
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function parseArgs-getCimRoles  { # or parseArgs-local
-	#argList+=(-optionArg,1,option,scriptVar,,script,'Help text')
-	#argList+=(-flagArg,2,switch,scriptVar,,script,'Help text')
-	argList+=(-allCims,3,switch,allCims,,script,'Process all the CIM instances present')
+function parseArgsStd2-getCimRoles { # or parseArgs-local
+	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 	return 0
 }
-function Goodbye-getCimRoles  { # or Goodbye-local
+function getCimRoles-Goodbye { # or Goodbye-local
 	SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
 	return 0
 }
-function testMode-getCimRoles  { # or testMode-local
+function getCimRoles-testMode { # or testMode-local
 	return 0
 }
 
@@ -45,7 +44,7 @@ step='getCimWorkflowRoles'
 #==================================================================================================
 helpSet='script,client,env,cims'
 GetDefaultsData $myName
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 Hello
 Init 'getClient getEnv getDirs checkEnvs getCims noPreview noPublic'
 
@@ -111,3 +110,4 @@ Goodbye 0
 ## 06-26-2017 @ 07.51.04 - (1.10.25)   - dscudiero - change cleanup to not remove the entier tmp directory
 ## 09-29-2017 @ 10.14.49 - (1.10.28)   - dscudiero - Update FindExcecutable call for new syntax
 ## 10-03-2017 @ 11.02.00 - (1.10.32)   - dscudiero - General syncing of dev to prod
+## 11-01-2017 @ 09.55.10 - (1.10.39)   - dscudiero - Switched to ParseArgsStd2
