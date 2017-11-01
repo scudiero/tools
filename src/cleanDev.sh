@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.50 # -- dscudiero -- Tue 10/31/2017 @  8:50:03.70
+version=3.5.51 # -- dscudiero -- Wed 11/01/2017 @ 15:58:19.35
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall StringFunctions PushPop"
@@ -20,20 +20,17 @@ scriptDescription="Cleanup private dev sites"
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-	function ParseArgsStd-cleanDev {
-		# argList+=(argFlag,minLen,type,scriptVariable,extraToken/exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
-		argList+=(-mark,1,switch,mark,,'script',"Mark the site for deletion")
-		argList+=(-delete,3,switch,delete,,'script',"Delete the site")
-		argList+=(-unMark,1,switch,unMark,,'script',"Unmark the site")
-		argList+=(-daemon,1,switch,daemonMode,,'script',"Run in daemon mode")
+	function cleanDev-ParseArgsStd2 {
+		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+		myArgs+=("daemon|daemon|switch|daemonMode||script|Run in daemon mode to automatically delete marked sites")
 	}
 
-	function Goodbye-cleanDev  { # or Goodbye-local
+	function cleanDev-Goodbye  { # or Goodbye-local
 		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
 		return 0
 	}
 
-	function Help-cleanDev  {
+	function cleanDev-Help  {
 		helpSet='client,env' # can also include any of {env,cim,cat,clss}, 'script' and 'common' automatically addeed
 		[[ $1 == 'setVarsOnly' ]] && return 0
 
@@ -209,33 +206,9 @@ RunSql2 $sqlStmt
 # Standard arg parsing and initialization
 #==================================================================================================
 Hello
-ParseArgsStd
+GetDefaultsData $myName
+ParseArgsStd2 $originalArgStr
 dump 1 mark delete unMark client daemonMode
-
-## Get the workflow files
-GetDefaultsData 'copyWorkflow'
-## Get the workflow files to check from the database
-	unset requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles ifThenDelete
-	[[ $scriptData1 == '' ]] && Msg3 $T "'scriptData1 (requiredInstanceFiles)' is null, please check script configuration data"
-	requiredInstanceFiles="$(cut -d':' -f2- <<< $scriptData1)"
-
-	[[ $scriptData2 == '' ]] && Msg3 $T "'scriptData2 (optionalInstanceFiles)' is null, please check script configuration data"
-	optionalInstanceFiles="$(cut -d':' -f2- <<< $scriptData2)"
-
-	[[ $scriptData3 == '' ]] && Msg3 $T "'scriptData3 (requiredGlobalFiles)' is null, please check script configuration data"
-	requiredGlobalFiles="$(cut -d':' -f2- <<< $scriptData3)"
-
-	[[ $scriptData4 == '' ]] && Msg3 $T "'scriptData4 (optionalGlobalFiles)' is null, please check script configuration data"
-	optionalGlobalFiles="$(cut -d':' -f2- <<< $scriptData4)"
-
-	if [[ $scriptData5 ]]; then
-		ifThenDelete="$(cut -d':' -f2- <<< $scriptData5)"
-		deleteThenIf=$(tr ',' ';' <<< $deleteThenIf)
-		deleteThenIf=$(tr ' ' ',' <<< $deleteThenIf)
-		deleteThenIf=$(tr ';' ' ' <<< $deleteThenIf)
-	fi
-
-	dump 2 requiredInstanceFiles requiredGlobalFiles optionalInstanceFiles optionalGlobalFiles
 
 #==================================================================================================
 # Main
@@ -273,7 +246,6 @@ if [[ $daemonMode == true ]]; then
 	Goodbye 0
 	exit 0
 fi
-
 
 ## if client was passed in then just delete that site, otherwise if it is 'daemon' then process autodeletes
 [[ -n $client ]] && searchStr="$client-$searchStr"
@@ -342,3 +314,4 @@ Goodbye 0
 ## 10-20-2017 @ 15.49.14 - (3.5.30)    - dscudiero - Misc cleanup
 ## 10-31-2017 @ 08.10.14 - (3.5.41)    - dscudiero - If running in daemon mode the exit
 ## 10-31-2017 @ 08.15.29 - (3.5.43)    - dscudiero - Put a check in to make sure we do not run the GetSites function in batch mode
+## 11-01-2017 @ 16.49.25 - (3.5.51)    - dscudiero - Switch to ParseArgsStd2
