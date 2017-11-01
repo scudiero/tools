@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.37 # -- dscudiero -- Mon 10/30/2017 @  8:02:53.51
+version=1.22.39 # -- dscudiero -- Wed 11/01/2017 @  7:57:58.51
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -315,6 +315,9 @@ case "$hostName" in
 					RunSql2 $sqlStmt
 					sqlStmt="rename table ${table}Bak to ${table}"
 					RunSql2 $sqlStmt
+				# else
+				# 	sqlStmt="drop table if exists  ${table}Bak"
+				# 	RunSql2 $sqlStmt
 				fi
 			done
 			[[ $errorDetected == true ]] && Terminate 'One or more of the database load procedures failed, please review messages'
@@ -354,7 +357,7 @@ esac
 #=======================================================================================================================
 ## Bye-bye
 [[ $fork == true ]] && wait
-Msg3 "\n$myName: Done\n"
+Msg3 "\n$(date) -- $myName: Done\n"
 return 0
 
 #=======================================================================================================================
@@ -445,3 +448,4 @@ return 0
 ## 10-27-2017 @ 07.15.19 - (1.22.34)   - dscudiero - Misc cleanup
 ## 10-27-2017 @ 08.10.29 - (1.22.35)   - dscudiero - Use CalcElapsed function to calculate elapsed times
 ## 10-30-2017 @ 08.03.15 - (1.22.37)   - dscudiero - Truncate the sites table on the first of the month
+## 11-01-2017 @ 07.58.07 - (1.22.39)   - dscudiero - Cosmetic/minor change
