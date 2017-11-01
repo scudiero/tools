@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.4.64 # -- dscudiero -- Mon 10/23/2017 @ 11:57:30.39
+version=2.4.65 # -- dscudiero -- Wed 11/01/2017 @ 15:53:21.09
 #==================================================================================================
 TrapSigs 'on'
 
@@ -23,7 +23,7 @@ scriptDescription="Check for private sites and notify the user owning the sites.
 #==================================================================================================
 Hello
 GetDefaultsData $myName
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 tmpFile=$(MkTmpFile)
 
 #==================================================================================================
@@ -138,3 +138,4 @@ Goodbye 0
 ## 09-05-2017 @ 16.22.22 - (2.4.58)    - dscudiero - Make sure there is a tmpFile
 ## 10-23-2017 @ 08.10.36 - (2.4.61)    - dscudiero - Switch to Msg3
 ## 10-23-2017 @ 11.57.55 - (2.4.64)    - dscudiero - Reformatted messaging
+## 11-01-2017 @ 15.59.57 - (2.4.65)    - dscudiero - Switch to use ParseArgsStd2
