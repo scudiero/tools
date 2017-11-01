@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.52 # -- dscudiero -- Thu 10/26/2017 @  8:12:10.72
+version=3.13.53 # -- dscudiero -- Wed 11/01/2017 @  7:44:45.29
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -258,7 +258,6 @@ tmpFile=$(mkTmpFile)
 askedDisplayWidthQuestion=false
 
 mode=$(tr '[:upper:]' '[:lower:]' <<< "$1")
-dump ifme mode
 [[ $mode == 'reports' || $mode == 'scripts' ]] && shift && originalArgStr="$*"
 [[ -z $mode ]] && mode='scripts'
 [[ $mode != 'scripts' && $mode != 'reports' ]] && Terminate "Invalid mode ($mode) specified on call"
