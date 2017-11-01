@@ -1,10 +1,10 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.85 # -- dscudiero -- Tue 10/31/2017 @  7:38:56.83
+version=4.3.98 # -- dscudiero -- Wed 11/01/2017 @ 15:04:04.23
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes="Call SetSiteDirs SetFileExpansion RunSql2 StringFunctions ProtectedCall FindExecutable PushPop"
+myIncludes="SetSiteDirs SetFileExpansion RunSql2 StringFunctions ProtectedCall FindExecutable PushPop"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -25,7 +25,7 @@ scriptDescription="Sync the data warehouse '$siteInfoTable' table with the trans
 #=======================================================================================================================
 # Standard call back functions
 #=======================================================================================================================
-	function buildSiteInfoTable-ParseArgsStd {
+	function buildSiteInfoTable-ParseArgsStd2 {
 		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
 		noNameCheck=false
 		quick=false
@@ -64,24 +64,19 @@ Hello
 Info "Loading script defaults..."
 GetDefaultsData $myName
 Info "Parsing arguments..."
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 if [[ $batchMode != true ]]; then
 	verifyMsg="You are asking to re-generate the data warehouse '$siteInfoTable' and "$siteAdminsTable" table"
 	[[ -n $client ]] && verifyMsg="$verifyMsg record(s) for client '$client'"
 	VerifyContinue "$verifyMsg"
 fi
 
-[[ -n $env ]] && envList="$env" || envList="$courseleafDevEnvs $courseleafProdEnvs"
+[[ -n $env ]] && envList="$env" || envList="$courseleafDevEnvs,$courseleafProdEnvs"
 [[ $fork == true ]] && forkStr='-fork' || unset forkStr
 
 ## Which table to use
 	useSiteInfoTable="$siteInfoTable"
 	useSiteAdminsTable="$siteAdminsTable"
-	# if [[ -n $tableName ]]; then
-	# 	useSiteInfoTable="$tableName"
-	# 	let tmpLen=${#tableName}-3
-	# 	[[ ${tableName:$tmpLen:3} == 'New' ]] && useSiteAdminsTable="${siteAdminsTable}New"
-	# fi
 	sqlStmt="select count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA=\"$warehouseDb\") AND (TABLE_NAME=\"$useSiteInfoTable\")"
 	RunSql2 $sqlStmt
 	[[ ${resultSet[0]} -ne 1 ]] && Terminate "Could not locate the load table '$useSiteInfoTable'"
@@ -104,12 +99,14 @@ fi
 			dbClients["${result%%|*}"]="${result##*|}"
 		done
 
-	## Get the list of actual clients on this server
+	## Get the list of actual directories pulling only those in a production server share
+		SetFileExpansion 'on'
 		if [[ -z $client ]]; then
-			clientDirs=($(ProtectedCall "find /mnt/* -maxdepth 1 -mindepth 1 2>/dev/null | grep -v '\-test$' | grep -v '^/mnt/dev'"))
+			clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 -not -name '*-test*' 2> /dev/null | grep "${prodServers//,/\|}"))
 		else
-			clientDirs+=($(ProtectedCall "find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep -v '\-test$' | grep $client"))
+			clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 -not -name '*-test*' 2> /dev/null | grep "${prodServers//,/\|}" | grep $client))
 		fi
+		SetFileExpansion
 		numClients=${#clientDirs[@]}
 
 if [[ $verboseLevel -ge 1 ]]; then
@@ -123,20 +120,21 @@ fi
 				(( clientCntr+=1 ))
 				client="$(basename $clientDir)"
 				clientId=${dbClients[$client]}
-				## Get the envDirs, make sure we have some
-					for env in $(tr ',' ' ' <<< "$envList"); do unset ${env}Dir ; done
-					SetSiteDirs 'set'
-					haveDir=false;
-					for env in $(tr ',' ' ' <<< "$envList"); do token="${env}Dir"; [[ -n ${!token} ]] && haveDir=true && break; done
-					[[ $haveDir == false ]] && continue
+				# ## Get the envDirs, make sure we have some
+				for env in ${envList//,/ }; do unset ${env}Dir ; done
+				SetSiteDirs 'set'
+				# 	haveDir=false;
+				# 	for env in $(tr ',' ' ' <<< "$envList"); do token="${env}Dir"; [[ -n ${!token} ]] && haveDir=true && break; done
+				# 	[[ $haveDir == false ]] && continue
 
 				[[ $batchMode != true ]] && Msg3 "Processing: $client -- $clientId (~$clientCntr/$numClients)..."
 				## Loop through envs and process the site env directory
-				for env in $(tr ',' ' ' <<< "$envList"); do
+				for env in ${envList//,/ }; do
 					[[ $env == 'pvt' ]] && continue
 					token="${env}Dir" ; envDir="${!token}"
 					[[ -z $envDir ]] && continue
 					if [[ -d $envDir/web ]]; then
+						Verbose 1 2 "Processing env: $env"
 						$DOIT source "$workerScriptFile" "$envDir" "$clientId" "$forkStr -tableName $useSiteInfoTable"
 						(( forkCntr+=1 )) ; (( siteCntr+=1 ))
 					fi
@@ -242,3 +240,4 @@ Goodbye 0 'alert'
 ## 10-25-2017 @ 08.40.03 - (4.3.81)    - dscudiero - Cosmetic/minor change
 ## 10-30-2017 @ 08.50.42 - (4.3.84)    - dscudiero - Filter out '-test' from the clientDirs
 ## 10-31-2017 @ 08.51.21 - (4.3.85)    - dscudiero - Wrap the grep calls in a ProtectedCall
+## 11-01-2017 @ 15.24.36 - (4.3.98)    - dscudiero - Updated client directory selection to use only server directories in the prodServer or devServers lists
