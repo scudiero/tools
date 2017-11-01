@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.31" // -- dscudiero -- Wed 10/25/2017 @ 16:43:47.83
+wfLibVersion="1.8.32" // -- dscudiero -- Wed 11/01/2017 @ 10:46:49.06
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -66,6 +66,7 @@ wfLibVersion="1.8.31" // -- dscudiero -- Wed 10/25/2017 @ 16:43:47.83
 // 10/24/17 - dgs - Removed debug statements from getAttrVal
 // 10/25/17 - dgs - Updated getAttrVal to first check the tcf data and then if no data is found use the getxxx functions (UWPLATT)
 // 10/25/17 - dgs - Fixed an issue where GetEcoSystemData2 was not setting path variable
+// *** See 'Check in log' below ***
 //======================================================================================================================
 
 // Make sure wffucs is defined
@@ -1245,7 +1246,7 @@ GetAttrVal = function(data) {
 		subjects=getTCFValue(subjVarName, { delimiter: "\n", retarray: true });
 		if (includeTCA)
 			subjects=subjects.concat(getTCFValue("subject", { data: tcaData, delimiter: "\n", retarray: true }));
-		wfDump(0,["\t\t" + subjVarName+" from tcfdata;"+subjects.toSource()])
+		wfDump(5,["\t\t" + subjVarName+" from tcfdata;"+subjects.toSource()])
 		if (subjects.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
 		}
@@ -1261,7 +1262,7 @@ GetAttrVal = function(data) {
 				});
 			}
 		}
-		wfDump(0,["\t\t" + deptVarName+" from tcfdata;"+departments.toSource()])
+		wfDump(5,["\t\t" + deptVarName+" from tcfdata;"+departments.toSource()])
 		if (departments.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			departments=wffuncs.getDepartments(subjects);
 		}
@@ -1285,7 +1286,7 @@ GetAttrVal = function(data) {
 				});
 			}
 		}
-		wfDump(0,["\t\t" + colVarName+" from tcfdata;"+colleges.toSource()])
+		wfDump(5,["\t\t" + colVarName+" from tcfdata;"+colleges.toSource()])
 		if (colleges.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			colleges=wffuncs.getColleges(departments);
 		}
@@ -2182,13 +2183,13 @@ wffuncs.wfDumpVars = function(inval, wfrule, args) {
 //======================================================================================================================
 wffuncs.TODO = function(inval, wfrule, args) {
 	var indent='&nbsp;&nbsp;&nbsp;&nbsp;';
+	var indent2=indent + indent + indent + indent + indent + "&nbsp;"
 	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
-	if (options === "" ) {
-		options="Workflow is not complete, waiting on further specifications"
-	} else {
-		options="Workflow is not complete,<br>" + indent + indent + indent + indent + indent + "&nbsp;" + options;
-	}
-	print_doc(indent + '<strong>*Note*</strong> -- ' + options + ', please contact your CSM.</strong><br>');
+
+	print_doc(indent + '<strong>*Note*</strong> -- Workflow is not yet complete:<br>');
+	if (options != "" ) print_doc(indent2 + options + "<br>");
+	print_doc(indent2 + 'Please contact your CSM.</strong><br>');
+
 	return false;
 } //TODO
 
@@ -2274,3 +2275,4 @@ var wfLibLoaded=true;
 // 10-20-2017 @ 08.20.19 - ("1.8.26")  - dscudiero - Updates to getAttrVal to taken into account that the client may use a different variable for 'college'
 // 10-24-2017 @ 13.53.44 - ("1.8.27")  - dscudiero - Remove debug statements from getAttrVal
 // 10-25-2017 @ 16.44.52 - ("1.8.31")  - dscudiero - Updated GetAttrVal to look at the tcf/tca data first
+// 11-01-2017 @ 10.47.16 - ("1.8.32")  - dscudiero - Tweak output message formatting
