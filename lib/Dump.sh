@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.59" # -- dscudiero -- Mon 10/23/2017 @  8:49:17.72
+# version="2.0.63" # -- dscudiero -- Wed 11/01/2017 @ 12:14:39.02
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -9,22 +9,23 @@
 #==================================================================================================
 dumpFirstWrite=true
 function Dump {
-	local token tabCnt re='^-{0,1}[0-9]$' logOnly=false out='/dev/tty' pause=false
+	local mytoken tabCnt re='^-{0,1}[0-9]$' logOnly=false out='/dev/tty' pause=false
 	local caller=${FUNCNAME[1]}
 	[[ $caller == 'dump' || $caller == 'Dump' ]] && caller=${FUNCNAME[2]}
 
-	for token in $*; do
-		if [[ $token =~ $re ]]; then
-			[[ ${token:0:1} == '-' ]] && token="${token:1}"
-			[[ $token -gt $verboseLevel ]] && return 0
+	for mytoken in $*; do
+		if [[ $mytoken =~ $re ]]; then
+			[[ ${mytoken:0:1} == '-' ]] && mytoken="${mytoken:1}"
+			[[ $mytoken -gt $verboseLevel ]] && return 0
 			shift
 			continue
 		fi
-		[[ ${token:0:2} == '-t' ]] && { tabCnt=${token:2}; tabCnt=${tabCnt:-1}; continue; }
-		[[ $token == '-n' ]] && { echo -e -n "\n"; continue; }
-		[[ $token == '-l' ]] && { logOnly=true; shift; continue; }
-		[[ $token == '-p' ]] && { pause=true; continue; }
-		[[ $token == '-ifme' ]] && { [[ $userName != dscudiero ]] && return 0; }
+		[[ ${mytoken:0:2} == '-t' ]] && { tabCnt=${mytoken:2}; tabCnt=${tabCnt:-1}; continue; }
+		[[ $mytoken == '-n' ]] && { echo -e -n "\n"; continue; }
+		[[ $mytoken == '-l' ]] && { logOnly=true; shift; continue; }
+		[[ $mytoken == '-p' ]] && { pause=true; continue; }
+		[[ $mytoken == '-q' ]] && { Goodbye X; }
+		[[ $mytoken == '-ifme' ]] && { [[ $userName != dscudiero ]] && return 0; }
 
 		if [[ -n $tabCnt ]]; then
 			for ((i=0; i<$tabCnt; i++)); do
@@ -33,9 +34,9 @@ function Dump {
 		fi
 		if [[ $logOnly == true && -n $logFile ]]; then
 			[[ $dumpFirstWrite == true ]] && { echo -e "\n\n$(head -c 100 < /dev/zero | tr '\0' '=')" >> $logFile; echo "$(date)" >> $logFile;  dumpFirstWrite=false; }
-			echo -e "${caller}.$token = >${!token}<" >> "$logFile"
+			echo -e "${caller}.$mytoken = >${!mytoken}<" >> "$logFile"
 		else
-			echo -e "${colorVerbose}${caller}${colorDefault}.$token = >${!token}<"
+			echo -e "${colorVerbose}${caller}${colorDefault}.$mytoken = >${!mytoken}<"
 		fi
 	done
 
@@ -49,15 +50,15 @@ export -f Dump dump
 # dumpFirstWrite=true
 # function DumpS {
 # 	declare lowervName
-# 	local singleLine=false quit=false pause=false logit=false tabs='' dumpLogFile=$HOME/stdout.txt vName vVal prefix token
+# 	local singleLine=false quit=false pause=false logit=false tabs='' dumpLogFile=$HOME/stdout.txt vName vVal prefix mytoken
 
 # 	PushSettings "$FUNCNAME"
 # 	set +xv # Turn off trace
 
 # 	## Process our own special directives
 # 		if [[ $(Lower $1) == 'if' || $(Lower $1) == 'is' ]]; then
-# 			shift ; token1="$1" ; shift
-# 			[[ $userName != $token1 ]] && return 0
+# 			shift ; mytoken1="$1" ; shift
+# 			[[ $userName != $mytoken1 ]] && return 0
 # 			shift
 # 		elif [[ $(Lower $1) == 'ifme' || $(Lower $1) == 'isme' ]]; then
 # 			[[ $userName != 'dscudiero' ]] && return 0
@@ -231,13 +232,13 @@ export -f DumpMap dumpmap dumphash
 ## 04-17-2017 @ 12.16.56 - ("2.0.11")  - dscudiero - General syncing of dev to prod
 ## 04-28-2017 @ 16.42.05 - ("2.0.12")  - dscudiero - General syncing of dev to prod
 ## 05-19-2017 @ 07.56.51 - ("2.0.24")  - dscudiero - Add ToDo function
-## 05-19-2017 @ 08.04.42 - ("2.0.29")  - dscudiero - Added 'isMe' token
+## 05-19-2017 @ 08.04.42 - ("2.0.29")  - dscudiero - Added 'isMe' mytoken
 ## 05-19-2017 @ 08.51.15 - ("2.0.39")  - dscudiero - General syncing of dev to prod
 ## 05-19-2017 @ 08.55.08 - ("2.0.40")  - dscudiero - Added script name to TODO output
 ## 05-19-2017 @ 14.15.28 - ("2.0.41")  - dscudiero - Added 'if <userid>' support
 ## 05-24-2017 @ 08.17.22 - ("2.0.42")  - dscudiero - Tweak ifMe logic
 ## 05-24-2017 @ 08.22.16 - ("2.0.45")  - dscudiero - Added isMe
-## 06-09-2017 @ 08.16.14 - ("2.0.46")  - dscudiero - lower case the first token before checking for special tokens
+## 06-09-2017 @ 08.16.14 - ("2.0.46")  - dscudiero - lower case the first mytoken before checking for special mytokens
 ## 06-23-2017 @ 09.26.13 - ("2.0.47")  - dscudiero - Add caller information if calling pause
 ## 09-27-2017 @ 07.51.19 - ("2.0.49")  - dscudiero - added dumq
 ## 09-27-2017 @ 10.08.47 - ("2.0.51")  - dscudiero - General syncing of dev to prod
@@ -247,3 +248,4 @@ export -f DumpMap dumpmap dumphash
 ## 10-03-2017 @ 10.07.07 - ("2.0.57")  - dscudiero - Add -p option to pause execution
 ## 10-03-2017 @ 10.19.47 - ("2.0.58")  - dscudiero - If -p specifed the pause after all output generated
 ## 10-23-2017 @ 08.49.28 - ("2.0.59")  - dscudiero - Add ifme flag
+## 11-01-2017 @ 12.15.21 - ("2.0.63")  - dscudiero - Add -q action
