@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.-1" # -- dscudiero -- Tue 10/31/2017 @ 16:28:58.39
+# version="3.0.2" # -- dscudiero -- Wed 11/01/2017 @  8:47:50.26
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -48,7 +48,7 @@ function ParseArgsStd2 {
 					tmpArg="${arg,,[a-z]}"
 					[[ $tmpArg =~ ^-${argShortName} || $tmpArg =~ ^--${argLongName}$ ]] && { found=true; break; }
 				done
-				dump 3 -t argShortName argLongName tmpArg tmpStr found
+				[[ $found == true ]] && dump 3 -t argShortName argLongName tmpArg tmpStr found || dump 3 -t found
 
 			## Parse the argument
 				if [[ $found == true ]]; then
@@ -105,3 +105,4 @@ export -f ParseArgsStd2
 #===================================================================================================
 # Check-in Log
 #===================================================================================================
+## 11-01-2017 @ 09.54.34 - ("3.0.2")   - dscudiero - m
