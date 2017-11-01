@@ -1,9 +1,12 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #==================================================================================================
-version=1.0.116 # -- dscudiero -- Fri 10/20/2017 @ 13:13:32.89
+version=1.0.117 # -- dscudiero -- Wed 11/01/2017 @  7:41:51.58
 #==================================================================================================
 TrapSigs 'on'
+myIncludes="RunSql2 ProtectedCall"
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
 scriptDescription=""
 
@@ -17,11 +20,11 @@ for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ "$(basename "${BASH_SOURCE[$i]}")"
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function Goodbye-insertTestingDetailRecord  { # or Goodbye-local
+function insertTestingDetailRecord-Goodbye { # or Goodbye-local
 	[[ -f tmpFile ]] && rm -f $tmpFile
 	return 0
 }
-function testMode-insertTestingDetailRecord  { # or testMode-local
+function insertTestingDetailRecord-testMode { # or testMode-local
 	[[ $userName != 'dscudiero' ]] && Msg "T You do not have sufficient permissions to run this script in 'testMode'"
 	return 0
 }
@@ -71,7 +74,7 @@ dump -2 workbookFile -t clientCode product project instance env
 ## Check to see if we have already processed this key
 	sqlStmt="select count(*) from $qaTestingDetailsTable where qatestid=$qastatusKey"
 	RunSql2 $sqlStmt
-	[[ ${resultSet[0]} -gt 0 ]] && Msg2 $WT2 "QaTestId '$qastatusKey' has already been processed into '$warehouseDb.$qaTestingDetailsTable', skipping file" && Goodbye 'Return' && return 1
+	[[ ${resultSet[0]} -gt 0 ]] && Warning 0 2 "QaTestId '$qastatusKey' has already been processed into '$warehouseDb.$qaTestingDetailsTable', skipping file" && Goodbye 'Return' && return 1
 
 ## Read the Testing Detail Final data
 	Verbose 1 "^^^^Parsing '$workSheet' worksheet..."
@@ -81,7 +84,7 @@ dump -2 workbookFile -t clientCode product project instance env
 	if [[ $grepStr != '' || $(tail -n 1 $tmpFile) == '-1' ]]; then
 		Error "Could not retrieve data from workbook, please see below"
 		tail -n 20 $tmpFile 2>&1 | xargs -I{} printf "\\t%s\\n" "{}"
-		Msg2
+		Msg3
 		Goodbye -1
 	fi
 	Verbose 1 "^^^^$(wc -l $tmpFile | cut -d' ' -f1) Records read from worksheet"
@@ -190,3 +193,4 @@ dump -2 workbookFile -t clientCode product project instance env
 ## 10-18-2017 @ 14.30.38 - (1.0.113)   - dscudiero - Fix who called check
 ## 10-19-2017 @ 09.42.47 - (1.0.114)   - dscudiero - Added debug arround caller check code
 ## 10-20-2017 @ 09.01.58 - (1.0.115)   - dscudiero - Fix problem in the caller check code
+## 11-01-2017 @ 07.42.33 - (1.0.117)   - dscudiero - Switch to Msg3
