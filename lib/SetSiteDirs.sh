@@ -1,6 +1,7 @@
+##  #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.26" # -- dscudiero -- Thu 09/28/2017 @  7:37:25.40
+# version="2.0.40" # -- dscudiero -- Wed 11/01/2017 @ 13:18:41.59
 #===================================================================================================
 # Set Directories based on the current hostName name and school name
 # Sets globals: devDir, nextDir, previewDir, publicDir, upgradeDir
@@ -13,65 +14,38 @@ function SetSiteDirs {
 	myIncludes="RunSql2"
 	Import "$standardInteractiveIncludes $myIncludes"
 
-	local mode server env token checkEnv
+	local mode server env envDirName found foundAll checkEnv
 	mode="$1"; shift || true; [[ $mode == 'set' ]] && mode='setDefault'
 	[[ $mode == 'check' ]] && checkEnv="$1"
 
 	## If setDefault mode then clear out any existing values
-		if [[ $mode == 'setDefault' ]]; then
-			for env in $(tr ',' ' ' <<< "$courseleafDevEnvs $courseleafProdEnvs"); do
-				unset ${env}Dir
-			done
-		fi
+		[[ $mode == 'setDefault' ]] && { for env in ${courseleafDevEnvs//,/ } ${courseleafProdEnvs//,/ }; do unset ${env}Dir; done; }
 
 	## Find dev directories
-		for server in $(tr ',' ' ' <<< "$devServers"); do
-			[[ ! -d "/mnt/$server/web/$client" && ! -d "/mnt/$server/web/$client-$userName" ]] && continue
-			for env in $(tr ',' ' ' <<< "$courseleafDevEnvs"); do
-				token="${env}Dir"
-				if [[ $env == 'pvt' && -z ${!token} ]]; then
-					if [[ $mode == 'setDefault' ]]; then
-						pvtDir="/mnt/$server/web/$client-$userName"
-					else
-						[[ -d "/mnt/$server/web/$client-$userName" ]] && pvtDir="/mnt/$server/web/$client-$userName"
-					fi
-				fi
-				if [[ $env == 'dev' && -z ${!token} ]]; then
-					if [[ $mode == 'setDefault' ]]; then
-						devDir="/mnt/$server/web/$client"
-					else
-						[[ -d "/mnt/$server/web/$client" ]] && devDir="/mnt/$server/web/$client"
-					fi
-				fi
+
+		foundAll=true
+		for server in ${devServers//,/ }; do
+			[[ ! -d "/mnt/$server/$client" && ! -d "/mnt/$server/$client=$userName" ]] && continue
+			for env in ${courseleafDevEnvs//,/ }; do
+				envDirName="${env}Dir"
+ 				[[ $env == 'pvt' && -z ${!envDirName} ]] && eval $envDirName="/mnt/$server/web/$client-$userName" || eval $envDirName="/mnt/$server/web/$client"
+				[[ $mode != 'setDefault'  && ! -d ${!envDirName} ]] && unset ${!envDirName} && foundAll=false
 			done
-			[[ -n $pvtDir && -n $devDir ]] && break
+			[[ $foundAll == true ]] && break
 		done
-		#dump server pvtDir devDir devSiteDir
+		#dump server pvtDir devDir devSiteDir -p
 
 	## Find production directories
-		unset testDir currDir previewDir publicDir priorDir
-		for server in $(tr ',' ' ' <<< "$prodServers"); do
+		for server in ${prodServers//,/ }; do
 			[[ ! -d "/mnt/$server/$client-test" && ! -d "/mnt/$server/$client" ]] && continue
-			for env in $(tr ',' ' ' <<< "$courseleafProdEnvs"); do
-				token="${env}Dir"
-				if [[ $env == 'test' && -z ${!token} ]]; then
-					if [[ $mode == 'setDefault' ]]; then
-						testDir="/mnt/$server/$client-$env/$env"
-					else
-						[[ -d "/mnt/$server/$client-$env/$env" ]] && testDir="/mnt/$server/$client-$env/$env"
-					fi
-				else
-					if [[ $mode == 'setDefault' ]]; then
-						eval $token="/mnt/$server/$client/$env"
-					else
-						[[ -d "/mnt/$server/$client/$env" ]] && eval $token="/mnt/$server/$client/$env"
-					fi
-				fi
+			for env in ${courseleafProdEnvs//,/ }; do
+				envDirName="${env}Dir"
+ 				[[ $env == 'test' && -z ${!envDirName} ]] && eval $envDirName="/mnt/$server/$client-$env/$env" || eval $envDirName="/mnt/$server/$client/$env"
+				[[ $mode != 'setDefault'  && ! -d ${!envDirName} ]] && unset ${!envDirName} && foundAll=false
 			done
-
-			[[ -n $testDir && -n $currDir && -n $previewDir && -n $publicDir && -n $priorDir ]] && break
+			[[ $foundAll == true ]] && break
 		done
-		#dump server testDir currDir previewDir publicDir priorDir prodSiteDir
+		#dump server testDir currDir previewDir publicDir priorDir -p
 
 	## If check mode, make sure the indicated environment diretory exists
 		if [[ $mode == 'check' ]]; then
@@ -79,7 +53,6 @@ function SetSiteDirs {
 			[[ -d ${!checkDir} ]] && echo true || echo false
 		fi
 
-	[[ $verboseLevel -ge 3 ]] && { Msg3 "SetSiteDirs:"; for env in $(tr ',' ' ' <<< "$courseleafDevEnvs $courseleafProdEnvs"); do dump -t ${env}Dir; done; }
 	return 0
 } #SetSiteDirs
 
@@ -97,3 +70,4 @@ export -f SetSiteDirs
 ## 09-27-2017 @ 10.59.03 - ("2.0.22")  - dscudiero - Fix problem with setDefault
 ## 09-27-2017 @ 11.50.43 - ("2.0.23")  - dscudiero - tweak logic
 ## 09-28-2017 @ 07.39.47 - ("2.0.26")  - dscudiero - fix bug in setting product dirs
+## 11-01-2017 @ 15.21.01 - ("2.0.40")  - dscudiero - Simplify logic
