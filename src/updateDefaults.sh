@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.62 # -- dscudiero -- Fri 10/27/2017 @  9:18:04.35
+version=2.0.80 # -- dscudiero -- Wed 11/01/2017 @ 12:36:56.14
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -32,9 +32,11 @@ Hello
 #==================================================================================================
 ## Load default settings
 GetDefaultsData #'buildSiteInfoTable'
-ignoreList="${ignoreList##*ignoreShares:}" ; ignoreList="${ignoreList%% *}"
+ParseArgsStd2
 
-mode="$1" ; shift || true
+ignoreList="${ignoreList##*ignoreShares:}" ; ignoreList="${ignoreList%% *}"
+mode="$client"
+
 Verbose 1 "mode = '$mode'"
 
 ## DEV servers
@@ -64,7 +66,7 @@ Verbose 1 "mode = '$mode'"
 	for server in $(ls /mnt | grep -v '^dev' | grep -v '^auth'); do
 		[[ $(Contains ",$ignoreList," ",$server,") == true ]] && continue
 		ProtectedCall "cd /mnt/$server > /dev/null 2>&1"
-		[[ $(pwd) != /mnt/$server ]] && continue
+		[[ $(pwd) != /mnt/$server ]] && Here 1 && continue
 		newServers="$newServers,$server"
 	done
 	newServers=${newServers:1}
@@ -88,7 +90,6 @@ Verbose 1 "mode = '$mode'"
 	sqlStmt="update defaults set value=\"$rhel\" where name=\"rhel\" and host=\"$hostName\" and os=\"linux\""
 	RunSql2 $sqlStmt
 	Verbose 1 "rhel = '$rhel'"
-
 
 ## Default CL version from the 'release' directory in the skeleton
 	unset defaultClVer
@@ -210,3 +211,4 @@ Goodbye 0;
 ## 10-18-2017 @ 15.15.05 - (2.0.60)    - dscudiero - touch the directory to update time date
 ## 10-27-2017 @ 08.13.09 - (2.0.61)    - dscudiero - Added debug statements
 ## 10-27-2017 @ 09.18.20 - (2.0.62)    - dscudiero - Remove debug statements
+## 11-01-2017 @ 12.37.43 - (2.0.80)    - dscudiero - Fixed an issue with the ignoreList
