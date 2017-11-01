@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.40" # -- dscudiero -- Wed 11/01/2017 @ 13:18:41.59
+# version="2.0.41" # -- dscudiero -- Wed 11/01/2017 @ 15:26:20.18
 #===================================================================================================
 # Set Directories based on the current hostName name and school name
 # Sets globals: devDir, nextDir, previewDir, publicDir, upgradeDir
@@ -29,7 +29,7 @@ function SetSiteDirs {
 			for env in ${courseleafDevEnvs//,/ }; do
 				envDirName="${env}Dir"
  				[[ $env == 'pvt' && -z ${!envDirName} ]] && eval $envDirName="/mnt/$server/web/$client-$userName" || eval $envDirName="/mnt/$server/web/$client"
-				[[ $mode != 'setDefault'  && ! -d ${!envDirName} ]] && unset ${!envDirName} && foundAll=false
+				[[ $mode != 'setDefault'  && ! -d ${!envDirName} ]] && unset $envDirName && foundAll=false
 			done
 			[[ $foundAll == true ]] && break
 		done
@@ -41,7 +41,7 @@ function SetSiteDirs {
 			for env in ${courseleafProdEnvs//,/ }; do
 				envDirName="${env}Dir"
  				[[ $env == 'test' && -z ${!envDirName} ]] && eval $envDirName="/mnt/$server/$client-$env/$env" || eval $envDirName="/mnt/$server/$client/$env"
-				[[ $mode != 'setDefault'  && ! -d ${!envDirName} ]] && unset ${!envDirName} && foundAll=false
+				[[ $mode != 'setDefault'  && ! -d ${!envDirName} ]] && unset $envDirName && foundAll=false
 			done
 			[[ $foundAll == true ]] && break
 		done
@@ -71,3 +71,4 @@ export -f SetSiteDirs
 ## 09-27-2017 @ 11.50.43 - ("2.0.23")  - dscudiero - tweak logic
 ## 09-28-2017 @ 07.39.47 - ("2.0.26")  - dscudiero - fix bug in setting product dirs
 ## 11-01-2017 @ 15.21.01 - ("2.0.40")  - dscudiero - Simplify logic
+## 11-01-2017 @ 15.26.37 - ("2.0.41")  - dscudiero - Fix a problem clearing out the directori variables
