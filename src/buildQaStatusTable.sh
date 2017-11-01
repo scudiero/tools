@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.53 # -- dscudiero -- Tue 10/31/2017 @ 10:58:05.01
+version=1.2.54 # -- dscudiero -- Wed 11/01/2017 @  7:41:45.78
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -225,7 +225,7 @@ for workbook in "${workbooks[@]}"; do
 	fileName=$(basename $workbook)
 	[[ ${fileName:0:1} == '~' ]] && continue
 	[[ $(Contains "$workbook" 'old') == true || $(Contains "$workbook" 'bak') == true ]] && continue
-	Msg3 $V1 "^Checking File: $workbook"
+	Verbose 1 "^Checking File: $workbook"
 	## Get the list of worksheets in the workbook
 		GetExcel2 -wb "$workbook" -ws 'GetSheets'
 		sheets="${resultSet[0]}"
@@ -235,7 +235,7 @@ for workbook in "${workbooks[@]}"; do
 
 	## Read the Project summary data
 		workSheet='ProjectSummary'
-		Msg3 $V1 "^^Parsing '$workSheet'..."
+		Verbose 1 "^^Parsing '$workSheet'..."
 		GetExcel2 -wb "$workbook" -ws "$workSheet"
 
 	## Parse sheet data --  the variable names MUST match the data base column names
@@ -294,7 +294,7 @@ for workbook in "${workbooks[@]}"; do
 		if [[ $verboseLevel -ge 2 ]]; then echo -e "\nFields:";for field in $(tr ',' ' ' <<< $insertFields); do echo -e "\t$field = ${!field}"; done; echo; fi
 
 	## Do we have the data necessary to continue
-		Msg3 $V1 "^^Checking data..."
+		Verbose 1 "^^Checking data..."
 		if [[ $clientCode == '' || $env == '' || $product == '' || $project == '' || $instance == '' ]]; then
 			Msg3 $WT1 "File '$workbook'\nhas insufficient data to uniquely identify QA project"
 			dump -t -t clientCode env product project instance
@@ -360,14 +360,14 @@ for workbook in "${workbooks[@]}"; do
 	## Build & run sqlStmt
 		sqlStmt="$sqlAction $qaStatusTable $setClause $whereClause"
 		RunSql2 $sqlStmt
-		Msg3 $V1 "^^${sqlAction} of record completed"
+		Verbose 1 "^^${sqlAction} of record completed"
 
 	## Populate the testing detains table if workbook is finalized
 		## Check to see if the workbook is finalized
 		if [[ $(Contains "|${sheets}|" '|TestingDetailFinal|') == true ]]; then
 			## Process the testing details records
 			Msg3 "^^Processing Testing Details data via '$workerScript'..."
-			ProtectedCall "Call "$workerScriptFile" "$workbook" 'TestingDetailFinal'"
+			ProtectedCall "source \"$workerScriptFile\" \"$workbook\" 'TestingDetailFinal'"
 			[[ $rc -ge 2 ]] && Msg3 $T "Processing the Testing Detail data, please review messages"
 			if [[ $(Contains "$workbook" 'archive') == false ]]; then
 				pushd $(dirname $workbook) >& /dev/null
@@ -426,3 +426,4 @@ Goodbye 0 #'alert'
 ## 09-29-2017 @ 10.14.39 - (1.2.45)    - dscudiero - Update FindExcecutable call for new syntax
 ## 10-31-2017 @ 10.57.06 - (1.2.52)    - dscudiero - Switch to GetExcel2 and Msg3
 ## 10-31-2017 @ 10.58.10 - (1.2.53)    - dscudiero - Cosmetic/minor change
+## 11-01-2017 @ 07.42.19 - (1.2.54)    - dscudiero - Updated how the helper script is called
