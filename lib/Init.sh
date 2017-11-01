@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.21 # -- dscudiero -- Thu 10/19/2017 @ 16:07:54.05
+# version=2.1.35 # -- dscudiero -- Wed 11/01/2017 @  9:27:08.69
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -17,6 +17,8 @@
 function Init {
 	myIncludes="Msg3 RunSql2 SetSiteDirs GetCims PushPop SetFileExpansion Prompt"
 	Import "$standardInteractiveIncludes $myIncludes"
+
+	function MyContains { local string="$1"; local subStr="$2"; [[ "${string#*$subStr}" != "$string" ]] && echo true || echo false; return 0; }
 
 	PushSettings "$FUNCNAME"
 	SetFileExpansion 'off'
@@ -91,6 +93,7 @@ function Init {
 		PopSettings "$FUNCNAME"
 		siteDir="$srcDir"
 		tgtDir="$pvtDir"
+		unset MyContains
 		return 0
 	fi
 
@@ -130,6 +133,18 @@ function Init {
 					[[ $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt $clientEnvs"
 				fi
 			fi
+			## If we have an envs variable that is not null then make sure all that are specified are valid
+			if [[ -n $envs ]]; then
+				if [[ $envs == 'all' ]]; then
+					envs="${clientEnvs//all/}"; envs="${envs//,,/,}"
+				else
+					local i tmpEnvs
+					tmpEnvs="$envs"; unset envs
+					for i in ${tmpEnvs//,/ }; do [[ $(MyContains "$clientEnvs" "$i") == true ]] && envs="$envs,$i"; done
+					envs="${envs:1}"
+				fi
+				env="${envs%% *}"
+			fi
 		fi
 
 		if [[ $getEnv == true ]]; then
@@ -150,14 +165,7 @@ function Init {
 			[[ -z $srcEnv && -n $env ]] && srcEnv="$env"
 			clientEnvsSave="$clientEnvs"
 			clientEnvs="$clientEnvs skel"
-			if [[ -n $tgtEnv ]]; then
-				unset clientEnvsNew
-				for token in $clientEnvs; do
-					[[ $token != $tgtEnv ]] && clientEnvsNew="$clientEnvsNew $token"
-				done
-				[[ ${clientEnvsNew:0:1} == '' ]] && $clientEnvsNew=${clientEnvsNew:1}
-				clientEnvs="$clientEnvsNew"
-			fi
+			[[ -n $tgtEnv ]] && clientEnvs=${clientEnvs//$tgtEnv/}; clientEnvs=${clientEnvs//,,/,}; 
 			unset defaultEnv
 			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false && $srcEnv != 'pvt' ]] && clientEnvs="pvt,$clientEnvs"
 			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt'
@@ -168,14 +176,7 @@ function Init {
 
 		if [[ $getTgtEnv == true ]]; then
 			[[ -z $tgtEnv && -n $env && $srcEnv != $env ]] && tgtEnv="$env"
-			if [[ -n $srcEnv ]]; then
-				unset clientEnvsNew
-				for token in $clientEnvs; do
-					[[ $token != $srcEnv ]] && clientEnvsNew="$clientEnvsNew $token"
-				done
-				[[ ${clientEnvsNew:0:1} == '' ]] && $clientEnvsNew=${clientEnvsNew:1}
-				clientEnvs="$clientEnvsNew"
-			fi
+			[[ -n $srcEnv ]] && clientEnvs=${clientEnvs//$srcEnv/}; clientEnvs=${clientEnvs//,,/,}; 
 			unset defaultEnv
 			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false && $srcEnv != 'pvt' ]] && clientEnvs="pvt,$clientEnvs"
 			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt'
@@ -184,32 +185,16 @@ function Init {
 			[[ $checkProdEnv == true ]] && checkProdEnv=$tgtEnv
 		fi
 
-		if [[ -n $envs ]]; then
-			if [[ $envs == 'all' ]]; then
-				envs="$clientEnvs"
-				envs=$(sed s'/all//' <<< $envs)
-			else
-				local i j tmpEnvs
-				tmpEnvs="$envs"
-				unset envs
-				for i in $(echo $tmpEnvs | tr ',' ' '); do
-					for j in $(echo $clientEnvs | tr ',' ' '); do
-						[[ $i == ${j:0:${#i}} ]] && envs="$envs,$j" && break;
-					done
-				done
-				envs="${envs:1}"
-			fi
-		fi
-		if [[ -n $srcEnv ]]; then
-			for j in $(echo pvt $clientEnvs skel | tr ',' ' '); do
-				[[ $srcEnv == ${j:0:${#srcEnv}} ]] && srcEnv="$j" && break;
-			done
-		fi
-		if [[ -n $tgtEnv ]]; then
-			for j in $(echo $clientEnvs | tr ',' ' '); do
-				[[ $tgtEnv == ${j:0:${#tgtEnv}} ]] && tgtEnv="$j" && break;
-			done
-		fi
+		# if [[ -n $srcEnv ]]; then
+		# 	for j in $(echo pvt $clientEnvs skel | tr ',' ' '); do
+		# 		[[ $srcEnv == ${j:0:${#srcEnv}} ]] && srcEnv="$j" && break;
+		# 	done
+		# fi
+		# if [[ -n $tgtEnv ]]; then
+		# 	for j in $(echo $clientEnvs | tr ',' ' '); do
+		# 		[[ $tgtEnv == ${j:0:${#tgtEnv}} ]] && tgtEnv="$j" && break;
+		# 	done
+		# fi
 
 		## Check to see if check production env is on and we are working in a next or curr environment, if yes then verify that
 		## the user has authorization to modify a produciton environment.
@@ -273,7 +258,7 @@ function Init {
 	fi # getProducts
 
 	## If all clients then split
-	[[ $client == '*' || $client == 'all' || $client == '.' ]] && PopSettings "$FUNCNAME" && return 0
+	[[ $client == '*' || $client == 'all' || $client == '.' ]] && PopSettings "$FUNCNAME" && unset MyContains && return 0
 
 	#===================================================================================================
 	## Set Directories based on the current host name and client name
@@ -339,6 +324,7 @@ function Init {
 
 	PopSettings "$FUNCNAME"
 
+	unset MyContains
 	return 0
 } #Init
 export -f Init
@@ -379,3 +365,4 @@ export -f Init
 ## 10-04-2017 @ 13.09.46 - (2.1.18)    - dscudiero - General syncing of dev to prod
 ## 10-05-2017 @ 09.41.42 - (2.1.19)    - dscudiero - Switch to use Msg3
 ## 10-19-2017 @ 16.05.16 - (2.1.20)    - dscudiero - Add to include list
+## 11-01-2017 @ 09.54.16 - (2.1.35)    - dscudiero - Tweak how envs are process in getenv
