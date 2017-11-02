@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.43 # -- dscudiero -- Thu 11/02/2017 @ 11:37:52.94
+# version=2.1.45 # -- dscudiero -- Thu 11/02/2017 @ 15:52:52.98
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -23,7 +23,7 @@ function Init {
 	PushSettings "$FUNCNAME"
 	SetFileExpansion 'off'
 
-	local trueVars='noPreview noPublic'
+	local trueVars='noPreview noPublic addPvt'
 	local falseVars='getClient anyClient getProducts getCims getEnv getSrcEnv getTgtEnv getDirs checkEnvs'
 	falseVars="$falseVars allowMulti allowMultiProds allowMultiEnvs allowMultiCims checkProdEnv noWarn"
 	for var in $trueVars; do eval $var=true; done
@@ -55,7 +55,6 @@ function Init {
 		[[ $token == 'nocheck' ]] && noCheck=true
 		[[ $token == 'checkprodenv' ]] && checkProdEnv=true
 		[[ $token == 'nowarn' ]] && noWarn=true
-		[[ $token == 'addpvt' ]] && addPvt=true
 	done
 	dump -3 -t -t parseStr getClient getEnv getDirs checkEnvs getProducts getCims allCims noPreview noPublic
 
@@ -156,7 +155,7 @@ function Init {
 				promptModifer=" (comma separated)"
 				clientEnvs="all $clientEnvs"
 			fi
-			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false && $srcEnv != 'pvt' ]] && clientEnvs="pvt,$clientEnvs"
+			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false && $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt,$clientEnvs"
 			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt' || unset defaultEnv
 			Prompt env "What environment/site do you wish to use?" "$(tr ' ' ',' <<< $clientEnvs)" $defaultEnv; srcEnv=$(Lower $srcEnv)
 			[[ $checkProdEnv == true ]] && checkProdEnv=$env
@@ -168,7 +167,7 @@ function Init {
 			clientEnvs="$clientEnvs skel"
 			[[ -n $tgtEnv ]] && clientEnvs=${clientEnvs//$tgtEnv/}; clientEnvs=${clientEnvs//,,/,}; 
 			unset defaultEnv
-			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false && $srcEnv != 'pvt' ]] && clientEnvs="pvt,$clientEnvs"
+			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false && $tgtEnv != 'pvt' && $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt,$clientEnvs"
 			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt'
 			Prompt srcEnv "What $(ColorK 'source') environment/site do you wish to use?" "$(tr ' ' ',' <<< $clientEnvs)" $defaultEnv; srcEnv=$(Lower $srcEnv)
 			clientEnvs="$clientEnvsSave"
@@ -179,7 +178,7 @@ function Init {
 			[[ -z $tgtEnv && -n $env && $srcEnv != $env ]] && tgtEnv="$env"
 			[[ -n $srcEnv ]] && clientEnvs=${clientEnvs//$srcEnv/}; clientEnvs=${clientEnvs//,,/,}; 
 			unset defaultEnv
-			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false && $srcEnv != 'pvt' ]] && clientEnvs="pvt,$clientEnvs"
+			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false && $srcEnv != 'pvt' && $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt,$clientEnvs"
 			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt'
 			[[ -z $defaultEnv && $(Contains "$clientEnvs" 'test') == true ]] && defaultEnv='test'
 			Prompt tgtEnv "What $(ColorK 'target') environment/site do you wish to use?" "$(tr ' ' ',' <<< $clientEnvs)" $defaultEnv; srcEnv=$(Lower $srcEnv)
@@ -367,3 +366,4 @@ export -f Init
 ## 10-19-2017 @ 16.05.16 - (2.1.20)    - dscudiero - Add to include list
 ## 11-01-2017 @ 09.54.16 - (2.1.35)    - dscudiero - Tweak how envs are process in getenv
 ## 11-02-2017 @ 10.51.57 - (2.1.38)    - dscudiero - Add 'addPvt' option
+## 11-02-2017 @ 15.54.00 - (2.1.45)    - dscudiero - Fix addPvt code to check to make sure the pvt site exists befor adding to the envs list
