@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.2.47 # -- dscudiero -- Wed 11/01/2017 @ 16:40:54.98
+version=2.2.48 # -- dscudiero -- Thu 11/02/2017 @ 11:01:24.21
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetOutputFile BackupCourseleafFile ProtectedCall SelectMenu GetExcel2 SetFileExpansion"
@@ -225,7 +225,7 @@ Hello
 GetDefaultsData $myName
 ParseArgsStd2 $originalArgStr
 displayGoodbyeSummaryMessages=true
-Init 'getClient getSrcEnv getTgtEnv getDirs checkEnvs'
+Init 'getClient getSrcEnv getTgtEnv getDirs checkEnvs addPvt'
 srcEnv="$(TitleCase "$srcEnv")"
 tgtEnv="$(TitleCase "$tgtEnv")"
 
@@ -547,3 +547,4 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 ## 09-25-2017 @ 12.26.53 - (2.2.24)    - dscudiero - Switch to use Msg3
 ## 10-16-2017 @ 09.06.27 - (2.2.45)    - dscudiero - Updated to use GetExcel2
 ## 11-02-2017 @ 06.58.56 - (2.2.47)    - dscudiero - Switch to ParseArgsStd2
+## 11-02-2017 @ 11.02.12 - (2.2.48)    - dscudiero - Add addPvt to the init call
