@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.43" # -- dscudiero -- Thu 11/02/2017 @ 10:44:56.10
+# version="2.0.44" # -- dscudiero -- Thu 11/02/2017 @ 11:22:12.93
 #===================================================================================================
 # Set Directories based on the current hostName name and school name
 # Sets globals: devDir, nextDir, previewDir, publicDir, upgradeDir
@@ -31,8 +31,6 @@ function SetSiteDirs {
 				if [[ -z ${!envDirName} ]]; then
  					[[ $env == 'pvt' ]] && eval $envDirName="/mnt/$server/web/$client-$userName" || eval $envDirName="/mnt/$server/web/$client"
 				fi
- 				[[ $env == 'pvt' && -z ${!envDirName} ]] && eval $envDirName="/mnt/$server/web/$client-$userName"
- 				[[ $env != 'pvt' && -z ${!envDirName} ]] && eval $envDirName="/mnt/$server/web/$client"
 				[[ $mode != 'setDefault'  && ! -d ${!envDirName} ]] && unset $envDirName && foundAll=false
 			done
 			[[ $foundAll == true ]] && break
@@ -79,3 +77,4 @@ export -f SetSiteDirs
 ## 11-01-2017 @ 15.21.01 - ("2.0.40")  - dscudiero - Simplify logic
 ## 11-01-2017 @ 15.26.37 - ("2.0.41")  - dscudiero - Fix a problem clearing out the directori variables
 ## 11-02-2017 @ 10.52.52 - ("2.0.43")  - dscudiero - Tweak how we check for pvt and test sites
+## 11-02-2017 @ 11.22.32 - ("2.0.44")  - dscudiero - Cosmetic/minor change
