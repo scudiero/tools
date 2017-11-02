@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.26 # -- dscudiero -- Wed 11/01/2017 @ 16:32:03.75
+version=1.0.27 # -- dscudiero -- Thu 11/02/2017 @ 11:00:56.28
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -49,7 +49,7 @@ GetDefaultsData $myName
 ParseArgsStd2 $originalArgStr
 dump -1 client cimStr proposal page
 
-Init "getClient getEnv getDirs checkEnvs"
+Init "getClient getEnv getDirs checkEnvs addPvt"
 
 [[ $cim != '' ]] && wfType='proposal'
 [[ $cat != '' ]] && wfType='page'
@@ -195,3 +195,4 @@ Goodbye 0 #'alert'
 ## Fri Mar 10 16:48:28 CST 2017 - dscudiero - Updated verify messages
 ## 04-13-2017 @ 14.00.56 - (1.0.20)    - dscudiero - Add a default for VerifyContinue
 ## 11-02-2017 @ 06.58.54 - (1.0.26)    - dscudiero - Switch to ParseArgsStd2
+## 11-02-2017 @ 11.02.09 - (1.0.27)    - dscudiero - Add addPvt to the init call
