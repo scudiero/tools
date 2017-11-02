@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.6" # -- dscudiero -- Thu 11/02/2017 @  9:39:47.43
+# version="3.0.14" # -- dscudiero -- Thu 11/02/2017 @ 15:20:28.13
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -13,7 +13,7 @@ function ParseArgsStd2 {
 	# dump -n -n client envs testMode srcEnv tgtEnv cimStr products file noPrompt noClear unknowArgs
 
 	Import "RunSql2 StringFunctions Msg3"
-	local argDefCntr arg argType found tmpStr tmpArg argShortName argLongName scriptVar scriptCmd
+	local argDefCntr arg argType found tmpStr tmpEnv tmpArg argShortName argLongName scriptVar scriptCmd
 
 	## Make sure we have the argdefs data loaded
 		if [[ ${#argDefs} -eq 0 ]]; then
@@ -73,8 +73,21 @@ function ParseArgsStd2 {
 						counter) 
 								[[ -n $scriptVar ]] && { eval "$scriptVar=${arg:2}"; }
 								;;
-						option) 
-								[[ -n $scriptVar ]] && { (( argCntr++)); eval "$scriptVar=\"${!argCntr}\""; }
+						option)
+								if [[ -n $scriptCmd ]]; then
+									if [[ $scriptCmd == 'expandEnv' ]]; then
+										(( argCntr++));
+										tmpStr="${!argCntr}"
+										found=false
+										for tmpEnv in ${courseleafDevEnvs//,/ } ${courseleafProdEnvs//,/ }; do
+											[[ $tmpEnv =~ ^${tmpStr} ]] && { found=true; break; }
+											#[[ $tmpStr =~ ^${tmpEnv} ]] && { echo "HERE HERE HERE HERE"; foune=true; break; }
+										done
+										[[ $found == true ]] && eval "$scriptVar=\"$tmpEnv\"";
+									fi
+								else
+									[[ -n $scriptVar ]] && { (( argCntr++)); eval "$scriptVar=\"${!argCntr}\""; }
+								fi
 								;;
 					esac
 				else
@@ -112,3 +125,4 @@ export -f ParseArgsStd2
 ## 11-01-2017 @ 15.14.34 - ("3.0.3")   - dscudiero - Add counter type to deal with -vx
 ## 11-01-2017 @ 15.16.36 - ("3.0.4")   - dscudiero - Fix counter type
 ## 11-02-2017 @ 10.27.46 - ("3.0.6")   - dscudiero - Seperate local argdefs from common
+## 11-02-2017 @ 15.22.27 - ("3.0.14")  - dscudiero - Added expandEnv command type for options to expand the entered value to a full env name
