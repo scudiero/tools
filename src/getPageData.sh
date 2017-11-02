@@ -1,9 +1,9 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.17 # -- dscudiero -- Fri 09/29/2017 @ 10:06:48.02
+version=2.1.20 # -- dscudiero -- Wed 11/01/2017 @ 16:28:44.00
 #==================================================================================================
 TrapSigs 'on'
-includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
+includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
 includes="$includes GetCourseleafPgm"
 Import "$includes"
 
@@ -26,10 +26,10 @@ step='getCatalogPageData'
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-GetDefaultsData $myName
-ParseArgsStd
 Hello
-Msg2
+GetDefaultsData $myName
+ParseArgsStd2 $originalArgStr
+Msg3
 Init 'getClient getEnv checkEnv getDirs'
 
 ## Set outfile -- look for std locations
@@ -70,20 +70,20 @@ cd $srcDir
 ## Find the step file to run
 	srcStepFile="$(FindExecutable -step "$step")"
 	[[ -z $srcStepFile ]] && Terminate "Could find the step file ('$step')"
-	Msg2 "Using step file: $srcStepFile"
+	Msg3 "Using step file: $srcStepFile"
 
 ## Copy step file to localsteps
 	cp -fP $srcStepFile $stepFile
 	chmod ug+w $stepFile
 
 ## Run the step
-	Msg2 "Running step: $step on every page (usually takes a while)..."
+	Msg3 "Running step: $step on every page (usually takes a while)..."
 	cd $courseLeafDir
-	Msg2 "Page Path\tPage Title\tPage Owner\tPage Workflow" > $outFile
+	Msg3 "Page Path\tPage Title\tPage Owner\tPage Workflow" > $outFile
 	./$courseLeafPgm.cgi -e $step / >> $outFile
 	rm $stepFile
 
-Msg2 "Output can be found in: $outFile\n"
+Msg3 "Output can be found in: $outFile\n"
 
 #==================================================================================================
 ## Bye-bye
@@ -93,3 +93,4 @@ Goodbye 0 'alert'
 ## Tue Oct 18 07:58:39 CDT 2016 - dscudiero - Add ENV to the output file name
 ## 04-13-2017 @ 14.01.07 - (2.1.13)    - dscudiero - Add a default for VerifyContinue
 ## 09-29-2017 @ 10.14.57 - (2.1.17)    - dscudiero - Update FindExcecutable call for new syntax
+## 11-02-2017 @ 06.58.52 - (2.1.20)    - dscudiero - Switch to ParseArgsStd2
