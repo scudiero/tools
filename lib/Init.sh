@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.38 # -- dscudiero -- Thu 11/02/2017 @ 10:51:34.40
+# version=2.1.39 # -- dscudiero -- Thu 11/02/2017 @ 11:19:36.46
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -281,7 +281,7 @@ function Init {
 		for i in $(echo "$courseleafDevEnvs $courseleafProdEnvs" | tr ',' ' ') skel; do
 			if [[ $srcEnv == $i ]]; then
 				chkDirName="${i}Dir"; chkDir="${!chkDirName}"
-				[[ ! -d $chkDir && $checkEnvs == true && $noCheck != true ]] && Terminate "Env is '$(TitleCase $i)' and directory '$chkDir' not found\nProcess stopping."
+				[[ ! -d $chkDir && $checkEnvs == true && $noCheck != true ]] && Terminate "Env is '$(TitleCase $i)' and site directory '$chkDir' not found\nProcess stopping."
 				srcDir=$chkDir
 				break
 			fi
@@ -293,12 +293,11 @@ function Init {
 	## Check to see if the tgtDir exists
 	if [[ $getTgtEnv == true && $getDirs == true && -z $tgtDir && $allowMultiEnvs != true ]]; then
 		[[ -z $tgtEnv && -n $env ]] && tgtEnv=$env
-		dump -3 tgtEnv
 		local i
 		for i in $(echo "$courseleafDevEnvs $courseleafProdEnvs" | tr ',' ' '); do
 			if [[ $tgtEnv == $i ]]; then
 				chkDirName="${i}Dir"; chkDir="${!chkDirName}"
-				[[ ! -d $chkDir && $checkEnvs == true && $noCheck != true ]] && Terminate "Env is '$(TitleCase $i)' and directory '$chkDir' not found\nProcess stopping."
+				[[ ! -d $chkDir && $checkEnvs == true && $noCheck != true ]] && Terminate "Env is '$(TitleCase $i)' and site directory '$chkDir' not found\nProcess stopping."
 				tgtDir=$chkDir
 				break
 			fi
