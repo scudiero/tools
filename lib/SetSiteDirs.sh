@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.44" # -- dscudiero -- Thu 11/02/2017 @ 11:22:12.93
+# version="2.0.52" # -- dscudiero -- Thu 11/02/2017 @ 11:37:30.53
 #===================================================================================================
 # Set Directories based on the current hostName name and school name
 # Sets globals: devDir, nextDir, previewDir, publicDir, upgradeDir
@@ -11,8 +11,7 @@
 #===================================================================================================
 function SetSiteDirs {
 	[[ -z $client ]] && Terminate "SetSiteDirs: No value for client"
-	myIncludes="RunSql2"
-	Import "$standardInteractiveIncludes $myIncludes"
+	#Import "$standardInteractiveIncludes $myIncludes"
 
 	local mode server env envDirName found foundAll checkEnv
 	mode="$1"; shift || true; [[ $mode == 'set' ]] && mode='setDefault'
@@ -20,12 +19,10 @@ function SetSiteDirs {
 
 	## If setDefault mode then clear out any existing values
 		[[ $mode == 'setDefault' ]] && { for env in ${courseleafDevEnvs//,/ } ${courseleafProdEnvs//,/ }; do unset ${env}Dir; done; }
-
 	## Find dev directories
-
 		foundAll=true
 		for server in ${devServers//,/ }; do
-			[[ ! -d "/mnt/$server/$client" && ! -d "/mnt/$server/$client=$userName" ]] && continue
+			[[ ! -d "/mnt/$server/web/$client" && ! -d "/mnt/$server/web/$client-$userName" ]] && continue
 			for env in ${courseleafDevEnvs//,/ }; do
 				envDirName="${env}Dir"
 				if [[ -z ${!envDirName} ]]; then
@@ -35,7 +32,7 @@ function SetSiteDirs {
 			done
 			[[ $foundAll == true ]] && break
 		done
-		#dump server pvtDir devDir devSiteDir -p
+		#dump server pvtDir devDir -p
 
 	## Find production directories
 		for server in ${prodServers//,/ }; do
@@ -78,3 +75,4 @@ export -f SetSiteDirs
 ## 11-01-2017 @ 15.26.37 - ("2.0.41")  - dscudiero - Fix a problem clearing out the directori variables
 ## 11-02-2017 @ 10.52.52 - ("2.0.43")  - dscudiero - Tweak how we check for pvt and test sites
 ## 11-02-2017 @ 11.22.32 - ("2.0.44")  - dscudiero - Cosmetic/minor change
+## 11-02-2017 @ 11.40.20 - ("2.0.52")  - dscudiero - Fix problem setting dev and pvt dirs
