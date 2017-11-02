@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.41" # -- dscudiero -- Wed 11/01/2017 @ 15:26:20.18
+# version="2.0.43" # -- dscudiero -- Thu 11/02/2017 @ 10:44:56.10
 #===================================================================================================
 # Set Directories based on the current hostName name and school name
 # Sets globals: devDir, nextDir, previewDir, publicDir, upgradeDir
@@ -28,7 +28,11 @@ function SetSiteDirs {
 			[[ ! -d "/mnt/$server/$client" && ! -d "/mnt/$server/$client=$userName" ]] && continue
 			for env in ${courseleafDevEnvs//,/ }; do
 				envDirName="${env}Dir"
- 				[[ $env == 'pvt' && -z ${!envDirName} ]] && eval $envDirName="/mnt/$server/web/$client-$userName" || eval $envDirName="/mnt/$server/web/$client"
+				if [[ -z ${!envDirName} ]]; then
+ 					[[ $env == 'pvt' ]] && eval $envDirName="/mnt/$server/web/$client-$userName" || eval $envDirName="/mnt/$server/web/$client"
+				fi
+ 				[[ $env == 'pvt' && -z ${!envDirName} ]] && eval $envDirName="/mnt/$server/web/$client-$userName"
+ 				[[ $env != 'pvt' && -z ${!envDirName} ]] && eval $envDirName="/mnt/$server/web/$client"
 				[[ $mode != 'setDefault'  && ! -d ${!envDirName} ]] && unset $envDirName && foundAll=false
 			done
 			[[ $foundAll == true ]] && break
@@ -40,7 +44,9 @@ function SetSiteDirs {
 			[[ ! -d "/mnt/$server/$client-test" && ! -d "/mnt/$server/$client" ]] && continue
 			for env in ${courseleafProdEnvs//,/ }; do
 				envDirName="${env}Dir"
- 				[[ $env == 'test' && -z ${!envDirName} ]] && eval $envDirName="/mnt/$server/$client-$env/$env" || eval $envDirName="/mnt/$server/$client/$env"
+				if [[ -z ${!envDirName} ]]; then
+ 					[[ $env == 'test' && -z ${!envDirName} ]] && eval $envDirName="/mnt/$server/$client-$env/$env" || eval $envDirName="/mnt/$server/$client/$env"
+				fi
 				[[ $mode != 'setDefault'  && ! -d ${!envDirName} ]] && unset $envDirName && foundAll=false
 			done
 			[[ $foundAll == true ]] && break
@@ -72,3 +78,4 @@ export -f SetSiteDirs
 ## 09-28-2017 @ 07.39.47 - ("2.0.26")  - dscudiero - fix bug in setting product dirs
 ## 11-01-2017 @ 15.21.01 - ("2.0.40")  - dscudiero - Simplify logic
 ## 11-01-2017 @ 15.26.37 - ("2.0.41")  - dscudiero - Fix a problem clearing out the directori variables
+## 11-02-2017 @ 10.52.52 - ("2.0.43")  - dscudiero - Tweak how we check for pvt and test sites
