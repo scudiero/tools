@@ -24,17 +24,17 @@ scriptDescription="Load Courseleaf Data"
 	#==============================================================================================
 	# parse script specific arguments
 	#==============================================================================================
-	function loadCourseleafData-ParseArgsStd  {
-		argList+=(-workbookFile,1,option,workbookFile,,script,'The fully qualified spreadsheet file name')
-		argList+=(-skipNulls,2,switch,skipNulls,,script,'If a data field is null then do not write out that data to the page')
-		argList+=(-uinMap,3,switch,uinMap,,script,'Map role data UIDs to UINs even if the uses UIN flag is not set on the client record')
-		argList+=(-noUinMap,3,switch,noUinMap,,script,'Do not map role data UIDs to UINs')
-		argList+=(-users,1,switch,processUserData,,script,'Load user data')
-		argList+=(-role,1,switch,processRoleData,,script,'Load role data')
-		argList+=(-page,2,switch,processPageData,,script,'Load catalog page data')
-		argList+=(-ignoreMissingPages,2,switch,ignoreMissingPages,,script,'Ignore missing catalog pages')
-		argList+=(-noIgnoreMissingPages,3,switch,ignoreMissingPages,ignoreMissingPages=false,script,'Do not ignore missing catalog pages')
-		argList+=(-product,2,option,product,,script,'Search the "CAT" or "CIM" Implementaton folders for spreadsheet files')
+	function loadCourseleafData-ParseArgsStd2  {
+		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+		myArgs+=("w|workbookFile|option|workbookFile||script|The fully qualified spreadsheet file name")
+		myArgs+=("skipNulls|skipNulls|switch|skipNulls||script|If a data field is null then do not write out that data to the page")
+		myArgs+=("ignore|ignoreMissingPages|switch|ignoreMissingPages||script|Ignore missing catalog pages")
+		myArgs+=("noIgnore|noIgnoreMissingPages|switch||ignoreMissingPages=false|script|Do not ignore missing catalog pages")
+		myArgs+=("uin|uinMap|switch|uinMap||script|Map role data UIDs to UINs even if the uses UIN flag is not set on the client record")
+		myArgs+=("noUin|noUinMap|switch||uinMap=false|script|Do not map role data UIDs to UINs")
+		myArgs+=("users|users|switch|processUserData||script|Load user data")
+		myArgs+=("role|role|switch|processRoleData||script|Load role data")
+		myArgs+=("page|page|switch|processPageData||script|Load catalog page data")
 		return 0
 	}
 	#==============================================================================================
@@ -680,14 +680,14 @@ Hello
 echo "Getting defaults..."
 GetDefaultsData $myName
 echo "Parsing arguments..."
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 [[ $allItems == true ]] && processUserData=true && processRoleData=true && processPageData=true
 [[ $product != '' ]] && product=$(Lower $product)
 
 [[ $hostName == 'build7' ]] && notifyThreshold=50 || notifyThreshold=100
 displayGoodbyeSummaryMessages=true
 echo "Calling Init"
-Init 'getClient getEnv getDirs checkEnvs checkProdEnv'
+Init 'getClient getEnv getDirs checkEnvs checkProdEnv addPvt'
 dump -1 processUserData processRoleData processPageData informationOnlyMode ignoreMissingPages
 echo "Back from Init"
 
@@ -1022,3 +1022,4 @@ ignoreMissingPages=true
 ## 07-17-2017 @ 13.48.41 - (3.8.95)    - dscudiero - Single quote strings to ParseWorksheetHeader function
 ## 09-29-2017 @ 10.15.03 - (3.8.119)   - dscudiero - Update FindExcecutable call for new syntax
 ## 10-09-2017 @ 16.54.07 - (3.9.9)     - dscudiero - Fixed problems with the conversion to getExecl2
+## 11-02-2017 @ 12.47.27 - (3.9.9)     - dscudiero - Swtich to ParseArgsStd2
