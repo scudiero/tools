@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.5.132 # -- dscudiero -- Thu 09/14/2017 @ 12:07:25.66
+version=1.5.138 # -- dscudiero -- Thu 11/02/2017 @ 11:45:48.14
 #==================================================================================================
 # Install a courseleaf feature on a client site
 #==================================================================================================
@@ -10,31 +10,26 @@ version=1.5.132 # -- dscudiero -- Thu 09/14/2017 @ 12:07:25.66
 # 07-17-15 --	dgs - Migrated to framework 5
 #==================================================================================================
 TrapSigs 'on'
-## Main script
-includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue'
-includes="$includes SetFileExpansion ProtectedCall Call PushPop SelectMenuNew"
-## Called scripts
-includes="$includes "
-Import "$includes"
+myIncludes="SetFileExpansion ProtectedCall PushPop SelectMenuNew"
+Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
-scriptDescription="Install a courseleaf feature - dispatcher"
+scriptDescription="Install a courseleaf feature to a site"
 
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-	function courseleafFeature-parseArgsStd {
-		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
-		argList+=(-feature,2,option,feature,,script,'The feature that you want to install')
-		argList+=(-force,2,switch,force,,script,'Install the feature even if it is already there, aka refresh')
+	function courseleafFeature-parseArgsStd2 {
+		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+		myArgs+=("fe|feature|option|feature||script|The feature that you want to install")
 	}
 
-	function courseleafFeature-Goodbye  {
+	function courseleafFeature-Goodbye {
 		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
 		return 0
 	}
 
-	function courseleafFeature-Help  {
+	function courseleafFeature-Help {
 		helpSet='script,client,env'
 		[[ $1 == 'setVarsOnly' ]] && return 0
 
@@ -111,11 +106,11 @@ if [[ $(Contains "$featuresFiles" ",$1,") == true ]]; then
 	shift;
 	originalArgStr="$*"
 fi
-helpSet='script'
-ParseArgsStd
 Hello
+helpSet='script'
+ParseArgsStd2 $originalArgStr
 displayGoodbyeSummaryMessages=true
-Init 'getClient getEnv getDirs checkEnvs'
+Init 'getClient getEnv getDirs checkEnvs addPvt'
 
 #==================================================================================================
 # Main
@@ -132,18 +127,16 @@ while [[ true == true ]]; do
 	if [[ $feature == '' ]]; then
 		[[ $verify != true ]] && Msg "T No value specified for feature and verify is off"
 		ProtectedCall "clear"
-		Msg2
-		BuildFeaturesList
-		Msg2
-		[[ $env != '' ]] && Msg2 "Please specify the feature you wish to install on '$client/$env':" || Msg2 "Please specify the feature you wish to install on '$client':"
-		Msg2
+		Msg3; BuildFeaturesList; Msg3
+		[[ $env != '' ]] && Msg3 "Please specify the feature you wish to install on '$client/$env':" || Msg3 "Please specify the feature you wish to install on '$client':"
+		Msg3
 		SelectMenuNew 'features' 'feature' "\nEnter the $(ColorK '(ordinal)') number of the feature you wish to install (or 'x' to quit) > "
 		[[ $feature == '' ]] && Goodbye 0 || feature=$(cut -d' ' -f1 <<< $feature)
 	else
 		[[ $(Contains "$feature" "email") == true ]] && feature='customEmails'
 		[[ $(Contains "$feature" "report") == true ]] && feature='courseleafReports'
 		[[ $(Contains "$feature" "system") == true ]] && feature='refreshSystem'
-		Msg2 $NT1 "Using specified value of '$feature' for feature"
+		Note "Using specified value of '$feature' for feature"
 	fi
 
 	## Verify OK to run
@@ -151,7 +144,7 @@ while [[ true == true ]]; do
 	verifyArgs+=("Client:$client")
 	verifyArgs+=("Target Env:$(TitleCase $env) ($siteDir)")
 	VerifyContinue "You are asking to install feature: '$feature':"
-	Msg2
+	Msg3
 
 	## Call the feature script
 	[[ $env != '' ]] && sendEnv="-$env"
@@ -176,7 +169,7 @@ Goodbye 0 #'alert'
 ## Wed Apr 13 16:28:05 CDT 2016 - dscudiero - Pass flags on to called script
 ## Wed Apr 27 07:20:01 CDT 2016 - dscudiero - Switch from using echo to direct input variable for parsing
 ## Fri Apr 29 14:07:48 CDT 2016 - dscudiero - Refactor to loop on the main menu
-## Wed Jun  1 10:28:32 CDT 2016 - dscudiero - Switch Msg to Msg2
+## Wed Jun  1 10:28:32 CDT 2016 - dscudiero - Switch Msg to Msg3
 ## Wed Jun  1 10:54:53 CDT 2016 - dscudiero - Edit out already installed features from the selection list
 ## Thu Aug  4 11:01:01 CDT 2016 - dscudiero - Added displayGoodbyeSummaryMessages=true
 ## Tue Aug 23 11:21:40 CDT 2016 - dscudiero - Updated to correctly parse output of selectMenuNew
@@ -185,3 +178,4 @@ Goodbye 0 #'alert'
 ## Tue Mar  7 14:45:27 CST 2017 - dscudiero - Fix parse of resultes from selectMenuNew after redo
 ## Tue Mar 14 13:20:30 CDT 2017 - dscudiero - Check the return code from the install scripts before editing the installed features list
 ## 04-06-2017 @ 10.09.40 - (1.5.69)    - dscudiero - renamed RunCourseLeafCgi, use new name
+## 11-02-2017 @ 11.48.55 - (1.5.138)   - dscudiero - Misc cleanup
