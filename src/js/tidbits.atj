@@ -17,6 +17,10 @@ return [inval.replace(wfrule.regex,'')];
 return [inval.replace(wfrule.ifregex,'')];
 
 ============================================================================================================================================================================
+// replace all instances of a char in a string
+myString.replace(/,/g , ", ");
+
+============================================================================================================================================================================
 //Loop through array using iterator
 for (var i=0,  tot=myArray.length; i < tot; i++) {
   console.log(myArray[i]);
@@ -347,3 +351,4 @@ attributes.forEach(function(attr) {
 // 08-24-2017 @ 14.19.28 - dscudiero - Added get tca data example
 // 10-04-2017 @ 07.47.38 - dscudiero - General syncing of dev to prod
 // 10-12-2017 @ 14.21.39 - dscudiero - Add example of checkchanges call
+// 11-02-2017 @ 12.38.20 - dscudiero - add example of relace all instances of a char in string
