@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.10.39 # -- dscudiero -- Wed 11/01/2017 @  9:27:39.14
+version=1.10.42 # -- dscudiero -- Wed 11/01/2017 @ 16:28:14.44
 #==================================================================================================
 TrapSigs 'on'
 myIncludes=""
@@ -18,7 +18,7 @@ scriptDescription="Build a list of all of the roles that are potentially use in 
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function parseArgsStd2-getCimRoles { # or parseArgs-local
+function getCimRoles-parseArgsStd2 { # or parseArgs-local
 	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 	return 0
 }
@@ -43,9 +43,9 @@ step='getCimWorkflowRoles'
 # Standard arg parsing and initialization
 #==================================================================================================
 helpSet='script,client,env,cims'
+Hello
 GetDefaultsData $myName
 ParseArgsStd2 $originalArgStr
-Hello
 Init 'getClient getEnv getDirs checkEnvs getCims noPreview noPublic'
 
 ## Set outfile -- look for std locations
@@ -65,7 +65,7 @@ verifyContinueDefault='Yes'
 VerifyContinue "You are asking generate CIM roles for"
 
 if [[ -e $outFile && $verify == true ]]; then
-	Msg2 "\nOutput file '$outFile' already exists, file renamed to:\n\t$outFile.$backupSuffix\n"
+	Msg3 "\nOutput file '$outFile' already exists, file renamed to:\n\t$outFile.$backupSuffix\n"
 	mv $outFile $outFile.$backupSuffix
 fi
 
@@ -79,16 +79,16 @@ cimStr=\"$(sed 's|,|","|g' <<< $cimStr)\"
 	srcStepFile="$(FindExecutable -step "$step")"
 	[[ -z $srcStepFile ]] && Terminate "Could find the step file ('$step')"
 
-	Msg2 "Using step file: $srcStepFile\n"
+	Msg3 "Using step file: $srcStepFile\n"
 	[[ -f $siteDir/web/courseleaf/localsteps/$step.html ]] && mv -f $siteDir/web/courseleaf/localsteps/$step.html $siteDir/web/courseleaf/localsteps/$step.html.bak
 	cp -fp $srcStepFile $siteDir/web/courseleaf/localsteps/$step.html
 	sed -i s"_var cims=\[\];_var cims=\[${cimStr}\];_" $siteDir/web/courseleaf/localsteps/$step.html
 	sed -i s"_var env='';_var env='${env}';_" $siteDir/web/courseleaf/localsteps/$step.html
 
-	Msg2 "Running step $step...\n"
+	Msg3 "Running step $step...\n"
 	cd $siteDir/web/courseleaf
 	./courseleaf.cgi $step /courseadmin/index.tcf > $outFile
-	Msg2 "\nOutput data generated in '$outFile'\n"
+	Msg3 "\nOutput data generated in '$outFile'\n"
 	rm -f "$siteDir/web/courseleaf/localsteps/$step.html"
 	[[ -f $siteDir/web/courseleaf/localsteps/$step.html.bak ]] && mv -f $siteDir/web/courseleaf/localsteps/$step.html.bak $siteDir/web/courseleaf/localsteps/$step.html
 
@@ -111,3 +111,4 @@ Goodbye 0
 ## 09-29-2017 @ 10.14.49 - (1.10.28)   - dscudiero - Update FindExcecutable call for new syntax
 ## 10-03-2017 @ 11.02.00 - (1.10.32)   - dscudiero - General syncing of dev to prod
 ## 11-01-2017 @ 09.55.10 - (1.10.39)   - dscudiero - Switched to ParseArgsStd2
+## 11-02-2017 @ 06.58.45 - (1.10.42)   - dscudiero - Switch to ParseArgsStd2
