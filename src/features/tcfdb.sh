@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.2.33 # -- dscudiero -- Thu 11/02/2017 @ 11:48:23.81
+version=1.2.34 # -- dscudiero -- Thu 11/02/2017 @ 12:06:09.50
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
@@ -9,7 +9,7 @@ version=1.2.33 # -- dscudiero -- Thu 11/02/2017 @ 11:48:23.81
 # Configure Custom emails on a Courseleaf site
 #==================================================================================================
 TrapSigs 'on'
-myIncludes="GetCims StringFunctions SetFileExpansion ProtectedCall Pause WriteChangelogEntry"
+myIncludes="GetCims StringFunctions SetFileExpansion ProtectedCall Pause WriteChangelogEntry InsertLineInFile"
 Import "$standardIncludes $myIncludes"
 
 currentScript=$(cut -d'.' -f1 <<< $(basename ${BASH_SOURCE[0]}))
@@ -297,3 +297,4 @@ return  ## We are called as a subprocess, just return to our parent
 ## 07-19-2017 @ 14.37.40 - (1.2.19)    - dscudiero - Update how the cgi files are sourced
 ## 09-22-2017 @ 07.50.23 - (1.2.32)    - dscudiero - Add to imports
 ## 11-02-2017 @ 11.48.48 - (1.2.33)    - dscudiero - Switch Msg2 to Msg3
+## 11-02-2017 @ 12.06.35 - (1.2.34)    - dscudiero - Added InsertLineInFile
