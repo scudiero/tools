@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.25 # -- dscudiero -- Thu 09/14/2017 @ 16:12:19.82
+version=1.0.26 # -- dscudiero -- Wed 11/01/2017 @ 16:32:03.75
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -16,16 +16,16 @@ scriptDescription="This script can be used to retrieve the workflow generated fo
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function parseArgs-getWorkflow  { # or parseArgs-local
-	argList+=(-proposal,4,option,proposal,,script,'The proposal key of the CIM proposal to lookup')
-	argList+=(-page,4,option,page,,script,'The CAT page to lookup')
+function getWorkflow-parseArgsStd2 { # or parseArgs-local
+	myArgs+=("prop|proposal|option|proposal||script|The proposal key of the CIM proposal to lookup")
+	myArgs+=("page|page|option|page||script|The CAT page to lookup")
 	return 0
 }
-function Goodbye-getWorkflow  { # or Goodbye-local
+function getWorkflow-Goodbye { # or Goodbye-local
 	rm -rf $tmpRoot > /dev/null 2>&1
 	return 0
 }
-function testMode-getWorkflow  { # or testMode-local
+function getWorkflow-testMode { # or testMode-local
 	return 0
 }
 
@@ -44,11 +44,11 @@ unset cims cimStr
 # Standard arg parsing and initialization
 #==================================================================================================
 helpSet='script,client,env,cim'
+Hello
 GetDefaultsData $myName
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 dump -1 client cimStr proposal page
 
-Hello
 Init "getClient getEnv getDirs checkEnvs"
 
 [[ $cim != '' ]] && wfType='proposal'
@@ -194,3 +194,4 @@ Goodbye 0 #'alert'
 ## Thu Jul 14 14:04:37 CDT 2016 - dscudiero - Add page title to the verifyContinue display for cim proposals
 ## Fri Mar 10 16:48:28 CST 2017 - dscudiero - Updated verify messages
 ## 04-13-2017 @ 14.00.56 - (1.0.20)    - dscudiero - Add a default for VerifyContinue
+## 11-02-2017 @ 06.58.54 - (1.0.26)    - dscudiero - Switch to ParseArgsStd2
