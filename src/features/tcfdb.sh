@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.2.32 # -- dscudiero -- Fri 09/22/2017 @  7:33:34.44
+version=1.2.33 # -- dscudiero -- Thu 11/02/2017 @ 11:48:23.81
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
@@ -50,8 +50,8 @@ unset changesMade
 # Standard arg parsing and initialization
 #==================================================================================================
 helpSet='script,client,env'
-ParseArgsStd
 Hello
+ParseArgsStd2 $originalArgStr
 Init 'getClient getEnv getDirs checkEnvs'
 tgtDir=$srcDir
 srcDir=$skeletonRoot/release
@@ -99,10 +99,10 @@ changeLogRecs+=("Feature: $feature")
 ## Add tcfdb db declaration
 	editFile="$tgtDir/courseleaf.cfg"
 	searchStr='db:tcfdb|sqlite|/db/tcfdb.sqlite'
-	Msg2 "Checking '$editFile'"
+	Msg3 "Checking '$editFile'"
 	grepStr=$(ProtectedCall "grep \"^$searchStr\" $editFile")
 	if [[ $grepStr == '' ]]; then
-		Msg2 "^Adding: $searchStr"
+		Msg3 "^Adding: $searchStr"
 		afterLine="$(ProtectedCall "grep '^db:' $editFile | tail -1")"
 		[[ $afterLine == '' ]] && Terminate 0 1 "Could not compute location to insert line:\n\t$searchStr\n\tinto file:\n\t$editFile"
 		unset insertMsg; insertMsg=$(InsertLineInFile "$searchStr" "$editFile" "$afterLine")
@@ -110,7 +110,7 @@ changeLogRecs+=("Feature: $feature")
 		changeLogRecs+=("Added 'db:tcfdb|sqlite|/db/tcfdb.sqlite' to courseleaf.cfg")
 		changesMade=true
 	fi
-	Msg2 "^Checking completed"
+	Msg3 "^Checking completed"
 
 ## update the courseleaf.cgi file
 	if [[ $cgiVerIsOk != true ]]; then
@@ -122,7 +122,7 @@ changeLogRecs+=("Feature: $feature")
 			courseleafCgiVer="$($courseleafCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
 			dump -1 courseleafCgiSourceFile courseleafCgiVer
 
-		Msg2; Msg2 "Updating courseleaf.cgi file to version $courseleafCgiVer..."
+		Msg3; Msg3 "Updating courseleaf.cgi file to version $courseleafCgiVer..."
 		## Copy the cgi file
 			unset courseleafCgiVer
 			result=$(CopyFileWithCheck "$courseleafCgiSourceFile" "$myCourseleafCgi" 'courseleaf')
@@ -136,7 +136,7 @@ changeLogRecs+=("Feature: $feature")
 	fi
 
 ## Create the tcfdb database
-	Msg2; Msg2 "Creating tcfdb instance, finding base database..."
+	Msg3; Msg3 "Creating tcfdb instance, finding base database..."
 	## Delete any existing tcfdb.sqlite file
 		cwd=$(pwd)
 		[[ -f $tgtDir/db/tcfdb.sqlite ]] && $DOIT rm -f $tgtDir/db/tcfdb.sqlite
@@ -191,19 +191,19 @@ changeLogRecs+=("Feature: $feature")
 		fi
 
 	## If baseDbFile is still not set then error out
-		[[ $baseDbFile == '' ]] && Msg2 $T "Could not determine the base sqlite file to use"
+		[[ $baseDbFile == '' ]] && Msg3 $T "Could not determine the base sqlite file to use"
 		$DOIT cp -fp "$baseDbFile" $tgtDir/db/tcfdb.sqlite
-		Msg2 "^Using base database file: '$baseDbFile'"
+		Msg3 "^Using base database file: '$baseDbFile'"
 
 	## Add tcfdb tables
-		Msg2 "^Exporting courseleaf data (takes a while)..."
+		Msg3 "^Exporting courseleaf data (takes a while)..."
 		cwd=$(pwd)
 	 	$DOIT cd "$tgtDir/web/courseleaf"
 		$myCourseleafCgi --sqlexport /
 		$DOIT cd $cwd
 
  	## Attach User Provisioning
- 		Msg2 "^Attaching the 'users' data..."
+ 		Msg3 "^Attaching the 'users' data..."
 		## get the clusers file name
 		unset clusersDbFile
 		grepStr=$(ProtectedCall "grep '^db:clusers|' $tgtDir/courseleaf.cfg")
@@ -220,7 +220,7 @@ changeLogRecs+=("Feature: $feature")
 		fi
 
 	## Attach Eco System DB
-		Msg2 "^Attaching the 'eco system' data..."
+		Msg3 "^Attaching the 'eco system' data..."
 		sqlStmt="drop table if exists courseref;"
 		$DOIT sqlite3 $tgtDir/db/tcfdb.sqlite "$sqlStmt"
 		## get the courseref file name
@@ -239,18 +239,18 @@ changeLogRecs+=("Feature: $feature")
 		fi
 
 	## Copy to client transfers folder
-		Msg2 "^Moving database file to /clienttransfers"
+		Msg3 "^Moving database file to /clienttransfers"
 		[[ -f $tgtDir/clienttransfers/tcfdb.sqlite ]] && mv -f $tgtDir/clienttransfers/tcfdb.sqlite $tgtDir/clienttransfers/tcfdb.sqlite.bak
 		$DOIT cp -f $tgtDir/db/tcfdb.sqlite $tgtDir/clienttransfers/tcfdb.sqlite
 
 	changeLogRecs+=("Created: /clienttransfers/tcfdb.sqlite")
-	Msg2 "^Database creation completed"
+	Msg3 "^Database creation completed"
 
 
 ## Check daily.sh
-	Msg2; Msg2 "Checking /bin/daily.sh..."
+	Msg3; Msg3 "Checking /bin/daily.sh..."
 	if [[ ! -f $tgtDir/bin/daily.sh ]]; then
-		Msg2 "^This client does not have a /bin/daily.sh file, copy from the skeleton..."
+		Msg3 "^This client does not have a /bin/daily.sh file, copy from the skeleton..."
 		$DOIT cp "$skeletonRoot/release/bin/daily.sh" "$tgtDir/bin/daily.sh"
 		Warning 0 1 "This site did not have a daily.sh script, Please contact the System Administration (UNIX) team and have them schedule the cron task for this client."
 	fi
@@ -265,7 +265,7 @@ changeLogRecs+=("Feature: $feature")
 				fromStr="$grepStr"
 				[[ $currentData == "" ]] && toStr="${fromStr}tcfdb" || toStr="${fromStr},tcfdb"
 				$DOIT sed -i s"_^${fromStr}_${toStr}_" $tgtDir/web/courseleaf/localsteps/default.tcf
-				Msg2 "^/localsteps/default.tcf file updated"
+				Msg3 "^/localsteps/default.tcf file updated"
 				changeLogRecs+=("Updated: /localsteps/default.tcf")
 			fi
 		else
@@ -274,7 +274,7 @@ changeLogRecs+=("Feature: $feature")
 	else
 		Warning 0 1 "This site is not running the 'new' daily.sh script, the site will need to be updated use the new script to ensure that the tcfdb is refreshed nightly, see 'https://stage-internal.leepfrog.com/development/libraries/dailysh/' For additional information."
 	fi
-	Msg2 "^Checking completed"
+	Msg3 "^Checking completed"
 
 # If changes made then log to changelog.txt
 	if [[ ${#changeLogRecs[@]} -gt 1 ]]; then
@@ -296,3 +296,4 @@ return  ## We are called as a subprocess, just return to our parent
 ## Tue Mar 14 12:18:47 CDT 2017 - dscudiero - Tweak messaging
 ## 07-19-2017 @ 14.37.40 - (1.2.19)    - dscudiero - Update how the cgi files are sourced
 ## 09-22-2017 @ 07.50.23 - (1.2.32)    - dscudiero - Add to imports
+## 11-02-2017 @ 11.48.48 - (1.2.33)    - dscudiero - Switch Msg2 to Msg3
