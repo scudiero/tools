@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.7.70 # -- dscudiero -- Fri 09/29/2017 @ 10:06:57.96
+version=1.7.71 # -- dscudiero -- Wed 11/01/2017 @ 16:45:51.90
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye SelectMenuNew ParseCourseleafFile'
@@ -16,14 +16,15 @@ scriptDescription="Patch Courseleaf - dispatcher"
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-	function parseArgs-patchCourseleaf  {
-		argList+=(-patch,2,option,patchId,,script,"Patch Id of the patch to apply, see '$TOOLSPATH/$myName.tcf'")
-		argList+=(-excludeList,2,option,excludeList,,script,"Comma sperated list of sites to exclude from processing, format for each is '<siteName>/<env>'. Note that if it is a test site you MUST include the '-test' in <siteName>")
+	function patchCourseleaf-parseArgsStd2 {
+		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+		myArgs+=("pa|patch|option|patchId||script|Patch Id of the patch to apply, see '$TOOLSPATH/$myName.tcf'")
+		myArgs+=("ex|excludelist|option|excludeList|script|script|Comma sperated list of sites to exclude from processing, format for each is '<siteName>/<env>'. Note that if it is a test site you MUST include the '-test' in <siteName>")
 	}
-	function Goodbye-patchCourseleaf  {
+	function patchCourseleaf-Goodbye {
 		return 0
 	}
-	function testMode-patchCourseleaf  {
+	function patchCourseleaf-testMode {
 		emailAddrs="$userName@leepfrog.com"
 		return 0
 	}
@@ -61,10 +62,10 @@ scriptHelpDesc="This script can be used to patch on or more couseleaf instances.
 \n\tPatches are defined in the '$courseleafPatchTable' table in the data warehouse and can be defined using the 'new' script.\
 \n\nEdited/changed files will be backed up to the /attic and actions will be logged in the /changelog.txt file."
 
-GetDefaultsData $myName
-ParseArgsStd
-displayGoodbyeSummaryMessages=true
 Hello
+GetDefaultsData $myName
+ParseArgsStd2 $originalArgStr
+displayGoodbyeSummaryMessages=true
 Init "getClient"
 Init "getEnvs checkEnv getDirs noCheck noPreview noPublic"
 patchIdIn=$patchId
@@ -254,3 +255,4 @@ Goodbye 0 #'alert'
 ## Tue Aug 23 11:21:53 CDT 2016 - dscudiero - Updated to correctly parse output of selectMenuNew
 ## Fri Oct 14 13:41:28 CDT 2016 - dscudiero - General syncing of dev to prod
 ## 09-29-2017 @ 10.15.09 - (1.7.70)    - dscudiero - Update FindExcecutable call for new syntax
+## 11-02-2017 @ 06.58.58 - (1.7.71)    - dscudiero - Switch to ParseArgsStd2
