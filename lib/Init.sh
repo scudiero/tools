@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.35 # -- dscudiero -- Wed 11/01/2017 @  9:27:08.69
+# version=2.1.38 # -- dscudiero -- Thu 11/02/2017 @ 10:51:34.40
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -55,6 +55,7 @@ function Init {
 		[[ $token == 'nocheck' ]] && noCheck=true
 		[[ $token == 'checkprodenv' ]] && checkProdEnv=true
 		[[ $token == 'nowarn' ]] && noWarn=true
+		[[ $token == 'addpvt' ]] && addPvt=true
 	done
 	dump -3 -t -t parseStr getClient getEnv getDirs checkEnvs getProducts getCims allCims noPreview noPublic
 
@@ -366,3 +367,4 @@ export -f Init
 ## 10-05-2017 @ 09.41.42 - (2.1.19)    - dscudiero - Switch to use Msg3
 ## 10-19-2017 @ 16.05.16 - (2.1.20)    - dscudiero - Add to include list
 ## 11-01-2017 @ 09.54.16 - (2.1.35)    - dscudiero - Tweak how envs are process in getenv
+## 11-02-2017 @ 10.51.57 - (2.1.38)    - dscudiero - Add 'addPvt' option
