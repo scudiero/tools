@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.2.45 # -- dscudiero -- Mon 10/16/2017 @  9:04:32.94
+version=2.2.47 # -- dscudiero -- Wed 11/01/2017 @ 16:40:54.98
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetOutputFile BackupCourseleafFile ProtectedCall SelectMenu GetExcel2 SetFileExpansion"
@@ -24,18 +24,16 @@ scriptDescription="Merge role data"
 	#==============================================================================================
 	# parse script specific arguments
 	#==============================================================================================
-	function parseArgs-mergeRoles  {
-		trap 'SignalHandler ERR ${LINENO} $? ${BASH_SOURCE[0]}' ERR
-		argList+=(-informationOnly,2,switch,informationOnlyMode,,script,'Only analyze data and print error messages, do not change any client data.')
-		argList+=(-workbookFile,1,option,workbookFile,,script,'The fully qualified spreadsheet file name')
-		argList+=(-merge,1,switch,merge,,script,'Merge role data when duplicate role names are found')
-		argList+=(-overlay,1,switch,overlay,,script,'Overlay role data when duplicate role names are found')
+	function mergeRoles-parseArgsStd2 {
+		myArgs+=("w|workbookFile|option|workbookFile||script|The fully qualified workbook file name")
+		myArgs+=("m|merge|switch|merge||script|Merge role data when duplicate role names are found")
+		myArgs+=("o|overlay|switch|overlay||script|Overlay role data when duplicate role names are found")
 		return 0
 	}
 	#==============================================================================================
 	# Goodbye call back
 	#==============================================================================================
-	function Goodbye-mergeRoles  {
+	function mergeRoles-Goodbye {
 		trap 'SignalHandler ERR ${LINENO} $? ${BASH_SOURCE[0]}' ERR
 		local exitCode="$1"
 		[[ -f $tmpWorkbookFile ]] && rm $tmpWorkbookFile
@@ -49,7 +47,7 @@ scriptDescription="Merge role data"
 	#==============================================================================================
 	# TestMode overrides
 	#==============================================================================================
-	function testMode-mergeRoles  {
+	function mergeRoles-testMode {
 		trap 'SignalHandler ERR ${LINENO} $? ${BASH_SOURCE[0]}' ERR
 		srcEnv='dev'
 		srcDir=~/testData/dev
@@ -225,7 +223,7 @@ helpSet='script,client,env'
 helpNotes+=("The output is written to the $HOME/clientData/<client> directory,\n\t   if the directory does exist one will be created.")
 Hello
 GetDefaultsData $myName
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 displayGoodbyeSummaryMessages=true
 Init 'getClient getSrcEnv getTgtEnv getDirs checkEnvs'
 srcEnv="$(TitleCase "$srcEnv")"
@@ -548,3 +546,4 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 ## 06-07-2017 @ 07.44.14 - (2.2.22)    - dscudiero - Added BackupCourseleafFIle to the import list
 ## 09-25-2017 @ 12.26.53 - (2.2.24)    - dscudiero - Switch to use Msg3
 ## 10-16-2017 @ 09.06.27 - (2.2.45)    - dscudiero - Updated to use GetExcel2
+## 11-02-2017 @ 06.58.56 - (2.2.47)    - dscudiero - Switch to ParseArgsStd2
