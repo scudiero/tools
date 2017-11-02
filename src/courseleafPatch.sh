@@ -9,7 +9,7 @@ myIncludes="$myIncludes ParseCourseleafFile GetCourseleafPgm CopyFileWithCheck A
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
-scriptDescription="Refresh a courseleaf product"
+scriptDescription="Refresh courseleaf product(s) from the git repository shadows ($gitRepoShadow)"
 cwdStart="$(pwd)"
 
 #=======================================================================================================================
@@ -26,7 +26,7 @@ cwdStart="$(pwd)"
 	function courseleafPatch-ParseArgsStd2 {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 		myArgs+=("adv|advance|switch|catalogAdvance||script|Advance the catalog")
-		myArgs+=("noAdv|noadvance|switch|catalogAdvance|catalogAdvance=false|script|Do not advance the catalog")
+		myArgs+=("noadv|noadvance|switch|catalogAdvance|catalogAdvance=false|script|Do not advance the catalog")
 		myArgs+=("full|fulladvance|switch|fullAdvance||script|Do a full catalog advance (Copy next to curr and then advance")
 		myArgs+=("new|newest|switch|newest||script|Update each product to the newest named version")
 		myArgs+=("latest|latest|switch|newest||script|Update each product to the newest named version")
@@ -1780,3 +1780,4 @@ Goodbye 0 "$text1" "$text2"
 ## 10-03-2017 @ 07.14.03 - (5.5.0)     - dscudiero - Add Alert to include list
 ## 10-16-2017 @ 16.40.53 - (5.5.0)     - dscudiero - Tweak messaging when reporting the uncommitte git files
 ## 11-02-2017 @ 06.58.37 - (5.5.0)     - dscudiero - Switch to ParseArgsStd2
+## 11-02-2017 @ 10.27.55 - (5.5.0)     - dscudiero - use help2
