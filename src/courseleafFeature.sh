@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.5.138 # -- dscudiero -- Thu 11/02/2017 @ 11:45:48.14
+version=1.5.139 # -- dscudiero -- Thu 11/02/2017 @ 11:58:07.80
 #==================================================================================================
 # Install a courseleaf feature on a client site
 #==================================================================================================
@@ -149,7 +149,7 @@ while [[ true == true ]]; do
 	## Call the feature script
 	[[ $env != '' ]] && sendEnv="-$env"
 	## Get the executable
-	Call "$feature" 'features'; rc=$?
+	FindExecutable $feature -fe -run; rc=$?
 	[[ $rc -eq 0 ]] && installedFeatures="$installedFeatures,$feature"
 	unset feature
 done
@@ -179,3 +179,4 @@ Goodbye 0 #'alert'
 ## Tue Mar 14 13:20:30 CDT 2017 - dscudiero - Check the return code from the install scripts before editing the installed features list
 ## 04-06-2017 @ 10.09.40 - (1.5.69)    - dscudiero - renamed RunCourseLeafCgi, use new name
 ## 11-02-2017 @ 11.48.55 - (1.5.138)   - dscudiero - Misc cleanup
+## 11-02-2017 @ 12.00.52 - (1.5.139)   - dscudiero - Call --> FindExecutable
