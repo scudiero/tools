@@ -158,9 +158,9 @@ fi
 		if [[ $noCheck == true ]]; then
 			GetSiteDirNoCheck $client "For the $(ColorK 'Source'), do you want to work with '$client's development or production env"
 			srcEnv="$env"; srcDir="$siteDir"; unset env
-			Init 'getTgtEnv getDirs'
+			Init 'getTgtEnv getDirs addPvt'
 		else
-			Init 'getSrcEnv getTgtEnv getDirs'
+			Init 'getSrcEnv getTgtEnv getDirs addPvt'
 			env="$srcEnv"
 		fi
 	fi
@@ -679,3 +679,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 10-17-2017 @ 14.08.56 - (4.12.10)   - dscudiero - Added -lock option
 ## 10-19-2017 @ 10.34.19 - (4.12.10)   - dscudiero - Add PushPop to the include list
 ## 11-01-2017 @ 09.55.06 - (4.13.-1)   - dscudiero - Switched to ParseArgsStd2
+## 11-02-2017 @ 11.01.58 - (4.13.-1)   - dscudiero - Add addPvt to the init call
