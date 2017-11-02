@@ -663,7 +663,7 @@ removeGitReposFromNext=true
 			GetSiteDirNoCheck $client
 			[[ -z $siteDir ]] && Terminate "Nocheck option active, could not resolve target site directory"
 		else
-			Init 'getClient getEnv getDirs checkDirs noPreview noPublic checkProdEnv'
+			Init 'getClient getEnv getDirs checkDirs noPreview noPublic checkProdEnv addPvt'
 		fi
 	fi
 
@@ -1781,3 +1781,4 @@ Goodbye 0 "$text1" "$text2"
 ## 10-16-2017 @ 16.40.53 - (5.5.0)     - dscudiero - Tweak messaging when reporting the uncommitte git files
 ## 11-02-2017 @ 06.58.37 - (5.5.0)     - dscudiero - Switch to ParseArgsStd2
 ## 11-02-2017 @ 10.27.55 - (5.5.0)     - dscudiero - use help2
+## 11-02-2017 @ 10.53.32 - (5.5.0)     - dscudiero - Add addPvt to the Init call
