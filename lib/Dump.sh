@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.64" # -- dscudiero -- Wed 11/01/2017 @ 15:18:27.92
+# version="2.0.66" # -- dscudiero -- Thu 11/02/2017 @  8:25:14.93
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -9,7 +9,7 @@
 #==================================================================================================
 dumpFirstWrite=true
 function Dump {
-	local mytoken tabCnt re='^-{0,1}[0-9]$' logOnly=false out='/dev/tty' pause=false
+	local mytoken tabCnt re='^-{0,1}[0-9]$' logOnly=false out='/dev/tty' pause=false i
 	local caller=${FUNCNAME[1]}
 	[[ $caller == 'dump' || $caller == 'Dump' ]] && caller=${FUNCNAME[2]}
 
@@ -250,3 +250,4 @@ export -f DumpMap dumpmap dumphash
 ## 10-23-2017 @ 08.49.28 - ("2.0.59")  - dscudiero - Add ifme flag
 ## 11-01-2017 @ 12.15.21 - ("2.0.63")  - dscudiero - Add -q action
 ## 11-01-2017 @ 15.18.44 - ("2.0.64")  - dscudiero - Use Quit command for -q
+## 11-02-2017 @ 10.26.38 - ("2.0.66")  - dscudiero - Make i a local variable
