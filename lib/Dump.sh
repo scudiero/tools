@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.66" # -- dscudiero -- Thu 11/02/2017 @  8:25:14.93
+# version="2.0.67" # -- dscudiero -- Thu 11/02/2017 @ 11:17:27.66
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -9,7 +9,7 @@
 #==================================================================================================
 dumpFirstWrite=true
 function Dump {
-	local mytoken tabCnt re='^-{0,1}[0-9]$' logOnly=false out='/dev/tty' pause=false i
+	local mytoken tabCnt re='^-{0,1}[0-9]$' logOnly=false out='/dev/tty' pause=false myTabCntr
 	local caller=${FUNCNAME[1]}
 	[[ $caller == 'dump' || $caller == 'Dump' ]] && caller=${FUNCNAME[2]}
 
@@ -28,7 +28,7 @@ function Dump {
 		[[ $mytoken == '-ifme' ]] && { [[ $userName != dscudiero ]] && return 0; }
 
 		if [[ -n $tabCnt ]]; then
-			for ((i=0; i<$tabCnt; i++)); do
+			for ((myTabCntr=0; myTabCntr<$tabCnt; myTabCntr++)); do
 				[[ -z $tabStr ]] && echo -e -n "\t" || echo -e -n "$tabStr"
 			done
 		fi
@@ -251,3 +251,4 @@ export -f DumpMap dumpmap dumphash
 ## 11-01-2017 @ 12.15.21 - ("2.0.63")  - dscudiero - Add -q action
 ## 11-01-2017 @ 15.18.44 - ("2.0.64")  - dscudiero - Use Quit command for -q
 ## 11-02-2017 @ 10.26.38 - ("2.0.66")  - dscudiero - Make i a local variable
+## 11-02-2017 @ 11.17.50 - ("2.0.67")  - dscudiero - Switch i to myTabCntr for the tab counter
