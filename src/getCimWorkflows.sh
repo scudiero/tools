@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.62 # -- dscudiero -- Tue 10/31/2017 @  9:08:32.12
+version=1.2.65 # -- dscudiero -- Wed 11/01/2017 @ 16:29:18.62
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -24,16 +24,15 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 	#==============================================================================================
 	# parse script specific arguments
 	#==============================================================================================
-	function ParseArgsStd-getCimWorkflows {
-		argList+=(-workbookFile,1,option,workbookFile,,script,'The fully qualified spreadsheet file name')
-		argList+=(-doNotLoadNulls,2,switch,doNotLoadNulls,,script,'If a data field is null then do not write out that data to the page')
+	function getCimWorkflows-ParseArgsStd2 {
+		myArgs+=("w|workbookFile|option|workbookFile||help group|The fully qualified output workbook file name")
 		return 0
 	}
 
 	#==============================================================================================
 	# Goodbye call back
 	#==============================================================================================
-	function Goodbye-getCimWorkflows {
+	function getCimWorkflows-Goodbye {
 		eval $errSigOn
 		if [[ -f $stepFile ]]; then echo rm stepFile; rm -f $stepFile; fi
 		if [[ -f $backupStepFile ]]; then mv -f $backupStepFile $stepFile; fi
@@ -44,7 +43,7 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 	#==============================================================================================
 	# TestMode overrides
 	#==============================================================================================
-	function testMode-getCimWorkflows {
+	function getCimWorkflows-testMode {
 		env='dev'
 		srcDir=~/testData/dev
 		return 0
@@ -138,7 +137,7 @@ Hello
 scriptNews+=("11/01/2016 - New")
 helpSet='script,client,env'
 GetDefaultsData $myName
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 [[ $allItems == true ]] && allCims='allCims' || unset allCims
 Init "getClient getEnv getDirs checkEnvs getCims $allCims"
 if [[ $informationModeOnly == true ]]; then
@@ -433,3 +432,4 @@ Goodbye 0 #'alert'
 ## 10-19-2017 @ 16.56.15 - (1.2.43)    - dscudiero - Read the cimconfig.cfg file if we cannot find the workflow.cfg file
 ## 10-20-2017 @ 08.50.19 - (1.2.60)    - dscudiero - Fix problem detectiong modifiers, reformatted output
 ## 10-31-2017 @ 10.15.04 - (1.2.62)    - dscudiero - Fixed setup of the callback functions
+## 11-02-2017 @ 06.58.49 - (1.2.65)    - dscudiero - Switch to ParseArgsStd2
