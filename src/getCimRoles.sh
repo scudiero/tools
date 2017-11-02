@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.10.42 # -- dscudiero -- Wed 11/01/2017 @ 16:28:14.44
+version=1.10.43 # -- dscudiero -- Thu 11/02/2017 @ 11:00:19.52
 #==================================================================================================
 TrapSigs 'on'
 myIncludes=""
@@ -46,7 +46,7 @@ helpSet='script,client,env,cims'
 Hello
 GetDefaultsData $myName
 ParseArgsStd2 $originalArgStr
-Init 'getClient getEnv getDirs checkEnvs getCims noPreview noPublic'
+Init 'getClient getEnv getDirs checkEnvs getCims noPreview noPublic addPvt'
 
 ## Set outfile -- look for std locations
 outFile=/home/$userName/$client-CIM_Roles.xls
@@ -112,3 +112,4 @@ Goodbye 0
 ## 10-03-2017 @ 11.02.00 - (1.10.32)   - dscudiero - General syncing of dev to prod
 ## 11-01-2017 @ 09.55.10 - (1.10.39)   - dscudiero - Switched to ParseArgsStd2
 ## 11-02-2017 @ 06.58.45 - (1.10.42)   - dscudiero - Switch to ParseArgsStd2
+## 11-02-2017 @ 11.02.04 - (1.10.43)   - dscudiero - Add addPvt to the init call
