@@ -5,7 +5,7 @@ version=5.5.0 # -- dscudiero -- Fri 09/29/2017 @ 16:20:20.74
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel2 EditTcfValue BackupCourseleafFile'
-myIncludes="$myIncludes ParseCourseleafFile GetCourseleafPgm CopyFileWithCheck ArrayRef GitUtilities Alert"
+myIncludes="$myIncludes ParseCourseleafFile GetCourseleafPgm CopyFileWithCheck ArrayRef GitUtilities Alert ProtectedCall"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -23,21 +23,21 @@ cwdStart="$(pwd)"
 #=======================================================================================================================
 # Standard call back functions
 #=======================================================================================================================
-	function courseleafPatch-ParseArgsStd {
-		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,helpswq
-		argList+=(-advance,3,switch,catalogAdvance,,script,"Advance the catalog")
-		argList+=(-noAdvance,4,switch,catalogAdvance=false,"catalogAdvance=false",script,"Do not advance the catalog")
-		argList+=(-fullAdvance,4,switch,fullAdvance,,script,"Do a full catalog advance")
-		argList+=(-newest,3,switch,newest,,script,"Update each product to the newest named version of each product")
-		argList+=(-latest,3,switch,newest,,script,"Update each product to the newest named version of each product")
-		argList+=(-master,3,switch,master,,script,"Update each product to the master version of each product")
-		argList+=(-edition,2,option,newEdition,,script,'The new edition value')
-		argList+=(-catalogAudit,2,switch,catalogAudit,,script,"Run the catalog audit report as part of the process")
-		argList+=(-noAudit,4,switch,catalogAudit=false,"catalogAudit=false",script,"Do not run the catalog audit report as part of the process")
-		argList+=(-listOnly,1,switch,listOnly,,script,"Do not do copy, only list out files that would be copied")
-		argList+=(-noBackup,3,switch,backup,backup=false,script,"Do not create a backup of the target site before any actions")
-		argList+=(-buildPatchPackage,5,switch,buildPatchPackage,,script,"Build the remote patching package for remote sites")
-		#argList+=(-offline,3,switch,offline,,script,"Take the target site offline during processing")
+	function courseleafPatch-ParseArgsStd2 {
+		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+		myArgs+=("adv|advance|switch|catalogAdvance||script|Advance the catalog")
+		myArgs+=("noAdv|noadvance|switch|catalogAdvance|catalogAdvance=false|script|Do not advance the catalog")
+		myArgs+=("full|fulladvance|switch|fullAdvance||script|Do a full catalog advance (Copy next to curr and then advance")
+		myArgs+=("new|newest|switch|newest||script|Update each product to the newest named version")
+		myArgs+=("latest|latest|switch|newest||script|Update each product to the newest named version")
+		myArgs+=("master|master|switch|master||script|Update each product to the current 'master' version")
+		myArgs+=("ed|edition|option|newEdition||script|The new edition value (for advance)")
+		myArgs+=("audit|audit|switch|catalogAudit||script|Run the catalog audit report as part of the process")
+		myArgs+=("noaudit|noaudit|switch|catalogAudit|catalogAudit=false|script|Do not run the catalog audit report as part of the process")
+		myArgs+=("noback|nobackup|switch|backup|backup=false|script|Do not create a backup of the target site before any actions")
+		myArgs+=("build|buildpatchpackage|switch|buildPatchPackage||script|Build the remote patching package for remote sites")
+		myArgs+=("package|package|switch|buildPatchPackage||script|Build the remote patching package for remote sites")
+		#myArgs+=("offline|offline|switch|offline||script|Take the target site offline during processing")
 	}
 
 	function courseleafPatch-Goodbye  {
@@ -183,7 +183,7 @@ cwdStart="$(pwd)"
 		## Set rsync options
 			[[ ! -d $rsyncBackup && $rsyncBackup != '/dev/null' ]] && $DOIT mkdir -p $rsyncBackup
 			[[ $quiet == true ]] && rsyncVerbose='' || rsyncVerbose='v'
-			[[ $listOnly == true ]] && rsyncListonly="--dry-run" || unset rsyncListonly
+			[[ $informationOnlyMode == true ]] && rsyncListonly="--dry-run" || unset rsyncListonly
 			rsyncFilters=$tmpRoot/$myName.$product.rsyncFilters
 			rsyncOut=$tmpRoot/$myName.$product.rsyncOut
 			rsyncOpts="-rptb$rsyncVerbose --backup-dir $rsyncBackup --prune-empty-dirs --checksum $rsyncListonly --include-from $rsyncFilters --links"
@@ -649,14 +649,14 @@ removeGitReposFromNext=true
 #=======================================================================================================================
 	Hello
 	[[ $userName == 'dscudiero' && $useLocal == true ]] && GetDefaultsData "$myName" -fromFiles || GetDefaultsData "$myName"
-	ParseArgsStd
+	ParseArgsStd2 $originalArgStr
 
 	displayGoodbyeSummaryMessages=true
 
 	cleanDirs="${scriptData3##*:}"
 	cleanFiles="${scriptData4##*:}"
 
-	[[ $listOnly == true ]] && Warning 0 1 "The 'listOnly' flag is turned on, files will not be copied"
+	[[ $informationOnlyMode == true ]] && Warning 0 1 "The 'informationOnlyMode' flag is turned on, files will not be copied"
 	if [[ $testMode != true ]]; then
 		if [[ $noCheck == true ]]; then
 			Init 'getClient checkProdEnv'
@@ -1779,3 +1779,4 @@ Goodbye 0 "$text1" "$text2"
 ## 10-02-2017 @ 17.07.54 - (5.5.0)     - dscudiero - Switch to GetExcel2
 ## 10-03-2017 @ 07.14.03 - (5.5.0)     - dscudiero - Add Alert to include list
 ## 10-16-2017 @ 16.40.53 - (5.5.0)     - dscudiero - Tweak messaging when reporting the uncommitte git files
+## 11-02-2017 @ 06.58.37 - (5.5.0)     - dscudiero - Switch to ParseArgsStd2
