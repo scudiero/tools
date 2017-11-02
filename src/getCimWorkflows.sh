@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.65 # -- dscudiero -- Wed 11/01/2017 @ 16:29:18.62
+version=1.2.66 # -- dscudiero -- Thu 11/02/2017 @ 11:00:41.71
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -139,7 +139,7 @@ helpSet='script,client,env'
 GetDefaultsData $myName
 ParseArgsStd2 $originalArgStr
 [[ $allItems == true ]] && allCims='allCims' || unset allCims
-Init "getClient getEnv getDirs checkEnvs getCims $allCims"
+Init "getClient getEnv getDirs checkEnvs getCims addPvt $allCims"
 if [[ $informationModeOnly == true ]]; then
 	outFile='/dev/null'
 else
@@ -433,3 +433,4 @@ Goodbye 0 #'alert'
 ## 10-20-2017 @ 08.50.19 - (1.2.60)    - dscudiero - Fix problem detectiong modifiers, reformatted output
 ## 10-31-2017 @ 10.15.04 - (1.2.62)    - dscudiero - Fixed setup of the callback functions
 ## 11-02-2017 @ 06.58.49 - (1.2.65)    - dscudiero - Switch to ParseArgsStd2
+## 11-02-2017 @ 11.02.06 - (1.2.66)    - dscudiero - Add addPvt to the init call
