@@ -1,6 +1,6 @@
-## DO NOT AUTOVERSION
+## XO NOT AUTOVERSION
 #===================================================================================================
-# version=3.0.-1 # -- dscudiero -- Fri 09/08/2017 @  9:28:25.55
+# version=3.0.0 # -- dscudiero -- Thu 11/02/2017 @ 10:27:07.22
 #===================================================================================================
 # Display script help -- passed an array of argument definitinons, see ParseArg function
 #===================================================================================================
@@ -15,6 +15,8 @@ function Help2 {
 
 	[[ $(type -t $FUNCNAME-$myName) == 'function' ]] && $FUNCNAME-$myName 'setVarsOnly'
 	[[ $(type -t $myName-$FUNCNAME) == 'function' ]] && $myName-$FUNCNAME 'setVarsOnly'
+
+	local argShortName shortNamePad argLongName longNamePad argType typePad argVar argCmd arghelpText tmpStr
 
 	local myHelpSet="common,script,$(tr ' ' ',' <<< $helpSet)"
 	local tempStr="$(ColorK "Usage:") $myName"
@@ -64,13 +66,28 @@ function Help2 {
 		sqlStmt="select max(length(longname)),max(length(shortname)),max(length(type)) from argdefs"
 		RunSql2 $sqlStmt
 		result="${resultSet[0]}";
-		maxWidthName="${result%%|*}"; result="${result##*|}"; (( maxWidthName++ ))
-		maxWidthAbbr="${result%%|*}"; result="${result##*|}"; (( maxWidthAbbr++ ))
-		maxWidthType="${result}"; (( maxWidthType++ ))
-		tmpStr='Long Name'; [[ ${#tmpStr} -gt $maxWidthName ]] && let maxWidthName=${#tmpStr}+1
-		tmpStr='Short Name'; [[ ${#tmpStr} -gt $maxWidthAbbr ]] && let maxWidthAbbr=${#tmpStr}+1
-		tmpStr='Type'; [[ ${#tmpStr} -gt $maxWidthType ]] && let maxWidthType=${#tmpStr}+1
+		maxWidthName="${result%%|*}"; result="${result##*|}"
+		maxWidthAbbr="${result%%|*}"; result="${result##*|}"
+		maxWidthType="${result}"
+		tmpStr='Long Name'; [[ ${#tmpStr} -gt $maxWidthName ]] && maxWidthName=${#tmpStr}
+		tmpStr='Short Name'; [[ ${#tmpStr} -gt $maxWidthAbbr ]] && maxWidthAbbr=${#tmpStr}
+		tmpStr='Type'; [[ ${#tmpStr} -gt $maxWidthType ]] && maxWidthType=${#tmpStr}
 		#dump result maxWidthName maxWidthAbbr maxWidthType -q
+
+	## If we have a myArgs array then check the script defined arguments to set max lengths
+		if [[ ${#myArgs[@]} -gt 0 ]]; then
+			for ((i=0; i<${#myArgs[@]}; i++)); do
+				tmpStr="${myArgs[$i]}"
+				argShortName="${tmpStr%%|*}"; tmpStr=${tmpStr#*|}; [[ ${#argShortName} -gt $maxWidthAbbr ]] && maxWidthAbbr=${#argShortName}
+				argLongName="${tmpStr%%|*}"; tmpStr=${tmpStr#*|}; [[ ${#argLongName} -gt $maxWidthName ]] && maxWidthName=${#argLongName}
+				argType="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; [[ ${#argType} -gt $maxWidthType ]] && maxWidthType=${#argType}
+			done
+		fi
+
+	## Add a pad char to lengths
+ 		(( maxWidthName++ ))
+  		(( maxWidthAbbr++ ))
+  		(( maxWidthType++ ))
 
 	echo
 	if [[ $hasClient == true ]]; then
@@ -80,143 +97,52 @@ function Help2 {
 	echo
 	Msg3 "$(ColorK "[OPTIONS]")"
 
+	## argument header
+	argShortName="Short Name"; let shortNamePad=$maxWidthAbbr-${#argShortName};
+	argLongName="Long Name"; let longNamePad=$maxWidthName-${#argLongName};
+	argType="Type"; let typePad=$maxWidthType-${#argType};
+	local argHeader="$(ColorK "${argLongName}$(PadChar ' ' $longNamePad) (${argShortName})$(PadChar ' ' $shortNamePad) ${argType}$(PadChar ' ' $typePad) -- Description")"
+
 	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
-	## print out options
-		#dump myHelpSet validArgs
-		local argShortName shortNamePad argLongName longNamePad argType typePad argVar argCmd arghelpText tmpStr
-		## seperate out options from flags
-		[[ -n $validArgs ]] && validArgsLower="${validArgs,,[a-z]}"  ## Lower case
-
-		if [[ ${#myArgs[@]} -gt 0 ]]; then
-			Msg3 "^$(ColorU "$(ColorK "Script specific options:")")"
-			argShortName="Short Name"; let shortNamePad=$maxWidthAbbr-${#argShortName};
-			argLongName="Long Name"; let longNamePad=$maxWidthName-${#argLongName};
-			argType="Type"; let typePad=$maxWidthType-${#argType};
-			tmpStr="$(ColorK "${argLongName}$(PadChar ' ' $longNamePad) (${argShortName})$(PadChar ' ' $shortNamePad) ${argType}$(PadChar ' ' $typePad) -- Description")"
-			Msg3 "^$tmpStr"
-
-			#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
-			for ((i=0; i<${#myArgs[@]}; i++)); do
-				tmpStr="${myArgs[$i]}"
-				#dump -n tmpStr
-				argShortName="${tmpStr%%|*}"; tmpStr=${tmpStr#*|}; let shortNamePad=$maxWidthAbbr-${#argShortName};
-				argLongName="${tmpStr%%|*}"; tmpStr=${tmpStr#*|}; let longNamePad=$maxWidthName-${#argLongName};
-				[[ $validArgsLower != '' && $(Contains ",$validArgsLower," ",${argName,,[a-z]},") != true ]] && continue
-				argType="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; let typePad=$maxWidthType-${#argType};
-				argVar="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; [[ $argVar == 'NULL' ]] && unset argVar;
-				argCmd="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; [[ $argCmd == 'NULL' ]] && unset argCmd;
-				argHelpGrp="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; [[ $argHelpGrp == 'NULL' ]] && unset argHelpGrp;
-				arghelpText="${tmpStr%%|*}"; [[ $arghelpText == 'NULL' ]] && unset arghelpText;
-				#dump -t argShortName shortNamePad argLongName longNamePad argType argVar argCmd arghelpText
-				tmpStr="${argLongName}$(PadChar ' ' $longNamePad) (${argShortName})$(PadChar ' ' $shortNamePad) ${argType}$(PadChar ' ' $typePad) -- $arghelpText"
-				Msg3 "^$tmpStr"
-			done
-		fi
-
-Quit
-	
-
-echo; echo
-
-		## Loop through the common script arguments
+	if [[ ${#myArgs[@]} -gt 0 ]]; then
+		Msg3 "^$(ColorU "$(ColorK "Script specific options:")")"
+		Msg3 "^$argHeader"
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
-		for ((i=0; i<${#argDefs[@]}; i++)); do
-			tmpStr="${argDefs[$i]}"
-			#dump -n tmpStr
-			argShortName="${tmpStr%%|*}"; tmpStr=${tmpStr#*|}
-			argLongName="${tmpStr%%|*}"; tmpStr=${tmpStr#*|}
-			[[ $validArgsLower != '' && $(Contains ",$validArgsLower," ",${argName,,[a-z]},") != true ]] && continue
-			argType="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"
+		for ((i=0; i<${#myArgs[@]}; i++)); do
+			tmpStr="${myArgs[$i]}"
+			argShortName="${tmpStr%%|*}"; tmpStr=${tmpStr#*|}; let shortNamePad=$maxWidthAbbr-${#argShortName};
+			argLongName="${tmpStr%%|*}"; tmpStr=${tmpStr#*|}; let longNamePad=$maxWidthName-${#argLongName};
+			argType="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; let typePad=$maxWidthType-${#argType};
 			argVar="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; [[ $argVar == 'NULL' ]] && unset argVar;
 			argCmd="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; [[ $argCmd == 'NULL' ]] && unset argCmd;
 			argHelpGrp="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; [[ $argHelpGrp == 'NULL' ]] && unset argHelpGrp;
 			arghelpText="${tmpStr%%|*}"; [[ $arghelpText == 'NULL' ]] && unset arghelpText;
-			#dump -t argShortName argLongName argType argVar argCmd arghelpText
+			#dump -t argShortName shortNamePad argLongName longNamePad argType argVar argCmd arghelpText
+			tmpStr="${argLongName}$(PadChar ' ' $longNamePad) (${argShortName})$(PadChar ' ' $shortNamePad) ${argType}$(PadChar ' ' $typePad) -- $arghelpText"
+			Msg3 "^$tmpStr"
 		done
-Quit
-		for parseStr in "${myArgs[@]} ${argDefs[@]}"; do
-			tmpStr="${myArgs[$argDefCntr]}"
-			argShortName="${tmpStr%%|*}"; argShortName=${argShortName,,[a-z]}; tmpStr=${tmpStr#*|};
-			argLongName="${tmpStr%%|*}"; argLongName=${argLongName,,[a-z]}; tmpStr=${tmpStr#*|};
-
-
-			# argType="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"
-			# argVar="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"
-			# argCmd="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"
-			# argHelpGrp="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"
-			# arghelpText="${tmpStr%%|*}"
-
-
-
-
-
-			#dump parseStr -t argGroup
-			[[ $argGroup != '' && $(Contains ",$myHelpSet," ",${argGroup,,[a-z]},") == false ]] && continue
-			argName=$(cut  -d '|' -f2 <<< $parseStr)
-			#dump -t argName
-			if [[ $validArgsLower != '' ]]; then
-				[[ $(Contains ",$validArgsLower," ",${argName,,[a-z]},") != true ]] && continue
-			fi
-minLen=$(echo $parseStr | cut  -d ',' -f 2)
-			argMinName=$(cut  -d '|' -f1 <<< $parseStr)
-			argType=$(cut  -d '|' -f3 <<< $parseStr)
-			helpText=$(cut  -d '|' -f 7- <<< "$parseStr")
-
-			junk=$(( padLen = $maxWidthName - ${#argName} ))
-			let padLen = 
-			tempStr2="${argMinName}$(PadChar ' ' $padLen)"
-			argName="${tempStr1}${tempStr2}"
-
-			msgString="^^$argName - $helpText"
-			# dump parseStr -t argGroup
-			[[ -z $msgString ]] && continue
-			#dump msgString argGroup argType
-			if [[ $argGroup == 'common' ]]; then
-				[[ ${argType:0:6} == 'option' ]] && commonOptionsArray+=("$msgString") || commonSwitchesArray+=("$msgString")
-			else
-				[[ ${argType:0:6} == 'option' ]] && scriptOptionsArray+=("$msgString") || scriptSwitchesArray+=("$msgString")
-			fi
-		done
-
-	echo
-	Msg3 "$(ColorK "[OPTIONS]")"
-	if [[ ${#scriptOptionsArray[@]} -gt 0 || ${#scriptSwitchesArray[@]} -gt 0  ]]; then
-		Msg3 "^$(ColorU "$(ColorK "Script specific options:")")"
-		## Script specific options
-		if [[ ${#scriptOptionsArray[@]} -gt 0 ]]; then
-			Msg3 "^^$(ColorK "Arguments with values (i.e. a flag with value e.g. -flag value):")"
-			for msgString in "${scriptOptionsArray[@]}"; do
-				Msg3 "^$msgString"
-			done
-			echo
-		fi
-		## Script specific switches
-		if [[ ${#scriptSwitchesArray[@]} -gt 0 ]]; then
-			Msg3 "^^$(ColorK "Arguments without values (i.e. a flag e.g. -flag):")"
-			for msgString in "${scriptSwitchesArray[@]}"; do
-				Msg3 "^$msgString"
-			done
-			echo
-		fi
 	fi
 
-	Msg3 "^$(ColorU "$(ColorK "Tools common options:")") $(ColorW "(Note: While all options can be specified they may not have a meaning for the current script)")"
-	## Common specific options
-	if [[ ${#commonOptionsArray[@]} -gt 0 ]]; then
-		Msg3 "^^$(ColorK "Arguments with values (i.e. a flag with value e.g. -flag value):")"
-		for msgString in "${commonOptionsArray[@]}"; do
-			Msg3 "^$msgString"
-		done
-		echo
-	fi
-	## Common specific switches
-	if [[ ${#commonSwitchesArray[@]} -gt 0 ]]; then
-		Msg3 "^^$(ColorK "Arguments without values (i.e. a flag e.g. -flag):")"
-		for msgString in "${commonSwitchesArray[@]}"; do
-			Msg3 "^$msgString"
-		done
-		echo
-	fi
+	## Loop through the commn argument defs
+	Msg3
+	Msg3 "^$(ColorU "$(ColorK "Common tools scripts options:")")"
+	Msg3 "^$argHeader"
+	[[ -n $validArgs ]] && validArgsLower="${validArgs,,[a-z]}"  ## Lower case
+	#argDefs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+	for ((i=0; i<${#argDefs[@]}; i++)); do
+		tmpStr="${argDefs[$i]}"
+		argShortName="${tmpStr%%|*}"; tmpStr=${tmpStr#*|}; let shortNamePad=$maxWidthAbbr-${#argShortName};
+		argLongName="${tmpStr%%|*}"; tmpStr=${tmpStr#*|}; let longNamePad=$maxWidthName-${#argLongName};
+		[[ $validArgsLower != '' && $(Contains ",$validArgsLower," ",${argName,,[a-z]},") != true ]] && continue
+		argType="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; let typePad=$maxWidthType-${#argType};
+		argVar="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; [[ $argVar == 'NULL' ]] && unset argVar;
+		argCmd="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; [[ $argCmd == 'NULL' ]] && unset argCmd;
+		argHelpGrp="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; [[ $argHelpGrp == 'NULL' ]] && unset argHelpGrp;
+		arghelpText="${tmpStr%%|*}"; [[ $arghelpText == 'NULL' ]] && unset arghelpText;
+		#dump -t argShortName shortNamePad argLongName longNamePad argType argVar argCmd arghelpText
+		tmpStr="${argLongName}$(PadChar ' ' $longNamePad) (${argShortName})$(PadChar ' ' $shortNamePad) ${argType}$(PadChar ' ' $typePad) -- $arghelpText"
+		Msg3 "^$tmpStr"
+	done
 
 	## print out script specific help notes
 	if [[ ${#helpNotes[@]} -gt 0 ]]; then
@@ -233,12 +159,14 @@ minLen=$(echo $parseStr | cut  -d ',' -f 2)
 	Msg3 "$(ColorK "General Notes:")"
 	local notesClient notesAlways notes
 	unset notesClient notesAlways notes
-	notesClient+=("A value of '.' may be specified for client to parse the client value from the current working directory.")
-	notesClient+=("A value of '?' may be specified for client to display a selection list of all clients.")
+	# notesClient+=("A value of '.' may be specified for client to parse the client value from the current working directory.")
+	# notesClient+=("A value of '?' may be specified for client to display a selection list of all clients.")
 
-	notesAlways+=("All flags/switches/options $(ColorB "must") be delimited from other flags by at lease one blank character.")
-	notesAlways+=("The minimum abbreviations for argument flags are indicated in the $(ColorK highlight) color above.")
-	notesAlways+=("If an argument is an option with a value, and the value contains blanks/spaces, the argument value needs\n^   to be enclosed in single quotes which need to be escaped on the command line, e.g. -file \'This is a File Name\'.")
+	notesAlways+=("All options $(ColorB "must") be delimited from other options by at lease one blank character.")
+	notesAlways+=("Options are processed in the order given above, script specific options are parsed before common options.")
+	notesAlways+=("All options of the type 'switch' may be specified as -shortName, alternately they may be specified as --longName.  Regular expression matching is used.")
+	notesAlways+=("All options of the type 'option' require a value to be passed, i.e. -option value.\n^   If the value contains blanks/spaces, the argument value needs to be enclosed in single quotes which need to be escaped on the command line, e.g. -file \'This is a File Name\'.")
+	notesAlways+=("Options listed in the 'Common tools scripts options' section may not apply this specific script.")
 	notesAlways+=("To get additional help information on what is used by this script you can use the -hh option.")
 
 	notes=("${notesAlways[@]}")
@@ -257,7 +185,7 @@ minLen=$(echo $parseStr | cut  -d ',' -f 2)
 	if [[ -n $SCRIPTINCLUDES ]]; then
 		## Scripts
 		local token
-		Msg3 "$(ColorK "Tools library modules used (via tools/lib):")"
+		Msg3 "$(ColorK "Tools library modules used by this script (via tools/lib):")"
 		for token in $(tr ',' ' ' <<< $SCRIPTINCLUDES); do
 			Msg3 "^$token"
 		done #| sort
@@ -265,7 +193,7 @@ minLen=$(echo $parseStr | cut  -d ',' -f 2)
 		## Java
 		if [[ $(Contains "$SCRIPTINCLUDES" "RunSql2") == true && -n $javaResources ]]; then
 			local token
-			Msg3 "$(ColorK "Java resources used (via $TOOLSPATH/src/java/tools.jar):")"
+			Msg3 "$(ColorK "Java resources used by this script (via $TOOLSPATH/src/java/tools.jar):")"
 			for token in $(tr ',' ' ' <<< $javaResources); do
 				Msg3 "^$token"
 			done | sort
@@ -274,7 +202,7 @@ minLen=$(echo $parseStr | cut  -d ',' -f 2)
 		## Python
 		if [[ $(Contains "$SCRIPTINCLUDES" "GetExcel") == true && -n $pythonResources ]]; then
 			local token
-			Msg3 "$(ColorK "Python resources used:")"
+			Msg3 "$(ColorK "Python resources used by this script:")"
 			for token in $(tr ',' ' ' <<< $pythonResources); do
 				Msg3 "^$token"
 			done | sort
@@ -295,3 +223,4 @@ export -f Help2
 ## 09-01-2017 @ 09.27.30 - (2.0.8)     - dscudiero - Add call myname-FUNCNAME function if found
 ## 09-01-2017 @ 09.38.26 - (2.0.9)     - dscudiero - Fix spelling error
 ## 09-25-2017 @ 08.14.09 - (2.1.-1)    - dscudiero - Use Msg3
+## 11-02-2017 @ 10.27.27 - (3.0.0)     - dscudiero - Initial implimentation
