@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.4" # -- dscudiero -- Wed 11/01/2017 @ 15:16:04.74
+# version="3.0.6" # -- dscudiero -- Thu 11/02/2017 @  9:39:47.43
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -27,22 +27,22 @@ function ParseArgsStd2 {
 		fi
 
 	## If there is a local function to add script specific arguments then call it
-		local rec myArgs; unset myArgs
+		local rec myArgs allArgDefs; unset myArgs allArgDefs
 		[[ $(type -t $myName-$FUNCNAME) == 'function' ]] && $myName-$FUNCNAME
-		for rec in "${argDefs[@]}"; do myArgs+=("$rec"); done
-		# for ((i=0; i<${#myArgs[@]}; i++)); do
-		# 	echo "myArgs[$i] = >${myArgs[$i]}<"
-		# done
+
+		[[ ${#myArgs[@] -gt 0} ]] && { for rec in "${myArgs[@]}"; do allArgDefs+=("$rec"); done; }
+		for rec in "${argDefs[@]}"; do allArgDefs+=("$rec"); done
+		# for ((i=0; i<${#allArgDefs[@]}; i++)); do echo "allArgDefs[$i] = >${allArgDefs[$i]}<"; done
 
 	# argdef record looks like: "shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp"
 	## Loop through all the argument tokens
 		for ((argCntr=1; argCntr<=$#; argCntr++)); do
 			arg="${!argCntr}"
 			dump 3 -n arg
-			# Loop through the argDefs array to see if we have a match
+			# Loop through the allArgDefs array to see if we have a match
 				found=false
-				for ((argDefCntr=0; argDefCntr<${#myArgs[@]}; argDefCntr++)); do
-					tmpStr="${myArgs[$argDefCntr]}"
+				for ((argDefCntr=0; argDefCntr<${#allArgDefs[@]}; argDefCntr++)); do
+					tmpStr="${allArgDefs[$argDefCntr]}"
 					argShortName="${tmpStr%%|*}"; argShortName=${argShortName,,[a-z]}; tmpStr=${tmpStr#*|};
 					argLongName="${tmpStr%%|*}"; argLongName=${argLongName,,[a-z]}; tmpStr=${tmpStr#*|};
 					tmpArg="${arg,,[a-z]}"
@@ -111,3 +111,4 @@ export -f ParseArgsStd2
 ## 11-01-2017 @ 09.54.34 - ("3.0.2")   - dscudiero - m
 ## 11-01-2017 @ 15.14.34 - ("3.0.3")   - dscudiero - Add counter type to deal with -vx
 ## 11-01-2017 @ 15.16.36 - ("3.0.4")   - dscudiero - Fix counter type
+## 11-02-2017 @ 10.27.46 - ("3.0.6")   - dscudiero - Seperate local argdefs from common
