@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.39 # -- dscudiero -- Thu 11/02/2017 @ 11:19:36.46
+# version=2.1.43 # -- dscudiero -- Thu 11/02/2017 @ 11:37:52.94
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -265,7 +265,7 @@ function Init {
 	## Set Directories based on the current host name and client name
 	# Set src and tgt directories based on client and env
 	if [[ $getDirs == true ]]; then
-		SetSiteDirs #'setDefault'
+		SetSiteDirs 'setDefault'
 		[[ -z $pvtDir && -n $devDir ]] && pvtDir="$(sed s/$client/$client-$userName/g <<< $devDir)"
 		[[ -z $pvtDir ]] && pvtDir="/mnt/$defaultDevServer/web/$client-$userName"
 	fi
