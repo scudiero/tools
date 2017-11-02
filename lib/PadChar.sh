@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.16" # -- dscudiero -- Fri 09/01/2017 @  9:18:55.73
+# version="2.0.17" # -- dscudiero -- Thu 11/02/2017 @  8:43:12.39
 #===================================================================================================
 # Get a sting of a char repeated n times
 # PadChar <char> <count>
@@ -9,11 +9,10 @@
 # All rights reserved
 #===================================================================================================
 function PadChar {
-
 	local char="$1"; shift
 	local len=$1
 	local re='^[0-9]+$'
-	#[[ $len -eq 0 ]] && echo '' && return 0
+	[[ $len -eq 0 ]] && echo '' && return 0
 
 	[[ ${char:1} =~ $re ]] && len=$char && unset char
 	[[ $char == '' ]] && char='='
@@ -54,3 +53,4 @@ export -f PadString
 ## Wed Jan  4 13:54:01 CST 2017 - dscudiero - General syncing of dev to prod
 ## 09-01-2017 @ 08.18.04 - ("2.0.15")  - dscudiero - Allow the pad char to be a string
 ## 09-01-2017 @ 09.27.42 - ("2.0.16")  - dscudiero - restore PadChar
+## 11-02-2017 @ 10.27.20 - ("2.0.17")  - dscudiero - Initial implimentation
