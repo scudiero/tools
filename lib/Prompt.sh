@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.43" # -- dscudiero -- Fri 11/03/2017 @  8:25:49.72
+# version="2.1.44" # -- dscudiero -- Fri 11/03/2017 @  8:41:51.74
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -102,7 +102,7 @@ function Prompt {
 						done
 						echo >> "$logFile"; echo -en "$timerPrompt $(ColorK "0") seconds\r"; echo
 						if [[ -z $response ]]; then
-							[[ -n $defaultVal ]] && { echo >> "$logFile"; Note 0 1 "Read timed out, using default value '$defaultVal' for '$promptVar'"; logResponse=false }
+							[[ -n $defaultVal ]] && { echo >> "$logFile"; Note 0 1 "Read timed out, using default value '$defaultVal' for '$promptVar'"; logResponse=false; }
 							eval $promptVar=\"$defaultVal\"
 							LogResponse
 							return 0
@@ -114,7 +114,7 @@ function Prompt {
 			[[ $(Lower ${response}) == 'x' ]] && Goodbye 'x'
 			if [[ -z $response && -n $defaultVal ]]; then
 				eval $promptVar=\"$defaultVal\"
-				[[ $defaultValueUseNotes == true && -n $defaultVal ]] && { echo >> "$logFile"; Note 0 1 "Using default value of '$defaultVal' for '$promptVar'"; logResponse=false }
+				[[ $defaultValueUseNotes == true && -n $defaultVal ]] && { echo >> "$logFile"; Note 0 1 "Using default value of '$defaultVal' for '$promptVar'"; logResponse=false; }
 				LogResponse
 				return 0
 			fi
@@ -129,7 +129,7 @@ function Prompt {
 			Info 0 1 "Gathering data..."
 			SelectClient 'response'
 			[[ $secondaryMessagesOnly != true && $defaultValueUseNotes == true ]] && \
-					{ echo >> "$logFile"; Note 0 1 "Using selected value of '$selectResp' for 'client'"; logResponse=false }
+					{ echo >> "$logFile"; Note 0 1 "Using selected value of '$selectResp' for 'client'"; logResponse=false; }
 			eval $promptVar=\"$response\"
 			loop=false
 
@@ -166,7 +166,7 @@ function Prompt {
 				fi
 				eval $promptVar=\"$response\"
 				[[ $hadValue == true && $secondaryMessagesOnly != true && $defaultValueUseNotes == true ]] && \
-							{ echo >> "$logFile"; Note 0 1 "Using specified value of '$response' for '$promptVar'"; logResponse=false}
+							{ echo >> "$logFile"; Note 0 1 "Using specified value of '$response' for '$promptVar'"; logResponse=false; }
 				loop=false
 			fi
 		fi #[[  "$promptVar" == 'client' && $response == '?' ]]
@@ -198,3 +198,4 @@ export -f Prompt
 ## 10-11-2017 @ 11.28.21 - ("2.1.24")  - dscudiero - Fix bug logging default value selection to the log file
 ## 10-11-2017 @ 12.50.55 - ("2.1.37")  - dscudiero - Tweak how we add output to the log file
 ## 11-03-2017 @ 08.26.06 - ("2.1.43")  - dscudiero - Eliminate duplicate log entries
+## 11-03-2017 @ 08.42.11 - ("2.1.44")  - dscudiero - Fix problem setting logResponse variable
