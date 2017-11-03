@@ -124,7 +124,7 @@ scriptDescription="Load Courseleaf Data"
 	# Get the users data from the db
 	#==================================================================================================
 	function GetUsersDataFromDB {
-		dbFile=$srcDir/db/clusers.sqlite
+		dbFile=$siteDir/db/clusers.sqlite
 		[[ ! -r $dbFile ]] && Terminate "Could not read the clusers database file:\n\t$dbFile"
 		Msg3 "Reading the user data from the clusers database ..."
 
@@ -179,7 +179,7 @@ scriptDescription="Load Courseleaf Data"
 		[[ $useUINs == true && $processedUserData != true ]] && Terminate "$FUNCNAME: Requesting UIN mapping but no userid sheet was provided"
 		Msg3 "Reading the workflow.tcf file ..."
 		## Get the roles data from the roles.tcf file
-			file=$srcDir/web/$courseleafProgDir/workflows.tcf
+			file=$siteDir/web/$courseleafProgDir/workflows.tcf
 			[[ ! -r $file ]] && Terminate "Could not read the '$file' file"
 			while read line; do
 				if [[ ${line:0:9} == 'workflow:' ]]; then
@@ -218,7 +218,7 @@ scriptDescription="Load Courseleaf Data"
 				(( i++ ))
 				resultSet=("${resultSet[@]:$i}")
 			else
-				Info 0 1 "Could not locate the header row indicator in the '$2' worksheet, using the first row as the header data"
+				Info 0 1 "Could not locate the header row indicator in the '$sheetName' worksheet, using the first row as the header data"
 				headerRow="${resultSet[0]}"
 				resultSet=("${resultSet[@]:1}")
 			fi
@@ -302,7 +302,7 @@ scriptDescription="Load Courseleaf Data"
 				if [[ ${usersFromSpreadsheet["$key"]+abc} ]]; then
 					if [[ -n $value && $value != '|' && ${usersFromSpreadsheet["$key"]} != $value ]]; then
 						Terminate "The '$workbookSheet' sheet contains duplicate records for userid '$key'\
-						\n^current value: '$value'\n^previous value = '${usersFromSpreadsheet["$key"]}'"
+						\n^current value: '$value'\n^previous value: '${usersFromSpreadsheet["$key"]}'"
 					fi
 				else
 					usersFromSpreadsheet["$key"]="$value"
@@ -321,7 +321,7 @@ scriptDescription="Load Courseleaf Data"
 			[[ $informationOnlyMode != true ]] && verb='Merging' || verb='Checking'
 			Msg3 "$verb User data..."
 
-			dbFile=$srcDir/db/clusers.sqlite
+			dbFile=$siteDir/db/clusers.sqlite
 			BackupCourseleafFile $dbFile
 			local procesingCntr=0
 			sTime=$(date "+%s")
@@ -370,7 +370,7 @@ scriptDescription="Load Courseleaf Data"
 
 		## Rebuild the appache-group file
 			if [[ $informationOnlyMode == false ]]; then
-				RunCourseLeafCgi "$srcDir" "-r /apache-group.html"
+				RunCourseLeafCgi "$siteDir" "-r /apache-group.html"
 			fi
 			echo
 
@@ -399,9 +399,9 @@ scriptDescription="Load Courseleaf Data"
 				dump -2  -n result -t key value
 				[[ $(IsNumeric ${value:0:1}) == true ]] && value=$(cut -d'.' -f1 <<< $value)
 				if [[ ${rolesFromSpreadsheet["$key"]+abc} ]]; then
-					if [[ -n $value && $value != '|' && ${usersFromSpreadsheet["$key"]} != $value ]]; then
+					if [[ -n $value && $value != '|' && ${rolesFromSpreadsheet["$key"]} != $value ]]; then
 						Terminate "The '$workbookSheet' sheet contains duplicate records for role '$key'\
-						\n^current value: '$value'\n^previous value = '${rolesFromSpreadsheet["$key"]}'"
+						\n^current value: '$value'\n^previous value: '${rolesFromSpreadsheet["$key"]}'"
 					fi
 				else
 					rolesFromSpreadsheet["$key"]="$value"
@@ -531,8 +531,9 @@ scriptDescription="Load Courseleaf Data"
 			for ((ii=0; ii<${#resultSet[@]}; ii++)); do
 				result="${resultSet[$ii]}"
 				key=$(cut -d '|' -f $pathCol <<< "$result")
+				[[ ${key:0:1} != '/' ]] && Warning "Invalid page path data found in data row $ii ($key), skipping data" && continue
 				[[ -z $key ]] && WarningMsg 0 1 "Work Sheet record:\n^^$result\n\tDoes not contain any path/url data, skipping" && continue
-				if [[ $key != '/' && ! -d $(dirname $srcDir/web/$key) ]]; then
+				if [[ $key != '/' && ! -d $(dirname $siteDir/web/$key) ]]; then
 					[[ $ignoreMissingPages != true ]] && WarningMsg 0 1 "Page: '$key' Not found"
 					((numPagesNotFound += 1))
 					continue
@@ -554,7 +555,7 @@ scriptDescription="Load Courseleaf Data"
 			if [[ $verboseLevel -ge 1 ]]; then Msg3 "\tworkflowDataFromSpreadsheet:"; for i in "${!workflowDataFromSpreadsheet[@]}"; do printf "\t\t[$i] = >${workflowDataFromSpreadsheet[$i]}<\n"; done; fi
 
 			## Get the courseleaf pgmname and dir
-				cd $srcDir
+				cd $siteDir
 				courseLeafPgm=$(GetCourseleafPgm | cut -d' ' -f1)
 				courseLeafDir=$(GetCourseleafPgm | cut -d' ' -f2)
 				if [[ $courseLeafPgm == '' || $courseLeafDir == '' ]]; then Terminate "^Could not find courseleaf executable"; fi
@@ -636,7 +637,7 @@ scriptDescription="Load Courseleaf Data"
 					if [[ $informationOnlyMode == false ]]; then
 						if [[ $pageOwner != '' || $pageWorkflow != '' || $skipNulls == false ]]; then
 							export QUERY_STRING="owner=$pageOwner|workflow=$pageWorkflow|skipNulls=$skipNulls"
-							$DOIT ProtectedCall "RunCourseLeafCgi "$srcDir" "$step $key""
+							$DOIT ProtectedCall "RunCourseLeafCgi "$siteDir" "$step $key""
 							((numPagesUpdated +=1))
 						fi
 					fi
@@ -821,7 +822,7 @@ ignoreMissingPages=true
 	[[ $processUserData == false && $processRoleData == false && $processPageData == false ]] && echo && Terminate "No actions requested, please review help text"
 
 	verifyArgs+=("Client:$client")
-	verifyArgs+=("Env:$(TitleCase $env) ($srcDir)")
+	verifyArgs+=("Env:$(TitleCase $env) ($siteDir)")
 	[[ $tmpWorkbookFile == true ]] && verifyArgs+=("Input File:'$workbookFileIn' as '$workbookFile'") || verifyArgs+=("Input File:'$workbookFile'")
 	#verifyArgs+=("Input workbook:'$workbookFileIn'")
 	[[ $processUserData == true ]] && verifyArgs+=("Process user sheet:$usersSheet")
@@ -832,7 +833,7 @@ ignoreMissingPages=true
 	verifyArgs+=("Map UIDs to UINs:$useUINs")
 	VerifyContinue "You are asking to update CourseLeaf data"
 
-	dump -1 client env srcDir processUserData processRoleData processPageData skipNulls useUINs
+	dump -1 client env siteDir processUserData processRoleData processPageData skipNulls useUINs
 	myData="Client: '$client', Env: '$env', product: '$product', skipNulls: '$skipNulls', ignoreMissingPages: '$ignoreMissingPages', File: '$workbookFile' "
 	[[ $logInDb != false && $myLogRecordIdx != "" ]] && dbLog 'data' $myLogRecordIdx "$myData"
 
@@ -842,7 +843,7 @@ ignoreMissingPages=true
 ## Process spreadsheet
 	[[ $client == 'internal' ]] && courseleafProgDir='pagewiz' || courseleafProgDir='courseleaf'
 	echo
-	rolesFile=$srcDir/web/$courseleafProgDir/roles.tcf
+	rolesFile=$siteDir/web/$courseleafProgDir/roles.tcf
 
 	dump -1 processUserData processRoleData processedPageData sheets
 	## Get process the sheets as directed
@@ -949,7 +950,7 @@ ignoreMissingPages=true
 		[[ $processedUserData == true ]] && changeLogLines+=("User data")
 		[[ $processedRoleData == true ]] && changeLogLines+=("Role data")
 		[[ $processedPageData == true ]] && changeLogLines+=("Page data")
-		WriteChangelogEntry 'changeLogLines' "$srcDir/changelog.txt"
+		WriteChangelogEntry 'changeLogLines' "$siteDir/changelog.txt"
 	fi
 
 
@@ -1023,3 +1024,4 @@ ignoreMissingPages=true
 ## 09-29-2017 @ 10.15.03 - (3.8.119)   - dscudiero - Update FindExcecutable call for new syntax
 ## 10-09-2017 @ 16.54.07 - (3.9.9)     - dscudiero - Fixed problems with the conversion to getExecl2
 ## 11-02-2017 @ 12.47.27 - (3.9.9)     - dscudiero - Swtich to ParseArgsStd2
+## 11-03-2017 @ 08.19.41 - (3.9.9)     - dscudiero - Check to make sure we have a valid 'path' when parsing the catalog workflow sheet
