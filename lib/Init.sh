@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.45 # -- dscudiero -- Thu 11/02/2017 @ 15:52:52.98
+# version=2.1.56 # -- dscudiero -- Fri 11/03/2017 @  9:53:05.05
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -146,6 +146,8 @@ function Init {
 				env="${envs%% *}"
 			fi
 		fi
+Here 1
+dump clientEnvs
 
 		if [[ $getEnv == true ]]; then
 			unset promptModifer varSuffix
@@ -155,9 +157,11 @@ function Init {
 				promptModifer=" (comma separated)"
 				clientEnvs="all $clientEnvs"
 			fi
-			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false && $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt,$clientEnvs"
-			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt' || unset defaultEnv
-			Prompt env "What environment/site do you wish to use?" "$(tr ' ' ',' <<< $clientEnvs)" $defaultEnv; srcEnv=$(Lower $srcEnv)
+			unset defaultEnv
+			if [[ $(Contains "$clientEnvs" 'pvt') == false ]]; then
+				[[ $addPvt == true || $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt $clientEnvs" && defaultEnv='pvt'
+			fi
+			Prompt env "What environment/site do you wish to use?" "${clientEnvs// /,}" $defaultEnv; srcEnv=$(Lower $srcEnv)
 			[[ $checkProdEnv == true ]] && checkProdEnv=$env
 		fi
 
@@ -165,23 +169,25 @@ function Init {
 			[[ -z $srcEnv && -n $env ]] && srcEnv="$env"
 			clientEnvsSave="$clientEnvs"
 			clientEnvs="$clientEnvs skel"
-			[[ -n $tgtEnv ]] && clientEnvs=${clientEnvs//$tgtEnv/}; clientEnvs=${clientEnvs//,,/,}; 
+			[[ -n $tgtEnv ]] && { clientEnvs="$(Trim "${clientEnvs//$tgtEnv/}")"; clientEnvs="${clientEnvs//,,/,}"; }
 			unset defaultEnv
-			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false && $tgtEnv != 'pvt' && $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt,$clientEnvs"
-			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt'
-			Prompt srcEnv "What $(ColorK 'source') environment/site do you wish to use?" "$(tr ' ' ',' <<< $clientEnvs)" $defaultEnv; srcEnv=$(Lower $srcEnv)
+			if [[ $(Contains "$clientEnvs" 'pvt') == false ]]; then
+				[[ $addPvt == true || $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt $clientEnvs" && defaultEnv='pvt'
+			fi
+			Prompt srcEnv "What $(ColorK 'source') environment/site do you wish to use?" "${clientEnvs// /,}" $defaultEnv; srcEnv=$(Lower $srcEnv)
 			clientEnvs="$clientEnvsSave"
 			[[ $checkProdEnv == true ]] && checkProdEnv=$srcEnv
 		fi
 
 		if [[ $getTgtEnv == true ]]; then
 			[[ -z $tgtEnv && -n $env && $srcEnv != $env ]] && tgtEnv="$env"
-			[[ -n $srcEnv ]] && clientEnvs=${clientEnvs//$srcEnv/}; clientEnvs=${clientEnvs//,,/,}; 
+			[[ -n $srcEnv ]] && { clientEnvs="$(Trim "${clientEnvs//$srcEnv/}")"; clientEnvs="${clientEnvs//,,/,}"; }
 			unset defaultEnv
-			[[ $addPvt == true && $(Contains "$clientEnvs" 'pvt') == false && $srcEnv != 'pvt' && $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt,$clientEnvs"
-			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt'
+			if [[ $(Contains "$clientEnvs" 'pvt') == false ]]; then
+				[[ $addPvt == true || $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt $clientEnvs"
+			fi
 			[[ -z $defaultEnv && $(Contains "$clientEnvs" 'test') == true ]] && defaultEnv='test'
-			Prompt tgtEnv "What $(ColorK 'target') environment/site do you wish to use?" "$(tr ' ' ',' <<< $clientEnvs)" $defaultEnv; srcEnv=$(Lower $srcEnv)
+			Prompt tgtEnv "What $(ColorK 'target') environment/site do you wish to use?" "${clientEnvs// /,}" $defaultEnv; srcEnv=$(Lower $srcEnv)
 			[[ $checkProdEnv == true ]] && checkProdEnv=$tgtEnv
 		fi
 
@@ -367,3 +373,4 @@ export -f Init
 ## 11-01-2017 @ 09.54.16 - (2.1.35)    - dscudiero - Tweak how envs are process in getenv
 ## 11-02-2017 @ 10.51.57 - (2.1.38)    - dscudiero - Add 'addPvt' option
 ## 11-02-2017 @ 15.54.00 - (2.1.45)    - dscudiero - Fix addPvt code to check to make sure the pvt site exists befor adding to the envs list
+## 11-03-2017 @ 09.53.34 - (2.1.56)    - dscudiero - Fix problem adding pvt site to clientEnvs lsit
