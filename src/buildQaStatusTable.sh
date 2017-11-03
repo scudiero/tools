@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.59 # -- dscudiero -- Fri 11/03/2017 @  9:56:34.17
+version=1.2.61 # -- dscudiero -- Fri 11/03/2017 @ 10:56:52.30
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -62,13 +62,13 @@ function buildQaStatusTable-testMode  { # or testMode-local
 		# Parse the header record, getting the column numbers of the fields
 			[[ $(Contains "$result" "$findColText") != true ]] && Terminate "$FUNCNAME: First record:\n\t'${resultSet[0]}'\nof the worksheet did not contain '$findColText'"
 
-			IFSave=$IFS; IFS=\|; sheetCols=(${lines[0]}); IFS=$IFSave;
+			IFSave=$IFS; IFS=\|; sheetCols=(${resultSet[0]}); IFS=$IFSave;
 			for sheetCol in "${sheetCols[@]}"; do
 				(( fieldCntr += 1 ))
 				[[ $(Lower "$(Trim "$sheetCol")") == "$findColText" ]] && found=true && break
 			done
-			
-			[[ $found != true ]] && Terminate "$FUNCNAME: Could not locate a column with name '$findColText' in the Worksheet"
+
+			[[ $found != true ]] && Terminate "$FUNCNAME: Could not locate a column with name '$findColText' in the '$workSheet' worksheet"
 			itemCol=$fieldCntr
 			itemHrsCol=$((itemCol+1))
 			dump -2 itemCol itemHrsCol
@@ -426,3 +426,4 @@ Goodbye 0 #'alert'
 ## 11-01-2017 @ 07.42.19 - (1.2.54)    - dscudiero - Updated how the helper script is called
 ## 11-01-2017 @ 15.50.22 - (1.2.55)    - dscudiero - Switch to use ParseArgsStd2
 ## 11-03-2017 @ 10.52.38 - (1.2.59)    - dscudiero - Updated because the name of the cim priority data tab in the worksheet was changed.
+## 11-03-2017 @ 11.07.03 - (1.2.61)    - dscudiero - Fix problem parsing the resoources sheet
