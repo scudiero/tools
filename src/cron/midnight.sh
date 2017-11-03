@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.41 # -- dscudiero -- Thu 11/02/2017 @ 15:57:33.08
+version=1.22.42 # -- dscudiero -- Fri 11/03/2017 @ 11:06:18.99
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -260,8 +260,7 @@ case "$hostName" in
 			Msg3 "^...done"
 
 		## Run programs/functions
-			#pgms=(buildClientInfoTable buildSiteInfoTable BuildEmployeeTable buildQaStatusTable checkCgiPermissions checkPublishSettings)
-			pgms=(buildClientInfoTable buildSiteInfoTable BuildEmployeeTable checkCgiPermissions checkPublishSettings)
+			pgms=(buildClientInfoTable buildSiteInfoTable BuildEmployeeTable buildQaStatusTable checkCgiPermissions checkPublishSettings)
 			pgms+=(updateDefaults syncCourseleafGitRepos BuildCourseleafDataTable "cleanDev -daemon")
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
@@ -451,3 +450,4 @@ return 0
 ## 10-30-2017 @ 08.03.15 - (1.22.37)   - dscudiero - Truncate the sites table on the first of the month
 ## 11-01-2017 @ 07.58.07 - (1.22.39)   - dscudiero - Cosmetic/minor change
 ## 11-02-2017 @ 15.58.08 - (1.22.41)   - dscudiero - Temporarially remove buildQaStatusTable call
+## 11-03-2017 @ 11.07.25 - (1.22.42)   - dscudiero - Add back buildQaStatusTable
