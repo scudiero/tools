@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.56 # -- dscudiero -- Fri 11/03/2017 @  9:53:05.05
+# version=2.1.57 # -- dscudiero -- Fri 11/03/2017 @ 13:21:18.55
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -146,8 +146,6 @@ function Init {
 				env="${envs%% *}"
 			fi
 		fi
-Here 1
-dump clientEnvs
 
 		if [[ $getEnv == true ]]; then
 			unset promptModifer varSuffix
