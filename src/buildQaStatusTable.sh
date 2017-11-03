@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.55 # -- dscudiero -- Wed 11/01/2017 @ 15:49:38.44
+version=1.2.59 # -- dscudiero -- Fri 11/03/2017 @  9:56:34.17
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -49,7 +49,7 @@ function buildQaStatusTable-testMode  { # or testMode-local
 		local outHashName="$1"; shift
 		local workBook="$1"; shift
 		local workSheet="$1"; shift
-		local findColText="$(Lower "$1")"; shift
+		local findColText=${1,,[a-z]} 
 		local grepStr line lines found=false IFSave="$IFS" fieldCntr=0 sheetCol sheetCols itemCol
 		local itemHrsCol item itemHrs priority=1 ctClient ctInstance ctProject hashKey mapCtr
 		dump -2 product workBook workSheet findColText
@@ -57,14 +57,17 @@ function buildQaStatusTable-testMode  { # or testMode-local
 		## Read the Worksheet data
 			GetExcel2 -wb "$workBook" -ws "$workSheet"
 			[[ ${#resultSet[@]} -le 0 ]] && Terminate "$FUNCNAME: Could not retrieve data from workbook\n$workBook / $workSheet"
+			local result="${resultSet[0]}"; result=${result,,[a-z]} 
 
 		# Parse the header record, getting the column numbers of the fields
-			[[ $(Contains "$(Lower "${resultSet[0]}")" "$findColText") != true ]] && Terminate "$FUNCNAME: First record:\n\t'${resultSet[0]}'\nof the worksheet did not contain '$findColText'"
+			[[ $(Contains "$result" "$findColText") != true ]] && Terminate "$FUNCNAME: First record:\n\t'${resultSet[0]}'\nof the worksheet did not contain '$findColText'"
+
 			IFSave=$IFS; IFS=\|; sheetCols=(${lines[0]}); IFS=$IFSave;
 			for sheetCol in "${sheetCols[@]}"; do
 				(( fieldCntr += 1 ))
 				[[ $(Lower "$(Trim "$sheetCol")") == "$findColText" ]] && found=true && break
 			done
+			
 			[[ $found != true ]] && Terminate "$FUNCNAME: Could not locate a column with name '$findColText' in the Worksheet"
 			itemCol=$fieldCntr
 			itemHrsCol=$((itemCol+1))
@@ -79,27 +82,22 @@ function buildQaStatusTable-testMode  { # or testMode-local
 				itemHrs="$(cut -d'|' -f $itemHrsCol <<< ${resultSet[$jj]})"
 				[[ -z ${item}${itemHrs} ]] && continue
 				[[ $item == 'meetings (hrs)' ]] && break
-				ctClient="$(cut -f1 -d' ' <<< "$item")"
-				ctInstance="$(cut -f2 -d' ' <<< "$item")"
-				ctProject="$(cut -f3 -d' ' <<< "$item")"
+				tmpStr="${item,,[a-z]}"
+				ctClient=${tmpStr%% *}; tmpStr=${tmpStr#* }
+				ctInstance=${tmpStr%% *}; tmpStr=${tmpStr#* }
+				[[ $ctInstance == '-' ]] && ctInstance=${tmpStr%% *}; tmpStr=${tmpStr#* }
+				[[ $(Contains "$ctInstance" 'c') == true ]] && ctInstance='courseadmin'
+				[[ $(Contains "$ctInstance" 'p') == true ]] && ctInstance='programadmin'
+				ctProject="$tmpStr"
 				[[ -z $ctProject ]] && ctProject='Implementation'
-				if [[ $ctProject == 'mn' || $(Contains "$(Lower "$item")" 'next') == true ]]; then
-					ctProject='Implementation'
-					ctEnv='mn'
-				else
-					ctEnv="$(cut -f4 -d' ' <<< "$item")"
-				fi
-				[[ $ctEnv == 'mn' ]] && ctEnv='next' || ctEnv='test'
+				[[ "$ctProject" == 'mn' ]] && ctProject='Implementation'
+				[[ $(Contains "$ctProject" 'next') == true ]] && ctEnv='next' || ctEnv='test'
 				hashKey="$(Lower "$ctClient-$(TitleCase "$ctInstance")Admin-$ctProject-$ctEnv")"
 				dump -2 -n item itemHrs -t hashKey
 				cimTrackingHash[$hashKey]="$itemHrs"
 				eval "$outHashName[$hashKey]=\"$itemHrs|$priority\""
 				((priority+=1))
 			done
-
-			[[ -f $tmpFile ]] && rm -f $tmpFile
-			[[ -f $tmpFile.2 ]] && rm -f $tmpFile.2
-
 		return 0
 	} ##GetCimPriorityData
 
@@ -117,7 +115,7 @@ for var in $falseVars; do eval $var=false; done
 	declare -A catTrackingHash
 	cimTrackingWorkBook="$cimTrackingDir/CIM - Multiweek - INTERNAL.xlsx"
 	cimTrackingWorkbookSheet='ThisWeekinCIM'
-	cimTester='Scotta'
+	qaColumnName='QA'
 
 ## Find the helper script location
 	workerScript='insertTestingDetailRecord'
@@ -197,7 +195,7 @@ DumpMap 2 "$(declare -p variableMap)"
 # Main
 #================================================================================================================================================================
 Msg3; Msg3 "Retrieveing Implementation Team data from '$(basename "$cimTrackingWorkBook")/$cimTrackingWorkbookSheet'"
-GetCimPriorityData 'cimTrackingHash' "$cimTrackingWorkBook" "$cimTrackingWorkbookSheet" "$cimTester"
+GetCimPriorityData 'cimTrackingHash' "$cimTrackingWorkBook" "$cimTrackingWorkbookSheet" "$qaColumnName"
 if [[ $verboseLevel -ge 1 ]]; then
 	dump -t priorityWeek
 	echo -e "\tcimTrackingHash:"
@@ -427,3 +425,4 @@ Goodbye 0 #'alert'
 ## 10-31-2017 @ 10.58.10 - (1.2.53)    - dscudiero - Cosmetic/minor change
 ## 11-01-2017 @ 07.42.19 - (1.2.54)    - dscudiero - Updated how the helper script is called
 ## 11-01-2017 @ 15.50.22 - (1.2.55)    - dscudiero - Switch to use ParseArgsStd2
+## 11-03-2017 @ 10.52.38 - (1.2.59)    - dscudiero - Updated because the name of the cim priority data tab in the worksheet was changed.
