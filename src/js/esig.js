@@ -1,4 +1,8 @@
 
+
+Make sure the following is in the showrec
+%?isesig?%         <input type="button" id="esig_btn" class="btn btn-green b_medium esig" value="Approve" />
+
 TYPE 1 -- single step esigs:
 	workflow.cfg / cimconfig.cfg
 		esiglist:DistribDesignation|DDApprove$|function|getDDEsig
