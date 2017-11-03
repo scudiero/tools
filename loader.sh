@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.56" # -- dscudiero -- Tue 10/31/2017 @ 15:32:19.58
+version="1.4.57" # -- dscudiero -- Fri 11/03/2017 @ 13:54:41.57
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -698,7 +698,6 @@ sTime=$(date "+%s")
 		[[ $checkMsg != true ]] && Terminate "$checkMsg"
 
 	## Get the users auth groups
-if [[ $userName = dscudiero ]]; then
 		sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\""
 		RunSql2 $sqlStmt
 		unset UsersAuthGroups
@@ -708,8 +707,6 @@ if [[ $userName = dscudiero ]]; then
 			done
 			UsersAuthGroups="${UsersAuthGroups:1}"
 		fi
-dump UsersAuthGroups
-fi
 
 		# prtStatus ", check run/auth"
 		# sTime=$(date "+%s")
@@ -916,3 +913,4 @@ fi
 ## 10-31-2017 @ 10.41.31 - ("1.4.54")  - dscudiero - Cosmetic/minor change
 ## 10-31-2017 @ 15.30.53 - ("1.4.55")  - dscudiero - Use | as seperator in argDefs
 ## 10-31-2017 @ 15.32.39 - ("1.4.56")  - dscudiero - Cosmetic/minor change
+## 11-03-2017 @ 13.55.07 - ("1.4.57")  - dscudiero - Un comment setting of UserAuthGroups
