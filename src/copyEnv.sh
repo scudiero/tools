@@ -472,7 +472,7 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		Msg3 "Changing 'nexturl' to point to local instance..."
 		editFile="$tgtDir/web/courseleaf/localsteps/default.tcf"
 		clientToken=$(cut -d'/' -f5 <<< $tgtDir)
-		toStr="nexturl:https://$clientToken/$(cut -d '/' -f3 <<< $tgtDir).leepfrog.com"
+		toStr="nexturl:https://$clientToken.$(cut -d '/' -f3 <<< $tgtDir).leepfrog.com"
 		unset grepStr; grepStr=$(ProtectedCall "grep "^$toStr" $editFile")
 		if [[ -z $grepStr ]]; then
 			unset fromStr; fromStr=$(ProtectedCall "grep '^nexturl:' $editFile")
@@ -680,3 +680,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 10-19-2017 @ 10.34.19 - (4.12.10)   - dscudiero - Add PushPop to the include list
 ## 11-01-2017 @ 09.55.06 - (4.13.-1)   - dscudiero - Switched to ParseArgsStd2
 ## 11-02-2017 @ 11.01.58 - (4.13.-1)   - dscudiero - Add addPvt to the init call
+## 11-06-2017 @ 13.32.24 - (4.13.-1)   - dscudiero - Fix setting nexturl url syntax
