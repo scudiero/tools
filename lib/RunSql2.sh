@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.1.23" # -- dscudiero -- Wed 11/01/2017 @ 15:23:34.45
+# version="1.1.36" # -- dscudiero -- Mon 11/06/2017 @ 16:32:35.70
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -24,6 +24,7 @@ function RunSql2 {
 		local dbType='mysql'
 	fi
 	local sqlStmt="$*"
+
 	[[ -z $sqlStmt ]] && return 0
 	unset resultSet
 	local javaPgm=${runMySqlJavaPgmName:-runMySql}
@@ -46,22 +47,28 @@ function RunSql2 {
 		SetFileExpansion 'off'
 	 	[[ $dbType == 'mysql' ]] && resultStr="$(java $javaPgm $sqlStmt 2>&1)" || resultStr="$(sqlite3 $dbFile "$sqlStmt" 2>&1 | tr "\t" '|')"
 		SetFileExpansion
- 		## Check for errors
-		if [[ $(MyContains "$resultStr" 'sever:') == true || $(MyContains "$resultStr" 'ERROR' == true) == true || \
-			  $(MyContains "$resultStr" '\*Error\*') == true || \
-			  $(MyContains "$resultStr" 'Error occurred during initialization of VM' == true) == true ]]; then
+
+ 	## Write output to an array
+		unset resultSet
+		[[ $resultStr != '' ]] && readarray -t resultSet <<< "${resultStr}"
+
+ 	## Check for errors
+ 	local i
+	for ((i=0; i<${#resultSet[@]}; i++)); do
+		local result="${resultSet[$i]}"
+		[[ $result =~ .*sever\:*. ]] && foundError=true
+		[[ $result =~ .*\*Error\**. ]] && foundError=true
+		[[ $result =~ .*Error\ occurred\ during\ initialization\ of\ VM*. ]] && foundError=true
+		if [[ $foundError == true ]]; then
 			local callerData="$(caller)"
 			local lineNo="$(basename $(cut -d' ' -f2 <<< $callerData))/$(cut -d' ' -f1 <<< $callerData)"
-			msg="$FUNCNAME: Error reported from $dbType"
+			local msg="$FUNCNAME: Error reported from $dbType"
 			[[ $dbType == 'sqlite3' ]] && msg="$msg\n\tFile: $dbFile"
 			msg="$msg\n\tsqlStmt: $sqlStmt\n\n\t$resultStr"
 			echo -e "$(ColorT "*Fatal Error*") -- ($lineNo) $msg"
 			return 3
 		fi
-	
- 	## Write output to an array
-		unset resultSet
-		[[ $resultStr != '' ]] && readarray -t resultSet <<< "${resultStr}"
+	done
 
 	return 0
 } #RunMySql
@@ -94,3 +101,4 @@ export -f RunSql2
 ## 10-16-2017 @ 13.39.46 - ("1.1.4")   - dscudiero - Tweak error dtection
 ## 10-23-2017 @ 16.04.00 - ("1.1.5")   - dscudiero - Make the name of the java program for mysql a variable, set by default from bootdata
 ## 11-01-2017 @ 15.23.36 - ("1.1.23")  - dscudiero - Use SetFileExpansion function1
+## 11-06-2017 @ 16.34.07 - ("1.1.36")  - dscudiero - Refactor the error detection stuff work for large result sets
