@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.57 # -- dscudiero -- Fri 11/03/2017 @ 15:51:47.58
+version=3.13.58 # -- dscudiero -- Mon 11/06/2017 @ 10:37:53.75
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -202,9 +202,12 @@ function ExecReport {
 		if [[ $type == 'query' ]]; then
 			if [[ $dbType == 'mysql' ]]; then
 				RunSql2 $sqlStmt
+Here 0  >> $logFile
+echo $sqlStmt >> $logFile
+Dump tmpFile >> $logFile
 				if [[ ${#resultSet[@]} -gt 0 ]]; then
 					resultSet=("$(tr ',' '|' <<< "$header")" "${resultSet[@]}")
-					[[ -f $tmpFile ]] && rm $tmpFile
+					[[ -f $tmpFile ]] && rm -f $tmpFile
 					for ((i=0; i<${#resultSet[@]}; i++)); do
 						echo "${resultSet[$i]}" >> "$tmpFile"
 					done
@@ -229,6 +232,10 @@ function ExecReport {
 			Terminate "Report type of '$type' not supported at this time"
 		fi
 
+Here 2  >> $logFile
+Dump tmpFile >> $logFile
+cat $tmpFile >> $logFile
+Here 3  >> $logFile
 		if [[ $(wc -l < "$tmpFile") -gt 1 ]]; then
 			if [[  $(Lower "$ignoreList") == 'returnsraw' ]]; then
 				Msg3 | tee "$outFileXlsx" > "$outFileText"
