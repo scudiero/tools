@@ -2,7 +2,7 @@
 
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.23" # -- dscudiero -- Tue 10/03/2017 @ 14:34:05.88
+# version="2.0.38" # -- dscudiero -- Fri 11/03/2017 @ 16:32:08.48
 #===================================================================================================
 # Check to see if the logged user can run this script
 # Returns true if user is authorized, otherwise it returns a message
@@ -13,38 +13,38 @@
 #===================================================================================================
 function CheckAuth {
 	Import 'RunSql2'
-	local sqlStmt author scriptUsers
+	local sqlStmt author restrictGroups
 	local scriptName=${1-$myName}
+	unset author restrictGroups
 
-	sqlStmt="select author,restrictToUsers,restrictToGroups from $scriptsTable where name=\"$scriptName\""
-	RunSql2 $sqlStmt
-	[[ ${#resultSet[@]} -eq 0 ]] && echo true && return 0
-	local author="$(cut -f1 -d'|' <<< ${resultSet[0]})"
-	local scriptUsers="$(cut -f2 -d'|' <<< ${resultSet[0]})" ; [[ $scriptUsers == 'NULL' ]] && unset scriptUsers
-	local scriptGroups="$(cut -f3 -d'|' <<< ${resultSet[0]})" ; [[ $scriptGroups == 'NULL' ]] && unset scriptGroups
-
-	[[ $author == $userName ]] && echo true && return 0
-	[[ -z ${scriptUsers}${scriptGroups} ]] && echo true && return
-
-	if [[ -n $scriptUsers ]]; then
-		scriptUsers="$(tr ' ' ',' <<< "$scriptUsers")"
-		[[ $(Contains ",$scriptUsers," ",$userName,") == true ]] && echo true && return 0
-	fi
-
-	if [[ -n $scriptGroups ]]; then
-		scriptGroups="\"$(sed 's/,/","/g' <<< "$scriptGroups")\""
-		sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\" and code in ($scriptGroups)"
+	[[ -z $UsersAuthGroups && -r "$TOOLSPATH/auth/$userName" ]] && UsersAuthGroups=$(cat "$TOOLSPATH/auth/$userName") || UsersAuthGroups='none'
+	## Get the retricted information for the script
+		whereClauseUser="and (restrictToUsers like \"%$userName%\" or restrictToUsers is null)"
+		sqlStmt="select author,restrictToGroups from $scriptsTable where name=\"$scriptName\" $whereClauseUser"
 		RunSql2 $sqlStmt
-		[[ ${#resultSet[@]} -ne 0 ]] && echo true && return 0
-	fi
+		[[ ${#resultSet[@]} -eq 0 ]] && echo true && return 0
+		result="${resultSet[0]}"
+		author="${result%%|*}"; result="${result#*|}";
+		[[ $author == $userName ]] && { echo true; return 0; }
+		restrictGroups="$result"
+
+	## If there is restrictToGroups data then check
+		found=false
+		if [[ -n $restrictGroups && $restrictGroups != 'NULL' ]]; then
+			for group in ${UsersAuthGroups//,/ }; do
+				[[ $(Contains ",$restrictGroups," ",$group,") == true ]] && { echo true; return 0; }
+			done
+		else
+			echo true
+			return 0
+		fi
 
 	## User does not have access
-	echo "The logged in user ($userName) does not have permissions to run this script."
+	echo "Sorry, you do not have permissions to run '$scriptName', the script is restricted to groups: '${restrictGroups//,/, }'.  FYI, you are in these groups: '${UsersAuthGroups//,/, }'"
 	return 0
 
 } #CheckAuth
 export -f CheckAuth
-
 #===================================================================================================
 # Checkin Log
 #===================================================================================================
@@ -59,3 +59,4 @@ export -f CheckAuth
 ## 05-19-2017 @ 11.14.50 - ("2.0.20")  - dscudiero - remove debug stuff
 ## 09-29-2017 @ 13.30.34 - ("2.0.22")  - dscudiero - General syncing of dev to prod
 ## 10-03-2017 @ 14.36.14 - ("2.0.23")  - dscudiero - Remove all the UserAuthGroups stuff, moved to loader
+## 11-06-2017 @ 07.22.41 - ("2.0.38")  - dscudiero - Switch to using the auth files
