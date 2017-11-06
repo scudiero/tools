@@ -1,6 +1,6 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
-version=1.0.6 # -- dscudiero -- 02/13/2017 @ 16:07:23.06
+version=1.0.12 # -- dscudiero -- Mon 11/06/2017 @ 16:37:08.59
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -66,28 +66,19 @@ Hello
 
 ## Get the workbook file and worksheet
 if [[ $workBook == "" ]]; then
-	Msg2
+	Msg3
 	unset ans; Prompt ans 'Do you have an attende list spreadsheet' 'Yes No' 'Yes'; ans=$(Lower "${ans:0:1}")
 	if [[ $ans == 'y' ]]; then
 		Prompt workBook 'Please specify the full path/name of the workbook file' '*file*'
 		## Get the list of sheets in the workbook
-		getXlsx $USELOCAL --noLog --noLogInDb "$workBook" 'GetSheets' \| > $tmpFile
-		grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
-		if [[ $grepStr != '' || $(tail -n 1 $tmpFile) == '-1' ]]; then
-			Msg2 $E "Could not retrieve data from workbook, please see below"
-			tail -n 10 $tmpFile > $tmpFile.2
-			while read -r line; do echo -e "\t$line"; done < $tmpFile.2;
-			[[ -f $tmpFile.2 ]] && rm -f $tmpFile.2
-			Msg2
-			Goodbye -1
-		fi
-		sheets=$(tail -n 1 $tmpFile)
+		GetExcel2 -wb "$workBook" -ws 'GetSheets'
+		IFS='|' read -ra sheets <<< "${resultSet[0]}"
 		dump -1 sheets
 		if ${#sheets[@]} -gt 1 ]]; then
-			Msg2 "The workbook has multiple worksheets:"
+			Msg3 "The workbook has multiple worksheets:"
 			unset sheetStr
 			for sheet in ${sheets[@]}; do
-				Msg2 "^$sheet"
+				Msg3 "^$sheet"
 				sheetStr="$sheetStr $sheet"
 			done
 			Prompt workSheet "Which worksheet do you wish to use" "$sheetStr"
@@ -103,34 +94,34 @@ fi
 ## If we have a workbook then read in the attendee list
 if [[ $workBook != '' ]]; then
 	## Reading data from a workbook
-		Msg2 "Reading workbook..."
-		getXlsx $USELOCAL --noLog --noLogInDb "$workBook" "$workSheet" '|' > $tmpFile 2>&1;
+		Msg3 "Reading workbook..."
+		GetExcel2 -wb "$workBook" -ws "$workSheet"
 		unset keyArray
-		while read line; do
-			[[ $line == '' ]] && continue
-			firstName=$(cut -d'|' -f1 <<< $line)
-			lastName=$(cut -d'|' -f2 <<< $line)
-			longName=$(cut -d'|' -f5 <<< $line)
-			email=$(cut -d'|' -f6 <<< $line)
+		for ((i=0; i<${#resultSet[@]}; i++)); do
+			result="${resultSet[$i]}"
+			firstName=$(cut -d'|' -f1 <<< $result)
+			lastName=$(cut -d'|' -f2 <<< $result)
+			longName=$(cut -d'|' -f5 <<< $result)
+			email=$(cut -d'|' -f6 <<< $result)
 			[[ $(Lower "$longName") == 'company' ]] && continue
 			key="$longName|$firstName|$lastName|$email"
 			attendeeList["$key"]=true
 			keyArray+=("$key")
-			dump -2 -n line -t longName firstName lastName email
-		done < $tmpFile
-		Msg2 "^Read ${#attendeeList[@]} records"
+			dump -2 -n result -t longName firstName lastName email
+		done
+		Msg3 "^Read ${#attendeeList[@]} records"
 		## Sort the key array
 		IFSave="$IFS"; IFS=$'\n' sortedArray=($(sort <<<"${keyArray[*]}")); IFS="$IFSave"
 		unset keyArray; for rec in "${sortedArray[@]}"; do keyArray+=("$rec"); done
 
 	## Generate first report - fols that attened
-		Msg2 "Generating Attendee / role map data..."
-		Msg2 > $outFile
-		Msg2 "Report: Attendee / role map data" >> $outFile
-		Msg2 "Date: $(date)" >> $outFile
-		[[ $shortDescription != '' ]] && Msg2 "$shortDescription" >> $outFile
-		[[ $scriptDescription != '' ]] && Msg2 "$scriptDescription" >> $outFile
-		Msg2 >> $outFile
+		Msg3 "Generating Attendee / role map data..."
+		Msg3 > $outFile
+		Msg3 "Report: Attendee / role map data" >> $outFile
+		Msg3 "Date: $(date)" >> $outFile
+		[[ $shortDescription != '' ]] && Msg3 "$shortDescription" >> $outFile
+		[[ $scriptDescription != '' ]] && Msg3 "$scriptDescription" >> $outFile
+		Msg3 >> $outFile
 		echo -e "$header" >> $outFile
 		unset notFound
 		foundCntr=0
@@ -169,30 +160,30 @@ if [[ $workBook != '' ]]; then
 					let foundCntr=$foundCntr+1
 				else
 					notFound+=("$longName\t$firstName\t$lastName\t$email")
-					#Msg2 $E "Could not file role data for '$lastName,$firstName' at '$longName', skipping"
+					#Msg3 $E "Could not file role data for '$lastName,$firstName' at '$longName', skipping"
 				fi
 
-			[[ $cntr -ne 0 && $(($cntr % 100)) -eq 0 ]] && Msg2 "^Processed $cntr out of ${#attendeeList[@]}..."
+			[[ $cntr -ne 0 && $(($cntr % 100)) -eq 0 ]] && Msg3 "^Processed $cntr out of ${#attendeeList[@]}..."
 			let cntr=$cntr+1
 		done ## attendeList
-		Msg2 "^Found $foundCntr matched records in the contactsDb"
+		Msg3 "^Found $foundCntr matched records in the contactsDb"
 		if [[ ${#notFound[@]} -gt 0 ]]; then
-			Msg2 >> $outFile;Msg2 >> $outFile;
-			Msg2 "^${#notFound[@]} attendee records did not have any matchs in the contactsDb (checking both institution name or email address):" >> $outFile
-			Msg2 "\tInstitution\tFirst Name\tLast Name\tEmail Address" >> $outFile
+			Msg3 >> $outFile;Msg3 >> $outFile;
+			Msg3 "^${#notFound[@]} attendee records did not have any matchs in the contactsDb (checking both institution name or email address):" >> $outFile
+			Msg3 "\tInstitution\tFirst Name\tLast Name\tEmail Address" >> $outFile
 			for ((cntr2=1; cntr2<${#notFound[@]}; cntr2++)); do
 				echo -e "\t${notFound[$cntr2]}" >> $outFile
 			done
 		fi
-		Msg2
+		Msg3
 fi
 
 ## Generate second report - folks in the contacts db that did not attend
-	Msg2 "Generating Non-Attendee / role map data..."
-	Msg2 >> $outFile; Msg2 >> $outFile; Msg2 >> $outFile
-	Msg2 "Report: Non-Attendee / role map data" >> $outFile
-	Msg2 "Date: $(date)" >> $outFile
-	Msg2 >> $outFile
+	Msg3 "Generating Non-Attendee / role map data..."
+	Msg3 >> $outFile; Msg3 >> $outFile; Msg3 >> $outFile
+	Msg3 "Report: Non-Attendee / role map data" >> $outFile
+	Msg3 "Date: $(date)" >> $outFile
+	Msg3 >> $outFile
 	echo -e "$header" >> $outFile
 
 	cntr=0
@@ -202,7 +193,7 @@ fi
 	RunSql2 "$contactsSqliteFile" $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		numRecs=${#resultSet[@]}
-		Msg2 "^Found $numRecs contacts records..."
+		Msg3 "^Found $numRecs contacts records..."
 		for result in "${resultSet[@]}"; do
 			if [[ $workBook != '' ]]; then
 				longName=$(cut -d'|' -f3 <<< $result)
@@ -212,24 +203,24 @@ fi
 				[[ ${attendeeList["$key"]+abc} ]] && continue
 			fi
 			echo -e "$(tr '|' "\t" <<< "$result")" >> $outFile
-			[[ $cntr -ne 0 && $(($cntr % 100)) -eq 0 ]] && Msg2 "^Processed $cntr out of $numRecs..."
+			[[ $cntr -ne 0 && $(($cntr % 100)) -eq 0 ]] && Msg3 "^Processed $cntr out of $numRecs..."
 			let cntr=$cntr+1
 		done
 	else
-		Msg2 $W "Did not find any contacts records meeting criteria" | tee -a $outFile
+		Msg3 $W "Did not find any contacts records meeting criteria" | tee -a $outFile
 	fi
 
-	Msg2 >> $outFile
-	Msg2
-	Msg2 "Report output can be found in: '$outFile'"
+	Msg3 >> $outFile
+	Msg3
+	Msg3 "Report output can be found in: '$outFile'"
 	#[[ ${#clientSet[@]} -gt 0 ]] && sendMail=true
 
 ## Generate third report - folks in the contacts db for sites contacts with leepday='Y'
-	Msg2 "Generating Client/Contacts data for client contacts marked with leepday='Y'..."
-	Msg2 >> $outFile; Msg2 >> $outFile; Msg2 >> $outFile
-	Msg2 "Report: Client/Contacts data for client contacts marked with leepday='Y'" >> $outFile
-	Msg2 "Date: $(date)" >> $outFile
-	Msg2 >> $outFile
+	Msg3 "Generating Client/Contacts data for client contacts marked with leepday='Y'..."
+	Msg3 >> $outFile; Msg3 >> $outFile; Msg3 >> $outFile
+	Msg3 "Report: Client/Contacts data for client contacts marked with leepday='Y'" >> $outFile
+	Msg3 "Date: $(date)" >> $outFile
+	Msg3 >> $outFile
 	echo -e "$header" >> $outFile
 
 	cntr=0
@@ -239,24 +230,24 @@ fi
 	RunSql2 "$contactsSqliteFile" $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		numRecs=${#resultSet[@]}
-		Msg2 "^Found $numRecs contacts records..."
+		Msg3 "^Found $numRecs contacts records..."
 		for result in "${resultSet[@]}"; do
 			echo -e "$(tr '|' "\t" <<< "$result")" >> $outFile
-			[[ $cntr -ne 0 && $(($cntr % 100)) -eq 0 ]] && Msg2 "^Processed $cntr out of $numRecs..."
+			[[ $cntr -ne 0 && $(($cntr % 100)) -eq 0 ]] && Msg3 "^Processed $cntr out of $numRecs..."
 			let cntr=$cntr+1
 		done
 	else
-		Msg2 $W "Did not find any contacts records meeting criteria" | tee -a $outFile
+		Msg3 $W "Did not find any contacts records meeting criteria" | tee -a $outFile
 	fi
 
-	Msg2 >> $outFile
-	Msg2
-	Msg2 "Report output can be found in: '$outFile'"
+	Msg3 >> $outFile
+	Msg3
+	Msg3 "Report output can be found in: '$outFile'"
 	#[[ ${#clientSet[@]} -gt 0 ]] && sendMail=true
 
 ## Send email
 	# if [[ $emailAddrs != '' && $sendMail == true && batchMode == true ]]; then
-	# 	Msg2 >> $outFile; Msg2 "Sending email(s) to: $emailAddrs">> $outFile; Msg2 >> $outFile
+	# 	Msg3 >> $outFile; Msg3 "Sending email(s) to: $emailAddrs">> $outFile; Msg3 >> $outFile
 	# 	for emailAddr in $(echo $emailAddrs | tr ',' ' '); do
 	# 		mutt -a "$outFile" -s "$report report results: $(date +"%m-%d-%Y")" -- $emailAddr < $outFile
 	# 	done
@@ -276,3 +267,4 @@ Goodbye 0 #'alert'
 
 
 ## Mon Feb 13 16:09:23 CST 2017 - dscudiero - make sure we have our own tmpFile
+## 11-06-2017 @ 16.43.26 - (1.0.12)    - dscudiero - Switch to new excel reader
