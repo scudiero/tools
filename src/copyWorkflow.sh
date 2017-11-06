@@ -1,10 +1,10 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.41 # -- dscudiero -- Thu 11/02/2017 @ 14:46:37.68
+version=2.10.42 # -- dscudiero -- Mon 11/06/2017 @ 15:56:59.44
 #====================================================================================================
 TrapSigs 'on'
-myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile"
+myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -646,3 +646,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 10-10-2017 @ 13.44.43 - (2.10.36)   - dscudiero - Add default values for some questions
 ## 10-20-2017 @ 16.33.02 - (2.10.40)   - dscudiero - Added code to check to make sure there is a workflow management record for the cim instance
 ## 11-02-2017 @ 15.54.32 - (2.10.41)   - dscudiero - Switch to ParseArgsStd2
+## 11-06-2017 @ 16.44.08 - (2.10.42)   - dscudiero - Add runCourseleafCgi to the includes list
