@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.58 # -- dscudiero -- Mon 11/06/2017 @ 10:37:53.75
+version=3.13.62 # -- dscudiero -- Mon 11/06/2017 @ 16:46:11.18
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -224,9 +224,9 @@ Dump tmpFile >> $logFile
 			## Call script
 			scriptArgs="-reportName $name -noHeaders"
 			if [[ $(Lower "$reportIgnoreList") == 'standalone' ]]; then
-				FindExecutable $reportScript -report $originalArgStr $reportArgs $scriptArgs | tee "$tmpFile"
+				FindExecutable $reportScript -report -run $originalArgStr $reportArgs $userArgs | tee "$tmpFile"
 			else
-				FindExecutable $reportScript -report $originalArgStr $reportArgs $scriptArgs > "$tmpFile"
+				FindExecutable $reportScript -report -run $originalArgStr $reportArgs $userArgs > "$tmpFile"
 			fi
 		else
 			Terminate "Report type of '$type' not supported at this time"
@@ -535,3 +535,4 @@ Goodbye 0
 ## 10-26-2017 @ 08.13.21 - (3.13.52)   - dscudiero - tweak the authorization groups output
 ## 11-01-2017 @ 08.03.05 - (3.13.54)   - dscudiero - Cosmetic/minor change
 ## 11-06-2017 @ 07.22.53 - (3.13.57)   - dscudiero - Switch to using the auth files
+## 11-06-2017 @ 16.46.28 - (3.13.62)   - dscudiero - Add debug
