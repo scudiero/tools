@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.57" # -- dscudiero -- Fri 11/03/2017 @ 13:54:41.57
+version="1.4.60" # -- dscudiero -- Fri 11/03/2017 @ 16:38:15.52
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -141,8 +141,7 @@ statusLine="Loader ($version): "
 		[[ $userName != 'dscudiero' ]] && echo "*Warning* -- ($myName) Using the tools development directories"
 	fi
 
-prtStatus "parse args"
-sTime=$(date "+%s")
+prtStatus "parse args"; sTime=$(date "+%s")
 
 #==================================================================================================
 # MAIN
@@ -213,15 +212,13 @@ sTime=$(date "+%s")
 	source "$importFile"
 	sTime=$(date "+%s")
 	Import "$loaderIncludes"
-	prtStatus ", imports"
-	sTime=$(date "+%s")
+	prtStatus ", imports"; sTime=$(date "+%s")
 	SetFileExpansion
 
 ## Load tools defaults value
 	defaultsLoaded=false
 	GetDefaultsData "$myName" -fromFiles
-	prtStatus ", getdefaults"
-	sTime=$(date "+%s")
+	prtStatus ", getdefaults"; sTime=$(date "+%s")
 
 ## Load argument parse definitions
 	if [[ ${#argDefs} -eq 0 ]]; then
@@ -270,8 +267,7 @@ sTime=$(date "+%s")
 			UsersAuthGroups="${UsersAuthGroups:1}"
 		fi
 
-		prtStatus ", check run/auth"
-		sTime=$(date "+%s")
+		prtStatus ", check run/auth"; sTime=$(date "+%s")
 
 	## Check semaphore
 		[[ $(Contains ",$setSemaphoreList," ",$callPgmName," ) == true ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
@@ -280,12 +276,10 @@ sTime=$(date "+%s")
 		[[ -z $executeFile ]] && executeFile=$(FindExecutable "$callPgmName")
 		[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
 		[[ $(cut -d' ' -f1 <<< $(wc -l "$executeFile")) -eq 0 ]] && Terminate "Execution file ($executeFile) is empty"
-		prtStatus ", find file"
-		sTime=$(date "+%s")
+		prtStatus ", find file"; sTime=$(date "+%s")
 
 ## Call the script
 	## Initialize the log file
-		sTime=$(date "+%s")
 		logFile=/dev/null
 		if [[ $noLog != true ]] && [[ $callPgmName != "scripts" || $callPgmName != "reports" ]]; then
 			logFile=${logsRoot}${callPgmName}/$userName--$backupSuffix.log
@@ -298,8 +292,7 @@ sTime=$(date "+%s")
 			echo -e  "$myName: $(date) loading $executeFile as '${callPgmName}${scriptArgsTxt}'\n" > $logFile
 		fi
 
-	prtStatus ", logFile"
-	sTime=$(date "+%s")
+	prtStatus ", logFile"; sTime=$(date "+%s")
 	## Call the script
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
@@ -465,7 +458,7 @@ myName='loader'
 # Local Functions
 #==================================================================================================
 	function prtStatus {
-		#[[ $batchMode == true || $myVerbose != true ]] && return 0
+		[[ $batchMode == true || $userName != 'dscudiero' ]] && return 0
 		[[ $batchMode == true ]] && return 0
 		local elapTime=$(( $(date "+%s") - $sTime ))
 		[[ $elapTime -eq 0 ]] && elapTime=1
@@ -698,18 +691,18 @@ sTime=$(date "+%s")
 		[[ $checkMsg != true ]] && Terminate "$checkMsg"
 
 	## Get the users auth groups
-		sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\""
-		RunSql2 $sqlStmt
-		unset UsersAuthGroups
-		if [[ ${#resultSet[@]} -ne 0 ]]; then
-			for ((i=0; i<${#resultSet[@]}; i++)); do
-				UsersAuthGroups="$UsersAuthGroups,${resultSet[$i]}"
-			done
-			UsersAuthGroups="${UsersAuthGroups:1}"
-		fi
+		[[ -z $UsersAuthGroups && -r "$TOOLSPATH/auth/$userName" ]] && UsersAuthGroups=$(cat "$TOOLSPATH/auth/$userName") || UsersAuthGroups='none'
+		# sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\""
+		# RunSql2 $sqlStmt
+		# unset UsersAuthGroups
+		# if [[ ${#resultSet[@]} -ne 0 ]]; then
+		# 	for ((i=0; i<${#resultSet[@]}; i++)); do
+		# 		UsersAuthGroups="$UsersAuthGroups,${resultSet[$i]}"
+		# 	done
+		# 	UsersAuthGroups="${UsersAuthGroups:1}"
+		# fi
 
-		# prtStatus ", check run/auth"
-		# sTime=$(date "+%s")
+		prtStatus ", check run/auth"; sTime=$(date "+%s")
 
 	## Check semaphore
 		[[ $(Contains ",$setSemaphoreList," ",$callPgmName," ) == true ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
@@ -717,12 +710,10 @@ sTime=$(date "+%s")
 	## Resolve the executable file"
 		[[ -z $executeFile ]] && executeFile=$(FindExecutable "$callPgmName")
 		[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
-		prtStatus ", find file"
-		sTime=$(date "+%s")
+		prtStatus ", find file"; sTime=$(date "+%s")
 
 ## Call the script
 	## Initialize the log file
-		sTime=$(date "+%s")
 		logFile=/dev/null
 		if [[ $noLog != true ]]; then
 			logFile=$logsRoot$callPgmName/$userName--$backupSuffix.log
@@ -741,8 +732,7 @@ sTime=$(date "+%s")
 			Msg3 >> $logFile
 		fi
 
-	prtStatus ", logFile"
-	sTime=$(date "+%s")
+	prtStatus ", logFile" sTime=$(date "+%s")
 	## Call program function
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
@@ -914,3 +904,4 @@ sTime=$(date "+%s")
 ## 10-31-2017 @ 15.30.53 - ("1.4.55")  - dscudiero - Use | as seperator in argDefs
 ## 10-31-2017 @ 15.32.39 - ("1.4.56")  - dscudiero - Cosmetic/minor change
 ## 11-03-2017 @ 13.55.07 - ("1.4.57")  - dscudiero - Un comment setting of UserAuthGroups
+## 11-06-2017 @ 07.22.48 - ("1.4.60")  - dscudiero - Switch to using the auth files
