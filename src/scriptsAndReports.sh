@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.54 # -- dscudiero -- Wed 11/01/2017 @  8:02:56.96
+version=3.13.57 # -- dscudiero -- Fri 11/03/2017 @ 15:51:47.58
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -43,29 +43,16 @@ function BuildMenuList {
 
 	## Get a list of scripts available to this user in the execution environment we are running in
 		unset whereClauseHost; unset whereClauseUser; unset whereClauseGroups
-		whereClauseActive="active = \"Yes\" and name != \"$mode\""
-		whereClauseActive="$whereClauseActive and showInScripts=\"Yes\""
-		# If reports build the auth where clauses
+		whereClauseActive="active = \"Yes\" and name != \"$mode\" and showInScripts=\"Yes\""
 		if [[ $mode == 'scripts' ]]; then
-			whereClauseHost="and (os=\"$osName\" and (host = \"$hostName\" or host is null))"
+			whereClauseHost="and os=\"$osName\" and (host = \"$hostName\" or host is null)"
 			whereClauseUser="and (restrictToUsers like \"%$userName%\" or restrictToUsers is null)"
-
-			sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\" "
-			RunSql2 $sqlStmt
-			if [[ ${#resultSet[@]} -ne 0 ]]; then
-				for result in "${resultSet[@]}"; do
-					[[ -z $whereClauseGroups ]] && whereClauseGroups="restrictToGroups like \"%$result%\"" || \
-													  whereClauseGroups="$whereClauseGroups or restrictToGroups like \"%$result%\""
-				done
-				whereClauseGroups="and ($whereClauseGroups or restrictToGroups is null)"
-			fi
-			fields="keyId,name,shortDescription" #,author,supported,edate"
+			fields="keyId,name,restrictToGroups,shortDescription"
 		else
-			fields="keyId,name,shortDescription" #,author,supported,edate,updatesClData"
+			fields="keyId,name,shortDescription"
 		fi
 
-		unset $(tr ',' ' ' <<< "$fields")
-		sqlStmt="select $fields from $table where $whereClauseActive $whereClauseHost $whereClauseUser $whereClauseGroups order by name"
+		sqlStmt="select $fields from $table where $whereClauseActive $whereClauseHost $whereClauseUser order by name"
 		dump -1 -p sqlStmt
 		RunSql2 $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Sorry, either no scripts are active or you do not have access to any scripts."
@@ -73,18 +60,31 @@ function BuildMenuList {
 		unset menuList
 		menuList+=("|Ordinal|$itemTypeCap Name|Description")
 		newItem=false
+		#dump UsersAuthGroups
 		for itemRec in "${resultSet[@]}"; do
-			itemRec=$(tr "\t" "|" <<< "$itemRec")
+			#dump -n itemRec
 			unset itemNum itemName itemDesc #itemAuthor itemSupported itemEdate
-			itemNum=$(cut -d"|" -f1 <<< "$itemRec")
-			itemName=$(cut -d"|" -f2 <<< "$itemRec")
-			itemDesc=$(cut -d"|" -f3 <<< "$itemRec")
-			#itemEdate=$(cut -d"|" -f6 <<< "$itemRec")
-			#itemUpdates=$(cut -d"|" -f7 <<< "$itemRec")
-			#dump -n itemName itemEdate ${myName}LastRunEdate
-			#[[ $itemEdate != 'NULL' && $itemEdate -gt ${myName}LastRunEdate ]] && itemName="${itemName}*" && newItem=true
-			menuList+=("|$itemNum|$itemName|$itemDesc")
+			itemNum="${itemRec%%|*}"; itemRec="${itemRec#*|}"; 
+			itemName="${itemRec%%|*}"; itemRec="${itemRec#*|}"; 
+			[[ $mode == 'scripts' ]] && restrictGroups="${itemRec%%|*}"; itemRec="${itemRec#*|}"; 
+			itemDesc="$itemRec"
+			#dump -t itemNum itemName restrictGroups itemDesc
+			if [[ $mode == 'scripts' ]]; then
+				found=false
+				if [[ -n $restrictGroups && $restrictGroups != 'NULL' ]]; then
+					for group in ${UsersAuthGroups//,/ }; do
+						[[ $(Contains ",$restrictGroups," ",$group,") == true ]] && { found=true; break; }
+					done
+				else
+					found=true
+				fi
+			else
+				found=true
+			fi
+			#dump -t2 found
+			[[ $found == true ]] && menuList+=("|$itemNum|$itemName|$itemDesc")
 		done
+
 	return 0
 } #BuildMenuList
 
@@ -527,3 +527,4 @@ Goodbye 0
 ## 10-26-2017 @ 08.09.32 - (3.13.50)   - dscudiero - Cosmetic/minor change
 ## 10-26-2017 @ 08.13.21 - (3.13.52)   - dscudiero - tweak the authorization groups output
 ## 11-01-2017 @ 08.03.05 - (3.13.54)   - dscudiero - Cosmetic/minor change
+## 11-06-2017 @ 07.22.53 - (3.13.57)   - dscudiero - Switch to using the auth files
