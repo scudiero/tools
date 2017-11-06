@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.37 # -- dscudiero -- Mon 10/30/2017 @  7:39:42.41
+version=2.1.38 # -- dscudiero -- Mon 11/06/2017 @ 10:19:25.89
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -54,6 +54,7 @@ case "$hostName" in
 				Semaphore 'waiton' "$reportName" 'true'
 				Msg3 "...$reportName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
+			;;
 	build5)
 			;;
 	build7)
@@ -93,3 +94,4 @@ return 0
 ## 10-23-2017 @ 11.42.15 - (2.1.35)    - dscudiero - Cosmetic/minor change
 ## 10-23-2017 @ 11.58.31 - (2.1.36)    - dscudiero - Added -noBanners flag to the called scripts
 ## 10-30-2017 @ 07.44.10 - (2.1.37)    - dscudiero - Refactored to use common launcing code
+## 11-06-2017 @ 10.38.31 - (2.1.38)    - dscudiero - Fix syntax error, missiong;; closure in mojave case block
