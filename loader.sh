@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.29" # -- dscudiero -- Mon 11/06/2017 @ 10:01:44.07
+version="1.4.30" # -- dscudiero -- Mon 11/06/2017 @ 13:59:22.15
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -125,8 +125,8 @@ statusLine="Loader ($version): "
 	scriptArgs=${scriptArgs:1} ## Strip off leading blank
 
 ## Hello
-[[ $batchMode != true && $(hostname) == 'build7.leepfrog.com' ]] && \
-	echo -e "\tNote: (loader) File system access from the current host has been found to be a bit slow,\n\tPatience you must have, my young padawan..." >&3
+# [[ $batchMode != true && $(hostname) == 'build7.leepfrog.com' ]] && \
+# 	echo -e "\tNote: (loader) File system access from the current host has been found to be a bit slow,\n\tPatience you must have, my young padawan..." >&3
 
 ## If called as ourselves, then the first token is the script name to call
 	if [[ $callPgmName == 'loader.sh' ]]; then
@@ -453,3 +453,4 @@ sTime=$(date "+%s")
 ## 11-03-2017 @ 13.55.07 - ("1.4.57")  - dscudiero - Un comment setting of UserAuthGroups
 ## 11-06-2017 @ 07.22.48 - ("1.4.60")  - dscudiero - Switch to using the auth files
 ## 11-06-2017 @ 10.03.24 - ("1.4.29")  - dscudiero - Use the auth files
+## 11-06-2017 @ 13.59.46 - ("1.4.30")  - dscudiero - Remove build7 is slow message
