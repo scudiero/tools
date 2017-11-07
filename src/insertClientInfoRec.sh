@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.129 # -- dscudiero -- Tue 10/31/2017 @ 11:17:16.07
+version=2.3.130 # -- dscudiero -- Tue 11/07/2017 @ 14:34:03.84
 #===================================================================================================
 TrapSigs 'on'
 
@@ -52,7 +52,7 @@ Dump -1 -n client
 #===================================================================================================
 # Main
 #===================================================================================================
-## Get the list of fields in the transactional db
+## Get the list of fields in the clients transactional db
 	Verbose 1 2 "^Getting transactional field names"
 	SetFileExpansion 'off'
 	sqlStmt="select * from sqlite_master where type=\"table\" and name=\"clients\""
@@ -71,7 +71,7 @@ Dump -1 -n client
 	IFS="$ifsSave"; unset tmpArray
 	Dump -2 numTFields tFields
 
-## Get the transactional data
+## Get the data from the clients transactional data
 	Verbose 1 2 "^Getting transactional data"
 	sql="select $tFields from clients where clientcode=\"$client\" and is_active=\"Y\""
 	RunSql2 "$contactsSqliteFile" $sql
@@ -90,7 +90,7 @@ Dump -1 -n client
 		done
 	fi
 
-## If the primary contact field is blank, then build the data from the transactional db clients table data
+## If the primary contact field is blank, then build the data from the 'contacts' transactional db table data
 	if [[ $primarycontact == '' ]]; then
 		fields='contactrole,firstname,lastname,title,workphone,cell,fax,email'
 		sqlStmt="select $fields from contacts where clientkey=\"$idx\" and contactrole like \"%primary%\" order by contactrole,lastname"
@@ -102,6 +102,24 @@ Dump -1 -n client
 		primarycontact=$(tr "'" '"' <<< $primarycontact)
 		primarycontact=$(sed s'/"/\\"/'g <<< $primarycontact)
 	fi
+
+## Additional data from the 'contacts' transactional db table data
+	fields='leepday'
+	numFields=1
+	sqlStmt="select $fields from contacts where clientkey=\"$idx\" "
+	RunSql2 "$contactsSqliteFile" $sqlStmt
+	result="${resultSet[0]}"
+	result="${resultSet[0]}"
+	Dump -2 result
+	for ((cntr = 1 ; cntr < $numFields+1 ; cntr++)); do
+		field=$(cut -d',' -f$cntr <<< $tFields)
+		fVal=$(cut -d'|' -f$cntr <<< $result)
+		Dump -2 -t2 cntr field fVal
+		[[ $(IsNumeric "$fVal") == false ]] && fVal="\"$fVal\""
+		Dump -2 -t2 $(MapTtoW "$field")
+		eval $(MapTtoW "$field")="$fVal"
+	done
+
 ## Get the URL data from the transactional db
 	Verbose 1 2 "^Getting url data"
 	envs="dev,qa,test,next,curr,prior,preview,public"
@@ -221,3 +239,4 @@ return 0
 ## 10-27-2017 @ 16.13.19 - (2.3.115)   - dscudiero - Make sure there is a client role for each reps'
 ## 10-30-2017 @ 09.04.39 - (2.3.125)   - dscudiero - Make sure that the url type data does not contain any special chars
 ## 10-31-2017 @ 11.21.08 - (2.3.129)   - dscudiero - Fix problem setting longName
+## 11-07-2017 @ 14.34.31 - (2.3.130)   - dscudiero - Added leepday field
