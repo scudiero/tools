@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.32" // -- dscudiero -- Wed 11/01/2017 @ 10:46:49.06
+wfLibVersion="1.8.33" // -- dscudiero -- Tue 11/07/2017 @ 10:20:31.50
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -852,76 +852,64 @@ GetRelated2 = function(type,data) {
 		var refSkipped=false;
 		switch (type.substr(0,3)) {
 			case "col": //Looking to return college values
-				if (proposalColsStr.length != 0 ) {
-					switch (ref.format.substr(0,3)) {
-						case "col":
-							if (proposalColsStr.indexOf(ref.data) >= 0) {
-								wfDebug(myDebugLevel,myIndent +"\tskipping ref, code ("+ ref.data +") is in proposalColsStr ("+ proposalColsStr.toSource() +")");
-							} else {
-								retToken={}
-								retToken.data=ref.data;
-								retToken.source=ref.source;
-								resultSet.push(retToken);
-							}
-							break;
-						case "dep":
-							resultSet=LookupCode2("colCode","deptCode",[ref.data],proposalCols);
-							break;
-						case "sub":
-							resultSet=LookupCode2("colCode","subjCode",[ref.data],proposalCols);
-							break;
-					} // end switch (ref.format.substr(0,3))
-				} else {
-					wfDebug(myDebugLevel,myIndent +"\t" + myName + " *Warning* -- Requested lookup of cols data but proposalColsStr is null, skipping eco system");
-				}
+				switch (ref.format.substr(0,3)) {
+					case "col":
+						if (proposalColsStr.indexOf(ref.data) >= 0) {
+							wfDebug(myDebugLevel,myIndent +"\tskipping ref, code ("+ ref.data +") is in proposalColsStr ("+ proposalColsStr.toSource() +")");
+						} else {
+							retToken={}
+							retToken.data=ref.data;
+							retToken.source=ref.source;
+							resultSet.push(retToken);
+						}
+						break;
+					case "dep":
+						resultSet=LookupCode2("colCode","deptCode",[ref.data],proposalCols);
+						break;
+					case "sub":
+						resultSet=LookupCode2("colCode","subjCode",[ref.data],proposalCols);
+						break;
+				} // end switch (ref.format.substr(0,3))
 				break;
 			case "dep": //Looking to return department values
-				if (proposalDepts.length != 0 ) {
-					switch (ref.format.substr(0,3)) {
-						case "col":
-							resultSet=LookupCode2("deptCode","colCode",[ref.data],proposalDepts);
-							break;
-						case "dep":
-							if (proposalDeptsStr.indexOf(ref.data) >= 0) {
-								wfDebug(myDebugLevel,myIndent +"\tskipping ref, code ("+ ref.data +") is in proposalDepts("+ proposalDepts.toSource() +")");
-							} else {
-								retToken={}
-								retToken.data=ref.data;
-								retToken.source=ref.source;
-								resultSet.push(retToken);
-							}
-							break
-						case "sub":
-							resultSet=LookupCode2("deptCode","subjCode",[ref.data],proposalDepts);
-							break;
-					} // end switch (ref.format.substr(0,3))
-				} else {
-					wfDebug(myDebugLevel,myIndent +"\t" + myName + " *Warning* -- Requested lookup of depts data but proposalDepts is null, skipping eco system");
-				}
+				switch (ref.format.substr(0,3)) {
+					case "col":
+						resultSet=LookupCode2("deptCode","colCode",[ref.data],proposalDepts);
+						break;
+					case "dep":
+						if (proposalDeptsStr.indexOf(ref.data) >= 0) {
+							wfDebug(myDebugLevel,myIndent +"\tskipping ref, code ("+ ref.data +") is in proposalDepts("+ proposalDepts.toSource() +")");
+						} else {
+							retToken={}
+							retToken.data=ref.data;
+							retToken.source=ref.source;
+							resultSet.push(retToken);
+						}
+						break
+					case "sub":
+						resultSet=LookupCode2("deptCode","subjCode",[ref.data],proposalDepts);
+						break;
+					}
 				break;
 			case "sub": //Looking to return subject values
-				if (proposalSubjs.length != 0 ) {
-					switch (ref.format.substr(0,3)) {
-						case "col":
-							resultSet=LookupCode2("subjCode","colCode",[ref.data],proposalSubjs);
-							break;
-						case "dep":
-							resultSet=LookupCode2("subjCode","deptCode",[ref.data],proposalSubjs);
-							break;
-						case "sub":
-							if (proposalSubjsStr.indexOf(ref.data) >= 0) {
-								wfDebug(myDebugLevel,myIndent +"\tskipping ref, code ("+ ref.data +") is in proposalSubjs("+ proposalSubjs.toSource() +")");
-							} else {
-								retToken={}
-								retToken.data=ref.data;
-								retToken.source=ref.source;
-								resultSet.push(retToken);
-							}
-							break;
+				switch (ref.format.substr(0,3)) {
+					case "col":
+						resultSet=LookupCode2("subjCode","colCode",[ref.data],proposalSubjs);
+						break;
+					case "dep":
+						resultSet=LookupCode2("subjCode","deptCode",[ref.data],proposalSubjs);
+						break;
+					case "sub":
+						if (proposalSubjsStr.indexOf(ref.data) >= 0) {
+							wfDebug(myDebugLevel,myIndent +"\tskipping ref, code ("+ ref.data +") is in proposalSubjs("+ proposalSubjs.toSource() +")");
+						} else {
+							retToken={}
+							retToken.data=ref.data;
+							retToken.source=ref.source;
+							resultSet.push(retToken);
+						}
+						break;
 					} // end switch (ref.format.substr(0,3))
-				} else {
-					wfDebug(myDebugLevel,myIndent +"\t" + myName + " *Warning* -- Requested lookup of subjs data but proposalSubjs is null, skipping eco system");
-				}
 				break;
 		} // end switch (type.substr(0,3))
 
@@ -2276,3 +2264,4 @@ var wfLibLoaded=true;
 // 10-24-2017 @ 13.53.44 - ("1.8.27")  - dscudiero - Remove debug statements from getAttrVal
 // 10-25-2017 @ 16.44.52 - ("1.8.31")  - dscudiero - Updated GetAttrVal to look at the tcf/tca data first
 // 11-01-2017 @ 10.47.16 - ("1.8.32")  - dscudiero - Tweak output message formatting
+// 11-07-2017 @ 10.21.36 - ("1.8.33")  - dscudiero - Fix a problem in GetRelated2 not running if the proposal data for each type is null
