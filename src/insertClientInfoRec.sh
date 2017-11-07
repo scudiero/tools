@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.130 # -- dscudiero -- Tue 11/07/2017 @ 14:34:03.84
+version=2.3.148 # -- dscudiero -- Tue 11/07/2017 @ 15:17:31.75
 #===================================================================================================
 TrapSigs 'on'
 
@@ -53,7 +53,7 @@ Dump -1 -n client
 # Main
 #===================================================================================================
 ## Get the list of fields in the clients transactional db
-	Verbose 1 2 "^Getting transactional field names"
+	Verbose 1 "^^Getting transactional field names"
 	SetFileExpansion 'off'
 	sqlStmt="select * from sqlite_master where type=\"table\" and name=\"clients\""
 	SetFileExpansion
@@ -72,7 +72,7 @@ Dump -1 -n client
 	Dump -2 numTFields tFields
 
 ## Get the data from the clients transactional data
-	Verbose 1 2 "^Getting transactional data"
+	Verbose 1 "^^Getting transactional data"
 	sql="select $tFields from clients where clientcode=\"$client\" and is_active=\"Y\""
 	RunSql2 "$contactsSqliteFile" $sql
 	if [[ ${#resultSet[@]} -le 0 ]]; then
@@ -92,6 +92,7 @@ Dump -1 -n client
 
 ## If the primary contact field is blank, then build the data from the 'contacts' transactional db table data
 	if [[ $primarycontact == '' ]]; then
+		Verbose 1 "^^Getting primary contact data"
 		fields='contactrole,firstname,lastname,title,workphone,cell,fax,email'
 		sqlStmt="select $fields from contacts where clientkey=\"$idx\" and contactrole like \"%primary%\" order by contactrole,lastname"
 		RunSql2 "$contactsSqliteFile" $sqlStmt
@@ -103,28 +104,28 @@ Dump -1 -n client
 		primarycontact=$(sed s'/"/\\"/'g <<< $primarycontact)
 	fi
 
-## Additional data from the 'contacts' transactional db table data
-	fields='leepday'
-	numFields=1
-	sqlStmt="select $fields from contacts where clientkey=\"$idx\" "
+## Additional data from the 'contacts' transactional db table data\
+	Verbose 1 "^^Getting transactional data from the contacts table"
+	tFields='leepday'
+	numTFields=1
+	for field in $(tr ',' ' '<<< $fields); do unset $field; done
+	sqlStmt="select $tFields from contacts where clientkey=\"$idx\""
 	RunSql2 "$contactsSqliteFile" $sqlStmt
-	result="${resultSet[0]}"
-	result="${resultSet[0]}"
-	Dump -2 result
-	for ((cntr = 1 ; cntr < $numFields+1 ; cntr++)); do
-		field=$(cut -d',' -f$cntr <<< $tFields)
-		fVal=$(cut -d'|' -f$cntr <<< $result)
-		Dump -2 -t2 cntr field fVal
-		[[ $(IsNumeric "$fVal") == false ]] && fVal="\"$fVal\""
-		Dump -2 -t2 $(MapTtoW "$field")
-		eval $(MapTtoW "$field")="$fVal"
-	done
+	if [[ ${#resultSet[@]} -gt 0 ]]; then
+		result="${resultSet[0]}"
+		for ((cntr=1 ; cntr < $numTFields+1 ; cntr++)); do
+			field=$(cut -d',' -f$cntr <<< $tFields)
+			fVal=$(cut -d'|' -f$cntr <<< $result)
+			[[ $(IsNumeric "$fVal") == false ]] && fVal="\"$fVal\""
+			eval $(MapTtoW "$field")="$fVal"
+		done
+	fi
 
 ## Get the URL data from the transactional db
-	Verbose 1 2 "^Getting url data"
+	Verbose 1 "^^Getting url data"
 	envs="dev,qa,test,next,curr,prior,preview,public"
 	for env in $(tr ',' ' '<<< $envs); do unset ${env}url ${env}internalurl; done
-	sqlStmt=" select type,domain,internal from clientsites where clientkey=$idx"
+	sqlStmt="select type,domain,internal from clientsites where clientkey=$idx"
 	RunSql2 "$contactsSqliteFile" $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		for ((cntr=0; cntr<${#resultSet[@]}; cntr++)); do
@@ -137,7 +138,7 @@ Dump -1 -n client
 	fi
 
 ## Get the Rep data from the transactional db
-	Verbose 1 2 "^Getting reps data"
+	Verbose 1 "^^Getting reps data"
 	reps="support,catcsm,cimcsm,clsscsm,salesrep,cateditor,catdev,cimdev,clssdev,trainer,pilotrep"
 	for rep in $(tr ',' ' '<<< $reps); do unset $rep; done
 	fields="LOWER(clientroles.role),employees.db_firstname || ' ' || employees.db_lastname || '/' || employees.db_email"
@@ -156,17 +157,17 @@ Dump -1 -n client
 	fi
 
 ## Build insert record
-	Verbose 1 2 "^Building sql statement"
+	Verbose 1 "^^Building sql statement"
 	sqlStmt="select lower(column_name),lower(column_type) from information_schema.columns where table_name=\"$useClientInfoTable\""
 	RunSql2 $sqlStmt
 	unset wFields insertVals
 	for result in "${resultSet[@]}"; do
-		dump 1 -n result
+		dump 2 -n result
 		field="${result%%|*}"
 		fieldType="${result##*|}"
 		wFields="$wFields,$field"
 		fieldVal="${!field}"
-		dump 1 -t field fieldType fieldVal wFields
+		dump 2 -t field fieldType fieldVal wFields
 		if [[ $field == 'recordstatus' ]]; 	then [[ $fieldVal == 'Y' ]] && fieldVal="\"A\"" || fieldVal="\"D\""
 		elif [[ $field == 'createdby' ]]; 	then fieldVal="\"$userName\""
 		elif [[ $field == 'createdon' ]]; 	then fieldVal='NOW()'
@@ -175,7 +176,7 @@ Dump -1 -n client
 			[[ ${fieldType:0:1} == 'v' ]] && fieldVal="\"$fieldVal\""
 			[[ ${fieldType:0:1} == 's' ]] && fieldVal="\"$fieldVal\""
 		fi
-		dump 1 -t fieldVal
+		dump -2 -t fieldVal
 		insertVals="$insertVals,$fieldVal"
 	done
 	wFields="${wFields:1}"
@@ -183,13 +184,13 @@ Dump -1 -n client
 	#dump -n insertVals
 
 ## Insert record
-	Verbose 1 2 "^Inserting data"
+	Verbose 1 "^^Inserting data"
 	## Delete old data
 		sqlStmt="delete from $useClientInfoTable where name=\"$client\""
 		RunSql2 $sqlStmt
 	## Insert new data
 		sqlStmt="insert into $useClientInfoTable ($wFields) values($insertVals)"
-		dump 1 -n wFields -n insertVals
+		dump 2 -n wFields -n insertVals
 		[[ $DOIT != '' || $informationOnlyMode == true ]] && Dump sqlStmt || RunSql2 $sqlStmt
 
 #===================================================================================================
@@ -240,3 +241,4 @@ return 0
 ## 10-30-2017 @ 09.04.39 - (2.3.125)   - dscudiero - Make sure that the url type data does not contain any special chars
 ## 10-31-2017 @ 11.21.08 - (2.3.129)   - dscudiero - Fix problem setting longName
 ## 11-07-2017 @ 14.34.31 - (2.3.130)   - dscudiero - Added leepday field
+## 11-07-2017 @ 15.18.35 - (2.3.148)   - dscudiero - More generalized the additional data from contacts table support
