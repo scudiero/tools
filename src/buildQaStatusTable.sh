@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.61 # -- dscudiero -- Fri 11/03/2017 @ 10:56:52.30
+version=1.2.63 # -- dscudiero -- Wed 11/08/2017 @  7:25:43.15
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -78,6 +78,7 @@ function buildQaStatusTable-testMode  { # or testMode-local
 			priorityWeek=${priorityWeek##* }
 			dump -2 priorityWeek
 			for ((jj=2; jj<${#resultSet[@]}; jj++)); do
+echo; echo "\${resultSet[$jj]} = '${resultSet[$jj]}'"
 				item="$(Lower "$(cut -d'|' -f $itemCol <<< ${resultSet[$jj]})")"
 				itemHrs="$(cut -d'|' -f $itemHrsCol <<< ${resultSet[$jj]})"
 				[[ -z ${item}${itemHrs} ]] && continue
@@ -95,6 +96,7 @@ function buildQaStatusTable-testMode  { # or testMode-local
 				hashKey="$(Lower "$ctClient-$(TitleCase "$ctInstance")Admin-$ctProject-$ctEnv")"
 				dump -2 -n item itemHrs -t hashKey
 				cimTrackingHash[$hashKey]="$itemHrs"
+dump outHashName hashKey itemHrs priority
 				eval "$outHashName[$hashKey]=\"$itemHrs|$priority\""
 				((priority+=1))
 			done
@@ -427,3 +429,4 @@ Goodbye 0 #'alert'
 ## 11-01-2017 @ 15.50.22 - (1.2.55)    - dscudiero - Switch to use ParseArgsStd2
 ## 11-03-2017 @ 10.52.38 - (1.2.59)    - dscudiero - Updated because the name of the cim priority data tab in the worksheet was changed.
 ## 11-03-2017 @ 11.07.03 - (1.2.61)    - dscudiero - Fix problem parsing the resoources sheet
+## 11-08-2017 @ 07.26.23 - (1.2.63)    - dscudiero - Added debug code
