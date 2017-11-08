@@ -1,14 +1,15 @@
 #===================================================================================================
 export TOOLSDEVPATH="/home/dscudiero/tools"
 
-#warehouseDb="courseleafdatawarehouse"
-#warehouseHost=mdb1-host.inside.leepfrog.com
+warehouseDb="courseleafdatawarehouse"
+warehouseDbName="$warehouseDb"
+warehouseHost="mdb1-host.inside.leepfrog.com"
 runMySqlJavaPgmName='runMySql2'
-runMySqlJavaPgmName='runMySql'
 
-warehouseDb="warehouse"
-warehouseDbName="warehouse"
-warehouseDbHost=duro.inside.leepfrog.com
+#warehouseDb="warehouse"
+#warehouseDbName="warehouse"
+#warehouseDbHost=duro.inside.leepfrog.com
+#runMySqlJavaPgmName='runMySql'
 
 adminUsers="dscudiero"
 setSemaphoreList='buildSiteInfoTable,buildClientInfoTable'
