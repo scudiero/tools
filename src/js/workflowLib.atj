@@ -458,6 +458,8 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 //								data 	- The data value to map
 //								expects a string back.
 //
+//		_ignoreList				A comma seperated list of codes to ommit from the generated output
+//
 //=================================================================================================
 // Notes:
 //	1) 	Variables above can be specific to a wfrule or general across all 'Related' wfrules in the
@@ -486,6 +488,7 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 // RelatedCrosslistedSlashlistedDepts_formFieldVars:crosslisted|courseCode|code
 // RelatedCrosslistedSlashlistedDepts_formFieldVars:slashlisted|courseCode|code
 // RelatedCrosslistedSlashlistedDepts_datamapper:WfDataMapper
+// RelatedCrosslistedSlashlistedDepts_ignoreList:<codes list>
 //
 // wfrules:RelatedCrosslistedSlashlistedCols|function|Related|;
 // RelatedCrosslistedSlashlistedCols_includeEcoSystemData:true
@@ -493,6 +496,7 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 // RelatedCrosslistedSlashlistedCols_formFieldVars:crosslisted|courseCode|code
 // RelatedCrosslistedSlashlistedCols_formFieldVars:slashlisted|courseCode|code
 // RelatedCrosslistedSlashlistedCols_datamapper:WfDataMapper
+// RelatedCrosslistedSlashlistedCols_ignoreList:<codes list>
 //
 // - OR  - (yields the same results)
 //
@@ -502,6 +506,7 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 // Related_formFieldVars:crosslisted|courseCode|code
 // Related_formFieldVars:slashlisted|courseCode|code
 // Related_datamapper:WfDataMapper
+// Related_ignoreList:<codes list>
 //
 //======================================================================================================================
 // 11/15/16	- dgs -	Re-factored to allow for the specification of the core proposal variable names
@@ -514,6 +519,7 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 // 08/25/17 - dgs - Refactored to use GetRelated
 // 09/01/17 - dgs - Update code that detects if the related wfrulename was used 'bare' without any other qualifiers
 // 10/12/17 - dgs - Refactored to cleanup logic
+// 11/08/17 - dgs - Added ignoreList to skip codes
 //======================================================================================================================
 wffuncs.Related = function(inval, wfrule, args) {
 	var version='4.9.16'; var myName=wfrule.attrname
@@ -581,6 +587,9 @@ wffuncs.Related = function(inval, wfrule, args) {
 			var dataMapper=getTCFValue(calledAs + "_dataMapper");
 			if (dataMapper === "") dataMapper=getTCFValue(myName + "_dataMapper");
 
+			var ignoreList=getTCFValue(calledAs + "_ignoreList");
+			if (ignoreList === "") ignoreList=getTCFValue(myName + "_ignoreList");
+
 		// Get the form field variables data, parse off to an array if found
 			var formFieldVars=[];
 			formFieldVars=getTCFValue(calledAs + "_formFieldVars", { delimiter: "\n", retarray: true });
@@ -603,7 +612,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 			wfDump(3,[
 					"\n\tcheckChanged;"+checkChanged,"includeEcoSystemData;"+includeEcoSystemData,"ecoSystemDataTypes;"+ecoSystemDataTypes,
 					"ecoSystemDataPaths;"+ecoSystemDataPaths,"ecoSystemDataFyi;"+ecoSystemDataFyi,"formFieldVars;"+formFieldVars.toSource(),
-					"searchString;"+searchString.toSource(),"dataMapper;"+dataMapper]);
+					"searchString;"+searchString.toSource(),"dataMapper;"+dataMapper,"ignoreList;"+ignoreList]);
 
 	//==================================================================================================================
 	// MAIN
@@ -614,6 +623,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 		dataObj.ecoSystemDataTypes=ecoSystemDataTypes;
 		dataObj.ecoSystemDataPaths=ecoSystemDataPaths;
 		dataObj.formDataVars=formFieldVars;
+		dataObj.ignoreList=ignoreList;
 		var relatedData=GetRelated2(substitutionType,dataObj);
 
 	// Output the steps
@@ -681,13 +691,14 @@ wffuncs.Related = function(inval, wfrule, args) {
 //==================================================================================================================
 // Return the proposal related information.
 // Usage:
-// 		GetRelated( {type: type, formDataVars: [fieldListArray], includeEcoSystem: includeEcoSystem, tcadata: tcadata})
+// 		GetRelated( {type: type, formDataVars: [fieldListArray], includeEcoSystem: includeEcoSystem, tcadata: tcadata, ignoreList: ignoreList})
 // Where
 //		type 				One in the set {"subjs","depts","cols"} -- the type of data to return.
 //		fieldListArray		An array that is the list of form field variables to examine.
 //
 //		includeEcoSystem	'true' to include data from the eco system, 'false' to skip eco system data.
 //							Only applies to courseadmin, defaults to 'false'
+//		ignoreList			S comma seperated list of codes to ignore.
 // Returns:
 // 		An array of objects of the form:
 //			{data: data, source: source}
@@ -701,6 +712,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 // 10/09/17 - dgs - Initial - refactored from GetRelated
 // 10/12/17 - dgs - Refactored call to GetEcoSystemData2 to pass data object
 // 10/16/17 - dgs - Fixed problem with setting default value for 'includeEcoSystemData' when GetRelated was called standalone
+// 11/08/17 - dgs - Added ignoreList to skip codes
 //==================================================================================================================
 GetRelated2 = function(type,data) {
 	var myName="GetRelated2"; var myDebugLevel=6; var myIndent="\t\t"; wfDebug(myDebugLevel,"\n" + myIndent +"*** In " + myName + " ***");
@@ -762,15 +774,18 @@ GetRelated2 = function(type,data) {
 		} //try
 		catch(err) { wfDebug(1,"\t*Error* -- " + myName + ": " + err + "\n"); return false; }
 
-		wfDump(myDebugLevel,[myIndent +"proposalCode;"+proposalCode,myIndent +"proposalCodes;"+proposalCodes,
-			myIndent +"proposalSubjs;"+proposalSubjs.toSource(),myIndent +"proposalDepts;"+proposalDepts.toSource(),
-			myIndent +"proposalCols;"+proposalCols.toSource()]);
-
 	// Process the argument list
 		var includeEcoSystemData=false;
 		if (data.hasOwnProperty("includeEcoSystemData")) includeEcoSystemData=data.includeEcoSystemData;
 		var tcaData={}
 		if (data.hasOwnProperty("tcadata")) tcaData=data.tcadata;
+		var ignoreList="";
+		if (data.hasOwnProperty("ignoreList")) ignoreList="," + data.ignoreList + ",";
+
+		wfDump(myDebugLevel,[myIndent +"proposalCode;"+proposalCode,myIndent +"proposalCodes;"+proposalCodes,
+			myIndent +"proposalSubjs;"+proposalSubjs.toSource(),myIndent +"proposalDepts;"+proposalDepts.toSource(),
+			myIndent +"proposalCols;"+proposalCols.toSource(),myIndent +"includeEcoSystemData;"+includeEcoSystemData,
+			myIndent +"ignoreList;"+ignoreList.toSource()]);
 
 		data.formDataVars.forEach(function(formVarData) {
 				var tmpArray=formVarData.split('|');
@@ -822,7 +837,7 @@ GetRelated2 = function(type,data) {
 				}
 
 			}); //data.formDataVars
-			wfDebug(myDebugLevel,myIndent +"\t\tFound " + refsArray.length + " references from form field data");
+			wfDebug(myDebugLevel,myIndent +"\t\tFound " + refsArray.length + " references from the form field data");
 
 		// If includeEcoSystemData, then get data from the CourseLeaf eco system
 			if (includeEcoSystemData && wfCimInstance === "courseadmin") {
@@ -841,7 +856,7 @@ GetRelated2 = function(type,data) {
 			wfDebug(myDebugLevel,myIndent +"\t\t*** No references found in the data")
 			return false;
 		}
-		refsArray.forEach(function(ref) { wfDump(myDebugLevel,[myIndent +"\t\t\tref;'"+ref.toSource()]); }); wfDebug(myDebugLevel,"");
+		refsArray.forEach(function(ref) { wfDump(myDebugLevel,[myIndent +"\t\tref;'"+ref.toSource()]); }); wfDebug(myDebugLevel,"");
 
 	// map the related data to the requested data type (i.e. type), build an intmediate resultSet array to collect the data
 	wfDebug(myDebugLevel,myIndent +"\tProcessing refs...");
@@ -918,6 +933,10 @@ GetRelated2 = function(type,data) {
 				//wfDump(5,["\t\tresultSet;"+resultSet.toSource()]);
 				resultSet.forEach(function(result) {
 					if (result != "" && result.hasOwnProperty("data")) {
+						if (ignoreList.indexOf("," + result.data + ",") >= 0 ) {
+							wfDebug(myDebugLevel,myIndent + "result.data '" + result.data + "' is on the ignoreList, skipping");
+							return;
+						}
 						retToken={};
 						retToken.data=result.data;
 						retToken.source=ref.source;
@@ -1366,6 +1385,7 @@ GetAttrVal = function(data) {
 			return retArray;
 			return false
 }; //GetAttrVal
+
 //======================================================================================================================
 // Check to see if a proposal attribute is in a specified list of values
 // the attribute is determined by looking at the workflow rule name:
@@ -1379,7 +1399,8 @@ GetAttrVal = function(data) {
 //======================================================================================================================
 // 05-01-17 - dgs - Initial coding -- gmu
 // 05/27-17 - dgs - Added code for 'xxxxNOTin-' requeste types
-// 07/27/16 - dgs - Tweaked debug output
+// 07/27/17 - dgs - Tweaked debug output
+// 11/08/17 - dgs - Refactored getting attribute data to use GetAttrVal, fixes problem if allcodes not set
 //======================================================================================================================
 wffuncs.AttrIn = function(inval, wfrule, args) {
 	var version='1.0.3'; var myName=wfrule.attrname;
@@ -1388,15 +1409,7 @@ wffuncs.AttrIn = function(inval, wfrule, args) {
 	// Standard initilization
 		var retArray=[];
 		var reqType=wfrule.searchfor.toLowerCase();
-		// Which attribute should we check
-			var checkAttr;
-			if (reqType.indexOf("deptin-") >= 0 || reqType.indexOf("deptnotin-") >= 0) checkAttr="departments";
-			if (reqType.indexOf("subjin-") >= 0 || reqType.indexOf("subjnotin-") >= 0) checkAttr="subjects";
-			if (reqType.indexOf("colin-") >= 0 || reqType.indexOf("colnotin-") >= 0) checkAttr="colleges";
-			if (checkAttr === "") {
-				wfDebug(1,"\tCould not resolve 'checkAttr' from the reqType (" + reqType + "), stopping")
-				return false;
-			}
+		var notMode=reqType.indexOf("not")>0;
 
 		// Get the check list from the options if specified, otherwise parse from the stepname
 			var options=wfrule.options.substring(0,wfrule.options.indexOf(";"));
@@ -1407,38 +1420,30 @@ wffuncs.AttrIn = function(inval, wfrule, args) {
 				checkList=checkList.replace("-",',');
 			}
 
-		var notMode=reqType.indexOf("not")>0;
-		wfDump(1,["reqType;"+reqType,"checkAttr;"+checkAttr,"checkList;"+checkList,"notMode;"+notMode,"wfAllcodes;"+wfAllcodes]);
-		checkList="," + checkList + ",";
+		// Which attribute should we check, get standard values
+			var valsArray=[];
+			if (reqType.indexOf("colin-") >= 0 || reqType.indexOf("colnotin-") >= 0) {
+				var valsArray=GetAttrVal({request:"cols", options:"includetca", tcadata: tcadata});
+			} else if (reqType.indexOf("deptin-") >= 0 || reqType.indexOf("deptnotin-") >= 0) {
+				var valsArray=GetAttrVal({request:"depts", options:"includetca", tcadata: tcadata});
+			} else if (reqType.indexOf("subjin-") >= 0 || reqType.indexOf("subjnotin-") >= 0) {
+				var valsArray=GetAttrVal({request:"subjs", options:"includetca", tcadata: tcadata});
+			}
 
-		// Get standard values
-		if (wfAllcodes && wfCimInstance === 'courseadmin') {
-			var subjects=[];
-			wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata)).forEach(function(subj) {
-				subjects.push(subj.split(" ")[0]);
-			});
-			var departments=wffuncs.getDepartments(subjects);
-			var colleges=wffuncs.getColleges(departments);
-		} else {
-			var subjects=getTCFValue("subject", { delimiter: "\n", retarray: true });
-			var departments=getTCFValue("departments", { delimiter: "\n", retarray: true });
-			var colleges=getTCFValue("colleges", { delimiter: "\n", retarray: true });
-		}
-		if (checkAttr === 'subjects') wfDump(2,["subjects;"+subjects.toSource(),])
-		if (checkAttr === 'departments') wfDump(2,["departments;"+departments.toSource()])
-		if (checkAttr === 'colleges') wfDump(2,["colleges;"+colleges.toSource()])
+		wfDump(1,["reqType;"+reqType,"checkList;"+checkList,"notMode;"+notMode,"valsArray;"+valsArray.toSource()]);
+		checkList="," + checkList + ",";
 
 	//Initial Checks
 	try {
 		if (checkList === ",,") throw("No checkList specified in options or stepname");
+		if (valsArray.length === 0) throw("Could not resolve 'valsArray' from the reqType (" + reqType + ")");
 		InitialChecks(["wfrule"],args)
 	} //try
 	catch(err) { wfDebug(1,"\t*Error* -- " + myName + ": " + err + "\n"); return false; }
 
 	// Main
  		var allowStep=false;
- 		eval("array="+checkAttr);
- 		array.forEach(function(token) {
+ 		valsArray.forEach(function(token) {
 	 		//wfDump(1,["\ttoken;"+token]);
 			if (checkList.indexOf(","+token+",") >= 0)
 				allowStep=true;
@@ -1447,10 +1452,10 @@ wffuncs.AttrIn = function(inval, wfrule, args) {
 	// Return results
 		if (notMode) allowStep=!allowStep
 		if(allowStep) {
-			wfDebug(1,"\t*** Allowing step")
+			wfDebug(1,"\t*** Allowing step, notmode: " + notMode);
 			return [inval.replace(wfrule.ifregex,'')];
 		}
-		wfDebug(1,"\t*** Skipping step")
+		wfDebug(1,"\t*** Skipping step, notmode: " + notMode);
 		return false
 
 } //wffuncs.AttrIn
@@ -2265,3 +2270,4 @@ var wfLibLoaded=true;
 // 10-25-2017 @ 16.44.52 - ("1.8.31")  - dscudiero - Updated GetAttrVal to look at the tcf/tca data first
 // 11-01-2017 @ 10.47.16 - ("1.8.32")  - dscudiero - Tweak output message formatting
 // 11-07-2017 @ 10.21.36 - ("1.8.33")  - dscudiero - Fix a problem in GetRelated2 not running if the proposal data for each type is null
+// 11-08-2017 @ 12.21.17 - ("1.8.33")  - dscudiero - Added ability to pass an 'ignoreList' into Related and GetRelated2
