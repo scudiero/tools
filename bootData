@@ -3,7 +3,7 @@ export TOOLSDEVPATH="/home/dscudiero/tools"
 
 warehouseDb="courseleafdatawarehouse"
 warehouseDbName="$warehouseDb"
-warehouseHost="mdb1-host.inside.leepfrog.com"
+warehouseDbHost="mdb1-host.inside.leepfrog.com"
 runMySqlJavaPgmName='runMySql2'
 
 #warehouseDb="warehouse"
