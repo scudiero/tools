@@ -1,6 +1,6 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
-version=1.0.12 # -- dscudiero -- Mon 11/06/2017 @ 16:37:08.59
+version=1.0.13 # -- dscudiero -- Wed 11/08/2017 @ 11:26:53.50
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -176,7 +176,7 @@ if [[ $workBook != '' ]]; then
 			done
 		fi
 		Msg3
-fi
+fi ##[[ $workBook != '' ]];
 
 ## Generate second report - folks in the contacts db that did not attend
 	Msg3 "Generating Non-Attendee / role map data..."
@@ -187,7 +187,7 @@ fi
 	echo -e "$header" >> $outFile
 
 	cntr=0
-	whereClause='clients.clientkey=contacts.clientkey and Lower(clients.is_active)="y" and clients.products is not null'
+	whereClause='clients.clientkey=contacts.clientkey and Lower(clients.is_active)="y" and clients.products is not null and Lower(contacts.leepday)="y"'
 	orderBy="clients.clientcode,contactrole,contacts.lastname"
 	sqlStmt="select $fields from clients,contacts where $whereClause order by $orderBy"
 	RunSql2 "$contactsSqliteFile" $sqlStmt
@@ -268,3 +268,4 @@ Goodbye 0 #'alert'
 
 ## Mon Feb 13 16:09:23 CST 2017 - dscudiero - make sure we have our own tmpFile
 ## 11-06-2017 @ 16.43.26 - (1.0.12)    - dscudiero - Switch to new excel reader
+## 11-08-2017 @ 12.22.21 - (1.0.13)    - dscudiero - Only return clients who have 'opted-in' (leepday=Y)
