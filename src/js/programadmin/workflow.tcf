@@ -4,15 +4,16 @@
 localsteps:Program Workflow Management|groups|workflow|attributes=isUndergraduate[Is Undergraduate],isGraduate[Is Graduate],isNew[New Program],isEdit[Program Change],isDelete[Program Delete],fyi[FYI Only],fyiall[FYI All],todo[ToDo Item],optional[If Role Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
 
 
+
 template:custom
 pageflags:autoapprove
 
 workflow:standard|TODO,Depts Chair,Cols Dean,Curriculum Committee fyiall, Curriculum Committee Chair,Registrar
 
-//workflow:standard|START,College: Col,Department: Dept,Academic level: AcadLevel,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is New] isNew,[Is not New] isNotNew,[Is Edit/Change] isEdit,[Is not Edit/Change] isNotEdit,[Is Delete] isDelete,[Is not Delete] isNotDelete,END
+//workflow:standard|START,College: Col,Department: Dept,Academic level: AcadLevel,Proposal State: ProposalState,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is New] isNew,[Is not New] isNotNew,[Is Edit/Change] isEdit,[Is not Edit/Change] isNotEdit,[Is Delete] isDelete,[Is not Delete] isNotDelete,END
 
 //======================================================================================================================
-// version:1.0.10 // -- dscudiero -- Wed 10/25/2017 @  9:36:41.81
+// version:1.0.11 // -- dscudiero -- Wed 11/08/2017 @ 11:20:17.19
 //======================================================================================================================
 // Check in log
 //======================================================================================================================
@@ -23,3 +24,4 @@ workflow:standard|TODO,Depts Chair,Cols Dean,Curriculum Committee fyiall, Curric
 // 09-11-2017 @ 15.52.05 - dscudiero - General syncing of dev to prod
 // 09-26-2017 @ 10.21.58 - dscudiero - tweak comments
 // 10-25-2017 @ 09.38.28 - (41.81)     - dscudiero - Reformatted comments
+// 11-08-2017 @ 11.20.58 - (17.19)     - dscudiero - Added Proposal State to the debug workflow
