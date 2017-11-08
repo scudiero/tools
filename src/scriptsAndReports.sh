@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.62 # -- dscudiero -- Mon 11/06/2017 @ 16:46:11.18
+version=3.13.63 # -- dscudiero -- Wed 11/08/2017 @  7:50:39.59
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -202,9 +202,6 @@ function ExecReport {
 		if [[ $type == 'query' ]]; then
 			if [[ $dbType == 'mysql' ]]; then
 				RunSql2 $sqlStmt
-Here 0  >> $logFile
-echo $sqlStmt >> $logFile
-Dump tmpFile >> $logFile
 				if [[ ${#resultSet[@]} -gt 0 ]]; then
 					resultSet=("$(tr ',' '|' <<< "$header")" "${resultSet[@]}")
 					[[ -f $tmpFile ]] && rm -f $tmpFile
@@ -223,6 +220,7 @@ Dump tmpFile >> $logFile
 			reportIgnoreList=$(cut -d'|' -f 9 <<< "$resultString") ; [[ $reportIgnoreList == 'NULL' ]] && unset reportIgnoreList
 			## Call script
 			scriptArgs="-reportName $name -noHeaders"
+			[[ -f $tmpFile ]] && rm -f $tmpFile
 			if [[ $(Lower "$reportIgnoreList") == 'standalone' ]]; then
 				FindExecutable $reportScript -report -run $originalArgStr $reportArgs $userArgs | tee "$tmpFile"
 			else
@@ -232,11 +230,7 @@ Dump tmpFile >> $logFile
 			Terminate "Report type of '$type' not supported at this time"
 		fi
 
-Here 2  >> $logFile
-Dump tmpFile >> $logFile
-cat $tmpFile >> $logFile
-Here 3  >> $logFile
-		if [[ $(wc -l < "$tmpFile") -gt 1 ]]; then
+		if [[ -f "$tmpFile" && $(wc -l < "$tmpFile") -gt 1 ]]; then
 			if [[  $(Lower "$ignoreList") == 'returnsraw' ]]; then
 				Msg3 | tee "$outFileXlsx" > "$outFileText"
 				Msg3 "$name report run by $userName on $(date +"%m-%d-%Y") at $(date +"%H.%M.%S")" | tee -a "$outFileXlsx" >> "$outFileText"
@@ -536,3 +530,4 @@ Goodbye 0
 ## 11-01-2017 @ 08.03.05 - (3.13.54)   - dscudiero - Cosmetic/minor change
 ## 11-06-2017 @ 07.22.53 - (3.13.57)   - dscudiero - Switch to using the auth files
 ## 11-06-2017 @ 16.46.28 - (3.13.62)   - dscudiero - Add debug
+## 11-08-2017 @ 07.51.01 - (3.13.63)   - dscudiero - Removed debug statements
