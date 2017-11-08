@@ -1,10 +1,10 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #==================================================================================================
-version=1.0.117 # -- dscudiero -- Wed 11/01/2017 @  7:41:51.58
+version=1.0.118 # -- dscudiero -- Wed 11/08/2017 @  7:31:44.29
 #==================================================================================================
 TrapSigs 'on'
-myIncludes="RunSql2 ProtectedCall"
+myIncludes="RunSql2 GetExcel2 ProtectedCall"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -78,20 +78,21 @@ dump -2 workbookFile -t clientCode product project instance env
 
 ## Read the Testing Detail Final data
 	Verbose 1 "^^^^Parsing '$workSheet' worksheet..."
-	GetExcel "$workbookFile" "$workSheet" '^' > $tmpFile
-	grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
-	[[ $grepStr == '' ]] && grepStr=$(ProtectedCall "grep 'usage:' $tmpFile")
-	if [[ $grepStr != '' || $(tail -n 1 $tmpFile) == '-1' ]]; then
-		Error "Could not retrieve data from workbook, please see below"
-		tail -n 20 $tmpFile 2>&1 | xargs -I{} printf "\\t%s\\n" "{}"
-		Msg3
-		Goodbye -1
-	fi
-	Verbose 1 "^^^^$(wc -l $tmpFile | cut -d' ' -f1) Records read from worksheet"
+	GetExcel2 -wb "$workbookFile" -ws "$workSheet"
+	# grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
+	# [[ $grepStr == '' ]] && grepStr=$(ProtectedCall "grep 'usage:' $tmpFile")
+	# if [[ $grepStr != '' || $(tail -n 1 $tmpFile) == '-1' ]]; then
+	# 	Error "Could not retrieve data from workbook, please see below"
+	# 	tail -n 20 $tmpFile 2>&1 | xargs -I{} printf "\\t%s\\n" "{}"
+	# 	Msg3
+	# 	Goodbye -1
+	# fi
+	Verbose 1 "^^^^${#resultSet[@]} Records read from worksheet"
 	## Loop through the lines, parseing data
 	## line = testCaseid|testDescrpton|howToTest|overallStatus|iterationStatus|iterationDate|iterationPhase|iterationPhaseQualifier|
 	insertCntr=0
-	while read line; do
+	for ((i=0; i<${#resultSet[@]}; i++)); do
+		line="${resultSet[$i]}"
 		testCaseId=$(cut -d'^' -f1 <<< $line); testCaseId=$(cut -d'.' -f1 <<< $testCaseId)
 		[[ $testCaseId == 'Test Case #' ]] && continue
 		description=$(cut -d'^' -f2 <<< $line) ;
@@ -133,7 +134,7 @@ dump -2 workbookFile -t clientCode product project instance env
 		sqlStmt="insert into $qaTestingDetailsTable values($values)"
 		RunSql2 $sqlStmt
 		(( insertCntr += 1))
-	done < $tmpFile
+	done ## resultSet
 	Verbose 1 "^^^^$insertCntr records inserted into the $warehouseDb.$qaTestingDetailsTable table for qaStatus key qastatusKey"
 
 	## Update the fixedDate, fixedPhase, and fixedPhaseQualifier columns
@@ -194,3 +195,4 @@ dump -2 workbookFile -t clientCode product project instance env
 ## 10-19-2017 @ 09.42.47 - (1.0.114)   - dscudiero - Added debug arround caller check code
 ## 10-20-2017 @ 09.01.58 - (1.0.115)   - dscudiero - Fix problem in the caller check code
 ## 11-01-2017 @ 07.42.33 - (1.0.117)   - dscudiero - Switch to Msg3
+## 11-08-2017 @ 07.32.09 - (1.0.118)   - dscudiero - Switch to GetExcel2
