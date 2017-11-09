@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.44" # -- dscudiero -- Thu 11/09/2017 @  7:25:37.66
+# version="2.0.46" # -- dscudiero -- Thu 11/09/2017 @ 11:08:43.52
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -34,8 +34,7 @@ function Hello {
 	[[ $noBanners != true ]] && Msg3 "$userStr, Host: $hostName, Database: $warehouseDb, PID: $$, PPID: $PPID"
 	[[ -n $(Trim "$originalArgStr") ]] && Msg3 "Arg String: '$originalArgStr'"
 
-[[ $userName == dscudiero ]] && echo "\$0 = $0"
-[[ $userName == dscudiero ]] && [[ ${0:0:6} == '/home/' ]] && Msg3 "$(ColorW "*** Running from a local directory")"
+	[[ $USELOCAL == true ]] && Msg3 "$(ColorW "*** Running from a local directory")"
 
 	[[ $testMode == true ]] && Msg3 "$(ColorW "*** Running in Testmode ***")"
 	[[ "$DOIT" != ''  ]] && Msg3 "$(ColorW "*** The 'Doit' flag is turned off, changes not committed")"
@@ -79,3 +78,4 @@ export -f Hello
 ## 10-19-2017 @ 12.45.29 - ("2.0.42")  - dscudiero - Add StringFunctions to the includes slist
 ## 11-01-2017 @ 08.02.37 - ("2.0.43")  - dscudiero - Cosmetic/minor change
 ## 11-09-2017 @ 07.26.29 - ("2.0.44")  - dscudiero - Add Debug statements
+## 11-09-2017 @ 11.09.05 - ("2.0.46")  - dscudiero - Added a runing from local message
