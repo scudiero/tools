@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.63 # -- dscudiero -- Wed 11/08/2017 @  7:25:43.15
+version=1.2.64 # -- dscudiero -- Thu 11/09/2017 @  7:18:06.39
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -81,11 +81,14 @@ function buildQaStatusTable-testMode  { # or testMode-local
 echo; echo "\${resultSet[$jj]} = '${resultSet[$jj]}'"
 				item="$(Lower "$(cut -d'|' -f $itemCol <<< ${resultSet[$jj]})")"
 				itemHrs="$(cut -d'|' -f $itemHrsCol <<< ${resultSet[$jj]})"
+dump -t item itemHrs
 				[[ -z ${item}${itemHrs} ]] && continue
 				[[ $item == 'meetings (hrs)' ]] && break
 				tmpStr="${item,,[a-z]}"
+dump -t tmpStr
 				ctClient=${tmpStr%% *}; tmpStr=${tmpStr#* }
 				ctInstance=${tmpStr%% *}; tmpStr=${tmpStr#* }
+dump --t ctClient ctInstance 
 				[[ $ctInstance == '-' ]] && ctInstance=${tmpStr%% *}; tmpStr=${tmpStr#* }
 				[[ $(Contains "$ctInstance" 'c') == true ]] && ctInstance='courseadmin'
 				[[ $(Contains "$ctInstance" 'p') == true ]] && ctInstance='programadmin'
@@ -96,8 +99,8 @@ echo; echo "\${resultSet[$jj]} = '${resultSet[$jj]}'"
 				hashKey="$(Lower "$ctClient-$(TitleCase "$ctInstance")Admin-$ctProject-$ctEnv")"
 				dump -2 -n item itemHrs -t hashKey
 				cimTrackingHash[$hashKey]="$itemHrs"
-dump outHashName hashKey itemHrs priority
-				eval "$outHashName[$hashKey]=\"$itemHrs|$priority\""
+dump -t outHashName hashKey itemHrs priority
+				eval "$outHashName[\"$hashKey\"]=\"$itemHrs|$priority\""
 				((priority+=1))
 			done
 		return 0
@@ -430,3 +433,4 @@ Goodbye 0 #'alert'
 ## 11-03-2017 @ 10.52.38 - (1.2.59)    - dscudiero - Updated because the name of the cim priority data tab in the worksheet was changed.
 ## 11-03-2017 @ 11.07.03 - (1.2.61)    - dscudiero - Fix problem parsing the resoources sheet
 ## 11-08-2017 @ 07.26.23 - (1.2.63)    - dscudiero - Added debug code
+## 11-09-2017 @ 07.18.50 - (1.2.64)    - dscudiero - Add more debug stuff, quote outHashName hashKey
