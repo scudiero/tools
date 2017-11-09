@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.33" # -- dscudiero -- Thu 10/19/2017 @ 10:35:25.16
+# version="1.0.34" # -- dscudiero -- Fri 11/03/2017 @ 11:59:51.54
 #===================================================================================================
 # Usage: Msg3 <msgType> <msgLevel> <indentLevel> msgText
 # 	msgType: [N,I,W,E,T]
@@ -16,13 +16,12 @@ function Msg3 {
 		unset msgType msgLevel indentLevel msgText
 		if [[ $# -gt 1 ]]; then
 			[[ $1 = 'Q' || $1 = 'q' ]] && shift && echo -e "$*" && return 0
-			local re='^[q,Q,n,N,i,I,w,W,e,E,t,T,v,V,l,L]$'
+			local re='^[n,N,i,I,w,W,e,E,t,T,v,V,l,L]$'
 			[[ $1 =~ $re ]] && msgType="$1" && shift 1 || true
 			if [[ -z $msgLevel ]]; then
 				## First/Next token is a msg level?
 				re='^[0-9]+$'
 				if [[ $1 =~ $re ]]; then
-					[[ $1 -gt $verboseLevel ]] && return 0
 					msgLevel="$1"
 					shift 1 || true
 				fi
@@ -33,27 +32,26 @@ function Msg3 {
 				[[ $1 =~ $re ]] && indentLevel="$1" && shift 1 || true
 			fi
 			#dump msgType msgLevel indentLevel
+		fi
 
-			## Format message
-			msgText="$*"
-			case $msgType in
-				n|N) msgText="$(ColorN "*Note*") -- $msgText" ;;
-				i|I) msgText="$(ColorI "*Info*") -- $msgText" ;;
-				w|W) msgText="$(ColorW "*Warning*") -- $msgText\a" ;;
-				e|E) msgText="$(ColorE "*Error*") -- $msgText\a" ;;
-				t|T) msgText="$(ColorT "*Fatal Error*") -- $msgText\a" ;;
-				v|V) msgText="$(ColorV)$msgText" ;;
-				l|L) [[ -n $logFile && -w $logFile ]] && echo -e "$msgText" >> $logFile
-					 return 0 ;;
-			esac
+	## Format message
+		msgText="$*"
+		case $msgType in
+			l|L) [[ -n $logFile && -w $logFile ]] && { echo -e "$msgText" >> $logFile; return 0; } ;;
+			n|N) msgText="$(ColorN "*Note*") -- $msgText" ;;
+			i|I) msgText="$(ColorI "*Info*") -- $msgText" ;;
+			w|W) msgText="$(ColorW "*Warning*") -- $msgText\a" ;;
+			e|E) msgText="$(ColorE "*Error*") -- $msgText\a" ;;
+			t|T) msgText="$(ColorT "*Fatal Error*") -- $msgText\a" ;;
+			v|V) [[ $msgLevel -lt $verboseLevel && -n $logFile && -w $logFile ]] && { echo -e "$msgText" >> $logFile; return 0; } 
+				msgText="$(ColorV)$msgText" ;;
+		esac
+		[[ $msgLevel -gt $verboseLevel ]] && return 0
 
-			## Add indention
-			if [[ -n $indentLevel && $indentLevel -gt 0 ]]; then
-				local tmpStr=$(echo "$(head -c $indentLevel < /dev/zero | tr '\0' "^")")
-				msgText="${tmpStr}${msgText}"
-			fi
-		else
-			msgText="$*"
+		## Add indention
+		if [[ -n $indentLevel && $indentLevel -gt 0 ]]; then
+			local tmpStr=$(echo "$(head -c $indentLevel < /dev/zero | tr '\0' "^")")
+			msgText="${tmpStr}${msgText}"
 		fi
 
 	## print message
@@ -103,3 +101,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 10-19-2017 @ 08.20.48 - ("1.0.31")  - dscudiero - c
 ## 10-19-2017 @ 09.01.09 - ("1.0.32")  - dscudiero - s
 ## 10-19-2017 @ 10.35.36 - ("1.0.33")  - dscudiero - Remove debug statements
+## 11-09-2017 @ 14.15.05 - ("1.0.34")  - dscudiero - Added NotifyAllApprovers
