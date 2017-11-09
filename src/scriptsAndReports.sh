@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.63 # -- dscudiero -- Wed 11/08/2017 @  7:50:39.59
+version=3.13.64 # -- dscudiero -- Thu 11/09/2017 @  7:23:06.79
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -389,7 +389,7 @@ dump -1 -p client report emailAddrs myName ${myName}LastRunDate ${myName}LastRun
 		sendMail=false
 		Exec$itemTypeCap "$itemName" "$scriptArgs" ; rc=$?
 		#TrapSigs 'on'
-		Msg3
+		[[ $batchMode != true ]] && Msg3
 		# [[ $rc -eq 0 ]] && Msg3 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed successfully" || \
 		# 	Msg3 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed with errors (exit code = $rc) \
 		# 	\nPlease record any Messages and contact the $itemType owner\n"
@@ -531,3 +531,4 @@ Goodbye 0
 ## 11-06-2017 @ 07.22.53 - (3.13.57)   - dscudiero - Switch to using the auth files
 ## 11-06-2017 @ 16.46.28 - (3.13.62)   - dscudiero - Add debug
 ## 11-08-2017 @ 07.51.01 - (3.13.63)   - dscudiero - Removed debug statements
+## 11-09-2017 @ 07.26.48 - (3.13.64)   - dscudiero - Remove extra blank line if batchMode
