@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.43" # -- dscudiero -- Wed 11/01/2017 @  8:02:33.74
+# version="2.0.44" # -- dscudiero -- Thu 11/09/2017 @  7:25:37.66
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -34,15 +34,15 @@ function Hello {
 	[[ $noBanners != true ]] && Msg3 "$userStr, Host: $hostName, Database: $warehouseDb, PID: $$, PPID: $PPID"
 	[[ -n $(Trim "$originalArgStr") ]] && Msg3 "Arg String: '$originalArgStr'"
 
-	# echo "\$0 = $0"
-	# [[ ${0:0:6} == '/home/' ]] && Msg3 "$(ColorW "*** Running from a local directory")"
+[[ $userName == dscudiero ]] && echo "\$0 = $0"
+[[ $userName == dscudiero ]] && [[ ${0:0:6} == '/home/' ]] && Msg3 "$(ColorW "*** Running from a local directory")"
 
 	[[ $testMode == true ]] && Msg3 "$(ColorW "*** Running in Testmode ***")"
 	[[ "$DOIT" != ''  ]] && Msg3 "$(ColorW "*** The 'Doit' flag is turned off, changes not committed")"
 	[[ "$informationOnlyMode" == true  ]] && Msg3 "$(ColorW "*** The 'informationOnly' flag is set, changes not committed")"
 	[[ $userName != $checkName ]] && Msg3 "$(ColorW "*** Running as user $userName ***")"
 
-	echo
+	[[ $batchMode != true ]] && echo
 	## Log Start in process log database
 		if [[ $noLogInDb != true ]]; then
 			myLogRecordIdx=$(ProcessLogger 'Start' "$myName")
@@ -78,3 +78,4 @@ export -f Hello
 ## 10-19-2017 @ 09.38.34 - ("2.0.41")  - dscudiero - Added -noBanner option to limit outout
 ## 10-19-2017 @ 12.45.29 - ("2.0.42")  - dscudiero - Add StringFunctions to the includes slist
 ## 11-01-2017 @ 08.02.37 - ("2.0.43")  - dscudiero - Cosmetic/minor change
+## 11-09-2017 @ 07.26.29 - ("2.0.44")  - dscudiero - Add Debug statements
