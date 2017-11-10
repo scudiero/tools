@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.65 # -- dscudiero -- Fri 11/10/2017 @  8:14:47.96
+version=1.2.66 # -- dscudiero -- Fri 11/10/2017 @  8:17:56.46
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -78,17 +78,13 @@ function buildQaStatusTable-testMode  { # or testMode-local
 			priorityWeek=${priorityWeek##* }
 			dump -2 priorityWeek
 			for ((jj=2; jj<${#resultSet[@]}; jj++)); do
-echo; echo "\${resultSet[$jj]} = '${resultSet[$jj]}'"
 				item="$(Lower "$(cut -d'|' -f $itemCol <<< ${resultSet[$jj]})")"
 				itemHrs="$(cut -d'|' -f $itemHrsCol <<< ${resultSet[$jj]})"
-dump -t item itemHrs
 				[[ -z ${item}${itemHrs} ]] && continue
 				[[ $item == 'meetings (hrs)' ]] && break
 				tmpStr="${item,,[a-z]}"
-dump -t tmpStr
 				ctClient=${tmpStr%% *}; tmpStr=${tmpStr#* }
 				ctInstance=${tmpStr%% *}; tmpStr=${tmpStr#* }
-dump --t ctClient ctInstance 
 				[[ $ctInstance == '-' ]] && ctInstance=${tmpStr%% *}; tmpStr=${tmpStr#* }
 				[[ $(Contains "$ctInstance" 'c') == true ]] && ctInstance='courseadmin'
 				[[ $(Contains "$ctInstance" 'p') == true ]] && ctInstance='programadmin'
@@ -99,7 +95,6 @@ dump --t ctClient ctInstance
 				hashKey="$(Lower "$ctClient-$(TitleCase "$ctInstance")Admin-$ctProject-$ctEnv")"
 				dump -2 -n item itemHrs -t hashKey
 				cimTrackingHash[$hashKey]="$itemHrs"
-dump -t outHashName hashKey itemHrs priority
 				eval "$outHashName[\"$hashKey\"]=\"$itemHrs|$priority\""
 				((priority+=1))
 			done
@@ -300,17 +295,15 @@ for workbook in "${workbooks[@]}"; do
 		fi
 
 	## Do we have data for this record from the implimentaiton team tracking spreadsheet
+		implPriorityWeek="Not Avaiable"
+		implHours"Not Avaiable"
+		implPriority"Not Avaiable"
 		checkKey="$(Lower "$clientCode-$instance-$project-$env")"
 		if [[ ${cimTrackingHash[$checkKey]+abc} ]]; then
 			implPriorityWeek="$priorityWeek"
 			tmpVal="${cimTrackingHash["$checkKey"]}"
 			implHours="${tmpVal%%|*}"
 			implPriority="${tmpVal##*|}"
-		else
-			unset implPriorityWeek implHours implPriority
-			implPriorityWeek="Not Avaiable"
-			implHours"Not Avaiable"
-			implPriority"Not Avaiable"
 		fi
 	## Quote strings
 		unset values
