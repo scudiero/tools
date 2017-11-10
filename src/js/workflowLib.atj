@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.34" // -- dscudiero -- Thu 11/09/2017 @ 14:08:13.68
+wfLibVersion="1.8.35" // -- dscudiero -- Thu 11/09/2017 @ 15:24:51.87
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -1574,6 +1574,9 @@ wffuncs.AddSisStep = function(inval, wfrule, args) {
 
 //======================================================================================================================
 // Notify all previous approvers in the workflow
+// The desired suffix (fyi/fyiall) can be passed as an option on the wfrule definition wfrule:....|<fyi/fyiall>
+// or can be coded on the workflow step name,e.g/ 'NotifyAllApprovers fyi'.  If not specified then the added modifier
+// will be 'fyiall'.
 //======================================================================================================================
 // 11/09/17 - dgs - Initial coding
 //======================================================================================================================
@@ -1582,30 +1585,51 @@ wffuncs.NotifyAllApprovers = function(inval, wfrule, args, prevsteps) {
 	var options=wfrule.options;	options=options.substring(0, options.indexOf(';'));
 	if (! args.hasOwnProperty("prevsteps")) return false;
 	var prevsteps=args.prevsteps;
-	var retArray=[];
+	if (prevsteps.length === 0) return false;
 
-	var reqType=wfrule.searchfor.toLowerCase();
-	var notMode=reqType.indexOf('not')>=0;
-	if (notMode === false)
-		notMode=options.toLowerCase().indexOf('notmode')>=0;
-	wfDebug(2,"\treqType = '"+reqType+"', notMode= '"+notMode+"', options= '"+ options + "'\n");
-	wfDebug(2,"\tprevsteps = " + prevsteps.toSource() + "\n");
+	var retArray=[];
+	var suffix=" fyiall";
+	var regex=/\bfyi\b|\bfyiall\b/;	//Note that this is not a string, there are no quotes arround the value
+	var ignore=[];
+	ignore["regen"]=true;
+	ignore[getTCFValue("sisname")]=true;
+
+	//Process options
+	wfDump(2,["options;"+options]);
+	var unknownOpts=""
+	options.split(",").forEach(function(option) {
+		switch(option.toLowerCase()) {
+		    case "fyiall":
+		        suffix=" fyiall";
+		        break;
+		    case "fyi":
+		        suffix=" fyi";
+		        break;
+		    default:
+		    	if (unknownOpts.length) {
+		    		unknownOpts=unknownOpts + "," + option;
+		    	} else {
+		    		unknownOpts=option;
+		    	}
+		    	// break;
+		} // switch
+	});
+
+	// Does the step name contain fyi or fyiall, if yes then do not add suffix
+	if (regex.test(inval))
+		suffix="";
+
+	wfDump(1,["suffix;"+suffix,"prevsteps;"+prevsteps.toSource(),"unknownOpts;"+unknownOpts]);
 
 	//Initial Checks
 	try { InitialChecks(["wfrule"],args) }
 	catch(err) { wfDebug(1,"\t" + myName + ": " + err + "\n") ; return false; }
 
 	// Main
- 		if (prevsteps.length === 0)
- 			return false;
- 		var ignore=[];
- 		ignore["regen"]=true;
- 		ignore[getTCFValue("sisname")]=true;
-
 		var regex=/\bfyi\b|\bfyiall\b/;					//Note that this is not a string, there are no quotes arround the value
 		prevsteps.forEach(function(step) {
 			if (! regex.test(step) && ! ignore[step])
-				retArray.push(step + " fyiall");
+				retArray.push(inval.replace(wfrule.regex,step + suffix));
 		});
 
 	// Return results -- date
@@ -2316,3 +2340,4 @@ var wfLibLoaded=true;
 // 11-07-2017 @ 10.21.36 - ("1.8.33")  - dscudiero - Fix a problem in GetRelated2 not running if the proposal data for each type is null
 // 11-08-2017 @ 12.21.17 - ("1.8.33")  - dscudiero - Added ability to pass an 'ignoreList' into Related and GetRelated2
 // 11-09-2017 @ 14.16.09 - ("1.8.34")  - dscudiero - Added NotifyAllApprovers
+// 11-10-2017 @ 08.19.13 - ("1.8.35")  - dscudiero - Updated NotifyAllApprovers to make it a bit more general, allowing the selection of fyi/fyiall
