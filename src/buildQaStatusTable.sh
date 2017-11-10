@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.64 # -- dscudiero -- Thu 11/09/2017 @  7:18:06.39
+version=1.2.65 # -- dscudiero -- Fri 11/10/2017 @  8:14:47.96
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -200,14 +200,9 @@ DumpMap 2 "$(declare -p variableMap)"
 # Main
 #================================================================================================================================================================
 Msg3; Msg3 "Retrieveing Implementation Team data from '$(basename "$cimTrackingWorkBook")/$cimTrackingWorkbookSheet'"
-GetCimPriorityData 'cimTrackingHash' "$cimTrackingWorkBook" "$cimTrackingWorkbookSheet" "$qaColumnName"
-if [[ $verboseLevel -ge 1 ]]; then
-	dump -t priorityWeek
-	echo -e "\tcimTrackingHash:"
-	for mapCtr in "${!cimTrackingHash[@]}"; do
-		echo -e "\t\tkey: '$mapCtr', value: '${cimTrackingHash[$mapCtr]}'";
-	done;
-fi
+## Disable getting resource data since the implementation will not cooperate with us on how the data is recorded
+## GetCimPriorityData 'cimTrackingHash' "$cimTrackingWorkBook" "$cimTrackingWorkbookSheet" "$qaColumnName"
+## if [[ $verboseLevel -ge 1 ]]; then Msg3 "^cimTrackingHash:"; for i in "${!cimTrackingHash[@]}"; do printf "\t\t[$i] = >${cimTrackingHash[$i]}<\n"; done; fi
 
 Msg3; Msg3 "QA Tracking Root directory = '$qaTrackingRoot'"
 unset numTokens clientCode product project instance
@@ -313,6 +308,9 @@ for workbook in "${workbooks[@]}"; do
 			implPriority="${tmpVal##*|}"
 		else
 			unset implPriorityWeek implHours implPriority
+			implPriorityWeek="Not Avaiable"
+			implHours"Not Avaiable"
+			implPriority"Not Avaiable"
 		fi
 	## Quote strings
 		unset values
@@ -434,3 +432,4 @@ Goodbye 0 #'alert'
 ## 11-03-2017 @ 11.07.03 - (1.2.61)    - dscudiero - Fix problem parsing the resoources sheet
 ## 11-08-2017 @ 07.26.23 - (1.2.63)    - dscudiero - Added debug code
 ## 11-09-2017 @ 07.18.50 - (1.2.64)    - dscudiero - Add more debug stuff, quote outHashName hashKey
+## 11-10-2017 @ 08.15.14 - (1.2.65)    - dscudiero - Comment out the processing of the CIM Trackign spreadsheet
