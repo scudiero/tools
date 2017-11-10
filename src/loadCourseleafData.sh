@@ -26,15 +26,15 @@ scriptDescription="Load Courseleaf Data"
 	#==============================================================================================
 	function loadCourseleafData-ParseArgsStd2  {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
-		myArgs+=("w|workbookFile|option|workbookFile||script|The fully qualified spreadsheet file name")
-		myArgs+=("skipNulls|skipNulls|switch|skipNulls||script|If a data field is null then do not write out that data to the page")
-		myArgs+=("ignore|ignoreMissingPages|switch|ignoreMissingPages||script|Ignore missing catalog pages")
-		myArgs+=("noIgnore|noIgnoreMissingPages|switch||ignoreMissingPages=false|script|Do not ignore missing catalog pages")
-		myArgs+=("uin|uinMap|switch|uinMap||script|Map role data UIDs to UINs even if the uses UIN flag is not set on the client record")
-		myArgs+=("noUin|noUinMap|switch||uinMap=false|script|Do not map role data UIDs to UINs")
-		myArgs+=("users|users|switch|processUserData||script|Load user data")
-		myArgs+=("role|role|switch|processRoleData||script|Load role data")
-		myArgs+=("page|page|switch|processPageData||script|Load catalog page data")
+		myArgs+=("w|workbookfile|option|workbookFile||script|The fully qualified spreadsheet file name")
+		myArgs+=("skipnulls|skipnulls|switch|skipNulls||script|If a data field is null then do not write out that data to the page")
+		myArgs+=("ignore|ignoremissingPages|switch|ignoreMissingPages||script|Ignore missing catalog pages")
+		myArgs+=("noignore|noignoremissingPages|switch||ignoreMissingPages=false|script|Do not ignore missing catalog pages")
+		myArgs+=("uin|uinmap|switch|uinMap||script|Map role data UIDs to UINs even if the uses UIN flag is not set on the client record")
+		myArgs+=("nouin|nouinmap|switch||uinMap=false|script|Do not map role data UIDs to UINs")
+		myArgs+=("users|users|switch|processuserdata||script|Load user data")
+		myArgs+=("role|role|switch|processroledata||script|Load role data")
+		myArgs+=("page|page|switch|processpagedata||script|Load catalog page data")
 		return 0
 	}
 	#==============================================================================================
@@ -102,18 +102,13 @@ scriptDescription="Load Courseleaf Data"
 	# Cleanup funtion, strip leadning blanks, tabs and commas
 	#==================================================================================================
 	function CleanString {
-
 		local string="$*"
-
 		## blanks before commas
 		string=$(echo "$string" | sed 's/ ,/,/g')
-
 		## blanks  after commas
 		string=$(echo "$string" | sed 's/, /,/g')
-
 		## Strip leading blanks. tabs. commas
 		string=$(echo "$string" | sed 's/^[ ,\t]*//g')
-
 		## Strip trailing blanks. tabs. commas
 		string=$(echo "$string" | sed 's/[ ,\t]*$//g')
 
@@ -121,24 +116,34 @@ scriptDescription="Load Courseleaf Data"
 	}
 
 	#==================================================================================================
-	# Get the users data from the db
+	# Get the users data from the db, loads a hash table, key is the userid and the value is the remaining 
+	# seperated with a '|' data if useUINs is set then it is assumed that the clusers table contains a 
+	# uin field
 	#==================================================================================================
 	function GetUsersDataFromDB {
-		dbFile=$siteDir/db/clusers.sqlite
+		local dbFile=$siteDir/db/clusers.sqlite
 		[[ ! -r $dbFile ]] && Terminate "Could not read the clusers database file:\n\t$dbFile"
 		Msg3 "Reading the user data from the clusers database ..."
 
-		sqlLiteFields="userid,lname,fname,email"
+		local sqlLiteFields="userid,lname,fname,email"
+		SetFileExpansion 'off'
+		local sqlStmt="select * from sqlite_master where type=\"table\" and name=\"users\""
+		SetFileExpansion
+		RunSql2 "$siteDir/db/clusers.sqlite" $sqlStmt
+		[[ ${#resultSet[@]} -le 0 ]] && Terminate "Could not retrieve clusers.users table definition data from '$contactsSqliteFile'"
+		local tData="${resultSet[0]#*(}"; tData="${tData%)*}"
+		[[ $(Contains "${tData%)*}" 'uin') == true ]] && sqlLiteFields="$sqlLiteFields,uin"
 		sqlStmt="select $sqlLiteFields FROM users"
 		RunSql2 "$dbFile" "$sqlStmt"
 		if [[ ${#resultSet[@]} -ne 0 ]]; then
 			for resultRec in "${resultSet[@]}"; do
-				dump -2 resultRec
-				key=$(cut -d '|' -f 1 <<< "$resultRec")
-				key=$(cut -d'.' -f1 <<< $key)
+				key=${resultRec%%|*}; key=${key%%.*}
 				[[ $key == '' ]] && continue
-				value=$(cut -d '|' -f 2 <<< "$resultRec")'|'$(cut -d '|' -f 3 <<< "$resultRec")'|'$(cut -d '|' -f 4 <<< "$resultRec")
+				local value=${resultRec#*|}; 
 				usersFromDb["$key"]="$value"
+				if [[ $useUINs == true ]] ; then
+					[[ ! ${uidUinHash["$key"]+abc} ]] && uidUinHash["$key"]="${value##*|}"
+				fi
 			done
 		fi
 		numUsersfromDb=${#usersFromDb[@]}
@@ -154,13 +159,13 @@ scriptDescription="Load Courseleaf Data"
 		[[ $useUINs == true && $processedUserData != true ]] && Terminate "$FUNCNAME: Requesting UIN mapping but no userid sheet was provided"
 		Msg3 "Reading the roles.tcf file ..."
 		## Get the roles data from the roles.tcf file
-			file=$rolesFile
+			local file=$rolesFile line
 			[[ ! -r $file ]] && Terminate "Could not read the roles file: '$file'"
 			while read line; do
 				if [[ ${line:0:5} == 'role:' ]]; then
-					key=$(cut -d '|' -f 1 <<< "$line" | cut -d ':' -f 2)
+					local key=$(cut -d '|' -f 1 <<< "$line" | cut -d ':' -f 2)
 					[[ $key == '' ]] && continue
-					data=$(Trim $(cut -d '|' -f 2- <<< "$line"))
+					local data=$(Trim $(cut -d '|' -f 2- <<< "$line"))
 					dump -3 -n line key data
 			      	rolesFromFile+=([$key]="$data")
 			      	rolesOut+=([$key]="$data")
@@ -179,11 +184,11 @@ scriptDescription="Load Courseleaf Data"
 		[[ $useUINs == true && $processedUserData != true ]] && Terminate "$FUNCNAME: Requesting UIN mapping but no userid sheet was provided"
 		Msg3 "Reading the workflow.tcf file ..."
 		## Get the roles data from the roles.tcf file
-			file=$siteDir/web/$courseleafProgDir/workflows.tcf
+			local file="$siteDir/web/$courseleafProgDir/workflows.tcf" line
 			[[ ! -r $file ]] && Terminate "Could not read the '$file' file"
 			while read line; do
 				if [[ ${line:0:9} == 'workflow:' ]]; then
-					key=$(cut -d ':' -f 2 <<< "$line" | cut -d '|' -f 1)
+					local key=$(cut -d ':' -f 2 <<< "$line" | cut -d '|' -f 1)
 					[[ $key == '' ]] && continue
 					workflowsFromFile[$key]=true
 		      	fi
@@ -207,7 +212,7 @@ scriptDescription="Load Courseleaf Data"
 		[[ ${#resultSet[@]} -le 0 ]] && Terminate "($FUNCNAME) No date in the workbook worksheet '$sheetName'"
 
 		## Scan returned data looking for the 'headerRowIndicator'
-			local result foundHeader=false i
+			local result foundHeader=false i headerRow
 			for ((i=0; i<${#resultSet[@]}; i++)); do
 				result="${resultSet[$i]}"
 				[[ ${result:0:${#headerIndicator}} == "$headerIndicator" ]] && { foundHeader=true; break; }
@@ -254,31 +259,48 @@ scriptDescription="Load Courseleaf Data"
 	#==================================================================================================
 	# Map UIDs to UINs in role members
 	#==================================================================================================
-	function EditRoleMembers {
-		local memberData="$*"
-		[[ $useUINs != true ]] && echo "$memberData" && return
+	# function EditRoleMembers {
+	# 	local memberData="$*"
+	# 	[[ $useUINs != true ]] && echo "$memberData" && return
 
-		local memberDataNew member members
+	# 	local memberDataNew member members
+	# 	IFSsave=$IFS; IFS=',' read -a members <<< "$memberData"; IFS=$IFSsave
+	# 	for member in "${members[@]}"; do
+	# 		[[ ${usersFromDb["$member"]+abc} ]] && echo -e "\tusersFromDb" >> $stdout && memberDataNew="$memberDataNew,$member" && continue
+	# 		[[ ${uidUinHash["$member"]+abc} ]] && echo -e "\tuidUinHash" >> $stdout && memberDataNew="$memberDataNew,${uidUinHash["$member"]}" && continue
+	# 		# memberDataNew="$memberDataNew,$member"
+	# 	done
+	# 	echo "${memberDataNew:1}"
+	# } #EditRoleMembers
 
-		IFSsave=$IFS; IFS=',' read -a members <<< "$memberData"; IFS=$IFSsave
-		for member in "${members[@]}"; do
-			[[ ${usersFromDb["$member"]+abc} ]] && memberDataNew="$memberDataNew,$member" && continue
-			[[ ${uidUinHash["$member"]+abc} ]] && memberDataNew="$memberDataNew,${uidUinHash["$member"]}" && continue
-			memberDataNew="$memberDataNew,$member"
+
+	#==================================================================================================
+	# Map UIDs to UINs in a comma seperated string
+	#==================================================================================================
+	function SubstituteUINs {
+		local data="$*" editedString tmpStr tokens token
+		[[ $useUINs != true ]] && echo "$data" && return
+
+		unset tmpStr
+		local IFSsave=$IFS; IFS=',' read -a tokens <<< "$data"; IFS=$IFSsave
+		for token in "${tokens[@]}"; do
+			[[ ${uidUinHash["$token"]+abc} ]] && tmpStr="$tmpStr,${uidUinHash["$token"]}" || tmpStr="$tmpStr,$token"
 		done
-		echo "${memberDataNew:1}"
-	} #EditRoleMembers
+		[[ ${tmpStr:0:1} == ',' ]] && echo "${tmpStr:1}" || echo "${tmpStr}"
+		return 0
+	} #SubstituteUINs
 
 	#==================================================================================================
 	# Process USER records
 	#==================================================================================================
 	function ProcessUserData {
 		local workbookSheet="$1"
+		local uin
 
 		## See if this client has special case handling for usernames
 			sqlStmt="select useridCase from $clientInfoTable where name=\"$client\""
 			RunSql2 $sqlStmt
-			useridCase=$(Upper ${resultSet[0]:0:1}) || useridCase='M'
+			local useridCase=$(Upper ${resultSet[0]:0:1}) || useridCase='M'
 
 		Msg3 "Parsing the 'user' data from the '$workbookSheet' worksheet ..."
 		## Get the user data from the spreadsheet
@@ -286,18 +308,25 @@ scriptDescription="Load Courseleaf Data"
 			## Read the header record, look for the specific columns to determine how to parse subsequent records
 			ParseWorksheetHeader "$workbookSheet" 'userid first last email' 'uin'
 			[[ $verboseLevel -ge 1 ]] && { for field in userid first last email uin; do dump ${field}Col; done; }
-			## If useUINs is set and there is no uin column in the user data then error
 			[[ $useUINs == true && -z $uinCol ]] && Terminate "Use UINs was set and no 'UIN' column was found in the user data"
+
 			## Parse the data rows into hash table
 			for ((ii=0; ii<${#resultSet[@]}; ii++)); do
-				result="${resultSet[$ii]}"
-				[[ -z $(tr -d '|' <<< "$result" ) ]] && continue
-				key=$(cut -d '|' -f $useridCol <<< "$result")
+				local result="${resultSet[$ii]}"
+				[[ -z ${result//|} ]] && continue
+				local key=$(cut -d '|' -f $useridCol <<< "$result") ## userid
 				[[ -z $key ]] && continue
-				[[ $useridCase == 'U' ]] && key=$(Upper $key)
-				[[ $useridCase == 'L' ]] && key=$(Lower $key)
-				value=$(cut -d '|' -f $lastCol <<< "$result")'|'$(cut -d '|' -f $firstCol <<< "$result")'|'$(cut -d '|' -f $emailCol <<< "$result")
-				[[ -n $uinCol ]] && value="$value'|'$(cut -d '|' -f $uinCol <<< "$result")"
+				key="${key%%.*}"; key="${key// }"
+				[[ $useridCase == 'U' ]] && key=${key^^[a-z]}
+				[[ $useridCase == 'L' ]] && key=${key,,[a-z]}
+				## Parse out the data
+				local first="$(cut -d '|' -f $firstCol <<< "$result")"; first="${first/# }"; first="${first/% }"
+				local last="$(cut -d '|' -f $lastCol <<< "$result")"; last="${last/# }"; last="${last/% }"
+				local email="$(cut -d '|' -f $emailCol <<< "$result")"; email="${email/# }"; email="${email/% }"
+				[[ -n $uinCol ]] && { uin="$(cut -d '|' -f $uinCol <<< "$result")"; uin="${uin%%.*}"; uin="${uin/# }"; uin="${uin/% }"; }
+
+				value="$last|$first|$email"
+				[[ -n $uinCol ]] && value="${value}|$uin"
 				dump -2 -n result -t key value
 				if [[ ${usersFromSpreadsheet["$key"]+abc} ]]; then
 					if [[ -n $value && $value != '|' && ${usersFromSpreadsheet["$key"]} != $value ]]; then
@@ -321,57 +350,62 @@ scriptDescription="Load Courseleaf Data"
 			[[ $informationOnlyMode != true ]] && verb='Merging' || verb='Checking'
 			Msg3 "$verb User data..."
 
-			dbFile=$siteDir/db/clusers.sqlite
+			local dbFile=$siteDir/db/clusers.sqlite
 			BackupCourseleafFile $dbFile
 			local procesingCntr=0
-			sTime=$(date "+%s")
+			local sTime=$(date "+%s")
 			for key in "${!usersFromSpreadsheet[@]}"; do
-				[[ $verboseLevel -ge 1 ]] && echo -e "\t\${usersFromSpreadsheet["$key"]} = '${usersFromSpreadsheet["$key"]}'"
+				key="${key%%.*}"
+				[[ $verboseLevel -ge 1 ]] && echo -e "\${usersFromSpreadsheet["$key"]} = '${usersFromSpreadsheet["$key"]}'"
 				unset lname fname email
-				lname=$(Trim "$(cut -d '|' -f1 <<< ${usersFromSpreadsheet["$key"]})")
-				fname=$(Trim "$(cut -d '|' -f2 <<< ${usersFromSpreadsheet["$key"]})")
-				email=$(Trim "$(cut -d '|' -f3 <<< ${usersFromSpreadsheet["$key"]})")
-				dump -1 -t-t lname fname email
+				local lname=$(Trim "$(cut -d '|' -f1 <<< ${usersFromSpreadsheet["$key"]})")
+				local fname=$(Trim "$(cut -d '|' -f2 <<< ${usersFromSpreadsheet["$key"]})")
+				local email=$(Trim "$(cut -d '|' -f3 <<< ${usersFromSpreadsheet["$key"]})")
+				local uin=$(Trim "$(cut -d '|' -f4 <<< ${usersFromSpreadsheet["$key"]})")
+				dump -1 -t2 lname fname email uin
 
 				if [[ ${usersFromDb["$key"]+abc} ]]; then
-					unset oldData;  oldData="${usersFromDb["$key"]}"
+					local oldData; unset oldData;
+					oldData="${usersFromDb["$key"]}"
 					[[ ${oldData:(-1)} == '|' ]] && oldData=${oldData:0:${#oldData}-1}
-					unset newData;  newData="${usersFromDb["$key"]}"
+					local newData; unset newData;
+					newData="${usersFromDb["$key"]}"
 					[[ ${newData:(-1)} == '|' ]] && newData=${newData:0:${#newData}-1}
 					if [[ $oldData != $newData ]]; then
 						WarningMsg 0 1 "Found User '$key' in the clusers database file but data is different, using new data"
 						Msg3 "^^New Data: $newData"
 						Msg3 "^^Old Data: $oldData"
-						sqlStmt="UPDATE users set lname=\"$lname\", fname=\"$fname\", email=\"$email\" where userid=\"$key\" "
+						sqlStmt="UPDATE users set lname=\"$lname\", fname=\"$fname\", email=\"$email\" where userid=\"$key\""
 						[[ $informationOnlyMode == false ]] && $DOIT RunSql2 "$dbFile" "$sqlStmt"
 						(( numModifiedUsers += 1 ))
 					fi
 				else
 					Verbose 1 "Adding new user: $key"
-					sqlStmt="INSERT into users values(NULL,\"$key\",\"$lname\",\"$fname\",\"$email\") "
+					sqlStmt="INSERT into users values(NULL,\"$key\",\"$lname\",\"$fname\",\"$email\")"
 					[[ $informationOnlyMode == false ]] && $DOIT RunSql2 "$dbFile" "$sqlStmt"
 					usersFromDb["$key"]="${usersFromSpreadsheet["$key"]}"
 					Verbose 1 2 "User added: $key"
 					(( numNewUsers += 1 ))
 				fi
 				# If useUINs is active then build userid to uin map from the email information
-				if [[ $useUINs == true ]]; then
-					uid=$(cut -d'|' -f 3 <<< $string | cut -d'@' -f1)
-					uidUinHash["$uid"]="$key"
+				if [[ $useUINs == true && -n $uin ]]; then
+					uid="${email%%@*}"
+					uidUinHash["$uid"]="$uin"
 				fi
 				if [[ $procesingCntr -ne 0 && $(($procesingCntr % $notifyThreshold)) -eq 0 ]]; then
-					elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1
+					local elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1
 					sTime=$(date "+%s")
 					Msg3 "^Processed $procesingCntr out of $numUsersfromSpreadsheet (${elapTime}s)..."
 				fi
 				let procesingCntr=$procesingCntr+1
 			done
-			if [[ $verboseLevel -ge 1 ]]; then Msg3 "\tMerged User list:"; for i in "${!usersFromDb[@]}"; do printf "\t\t[$i] = >${usersFromDb[$i]}<\n"; done; fi
+			if [[ $verboseLevel -ge 1 ]]; then 
+				Msg3 "\tMerged User list (usersFromDb):"; for i in "${!usersFromDb[@]}"; do printf "\t\t[$i] = >${usersFromDb[$i]}<\n"; done; 
+				Msg3 "\tUserid/UIN map (uidUinHash):"; for i in "${!uidUinHash[@]}"; do printf "\t\t[$i] = >${uidUinHash[$i]}<\n"; done; 
+			fi
 
 		## Rebuild the appache-group file
-			if [[ $informationOnlyMode == false ]]; then
-				RunCourseLeafCgi "$siteDir" "-r /apache-group.html"
-			fi
+			[[ $informationOnlyMode == false ]] && RunCourseLeafCgi "$siteDir" "-r /apache-group.html"
 			echo
 
 		return 0
@@ -396,7 +430,7 @@ scriptDescription="Load Courseleaf Data"
 				[[ -z $key ]] && continue
 				value=$(cut -d '|' -f $membersCol <<< "$result")'|'$(cut -d '|' -f $emailCol <<< "$result")
 				value=$(tr -d ' ' <<< $value)
-				dump -2  -n result -t key value
+				dump -2 -n result -t key value
 				[[ $(IsNumeric ${value:0:1}) == true ]] && value=$(cut -d'.' -f1 <<< $value)
 				if [[ ${rolesFromSpreadsheet["$key"]+abc} ]]; then
 					if [[ -n $value && $value != '|' && ${rolesFromSpreadsheet["$key"]} != $value ]]; then
@@ -413,7 +447,6 @@ scriptDescription="Load Courseleaf Data"
 
 		## Merge the spreadsheet data and the file data
 			GetRolesDataFromFile #Also sets rolesOut
-
 			if [[ $verboseLevel -ge 1 ]]; then Msg3 "\trolesOut:"; for i in "${!rolesOut[@]}"; do printf "\t\t[$i] = >${rolesOut[$i]}<\n"; done; fi
 			numNewRoles=0
 			numModifiedRoles=0
@@ -425,14 +458,18 @@ scriptDescription="Load Courseleaf Data"
 			sTime=$(date "+%s")
 			for key in "${!rolesFromSpreadsheet[@]}"; do
 				## Edit role data if useUINs is on
-					memberData="$(cut -d'|' -f 1 <<< "${rolesFromSpreadsheet["$key"]}")"
-					emailData="$(cut -d'|' -f 2 <<< "${rolesFromSpreadsheet["$key"]}")"
-					newMemberData="$(EditRoleMembers "$memberData")"
-					if [[ $memberData != $newMemberData ]]; then
-						rolesFromSpreadsheet["$key"]="$newMemberData|$emailData"
-						Note  "Role: '$key' -- UIDs mapped to UINs"
+				if [[ $useUINs == true ]]; then
+					tmpStr="${rolesFromSpreadsheet["$key"]}"
+					memberData=${tmpStr%%|*}; key=${key%%.*}; tmpStr=${tmpStr#*|};
+					emailData=${tmpStr%%|*}; key=${key%%.*}; tmpStr=${tmpStr#*|};
+					unset tmpStr
+					tmpStr="$(SubstituteUINs $memberData)"
+					if [[ $tmpStr != $memberData ]]; then
+						rolesFromSpreadsheet["$key"]="$tmpStr|$emailData"
+						#Note  "Role: '$key' -- UIDs mapped to UINs"
 						(( numRoleMembersMappedToUIN +=1 ))
 					fi
+				fi
 
 				## Check spreadsheet data vs file data
 					if [[ ${rolesOut["$key"]+abc} ]]; then
@@ -444,12 +481,12 @@ scriptDescription="Load Courseleaf Data"
 								[[ ${oldData:(-1)} == '|' ]] && oldData=${oldData:0:${#oldData}-1}
 								Msg3 "^^Old Data: $oldData"
 							fi
-							Info 0 1 "Found Role '$key' in the roles file, old data is null, using new data"
+							Info 2 1 "Found Role '$key' in the roles file, old data is null, using new data"
 							rolesOut["$key"]="${rolesFromSpreadsheet["$key"]}"
 							(( numModifiedRoles += 1 ))
 						fi
 					else
-						Verbose 1 2 "New role added: $key"
+						Verbose 2 2 "New role added: $key"
 						rolesOut["$key"]="${rolesFromSpreadsheet["$key"]}"
 						(( numNewRoles += 1 ))
 					fi
@@ -460,6 +497,8 @@ scriptDescription="Load Courseleaf Data"
 				fi
 				let procesingCntr=$procesingCntr+1
 			done
+			#for i in "${!rolesOut[@]}"; do echo -e "\tkey: '$i', value: '${rolesOut[$i]}'"; done;
+
 
 ##TODO: Replace writing of the roles data with a courseleaf step somehow
 		## Write out the role data to the role file
@@ -499,8 +538,7 @@ scriptDescription="Load Courseleaf Data"
 				Msg3 "Checking Role members..."
 				for key in "${!rolesOut[@]}"; do
 					members=$(cut -d '|' -f1 <<< "${rolesOut["$key"]}")
-					#IFSsave=$IFS; IFS=','
-					for member in $(tr ',' ' ' <<< $members); do
+					for member in ${members//,/ }; do
 						if [[ ! ${usersFromDb["$member"]+abc} ]]; then
 							WarningMsg 0 1 "Role member '$member' use in role '$key' is not provisioned"
 							(( numRoleMembersNotProvisoned += 1 ))
@@ -539,7 +577,6 @@ scriptDescription="Load Courseleaf Data"
 					continue
 				fi
 				value=$(cut -d '|' -f $titleCol <<< "$result")'|'$(cut -d '|' -f $ownerCol <<< "$result")'|'$(cut -d '|' -f $workflowCol <<< "$result")
-				dump -2 -n result -t key value
 				if [[ ${workflowDataFromSpreadsheet["$key"]} != '' ]]; then
 					if [[ -n $value && $value != '|' && ${workflowDataFromSpreadsheet["$key"]} != $value ]]; then
 						Terminate "^The '$workbookSheet' sheet contains duplicate records with the same 'path' and differeing data\
@@ -579,12 +616,13 @@ scriptDescription="Load Courseleaf Data"
 			[[ $informationOnlyMode != true ]] && verb='Updating' || verb='Checking'
 			Msg3 "^$verb catalog page data (this takes a while)..."
 			local procesingCntr=0
-			sTime=$(date "+%s")
+			local sTime=$(date "+%s")
 			for key in "${!workflowDataFromSpreadsheet[@]}"; do
 				tmpData="${workflowDataFromSpreadsheet[$key]}"
 				pageTitle="$(cut -d'|' -f1 <<< "$tmpData")"
 				pageOwner="$(CleanString "$(cut -d'|' -f2 <<< "$tmpData")")"
 				pageWorkflow="$(cut -d'|' -f3 <<< "$tmpData")"
+
 				## Check to see if the pageWorkflow data is a real defined workflow
 					# foundNamedWorkflow=false
 					# if [[ $pageWorkflow != '' && ${workflowsFromFile["$pageWorkflow"]} == true ]]; then
@@ -596,17 +634,17 @@ scriptDescription="Load Courseleaf Data"
 				## Edit role data if useUINs is on
 					if [[ $useUINs == true ]]; then
 						if [[ $foundNamedWorkflow != true ]]; then
-						pageWorkflowNew="$(EditRoleMembers "$pageWorkflow")"
+						pageWorkflowNew="$(SubstituteUINs "$pageWorkflow")"
 							if [[ $pageWorkflowNew != $pageWorkflow ]]; then
 								pageWorkflow="$pageWorkflowNew"
-								Note "Page: '$key' -- Workflow UIDs mapped to UINs"
+								Note 1 1 "Page: '$key' -- Workflow UIDs mapped to UINs"
 								((numMembersMappedToUIN +=1))
 							fi
 						fi
-						pageOwnerNew="$(EditRoleMembers "$pageOwner")"
+						pageOwnerNew="$(SubstituteUINs "$pageOwner")"
 						if [[ $pageOwnerNew != $pageOwner ]]; then
 							pageOwner="$pageOwnerNew"
-							Note "Page: '$key' -- Owner UIDs mapped to UINs"
+							Note 1 1 "Page: '$key' -- Owner UIDs mapped to UINs"
 							((numMembersMappedToUIN +=1))
 						fi
 					fi
@@ -693,16 +731,14 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 echo "Back from Init"
 
 ## Find out if this client uses UINs
-	if [[ $noUinMap == false ]]; then
-		if [[ $uinMap == true ]]; then
-			usesUINs=true
-		else
-			sqlStmt="select usesUINs from $clientInfoTable where name=\"$client\""
-			RunSql2 $sqlStmt
-			if [[ ${#resultSet[@]} -ne 0 ]]; then
-				result="${resultSet[0]}"
-				[[ $result == 'Y' ]] && useUINs=true && echo
-			fi
+	if [[ $uinMap == true ]]; then
+		useUINs=true
+	else
+		sqlStmt="select usesUINs from $clientInfoTable where name=\"$client\""
+		RunSql2 $sqlStmt
+		if [[ ${#resultSet[@]} -ne 0 ]]; then
+			result="${resultSet[0]}"
+			[[ $result == 'Y' ]] && useUINs=true && echo
 		fi
 	fi
 
@@ -788,6 +824,13 @@ echo "Back from Init"
 	else
 		[[ $dataArgSpecified == false && -n $pagesSheet ]] && processPageData=true
 	fi
+
+	# ## If we are processing page data and role data see if the user page has uin mapping information
+	# if [[ $verify == true && $processPageData == true ]] && [[ $processPageData == true || $processRoleData == true ]]; then
+	# 	GetExcel2 -wb "$workbookFile" -ws 'GetSheets'
+	# 	IFS='|' read -ra sheets <<< "${resultSet[0]}"
+	# fi
+
 
 ## Do we have anything to do
 	[[ $processUserData != true && $processRoleData != true && $processPageData != true ]] && Terminate "No load actions are avaiable given the data provided"
@@ -930,11 +973,13 @@ ignoreMissingPages=true
 		[[ ${#membersErrors[@]} -gt 0 ]] && Msg3 "^$string" && changeLogLines+=("$string")
 
 		## Member lookup errors
+
 		if [[ ${#membersErrors[@]} -gt 0 ]]; then
 			echo
 			WarningMsg 0 1 "Found page owner or workflow data without a defined userid or role:"
 			for key in "${!membersErrors[@]}"; do
 				Msg3 "^$(ColorW "*Warning*") -- Workflow/Owner member: '$key' not defined and used on the following pages:"
+				tmpStr="${membersErrors["$key"]}"
 				IFSsave=$IFS; IFS='|' read -a pages <<< "${membersErrors["$key"]}"; IFS=$IFSsave
 				for page in "${pages[@]}"; do
 					Msg3 "^^'$page'"
@@ -952,7 +997,6 @@ ignoreMissingPages=true
 		[[ $processedPageData == true ]] && changeLogLines+=("Page data")
 		WriteChangelogEntry 'changeLogLines' "$siteDir/changelog.txt"
 	fi
-
 
 #==================================================================================================
 ## Done
@@ -1025,3 +1069,5 @@ ignoreMissingPages=true
 ## 10-09-2017 @ 16.54.07 - (3.9.9)     - dscudiero - Fixed problems with the conversion to getExecl2
 ## 11-02-2017 @ 12.47.27 - (3.9.9)     - dscudiero - Swtich to ParseArgsStd2
 ## 11-03-2017 @ 08.19.41 - (3.9.9)     - dscudiero - Check to make sure we have a valid 'path' when parsing the catalog workflow sheet
+## 11-09-2017 @ 14.15.37 - (3.9.9)     - dscudiero - Added NotifyAllApprovers
+## 11-10-2017 @ 12.37.41 - (3.9.9)     - dscudiero - Refactor the uid to uin mapping
