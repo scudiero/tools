@@ -95,7 +95,7 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 			if [[ $foundFiles == true && $noEmails != true ]]; then
 				Verbose "Emails sent to: $resultRec"
 				Msg3 "\n*** Please do not respond to this email, it was sent by an automated process\n" >> $tmpFile
-				$DOIT mutt -a "$tmpFile" -s "Private Dev Sites - $(date +"%m-%d-%Y")" -- $emailAddr < $tmpFile
+				$DOIT mutt -a "$tmpFile" -s "$hostNam -- Private Dev Sites - $(date +"%m-%d-%Y")" -- $emailAddr < $tmpFile
 			fi
 		fi
 	done
@@ -139,3 +139,4 @@ Goodbye 0
 ## 10-23-2017 @ 08.10.36 - (2.4.61)    - dscudiero - Switch to Msg3
 ## 10-23-2017 @ 11.57.55 - (2.4.64)    - dscudiero - Reformatted messaging
 ## 11-01-2017 @ 15.59.57 - (2.4.65)    - dscudiero - Switch to use ParseArgsStd2
+## 11-13-2017 @ 07.36.26 - (2.4.65)    - dscudiero - Add the hostname to the email subject
