@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.66 # -- dscudiero -- Thu 11/02/2017 @ 11:00:41.71
+version=1.2.79 # -- dscudiero -- Mon 11/13/2017 @ 16:54:35.18
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -150,7 +150,7 @@ unset ignoreRules ignoreSteps ignoreWorkflows
 ignoreRules="$(cut -d':' -f2- <<< $scriptData1)"
 ignoreSteps="$(cut -d':' -f2- <<< $scriptData2)"
 ignoreWorkflows="$(cut -d':' -f2- <<< $scriptData3)"
-modifiers="$(cut -d':' -f2- <<< $scriptData4)"
+stdModifiers="$(cut -d':' -f2- <<< $scriptData4)"
 
 unset verifyArgs
 verifyArgs+=("Client:$client")
@@ -173,7 +173,7 @@ myData="Client: '$client', Env: '$env', Cims: '$cimStr' "
 #==================================================================================================
 
 ## Loop through CIMs
-for cim in $(echo $cimStr | tr ',' ' '); do
+for cim in ${cimStr//,/ }; do
 	Msg3
 	Msg3 "Processing CIM instance: '$cim'"
 	grepFile="$srcDir/web/$cim/workflow.cfg"
@@ -188,7 +188,7 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 	## Read the workflow.cfg file for the cim
 		## Get any special modifiers
 			specialModifiers=$(ProtectedCall grep 'wfSpecialModifiers:' $grepFile)
-			[[ -n $specialModifiers ]] && myModifiers="${specialModifiers##*:},$modifiers" || myModifiers="$modifiers"
+			[[ -n $specialModifiers ]] && myModifiers="${specialModifiers##*:},$stdModifiers" || myModifiers="$stdModifiers"
 			myModifiers="$(Upper "$myModifiers")"
 
 		## Parse off the wfrules
@@ -349,7 +349,6 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 					#[[ $(Contains ",$(Upper "${modifiers},${specialModifiers}")," ",$Upper($keyword),") == true ]] && continue
 					keywordDef=${token##*[}
 					keywordDef="$(Upper "[${keywordDef##*[}")"
-
 					if [[ $(Contains ",$myModifiers," ",$(Upper "$keyword"),") == true ]] ; then
 						modifiersRef["$keyword"]=true
 					else
@@ -358,6 +357,11 @@ for cim in $(echo $cimStr | tr ',' ' '); do
 					## Write out 'debug' workflow record
 					Msg3 "^$keywordDef\t$keyword" >> $outFile
 				done
+				if [[ -n $specialModifiers ]]; then
+					for token in $(tr ',' ' ' <<< ${specialModifiers##*:}); do
+						modifiersRef["$token"]=true
+					done
+				fi
 				if [[ $verboseLevel -ge 1 ]]; then Msg3 "^modifiersRef:"; for i in "${!modifiersRef[@]}"; do printf "\t\t[$i] = >${modifiersRef[$i]}<\n"; done; fi
 				if [[ $verboseLevel -ge 1 ]]; then Msg3 "^conditionalsRef:"; for i in "${!conditionalsRef[@]}"; do printf "\t\t[$i] = >${conditionalsRef[$i]}<\n"; done; fi
 
@@ -434,3 +438,4 @@ Goodbye 0 #'alert'
 ## 10-31-2017 @ 10.15.04 - (1.2.62)    - dscudiero - Fixed setup of the callback functions
 ## 11-02-2017 @ 06.58.49 - (1.2.65)    - dscudiero - Switch to ParseArgsStd2
 ## 11-02-2017 @ 11.02.06 - (1.2.66)    - dscudiero - Add addPvt to the init call
+## 11-13-2017 @ 16.57.23 - (1.2.79)    - dscudiero - Fix problem parsing modifiers and special modifiers
