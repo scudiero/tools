@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.39" # -- dscudiero -- Tue 11/14/2017 @ 11:57:43.12
+version="1.4.40" # -- dscudiero -- Tue 11/14/2017 @ 11:58:45.15
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -52,7 +52,6 @@ function CleanUp {
 		[[ -n $saveClasspath ]] && export CLASSPATH="$saveClasspath"
 
 	exec 3>&-  ## Close file descriptor #3 -
-Here 4
 	exit $rc
 } #CleanUp
 
