@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.67 # -- dscudiero -- Tue 11/14/2017 @  7:10:48.59
+version=1.2.68 # -- dscudiero -- Tue 11/14/2017 @ 14:00:20.62
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -51,7 +51,7 @@ function buildQaStatusTable-testMode  { # or testMode-local
 		local workSheet="$1"; shift
 		local findColText=${1,,[a-z]} 
 		local grepStr line lines found=false IFSave="$IFS" fieldCntr=0 sheetCol sheetCols itemCol
-		local itemHrsCol item itemHrs priority=1 ctClient ctInstance ctProject hashKey mapCtr
+		local itemHrsCol item itemHrs priority=0 ctClient ctInstance ctProject hashKey mapCtr
 		dump -2 product workBook workSheet findColText
 
 		## Read the Worksheet data
@@ -71,32 +71,39 @@ function buildQaStatusTable-testMode  { # or testMode-local
 			[[ $found != true ]] && Terminate "$FUNCNAME: Could not locate a column with name '$findColText' in the '$workSheet' worksheet"
 			itemCol=$fieldCntr
 			itemHrsCol=$((itemCol+1))
-			dump -2 itemCol itemHrsCol
 
 		## Loop throug spreadsheet records getting data
-			priorityWeek=$(cut -d'|' -f $itemCol <<< ${resultSet[1]})
-			priorityWeek=${priorityWeek##* }
-			dump -2 priorityWeek
-			for ((jj=2; jj<${#resultSet[@]}; jj++)); do
+			for ((jj=1; jj<${#resultSet[@]}; jj++)); do
 				item="$(Lower "$(cut -d'|' -f $itemCol <<< ${resultSet[$jj]})")"
 				itemHrs="$(cut -d'|' -f $itemHrsCol <<< ${resultSet[$jj]})"
 				[[ -z ${item}${itemHrs} ]] && continue
 				[[ $item == 'meetings (hrs)' ]] && break
 				tmpStr="${item,,[a-z]}"
 				ctClient=${tmpStr%% *}; tmpStr=${tmpStr#* }
+				ctClient=${ctClient//\*/};
 				ctInstance=${tmpStr%% *}; tmpStr=${tmpStr#* }
 				[[ $ctInstance == '-' ]] && ctInstance=${tmpStr%% *}; tmpStr=${tmpStr#* }
-				[[ $(Contains "$ctInstance" 'c') == true ]] && ctInstance='courseadmin'
-				[[ $(Contains "$ctInstance" 'p') == true ]] && ctInstance='programadmin'
-				ctProject="$tmpStr"
-				[[ -z $ctProject ]] && ctProject='Implementation'
-				[[ "$ctProject" == 'mn' ]] && ctProject='Implementation'
-				[[ $(Contains "$ctProject" 'next') == true ]] && ctEnv='next' || ctEnv='test'
-				hashKey="$(Lower "$ctClient-$(TitleCase "$ctInstance")Admin-$ctProject-$ctEnv")"
-				dump -2 -n item itemHrs -t hashKey
-				cimTrackingHash[$hashKey]="$itemHrs"
-				eval "$outHashName[\"$hashKey\"]=\"$itemHrs|$priority\""
+				ctProject='Implementation'
+				[[ $(Contains "$tmpStr" 'sow') == true ]] && ctProject='SOW'
+				[[ $(Contains "$tmpStr" 'refresh') == true ]] && ctProject='Refresh'
+
+				[[ $(Contains "$tmpStr" 'next') == true || $(Contains "$tmpStr" 'mn') == true ]] && ctEnv='next'
+				[[ $(Contains "$tmpStr" 'test') == true || $(Contains "$tmpStr" 'final') == true ]] && ctEnv='test'
+
+				dump -2 -n item -t itemHrs tmpStr ctClient ctInstance ctProject
 				((priority+=1))
+				if [[ $(Contains "$ctInstance" 'c') == true ]]; then
+					hashKey="$ctClient-CourseAdmin-$ctProject-$ctEnv"
+					dump -2 -t hashKey
+					cimTrackingHash[$hashKey]="$itemHrs"
+					eval "$outHashName[\"$hashKey\"]=\"$itemHrs|$priority\""
+				fi
+				if [[ $(Contains "$ctInstance" 'p') == true ]]; then
+					hashKey="$ctClient-ProgramAdmin-$ctProject-$ctEnv"
+					dump -2 -t hashKey
+					cimTrackingHash[$hashKey]="$itemHrs"
+					eval "$outHashName[\"$hashKey\"]=\"$itemHrs|$priority\""
+				fi
 			done
 		return 0
 	} ##GetCimPriorityData
@@ -427,3 +434,4 @@ Goodbye 0 #'alert'
 ## 11-09-2017 @ 07.18.50 - (1.2.64)    - dscudiero - Add more debug stuff, quote outHashName hashKey
 ## 11-10-2017 @ 08.15.14 - (1.2.65)    - dscudiero - Comment out the processing of the CIM Trackign spreadsheet
 ## 11-14-2017 @ 07.11.12 - (1.2.67)    - dscudiero - Fix syntax error , missing = sign line 299
+## 11-14-2017 @ 14.00.44 - (1.2.68)    - dscudiero - Updated parsing of the CIM multiweek data
