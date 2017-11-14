@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.66 # -- dscudiero -- Fri 11/10/2017 @  8:17:56.46
+version=1.2.67 # -- dscudiero -- Tue 11/14/2017 @  7:10:48.59
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -296,8 +296,8 @@ for workbook in "${workbooks[@]}"; do
 
 	## Do we have data for this record from the implimentaiton team tracking spreadsheet
 		implPriorityWeek="Not Avaiable"
-		implHours"Not Avaiable"
-		implPriority"Not Avaiable"
+		implHours="Not Avaiable"
+		implPriority="Not Avaiable"
 		checkKey="$(Lower "$clientCode-$instance-$project-$env")"
 		if [[ ${cimTrackingHash[$checkKey]+abc} ]]; then
 			implPriorityWeek="$priorityWeek"
@@ -426,3 +426,4 @@ Goodbye 0 #'alert'
 ## 11-08-2017 @ 07.26.23 - (1.2.63)    - dscudiero - Added debug code
 ## 11-09-2017 @ 07.18.50 - (1.2.64)    - dscudiero - Add more debug stuff, quote outHashName hashKey
 ## 11-10-2017 @ 08.15.14 - (1.2.65)    - dscudiero - Comment out the processing of the CIM Trackign spreadsheet
+## 11-14-2017 @ 07.11.12 - (1.2.67)    - dscudiero - Fix syntax error , missing = sign line 299
