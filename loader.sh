@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.37" # -- dscudiero -- Tue 11/14/2017 @ 11:55:50.88
+version="1.4.38" # -- dscudiero -- Tue 11/14/2017 @ 11:56:32.73
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -32,9 +32,7 @@ function CleanUp {
 	set +eE
 	trap - ERR EXIT
 	## Cleanup log file
-Here 0
 		if [[ $logFile != /dev/null && -r $logFile ]]; then
-Here 1
 			mv $logFile $logFile.bak
 		 	#cat $logFile.bak | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" | tr -d '\007' > $logFile
 		 	cat $logFile.bak | sed "s/\x1B\[[0-9;]*[a-zA-Z]//g" | tr -d '\007' > $logFile
@@ -42,7 +40,6 @@ Here 1
 			chmod 660 "$logFile"
 		 	rm $logFile.bak
 		fi
-Here 3
 	## Cleanup semaphore and dblogging
 		[[ -n $semaphoreId ]] && Semaphore 'clear' $semaphoreId
 		[[ $logInDb != false && -n $myLogRecordIdx ]] && ProcessLogger 'End' $myLogRecordIdx
