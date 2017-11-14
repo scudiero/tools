@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.32" # -- dscudiero -- Tue 11/14/2017 @ 11:52:16.39
+version="1.4.35" # -- dscudiero -- Tue 11/14/2017 @ 11:53:24.17
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -269,11 +269,15 @@ sTime=$(date "+%s")
 				chown -R "$userName:leepfrog" "$(dirname $logFile)"
 				chmod -R 775 "$(dirname $logFile)"
 			fi
+Here 00
 			if [[ $logFile != '/dev/null' ]]; then
+				Here 0
 				touch "$logFile"
 				chmod 660 "$logFile"
 				chown "$userName:leepfrog" "$logFile"
+				Here 1
 			fi
+Here 3
 			Msg3 "$(PadChar)" > $logFile
 			[[ -n $scriptArgs ]] && scriptArgsTxt=" $scriptArgs" || unset scriptArgsTxt
 			Msg3 "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}" >> $logFile
