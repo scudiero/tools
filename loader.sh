@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.30" # -- dscudiero -- Mon 11/06/2017 @ 13:59:22.15
+version="1.4.31" # -- dscudiero -- Tue 11/14/2017 @ 11:50:24.52
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -269,9 +269,11 @@ sTime=$(date "+%s")
 				chown -R "$userName:leepfrog" "$(dirname $logFile)"
 				chmod -R 775 "$(dirname $logFile)"
 			fi
-			touch "$logFile"
-			chmod 660 "$logFile"
-			chown "$userName:leepfrog" "$logFile"
+			[[ $logFile != '/dev/null' ]]; then
+				touch "$logFile"
+				chmod 660 "$logFile"
+				chown "$userName:leepfrog" "$logFile"
+			fi
 			Msg3 "$(PadChar)" > $logFile
 			[[ -n $scriptArgs ]] && scriptArgsTxt=" $scriptArgs" || unset scriptArgsTxt
 			Msg3 "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}" >> $logFile
@@ -454,3 +456,4 @@ sTime=$(date "+%s")
 ## 11-06-2017 @ 07.22.48 - ("1.4.60")  - dscudiero - Switch to using the auth files
 ## 11-06-2017 @ 10.03.24 - ("1.4.29")  - dscudiero - Use the auth files
 ## 11-06-2017 @ 13.59.46 - ("1.4.30")  - dscudiero - Remove build7 is slow message
+## 11-14-2017 @ 11.51.02 - ("1.4.31")  - dscudiero - Do not touch the log file if it is /dev/null
