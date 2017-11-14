@@ -1,11 +1,12 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.10 # -- dscudiero -- Mon 04/17/2017 @ 10:17:55.75
+version=1.0.14 # -- dscudiero -- Tue 11/14/2017 @  8:02:27.88
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye SelectMenuNew' #imports="$imports "
-Import "$imports"
+myIncludes="ProtectedCall SelectMenuNew"
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
 scriptDescription=""
 
@@ -33,9 +34,9 @@ function testMode-courseleafRelease  { # or testMode-local
 	runTest='all'
 	overWrite=true
 	verify=false
-	Msg2 $N "TestMode:"
+	Msg3 $N "TestMode:"
 	dump -t client env cimStr runTest overWrite verify
-	Msg2
+	Msg3
 	return 0
 }
 
@@ -62,11 +63,11 @@ ParseArgsStd
 Hello
 
 # Get the list of available releases to release
-	[[ $client != '' ]] && findRoot="./$client" || findRoot='.'
+	[[ -n $client ]] && findRoot="./$client" || findRoot='.'
 	cwd=$(pwd)
 	cd $gitRepoShadow
 	newReleases=($(ProtectedCall "find $findRoot -mindepth 1 -maxdepth 2 -type d -name '*-new'" 2> /dev/null))
-	[[ ${#newReleases[@]} -eq 0 ]] && Terminate "Found no new releases"
+	[[ ${#newReleases[@]} -eq 0 ]] && Msg "Found no new releases for '$client'" && Goodbye 0
 
 if [[ ${#newReleases[@]} -gt 1 ]]; then
 	unset menuList menuItem
@@ -77,9 +78,9 @@ if [[ ${#newReleases[@]} -gt 1 ]]; then
 			menuList+=("$menuItem")
 		done
 	## Display the menu
-		Msg2
-		Msg2 "Please select the item that you wish to release:"
-		Msg2
+		Msg3
+		Msg3 "Please select the item that you wish to release:"
+		Msg3
 		SelectMenuNew 'menuList' 'selectItem' "\nRelease ordinal number $(ColorK '(ord)') (or 'x' to quit) > "
 		[[ $selectItem == '' ]] && Goodbye 0
 		product=$(cut -d'|' -f1 <<< $selectItem)
@@ -118,3 +119,4 @@ Goodbye 0 #'alert'
 ## Fri Oct 14 13:47:39 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Wed Oct 19 10:42:46 CDT 2016 - dscudiero - fixed another reference to courseleafRefresh
 ## 04-17-2017 @ 10.31.44 - (1.0.10)    - dscudiero - fixed for selectMenuNew changes
+## 11-14-2017 @ 08.02.56 - (1.0.14)    - dscudiero - Switch to Msg3
