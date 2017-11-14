@@ -1,11 +1,11 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.123 # -- dscudiero -- Fri 10/20/2017 @ 13:57:53.40
+version=1.3.126 # -- dscudiero -- Tue 11/14/2017 @  9:14:51.89
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye PushPop'
-imports="$imports SelectMenu CopyFileWithCheck BackupCourseleafFile WriteChangelogEntry"
-Import "$imports"
+myIncludes="ProtectedCall PushPop SelectMenu CopyFileWithCheck BackupCourseleafFile WriteChangelogEntry"
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
 scriptDescription="Refresh courseleaf components - dispatcher"
 
@@ -84,7 +84,7 @@ function vba {
 
 	Msg3 "Refreshing '$app' from $project..."
 	## Copy the application files
-		srcDir="$HOME/windowsStuff/documents/Visual Studio 2015/Projects/$project/$project/bin/Release"
+		srcDir="$HOME/windowsStuff/VisualStudio2015/Projects/$project/$project/bin/Release"
 		tgtDir=$TOOLSPATH/bin
 		[[ -d $tgtDir/$app-new ]] && rm -rf $tgtDir/$app-new
 		[[ ! -d $tgtDir/$app-new ]] && mkdir -p $tgtDir/$app-new
@@ -352,3 +352,4 @@ Goodbye 0
 ## 07-19-2017 @ 15.26.58 - (1.3.119)   - dscudiero - add -action flag
 ## 07-19-2017 @ 15.28.53 - (1.3.121)   - dscudiero - General syncing of dev to prod
 ## 10-20-2017 @ 13.59.37 - (1.3.123)   - dscudiero - Add PushPop to the includes list
+## 11-14-2017 @ 09.15.05 - (1.3.126)   - dscudiero - Changed source directory for vba
