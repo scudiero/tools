@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.38" # -- dscudiero -- Tue 11/14/2017 @ 11:56:32.73
+version="1.4.39" # -- dscudiero -- Tue 11/14/2017 @ 11:57:43.12
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -290,7 +290,7 @@ sTime=$(date "+%s")
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		[[ $(cut -d' ' -f1 <<< $(wc -l "$executeFile")) -eq 0 ]] && Terminate "Execution file ($executeFile) is empty"
 		source $executeFile $scriptArgs 2>&1 | tee -a $logFile; rc=$?
-		touch "$(dirname $logFile)"
+		[[ $logFile != '/dev/null' ]] && touch "$(dirname $logFile)"
 
 ## Should never get here but just in case
 	CleanUp $rc
@@ -456,3 +456,4 @@ sTime=$(date "+%s")
 ## 11-06-2017 @ 13.59.46 - ("1.4.30")  - dscudiero - Remove build7 is slow message
 ## 11-14-2017 @ 11.51.02 - ("1.4.31")  - dscudiero - Do not touch the log file if it is /dev/null
 ## 11-14-2017 @ 11.52.21 - ("1.4.32")  - dscudiero - Cosmetic/minor change
+## 11-14-2017 @ 11.58.15 - ("1.4.39")  - dscudiero - Do not touch the log directory if the logFile is /dev/null
