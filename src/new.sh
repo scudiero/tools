@@ -1,11 +1,11 @@
 #!/bin/bash
 #===================================================================================================
-version=1.2.24 # -- dscudiero -- Tue 09/05/2017 @ 10:03:52.64
+version=1.2.30 # -- dscudiero -- Tue 11/14/2017 @  7:56:25.79
 #===================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
-imports="$imports SelectMenu"
-Import "$imports"
+myIncludes="ProtectedCall PushPop"
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
 scriptDescription="Display news"
 
@@ -31,11 +31,11 @@ function NewScript {
 	unset localToolsDir
 	[[ -d $HOME/tools ]] && localToolsDir="$HOME/tools"
 	[[ -d $HOME/tools.git ]] && localToolsDir="$HOME/tools.git"
-	[[ $localToolsDir = '' ]] && Msg2 $T "Could not find local tools directory\n"
-	[[ ! -d $localToolsDir/.git ]] && Msg2 $T "local tools directory '$localToolsDir' not a git repository"
+	[[ $localToolsDir = '' ]] && Msg3 $T "Could not find local tools directory\n"
+	[[ ! -d $localToolsDir/.git ]] && Msg3 $T "local tools directory '$localToolsDir' not a git repository"
 
 	## Make sure we have a local bin
-	[[ ! -d $HOME/bin ]] && Msg2 $T "Could not find local bin directory\n"
+	[[ ! -d $HOME/bin ]] && Msg3 $T "Could not find local bin directory\n"
 
 	## Parse file extension
 		fileExt=$(echo $file | cut -d'.' -f2)
@@ -43,12 +43,12 @@ function NewScript {
 		linkFile=$(echo $file | cut -d'.' -f1)
 		doCopy=true
 	## Check for existing files
-		[[ -f $localToolsDir/${linkFile}.${fileExt} ]] && Msg2 $T "File '$localToolsDir/${linkFile}.${fileExt}' already exists"
-		[[ ! -f $localToolsDir/src/test${fileExt}.${fileExt} ]] && Msg2 $T "Could not locate prototype file '$localToolsDir/src/test${fileExt}.${fileExt}'"
+		[[ -f $localToolsDir/${linkFile}.${fileExt} ]] && Msg3 $T "File '$localToolsDir/${linkFile}.${fileExt}' already exists"
+		[[ ! -f $localToolsDir/src/test${fileExt}.${fileExt} ]] && Msg3 $T "Could not locate prototype file '$localToolsDir/src/test${fileExt}.${fileExt}'"
 		if [[ -h $TOOLSPATH/bin/$linkFile ]]; then
 			unset ans; Prompt ans "Found a pre-esiting file '$TOOLSPATH/bin/$linkFile, do you wish to overwrite" 'Yes No' 'No'; ans=$(Lower ${ans:0:1})
 			[[ $ans == 'n' ]] && doCopy=false
-			Msg2 $T "found pre-existing link file '$TOOLSPATH/bin/$linkFile'"
+			Msg3 $T "found pre-existing link file '$TOOLSPATH/bin/$linkFile'"
 		fi
 	## Copy file from prototype
 		if [[ $doCopy == true ]]; then
@@ -57,7 +57,7 @@ function NewScript {
 			fromStr="test${fileExt}"
 			toStr="$(basename ${linkFile})"
 			sed -i s"_${fromStr}_${toStr}_g" $localToolsDir/src/${linkFile}.${fileExt}
-			Msg2 "^File '$file' -- copied from '$localToolsDir/src/test${fileExt}.${fileExt}'"
+			Msg3 "^File '$file' -- copied from '$localToolsDir/src/test${fileExt}.${fileExt}'"
 		fi
 
 	## Create link
@@ -65,7 +65,7 @@ function NewScript {
 			cwd="$(pwd)";
 			cd $HOME/bin ;
 			ln -s $TOOLSPATH/src/dispatcher $linkFile; cd "$cwd"
-			Msg2 "^File '$file' -- created '$linkFile' symbolic link in '$HOME/bin' to '$TOOLSPATH/src/dispatcher'"
+			Msg3 "^File '$file' -- created '$linkFile' symbolic link in '$HOME/bin' to '$TOOLSPATH/src/dispatcher'"
 		fi
 
 	## Create db entry
@@ -144,7 +144,7 @@ function NewPatch {
 	if [[ $action == 'runScript' ]]; then
 		until [[ $actionTarget != '' ]]; do
 			Prompt actionTarget "\tScript name" '*any*'
-			[[ ! -f $TOOLSPATH/src/$actionTarget ]] && Msg2 "^^File $actionTarget not found in $TOOLSPATH/src" && unset actionTarget
+			[[ ! -f $TOOLSPATH/src/$actionTarget ]] && Msg3 "^^File $actionTarget not found in $TOOLSPATH/src" && unset actionTarget
 		done
 		actionTarget="\"$actionTarget\""
 		lineText=NULL
@@ -246,15 +246,15 @@ function NewMonitorFile {
 }
 
 #===================================================================================================
-function NewVba {
+function NewVba {	
 	local visualStudioDir projectDirs project newProject editFile editFiles renameFile renameFiles
 	visualStudioDir="$HOME/windowsStuff/documents/Visual Studio 2015/Projects"
-	[[ ! -d $visualStudioDir ]] && Msg2 $T "Could not locate the Visual Studio directory"
+	[[ ! -d $visualStudioDir ]] && Msg3 $T "Could not locate the Visual Studio directory"
 	cwd=$(pwd)
 	cd "$visualStudioDir"
 	SetFileExpansion 'on'; projectDirs=($(ls -d -t $objName* 2> /dev/null)); SetFileExpansion
-	[[ ${#projectDirs[@]} -eq 0 ]] && Msg2 $T "Could not locate any matching project directories for '$objType'"
-	Msg2; Msg2 "Please specify the ordinal number of the Project you wish to clone\n"
+	[[ ${#projectDirs[@]} -eq 0 ]] && Msg3 $T "Could not locate any matching project directories for '$objType'"
+	Msg3; Msg3 "Please specify the ordinal number of the Project you wish to clone\n"
 	SelectMenu 'projectDirs' 'project' '\nProject ordinal(or 'x' to quit) > '
 	[[ $project == '' ]] && Goodbye 0
 	if [[ $(IsNumeric ${project: -1}) == true ]]; then
@@ -270,7 +270,7 @@ function NewVba {
 			[[ $ans != 'y' ]] && Goodbye 0
 			rm -rf $newProject
 		fi
-		Msg2 "^Creating new project directory: $newProject"
+		Msg3 "^Creating new project directory: $newProject"
 		cp -rfp $project $newProject
 		cd $newProject
 
@@ -278,19 +278,19 @@ function NewVba {
 		ignoreFileTypes='executable|TrueType|directory|MSVC program database|data|CDF V2 Document'
 		editFiles=($(find . -name 'packages' -prune -o -print0 | xargs -0r file | grep -E --null -v  "$ignoreFileTypes" | awk -F: '{printf "%s\0", $1}' | xargs -0 grep -l $project))
 		for editFile in "${editFiles[@]}"; do
-			Msg2 "^Editing file: $editFile"
+			Msg3 "^Editing file: $editFile"
 			sed -i s"/$project/$newProject/g" $editFile
 		done
 
 	## Rename the top directory
-		[[ ! -d ./$newProject ]] && mv -f ./$project ./$newProject && Msg2 "^Renaming file: ./$project"
+		[[ ! -d ./$newProject ]] && mv -f ./$project ./$newProject && Msg3 "^Renaming file: ./$project"
 	## Rename the .vs subdirectory
-		[[ ! -d ./.vs/$newProject ]] && mv -f ./.vs/$project ./.vs/$newProject && Msg2 "^Renaming file: ./.vs/$project"
+		[[ ! -d ./.vs/$newProject ]] && mv -f ./.vs/$project ./.vs/$newProject && Msg3 "^Renaming file: ./.vs/$project"
 
 	## Get the list of files that need to be renamed
 		renameFiles=($(find . -name 'packages' -prune -o -print | grep "$project"))
 		for renameFile in "${renameFiles[@]}"; do
-			Msg2 "^Renaming file: $renameFile"
+			Msg3 "^Renaming file: $renameFile"
 			newName=$(sed "s/$project/$newProject/g" <<< "$renameFile")
 			mv -f "$renameFile" "$newName"
 		done
@@ -311,13 +311,13 @@ function NewClient {
 		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
 			clientId=${resultSet[0]}
-			Msg2 $WT1 "Client record already exist for '$client' in the '$clientInfoTable' table"
+			Msg3 $WT1 "Client record already exist for '$client' in the '$clientInfoTable' table"
 		else
 			$DOIT insertClientInfoRec $client -noLog -noLogInDb
 			sqlStmt="select max(idx) from $clientInfoTable"
 			RunSql2 $sqlStmt
 			clientId=${resultSet[0]}
-			Msg2 "^Created '$clientInfoTable' record for '$env'"
+			Msg3 "^Created '$clientInfoTable' record for '$env'"
 
 		fi
 
@@ -329,10 +329,10 @@ function NewClient {
 				sqlStmt="select siteId from $siteInfoTable where name=\"$client\" and env=\"$env\""
 				RunSql2 $sqlStmt
 				if [[ ${#resultSet[@]} -gt 0 ]]; then
-					Msg2 $WT1 "Site record already exist for '$env' in the '$siteInfoTable' table "
+					Msg3 $WT1 "Site record already exist for '$env' in the '$siteInfoTable' table "
 				else
 					$DOIT insertSiteInfoTableRecord "$siteDir" -clientId $clientId -noLog -noLogInDb
-					Msg2 "^Created '$siteInfoTable' record for '$env'"
+					Msg3 "^Created '$siteInfoTable' record for '$env'"
 				fi
 			fi
 		done
@@ -355,15 +355,15 @@ Prompt objType "Please specify the object type" "$validTypes"; objType=$(TitleCa
 [[ $(Lower ${objType:0:4}) == 'news' ]] && objType='NewsItem'
 [[ $(Lower ${objType:0:1}) == 'v' ]] && objType='Vba'
 
-[[ $objType == 'Script' || $objType == 'NewsItem' ]] && Prompt objName "Please specify the name of the new $objType obj" '*any*'
-[[ $objType == 'vba' ]] && Prompt objName "Please specify the name of the new $objType obj" '*optional*'
+[[ $objType == 'Script' || $objType == 'NewsItem' || $objType == 'Vba' ]] && Prompt objName "Please specify the name of the new $objType obj" '*any*'
+#[[ $objType == 'vba' ]] && Prompt objName "Please specify the name of the new $objType obj" '*optional*'
 
 ## Call functon to build the object
-[[ $(type -t New$objType) != 'function' ]] && Msg2 $T "Invalid object typo specified"
-Msg2
-[[ $objName != '' ]] && Msg2 "Creating a new $objType object with name '$objName'" || Msg2 "Creating a new $objType object"
+[[ $(type -t New$objType) != 'function' ]] && Msg3 $T "Invalid object typo specified"
+Msg3
+[[ $objName != '' ]] && Msg3 "Creating a new $objType object with name '$objName'" || Msg3 "Creating a new $objType object"
 New$objType $objName
-Msg2; Msg2 "$objType object created"
+Msg3; Msg3 "$objType object created"
 
 #==================================================================================================
 ## Bye-bye
@@ -394,3 +394,4 @@ Msg2; Msg2 "$objType object created"
 ## Thu Dec 29 16:50:57 CST 2016 - dscudiero - Updated creating a default to add the status column
 ## Wed Jan 11 16:41:31 CST 2017 - dscudiero - fixed import statements
 ## 09-05-2017 @ 10.09.44 - (1.2.24)    - dscudiero - change location of testsh.sh
+## 11-14-2017 @ 07.56.56 - (1.2.30)    - dscudiero - Fix up Vba prompt and switch to Msg3
