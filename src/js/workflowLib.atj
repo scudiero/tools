@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.37" // -- dscudiero -- Wed 11/15/2017 @ 12:33:08.98
+wfLibVersion="1.8.38" // -- dscudiero -- Wed 11/15/2017 @ 16:38:41.91
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -437,6 +437,10 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 //								end of the generated steps.
 //								e.g. 	Related_ecoSystemTypeFyi:equiv
 //
+//		_ecoSystemInstances 	Comma seperated list of cim instance names where the eco system can be added 
+//								(i.e. course based cim instances), defaults to 'courseadmin'
+//
+//
 //		_formFieldVars			The form fields that contain 'related/crosslisted/associated/consultant' data.
 //								The formate is name[|format][|dataAttributeName] where :
 //								format is one item in the set {courseCode,colCode,deptCode,subjCode}, the default is 'code'
@@ -483,6 +487,7 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 // Examples
 //======================================================================================================================
 // wfrules:RelatedCrosslistedSlashlistedDepts|function|Related|;
+// RelatedCrosslistedSlashlistedDepts:courseadmin,sectoradmin,outlineadmin
 // RelatedCrosslistedSlashlistedDepts_includeEcoSystemData:true
 // RelatedCrosslistedSlashlistedDepts_ecoSystemDataFyi:false
 // RelatedCrosslistedSlashlistedDepts_formFieldVars:crosslisted|courseCode|code
@@ -491,6 +496,7 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 // RelatedCrosslistedSlashlistedDepts_ignoreList:<codes list>
 //
 // wfrules:RelatedCrosslistedSlashlistedCols|function|Related|;
+// RelatedCrosslistedSlashlistedCols:courseadmin,sectoradmin,outlineadmin
 // RelatedCrosslistedSlashlistedCols_includeEcoSystemData:true
 // RelatedCrosslistedSlashlistedCols_ecoSystemDataFyi:false
 // RelatedCrosslistedSlashlistedCols_formFieldVars:crosslisted|courseCode|code
@@ -501,6 +507,7 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 // - OR  - (yields the same results)
 //
 // wfrules:RelatedCrosslistedSlashlistedDepts|function|Related|;
+// Related_ecoSystemInstances:courseadmin,sectoradmin,outlineadmin
 // Related_includeEcoSystemData:true
 // Related_ecoSystemDataFyi:fyi
 // Related_formFieldVars:crosslisted|courseCode|code
@@ -578,6 +585,9 @@ wffuncs.Related = function(inval, wfrule, args) {
 			if (ecoSystemDataFyi === "true") { ecoSystemDataFyi=true; } else { ecoSystemDataFyi=false; }
 
 		// Get variables that have data values
+			var ecoSystemInstances=getTCFValue(calledAs + "_ecoSystemInstances");
+			if (ecoSystemInstances === "") ecoSystemInstances=getTCFValue(myName + "_ecoSystemInstances");
+
 			var ecoSystemDataTypes=getTCFValue(calledAs + "_ecoSystemDataTypes");
 			if (ecoSystemDataTypes === "") ecoSystemDataTypes=getTCFValue(myName + "_ecoSystemDataTypes");
 
@@ -611,8 +621,9 @@ wffuncs.Related = function(inval, wfrule, args) {
 		// Print debug info
 			wfDump(3,[
 					"\n\tcheckChanged;"+checkChanged,"includeEcoSystemData;"+includeEcoSystemData,"ecoSystemDataTypes;"+ecoSystemDataTypes,
-					"ecoSystemDataPaths;"+ecoSystemDataPaths,"ecoSystemDataFyi;"+ecoSystemDataFyi,"formFieldVars;"+formFieldVars.toSource(),
-					"searchString;"+searchString.toSource(),"dataMapper;"+dataMapper,"ignoreList;"+ignoreList]);
+					"ecoSystemInstances;"+ecoSystemInstances,"ecoSystemDataPaths;"+ecoSystemDataPaths,"ecoSystemDataFyi;"+ecoSystemDataFyi,
+					"formFieldVars;"+formFieldVars.toSource(),"searchString;"+searchString.toSource(),"dataMapper;"+dataMapper,
+					"ignoreList;"+ignoreList]);
 
 	//==================================================================================================================
 	// MAIN
@@ -620,6 +631,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 	// Get a list of the related departments
 		var dataObj={};
 		dataObj.includeEcoSystemData=includeEcoSystemData;
+		dataObj.ecoSystemInstances=ecoSystemInstances;
 		dataObj.ecoSystemDataTypes=ecoSystemDataTypes;
 		dataObj.ecoSystemDataPaths=ecoSystemDataPaths;
 		dataObj.formDataVars=formFieldVars;
@@ -773,17 +785,25 @@ GetRelated2 = function(type,data) {
 
 			var proposalSubjs=getTCFValue(wfSubjVarName, { delimiter: "\n", retarray: true });
 			proposalSubjs=RemoveDupes(proposalSubjs.concat(getTCFValue(wfSubjVarName, { delimiter: "\n", retarray: true , data: tcadata })));
-			//if (proposalSubjs.length === 0) throw "Failed, code tcf variable 'proposalSubjs' not null check"
+			if (proposalSubjs.length === 0) throw "Failed, code tcf variable 'proposalSubjs' not null check"
 			proposalSubjsStr="," + proposalSubjs.join(",") + ",";
 
 			var proposalDepts=getTCFValue(wfDeptVarName, { delimiter: "\n", retarray: true });
 			proposalDepts=RemoveDupes(proposalDepts.concat(getTCFValue(wfDeptVarName, { delimiter: "\n", retarray: true , data: tcadata })));
-			//if (proposalDepts.length === 0) throw "Failed, code tcf variable 'proposalDepts' not null check"
+			if (proposalDepts.length === 0) {
+				if (proposalSubjs.length === 0) throw "Failed, code tcf variable 'proposalDepts' not null check (1)"
+				proposalDepts=GetAttrVal({request:"depts", options:"includetca", tcadata: tcadata});
+				if (proposalDepts.length === 0) throw "Failed, code tcf variable 'proposalDepts' not null check (2)"
+			}
 			proposalDeptsStr="," + proposalDepts.join(",") + ",";
 
 			var proposalCols=getTCFValue(wfColVarName, { delimiter: "\n", retarray: true });
 			proposalCols=RemoveDupes(proposalCols.concat(getTCFValue(wfColVarName, { delimiter: "\n", retarray: true , data: tcadata })));
-			//if (proposalCols.length === 0) throw "Failed, code tcf variable 'proposalCols' not null check"
+			if (proposalCols.length === 0) {
+				if (proposalSubjs.length === 0 && proposalDepts.length === 0) throw "Failed, code tcf variable 'proposalCols' not null check (1)"
+				proposalCols=GetAttrVal({request:"cols", options:"includetca", tcadata: tcadata});
+				if (proposalCols.length === 0) throw "Failed, code tcf variable 'proposalCols' not null check (2)"
+			}
 			proposalColsStr="," + proposalCols.join(",") + ",";
 		} //try
 		catch(err) { wfDebug(1,"\t*Error* -- " + myName + ": " + err + "\n"); return false; }
@@ -791,6 +811,9 @@ GetRelated2 = function(type,data) {
 	// Process the argument list
 		var includeEcoSystemData=false;
 		if (data.hasOwnProperty("includeEcoSystemData")) includeEcoSystemData=data.includeEcoSystemData;
+		var ecoSystemInstances=",courseadmin,";
+		if (data.hasOwnProperty("ecoSystemInstances")) ecoSystemInstances="," + data.ecoSystemInstances + ",";
+
 		var tcaData={}
 		if (data.hasOwnProperty("tcadata")) tcaData=data.tcadata;
 		var ignoreList="";
@@ -854,7 +877,7 @@ GetRelated2 = function(type,data) {
 			wfDebug(myDebugLevel,myIndent +"\t\tFound " + refsArray.length + " references from the form field data");
 
 		// If includeEcoSystemData, then get data from the CourseLeaf eco system
-			if (includeEcoSystemData && wfCimInstance === "courseadmin") {
+			if (includeEcoSystemData &&  ecoSystemInstances.indexOf("," + wfCimInstance + ",") >= 0) {
 				if (proposalDepts.length != 0) {
 					var tempArray=(GetEcoSystemData2(proposalCodes,proposalDepts,data))
 					if (tempArray.length > 0)
@@ -1185,13 +1208,14 @@ function GetEcoSystemData2(proposalCodes,proposalDepts,data) {
 // 05/08/2017 - RemoveDupesdgs - New
 //=======================================================================================================================
 wffuncs.wfAttr = function(inval, wfrule, args) {
-	wfDebug(3,"\n*** In wffuncs.wfAttr ***, called as: '" + inval + "'");
+	var version='1.0.0'; var myName=wfrule.attrname;
+	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
 
 	var tmpArray=[], retArray=[];
 	tmpArray=GetAttrVal({ request: wfrule.searchfor.toLowerCase(), options: wfrule.options.substring(0,wfrule.options.indexOf(";")), tcadata: tcadata});
 
 	if (tmpArray.length > 0) {
-		wfDebug(3,"\t*** Returning:")
+		wfDebug(3,"\t*** " + myName + ": Returning: ")
 		tmpArray.forEach(function(retVal) {
 			retArray.push(inval.replace(wfrule.regex,retVal));
 			wfDebug(3,"\t\t>"+retArray[retArray.length-1]+"<");
@@ -1232,8 +1256,8 @@ wffuncs.wfAttr = function(inval, wfrule, args) {
 // 10/19/17 - dgs - Fix bug if resultSet is not an array
 //=======================================================================================================================
 GetAttrVal = function(data) {
-	wfDebug(5,"\t*** In GetAttrVal ***");
-	wfDump(6,["\tdata;"+data.toSource()]);
+	var version='1.0.0'; var myName="GetAttrVal"; wfDebug(5,"\n*** In " + myName + " ***"); wfDump(6,["\tdata;"+data.toSource()]);
+
 	var reqType=data.request;
 	var optionStr=data.options; 	if (optionStr === undefined) optionStr="";
 	optionStr=optionStr.toLowerCase();
@@ -1257,9 +1281,9 @@ GetAttrVal = function(data) {
 	if (optionStr.indexOf("type=") >= 0)
 		reqType=optionStr.split("=")[1];
 
-	wfDump(5,["\t\treqType;"+reqType,"\t\toptionStr;"+optionStr,"\t\ttcaData;"+tcaData,"\t\tsubjVarName;"+subjVarName,
-		"\t\tdeptVarName;"+deptVarName,"\t\tcolVarName;"+colVarName,"\t\twfAllcodes;"+wfAllcodes,"\t\tincludeTCA;"+includeTCA,
-		"\t\tmapValue;"+mapValue,"\t\twfAllcodes;"+wfAllcodes,"\t\twfCimInstance;"+wfCimInstance,"\t\tproposalOnly;"+proposalOnly]);
+	wfDump(5,["reqType;"+reqType,"optionStr;"+optionStr,"tcaData;"+tcaData,"subjVarName;"+subjVarName,
+		"deptVarName;"+deptVarName,"colVarName;"+colVarName,"wfAllcodes;"+wfAllcodes,"includeTCA;"+includeTCA,
+		"mapValue;"+mapValue,"wfAllcodes;"+wfAllcodes,"wfCimInstance;"+wfCimInstance,"proposalOnly;"+proposalOnly]);
 
 	var subjects=[], departments=[], colleges=[];
 
@@ -1267,7 +1291,7 @@ GetAttrVal = function(data) {
 		subjects=getTCFValue(subjVarName, { delimiter: "\n", retarray: true });
 		if (includeTCA)
 			subjects=subjects.concat(getTCFValue("subject", { data: tcaData, delimiter: "\n", retarray: true }));
-		wfDump(5,["\t\t" + subjVarName+" from tcfdata;"+subjects.toSource()])
+		wfDump(5,[subjVarName+" from tcfdata;"+subjects.toSource()])
 		if (subjects.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
 		}
@@ -1283,7 +1307,7 @@ GetAttrVal = function(data) {
 				});
 			}
 		}
-		wfDump(5,["\t\t" + deptVarName+" from tcfdata;"+departments.toSource()])
+		wfDump(5,[deptVarName+" from tcfdata;"+departments.toSource()])
 		if (departments.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			departments=wffuncs.getDepartments(subjects);
 		}
@@ -1307,7 +1331,7 @@ GetAttrVal = function(data) {
 				});
 			}
 		}
-		wfDump(5,["\t\t" + colVarName+" from tcfdata;"+colleges.toSource()])
+		wfDump(5,[colVarName+" from tcfdata;"+colleges.toSource()])
 		if (colleges.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			colleges=wffuncs.getColleges(departments);
 		}
@@ -1394,7 +1418,7 @@ GetAttrVal = function(data) {
 		}
 
 	// Return data
-		wfDebug(5,"\t\t*** Returning: " + retArray.toSource() + "<");
+		wfDebug(5,"*** " + myName + ": Returning: " + retArray.toSource() + "<");
 		if (retArray.length > 0)
 			return retArray;
 			return false
@@ -2356,3 +2380,4 @@ var wfLibLoaded=true;
 // 11-09-2017 @ 14.16.09 - ("1.8.34")  - dscudiero - Added NotifyAllApprovers
 // 11-10-2017 @ 08.19.13 - ("1.8.35")  - dscudiero - Updated NotifyAllApprovers to make it a bit more general, allowing the selection of fyi/fyiall
 // 11-15-2017 @ 12.34.14 - ("1.8.37")  - dscudiero - Fix bug checking formatCode in ParseRelatedData
+// 11-15-2017 @ 16.39.10 - ("1.8.38")  - dscudiero - Many small updates
