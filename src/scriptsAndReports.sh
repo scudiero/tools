@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.64 # -- dscudiero -- Thu 11/09/2017 @  7:23:06.79
+version=3.13.116 # -- dscudiero -- Wed 11/15/2017 @  9:42:58.99
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -163,12 +163,13 @@ function ExecScript {
 ## Execute a report
 #==================================================================================================
 function ExecReport {
-	local name=$1; shift
+	local name=${1,,[a-z]}; shift
 	local additionalArgs="$*"
 	[[ -n ${additionalArgs}${client} ]] && additionalArgs="$client $additionalArgs"
 	[[ -z $additionalArgs && -n $client ]] && additionalArgs="$client"
 	local exec rc
 
+	Msg3 "^Running report '$name'..."
 	## Lookup detailed script info from db
 		local fields="shortDescription,type,header,db,dbType,sqlStmt,script,scriptArgs,ignoreList"
 		local sqlStmt="select $fields from $reportsTable where lower(name) =\"$(Lower $name)\" "
@@ -183,14 +184,6 @@ function ExecReport {
 			eval $field=\"$(cut -d'|' -f$fieldCntr <<< "$resultString")\"
 			((fieldCntr += 1))
 		done
-
-		if [[ $scriptArgs == '<prompt>' ]]; then
-			unset scriptArgs;
-			if [[ $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true  && $quiet != true ]]; then
-				Msg3 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
-				unset userArgs; Prompt userArgs "^Please specify parameters to be passed to '$itemName'" '*optional*' '' '4'
-			fi
-		fi
 
 	## Run report
 		outDir="$HOME/Reports/$name"
@@ -219,31 +212,37 @@ function ExecReport {
 			reportArgs=$(cut -d'|' -f 8 <<< "$resultString"); [[ $reportArgs == 'NULL' ]] && unset reportArgs
 			reportIgnoreList=$(cut -d'|' -f 9 <<< "$resultString") ; [[ $reportIgnoreList == 'NULL' ]] && unset reportIgnoreList
 			## Call script
-			scriptArgs="-reportName $name -noHeaders"
+			if [[ $scriptArgs == '<prompt>' ]]; then
+				unset scriptArgs;
+				if [[ $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true  && $quiet != true ]]; then
+					Msg3 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
+					unset userArgs; Prompt userArgs "^Please specify parameters to be passed to '$itemName'" '*optional*' '' '4'
+				fi
+			fi
+			scriptArgs="-reportName $name -noHeaders $userArgs"
 			[[ -f $tmpFile ]] && rm -f $tmpFile
+
 			if [[ $(Lower "$reportIgnoreList") == 'standalone' ]]; then
-				FindExecutable $reportScript -report -run $originalArgStr $reportArgs $userArgs | tee "$tmpFile"
+				(FindExecutable $reportScript -report -run $originalArgStr $reportArgs $userArgs) | tee "$tmpFile"
 			else
-				FindExecutable $reportScript -report -run $originalArgStr $reportArgs $userArgs > "$tmpFile"
+				(FindExecutable $reportScript -report -run $originalArgStr $reportArgs $userArgs) > "$tmpFile"
 			fi
 		else
 			Terminate "Report type of '$type' not supported at this time"
 		fi
 
 		if [[ -f "$tmpFile" && $(wc -l < "$tmpFile") -gt 1 ]]; then
-			if [[  $(Lower "$ignoreList") == 'returnsraw' ]]; then
-				Msg3 | tee "$outFileXlsx" > "$outFileText"
-				Msg3 "$name report run by $userName on $(date +"%m-%d-%Y") at $(date +"%H.%M.%S")" | tee -a "$outFileXlsx" >> "$outFileText"
-				Msg3 "($shortDescription)" | tee -a "$outFileXlsx" >> "$outFileText"
-				Msg3  | tee -a "$outFileXlsx" >> "$outFileText"
+			if [[ ${ignoreList,,[a-z]} == 'returnsraw' ]]; then
+				Msg3 "\n$name report run by $userName on $(date +"%m-%d-%Y") at $(date +"%H.%M.%S")" >> "$outFileXlsx"
+				Msg3 "($shortDescription)\n" >> "$outFileXlsx"
 				sed s"/|/\t/g" < "$tmpFile" >> "$outFileXlsx"
-				mapfile -t resultSet < "$tmpFile"
-				PrintColumnarData 'resultSet' '|' >> "$outFileText"
+				# mapfile -t resultSet < "$tmpFile"
+				# PrintColumnarData 'resultSet' '|' >> "$outFileText"
 			else
-				cp -fp "$tmpFile" "$outFileText"
 				cp -fp "$tmpFile" "$outFileXlsx"
 			fi
-			[[ $quiet != true ]] && cat "$outFileText"
+			Msg3 "\n^Report output can be found in: '$outFileXlsx'"
+			Msg3 "^(On MS windows explorer, go to '\\\\\\saugus\\$userName\\Reports\\$name\\$(basename $outFileXlsx)')"
 			sendMail=true
 		else
 			Warning "No data returned from report script"
@@ -332,11 +331,14 @@ Hello
 helpSet='script,client'
 parseQuiet=true
 GetDefaultsData $myName -fromFiles
-ParseArgsStd
+
+ParseArgsStd2 $originalArgStr
 
 [[ $newsDisplayed == true ]] && Pause "\nNews was displayed, please review and press any key to continue"
-[[ $mode == 'scripts' && -n $client ]] && Init 'getClient'
-[[ $mode == 'reports' && $client != '' ]] && report="$client"
+if [[ -n $client ]]; then
+	[[ $mode == 'scripts' && $client != 'reports' ]] && Init 'getClient' || mode='reports'
+	[[ $mode == 'reports' ]] && { report="$unknowArgs"; itemType='report'; itemTypeCap='Report'; table=$reportsTable; }
+fi
 
 dump -1 mode report script originalArgStr itemType itemTypeCap table
 dump -1 -p client report emailAddrs myName ${myName}LastRunDate ${myName}LastRunEDate
@@ -374,37 +376,39 @@ dump -1 -p client report emailAddrs myName ${myName}LastRunDate ${myName}LastRun
 			menuDisplayed=false
 		fi
 		[[ $itemName == 'REFRESHLIST' ]] && continue
-		unset userArgs;
-		if [[ $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true  && $quiet != true && $noArgs != true ]]; then
-			Msg3 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
-			unset userArgs; Prompt userArgs "^Please specify parameters to be passed to '$itemName'" '*optional*' '' '3'
-			[[ -n $userArgs ]] && scriptArgs="$userArgs $scriptArgs"
+
+		if [[ $itemName != 'reports' ]]; then
+			## Get additioal parms
+				unset userArgs;
+				if [[ $mode == true && $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true && $quiet != true && $noArgs != true ]]; then
+					Msg3 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
+					unset userArgs; Prompt userArgs "^Please specify parameters to be passed to '$itemName'" '*optional*' '' '3'
+					[[ -n $userArgs ]] && scriptArgs="$userArgs $scriptArgs"
+				fi
+			## Call function to fulfill the request
+				calledViaScripts=true
+				sendMail=false
+				Exec$itemTypeCap "$itemName" "$scriptArgs" ; rc=$?
+				#TrapSigs 'on'
+				[[ $batchMode != true ]] && Msg3
+				[[ $menuDisplayed == true ]] && Pause "Please press enter to go back to '${itemType}s'"
+				unset calledViaScripts
+			## Send out emails
+				if [[ -n $emailAddrs && $mode == 'reports' && $noEmails == false && $sendMail == true ]]; then
+					Msg3 | tee -a $outFileText; Msg3 "Sending email(s) to: $emailAddrs" | tee -a $outFileText; Msg3 | tee -a "$outFileText"
+					for addr in $(tr ',' ' ' <<< "$emailAddrs"); do
+						[[ $(Contains "$addr" '@') != true ]] && addr="$addr@leepfrog.com"
+						$DOIT mutt -a "$outFileXlsx" -s "$report report results: $(date +"%m-%d-%Y")" -- $addr < "$outFileText"
+					done
+				fi
+		else
+			mode='reports'
+			itemType='report'
+			itemTypeCap='Report'
+			table=$reportsTable
+			BuildMenuList
+			menuDisplayed=false
 		fi
-
-		## call function to 'execute' the request
-		calledViaScripts=true
-		#itemName="$(echo -e $itemName | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g")"
-		#TrapSigs 'off'
-
-		sendMail=false
-		Exec$itemTypeCap "$itemName" "$scriptArgs" ; rc=$?
-		#TrapSigs 'on'
-		[[ $batchMode != true ]] && Msg3
-		# [[ $rc -eq 0 ]] && Msg3 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed successfully" || \
-		# 	Msg3 "Execution of '$(echo $itemName | cut -d' ' -f1)' completed with errors (exit code = $rc) \
-		# 	\nPlease record any Messages and contact the $itemType owner\n"
-		[[ $menuDisplayed == true ]] && Pause "Please press enter to go back to '${itemType}s'"
-		unset calledViaScripts
-
-		## Send out emails
-		if [[ -n $emailAddrs && $mode == 'reports' && $noEmails == false && $sendMail == true ]]; then
-			Msg3 | tee -a $outFileText; Msg3 "Sending email(s) to: $emailAddrs" | tee -a $outFileText; Msg3 | tee -a "$outFileText"
-			for addr in $(tr ',' ' ' <<< "$emailAddrs"); do
-				[[ $(Contains "$addr" '@') != true ]] && addr="$addr@leepfrog.com"
-				$DOIT mutt -a "$outFileXlsx" -s "$report report results: $(date +"%m-%d-%Y")" -- $addr < "$outFileText"
-			done
-		fi
-		#[[ -f $outFileText ]] && rm -f "$outFileText"
 	done
 
 
@@ -532,3 +536,4 @@ Goodbye 0
 ## 11-06-2017 @ 16.46.28 - (3.13.62)   - dscudiero - Add debug
 ## 11-08-2017 @ 07.51.01 - (3.13.63)   - dscudiero - Removed debug statements
 ## 11-09-2017 @ 07.26.48 - (3.13.64)   - dscudiero - Remove extra blank line if batchMode
+## 11-15-2017 @ 09.48.24 - (3.13.116)  - dscudiero - Refactored passing in reports naming data from command line, fixed scripts calling reports
