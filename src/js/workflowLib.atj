@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.35" // -- dscudiero -- Thu 11/09/2017 @ 15:24:51.87
+wfLibVersion="1.8.36" // -- dscudiero -- Wed 11/15/2017 @ 12:17:58.27
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -734,15 +734,30 @@ GetRelated2 = function(type,data) {
 		var ref={};
 		format=format.toLowerCase();
 		var data=eval("dataObj." + dataAttributeName);
-		ref.data=wffuncs.subjFromCode(data);
-		ref.data=ref.data.replace(/ $/,"");
-		ref.format="subj";
 
-		if (format.indexOf("dep") >= 0) {
-			ref.format="dept";
-		} else if (format.indexOf("col") >= 0) {
-			ref.format="col";
-		}
+		switch(format) {
+		    case "coursecode":
+		        if (typeof wffuncs.subjFromCode == "function") {
+					ref.data=wffuncs.subjFromCode(data);
+		        } else {
+		        	ref.data=data.split( )[0];
+		        }
+				ref.data=ref.data.trim();
+				ref.format="subj";
+		        break;
+		    case "subjCode":
+				ref.data=data;
+				ref.format="subj";
+		        break;
+		    case "deptCode":
+				ref.data=data;
+				ref.format="dept";
+		        break;
+		    case "colCode":
+				ref.data=data;
+				ref.format="col";
+		        break;
+		} // switch
 
 		return ref;
 	} //ParseRelatedData
@@ -2341,3 +2356,4 @@ var wfLibLoaded=true;
 // 11-08-2017 @ 12.21.17 - ("1.8.33")  - dscudiero - Added ability to pass an 'ignoreList' into Related and GetRelated2
 // 11-09-2017 @ 14.16.09 - ("1.8.34")  - dscudiero - Added NotifyAllApprovers
 // 11-10-2017 @ 08.19.13 - ("1.8.35")  - dscudiero - Updated NotifyAllApprovers to make it a bit more general, allowing the selection of fyi/fyiall
+// 11-15-2017 @ 12.20.02 - ("1.8.36")  - dscudiero - Expand code in ParseRelatedData function for each format type, if we do not have the 'wffuncs.subjFromCode' then just parse the code on blank'
