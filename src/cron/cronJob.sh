@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.28 # -- dscudiero -- Tue 10/31/2017 @ 10:06:50.16
+version=2.1.29 # -- dscudiero -- Wed 11/15/2017 @  7:08:30.60
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -75,7 +75,7 @@ originalArgStr="$*"
 		else
 			tmpFile1="/tmp/$callScriptName.$$.dat"
 			tmpFile2="$tmpFile1.msg"
-			for token in error invalid warning; do
+			for token in error invalid; do
 				\grep -i "$token" "$logFile" > $tmpFile1; rc=$?
 				if [[ $rc -eq 0 ]]; then
 					echo -e "\nFound error token '$token' in the logfile \n\t"$logFile"\nfor $callScriptName\n" > $tmpFile2
@@ -143,3 +143,4 @@ exit 0
 ## 10-27-2017 @ 08.18.56 - (2.1.20)    - dscudiero - Add cleanup code to keep the cronjob.log a reasonable size
 ## 10-27-2017 @ 09.36.59 - (2.1.22)    - dscudiero - Set USELOCAL before resolving sript file
 ## 10-27-2017 @ 09.41.18 - (2.1.23)    - dscudiero - Remove debug stuff
+## 11-15-2017 @ 07.08.56 - (2.1.29)    - dscudiero - Do not email on warnings
