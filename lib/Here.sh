@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.10" # -- dscudiero -- Wed 11/15/2017 @  8:28:30.01
+# version="2.0.11" # -- dscudiero -- Wed 11/15/2017 @  8:29:48.12
 #===================================================================================================
 # Got HERE
 #===================================================================================================
@@ -16,7 +16,7 @@ function Here {
 		return
 	fi
 
-	if [[ $1 == '-s' $$ -n $stdout ]]; then
+	if [[ $1 == '-s' && -n $stdout ]]; then
 		shift || true
 		echo HERE $* >> $stdout
 	else
@@ -36,3 +36,4 @@ export -f here
 
 ## Wed Jan  4 13:53:43 CST 2017 - dscudiero - General syncing of dev to prod
 ## 11-15-2017 @ 08.29.15 - ("2.0.10")  - dscudiero - Added -s option to write to $stdout
+## 11-15-2017 @ 08.29.53 - ("2.0.11")  - dscudiero - Cosmetic/minor change
