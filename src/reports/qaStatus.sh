@@ -12,10 +12,7 @@ TrapSigs 'on'
 #=======================================================================================================================
 function parseArgs-qaStatus  { # or parseArgs-local
 	#argList+=(-ignoreXmlFiles,7,switch,ignoreXmlFiles,,script,'Ignore extra xml files')
-	argList+=(-short,5,switch,short,,script,'Generate the short report')
 	argList+=(-long,4,switch,long,,script,'Generate the long report')
-	argList+=(-cat,3,switch,cat,,script,'Generate report for CAT test results')
-	argList+=(-cim,3,switch,cim,,script,'Generate report for CIM test results')
 	argList+=(-emailAddrs,5,option,emailAddrs,,script,'Email addresses to send reports to when running in batch mode')
 	return 0
 }
@@ -43,12 +40,10 @@ GetDefaultsData
 #=======================================================================================================================
 # Standard arg parsing and initialization
 #=======================================================================================================================
-ParseArgsStd
+ParseArgsStd2
 [[ -n $reportName ]] && GetDefaultsData "$reportName" "$reportsTable"
-[[ $short == false && $short == false ]] && mode='short'
 [[ $long == true ]] && mode='long'
-[[ $cat == false && $cim == false ]] && cat=true && cim=true
-dump -1 mode cat cim
+dump -1 mode
 
 #========================================================================================================================
 # Main
@@ -116,3 +111,4 @@ Goodbye 0 #'alert'
 ## 05-25-2017 @ 09.36.55 - (1.0.77)    - dscudiero - call PrintColumnarData function for output
 ## 05-25-2017 @ 16.25.34 - (1.0.77)    - dscudiero - Refactoredto just send data back
 ## 08-25-2017 @ 07.42.04 - (1.0.77)    - dscudiero - Added debug statement
+## 11-15-2017 @ 09.47.45 - (1.0.77)    - dscudiero - misc cleanup of stale arguments
