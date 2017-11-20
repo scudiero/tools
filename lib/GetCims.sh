@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.22" # -- dscudiero -- Mon 10/30/2017 @  9:25:06.64
+# version="2.0.36" # -- dscudiero -- Mon 11/20/2017 @  9:13:11.21
 #===================================================================================================
 # Get CIMs
 #===================================================================================================
@@ -20,10 +20,10 @@ function GetCims {
 	local ans suffix validVals
 	if [[ $allowMultiCims == true ]]; then
 		suffix=', a for all cims'
-		validVals='Yes No All'
+		validVals='Yes No Other All'
 	else
 		unset suffix
-		validVals='Yes No'
+		validVals='Yes No Other'
 	fi
 	dump -3 -t siteDir allowMultiCims suffix validVals
 
@@ -40,10 +40,18 @@ function GetCims {
 				unset ans
 				Prompt ans "${prefix}Found CIM Instance '$(ColorK $dir)' in source instance,\n${prefix}\tdo you wish to $verb it? (y to use$suffix)? >"\
 			 			"$validVals"; ans=${ans,,[a-z]} ans=${ans:0:1};
-				[[ $ans == 'a' ]] && cims=(${adminDirs[@]}) && break
+				[[ $ans == 'a' ]] && { cims=(${adminDirs[@]}); break; }
 				if [[ $ans == 'y' ]]; then
 					cims+=($dir);
 					[[ $allowMultiCims != true ]] && break
+				elif [[ $ans == 'o' ]]; then
+					local dir
+					while [[ -z $dir ]]; do
+						Prompt dir "${prefix}Please specifiy the CIM instance directory (relative to '$siteDir/web')? >" '*dir'
+						[[ $dir == 'x' || $dir == 'X' ]] && GoodBye 'x'
+						[[ ! -f "$siteDir/web/$dir/cimconfig.cfg" ]] && { Error "Specified directory '$dir' is not a CIM instance (no cimconfig.cfg), "; unset dir; } || \
+						{ unset cims; cimStr="$dir"; return 0; } 
+					done
 				fi
 			else
 				cims+=($dir)
@@ -74,3 +82,4 @@ export -f GetCims
 ## 04-13-2017 @ 11.43.55 - ("2.0.17")  - dscudiero - remove debug stuff
 ## 10-16-2017 @ 12.35.41 - ("2.0.19")  - dscudiero - Refactor includes
 ## 10-30-2017 @ 09.34.23 - ("2.0.22")  - dscudiero - Switch lower caseing of ans to use variable substitution
+## 11-20-2017 @ 10.06.01 - ("2.0.36")  - dscudiero - Add 'other' option when not standard cim naming for instance
