@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.38" // -- dscudiero -- Wed 11/15/2017 @ 16:38:41.91
+wfLibVersion="1.8.39" // -- dscudiero -- Mon 11/20/2017 @  7:24:52.89
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -179,6 +179,20 @@ Array.prototype.compare = function(array2) {
 	}
 	return allOf1In2;
 }
+
+//======================================================================================================================
+// Returns the difference between two arrays
+// Usage:
+//		array1.diff(array2);
+// filters array1 based on array2, only return those elements of array1 NOT in array2.
+//======================================================================================================================
+// 11-20-17 - dgs - Initial coding
+//======================================================================================================================
+Array.prototype.diff = function (a) {
+    return this.filter(function (i) {
+        return a.indexOf(i) === -1;
+    });
+};
 
 //=======================================================================================================================
 // Check if proposal is in EDIT mode
@@ -2381,3 +2395,4 @@ var wfLibLoaded=true;
 // 11-10-2017 @ 08.19.13 - ("1.8.35")  - dscudiero - Updated NotifyAllApprovers to make it a bit more general, allowing the selection of fyi/fyiall
 // 11-15-2017 @ 12.34.14 - ("1.8.37")  - dscudiero - Fix bug checking formatCode in ParseRelatedData
 // 11-15-2017 @ 16.39.10 - ("1.8.38")  - dscudiero - Many small updates
+// 11-20-2017 @ 10.06.49 - ("1.8.39")  - dscudiero - Add array.diff prototype
