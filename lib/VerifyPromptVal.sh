@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.55" # -- dscudiero -- Thu 10/19/2017 @ 16:21:36.36
+# version="2.0.56" # -- dscudiero -- Tue 11/21/2017 @ 10:38:40.49
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -72,7 +72,7 @@ function VerifyPromptVal {
 									ans='y'
 								fi
 								if [[ $ans == 'y' ]]; then
-									Msg3; Info "Starting ssh session to host '$hostedOn', enter credentials and then 'exit' to return to '$hostName'...";
+									Msg3; Info "Starting ssh session to host '$hostedOn', enter your credentials and then 'exit' to return to '$hostName'...";
 									[[ $(Contains "$originalArgStr" "$response") == false ]] && commandStr="$response $originalArgStr" || commandStr="$originalArgStr"
 									StartRemoteSession "${userName}@${hostedOn}" $myName $commandStr
 									Msg3; Info "Back from remote ssh session\n"
@@ -232,3 +232,4 @@ export -f VerifyPromptVal
 ## 09-22-2017 @ 07.18.50 - ("2.0.53")  - dscudiero - Include StartRemoteSession
 ## 09-29-2017 @ 16.09.19 - ("2.0.54")  - dscudiero - Add RunSql2 to includes
 ## 10-19-2017 @ 16.21.56 - ("2.0.55")  - dscudiero - Replace Msg2 with Msg3
+## 11-21-2017 @ 10.43.07 - ("2.0.56")  - dscudiero - Cosmetic/minor change
