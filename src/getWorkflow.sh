@@ -1,11 +1,11 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.27 # -- dscudiero -- Thu 11/02/2017 @ 11:00:56.28
+version=1.0.39 # -- dscudiero -- Mon 11/20/2017 @ 10:01:21.14
 #==================================================================================================
 TrapSigs 'on'
-includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
-includes="$includes GetCims"
-Import "$includes"
+myIncludes="ProtectedCall"
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
 scriptDescription="This script can be used to retrieve the workflow generated for a CourseLeaf object"
 
@@ -16,7 +16,7 @@ scriptDescription="This script can be used to retrieve the workflow generated fo
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function getWorkflow-parseArgsStd2 { # or parseArgs-local
+function getWorkflow-ParseArgsStd2 { # or parseArgs-local
 	myArgs+=("prop|proposal|option|proposal||script|The proposal key of the CIM proposal to lookup")
 	myArgs+=("page|page|option|page||script|The CAT page to lookup")
 	return 0
@@ -47,7 +47,7 @@ helpSet='script,client,env,cim'
 Hello
 GetDefaultsData $myName
 ParseArgsStd2 $originalArgStr
-dump -1 client cimStr proposal page
+dump -1 client proposal page cat cim
 
 Init "getClient getEnv getDirs checkEnvs addPvt"
 
@@ -55,21 +55,20 @@ Init "getClient getEnv getDirs checkEnvs addPvt"
 [[ $cat != '' ]] && wfType='page'
 
 ## Get wfType
-	if [[ $page == '' && $cimStr == '' && $wfType == '' ]]; then
+	if [[ -z ${page}${proposal}${wfType} ]]; then
 		Prompt wfType 'Is this a CIM proposal or a Catalog page:' 'cim page' 'cim'; wfType=$(Lower $wfType)
 	else
-		[[ $page != '' ]] && wfType='page'
-		[[ $cimStr != '' ]] && wfType='proposal'
+		[[ -n $page ]] && wfType='page'
+		[[ -n $proposal ]] && wfType='proposal'
 	fi
-	[[ $wfType == 'cim' ]] && wfType='proposal'
 
 ## Get cim instance if wfType is cim
-	if [[ $wfType == 'proposal' && $cimStr == '' ]]; then
+	if [[ $wfType == 'proposal' && -z $cimStr ]]; then
 		allowMultiCims=false
-		Msg2 "Please select a CIM instance to use:"
+		Msg3 "Please select the CIM instance to use:"
 		while [[ $cimStr == '' ]]; do
 			GetCims $srcDir
-			[[ $cimStr == '' ]] && Msg2 && Msg2 $ET "You must select a CIM instance"
+			[[ $cimStr == '' ]] && Msg3 && Msg3 $ET "You must select a CIM instance"
 		done
 	fi
 
@@ -79,11 +78,11 @@ Init "getClient getEnv getDirs checkEnvs addPvt"
 		if [[ $wfType == 'page' ]]; then
 			Prompt page "What catalog page do you wish to lookup (page path from siteDir)" "*any*"
 			[[ ${page:0:1} != '/' ]] && page="/$page"
-			[[ ! -d $srcDir/web/$page ]] && Msg2 $ET1 "Could not locate '$siteDir/$page'" && unset page && continue
+			[[ ! -d $srcDir/web/$page ]] && Msg3 $ET1 "Could not locate '$siteDir/$page'" && unset page && continue
 			foundObj=true
 		else
 			Prompt proposal "What CIM proposal in '$cimStr' do you wish to lookup (enter key value)" "*any*"
-			[[ ! -d $srcDir/web/$cimStr/$proposal ]] && Msg2 $ET1 "Could not locate proposal key '$proposal' in '$cimStr'" && unset proposal && continue
+			[[ ! -d $srcDir/web/$cimStr/$proposal ]] && Msg3 $ET1 "Could not locate proposal key '$proposal' in '$cimStr'" && unset proposal && continue
 			foundObj=true
 			page="/$cimStr/$proposal"
 		fi
@@ -124,10 +123,10 @@ fi
 #===================================================================================================
 # Main
 #===================================================================================================
-Msg2
-[[ $wfType == 'proposal' ]] && Msg2 "^$client / CIM: $cimStr, Proposal: $proposal" || Msg2 "^$client / Page: $page"
-[[ $inWorkflowData != '' ]] && Msg2 $NT1 "$inWorkflowData"
-Msg2
+Msg3
+[[ $wfType == 'proposal' ]] && Msg3 "^$client / CIM: $cimStr, Proposal: $proposal" || Msg3 "^$client / Page: $page"
+[[ $inWorkflowData != '' ]] && Msg3 $NT1 "$inWorkflowData"
+Msg3
 
 ## Get the workflow preview data
 	cwd=$(pwd)
@@ -145,18 +144,18 @@ Msg2
 				## WParse 'Workflow' record
 				workflowwfType=$(cut -d':' -f1 <<< $line)
 				if [[ $workflowwfType == 'Manually Assigned Workflow' ]]; then
-					Msg2 "^^$workflowwfType"
+					Msg3 "^^$workflowwfType"
 					line=${line#*:</strong> }
 					line=${line%%<*}
 					IFS=',' read -r -a steps <<< "$line"
 					for step in "${steps[@]}"; do
-						Msg2 "^^^$step"
+						Msg3 "^^^$step"
 					done
 					break
 				else
 					line=${line#*:</strong> }
 					workflow=${line%%<*}
-					Msg2 "^^Workflow: $workflow"
+					Msg3 "^^Workflow: $workflow"
 					line=${line#*<ul class=\"role\">}
 				fi
 			fi
@@ -167,17 +166,17 @@ Msg2
 				[[ $(Contains "$line" '<em>FYI All</em>') == true ]] && fyiStr='fyiall'
 				line=${line##'<li><strong>'}
 				step=${line%%<*}
-				Msg2 "^^^$step $fyiStr"
+				Msg3 "^^^$step $fyiStr"
 			fi
 		fi
 	done < $cgiOut
 
 ## If workflow file has changed since the page/proposal was placed in workflow
 	if [[ $workflowFileEdate > $tsoEdate ]]; then
-		Msg2
+		Msg3
 		Warning 0 1 "The workflow file has changed since this $wfType was placed into workflow"
-		Msg2 "^^Tso file date: $(date -d @$tsoEdate '+%D')"
-		Msg2 "^^Workflow file date: $(date -d @$workflowFileEdate '+%D @ %H:%M:%S')"
+		Msg3 "^^Tso file date: $(date -d @$tsoEdate '+%D')"
+		Msg3 "^^Workflow file date: $(date -d @$workflowFileEdate '+%D @ %H:%M:%S')"
 	fi
 
 #===================================================================================================
@@ -196,3 +195,4 @@ Goodbye 0 #'alert'
 ## 04-13-2017 @ 14.00.56 - (1.0.20)    - dscudiero - Add a default for VerifyContinue
 ## 11-02-2017 @ 06.58.54 - (1.0.26)    - dscudiero - Switch to ParseArgsStd2
 ## 11-02-2017 @ 11.02.09 - (1.0.27)    - dscudiero - Add addPvt to the init call
+## 11-21-2017 @ 08.17.19 - (1.0.39)    - dscudiero - switch to Msg3
