@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.42 # -- dscudiero -- Fri 11/03/2017 @ 11:06:18.99
+version=1.22.43 # -- dscudiero -- Tue 11/21/2017 @  8:16:03.69
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -322,6 +322,9 @@ case "$hostName" in
 			done
 			[[ $errorDetected == true ]] && Terminate 'One or more of the database load procedures failed, please review messages'
 
+			## Refresh my local warehouse
+			[[ -x $HOME/bin/refreshDevWarehouse ]] && $HOME/bin/refreshDevWarehouse
+
 		;; ## mojave
 
 	*) ## build7
@@ -451,3 +454,4 @@ return 0
 ## 11-01-2017 @ 07.58.07 - (1.22.39)   - dscudiero - Cosmetic/minor change
 ## 11-02-2017 @ 15.58.08 - (1.22.41)   - dscudiero - Temporarially remove buildQaStatusTable call
 ## 11-03-2017 @ 11.07.25 - (1.22.42)   - dscudiero - Add back buildQaStatusTable
+## 11-21-2017 @ 08.16.49 - (1.22.43)   - dscudiero - Add call to refreshDevWarehouse to refresh local warehouse
