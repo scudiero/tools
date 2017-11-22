@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #===================================================================================================
-version=1.0.32 # -- dscudiero -- Mon 10/23/2017 @  8:30:32.86
+version=1.0.33 # -- dscudiero -- Wed 11/22/2017 @  6:24:30.11
 #===================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall RunSql2 SetFileExpansion"
@@ -16,7 +16,7 @@ scriptDescription=""
 #===================================================================================================
 # Standard call back functions
 #===================================================================================================
-function weeklyRollup-ParseArgsStd  { # or parseArgs-local
+function weeklyRollup-ParseArgsStd2  { # or parseArgs-local
 	#argList+=(-optionArg,1,option,scriptVar,,script,'Help text')
 	#argList+=(-flagArg,2,switch,scriptVar,,script,'Help text')
 	argList+=(-file,4,option,file,,script,'The file name relative to the root site directory')
@@ -47,7 +47,7 @@ for var in $falseVars; do eval $var=false; done
 #===================================================================================================
 Hello
 GetDefaultsData $myName
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 
 #===================================================================================================
 # Main
@@ -122,3 +122,4 @@ Goodbye 0 #'alert'
 ## 09-21-2017 @ 10.03.00 - (1.0.28)    - dscudiero - comment out the truncating of the processlog
 ## 09-25-2017 @ 07.57.52 - (1.0.29)    - dscudiero - General syncing of dev to prod
 ## 10-23-2017 @ 08.30.56 - (1.0.32)    - dscudiero - Switch to Msg3
+## 11-22-2017 @ 06.25.55 - (1.0.33)    - dscudiero - Switch to parseargsstd2
