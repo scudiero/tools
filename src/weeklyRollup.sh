@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #===================================================================================================
-version=1.0.33 # -- dscudiero -- Wed 11/22/2017 @  6:24:30.11
+version=1.0.34 # -- dscudiero -- Mon 11/27/2017 @  9:39:07.96
 #===================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall RunSql2 SetFileExpansion"
@@ -101,8 +101,8 @@ ParseArgsStd2 $originalArgStr
 	cd $TOOLSPATH/Logs
 	[[ -d ./cronJobs ]] && ProtectedCall "rm -rf ./cronJobs"
 	ProtectedCall "tar -czf \"$(date '+%m-%d-%y').tar.gz\" * --exclude '*.gz' --exclude \"$myName*\"" #-remove-files
-	ProtectedCall "find . -maxdepth 1 -mindepth 1 -type d -exec rm -rf {} \; > /dev/null 2>&1"
-	ProtectedCall "find . -maxdepth 1 -mindepth 1 -type f -name '*.tar' -exec rm -rf {} \; > /dev/null 2>&1"
+	ProtectedCall "find . -maxdepth 1 -mindepth 1 -type d  --exclude \"$myName*\" -exec rm -rf {} \; > /dev/null 2>&1"
+	ProtectedCall "find . -maxdepth 1 -mindepth 1 -type f -name '*.tar' --exclude \"$myName*\" -exec rm -rf {} \; > /dev/null 2>&1"
 	Msg3 "^Logs rollup -- Completed"
 
 
@@ -123,3 +123,4 @@ Goodbye 0 #'alert'
 ## 09-25-2017 @ 07.57.52 - (1.0.29)    - dscudiero - General syncing of dev to prod
 ## 10-23-2017 @ 08.30.56 - (1.0.32)    - dscudiero - Switch to Msg3
 ## 11-22-2017 @ 06.25.55 - (1.0.33)    - dscudiero - Switch to parseargsstd2
+## 11-27-2017 @ 09.45.11 - (1.0.34)    - dscudiero - Fix problem deleting the weekly log file while in use
