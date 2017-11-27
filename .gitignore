@@ -19,3 +19,6 @@
 .nfs*
 /dailysh/
 /bin/
+/src/java/WorkWith/nbproject/private/
+/src/java/WorkWith/build/
+/src/java/WorkWith/dist/
