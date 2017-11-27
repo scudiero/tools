@@ -2,6 +2,7 @@
 // 10/25/17 - dgs - Initial - 
 //======================================================================================================================
 // Import the common setup and functions library
+%import %progdir%/cim/util.atj:atj;
 wfLibName="/locallibs/workflowLib.atj"
 %import %progdir%/locallibs/workflowLib.atj:atj;
 //======================================================================================================================
@@ -58,7 +59,7 @@ wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 
 
 //======================================================================================================================
-// version:2.0.10 // -- dscudiero -- Fri 11/10/2017 @  9:59:18.91
+// version:2.0.11 // -- dscudiero -- Mon 11/27/2017 @  8:38:11.22
 //======================================================================================================================
 // Check in log
 //======================================================================================================================
@@ -70,3 +71,4 @@ wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 // 10-04-2017 @ 07.46.52 - (31.96)     - dscudiero - Tweeaked catch statement to use wfDebug
 // 10-25-2017 @ 09.40.56 - (13.59)     - dscudiero - Reformatted comments
 // 11-10-2017 @ 12.37.57 - (18.91)     - dscudiero - Cleanup on setting the options variable
+// 11-27-2017 @ 09.38.44 - (11.22)     - dscudiero - Added a include statement for util.atj
