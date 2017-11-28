@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.43 # -- dscudiero -- Tue 11/21/2017 @  8:16:03.69
+version=1.22.44 # -- dscudiero -- Mon 11/27/2017 @ 14:35:40.52
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -322,6 +322,25 @@ case "$hostName" in
 			done
 			[[ $errorDetected == true ]] && Terminate 'One or more of the database load procedures failed, please review messages'
 
+		 ## Create the data dump for the workwith tool
+			fields="$clientInfoTable.name,$clientInfoTable.longname,$clientInfoTable.hosting,products"
+			hostClause="(select distinct host from $siteInfoTable where $siteInfoTable.name=$clientInfoTable.name and $siteInfoTable.host <> 'N/A' \
+						and $siteInfoTable.name not like '%-test') as host"
+			envsClause="GROUP_CONCAT(distinct env SEPARATOR ',') as envList"
+			fromClause="from $clientInfoTable,$siteInfoTable where ($siteInfoTable.name REGEXP $clientInfoTable.name) 
+						and $siteInfoTable.env not in('prior','public','preview')"
+			groupClause="GROUP BY $clientInfoTable.name"
+		 	sqlStmt="select $fields,$hostClause,$envsClause,ifnull($siteInfoTable.cims,'') $fromClause $groupClause"
+
+			#echo; dump sqlStmt; echo
+		 	RunSql2 $sqlStmt
+		 	[[ ! -d $(dirname "$workwithDataFile") ]] && mkdir -p "$(dirname "$workwithDataFile")"
+		 	[[ -e ${workwithDataFile}.new ]] && rm -f "${workwithDataFile}.new"
+			for ((i=0; i<${#resultSet[@]}; i++)); do
+				echo "${resultSet[$i]}" >> "${workwithDataFile}.new"
+			done
+			[[ -f "$workwithDataFile" ]] && mv -f "${workwithDataFile}" "${workwithDataFile}.bak"
+			mv -f "${workwithDataFile}.new" "${workwithDataFile}"
 			## Refresh my local warehouse
 			[[ -x $HOME/bin/refreshDevWarehouse ]] && $HOME/bin/refreshDevWarehouse
 
@@ -455,3 +474,4 @@ return 0
 ## 11-02-2017 @ 15.58.08 - (1.22.41)   - dscudiero - Temporarially remove buildQaStatusTable call
 ## 11-03-2017 @ 11.07.25 - (1.22.42)   - dscudiero - Add back buildQaStatusTable
 ## 11-21-2017 @ 08.16.49 - (1.22.43)   - dscudiero - Add call to refreshDevWarehouse to refresh local warehouse
+## 11-28-2017 @ 14.33.20 - (1.22.44)   - dscudiero - Add the data dump for workwith
