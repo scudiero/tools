@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.39" // -- dscudiero -- Mon 11/20/2017 @  7:24:52.89
+wfLibVersion="1.8.40" // -- dscudiero -- Tue 11/28/2017 @ 15:09:34.51
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -2296,7 +2296,7 @@ wffuncs.wfDumpVars = function(inval, wfrule, args) {
 //======================================================================================================================
 wffuncs.TODO = function(inval, wfrule, args) {
 	var indent='&nbsp;&nbsp;&nbsp;&nbsp;';
-	var indent2=indent + indent + indent + indent + indent + "&nbsp;"
+	var indent2=indent + indent + indent + indent + "&nbsp;&nbsp;&nbsp;";
 	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
 
 	print_doc(indent + '<strong>*Note*</strong> -- Workflow is not yet complete:<br>');
@@ -2396,3 +2396,4 @@ var wfLibLoaded=true;
 // 11-15-2017 @ 12.34.14 - ("1.8.37")  - dscudiero - Fix bug checking formatCode in ParseRelatedData
 // 11-15-2017 @ 16.39.10 - ("1.8.38")  - dscudiero - Many small updates
 // 11-20-2017 @ 10.06.49 - ("1.8.39")  - dscudiero - Add array.diff prototype
+// 11-28-2017 @ 15.10.07 - ("1.8.40")  - dscudiero - Tweaked format of TODO output
