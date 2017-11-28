@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.40" // -- dscudiero -- Tue 11/28/2017 @ 15:09:34.51
+wfLibVersion="1.8.41" // -- dscudiero -- Tue 11/28/2017 @ 16:27:27.99
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -1693,6 +1693,32 @@ wffuncs.NotifyAllApprovers = function(inval, wfrule, args, prevsteps) {
 } //NotifyAllApprovers
 
 
+//=================================================================================================
+// Include step only if it is not the first step in the workflow
+//=================================================================================================
+// 11-28-17 - dgs - Initial coding
+//=================================================================================================
+wffuncs.IsNotFirstStep = function(inval, wfrule, args) {
+	var myName=wfrule.attrname;
+	wfDebug(1,"\n*** In "+ myName + " called as '" + wfrule.searchfor + "', Step: '" + inval +"' ***");
+
+	var prevsteps=args.prevsteps;
+	if (! args.hasOwnProperty("prevsteps")) {
+		wfDebug(1,"\t*** Do not have any previous steps attribute in 'args', allowing step")
+		return [inval.replace(wfrule.regex,"")];
+	}
+	
+	if (prevsteps.length === 0) {
+		wfDebug(1,"\t*** This is the first step in workflow, skipping step")
+		return false;
+	}
+
+	wfDebug(1,"\t*** This is not the first step in workflow, allowing step")
+	return [inval.replace(wfrule.regex,"")]
+
+} //IsNotFirstStep
+
+
 //==================================================================================================
 //==================================================================================================
 // Common utilities
@@ -2397,3 +2423,4 @@ var wfLibLoaded=true;
 // 11-15-2017 @ 16.39.10 - ("1.8.38")  - dscudiero - Many small updates
 // 11-20-2017 @ 10.06.49 - ("1.8.39")  - dscudiero - Add array.diff prototype
 // 11-28-2017 @ 15.10.07 - ("1.8.40")  - dscudiero - Tweaked format of TODO output
+// 11-28-2017 @ 16.28.49 - ("1.8.41")  - dscudiero - Added 'IsNotFirstStep' function
