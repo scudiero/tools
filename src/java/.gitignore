@@ -9,4 +9,5 @@ test*
 !log4j-api-2.7.jar
 !log4j-core-2.7.jar
 !mysql-connector-java-5.1.40-bin.jar
+!WorkWith.jar
 !tools.jar
