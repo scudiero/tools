@@ -1,7 +1,7 @@
 //======================================================================================================================
 // ??/??/17 - dgs - initial - ??
 //======================================================================================================================
-localsteps:Program Workflow Management|groups|workflow|attributes=isUndergraduate[Is Undergraduate],isGraduate[Is Graduate],isNew[Is New],isNotNew[Is not New],isEdit[Is Edit/Change],isNotEdit[Is not Edit/Change],isDelete[Is Delete],isNotDelete[Is not Delete],fyi[FYI Only],fyiall[FYI All],todo[ToDo Item],optional[If Role Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
+localsteps:Program Workflow Management|groups|workflow|attributes=isUndergraduate[Is Undergraduate],isGraduate[Is Graduate],isNew[Is New],isNotNew[Is not New],isEdit[Is Edit/Change],isNotEdit[Is not Edit/Change],isDelete[Is Delete],isNotDelete[Is not Delete],isNotFirstStep[Is not the first step],fyi[FYI Only],fyiall[FYI All],todo[ToDo Item],optional[If Role Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
 
 template:custom
 pageflags:autoapprove
@@ -11,7 +11,7 @@ workflow:standard|TODO,Depts Chair,Cols Dean,Curriculum Committee fyiall,Curricu
 //workflow:standard|START,College: Col,Department: Dept,Academic level: AcadLevel,Proposal State: ProposalState,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is New] isNew,[Is not New] isNotNew,[Is Edit/Change] isEdit,[Is not Edit/Change] isNotEdit,[Is Delete] isDelete,[Is not Delete] isNotDelete,END
 
 //======================================================================================================================
-// version:1.0.12 // -- dscudiero -- Tue 11/28/2017 @ 14:49:29.30
+// version:1.0.13 // -- dscudiero -- Tue 11/28/2017 @ 16:35:47.49
 //======================================================================================================================
 // Check in log
 //======================================================================================================================
@@ -24,3 +24,4 @@ workflow:standard|TODO,Depts Chair,Cols Dean,Curriculum Committee fyiall,Curricu
 // 10-25-2017 @ 09.38.28 - (41.81)     - dscudiero - Reformatted comments
 // 11-08-2017 @ 11.20.58 - (17.19)     - dscudiero - Added Proposal State to the debug workflow
 // 11-28-2017 @ 14.50.35 - (29.30)     - dscudiero - Add all proposal state rules to the selectable conditionals
+// 11-28-2017 @ 16.54.36 - (47.49)     - dscudiero - Added the isNotFirstStep conditional & code
