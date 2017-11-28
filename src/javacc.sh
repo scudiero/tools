@@ -22,13 +22,15 @@ module=$1; shift
 	javaFile="$module"
 	[[ ! -f $javaFile ]] && javaFile="$javaFile.java"
 	javac $javaFile; rc=$?
+	#javac -Xlint $javaFile; rc=$?
 	echo -e "\t$module compiled, rc=$rc"
 
 ## Refresh the jar file
-	[[ $rc -eq 0 && -r $module.class ]] && jar -uf tools.jar *.class && echo -e "\ttools.jar refreshed " && rm -f $module.class
+	#[[ $rc -eq 0 && -r $module.class ]] && jar -uf tools.jar *.class && echo -e "\ttools.jar refreshed " && rm -f $module.class
 
 ## Cleanup
 	export CLASSPATH="$classPathSave"
 	popd >& /dev/null
 exit
 ## 10-23-2017 @ 16.07.08 - dscudiero - misc cleanup
+## 11-28-2017 @ 14.34.16 - dscudiero - comment out removing the class files
