@@ -244,9 +244,8 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 	fi
 
 ## See if we have any CIMs
-	allCims=true; unset cimStr
-	GetCims "$srcDir"
-	unset allCims
+	unset cimStr
+	GetCims "$srcDir" -all
 	[[ -n $cimStr ]] && haveCims=true
 
 ## See if we have CLSS
@@ -681,3 +680,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 11-01-2017 @ 09.55.06 - (4.13.-1)   - dscudiero - Switched to ParseArgsStd2
 ## 11-02-2017 @ 11.01.58 - (4.13.-1)   - dscudiero - Add addPvt to the init call
 ## 11-06-2017 @ 13.32.24 - (4.13.-1)   - dscudiero - Fix setting nexturl url syntax
+## 11-30-2017 @ 13.26.27 - (4.13.-1)   - dscudiero - Switch to use the -all flag on the GetCims call
