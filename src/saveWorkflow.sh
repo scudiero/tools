@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.87 # -- dscudiero -- Thu 09/14/2017 @ 16:35:45.62
+version=2.2.88 # -- dscudiero -- Thu 11/30/2017 @ 13:17:54.03
 #====================================================================================================
 TrapSigs 'on'
 includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -68,7 +68,7 @@ if [[ $daemon == true ]]; then
 	env="${data%% *}"
 
 	dump -1 userName siteFile data client env
-	allCims=true; GetCims  "$siteFile"
+	GetCims "$siteFile" -all
 	srcDir="$siteFile"
 	backupFolder="$tmpRoot/$myName/$client-$env-$BASHPID/beforeDelete"
 else
@@ -193,3 +193,4 @@ Goodbye 0
 ## 09-07-2017 @ 08.02.48 - (2.2.80)    - dscudiero - Add debug messages
 ## 09-13-2017 @ 06.59.34 - (2.2.84)    - dscudiero - remove debug statements
 ## 09-13-2017 @ 11.22.19 - (2.2.84)    - dscudiero - Change the parsing of the client and env for daemon mode
+## 11-30-2017 @ 13.26.45 - (2.2.88)    - dscudiero - Switch to use the -all flag on the GetCims call
