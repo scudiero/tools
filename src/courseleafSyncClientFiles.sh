@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.6 # -- dscudiero -- Thu 09/14/2017 @ 12:21:01.28
+version=1.1.7 # -- dscudiero -- Thu 11/30/2017 @ 13:21:54.57
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye Prompt VerifyContinue'
@@ -155,9 +155,8 @@ myData="Client: '$client', SrcEnv: '$srcEnv', TgtEnv: '$tgtEnv' "
 # Main
 #===================================================================================================
 ## Get the CIMS
-	allCims=true
-	unset cimStr cims; GetCims $tgtDir; tgtCims="$cimStr"
-	unset cimStr cims; GetCims $srcDir; srcCims="$cimStr"
+	unset cimStr cims; GetCims $tgtDir -all; tgtCims="$cimStr"
+	unset cimStr cims; GetCims $srcDir -all; srcCims="$cimStr"
 
 # ## CAT -- Get the courseleaf dirs under web from the skeleton -- dont sync these
 	## initialize the rsync control file, skip cims for now
@@ -279,3 +278,4 @@ Goodbye 0 'alert' "$(ColorK "$(Upper $client) -- Refreshed $(Upper $srcEnv) from
 ## Tue Jul 12 10:12:51 CDT 2016 - dscudiero - Fix problem if the source does not have any CIMs
 ## Thu Aug  4 11:01:28 CDT 2016 - dscudiero - Added displayGoodbyeSummaryMessages=true
 ## 04-06-2017 @ 10.09.53 - (1.0.99)    - dscudiero - renamed RunCourseLeafCgi, use new name
+## 11-30-2017 @ 13.26.36 - (1.1.7)     - dscudiero - Switch to use the -all flag on the GetCims call
