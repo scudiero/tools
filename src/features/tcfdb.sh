@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.2.34 # -- dscudiero -- Thu 11/02/2017 @ 12:06:09.50
+version=1.2.35 # -- dscudiero -- Thu 11/30/2017 @ 13:20:17.50
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
@@ -143,8 +143,7 @@ changeLogRecs+=("Feature: $feature")
 
 	# Find the base database file, look in the cims
 		unset baseDbFile
-		allCims=true
-		GetCims "$tgtDir"
+		GetCims "$tgtDir" -all
 		if [[ ${#cims[@]} -gt 0 ]]; then
 			for cim in "${cims[@]}"; do
 				## Get the dbname field from the cimconfig.cfg file, parse of the dbname
@@ -298,3 +297,4 @@ return  ## We are called as a subprocess, just return to our parent
 ## 09-22-2017 @ 07.50.23 - (1.2.32)    - dscudiero - Add to imports
 ## 11-02-2017 @ 11.48.48 - (1.2.33)    - dscudiero - Switch Msg2 to Msg3
 ## 11-02-2017 @ 12.06.35 - (1.2.34)    - dscudiero - Added InsertLineInFile
+## 11-30-2017 @ 13.26.39 - (1.2.35)    - dscudiero - Switch to use the -all flag on the GetCims call
