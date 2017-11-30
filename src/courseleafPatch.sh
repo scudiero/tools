@@ -834,7 +834,7 @@ removeGitReposFromNext=true
 	processControl=${processControl:1}
 	dump -2 processControl betaProducts
 	addAdvanceCode=false
-	allCims=true; GetCims "$tgtDir"
+	GetCims "$tgtDir" -all
 
 ## If cat is one of the products, should we advance the edition, should we audit the catalog
 	if [[ $(Contains "$patchProducts" 'cat') == true ]]; then
@@ -1498,6 +1498,8 @@ Msg3 "\nCross product checks..."
 ##	1) change title to 'CourseLeaf Console' (requested by Mike 02/09/17)
 ## 	2) remove 'System Refresh' (requested by Mike Miller 09/13/17)
 ## 	3) remove 'localsteps:links|links|links' (requested by Mike Miller 09/13/17)
+## 	4) Add 'navlinks:CAT|Rebuild Course Bubbles and Search Results'
+
 	editFile="$tgtDir/web/$courseleafProgDir/index.tcf"
 	if [[ -w "$editFile" ]]; then
 		fromStr='title:Catalog Console'
@@ -1533,6 +1535,21 @@ Msg3 "\nCross product checks..."
 			rebuildConsole=true
 			filesEdited+=("$editFile")
 		fi
+		#navlinks:CAT|Rebuild Course Bubbles and Search Results|mkfscourses^^<h4>Rebuild Course Bubbles and Search Results</h4>Rebuild the course description pop-up bubbles, and also search results.^steptitle=Rebuilding Course Bubbles and Search Results
+		fromStr='localsteps:links|links|links'
+		toStr='// localsteps:links|links|links'
+		grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
+		if [[ -n $grepStr ]]; then
+			sed -i s"!^$fromStr!$toStr!" $editFile
+			updateFile="/$courseleafProgDir/index.tcf"
+			changeLogRecs+=("$updateFile updated to change title")
+			Msg3 "^Updated '$updateFile' to remove 'localsteps:links|links|links"
+			rebuildConsole=true
+			filesEdited+=("$editFile")
+		fi
+
+
+
 	else
 		Msg3
 		Warning 0 2 "Could not locate '$editFile', please check the target site"
@@ -1782,3 +1799,4 @@ Goodbye 0 "$text1" "$text2"
 ## 11-02-2017 @ 06.58.37 - (5.5.0)     - dscudiero - Switch to ParseArgsStd2
 ## 11-02-2017 @ 10.27.55 - (5.5.0)     - dscudiero - use help2
 ## 11-02-2017 @ 10.53.32 - (5.5.0)     - dscudiero - Add addPvt to the Init call
+## 11-30-2017 @ 13.26.33 - (5.5.0)     - dscudiero - Switch to use the -all flag on the GetCims call
