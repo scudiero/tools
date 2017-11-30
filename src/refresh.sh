@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.126 # -- dscudiero -- Tue 11/14/2017 @  9:14:51.89
+version=1.3.128 # -- dscudiero -- Thu 11/30/2017 @ 11:34:56.46
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall PushPop SelectMenu CopyFileWithCheck BackupCourseleafFile WriteChangelogEntry"
@@ -59,8 +59,9 @@ function mapRefreshObj {
 #==============================================================================================
 function vba {
 	[[ $userName != 'dscudiero' ]] && Terminate "Sorry you cannot refresh objects of type $refreshObj"
+		vbaSrcDir="$HOME/windowsStuff/VisualStudio2017"
 	## Get the list of vba applications
-		srcDir="/home/dscudiero/windowsStuff/documents/Visual Studio 2015/Projects"
+		srcDir="$vbaSrcDir/Projects"
 		cwd=$(pwd)
 		cd "$srcDir"
 		SetFileExpansion 'on'; projectDirs=$(ls -d -t "./"* 2> /dev/null | tr $'\n' ' ' | tr -d '.' | tr -d '/'); SetFileExpansion
@@ -84,7 +85,7 @@ function vba {
 
 	Msg3 "Refreshing '$app' from $project..."
 	## Copy the application files
-		srcDir="$HOME/windowsStuff/VisualStudio2015/Projects/$project/$project/bin/Release"
+		srcDir="$vbaSrcDir/Projects/$project/$project/bin/Release"
 		tgtDir=$TOOLSPATH/bin
 		[[ -d $tgtDir/$app-new ]] && rm -rf $tgtDir/$app-new
 		[[ ! -d $tgtDir/$app-new ]] && mkdir -p $tgtDir/$app-new
@@ -353,3 +354,4 @@ Goodbye 0
 ## 07-19-2017 @ 15.28.53 - (1.3.121)   - dscudiero - General syncing of dev to prod
 ## 10-20-2017 @ 13.59.37 - (1.3.123)   - dscudiero - Add PushPop to the includes list
 ## 11-14-2017 @ 09.15.05 - (1.3.126)   - dscudiero - Changed source directory for vba
+## 11-30-2017 @ 12.42.50 - (1.3.128)   - dscudiero - Updated the vba section to reflect the new file locations
