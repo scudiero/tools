@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.99 # -- dscudiero -- Wed 11/01/2017 @ 15:45:20.03
+version=4.3.105 # -- dscudiero -- Fri 12/01/2017 @ 10:24:05.65
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql2 StringFunctions ProtectedCall FindExecutable PushPop"
@@ -100,9 +100,10 @@ fi
 	## Get the list of actual directories pulling only those in a production server share
 		SetFileExpansion 'on'
 		if [[ -z $client ]]; then
-			clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 -not -name '*-test*' 2> /dev/null | grep "${prodServers//,/\|}"))
+			clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | sort | grep "${prodServers//,/\|}"))
 		else
-			clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 -not -name '*-test*' 2> /dev/null | grep "${prodServers//,/\|}" | grep $client))
+			clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 -not -name '*-test' 2> /dev/null | grep "${prodServers//,/\|}" | grep $client || true))
+			[[ ${#clientDirs[@]} -eq 0 ]] && clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep "${prodServers//,/\|}" | grep $client || true))
 		fi
 		SetFileExpansion
 		numClients=${#clientDirs[@]}
@@ -113,10 +114,14 @@ if [[ $verboseLevel -ge 1 ]]; then
 	Msg3 "clientDirs:"; for i in "${!clientDirs[@]}"; do printf "\t[$i] = >${clientDirs[$i]}<\n"; done; echo
 fi
 	## Loop through actual clientDirs
+		declare -A foundCodes ## Has table to keep track of 'seen' client codes (because we can have xxx and xxx-test)
 		for clientDir in ${clientDirs[@]}; do
-			if [[ ${dbClients[$(basename $clientDir)]+abc} ]]; then
+			clientCode="$(basename $clientDir)"; clientCode="${clientCode//-test/}"
+			[[ ${foundCodes[$clientCode]+abc} ]] && continue  ## have we seen this client code before, if yes then skip
+			foundCodes["$clientCode"]=true
+			if [[ ${dbClients[$clientCode]+abc} ]]; then
 				(( clientCntr+=1 ))
-				client="$(basename $clientDir)"
+				client="$clientCode"
 				clientId=${dbClients[$client]}
 				# ## Get the envDirs, make sure we have some
 				for env in ${envList//,/ }; do unset ${env}Dir ; done
@@ -240,3 +245,4 @@ Goodbye 0 'alert'
 ## 10-31-2017 @ 08.51.21 - (4.3.85)    - dscudiero - Wrap the grep calls in a ProtectedCall
 ## 11-01-2017 @ 15.24.36 - (4.3.98)    - dscudiero - Updated client directory selection to use only server directories in the prodServer or devServers lists
 ## 11-01-2017 @ 15.50.25 - (4.3.99)    - dscudiero - Switch to use ParseArgsStd2
+## 12-01-2017 @ 10.24.36 - (4.3.105)   - dscudiero - Fix problem when the client does not have a next site
