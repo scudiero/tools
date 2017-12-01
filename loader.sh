@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.40" # -- dscudiero -- Tue 11/14/2017 @ 11:58:45.15
+version="1.4.42" # -- dscudiero -- Fri 12/01/2017 @  9:09:32.18
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -194,7 +194,7 @@ sTime=$(date "+%s")
 	[[ $myRhel == 'release' ]] && myRhel=$(cat /etc/redhat-release | cut -d" " -f4)
 	## set default values for common variables
 		if [[ $myName != 'bashShell' ]]; then
-			trueVars="verify traceLog trapExceptions logInDb allowAlerts waitOnForkedProcess defaultValueUseNotes autoRemote"
+			trueVars="verify traceLog trapExceptions logInDb allowAlerts waitOnForkedProcess defaultValueUseNotes"
 
 			falseVars="testMode noEmails noHeaders noCheck noLog verbose quiet warningMsgsIssued errorMsgsIssued noClear"
 			falseVars="$falseVars force newsDisplayed noNews informationOnlyMode secondaryMessagesOnly changesMade fork"
@@ -456,3 +456,4 @@ sTime=$(date "+%s")
 ## 11-14-2017 @ 11.51.02 - ("1.4.31")  - dscudiero - Do not touch the log file if it is /dev/null
 ## 11-14-2017 @ 11.52.21 - ("1.4.32")  - dscudiero - Cosmetic/minor change
 ## 11-14-2017 @ 11.58.15 - ("1.4.39")  - dscudiero - Do not touch the log directory if the logFile is /dev/null
+## 12-01-2017 @ 09.09.59 - ("1.4.42")  - dscudiero - Remove autoRemote from the trueVars set
