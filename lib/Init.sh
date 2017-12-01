@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.57 # -- dscudiero -- Fri 11/03/2017 @ 13:21:18.55
+# version=2.1.58 # -- dscudiero -- Fri 12/01/2017 @  8:51:28.26
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -165,6 +165,7 @@ function Init {
 
 		if [[ $getSrcEnv == true ]]; then
 			[[ -z $srcEnv && -n $env ]] && srcEnv="$env"
+			[[ -z $srcEnv && -n $envs ]] && srcEnv="$envs"
 			clientEnvsSave="$clientEnvs"
 			clientEnvs="$clientEnvs skel"
 			[[ -n $tgtEnv ]] && { clientEnvs="$(Trim "${clientEnvs//$tgtEnv/}")"; clientEnvs="${clientEnvs//,,/,}"; }
@@ -179,6 +180,7 @@ function Init {
 
 		if [[ $getTgtEnv == true ]]; then
 			[[ -z $tgtEnv && -n $env && $srcEnv != $env ]] && tgtEnv="$env"
+			[[ -z $tgtEnv && -n $envs && $srcEnv != $envs ]] && tgtEnv="$envs"
 			[[ -n $srcEnv ]] && { clientEnvs="$(Trim "${clientEnvs//$srcEnv/}")"; clientEnvs="${clientEnvs//,,/,}"; }
 			unset defaultEnv
 			if [[ $(Contains "$clientEnvs" 'pvt') == false ]]; then
@@ -372,3 +374,4 @@ export -f Init
 ## 11-02-2017 @ 10.51.57 - (2.1.38)    - dscudiero - Add 'addPvt' option
 ## 11-02-2017 @ 15.54.00 - (2.1.45)    - dscudiero - Fix addPvt code to check to make sure the pvt site exists befor adding to the envs list
 ## 11-03-2017 @ 09.53.34 - (2.1.56)    - dscudiero - Fix problem adding pvt site to clientEnvs lsit
+## 12-01-2017 @ 09.14.03 - (2.1.58)    - dscudiero - Make sure env is set from envs if envs has a value
