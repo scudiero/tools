@@ -1,7 +1,7 @@
 #!/bin/bash
-# DO NOT AUTOVERSION
+# XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.-1 # -- dscudiero -- Fri 09/29/2017 @ 13:37:02.61
+version=4.13.1 # -- dscudiero -- Fri 12/01/2017 @  9:07:33.06
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop"
@@ -171,12 +171,14 @@ mustHaveDirs=$(sed "s/<progDir>/$progDir/g" <<< $(cut -d":" -f2 <<< $scriptData1
 mustHaveFiles=$(sed "s/<progDir>/$progDir/g" <<< $(cut -d":" -f2 <<< $scriptData2))
 dump -1 ignoreList mustHaveDirs mustHaveFiles
 
+[[ $srcEnv == $tgtEnv ]] && Terminate "Source environment and target environment are the same"
+
 ## check to see if this client is remote or on another host
 	if [[ $client != 'internal' && $client != 'lilypadu' && $noCheck != true ]]; then
-		sqlStmt="select hosting from $clientInfoTable where name=\"$client\""
-		RunSql2 $sqlStmt
-		clientHosting=${resultSet[0]}
-		if [[ $clientHosting == 'leepfrog' ]]; then
+		# sqlStmt="select hosting from $clientInfoTable where name=\"$client\""
+		# RunSql2 $sqlStmt
+		# clientHosting=${resultSet[0]}
+		#if [[ $clientHosting == 'leepfrog' ]]; then
 			## check to see if this client is on another host
 			[[ $env == 'test' ]] && tempClient="${client}-test" || tempClient="${client}"
 			sqlStmt="select host,share,redhatVer from $siteInfoTable where name=\"$tempClient\" and env=\"$env\""
@@ -188,26 +190,15 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 			else
 				Terminate "Could not retrieve data for client ($tempClient), env ($env) from $workflowDb.$siteInfoTable"
 			fi
-			[[ $clientHost != $hostName ]] && srcDir="ssh $userName@$clientHost.leepfrog.com:$srcDir" && remoteCopy=true
+			if [[ $clientHost != $hostName ]]; then
+				Msg3 "^Copying remote directory on 'clientHost', you will be prompted for your password on that server."
+				srcDir="ssh $userName@$clientHost.leepfrog.com:$srcDir"
+				remoteCopy=true
+			fi
 			dump -2 -t clientHost clientShare clientRhel srcDir
-		else
-			Terminate "Copying of remote client sites not supported at this time"
-			#[[ -f /home/$userName/.remoteSites ]] && remoteSitesDataFile=/home/$userName/.remoteSites || remoteSitesDataFile=$TOOLSPATH/.remoteSites
-			#unset pwRec
-			#[[ ! -r $remoteSitesDataFile ]] && Msg "T Could not read remote site data file: '$remoteSitesDataFile'.";
-			#$trapErrexitOff
-			#
-			#pwRec=$(grep "^$client" $remoteSitesDataFile)
-			#$trapErrexitOn
-			#[[ -z $pwRec ]] && Msg "T Could not retrieve remote site login data for '$client' from file: '$remoteSitesDataFile'.";
-			#remoteUser=$(echo $pwRec | cut -d ' ' -f1)
-			#remotePw=$(echo $pwRec | cut -d ' ' -f2)
-			#remoteHost=$(echo $pwRec | cut -d ' ' -f3)
-			#remoteNext=$(echo $pwRec | cut -d ' ' -f4)
-			#remoteCurr=$(echo $pwRec | cut -d ' ' -f5)
-			#dump pwRec remoteUser remotePw remoteHost remoteNext remoteCurr
-			#remoteCopy=true
-		fi
+		# else
+		# 	Terminate "Copying of remote client sites not supported at this time"
+		# fi
 	else
 		clientHost=$hostName
 		clientRhel=$myRhel
@@ -681,3 +672,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 11-02-2017 @ 11.01.58 - (4.13.-1)   - dscudiero - Add addPvt to the init call
 ## 11-06-2017 @ 13.32.24 - (4.13.-1)   - dscudiero - Fix setting nexturl url syntax
 ## 11-30-2017 @ 13.26.27 - (4.13.-1)   - dscudiero - Switch to use the -all flag on the GetCims call
+## 12-01-2017 @ 09.15.07 - (4.13.1)    - dscudiero - Remove check for remotely hosted clients
