@@ -804,7 +804,7 @@ removeGitReposFromNext=true
 			fileList="$(ls -t $srcDir | grep -v .bad | grep -v master | tr "\n" " ")"
 			prodShadowVer=${fileList%% *}
 			[[ ! -f $srcDir/master/.syncDate ]] && Terminate "Could not locate '$srcDir/master/.syncDate'. The skeleton shadow is probably being updated, please try again later"
-	master=true
+	#master=true
 			eval ${productLower}MasterDate=\"$(date +"%m-%d-%Y @ %H.%M.%S" -r $srcDir/master/.syncDate)\"
 			eval prodMasterDate=\$${productLower}MasterDate
 			if [[ -z $newest && -z $master && -n $prodShadowVer ]]; then
@@ -1800,3 +1800,4 @@ Goodbye 0 "$text1" "$text2"
 ## 11-02-2017 @ 10.27.55 - (5.5.0)     - dscudiero - use help2
 ## 11-02-2017 @ 10.53.32 - (5.5.0)     - dscudiero - Add addPvt to the Init call
 ## 11-30-2017 @ 13.26.33 - (5.5.0)     - dscudiero - Switch to use the -all flag on the GetCims call
+## 12-01-2017 @ 12.27.36 - (5.5.0)     - dscudiero - Remove the hard coded override to always patch from the master release
