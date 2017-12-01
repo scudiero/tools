@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.56" # -- dscudiero -- Tue 11/21/2017 @ 10:38:40.49
+# version="2.0.59" # -- dscudiero -- Fri 12/01/2017 @  9:13:28.05
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -57,14 +57,14 @@ function VerifyPromptVal {
 			## OK found client, now make sure it is valid for the current host
 			if [[ $verifyMsg == "" ]]; then
 				if [[ $anyClient != 'true' ]]; then
-					sqlStmt="select host from $siteInfoTable where name=\"$response\""
+					sqlStmt="select host from $siteInfoTable where name like \"$response%\""
 					RunSql2 $sqlStmt
 					[[ ${#resultSet[0]} -eq 0 ]] && verifyMsg="$(Error "Could not retrieve any records for '$response' in the $warehouseDb.$siteInfoTable")"
 					if [[ $verifyMsg == "" ]]; then
 						hostedOn="${resultSet[0]}"
 						if [[ $hostedOn != $hostName ]]; then
 							if [[ $verify == true ]]; then
-								if [[ $autoRemote == false ]]; then
+								if [[ $autoRemote != true ]]; then
 									responseSave="$response"
 									unset ans; Prompt ans "Client '$response' is hosted on '$hostedOn', Do you wish to start a session on that host" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
 									response="$responseSave"
@@ -72,7 +72,7 @@ function VerifyPromptVal {
 									ans='y'
 								fi
 								if [[ $ans == 'y' ]]; then
-									Msg3; Info "Starting ssh session to host '$hostedOn', enter your credentials and then 'exit' to return to '$hostName'...";
+									Msg3; Info "Starting ssh session to host '$hostedOn', enter your credentials if prompted...";
 									[[ $(Contains "$originalArgStr" "$response") == false ]] && commandStr="$response $originalArgStr" || commandStr="$originalArgStr"
 									StartRemoteSession "${userName}@${hostedOn}" $myName $commandStr
 									Msg3; Info "Back from remote ssh session\n"
@@ -233,3 +233,4 @@ export -f VerifyPromptVal
 ## 09-29-2017 @ 16.09.19 - ("2.0.54")  - dscudiero - Add RunSql2 to includes
 ## 10-19-2017 @ 16.21.56 - ("2.0.55")  - dscudiero - Replace Msg2 with Msg3
 ## 11-21-2017 @ 10.43.07 - ("2.0.56")  - dscudiero - Cosmetic/minor change
+## 12-01-2017 @ 09.14.37 - ("2.0.59")  - dscudiero - Tweak messaging for do you want to start remote session
