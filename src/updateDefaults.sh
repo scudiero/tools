@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.81 # -- dscudiero -- Wed 11/01/2017 @ 16:48:58.69
+version=2.0.83 # -- dscudiero -- Fri 12/01/2017 @  8:32:39.99
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -37,7 +37,7 @@ Verbose 1 "mode = '$mode'"
 
 ## DEV servers
 	unset newServers
-	for server in $(ls /mnt | grep '^dev' ); do
+	for server in $(ls /mnt | grep '^dev' | grep -v '\-test$'); do
 		[[ $(Contains ",$ignoreList," ",$server,") == true ]] && continue
 		ProtectedCall "cd /mnt/$server > /dev/null 2>&1"
 		[[ $(pwd) != /mnt/$server ]] && continue
@@ -59,7 +59,7 @@ Verbose 1 "mode = '$mode'"
 ## PROD servers
 	unset newServers
 	unset newServers
-	for server in $(ls /mnt | grep -v '^dev' | grep -v '^auth'); do
+	for server in $(ls /mnt | grep -v '^dev' | grep -v '^auth' | grep -v '\-test$'); do
 		[[ $(Contains ",$ignoreList," ",$server,") == true ]] && continue
 		ProtectedCall "cd /mnt/$server > /dev/null 2>&1"
 		[[ $(pwd) != /mnt/$server ]] && Here 1 && continue
@@ -209,3 +209,4 @@ Goodbye 0;
 ## 10-27-2017 @ 09.18.20 - (2.0.62)    - dscudiero - Remove debug statements
 ## 11-01-2017 @ 12.37.43 - (2.0.80)    - dscudiero - Fixed an issue with the ignoreList
 ## 11-01-2017 @ 16.49.38 - (2.0.81)    - dscudiero - Switch to ParseArgsStd2
+## 12-01-2017 @ 08.33.08 - (2.0.83)    - dscudiero - ignore /mnt directories that end with -test
