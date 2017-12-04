@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.42" # -- dscudiero -- Fri 12/01/2017 @  9:09:32.18
+version="1.4.51" # -- dscudiero -- Mon 12/04/2017 @ 11:13:43.94
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -225,6 +225,30 @@ sTime=$(date "+%s")
 	hour=$(date +%H); hour=${hour#0}
 	[[ $hour -ge 20 && $maxForkedProcessesAfterHours -gt $maxForkedProcesses ]] && maxForkedProcesses=$maxForkedProcessesAfterHours
 	[[ -z $maxForkedProcesses ]] && maxForkedProcesses=3
+
+# If the user has a .tools file then read the values into a hash table
+	if [[ -r "$HOME/tools.cfg" ]]; then
+		ifsSave="$IFS"; IFS=$'\n'; while read -r line; do
+			line=$(tr -d '\011\012\015' <<< "$line")
+			[[ -z $line || ${line:0:1} == '#' ]] && continue
+			vName="${line%%=*}"; vValue="${line##*=}"
+			[[ $(Contains ",${allowedUserVars}," ",${vName},") == false ]] && Error "Variable '$vName' not allowed in tools.cfg file, setting will be ignored" && continue
+			vValue=$(cut -d'=' -f2 <<< "$line"); [[ -z $vName ]] && $(cut -d':' -f2 <<< "$line")
+			eval $vName=\"$vValue\"
+		done < "$HOME/tools.cfg"
+		IFS="$ifsSave"
+
+		function ColorD { local string="$*"; echo "${colorDefaultVal}${string}${colorDefault}"; }
+		function ColorK { local string="$*"; echo "${colorKey}${string}${colorDefault}"; }
+		function ColorI { local string="$*"; echo "${colorInfo}${string}${colorDefault}"; }
+		function ColorN { local string="$*"; echo "${colorNote}${string}${colorDefault}"; }
+		function ColorW { local string="$*"; echo "${colorWarn}${string}${colorDefault}"; }
+		function ColorE { local string="$*"; echo "${colorError}${string}${colorDefault}"; }
+		function ColorT { local string="$*"; echo "${colorTerminate}${string}${colorDefault}"; }
+		function ColorV { local string="$*"; echo "${colorVerbose}${string}${colorDefault}"; }
+		function ColorM { local string="$*"; echo "${colorMenu}${string}${colorDefault}"; }
+		export -f ColorD ColorK ColorI ColorN ColorW ColorE ColorT ColorV ColorM
+	fi
 
 ## If sourced then just return
 	[[ $viaCron == true ]] && return 0
@@ -457,3 +481,4 @@ sTime=$(date "+%s")
 ## 11-14-2017 @ 11.52.21 - ("1.4.32")  - dscudiero - Cosmetic/minor change
 ## 11-14-2017 @ 11.58.15 - ("1.4.39")  - dscudiero - Do not touch the log directory if the logFile is /dev/null
 ## 12-01-2017 @ 09.09.59 - ("1.4.42")  - dscudiero - Remove autoRemote from the trueVars set
+## 12-04-2017 @ 11.18.15 - ("1.4.51")  - dscudiero - Added loading of user tools.cfg file
