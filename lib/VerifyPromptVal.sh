@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.63" # -- dscudiero -- Mon 12/04/2017 @ 10:48:09.55
+# version="2.0.64" # -- dscudiero -- Mon 12/04/2017 @ 11:20:00.04
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -62,7 +62,6 @@ function VerifyPromptVal {
 					[[ ${#resultSet[0]} -eq 0 ]] && verifyMsg="$(Error "Could not retrieve any records for '$response' in the $warehouseDb.$siteInfoTable")"
 					if [[ $verifyMsg == "" ]]; then
 						hostedOn="${resultSet[0]}"
-dump hostedOn autoRemote
 						if [[ $hostedOn != $hostName ]]; then
 							if [[ $verify == true ]]; then
 								if [[ $autoRemote != true ]]; then
