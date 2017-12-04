@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.59" # -- dscudiero -- Fri 12/01/2017 @  9:13:28.05
+# version="2.0.63" # -- dscudiero -- Mon 12/04/2017 @ 10:48:09.55
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -24,7 +24,7 @@ function VerifyPromptVal {
 		verifyMsg=true
 		SetFileExpansion
 		PopSettings "$FUNCNAME"
-		return 0
+		return 0F
 	fi
 
 	## Client
@@ -62,6 +62,7 @@ function VerifyPromptVal {
 					[[ ${#resultSet[0]} -eq 0 ]] && verifyMsg="$(Error "Could not retrieve any records for '$response' in the $warehouseDb.$siteInfoTable")"
 					if [[ $verifyMsg == "" ]]; then
 						hostedOn="${resultSet[0]}"
+dump hostedOn autoRemote
 						if [[ $hostedOn != $hostName ]]; then
 							if [[ $verify == true ]]; then
 								if [[ $autoRemote != true ]]; then
@@ -71,17 +72,17 @@ function VerifyPromptVal {
 								else
 									ans='y'
 								fi
-								if [[ $ans == 'y' ]]; then
-									Msg3; Info "Starting ssh session to host '$hostedOn', enter your credentials if prompted...";
-									[[ $(Contains "$originalArgStr" "$response") == false ]] && commandStr="$response $originalArgStr" || commandStr="$originalArgStr"
-									StartRemoteSession "${userName}@${hostedOn}" $myName $commandStr
-									Msg3; Info "Back from remote ssh session\n"
-									Goodbye 0
-								fi ## [[ $ans == 'y' ]]
 							else
-								ans='n'
+								verifyMsg="$(Error "Client value of '$response' is not valid on this host ('$hostName') it is hosted on '$hostedOn' ")"
+								[[ $autoRemote == true ]] && { ans=y; unset verifyMsg; } || { ans=n; }
 							fi
-							[[ $ans != 'y' ]] && verifyMsg="$(Error "Client value of '$response' is not valid on this host ('$hostName') it is hosted on '$hostedOn' ")"
+							if [[ $ans == 'y' ]]; then
+								Msg3; Info "Starting ssh session to host '$hostedOn', enter your credentials if prompted...";
+								[[ $(Contains "$originalArgStr" "$response") == false ]] && commandStr="$response $originalArgStr" || commandStr="$originalArgStr"
+								StartRemoteSession "${userName}@${hostedOn}" $myName $commandStr
+								Msg3; Info "Back from remote ssh session\n"
+								Goodbye 0
+							fi ## [[ $ans == 'y' ]]
 						fi ## [[ $hostedOn != $hostName ]]
 					fi ## [[ $verifyMsg == "" ]]
 				fi ## [[ $anyClient != 'true' ]]
@@ -234,3 +235,4 @@ export -f VerifyPromptVal
 ## 10-19-2017 @ 16.21.56 - ("2.0.55")  - dscudiero - Replace Msg2 with Msg3
 ## 11-21-2017 @ 10.43.07 - ("2.0.56")  - dscudiero - Cosmetic/minor change
 ## 12-01-2017 @ 09.14.37 - ("2.0.59")  - dscudiero - Tweak messaging for do you want to start remote session
+## 12-04-2017 @ 11.18.38 - ("2.0.63")  - dscudiero - Fix issue with the automagic ssh to other server
