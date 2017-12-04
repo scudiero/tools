@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.58 # -- dscudiero -- Fri 12/01/2017 @  8:51:28.26
+# version=2.1.59 # -- dscudiero -- Mon 12/04/2017 @  9:54:57.06
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -215,8 +215,8 @@ function Init {
 				[[ ${resultSet[0]} != 'NULL' ]] && productsinsupport="${resultSet[0]}"
 				## If client has products in support and the user is not in the support group then quit
 				[[ -n $UsersAuthGroups && -n $productsinsupport && $(Contains ",$UsersAuthGroups," ',support,') != true ]] && \
-		 				Terminate "You do not have authority to modify the $env environment, please contact the support person assigned to this client"
-		 		[[ -n productsinsupport ]] && Info 0 1 "FYI, the client has the following products in production: '${resultSet[0]}'"
+		 				Terminate "The client has products in support ($productsinsupport), please contact the support person assigned to this client to update the '$env' site"
+		 		[[ -n productsinsupport ]] && Info 0 1 "FYI, the client has the following products in production: '$productsinsupport'"
 				unset ans; Prompt ans "Are you sure" "Yes No";
 				ans=$(Lower ${ans:0:1})
 				[[ $ans != 'y' ]] && Goodbye -1
@@ -375,3 +375,4 @@ export -f Init
 ## 11-02-2017 @ 15.54.00 - (2.1.45)    - dscudiero - Fix addPvt code to check to make sure the pvt site exists befor adding to the envs list
 ## 11-03-2017 @ 09.53.34 - (2.1.56)    - dscudiero - Fix problem adding pvt site to clientEnvs lsit
 ## 12-01-2017 @ 09.14.03 - (2.1.58)    - dscudiero - Make sure env is set from envs if envs has a value
+## 12-04-2017 @ 09.55.21 - (2.1.59)    - dscudiero - Update 'products in support' messaging
