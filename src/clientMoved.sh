@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.48 # -- dscudiero -- Mon 12/04/2017 @  8:28:35.97
+version=1.0.50 # -- dscudiero -- Mon 12/04/2017 @  9:12:19.03
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="SelectMenuNew RunCourseLeafCgi"
@@ -153,35 +153,41 @@ myData="Client: '$client', New Host: '$newHost', New Dev Share: '$newDevShare', 
 # Main
 #===================================================================================================
 
-sqlStmt="Update $siteInfoTable set host=\"$newHost\" where name=\"$client\" and host is not null and host <> \"N/A\""
-RunSql2 $sqlStmt
+## Update the data warehouse
+	sqlStmt="Update $siteInfoTable set host=\"$newHost\" where name=\"$client\" and host is not null and host <> \"N/A\""
+	RunSql2 $sqlStmt
+	sqlStmt="Update $siteInfoTable set share=\"$newDevShare\" where name=\"$client\" and env=\"dev\""
+	RunSql2 $sqlStmt
+	sqlStmt="Update $siteInfoTable set share=\"$newProdShare\" where name=\"${client}\" and env not in (\"dev\",\"preview\",\"public\")"
+	RunSql2 $sqlStmt
 
-sqlStmt="Update $siteInfoTable set share=\"$newDevShare\" where name=\"$client\" and env=\"dev\""
-RunSql2 $sqlStmt
+	sqlStmt="Update $siteInfoTable set host=\"$newHost\" where name=\"${client}-test\" and env=\"test\" and host is not null and host <> \"N/A\""
+	RunSql2 $sqlStmt
+	sqlStmt="Update $siteInfoTable set share=\"$newProdShare\" where name=\"${client}-test\" and env=\"test\""
+	RunSql2 $sqlStmt
 
-sqlStmt="Update $siteInfoTable set share=\"$newProdShare\" where name=\"${client}\" and env not in (\"dev\",\"preview\",\"public\")"
-RunSql2 $sqlStmt
+	Msg3 "Data Warehouse data updated to reflect the clients new location"
 
-sqlStmt="Update $siteInfoTable set host=\"$newHost\" where name=\"${client}-test\" and env=\"test\" and host is not null and host <> \"N/A\""
-RunSql2 $sqlStmt
-sqlStmt="Update $siteInfoTable set share=\"$newProdShare\" where name=\"${client}-test\" and env=\"test\""
-RunSql2 $sqlStmt
+## Update the workwith data
+	grepStr=$(ProtectedCall "grep ^$client\\| \"$workwithDataFile\"")
+	toStr="$(sed s"/$origHost/$newHost/" <<< "$grepStr")"
+	sed -i s"/$grepStr/$toStr/" "$workwithDataFile"
+	Msg3 "WorkWith client data file updated"
 
-Msg3 "Data Warehouse data updated to reflect the clients new location"
-
-lfinternal=$(ProtectedCall "grep lfinternal /etc/group")
-if [[ $lfinternal != '' ]]; then
-	if [[ $(Contains "$lfinternal" "$userName") == true ]]; then
-		RunCourseLeafCgi "$stageInternal" "-r /clients/$client"
-		Msg3 "Internal client page republished to reflect change"
-		RunCourseLeafCgi "$stageInternal" "-r /support/tools/quicklinks"
-		Msg3 "Internal quicklinks page republished to reflect change"
+## Re-publish the clients page
+	lfinternal=$(ProtectedCall "grep lfinternal /etc/group")
+	if [[ $lfinternal != '' ]]; then
+		if [[ $(Contains "$lfinternal" "$userName") == true ]]; then
+			RunCourseLeafCgi "$stageInternal" "-r /clients/$client"
+			Msg3 "Internal client page republished to reflect change"
+			RunCourseLeafCgi "$stageInternal" "-r /support/tools/quicklinks"
+			Msg3 "Internal quicklinks page republished to reflect change"
+		else
+			Msg3 $W "Your account does not have access to the internal site file system, skipping client page republishing, please go to the client page on the internal site and republish the client page."
+		fi
 	else
-		Msg3 $W "Your account does not have access to the internal site file system, skipping client page republishing, please go to the client page on the internal site and republish the client page."
+		Msg3 $W "The 'lfinternal' group was not defined in '/etc/group', skipping client page republishing, please go to the client page on the internal site and republish the client page."
 	fi
-else
-	Msg3 $W "The 'lfinternal' group was not defined in '/etc/group', skipping client page republishing, please go to the client page on the internal site and republish the client page."
-fi
 
 #===================================================================================================
 ## Done
@@ -205,3 +211,4 @@ Goodbye 0 #'alert'
 ## 04-06-2017 @ 10.09.28 - (1.0.36)    - dscudiero - renamed RunCourseLeafCgi, use new name
 ## 12-04-2017 @ 08.25.27 - (1.0.47)    - dscudiero - Updated to add arguments for parameters and switch to Msg3
 ## 12-04-2017 @ 08.28.53 - (1.0.48)    - dscudiero - Removed the --useLocal from example script
+## 12-04-2017 @ 09.12.35 - (1.0.50)    - dscudiero - Added updating the workwith data
