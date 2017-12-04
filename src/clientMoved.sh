@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.47 # -- dscudiero -- Mon 12/04/2017 @  8:24:49.44
+version=1.0.48 # -- dscudiero -- Mon 12/04/2017 @  8:28:35.97
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="SelectMenuNew RunCourseLeafCgi"
@@ -14,7 +14,7 @@ scriptDescription=""
 # clients=$(ls /mnt/bluestone | grep -v 'test')
 # for client in $clients; do
 # 	Msg3 "Processing:" $client
-# 	clientMoved --useLocal $client -newh "$newHost" -newprods "$newProdServer" -newdevs "$newDevServer" -nop -quiet
+# 	clientMoved $client -newh "$newHost" -newprods "$newProdServer" -newdevs "$newDevServer" -nop -quiet
 # done
 #==================================================================================================
 
@@ -204,3 +204,4 @@ Goodbye 0 #'alert'
 ## Mon Oct 17 08:48:30 CDT 2016 - dscudiero - Removed extra set of calls to rebuild pages
 ## 04-06-2017 @ 10.09.28 - (1.0.36)    - dscudiero - renamed RunCourseLeafCgi, use new name
 ## 12-04-2017 @ 08.25.27 - (1.0.47)    - dscudiero - Updated to add arguments for parameters and switch to Msg3
+## 12-04-2017 @ 08.28.53 - (1.0.48)    - dscudiero - Removed the --useLocal from example script
