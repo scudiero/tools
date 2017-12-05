@@ -8,6 +8,11 @@ tcfview.onDataLoad = function(data, args) {
 	}
 }
 
+
+============================================================================================================================================================================
+return [inval.replace(wfrule.ifregex," (" + myName + ": Check to see if the subject code has multiple entries in the subject/campus table)")];
+return [inval.replace(wfrule.regex," (" + myName + ": Check to see if the subject code has multiple entries in the subject/campus table)")];
+
 ============================================================================================================================================================================
 print_debug('\ninval =' + inval + '\nwfrule =' + wfrule.toSource() + '\nargs =' + args.toSource() + '\n'  );
 print_debug('args.context = ' + args.context.toString() + '\n');
@@ -352,3 +357,4 @@ attributes.forEach(function(attr) {
 // 10-04-2017 @ 07.47.38 - dscudiero - General syncing of dev to prod
 // 10-12-2017 @ 14.21.39 - dscudiero - Add example of checkchanges call
 // 11-02-2017 @ 12.38.20 - dscudiero - add example of relace all instances of a char in string
+// 12-05-2017 @ 13.18.46 - dscudiero - Cosmetic/minor change
