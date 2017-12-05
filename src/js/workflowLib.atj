@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.43" // -- dscudiero -- Wed 11/29/2017 @ 12:17:58.16
+wfLibVersion="1.8.44" // -- dscudiero -- Tue 12/05/2017 @ 11:03:42.53
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -193,6 +193,20 @@ Array.prototype.diff = function (a) {
         return a.indexOf(i) === -1;
     });
 };
+
+//======================================================================================================================
+// Add a text annotation to the workflow (as step)
+// Usage:
+//		code the step as 'Annotate xxxx yyyy zzz'
+//======================================================================================================================
+// 12-05-17 - dgs - Initial coding
+//======================================================================================================================
+wffuncs.AnnotateWorkflow = function(inval, wfrule, args) {
+	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
+	var options=wfrule.options;	options=options.substring(0, options.indexOf(';'));
+	inval=inval.replace("Annotate",''); inval=inval.replace("annotate",'');
+	return [inval];
+} //wffuncs.AnnotateWorkflow
 
 //=======================================================================================================================
 // Check if proposal is in EDIT mode
@@ -2428,3 +2442,4 @@ var wfLibLoaded=true;
 // 11-28-2017 @ 15.10.07 - ("1.8.40")  - dscudiero - Tweaked format of TODO output
 // 11-28-2017 @ 16.28.49 - ("1.8.41")  - dscudiero - Added 'IsNotFirstStep' function
 // 11-29-2017 @ 12.18.57 - ("1.8.43")  - dscudiero - Updated RemoveDupes to optionaly sort the array instead of forcing the sort all the time
+// 12-05-2017 @ 11.06.22 - ("1.8.44")  - dscudiero - Added the Annotate function
