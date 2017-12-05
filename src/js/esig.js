@@ -5,7 +5,7 @@ Make sure the following is in the showrec
 
 TYPE 1 -- single step esigs:
 	workflow.cfg / cimconfig.cfg
-		esiglist:DistribDesignation|DDApprove$|function|getDDEsig
+		esiglist:DistribDesignation|DDApprove$|function|getDDEsig					<--- NO TRAILING ';'
 
 		esiglist:IC_CollegeCommittee|IC Committee|function|getColCommitteeEsig
 		esiglist:IC_CollegeFaculty|IC Faculty|function|getColFacultyEsig
