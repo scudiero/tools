@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.17 # -- dscudiero -- Mon 10/30/2017 @  7:23:55.09
+version=2.2.18 # -- dscudiero -- Wed 12/06/2017 @ 11:15:06.29
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -191,7 +191,7 @@ case "$hostName" in
 		fi
 
 		## Run programs/functions
-			pgms=("updateDefaults all" CheckMonitorFiles SyncInternalDb SyncCourseleafCgis SyncSkeleton)
+			pgms=(updateDefaults CheckMonitorFiles SyncInternalDb SyncCourseleafCgis SyncSkeleton)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -235,7 +235,7 @@ case "$hostName" in
 			fi
 		fi
 		## Run programs/functions
-			pgms=("updateDefaults" CheckMonitorFiles)
+			pgms=(CheckMonitorFiles)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -308,3 +308,4 @@ return 0
 ## 10-27-2017 @ 07.30.18 - (2.2.15)    - dscudiero - Cleanup old log files every night
 ## 10-27-2017 @ 08.08.03 - (2.2.16)    - dscudiero - Use CalcElapsed function to calculate elapsed times
 ## 10-30-2017 @ 07.43.44 - (2.2.17)    - dscudiero - Tweak messaging
+## 12-06-2017 @ 11.16.14 - (2.2.18)    - dscudiero - Refactored building the defaults data files
