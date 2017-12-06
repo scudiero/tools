@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.83 # -- dscudiero -- Fri 12/01/2017 @  8:32:39.99
+version=2.0.84 # -- dscudiero -- Wed 12/06/2017 @ 11:13:43.78
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -28,7 +28,7 @@ ParseArgsStd2 $originalArgStr
 Hello
 
 #==================================================================================================
-## Maine
+## Main
 #==================================================================================================
 ignoreList="${ignoreList##*ignoreShares:}" ; ignoreList="${ignoreList%% *}"
 mode="$client"
@@ -99,11 +99,66 @@ Verbose 1 "mode = '$mode'"
 	fi
 	Verbose 1 "defaultClVer = '$defaultClVer'"
 
+#==================================================================================================
 ## Write out the defaults files
-	if [[ $mode == 'all' || $mode == 'common' ]]; then
-		defaultsFile="$TOOLSDEFAULTSPATH/common"
+#==================================================================================================
+## Common tools defaults data
+	Verbose 1 "Updating common defaults files"
+	defaultsFile="$TOOLSDEFAULTSPATH/common"
+	Verbose 1 "\ndefaultsFile = '$defaultsFile'"
+	sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and status=\"A\" order by name"
+	RunSql2 $sqlStmt
+	if [[ ${#resultSet[@]} -gt 0 ]]; then
+		echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
+		for ((ii=0; ii<${#resultSet[@]}; ii++)); do
+			result="${resultSet[$ii]}"
+			name=${result%%|*}
+			value=${result##*|}
+			echo "$name=\"$value\"" >> "$defaultsFile"
+		done
+		chgrp 'leepfrog' "$defaultsFile"
+		chmod 750 "$defaultsFile"
+	else
+		Warning "Could not retrieve defaults data for 'common' from the data warehouse\n\tsqlStmt = >$sqlStmt<"
+	fi
+
+## Script defaults data
+	Verbose 1 "Updating script defaults files"
+	fields="name,ignoreList,allowList,emailAddrs,scriptData1,scriptData2,scriptData3,scriptData4,scriptData5,setSemaphore,waitOn"
+	IFS=',' read -r -a fieldsArray <<< "$fields"
+	where="where active not in (\"No\",\"Old\")"
+	sqlStmt="select $fields from scripts $where order by name"
+	RunSql2 $sqlStmt
+	[[ ${#resultSet[@]} -gt 0 ]] && rm -f "$defaultsFile >& /dev/null"
+	if [[ ${#resultSet[@]} -gt 0 ]]; then
+		for ((ii=0; ii<${#resultSet[@]}; ii++)); do
+			unset result
+			result="${resultSet[$ii]}"
+			name=${result%%|*}
+			[[ ${name:0:1} == '_' ]] && continue
+			defaultsFile="$TOOLSDEFAULTSPATH/$name"
+			Verbose 1 "defaultsFile = '$defaultsFile'"
+			echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
+			fieldCntr=1
+			for ((ij=1; ij<${#fieldsArray[@]}; ij++)); do
+				field=${fieldsArray[$ij]}
+				(( fieldCntr++ ))
+				value="$(cut -d'|' -f$fieldCntr <<< "$result")"
+				[[ $value == 'NULL' || $value == '' ]] && echo "unset $field" >> "$defaultsFile" || echo "$field=\"$value\"" >> "$defaultsFile"
+			done
+		done
+		chgrp 'leepfrog' "$defaultsFile"
+		chmod 750 "$defaultsFile"
+	else
+		Warning "Could not retrieve defaults data for 'scripts' from the data warehouse\n\tsqlStmt = >$sqlStmt<"
+	fi
+
+## Host specific tools defaults data
+	Verbose 1 "Updating host specific defaults files"
+	for host in ${linuxHosts//,/ }; do
+		defaultsFile="$TOOLSDEFAULTSPATH/$host"
 		Verbose 1 "\ndefaultsFile = '$defaultsFile'"
-		sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and status=\"A\" order by name"
+		sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and host=\"$host\" and status=\"A\" order by name"
 		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
 			echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
@@ -116,62 +171,11 @@ Verbose 1 "mode = '$mode'"
 			chgrp 'leepfrog' "$defaultsFile"
 			chmod 750 "$defaultsFile"
 		else
-			Warning "Could not retrieve defaults data for 'common' from the data warehouse\n$sqlStmt"
+			Info "Could not retrieve defaults data for '$host' from the data warehouse\n\tsqlStmt = >$sqlStmt<"
 		fi
-	fi
+	done
 
-	if [[ $mode == 'all' ]]; then
-		## Get script defaults data
-		fields="name,ignoreList,allowList,emailAddrs,scriptData1,scriptData2,scriptData3,scriptData4,scriptData5,setSemaphore,waitOn"
-		IFS=',' read -r -a fieldsArray <<< "$fields"
-		where="where active not in (\"No\",\"Old\")"
-		sqlStmt="select $fields from scripts $where order by name"
-		RunSql2 $sqlStmt
-		[[ ${#resultSet[@]} -gt 0 ]] && rm -f "$defaultsFile >& /dev/null"
-		if [[ ${#resultSet[@]} -gt 0 ]]; then
-			for ((ii=0; ii<${#resultSet[@]}; ii++)); do
-				unset result
-				result="${resultSet[$ii]}"
-				name=${result%%|*}
-				[[ ${name:0:1} == '_' ]] && continue
-				defaultsFile="$TOOLSDEFAULTSPATH/$name"
-				Verbose 1 "defaultsFile = '$defaultsFile'"
-				echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
-				fieldCntr=1
-				for ((ij=1; ij<${#fieldsArray[@]}; ij++)); do
-					field=${fieldsArray[$ij]}
-					(( fieldCntr++ ))
-					value="$(cut -d'|' -f$fieldCntr <<< "$result")"
-					[[ $value == 'NULL' || $value == '' ]] && echo "unset $field" >> "$defaultsFile" || echo "$field=\"$value\"" >> "$defaultsFile"
-				done
-			done
-			chgrp 'leepfrog' "$defaultsFile"
-			chmod 750 "$defaultsFile"
-		else
-			Warning "Could not retrieve defaults data for 'scripts' from the data warehouse\n$sqlStmt"
-		fi
-	fi
-
-	if [[ $mode == 'all' || $mode == 'common' ]]; then
-		defaultsFile="$TOOLSDEFAULTSPATH/$hostName"
-		Verbose 1 "\ndefaultsFile = '$defaultsFile'"
-		sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and host=\"$hostName\" and status=\"A\" order by name"
-		RunSql2 $sqlStmt
-		if [[ ${#resultSet[@]} -gt 0 ]]; then
-			echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
-			for ((ii=0; ii<${#resultSet[@]}; ii++)); do
-				result="${resultSet[$ii]}"
-				name=${result%%|*}
-				value=${result##*|}
-				echo "$name=\"$value\"" >> "$defaultsFile"
-			done
-			chgrp 'leepfrog' "$defaultsFile"
-			chmod 750 "$defaultsFile"
-		else
-			Warning "Could not retrieve defaults data for '$hostName' from the data warehouse\n$sqlStmt"
-		fi
-	fi
-	touch "$TOOLSDEFAULTSPATH"
+touch "$TOOLSDEFAULTSPATH"
 
 Goodbye 0;
 #==================================================================================================
@@ -210,3 +214,4 @@ Goodbye 0;
 ## 11-01-2017 @ 12.37.43 - (2.0.80)    - dscudiero - Fixed an issue with the ignoreList
 ## 11-01-2017 @ 16.49.38 - (2.0.81)    - dscudiero - Switch to ParseArgsStd2
 ## 12-01-2017 @ 08.33.08 - (2.0.83)    - dscudiero - ignore /mnt directories that end with -test
+## 12-06-2017 @ 11.16.01 - (2.0.84)    - dscudiero - Refactored building the defaults data files
