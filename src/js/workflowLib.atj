@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.44" // -- dscudiero -- Tue 12/05/2017 @ 11:03:42.53
+wfLibVersion="1.8.46" // -- dscudiero -- Wed 12/06/2017 @  8:15:42.42
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -1870,7 +1870,8 @@ CheckChanged = function(data) {
 		}
 	// Get the changed fields
 		var diffdata = {};
-		tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata});
+		//tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata});
+		tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata, olddata: tcadata});
 
 	// create a hash table for the cycleattrs
 		var cycleattrsHash=[];
@@ -2339,7 +2340,7 @@ wffuncs.wfDumpVars = function(inval, wfrule, args) {
 //======================================================================================================================
 wffuncs.TODO = function(inval, wfrule, args) {
 	var indent='&nbsp;&nbsp;&nbsp;&nbsp;';
-	var indent2=indent + indent + indent + indent + "&nbsp;&nbsp;&nbsp;";
+	var indent2=indent + indent + indent + indent + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
 
 	print_doc(indent + '<strong>*Note*</strong> -- Workflow is not yet complete:<br>');
@@ -2443,3 +2444,4 @@ var wfLibLoaded=true;
 // 11-28-2017 @ 16.28.49 - ("1.8.41")  - dscudiero - Added 'IsNotFirstStep' function
 // 11-29-2017 @ 12.18.57 - ("1.8.43")  - dscudiero - Updated RemoveDupes to optionaly sort the array instead of forcing the sort all the time
 // 12-05-2017 @ 11.06.22 - ("1.8.44")  - dscudiero - Added the Annotate function
+// 12-06-2017 @ 09.05.52 - ("1.8.46")  - dscudiero - tweaked formatting of TODO messaging
