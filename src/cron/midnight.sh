@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.45 # -- dscudiero -- Mon 12/04/2017 @  9:02:45.85
+version=1.22.46 # -- dscudiero -- Wed 12/06/2017 @ 11:15:38.19
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -363,7 +363,7 @@ case "$hostName" in
 			fi
 
 		## Run programs/functions
-			pgms=(buildSiteInfoTable checkCgiPermissions checkPublishSettings updateDefaults "cleanDev -daemon")
+			pgms=(buildSiteInfoTable checkCgiPermissions checkPublishSettings "cleanDev -daemon")
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -476,3 +476,4 @@ return 0
 ## 11-21-2017 @ 08.16.49 - (1.22.43)   - dscudiero - Add call to refreshDevWarehouse to refresh local warehouse
 ## 11-28-2017 @ 14.33.20 - (1.22.44)   - dscudiero - Add the data dump for workwith
 ## 12-04-2017 @ 09.13.30 - (1.22.45)   - dscudiero - Update code building the workwith data file
+## 12-06-2017 @ 11.16.18 - (1.22.46)   - dscudiero - Refactored building the defaults data files
