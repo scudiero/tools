@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.52" # -- dscudiero -- Thu 11/02/2017 @ 11:37:30.53
+# version="2.0.53" # -- dscudiero -- Wed 12/06/2017 @  8:58:03.08
 #===================================================================================================
 # Set Directories based on the current hostName name and school name
 # Sets globals: devDir, nextDir, previewDir, publicDir, upgradeDir
@@ -21,9 +21,12 @@ function SetSiteDirs {
 		[[ $mode == 'setDefault' ]] && { for env in ${courseleafDevEnvs//,/ } ${courseleafProdEnvs//,/ }; do unset ${env}Dir; done; }
 	## Find dev directories
 		foundAll=true
+		dump -n devServers courseleafDevEnvs
 		for server in ${devServers//,/ }; do
+			dump -3 -t server
 			[[ ! -d "/mnt/$server/web/$client" && ! -d "/mnt/$server/web/$client-$userName" ]] && continue
 			for env in ${courseleafDevEnvs//,/ }; do
+				dump -3 -t -t env
 				envDirName="${env}Dir"
 				if [[ -z ${!envDirName} ]]; then
  					[[ $env == 'pvt' ]] && eval $envDirName="/mnt/$server/web/$client-$userName" || eval $envDirName="/mnt/$server/web/$client"
@@ -35,9 +38,12 @@ function SetSiteDirs {
 		#dump server pvtDir devDir -p
 
 	## Find production directories
+		dump -n prodServers courseleafProdEnvs
 		for server in ${prodServers//,/ }; do
+			dump -3 -t server
 			[[ ! -d "/mnt/$server/$client-test" && ! -d "/mnt/$server/$client" ]] && continue
 			for env in ${courseleafProdEnvs//,/ }; do
+				dump -3 -t -t env
 				envDirName="${env}Dir"
 				if [[ -z ${!envDirName} ]]; then
  					[[ $env == 'test' && -z ${!envDirName} ]] && eval $envDirName="/mnt/$server/$client-$env/$env" || eval $envDirName="/mnt/$server/$client/$env"
@@ -76,3 +82,4 @@ export -f SetSiteDirs
 ## 11-02-2017 @ 10.52.52 - ("2.0.43")  - dscudiero - Tweak how we check for pvt and test sites
 ## 11-02-2017 @ 11.22.32 - ("2.0.44")  - dscudiero - Cosmetic/minor change
 ## 11-02-2017 @ 11.40.20 - ("2.0.52")  - dscudiero - Fix problem setting dev and pvt dirs
+## 12-06-2017 @ 09.05.30 - ("2.0.53")  - dscudiero - Add debug statements
