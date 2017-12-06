@@ -1,10 +1,10 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.1 # -- dscudiero -- Fri 12/01/2017 @  9:07:33.06
+version=4.13.2 # -- dscudiero -- Wed 12/06/2017 @ 10:28:47.79
 #==================================================================================================
 TrapSigs 'on'
-myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop"
+myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims"
 Import "$standardInteractiveIncludes $myIncludes"
 
 [[ $1 == $myName ]] && shift
@@ -673,3 +673,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 11-06-2017 @ 13.32.24 - (4.13.-1)   - dscudiero - Fix setting nexturl url syntax
 ## 11-30-2017 @ 13.26.27 - (4.13.-1)   - dscudiero - Switch to use the -all flag on the GetCims call
 ## 12-01-2017 @ 09.15.07 - (4.13.1)    - dscudiero - Remove check for remotely hosted clients
+## 12-06-2017 @ 10.29.03 - (4.13.2)    - dscudiero - Add GetCims to imports list
