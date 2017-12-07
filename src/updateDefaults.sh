@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.84 # -- dscudiero -- Wed 12/06/2017 @ 11:13:43.78
+version=2.0.85 # -- dscudiero -- Thu 12/07/2017 @ 10:02:39.56
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -109,7 +109,7 @@ Verbose 1 "mode = '$mode'"
 	sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and status=\"A\" order by name"
 	RunSql2 $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
-		echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
+		echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
 		for ((ii=0; ii<${#resultSet[@]}; ii++)); do
 			result="${resultSet[$ii]}"
 			name=${result%%|*}
@@ -138,7 +138,7 @@ Verbose 1 "mode = '$mode'"
 			[[ ${name:0:1} == '_' ]] && continue
 			defaultsFile="$TOOLSDEFAULTSPATH/$name"
 			Verbose 1 "defaultsFile = '$defaultsFile'"
-			echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
+			echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
 			fieldCntr=1
 			for ((ij=1; ij<${#fieldsArray[@]}; ij++)); do
 				field=${fieldsArray[$ij]}
@@ -161,7 +161,7 @@ Verbose 1 "mode = '$mode'"
 		sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and host=\"$host\" and status=\"A\" order by name"
 		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
-			echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
+			echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
 			for ((ii=0; ii<${#resultSet[@]}; ii++)); do
 				result="${resultSet[$ii]}"
 				name=${result%%|*}
@@ -215,3 +215,4 @@ Goodbye 0;
 ## 11-01-2017 @ 16.49.38 - (2.0.81)    - dscudiero - Switch to ParseArgsStd2
 ## 12-01-2017 @ 08.33.08 - (2.0.83)    - dscudiero - ignore /mnt directories that end with -test
 ## 12-06-2017 @ 11.16.01 - (2.0.84)    - dscudiero - Refactored building the defaults data files
+## 12-07-2017 @ 10.03.35 - (2.0.85)    - dscudiero - Add time stamp to the top comment in the generated defaults files
