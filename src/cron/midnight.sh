@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.46 # -- dscudiero -- Wed 12/06/2017 @ 11:15:38.19
+version=1.22.47 # -- dscudiero -- Thu 12/07/2017 @ 10:07:51.14
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -335,7 +335,7 @@ case "$hostName" in
 			#echo; dump sqlStmt; echo
 		 	RunSql2 $sqlStmt
 		 	[[ ! -d $(dirname "$workwithDataFile") ]] && mkdir -p "$(dirname "$workwithDataFile")"
-		 	[[ -e ${workwithDataFile}.new ]] && rm -f "${workwithDataFile}.new"
+		 	echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE CLIENTS/SITES TABLES IN THE DATA WAREHOUSE" > "${workwithDataFile}.new"
 			for ((i=0; i<${#resultSet[@]}; i++)); do
 				echo "${resultSet[$i]}" >> "${workwithDataFile}.new"
 			done
@@ -477,3 +477,4 @@ return 0
 ## 11-28-2017 @ 14.33.20 - (1.22.44)   - dscudiero - Add the data dump for workwith
 ## 12-04-2017 @ 09.13.30 - (1.22.45)   - dscudiero - Update code building the workwith data file
 ## 12-06-2017 @ 11.16.18 - (1.22.46)   - dscudiero - Refactored building the defaults data files
+## 12-07-2017 @ 10.08.34 - (1.22.47)   - dscudiero - Add a time stamp comment at the top of the workwith/clientdata file
