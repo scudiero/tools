@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.129 # -- dscudiero -- Thu 12/07/2017 @ 10:17:05.26
+version=1.3.130 # -- dscudiero -- Fri 12/08/2017 @  9:26:46.67
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall PushPop SelectMenu CopyFileWithCheck BackupCourseleafFile WriteChangelogEntry"
@@ -119,14 +119,13 @@ function vba {
 function workwithclientdata {
 	Msg3 "Refreshing WorkWith clientData..."
 	## Create the data dump for the workwith tool
-		fields="$clientInfoTable.name,$clientInfoTable.longname,$clientInfoTable.hosting,$clientInfoTable.products,$siteInfoTable.host,$siteInfoTable.share"
+		fields="$clientInfoTable.name,$clientInfoTable.longname,$clientInfoTable.hosting,$clientInfoTable.products,$siteInfoTable.host"
 		envsClause="GROUP_CONCAT(distinct env SEPARATOR ',') as envList"
+		serverClause="GROUP_CONCAT(distinct share SEPARATOR ',') as serverList"
 		fromClause="from $clientInfoTable,$siteInfoTable where ($siteInfoTable.name REGEXP $clientInfoTable.name) 
 					and $siteInfoTable.env not in('prior','public','preview')"
 		groupClause="GROUP BY $clientInfoTable.name"
-	 	sqlStmt="select $fields,$envsClause,ifnull($siteInfoTable.cims,'') $fromClause $groupClause"
-
-		#echo; dump sqlStmt; echo
+	 	sqlStmt="select $fields,$serverClause,$envsClause,ifnull($siteInfoTable.cims,'') $fromClause $groupClause"
 	 	RunSql2 $sqlStmt
 	 	[[ ! -d $(dirname "$workwithDataFile") ]] && mkdir -p "$(dirname "$workwithDataFile")"
 	 	echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE CLIENTS/SITES TABLES IN THE DATA WAREHOUSE" > "${workwithDataFile}.new"
@@ -383,3 +382,4 @@ Goodbye 0
 ## 11-14-2017 @ 09.15.05 - (1.3.126)   - dscudiero - Changed source directory for vba
 ## 11-30-2017 @ 12.42.50 - (1.3.128)   - dscudiero - Updated the vba section to reflect the new file locations
 ## 12-08-2017 @ 07.49.01 - (1.3.129)   - dscudiero - Add workwith clientData
+## 12-08-2017 @ 09.28.00 - (1.3.130)   - dscudiero - Update sql query for workwith clientData to get all servers
