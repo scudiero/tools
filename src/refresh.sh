@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.128 # -- dscudiero -- Thu 11/30/2017 @ 11:34:56.46
+version=1.3.129 # -- dscudiero -- Thu 12/07/2017 @ 10:17:05.26
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall PushPop SelectMenu CopyFileWithCheck BackupCourseleafFile WriteChangelogEntry"
@@ -30,6 +30,7 @@ scriptDescription="Refresh courseleaf components - dispatcher"
 if [[ $userName == 'dscudiero' ]]; then
 	refreshObjs+=('VBA')
 	refreshObjs+=('wharehouseSqliteShadow')
+	refreshObjs+=('workwithClientData')
 fi
 refreshObjs+=('Courseleaf')
 refreshObjs+=('CGIs')
@@ -109,6 +110,32 @@ function vba {
 		mv -f $tgtDir/$app-new $tgtDir/$app
 	cd "$cwd"
 	Msg3 "Production '$app' refreshed from $project"
+	return 0
+}
+
+#==============================================================================================
+# workwithclientdata
+#==============================================================================================
+function workwithclientdata {
+	Msg3 "Refreshing WorkWith clientData..."
+	## Create the data dump for the workwith tool
+		fields="$clientInfoTable.name,$clientInfoTable.longname,$clientInfoTable.hosting,$clientInfoTable.products,$siteInfoTable.host,$siteInfoTable.share"
+		envsClause="GROUP_CONCAT(distinct env SEPARATOR ',') as envList"
+		fromClause="from $clientInfoTable,$siteInfoTable where ($siteInfoTable.name REGEXP $clientInfoTable.name) 
+					and $siteInfoTable.env not in('prior','public','preview')"
+		groupClause="GROUP BY $clientInfoTable.name"
+	 	sqlStmt="select $fields,$envsClause,ifnull($siteInfoTable.cims,'') $fromClause $groupClause"
+
+		#echo; dump sqlStmt; echo
+	 	RunSql2 $sqlStmt
+	 	[[ ! -d $(dirname "$workwithDataFile") ]] && mkdir -p "$(dirname "$workwithDataFile")"
+	 	echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE CLIENTS/SITES TABLES IN THE DATA WAREHOUSE" > "${workwithDataFile}.new"
+		for ((i=0; i<${#resultSet[@]}; i++)); do
+			echo "${resultSet[$i]}" >> "${workwithDataFile}.new"
+		done
+		[[ -f "$workwithDataFile" ]] && mv -f "${workwithDataFile}" "${workwithDataFile}.bak"
+		mv -f "${workwithDataFile}.new" "${workwithDataFile}"
+
 	return 0
 }
 
@@ -355,3 +382,4 @@ Goodbye 0
 ## 10-20-2017 @ 13.59.37 - (1.3.123)   - dscudiero - Add PushPop to the includes list
 ## 11-14-2017 @ 09.15.05 - (1.3.126)   - dscudiero - Changed source directory for vba
 ## 11-30-2017 @ 12.42.50 - (1.3.128)   - dscudiero - Updated the vba section to reflect the new file locations
+## 12-08-2017 @ 07.49.01 - (1.3.129)   - dscudiero - Add workwith clientData
