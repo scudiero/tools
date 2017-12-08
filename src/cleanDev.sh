@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.51 # -- dscudiero -- Wed 11/01/2017 @ 15:58:19.35
+version=3.5.52 # -- dscudiero -- Fri 12/08/2017 @  7:33:50.68
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall StringFunctions PushPop"
@@ -169,7 +169,8 @@ scriptDescription="Cleanup private dev sites"
 			y*)
 				if [[ $userName = 'dscudiero' ]]; then
 					unset ans; Prompt ans "^Do you wish to save the workflow files" 'Yes No' 'Yes' ; ans=$(Lower "${ans:0:1}")
-					[[ $ans == 'y' ]] && Msg3 "Saving workflow..." && Call saveWorkflow $processClient -p -all -suffix "beforeDelete-$backupSuffix" -nop #-quiet
+					[[ $ans == 'y' ]] && Msg3 "Saving workflow..." && \
+						FindExecutable scriptsAndReports -sh -run saveWorkflow $processClient -p -all -suffix "beforeDelete-$backupSuffix" -nop #-quiet
 				fi
 				echo; Msg3 "Removing '$file' offline..."
 				if [[ $DOIT == '' ]]; then
@@ -232,7 +233,7 @@ if [[ $daemonMode == true ]]; then
 		if [[ $(Contains "$file" 'WithSave') == true ]]; then
 			Msg3 "^Deleting '$(basename $file)' with workflow save"
 			quiet=true
-			Call saveWorkflow -daemon -siteFile "$file" -all -suffix "beforeDelete-$backupSuffix -quiet -nop"
+			FindExecutable scriptsAndReports -sh -run saveWorkflow -daemon -siteFile "$file" -all -suffix "beforeDelete-$backupSuffix -quiet -nop"
 			quiet=false
 			Msg3 "^^workflow saved"
 		else
@@ -315,3 +316,4 @@ Goodbye 0
 ## 10-31-2017 @ 08.10.14 - (3.5.41)    - dscudiero - If running in daemon mode the exit
 ## 10-31-2017 @ 08.15.29 - (3.5.43)    - dscudiero - Put a check in to make sure we do not run the GetSites function in batch mode
 ## 11-01-2017 @ 16.49.25 - (3.5.51)    - dscudiero - Switch to ParseArgsStd2
+## 12-08-2017 @ 07.34.16 - (3.5.52)    - dscudiero - Replace 'Call' with FindExecutable -run
