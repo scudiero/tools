@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.69 # -- dscudiero -- Fri 12/08/2017 @  7:48:29.72
+version=1.2.70 # -- dscudiero -- Fri 12/08/2017 @  7:51:14.68
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -296,7 +296,7 @@ for workbook in "${workbooks[@]}"; do
 		Verbose 1 "^^Checking data..."
 		if [[ $clientCode == '' || $product == '' || $project == '' || $instance == '' ]]; then
 			Warning "File '$workbook'\nhas insufficient data to uniquely identify QA project"
-			dump -t -t clientCode product project instance
+			dump -2 -t -t clientCode product project instance
 			Msg3 "^^Skipping file"
 			continue
 		fi
@@ -436,3 +436,4 @@ Goodbye 0 #'alert'
 ## 11-14-2017 @ 07.11.12 - (1.2.67)    - dscudiero - Fix syntax error , missing = sign line 299
 ## 11-14-2017 @ 14.00.44 - (1.2.68)    - dscudiero - Updated parsing of the CIM multiweek data
 ## 12-08-2017 @ 07.48.51 - (1.2.69)    - dscudiero - Updated to remove env data variable
+## 12-08-2017 @ 07.51.33 - (1.2.70)    - dscudiero - add a mesage level to a dump statement
