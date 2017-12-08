@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.48 # -- dscudiero -- Fri 12/08/2017 @  7:25:59.25
+version=1.22.49 # -- dscudiero -- Fri 12/08/2017 @  9:27:05.66
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -323,15 +323,15 @@ case "$hostName" in
 			[[ $errorDetected == true ]] && Terminate 'One or more of the database load procedures failed, please review messages'
 
 		 ## Create the data dump for the workwith tool
-			fields="$clientInfoTable.name,$clientInfoTable.longname,$clientInfoTable.hosting,$clientInfoTable.products,$siteInfoTable.host,$siteInfoTable.share"
 			# hostClause="(select distinct host from $siteInfoTable where $siteInfoTable.name=$clientInfoTable.name and $siteInfoTable.host <> 'N/A' \
 			# 			and $siteInfoTable.name not like '%-test') as host"
+			fields="$clientInfoTable.name,$clientInfoTable.longname,$clientInfoTable.hosting,$clientInfoTable.products,$siteInfoTable.host"
 			envsClause="GROUP_CONCAT(distinct env SEPARATOR ',') as envList"
+			serverClause="GROUP_CONCAT(distinct share SEPARATOR ',') as serverList"
 			fromClause="from $clientInfoTable,$siteInfoTable where ($siteInfoTable.name REGEXP $clientInfoTable.name) 
 						and $siteInfoTable.env not in('prior','public','preview')"
 			groupClause="GROUP BY $clientInfoTable.name"
-		 	sqlStmt="select $fields,$envsClause,ifnull($siteInfoTable.cims,'') $fromClause $groupClause"
-
+		 	sqlStmt="select $fields,$serverClause,$envsClause,ifnull($siteInfoTable.cims,'') $fromClause $groupClause"
 			#echo; dump sqlStmt; echo
 		 	RunSql2 $sqlStmt
 		 	[[ ! -d $(dirname "$workwithDataFile") ]] && mkdir -p "$(dirname "$workwithDataFile")"
@@ -479,3 +479,5 @@ return 0
 ## 12-06-2017 @ 11.16.18 - (1.22.46)   - dscudiero - Refactored building the defaults data files
 ## 12-07-2017 @ 10.08.34 - (1.22.47)   - dscudiero - Add a time stamp comment at the top of the workwith/clientdata file
 ## 12-08-2017 @ 07.34.33 - (1.22.48)   - dscudiero - COmment out refresh of dev data warehouse
+## 12-08-2017 @ 09.27.37 - (1.22.49)   - dscudiero - fields="$clientInfoTable.name,$clientInfoTable.longname,$clientInfoTable.hosting,$clientInfoTable.products,$siteInfoTable.host"
+## 12-08-2017 @ 09.27.56 - (1.22.49)   - dscudiero - Update sql query for workwith clientData to get all servers
