@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.68 # -- dscudiero -- Tue 11/14/2017 @ 14:00:20.62
+version=1.2.69 # -- dscudiero -- Fri 12/08/2017 @  7:48:29.72
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -136,7 +136,7 @@ for var in $falseVars; do eval $var=false; done
 	variableMap['Project']='project'
 	#variableMap['Jalot Task Number']='jalotTaskNumber'
 	variableMap['Instance Name']='instance'
-	variableMap['Environment']='env'
+	#variableMap['Environment']='env'
 	variableMap['Requester (CSM)']='requester'
 	variableMap['Requestor (CSM)']='requester'
 	variableMap['Tester']='tester'
@@ -294,9 +294,9 @@ for workbook in "${workbooks[@]}"; do
 
 	## Do we have the data necessary to continue
 		Verbose 1 "^^Checking data..."
-		if [[ $clientCode == '' || $env == '' || $product == '' || $project == '' || $instance == '' ]]; then
-			Msg3 $WT1 "File '$workbook'\nhas insufficient data to uniquely identify QA project"
-			dump -t -t clientCode env product project instance
+		if [[ $clientCode == '' || $product == '' || $project == '' || $instance == '' ]]; then
+			Warning "File '$workbook'\nhas insufficient data to uniquely identify QA project"
+			dump -t -t clientCode product project instance
 			Msg3 "^^Skipping file"
 			continue
 		fi
@@ -305,7 +305,7 @@ for workbook in "${workbooks[@]}"; do
 		implPriorityWeek="Not Avaiable"
 		implHours="Not Avaiable"
 		implPriority="Not Avaiable"
-		checkKey="$(Lower "$clientCode-$instance-$project-$env")"
+		checkKey="$(Lower "$clientCode-$instance-$project")"
 		if [[ ${cimTrackingHash[$checkKey]+abc} ]]; then
 			implPriorityWeek="$priorityWeek"
 			tmpVal="${cimTrackingHash["$checkKey"]}"
@@ -325,7 +325,7 @@ for workbook in "${workbooks[@]}"; do
 		done
 
 	## See if there is an existing record in the database do setup accordingly
-		whereClause="clientCode=$clientCode and env=$env and product=$product and project=$project and instance=$instance"
+		whereClause="clientCode=$clientCode and product=$product and project=$project and instance=$instance"
 		sqlStmt="select $primaryKey from $qaStatusTable where $whereClause and recordStatus=\"A\""
 		RunSql2 $sqlStmt
 		if [[ ${#resultSet[@]} -eq 0 ]]; then
@@ -374,7 +374,7 @@ for workbook in "${workbooks[@]}"; do
 				$DOIT mv -f $workbook "$qaTrackingRoot/Archive/"
 				popd $(dirname $workbook) >& /dev/null
 				## Get the key for the qastatus record
-					whereClause="clientCode=$clientCode and product=$product and project=$project and instance=$instance and env=$env"
+					whereClause="clientCode=$clientCode and product=$product and project=$project and instance=$instance"
 					sqlStmt="select idx from $qaStatusTable where $whereClause"
 					RunSql2 $sqlStmt
 					if [[ ${#resultSet[@]} -eq 0 ]]; then
@@ -435,3 +435,4 @@ Goodbye 0 #'alert'
 ## 11-10-2017 @ 08.15.14 - (1.2.65)    - dscudiero - Comment out the processing of the CIM Trackign spreadsheet
 ## 11-14-2017 @ 07.11.12 - (1.2.67)    - dscudiero - Fix syntax error , missing = sign line 299
 ## 11-14-2017 @ 14.00.44 - (1.2.68)    - dscudiero - Updated parsing of the CIM multiweek data
+## 12-08-2017 @ 07.48.51 - (1.2.69)    - dscudiero - Updated to remove env data variable
