@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.46" // -- dscudiero -- Wed 12/06/2017 @  8:15:42.42
+wfLibVersion="1.8.47" // -- dscudiero -- Mon 12/11/2017 @ 11:44:44.27
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -1763,7 +1763,7 @@ wffuncs.CheckProposalMode = function(inval, wfrule, args) {
 //=======================================================================================================================
 //Adaptor for call to CheckChanged from workflow
 // Usage:
-//		wfrules:isMinorChange|function|CheckChanged|mode:only fields:<comma seperatered list of field>; // Minor change
+//		wfrules:isMinorChange|function|CheckChanged|mode:only checkfields:<comma seperatered list of field>; // Minor change
 //	or
 //		<callName>_wfCheckChangedFields: <comma seperatered list of field>
 //		wfrules:isMinorChange|function|CheckChanged|mode:only
@@ -2445,3 +2445,4 @@ var wfLibLoaded=true;
 // 11-29-2017 @ 12.18.57 - ("1.8.43")  - dscudiero - Updated RemoveDupes to optionaly sort the array instead of forcing the sort all the time
 // 12-05-2017 @ 11.06.22 - ("1.8.44")  - dscudiero - Added the Annotate function
 // 12-06-2017 @ 09.05.52 - ("1.8.46")  - dscudiero - tweaked formatting of TODO messaging
+// 12-11-2017 @ 11.45.07 - ("1.8.47")  - dscudiero - Updated comments for checkchanged
