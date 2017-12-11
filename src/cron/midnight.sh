@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.49 # -- dscudiero -- Fri 12/08/2017 @  9:27:05.66
+version=1.22.50 # -- dscudiero -- Mon 12/11/2017 @ 10:18:57.72
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -323,24 +323,55 @@ case "$hostName" in
 			[[ $errorDetected == true ]] && Terminate 'One or more of the database load procedures failed, please review messages'
 
 		 ## Create the data dump for the workwith tool
-			# hostClause="(select distinct host from $siteInfoTable where $siteInfoTable.name=$clientInfoTable.name and $siteInfoTable.host <> 'N/A' \
-			# 			and $siteInfoTable.name not like '%-test') as host"
-			fields="$clientInfoTable.name,$clientInfoTable.longname,$clientInfoTable.hosting,$clientInfoTable.products,$siteInfoTable.host"
-			envsClause="GROUP_CONCAT(distinct env SEPARATOR ',') as envList"
-			serverClause="GROUP_CONCAT(distinct share SEPARATOR ',') as serverList"
-			fromClause="from $clientInfoTable,$siteInfoTable where ($siteInfoTable.name REGEXP $clientInfoTable.name) 
-						and $siteInfoTable.env not in('prior','public','preview')"
-			groupClause="GROUP BY $clientInfoTable.name"
-		 	sqlStmt="select $fields,$serverClause,$envsClause,ifnull($siteInfoTable.cims,'') $fromClause $groupClause"
-			#echo; dump sqlStmt; echo
-		 	RunSql2 $sqlStmt
+		 	Msg3 "^Building the 'WorkWith' client data file..."
+			# # hostClause="(select distinct host from $siteInfoTable where $siteInfoTable.name=$clientInfoTable.name and $siteInfoTable.host <> 'N/A' \
+			# # 			and $siteInfoTable.name not like '%-test') as host"
+			# fields="$clientInfoTable.name,$clientInfoTable.longname,$clientInfoTable.hosting,$clientInfoTable.products,$siteInfoTable.host"
+			# envsClause="GROUP_CONCAT(distinct env SEPARATOR ',') as envList"
+			# serverClause="GROUP_CONCAT(distinct share SEPARATOR ',') as serverList"
+			# fromClause="from $clientInfoTable,$siteInfoTable where ($siteInfoTable.name REGEXP $clientInfoTable.name) 
+			# 			and $siteInfoTable.env not in('prior','public','preview')"
+			# groupClause="GROUP BY $clientInfoTable.name"
+		 # 	sqlStmt="select $fields,$serverClause,$envsClause,ifnull($siteInfoTable.cims,'') $fromClause $groupClause"
+			# #echo; dump sqlStmt; echo
+		 # 	RunSql2 $sqlStmt
+		 # 	[[ ! -d $(dirname "$workwithDataFile") ]] && mkdir -p "$(dirname "$workwithDataFile")"
+		 # 	echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE CLIENTS/SITES TABLES IN THE DATA WAREHOUSE" > "${workwithDataFile}.new"
+			# for ((i=0; i<${#resultSet[@]}; i++)); do
+			# 	echo "${resultSet[$i]}" >> "${workwithDataFile}.new"
+			# done
+			# [[ -f "$workwithDataFile" ]] && mv -f "${workwithDataFile}" "${workwithDataFile}.bak"
+			# mv -f "${workwithDataFile}.new" "${workwithDataFile}"
+
 		 	[[ ! -d $(dirname "$workwithDataFile") ]] && mkdir -p "$(dirname "$workwithDataFile")"
 		 	echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE CLIENTS/SITES TABLES IN THE DATA WAREHOUSE" > "${workwithDataFile}.new"
-			for ((i=0; i<${#resultSet[@]}; i++)); do
-				echo "${resultSet[$i]}" >> "${workwithDataFile}.new"
+			sqlStmt="select ignoreList from $scriptsTable where name=\"buildClientInfoTable\""
+		 	RunSql2 $sqlStmt
+		 	ignoreList="${resultSet[$i]}"; ignoreList=${ignoreList##*:}; ignoreList="'${ignoreList//,/','}'"
+			sqlStmt="select name,longName,hosting,products from $clientInfoTable where recordstatus=\"A\" and name not in ($ignoreList) order by name"
+		 	RunSql2 $sqlStmt
+			for rec in "${resultSet[@]}"; do clients+=("$rec"); done
+
+			for ((i=0; i<${#clients[@]}; i++)); do
+				clientRec="${clients[$i]}"
+				client=${clientRec%%|*}
+				unset envList
+				sqlStmt="select env,cims from $siteInfoTable where name like \"$client%\""
+		 		RunSql2 $sqlStmt
+		 		if [[ ${#resultSet[@]} -gt 0 ]]; then
+					for ((ii=0; ii<${#resultSet[@]}; ii++)); do
+						envListStr="${resultSet[$ii]}"; envListStr=${envListStr//\|/:}
+						envList="$envList;$envListStr"
+					done
+		 		fi
+		 		clientRec="$clientRec|${envList:1}"
+				echo "$clientRec" >> "${workwithDataFile}.new"
 			done
+
 			[[ -f "$workwithDataFile" ]] && mv -f "${workwithDataFile}" "${workwithDataFile}.bak"
 			mv -f "${workwithDataFile}.new" "${workwithDataFile}"
+			Msg3 "^...Done"
+
 			## Refresh my local warehouse
 			## [[ -x $HOME/bin/refreshDevWarehouse ]] && $HOME/bin/refreshDevWarehouse
 
@@ -481,3 +512,4 @@ return 0
 ## 12-08-2017 @ 07.34.33 - (1.22.48)   - dscudiero - COmment out refresh of dev data warehouse
 ## 12-08-2017 @ 09.27.37 - (1.22.49)   - dscudiero - fields="$clientInfoTable.name,$clientInfoTable.longname,$clientInfoTable.hosting,$clientInfoTable.products,$siteInfoTable.host"
 ## 12-08-2017 @ 09.27.56 - (1.22.49)   - dscudiero - Update sql query for workwith clientData to get all servers
+## 12-11-2017 @ 11.47.05 - (1.22.50)   - dscudiero - Refactored the logic for how the workwith clientdata file is generated
