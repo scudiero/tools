@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.4.65 # -- dscudiero -- Wed 11/01/2017 @ 15:53:21.09
+version=2.4.66 # -- dscudiero -- Mon 12/11/2017 @  6:44:37.00
 #==================================================================================================
 TrapSigs 'on'
 
@@ -61,7 +61,7 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 			foundFiles=true
 			echo; echo > "$tmpFile"
 			Msg3 | tee -a $tmpFile
-			Msg3 "^The following private dev sites where found for userid: '$userId'" | tee -a $tmpFile
+			Msg3 "^The following private dev sites where found for userid: '$userId' on host: '$hostName'" | tee -a $tmpFile
 			Msg3 | tee -a $tmpFile
 			for dir in "${dirsFound[@]}"; do
 				## Get the newest last modified date for the site
@@ -95,7 +95,7 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 			if [[ $foundFiles == true && $noEmails != true ]]; then
 				Verbose "Emails sent to: $resultRec"
 				Msg3 "\n*** Please do not respond to this email, it was sent by an automated process\n" >> $tmpFile
-				$DOIT mutt -a "$tmpFile" -s "$hostNam -- Private Dev Sites - $(date +"%m-%d-%Y")" -- $emailAddr < $tmpFile
+				$DOIT mutt -a "$tmpFile" -s "$hostName -- Private Dev Sites - $(date +"%m-%d-%Y")" -- $emailAddr < $tmpFile
 			fi
 		fi
 	done
@@ -140,3 +140,4 @@ Goodbye 0
 ## 10-23-2017 @ 11.57.55 - (2.4.64)    - dscudiero - Reformatted messaging
 ## 11-01-2017 @ 15.59.57 - (2.4.65)    - dscudiero - Switch to use ParseArgsStd2
 ## 11-13-2017 @ 07.36.26 - (2.4.65)    - dscudiero - Add the hostname to the email subject
+## 12-11-2017 @ 06.45.08 - (2.4.66)    - dscudiero - Add hostname to the messaging
