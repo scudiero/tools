@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.42" # -- dscudiero -- Mon 12/11/2017 @  7:46:52.03
+# version="2.0.43" # -- dscudiero -- Mon 12/11/2017 @ 16:21:14.54
 #===================================================================================================
 # Get CIMs
 #===================================================================================================
@@ -51,7 +51,7 @@ function GetCims {
 
 	for ((jj=0; jj<${#cimDirs[@]}; jj++)); do
 		dir="${cimDirs[$jj]}"; dir=${dir:2}
-		[[ $(Contains "$dir" ".old") == true || $(Contains "$dir" ".bak") == true || $(Contains "$dir" " - Copy") == true ]] && continue
+		[[ $(Contains "$dir" ".old") == true || $(Contains "$dir" ".bak") == true || $(Contains "$dir" " - Copy") == true  || $(Contains "$dir" "_") == true ]] && continue
 		[[ $onlyWithTestFile == true && ! -f $siteDir/web/$dir/wfTest.xml ]] && continue
 		if [[ $verify == true && $getAllCims != true ]]; then
 			unset ans
@@ -101,3 +101,4 @@ export -f GetCims
 ## 11-20-2017 @ 10.06.01 - ("2.0.36")  - dscudiero - Add 'other' option when not standard cim naming for instance
 ## 11-30-2017 @ 12.42.20 - ("2.0.41")  - dscudiero - Updated to return any directory that contains a cimconfig.cfg file, add arguments to handle the special situations
 ## 12-11-2017 @ 11.46.41 - ("2.0.42")  - dscudiero - Added PushPop to the includes list
+## 12-11-2017 @ 16.26.50 - ("2.0.43")  - dscudiero - Filter out cim imstances with '_' in the name
