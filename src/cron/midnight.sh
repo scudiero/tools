@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.51 # -- dscudiero -- Mon 12/11/2017 @ 13:26:13.11
+version=1.22.56 # -- dscudiero -- Mon 12/11/2017 @ 16:19:21.93
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -345,26 +345,29 @@ case "$hostName" in
 
 		 	[[ ! -d $(dirname "$workwithDataFile") ]] && mkdir -p "$(dirname "$workwithDataFile")"
 		 	echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE CLIENTS/SITES TABLES IN THE DATA WAREHOUSE" > "${workwithDataFile}.new"
-			sqlStmt="select ignoreList from $scriptsTable where name=\"buildClientInfoTable\""
-		 	RunSql2 $sqlStmt
-		 	ignoreList="${resultSet[$i]}"; ignoreList=${ignoreList##*:}; ignoreList="'${ignoreList//,/','}'"
-			sqlStmt="select name,longName,hosting,products from $clientInfoTable where recordstatus=\"A\" and name not in ($ignoreList) order by name"
+			# sqlStmt="select ignoreList from $scriptsTable where name=\"buildClientInfoTable\""
+		 	# RunSql2 $sqlStmt
+		 	# ignoreList="${resultSet[$i]}"; ignoreList=${ignoreList##*:}; ignoreList="'${ignoreList//,/','}'"
+			# sqlStmt="select name,longName,hosting,products from $clientInfoTable where recordstatus=\"A\" and name not in ($ignoreList) order by name"
+			sqlStmt="select name,longName,hosting,products from $clientInfoTable where recordstatus=\"A\" order by name"
 		 	RunSql2 $sqlStmt
 			for rec in "${resultSet[@]}"; do clients+=("$rec"); done
 
 			for ((i=0; i<${#clients[@]}; i++)); do
 				clientRec="${clients[$i]}"
 				client=${clientRec%%|*}
+				Verbose -1 "Processing client: $client"
 				unset envList
-				sqlStmt="select env,share,cims from $siteInfoTable where name like \"$client%\""
+				sqlStmt="select env,host,share,cims from $siteInfoTable where name like \"$client%\" and env not in ('preview','public')"
 		 		RunSql2 $sqlStmt
 		 		if [[ ${#resultSet[@]} -gt 0 ]]; then
 					for ((ii=0; ii<${#resultSet[@]}; ii++)); do
 						envListStr="${resultSet[$ii]}"; 
 						env=${envListStr%%|*}; envListStr="${envListStr#*|}"
+						host=${envListStr%%|*}; envListStr="${envListStr#*|}"
 						server=${envListStr%%|*}; envListStr="${envListStr#*|}"
 						envListStr="${envListStr//\|/:}"
-						envList="$envList;$env-$server-$envListStr"
+						envList="$envList;$env-$host/$server-$envListStr"
 					done
 		 		fi
 		 		clientRec="$clientRec|${envList:1}"
@@ -518,3 +521,4 @@ return 0
 ## 12-08-2017 @ 09.27.56 - (1.22.49)   - dscudiero - Update sql query for workwith clientData to get all servers
 ## 12-11-2017 @ 11.47.05 - (1.22.50)   - dscudiero - Refactored the logic for how the workwith clientdata file is generated
 ## 12-11-2017 @ 13.26.50 - (1.22.51)   - dscudiero - Update workwith/clientdata logic again to add the server per env
+## 12-11-2017 @ 16.19.46 - (1.22.56)   - dscudiero - tweak workWith/clientData again
