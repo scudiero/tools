@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.42 # -- dscudiero -- Mon 11/06/2017 @ 15:56:59.44
+version=2.10.56 # -- dscudiero -- Mon 12/11/2017 @ 13:49:04.85
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi"
@@ -352,7 +352,7 @@ ParseArgsStd2 $originalArgStr
 		[[ $ans == 'y' ]] && refreshSystem=true || refreshSystem=false
 	fi
 
-## check cim and courseleaf versios
+## check cim and courseleaf versions
 	unset srcClVer srcCimVer tgtClVer tgtCimVer
 	[[ -r "$srcDir/web/courseleaf/clver.txt" ]] && srcClVer=$(cat "$srcDir/web/courseleaf/clver.txt")
 	[[ -r "$srcDir/web/courseleaf/cim/clver.txt" ]] && srcCimVer=$(cat "$srcDir/web/courseleaf/cim/clver.txt")
@@ -367,6 +367,22 @@ ParseArgsStd2 $originalArgStr
 		[[ $ans != 'y' ]] && Terminate "Stopping"
 	fi
 
+dump cimStr
+## check the courseleaf revision levels in the workflow.tcf file
+for cim in ${cimStr//,/ }; do
+	srcFile="$srcDir/web/$cim/workflow.tcf"
+	tgtFile="$tgtDir/web/$cim/workflow.tcf"
+	srcRevhistorytca="$(ProtectedCall "grep 'revhistorytca:' $srcDir/web/$cim/workflow.tcf | tail -1 ")"
+	tgtRevhistorytca="$(ProtectedCall "grep 'revhistorytca:' $tgtDir/web/$cim/workflow.tcf | tail -1 ")"
+	if [[ $srcRevhistorytca != $tgtRevhistorytca ]]; then
+		Warning "The base revision history tag's for the source and target are different in cim instance '$cim'"
+		Msg3 "^^ The workflow.tcf file has been modified since the source was cloned."
+		Msg3 "^^^ Source revhistorytca: $srcRevhistorytca"
+		Msg3 "^^^ Target revhistorytca: $tgtRevhistorytca"
+		unset ans; Prompt ans "Do you wish to continue" "Yes No" "No"; ans="$(Lower ${ans:0:1})"
+	fi
+done
+
 ## Verify continue
 	unset verifyArgs
 	verifyArgs+=("Client:$client")
@@ -376,6 +392,7 @@ ParseArgsStd2 $originalArgStr
 	verifyArgs+=("CIM(s):$cimStr")
 	[[ $srcClVer != $tgtClVer ]] && verifyArgs+=("Warning:CourseLeaf version for source ($srcClVer) not the same as target ($tgtClVer)")
 	[[ $srcCimVer != $tgtCimVer ]] && verifyArgs+=("Warning:CIM version for source ($srcCimVer) not the same as target ($tgtCimVer)")
+	[[ $srcRevhistorytca != $tgtRevhistorytca ]] && verifyArgs+=("Warning:Courseleaf revision base's are not the same (see above))")
 	[[ $refreshSystem == true ]] && verifyArgs+=("Refresh system files:$refreshSystem")
 	VerifyContinue "You are copying CIM workflow files for:"
 	dump -1 client srcEnv tgtEnv srcDir tgtDir cimStr
@@ -647,3 +664,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 10-20-2017 @ 16.33.02 - (2.10.40)   - dscudiero - Added code to check to make sure there is a workflow management record for the cim instance
 ## 11-02-2017 @ 15.54.32 - (2.10.41)   - dscudiero - Switch to ParseArgsStd2
 ## 11-06-2017 @ 16.44.08 - (2.10.42)   - dscudiero - Add runCourseleafCgi to the includes list
+## 12-11-2017 @ 13.51.57 - (2.10.56)   - dscudiero - Add a check of the workflow.tcf revhistorytca data between source and target
