@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.41" # -- dscudiero -- Thu 11/30/2017 @ 12:41:16.71
+# version="2.0.42" # -- dscudiero -- Mon 12/11/2017 @  7:46:52.03
 #===================================================================================================
 # Get CIMs
 #===================================================================================================
@@ -8,7 +8,7 @@
 # All rights reserved
 #===================================================================================================
 function GetCims {
-	myIncludes="ProtectedCall"
+	myIncludes="ProtectedCall PushPop"
 	Import "$standardInteractiveIncludes $myIncludes"
 
 	local siteDir jj verb prefix multiCims onlyWithTestFile getAllCims
@@ -100,3 +100,4 @@ export -f GetCims
 ## 10-30-2017 @ 09.34.23 - ("2.0.22")  - dscudiero - Switch lower caseing of ans to use variable substitution
 ## 11-20-2017 @ 10.06.01 - ("2.0.36")  - dscudiero - Add 'other' option when not standard cim naming for instance
 ## 11-30-2017 @ 12.42.20 - ("2.0.41")  - dscudiero - Updated to return any directory that contains a cimconfig.cfg file, add arguments to handle the special situations
+## 12-11-2017 @ 11.46.41 - ("2.0.42")  - dscudiero - Added PushPop to the includes list
