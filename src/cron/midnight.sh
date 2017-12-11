@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.50 # -- dscudiero -- Mon 12/11/2017 @ 10:18:57.72
+version=1.22.51 # -- dscudiero -- Mon 12/11/2017 @ 13:26:13.11
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -356,15 +356,19 @@ case "$hostName" in
 				clientRec="${clients[$i]}"
 				client=${clientRec%%|*}
 				unset envList
-				sqlStmt="select env,cims from $siteInfoTable where name like \"$client%\""
+				sqlStmt="select env,share,cims from $siteInfoTable where name like \"$client%\""
 		 		RunSql2 $sqlStmt
 		 		if [[ ${#resultSet[@]} -gt 0 ]]; then
 					for ((ii=0; ii<${#resultSet[@]}; ii++)); do
-						envListStr="${resultSet[$ii]}"; envListStr=${envListStr//\|/:}
-						envList="$envList;$envListStr"
+						envListStr="${resultSet[$ii]}"; 
+						env=${envListStr%%|*}; envListStr="${envListStr#*|}"
+						server=${envListStr%%|*}; envListStr="${envListStr#*|}"
+						envListStr="${envListStr//\|/:}"
+						envList="$envList;$env-$server-$envListStr"
 					done
 		 		fi
 		 		clientRec="$clientRec|${envList:1}"
+
 				echo "$clientRec" >> "${workwithDataFile}.new"
 			done
 
@@ -513,3 +517,4 @@ return 0
 ## 12-08-2017 @ 09.27.37 - (1.22.49)   - dscudiero - fields="$clientInfoTable.name,$clientInfoTable.longname,$clientInfoTable.hosting,$clientInfoTable.products,$siteInfoTable.host"
 ## 12-08-2017 @ 09.27.56 - (1.22.49)   - dscudiero - Update sql query for workwith clientData to get all servers
 ## 12-11-2017 @ 11.47.05 - (1.22.50)   - dscudiero - Refactored the logic for how the workwith clientdata file is generated
+## 12-11-2017 @ 13.26.50 - (1.22.51)   - dscudiero - Update workwith/clientdata logic again to add the server per env
