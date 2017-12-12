@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.56 # -- dscudiero -- Mon 12/11/2017 @ 16:19:21.93
+version=1.22.57 # -- dscudiero -- Tue 12/12/2017 @  6:57:47.56
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -356,7 +356,6 @@ case "$hostName" in
 			for ((i=0; i<${#clients[@]}; i++)); do
 				clientRec="${clients[$i]}"
 				client=${clientRec%%|*}
-				Verbose -1 "Processing client: $client"
 				unset envList
 				sqlStmt="select env,host,share,cims from $siteInfoTable where name like \"$client%\" and env not in ('preview','public')"
 		 		RunSql2 $sqlStmt
@@ -522,3 +521,4 @@ return 0
 ## 12-11-2017 @ 11.47.05 - (1.22.50)   - dscudiero - Refactored the logic for how the workwith clientdata file is generated
 ## 12-11-2017 @ 13.26.50 - (1.22.51)   - dscudiero - Update workwith/clientdata logic again to add the server per env
 ## 12-11-2017 @ 16.19.46 - (1.22.56)   - dscudiero - tweak workWith/clientData again
+## 12-12-2017 @ 06.58.07 - (1.22.57)   - dscudiero - removed debug statements from workwith.clientdata
