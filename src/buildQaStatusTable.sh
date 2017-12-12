@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.70 # -- dscudiero -- Fri 12/08/2017 @  7:51:14.68
+version=1.2.72 # -- dscudiero -- Tue 12/12/2017 @  6:56:00.16
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -185,7 +185,7 @@ for var in $falseVars; do eval $var=false; done
 #=======================================================================================================================
 # Standard argument parsing and initialization
 #=======================================================================================================================
-helpSet='script,client,env'
+helpSet='script,client'
 
 Hello
 GetDefaultsData $myName
@@ -368,22 +368,25 @@ for workbook in "${workbooks[@]}"; do
 			## Process the testing details records
 			Msg3 "^^Processing Testing Details data via '$workerScript'..."
 			ProtectedCall "source \"$workerScriptFile\" \"$workbook\" 'TestingDetailFinal'"
-			[[ $rc -ge 2 ]] && Msg3 $T "Processing the Testing Detail data, please review messages"
-			if [[ $(Contains "$workbook" 'archive') == false ]]; then
-				pushd $(dirname $workbook) >& /dev/null
-				$DOIT mv -f $workbook "$qaTrackingRoot/Archive/"
-				popd $(dirname $workbook) >& /dev/null
-				## Get the key for the qastatus record
-					whereClause="clientCode=$clientCode and product=$product and project=$project and instance=$instance"
-					sqlStmt="select idx from $qaStatusTable where $whereClause"
-					RunSql2 $sqlStmt
-					if [[ ${#resultSet[@]} -eq 0 ]]; then
-						Error "Could not retrieve record key in $warehouseDb.$qaStatusTable for: $whereClause\nCould not set the record as deactivated"
-					else
-						qastatusKey=${resultSet[0]}
-						sqlStmt="update $qaStatusTable set recordStatus=\"D\" where idx=$qastatusKey"
+			if [[ $rc -ge 2 ]]; then
+				Error "Processing the Testing Detail data, please review messages"
+			else
+				if [[ $(Contains "$workbook" 'archive') == false ]]; then
+					pushd $(dirname $workbook) >& /dev/null
+					$DOIT mv -f $workbook "$qaTrackingRoot/Archive/"
+					popd $(dirname $workbook) >& /dev/null
+					## Get the key for the qastatus record
+						whereClause="clientCode=$clientCode and product=$product and project=$project and instance=$instance"
+						sqlStmt="select idx from $qaStatusTable where $whereClause"
 						RunSql2 $sqlStmt
-					fi
+						if [[ ${#resultSet[@]} -eq 0 ]]; then
+							Error "Could not retrieve record key in $warehouseDb.$qaStatusTable for: $whereClause\nCould not set the record as deactivated"
+						else
+							qastatusKey=${resultSet[0]}
+							sqlStmt="update $qaStatusTable set recordStatus=\"D\" where idx=$qastatusKey"
+							RunSql2 $sqlStmt
+						fi
+				fi
 			fi
 		fi
 	((fileCntr+=1))
@@ -437,3 +440,4 @@ Goodbye 0 #'alert'
 ## 11-14-2017 @ 14.00.44 - (1.2.68)    - dscudiero - Updated parsing of the CIM multiweek data
 ## 12-08-2017 @ 07.48.51 - (1.2.69)    - dscudiero - Updated to remove env data variable
 ## 12-08-2017 @ 07.51.33 - (1.2.70)    - dscudiero - add a mesage level to a dump statement
+## 12-12-2017 @ 06.56.57 - (1.2.72)    - dscudiero - Fix problem with messaging if insertTestingDetail returns an error code
