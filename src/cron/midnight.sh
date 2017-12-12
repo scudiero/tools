@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.59 # -- dscudiero -- Tue 12/12/2017 @  9:48:58.87
+version=1.22.61 # -- dscudiero -- Tue 12/12/2017 @ 10:31:36.75
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -324,40 +324,27 @@ case "$hostName" in
 
 		 ## Create the data dump for the workwith tool
 		 	Msg3 "^Building the 'WorkWith' client data file..."
-			# # hostClause="(select distinct host from $siteInfoTable where $siteInfoTable.name=$clientInfoTable.name and $siteInfoTable.host <> 'N/A' \
-			# # 			and $siteInfoTable.name not like '%-test') as host"
-			# fields="$clientInfoTable.name,$clientInfoTable.longname,$clientInfoTable.hosting,$clientInfoTable.products,$siteInfoTable.host"
-			# envsClause="GROUP_CONCAT(distinct env SEPARATOR ',') as envList"
-			# serverClause="GROUP_CONCAT(distinct share SEPARATOR ',') as serverList"
-			# fromClause="from $clientInfoTable,$siteInfoTable where ($siteInfoTable.name REGEXP $clientInfoTable.name) 
-			# 			and $siteInfoTable.env not in('prior','public','preview')"
-			# groupClause="GROUP BY $clientInfoTable.name"
-		 # 	sqlStmt="select $fields,$serverClause,$envsClause,ifnull($siteInfoTable.cims,'') $fromClause $groupClause"
-			# #echo; dump sqlStmt; echo
-		 # 	RunSql2 $sqlStmt
-		 # 	[[ ! -d $(dirname "$workwithDataFile") ]] && mkdir -p "$(dirname "$workwithDataFile")"
-		 # 	echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE CLIENTS/SITES TABLES IN THE DATA WAREHOUSE" > "${workwithDataFile}.new"
-			# for ((i=0; i<${#resultSet[@]}; i++)); do
-			# 	echo "${resultSet[$i]}" >> "${workwithDataFile}.new"
-			# done
-			# [[ -f "$workwithDataFile" ]] && mv -f "${workwithDataFile}" "${workwithDataFile}.bak"
-			# mv -f "${workwithDataFile}.new" "${workwithDataFile}"
-
-		 	[[ ! -d $(dirname "$workwithDataFile") ]] && mkdir -p "$(dirname "$workwithDataFile")"
-		 	echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE CLIENTS/SITES TABLES IN THE DATA WAREHOUSE" > "${workwithDataFile}.new"
-			# sqlStmt="select ignoreList from $scriptsTable where name=\"buildClientInfoTable\""
-		 	# RunSql2 $sqlStmt
-		 	# ignoreList="${resultSet[$i]}"; ignoreList=${ignoreList##*:}; ignoreList="'${ignoreList//,/','}'"
-			# sqlStmt="select name,longName,hosting,products from $clientInfoTable where recordstatus=\"A\" and name not in ($ignoreList) order by name"
-			sqlStmt="select name,longName,hosting,products from $clientInfoTable where recordstatus=\"A\" order by name"
-		 	RunSql2 $sqlStmt
-			for rec in "${resultSet[@]}"; do clients+=("$rec"); done
+		 	unset client
+			if [[ -z $client ]]; then
+			 	[[ ! -d $(dirname "$workwithDataFile") ]] && mkdir -p "$(dirname "$workwithDataFile")"
+			 	outFile="${workwithDataFile}.new"
+			 	echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE CLIENTS/SITES TABLES IN THE DATA WAREHOUSE" > "$outFile"
+				sqlStmt="select ignoreList from $scriptsTable where name=\"buildClientInfoTable\""
+			 	RunSql2 $sqlStmt
+			 	ignoreList="${resultSet[$i]}"; ignoreList=${ignoreList##*:}; ignoreList="'${ignoreList//,/','}'"
+				sqlStmt="select name,longName,hosting,products from $clientInfoTable where recordstatus=\"A\" and name not in ($ignoreList) order by name"
+			 	RunSql2 $sqlStmt
+				for rec in "${resultSet[@]}"; do clients+=("$rec"); done
+			else
+				clients=($client)
+				outFile="/dev/stdout"
+			fi
 
 			for ((i=0; i<${#clients[@]}; i++)); do
 				clientRec="${clients[$i]}"
 				client=${clientRec%%|*}
-				Verbose 1 "Processing client: $client"
-				unset envList
+				Verbose 1 "^client: $client ($i of ${#clients[@]})"
+				unset envList envListStr
 				sqlStmt="select env,host,share,cims from $siteInfoTable where name in (\"$client\",\"$client-test\") and env not in ('preview','public')"
 		 		RunSql2 $sqlStmt
 		 		if [[ ${#resultSet[@]} -gt 0 ]]; then
@@ -371,12 +358,14 @@ case "$hostName" in
 					done
 		 		fi
 		 		clientRec="$clientRec|${envList:1}"
-
-				echo "$clientRec" >> "${workwithDataFile}.new"
+				echo "$clientRec" >> "$outFile"
 			done
 
-			[[ -f "$workwithDataFile" ]] && mv -f "${workwithDataFile}" "${workwithDataFile}.bak"
-			mv -f "${workwithDataFile}.new" "${workwithDataFile}"
+			if [[ $outFile != '/dev/stdout' ]]; then
+				[[ -f "$workwithDataFile" ]] && mv -f "$workwithDataFile" "${workwithDataFile}.bak"
+				mv -f "$outFile" "$workwithDataFile"
+			fi
+
 			Msg3 "^...Done"
 
 			## Refresh my local warehouse
@@ -525,3 +514,4 @@ return 0
 ## 12-12-2017 @ 06.58.07 - (1.22.57)   - dscudiero - removed debug statements from workwith.clientdata
 ## 12-12-2017 @ 09.22.22 - (1.22.58)   - dscudiero - Fix problem with select statement in workwith.data picking up too much data
 ## 12-12-2017 @ 09.49.11 - (1.22.59)   - dscudiero - Cosmetic/minor change
+## 12-12-2017 @ 10.31.44 - (1.22.61)   - dscudiero - Cosmetic/minor change
