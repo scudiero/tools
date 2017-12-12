@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #==================================================================================================
-version=1.0.118 # -- dscudiero -- Wed 11/08/2017 @  7:31:44.29
+version=1.0.119 # -- dscudiero -- Tue 12/12/2017 @  6:56:12.69
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 GetExcel2 ProtectedCall"
@@ -59,12 +59,11 @@ clientCode=$(cut -d'-' -f1 <<< $fileName)
 product=$(cut -d'-' -f2 <<< $fileName)
 instance=$(cut -d'-' -f3 <<< $fileName)
 project=$(cut -d'-' -f4 <<< $fileName)
-env=$(cut -d'-' -f5 <<< $fileName)
-dump -2 workbookFile -t clientCode product project instance env 
+dump -2 workbookFile -t clientCode product project instance
 
 ## Get the key for the qastatus record
-	Verbose 1 "^^^Retrieving qaStatusKey for '$clientCode.$product.$project.$instance.$env'..."
-	whereClause="clientCode=\"$clientCode\" and  product=\"$product\" and project=\"$project\" and instance=\"$instance\" and env=\"$env\" "
+	Verbose 1 "^^^Retrieving qaStatusKey for '$clientCode.$product.$project.$instance'..."
+	whereClause="clientCode=\"$clientCode\" and  product=\"$product\" and project=\"$project\" and instance=\"$instance\""
 	sqlStmt="select idx from $qaStatusTable where $whereClause"
 	RunSql2 $sqlStmt
 	[[ ${#resultSet[@]} -eq 0 ]] && Error "Could not retrieve record key in $warehouseDb.$qaStatusTable for:\n^$whereClause" && Goodbye 'Return' && return 2
@@ -196,3 +195,4 @@ dump -2 workbookFile -t clientCode product project instance env
 ## 10-20-2017 @ 09.01.58 - (1.0.115)   - dscudiero - Fix problem in the caller check code
 ## 11-01-2017 @ 07.42.33 - (1.0.117)   - dscudiero - Switch to Msg3
 ## 11-08-2017 @ 07.32.09 - (1.0.118)   - dscudiero - Switch to GetExcel2
+## 12-12-2017 @ 06.57.11 - (1.0.119)   - dscudiero - Remove 'env' from the queries
