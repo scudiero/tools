@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.58 # -- dscudiero -- Tue 12/12/2017 @  9:21:11.61
+version=1.22.59 # -- dscudiero -- Tue 12/12/2017 @  9:48:58.87
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -356,6 +356,7 @@ case "$hostName" in
 			for ((i=0; i<${#clients[@]}; i++)); do
 				clientRec="${clients[$i]}"
 				client=${clientRec%%|*}
+				Verbose 1 "Processing client: $client"
 				unset envList
 				sqlStmt="select env,host,share,cims from $siteInfoTable where name in (\"$client\",\"$client-test\") and env not in ('preview','public')"
 		 		RunSql2 $sqlStmt
@@ -523,3 +524,4 @@ return 0
 ## 12-11-2017 @ 16.19.46 - (1.22.56)   - dscudiero - tweak workWith/clientData again
 ## 12-12-2017 @ 06.58.07 - (1.22.57)   - dscudiero - removed debug statements from workwith.clientdata
 ## 12-12-2017 @ 09.22.22 - (1.22.58)   - dscudiero - Fix problem with select statement in workwith.data picking up too much data
+## 12-12-2017 @ 09.49.11 - (1.22.59)   - dscudiero - Cosmetic/minor change
