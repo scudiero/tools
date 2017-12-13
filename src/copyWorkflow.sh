@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.56 # -- dscudiero -- Mon 12/11/2017 @ 13:49:04.85
+version=2.10.57 # -- dscudiero -- Wed 12/13/2017 @  8:36:39.68
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi"
@@ -367,7 +367,6 @@ ParseArgsStd2 $originalArgStr
 		[[ $ans != 'y' ]] && Terminate "Stopping"
 	fi
 
-dump cimStr
 ## check the courseleaf revision levels in the workflow.tcf file
 for cim in ${cimStr//,/ }; do
 	srcFile="$srcDir/web/$cim/workflow.tcf"
