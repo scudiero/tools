@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.57 # -- dscudiero -- Wed 12/13/2017 @  8:36:39.68
+version=2.10.59 # -- dscudiero -- Wed 12/13/2017 @ 14:21:17.27
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi"
@@ -508,10 +508,12 @@ Msg3
 		pushd "$backupFolder" >& /dev/null
 		tarDir=$localClientWorkFolder/$client/workflowBackups
 		[[ ! -d $tarDir ]] && mkdir -p $tarDir
-		tarFile="$tarDir/${srcEnv}---${tgtEnv}--$backupSuffix.tar.gz"
+		tarFile="$tarDir/${srcEnv}-2-${tgtEnv}--$backupSuffix.tar.gz"
 		$DOIT ProtectedCall "tar -cpzf \"$tarFile\" ./*"; rc=$?
 		[[ $rc -ne 0 ]] && Error "Non-zero return code from tar"
 		cd ..
+		[[ ! -d "$tgtDir/attic" ]] && mkdir -p "$tgtDir/attic"
+		cp -f "$tarFile" "$tgtDir/attic"
 		$DOIT rm -rf "/${backupFolder#*/}"
 		popd >& /dev/null
 
@@ -664,3 +666,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 11-02-2017 @ 15.54.32 - (2.10.41)   - dscudiero - Switch to ParseArgsStd2
 ## 11-06-2017 @ 16.44.08 - (2.10.42)   - dscudiero - Add runCourseleafCgi to the includes list
 ## 12-11-2017 @ 13.51.57 - (2.10.56)   - dscudiero - Add a check of the workflow.tcf revhistorytca data between source and target
+## 12-13-2017 @ 14.21.18 - (2.10.59)   - dscudiero - Write out the backup file to the target sites attic directory
