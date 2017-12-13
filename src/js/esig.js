@@ -108,3 +108,65 @@ TYPE 2 -- multiple step esigs (e.g. yale courseadmin):
 		};
 
 
+TYPE 3 -- Emit esig steps from Related data  (e.g. wisc courseadmin):
+
+	workflow.cfg:
+		//======================================================================================================================
+		// Deferred Approval step (esigs) definitions
+		//======================================================================================================================
+		// esig steps are build from the related data from the crosslisted field on the form, set things up for the GetRelated2 
+		// call insided the esigs functions
+		//======================================================================================================================
+		GetRelatedSubjsEsigs_formFieldVars:crosslisted|courseCode|code
+		GetRelatedColsEsigs_formFieldVars:crosslisted|courseCode|code
+
+		esiglist:RelatedSubjs|^RelatedSubjsApprove.*Approver$|function|GetRelatedSubjsEsigs|;
+		esiglist:RelatedCols|^RelatedColsApprove.*Approver$|function|GetRelatedColsEsigs|;
+
+	workflow.tcf:
+		...
+		RelatedSubjsApprove Subject Approver,
+		...
+
+	workflowFuncs.atj:
+	//======================================================================================================================
+	// Return the steps for the RelatedSubjsEsig esig group, get the data from the GetRelatd function
+	//======================================================================================================================
+	// 10-05-17 - dgs - Initial coding - wisc
+	// 11/08/17 - dgs - Changed variable 'breadth' to 'breadth_attribute'
+	//======================================================================================================================
+	wffuncs.GetRelatedSubjsEsigs = function(data) {
+		var myName="GetRelatedSubjsEsigs"; wfDebug(1,"\n*** In " + myName + " ***");
+		var retArray=[];
+		var getRelatedData={};
+
+		// Get the form variable data
+			var formDataVars="";
+			varName=myName + "_" + "formFieldVars";
+			formDataVars=getTCFValue(varName).toString();
+			if (formDataVars === "") return false;
+			getRelatedData.formDataVars=formDataVars.split(",");
+
+		// Get the ignoreList
+			varName=myName + "_" + "ignoreList";
+			ignoreList=getTCFValue(varName).toString();
+			if (ignoreList != "") getRelatedData.ignoreList=ignoreList;
+			wfDump(1,["formDataVars;"+formDataVars.toSource(),"ignoreList;"+ignoreList.toSource(),"getRelatedData;"+getRelatedData.toSource()])
+
+		// Get the related data
+			var relatedData=GetRelated2("subj",getRelatedData);
+			wfDump(1,["relatedData;"+relatedData.toSource()])
+			if (relatedData.length > 0) {
+				relatedData.forEach(function(dataObj) {
+					retArray.push(dataObj.data + " Subject Approver");
+				});
+			}
+
+		// Return results -- date
+			if(retArray.length > 0) {
+				wfDebug(1,"\t*** Returning " + retArray.toSource());
+				return retArray;
+			}
+			return false;
+
+	} //GetRelatedSubjsEsigs
