@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.79 # -- dscudiero -- Mon 11/13/2017 @ 16:54:35.18
+version=1.2.80 # -- dscudiero -- Wed 12/13/2017 @ 15:41:20.25
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -405,7 +405,8 @@ for cim in ${cimStr//,/ }; do
 done # cims
 Msg3
 Msg3 "Processed CIMs: $cimStr"
-[[ $informationOnlyMode != true ]] && Msg3 "Output written to: $outFile"
+[[ $informationOnlyMode != true ]] && 
+	{ Msg3 "Output written to: $outFile"; Msg3 "You can create a Excel workbook using the template work sheet:\n^$TOOLSPATH/workbooks/CIMWorkflows.xltm"; } 
 [[ -f "$tmpFile" ]] && rm "$tmpFile"
 
 #==================================================================================================
@@ -439,3 +440,4 @@ Goodbye 0 #'alert'
 ## 11-02-2017 @ 06.58.49 - (1.2.65)    - dscudiero - Switch to ParseArgsStd2
 ## 11-02-2017 @ 11.02.06 - (1.2.66)    - dscudiero - Add addPvt to the init call
 ## 11-13-2017 @ 16.57.23 - (1.2.79)    - dscudiero - Fix problem parsing modifiers and special modifiers
+## 12-13-2017 @ 15.41.39 - (1.2.80)    - dscudiero - Add message where the excel template file can be found
