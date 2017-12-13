@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.59 # -- dscudiero -- Wed 12/13/2017 @ 14:21:17.27
+version=2.10.60 # -- dscudiero -- Wed 12/13/2017 @ 14:25:04.55
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi"
@@ -516,6 +516,7 @@ Msg3
 		cp -f "$tarFile" "$tgtDir/attic"
 		$DOIT rm -rf "/${backupFolder#*/}"
 		popd >& /dev/null
+		Msg3 "Backup files located at: '$tarFile'"
 
 		## Make sure that we have workflow management on the console
 		if [[ $tgtEnv == 'next' || $tgtEnv == 'test' ]]; then
@@ -667,3 +668,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 11-06-2017 @ 16.44.08 - (2.10.42)   - dscudiero - Add runCourseleafCgi to the includes list
 ## 12-11-2017 @ 13.51.57 - (2.10.56)   - dscudiero - Add a check of the workflow.tcf revhistorytca data between source and target
 ## 12-13-2017 @ 14.21.18 - (2.10.59)   - dscudiero - Write out the backup file to the target sites attic directory
+## 12-13-2017 @ 14.25.14 - (2.10.60)   - dscudiero - Cosmetic/minor change
