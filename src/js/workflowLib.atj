@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.47" // -- dscudiero -- Mon 12/11/2017 @ 11:44:44.27
+wfLibVersion="1.8.48" // -- dscudiero -- Wed 12/13/2017 @ 11:09:03.74
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -1110,7 +1110,7 @@ function LookupCode2(lookupType,givenType,givenData,excludeData) {
 	resultSet=dbquery(tcfdata.dbname[0],sqlStmt);
 	wfDump(myDebugLevel+1,[myIndent + "\tsqlStmt;"+sqlStmt,myIndent + "\tresultSet;"+resultSet.toSource()]);
 	if (resultSet.length <= 0) {
-		wfDebug(6,myIndent + "*** No data returned from sql query, returning false");
+		wfDebug(myDebugLevel,myIndent + "*** No data returned from sql query, returning false");
 		return false;
 	}
 
@@ -1127,7 +1127,7 @@ function LookupCode2(lookupType,givenType,givenData,excludeData) {
 
 	// Return results -- date
 	if(retArray.length > 0) {
-		wfDebug(1,myIndent + "*** " + myName + ": Returning: " + retArray.toSource() + "\n");
+		wfDebug(myDebugLevel,myIndent + "*** " + myName + ": Returning: " + retArray.toSource() + "\n");
 		return retArray;
 	}
 	return false;
@@ -2446,3 +2446,4 @@ var wfLibLoaded=true;
 // 12-05-2017 @ 11.06.22 - ("1.8.44")  - dscudiero - Added the Annotate function
 // 12-06-2017 @ 09.05.52 - ("1.8.46")  - dscudiero - tweaked formatting of TODO messaging
 // 12-11-2017 @ 11.45.07 - ("1.8.47")  - dscudiero - Updated comments for checkchanged
+// 12-13-2017 @ 11.10.11 - ("1.8.48")  - dscudiero - Fix debug messages in lookupcode2 that were hardcoded
