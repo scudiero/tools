@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.20 # -- dscudiero -- Wed 11/01/2017 @ 16:28:44.00
+version=2.1.21 # -- dscudiero -- Wed 12/13/2017 @ 15:39:25.26
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -84,6 +84,7 @@ cd $srcDir
 	rm $stepFile
 
 Msg3 "Output can be found in: $outFile\n"
+Msg3 "You can create a Excel workbook using the template work sheet:\n^$TOOLSPATH/workbooks/CourseleafData.xltm"
 
 #==================================================================================================
 ## Bye-bye
@@ -94,3 +95,4 @@ Goodbye 0 'alert'
 ## 04-13-2017 @ 14.01.07 - (2.1.13)    - dscudiero - Add a default for VerifyContinue
 ## 09-29-2017 @ 10.14.57 - (2.1.17)    - dscudiero - Update FindExcecutable call for new syntax
 ## 11-02-2017 @ 06.58.52 - (2.1.20)    - dscudiero - Switch to ParseArgsStd2
+## 12-13-2017 @ 15.39.36 - (2.1.21)    - dscudiero - 1
