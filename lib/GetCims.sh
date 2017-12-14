@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.43" # -- dscudiero -- Mon 12/11/2017 @ 16:21:14.54
+# version="2.0.44" # -- dscudiero -- Thu 12/14/2017 @ 15:45:00.65
 #===================================================================================================
 # Get CIMs
 #===================================================================================================
@@ -23,7 +23,7 @@ function GetCims {
 		    [[ $1 =~ ^-o|--onlyWithTestFile$ ]] && { onlyWithTestFile=true; shift 1; continue; }
 		    [[ $1 =~ ^-v|--verb$ ]] && { verb="$2"; shift 2; continue; }
 		    [[ $1 =~ ^-p|--prefix$ ]] && { prefix="$2"; shift 2; continue; }
-		    local siteDir=$1
+		    [[ -z $siteDir ]] && siteDir=$1
 		    shift 1 || true
 		done
 
@@ -102,3 +102,4 @@ export -f GetCims
 ## 11-30-2017 @ 12.42.20 - ("2.0.41")  - dscudiero - Updated to return any directory that contains a cimconfig.cfg file, add arguments to handle the special situations
 ## 12-11-2017 @ 11.46.41 - ("2.0.42")  - dscudiero - Added PushPop to the includes list
 ## 12-11-2017 @ 16.26.50 - ("2.0.43")  - dscudiero - Filter out cim imstances with '_' in the name
+## 12-14-2017 @ 15.46.53 - ("2.0.44")  - dscudiero - Only set siteDir if it is null on parg parsing
