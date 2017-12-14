@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.59 # -- dscudiero -- Mon 12/04/2017 @  9:54:57.06
+# version=2.1.60 # -- dscudiero -- Thu 12/14/2017 @ 15:43:50.71
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -315,7 +315,7 @@ function Init {
 	#===================================================================================================
 	## find CIMs
 	if [[ $getCims == true || $allCims == true ]] && [[ $getDirs == true ]] && [[ -z $cimStr ]]; then
-		[[ ${#cims} -eq 0 ]] && GetCims "$siteDir" "\t"
+		[[ ${#cims} -eq 0 ]] && GetCims "$siteDir"
 		[[ -z $cimStr ]] && cimStr=$(printf -- "%s, " "${cims[@]}") && cimStr=${cimStr:0:${#cimStr}-2}
 	fi
 
@@ -376,3 +376,4 @@ export -f Init
 ## 11-03-2017 @ 09.53.34 - (2.1.56)    - dscudiero - Fix problem adding pvt site to clientEnvs lsit
 ## 12-01-2017 @ 09.14.03 - (2.1.58)    - dscudiero - Make sure env is set from envs if envs has a value
 ## 12-04-2017 @ 09.55.21 - (2.1.59)    - dscudiero - Update 'products in support' messaging
+## 12-14-2017 @ 15.47.21 - (2.1.60)    - dscudiero - Remove errant "t" on call to GetCims
