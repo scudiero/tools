@@ -3,6 +3,9 @@
 **/archive/
 /auth/
 /shadows/
+/jars/
+/dailysh/
+/bin/
 /courseleafcgiShadow
 /courseleafEscrowedSites
 /courseleafGitRepoShadow
@@ -17,9 +20,6 @@
 *.pyc
 *.bak
 .nfs*
-/dailysh/
-/bin/
 /src/java/WorkWith/nbproject/private/
 /src/java/WorkWith/build/
 /src/java/WorkWith/dist/
-/jars/
