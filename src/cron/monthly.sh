@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.10 # -- dscudiero -- Wed 11/22/2017 @  6:28:16.69
+version=2.1.12 # -- dscudiero -- Mon 12/18/2017 @  7:50:12.48
 #=======================================================================================================================
 # Run once a week from cron
 #=======================================================================================================================
@@ -33,7 +33,7 @@ case "$hostName" in
 				cd $TOOLSPATH/Logs
 				[[ -d ./cronJobs ]] && rm -rf ./cronJobs
 				tar -cvzf "${lastMonthAbbrev}-$(date '+%Y').tar.gz" $lastMonthNum-* --remove-files
-				Msg3 "\n*** Logs rollup -- Completed ***"
+				Msg3 "\n^$myName logs rollup -- Completed ***"
 			;;
 	build5)
 			;;
@@ -52,3 +52,4 @@ return 0
 ## Thu Jan  5 14:50:06 CST 2017 - dscudiero - Switch to use RunSql2
 ## 10-11-2017 @ 10.37.45 - (2.1.9)     - dscudiero - Switch to use FindExecutable -run
 ## 11-22-2017 @ 06.28.33 - (2.1.10)    - dscudiero - switch to use parsargsstd2
+## 12-18-2017 @ 07.50.50 - (2.1.12)    - dscudiero - Tweak messaging
