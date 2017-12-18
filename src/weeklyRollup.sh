@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #===================================================================================================
-version=1.0.35 # -- dscudiero -- Mon 12/11/2017 @  6:49:08.06
+version=1.0.36 # -- dscudiero -- Mon 12/18/2017 @  7:46:12.97
 #===================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall RunSql2 SetFileExpansion"
@@ -80,7 +80,7 @@ ParseArgsStd2 $originalArgStr
 	cd $TOOLSPATH/Logs
 	outFile="$(date '+%m-%d-%y').processLog.xls"
 	## Get the column names
-	sqlStmt="select column_name from information_schema.columns where table_schema = \"$warehouseDb\" and table_name = \"$processLogTable\"";
+	sqlStmt="select column_name from information_schema.columns where table_schema = \"$warehouseDb\" and table_name = \"$processLogTable\""
 	RunSql2 $sqlStmt
 	resultString="${resultSet[@]}" ; resultString=$(tr " " "\t" <<< $resultString)
 	echo "$resultString" >> $outFile
@@ -94,6 +94,8 @@ ParseArgsStd2 $originalArgStr
 		done
 		ProtectedCall "tar -cvzf \"$(date '+%m-%d-%y').processLog.tar\" $outFile --remove-files > /dev/null 2>&1"
 	fi
+	sqlStmt="truncate $processLogTable"
+	RunSql2 $sqlStmt
 	Msg3 "^Processlog rollup -- Completed"
 
 ## Roll up the weeks log files
@@ -101,10 +103,8 @@ ParseArgsStd2 $originalArgStr
 	cd $TOOLSPATH/Logs
 	[[ -d ./cronJobs ]] && ProtectedCall "rm -rf ./cronJobs"
 	ProtectedCall "tar -czf \"$(date '+%m-%d-%y').tar.gz\" * --exclude '*.gz' --exclude \"weekly*\"" #-remove-files
-	ProtectedCall "find . -maxdepth 1 -mindepth 1 -type d  --exclude \"weekly*\" -exec rm -rf {} \; > /dev/null 2>&1"
-	ProtectedCall "find . -maxdepth 1 -mindepth 1 -type f -name '*.tar' --exclude \"weekly*\" -exec rm -rf {} \; > /dev/null 2>&1"
+	ProtectedCall "find . -maxdepth 1 -mindepth 1 -type d -type d ! -name weekly -exec rm -rf {} \; > /dev/null 2>&1"
 	Msg3 "^Logs rollup -- Completed"
-
 
 #===================================================================================================
 ## Done
@@ -125,3 +125,4 @@ Goodbye 0 #'alert'
 ## 11-22-2017 @ 06.25.55 - (1.0.33)    - dscudiero - Switch to parseargsstd2
 ## 11-27-2017 @ 09.45.11 - (1.0.34)    - dscudiero - Fix problem deleting the weekly log file while in use
 ## 12-11-2017 @ 06.49.36 - (1.0.35)    - dscudiero - Update code excluding the weekly cron log
+## 12-18-2017 @ 07.46.57 - (1.0.36)    - dscudiero - Fix problem with the final rollup deleteing the log directories
