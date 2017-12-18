@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.6 # -- dscudiero -- Mon 12/18/2017 @  8:03:10.29
+version=4.13.7 # -- dscudiero -- Mon 12/18/2017 @  8:05:36.75
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims"
@@ -675,3 +675,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 12-01-2017 @ 09.15.07 - (4.13.1)    - dscudiero - Remove check for remotely hosted clients
 ## 12-06-2017 @ 10.29.03 - (4.13.2)    - dscudiero - Add GetCims to imports list
 ## 12-18-2017 @ 08.03.32 - (4.13.6)    - dscudiero - Fix issue processing the product codes properly
+## 12-18-2017 @ 09.45.02 - (4.13.7)    - dscudiero - Cosmetic/minor change
