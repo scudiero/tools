@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.2 # -- dscudiero -- Wed 12/06/2017 @ 10:28:47.79
+version=4.13.6 # -- dscudiero -- Mon 12/18/2017 @  8:03:10.29
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims"
@@ -123,14 +123,14 @@ ParseArgsStd2 $originalArgStr
 [[ -n $envs && -z $srcEnv ]] && srcEnv="$env"
 
 [[ $allItems == true || $fullCopy == true ]] && cim='Yes' && overlay=false
-dump -2 -n client envs products fullCopy overlay suffix email
 
 addPvt=true
 if [[ -n products ]]; then
-	[[ $(Contains "products" 'cat') == true ]] && skipCat=false && skipCim=true && skipClss=true && unset skipAlso
-	[[ $(Contains "products" 'cim') == true ]] && skipCat=true && skipCim=false && skipClss=true && unset skipAlso
-	[[ $(Contains "products" 'clss') == true ]] && skipCat=true && skipCim=true && skipClss=false && unset skipAlso
+	[[ $(Contains "$products" 'cat') == true ]] && skipCat=false && skipCim=true && skipClss=true && unset skipAlso
+	[[ $(Contains "$products" 'cim') == true ]] && skipCat=true && skipCim=false && skipClss=true && unset skipAlso
+	[[ $(Contains "$products" 'clss') == true ]] && skipCat=true && skipCim=true && skipClss=false && unset skipAlso
 fi
+dump -2 -n client envs products fullCopy overlay suffix email skipCat skipCim skipClss skipAlso
 
 ## Resolve data based on passed in client, handle special cases
 	if [[ $(Lower "${client:0:5}") == 'luc20' && ${srcEnv:0:1} == 'p' && ${tgtEnv:0:1} == 'p' ]]; then
@@ -674,3 +674,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 ## 11-30-2017 @ 13.26.27 - (4.13.-1)   - dscudiero - Switch to use the -all flag on the GetCims call
 ## 12-01-2017 @ 09.15.07 - (4.13.1)    - dscudiero - Remove check for remotely hosted clients
 ## 12-06-2017 @ 10.29.03 - (4.13.2)    - dscudiero - Add GetCims to imports list
+## 12-18-2017 @ 08.03.32 - (4.13.6)    - dscudiero - Fix issue processing the product codes properly
