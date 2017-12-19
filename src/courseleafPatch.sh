@@ -1,7 +1,7 @@
 #!/bin/bash
-# DO NOT AUTOVERSION
+# XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.0 # -- dscudiero -- Fri 09/29/2017 @ 16:20:20.74
+version=5.5.8 # -- dscudiero -- Tue 12/19/2017 @  9:52:35.51
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel2 EditTcfValue BackupCourseleafFile'
@@ -185,7 +185,9 @@ cwdStart="$(pwd)"
 			[[ $quiet == true ]] && rsyncVerbose='' || rsyncVerbose='v'
 			[[ $informationOnlyMode == true ]] && rsyncListonly="--dry-run" || unset rsyncListonly
 			rsyncFilters=$tmpRoot/$myName.$product.rsyncFilters
+			[[ -e $rsyncFilters ]] && rm -f "$rsyncFilters"
 			rsyncOut=$tmpRoot/$myName.$product.rsyncOut
+			[[ -e $rsyncOut ]] && rm -f "$rsyncOut"
 			rsyncOpts="-rptb$rsyncVerbose --backup-dir $rsyncBackup --prune-empty-dirs --checksum $rsyncListonly --include-from $rsyncFilters --links"
 			echo > $rsyncFilters 
 			SetFileExpansion 'off'
@@ -196,12 +198,9 @@ cwdStart="$(pwd)"
 		## Do copies
 			if [[ -z $DOIT ]]; then
 				SetFileExpansion 'on'
-				if [[ $verboseLevel -eq 0 ]]; then
-					rsync $rsyncOpts $rsyncSrc $rsyncTgt 2>$rsyncErr | Indent > "$rsyncOut"; rsyncRc=$?
-					cat "$rsyncOut" | Indent >> $logFile
-				else
-					rsync $rsyncOpts $rsyncSrc $rsyncTgt 2>$rsyncErr | Indent | tee "$rsyncOut"; rsyncRc=$?
-				fi
+				[[ $verboseLevel -eq 0 ]] && rsyncStdout="/dev/null" || rsyncStdout="/dev/stdout"
+				rsync $rsyncOpts $rsyncSrc $rsyncTgt 2>$rsyncErr | Indent | tee -a "$rsyncOut" "$logFile" > "$rsyncStdout"
+				rsyncRc=$?
 				SetFileExpansion
 			    if [[ $rsyncRc -eq 0 ]]; then
 			       [[ $(wc -l < $rsyncOut) -gt 4 ]] && rsyncResults="true" || rsyncResults="false"
@@ -857,7 +856,7 @@ removeGitReposFromNext=true
 					currentEdition=$(ProtectedCall "grep "^edition:" $localstepsDir/default.tcf" | cut -d':' -f2)
 					currentEdition=$(tr -d '\040\011\012\015' <<< "$currentEdition")
 					## Set the new edition and prompt user
-					Msg3; Note 0 1 "^Current CAT edition is: '$currentEdition'."
+					Note 0 1 "^Current CAT edition is: '$currentEdition'."
 					unset defaultNewEdition
 					if [[ $currentEdition != '' && $currentEdition != *'migration'* ]]; then
 						if [[ $(Contains "$currentEdition" '-') == true ]]; then
@@ -872,7 +871,7 @@ removeGitReposFromNext=true
 							[[ $(IsNumeric $currentEdition) == true ]] && defaultNewEdition=$currentEdition && (( defaultNewEdition++ ))
 						fi
 					fi
-					Prompt newEdition "Please specify the new edition value" "$defaultNewEdition,*any*" "$defaultNewEdition" || Prompt newEdition "Please specify the new edition value" "*any*"
+					Prompt newEdition "^Please specify the new edition value" "$defaultNewEdition,*any*" "$defaultNewEdition" || Prompt newEdition "Please specify the new edition value" "*any*"
 				fi
 				[[ -z $newEdition ]] && Terminate "New edition variable has not been set"
 				Msg3
@@ -896,14 +895,14 @@ removeGitReposFromNext=true
 	fi ##[[ $(Contains "$products" 'cat') == true ]]
 
 	## Should we backup the target site
-		if [[ $env == 'next' || $env == 'curr' ]]; then
+		#if [[ $env == 'next' || $env == 'curr' ]]; then
 			[[ $backup == true ]] && backup='Yes' ; [[ $backup == false ]] && backup='No'
 			Prompt backup "Do you wish to make a backup of the target site before patching" 'Yes No' 'Yes'; backup=$(Lower ${backup:0:1})
 			[[ $backup == 'y' ]] && backup=true || backup=false
 			# [[ $offline == true ]] && offline='Yes' ; [[ $offline == false ]] && offline='No'
 			# Prompt offline "Do you wish to take the site offline during the patching process" 'Yes No' 'Yes'; offline=$(Lower ${offline:0:1})
 			# [[ $offline == 'y' ]] && offline=true || offline=false
-		fi
+		#fi
 
 	## Get the cgisDir
 		courseleafCgiDirRoot="$skeletonRoot/release/web/courseleaf"
@@ -932,6 +931,13 @@ removeGitReposFromNext=true
 	## Does the target directory have a git repository
 		targetHasGit=false
 		[[ -d $tgtDir/.git ]] && targetHasGit=true
+
+	## Set the backup site
+	unset backupSite
+	if [[ $backup == true ]]; then
+		[[ $env == "next" || $env == "curr" ]] && backupSite="$tgtDir/$env" || backupSite="$tgtDir/$client"
+		backupSite="$backupSite.$(date +"%m-%d-%y").bak"
+	fi
 
 #=======================================================================================================================
 # Verify continue
@@ -963,7 +969,7 @@ fi
 [[ -n $ribbitCgiVer ]] && verifyArgs+=("ribbit.cgi version:$ribbitCgiVer (from $(basename $ribbitCgiSourceFile))")
 [[ -n $dailyShVer ]] && verifyArgs+=("daily.sh version:$dailyShVer") 	## (from: '$skeletonRoot/release')")
 [[ $targetHasGit == true ]] && verifyArgs+=("Target directory git:$targetHasGit")
-[[ $backup == true ]] && verifyArgs+=("Backup site:$backup")
+[[ $backup == true ]] && verifyArgs+=("Backup site:$backup, backup directory: '$backupSite'")
 [[ $offline == true ]] && verifyArgs+=("Take site offline:$offline")
 [[ $buildPatchPackage == true ]] && verifyArgs+=("Build patcPackage:$buildPatchPackage")
 
@@ -1037,13 +1043,14 @@ fi
 if [[ $backup == true ]]; then
 	[[ $env == "next" || $env == "curr" ]] && backupSite="$tgtDir/$env" || backupSite="$tgtDir/$client"
 	backupSite="$backupSite.$(date +"%m-%d-%y").bak"
-	Msg3 "Backing up the target site to '$backupSite' (this may take a while)..."
+	Msg3 "Backing up the target site to, this will take a while..."
+	Msg3 "^(Fyi, you can check the status, view/tail the log file: '$logFile')"
 	sourceSpec="$tgtDir/"
 	targetSpec="$backupSite"
 	[[ ! -d "$targetSpec" ]] && mkdir -p "$targetSpec"
 	unset rsyncResults
 	RunRsync 'tgtSiteBackup' "$sourceSpec" "$targetSpec"
-	Msg3 "^Backup completed"
+	Msg3 "^...Backup completed"
 	Alert 1
 else
 	backup=false
@@ -1062,12 +1069,13 @@ if [[ $catalogAdvance == true || $fullAdvance == true ]]; then
 		sourceSpec="$tgtDir/"
 		targetSpec="$(dirname $tgtDir)/${env}.${backupSuffix}"
 		[[ $env == 'pvt' ]] && targetSpec="$tgtDir/$env.$(date +"%m-%d-%y")"
-		Msg3 "^Full advance requested, making a copy of '$env' to sans CIMs/CLSS (this will take a while)..."
-		Msg3 "^^ '$tgtDir' --> '$(basename $targetSpec)'"
 		ignoreList="/db/clwen*|/bin/clssimport-log-archive/|/web/$progDir/wen/|/web/wen/"
 		[[ -n $cimStr ]] && ignoreList="$ignoreList|$(tr ',' '|' <<< "$cimStr")"
 		[[ ! -d "$targetSpec" ]] && mkdir -p "$targetSpec"
 		unset rsyncResults
+		Msg3 "^Full advance requested, making a copy of '$env' to sans CIMs/CLSS (this will take a while)..."
+		Msg3 "^^ '$tgtDir' --> '$(basename $targetSpec)'"
+		Msg3 "^(Fyi, you can check the status, view/tail the log file: '$logFile')"
 		RunRsync "$product" "$sourceSpec" "$targetSpec" "$ignoreList"
 		Msg3 "^^Copy operation completed"
 		Alert 1
