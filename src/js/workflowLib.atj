@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.53" // -- dscudiero -- Tue 12/19/2017 @ 11:58:07.26
+wfLibVersion="1.8.54" // -- dscudiero -- Tue 12/19/2017 @ 13:51:17.87
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -2355,7 +2355,7 @@ wffuncs.TODO = function(inval, wfrule, args) {
 //======================================================================================================================
 wffuncs.NoWorkflow = function(inval, wfrule, args) {
 	var indent='&nbsp;&nbsp;&nbsp;&nbsp;';
-	var indent2='&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+	var indent2='&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
 	if (options === "" ) {
 		options="There is insufficient data in the proposal to calculate workflow. <br>" + indent2 + "Please complete the required form fields and try again."
@@ -2445,3 +2445,4 @@ var wfLibLoaded=true;
 // 12-06-2017 @ 09.05.52 - ("1.8.46")  - dscudiero - tweaked formatting of TODO messaging
 // 12-11-2017 @ 11.45.07 - ("1.8.47")  - dscudiero - Updated comments for checkchanged
 // 12-13-2017 @ 11.10.11 - ("1.8.48")  - dscudiero - Fix debug messages in lookupcode2 that were hardcoded
+// 12-19-2017 @ 13.52.08 - ("1.8.54")  - dscudiero - Tweak messaging for NoWorkflow
