@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.48" // -- dscudiero -- Wed 12/13/2017 @ 11:09:03.74
+wfLibVersion="1.8.49" // -- dscudiero -- Tue 12/19/2017 @ 11:40:50.19
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -808,31 +808,26 @@ GetRelated2 = function(type,data) {
 		try {
 			var proposalCode=getTCFValue("code");
 			proposalCodes=RemoveDupes([proposalCode].concat(getTCFValue("code", { delimiter: "\n", retarray: true , data: tcadata })));
-			//if (proposalCodes.length === 0) throw "Failed, code tcf variable 'proposalCodes' not null check"
-			proposalCodesStr="," + proposalCodes.join(",") + ",";
+			if (proposalCodes.length === 0) throw "Failed, 'code' tcf variable 'proposalCodes' not null check"
+			if (proposalCodes.length > 0) proposalCodesStr="," + proposalCodes.join(",") + ",";
 
 			var proposalSubjs=getTCFValue(wfSubjVarName, { delimiter: "\n", retarray: true });
 			proposalSubjs=RemoveDupes(proposalSubjs.concat(getTCFValue(wfSubjVarName, { delimiter: "\n", retarray: true , data: tcadata })));
-			if (proposalSubjs.length === 0) throw "Failed, code tcf variable 'proposalSubjs' not null check"
-			proposalSubjsStr="," + proposalSubjs.join(",") + ",";
+			if (proposalSubjs.length > 0) proposalSubjsStr="," + proposalSubjs.join(",") + ",";
 
 			var proposalDepts=getTCFValue(wfDeptVarName, { delimiter: "\n", retarray: true });
 			proposalDepts=RemoveDupes(proposalDepts.concat(getTCFValue(wfDeptVarName, { delimiter: "\n", retarray: true , data: tcadata })));
 			if (proposalDepts.length === 0) {
-				if (proposalSubjs.length === 0) throw "Failed, code tcf variable 'proposalDepts' not null check (1)"
 				proposalDepts=GetAttrVal({request:"depts", options:"includetca", tcadata: tcadata});
-				if (proposalDepts.length === 0) throw "Failed, code tcf variable 'proposalDepts' not null check (2)"
 			}
-			proposalDeptsStr="," + proposalDepts.join(",") + ",";
+			if (proposalDepts.length > 0) proposalDeptsStr="," + proposalDepts.join(",") + ",";
 
 			var proposalCols=getTCFValue(wfColVarName, { delimiter: "\n", retarray: true });
 			proposalCols=RemoveDupes(proposalCols.concat(getTCFValue(wfColVarName, { delimiter: "\n", retarray: true , data: tcadata })));
 			if (proposalCols.length === 0) {
-				if (proposalSubjs.length === 0 && proposalDepts.length === 0) throw "Failed, code tcf variable 'proposalCols' not null check (1)"
 				proposalCols=GetAttrVal({request:"cols", options:"includetca", tcadata: tcadata});
-				if (proposalCols.length === 0) throw "Failed, code tcf variable 'proposalCols' not null check (2)"
 			}
-			proposalColsStr="," + proposalCols.join(",") + ",";
+			if (proposalCols.length > 0) proposalColsStr="," + proposalCols.join(",") + ",";
 		} //try
 		catch(err) { wfDebug(1,"\t*Error* -- " + myName + ": " + err + "\n"); return false; }
 
@@ -1047,7 +1042,10 @@ function LookupCode2(lookupType,givenType,givenData,excludeData) {
 	var myDebugLevel=6; var myIndent="\t\t"; wfDebug(myDebugLevel,"\n" + myIndent + "*** In "+ myName + " (" + version +") ***")
 	wfDump(myDebugLevel,[myIndent + "lookupType;"+lookupType,myIndent + "givenType;"+givenType,myIndent + "givenData;"+givenData.toSource()]);
 	var excludeDataStr="";
-	if (typeof excludeData != 'undefined') { 
+
+	//if (typeof excludeData != 'undefined') { 
+	if (excludeData instanceof Array) { 
+Dump("excludeData",excludeData)
 		excludeDataStr="," + excludeData.join(",") + ",";
 		wfDump(myDebugLevel,[myIndent + "excludeData;"+excludeData.toSource()]); 
 	}
