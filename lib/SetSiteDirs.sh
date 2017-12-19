@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.54" # -- dscudiero -- Wed 12/06/2017 @ 10:01:31.58
+# version="2.0.56" # -- dscudiero -- Tue 12/19/2017 @ 16:45:33.74
 #===================================================================================================
 # Set Directories based on the current hostName name and school name
 # Sets globals: devDir, nextDir, previewDir, publicDir, upgradeDir
@@ -26,7 +26,7 @@ function SetSiteDirs {
 			dump -3 -t server
 			[[ ! -d "/mnt/$server/web/$client" && ! -d "/mnt/$server/web/$client-$userName" ]] && continue
 			for env in ${courseleafDevEnvs//,/ }; do
-				dump -3 -t -t env
+				dump -3 -t2 env
 				envDirName="${env}Dir"
 				if [[ -z ${!envDirName} ]]; then
  					[[ $env == 'pvt' ]] && eval $envDirName="/mnt/$server/web/$client-$userName" || eval $envDirName="/mnt/$server/web/$client"
@@ -43,10 +43,10 @@ function SetSiteDirs {
 			dump -3 -t server
 			[[ ! -d "/mnt/$server/$client-test" && ! -d "/mnt/$server/$client" ]] && continue
 			for env in ${courseleafProdEnvs//,/ }; do
-				dump -3 -t -t env
+				dump -3 -t2  env
 				envDirName="${env}Dir"
 				if [[ -z ${!envDirName} ]]; then
- 					[[ $env == 'test' && -z ${!envDirName} ]] && eval $envDirName="/mnt/$server/$client-$env/$env" || eval $envDirName="/mnt/$server/$client/$env"
+ 					[[ $env == 'test' ]] && eval $envDirName="/mnt/$server/$client-$env/$env" || eval $envDirName="/mnt/$server/$client/$env"
 				fi
 				[[ $mode != 'setDefault'  && ! -d ${!envDirName} ]] && unset $envDirName && foundAll=false
 			done
@@ -84,3 +84,4 @@ export -f SetSiteDirs
 ## 11-02-2017 @ 11.40.20 - ("2.0.52")  - dscudiero - Fix problem setting dev and pvt dirs
 ## 12-06-2017 @ 09.05.30 - ("2.0.53")  - dscudiero - Add debug statements
 ## 12-06-2017 @ 10.01.51 - ("2.0.54")  - dscudiero - Switch debug statements to level 3
+## 12-19-2017 @ 16.45.51 - ("2.0.56")  - dscudiero - Tweak debug outout
