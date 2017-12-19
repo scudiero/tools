@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.8 # -- dscudiero -- Tue 12/19/2017 @  9:52:35.51
+version=5.5.9 # -- dscudiero -- Tue 12/19/2017 @ 13:29:51.15
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel2 EditTcfValue BackupCourseleafFile'
