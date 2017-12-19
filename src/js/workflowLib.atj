@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.54" // -- dscudiero -- Tue 12/19/2017 @ 13:51:17.87
+wfLibVersion="1.8.55" // -- dscudiero -- Tue 12/19/2017 @ 14:15:11.34
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -808,7 +808,6 @@ GetRelated2 = function(type,data) {
 		try {
 			var proposalCode=getTCFValue("code");
 			proposalCodes=RemoveDupes([proposalCode].concat(getTCFValue("code", { delimiter: "\n", retarray: true , data: tcadata })));
-			if (proposalCodes.length === 0) throw "Failed, 'code' tcf variable 'proposalCodes' not null check"
 			if (proposalCodes.length > 0) proposalCodesStr="," + proposalCodes.join(",") + ",";
 
 			var proposalSubjs=getTCFValue(wfSubjVarName, { delimiter: "\n", retarray: true });
@@ -901,7 +900,7 @@ GetRelated2 = function(type,data) {
 
 		// If includeEcoSystemData, then get data from the CourseLeaf eco system
 			if (includeEcoSystemData &&  ecoSystemInstances.indexOf("," + wfCimInstance + ",") >= 0) {
-				if (proposalDepts.length != 0) {
+				if (proposalDepts.length != 0 && proposalCodes.length != 0) {
 					var tempArray=(GetEcoSystemData2(proposalCodes,proposalDepts,data))
 					if (tempArray.length > 0)
 						refsArray=refsArray.concat(tempArray);
@@ -2446,3 +2445,4 @@ var wfLibLoaded=true;
 // 12-11-2017 @ 11.45.07 - ("1.8.47")  - dscudiero - Updated comments for checkchanged
 // 12-13-2017 @ 11.10.11 - ("1.8.48")  - dscudiero - Fix debug messages in lookupcode2 that were hardcoded
 // 12-19-2017 @ 13.52.08 - ("1.8.54")  - dscudiero - Tweak messaging for NoWorkflow
+// 12-19-2017 @ 14.16.33 - ("1.8.55")  - dscudiero - Remove the exception in GetRelated2 if the proposal code is null
