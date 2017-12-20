@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.12" # -- dscudiero -- Wed 12/20/2017 @ 15:04:03.87
+# version="1.0.13" # -- dscudiero -- Wed 12/20/2017 @ 15:09:38.35
 #===================================================================================================
 # Various string manipulation functions
 #===================================================================================================
@@ -98,6 +98,10 @@ function Indent {
 	return
 } #Indent
 export -f Indent
+function Indent++ { Indent '++'; return 0; }
+export -f Indent++
+function Indent-- { Indent '--'; return 0; }
+export -f Indent--
 
 #===================================================================================================
 # Check if a string contains another string
@@ -208,3 +212,4 @@ function PrintColumnarData() {
 ## 05-25-2017 @ 09.36.32 - ("1.0.10")  - dscudiero - Added PrintColumnarData function
 ## 05-25-2017 @ 09.52.37 - ("1.0.11")  - dscudiero - remove extranious < from PrintCoumnarData
 ## 12-20-2017 @ 15.04.35 - ("1.0.12")  - dscudiero - Added ++ and -- options to the Indent function to increment/decrement the indentLevel
+## 12-20-2017 @ 15.09.53 - ("1.0.13")  - dscudiero - Added Indent++ and Indent-- functions
