@@ -865,9 +865,9 @@ ignoreMissingPages=true
 	[[ $processUserData == false && $processRoleData == false && $processPageData == false ]] && echo && Terminate "No actions requested, please review help text"
 
 ## If this is next or curr then get a task number
-	if [[ $env == 'next' || $env == 'curr' ]]; then
-		Init 'getJalot'
-	fi
+	# if [[ $env == 'next' || $env == 'curr' ]]; then
+	# 	Init 'getJalot'
+	# fi
 
 	verifyArgs+=("Client:$client")
 	verifyArgs+=("Env:$(TitleCase $env) ($siteDir)")
@@ -1080,3 +1080,4 @@ ignoreMissingPages=true
 ## 11-09-2017 @ 14.15.37 - (3.9.9)     - dscudiero - Added NotifyAllApprovers
 ## 11-10-2017 @ 12.37.41 - (3.9.9)     - dscudiero - Refactor the uid to uin mapping
 ## 12-20-2017 @ 09.29.24 - (3.9.9)     - dscudiero - Added gathering of a jalot task number for updates to next and curr
+## 12-20-2017 @ 09.34.09 - (3.9.9)     - dscudiero - Add getting jalot
