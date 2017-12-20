@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.22 # -- dscudiero -- Wed 12/20/2017 @ 14:45:19.81
+version=5.5.23 # -- dscudiero -- Wed 12/20/2017 @ 16:03:51.17
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel2 EditTcfValue BackupCourseleafFile'
@@ -1050,7 +1050,7 @@ if [[ $backup == true ]]; then
 	targetSpec="$backupSite"
 	[[ ! -d "$targetSpec" ]] && mkdir -p "$targetSpec"
 	unset rsyncResults
-	RunRsync 'tgtSiteBackup' "$sourceSpec" "$targetSpec"
+	Indent++; RunRsync 'tgtSiteBackup' "$sourceSpec" "$targetSpec"; Indent--
 	Msg3 "^...Backup completed"
 	Alert 1
 else
@@ -1077,7 +1077,7 @@ if [[ $catalogAdvance == true || $fullAdvance == true ]]; then
 		Msg3 "^Full advance requested, making a copy of '$env' to sans CIMs/CLSS (this will take a while)..."
 		Msg3 "^^ '$tgtDir' --> '$(basename $targetSpec)'"
 		Msg3 "^(Fyi, you can check the status, view/tail the log file: '$logFile')"
-		RunRsync "$product" "$sourceSpec" "$targetSpec" "$ignoreList"
+		Indent++; RunRsync "$product" "$sourceSpec" "$targetSpec" "$ignoreList"; Indent--
 		Msg3 "^^Copy operation completed"
 		Alert 1
 
@@ -1275,9 +1275,7 @@ declare -A processedSpecs
 							sourceSpec="${gitRepoShadow}/${specPattern%% *}${specPattern##* }/*"
 							targetSpec="${tgtDir}${specTarget}"
 							unset rsyncResults
-							((indentLevel++)) || true
-							RunRsync "$product" "$sourceSpec" "$targetSpec" "$specIgnoreList" "$backupDir"
-							((indentLevel--)) || true
+							Indent++; RunRsync "$product" "$sourceSpec" "$targetSpec" "$specIgnoreList" "$backupDir"; Indent--
 							if [[ $rsyncResults == 'false' ]]; then
 								Msg3 "^^^All files are current, no files updated"
 							else
@@ -1289,9 +1287,7 @@ declare -A processedSpecs
 							if [[ $buildPatchPackage == true ]]; then
 								targetSpec="${packageDir}${specTarget}"
 								unset backupDir
-								((indentLevel++)) || true
-								RunRsync "$product" "$sourceSpec" "$targetSpec" "$specIgnoreList" "$backupDir"
-								((indentLevel--)) || true
+								Indent++; RunRsync "$product" "$sourceSpec" "$targetSpec" "$specIgnoreList" "$backupDir"; Indent--
 								Msg3 "^^^Files copied to the staging area"
 							fi
 							;;
@@ -1301,9 +1297,7 @@ declare -A processedSpecs
 							sourceSpec="$skeletonRoot/release${specPattern%% *}/*"
 							targetSpec="${tgtDir}${specTarget}"
 							unset rsyncResults
-							((indentLevel++)) || true
-							RunRsync "$product" "$sourceSpec" "$targetSpec" 'none' "$backupDir"
-							((indentLevel--)) || true
+							Indent++; RunRsync "$product" "$sourceSpec" "$targetSpec" 'none' "$backupDir"; Indent--
 							if [[ $rsyncResults == 'false' ]]; then
 								Msg3 "^^^All files are current, no files updated"
 							else
@@ -1315,9 +1309,7 @@ declare -A processedSpecs
 							if [[ $buildPatchPackage == true ]]; then
 								targetSpec="${packageDir}${specTarget}"
 								unset backupDir
-								((indentLevel++)) || true
-								RunRsync "$product" "$sourceSpec" "$targetSpec" 'none' "$backupDir"
-								((indentLevel--)) || true
+								Indent++; RunRsync "$product" "$sourceSpec" "$targetSpec" 'none' "$backupDir"; Indent--
 								Msg3 "^^^Files copied to the staging area"
 							fi
 							;;
@@ -1331,9 +1323,7 @@ declare -A processedSpecs
 										sourceSpec="$skeletonRoot/release${specPattern%% *}"
 										targetSpec="${tgtDir}${specTarget}"
 										unset rsyncResults
-										((indentLevel++)) || true
-										RunRsync "$product" "$sourceSpec" "$targetSpec" 'none' "$backupDir"
-										((indentLevel--)) || true
+										Indent++; RunRsync "$product" "$sourceSpec" "$targetSpec" 'none' "$backupDir"; Indent--
 										if [[ $rsyncResults == 'false' ]]; then
 											Msg3 "^^^All files are current, no files updated"
 										else
