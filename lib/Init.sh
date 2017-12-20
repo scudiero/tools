@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.60 # -- dscudiero -- Thu 12/14/2017 @ 15:43:50.71
+# version=2.1.61 # -- dscudiero -- Wed 12/20/2017 @  9:19:19.09
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -25,7 +25,7 @@ function Init {
 
 	local trueVars='noPreview noPublic addPvt'
 	local falseVars='getClient anyClient getProducts getCims getEnv getSrcEnv getTgtEnv getDirs checkEnvs'
-	falseVars="$falseVars allowMulti allowMultiProds allowMultiEnvs allowMultiCims checkProdEnv noWarn"
+	falseVars="$falseVars allowMulti allowMultiProds allowMultiEnvs allowMultiCims checkProdEnv noWarn getjalot"
 	for var in $trueVars; do eval $var=true; done
 	for var in $falseVars; do eval $var=false; done
 
@@ -55,8 +55,9 @@ function Init {
 		[[ $token == 'nocheck' ]] && noCheck=true
 		[[ $token == 'checkprodenv' ]] && checkProdEnv=true
 		[[ $token == 'nowarn' ]] && noWarn=true
+		[[ $token == 'getjalot' ]] && getjalot=true
 	done
-	dump -3 -t -t parseStr getClient getEnv getDirs checkEnvs getProducts getCims allCims noPreview noPublic
+	dump -3 -t -t parseStr getClient getEnv getDirs checkEnvs getProducts getCims allCims noPreview noPublic getjalot
 
 	#===================================================================================================
 	## Get data from user if necessary
@@ -320,6 +321,23 @@ function Init {
 	fi
 
 	#===================================================================================================
+	## Get jalot task number
+	if [[ $getJalot == true ]]; then
+		[[ -n $jalot && $(IsNumeric $jalot) != true && $jalot != 'na' && $jalot != 'n/a' ]] && unset jalot
+		while [[ -z $jalot ]]; do
+			Prompt jalot "Please enter the jalot task number:" "*any*,na"
+			if [[ $jalot == 'na' || $jalot == 'n/a' || $jalot == 0 ]]; then
+				jalot='N/A'
+			else
+				[[ $(IsNumeric $jalot) != true ]] && { Msg3 "^Jalot must be numeric or 'na', please try again" ; unset jalot; }
+			fi
+			[[ $noComment != true && -n $jalot && ${jalot,,[a-z]} != 'n/a' ]] && Prompt comment "Please enter the business reason for making this update:\n^" "*any*"
+		done
+		[[ $jalot == 'na' || $jalot == 'n/a' || $jalot == 0 ]] && jalot='N/A'
+		[[ -n $comment ]] && comment="(Task:$jalot) $comment"
+	fi
+
+	#===================================================================================================
 	## If testMode then run local customizations
 		if [[ $testMode == true ]]; then
 			[[ $(Contains ",$adminUsers," ",$userName,") != true ]] && Terminate "Sorry, you do not have sufficient permissions to run this script in 'testMode'"
@@ -377,3 +395,4 @@ export -f Init
 ## 12-01-2017 @ 09.14.03 - (2.1.58)    - dscudiero - Make sure env is set from envs if envs has a value
 ## 12-04-2017 @ 09.55.21 - (2.1.59)    - dscudiero - Update 'products in support' messaging
 ## 12-14-2017 @ 15.47.21 - (2.1.60)    - dscudiero - Remove errant "t" on call to GetCims
+## 12-20-2017 @ 09.19.45 - (2.1.61)    - dscudiero - Added 'getJalot' as an action request
