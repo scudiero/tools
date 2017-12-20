@@ -864,16 +864,23 @@ ignoreMissingPages=true
 ## Verify processing
 	[[ $processUserData == false && $processRoleData == false && $processPageData == false ]] && echo && Terminate "No actions requested, please review help text"
 
+## If this is next or curr then get a task number
+	if [[ $env == 'next' || $env == 'curr' ]]; then
+		Init 'getJalot'
+	fi
+
 	verifyArgs+=("Client:$client")
 	verifyArgs+=("Env:$(TitleCase $env) ($siteDir)")
 	[[ $tmpWorkbookFile == true ]] && verifyArgs+=("Input File:'$workbookFileIn' as '$workbookFile'") || verifyArgs+=("Input File:'$workbookFile'")
-	#verifyArgs+=("Input workbook:'$workbookFileIn'")
+	#verifyArgs+=("Input workbook:'$workbookFileIn'")	
 	[[ $processUserData == true ]] && verifyArgs+=("Process user sheet:$usersSheet")
 	[[ $processRoleData == true ]] && verifyArgs+=("Process role sheet:$rolesSheet")
 	[[ $processPageData == true ]] && verifyArgs+=("Process page sheet:$pagesSheet")
 	verifyArgs+=("Skip null values:$skipNulls")
 	verifyArgs+=("Ignore missing pages:$ignoreMissingPages")
 	verifyArgs+=("Map UIDs to UINs:$useUINs")
+	[[ -n $jalot ]] && verifyArgs+=("Jalot:$comment")
+
 	VerifyContinue "You are asking to update CourseLeaf data"
 
 	dump -1 client env siteDir processUserData processRoleData processPageData skipNulls useUINs
@@ -991,6 +998,7 @@ ignoreMissingPages=true
 
 	## Write out change log entries
 	if [[ $informationOnlyMode != true ]]; then
+		[[ $comment == true ]] && changeLogLines+=("$comment")
 		changeLogLines=("Data updated from '$workbookFileIn':")
 		[[ $processedUserData == true ]] && changeLogLines+=("User data")
 		[[ $processedRoleData == true ]] && changeLogLines+=("Role data")
@@ -1071,3 +1079,4 @@ ignoreMissingPages=true
 ## 11-03-2017 @ 08.19.41 - (3.9.9)     - dscudiero - Check to make sure we have a valid 'path' when parsing the catalog workflow sheet
 ## 11-09-2017 @ 14.15.37 - (3.9.9)     - dscudiero - Added NotifyAllApprovers
 ## 11-10-2017 @ 12.37.41 - (3.9.9)     - dscudiero - Refactor the uid to uin mapping
+## 12-20-2017 @ 09.29.24 - (3.9.9)     - dscudiero - Added gathering of a jalot task number for updates to next and curr
