@@ -1,8 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.13 # -- dscudiero -- Wed 12/20/2017 @  7:21:28.77
-gitCommit=$Id$
+version=5.5.15 # -- dscudiero -- Wed 12/20/2017 @ 11:11:16.31
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel2 EditTcfValue BackupCourseleafFile'
@@ -972,7 +971,8 @@ fi
 [[ $targetHasGit == true ]] && verifyArgs+=("Target directory git:$targetHasGit")
 [[ $backup == true ]] && verifyArgs+=("Backup site:$backup, backup directory: '$backupSite'")
 [[ $offline == true ]] && verifyArgs+=("Take site offline:$offline")
-[[ $buildPatchPackage == true ]] && verifyArgs+=("Build patcPackage:$buildPatchPackage")
+[[ $buildPatchPackage == true ]] && verifyArgs+=("Build Patch Package:$buildPatchPackage")
+[[ -n $comment ]] && verifyArgs+=("Jalot:$comment")
 
 [[ -n $betaProducts ]] && [[ $env == 'next' || $env == 'curr' ]] && Msg3 && Warning "You are asking to refresh to beta/rc version of the software for: $betaProducts"
 
@@ -1205,6 +1205,7 @@ fi #[[ $catalogAdvance == true || $fullAdvance == true ]] && [[ buildPatchPackag
 Msg3
 Msg3 "Patching the '$(Upper $env)' site..."
 unset changeLogRecs processedDailysh skipProducts cgiCommands unixCommands
+[[ -n $comment ]] && changeLogRecs+=("$comment")
 declare -A processedSpecs
 ## Refresh proucts
 	for processSpec in $(tr ',' ' ' <<< $processControl); do
