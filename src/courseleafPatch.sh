@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.11 # -- dscudiero -- Wed 12/20/2017 @  7:19:25.25
+version=5.5.13 # -- dscudiero -- Wed 12/20/2017 @  7:21:28.77
 gitCommit=$Id$
 #=======================================================================================================================
 TrapSigs 'on'
@@ -1822,3 +1822,4 @@ Goodbye 0 "$text1" "$text2"
 ## 12-01-2017 @ 12.27.36 - (5.5.0)     - dscudiero - Remove the hard coded override to always patch from the master release
 ## 12-20-2017 @ 07.05.24 - (5.5.10)    - dscudiero - Add to indentention level before calling Rsync
 ## 12-20-2017 @ 07.19.54 - (5.5.11)    - dscudiero - Cosmetic/minor change
+## 12-20-2017 @ 07.21.42 - (5.5.13)    - dscudiero - Cosmetic/minor change
