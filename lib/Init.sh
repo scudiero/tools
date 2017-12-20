@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.61 # -- dscudiero -- Wed 12/20/2017 @  9:19:19.09
+# version=2.1.62 # -- dscudiero -- Wed 12/20/2017 @  9:32:19.97
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -221,6 +221,7 @@ function Init {
 				unset ans; Prompt ans "Are you sure" "Yes No";
 				ans=$(Lower ${ans:0:1})
 				[[ $ans != 'y' ]] && Goodbye -1
+				getjalot=true
 			fi
 		fi
 	fi
@@ -396,3 +397,4 @@ export -f Init
 ## 12-04-2017 @ 09.55.21 - (2.1.59)    - dscudiero - Update 'products in support' messaging
 ## 12-14-2017 @ 15.47.21 - (2.1.60)    - dscudiero - Remove errant "t" on call to GetCims
 ## 12-20-2017 @ 09.19.45 - (2.1.61)    - dscudiero - Added 'getJalot' as an action request
+## 12-20-2017 @ 09.33.39 - (2.1.62)    - dscudiero - Force getJalot if updating next or curr
