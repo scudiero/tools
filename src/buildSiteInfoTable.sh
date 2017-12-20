@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.105 # -- dscudiero -- Fri 12/01/2017 @ 10:24:05.65
+version=4.3.119 # -- dscudiero -- Wed 12/20/2017 @  6:55:04.25
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql2 StringFunctions ProtectedCall FindExecutable PushPop"
@@ -102,7 +102,7 @@ fi
 		if [[ -z $client ]]; then
 			clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | sort | grep "${prodServers//,/\|}"))
 		else
-			clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 -not -name '*-test' 2> /dev/null | grep "${prodServers//,/\|}" | grep $client || true))
+			#clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 -not -name '*-test' 2> /dev/null | grep "${prodServers//,/\|}" | grep $client || true))
 			[[ ${#clientDirs[@]} -eq 0 ]] && clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep "${prodServers//,/\|}" | grep $client || true))
 		fi
 		SetFileExpansion
@@ -117,36 +117,30 @@ fi
 		declare -A foundCodes ## Has table to keep track of 'seen' client codes (because we can have xxx and xxx-test)
 		for clientDir in ${clientDirs[@]}; do
 			clientCode="$(basename $clientDir)"; clientCode="${clientCode//-test/}"
-			[[ ${foundCodes[$clientCode]+abc} ]] && continue  ## have we seen this client code before, if yes then skip
 			foundCodes["$clientCode"]=true
 			if [[ ${dbClients[$clientCode]+abc} ]]; then
 				(( clientCntr+=1 ))
 				client="$clientCode"
 				clientId=${dbClients[$client]}
-				# ## Get the envDirs, make sure we have some
-				for env in ${envList//,/ }; do unset ${env}Dir ; done
-				SetSiteDirs 'set'
-				# 	haveDir=false;
-				# 	for env in $(tr ',' ' ' <<< "$envList"); do token="${env}Dir"; [[ -n ${!token} ]] && haveDir=true && break; done
-				# 	[[ $haveDir == false ]] && continue
-
 				[[ $batchMode != true ]] && Msg3 "Processing: $client -- $clientId (~$clientCntr/$numClients)..."
-				## Loop through envs and process the site env directory
-				for env in ${envList//,/ }; do
-					[[ $env == 'pvt' ]] && continue
+				## Get the envDirs, make sure we have some
+				for env in ${envList//,/ }; do unset ${env}Dir ; done
+				SetSiteDirs
+				## Loop through the environments, processing any that are not null
+				for env in ${courseleafProdEnvs//,/ }; do
 					token="${env}Dir" ; envDir="${!token}"
 					[[ -z $envDir ]] && continue
-					if [[ -d $envDir/web ]]; then
-						Verbose 1 2 "Processing env: $env"
-						$DOIT source "$workerScriptFile" "$envDir" "$clientId" "$forkStr -tableName $useSiteInfoTable"
-						(( forkCntr+=1 )) ; (( siteCntr+=1 ))
-					fi
+					[[ ${foundCodes[${clientCode}.${env}]+abc} ]] && continue  ## have we seen this client code before, if yes then skip
+					Verbose 1 2 "Processing env: $env"
+					$DOIT source "$workerScriptFile" "$envDir" "$clientId" "$forkStr -tableName $useSiteInfoTable"
+					(( forkCntr+=1 )) ; (( siteCntr+=1 ))
+					foundCodes["${clientCode}.${env}"]=true
 					if [[ $fork == true && $((forkCntr%$maxForkedProcesses)) -eq 0 ]]; then
 						[[ $batchMode != true ]] && Msg3 "^Waiting on forked processes..."
 						wait
 					fi
 				done
-				[[ $fork == true && $batchMode != true ]] && Msg3 "^Waiting on forked processes..." && wait
+				[[ $fork == true && $batchMode != true ]] && Msg3 "^Waiting on forked processes (final)..." && wait
 			fi #[[ ${dbClients[$(basename $clientDir)]+abc} ]]
 		done #clientDir in ${clientDirs[@]}
 
@@ -246,3 +240,4 @@ Goodbye 0 'alert'
 ## 11-01-2017 @ 15.24.36 - (4.3.98)    - dscudiero - Updated client directory selection to use only server directories in the prodServer or devServers lists
 ## 11-01-2017 @ 15.50.25 - (4.3.99)    - dscudiero - Switch to use ParseArgsStd2
 ## 12-01-2017 @ 10.24.36 - (4.3.105)   - dscudiero - Fix problem when the client does not have a next site
+## 12-20-2017 @ 06.55.52 - (4.3.119)   - dscudiero - Remove the 'set' option onthe SetSiteDirs call
