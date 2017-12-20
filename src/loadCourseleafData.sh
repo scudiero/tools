@@ -946,11 +946,11 @@ ignoreMissingPages=true
 		Msg3 "^Retrieved $numRolesfromSpreadsheet records from $workbookFileIn"
 
 		string="Added $numNewRoles new roles"
-		[[ $informationOnlyMode != true ]] && string="Added $numNewRoles new roles" && string="Would add $numNewRoles new roles"
+		[[ $informationOnlyMode != true ]] && string="Added $numNewRoles new roles" || string="Would have add $numNewRoles new roles"
 		Msg3 "^$string"
 		[[ $numNewRoles -gt 0 ]] && changeLogLines+=("$string")
 
-		[[ $informationOnlyMode != true ]] && string="Modified $numModifiedRoles existing roles" || string="Would modify $numModifiedRoles existing roles"
+		[[ $informationOnlyMode != true ]] && string="Modified $numModifiedRoles existing roles" || string="Would have modified $numModifiedRoles existing roles"
 		Msg3 "^$string"
 		[[ $numModifiedRoles -gt 0 ]] && changeLogLines+=("$string")
 
@@ -966,7 +966,7 @@ ignoreMissingPages=true
 		Msg3 "Page data:"
 		Msg3 "^Retrieved $numWorkflowDataFromSpreadsheet records from $workbookFileIn"
 
-		[[ $informationOnlyMode != true ]] && string="Updated $numPagesUpdated pages" || string="Would update $numPagesUpdated pages"
+		[[ $informationOnlyMode != true ]] && string="Updated $numPagesUpdated pages" || string="Would have updated $numPagesUpdated pages"
 		Msg3 "^$string"
 		[[ $numPagesUpdated -gt 0 ]] && changeLogLines+=("$string")
 
