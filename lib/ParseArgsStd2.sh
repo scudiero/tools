@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.19" # -- dscudiero -- Wed 12/20/2017 @  7:58:02.26
+# version="3.0.20" # -- dscudiero -- Wed 12/20/2017 @  9:33:17.71
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -32,7 +32,7 @@ function ParseArgsStd2 {
 
 		[[ ${#myArgs[@] -gt 0} ]] && { for rec in "${myArgs[@]}"; do allArgDefs+=("$rec"); done; }
 		for rec in "${argDefs[@]}"; do allArgDefs+=("$rec"); done
-for ((i=0; i<${#allArgDefs[@]}; i++)); do echo "allArgDefs[$i] = >${allArgDefs[$i]}<"; done; Pause
+		#for ((i=0; i<${#allArgDefs[@]}; i++)); do echo "allArgDefs[$i] = >${allArgDefs[$i]}<"; done; Pause
 
 	# argdef record looks like: "shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp"
 	## Loop through all the argument tokens
