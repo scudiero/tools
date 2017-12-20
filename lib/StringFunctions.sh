@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.11" # -- dscudiero -- Thu 05/25/2017 @  9:52:12.26
+# version="1.0.12" # -- dscudiero -- Wed 12/20/2017 @ 15:04:03.87
 #===================================================================================================
 # Various string manipulation functions
 #===================================================================================================
@@ -78,6 +78,13 @@ export -f IsAlpha
 
 #===================================================================================================
 function Indent {
+	## Special rquest to inclrease/decrease the indentLevel
+		[[ $1 = '++' ]] && { ((indentLevel++))||true; return 0; }
+		if [[ $1 = '--' ]]; then 
+			[[ $indentLevel -gt 0 ]] && ((indentLevel--))||true
+			return 0
+		fi
+
 	local line i
 	[[ -z $indentLevel ]] && local indentLevel=1
 
@@ -200,3 +207,4 @@ function PrintColumnarData() {
 ## 05-17-2017 @ 16.08.15 - ("1.0.9")   - dscudiero - Added IsAlpha function
 ## 05-25-2017 @ 09.36.32 - ("1.0.10")  - dscudiero - Added PrintColumnarData function
 ## 05-25-2017 @ 09.52.37 - ("1.0.11")  - dscudiero - remove extranious < from PrintCoumnarData
+## 12-20-2017 @ 15.04.35 - ("1.0.12")  - dscudiero - Added ++ and -- options to the Indent function to increment/decrement the indentLevel
