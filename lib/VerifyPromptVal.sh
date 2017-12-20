@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.64" # -- dscudiero -- Mon 12/04/2017 @ 11:20:00.04
+# version="2.0.65" # -- dscudiero -- Wed 12/20/2017 @ 11:25:12.11
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -8,7 +8,7 @@
 # All rights reserved
 #===================================================================================================
 function VerifyPromptVal {
-	myIncludes="RunSql2 StartRemoteSession"
+	myIncludes="RunSql2 StartRemoteSession PushPop"
 	Import "$standardInteractiveIncludes $myIncludes"
 
 	local i
@@ -235,3 +235,4 @@ export -f VerifyPromptVal
 ## 11-21-2017 @ 10.43.07 - ("2.0.56")  - dscudiero - Cosmetic/minor change
 ## 12-01-2017 @ 09.14.37 - ("2.0.59")  - dscudiero - Tweak messaging for do you want to start remote session
 ## 12-04-2017 @ 11.18.38 - ("2.0.63")  - dscudiero - Fix issue with the automagic ssh to other server
+## 12-20-2017 @ 14.17.07 - ("2.0.65")  - dscudiero - Add PushPop to the includes list
