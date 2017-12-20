@@ -725,10 +725,8 @@ ParseArgsStd2 $originalArgStr
 
 [[ $hostName == 'build7' ]] && notifyThreshold=50 || notifyThreshold=100
 displayGoodbyeSummaryMessages=true
-echo "Calling Init"
 Init 'getClient getEnv getDirs checkEnvs checkProdEnv addPvt'
 dump -1 processUserData processRoleData processPageData informationOnlyMode ignoreMissingPages
-echo "Back from Init"
 
 ## Find out if this client uses UINs
 	if [[ $uinMap == true ]]; then
