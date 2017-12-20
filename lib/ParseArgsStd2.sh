@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.14" # -- dscudiero -- Thu 11/02/2017 @ 15:20:28.13
+# version="3.0.19" # -- dscudiero -- Wed 12/20/2017 @  7:58:02.26
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -32,7 +32,7 @@ function ParseArgsStd2 {
 
 		[[ ${#myArgs[@] -gt 0} ]] && { for rec in "${myArgs[@]}"; do allArgDefs+=("$rec"); done; }
 		for rec in "${argDefs[@]}"; do allArgDefs+=("$rec"); done
-		# for ((i=0; i<${#allArgDefs[@]}; i++)); do echo "allArgDefs[$i] = >${allArgDefs[$i]}<"; done
+for ((i=0; i<${#allArgDefs[@]}; i++)); do echo "allArgDefs[$i] = >${allArgDefs[$i]}<"; done; Pause
 
 	# argdef record looks like: "shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp"
 	## Loop through all the argument tokens
@@ -49,7 +49,6 @@ function ParseArgsStd2 {
 					[[ $tmpArg =~ ^-${argShortName} || $tmpArg =~ ^--${argLongName}$ ]] && { found=true; break; }
 				done
 				[[ $found == true ]] && dump 3 -t argShortName argLongName tmpArg tmpStr found || dump 3 -t found
-
 			## Parse the argument
 				if [[ $found == true ]]; then
 					[[ $verboseLevel -ge 3 ]] && echo -e "\tFound match: '$argShortName/$argLongName' --- $tmpStr";
@@ -74,7 +73,7 @@ function ParseArgsStd2 {
 								[[ -n $scriptVar ]] && { eval "$scriptVar=${arg:2}"; }
 								;;
 						option)
-								if [[ -n $scriptCmd ]]; then
+								if [[ -n $scriptCmd && ${scriptCmd,,[a-z]} != 'null' ]]; then
 									if [[ $scriptCmd == 'expandEnv' ]]; then
 										(( argCntr++));
 										tmpStr="${!argCntr}"
@@ -126,3 +125,4 @@ export -f ParseArgsStd2
 ## 11-01-2017 @ 15.16.36 - ("3.0.4")   - dscudiero - Fix counter type
 ## 11-02-2017 @ 10.27.46 - ("3.0.6")   - dscudiero - Seperate local argdefs from common
 ## 11-02-2017 @ 15.22.27 - ("3.0.14")  - dscudiero - Added expandEnv command type for options to expand the entered value to a full env name
+## 12-20-2017 @ 08.31.40 - ("3.0.19")  - dscudiero - Fix a problem when the default value in the database for an option arg is 'NULL'
