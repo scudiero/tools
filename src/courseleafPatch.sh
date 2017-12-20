@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.9 # -- dscudiero -- Tue 12/19/2017 @ 13:29:51.15
+version=5.5.10 # -- dscudiero -- Wed 12/20/2017 @  7:04:48.26
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel2 EditTcfValue BackupCourseleafFile'
@@ -1273,7 +1273,9 @@ declare -A processedSpecs
 							sourceSpec="${gitRepoShadow}/${specPattern%% *}${specPattern##* }/*"
 							targetSpec="${tgtDir}${specTarget}"
 							unset rsyncResults
+							((indentLevel++))
 							RunRsync "$product" "$sourceSpec" "$targetSpec" "$specIgnoreList" "$backupDir"
+							((indentLevel--))
 							if [[ $rsyncResults == 'false' ]]; then
 								Msg3 "^^^All files are current, no files updated"
 							else
@@ -1285,7 +1287,9 @@ declare -A processedSpecs
 							if [[ $buildPatchPackage == true ]]; then
 								targetSpec="${packageDir}${specTarget}"
 								unset backupDir
+								((indentLevel++))
 								RunRsync "$product" "$sourceSpec" "$targetSpec" "$specIgnoreList" "$backupDir"
+								((indentLevel--))
 								Msg3 "^^^Files copied to the staging area"
 							fi
 							;;
@@ -1295,7 +1299,9 @@ declare -A processedSpecs
 							sourceSpec="$skeletonRoot/release${specPattern%% *}/*"
 							targetSpec="${tgtDir}${specTarget}"
 							unset rsyncResults
+							((indentLevel++))
 							RunRsync "$product" "$sourceSpec" "$targetSpec" 'none' "$backupDir"
+							((indentLevel--))
 							if [[ $rsyncResults == 'false' ]]; then
 								Msg3 "^^^All files are current, no files updated"
 							else
@@ -1307,7 +1313,9 @@ declare -A processedSpecs
 							if [[ $buildPatchPackage == true ]]; then
 								targetSpec="${packageDir}${specTarget}"
 								unset backupDir
+								((indentLevel++))
 								RunRsync "$product" "$sourceSpec" "$targetSpec" 'none' "$backupDir"
+								((indentLevel--))
 								Msg3 "^^^Files copied to the staging area"
 							fi
 							;;
@@ -1321,7 +1329,9 @@ declare -A processedSpecs
 										sourceSpec="$skeletonRoot/release${specPattern%% *}"
 										targetSpec="${tgtDir}${specTarget}"
 										unset rsyncResults
+										((indentLevel++))
 										RunRsync "$product" "$sourceSpec" "$targetSpec" 'none' "$backupDir"
+										((indentLevel--))
 										if [[ $rsyncResults == 'false' ]]; then
 											Msg3 "^^^All files are current, no files updated"
 										else
@@ -1809,3 +1819,4 @@ Goodbye 0 "$text1" "$text2"
 ## 11-02-2017 @ 10.53.32 - (5.5.0)     - dscudiero - Add addPvt to the Init call
 ## 11-30-2017 @ 13.26.33 - (5.5.0)     - dscudiero - Switch to use the -all flag on the GetCims call
 ## 12-01-2017 @ 12.27.36 - (5.5.0)     - dscudiero - Remove the hard coded override to always patch from the master release
+## 12-20-2017 @ 07.05.24 - (5.5.10)    - dscudiero - Add to indentention level before calling Rsync
