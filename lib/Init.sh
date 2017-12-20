@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.62 # -- dscudiero -- Wed 12/20/2017 @  9:32:19.97
+# version=2.1.63 # -- dscudiero -- Wed 12/20/2017 @  9:41:14.15
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -55,9 +55,9 @@ function Init {
 		[[ $token == 'nocheck' ]] && noCheck=true
 		[[ $token == 'checkprodenv' ]] && checkProdEnv=true
 		[[ $token == 'nowarn' ]] && noWarn=true
-		[[ $token == 'getjalot' ]] && getjalot=true
+		[[ $token == 'getjalot' ]] && getJalot=true
 	done
-	dump -3 -t -t parseStr getClient getEnv getDirs checkEnvs getProducts getCims allCims noPreview noPublic getjalot
+	dump -3 -t -t parseStr getClient getEnv getDirs checkEnvs getProducts getCims allCims noPreview noPublic getJalot
 
 	#===================================================================================================
 	## Get data from user if necessary
@@ -221,7 +221,7 @@ function Init {
 				unset ans; Prompt ans "Are you sure" "Yes No";
 				ans=$(Lower ${ans:0:1})
 				[[ $ans != 'y' ]] && Goodbye -1
-				getjalot=true
+				getJalot=true
 			fi
 		fi
 	fi
@@ -398,3 +398,4 @@ export -f Init
 ## 12-14-2017 @ 15.47.21 - (2.1.60)    - dscudiero - Remove errant "t" on call to GetCims
 ## 12-20-2017 @ 09.19.45 - (2.1.61)    - dscudiero - Added 'getJalot' as an action request
 ## 12-20-2017 @ 09.33.39 - (2.1.62)    - dscudiero - Force getJalot if updating next or curr
+## 12-20-2017 @ 09.41.19 - (2.1.63)    - dscudiero - Cosmetic/minor change
