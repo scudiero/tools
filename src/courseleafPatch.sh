@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.15 # -- dscudiero -- Wed 12/20/2017 @ 11:11:16.31
+version=5.5.22 # -- dscudiero -- Wed 12/20/2017 @ 14:45:19.81
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel2 EditTcfValue BackupCourseleafFile'
@@ -1203,7 +1203,7 @@ fi #[[ $catalogAdvance == true || $fullAdvance == true ]] && [[ buildPatchPackag
 ## Patch catalog
 ##======================================================================================================================
 Msg3
-Msg3 "Patching the '$(Upper $env)' site..."
+[[ -n $forUser ]] && Msg3 "Patching the '${forUser}/$(Upper $env)' site..." || Msg3 "Patching the '$(Upper $env)' site..."
 unset changeLogRecs processedDailysh skipProducts cgiCommands unixCommands
 [[ -n $comment ]] && changeLogRecs+=("$comment")
 declare -A processedSpecs
@@ -1275,9 +1275,9 @@ declare -A processedSpecs
 							sourceSpec="${gitRepoShadow}/${specPattern%% *}${specPattern##* }/*"
 							targetSpec="${tgtDir}${specTarget}"
 							unset rsyncResults
-							((indentLevel++))
+							((indentLevel++)) || true
 							RunRsync "$product" "$sourceSpec" "$targetSpec" "$specIgnoreList" "$backupDir"
-							((indentLevel--))
+							((indentLevel--)) || true
 							if [[ $rsyncResults == 'false' ]]; then
 								Msg3 "^^^All files are current, no files updated"
 							else
@@ -1289,9 +1289,9 @@ declare -A processedSpecs
 							if [[ $buildPatchPackage == true ]]; then
 								targetSpec="${packageDir}${specTarget}"
 								unset backupDir
-								((indentLevel++))
+								((indentLevel++)) || true
 								RunRsync "$product" "$sourceSpec" "$targetSpec" "$specIgnoreList" "$backupDir"
-								((indentLevel--))
+								((indentLevel--)) || true
 								Msg3 "^^^Files copied to the staging area"
 							fi
 							;;
@@ -1301,9 +1301,9 @@ declare -A processedSpecs
 							sourceSpec="$skeletonRoot/release${specPattern%% *}/*"
 							targetSpec="${tgtDir}${specTarget}"
 							unset rsyncResults
-							((indentLevel++))
+							((indentLevel++)) || true
 							RunRsync "$product" "$sourceSpec" "$targetSpec" 'none' "$backupDir"
-							((indentLevel--))
+							((indentLevel--)) || true
 							if [[ $rsyncResults == 'false' ]]; then
 								Msg3 "^^^All files are current, no files updated"
 							else
@@ -1315,9 +1315,9 @@ declare -A processedSpecs
 							if [[ $buildPatchPackage == true ]]; then
 								targetSpec="${packageDir}${specTarget}"
 								unset backupDir
-								((indentLevel++))
+								((indentLevel++)) || true
 								RunRsync "$product" "$sourceSpec" "$targetSpec" 'none' "$backupDir"
-								((indentLevel--))
+								((indentLevel--)) || true
 								Msg3 "^^^Files copied to the staging area"
 							fi
 							;;
@@ -1331,9 +1331,9 @@ declare -A processedSpecs
 										sourceSpec="$skeletonRoot/release${specPattern%% *}"
 										targetSpec="${tgtDir}${specTarget}"
 										unset rsyncResults
-										((indentLevel++))
+										((indentLevel++)) || true
 										RunRsync "$product" "$sourceSpec" "$targetSpec" 'none' "$backupDir"
-										((indentLevel--))
+										((indentLevel--)) || true
 										if [[ $rsyncResults == 'false' ]]; then
 											Msg3 "^^^All files are current, no files updated"
 										else
@@ -1824,3 +1824,4 @@ Goodbye 0 "$text1" "$text2"
 ## 12-20-2017 @ 07.05.24 - (5.5.10)    - dscudiero - Add to indentention level before calling Rsync
 ## 12-20-2017 @ 07.19.54 - (5.5.11)    - dscudiero - Cosmetic/minor change
 ## 12-20-2017 @ 07.21.42 - (5.5.13)    - dscudiero - Cosmetic/minor change
+## 12-20-2017 @ 14.45.55 - (5.5.22)    - dscudiero - Fix problem where (indentLevel++) breaks if starting value is 0
