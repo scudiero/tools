@@ -8,10 +8,11 @@ pageflags:autoapprove
 
 workflow:standard|TODO,Depts Chair,Cols Dean,Curriculum Committee fyiall,Curriculum Committee Chair,Registrar,AddSisStep
 
-//workflow:standard|START,College: 'Col',Department: 'Dept',Subject: 'Subj',Proposal State: ProposalState,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is General Education] isGenEd,[Is New] isNew,[Not New] isNotNew,[Course Change] isEdit,[Not Course Change] isNotEdit,[Course Delete] isDelete,[Not Course Delete] isNotDelete,END
+//workflow:standard|debug
+//workflow:debug|START (debug),Workflow Library: wfLibVersion,College: Col,Department: Dept,Academic level: AcadLevel,Proposal State: ProposalState,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is New] isNew,[Is not New] isNotNew,[Is Edit/Change] isEdit,[Is not Edit/Change] isNotEdit,[Is Delete] isDelete,[Is not Delete] isNotDelete,END (debug)
 
 //======================================================================================================================
-// version:1.0.12 // -- dscudiero -- Tue 11/28/2017 @ 16:36:05.96
+// version:1.0.13 // -- dscudiero -- Thu 12/21/2017 @ 13:20:42.47
 //======================================================================================================================
 // Check in log
 //======================================================================================================================
@@ -27,3 +28,4 @@ workflow:standard|TODO,Depts Chair,Cols Dean,Curriculum Committee fyiall,Curricu
 // 10-25-2017 @ 09.37.59 - (34.05)     - dscudiero - Reformatted comments
 // 11-08-2017 @ 11.20.51 - (32.44)     - dscudiero - Added Proposal State to the debug workflow
 // 11-28-2017 @ 16.54.33 - (05.96)     - dscudiero - Added the isNotFirstStep conditional & code
+// 12-21-2017 @ 13.21.36 - (42.47)     - dscudiero - Add displaying 'wfLibVersion' in the debug workflow
