@@ -1,5 +1,7 @@
 //======================================================================================================================
-wfLibVersion="1.8.58" // -- dscudiero -- Thu 12/21/2017 @  9:47:07.60
+wfLibVersion="1.8.59" // -- dscudiero -- Thu 12/21/2017 @ 13:17:59.77
+attr_write("wfLibVersion", wfLibVersion);
+
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
 //======================================================================================================================
@@ -2470,3 +2472,4 @@ var wfLibLoaded=true;
 // 12-19-2017 @ 14.16.33 - ("1.8.55")  - dscudiero - Remove the exception in GetRelated2 if the proposal code is null
 // 12-20-2017 @ 12.38.41 - ("1.8.56")  - dscudiero - Fixed problems in getEcoData when there is no proposalDepts data
 // 12-21-2017 @ 09.47.48 - ("1.8.58")  - dscudiero - Add a check for proposal mode in wffuncs.CheckChanged, skip if not EDIT
+// 12-21-2017 @ 13.21.48 - ("1.8.59")  - dscudiero - Add displaying 'wfLibVersion' in the debug workflow
