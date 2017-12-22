@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.59" // -- dscudiero -- Thu 12/21/2017 @ 13:17:59.77
+wfLibVersion="1.8.58" // -- dscudiero -- Thu 12/21/2017 @  9:47:07.60
 attr_write("wfLibVersion", wfLibVersion);
 
 //======================================================================================================================
@@ -1804,7 +1804,7 @@ wffuncs.CheckChanged = function(inval, wfrule, args) {
 		}
 
 	// Parse the passed options
-		var mode="", checkFieldsStr="", unknownOpts=""
+		var mode="", checkFieldsStr="", unknownOpts="", checkFieldsVar="";
 		var tmpArray1=options.split(" ");
 		tmpArray1.forEach(function(text) {
 			tmpArray2=text.split(':');
@@ -1818,6 +1818,10 @@ wffuncs.CheckChanged = function(inval, wfrule, args) {
 					if (tmpArray2[1].slice(-1) === ";") tmpArray2[1]=tmpArray2[1].slice(0, -1);
 			        checkFieldsStr=tmpArray2[1];
 			        break;
+			    case "checkfieldsvar":
+					if (tmpArray2[1].slice(-1) === ";") tmpArray2[1]=tmpArray2[1].slice(0, -1);
+			        checkFieldsStr=getTCFValue(tmpArray2[1]);
+			        break;
 			    case "notmode":
 					if (tmpArray2[1].slice(-1) === ";") tmpArray2[1]=tmpArray2[1].slice(0, -1);
 			    	notMode=tmpArray2[1];
@@ -1826,6 +1830,7 @@ wffuncs.CheckChanged = function(inval, wfrule, args) {
 			        unknownOpts=unknownOpts + text;
 			}
 		});
+
 
 	// If the checkfields were not passed in the options record then check the tcfdata for a variable called "wfCheckChangedFields" 
 	// or <calledAs>_wfCheckChangedFields
@@ -2472,4 +2477,4 @@ var wfLibLoaded=true;
 // 12-19-2017 @ 14.16.33 - ("1.8.55")  - dscudiero - Remove the exception in GetRelated2 if the proposal code is null
 // 12-20-2017 @ 12.38.41 - ("1.8.56")  - dscudiero - Fixed problems in getEcoData when there is no proposalDepts data
 // 12-21-2017 @ 09.47.48 - ("1.8.58")  - dscudiero - Add a check for proposal mode in wffuncs.CheckChanged, skip if not EDIT
-// 12-21-2017 @ 13.21.48 - ("1.8.59")  - dscudiero - Add displaying 'wfLibVersion' in the debug workflow
+// 12-22-2017 @ 07.17.53 - ("1.8.58")  - dscudiero - Added the 'checkfieldsvar' option to CheckChanged
