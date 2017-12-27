@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.51" # -- dscudiero -- Mon 12/04/2017 @ 11:13:43.94
+version="1.4.53" # -- dscudiero -- Wed 12/27/2017 @ 12:31:18.02
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -150,16 +150,17 @@ sTime=$(date "+%s")
 ## Set the CLASSPATH
 	sTime=$(date "+%s")
 	saveClasspath="$CLASSPATH"
-	searchDirs="$TOOLSPATH/src"
-	[[ $USEDEV == true && -d "$TOOLSDEVPATH/src" ]] && searchDirs="$TOOLSDEVPATH/src"
+	searchDirs="$TOOLSPATH/jars"
+	[[ $USEDEV == true && -d "$TOOLSDEVPATH/jars" ]] && searchDirs="$TOOLSDEVPATH/jars"
 	[[ -n $TOOLSSRCPATH ]] && searchDirs="$( tr ':' ' ' <<< $TOOLSSRCPATH)"
 	unset CLASSPATH
 	for searchDir in $searchDirs; do
-		for jar in $(find $searchDir/java -mindepth 1 -maxdepth 1 -type f -name \*.jar); do
+		for jar in $(find $searchDir/jars -mindepth 1 -maxdepth 1 -type f -name \*.jar); do
 			[[ -z $CLASSPATH ]] && CLASSPATH="$jar" || CLASSPATH="$CLASSPATH:$jar"
 		done
 	done
 	export CLASSPATH="$CLASSPATH"
+echo "CLASSPATH = '$CLASSPATH'"
 
 # ## Look for the Initialization and Import function in the library path
 # 	sTime=$(date "+%s")
