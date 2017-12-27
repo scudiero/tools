@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.57" # -- dscudiero -- Wed 12/27/2017 @ 12:35:45.89
+version="1.4.58" # -- dscudiero -- Wed 12/27/2017 @ 12:37:35.53
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -160,7 +160,7 @@ sTime=$(date "+%s")
 		done
 	done
 	export CLASSPATH="$CLASSPATH"
-	#echo "CLASSPATH = '$CLASSPATH'"
+echo "CLASSPATH = '$CLASSPATH'"
 
 # ## Look for the Initialization and Import function in the library path
 # 	sTime=$(date "+%s")
