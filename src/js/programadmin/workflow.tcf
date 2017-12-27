@@ -6,13 +6,13 @@ localsteps:Program Workflow Management|groups|workflow|attributes=isUndergraduat
 template:custom
 pageflags:autoapprove
 
-workflow:standard|TODO,Depts Chair,Cols Dean,Curriculum Committee fyiall,Curriculum Committee Chair,Registrar
+workflow:standard|CheckOnDisk,TODO,Depts Chair,Cols Dean,Curriculum Committee fyiall,Curriculum Committee Chair,Registrar
 
 //workflow:standard|debug
 //workflow:debug|START (debug),Workflow Library: wfLibVersion,College: Col,Department: Dept,Academic level: AcadLevel,Proposal State: ProposalState,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is New] isNew,[Is not New] isNotNew,[Is Edit/Change] isEdit,[Is not Edit/Change] isNotEdit,[Is Delete] isDelete,[Is not Delete] isNotDelete,END (debug)
 
 //======================================================================================================================
-// version:1.0.14 // -- dscudiero -- Thu 12/21/2017 @ 13:20:45.57
+// version:1.0.15 // -- dscudiero -- Fri 12/22/2017 @  9:00:42.20
 //======================================================================================================================
 // Check in log
 //======================================================================================================================
