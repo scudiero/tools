@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.63" # -- dscudiero -- Wed 12/27/2017 @ 13:00:39.92
+version="1.4.73" # -- dscudiero -- Wed 12/27/2017 @ 13:28:07.69
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -228,15 +228,21 @@ sTime=$(date "+%s")
 	[[ -z $maxForkedProcesses ]] && maxForkedProcesses=3
 
 # If the user has a .tools file then read the values into a hash table
-	if [[ -r "$HOME/tools.cfg" ]]; then
+	if [[ -r "$HOME/$userName.cfg" || "$HOME/tools.cfg" ]]; then
+		[[ -r "$HOME/tools.cfg" ]] && configFile="$HOME/tools.cfg"
+		[[ -r "$HOME/$userName.cfg" ]] && configFile="$HOME/$userName.cfg"
+		foundToolsSection=false
 		ifsSave="$IFS"; IFS=$'\n'; while read -r line; do
 			line=$(tr -d '\011\012\015' <<< "$line")
 			[[ -z $line || ${line:0:1} == '#' ]] && continue
+			[[ ${line:0:7} == '[tools]' ]] && foundToolsSection=true && continue
+			[[ $foundToolsSection != true ]] && continue
+			[[ $foundToolsSection == true && ${line:0:1} == '[' ]] && break
 			vName="${line%%=*}"; vValue="${line##*=}"
 			[[ $(Contains ",${allowedUserVars}," ",${vName},") == false ]] && Error "Variable '$vName' not allowed in tools.cfg file, setting will be ignored" && continue
 			vValue=$(cut -d'=' -f2 <<< "$line"); [[ -z $vName ]] && $(cut -d':' -f2 <<< "$line")
 			eval $vName=\"$vValue\"
-		done < "$HOME/tools.cfg"
+		done < "$configFile"
 		IFS="$ifsSave"
 
 		function ColorD { local string="$*"; echo "${colorDefaultVal}${string}${colorDefault}"; }
