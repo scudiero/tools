@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.60 # -- dscudiero -- Wed 12/13/2017 @ 14:25:04.55
+version=2.10.61 # -- dscudiero -- Wed 12/27/2017 @ 10:06:44.04
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi"
@@ -530,7 +530,7 @@ Msg3
 						fromStr="$grepStr"
 						toStr="${grepStr:2}"
 						$DOIT sed -i s"_^${fromStr}_${toStr}_" $editFile
-						Msg3 "^Activating Workflow Manatement for '$cim'"
+						Msg3 "^Activating Workflow Management for '$cim'"
 						updatedFile=true
 					fi
 				else
@@ -669,3 +669,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 12-11-2017 @ 13.51.57 - (2.10.56)   - dscudiero - Add a check of the workflow.tcf revhistorytca data between source and target
 ## 12-13-2017 @ 14.21.18 - (2.10.59)   - dscudiero - Write out the backup file to the target sites attic directory
 ## 12-13-2017 @ 14.25.14 - (2.10.60)   - dscudiero - Cosmetic/minor change
+## 12-27-2017 @ 10.07.04 - (2.10.61)   - dscudiero - Cosmetic/minor change
