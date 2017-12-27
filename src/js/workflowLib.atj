@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.58" // -- dscudiero -- Thu 12/21/2017 @  9:47:07.60
+wfLibVersion="1.8.59" // -- dscudiero -- Fri 12/22/2017 @  8:56:43.99
 attr_write("wfLibVersion", wfLibVersion);
 
 //======================================================================================================================
@@ -2375,6 +2375,31 @@ wffuncs.TODO = function(inval, wfrule, args) {
 
 	return false;
 } //TODO
+
+//======================================================================================================================
+// Add a step in workflow that checks to see if the proposal has been written out to disk, if not then display a 
+// warning message
+//		workflow step = 'CheckOnDisk'
+// 		wfrules:CheckOnDisk|function|CheckOnDisk|<Message to display>; //Put a TODO message to the preview workflow screen
+//======================================================================================================================
+// 12-22-17 - dgs - Initial coding -
+//======================================================================================================================
+wffuncs.CheckOnDisk = function(inval, wfrule, args) {
+	var indent="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+	var indent2=indent + indent + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
+	//Dump("tcfdata.pagename[0]",tcfdata.pagename[0]);
+	if (tcfdata.pagename[0].split("/")[2] === "index.html") {
+		print_debug("\nProposal is not on disk\n\n");
+		print_doc(indent + '<strong>*Note*</strong> -- The proposal has not yet been saved in CourseLeaf<br>');
+		print_doc(indent2 + 'The displayed workflow below may not fully reflect the final workflow.<br>');
+		if (options != "" ) print_doc(indent2 + options + "<br>");
+	} else {
+		print_debug("\nProposal is on disk\n\n");
+	}
+	return false;
+}
+
 
 //======================================================================================================================
 // There was insufficient data on the for to calculate workflow
