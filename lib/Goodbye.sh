@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.6" # -- dscudiero -- Thu 10/19/2017 @ 16:15:20.98
+# version="2.1.7" # -- dscudiero -- Thu 12/28/2017 @ 10:55:40.87
 #===================================================================================================
 # Common script exit
 # args:
@@ -108,7 +108,7 @@ function Goodbye {
 					if [[ $exitCode -eq 0 ]]; then
 						Msg3 "$(ColorK "${myName}") $(ColorI " -- $additionalText completed successfully.")"
 					else
-						Msg3 "$(ColorK "${myName}") $(ColorE " -- $additionalText completed with errors, exit code = $exitCode")\a"
+						Msg3 "$(ColorK "${myName}") $(ColorE " -- $additionalText completed with errors, exit code = $exitCode\n")\a"
 					fi
 					[[ $logFile != '/dev/null' && $noBanners != true ]] && Msg3 "Additional details may be found in:\n^'$logFile'"
 					[[ $noBanners != true ]] && Msg3 "$date (Elapsed time: $elapTime)"
