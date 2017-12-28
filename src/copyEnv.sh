@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.8 # -- dscudiero -- Wed 12/27/2017 @ 14:44:11.82
+version=4.13.9 # -- dscudiero -- Thu 12/28/2017 @ 10:28:55.66
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims"
