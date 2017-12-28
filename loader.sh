@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.73" # -- dscudiero -- Wed 12/27/2017 @ 13:28:07.69
+version="1.4.74" # -- dscudiero -- Thu 12/28/2017 @ 10:59:27.02
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -32,13 +32,15 @@ function CleanUp {
 	set +eE
 	trap - ERR EXIT
 	## Cleanup log file
-		if [[ $logFile != /dev/null && -r $logFile ]]; then
+		if [[ $logFile != /dev/null && -e $logFile ]]; then
 			mv $logFile $logFile.bak
 		 	#cat $logFile.bak | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" | tr -d '\007' > $logFile
 		 	cat $logFile.bak | sed "s/\x1B\[[0-9;]*[a-zA-Z]//g" | tr -d '\007' > $logFile
 			chown -R "$userName:leepfrog" "$logFile"
 			chmod 660 "$logFile"
 		 	rm $logFile.bak
+		 else
+		 	Warning "The log file could not be located:\n^$logFile"
 		fi
 	## Cleanup semaphore and dblogging
 		[[ -n $semaphoreId ]] && Semaphore 'clear' $semaphoreId
