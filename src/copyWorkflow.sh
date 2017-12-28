@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.61 # -- dscudiero -- Wed 12/27/2017 @ 10:06:44.04
+version=2.10.62 # -- dscudiero -- Thu 12/28/2017 @ 10:19:32.77
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi"
@@ -523,6 +523,20 @@ Msg3
 			updatedFile=false
 			Msg3 "Checking console workflow management entries"
 			editFile="$tgtDir/web/courseleaf/index.tcf"
+			unset grepStr; grepStr=$(ProtectedCall "grep "sectionlinks:CIM" "$editFile"")
+			if [[ -n $grepStr ]]; then
+				if [[ ${grepStr:0:2} == '//' ]]; then
+					fromStr="$grepStr"
+					toStr="${grepStr:2}"
+					$DOIT sed -i s"_^${fromStr}_${toStr}_" $editFile
+					Msg3 "^Activating CIM 'section'"
+					updatedFile=true
+				fi
+			else
+				Warning "Could not locate the 'workflow management' record for '$cim'"
+			fi
+
+
 			for cim in $(tr ',' ' ' <<< "$cimStr"); do
 				unset grepStr; grepStr=$(ProtectedCall "grep "/$cim/workflow.html" "$editFile"")
 				if [[ -n $grepStr ]]; then
