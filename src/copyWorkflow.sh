@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.62 # -- dscudiero -- Thu 12/28/2017 @ 10:19:32.77
+version=2.10.63 # -- dscudiero -- Thu 12/28/2017 @ 10:22:31.71
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi"
@@ -518,11 +518,12 @@ Msg3
 		popd >& /dev/null
 		Msg3 "Backup files located at: '$tarFile'"
 
-		## Make sure that we have workflow management on the console
+		## Check the courseleaf console page
 		if [[ $tgtEnv == 'next' || $tgtEnv == 'test' ]]; then
 			updatedFile=false
 			Msg3 "Checking console workflow management entries"
 			editFile="$tgtDir/web/courseleaf/index.tcf"
+			## Make sure we have an active sectionlinks:CIM on the console
 			unset grepStr; grepStr=$(ProtectedCall "grep "sectionlinks:CIM" "$editFile"")
 			if [[ -n $grepStr ]]; then
 				if [[ ${grepStr:0:2} == '//' ]]; then
@@ -533,10 +534,10 @@ Msg3
 					updatedFile=true
 				fi
 			else
-				Warning "Could not locate the 'workflow management' record for '$cim'"
+				Warning "Could not locate the 'sectionlinks:CIM' record"
 			fi
 
-
+			## Make sure that we have active workflow management on the console
 			for cim in $(tr ',' ' ' <<< "$cimStr"); do
 				unset grepStr; grepStr=$(ProtectedCall "grep "/$cim/workflow.html" "$editFile"")
 				if [[ -n $grepStr ]]; then
