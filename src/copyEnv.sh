@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.7 # -- dscudiero -- Mon 12/18/2017 @  8:05:36.75
+version=4.13.8 # -- dscudiero -- Wed 12/27/2017 @ 14:44:11.82
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims"
@@ -558,7 +558,7 @@ fi
 ## Bye-bye
 [[ -n $asSite ]] && msgText="$(ColorK "$(Upper $asSite)")" || msgText="$(ColorK "$(Upper $client)")"
 
-[[ $startWizdebug == true ]] && FindExecutable -sh -run wizdebug $client -${tgtEnv}
+[[ $startWizdebug == true ]] && { echo "FindExecutable -sh -run wizdebug $client -${tgtEnv}"; FindExecutable -sh -run wizdebug $client -${tgtEnv}; }
 
 Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
 
