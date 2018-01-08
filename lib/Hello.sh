@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.46" # -- dscudiero -- Thu 11/09/2017 @ 11:08:43.52
+# version="2.0.50" # -- dscudiero -- Mon 01/08/2018 @ 14:09:44.35
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -49,7 +49,7 @@ function Hello {
 		fi
 
 	## Display script and tools news
-		#DisplayNews
+		DisplayNews
 
 	## If verbose level is 99 then show everything
 		[[ $verboseLevel -eq 99 ]] && set -v
