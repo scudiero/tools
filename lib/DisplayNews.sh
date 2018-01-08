@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.9" # -- dscudiero -- Mon 10/02/2017 @ 15:28:58.48
+# version="2.0.39" # -- dscudiero -- Mon 01/08/2018 @ 14:09:00.23
 #===================================================================================================
 # Display News
 #===================================================================================================
@@ -23,33 +23,31 @@ function DisplayNews {
 				RunSql2 $sqlStmt
 				#[[ ${#resultSet[@]} -gt 0 ]] && lastViewedDate=$(echo "${resultSet[0]}" | cut -d'|' -f1) && lastViewedEDate=$(echo "${resultSet[0]}" | cut -d'|' -f2)
 				if [[ ${#resultSet[@]} -gt 0 ]]; then
-					lastViewedDate=$(cut -d'|' -f1 <<< "${resultSet[0]}")
-					lastViewedEdate=$(cut -d'|' -f2 <<< "${resultSet[0]}")
+					result="${resultSet[0]}"
+					lastViewedDate=${result%%|*}; result=${result#*|};
+					lastViewedEdate=${result%%*|}; result=${result#*|};
 					eval ${newsType}LastRunDate=\"$lastViewedDate\"
 					eval ${newsType}LastRunEdate=$lastViewedEdate
 				fi
-				#dump ${newsType}LastRunDate ${newsType}LastRunEDate
-
 			## Read news items from the database
-				#dump newsType lastViewedEdate
-
 				sqlStmt="select item,date from $newsTable where edate >= \"$lastViewedEdate\" and object=\"$newsType\""
 				RunSql2 $sqlStmt
+				itemNum=0
 				for result in "${resultSet[@]}"; do
 					if [[ $displayedHeader == false ]]; then
-						msgText="\n$(ColorK "'$newsType'") news items"
-						[[ $lastViewedDate != '' ]] && msgText="$msgText since the last time you ran this script/report ($(cut -d ' ' -f1 <<< $lastViewedDate))"
+						msgText="$(ColorK "'$newsType'") news items"
+						[[ -n $lastViewedDate ]] && msgText="$msgText since the last time you ran this script/report ($(cut -d ' ' -f1 <<< $lastViewedDate))"
 						Info "$msgText:\a"
 						displayedHeader=true
 					fi
-					item=$(cut -d'|' -f1 <<< $result)
-					date=$(cut -d'|' -f2 <<< $result)
-					ProtectedCall "((itemNum++))"
-					msg3 "^$itemNum) $item"
+					item=${result%%|*}; result=${result#*|};
+					date=${result%%*|}; result=${result#*|};
+					let itemNum=$itemNum+1
+					Msg3 "^$itemNum) $item (${date%% *})"
 					newsDisplayed=true
 				done
 			## Set the last read date on the database
-				if [[ $lastViewedDate == '' ]]; then
+				if [[ -z $lastViewedDate ]]; then
 					sqlStmt="insert into $newsInfoTable values(NULL,\"$newsType\",\"$userName\",NOW(),\"$(date +%s)\")"
 				else
 					sqlStmt="update $newsInfoTable set date=NOW(),edate=\"$(date +%s)\" where userName=\"$userName\" and object=\"$newsType\""
