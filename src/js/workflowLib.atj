@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.59" // -- dscudiero -- Fri 12/22/2017 @  8:56:43.99
+wfLibVersion="1.8.60" // -- dscudiero -- Mon 01/08/2018 @ 14:48:44.87
 attr_write("wfLibVersion", wfLibVersion);
 
 //======================================================================================================================
@@ -1172,12 +1172,9 @@ function GetEcoSystemData2(proposalCodes,proposalDepts,data) {
 	proposalCodes.forEach(function(code) {
 		proposalSubjs.push(code.split(' ')[0]);
 	});
-	Here(0);
 	if (proposalDepts instanceof Array) {
-		Here(1);
 		var excludeDepts=proposalDepts;
 	} else {
-		Here(2);
 		var excludeDepts=GetAttrVal({request:"depts", options:"includetca", tcadata: tcadata});
 		if (!excludeDepts) excludeDepts=[];
 	}
