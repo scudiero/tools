@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #==================================================================================================
-version=1.0.119 # -- dscudiero -- Tue 12/12/2017 @  6:56:12.69
+version=1.0.120 # -- dscudiero -- Wed 01/10/2018 @  8:14:08.26
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 GetExcel2 ProtectedCall"
@@ -51,14 +51,10 @@ for var in $falseVars; do eval $var=false; done
 #===================================================================================================
 workbookFile="$1"; shift
 workSheet="$1"; shift
-
-## Parse the workbook file name
-fileName=$(basename $workbookFile)
-fileName=$(cut -d'.' -f1 <<< $fileName)
-clientCode=$(cut -d'-' -f1 <<< $fileName)
-product=$(cut -d'-' -f2 <<< $fileName)
-instance=$(cut -d'-' -f3 <<< $fileName)
-project=$(cut -d'-' -f4 <<< $fileName)
+clientCode="$1"; shift
+product="$1"; shift
+instance="$1"; shift
+project="$1"; shift
 dump -2 workbookFile -t clientCode product project instance
 
 ## Get the key for the qastatus record
