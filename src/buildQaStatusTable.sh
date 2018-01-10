@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.72 # -- dscudiero -- Tue 12/12/2017 @  6:56:00.16
+version=1.2.73 # -- dscudiero -- Wed 01/10/2018 @  8:14:04.59
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -207,7 +207,6 @@ Msg3; Msg3 "Retrieveing Implementation Team data from '$(basename "$cimTrackingW
 ## if [[ $verboseLevel -ge 1 ]]; then Msg3 "^cimTrackingHash:"; for i in "${!cimTrackingHash[@]}"; do printf "\t\t[$i] = >${cimTrackingHash[$i]}<\n"; done; fi
 
 Msg3; Msg3 "QA Tracking Root directory = '$qaTrackingRoot'"
-unset numTokens clientCode product project instance
 ## Loop through workbooks
 Msg3 "Scanning the directory..."
 SetFileExpansion 'off'
@@ -241,6 +240,7 @@ for workbook in "${workbooks[@]}"; do
 		unset $(tr ',' ' ' <<< $insertFields)
 		foundFailed=false; foundWaiting=false; foundNotes=false
 
+		unset clientCode product project instance
 		for ((i=0; i<${#resultSet[@]}; i++)); do
 			line="${resultSet[$i]}"
 			dump -2 -n -t line
@@ -367,7 +367,8 @@ for workbook in "${workbooks[@]}"; do
 		if [[ $(Contains "|${sheets}|" '|TestingDetailFinal|') == true ]]; then
 			## Process the testing details records
 			Msg3 "^^Processing Testing Details data via '$workerScript'..."
-			ProtectedCall "source \"$workerScriptFile\" \"$workbook\" 'TestingDetailFinal'"
+			ProtectedCall "source \"$workerScriptFile\" \"$workbook\" 'TestingDetailFinal' \"$clientCode\" \"$product\" \"$instance\" \"$project\""
+
 			if [[ $rc -ge 2 ]]; then
 				Error "Processing the Testing Detail data, please review messages"
 			else
