@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.23 # -- dscudiero -- Wed 12/20/2017 @ 16:03:51.17
+version=5.5.42 # -- dscudiero -- Wed 01/10/2018 @ 15:14:05.74
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel2 EditTcfValue BackupCourseleafFile'
@@ -690,7 +690,7 @@ removeGitReposFromNext=true
 	workbookFile="$HOME/tools/workbooks/$(basename $courseleafPatchControlFile)"
 	[[ -r $workbookFile ]] && Note 0 1 "Using workbook: '$workbookFile'" || workbookFile="$courseleafPatchControlFile"
 	## Get the list of sheets in the workbook
-		Note 0 1 "Parsing: '$workbookFile' ($(tr ' ' '@' <<< $(cut -d'.' -f1 <<< $(stat -c "%y" $workbookFile))))..."
+		Note 0 1 "Parsing patch control file: '$workbookFile' ($(tr ' ' '@' <<< $(cut -d'.' -f1 <<< $(stat -c "%y" $workbookFile))))..."
 		GetExcel2 -wb "$workbookFile" -ws 'GetSheets'
 		[[ ${#resultSet[@]} -le 0 ]] && Terminate "Could not retrieve the patcher control data from:\n'$workbookFile'"
 		sheets="${resultSet[0]}"
@@ -925,7 +925,7 @@ removeGitReposFromNext=true
 		dump -2 dailyShVer
 
 	## Backup root
-		backupRootDir="$tgtDir/attic/$myName.$(date +"%m-%d-%Y").prePatch"
+		backupRootDir="$tgtDir/attic/$myName.$(date +"%m-%d-%Y@%H.%M.%S").prePatch"
 		mkdir -p "$backupRootDir"
 
 	## Does the target directory have a git repository
@@ -1231,6 +1231,11 @@ declare -A processedSpecs
 				fi
 			fi
 		fi
+		if [[ $product == 'cim' ]]; then
+			tempBackupDir="cim_ug_$(date +"%m-%d-%y")"
+			Msg3 "^^Making temporary backup of the 'cim' directory, 'cim' --> '$tempBackupDir'"
+			cp -rfp "$tgtDir/web/courseleaf/cim" "$tgtDir/web/courseleaf/$tempBackupDir"
+		fi
 		changesMade=false
 		## Run through the action records for the product
 			productSpecArrayName="$product[@]"
@@ -1361,6 +1366,10 @@ declare -A processedSpecs
 
 							[[ ! -d $(dirname "${tgtDir}${specTarget}") ]] && echo "mkdir"  && mkdir -p "${tgtDir}${specTarget}"
 							[[ $specPattern == ${courseleafProgDir}.cgi ]] && sourceFile="$courseleafCgiSourceFile" || sourceFile="$ribbitCgiSourceFile"
+							## Backup the target file
+							mkdir -p "${backupRootDir}$(dirname "${specTarget}")"
+							[[ -f "${tgtDir}${specTarget}" ]] && cp -fp "${tgtDir}${specTarget}" "${backupRootDir}${specTarget}"
+							## Do copy
 							result=$(CopyFileWithCheck "$sourceFile" "${tgtDir}${specTarget}" 'courseleaf')
 							if [[ $result == true ]]; then
 								currentCgiVer=$(${tgtDir}${specTarget} -v | cut -d" " -f 3)
@@ -1614,9 +1623,8 @@ Msg3 "\nCross product checks..."
 	WriteChangelogEntry 'changeLogRecs' "$tgtDir/changelog.txt"
 
 ## tar up the backup files
-	tarFile="$myName-$(date +%D | tr '/' '-').tar.gz"
+	tarFile="$myName-$(date +"%m-%d-%y@%H-%M-%S").tar.gz"
 	cd $backupRootDir
-
 	PushSettings
 	SetFileExpansion 'off'
 	ProtectedCall "tar -czf $tarFile * --exclude '*.gz' --remove-files"
