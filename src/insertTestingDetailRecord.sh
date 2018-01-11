@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #==================================================================================================
-version=1.0.120 # -- dscudiero -- Wed 01/10/2018 @  8:14:08.26
+version=1.0.121 # -- dscudiero -- Thu 01/11/2018 @  8:59:00.81
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 GetExcel2 ProtectedCall"
@@ -84,7 +84,7 @@ dump -2 workbookFile -t clientCode product project instance
 	# fi
 	Verbose 1 "^^^^${#resultSet[@]} Records read from worksheet"
 	## Loop through the lines, parseing data
-	## line = testCaseid|testDescrpton|howToTest|overallStatus|iterationStatus|iterationDate|iterationPhase|iterationPhaseQualifier|
+	## line = testCaseid|testDescrpton|howToTest|overallStatus|iterationStatus|iterationDate|iterationPhase|notes|
 	insertCntr=0
 	for ((i=0; i<${#resultSet[@]}; i++)); do
 		line="${resultSet[$i]}"
@@ -104,7 +104,8 @@ dump -2 workbookFile -t clientCode product project instance
 		iterationStatus=$(cut -d'^' -f5 <<< $line) ; [[ $iterationStatus == '' ]] && iterationStatus='NULL'
 		iterationDate=$(cut -d'^' -f6 <<< $line) ; [[ $iterationDate == '' ]] && iterationDate='NULL'
 		iterationPhase=$(cut -d'^' -f7 <<< $line) ; [[ $iterationPhase == '' ]] && iterationPhase='NULL'
-		iterationPhaseQualifier=$(cut -d'^' -f8 <<< $line) ; [[ $iterationPhaseQualifier == '' ]] && iterationPhaseQualifier='NULL'
+
+		iterationPhaseQualifier='NULL'
 		[[ $overallStatus == 'NULL' && $iterationStatus == 'NULL' && $iterationDate == 'NULL' && $iterationPhase == 'NULL' && $iterationPhaseQualifier == 'NULL' ]] && continue
 
 		[[ $testCaseId == '' ]] && testCaseId="$previousTestCaseId"
