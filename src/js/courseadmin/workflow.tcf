@@ -1,18 +1,19 @@
 //======================================================================================================================
-// ??/??/17 - dgs - initial - ??
+// ??/??/18 - dgs - initial - ??
 //======================================================================================================================
 localsteps:Course Workflow Management|groups|workflow|attributes=isUndergraduate[Is Undergraduate],isGraduate[Is Graduate],isGenEd[Is General Education],isNew[New Course],isNotNew[Not New],isEdit[Course Change],isNotEdit[Not Course Change],isDelete[Course Delete],isNotDelete[Not Course Delete],isNotFirstStep[Is not the first step],fyi[FYI Only],fyiall[FYI All],todo[ToDo Item],optional[If Role Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
+
 
 template:custom
 pageflags:autoapprove
 
-workflow:standard|CheckOnDisk,TODO,Depts Chair,Cols Dean,Curriculum Committee fyiall,Curriculum Committee Chair,Registrar,AddSisStep
+workflow:standard|CheckOnDisk,TODO,Dept Chair,Col Dean,Curriculum Committee fyiall,Curriculum Committee Chair,Registrar,AddSisStep
 
 //workflow:standard|debug
-//workflow:debug|START (debug),Workflow Library: wfLibVersion,College: Col,Department: Dept,Academic level: AcadLevel,Proposal State: ProposalState,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is New] isNew,[Is not New] isNotNew,[Is Edit/Change] isEdit,[Is not Edit/Change] isNotEdit,[Is Delete] isDelete,[Is not Delete] isNotDelete,END (debug)
+//workflow:debug|START (debug),Workflow Library: wfLibVersion,College: Col,Department: Dept,Subject: Subj,Academic level: AcadLevel,Proposal State: ProposalState,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is New] isNew,[Is not New] isNotNew,[Is Edit/Change] isEdit,[Is not Edit/Change] isNotEdit,[Is Delete] isDelete,[Is not Delete] isNotDelete,END (debug)
 
 //======================================================================================================================
-// version:1.0.14 // -- dscudiero -- Fri 12/22/2017 @  9:00:35.42
+// version:1.0.15 // -- dscudiero -- Tue 01/16/2018 @ 10:26:50.36
 //======================================================================================================================
 // Check in log
 //======================================================================================================================
