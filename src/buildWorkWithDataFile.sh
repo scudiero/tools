@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.120 # -- dscudiero -- Fri 01/12/2018 @ 14:56:00.60
+version=4.3.122 # -- dscudiero -- Fri 01/12/2018 @ 15:39:14.50
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql2 StringFunctions ProtectedCall FindExecutable PushPop"
@@ -103,9 +103,9 @@ for ((i=0; i<${#clients[@]}; i++)); do
 				host=${envListStr%%|*}; envListStr="${envListStr#*|}"
 				server=${envListStr%%|*}; envListStr="${envListStr#*|}"
 				envListStr="${envListStr//\|/:}"
-				envList="$envList#$env-$host/$server-$envListStr"
+				envList="$envList;$env-$host/${server}#${envListStr}"
 			done
-		fi
+	fi
 		clientRec="$clientRec|${envList:1}"
 	echo "$clientRec" >> "$outFile"
 done
