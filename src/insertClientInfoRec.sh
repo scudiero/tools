@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.148 # -- dscudiero -- Tue 11/07/2017 @ 15:17:31.75
+version=2.3.149 # -- dscudiero -- Wed 01/17/2018 @  9:24:51.74
 #===================================================================================================
 TrapSigs 'on'
 
@@ -139,7 +139,7 @@ Dump -1 -n client
 
 ## Get the Rep data from the transactional db
 	Verbose 1 "^^Getting reps data"
-	reps="support,catcsm,cimcsm,clsscsm,salesrep,cateditor,catdev,cimdev,clssdev,trainer,pilotrep"
+	reps="catsup,cimsup,catcsm,cimcsm,clsscsm,salesrep,cateditor,catdev,cimdev,clssdev,trainer,pilotrep"
 	for rep in $(tr ',' ' '<<< $reps); do unset $rep; done
 	fields="LOWER(clientroles.role),employees.db_firstname || ' ' || employees.db_lastname || '/' || employees.db_email"
 	dbs="clientroles,employees"
