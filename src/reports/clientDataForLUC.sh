@@ -1,6 +1,6 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
-version=1.0.17 # -- dscudiero -- Wed 11/15/2017 @ 11:25:28.23
+version=1.0.18 # -- dscudiero -- Wed 01/17/2018 @  9:44:09.68
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -89,6 +89,7 @@ Hello
 		numRecs=${#resultSet[@]}
 		Msg3 "^Found $numRecs contacts records..."
 		for result in "${resultSet[@]}"; do
+dump result
 			if [[ $workBook != '' ]]; then
 				longName=$(cut -d'|' -f3 <<< $result)
 				firstName=$(cut -d'|' -f5 <<< $result)
