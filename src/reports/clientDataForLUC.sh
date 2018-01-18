@@ -1,6 +1,6 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
-version=1.0.21 # -- dscudiero -- Thu 01/18/2018 @ 15:20:01.44
+version=1.0.23 # -- dscudiero -- Thu 01/18/2018 @ 15:28:56.85
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -36,9 +36,8 @@ outFile="$outFileRoot.xlsx"
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-ParseArgsStd
-[[ $reportName != '' ]] && GetDefaultsData "$reportName" "$reportsTable"
-#Hello
+GetDefaultsData -f $myName
+ParseArgsStd2 $originalArgStr
 
 #==================================================================================================
 ## MAIN
@@ -70,9 +69,8 @@ fi
 #===================================================================================================
 ## Done
 #===================================================================================================
-[[ -f $tmpFile ]] && rm -f $tmpFile
-[[ $batchMode == true && -f $outFile ]] && rm -f $outFileRoot*
-Goodbye 0 #'alert'
+Goodbye-clientDataForLUC
+Quit
 
 #===================================================================================================
 ## Check-in log
