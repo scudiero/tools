@@ -1,6 +1,6 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
-version=1.0.19 # -- dscudiero -- Thu 01/18/2018 @ 10:11:40.04
+version=1.0.20 # -- dscudiero -- Thu 01/18/2018 @ 15:16:57.21
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -31,7 +31,7 @@ tmpFile=$(mkTmpFile)
 outDir=/home/$userName/Reports/$myName
 [[ ! -d $outDir ]] && mkdir -p $outDir
 outFileRoot="$outDir/$(date '+%Y-%m-%d-%H%M%S')"
-outFile="$outFileRoot-attendeeLeepfrogRolesData.xls"
+outFile="$outFileRoot.xlsx"
 
 #==================================================================================================
 # Standard arg parsing and initialization
@@ -49,7 +49,7 @@ RunSql2 $sqlStmt
 if [[ ${#resultSet[@]} -gt 0 ]]; then
 	numRecs=${#resultSet[@]}
 	Msg3 "^Found $numRecs contacts records..."
-	Msg3 "${fields//,/\t}" > $outFile
+	Msg3 "${fields//,/\t}" #> $outFile
 	for result in "${resultSet[@]}"; do
 		## Escape single and double quotes
 		result="${result//\'/''}"; result="${result//\"/""}"; result="${result//NULL/ }"
@@ -61,10 +61,10 @@ if [[ ${#resultSet[@]} -gt 0 ]]; then
 			outLine="$outLine\t${!field}"
 			((fieldCntr += 1))
 		done
-		Msg3 "${outLine:2}" >> $outFile
+		Msg3 "${outLine:2}" #>> $outFile
 	done
 else
-	Warning "Did not find any contacts records meeting criteria" | tee -a $outFile
+	Warning "Did not find any contacts records meeting criteria" #| tee -a $outFile
 fi
 
 #===================================================================================================
