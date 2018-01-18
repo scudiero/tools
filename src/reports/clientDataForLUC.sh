@@ -1,6 +1,6 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
-version=1.0.23 # -- dscudiero -- Thu 01/18/2018 @ 15:28:56.85
+version=1.0.24 # -- dscudiero -- Thu 01/18/2018 @ 15:32:34.33
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -27,11 +27,6 @@ function testMode-clientDataForLUC  { # or testMode-local
 #==================================================================================================
 # Declare local variables and constants
 #==================================================================================================
-tmpFile=$(mkTmpFile)
-outDir=/home/$userName/Reports/$myName
-[[ ! -d $outDir ]] && mkdir -p $outDir
-outFileRoot="$outDir/$(date '+%Y-%m-%d-%H%M%S')"
-outFile="$outFileRoot.xlsx"
 
 #==================================================================================================
 # Standard arg parsing and initialization
@@ -46,9 +41,7 @@ fields="name,longname,primarycontact,salesRep,catSup,cimSup,catCsm,cimCsm,clssCs
 sqlStmt="select $fields from $clientInfoTable where recordstatus=\"A\" order by name"
 RunSql2 $sqlStmt
 if [[ ${#resultSet[@]} -gt 0 ]]; then
-	numRecs=${#resultSet[@]}
-	#Msg3 "^Found $numRecs contacts records..."
-	Msg3 "${fields//,/\t}" #> $outFile
+	Msg3 "${fields//,/\t}"
 	for result in "${resultSet[@]}"; do
 		## Escape single and double quotes
 		result="${result//\'/''}"; result="${result//\"/""}"; result="${result//NULL/ }"
@@ -60,10 +53,10 @@ if [[ ${#resultSet[@]} -gt 0 ]]; then
 			outLine="$outLine\t${!field}"
 			((fieldCntr += 1))
 		done
-		Msg3 "${outLine:2}" #>> $outFile
+		Msg3 "${outLine:2}"
 	done
 else
-	Warning "Did not find any contacts records meeting criteria" #| tee -a $outFile
+	Warning "Did not find any contacts records meeting criteria"
 fi
 
 #===================================================================================================
