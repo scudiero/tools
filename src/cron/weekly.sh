@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.38 # -- dscudiero -- Mon 11/06/2017 @ 10:19:25.89
+version=2.1.39 # -- dscudiero -- Thu 01/18/2018 @ 15:55:04.20
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -26,18 +26,6 @@ scriptArgs="$* -noBanners"
 #========================================================================================================================
 case "$hostName" in
 	mojave)
-		## Run programs/functions
-			pgms=(checkForPrivateDevSites weeklyRollup)
-			for ((i=0; i<${#pgms[@]}; i++)); do
-				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
-				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
-				TrapSigs 'off'
-				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
-				TrapSigs 'on'
-				Semaphore 'waiton' "$pgmName" 'true'
-				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
-			done
-
 		## Run Reports
 			publishingEmails='froggersupport@leepfrog.com'
 			client2DaySummariesEmails='froggersupport@leepfrog.com'
@@ -54,8 +42,19 @@ case "$hostName" in
 				Semaphore 'waiton' "$reportName" 'true'
 				Msg3 "...$reportName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
-			;;
-	build5)
+
+		## Run programs/functions
+			pgms=(checkForPrivateDevSites weeklyRollup)
+			for ((i=0; i<${#pgms[@]}; i++)); do
+				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
+				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
+				TrapSigs 'off'
+				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
+				TrapSigs 'on'
+				Semaphore 'waiton' "$pgmName" 'true'
+				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+			done
+
 			;;
 	build7)
 		## Run programs/functions
