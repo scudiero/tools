@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.149 # -- dscudiero -- Wed 01/17/2018 @  9:24:51.74
+version=2.3.150 # -- dscudiero -- Thu 01/18/2018 @  8:19:22.46
 #===================================================================================================
 TrapSigs 'on'
 
@@ -97,7 +97,7 @@ Dump -1 -n client
 		sqlStmt="select $fields from contacts where clientkey=\"$idx\" and contactrole like \"%primary%\" order by contactrole,lastname"
 		RunSql2 "$contactsSqliteFile" $sqlStmt
 		for contactRec in "${resultSet[@]}"; do
-			primarycontact="$primarycontact|$(tr '|' ',' <<< $contactRec)"
+			primarycontact="$primarycontact;$(tr '|' ',' <<< $contactRec)"
 		done
 		primarycontact=${primarycontact:1}
 		primarycontact=$(tr "'" '"' <<< $primarycontact)
