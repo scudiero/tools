@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.42 # -- dscudiero -- Wed 01/10/2018 @ 15:14:05.74
+version=5.5.43 # -- dscudiero -- Thu 01/18/2018 @ 16:24:45.15
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel2 EditTcfValue BackupCourseleafFile'
@@ -1428,9 +1428,8 @@ declare -A processedSpecs
 									if [[ -f $compareToFile ]]; then
 										cmpFileMd5=$(md5sum $compareToFile | cut -f1 -d" ")
 										if [[ $tgtFileMd5 != $cmpFileMd5 ]]; then
-											if [[ $specIgnoreList == 'warn' ]]; then
-												Warning 0 3 "'${specPattern##* }' file is different than the skeleton file, please analyze the differnces to ensure a custom copy is still needed"
-											elif [[ $specIgnoreList == 'report' ]]; then
+											Warning 0 3 "'${specPattern##* }' file is different than the skeleton file, please analyze the differences (below) to ensure a custom copy is still needed"
+											if [[ $specIgnoreList == 'report' ]]; then
 												Msg3 "^^^${colorRed}< is ${compareToFile}${colorDefault}"
 												Msg3 "^^^${colorBlue}> is ${tgtFile}${colorDefault}"
 												(( indentLevel = indentLevel + 3 )) || true
