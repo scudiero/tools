@@ -1,6 +1,6 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
-version=1.0.20 # -- dscudiero -- Thu 01/18/2018 @ 15:16:57.21
+version=1.0.21 # -- dscudiero -- Thu 01/18/2018 @ 15:20:01.44
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -38,7 +38,7 @@ outFile="$outFileRoot.xlsx"
 #==================================================================================================
 ParseArgsStd
 [[ $reportName != '' ]] && GetDefaultsData "$reportName" "$reportsTable"
-Hello
+#Hello
 
 #==================================================================================================
 ## MAIN
@@ -48,7 +48,7 @@ sqlStmt="select $fields from $clientInfoTable where recordstatus=\"A\" order by 
 RunSql2 $sqlStmt
 if [[ ${#resultSet[@]} -gt 0 ]]; then
 	numRecs=${#resultSet[@]}
-	Msg3 "^Found $numRecs contacts records..."
+	#Msg3 "^Found $numRecs contacts records..."
 	Msg3 "${fields//,/\t}" #> $outFile
 	for result in "${resultSet[@]}"; do
 		## Escape single and double quotes
