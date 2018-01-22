@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.45" # -- dscudiero -- Mon 01/22/2018 @ 11:07:12.93
+# version="2.1.46" # -- dscudiero -- Mon 01/22/2018 @ 11:23:31.85
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -112,7 +112,8 @@ function Prompt {
 			else
 				[[ -n "$defaultVal" ]] && response="$defaultVal" || Terminate "No Prompt is active and no default value specified for '$promptVar'"
 			fi #[[ $verify != false ]]
-			[[ $(Lower ${response}) == 'x' ]] && Goodbye 'x'
+
+			[[ $response == 'x' || $response == 'X' ]] && Goodbye 'x'
 			if [[ -z $response && -n $defaultVal ]]; then
 				eval $promptVar=\"$defaultVal\"
 				[[ $defaultValueUseNotes == true && -n $defaultVal ]] && { echo >> "$logFile"; Note 0 1 "Using default value of '$defaultVal' for '$promptVar'"; logResponse=false; }
@@ -158,10 +159,10 @@ function Prompt {
 			else
 				## Map abbreviated response to full response token from the validation list
 				if [[ "$promptVar" != 'client' ]]; then
-					local answer=$(Lower $response)
+					local answer=${response,,[a-z]}
 					local length=${#answer}
 					for i in "${validValues[@]}"; do
-						local checkStr=$(Lower ${i:0:$length})
+						local checkStr=${i:0:$length}; checkStr=${checkStr,,[a-z]}
 						[[ $answer == "$checkStr" ]] && response=$i && break
 					done
 				fi
