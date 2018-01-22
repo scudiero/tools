@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.44" # -- dscudiero -- Fri 11/03/2017 @  8:41:51.74
+# version="2.1.45" # -- dscudiero -- Mon 01/22/2018 @ 11:07:12.93
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -24,19 +24,6 @@ function Prompt {
 	[[ ${promptText:0:1} == '^' ]] && timerPrompt="^$timerPrompt"
 	declare timerInterruptPrompt=${1:-"$promptText"}; shift || true
 	dump -2 -r ; dump -2 -l promptVar promptText defaultVal validateList validateListString timeOut timerPrompt timerInterruptPrompt
-
-	if [[ $batchMode == true ]] || [[ $TERM != 'xterm' && $TERM != 'screen' ]]; then
-		if [[ -z $defaultVal ]]; then
-			[[ $batchMode == true ]] && Terminate "$FUNCNAME: batchMode flag is set and no defaultVal specified, cannot continue\n\t\tVar: '$promptVar', Prompt: '$promptText'"
-			[[ $TERM != 'xterm' && $TERM != 'screen' ]] && \
-				Terminate "$FUNCNAME: TERM ($TERM) is not 'xterm' or 'screen' and no defaultVal specified, cannot continue\n\t\tVar: '$promptVar', Prompt: '$promptText'"
-		else
-			eval $promptVar=\"$defaultVal\"
-			Note 0 1 "'batchMode is set, using selected value of '$defaultVal' for 'client'"
-			LogResponse
-			return 0
-		fi
-	fi
 
 	declare validateListString="$(echo $validateList | tr " " ",")"
 	if [[ -n $defaultVal ]]; then
@@ -63,6 +50,20 @@ function Prompt {
 	## Retrieve value for the variable from the callers address space, verify if not null and verify is on
 	response=\$$promptVar
 	response=$(eval echo $response)
+
+	## If we do not have a value: if we have default value then use it, otherwise error out
+	if [[ -z response && -z defaultVal ]]; then
+		if [[ $batchMode == true ]] || [[ $TERM != 'xterm' && $TERM != 'screen' ]]; then
+			[[ $batchMode == true ]] && Terminate "$FUNCNAME: batchMode flag is set and no defaultVal specified, cannot continue\n\t\tVar: '$promptVar', Prompt: '$promptText'"
+			[[ $TERM != 'xterm' && $TERM != 'screen' ]] && \
+				Terminate "$FUNCNAME: TERM ($TERM) is not 'xterm' or 'screen' and no defaultVal specified, cannot continue\n\t\tVar: '$promptVar', Prompt: '$promptText'"
+		else
+			eval $promptVar=\"$defaultVal\"
+			Note 0 1 "'batchMode is set, using selected value of '$defaultVal' for 'client'"
+			LogResponse
+			return 0
+		fi
+	fi
 
 	#printf "%s = >%s<\n" promptVar "$promptVar" response "$response" validateList "$validateList" >> ~/stdout.txt
 	local loop=true hadValue=true timedRead=true promptTextTabs
