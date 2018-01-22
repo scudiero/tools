@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.49" # -- dscudiero -- Tue 10/03/2017 @ 16:24:13.70
+# version="1.0.51" # -- dscudiero -- Mon 01/22/2018 @  7:41:34.43
 #===================================================================================================
 # Write out / update a start record into the process log database
 # Called as 'mode' 'token' 'data'
@@ -17,8 +17,8 @@ function ProcessLogger {
 	local myName argString epochTime sqlStmt epochTime epochStime epochEtime eHr eMin eSec elapSeconds elapTime
 	Import 'RunSql2 StringFunctions'
 
-	case $(Lower ${mode:0:1}) in
-	    s)	# START
+	case ${mode:0:1} in
+	    s|S)	# START
 			myName=$1; shift || true
 			argString="$*"
 			[[ $informationOnlyMode == true ]] && argString="${argString}, informationOnlyMode"
@@ -31,7 +31,7 @@ function ProcessLogger {
 			[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Could not insert record into $processLogTable"
 			echo ${resultSet[0]}
 			;;
-	    e)	# END
+	    e|E)	# END
 			idx=$1
 			[[ -z $idx ]] && return 0
 			sqlStmt="select startEtime from $processLogTable where idx=$idx"
@@ -53,7 +53,7 @@ function ProcessLogger {
 			sqlStmt="update $processLogTable set endTime=\"$endTime\",endEtime=\"$epochEtime\",elapsedTime=\"$elapTime\" where idx=$idx"
 			RunSql2 $sqlStmt
 	        ;;
-	    u)	# UPDATE DATA FIELD, The second token is the name of the field to update
+	    u|U)	# UPDATE DATA FIELD, The second token is the name of the field to update
 			idx=$1; shift || true
 			[[ -z $idx ]] && return 0
 			local field=$1; shift || true
@@ -61,7 +61,7 @@ function ProcessLogger {
 			sqlStmt="update $processLogTable set $field=\"$argString\" where idx=$idx"
 			RunSql2 $sqlStmt
 	        ;;
-	    r)	# REMOVE
+	    r|R)	# REMOVE
 			idx=$1; shift || true
 			[[ -z $idx ]] && return 0
 			sqlStmt="delete from $processLogTable where idx=$idx"
