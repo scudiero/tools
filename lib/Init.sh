@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.64 # -- dscudiero -- Wed 01/10/2018 @ 16:55:17.51
+# version=2.1.66 # -- dscudiero -- Mon 01/22/2018 @ 15:35:10.18
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -32,7 +32,7 @@ function Init {
 	local token checkEnv
 	#printf "%s\n" "$@"
 	for token in $@; do
-		token=$(Lower $token)
+		token=${token,,[a-z]}
 		dump -3 -t token
 		[[ $token == 'clean' || $token == 'clear' ]] && unset env srcEnv tgtEnv srcDir tgtDir siteDir pvtDir devDir testDir currDir previewDir publicDir
 		if [[ $token == 'courseleaf' || $token == 'all' ]]; then getClient=true; getEnv=true; getDirs=true; checkEnvs=true; fi
@@ -68,13 +68,13 @@ function Init {
 			checkClient='noCheck';
 		fi
 		Prompt client 'What client do you wish to work with?' "$checkClient";
-		Client="$client"; client=$(Lower $client)
+		Client="$client"; client=${client,,[a-z]}
 		if [[ $client == '.' ]]; then
 			client=$(basename $(pwd))
 			if [[ $client == 'qa' || $client == 'test' || $client == 'next' || $client == 'curr'  || $client == 'preview'  || $client == 'public' ]]; then
 				pushd $(pwd)
 				cd ..
-				Client=$(basename $(pwd)); client=$(Lower $client)
+				Client=$(basename $(pwd)); client=${client,,[a-z]}
 				popd
 			fi
 			getEnv=false; getSrcEnv=false; getTgtEnv=false; getDirs=false; checkEnvs=false
@@ -160,7 +160,7 @@ function Init {
 			if [[ $(Contains "$clientEnvs" 'pvt') == false ]]; then
 				[[ $addPvt == true || $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt $clientEnvs" && defaultEnv='pvt'
 			fi
-			Prompt env "What environment/site do you wish to use?" "${clientEnvs// /,}" $defaultEnv; srcEnv=$(Lower $srcEnv)
+			Prompt env "What environment/site do you wish to use?" "${clientEnvs// /,}" $defaultEnv; srcEnv=${srcEnv,,[a-z]}
 			[[ $checkProdEnv == true ]] && checkProdEnv=$env
 		fi
 
@@ -174,7 +174,7 @@ function Init {
 			if [[ $(Contains "$clientEnvs" 'pvt') == false ]]; then
 				[[ $addPvt == true || $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt $clientEnvs" && defaultEnv='pvt'
 			fi
-			Prompt srcEnv "What $(ColorK 'source') environment/site do you wish to use?" "${clientEnvs// /,}" $defaultEnv; srcEnv=$(Lower $srcEnv)
+			Prompt srcEnv "What $(ColorK 'source') environment/site do you wish to use?" "${clientEnvs// /,}" $defaultEnv; srcEnv=${srcEnv,,[a-z]}
 			clientEnvs="$clientEnvsSave"
 			[[ $checkProdEnv == true ]] && checkProdEnv=$srcEnv
 		fi
@@ -188,7 +188,7 @@ function Init {
 				[[ $addPvt == true || $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt $clientEnvs"
 			fi
 			[[ -z $defaultEnv && $(Contains "$clientEnvs" 'test') == true ]] && defaultEnv='test'
-			Prompt tgtEnv "What $(ColorK 'target') environment/site do you wish to use?" "${clientEnvs// /,}" $defaultEnv; srcEnv=$(Lower $srcEnv)
+			Prompt tgtEnv "What $(ColorK 'target') environment/site do you wish to use?" "${clientEnvs// /,}" $defaultEnv; srcEnv=${srcEnv,,[a-z]}
 			[[ $checkProdEnv == true ]] && checkProdEnv=$tgtEnv
 		fi
 
@@ -218,8 +218,7 @@ function Init {
 				[[ -n $UsersAuthGroups && -n $productsinsupport && $(Contains ",$UsersAuthGroups," ',support,') != true ]] && \
 		 				Terminate "The client has products in support ($productsinsupport), please contact the support person assigned to this client to update the '$env' site"
 		 		[[ -n productsinsupport ]] && Info 0 1 "FYI, the client has the following products in production: '$productsinsupport'"
-				unset ans; Prompt ans "Are you sure" "Yes No";
-				ans=$(Lower ${ans:0:1})
+				unset ans; Prompt ans "Are you sure" "Yes No"; ans=${ans:0:1}; ans=${ans,,[a-z]}
 				[[ $ans != 'y' ]] && Goodbye -1
 				getJalot=true
 			fi
@@ -257,11 +256,13 @@ function Init {
 		prodCnt=$(grep -o ' ' <<< "$validProducts" | wc -l)
 		if [[ $prodCnt -gt 0 ]]; then
 			Prompt $prodVar "What $prodVar do you wish to work with$promptModifer?" "$validProducts all"
-			eval $prodVar=$(Lower \$$prodVar)
+			prodVar=${prodVar,,[a-z]}; 
+			eval $prodVar=\$$prodVar
 			[[ $prodVar == 'all' ]] && eval $prodVar=$validProducts
 		else
 			Note 0 1 "Only one value valid for '$prodVar', using '$validProducts'"
-			eval $prodVar=$(Lower $validProducts)
+			prodVar=${validProducts,,[a-z]}; 
+			eval $prodVar=\$$prodVar
 		fi
 	fi # getProducts
 
