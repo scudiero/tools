@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.7" # -- dscudiero -- Thu 12/28/2017 @ 10:55:40.87
+# version="2.1.8" # -- dscudiero -- Mon 01/22/2018 @  8:44:18.62
 #===================================================================================================
 # Common script exit
 # args:
@@ -15,13 +15,15 @@ function Goodbye {
 	Import "$standardIncludes $myIncludes"
 
 	SetFileExpansion 'off'
-	local exitCode=$1; shift
+	local exitCode=$1; shift; exitCode="${exitCode,,[a-z]}"
+
 	local additionalText=$*
 	dump -3 exitCode additionalText
 
 	local tokens
 	local alert=false
-	local token=$(Lower $(cut -d' ' -f1 <<< $additionalText))
+	local token=$(cut -d' ' -f1 <<< $additionalText)
+	local token="${token,,[a-z]}"
 	[[ $token == 'alert' ]] && alert=true && shift && additionalText=$*
 	[[ "$exitCode" = "" ]] && exitCode=0
 
@@ -33,7 +35,7 @@ function Goodbye {
 		[[ -n $tmpRoot ]] && SetFileExpansion 'on' && rm -rf $tmpRoot/${myName}* >& /dev/null && SetFileExpansion
 
 	## Exit Process
-	case "$(Lower "$exitCode")" in
+	case $exitCode in
 		quiet)
 			[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Remove' $myLogRecordIdx
 			[[ $$ -ne $BASHPID ]] && kill -1 $BASHPID  ## If the BASHPID != the current processid then we are in a subshell, send a HangUP signel to the subshell
