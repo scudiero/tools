@@ -1,10 +1,10 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.12 # -- dscudiero -- Mon 01/22/2018 @  7:46:03.03
+version=4.13.13 # -- dscudiero -- Mon 01/22/2018 @  7:55:06.09
 #==================================================================================================
 TrapSigs 'on'
-myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFuntions"
+myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
 Import "$standardInteractiveIncludes $myIncludes"
 
 [[ $1 == $myName ]] && shift
