@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.119 # -- dscudiero -- Wed 12/20/2017 @  6:55:04.25
+version=4.3.122 # -- dscudiero -- Mon 01/22/2018 @ 12:03:23.50
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql2 StringFunctions ProtectedCall FindExecutable PushPop"
@@ -108,11 +108,11 @@ fi
 		SetFileExpansion
 		numClients=${#clientDirs[@]}
 
-if [[ $verboseLevel -ge 1 ]]; then
-	echo
-	Msg3 "dbClients:"; for i in "${!dbClients[@]}"; do printf "\t[$i] = >${dbClients[$i]}<\n"; done; echo
-	Msg3 "clientDirs:"; for i in "${!clientDirs[@]}"; do printf "\t[$i] = >${clientDirs[$i]}<\n"; done; echo
-fi
+	if [[ $verboseLevel -ge 1 ]]; then
+		echo
+		Msg3 "dbClients:"; for i in "${!dbClients[@]}"; do printf "\t[$i] = >${dbClients[$i]}<\n"; done; echo
+		Msg3 "clientDirs:"; for i in "${!clientDirs[@]}"; do printf "\t[$i] = >${clientDirs[$i]}<\n"; done; echo
+	fi
 	## Loop through actual clientDirs
 		declare -A foundCodes ## Has table to keep track of 'seen' client codes (because we can have xxx and xxx-test)
 		for clientDir in ${clientDirs[@]}; do
@@ -127,7 +127,8 @@ fi
 				for env in ${envList//,/ }; do unset ${env}Dir ; done
 				SetSiteDirs
 				## Loop through the environments, processing any that are not null
-				for env in ${courseleafProdEnvs//,/ }; do
+				for env in ${courseleafProdEnvs//,/ } ${courseleafDevEnvs//,/ }; do
+					[[ $env == 'pvt' ]] && continue
 					token="${env}Dir" ; envDir="${!token}"
 					[[ -z $envDir ]] && continue
 					[[ ${foundCodes[${clientCode}.${env}]+abc} ]] && continue  ## have we seen this client code before, if yes then skip
