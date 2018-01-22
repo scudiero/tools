@@ -1,12 +1,11 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.15 # -- dscudiero -- Mon 01/22/2018 @  8:37:12.56
+version=4.13.29 # -- dscudiero -- Mon 01/22/2018 @ 15:33:42.99
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
 Import "$standardInteractiveIncludes $myIncludes"
-
 [[ $1 == $myName ]] && shift
 originalArgStr="$*"
 scriptDescription="Create a cloned private dev site"
@@ -542,7 +541,7 @@ fi
 
 ## If we have cims and copying from test or next and lock is on then comment out workflow mgmt records on the console
 	if [[ $srcEnv == 'next' || $srcEnv == 'test' ]] && [[ -n $lockWorkflows ]]; then
-		Warning "Disabling workflow modifications in the '$(Upper "$srcEnv")' environment"
+		Warning "Disabling workflow modifications in the '${srcEnv^^[a-z]}' environment"
 		editFile="$srcDir/web/courseleaf/index.tcf"
 		for cim in $(tr ',' ' ' <<< "$lockWorkflows"); do
 			[[ $(Contains "$cim" 'admin') != true ]] && cim="${cim}admin"
@@ -559,11 +558,11 @@ fi
 
 #==================================================================================================
 ## Bye-bye
-[[ -n $asSite ]] && msgText="$(ColorK "$(Upper $asSite)")" || msgText="$(ColorK "$(Upper $client)")"
+[[ -n $asSite ]] && msgText="$(ColorK "${aaSite^^[a-z]}")" || msgText="$(ColorK "${client^^[a-z]}")"
 
 [[ $startWizdebug == true ]] && { echo "FindExecutable -sh -run wizdebug $client -${tgtEnv}"; FindExecutable -sh -run wizdebug $client -${tgtEnv}; }
 
-Goodbye 0 'alert' "$msgText clone from $(ColorK "$(Upper $env)")"
+Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 
 # 10-16-2015 -- dscudiero -- Update for framework 6 (4.1)
 # 10-21-2015 -- dscudiero -- Updated for Framework 6, errexit (4.4)
