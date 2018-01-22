@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.1.17" # -- dscudiero -- Tue 10/31/2017 @ 10:34:28.09
+# version="1.1.19" # -- dscudiero -- Mon 01/22/2018 @  8:20:16.33
 #===================================================================================================
 # Import need functions into the runtime environment
 #===================================================================================================
@@ -35,6 +35,7 @@ function Import {
 			[[ $verboseLevel -ge 2 ]] && echo -e "\t\t$caller/$FUNCNAME: searchDir= '$searchDir'"
 			if [[ -r ${searchDir}/${includeName}.sh ]]; then
 				[[ $verboseLevel -ge 2 ]] && echo -e "\tImporting: '$includeName' from ${searchDir}"
+[[ $userName == 'dscudiero' ]] && echo -e "\tImporting: '$includeName' from ${searchDir}"
 				source ${searchDir}/${includeName}.sh
 				SCRIPTINCLUDES="$SCRIPTINCLUDES,$includeName"
 				found=true
