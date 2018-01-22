@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.65" # -- dscudiero -- Wed 12/20/2017 @ 11:25:12.11
+# version="2.0.66" # -- dscudiero -- Mon 01/22/2018 @ 11:33:23.67
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -66,7 +66,8 @@ function VerifyPromptVal {
 							if [[ $verify == true ]]; then
 								if [[ $autoRemote != true ]]; then
 									responseSave="$response"
-									unset ans; Prompt ans "Client '$response' is hosted on '$hostedOn', Do you wish to start a session on that host" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
+									unset ans; Prompt ans "Client '$response' is hosted on '$hostedOn', Do you wish to start a session on that host" 'Yes No' 'Yes'
+									ans="${ans:0:1}"; ans=${ans,,[a-z]}
 									response="$responseSave"
 								else
 									ans='y'
@@ -92,7 +93,7 @@ function VerifyPromptVal {
 
 	## Envs(s)
 	if [[ $${promptVar:0:3} == 'env' && $verifyMsg == '' ]]; then
-		local answer=$(Lower $response)
+		local answer=${response,,[a-z]}
 		if [[ $allowMultiple != true && $(Contains "$answer" ",") == true ]]; then
 			verifyMsg=$(Error "$promptVar' does not allow for multiple values, valid values is one in {$validateList}")
 		else
@@ -123,8 +124,7 @@ function VerifyPromptVal {
 			RunSql2 "$sqlStmt"
 			[[ ${#resultSet[@]} -gt 0 ]] && validProducts="${resultSet[0]}"
 		fi
-
-		local ans=$(Lower $response)
+		local ans=${response,,[a-z]}
 		if [[ $allowMultiple != true && $(Contains "$ans" ",") == true ]]; then
 			verifyMsg=$(Error "$promptVar' does not allow for multiple values, valid values is one in {$validProducts}")
 		else
@@ -141,8 +141,8 @@ function VerifyPromptVal {
 				if [[ $allowExtraProducts == true ]]; then
 					unset ans
 					echo -n -e "\tYou have specified a product not on this clients product list, please confirm this is correct (Yes, No)>"
-					read ans
-					[[ $(Lower ${ans}) == 'x' ]] && Goodbye 'x'
+					read ans; ans="${ans:0:1}"; ans=${ans,,[a-z]}
+					[[ $ans == 'x' ]] && Goodbye 'x'
 					[[ $ans == 'y' ]] && foundAll=true
 				fi
 			fi
@@ -180,7 +180,7 @@ function VerifyPromptVal {
 		if [[ $validateListString == '' ]]; then
 			eval $promptVar=$response
 		else
-			local answer=$(Lower $response)
+			local answer=${response,,[a-z]}
 			local length token checkStr foundAll found
 			## If allow multiples are allowed then loop throug responses and check each against valid values
 			if [[ $allowMultiple == true ]]; then
@@ -189,7 +189,7 @@ function VerifyPromptVal {
 					length=${#token}
 					found=false
 					for i in "${validValues[@]}"; do
-						checkStr=$(Lower ${i:0:$length})
+						checkStr=${i:0:$length}; checkStr=${response,,[a-z]}
 						[[ $token == $checkStr ]] && found=true && break
 					done
 					[[ $found != true ]] && foundAll=false && break
@@ -199,7 +199,7 @@ function VerifyPromptVal {
 				length=${#answer}
 				for i in "${validValues[@]}"; do
 					[[ $i == '*any*' ]] && PopSettings && verifyMsg=true && SetFileExpansion && return 0
-					checkStr=$(Lower ${i:0:$length})
+					checkStr=${i:0:$length}; checkStr=${checkStr,,[a-z]}
 					dump -3 -l -t -t answer length i checkStr
 					[[ $answer == $checkStr ]] && PopSettings && verifyMsg=true && SetFileExpansion && return 0
 				done
