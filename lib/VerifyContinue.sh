@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.24" # -- dscudiero -- Mon 01/22/2018 @  9:53:29.55
+# version="2.0.25" # -- dscudiero -- Mon 01/22/2018 @ 10:13:06.89
 #===================================================================================================
 ## Make sure the user really wants to do this
 ## If the first argument is 'loop' then loop back to self if user responds with 'n'
@@ -26,7 +26,7 @@ function VerifyContinue {
 		dots=$(PadChar '.' $maxArgWidth)
 		for arg in "${verifyArgs[@]}"; do
 			tempStr="$(echo $arg | cut -d':' -f1)"
-			local token1 = "$(echo $arg | cut -d':' -f1)" ; token1=${token1,,[a-z]}
+			local token1="$(echo $arg | cut -d':' -f1)" ; token1=${token1,,[a-z]}
 			[[ $token1 == 'warning' ]] && color='ColorW' || color='ColorK'
 			tempStr="${tempStr}${dots}"
 			tempStr=${tempStr:0:$maxArgWidth+3}
