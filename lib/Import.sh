@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.1.19" # -- dscudiero -- Mon 01/22/2018 @  8:20:16.33
+# version="1.1.20" # -- dscudiero -- Mon 01/22/2018 @  8:26:43.42
 #===================================================================================================
 # Import need functions into the runtime environment
 #===================================================================================================
@@ -26,6 +26,7 @@ function Import {
 	## Search for the include file, load the first one
 	[[ $verboseLevel -ge 2 ]] && echo -e "$caller/$FUNCNAME: searchDirs= '$searchDirs'"
 	[[ $verboseLevel -ge 2 ]] && echo -e "$caller/$FUNCNAME: includeList= '$includeList'"
+[[ $userName == 'dscudiero' ]] && echo -e "$caller/$FUNCNAME: includeList= '$includeList'"
 	for includeName in $includeList; do
 		[[ $verboseLevel -ge 2 ]] && echo -e "\t$caller/$FUNCNAME: includeName= '$includeName'"
 		[[ $(MyContains ",$SCRIPTINCLUDES," ",$includeName,") == true ]] && continue
