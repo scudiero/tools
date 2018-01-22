@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.75" # -- dscudiero -- Mon 01/22/2018 @  7:57:50.06
+version="1.4.76" # -- dscudiero -- Mon 01/22/2018 @  8:52:04.97
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -109,7 +109,7 @@ statusLine="Loader ($version): "
 	[[ $USELOCAL == true ]] && useLocal=true
 	while [[ -n $@ ]]; do
 		if [[ ${1:0:2} == '--' ]]; then
-			myArg=$(echo ${1:2} | tr '[:upper:]' '[:lower:]')
+			myArg="${1:2}" ; myArg=${myArg,,[a-z]}
 			[[ ${myArg:0:1} == 'v' ]] && myVerbose=true
 			[[ $myArg == 'usedev' ]] && useDev=true
 			[[ $myArg == 'uselocal' ]] && useLocal=true
