@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.23" # -- dscudiero -- Wed 10/04/2017 @ 16:56:22.85
+# version="2.0.24" # -- dscudiero -- Mon 01/22/2018 @  9:53:29.55
 #===================================================================================================
 ## Make sure the user really wants to do this
 ## If the first argument is 'loop' then loop back to self if user responds with 'n'
@@ -26,7 +26,8 @@ function VerifyContinue {
 		dots=$(PadChar '.' $maxArgWidth)
 		for arg in "${verifyArgs[@]}"; do
 			tempStr="$(echo $arg | cut -d':' -f1)"
-			[[ $(Lower "$tempStr") == 'warning' ]] && color='ColorW' || color='ColorK'
+			local token1 = "$(echo $arg | cut -d':' -f1)" ; token1=${token1,,[a-z]}
+			[[ $token1 == 'warning' ]] && color='ColorW' || color='ColorK'
 			tempStr="${tempStr}${dots}"
 			tempStr=${tempStr:0:$maxArgWidth+3}
 			Msg3 "^$(eval "$color \"${tempStr}\"")$(echo $arg | cut -d':' -f2-)"
@@ -39,7 +40,7 @@ function VerifyContinue {
 		unset ans
 		inVerifyContinue=true
 		[[ $informationOnlyMode == true ]] && verifyContinueDefault='Yes'
-		Prompt ans "\n'Yes' to continue, 'No' to exit" 'Yes No' "$verifyContinueDefault"; ans=$(Lower ${ans:0:1})
+		Prompt ans "\n'Yes' to continue, 'No' to exit" 'Yes No' "$verifyContinueDefault"; ans="${ans:0:1}"; ans=${ans,,[a-z]}
 		inVerifyContinue=false
 		if [[ $ans == "i" ]]; then
 			informationOnlyMode=true
