@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.14 # -- dscudiero -- Mon 01/22/2018 @  8:24:23.69
+version=4.13.15 # -- dscudiero -- Mon 01/22/2018 @  8:37:12.56
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -133,7 +133,8 @@ fi
 dump -2 -n client envs products fullCopy overlay suffix email skipCat skipCim skipClss skipAlso
 
 ## Resolve data based on passed in client, handle special cases
-	if [[ $(Lower "${client:0:5}") == 'luc20' && ${srcEnv:0:1} == 'p' && ${tgtEnv:0:1} == 'p' ]]; then
+	tmpStr="${client:0:5}"; tmpStr=${tmpStr,,[a-z]}
+	if [[ $tmpStr == 'luc20' && ${srcEnv:0:1} == 'p' && ${tgtEnv:0:1} == 'p' ]]; then
 		srcEnv='pvt'
 		srcDir="/mnt/dev7/web/lilypadu-$userName"
 		[[ ! -d "$srcDir" ]] && srcEnv='next' && srcDir='/mnt/lilypadu/site/next'
@@ -230,7 +231,8 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 		Msg3
 		unset ans
 		Warning "Target site ($tgtDir) already existes."
-		Prompt ans "Do you wish to $(ColorK 'overwrite') the existing site (Yes) or $(ColorK 'refresh') files in the existing sites site (No) ?" 'Yes No' 'Yes' ; ans=$(Lower ${ans:0:1})
+		Prompt ans "Do you wish to $(ColorK 'overwrite') the existing site (Yes) or $(ColorK 'refresh') files in the existing sites site (No) ?" 'Yes No' 'Yes' 
+		ans=${ans:0:1}; ans=${ans,,[a-z]}
 		[[ $ans == 'y' ]] && cloneMode='Replace' || cloneMode='Refresh'
 	fi
 
@@ -254,24 +256,25 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 ## See if there are any additional directories the user wants to skip
 if [[ $verify == true ]]; then
 	echo
-	unset ans; Prompt ans "Do you wish to specify which file sets to EXCLUDE" 'No Yes' 'No'; ans="$(Lower "${ans:0:1}")"
+	unset ans; Prompt ans "Do you wish to specify which file sets to EXCLUDE" 'No Yes' 'No'; ans=${ans:0:1}; ans=${ans,,[a-z]}
 	if [[ $ans == 'y' ]]; then
 		if [[ -z $skipCat ]]; then
-			unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') Client CAT files" 'No,Yes' 'No' '3'; ans="$(Lower "${ans:0:1}")"
+			unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') Client CAT files" 'No,Yes' 'No' '3'; ans=${ans:0:1}; ans=${ans,,[a-z]}
 			[[ $ans == 'y' ]] && skipCat=true
 		fi
 		if [[ -z $skipCim && $haveCims == true ]]; then
-			unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CIM & CIM instances" 'No,Yes' 'No' '3'; ans="$(Lower "${ans:0:1}")"
+			unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CIM & CIM instances" 'No,Yes' 'No' '3'; ans=${ans:0:1}; ans=${ans,,[a-z]}
 			[[ $ans == 'y' ]] && skipCim=true
 		fi
 		if [[ -z $skipClss && $haveClss == true ]]; then
-			unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CLSS/WEN" 'No,Yes' 'No' '3'; ans="$(Lower "${ans:0:1}")"
+			unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CLSS/WEN" 'No,Yes' 'No' '3'; ans=${ans:0:1}; ans=${ans,,[a-z]}
 			[[ $ans == 'y' ]] && skipClss=true
 		fi
 
 		if [[ -z $skipAlso && $cat != true && $cim != true && $clss != true ]]; then
 			echo
-			unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') additional directories/files from the copy operation" 'No,Yes' 'No' '3'; ans="$(Lower "${ans:0:1}")"
+			unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') additional directories/files from the copy operation" 'No,Yes' 'No' '3'
+			ans=${ans:0:1}; ans=${ans,,[a-z]}
 			if [[ $ans == 'y' ]]; then
 				SetFileExpansion 'off'
 				Msg3 "^Please specify the directories/files you wish to exclude, use '*' as a the wild card,"
@@ -280,7 +283,7 @@ if [[ $verify == true ]]; then
 				while true; do
 					MsgNoCRLF "^^==> "
 					read ignore
-					[[ -z $ignore || $(Lower "$ignore") == 'x' ]] && break
+					[[ -z $ignore || ${ignore,,[a-z]} == 'x' ]] && break
 					ignoreList="$ignoreList,$ignore"
 					unset ignore
 				done
@@ -454,7 +457,7 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		Msg3 "^'$leepfrogUserId' added as an admin with pw: '<normal pw>'"
 		$DOIT echo "user:test|test||" >> $tgtDir/$progDir.cfg
 		Msg3 "^'test' added as a normal user with pw: 'test'"
-		[[ $(Lower "${client:0:5}") != 'luc20' ]] && $DOIT echo "user:$client|$client||admin" >> $tgtDir/$progDir.cfg
+		[[ $tmpStr != 'luc20' ]] && $DOIT echo "user:$client|$client||admin" >> $tgtDir/$progDir.cfg
 		$DOIT echo "user:$client|$client||admin" >> $tgtDir/$progDir.cfg
 		[[ -n $forUser ]] && $DOIT echo "user:$userAccount|$userPassword||admin" >> $tgtDir/$progDir.cfg
 
