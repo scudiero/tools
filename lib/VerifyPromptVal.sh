@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.66" # -- dscudiero -- Mon 01/22/2018 @ 11:33:23.67
+# version="2.0.71" # -- dscudiero -- Tue 01/23/2018 @ 15:27:23.37
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -189,7 +189,7 @@ function VerifyPromptVal {
 					length=${#token}
 					found=false
 					for i in "${validValues[@]}"; do
-						checkStr=${i:0:$length}; checkStr=${response,,[a-z]}
+						checkStr=${i:0:$length}; checkStr=${checkStr,,[a-z]}
 						[[ $token == $checkStr ]] && found=true && break
 					done
 					[[ $found != true ]] && foundAll=false && break
