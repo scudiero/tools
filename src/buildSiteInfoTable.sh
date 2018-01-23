@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.122 # -- dscudiero -- Mon 01/22/2018 @ 12:03:23.50
+version=4.3.123 # -- dscudiero -- Tue 01/23/2018 @  7:16:14.28
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql2 StringFunctions ProtectedCall FindExecutable PushPop"
@@ -130,7 +130,7 @@ fi
 				for env in ${courseleafProdEnvs//,/ } ${courseleafDevEnvs//,/ }; do
 					[[ $env == 'pvt' ]] && continue
 					token="${env}Dir" ; envDir="${!token}"
-					[[ -z $envDir ]] && continue
+					[[ -z $envDir || ! -d $envDir ]] && continue
 					[[ ${foundCodes[${clientCode}.${env}]+abc} ]] && continue  ## have we seen this client code before, if yes then skip
 					Verbose 1 2 "Processing env: $env"
 					$DOIT source "$workerScriptFile" "$envDir" "$clientId" "$forkStr -tableName $useSiteInfoTable"
