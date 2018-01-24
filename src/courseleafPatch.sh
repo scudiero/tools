@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.44 # -- dscudiero -- Wed 01/24/2018 @ 10:58:38.18
+version=5.5.45 # -- dscudiero -- Wed 01/24/2018 @ 13:32:31.30
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel2 EditTcfValue BackupCourseleafFile'
@@ -935,8 +935,8 @@ removeGitReposFromNext=true
 	## Set the backup site
 	unset backupSite
 	if [[ $backup == true ]]; then
-		[[ $env == "next" || $env == "curr" ]] && backupSite="$tgtDir/$env" || backupSite="$tgtDir/$client"
-		backupSite="$backupSite.$(date +"%m-%d-%y").bak"
+		backupSite="$tgtDir/$client.$userName.$(date +"%m-%d-%y").bak"
+		[[ $env == "next" || $env == "curr" ]] && backupSite="$(dirname "$tgtDir")/${env}.$userName.$(date +"%m-%d-%y").bak"
 	fi
 
 #=======================================================================================================================
@@ -1042,8 +1042,6 @@ if [[ $offline == true ]]; then
 fi
 
 if [[ $backup == true ]]; then
-	[[ $env == "next" || $env == "curr" ]] && backupSite="$tgtDir/$env" || backupSite="$tgtDir/$client"
-	backupSite="$backupSite.$(date +"%m-%d-%y").bak"
 	Msg3 "Backing up the target site to, this will take a while..."
 	Msg3 "^(Fyi, you can check the status, view/tail the log file: '$logFile')"
 	sourceSpec="$tgtDir/"
@@ -1053,8 +1051,6 @@ if [[ $backup == true ]]; then
 	Indent++; RunRsync 'tgtSiteBackup' "$sourceSpec" "$targetSpec"; Indent--
 	Msg3 "^...Backup completed"
 	Alert 1
-else
-	backup=false
 fi
 
 ##======================================================================================================================
@@ -1823,3 +1819,4 @@ Goodbye 0 "$text1" "$text2"
 ## 12-20-2017 @ 07.21.42 - 5.5.13 - dscudiero - Cosmetic/minor change
 ## 12-20-2017 @ 14.45.55 - 5.5.22 - dscudiero - Fix problem where ((indentLevel++)) breaks if starting value is 0
 ## 01-24-2018 @ 10.58.48 - 5.5.44 - dscudiero - Cosmetic/minor change/Sync
+## 01-24-2018 @ 13.33.01 - 5.5.45 - dscudiero - Move the backup site to be at the same level as the target directory.
