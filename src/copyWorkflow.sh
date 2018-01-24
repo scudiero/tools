@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.64 # -- dscudiero -- Wed 01/24/2018 @ 10:25:17.62
+version=2.10.65 # -- dscudiero -- Wed 01/24/2018 @ 10:42:13.81
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi"
@@ -687,4 +687,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 12-13-2017 @ 14.21.18 - (2.10.59)   - dscudiero - Write out the backup file to the target sites attic directory
 ## 12-13-2017 @ 14.25.14 - (2.10.60)   - dscudiero - Cosmetic/minor change
 ## 12-27-2017 @ 10.07.04 - (2.10.61)   - dscudiero - Cosmetic/minor change
-## 01-24-2018 @ 10.25.30 - #XO NOT AUTOVERSION - dscudiero - added additional messaging
+## 01-24-2018 @ 10.46.36 - 2.10.65 - dscudiero - Added additional messaging
