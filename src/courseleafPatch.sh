@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.43 # -- dscudiero -- Thu 01/18/2018 @ 16:24:45.15
+version=5.5.44 # -- dscudiero -- Wed 01/24/2018 @ 10:58:38.18
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel2 EditTcfValue BackupCourseleafFile'
@@ -1776,49 +1776,50 @@ Goodbye 0 "$text1" "$text2"
 ## Thu Jan 12 10:25:02 CST 2017 - dscudiero - Add logic to get siteDir if nocheck flag is on, Resolve cgiVersion fully
 ## Wed Jan 18 15:00:15 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Jan 20 09:52:15 CST 2017 - dscudiero - remove debug statement
-## 04-17-2017 @ 10.31.31 - (5.0.124)   - dscudiero - fixed for selectMenuNew changes
-## 04-27-2017 @ 11.10.21 - (5.0.125)   - dscudiero - Fixed error reporting rsync errors
-## 05-10-2017 @ 07.02.02 - (5.1.22)    - dscudiero - Add support for remote patch packages
-## 05-10-2017 @ 07.08.45 - (5.1.23)    - dscudiero - fix problem setting ownership in the remote pachage
-## 05-12-2017 @ 13.46.25 - (5.1.63)    - dscudiero - Fix numerious problems with the patch package
-## 06-05-2017 @ 07.58.16 - (5.1.88)    - dscudiero - Added support for selected refresh of index.cgi in the search directory
-## 06-05-2017 @ 11.04.04 - (5.1.95)    - dscudiero - Tweaked messaging for product, fixed editing of courseleaf console
-## 06-05-2017 @ 14.52.03 - (5.1.101)   - dscudiero - Added checing for deprecated formbuilder widgets
-## 06-13-2017 @ 12.46.00 - (5.1.105)   - dscudiero - g
-## 06-19-2017 @ 07.14.10 - (5.2.-1)    - dscudiero - Added the include calability back
-## 06-19-2017 @ 15.07.53 - (5.2.-1)    - dscudiero - Add setting of siteadminmode in the curr site
-## 06-19-2017 @ 15.39.16 - (5.2.-1)    - dscudiero - Added report as an option to compare directive
-## 06-26-2017 @ 10.14.14 - (5.2.0)     - dscudiero - Updated for new requirements
-## 06-26-2017 @ 15.33.06 - (5.2.1)     - dscudiero - Make not having a locallibs directory a warning
-## 06-26-2017 @ 15.48.08 - (5.2.2)     - dscudiero - General syncing of dev to prod
-## 07-17-2017 @ 11.33.20 - (5.2.4)     - dscudiero - Updated code checking for locallibs directory
-## 07-17-2017 @ 16.25.46 - (5.2.6)     - dscudiero - check to see if source file exists for compare actions
-## 07-19-2017 @ 14.37.32 - (5.2.10)    - dscudiero - Update how the cgi files are sourced
-## 07-20-2017 @ 11.08.42 - (5.2.20)    - dscudiero - Fix problem where commands were not being run
-## 07-20-2017 @ 12.41.43 - (5.2.22)    - dscudiero - Move the setting of the permisions for /search/index.cgi into the searchcgi record processing in the script
-## 07-24-2017 @ 07.57.41 - (5.2.23)    - dscudiero - remove trailing blanks in the log file entries
-## 08-02-2017 @ 09.32.38 - (5.3.9)     - dscudiero - Updates to cgi selection and add git processing
-## 08-02-2017 @ 11.20.43 - (5.3.12)    - dscudiero - Change not having a locallibs directory a warning
-## 08-02-2017 @ 15.12.51 - (5.3.24)    - dscudiero - Fix problem not setting processControl for proucts not in git (e.g. cgis)
-## 08-07-2017 @ 13.51.42 - (5.4.0)     - dscudiero - Refreshed how git controlled files are handled
-## 08-07-2017 @ 13.58.18 - (5.4.1)     - dscudiero - Allow only mzollo and epingel to run the script
-## 08-07-2017 @ 14.12.41 - (5.4.0)     - dscudiero - Add dscudiero to the allow list
-## 08-07-2017 @ 15.52.39 - (5.4.1)     - dscudiero - Add checkProdEnv on the Init calls, verify the user can change a production env
-## 08-07-2017 @ 17.00.43 - (5.4.2)     - dscudiero - remove debug code
-## 09-05-2017 @ 08.06.54 - (5.4.4)     - dscudiero - Added --ignore-times to the rsync options
-## 09-06-2017 @ 13.24.30 - (5.4.5)     - dscudiero - Remove ignore-times directive on rsync
-## 09-20-2017 @ 15.31.32 - (5.4.17)    - dscudiero - Released latest change to edit the console
-## 09-21-2017 @ 07.06.18 - (5.4.27)    - dscudiero - Comment out the refresh of the auth table
-## 09-25-2017 @ 09.48.48 - (5.4.30)    - dscudiero - Switch to Msg3
-## 10-02-2017 @ 17.07.54 - (5.5.0)     - dscudiero - Switch to GetExcel2
-## 10-03-2017 @ 07.14.03 - (5.5.0)     - dscudiero - Add Alert to include list
-## 10-16-2017 @ 16.40.53 - (5.5.0)     - dscudiero - Tweak messaging when reporting the uncommitte git files
-## 11-02-2017 @ 06.58.37 - (5.5.0)     - dscudiero - Switch to ParseArgsStd2
-## 11-02-2017 @ 10.27.55 - (5.5.0)     - dscudiero - use help2
-## 11-02-2017 @ 10.53.32 - (5.5.0)     - dscudiero - Add addPvt to the Init call
-## 11-30-2017 @ 13.26.33 - (5.5.0)     - dscudiero - Switch to use the -all flag on the GetCims call
-## 12-01-2017 @ 12.27.36 - (5.5.0)     - dscudiero - Remove the hard coded override to always patch from the master release
-## 12-20-2017 @ 07.05.24 - (5.5.10)    - dscudiero - Add to indentention level before calling Rsync
-## 12-20-2017 @ 07.19.54 - (5.5.11)    - dscudiero - Cosmetic/minor change
-## 12-20-2017 @ 07.21.42 - (5.5.13)    - dscudiero - Cosmetic/minor change
-## 12-20-2017 @ 14.45.55 - (5.5.22)    - dscudiero - Fix problem where (indentLevel++) breaks if starting value is 0
+## 04-17-2017 @ 10.31.31 - 5.0.124 - dscudiero - fixed for selectMenuNew changes
+## 04-27-2017 @ 11.10.21 - 5.0.125 - dscudiero - Fixed error reporting rsync errors
+## 05-10-2017 @ 07.02.02 - 5.1.22 - dscudiero - Add support for remote patch packages
+## 05-10-2017 @ 07.08.45 - 5.1.23 - dscudiero - fix problem setting ownership in the remote pachage
+## 05-12-2017 @ 13.46.25 - 5.1.63 - dscudiero - Fix numerious problems with the patch package
+## 06-05-2017 @ 07.58.16 - 5.1.88 - dscudiero - Added support for selected refresh of index.cgi in the search directory
+## 06-05-2017 @ 11.04.04 - 5.1.95 - dscudiero - Tweaked messaging for product, fixed editing of courseleaf console
+## 06-05-2017 @ 14.52.03 - 5.1.101 - dscudiero - Added checing for deprecated formbuilder widgets
+## 06-13-2017 @ 12.46.00 - 5.1.105 - dscudiero - g
+## 06-19-2017 @ 07.14.10 - 5.2.-1 - dscudiero - Added the include calability back
+## 06-19-2017 @ 15.07.53 - 5.2.-1 - dscudiero - Add setting of siteadminmode in the curr site
+## 06-19-2017 @ 15.39.16 - 5.2.-1 - dscudiero - Added report as an option to compare directive
+## 06-26-2017 @ 10.14.14 - 5.2.0 - dscudiero - Updated for new requirements
+## 06-26-2017 @ 15.33.06 - 5.2.1 - dscudiero - Make not having a locallibs directory a warning
+## 06-26-2017 @ 15.48.08 - 5.2.2 - dscudiero - General syncing of dev to prod
+## 07-17-2017 @ 11.33.20 - 5.2.4 - dscudiero - Updated code checking for locallibs directory
+## 07-17-2017 @ 16.25.46 - 5.2.6 - dscudiero - check to see if source file exists for compare actions
+## 07-19-2017 @ 14.37.32 - 5.2.10 - dscudiero - Update how the cgi files are sourced
+## 07-20-2017 @ 11.08.42 - 5.2.20 - dscudiero - Fix problem where commands were not being run
+## 07-20-2017 @ 12.41.43 - 5.2.22 - dscudiero - Move the setting of the permisions for /search/index.cgi into the searchcgi record processing in the script
+## 07-24-2017 @ 07.57.41 - 5.2.23 - dscudiero - remove trailing blanks in the log file entries
+## 08-02-2017 @ 09.32.38 - 5.3.9 - dscudiero - Updates to cgi selection and add git processing
+## 08-02-2017 @ 11.20.43 - 5.3.12 - dscudiero - Change not having a locallibs directory a warning
+## 08-02-2017 @ 15.12.51 - 5.3.24 - dscudiero - Fix problem not setting processControl for proucts not in git e.g. cgis
+## 08-07-2017 @ 13.51.42 - 5.4.0 - dscudiero - Refreshed how git controlled files are handled
+## 08-07-2017 @ 13.58.18 - 5.4.1 - dscudiero - Allow only mzollo and epingel to run the script
+## 08-07-2017 @ 14.12.41 - 5.4.0 - dscudiero - Add dscudiero to the allow list
+## 08-07-2017 @ 15.52.39 - 5.4.1 - dscudiero - Add checkProdEnv on the Init calls, verify the user can change a production env
+## 08-07-2017 @ 17.00.43 - 5.4.2 - dscudiero - remove debug code
+## 09-05-2017 @ 08.06.54 - 5.4.4 - dscudiero - Added --ignore-times to the rsync options
+## 09-06-2017 @ 13.24.30 - 5.4.5 - dscudiero - Remove ignore-times directive on rsync
+## 09-20-2017 @ 15.31.32 - 5.4.17 - dscudiero - Released latest change to edit the console
+## 09-21-2017 @ 07.06.18 - 5.4.27 - dscudiero - Comment out the refresh of the auth table
+## 09-25-2017 @ 09.48.48 - 5.4.30 - dscudiero - Switch to Msg3
+## 10-02-2017 @ 17.07.54 - 5.5.0 - dscudiero - Switch to GetExcel2
+## 10-03-2017 @ 07.14.03 - 5.5.0 - dscudiero - Add Alert to include list
+## 10-16-2017 @ 16.40.53 - 5.5.0 - dscudiero - Tweak messaging when reporting the uncommitte git files
+## 11-02-2017 @ 06.58.37 - 5.5.0 - dscudiero - Switch to ParseArgsStd2
+## 11-02-2017 @ 10.27.55 - 5.5.0 - dscudiero - use help2
+## 11-02-2017 @ 10.53.32 - 5.5.0 - dscudiero - Add addPvt to the Init call
+## 11-30-2017 @ 13.26.33 - 5.5.0 - dscudiero - Switch to use the -all flag on the GetCims call
+## 12-01-2017 @ 12.27.36 - 5.5.0 - dscudiero - Remove the hard coded override to always patch from the master release
+## 12-20-2017 @ 07.05.24 - 5.5.10 - dscudiero - Add to indentention level before calling Rsync
+## 12-20-2017 @ 07.19.54 - 5.5.11 - dscudiero - Cosmetic/minor change
+## 12-20-2017 @ 07.21.42 - 5.5.13 - dscudiero - Cosmetic/minor change
+## 12-20-2017 @ 14.45.55 - 5.5.22 - dscudiero - Fix problem where ((indentLevel++)) breaks if starting value is 0
+## 01-24-2018 @ 10.58.48 - 5.5.44 - dscudiero - Cosmetic/minor change/Sync
