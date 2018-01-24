@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.60" // -- dscudiero -- Mon 01/08/2018 @ 14:48:44.87
+wfLibVersion="1.8.61" // -- dscudiero -- Wed 01/24/2018 @  9:12:14.50
 attr_write("wfLibVersion", wfLibVersion);
 
 //======================================================================================================================
@@ -457,6 +457,9 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 //
 //		_includeEcoSystemData 	Included data from the Eco system in the results
 //
+//		_ecoSystemCatDataType	How to interprete catalog references from the eco system, valid values are {"subj","dept"}, 
+//								default value is "subj"
+//
 //		_ecoSystemType 			If retrieving data from the eco system you may define which references types to use
 //								This is used to match against the type field in the echo system record, if not specified
 //								all reference types are considered valid.
@@ -539,6 +542,7 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 // wfrules:RelatedCrosslistedSlashlistedDepts|function|Related|;
 // Related_ecoSystemInstances:courseadmin,sectoradmin,outlineadmin
 // Related_includeEcoSystemData:true
+// Related_ecoSystemCatDataType:subj
 // Related_ecoSystemDataFyi:fyi
 // Related_formFieldVars:crosslisted|courseCode|code
 // Related_formFieldVars:slashlisted|courseCode|code
@@ -625,6 +629,11 @@ wffuncs.Related = function(inval, wfrule, args) {
 			var ecoSystemDataPaths=getTCFValue(calledAs + "_ecoSystemDataPaths");
 			if (ecoSystemDataPaths === "") ecoSystemDataPaths=getTCFValue(myName + "_ecoSystemDataPaths");
 
+			var ecoSystemCatDataType=getTCFValue(calledAs + "_ecoSystemCatDataType");
+			if (ecoSystemCatDataType === "") ecoSystemCatDataType=getTCFValue(myName + "_ecoSystemCatDataType");
+			if (ecoSystemCatDataType === "") ecoSystemCatDataType="subj";
+
+
 			var dataMapper=getTCFValue(calledAs + "_dataMapper");
 			if (dataMapper === "") dataMapper=getTCFValue(myName + "_dataMapper");
 
@@ -652,7 +661,8 @@ wffuncs.Related = function(inval, wfrule, args) {
 		// Print debug info
 			wfDump(3,[
 					"\n\tcheckChanged;"+checkChanged,"includeEcoSystemData;"+includeEcoSystemData,"ecoSystemDataTypes;"+ecoSystemDataTypes,
-					"ecoSystemInstances;"+ecoSystemInstances,"ecoSystemDataPaths;"+ecoSystemDataPaths,"ecoSystemDataFyi;"+ecoSystemDataFyi,
+					"ecoSystemInstances;"+ecoSystemInstances,"ecoSystemDataPaths;"+ecoSystemDataPaths,"ecoSystemCatDataType;"+ecoSystemCatDataType,
+					"ecoSystemDataFyi;"+ecoSystemDataFyi,
 					"formFieldVars;"+formFieldVars.toSource(),"searchString;"+searchString.toSource(),"dataMapper;"+dataMapper,
 					"ignoreList;"+ignoreList]);
 
@@ -665,6 +675,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 		dataObj.ecoSystemInstances=ecoSystemInstances;
 		dataObj.ecoSystemDataTypes=ecoSystemDataTypes;
 		dataObj.ecoSystemDataPaths=ecoSystemDataPaths;
+		dataObj.ecoSystemCatDataType=ecoSystemCatDataType;
 		dataObj.formDataVars=formFieldVars;
 		dataObj.ignoreList=ignoreList;
 		var relatedData=GetRelated2(substitutionType,dataObj);
@@ -1148,6 +1159,7 @@ function LookupCode2(lookupType,givenType,givenData,excludeData) {
 //		paths: This is an string that may contain tokens in the set {'course','program','catalog'}, if
 //				specified then only references of those paths will be included in the results, if not
 //				specified then all will be considered.
+//
 // Returns an array of reference objects, each reference object is of the form:
 // {ref:data ref:dept ref:format}
 // format is in {'subj','dept','path'}
@@ -1162,7 +1174,7 @@ function LookupCode2(lookupType,givenType,givenData,excludeData) {
 //==================================================================================================
 function GetEcoSystemData2(proposalCodes,proposalDepts,data) {
 	var version="1.0.2";
-	var myName="GetEcoSystemData2"; wfDebug(4,'\n\t*** In '+ myName + " (" + version + ") ***");
+	var myName="GetEcoSystemData2"; wfDebug(4,"\n\t*** In "+ myName + " (" + version + ") ***");
 	if (proposalCodes.length === 0) return false;
 	wfDump(5,["\tproposalCodes;"+proposalCodes.toSource(),"\tproposalDepts;"+proposalDepts.toSource(),"\tdata;"+data.toSource()]);
 
@@ -1178,56 +1190,59 @@ function GetEcoSystemData2(proposalCodes,proposalDepts,data) {
 		var excludeDepts=GetAttrVal({request:"depts", options:"includetca", tcadata: tcadata});
 		if (!excludeDepts) excludeDepts=[];
 	}
-	var types=[], paths=",course,program,catalog,";
+	var types=[], paths=",course,program,catalog,", catType="subj";
 	if (data.hasOwnProperty("ecoSystemDataTypes")) types=data.ecoSystemDataTypes;
 	if (data.hasOwnProperty("ecoSystemDataPaths")) {
 		if (data.ecoSystemDataPaths !== "")
 			paths="," + data.ecoSystemDataPaths + ",";
 	}
+	if (data.hasOwnProperty("ecoSystemCatDataType")) {
+	if (data.ecoSystemCatDataType !== "")
+		catType=data.ecoSystemCatDataType;
+	}
 
-	wfDump(5,["\tproposalSubjs;"+proposalSubjs.toSource(),"\ttypes;"+types.toSource(),"\tpaths;"+paths.toSource(),"\texcludeDepts;"+excludeDepts.toSource()]);
+	wfDump(5,["\tproposalSubjs;"+proposalSubjs.toSource(),"\ttypes;"+types.toSource(),"\tpaths;"+paths.toSource(),
+		"\tcatType;"+catType,"\texcludeDepts;"+excludeDepts.toSource()]);
 
 	var refsArray=[];
 	//Check for any cross references data for this course in the crossref table (eco system)
-
-
 		var sqlStmt="SELECT DISTINCT path,dept,type FROM courseref WHERE code in (\"" + proposalCodes.join('","') + 
 					"\") and dept not in (\"" + excludeDepts.join('","') + "\") and dept <> ''";
 		if (types.length > 0) sqlStmt=sqlStmt + " and type in in (\"" + types.join('","') + "\")";
 
-		wfDump(5,['\tsqlStmt;'+sqlStmt]);
+		wfDump(5,["\tsqlStmt;"+sqlStmt]);
 		var resultSet=dbquery("courseref",sqlStmt);
-		wfDump(5,['\tresultSet;'+resultSet.toSource()]);
+		wfDump(5,["\tresultSet;"+resultSet.toSource()]);
 		var checkArray=[];
 		var proposalDeptsStr="";
 		if (!excludeDepts) proposalDeptsStr="," + proposalDepts.join(",") + ","; 
 		var proposalSubjsStr="," + proposalSubjs.join(",") + ",";
 		resultSet.forEach(function(result) {
 			var ref={};
-			if (result.path.substr(0,1) === '/' && paths.indexOf(",catalog,") >= 0) {
+			if (result.path.substr(0,1) === "/" && paths.indexOf(",catalog,") >= 0) {
 				if (proposalDeptsStr.indexOf(result.dept) < 0) {
-					ref.source='eco-cat';
+					ref.source="eco-cat";
 					ref.data=result.dept;
-					ref.format='dept';
+					ref.format=catType;
 					ref.type=result.type;
 				}
-			} else if (result.path.substr(0,12) === 'programcode:' && paths.indexOf(",program,") >= 0) {
+			} else if (result.path.substr(0,12) === "programcode:" && paths.indexOf(",program,") >= 0) {
 				if (proposalDeptsStr.indexOf(result.dept) < 0) {
-					ref.source='eco-program';
+					ref.source="eco-program";
 					ref.data=result.dept;
-					ref.format='dept';
+					ref.format="dept";
 					ref.type=result.type;
 				}
-			} else if (result.path.substr(0,5) === 'code:' && paths.indexOf(",course,") >= 0) {
+			} else if (result.path.substr(0,5) === "code:" && paths.indexOf(",course,") >= 0) {
 				if (proposalSubjsStr.indexOf(result.dept) < 0) {
-					ref.source='eco-course';
+					ref.source="eco-course";
 					ref.data=result.dept;
-					ref.format='subj';
+					ref.format="subj";
 					ref.type=result.type;
 				}
 			}
 			var key=ref.source+ref.data+ref.format+ref.type
-			if (Object.keys(ref).length != 0 && typeof checkArray[key] === 'undefined') {
+			if (Object.keys(ref).length != 0 && typeof checkArray[key] === "undefined") {
 				refsArray.push(ref); checkArray[key]=true;
 			}
 		}); //resultSet
