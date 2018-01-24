@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.65 # -- dscudiero -- Wed 01/24/2018 @ 10:42:13.81
+version=2.10.66 # -- dscudiero -- Wed 01/24/2018 @ 10:54:20.81
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi"
@@ -640,51 +640,52 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## Mon Mar  6 12:07:10 CST 2017 - dscudiero - added update comment for the log
 ## Tue Mar  7 14:45:49 CST 2017 - dscudiero - add jalot task to the update comment
 ## Fri Mar 17 16:40:36 CDT 2017 - dscudiero - remove errant t from logged lines
-## 04-04-2017 @ 09.08.22 - (2.8.75)    - dscudiero - Fix issue where it wasa still prompting for jalot and reason when noPrompt was active
-## 05-12-2017 @ 11.10.41 - (2.8.76)    - dscudiero - Added -jalot and -changeComment as options to the command line call
-## 05-16-2017 @ 08.23.15 - (2.8.88)    - dscudiero - Incorporate save workflow functionality into the script proper
-## 05-16-2017 @ 10.30.20 - (2.8.89)    - dscudiero - only delete the created tmp directory, not all of tmpRoot
-## 05-19-2017 @ 14.08.07 - (2.8.90)    - dscudiero - Turn off debugging messages when copy a workflow
-## 05-22-2017 @ 11.12.35 - (2.8.100)   - dscudiero - Make check for jalot number isNumeric
-## 05-24-2017 @ 08.11.15 - (2.9.9)     - dscudiero - Put in checks to make sure there is not a debug standard workflow active
-## 05-24-2017 @ 12.22.33 - (2.9.19)    - dscudiero - Fix problem when the target file/directory does not exist
-## 05-26-2017 @ 09.41.06 - (2.9.22)    - dscudiero - Make sure that cimsync is not commentd out
-## 07-21-2017 @ 13.15.56 - (2.9.23)    - dscudiero - Add more records in the workflow.cfg record checking/commenting logic
-## 08-08-2017 @ 16.56.10 - (2.9.24)    - dscudiero - Display the directory with the file when updating files
-## 08-08-2017 @ 16.58.02 - (2.9.25)    - dscudiero - General syncing of dev to prod
-## 08-17-2017 @ 15.56.56 - (2.9.26)    - dscudiero - set DOIT to echo if informationMode
-## 08-22-2017 @ 14.16.02 - (2.9.31)    - dscudiero - Fix syntax error
-## 08-28-2017 @ 11.37.12 - (2.9.32)    - dscudiero - Add checking for TODO step if target env is NEXT
-## 08-28-2017 @ 14.29.02 - (2.9.37)    - dscudiero - Fixed check for TODO in workflow.tcf
-## 08-29-2017 @ 13.12.12 - (2.9.38)    - dscudiero - Add warning message if a workflow contains the TODO step
-## 08-30-2017 @ 09.37.22 - (2.9.45)    - dscudiero - Hack to turn off requiredGlobalFiles
-## 08-30-2017 @ 09.38.48 - (2.9.46)    - dscudiero - Commented out the 'refreshSystem' option
-## 08-30-2017 @ 13.55.26 - (2.9.72)    - dscudiero - Add help text
-## 08-30-2017 @ 14.07.46 - (2.9.73)    - dscudiero - move name and version to the Help file
-## 08-30-2017 @ 15.16.12 - (2.9.75)    - dscudiero - Add a check to make sure the courseleaf or cim versions are the same from src to target
-## 08-31-2017 @ 07.54.14 - (2.9.77)    - dscudiero - If clver or cimver differ and target is next then terminaete
-## 08-31-2017 @ 09.57.31 - (2.9.79)    - dscudiero - add -norefresh optiona
-## 08-31-2017 @ 10.06.22 - (2.9.80)    - dscudiero - remove debug stuff
-## 09-01-2017 @ 09.28.41 - (2.9.93)    - dscudiero - g
-## 09-01-2017 @ 09.33.30 - (2.9.95)    - dscudiero - move helpSet to new help function
-## 09-01-2017 @ 10.00.11 - (2.9.98)    - dscudiero - Commented out CleanupOldFiles
-## 09-01-2017 @ 10.05.31 - (2.10.0)    - dscudiero - Change format of help
-## 09-01-2017 @ 13.44.38 - (2.10.3)    - dscudiero - run the previously named local function if found
-## 09-01-2017 @ 14.12.22 - (2.10.4)    - dscudiero - put
-## 09-05-2017 @ 08.56.49 - (2.10.5)    - dscudiero - Tweaked format of warning message
-## 09-20-2017 @ 15.31.04 - (2.10.25)   - dscudiero - Updated how it handles the situation where cl or cim versions are different and copying to next
-## 09-21-2017 @ 09.34.06 - (2.10.26)   - dscudiero - UPdated includes
-## 09-27-2017 @ 14.21.34 - (2.10.27)   - dscudiero - Switch to Msg3
-## 10-04-2017 @ 11.29.57 - (2.10.28)   - dscudiero - Do not update target file stuctures if different from source, just print a message
-## 10-04-2017 @ 16.12.32 - (2.10.29)   - dscudiero - Tweak the names of the workflow backup files
-## 10-09-2017 @ 16.53.42 - (2.10.34)   - dscudiero - Fix problem setting backup directory names
-## 10-10-2017 @ 13.33.45 - (2.10.35)   - dscudiero - Take the restriction for the jalot data to be only numeric away
-## 10-10-2017 @ 13.44.43 - (2.10.36)   - dscudiero - Add default values for some questions
-## 10-20-2017 @ 16.33.02 - (2.10.40)   - dscudiero - Added code to check to make sure there is a workflow management record for the cim instance
-## 11-02-2017 @ 15.54.32 - (2.10.41)   - dscudiero - Switch to ParseArgsStd2
-## 11-06-2017 @ 16.44.08 - (2.10.42)   - dscudiero - Add runCourseleafCgi to the includes list
-## 12-11-2017 @ 13.51.57 - (2.10.56)   - dscudiero - Add a check of the workflow.tcf revhistorytca data between source and target
-## 12-13-2017 @ 14.21.18 - (2.10.59)   - dscudiero - Write out the backup file to the target sites attic directory
-## 12-13-2017 @ 14.25.14 - (2.10.60)   - dscudiero - Cosmetic/minor change
-## 12-27-2017 @ 10.07.04 - (2.10.61)   - dscudiero - Cosmetic/minor change
-## 01-24-2018 @ 10.46.36 - 2.10.65 - dscudiero - Added additional messaging
+## 04-04-2017 @ 09.08.22 - 2.8.75 - dscudiero - Fix issue where it wasa still prompting for jalot and reason when noPrompt was active
+## 05-12-2017 @ 11.10.41 - 2.8.76 - dscudiero - Added -jalot and -changeComment as options to the command line call
+## 05-16-2017 @ 08.23.15 - 2.8.88 - dscudiero - Incorporate save workflow functionality into the script proper
+## 05-16-2017 @ 10.30.20 - 2.8.89 - dscudiero - only delete the created tmp directory, not all of tmpRoot
+## 05-19-2017 @ 14.08.07 - 2.8.90 - dscudiero - Turn off debugging messages when copy a workflow
+## 05-22-2017 @ 11.12.35 - 2.8.10 - dscudiero - Make check for jalot number isNumeric
+## 05-24-2017 @ 08.11.15 - 2.9.9  - dscudiero - Put in checks to make sure there is not a debug standard workflow active
+## 05-24-2017 @ 12.22.33 - 2.9.19 - dscudiero - Fix problem when the target file/directory does not exist
+## 05-26-2017 @ 09.41.06 - 2.9.22 - dscudiero - Make sure that cimsync is not commentd out
+## 07-21-2017 @ 13.15.56 - 2.9.23 - dscudiero - Add more records in the workflow.cfg record checking/commenting logic
+## 08-08-2017 @ 16.56.10 - 2.9.24 - dscudiero - Display the directory with the file when updating files
+## 08-08-2017 @ 16.58.02 - 2.9.25 - dscudiero - General syncing of dev to prod
+## 08-17-2017 @ 15.56.56 - 2.9.26 - dscudiero - set DOIT to echo if informationMode
+## 08-22-2017 @ 14.16.02 - 2.9.31 - dscudiero - Fix syntax error
+## 08-28-2017 @ 11.37.12 - 2.9.32 - dscudiero - Add checking for TODO step if target env is NEXT
+## 08-28-2017 @ 14.29.02 - 2.9.37 - dscudiero - Fixed check for TODO in workflow.tcf
+## 08-29-2017 @ 13.12.12 - 2.9.38 - dscudiero - Add warning message if a workflow contains the TODO step
+## 08-30-2017 @ 09.37.22 - 2.9.45 - dscudiero - Hack to turn off requiredGlobalFiles
+## 08-30-2017 @ 09.38.48 - 2.9.46 - dscudiero - Commented out the 'refreshSystem' option
+## 08-30-2017 @ 13.55.26 - 2.9.72 - dscudiero - Add help text
+## 08-30-2017 @ 14.07.46 - 2.9.73 - dscudiero - move name and version to the Help file
+## 08-30-2017 @ 15.16.12 - 2.9.75 - dscudiero - Add a check to make sure the courseleaf or cim versions are the same from src to target
+## 08-31-2017 @ 07.54.14 - 2.9.77 - dscudiero - If clver or cimver differ and target is next then terminaete
+## 08-31-2017 @ 09.57.31 - 2.9.79 - dscudiero - add -norefresh optiona
+## 08-31-2017 @ 10.06.22 - 2.9.80 - dscudiero - remove debug stuff
+## 09-01-2017 @ 09.28.41 - 2.9.93 - dscudiero - g
+## 09-01-2017 @ 09.33.30 - 2.9.95 - dscudiero - move helpSet to new help function
+## 09-01-2017 @ 10.00.11 - 2.9.98 - dscudiero - Commented out CleanupOldFiles
+## 09-01-2017 @ 10.05.31 - 2.10.0 - dscudiero - Change format of help
+## 09-01-2017 @ 13.44.38 - 2.10.3 - dscudiero - run the previously named local function if found
+## 09-01-2017 @ 14.12.22 - 2.10.4 - dscudiero - put
+## 09-05-2017 @ 08.56.49 - 2.10.5 - dscudiero - Tweaked format of warning message
+## 09-20-2017 @ 15.31.04 - 2.10.25 - dscudiero - Updated how it handles the situation where cl or cim versions are different and copying to next
+## 09-21-2017 @ 09.34.06 - 2.10.26 - dscudiero - UPdated includes
+## 09-27-2017 @ 14.21.34 - 2.10.27 - dscudiero - Switch to Msg3
+## 10-04-2017 @ 11.29.57 - 2.10.28 - dscudiero - Do not update target file stuctures if different from source, just print a message
+## 10-04-2017 @ 16.12.32 - 2.10.29 - dscudiero - Tweak the names of the workflow backup files
+## 10-09-2017 @ 16.53.42 - 2.10.34 - dscudiero - Fix problem setting backup directory names
+## 10-10-2017 @ 13.33.45 - 2.10.35 - dscudiero - Take the restriction for the jalot data to be only numeric away
+## 10-10-2017 @ 13.44.43 - 2.10.36 - dscudiero - Add default values for some questions
+## 10-20-2017 @ 16.33.02 - 2.10.40 - dscudiero - Added code to check to make sure there is a workflow management record for the cim instance
+## 11-02-2017 @ 15.54.32 - 2.10.41 - dscudiero - Switch to ParseArgsStd2
+## 11-06-2017 @ 16.44.08 - 2.10.42 - dscudiero - Add runCourseleafCgi to the includes list
+## 12-11-2017 @ 13.51.57 - 2.10.56 - dscudiero - Add a check of the workflow.tcf revhistorytca data between source and target
+## 12-13-2017 @ 14.21.18 - 2.10.59 - dscudiero - Write out the backup file to the target sites attic directory
+## 12-13-2017 @ 14.25.14 - 2.10.60 - dscudiero - Cosmetic/minor change
+## 12-27-2017 @ 10.07.04 - 2.10.61 - dscudiero - Cosmetic/minor change
+## 01-24-2018 @ 10.46.36 - 2.10.65- dscudiero - Added additional messaging
+## 01-24-2018 @ 10.54.40 - 2.10.66 - dscudiero - Cosmetic/minor change/Sync
