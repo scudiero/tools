@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.63" // -- dscudiero -- Wed 01/24/2018 @ 10:09:28.14
+wfLibVersion="1.8.64" // -- dscudiero -- Wed 01/24/2018 @ 10:11:36.82
 attr_write("wfLibVersion", wfLibVersion);
 
 //======================================================================================================================
@@ -2515,4 +2515,4 @@ var wfLibLoaded=true;
 // 12-20-2017 @ 12.38.41 - ("1.8.56")  - dscudiero - Fixed problems in getEcoData when there is no proposalDepts data
 // 12-21-2017 @ 09.47.48 - ("1.8.58")  - dscudiero - Add a check for proposal mode in wffuncs.CheckChanged, skip if not EDIT
 // 12-22-2017 @ 07.17.53 - ("1.8.58")  - dscudiero - Added the 'checkfieldsvar' option to CheckChanged
-// 01-24-2018 @ 10.09.57 - 1.8.63 -  - Add ability to define how the catalog eco system data should be use, as subject codes or department codes
+// 01-24-2018 @ 10.11.44 - 1.8.64 - dscudiero - Add ability to define how the catalog eco system data should be use, as subject codes or department codes
