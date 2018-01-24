@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.63 # -- dscudiero -- Thu 12/28/2017 @ 10:22:31.71
+version=2.10.64 # -- dscudiero -- Wed 01/24/2018 @ 10:25:17.62
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi"
@@ -567,6 +567,7 @@ Msg3
 	fi
 
 ## Delete obsolete files
+	Msg3 "Cleaning up obsolete files"
 	for cim in $(echo $cimStr | tr ',' ' '); do
 		for filePair in $ifThenDelete; do
 			checkSrcFile=$(cut -d ',' -f1 <<< $filePair); checkTgtFile=$(cut -d ',' -f2 <<< $filePair)
@@ -582,6 +583,7 @@ Msg3
 
 ## Write out change log entries
 	if [[ ${#copyFileList} -gt 0 ]]; then
+		Msg3 "Logging update"
 		## Log changes
 		[[ -n $comment ]] && changeLogLines=("$comment")
 		changeLogLines+=("Files updated from: '$srcDir'")
@@ -685,3 +687,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 12-13-2017 @ 14.21.18 - (2.10.59)   - dscudiero - Write out the backup file to the target sites attic directory
 ## 12-13-2017 @ 14.25.14 - (2.10.60)   - dscudiero - Cosmetic/minor change
 ## 12-27-2017 @ 10.07.04 - (2.10.61)   - dscudiero - Cosmetic/minor change
+## 01-24-2018 @ 10.25.30 - #XO NOT AUTOVERSION - dscudiero - added additional messaging
