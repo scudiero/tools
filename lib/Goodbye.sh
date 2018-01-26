@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.9" # -- dscudiero -- Fri 01/26/2018 @  8:32:31.39
+# version="2.1.10" # -- dscudiero -- Fri 01/26/2018 @  8:38:35.92
 #===================================================================================================
 # Common script exit
 # args:
@@ -156,7 +156,7 @@ function Quit {
 	Goodbye 'quickQuit'
 } #Quit
 function quit { Quit $* ; }
-function QUIT { trap - ERR EXIT; set +xveE; rm -rf $tmpRoot > /dev/null 2>&1; exit; }
+function QUIT { [[ -f $tmpFile ]] rm -f "$tmpFile"; trap - ERR EXIT; set +xveE; rm -rf $tmpRoot > /dev/null 2>&1; exit; }
 
 export -f Quit
 export -f quit
@@ -194,3 +194,4 @@ export -f QUIT
 ## 10-19-2017 @ 09.38.28 - ("2.1.3")   - dscudiero - Added -noBanner option to limit outout
 ## 10-19-2017 @ 16.15.42 - ("2.1.6")   - dscudiero - Fix problem where we were not printing banners
 ## 01-26-2018 @ 08.33.46 - 2.1.9 - dscudiero - Move Quit into Goodbye
+## 01-26-2018 @ 08.38.56 - 2.1.10 - dscudiero - Also delete the tmpFile if it exits for QUIT
