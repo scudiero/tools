@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.8" # -- dscudiero -- Mon 01/22/2018 @  8:44:18.62
+# version="2.1.9" # -- dscudiero -- Fri 01/26/2018 @  8:32:31.39
 #===================================================================================================
 # Common script exit
 # args:
@@ -151,6 +151,18 @@ function Goodbye {
 } #Goodbye
 export -f Goodbye
 
+function Quit {
+	exitCode=$1
+	Goodbye 'quickQuit'
+} #Quit
+function quit { Quit $* ; }
+function QUIT { trap - ERR EXIT; set +xveE; rm -rf $tmpRoot > /dev/null 2>&1; exit; }
+
+export -f Quit
+export -f quit
+export -f QUIT
+
+
 #===================================================================================================
 # Check-in Log
 #===================================================================================================
@@ -181,3 +193,4 @@ export -f Goodbye
 ## 10-16-2017 @ 14.01.40 - ("2.1.1")   - dscudiero - If in batchmode then return vs exit
 ## 10-19-2017 @ 09.38.28 - ("2.1.3")   - dscudiero - Added -noBanner option to limit outout
 ## 10-19-2017 @ 16.15.42 - ("2.1.6")   - dscudiero - Fix problem where we were not printing banners
+## 01-26-2018 @ 08.33.46 - 2.1.9 - dscudiero - Move Quit into Goodbye
