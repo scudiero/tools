@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.29 # -- dscudiero -- Mon 01/22/2018 @ 15:33:42.99
+version=4.13.30 # -- dscudiero -- Fri 01/26/2018 @ 10:42:30.20
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -225,7 +225,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 
 #==================================================================================================
 ## Check to see if all dirs exist
-	[[ -z $srcDir ]] && Terminate "No Source directory was specified"
+	[[ -z $srcDir ]] && Terminate "Could not resolve the source directory, you may not have access."
 	if [[ -d $tgtDir && $overlay == false  && $refresh == false ]]; then
 		Msg3
 		unset ans
@@ -678,3 +678,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 12-06-2017 @ 10.29.03 - (4.13.2)    - dscudiero - Add GetCims to imports list
 ## 12-18-2017 @ 08.03.32 - (4.13.6)    - dscudiero - Fix issue processing the product codes properly
 ## 12-18-2017 @ 09.45.02 - (4.13.7)    - dscudiero - Cosmetic/minor change
+## 01-26-2018 @ 10.42.43 - 4.13.30 - dscudiero - M
