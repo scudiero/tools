@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.5" # -- dscudiero -- 01/04/2017 @ 13:51:31.10
+# version="2.0.6" # -- dscudiero -- Fri 01/26/2018 @  8:30:21.71
 #===================================================================================================
 # Quick quit
 #===================================================================================================
@@ -13,7 +13,7 @@ function Quit {
 	Goodbye 'quickQuit'
 } #Quit
 function quit { Quit $* ; }
-function QUIT { trap - ERR EXIT; set +xveE; rm -rf $tmpRoot > /dev/null 2>&1; exit; }
+function QUIT { trap - ERR EXIT; set +xveE; rm -rf $tmpRoot/* > /dev/null 2>&1; exit; }
 
 export -f Quit
 export -f quit
@@ -24,3 +24,4 @@ export -f QUIT
 #===================================================================================================
 
 ## Wed Jan  4 13:54:14 CST 2017 - dscudiero - General syncing of dev to prod
+## 01-26-2018 @ 08.33.24 - 2.0.6 - dscudiero - Only clean up directories and files under tmpRoot
