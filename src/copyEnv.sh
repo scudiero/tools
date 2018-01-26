@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.30 # -- dscudiero -- Fri 01/26/2018 @ 10:42:30.20
+version=4.13.31 # -- dscudiero -- Fri 01/26/2018 @ 10:43:29.68
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -678,4 +678,5 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 12-06-2017 @ 10.29.03 - (4.13.2)    - dscudiero - Add GetCims to imports list
 ## 12-18-2017 @ 08.03.32 - (4.13.6)    - dscudiero - Fix issue processing the product codes properly
 ## 12-18-2017 @ 09.45.02 - (4.13.7)    - dscudiero - Cosmetic/minor change
-## 01-26-2018 @ 10.42.43 - 4.13.30 - dscudiero - M
+## 01-26-2018 @ 10.42.43 - 4.13.30 - dscudiero - Tweak messaging if we cannot find the srcDir
+## 01-26-2018 @ 10.43.36 - 4.13.31 - dscudiero - Cosmetic/minor change/Sync
