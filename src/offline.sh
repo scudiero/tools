@@ -1,6 +1,6 @@
 #!/bin/bash
 #===================================================================================================
-version=1.0.17 # -- dscudiero -- Tue 10/03/2017 @ 16:12:41.81
+version=1.0.18 # -- dscudiero -- Fri 02/02/2018 @ 10:46:28.52
 #===================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2"
@@ -13,6 +13,8 @@ scriptDescription="Take a tools script offline or display the current scripts of
 ## turn a script offline -- i.e. create an .offline file
 #===================================================================================================
 GetDefaultsData $myName
+
+[[ $(Contains "$administrators" "$userName") != true ]] && Terminate "You do not have sufficient permissions to run this scrip"
 
 if [[ -n $originalArgStr ]]; then
 	for script in $originalArgStr; do
@@ -40,3 +42,4 @@ Goodbye
 ## Fri Jul 15 13:22:44 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Wed Jul 27 12:41:23 CDT 2016 - dscudiero - Fix problem where it was picking up N/A scripts
 ## 10-03-2017 @ 16.13.44 - (1.0.17)    - dscudiero - Refactored to allow report on all offline scripts
+## 02-02-2018 @ 10.46.37 - 1.0.18 - dscudiero - Add userid check
