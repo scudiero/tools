@@ -26,5 +26,6 @@ standardInteractiveIncludes="$standardIncludes Prompt VerifyContinue"
 #===================================================================================================
 ## Check-in log
 #===================================================================================================
-# 02-02-2018 @ 10.44.35 -  - dscudiero - Change the name of the administrators variable
+## 02-02-2018 @ 10.44.35 -  - dscudiero - Change the name of the administrators variable
 ## 02-02-2018 @ 11.07.28 -  - dscudiero - Cleanup login comments
+## 02-02-2018 @ 11.08.12 -  - dscudiero - Cosmetic/minor change/Sync
