@@ -2,7 +2,7 @@
 
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.41" # -- dscudiero -- Fri 02/02/2018 @  9:26:32.61
+# version="2.0.42" # -- dscudiero -- Fri 02/02/2018 @  9:28:15.51
 #===================================================================================================
 # Check to see if the logged user can run this script
 # Returns true if user is authorized, otherwise it returns a message
@@ -50,6 +50,8 @@ function CheckAuth {
 					done
 					[[ $found == true ]] && break
 				done
+			else
+				found=true
 			fi
 		fi
 
@@ -83,3 +85,4 @@ export -f CheckAuth
 ## 11-06-2017 @ 07.22.41 - ("2.0.38")  - dscudiero - Switch to using the auth files
 ## 02-02-2018 @ 09.25.58 - 2.0.40 - dscudiero - Fix problem not seeing first token in the restrictToGroups string
 ## 02-02-2018 @ 09.26.40 - 2.0.41 - dscudiero - Comment out the author check
+## 02-02-2018 @ 09.28.26 - 2.0.42 - dscudiero - Cosmetic/minor change/Sync
