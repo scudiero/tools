@@ -11,7 +11,7 @@ runMySqlJavaPgmName='runMySql2'
 #warehouseDbHost=duro.inside.leepfrog.com
 #runMySqlJavaPgmName='runMySql'
 
-adminUsers="dscudiero"
+administrators="dscudiero"
 setSemaphoreList='buildSiteInfoTable,buildClientInfoTable'
 
 javaResources='org.apache.commons.cli.*,java.sql.*,java.util.logging.*,java.util.*,java.io.*,java.lang.Runtime'
@@ -26,3 +26,4 @@ standardInteractiveIncludes="$standardIncludes Prompt VerifyContinue"
 #===================================================================================================
 ## Check-in log
 #===================================================================================================
+// 02-02-2018 @ 10.44.35 -  - dscudiero - Change the name of the administrators variable
