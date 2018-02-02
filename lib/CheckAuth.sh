@@ -2,7 +2,7 @@
 
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.42" # -- dscudiero -- Fri 02/02/2018 @  9:28:15.51
+# version="2.0.46" # -- dscudiero -- Fri 02/02/2018 @  9:44:21.40
 #===================================================================================================
 # Check to see if the logged user can run this script
 # Returns true if user is authorized, otherwise it returns a message
@@ -17,7 +17,8 @@ function CheckAuth {
 	local scriptName=${1-$myName}
 	unset author restrictGroups
 
-	[[ -z $UsersAuthGroups && -r "$TOOLSPATH/auth/$userName" ]] && UsersAuthGroups=$(cat "$TOOLSPATH/auth/$userName") || UsersAuthGroups='none' 
+	[[ -z $UsersAuthGroups && -r "$TOOLSPATH/auth/$userName" ]] && UsersAuthGroups=$(cat "$TOOLSPATH/auth/$userName")
+	[[ -z $UsersAuthGroups ]] && UsersAuthGroups='none' 
 
 	## Get the retricted information for the script
 		sqlStmt="select author,restrictToUsers,restrictToGroups from $scriptsTable where name=\"$scriptName\""
@@ -86,3 +87,4 @@ export -f CheckAuth
 ## 02-02-2018 @ 09.25.58 - 2.0.40 - dscudiero - Fix problem not seeing first token in the restrictToGroups string
 ## 02-02-2018 @ 09.26.40 - 2.0.41 - dscudiero - Comment out the author check
 ## 02-02-2018 @ 09.28.26 - 2.0.42 - dscudiero - Cosmetic/minor change/Sync
+## 02-02-2018 @ 09.44.36 - 2.0.46 - dscudiero - Fix bug checking of the auth file existrs
