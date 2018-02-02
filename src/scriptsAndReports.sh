@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.116 # -- dscudiero -- Wed 11/15/2017 @  9:42:58.99
+version=3.13.117 # -- dscudiero -- Fri 02/02/2018 @  9:57:40.13
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -43,10 +43,10 @@ function BuildMenuList {
 
 	## Get a list of scripts available to this user in the execution environment we are running in
 		unset whereClauseHost; unset whereClauseUser; unset whereClauseGroups
-		whereClauseActive="active = \"Yes\" and name != \"$mode\" and showInScripts=\"Yes\""
+		whereClauseActive="active = \"Yes\" and name <> \"$mode\" and showInScripts=\"Yes\""
 		if [[ $mode == 'scripts' ]]; then
-			whereClauseHost="and os=\"$osName\" and (host = \"$hostName\" or host is null)"
-			whereClauseUser="and (restrictToUsers like \"%$userName%\" or restrictToUsers is null)"
+			whereClauseHost="and os=\"$osName\" and (host = \"$hostName\" or lower(host) is null)"
+			whereClauseUser="and (restrictToUsers like \"%$userName%\" or lower(restrictToUsers) is null)"
 			fields="keyId,name,restrictToGroups,shortDescription"
 		else
 			fields="keyId,name,shortDescription"
@@ -537,3 +537,4 @@ Goodbye 0
 ## 11-08-2017 @ 07.51.01 - (3.13.63)   - dscudiero - Removed debug statements
 ## 11-09-2017 @ 07.26.48 - (3.13.64)   - dscudiero - Remove extra blank line if batchMode
 ## 11-15-2017 @ 09.48.24 - (3.13.116)  - dscudiero - Refactored passing in reports naming data from command line, fixed scripts calling reports
+## 02-02-2018 @ 09.57.59 - 3.13.117 - dscudiero - Tweak the sql query to make sure we take into account case
