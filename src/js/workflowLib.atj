@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.65" // -- dscudiero -- Mon 02/05/2018 @  9:33:09.18
+wfLibVersion="1.8.66" // -- dscudiero -- Mon 02/05/2018 @  9:46:35.00
 attr_write("wfLibVersion", wfLibVersion);
 
 //======================================================================================================================
@@ -1941,7 +1941,7 @@ CheckChanged = function(data) {
 			// Loop through the changed fields array
 			var allInList=true;
 			// if (numChanged > numCheck) allInList=false;
-			wfDebug(3,"\t\tChecking fields...")
+			wfDebug(3,"\t\tChecking changed fields...")
 			// loop through the list of changed fields and make sure they are all in the checkfields list
 			for (var key in changedHash) {
 				// check to make sure the field data really changed (i.e. scrub the data and then compare)
@@ -2546,3 +2546,4 @@ var wfLibLoaded=true;
 // 12-22-2017 @ 07.17.53 - ("1.8.58")  - dscudiero - Added the 'checkfieldsvar' option to CheckChanged
 // 01-24-2018 @ 10.11.44 - 1.8.64 - dscudiero - Add ability to define how the catalog eco system data should be use, as subject codes or department codes
 // 02-05-2018 @ 09.34.27 - 1.8.65 - dscudiero - Fixed bug where htmltext fields were being seen as changed because non-significant markup changes were in the text.
+// 02-05-2018 @ 09.47.00 - 1.8.66 - dscudiero - Tweaking messaging
