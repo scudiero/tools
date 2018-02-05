@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.64" // -- dscudiero -- Wed 01/24/2018 @ 10:11:36.82
+wfLibVersion="1.8.65" // -- dscudiero -- Mon 02/05/2018 @  9:33:09.18
 attr_write("wfLibVersion", wfLibVersion);
 
 //======================================================================================================================
@@ -1788,17 +1788,17 @@ wffuncs.CheckProposalMode = function(inval, wfrule, args) {
 }; //wffuncs.CheckProposalMode
 
 //=======================================================================================================================
-//Adaptor for call to CheckChanged from workflow
+//Adapter for call to CheckChanged from workflow
 // Usage:
-//		wfrules:isMinorChange|function|CheckChanged|mode:only checkfields:<comma seperatered list of field>; // Minor change
+//		wfrules:isMinorChange|function|CheckChanged|mode:only checkfields:<comma separated list of field>; // Minor change
 //	or
-//		<callName>_wfCheckChangedFields: <comma seperatered list of field>
+//		<callName>_wfCheckChangedFields: <comma separated list of field>
 //		wfrules:isMinorChange|function|CheckChanged|mode:only
 //
 // mode in {"only","any"}
 //=======================================================================================================================
-// 05/08/2017 - dgs - New
-// 10/12/2017 - dgs Fix bug detecting not mode if 'not' is at the begining of the string
+// 05/08/17 - dgs - New
+// 10/12/17 - dgs - Fix bug detecting not mode if 'not' is at the beginning of the string
 //=======================================================================================================================
 wffuncs.CheckChanged = function(inval, wfrule, args) {
 	var version='1.0.0'; var myName=wfrule.attrname; wfDebug(3,"\n*** In wffuncs." + myName + "(" + version + ") called as " + wfrule.searchfor + " ***");
@@ -1885,13 +1885,15 @@ wffuncs.CheckChanged = function(inval, wfrule, args) {
 //	mode: 		 is in the set {'only','any'}
 //					'only' 	- if only the listed variables have changed then true, otherwise false
 //					'any'	- if any of the listed variables have changed then true, otherwise false
-//	checkFields: is a comma seperated list of variables to check
+//	checkFields: is a comma separated list of variables to check
 // Returns true or false as above
 //=================================================================================================
 // 03-10-17 - dgs - 	Initial coding -- ???
-// 05/10/17 - dgs - 	Refactored into a local module to be called by a wffuncs. module
+// 05/10/17 - dgs - 	Re-factored into a local module to be called by a wffuncs. module
 // 06/24/17 - dgs - 	Check to see if any non cycleattr fields changed, if not then short circuit
 //						the variable checks
+// 02/05/18 - dgs - Fixed bug where htmltext fields were being seen as changed because non-significant markup changes were 
+//					in the text.
 //=================================================================================================
 CheckChanged = function(data) {
 	var version='2.0.0'; wfDebug(3,"\t*** In CheckChanged ***");
@@ -1942,9 +1944,36 @@ CheckChanged = function(data) {
 			wfDebug(3,"\t\tChecking fields...")
 			// loop through the list of changed fields and make sure they are all in the checkfields list
 			for (var key in changedHash) {
+				// check to make sure the field data really changed (i.e. scrub the data and then compare)
+				// Dump("\n\nkey",key); Dump("\ntcfdata." + key,eval("tcfdata." + key + ".toSource()"));
+				var tcfDataStr="";
+				var tcfData=getTCFValue(key, { delimiter: "\n", retarray: true });
+				//Dump("\ttcfData.length",tcfData.length);
+				for (var i=0, tot=eval(tcfData.length); i < tot; i++) {
+					//Dump("\ttcfData" + "[" + i + "]",tcfData[i]);
+					tcfDataStr=tcfDataStr+tcfData[i].replace(/<\/?[^>]+>/g, "").replace(/\n/g, " ").replace(/&#160;/g, " ").replace(/\s+/g, "");
+				}
+				//Dump("\ttcfDataStr",tcfDataStr);
+				var tcaDataStr="";
+				var tcaData=getTCFValue(key, { delimiter: "\n", retarray: true, data: tcadata });
+				//Dump("\ttcaData.length",tcaData.length);
+				for (var i=0, tot=eval(tcaData.length); i < tot; i++) {
+					//Dump("\ttcaData" + "[" + i + "]",tcaData[i]);
+					tcaDataStr=tcaDataStr+tcaData[i].replace(/<\/?[^>]+>/g, "").replace(/\n/g, " ").replace(/&#160;/g, " ").replace(/\s+/g, "");
+				}
+				//Dump("\ttcaDataStr",tcaDataStr);
+				if (tcfDataStr === tcaDataStr) {
+					wfDebug(0,"\t\t\tFound field '" + key + "' changed but tcf/tca text compare as equal")
+					delete changedHash[key];
+					continue;
+				}
+
+				// OK, absolute check of tcf and tca data proved not equal so check to see if the changed field is in the list
 				if (changedHash.hasOwnProperty(key)) {
 					if (checkFieldsStr.indexOf(","+key+",") < 0) {
-						wfDebug(3,"\t\t\tFound field '" + key + "' changed and not in the check list, setting allInList=false");
+						wfDebug(3,"\t\t\t*** Found field '" + key + "' changed and not in the check list, setting allInList=false");
+						wfDump(4,["\t\t\ttcfDataStr;"+tcfDataStr]);
+						wfDump(4,["\t\t\ttcaDataStr;"+tcaDataStr]);
 						allInList=false;
 					} else {
 						wfDebug(3,"\t\t\tFound field '" + key + "' changed and in the check list");
@@ -2516,3 +2545,4 @@ var wfLibLoaded=true;
 // 12-21-2017 @ 09.47.48 - ("1.8.58")  - dscudiero - Add a check for proposal mode in wffuncs.CheckChanged, skip if not EDIT
 // 12-22-2017 @ 07.17.53 - ("1.8.58")  - dscudiero - Added the 'checkfieldsvar' option to CheckChanged
 // 01-24-2018 @ 10.11.44 - 1.8.64 - dscudiero - Add ability to define how the catalog eco system data should be use, as subject codes or department codes
+// 02-05-2018 @ 09.34.27 - 1.8.65 - dscudiero - Fixed bug where htmltext fields were being seen as changed because non-significant markup changes were in the text.
