@@ -25,6 +25,8 @@ scriptDescription="Copy workflow files"
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 		myArgs+=("jal|jalot|option|jalot||script|Jalot task number")
 		myArgs+=("comment|comment|option|comment||script|Comment describing the reason for the update")
+		myArgs+=("roles|roles|switch|roles||script|Also copy the '/courseleaf/roles.tcf' file")
+		myArgs+=("users|users|switch|users||script|Also copy the '/db/clusers.sqlite' file")
 	}
 
 	function copyWorkflow-Goodbye  {
@@ -387,6 +389,8 @@ done
 	verifyArgs+=("Client:$client")
 	verifyArgs+=("Source Env:$(TitleCase $srcEnv) ($srcDir)")
 	verifyArgs+=("Target Env:$(TitleCase $tgtEnv) ($tgtDir)")
+	[[ -n $roles ]] && verifyArgs+=("/courseleaf/roles.tcf:$roles")
+	[[ -n $users ]] && verifyArgs+=("/db/clusers.sqlite:$roles")
 	verifyArgs+=("Update comment:$comment")
 	verifyArgs+=("CIM(s):$cimStr")
 	[[ $srcClVer != $tgtClVer ]] && verifyArgs+=("Warning:CourseLeaf version for source ($srcClVer) not the same as target ($tgtClVer)")
@@ -445,6 +449,8 @@ done
 	done #Cims
 
 ## Global files
+	[[ $roles == true ]] && optionalGlobalFiles="$optionalGlobalFiles /courseleaf/roles.tcf"
+	[[ $users == true ]] && optionalGlobalFiles="$optionalGlobalFiles ../db/clusers.sqlite"
 	echo; Msg3 "Checking global/system workflow files..."
 	for file in $(echo "$requiredGlobalFiles $optionalGlobalFiles" | tr ',' ' '); do
 		Msg3 "^$file"
@@ -583,7 +589,7 @@ Msg3
 
 ## Write out change log entries
 	if [[ ${#copyFileList} -gt 0 ]]; then
-		Msg3 "Logging update"
+		Msg3 "Writing changelog.txt records..."
 		## Log changes
 		[[ -n $comment ]] && changeLogLines=("$comment")
 		changeLogLines+=("Files updated from: '$srcDir'")
@@ -598,6 +604,7 @@ Msg3
 				echo -e "\t${changeLogLines[$i]}"
 			done
 		fi
+		Msg3 "Logging done"
 	fi
 
 #====================================================================================================
