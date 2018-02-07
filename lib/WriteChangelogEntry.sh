@@ -46,9 +46,11 @@ function WriteChangelogEntry {
 		printf '\t%s\n' "${!ref}" | tee -a "$logFile" | tee -a "$usersActivityLog" >> "$usersClientLogFile"
 
 	## Check if the user has a local logit script in $HOME/bin, if found the call it.
-		logText=$(sed "s_'_\\\'_"g <<< "$logger: ${!ref[0]}")
-		logText=$(sed 's_\"_\\\"_'g <<< "$logText")
-		[[ -x $HOME/bin/logit ]] && $HOME/bin/logit -cl "${client:--}" -e "${env:--}" "$logText"
+		if [[ -x $HOME/bin/logit ]]; then
+			logText=$(sed "s_'_\\\'_"g <<< "$logger: ${!ref[0]}")
+			logText=$(sed 's_\"_\\\"_'g <<< "$logText")
+			$HOME/bin/logit -cl "${client:--}" -e "${env:--}" "$logText"
+		fi
 
 	return 0
 }
