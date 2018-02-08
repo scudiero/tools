@@ -8,7 +8,6 @@ tcfview.onDataLoad = function(data, args) {
 	}
 }
 
-
 ============================================================================================================================================================================
 return [inval.replace(wfrule.ifregex," (" + myName + ": Check to see if the subject code has multiple entries in the subject/campus table)")];
 return [inval.replace(wfrule.regex," (" + myName + ": Check to see if the subject code has multiple entries in the subject/campus table)")];
@@ -67,7 +66,10 @@ var tcfValue=getTCFValue("someVariable", { delimiter: "\n", retarray: true });
 var tcaValue=getTCFValue("someVariable", { data: tcadata });
 var tcaValue=getTCFValue("someVariable", { delimiter: "\n", retarray: true, data: tcadata });
 
-if definition is <variable>:id|<attr1>|<attr2>|<attr3>
+// return a multi line field connected (e.g. htmltext) with blanks
+var tcfValue=getTCFValue(key, { multiline: true });
+
+//if definition is <variable>:id|<attr1>|<attr2>|<attr3>
 var competency=getTCFValue("<variable>.<attr1>", { delimiter: "\n", retarray: true });
 
 both tcf and tca data
