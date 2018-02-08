@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.66" // -- dscudiero -- Mon 02/05/2018 @  9:46:35.00
+wfLibVersion="1.8.67" // -- dscudiero -- Thu 02/08/2018 @  9:18:06.69
 //attr_write("wfLibVersion", wfLibVersion);
 
 //======================================================================================================================
@@ -10,44 +10,44 @@ wfLibVersion="1.8.66" // -- dscudiero -- Mon 02/05/2018 @  9:46:35.00
 //					Updated other functions to use wfDebug and wfDump
 //					Added HasValue function
 // 04/26/17 - dgs - Added helper function CheckChanged back again
-// 05/01/17 - dgs - Added AttrIn function to accomidate allcodes sites
+// 05/01/17 - dgs - Added AttrIn function to accommodate allcodes sites
 // 05/08/17 - dgs - Added wfAttr function to handle attribute expansion in the world of allcodes
 //					- Added getTCAValue function like getTCFValue function
-// 05/09/17 - dgs - Refactored/renamed wfAttr so it could be called from anither function
-//					Refactored Related to use GetAttrVal to retrieve the values for the proposal data (subject, department, college)
-// 05/10/17 - dgs - Refactored CheckChanged, split into wffuncs.checkChanged and a local function CheckChanged
-// 05/11/17 - des - Updated GetAttrVal to recognize differences between requests ending in "s" and not
+// 05/09/17 - dgs - Re-factored/renamed wfAttr so it could be called from another function
+//					Re-factored Related to use GetAttrVal to retrieve the values for the proposal data (subject, department, college)
+// 05/10/17 - dgs - Re-factored CheckChanged, split into wffuncs.checkChanged and a local function CheckChanged
+// 05/11/17 - dgs - Updated GetAttrVal to recognize differences between requests ending in "s" and not
 //					Also changed argument passing to use an object
-//					wfCheckChanged - allowed different tcf variables based on the rulename on the call
+//					wfCheckChanged - allowed different tcf variables based on the rule name on the call
 // 05/17/17 - dgs - Updated calls to GetAttrVal to add passing in the names of the form variables
-//					Fixed callse to GetAttrVal in Related
-// 05/24/17 - dgs - Refactored Related to use wffuncs.subjFromCode, wffuncs.getDeppartments, and wffuncs.getCollege
+//					Fixed calls to GetAttrVal in Related
+// 05/24/17 - dgs - Re-factored Related to use wffuncs.subjFromCode, wffuncs.getDeppartments, and wffuncs.getCollege
 // 06/09/17 - dgs - Added mapping function call in GetAttrValue
-// 06/13/17 - dgs - Refactored LookupCode to use getXXXX functions if cim has allcodes
+// 06/13/17 - dgs - Re-factored LookupCode to use getXXXX functions if CIM has allcodes
 // 06/23/17 - dgs - Added the ability to set the search/replacement string for Related (MIT)
 // 07/18/17 - dgs - Updated logic in getAttr function to properly process includeTCA directive
-// 07/19/17 - dgs - Numerious changes
+// 07/19/17 - dgs - Numerous changes
 // 07/20/17 - dgs - Tweaked lookup logic in Related changed (resultSet.length === 0) to (resultSet[0] === "") since getXXX
 //					functions always return an object.
-// 05/27-17 - dgs - Added code for 'xxxxNOTin-' requeste types
+// 05/27-17 - dgs - Added code for 'xxxxNOTin-' request types
 // 07/26-17 - dgs - Removed 'HasValue', replaced by 'CheckSetHasValue'
-// 07/27/17 - dgs - Updated wfDumpVars to dump subjects, departments, and collegs if no data passed in the wfrules.options
-//					Set wfAllcodes in each function that requires it since the tcfdata is not avaiable to workflowFuncs
+// 07/27/17 - dgs - Updated wfDumpVars to dump subjects, departments, and colleges if no data passed in the wfrules.options
+//					Set wfAllcodes in each function that requires it since the tcfdata is not available to workflowFuncs
 // 08/03/17 - dgs - Moved in the common code from workflowFuncs
 // 08/07/17 - dgs - Added a check to make sure we are in courseadmin before using allcodes
 // 08/07/17 - dgs - Added CheckAcadLevel and GetAcadLevel
 // 08/09/17 - dgs - Added IsNew and IsDelete
 //					Added Array.prototype.compare
 // 08/16/17 - dgs - Tweaked formatting of the starting logic
-// 08/17/17 - dgs - Refactored proposal state functions, added REACTIVATE state
+// 08/17/17 - dgs - Re-factored proposal state functions, added REACTIVATE state
 // 09/22/17 - dgs - Updated GetEcoSystemData to deal with proposalDepts that can be an array
 // 08/23/17 - dgs - Only display the debug messages from Related to the preview workflow if debug levels is >= 4
 // 				  - Added GetRelated function.
-// 08/25/17 - dgs - Refactored Related to use the GetRelated function
+// 08/25/17 - dgs - Re-factored Related to use the GetRelated function
 // 08/28/17 - dgs - Added 'TODO' step
 // 08/29/17 - dgs - GetRelated -- Remove duplicates when processing the final resultSet array
 // 08/30/17 - dgs - Updates GetAttr to allow for request to be passed in as an option
-// 09/01/17 - dgs - Related - Update code that detects if the related wfrulename was used 'bare' without any other qualifiers
+// 09/01/17 - dgs - Related - Update code that detects if the related rule name was used 'bare' without any other qualifiers
 // 09/05/17 - dgs - Tweaked TODO to add prefix text and adjust spacing
 // 09/08/17 - dgs - Fixed bug where related was not editing out the reference data if it was in the proposal data for depts
 // 09/14/17 - dgs - Added wfSubjVarName, wfDeptVarName, wfColVarName globals set in workflow.cfg
@@ -55,12 +55,12 @@ wfLibVersion="1.8.66" // -- dscudiero -- Mon 02/05/2018 @  9:46:35.00
 // 09/22/17 - dgs - Added NoWorkflow function
 // 10/02/17 - dgs - Fixed problem in GettAttrVal building the call string for the value mapper callback
 // 10/03/17 - dgs - Misc non-functional cosmetic changes
-// 10/06/17 - dgs - Fixed bug in GetRelated where if the lookup type was subject we were returnging department data
-// 10/09/17 - dgs - Reactored GetRelated and LookupValue, renamed to xxx2
+// 10/06/17 - dgs - Fixed bug in GetRelated where if the lookup type was subject we were returning department data
+// 10/09/17 - dgs - Re-factored GetRelated and LookupValue, renamed to xxx2
 // 10/10/17 - dgs - Updated GetEcoSystemData to accept an array of codes and departments, renamed to xxx2
 // 10/12/17 - dgs - Updated Related, GetRelated, and GetEcoSystemData2 to streamline and allow passing of ecosystem path and types
 //					to GetEcoSystemData2
-// 10/12/17 - dgs - Fix bug in wffuncs.CheckChanged detecting not mode if 'not' is at the begining of the string
+// 10/12/17 - dgs - Fix bug in wffuncs.CheckChanged detecting not mode if 'not' is at the beginning of the string
 // 10/16/17 - dgs - Fixed problem where 'getSubjects' function was returning the entire course code as returned by getAllcodes.
 // 10/16/17 - dgs - Fixed problem when gGetRelated was called standalone
 // 10/18/17 - dgs - Updated LookupCode
@@ -551,15 +551,15 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 //
 //======================================================================================================================
 // 11/15/16	- dgs -	Re-factored to allow for the specification of the core proposal variable names
-// 05/24/17 - dgs -	Refactored to use wffuncs.subjFromCode, wffuncs.getDeppartments, and wffuncs.getCollege
+// 05/24/17 - dgs -	Re-factored to use wffuncs.subjFromCode, wffuncs.getDeppartments, and wffuncs.getCollege
 // 06/12/17 - dgs - Use LookupCode to get codes if the not courseadmin or not allcodes
 // 06/23/17 - dgs - Added the ability to set the search/replacement string for Related (MIT)
 // 07/18/17 - dgs - Updated lookup logic to fall back to calling the LookupCode function if the getXXX functions do not return data
 // 07/20/17 - dgs - Fix problem with when using the GetXXX functions -- needed to map the output to the expected output format
 // 08/23/17 - dgs - Only display the debug messages from Related to the preview workflow if debug levels is >= 4
-// 08/25/17 - dgs - Refactored to use GetRelated
+// 08/25/17 - dgs - Re-factored to use GetRelated
 // 09/01/17 - dgs - Update code that detects if the related wfrulename was used 'bare' without any other qualifiers
-// 10/12/17 - dgs - Refactored to cleanup logic
+// 10/12/17 - dgs - Re-factored to cleanup logic
 // 11/08/17 - dgs - Added ignoreList to skip codes
 //======================================================================================================================
 wffuncs.Related = function(inval, wfrule, args) {
@@ -763,8 +763,8 @@ wffuncs.Related = function(inval, wfrule, args) {
 //	e.g.
 //		{data:"7", source:"formVar:equivalents"}
 //==================================================================================================================
-// 10/09/17 - dgs - Initial - refactored from GetRelated
-// 10/12/17 - dgs - Refactored call to GetEcoSystemData2 to pass data object
+// 10/09/17 - dgs - Initial - Re-factored from GetRelated
+// 10/12/17 - dgs - Re-factored call to GetEcoSystemData2 to pass data object
 // 10/16/17 - dgs - Fixed problem with setting default value for 'includeEcoSystemData' when GetRelated was called standalone
 // 11/08/17 - dgs - Added ignoreList to skip codes
 //==================================================================================================================
@@ -1052,7 +1052,7 @@ GetRelated2 = function(type,data) {
 //		returns the college code(s) for subject 'AHL' or 'AAS' unless the college code is 'AS'
 //
 //======================================================================================================================
-// 10/09/16 - dgs - Initial, refactored from LookupCode
+// 10/09/16 - dgs - Initial, Re-factored from LookupCode
 //======================================================================================================================
 function LookupCode2(lookupType,givenType,givenData,excludeData) {
 	var version='2.0.0'; var myName=arguments.callee.toString().match(/function ([^\(]+)/)[1];
@@ -1493,7 +1493,7 @@ GetAttrVal = function(data) {
 // 05-01-17 - dgs - Initial coding -- gmu
 // 05/27-17 - dgs - Added code for 'xxxxNOTin-' requeste types
 // 07/27/17 - dgs - Tweaked debug output
-// 11/08/17 - dgs - Refactored getting attribute data to use GetAttrVal, fixes problem if allcodes not set
+// 11/08/17 - dgs - Re-factored getting attribute data to use GetAttrVal, fixes problem if allcodes not set
 //======================================================================================================================
 wffuncs.AttrIn = function(inval, wfrule, args) {
 	var version='1.0.3'; var myName=wfrule.attrname;
@@ -1627,8 +1627,8 @@ wffuncs.AddSameAs = function(inval, wfrule, args) {
 // Pull the sisName value in the config file and replace that in the workflow, include in workflow if
 // not running.  Only add sissync step if current env is in 'tcfdata.addSisEnvs'
 // ??/??/2014 - dgs - New
-// 02/26/2015 - dgs - Refactored to move sisname = '' warning earlier, add sisname to other messages
-// 01/25/2016 - dgs - Refactored check env in addSisEnvs
+// 02/26/2015 - dgs - Re-factored to move sisname = '' warning earlier, add sisname to other messages
+// 01/25/2016 - dgs - Re-factored check env in addSisEnvs
 //=========================================================================================================================
 wffuncs.AddSisStep = function(inval, wfrule, args) {
 	// setup
@@ -2470,19 +2470,19 @@ var wfLibLoaded=true;
 //======================================================================================================================
 // Tue Mar 21 11:07:32 CDT 2017 - dscudiero - Added check in log comments
 // 03-24-2017 @ 07.37.00 - (wfrule.att - dscudiero - General syncing of dev to prod
-// 04-10-2017 @ 13.56.39 - (wfrule.att - dscudiero - Tweak messageing in the Related function
-// 04-11-2017 @ 11.42.51 - (wfrule.att - dscudiero - Fixed a problem in Related, tweaked debug outout for lookupCode
+// 04-10-2017 @ 13.56.39 - (wfrule.att - dscudiero - Tweak messaging in the Related function
+// 04-11-2017 @ 11.42.51 - (wfrule.att - dscudiero - Fixed a problem in Related, tweaked debug output for lookupCode
 // 04-26-2017 @ 13.47.35 - (wfrule.att - dscudiero - Added CheckChanged helper function
 // 05-02-2017 @ 07.33.06 - (wfrule.att - dscudiero - add AttrIn function
 // 05-08-2017 @ 15.23.04 - (wfrule.att - dscudiero - Added wfAttr and getTCAValue functions
-// 05-09-2017 @ 11.01.37 - (wfrule.att - dscudiero - Swithch to use getTCFValue to retrieve the tca data in getAttrVal
+// 05-09-2017 @ 11.01.37 - (wfrule.att - dscudiero - Switch to use getTCFValue to retrieve the tca data in getAttrVal
 // 05-11-2017 @ 14.56.12 - (wfrule.att - dscudiero - Tweaked data passing and arg parsing for wffuncs.CheckChanged
 // 05-17-2017 @ 10.51.49 - (wfrule.att - dscudiero - Updated GetAttrVal to accept the variable names as input, updated Related to fix problem calling GetAttrVal
 // 06-09-2017 @ 12.43.59 - (wfrule.att - dscudiero - Added callback to mapper functions in GetAttrValue
-// 06-13-2017 @ 14.05.05 - (wfrule.att - dscudiero - refactor allcodes and related
+// 06-13-2017 @ 14.05.05 - (wfrule.att - dscudiero - re-factor allcodes and related
 // 06-21-2017 @ 08.56.20 - (wfrule.att - dscudiero - Added additional usage notes to wffuncs.CheckChanged
 // 06-23-2017 @ 09.27.14 - (wfrule.att - dscudiero - Added ability to specify the search string to Related
-// 07-18-2017 @ 13.15.54 - (wfrule.att - dscudiero - Updates to getAttr funcion
+// 07-18-2017 @ 13.15.54 - (wfrule.att - dscudiero - Updates to getAttr function
 // 07-19-2017 @ 14.06.30 - (wfrule.att - dscudiero - General syncing of dev to prod
 // 07-20-2017 @ 08.56.52 - (		if)      - dscudiero - Additional fixes for lookups in related
 // 07-21-2017 @ 13.17.30 - (		if)      - dscudiero - Tweak lookup logic again
@@ -2491,14 +2491,14 @@ var wfLibLoaded=true;
 // 07-26-2017 @ 08.01.53 - (		if)      - dscudiero - Updated wffuncs.AttrIn
 // 07-26-2017 @ 16.07.21 - ("1.7.46")  - dscudiero - Tweak getAttr to always do lookups for all three objects regardless of request type
 // 07-27-2017 @ 16.47.05 - ("1.7.51")  - dscudiero - General syncing of dev to prod
-// 08-03-2017 @ 11.18.51 - ("1.7.53")  - dscudiero - Only add message steps in Related if dnv is in debugEnvs
+// 08-03-2017 @ 11.18.51 - ("1.7.53")  - dscudiero - Only add message steps in Related if env is in debugEnvs
 // 08-03-2017 @ 15.12.37 - ("1.7.55")  - dscudiero - Moved in the common code from workflowFuncs
-// 08-07-2017 @ 12.56.22 - ("1.7.56")  - dscudiero - Check to make sure we are in courseadmin before using allcode4s
+// 08-07-2017 @ 12.56.22 - ("1.7.56")  - dscudiero - Check to make sure we are in courseadmin before using allcodes
 // 08-08-2017 @ 10.54.50 - ("1.7.59")  - dscudiero - added AcadLevel functions
 // 08-09-2017 @ 14.42.59 - ("1.7.62")  - dscudiero - Added Array.compare
-// 08-17-2017 @ 15.57.15 - ("1.7.67")  - dscudiero - Refactored the proposal state functions
+// 08-17-2017 @ 15.57.15 - ("1.7.67")  - dscudiero - Re-factored the proposal state functions
 // 08-22-2017 @ 08.41.34 - ("1.7.68")  - dscudiero - Updated GeEcoSystemData to deal with multi value proposalDept data
-// 08-23-2017 @ 08.18.05 - ("1.7.70")  - dscudiero - Only include the debug messages from Related to the preview screen if debuglevel >= 4
+// 08-23-2017 @ 08.18.05 - ("1.7.70")  - dscudiero - Only include the debug messages from Related to the preview screen if debug level >= 4
 // 08-28-2017 @ 10.34.56 - ("1.7.73")  - dscudiero - Tweak the logic for products in support
 // 08-28-2017 @ 11.36.45 - ("1.7.74")  - dscudiero - Added TODO
 // 08-29-2017 @ 12.10.56 - ("1.7.75")  - dscudiero - Updated GetRelated to remove duplicates before returning data
@@ -2514,7 +2514,7 @@ var wfLibLoaded=true;
 // 09-29-2017 @ 12.57.06 - ("1.8.6")   - dscudiero - Fix problem setting wfAllcodes
 // 10-02-2017 @ 13.47.09 - ("1.8.8")   - dscudiero - General syncing of dev to prod
 // 10-04-2017 @ 13.28.38 - ("1.8.9")   - dscudiero - General syncing of dev to prod
-// 10-09-2017 @ 16.55.35 - ("1.8.11")  - dscudiero - Major refactoreing of GetRelated and LookupCode
+// 10-09-2017 @ 16.55.35 - ("1.8.11")  - dscudiero - Major refactoring of GetRelated and LookupCode
 // 10-12-2017 @ 08.54.10 - ("1.8.13")  - dscudiero - Updated Related, GetRelated, and GetEcoSystemData2 to streamline and allow passing of ecosystem path and types
 // 10-12-2017 @ 08.56.51 - ("1.8.14")  - dscudiero - sync
 // 10-12-2017 @ 14.22.08 - ("1.8.16")  - dscudiero - Fix problem with checkchanged when there is only one changed field and only one checkfield
@@ -2534,11 +2534,11 @@ var wfLibLoaded=true;
 // 11-20-2017 @ 10.06.49 - ("1.8.39")  - dscudiero - Add array.diff prototype
 // 11-28-2017 @ 15.10.07 - ("1.8.40")  - dscudiero - Tweaked format of TODO output
 // 11-28-2017 @ 16.28.49 - ("1.8.41")  - dscudiero - Added 'IsNotFirstStep' function
-// 11-29-2017 @ 12.18.57 - ("1.8.43")  - dscudiero - Updated RemoveDupes to optionaly sort the array instead of forcing the sort all the time
+// 11-29-2017 @ 12.18.57 - ("1.8.43")  - dscudiero - Updated RemoveDupes to optionally sort the array instead of forcing the sort all the time
 // 12-05-2017 @ 11.06.22 - ("1.8.44")  - dscudiero - Added the Annotate function
 // 12-06-2017 @ 09.05.52 - ("1.8.46")  - dscudiero - tweaked formatting of TODO messaging
 // 12-11-2017 @ 11.45.07 - ("1.8.47")  - dscudiero - Updated comments for checkchanged
-// 12-13-2017 @ 11.10.11 - ("1.8.48")  - dscudiero - Fix debug messages in lookupcode2 that were hardcoded
+// 12-13-2017 @ 11.10.11 - ("1.8.48")  - dscudiero - Fix debug messages in lookupcode2 that were hard coded
 // 12-19-2017 @ 13.52.08 - ("1.8.54")  - dscudiero - Tweak messaging for NoWorkflow
 // 12-19-2017 @ 14.16.33 - ("1.8.55")  - dscudiero - Remove the exception in GetRelated2 if the proposal code is null
 // 12-20-2017 @ 12.38.41 - ("1.8.56")  - dscudiero - Fixed problems in getEcoData when there is no proposalDepts data
