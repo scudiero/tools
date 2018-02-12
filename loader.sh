@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.76" # -- dscudiero -- Mon 01/22/2018 @  8:52:04.97
+version="1.4.77" # -- dscudiero -- Mon 02/12/2018 @  7:20:43.43
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -32,7 +32,7 @@ function CleanUp {
 	set +eE
 	trap - ERR EXIT
 	## Cleanup log file
-		if [[ $logFile != '/dev/null' ]]; then
+		if [[ $logFile != '/dev/null'  && -f $logFile ]]; then
 			if [[ -e $logFile ]]; then
 				mv $logFile $logFile.bak
 			 	#cat $logFile.bak | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" | tr -d '\007' > $logFile
