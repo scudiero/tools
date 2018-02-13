@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.77" # -- dscudiero -- Mon 02/12/2018 @  7:20:43.43
+version="1.4.78" # -- dscudiero -- Tue 02/13/2018 @  9:02:01.45
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -131,6 +131,8 @@ statusLine="Loader ($version): "
 # [[ $batchMode != true && $(hostname) == 'build7.leepfrog.com' ]] && \
 # 	echo -e "\tNote: (loader) File system access from the current host has been found to be a bit slow,\n\tPatience you must have, my young padawan..." >&3
 
+[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 1"
+
 ## If called as ourselves, then the first token is the script name to call
 	if [[ $callPgmName == 'loader.sh' ]]; then
 		callPgmName=$(cut -d' ' -f1 <<< $scriptArgs)
@@ -180,6 +182,7 @@ sTime=$(date "+%s")
 # 	[[ -z $initFile ]] && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
 
 ## Initialize the runtime environment
+[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 2"
 	TERM=${TERM:-dumb}
 	shopt -s checkwinsize
 	set -e  # Turn ON Exit immediately
@@ -212,6 +215,7 @@ sTime=$(date "+%s")
 			for var in $clearVars; do unset $var; done
 		fi
 
+[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 3"
 ## Import things we need to continue
 	source "$TOOLSPATH/lib/Import.sh"
 	sTime=$(date "+%s")
@@ -224,6 +228,7 @@ sTime=$(date "+%s")
 	defaultsLoaded=false
 	GetDefaultsData "$myName" -fromFiles
 
+[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 4"
 ## Set forking limit
 	maxForkedProcesses=$maxForkedProcessesPrime
 	[[ -n $scriptData3 && $(IsNumeric $scriptData3) == true ]] && maxForkedProcesses=$scriptData3
@@ -264,6 +269,7 @@ sTime=$(date "+%s")
 ## If sourced then just return
 	[[ $viaCron == true ]] && return 0
 
+[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 5"
 ## Resolve the script file to run
 	## Were we passed in a fully qualified file name
 	if [[ ${callPgmName:0:1} == '/' ]]; then
@@ -293,6 +299,7 @@ sTime=$(date "+%s")
 		[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
 		prtStatus ", find file"; sTime=$(date "+%s")
 
+[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 6"
 ## Call the script
 	## Initialize the log file
 		logFile=/dev/null
