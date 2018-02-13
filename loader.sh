@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.81" # -- dscudiero -- Tue 02/13/2018 @ 11:09:23.56
+version="1.4.82" # -- dscudiero -- Tue 02/13/2018 @ 12:12:45.79
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -131,8 +131,6 @@ statusLine="Loader ($version): "
 # [[ $batchMode != true && $(hostname) == 'build7.leepfrog.com' ]] && \
 # 	echo -e "\tNote: (loader) File system access from the current host has been found to be a bit slow,\n\tPatience you must have, my young padawan..." >&3
 
-[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 1"
-
 ## If called as ourselves, then the first token is the script name to call
 	if [[ $callPgmName == 'loader.sh' ]]; then
 		callPgmName=$(cut -d' ' -f1 <<< $scriptArgs)
@@ -182,7 +180,6 @@ sTime=$(date "+%s")
 # 	[[ -z $initFile ]] && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
 
 ## Initialize the runtime environment
-[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 2"
 	TERM=${TERM:-dumb}
 	shopt -s checkwinsize
 	set -e  # Turn ON Exit immediately
@@ -215,7 +212,6 @@ sTime=$(date "+%s")
 			for var in $clearVars; do unset $var; done
 		fi
 
-[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 3"
 ## Import things we need to continue
 	source "$TOOLSPATH/lib/Import.sh"
 	sTime=$(date "+%s")
@@ -228,7 +224,6 @@ sTime=$(date "+%s")
 	defaultsLoaded=false
 	GetDefaultsData "$myName" -fromFiles
 
-[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 4"
 ## Set forking limit
 	maxForkedProcesses=$maxForkedProcessesPrime
 	[[ -n $scriptData3 && $(IsNumeric $scriptData3) == true ]] && maxForkedProcesses=$scriptData3
@@ -236,17 +231,13 @@ sTime=$(date "+%s")
 	[[ $hour -ge 20 && $maxForkedProcessesAfterHours -gt $maxForkedProcesses ]] && maxForkedProcesses=$maxForkedProcessesAfterHours
 	[[ -z $maxForkedProcesses ]] && maxForkedProcesses=3
 
-[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 4a"
 # If the user has a .tools file then read the values into a hash table
 	if [[ -r "$HOME/$userName.cfg" || -r "$HOME/tools.cfg" ]]; then
-[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 4b"
 		[[ -r "$HOME/tools.cfg" ]] && configFile="$HOME/tools.cfg"
 		[[ -r "$HOME/$userName.cfg" ]] && configFile="$HOME/$userName.cfg"
 		foundToolsSection=false
 		ifsSave="$IFS"; IFS=$'\n'; while read -r line; do
 			line=$(tr -d '\011\012\015' <<< "$line")
-[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "\tline = $line"
-
 			[[ -z $line || ${line:0:1} == '#' ]] && continue
 			[[ ${line:0:7} == '[tools]' ]] && foundToolsSection=true && continue
 			[[ $foundToolsSection != true ]] && continue
@@ -254,11 +245,9 @@ sTime=$(date "+%s")
 			vName="${line%%=*}"; vValue="${line##*=}"
 			[[ $(Contains ",${allowedUserVars}," ",${vName},") == false ]] && Error "Variable '$vName' not allowed in tools.cfg file, setting will be ignored" && continue
 			vValue=$(cut -d'=' -f2 <<< "$line"); [[ -z $vName ]] && $(cut -d':' -f2 <<< "$line")
-[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "\t\teval $vName=\"$vValue\""
 			eval $vName=\"$vValue\"
 		done < "$configFile"
 		IFS="$ifsSave"
-[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 4c"
 
 		function ColorD { local string="$*"; echo "${colorDefaultVal}${string}${colorDefault}"; }
 		function ColorK { local string="$*"; echo "${colorKey}${string}${colorDefault}"; }
@@ -271,12 +260,10 @@ sTime=$(date "+%s")
 		function ColorM { local string="$*"; echo "${colorMenu}${string}${colorDefault}"; }
 		export -f ColorD ColorK ColorI ColorN ColorW ColorE ColorT ColorV ColorM
 	fi
-[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 4d"
 
 ## If sourced then just return
 	[[ $viaCron == true ]] && return 0
 
-[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 5"
 ## Resolve the script file to run
 	## Were we passed in a fully qualified file name
 	if [[ ${callPgmName:0:1} == '/' ]]; then
@@ -306,7 +293,6 @@ sTime=$(date "+%s")
 		[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
 		prtStatus ", find file"; sTime=$(date "+%s")
 
-[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 6"
 ## Call the script
 	## Initialize the log file
 		logFile=/dev/null
