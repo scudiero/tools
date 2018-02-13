@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.78" # -- dscudiero -- Tue 02/13/2018 @  9:02:01.45
+version="1.4.79" # -- dscudiero -- Tue 02/13/2018 @ 10:07:18.66
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -236,8 +236,10 @@ sTime=$(date "+%s")
 	[[ $hour -ge 20 && $maxForkedProcessesAfterHours -gt $maxForkedProcesses ]] && maxForkedProcesses=$maxForkedProcessesAfterHours
 	[[ -z $maxForkedProcesses ]] && maxForkedProcesses=3
 
+[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 4a"
 # If the user has a .tools file then read the values into a hash table
 	if [[ -r "$HOME/$userName.cfg" || "$HOME/tools.cfg" ]]; then
+[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 4b"
 		[[ -r "$HOME/tools.cfg" ]] && configFile="$HOME/tools.cfg"
 		[[ -r "$HOME/$userName.cfg" ]] && configFile="$HOME/$userName.cfg"
 		foundToolsSection=false
@@ -253,6 +255,7 @@ sTime=$(date "+%s")
 			eval $vName=\"$vValue\"
 		done < "$configFile"
 		IFS="$ifsSave"
+[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 4c"
 
 		function ColorD { local string="$*"; echo "${colorDefaultVal}${string}${colorDefault}"; }
 		function ColorK { local string="$*"; echo "${colorKey}${string}${colorDefault}"; }
@@ -265,6 +268,7 @@ sTime=$(date "+%s")
 		function ColorM { local string="$*"; echo "${colorMenu}${string}${colorDefault}"; }
 		export -f ColorD ColorK ColorI ColorN ColorW ColorE ColorT ColorV ColorM
 	fi
+[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 4d"
 
 ## If sourced then just return
 	[[ $viaCron == true ]] && return 0
