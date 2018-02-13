@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.79" # -- dscudiero -- Tue 02/13/2018 @ 10:07:18.66
+version="1.4.80" # -- dscudiero -- Tue 02/13/2018 @ 11:06:07.21
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -245,6 +245,8 @@ sTime=$(date "+%s")
 		foundToolsSection=false
 		ifsSave="$IFS"; IFS=$'\n'; while read -r line; do
 			line=$(tr -d '\011\012\015' <<< "$line")
+[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "\tline = $line"
+
 			[[ -z $line || ${line:0:1} == '#' ]] && continue
 			[[ ${line:0:7} == '[tools]' ]] && foundToolsSection=true && continue
 			[[ $foundToolsSection != true ]] && continue
@@ -252,6 +254,7 @@ sTime=$(date "+%s")
 			vName="${line%%=*}"; vValue="${line##*=}"
 			[[ $(Contains ",${allowedUserVars}," ",${vName},") == false ]] && Error "Variable '$vName' not allowed in tools.cfg file, setting will be ignored" && continue
 			vValue=$(cut -d'=' -f2 <<< "$line"); [[ -z $vName ]] && $(cut -d':' -f2 <<< "$line")
+[[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "\t\teval $vName=\"$vValue\""
 			eval $vName=\"$vValue\"
 		done < "$configFile"
 		IFS="$ifsSave"
