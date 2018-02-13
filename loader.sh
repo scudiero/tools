@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.80" # -- dscudiero -- Tue 02/13/2018 @ 11:06:07.21
+version="1.4.81" # -- dscudiero -- Tue 02/13/2018 @ 11:09:23.56
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -238,7 +238,7 @@ sTime=$(date "+%s")
 
 [[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 4a"
 # If the user has a .tools file then read the values into a hash table
-	if [[ -r "$HOME/$userName.cfg" || "$HOME/tools.cfg" ]]; then
+	if [[ -r "$HOME/$userName.cfg" || -r "$HOME/tools.cfg" ]]; then
 [[ $batchMode == true && $LOGNAME == 'dscudiero' ]] && echo "Here 4b"
 		[[ -r "$HOME/tools.cfg" ]] && configFile="$HOME/tools.cfg"
 		[[ -r "$HOME/$userName.cfg" ]] && configFile="$HOME/$userName.cfg"
