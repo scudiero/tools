@@ -3,16 +3,15 @@
 //======================================================================================================================
 localsteps:Course Workflow Management|groups|workflow|attributes=isUndergraduate[Is Undergraduate],isGraduate[Is Graduate],isGenEd[Is General Education],isNew[New Course],isNotNew[Not New],isEdit[Course Change],isNotEdit[Not Course Change],isDelete[Course Delete],isNotDelete[Not Course Delete],isNotFirstStep[Is not the first step],fyi[FYI Only],fyiall[FYI All],todo[ToDo Item],optional[If Role Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
 
-
 template:custom
 pageflags:autoapprove
 
 workflow:standard|CheckOnDisk,TODO,Dept Chair,Col Dean,Curriculum Committee fyiall,Curriculum Committee Chair,Registrar,AddSisStep
 
-//workflow:debug|START (debug),Workflow Library: wfLibVersion,College: Col,Department: Dept,Subject: Subj,Academic level: AcadLevel,Proposal State: ProposalState,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is New] isNew,[Is not New] isNotNew,[Is Edit/Change] isEdit,[Is not Edit/Change] isNotEdit,[Is Delete] isDelete,[Is not Delete] isNotDelete,END (debug)
+//workflow:standard|START,Workflow Library: wfLibVersion,College: Col,Department: Dept,Subject: Subj,Academic level: AcadLevel,Proposal State: ProposalState,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is New] isNew,[Is not New] isNotNew,[Is Edit/Change] isEdit,[Is not Edit/Change] isNotEdit,[Is Delete] isDelete,[Is not Delete] isNotDelete,END
 
 //======================================================================================================================
-// version:1.0.16 // -- dscudiero -- Thu 01/18/2018 @ 12:09:26.61
+// version:1.0.17 // -- dscudiero -- Wed 02/14/2018 @ 13:00:05.06
 //======================================================================================================================
 // Check in log
 //======================================================================================================================
