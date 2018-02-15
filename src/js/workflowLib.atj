@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.71" // -- dscudiero -- Thu 02/15/2018 @  9:34:19.25
+wfLibVersion="1.8.72" // -- dscudiero -- Thu 02/15/2018 @ 14:44:49.41
 //attr_write("wfLibVersion", wfLibVersion);
 
 //======================================================================================================================
@@ -1527,7 +1527,7 @@ wffuncs.AttrIn = function(inval, wfrule, args) {
 	//Initial Checks
 	try {
 		if (checkList === ",,") throw("No checkList specified in options or stepname");
-		if (valsArray.length === 0) throw("Could not resolve 'valsArray' from the reqType (" + reqType + ")");
+		if (!valsArray || valsArray.length === 0) throw("Could not resolve 'valsArray' from the reqType (" + reqType + ")");
 		InitialChecks(["wfrule"],args)
 	} //try
 	catch(err) { wfDebug(1,"\t*Error* -- " + myName + ": " + err + "\n"); return false; }
