@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.67" // -- dscudiero -- Thu 02/08/2018 @  9:18:06.69
+wfLibVersion="1.8.70" // -- dscudiero -- Thu 02/15/2018 @  9:31:16.69
 //attr_write("wfLibVersion", wfLibVersion);
 
 //======================================================================================================================
@@ -597,9 +597,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 		if (substitutionType === "") {
   			print_debug(3,"\n\n*** Error in '" + myName + "' function in " + wfLibName +
   				" , invalid value for substitutionType ('" + substitutionType + "') *** \n\n");
-			print_doc(3,"<br>*** Error in " + myName + " function in " + wfLibName +
-				",<br> *** invalid value for substitutionType ('" + substitutionType + "') *** <br> ");
-			return 0;
+			return false;
 		}
 
 	wfDump(3,["calledAs;"+calledAs,"reqType;"+reqType,"notifyMode;"+notifyMode,"callOpts;"+callOpts,"substitutionType;"+substitutionType,"wfAllcodes;"+wfAllcodes]);
@@ -2252,8 +2250,10 @@ function wfDebug(msgLevel,text,mode){
 	// Print message
 		if ( mode == 'D' || mode == 'B' )
 			print_debug(text + ' \n');
-		if ( mode == 'S' || mode == 'B' )
+		if ( mode == 'S' || mode == 'B' ) {
+			if (typeof intestworkflow === "undefined" || !intestworkflow) return false;
 			print_doc("&nbsp;&nbsp;&nbsp;" + text + ' <br>');
+		}
 	return;
 } //Debug
 
@@ -2304,6 +2304,7 @@ function wfDump(msgLevel,varList,delimiter){
 function CheckForVal(varName,varValue) {
 	//print_debug('\tvarName = ' + varName + ', varValue =' + varValue + ',varValue.length  = ' + varValue.length + '\n');
 	if (!varValue || !varValue.length) {
+		if (typeof intestworkflow === "undefined" || !intestworkflow) return false;
 		print_doc('&nbsp;&nbsp;<strong>*WARNING*</strong> -- Data Field&nbsp;&nbsp;<em>\'' + varName + '\'</em>&nbsp;&nbsp;does not have a value, workflow calculation incomplete.<br>');
 		return false;
 	}
@@ -2397,6 +2398,17 @@ wffuncs.wfDumpVars = function(inval, wfrule, args) {
 }; //wffuncs.wfDumpVars
 
 //======================================================================================================================
+// Split a string into equal sized substrings
+// returns array of strings
+//======================================================================================================================
+// 09-22-17 - dgs - Initial coding
+//======================================================================================================================
+function wfSplitString (string, size) {
+	var re = new RegExp('.{1,' + size + '}', 'g');
+	return string.match(re);
+} //wfSplitString
+
+//======================================================================================================================
 // Add a todo item to the workflow display
 // runs as a wfrule directive
 //		workflow step = 'TODO'
@@ -2404,18 +2416,24 @@ wffuncs.wfDumpVars = function(inval, wfrule, args) {
 //======================================================================================================================
 // 08-28-17 - dgs - Initial coding -
 // 09/05/17 - dgs - Added 'Workflow is not complete' prefex text and adjusted spacing
+// 02/15/18 - dgs - Updated to automatically parse the message string to fit in the preview workflow window
 //======================================================================================================================
 wffuncs.TODO = function(inval, wfrule, args) {
-	var indent='&nbsp;&nbsp;&nbsp;&nbsp;';
-	var indent2=indent + indent + indent + indent + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
+	if (typeof intestworkflow === "undefined" || !intestworkflow) return false;
 
-	print_doc(indent + '<strong>*Note*</strong> -- Workflow is not yet complete:<br>');
-	if (options != "" ) print_doc(indent2 + options + "<br>");
-	print_doc(indent2 + 'Please contact your CSM.</strong><br>');
+	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
+	if (options === "" ) options = "Awaiting final client approval."
+
+	var indent=""; for (var i=0,  tot=15; i < tot; i++) { indent = indent+"&nbsp;"; }
+
+	print_doc("<strong><em>*Note*</strong></em> -- Workflow is not yet complete:<br>")
+	wfSplitString(options,96).forEach(function(text) {
+		print_doc(indent + text + "<br>")
+	});
+	print_doc(indent + 'Please contact your Courseleaf administrator for additional information.</strong><br>');
 
 	return false;
-} //TODO
+} //wffuncs.TODO
 
 //======================================================================================================================
 // Add a step in workflow that checks to see if the proposal has been written out to disk, if not then display a 
@@ -2424,40 +2442,51 @@ wffuncs.TODO = function(inval, wfrule, args) {
 // 		wfrules:CheckOnDisk|function|CheckOnDisk|<Message to display>; //Put a TODO message to the preview workflow screen
 //======================================================================================================================
 // 12-22-17 - dgs - Initial coding -
+// 02/15/18 - dgs - Updated to automatically parse the message string to fit in the preview workflow window
 //======================================================================================================================
 wffuncs.CheckOnDisk = function(inval, wfrule, args) {
-	var indent="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-	var indent2=indent + indent + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+	if (typeof intestworkflow === "undefined" || !intestworkflow) return false;
+
 	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
-	//Dump("tcfdata.pagename[0]",tcfdata.pagename[0]);
+	if (options === "" ) options = "The displayed workflow below may not fully reflect the final workflow.."
+
+	var indent=""; for (var i=0,  tot=15; i < tot; i++) { indent = indent+"&nbsp;"; }	
+
 	if (tcfdata.pagename[0].split("/")[2] === "index.html") {
 		print_debug("\nProposal is not on disk\n\n");
-		print_doc(indent + '<strong>*Note*</strong> -- The proposal has not yet been saved in CourseLeaf<br>');
-		print_doc(indent2 + 'The displayed workflow below may not fully reflect the final workflow.<br>');
-		if (options != "" ) print_doc(indent2 + options + "<br>");
+		print_doc("<strong><em>*Note*</strong></em> -- The proposal has not yet been saved in CourseLeaf.<br>")
+		wfSplitString(options,96).forEach(function(text) {
+			print_doc(indent + text + "<br>")
+		});
+		print_doc(indent + 'Please contact your Courseleaf administrator for additional information.</strong><br>');
 	} else {
 		print_debug("\nProposal is on disk\n\n");
 	}
 	return false;
-}
-
+} //wffuncs.CheckOnDisk
 
 //======================================================================================================================
 // There was insufficient data on the for to calculate workflow
 //======================================================================================================================
 // 09-22-17 - dgs - Initial coding
+// 02/15/18 - dgs - Updated to automatically parse the message string to fit in the preview workflow window
 //======================================================================================================================
 wffuncs.NoWorkflow = function(inval, wfrule, args) {
-	var indent='&nbsp;&nbsp;&nbsp;&nbsp;';
-	var indent2='&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+	if (typeof intestworkflow === "undefined" || !intestworkflow) return false;
+
 	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
-	if (options === "" ) {
-		options="There is insufficient data in the proposal to calculate workflow. <br>" + indent2 + "Please complete the required form fields and try again."
-	}
-	print_doc(indent + '<strong>*Note*</strong> -- ' + options);
-	print_doc('<br>' + indent2 + 'For additional information please contact your CourseLeaf administrator.</strong><br>');
+	if (options === "" ) options = "Please complete the required form fields and try again."
+
+	var indent=""; for (var i=0,  tot=15; i < tot; i++) { indent = indent+"&nbsp;"; }	
+
+	print_doc("<strong><em>*Note*</strong></em> -- There is insufficient data in the proposal to calculate workflow.<br>")
+	wfSplitString(options,96).forEach(function(text) {
+		print_doc(indent + text + "<br>")
+	});
+	print_doc(indent + 'Please contact your Courseleaf administrator for additional information.</strong><br>');
+
 	return false;
-} //NoWorkflow
+} //wffuncs.NoWorkflow
 
 //==================================================================================================
 // END
