@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.70" // -- dscudiero -- Thu 02/15/2018 @  9:31:16.69
+wfLibVersion="1.8.71" // -- dscudiero -- Thu 02/15/2018 @  9:34:19.25
 //attr_write("wfLibVersion", wfLibVersion);
 
 //======================================================================================================================
@@ -2576,3 +2576,4 @@ var wfLibLoaded=true;
 // 01-24-2018 @ 10.11.44 - 1.8.64 - dscudiero - Add ability to define how the catalog eco system data should be use, as subject codes or department codes
 // 02-05-2018 @ 09.34.27 - 1.8.65 - dscudiero - Fixed bug where htmltext fields were being seen as changed because non-significant markup changes were in the text.
 // 02-05-2018 @ 09.47.00 - 1.8.66 - dscudiero - Tweaking messaging
+// 02-15-2018 @ 09.33.00 - 1.8.71 - dscudiero - Updated functions that write to 'doc' to not write if not in testworkflow step.
