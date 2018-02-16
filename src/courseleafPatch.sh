@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.45 # -- dscudiero -- Wed 01/24/2018 @ 13:32:31.30
+version=5.5.46 # -- dscudiero -- Fri 02/16/2018 @ 13:24:16.82
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel2 EditTcfValue BackupCourseleafFile'
@@ -79,7 +79,7 @@ cwdStart="$(pwd)"
 		(( bullet++ )) ; echo -e "\t$bullet) If 'Advance' is requested then"
 		(( bullet++ )) ; bulletSave=$bullet ; bullet=1
 		echo -e "\t\t$bullet) Backup the curr site"
-		(( bullet++ )) ; echo -e "\t\t$bullet) Copy current NEXT site to new CURR site sans CIMs and CLSS"
+		(( bullet++ )) ; echo -e "\t\t$bullet) Copy current NEXT site to new CURR site sans CIMs (other than programadmin) and CLSS"
 		(( bullet++ )) ; echo -e "\t\t$bullet) Update edition variable"
 		(( bullet++ )) ; echo -e "\t\t$bullet) Resets console statistics"
 		(( bullet++ )) ; echo -e "\t\t$bullet) Archives the request logs"
@@ -1067,7 +1067,10 @@ if [[ $catalogAdvance == true || $fullAdvance == true ]]; then
 		targetSpec="$(dirname $tgtDir)/${env}.${backupSuffix}"
 		[[ $env == 'pvt' ]] && targetSpec="$tgtDir/$env.$(date +"%m-%d-%y")"
 		ignoreList="/db/clwen*|/bin/clssimport-log-archive/|/web/$progDir/wen/|/web/wen/"
-		[[ -n $cimStr ]] && ignoreList="$ignoreList|$(tr ',' '|' <<< "$cimStr")"
+		if [[ -n $cimStr && $cimStr != 'programadmin' ]]; then
+			tmpStr=$(sed s"/,programadmin//"g <<< $cimStr)
+			ignoreList="$ignoreList|$(tr ',' '|' <<< "$tmpStr")"
+		fi
 		[[ ! -d "$targetSpec" ]] && mkdir -p "$targetSpec"
 		unset rsyncResults
 		Msg3 "^Full advance requested, making a copy of '$env' to sans CIMs/CLSS (this will take a while)..."
