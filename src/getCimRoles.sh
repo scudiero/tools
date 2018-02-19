@@ -1,9 +1,9 @@
 #!/bin/bash
 #==================================================================================================
-version=1.10.43 # -- dscudiero -- Thu 11/02/2017 @ 11:00:19.52
+version=1.10.90 # -- dscudiero -- Mon 02/19/2018 @ 15:33:33.75
 #==================================================================================================
 TrapSigs 'on'
-myIncludes=""
+myIncludes="WriteChangelogEntry"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -18,8 +18,11 @@ scriptDescription="Build a list of all of the roles that are potentially use in 
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function getCimRoles-parseArgsStd2 { # or parseArgs-local
+function getCimRoles-ParseArgsStd2 { # or parseArgs-local
 	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+	myArgs+=("load|load|switch|load||script|Automatically load the roles to the site")
+	myArgs+=("replace||switch||loadMode='replace'|script|Replace all of the target sites role data")
+	myArgs+=("merge||switch||loadMode='merge'|script|Merge the role data into the sites existing role data")
 	return 0
 }
 function getCimRoles-Goodbye { # or Goodbye-local
@@ -46,13 +49,20 @@ helpSet='script,client,env,cims'
 Hello
 GetDefaultsData $myName
 ParseArgsStd2 $originalArgStr
+
+[[ -n unknowArgs ]] && cimStr="$unknowArgs"
 Init 'getClient getEnv getDirs checkEnvs getCims noPreview noPublic addPvt'
+dump load loadMode
+[[ -n $loadMode ]] && load=true
+[[ $load == true && -z $loadMode ]] && loadMode='merge'
+[[ $loadMode == 'merge' ]] && Terminate "Sorry, the '-merge' option is not supported at this time."
+dump load loadMode
 
 ## Set outfile -- look for std locations
-outFile=/home/$userName/$client-CIM_Roles.xls
+outFile=/home/$userName/$client-$env-CIM_Roles.xls
 if [[ -d $localClientWorkFolder ]]; then
 	if [[ ! -d $localClientWorkFolder/$client ]]; then mkdir -p $localClientWorkFolder/$client; fi
-	outFile=$localClientWorkFolder/$client/$client-CimRoles.xls
+	outFile=$localClientWorkFolder/$client/$client-$env-CimRoles.xls
 fi
 
 ## Make sure user wants to continue
@@ -60,7 +70,7 @@ unset verifyArgs
 verifyArgs+=("Client:$client")
 verifyArgs+=("Env:$(TitleCase $env) ($siteDir)")
 verifyArgs+=("CIMs:$cimStr")
-verifyArgs+=("Output File:$outFile")
+[[ $load == true ]] && verifyArgs+=("Load site roles:$loadMode")
 verifyContinueDefault='Yes'
 VerifyContinue "You are asking generate CIM roles for"
 
@@ -73,7 +83,6 @@ fi
 #= Main
 #===================================================================================================
 cimStr=$(echo $cimStr | tr -d ' ' )
-cimStr=\"$(sed 's|,|","|g' <<< $cimStr)\"
 
 #= Run the step
 	srcStepFile="$(FindExecutable -step "$step")"
@@ -81,13 +90,61 @@ cimStr=\"$(sed 's|,|","|g' <<< $cimStr)\"
 
 	Msg3 "Using step file: $srcStepFile\n"
 	[[ -f $siteDir/web/courseleaf/localsteps/$step.html ]] && mv -f $siteDir/web/courseleaf/localsteps/$step.html $siteDir/web/courseleaf/localsteps/$step.html.bak
-	cp -fp $srcStepFile $siteDir/web/courseleaf/localsteps/$step.html
-	sed -i s"_var cims=\[\];_var cims=\[${cimStr}\];_" $siteDir/web/courseleaf/localsteps/$step.html
+	
+	echo > "$siteDir/web/courseleaf/localsteps/$step.html"
+	for cim in ${cimStr//,/ }; do
+		echo "%import /$cim/workflowFuncs.atj:atj%" >> "$siteDir/web/courseleaf/localsteps/$step.html"
+	done
+	cat $srcStepFile >> "$siteDir/web/courseleaf/localsteps/$step.html"
+
+	cimStr=\"$(sed 's|,|","|g' <<< $cimStr)\"
+	sed -i s"_var cims=\[''\];_var cims=\[${cimStr}\];_" $siteDir/web/courseleaf/localsteps/$step.html
 	sed -i s"_var env='';_var env='${env}';_" $siteDir/web/courseleaf/localsteps/$step.html
 
 	Msg3 "Running step $step...\n"
 	cd $siteDir/web/courseleaf
 	./courseleaf.cgi $step /courseadmin/index.tcf > $outFile
+
+	## If the user requested that the data be loaded the read data and write out to the roles.tcf file
+	if [[ $load == true ]]; then
+		Msg3 "'Load' option is active, $loadMode data..."
+		roleFile=$siteDir/web/courseleaf/roles.tcf
+		tmpRoleFile=$siteDir/web/courseleaf/roles.tcf.new
+		cp -rfp "$roleFile" "${roleFile}.bak"
+		Msg3 "^Existing roles file saved as 'roles.tcf.bak'"	
+			
+		if [[ $loadMode == 'replace' ]]; then
+			echo "// Loaded ($loadMode) by $userName using $myName ($version) on $(date)" > $tmpRoleFile
+			echo "template:custom" >> $tmpRoleFile
+			echo "pageflags:autoapprove" >> $tmpRoleFile
+			echo "localsteps:Role Management|groups|role|fields=Email;lookuptypes=user;" >> $tmpRoleFile
+			echo >> $tmpRoleFile
+			foundStart=false
+			ifs="$IFS"; IFS=$'\r'; while read line; do
+				[[ ${line:0:5} == 'Role ' ]] && foundStart=true && continue
+				[[ $foundStart != true ]] && continue
+				[[ -z $line ]] && break
+				# line=$(tr \t '|' <<< "$line")
+				roleName="$(cut -f1 -d$'\t' <<< $line)"
+				roleMembers="$(cut -f2 -d$'\t' <<< $line)"
+				roleEmail="$(cut -f3 -d$'\t' <<< $line)"
+				dump -1 -n line -t roleName roleMembers roleEmail
+				echo "role:$roleName|$roleMembers|$roleEmail" >> "$tmpRoleFile"
+			done < $outFile
+			IFS="$ifs"
+		else
+			:
+		fi
+		mv -f "$tmpRoleFile" "$roleFile"
+		Msg3 "Roles file updated"
+		Msg3 "Writing changelog.txt records..."
+		changeLogLines+=("Roles file updated ($loadMode)")
+		WriteChangelogEntry 'changeLogLines' "$siteDir/changelog.txt" "$myName"
+		Msg3 "Logging done"
+	fi
+
+
+
 	Msg3 "\nOutput data generated in '$outFile'\n"
 	rm -f "$siteDir/web/courseleaf/localsteps/$step.html"
 	[[ -f $siteDir/web/courseleaf/localsteps/$step.html.bak ]] && mv -f $siteDir/web/courseleaf/localsteps/$step.html.bak $siteDir/web/courseleaf/localsteps/$step.html
@@ -96,7 +153,11 @@ cimStr=\"$(sed 's|,|","|g' <<< $cimStr)\"
 #= Bye-bye
 #printf "0: noDbLog = '$noDbLog', myLogRecordIdx = '$myLogRecordIdx'\n" >> ~/stdout.txt
 Goodbye 0
-## Thu Mar 24 15:03:02 CDT 2016 - dscudiero - Get steps soruce directory from the database
+
+#===================================================================================================
+# Check-in Log
+#===================================================================================================
+## Thu Mar 24 15:03:02 CDT 2016 - dscudiero - Get steps source directory from the database
 ## Thu Mar 24 15:29:16 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Fri Apr  1 11:49:16 CDT 2016 - dscudiero - Switch to new format VerifyContinue
 ## Wed Jul 27 09:02:11 CDT 2016 - dscudiero - Delete step file after run
@@ -107,7 +168,7 @@ Goodbye 0
 ## 06-08-2017 @ 10.33.24 - (1.10.21)   - dscudiero - delete step file after run
 ## 06-08-2017 @ 11.39.13 - (1.10.23)   - dscudiero - General syncing of dev to prod
 ## 06-08-2017 @ 11.55.25 - (1.10.24)   - dscudiero - General syncing of dev to prod
-## 06-26-2017 @ 07.51.04 - (1.10.25)   - dscudiero - change cleanup to not remove the entier tmp directory
+## 06-26-2017 @ 07.51.04 - (1.10.25)   - dscudiero - change cleanup to not remove the entire tmp directory
 ## 09-29-2017 @ 10.14.49 - (1.10.28)   - dscudiero - Update FindExcecutable call for new syntax
 ## 10-03-2017 @ 11.02.00 - (1.10.32)   - dscudiero - General syncing of dev to prod
 ## 11-01-2017 @ 09.55.10 - (1.10.39)   - dscudiero - Switched to ParseArgsStd2
