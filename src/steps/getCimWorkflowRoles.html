@@ -1,7 +1,4 @@
 
-%import /courseadmin/workflowFuncs.atj:atj%
-//%import /programadmin/workflowFuncs.atj:at
-
 %spidercode%
 
 //============================================================================================================
@@ -14,6 +11,7 @@
 // 08/25/17 - dgs -	make sure that we add the real departement code to the subruleshash even if it is not mapped.
 // 08/30/17 - dgs -	Clean up debug messaging, fix problem adding the raw step text to the output array
 // 09/13/17 - dgs -	Added 'optional' flag on the reported instance name
+// 02/19/18 - dgs - Update to handle multiple substitution variables in a single step name
 //============================================================================================================
 // Function wrapper
 (function getCimWorkflowRoles() {
@@ -22,23 +20,22 @@ var debug=false;
 //============================================================================================================
 //Variable Declares
 //============================================================================================================
-	var cims=[];
+	var cims=[''];
 	if (cims.length == 0)
 		cims=['courseadmin','programadmin'];
 	var env='pvt';
-	var version="5.3";
+	var version="6.0";
 	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
 
 	var ignoreSteps = {
 		"initiator":true,
-		"relateddepts": true,
 		"regen": true,
-		"crosslisteddepts": true,
-		"crosslistedschools": true,
-		"crosslistedcolleges": true,
-		"associateddepts": true,
-		"associatedschools": true,
-		"associatedcolleges": true,
+		"addsisstep": true,
+		"proposalstate": true,
+		"annotate": true,
+		"notifyallapprovers": true,
+		"wflibversion": true,
+		"checkondisk": true,
 		"todo": true
 	}
 
@@ -67,8 +64,8 @@ var debug=false;
 	// header.push("")
 	// header.push("Notes:");
 	// header.push("   1) Data for college, department, and subject code values is pulled from the data provided in the CIM \'codes\' table.");
- //  	header.push("   2) If any particular role is not going to be used (e.g. the department does not have a Chair),");
- //   	header.push("      then please remove that line from this spreadsheet.");
+ 	// header.push("   2) If any particular role is not going to be used (e.g. the department does not have a Chair),");
+ 	// header.push("      then please remove that line from this spreadsheet.");
 	// header.push("   3) If there is preexisting member data for a role it is added in below as a startint point.");
 	// header.push("   4) Order is alphabetic by step name before substitution.");
 	// header.push("   5) Roles below are a composite of all roles from workflows in: " + cims + ".");
@@ -156,7 +153,7 @@ if (debug) {print_doc('\n*** In ' + myName + ' ***\n');}
 	});
 
 	if (debug) {
-		print_doc('\nrolesHash table:\n');
+		print_doc('\nrolesHash table from roles.tcf:\n');
 		for (var key in rolesHash) {
 			print_doc('\trolesHash[' + key + '] = >' + rolesHash[key].toSource() + '<\n');
 		}
@@ -178,7 +175,6 @@ if (debug) { wfDump("sisName",sisName); }
 	cims.forEach(function(cim) {
 		var workflowTcfData = load_tcf('/' + cim + '/workflow.tcf');
 		if (workflowTcfData) {
-
 			print_doc('\nProcessing cim: ' + cim);
 
 			//pull off list of conditional attributes from the localsteps data
@@ -230,82 +226,59 @@ if (debug) { wfDump("sisName",sisName); }
 			if (cimconfigTcfData) {
 				print_doc('\nProcessing wfSubRules\n' );
 				if (cimconfigTcfData.wfSubRule) {
-					//if (debug) { print_doc('cimconfigTcfData.wfSubRule >' + cimconfigTcfData.wfSubRule.toSource()  + '<\n') }
-					// wfSubRule:Col|SELECT code,name FROM codedesc WHERE setname="college" and rank >= 0 order by code  -or-
-					// wfSubRule:AcadLevel|['UG:Undergraduate','GR:Graduate','PR:Professional']
 					cimconfigTcfData.wfSubRule.forEach(function(text) {
 						var idx1=text.indexOf("|");
 						var subRuleName=text.substr(0,idx1);
 						var subRuleText=text.substr(idx1+1);
 						wfDump('\n\twfSubRule',text); wfDump('\t\tsubRuleName',subRuleName); wfDump('\t\tsubRuleText',subRuleText);
-
-						// If we have not already processed this rule then create a new hash table element for the rulename
-						if (wfSubRulesHash[subRuleName] == undefined) {
-							print_doc('\t\t' + subRuleName + " : " + subRuleText + '\n');
-							// If rule is an enumeration then parse off and create an object array
-							if (subRuleText.substr(0,1) === "[" ) {
-								var tmpHashArray=[];
-								var tmpStr=subRuleText.substr(1,subRuleText.length-2);
-								var tmpArray=tmpStr.split(',');
-								tmpArray.forEach(function(token) {
-								var tmpObj={};
-								var idx2=token.indexOf(":");
-								if (idx2 > 0) {
-									tmpObj.code=token.substr(1,idx2-1);
-									tmpObj.name=token.substr(idx2+1,token.length-tmpObj.code.length-2);
-								} else {
-									tmpObj.code=token;
-									tmpObj.name=token;
-								}
-								//tmpObj.origCode=tmpObj.code;
-								tmpHashArray.push(tmpObj);
-								});
-								wfSubRulesHash[subRuleName]=tmpHashArray;
-							// Otherwise assume rule is a sql query on the cimcodes table
+						// If we have already processed this rule then skip it
+						if (wfSubRulesHash[subRuleName] != undefined) {
+							print_doc("\t\t'" + subRuleName + "' already included above\n");
+							return;
+						}
+						print_doc('\t\tsubRuleRule :' + subRuleText + '\n');
+						// If rule is an enumeration then parse off and create an object array
+						if (subRuleText.substr(0,1) === "[" ) {
+							var tmpHashArray=[];
+							var tmpStr=subRuleText.substr(1,subRuleText.length-2);
+							var tmpArray=tmpStr.split(',');
+							tmpArray.forEach(function(token) {
+							var tmpObj={};
+							var idx2=token.indexOf(":");
+							if (idx2 > 0) {
+								tmpObj.code=token.substr(1,idx2-1);
+								tmpObj.name=token.substr(idx2+1,token.length-tmpObj.code.length-2);
 							} else {
-								wfSubRulesHash[subRuleName]=dbquery('cimcourses',text.substr(idx1+1));
-								}
-							} else {
-								print_doc("\t\t'" + subRuleName + "' already included above\n");
+								tmpObj.code=token;
+								tmpObj.name=token;
 							}
+							//tmpObj.origCode=tmpObj.code;
+							tmpHashArray.push(tmpObj);
+							});
+							wfSubRulesHash[subRuleName]=tmpHashArray;
+						// Otherwise assume rule is a sql query on the cimcodes table
+						} else {
+							wfSubRulesHash[subRuleName]=dbquery('cimcourses',text.substr(idx1+1));
+						}
 
-							// See if we have a mapper function for this variable
-							var mapperFunctionName="Map" + subRuleName + "Val";
-							mappedArray=[];
-							wfSubRulesHash[subRuleName].forEach(function(token) {
-								if (eval("typeof " + mapperFunctionName) === "function") {
-									tmpObj={};
-									eval("tmpObj.code="+ mapperFunctionName + "(\"" + token.code + "\")");
-									tmpObj.name=token.name;
-									tmpObj.origCode=token.code;
-									mappedArray.push(tmpObj);
-								} else {
-									token.origCode=token.code
-									mappedArray.push(token)
-								}
-							});//wfSubRulesHash[key].forEach
-							wfSubRulesHash[subRuleName]=mappedArray
+						// See if we have a mapper function for this variable
+						var mapperFunctionName="Map" + subRuleName + "Val";
+						mappedArray=[];
+						wfSubRulesHash[subRuleName].forEach(function(token) {
+							if (eval("typeof " + mapperFunctionName) === "function") {
+								tmpObj={};
+								eval("tmpObj.code="+ mapperFunctionName + "(\"" + token.code + "\")");
+								tmpObj.name=token.name;
+								tmpObj.origCode=token.code;
+								mappedArray.push(tmpObj);
+							} else {
+								token.origCode=token.code
+								mappedArray.push(token)
+							}
+						});//wfSubRulesHash[key].forEach
+						wfSubRulesHash[subRuleName]=mappedArray
 
-
-							// // See if we have a mapper function for this variable
-							// var mapperFunctionName="Map" + subRuleName + "Val";
-							// if (eval("typeof " + mapperFunctionName) === "function") {
-							// 	mappedArray=[];
-							// 	wfSubRulesHash[subRuleName].forEach(function(token) {
-							// 		tmpObj={};
-							// 		eval("tmpObj.code="+ mapperFunctionName + "(\"" + token.code + "\")");
-							// 		tmpObj.name=token.name;
-							// 		tmpObj.origCode=token.code;
-							// 		mappedArray.push(tmpObj);
-							// 	});//wfSubRulesHash[key].forEach
-							// 	wfSubRulesHash[subRuleName]=mappedArray;
-
-							// } else {
-							// 	wfSubRulesHash[subRuleName].origCode=token.code;
-							// }
-
-							//wfDump("\n\t\twfSubRulesHash",wfSubRulesHash[subRuleName].toSource())
-					}); // wfSubRules
+					}); // cimconfigTcfData.wfSubRule.forEach
 				} else {
 					print_doc('\n\t* Warning * -- could not find any wfSubRules defined in ' + cim + ' cimconfig.cfg file.\n\tStopping\n\n');
 				}
@@ -319,8 +292,8 @@ if (debug) { wfDump("sisName",sisName); }
 
 	if (debug) {
 		print_doc('\n\nFound ' + Object.keys(wfSubRulesHash).length + ' subRules...\n');
-		for (var key in wfSubRulesHash) {
-			wfDump("\n\twfSubRulesHash[" + key + "]",wfSubRulesHash[key].toSource())
+		for (var i2=0,  tot=Object.keys(wfSubRulesHash).length; i2 < tot; i2++) {
+			wfDump("\n\twfSubRulesHash[" + Object.keys(wfSubRulesHash)[i2] + "]",wfSubRulesHash[Object.keys(wfSubRulesHash)[i2]].toSource())
 		}
 		wfDump('');
 	}
@@ -395,103 +368,87 @@ if (debug) { wfDump("sisName",sisName); }
 //# Main
 //============================================================================================================
 // Loop through the steps, substitute values and build initial output roles array
-var rolesOut=[], expandedSteps=[], editString='';
 
-// Loop through all the steps, substuting in values
-//i=0; while (true) {
-for (var i=0, tot=steps.length; i < tot; i++) {
-	editString=steps[i].stepData;
-	if (debug) { print_doc('step = >' + editString + '<\n'); }
-	if (editString != '') {
-		//Loop through substituted variable names
-		var substitutionMade=false;
-		for (var key in wfSubRulesHash) {
-			subsFound=false;
-			re = new RegExp("\\b" + key + "\\b", "g");
-			//if (debug) { print_doc("\tkey: '" + key + "'\tre: '" + re + "'\n") }
-			if (re.test(editString)) {
-				if (debug) { print_doc("\tSubstitute: '" + key + "' into '" + editString + "'\n"); }
-				subsFound=true;
-				//rolesOut[i]='';
-				wfSubRulesHash[key].forEach(function(token) {
-					//if (debug) { print_doc("\t\ttoken: " + token.toSource() ) ; print_doc("\t\ttoken.code: " + token.code + ", token.name: " + token.name + "\n" ) }
-					if (typeof token.code === 'undefined') { var repString=token.name; } else { var repString=token.code; }
-					// Make the strign substitution
-					var str=editString.replace(re,repString);
-					//if (debug) { print_doc("\t\teditString (" + key + ") = " + str + "\n") }
-					if (debug) { print_doc("\t\t" + str + "\n") }
+var rolesOut=steps;
+var instanceData="";
+var editString="";
+var madeSubstitution=false;
+var startLoopAt=0;
 
-					//If there are role members, then add to output string
-					if (rolesHash[str] != undefined ) {
-						//if (debug) { print_doc('\t\t\trolesHash['+str+'] = >' + rolesHash[str].toSource() + '<\n'); }
-						str=str + '\t' + rolesHash[str].members.toString() + '\t' + rolesHash[str].email.toString() + '\t';
+for (var i1=startLoopAt; i1 < rolesOut.length; i1++) {
+	firstPassForThisStep=true;
+	if (debug) { print_doc("rolesOut[" + i1 + "] = >" + rolesOut[i1].toSource() + "<\n"); }
+	if (rolesOut[i1].stepData === "") continue
+	editString=rolesOut[i1].stepData;
+	instanceData=rolesOut[i1].cimInstance;
+	variableData=rolesOut[i1].subVariables;
+	madeSubstitution=false;
+	for (var i2=0,  tot=Object.keys(wfSubRulesHash).length; i2 < tot; i2++) {
+		key = Object.keys(wfSubRulesHash)[i2];
+		re = new RegExp("\\b" + key + " |\\b" + key + "$", "g");
+		//if (debug) { print_doc("\tkey: '" + key + "'\tre: '" + re + "'\n") }
+		if (re.test(editString)) {
+			madeSubstitution=true;
+			if (debug) { print_doc("\t*** Substitute: '" + key + "' into '" + editString + "'\n"); }
+			wfSubRulesHash[key].forEach(function(token) {
+				if (typeof token.code === 'undefined') { var repString=token.name; } else { var repString=token.code; }
+				editString=rolesOut[i1].stepData.replace(re,repString + " ");
+					if (debug) { print_doc("\t   " + editString + "'\n"); }
+					if (variableData === undefined) { 
+						variableData=key; 
 					} else {
-						if (str.indexOf("\t") < 0 ) { str=str + '\t\t\t' }
+						if (variableData.indexOf(key)<0) 
+							variableData=variableData + ", " + key;
 					}
-					//Add the substituted variable info
-					if (str.indexOf("(") < 0 ) {
-						rolesOut.push(str + '(' + steps[i].cimInstance + ' -- ' + key.toLowerCase() + ':' + token.origCode + ')');
-					} else {
-						rolesOut.push(str + ' (' + key.toLowerCase() + ':' + repString + ')');
-					}
-				}); //wfSubRulesHash[key].forEach
-				var substitutionMade=true;
-				break; //Stop processing wfSubRule -- only one at a time
-			} //(re.test(editString))
-		} //(key in wfSubRulesHash)
-	} //(editString != '')
-	if (! substitutionMade)
-		rolesOut.push(steps[i].stepData + '\t\t\t(' + steps[i].cimInstance  + ')');
-} //(var i=0, tot=steps.length; i < tot; i++)
+				rolesOut.push({ stepData:editString, cimInstance:instanceData,subVariables:variableData }); // Add edited role string to the bottom of the array 
+			}); //wfSubRulesHash[key].forEach
+			rolesOut.splice(i1,1); i1--; //Remove the template role from rolesOut
+		}
+		if (madeSubstitution) break; //Only one substitution at a time
+		//startLoopAt=i1;
+	} //tot=Object.keys(wfSubRulesHash).length
+} //tot=rolesOut.length
+
+// Loop through the rolesOut array and add role member list and instance annotations
+var haveStep=[];
+rolesOut=rolesOut.sort();
+for (var i1=0, tot=rolesOut.length; i1 < tot; i1++) {
+	//If there are role members, then add to output string
+	editString=rolesOut[i1].stepData;
+	instanceData=rolesOut[i1].cimInstance;
+	variableData=rolesOut[i1].subVariables;
+
+	if (haveStep[editString] != undefined)
+		continue;
+	haveStep[editString]=true;
+	
+	if (rolesHash[editString] != undefined ) {
+		//if (debug) { print_doc("\t\t\trolesHash["+str+"] = >" + rolesHash[str].toSource() + "<\n"); }
+		editString=editString + "\t" + rolesHash[editString].members.toString() + "\t" + rolesHash[editString].email.toString() + "\t";
+	} else {
+		if (editString.indexOf("\t") < 0 ) { editString=editString + "\t\t\t" }
+	}
+	//Add the substituted variable info
+	if (editString.indexOf("(") < 0 ) {
+		rolesOut[i1]=editString + "(" +instanceData + " -- " + variableData + ")";
+	} else {
+		rolesOut[i1]=(editString + " (" + key.toLowerCase() + ":" + repString + ")");
+	}
+}
 
 //Write the putput to stdout
-	// Header
-		print_doc('\n');
-		header.forEach(function(text) {
-			print_doc(text + '\n');
-		});
-	// Roles
-		rolesOut=rolesOut.sort();
-		rolesOut.forEach(function(text) {
-			if (text != '' ) print_doc(text + '\n');
-		});
+// Header
+print_doc('\n');
+header.forEach(function(text) {
+	print_doc(text + '\n');
+});
+// Roles
+rolesOut=rolesOut.sort();
+rolesOut.forEach(function(text) {
+	if (typeof text === "string") print_doc(text + '\n');
+});
 
 return;
-
-//============================================================================================================
-// Subs
-//============================================================================================================
-// function SpecialPrintRoles(labelArray) {
-// 	var labelArray;
-// 	var debug=false;
-// 	var addSep=true;
-// 	var label='', table='', selectClause='';
-// 	var tokens=[];
-// 	if (labelArray.length <= 0) { return }
-// 	if (debug) { for(var i=0; i < labelArray.length; i++) { print_stdout('labelArray[' + i + '] = ' + labelArray[i] + "\n"); } }
-
-// 	// Pull config data off the top of the array
-// 	sep=labelArray[0]; labelArray.shift();
-// 	table=labelArray[0]; labelArray.shift();
-// 	selectClause=labelArray[0]; labelArray.shift();
-// 	if (debug) { print_stdout('sep = >' + sep + '<\ntable = >' + table + '<\nselectClause = >' + selectClause + '<\n') }
-
-// 	// retrieve data from database & loop through values
-// 	var tokens = dbquery(table, selectClause);
-// 	if (debug) { for(var i=0; i < tokens.length; i++) { print_stdout('tokens[' + i + '] = ' + tokens[i].school + '\n'); } }
-
-// 	tokens.forEach(function(token) {
-// 		labelArray.forEach(function(text) {
-// 			if ( text != '' ) {
-// 				if (addSep) { print_stdout('** ' + sep + '\n'); addSep=false }
-// 				print_stdout(token.school + ' ' + text + '\n');
-// 			}
-// 		});
-// 	});
-
-// 	print_stdout('\n');
-// 	return;
-// }
 
 //============================================================================================================
 //Close function wrapper
