@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.10.90 # -- dscudiero -- Mon 02/19/2018 @ 15:33:33.75
+version=1.10.91 # -- dscudiero -- Tue 02/20/2018 @  8:11:29.45
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="WriteChangelogEntry"
@@ -52,11 +52,9 @@ ParseArgsStd2 $originalArgStr
 
 [[ -n unknowArgs ]] && cimStr="$unknowArgs"
 Init 'getClient getEnv getDirs checkEnvs getCims noPreview noPublic addPvt'
-dump load loadMode
 [[ -n $loadMode ]] && load=true
 [[ $load == true && -z $loadMode ]] && loadMode='merge'
 [[ $loadMode == 'merge' ]] && Terminate "Sorry, the '-merge' option is not supported at this time."
-dump load loadMode
 
 ## Set outfile -- look for std locations
 outFile=/home/$userName/$client-$env-CIM_Roles.xls
