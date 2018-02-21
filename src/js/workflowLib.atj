@@ -1,6 +1,6 @@
 //======================================================================================================================
-wfLibVersion="1.8.72" // -- dscudiero -- Thu 02/15/2018 @ 14:44:49.41
-//attr_write("wfLibVersion", wfLibVersion);
+wfLibVersion="1.8.75" // -- dscudiero -- Wed 02/21/2018 @  8:56:21.23
+attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
@@ -1944,21 +1944,31 @@ CheckChanged = function(data) {
 			for (var key in changedHash) {
 				// check to make sure the field data really changed (i.e. scrub the data and then compare)
 				// Dump("\n\nkey",key); Dump("\ntcfdata." + key,eval("tcfdata." + key + ".toSource()"));
-				var tcfDataStr="";
-				var tcfData=getTCFValue(key, { delimiter: "\n", retarray: true });
-				//Dump("\ttcfData.length",tcfData.length);
-				for (var i=0, tot=eval(tcfData.length); i < tot; i++) {
-					//Dump("\ttcfData" + "[" + i + "]",tcfData[i]);
-					tcfDataStr=tcfDataStr+tcfData[i].replace(/<\/?[^>]+>/g, "").replace(/\n/g, " ").replace(/&#160;/g, " ").replace(/\s+/g, "");
-				}
-				//Dump("\ttcfDataStr",tcfDataStr);
-				var tcaDataStr="";
-				var tcaData=getTCFValue(key, { delimiter: "\n", retarray: true, data: tcadata });
-				//Dump("\ttcaData.length",tcaData.length);
-				for (var i=0, tot=eval(tcaData.length); i < tot; i++) {
-					//Dump("\ttcaData" + "[" + i + "]",tcaData[i]);
-					tcaDataStr=tcaDataStr+tcaData[i].replace(/<\/?[^>]+>/g, "").replace(/\n/g, " ").replace(/&#160;/g, " ").replace(/\s+/g, "");
-				}
+				// var tcfDataStr="";
+				// var tcfData=getTCFValue(key, { delimiter: "\n", retarray: true });
+				// //Dump("\ttcfData.length",tcfData.length);
+				// for (var i=0, tot=eval(tcfData.length); i < tot; i++) {
+				// 	//Dump("\ttcfData" + "[" + i + "]",tcfData[i]);
+				// 	tcfDataStr=tcfDataStr+tcfData[i].replace(/<\/?[^>]+>/g, "").replace(/\n/g, " ").replace(/&#160;/g, " ").replace(/\s+/g, "");
+				// }
+				// //Dump("\ttcfDataStr",tcfDataStr);
+				// var tcaDataStr="";
+				// var tcaData=getTCFValue(key, { delimiter: "\n", retarray: true, data: tcadata });
+				// //Dump("\ttcaData.length",tcaData.length);
+				// for (var i=0, tot=eval(tcaData.length); i < tot; i++) {
+				// 	//Dump("\ttcaData" + "[" + i + "]",tcaData[i]);
+				// 	tcaDataStr=tcaDataStr+tcaData[i].replace(/<\/?[^>]+>/g, "").replace(/\n/g, " ").replace(/&#160;/g, " ").replace(/\s+/g, "");
+				// }
+				var tcfDataStr=eval("tcfdata." + key + ".toSource()");
+				//Dump("\n\tkey",key); Dump("\t\ttcfdata." + key,tcfDataStr);
+				tcfDataStr=tcfDataStr.replace(/<\/?[^>]+>/g, "").replace(/\n/g, " ").replace(/&#160;/g, " ").replace(/\s+/g, "");
+				//Dump("tcfDataStr",tcfDataStr)
+
+				var tcaDataStr=eval("tcadata." + key + ".toSource()");
+				//Dump("\n\tkey",key); Dump("\t\ttcadata." + key,tcaDataStr);
+				tcaDataStr=tcaDataStr.replace(/<\/?[^>]+>/g, "").replace(/\n/g, " ").replace(/&#160;/g, " ").replace(/\s+/g, "");
+				//Dump("tcaDataStr",tcaDataStr)
+				
 				//Dump("\ttcaDataStr",tcaDataStr);
 				if (tcfDataStr === tcaDataStr) {
 					wfDebug(0,"\t\t\tFound field '" + key + "' changed but tcf/tca text compare as equal")
