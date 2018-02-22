@@ -2261,7 +2261,7 @@ function wfDebug(msgLevel,text,mode){
 		if ( mode == 'D' || mode == 'B' )
 			print_debug(text + ' \n');
 		if ( mode == 'S' || mode == 'B' ) {
-			if (typeof intestworkflow === "undefined" || !intestworkflow) return false;
+			if (typeof workflow.intestworkflow === "undefined" || !workflow.intestworkflow) return false;
 			print_doc("&nbsp;&nbsp;&nbsp;" + text + ' <br>');
 		}
 	return;
@@ -2314,7 +2314,7 @@ function wfDump(msgLevel,varList,delimiter){
 function CheckForVal(varName,varValue) {
 	//print_debug('\tvarName = ' + varName + ', varValue =' + varValue + ',varValue.length  = ' + varValue.length + '\n');
 	if (!varValue || !varValue.length) {
-		if (typeof intestworkflow === "undefined" || !intestworkflow) return false;
+		if (typeof workflow.intestworkflow === "undefined" || !workflow.intestworkflow) return false;
 		print_doc('&nbsp;&nbsp;<strong>*WARNING*</strong> -- Data Field&nbsp;&nbsp;<em>\'' + varName + '\'</em>&nbsp;&nbsp;does not have a value, workflow calculation incomplete.<br>');
 		return false;
 	}
@@ -2429,7 +2429,7 @@ function wfSplitString (string, size) {
 // 02/15/18 - dgs - Updated to automatically parse the message string to fit in the preview workflow window
 //======================================================================================================================
 wffuncs.TODO = function(inval, wfrule, args) {
-	if (typeof intestworkflow === "undefined" || !intestworkflow) return false;
+	if (typeof workflow.intestworkflow === "undefined" || !workflow.intestworkflow) return false;
 
 	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
 	if (options === "" ) options = "Awaiting final client approval."
@@ -2455,7 +2455,7 @@ wffuncs.TODO = function(inval, wfrule, args) {
 // 02/15/18 - dgs - Updated to automatically parse the message string to fit in the preview workflow window
 //======================================================================================================================
 wffuncs.CheckOnDisk = function(inval, wfrule, args) {
-	if (typeof intestworkflow === "undefined" || !intestworkflow) return false;
+	if (typeof workflow.intestworkflow === "undefined" || !workflow.intestworkflow) return false;
 
 	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
 	if (options === "" ) options = "The displayed workflow below may not fully reflect the final workflow.."
@@ -2482,7 +2482,7 @@ wffuncs.CheckOnDisk = function(inval, wfrule, args) {
 // 02/15/18 - dgs - Updated to automatically parse the message string to fit in the preview workflow window
 //======================================================================================================================
 wffuncs.NoWorkflow = function(inval, wfrule, args) {
-	if (typeof intestworkflow === "undefined" || !intestworkflow) return false;
+	if (typeof workflow.intestworkflow === "undefined" || !workflow.intestworkflow) return false;
 
 	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
 	if (options === "" ) options = "Please complete the required form fields and try again."
