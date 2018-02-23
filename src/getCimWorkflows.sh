@@ -86,7 +86,7 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 
 		[[ $(Contains ",${ignoreRules}," ",${ruleName},") == true ]] && return 0
 
-		if [[ $(Contains "$line" '|attr|') == true || $(Contains "$line" '|function|wfAttr|') == true ]]; then
+		if [[ $(Contains "$line" '|attr|') == true || $(Contains "$line" '|function|wfAttr|' || $(Contains "$line" '|function|Related|') == true ]]; then
 			#line = >Col|attr|college_prog.code|; <
 			substitutionVars[$ruleName]="$description\t\tattr{$(cut -d'|' -f3 <<< "$line")}"
 			substitutionVarsKeys+=($ruleName)
@@ -216,7 +216,12 @@ for cim in ${cimStr//,/ }; do
 			elif [[ $ruleType == 'wforder' ]]; then
 				wforders+=("$(cut -d':' -f2 <<< "$line")")
 			elif [[ $ruleType == 'voterules' ]]; then
-				voterules+=("$(cut -d':' -f2 <<< "$line")")
+				##voterules:voteName| stepRegex|duration|attribute1;attribute2,...
+				ruleName="$(cut -d'|' -f1 <<< "${line#*:}")"
+				ruleRegex="$(cut -d'|' -f2 <<< "$line")"
+				duration="$(cut -d'|' -f3 <<< "$line")"; [[ $duration == '0' ]] && duration='none'
+				attributes="$(cut -d'|' -f4- <<< "$line")"; attributes="${attributes//;/; }"
+				voterules+=("$ruleName / \"$ruleRegex\"\tDuration: $duration, Attributes: $attributes")
 			else
 				:
 			fi
