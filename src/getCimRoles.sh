@@ -49,18 +49,17 @@ helpSet='script,client,env,cims'
 Hello
 GetDefaultsData $myName
 ParseArgsStd2 $originalArgStr
-
-[[ -n unknowArgs ]] && cimStr="$unknowArgs"
+[[ -n $unknowArgs ]] && cimStr="$unknowArgs"
 Init 'getClient getEnv getDirs checkEnvs getCims noPreview noPublic addPvt'
 [[ -n $loadMode ]] && load=true
 [[ $load == true && -z $loadMode ]] && loadMode='merge'
 [[ $loadMode == 'merge' ]] && Terminate "Sorry, the '-merge' option is not supported at this time."
 
 ## Set outfile -- look for std locations
-outFile=/home/$userName/$client-$env-CIM_Roles.xls
+outFile=/home/$userName/$client-$env-CIM_Roles.csv
 if [[ -d $localClientWorkFolder ]]; then
 	if [[ ! -d $localClientWorkFolder/$client ]]; then mkdir -p $localClientWorkFolder/$client; fi
-	outFile=$localClientWorkFolder/$client/$client-$env-CimRoles.xls
+	outFile=$localClientWorkFolder/$client/$client-$env-CimRoles.csv
 fi
 
 ## Make sure user wants to continue
@@ -72,10 +71,10 @@ verifyArgs+=("CIMs:$cimStr")
 verifyContinueDefault='Yes'
 VerifyContinue "You are asking generate CIM roles for"
 
-if [[ -e $outFile && $verify == true ]]; then
-	Msg3 "\nOutput file '$outFile' already exists, file renamed to:\n\t$outFile.$backupSuffix\n"
-	mv $outFile $outFile.$backupSuffix
-fi
+# if [[ -e $outFile && $verify == true ]]; then
+# 	Msg3 "\nOutput file '$outFile' already exists, file renamed to:\n\t$outFile.$backupSuffix\n"
+# 	mv $outFile $outFile.$backupSuffix
+# fi
 
 #===================================================================================================
 #= Main
@@ -141,9 +140,36 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 		Msg3 "Logging done"
 	fi
 
+	Msg3
+	Note "The generated output data can be found at:"
+	Msg3 "^'$(ColorK $outFile)'"
+	Msg3 "This is a .csv file that can be loaded by Microsoft Excel, if you wish to provide"
+	Msg3 "the client a 'prettier' version you can copy this data into a .xlsx format file."
+	Msg3 "A master workflows template Excel file can be found at: to start if you wish:"
+	Msg3 "^'$(ColorK "$TOOLSPATH/workbooks/CIMWorkflows.xltm")'"
+	Msg3 "You can use this as a start if you wish."
+	Msg3
+
+	if [[ $userName == dscudiero ]]; then
+		Msg3
+		Msg3 "Workflow roles have been generated for:"
+		Msg3 "^$client / $env / $cimStr"
+		Msg3 "Attached you will find a workbook with the roles data."
+		Msg3 "^$(basename $outFile)"
+		[[ $load == true ]] && loadedStr=' ' || loadedStr=' not ' 
+		Msg3 "The roles have${loadStr}been loaded into the $env The attached"
+		Msg3 "roles data is provided in raw tab delimited format, if you"
+		Msg3 "wish to provide the client a 'prettier' format, you can copy"
+		Msg3 "this data into a true .xlsx format file."
+		Msg3 "Fyi, a master workflows template Excel file can be found at: "
+		Msg3 '^\\\\saugus\docs\\tools\workbooks'
+		Msg3 "that could be used as a starting point."
+		Msg3
+		Msg3 "If you have questions please see me."
+		Msg3
+	fi
 
 
-	Msg3 "\nOutput data generated in '$outFile'\n"
 	rm -f "$siteDir/web/courseleaf/localsteps/$step.html"
 	[[ -f $siteDir/web/courseleaf/localsteps/$step.html.bak ]] && mv -f $siteDir/web/courseleaf/localsteps/$step.html.bak $siteDir/web/courseleaf/localsteps/$step.html
 
