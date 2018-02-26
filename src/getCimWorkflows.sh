@@ -11,10 +11,10 @@ originalArgStr="$*"
 scriptDescription="Extracts workflow data in a format that facilitates pasteing into a MS Excel workbook"
 
 #==================================================================================================
-# Run hourly from cron
+# Parse site workflow files and print workflow in a friendly format
 #==================================================================================================
 #==================================================================================================
-# Copyright ©2014 David Scudiero -- all rights reserved.
+# Copyright ©2018 David Scudiero -- all rights reserved.
 # xx-xx-15 -- dgs - Initial coding
 #==================================================================================================
 
@@ -86,7 +86,10 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 
 		[[ $(Contains ",${ignoreRules}," ",${ruleName},") == true ]] && return 0
 
-		if [[ $(Contains "$line" '|attr|') == true || $(Contains "$line" '|function|wfAttr|' || $(Contains "$line" '|function|Related|') == true ]]; then
+		if [[ $(Contains "$line" '|attr|') == true || $(Contains "$line" '|function|wfAttr|') == true || \
+			$(Contains "$line" '|function|Related|') == true || $(Contains "$line" 'AcadLevel') == true || \
+			$(Contains "$line" 'ProposalState') == true || $(Contains "$line" 'NotifyAllApprovers') == true || \
+			$(Contains "$line" 'RelatedDepts') == true ]]; then
 			#line = >Col|attr|college_prog.code|; <
 			substitutionVars[$ruleName]="$description\t\tattr{$(cut -d'|' -f3 <<< "$line")}"
 			substitutionVarsKeys+=($ruleName)
