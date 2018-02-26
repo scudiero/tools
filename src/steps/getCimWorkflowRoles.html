@@ -168,8 +168,8 @@ if (debug) { wfDump("sisName",sisName); }
 // Add run info to the output
 	print_doc(Array(120).join("="));
 	print_doc("\nLEEPFROG INSTRUCTIONS \n");
-	print_doc("If you wish, you can copy the data below the header 'CLIENT DATA' into an .xlsx file");
-	print_doc("before you send to the client, if you just send this file to the client you should");
+	print_doc("If you wish, you can copy the data below the header 'CLIENT DATA' into an .xlsx file\n");
+	print_doc("before you send to the client, if you just send this file to the client you should\n");
 	print_doc("remove all lines up to and includeing the 'CLIENT DATA'.\n\n");
 	print_doc("\t" + myName + "version: " + version + "\n");
 	print_doc("\t" + new Date() + "\n");
@@ -241,7 +241,7 @@ if (debug) { wfDump("sisName",sisName); }
 							print_doc("\t\t'" + subRuleName + "' already included above\n");
 							return;
 						}
-						print_doc('\t\tsubRuleRule :' + subRuleText + '\n');
+						print_doc('\t\t' + subRuleName + ': ' + subRuleText + '\n');
 						// If rule is an enumeration then parse off and create an object array
 						if (subRuleText.substr(0,1) === "[" ) {
 							var tmpHashArray=[];
