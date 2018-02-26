@@ -166,16 +166,17 @@ if (cimconfigData && cimconfigData.sisname) { sisName=cimconfigData.sisname[0] }
 if (debug) { wfDump("sisName",sisName); }
 
 // Add run info to the output
-	print_doc('\n' + myName + 'version: ' + version + '\n');
-	print_doc(new Date() + '\n');
+	print_doc('\n LEEPFROG INSTRUCTIONS \n');
+	print_doc('\t' + myName + 'version: ' + version + '\n');
+	print_doc('\t' + new Date() + '\n');
 
 // Build a list of workflow steps from cims workflow.tcf files (see cims definition)
-	print_doc('\nEnvironment: ' + env + '\n');
+	print_doc('\n\tEnvironment: ' + env + '\n');
  	var idx, str, steps=[], conditionals=[], functions=[], tempArray=[], errorDetected=false, wfSubRulesHash=[], stepsHash=[];
 	cims.forEach(function(cim) {
 		var workflowTcfData = load_tcf('/' + cim + '/workflow.tcf');
 		if (workflowTcfData) {
-			print_doc('\nProcessing cim: ' + cim);
+			print_doc('\t\tProcessing cim: ' + cim);
 
 			//pull off list of conditional attributes from the localsteps data
 				str=workflowTcfData.localsteps[0].params.replace('attributes=','');
@@ -224,7 +225,7 @@ if (debug) { wfDump("sisName",sisName); }
 			}
 			// Loop through wfSubRules data
 			if (cimconfigTcfData) {
-				print_doc('\nProcessing wfSubRules\n' );
+				print_doc('\n\tProcessing wfSubRules\n' );
 				if (cimconfigTcfData.wfSubRule) {
 					cimconfigTcfData.wfSubRule.forEach(function(text) {
 						var idx1=text.indexOf("|");
@@ -283,7 +284,6 @@ if (debug) { wfDump("sisName",sisName); }
 					print_doc('\n\t* Warning * -- could not find any wfSubRules defined in ' + cim + ' cimconfig.cfg file.\n\tStopping\n\n');
 				}
 			} else {
-				Here(3);
 				print_doc('\n\t* Error * -- could not load /' + cim + '/cimconfig.cfg  or /workflow.cfg file.\n\tStopping\n\n');
 				errorDetected=true;
 			}
@@ -438,6 +438,8 @@ for (var i1=0, tot=rolesOut.length; i1 < tot; i1++) {
 
 //Write the putput to stdout
 // Header
+print_doc('\n');
+print_doc('CLIENT DATA');
 print_doc('\n');
 header.forEach(function(text) {
 	print_doc(text + '\n');
