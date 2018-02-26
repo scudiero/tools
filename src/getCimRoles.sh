@@ -23,6 +23,7 @@ function getCimRoles-ParseArgsStd2 { # or parseArgs-local
 	myArgs+=("load|load|switch|load||script|Automatically load the roles to the site")
 	myArgs+=("replace||switch||loadMode='replace'|script|Replace all of the target sites role data")
 	myArgs+=("merge||switch||loadMode='merge'|script|Merge the role data into the sites existing role data")
+	myArgs+=("add||switch||loadMode='add'|script|Add the role data into the sites existing role data")
 	return 0
 }
 function getCimRoles-Goodbye { # or Goodbye-local
@@ -104,40 +105,55 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 
 	## If the user requested that the data be loaded the read data and write out to the roles.tcf file
 	if [[ $load == true ]]; then
+		loadedStr=' '
 		Msg3 "'Load' option is active, $loadMode data..."
 		roleFile=$siteDir/web/courseleaf/roles.tcf
 		tmpRoleFile=$siteDir/web/courseleaf/roles.tcf.new
 		cp -rfp "$roleFile" "${roleFile}.bak"
-		Msg3 "^Existing roles file saved as 'roles.tcf.bak'"	
-			
-		if [[ $loadMode == 'replace' ]]; then
+		Msg3 "^Existing roles file saved as 'roles.tcf.bak'"
+		if  [[ $loadMode == 'replace' ]]; then
 			echo "// Loaded ($loadMode) by $userName using $myName ($version) on $(date)" > $tmpRoleFile
 			echo "template:custom" >> $tmpRoleFile
 			echo "pageflags:autoapprove" >> $tmpRoleFile
 			echo "localsteps:Role Management|groups|role|fields=Email;lookuptypes=user;" >> $tmpRoleFile
 			echo >> $tmpRoleFile
-			foundStart=false
-			ifs="$IFS"; IFS=$'\r'; while read line; do
-				[[ ${line:0:5} == 'Role ' ]] && foundStart=true && continue
-				[[ $foundStart != true ]] && continue
-				[[ -z $line ]] && break
-				# line=$(tr \t '|' <<< "$line")
-				roleName="$(cut -f1 -d$'\t' <<< $line)"
-				roleMembers="$(cut -f2 -d$'\t' <<< $line)"
-				roleEmail="$(cut -f3 -d$'\t' <<< $line)"
-				dump -1 -n line -t roleName roleMembers roleEmail
-				echo "role:$roleName|$roleMembers|$roleEmail" >> "$tmpRoleFile"
-			done < $outFile
-			IFS="$ifs"
 		else
-			:
+			cp -fp "$roleFile" "$tmpRoleFile"
 		fi
+
+		foundStart=false
+		ifs="$IFS"; IFS=$'\r'; while read line; do
+			[[ ${line:0:5} == 'Role ' ]] && foundStart=true && continue
+			[[ $foundStart != true ]] && continue
+			[[ -z $line ]] && break
+			# line=$(tr \t '|' <<< "$line")
+			roleName="$(cut -f1 -d$'\t' <<< $line)"
+			roleMembers="$(cut -f2 -d$'\t' <<< $line)"
+			roleEmail="$(cut -f3 -d$'\t' <<< $line)"
+			dump -1 -n line -t roleName roleMembers roleEmail
+			case $loadMode in
+				merge)
+					Terminate "Load mode $loadMode not supported at this time"
+					;;
+				add) 
+					unset grepStr; grepStr=$(ProtectedCall "grep 'role:$roleName' $tmpRoleFile")
+					[[ -z $grepStr ]] && echo "role:$roleName|$roleMembers|$roleEmail" >> "$tmpRoleFile"
+					;;
+				replace)
+					echo "role:$roleName|$roleMembers|$roleEmail" >> "$tmpRoleFile"
+					;;
+			esac
+		done < $outFile
+		IFS="$ifs"
+
 		mv -f "$tmpRoleFile" "$roleFile"
 		Msg3 "Roles file updated"
 		Msg3 "Writing changelog.txt records..."
 		changeLogLines+=("Roles file updated ($loadMode)")
 		WriteChangelogEntry 'changeLogLines' "$siteDir/changelog.txt" "$myName"
 		Msg3 "Logging done"
+	else
+		loadedStr=' not '
 	fi
 
 	Msg3
@@ -156,7 +172,6 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 		Msg3 "^$client / $env / $cimStr"
 		Msg3 "Attached you will find a workbook with the roles data."
 		Msg3 "^$(basename $outFile)"
-		[[ $load == true ]] && loadedStr=' ' || loadedStr=' not ' 
 		Msg3 "The roles have${loadStr}been loaded into the $env The attached"
 		Msg3 "roles data is provided in raw tab delimited format, if you"
 		Msg3 "wish to provide the client a 'prettier' format, you can copy"
