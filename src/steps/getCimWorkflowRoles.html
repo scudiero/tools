@@ -166,7 +166,7 @@ if (cimconfigData && cimconfigData.sisname) { sisName=cimconfigData.sisname[0] }
 if (debug) { wfDump("sisName",sisName); }
 
 // Add run info to the output
-	print_doc(Array(80).join("="))
+	print_doc(Array(120).join("="));
 	print_doc('\n LEEPFROG INSTRUCTIONS \n');
 	print_doc('\t' + myName + 'version: ' + version + '\n');
 	print_doc('\t' + new Date() + '\n');
@@ -439,10 +439,7 @@ for (var i1=0, tot=rolesOut.length; i1 < tot; i1++) {
 
 //Write the putput to stdout
 // Header
-print_doc('\n');
-print_doc(Array(80).join("="))
-print_doc('CLIENT DATA');
-print_doc('\n');
+print_doc('\n' + Array(120).join("=") + '\nCLIENT DATA\n');
 header.forEach(function(text) {
 	print_doc(text + '\n');
 });
