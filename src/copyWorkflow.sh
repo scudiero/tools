@@ -530,32 +530,34 @@ Msg3
 			Msg3 "Checking console workflow management entries"
 			editFile="$tgtDir/web/courseleaf/index.tcf"
 			## Make sure we have an active sectionlinks:CIM on the console
-			unset grepStr; grepStr=$(ProtectedCall "grep "sectionlinks:CIM" "$editFile"")
-			if [[ -n $grepStr ]]; then
-				if [[ ${grepStr:0:2} == '//' ]]; then
+			unset grepStr; grepStr=$(ProtectedCall "grep "^sectionlinks:CIM" "$editFile"")
+			if [[ -z $grepStr ]]; then
+				unset grepStr; grepStr=$(ProtectedCall "grep "^//sectionlinks:CIM" "$editFile"")
+				if [[ -n $grepStr ]]; then
 					fromStr="$grepStr"
 					toStr="${grepStr:2}"
 					$DOIT sed -i s"_^${fromStr}_${toStr}_" $editFile
 					Msg3 "^Activating CIM 'section'"
 					updatedFile=true
+				else
+					Warning "Could not locate the 'sectionlinks:CIM' record in\n^ '$editFile'"
 				fi
-			else
-				Warning "Could not locate the 'sectionlinks:CIM' record"
 			fi
 
 			## Make sure that we have active workflow management on the console
 			for cim in $(tr ',' ' ' <<< "$cimStr"); do
-				unset grepStr; grepStr=$(ProtectedCall "grep "/$cim/workflow.html" "$editFile"")
-				if [[ -n $grepStr ]]; then
-					if [[ ${grepStr:0:2} == '//' ]]; then
+				unset grepStr; grepStr=$(ProtectedCall "grep '^navlinks:CIM|Course Workflow Management|workflow^/$cim/workflow.html' "$editFile"")
+				if [[ -z $grepStr ]]; then
+					unset grepStr; grepStr=$(ProtectedCall "grep '^//navlinks:CIM|Course Workflow Management|workflow^/$cim/workflow.html' "$editFile"")
+					if [[ -n $grepStr ]]; then
 						fromStr="$grepStr"
 						toStr="${grepStr:2}"
-						$DOIT sed -i s"_^${fromStr}_${toStr}_" $editFile
 						Msg3 "^Activating Workflow Management for '$cim'"
+						$DOIT sed -i s"_^${fromStr}_${toStr}_" $editFile
 						updatedFile=true
+					else
+						Warning "Could not locate a 'workflow management' record for '$cim' in \n^'$editFile'"
 					fi
-				else
-					Warning "Could not locate the 'workflow management' record for '$cim'"
 				fi
 			done
 			[[ $updatedFile == true ]] && RunCourseLeafCgi "$tgtDir" "-r /courseleaf/index.tcf"
