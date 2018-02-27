@@ -328,7 +328,7 @@ ParseArgsStd2 $originalArgStr
 	dump -1 client env srcEnv srcDir tgtEnv tgtDir cimStr
 
 # If target is NEXT then source must be TEST
-	[[ $tgtEnv != 'next' && $srcEnv != 'test' ]] && Terminate "The NEXT site may only be updated from the TEST environment, please push your changes in '$srcEnv' to TEST."
+	[[ $tgtEnv == 'next' && $srcEnv != 'test' ]] && Terminate "The NEXT site may only be updated from the TEST environment, please push your changes in '$srcEnv' to TEST."
 
 ## If pvtDir exists and src is not pvt make sure that this is what the user really wants to to
 	if [[ -d "$pvtDir" && $srcEnv != 'pvt' && $tgtEnv != 'pvt' ]]; then
