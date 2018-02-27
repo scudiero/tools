@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.75" // -- dscudiero -- Wed 02/21/2018 @  8:56:21.23
+wfLibVersion="1.8.76" // -- dscudiero -- Wed 02/27/2018 @  14:56:21.23
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -629,8 +629,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 
 			var ecoSystemCatDataType=getTCFValue(calledAs + "_ecoSystemCatDataType");
 			if (ecoSystemCatDataType === "") ecoSystemCatDataType=getTCFValue(myName + "_ecoSystemCatDataType");
-			if (ecoSystemCatDataType === "") ecoSystemCatDataType="subj";
-
+			if (ecoSystemCatDataType === "") ecoSystemCatDataType="dept";
 
 			var dataMapper=getTCFValue(calledAs + "_dataMapper");
 			if (dataMapper === "") dataMapper=getTCFValue(myName + "_dataMapper");
