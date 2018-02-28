@@ -26,7 +26,7 @@ var debug=false;
 	if (cims.length == 0)
 		cims=['courseadmin','programadmin'];
 	var env='pvt';
-	var version="6.2";
+	var version="6.3";
 	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
 
 	var ignoreSteps = {
@@ -455,7 +455,7 @@ for (var i1=0, tot=rolesOut.length; i1 < tot; i1++) {
 	}
 	//Add the substituted variable info
 	if (editString.indexOf("(") < 0 ) {
-		if (typeof variableData != undefined)  {
+		if (typeof variableData != "undefined")  {
 			rolesOut[i1]=editString + "(" +instanceData + " -- " + variableData + ")";
 		} else {
 			rolesOut[i1]=editString + "(" +instanceData + ")";
