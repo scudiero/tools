@@ -24,7 +24,7 @@ var debug=false;
 	if (cims.length == 0)
 		cims=['courseadmin','programadmin'];
 	var env='pvt';
-	var version="6.0";
+	var version="6.1";
 	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
 
 	var ignoreSteps = {
@@ -380,6 +380,7 @@ var editString="";
 var madeSubstitution=false;
 var startLoopAt=0;
 
+if (debug) { print_doc("\nLoop through the steps, substitute values and build initial output roles array...\n"); }
 for (var i1=startLoopAt; i1 < rolesOut.length; i1++) {
 	firstPassForThisStep=true;
 	if (debug) { print_doc("rolesOut[" + i1 + "] = >" + rolesOut[i1].toSource() + "<\n"); }
@@ -415,6 +416,7 @@ for (var i1=startLoopAt; i1 < rolesOut.length; i1++) {
 } //tot=rolesOut.length
 
 // Loop through the rolesOut array and add role member list and instance annotations
+if (debug) { print_doc("\nLoop through the rolesOut array and add role member list and instance annotations...\n"); }
 var haveStep=[];
 rolesOut=rolesOut.sort();
 for (var i1=0, tot=rolesOut.length; i1 < tot; i1++) {
@@ -434,24 +436,22 @@ for (var i1=0, tot=rolesOut.length; i1 < tot; i1++) {
 		if (editString.indexOf("\t") < 0 ) { editString=editString + "\t\t\t" }
 	}
 	//Add the substituted variable info
-	if (editString.indexOf("(") < 0 ) {
+	if (editString.indexOf("(") < 0 )
 		rolesOut[i1]=editString + "(" +instanceData + " -- " + variableData + ")";
-	} else {
-		rolesOut[i1]=(editString + " (" + key.toLowerCase() + ":" + repString + ")");
-	}
 }
 
 //Write the putput to stdout
+if (debug) { print_doc("\nWrite the putput to stdout...\n"); }
 // Header
-print_doc('\n' + Array(120).join("=") + '\nCLIENT DATA\n');
-header.forEach(function(text) {
-	print_doc(text + '\n');
-});
+	print_doc('\n' + Array(120).join("=") + '\nCLIENT DATA\n');
+	header.forEach(function(text) {
+		print_doc(text + '\n');
+	});
 // Roles
-rolesOut=rolesOut.sort();
-rolesOut.forEach(function(text) {
-	if (typeof text === "string") print_doc(text + '\n');
-});
+	rolesOut=rolesOut.sort();
+	rolesOut.forEach(function(text) {
+		if (typeof text === "string") print_doc(text + '\n');
+	});
 
 return;
 
