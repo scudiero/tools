@@ -240,7 +240,7 @@ if (debug) { wfDump("sisName",sisName); }
 						var subRuleText=text.substr(idx1+1);
 						wfDump('\n\twfSubRule',text); wfDump('\t\tsubRuleName',subRuleName); wfDump('\t\tsubRuleText',subRuleText);
 						// If the subrulenName is 'AdditionalSteps' then the rule is an array of steps tp add to the steps array
-						if (subRuleName === "AdditionalSteps") {
+						if (subRuleName.toLowerCase() === "additionalsteps" || subRuleName.toLowerCase() === "addsteps") {
 							var tmpStr=subRuleText.substr(1,subRuleText.length-2);
 							var tmpArray=tmpStr.split(',');
 							tmpArray.forEach(function(step) {
@@ -454,8 +454,14 @@ for (var i1=0, tot=rolesOut.length; i1 < tot; i1++) {
 		if (editString.indexOf("\t") < 0 ) { editString=editString + "\t\t\t" }
 	}
 	//Add the substituted variable info
-	if (editString.indexOf("(") < 0 )
-		rolesOut[i1]=editString + "(" +instanceData + " -- " + variableData + ")";
+	if (editString.indexOf("(") < 0 ) {
+		if (variableData === "undefined")  {
+			rolesOut[i1]=editString + "(" +instanceData + " -- " + variableData + ")";
+		} else {
+			rolesOut[i1]=editString + "(" +instanceData + ")";
+		}
+
+	}
 }
 
 //Write the putput to stdout
