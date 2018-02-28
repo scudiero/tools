@@ -12,6 +12,8 @@
 // 08/30/17 - dgs -	Clean up debug messaging, fix problem adding the raw step text to the output array
 // 09/13/17 - dgs -	Added 'optional' flag on the reported instance name
 // 02/19/18 - dgs - Update to handle multiple substitution variables in a single step name
+// 02/28/18 - dgs - Fixed a bug with dead code in 'Loop through the rolesOut array and add role member list and instance annotations'
+//					Added a new subrule type of 'AdditionalSetps' to add additional steps to the workflow steps array (e.g. emitted by an esig)
 //============================================================================================================
 // Function wrapper
 (function getCimWorkflowRoles() {
@@ -24,7 +26,7 @@ var debug=false;
 	if (cims.length == 0)
 		cims=['courseadmin','programadmin'];
 	var env='pvt';
-	var version="6.1";
+	var version="6.2";
 	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
 
 	var ignoreSteps = {
@@ -237,6 +239,18 @@ if (debug) { wfDump("sisName",sisName); }
 						var subRuleName=text.substr(0,idx1);
 						var subRuleText=text.substr(idx1+1);
 						wfDump('\n\twfSubRule',text); wfDump('\t\tsubRuleName',subRuleName); wfDump('\t\tsubRuleText',subRuleText);
+						// If the subrulenName is 'AdditionalSteps' then the rule is an array of steps tp add to the steps array
+						if (subRuleName === "AdditionalSteps") {
+							var tmpStr=subRuleText.substr(1,subRuleText.length-2);
+							var tmpArray=tmpStr.split(',');
+							tmpArray.forEach(function(step) {
+								var tmpObj={};
+								tmpObj.stepData=step;
+								tmpObj.cimInstance=cim;
+								steps.push(tmpObj);
+							});
+							return;
+						}
 						// If we have already processed this rule then skip it
 						if (wfSubRulesHash[subRuleName] != undefined) {
 							print_doc("\t\t'" + subRuleName + "' already included above\n");
@@ -249,17 +263,17 @@ if (debug) { wfDump("sisName",sisName); }
 							var tmpStr=subRuleText.substr(1,subRuleText.length-2);
 							var tmpArray=tmpStr.split(',');
 							tmpArray.forEach(function(token) {
-							var tmpObj={};
-							var idx2=token.indexOf(":");
-							if (idx2 > 0) {
-								tmpObj.code=token.substr(1,idx2-1);
-								tmpObj.name=token.substr(idx2+1,token.length-tmpObj.code.length-2);
-							} else {
-								tmpObj.code=token;
-								tmpObj.name=token;
-							}
-							//tmpObj.origCode=tmpObj.code;
-							tmpHashArray.push(tmpObj);
+								var tmpObj={};
+								var idx2=token.indexOf(":");
+								if (idx2 > 0) {
+									tmpObj.code=token.substr(1,idx2-1);
+									tmpObj.name=token.substr(idx2+1,token.length-tmpObj.code.length-2);
+								} else {
+									tmpObj.code=token;
+									tmpObj.name=token;
+								}
+								//tmpObj.origCode=tmpObj.code;
+								tmpHashArray.push(tmpObj);
 							});
 							wfSubRulesHash[subRuleName]=tmpHashArray;
 						// Otherwise assume rule is a sql query on the cimcodes table
@@ -301,8 +315,12 @@ if (debug) { wfDump("sisName",sisName); }
 			wfDump("\n\twfSubRulesHash[" + Object.keys(wfSubRulesHash)[i2] + "]",wfSubRulesHash[Object.keys(wfSubRulesHash)[i2]].toSource())
 		}
 		wfDump('');
+		print_doc('\n\nFound ' + steps.length + ' steps...\n');
+		for (var i2=0,  tot=steps.length; i2 < tot; i2++) {
+			wfDump("\tsteps[" + i2 + "]",steps[i2].toSource())
+		}
+		wfDump('');
 	}
-
 	if (errorDetected) {
 		print_doc('\n*Error* --- Errors detected.\nStopping\n');
 		return false;
