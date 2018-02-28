@@ -455,7 +455,7 @@ for (var i1=0, tot=rolesOut.length; i1 < tot; i1++) {
 	}
 	//Add the substituted variable info
 	if (editString.indexOf("(") < 0 ) {
-		if (variableData === "undefined")  {
+		if (variableData != "undefined")  {
 			rolesOut[i1]=editString + "(" +instanceData + " -- " + variableData + ")";
 		} else {
 			rolesOut[i1]=editString + "(" +instanceData + ")";
