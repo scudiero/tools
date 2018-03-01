@@ -139,7 +139,7 @@ function Goodbye {
 		rm -f $tmpFile
 	fi
 
-	[[ $PAUSEATEXIT == true ]] && Pause "\nRemote script excution has complete\n"
+	[[ $PAUSEATEXIT == true ]] && Pause "\nRemote script excution has complete, please press enter to close window\n"
 	[[ $(IsNumeric $exitCode) != true ]] && exitCode=0
 	if [[ $secondaryMessagesOnly == true || $batchMode == true ]]; then
 		secondaryMessagesOnly=false
