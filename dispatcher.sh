@@ -1,5 +1,19 @@
 #!/bin/bash
 
+## Parse through arguments looking for keywords
+	useLocal=false
+	pauseAtExit=false
+	viaCron=false
+	for token in $*; do
+		if [[ ${token:0:2} == '--' ]]; then
+			token="${token:2}" ; token=${token,,[a-z]}
+			[[ $token == 'viacron' ]] && viaCron=true
+			[[ $token == 'uselocal' ]] && useLocal=true
+			[[ $token == 'pauseatexit' || $token == 'pauseonexit' ]] && export PAUSEATEXIT=true
+			[[ $token == 'pauseatexit' || $token == 'pauseonexit' ]] && export PAUSEATEXIT=true
+		fi
+	done
+
 ## Make sure we have a TOOLSPATH and it is valid
 	[[ -z $TOOLSPATH ]] && TOOLSPATH="/steamboat/leepfrog/docs/tools"
 	[[ ! -d $TOOLSPATH ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but is not a directory, cannot continue\n" && exit -1
@@ -25,7 +39,7 @@
 
 ## Find the loader
 	loaderDir="$TOOLSPATH"
-	if [[ $1 == '--useLocal' && -r $HOME/tools/loader.sh ]]; then
+	if [[ $useLocal == true && -r $HOME/tools/loader.sh ]]; then
 		loaderDir="$HOME/tools"
 		[[ -d "$loaderDir/lib" ]] && export TOOLSLIBPATH="$loaderDir/lib:$TOOLSLIBPATH"
 		[[ -d "$loaderDir/src" ]] && export TOOLSSRCPATH="$loaderDir/src:$TOOLSSRCPATH"
@@ -33,13 +47,13 @@
 	export LOADER="$loaderDir/loader.sh"
 
 ## call script loader
-	if [[ $1 == '--viaCron' ]]; then
-		#echo -e "\t-- $hostName - sourcing \"$loaderDir/loader.sh\" $(basename $0) --batchMode $*" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
-		source "$loaderDir/loader.sh" $(basename $0) --batchMode $*
-		#echo -e "\t\t-- $hostName - back from loader" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
+	loadPgm="$(basename $0)"; 
+	[[ $loadPgm == 'dispatcher.sh' ]] && { loadPgm="$1"; shift || true; }
+	if [[ $viaCron == true ]]; then
+		source "$loaderDir/loader.sh" $loadPgm --batchMode $*
 		return 0
 	else
-		source "$loaderDir/loader.sh" $(basename $0) $*
+		source "$loaderDir/loader.sh" $loadPgm $*
 	fi
 
 exit
