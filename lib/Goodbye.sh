@@ -140,6 +140,7 @@ function Goodbye {
 	fi
 
 	if [[ $PAUSEATEXIT == true ]]; then
+		Alert 3
 		Msg3 "$colorKey"
 		Msg3 '*******************************************************************************'
 		Msg3 '*** Remote script excution has complete, please press enter to close window ***'
