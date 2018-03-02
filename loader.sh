@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.82" # -- dscudiero -- Tue 02/13/2018 @ 12:12:45.79
+version="1.4.98" # -- dscudiero -- Fri 03/02/2018 @  8:37:48.70
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -119,6 +119,7 @@ statusLine="Loader ($version): "
 			[[ $myArg == 'devdb' || $myArg == 'usedevdb' ]] && useDevDb=true
 			[[ $myArg == 'quiet' ]] && myQuiet=true
 			[[ $myArg == 'viacron' ]] && viaCron=true
+			[[ $myArg == 'pauseatexit' || $myArg == 'pauseonexit' ]] && export PAUSEATEXIT=true
 		else
 		 	scriptArgs="$scriptArgs $1"
 		fi
@@ -156,7 +157,6 @@ sTime=$(date "+%s")
 	saveClasspath="$CLASSPATH"
 	searchDirs="$TOOLSPATH"
 	[[ $USEDEV == true && -d "$HOME/tools/jars" ]] && searchDirs="$HOME/tools"
-	#[[ -n $TOOLSSRCPATH ]] && searchDirs="$( tr ':' ' ' <<< $TOOLSSRCPATH)"
 	unset CLASSPATH
 	for searchDir in $searchDirs; do
 		for jar in $(find $searchDir/jars -mindepth 1 -maxdepth 1 -type f -name \*.jar); do
@@ -164,20 +164,6 @@ sTime=$(date "+%s")
 		done
 	done
 	export CLASSPATH="$CLASSPATH"
-	#[[ $userName == dscudiero ]] && echo "CLASSPATH = '$CLASSPATH'"
-
-# ## Look for the Initialization and Import function in the library path
-# 	sTime=$(date "+%s")
-# 	unset importFile;
-# 	[[ -z $TOOLSLIBPATH ]] && searchDirs="$TOOLSPATH/lib" || searchDirs="$( tr ':' ' ' <<< $TOOLSLIBPATH)"
-# 	[[ $USEDEV == true && -d "$TOOLSDEVPATH/lib" ]] && searchDirs="$TOOLSDEVPATH/lib"
-# 	for searchDir in $searchDirs; do
-# 		[[ -r ${searchDir}/Import.sh ]] && importFile="${searchDir}/Import.sh" && source $importFile
-# 		[[ -n $initFile && -n $importFile ]] && break
-# 	done
-
-# ## Initialize the runtime environment
-# 	[[ -z $initFile ]] && echo "*Error* -- ($myName) Sorry, no 'InitializeRuntime' file found in the library directories" && exit -1
 
 ## Initialize the runtime environment
 	TERM=${TERM:-dumb}
@@ -280,7 +266,6 @@ sTime=$(date "+%s")
 	## Check to make sure we are authorized
 		checkMsg=$(CheckAuth $callPgmName)
 		[[ $checkMsg != true ]] && Terminate "$checkMsg"
-
 	## Get the users auth groups
 		[[ -z $UsersAuthGroups && -r "$TOOLSPATH/auth/$userName" ]] && UsersAuthGroups=$(cat "$TOOLSPATH/auth/$userName") || UsersAuthGroups='none'
 		prtStatus ", check run/auth"; sTime=$(date "+%s")
