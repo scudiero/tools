@@ -76,6 +76,7 @@ function GetCims {
 	done
 	if [[ -z $cimStr ]]; then
 		cimStr=$(printf -- "%s, " "${cims[@]}")
+		cimStr="${cimStr//.\//}"
 		cimStr=${cimStr:0:${#cimStr}-2}
 	fi
 	#[[ $products == '' ]] && products='cim' || products="$products,cim"
