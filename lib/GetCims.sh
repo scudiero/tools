@@ -57,7 +57,7 @@ function GetCims {
 			unset ans
 			Prompt ans "${prefix}Found CIM Instance '$(ColorK $dir)' in source instance,\n${prefix}\tdo you wish to $verb it? (y to use$suffix)? >"\
 		 			"$validVals"; ans=${ans,,[a-z]} ans=${ans:0:1};
-			[[ $ans == 'a' ]] && { cims=(${adminDirs[@]}); break; }
+			[[ $ans == 'a' ]] && { cims=(${cimDirs[@]}); break; }
 			if [[ $ans == 'y' ]]; then
 				cims+=($dir);
 				[[ $multiCims != true ]] && break
