@@ -161,9 +161,10 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 	Msg3 "^'$(ColorK $outFile)'"
 	Msg3 "This is a .csv file that can be loaded by Microsoft Excel, if you wish to provide"
 	Msg3 "the client a 'prettier' version you can copy this data into a .xlsx format file."
-	Msg3 "A master workflows template Excel file can be found at: to start if you wish:"
-	Msg3 "^'$(ColorK "$TOOLSPATH/workbooks/CIMWorkflows.xltm")'"
-	Msg3 "You can use this as a start if you wish."
+	Msg3 "A master workflows template Excel file can be found at:"
+	Msg3 "^'$(ColorK '\\\\saugus\docs\\tools\workbooksCIMWorkflows.xltm')' (Windows)"
+	Msg3 "^'$(ColorK "$TOOLSPATH/workbooks/CIMWorkflows.xltm")' (Linux)"
+	Msg3 "You can use this file as a start if you wish."
 	Msg3
 
 	if [[ $userName == dscudiero ]]; then
@@ -177,7 +178,7 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 		Msg3 "wish to provide the client a 'prettier' format, you can copy"
 		Msg3 "this data into a true .xlsx format file."
 		Msg3 "Fyi, a master workflows template Excel file can be found at: "
-		Msg3 '^\\\\saugus\docs\\tools\workbooks'
+		Msg3 '^\\\\saugus\docs\\tools\workbooksCIMWorkflows.xltm'
 		Msg3 "that could be used as a starting point."
 		Msg3
 		Msg3 "If you have questions please see me."
