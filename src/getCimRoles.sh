@@ -177,9 +177,9 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 		Msg3 "roles data is provided in raw tab delimited format, if you"
 		Msg3 "wish to provide the client a 'prettier' format, you can copy"
 		Msg3 "this data into a true .xlsx format file."
-		Msg3 "Fyi, a master workflows template Excel file can be found at: "
-		Msg3 '^\\\\saugus\docs\\tools\workbooksCIMWorkflows.xltm'
-		Msg3 "that could be used as a starting point."
+		Msg3 "Fyi, the master workflows template Excel file can be found at: "
+		Msg3 '^\\\\saugus\docs\\tools\workbooksCIMWorkflows.xltm (Windows)'
+		Msg3 "You can use this file as a start if you wish."
 		Msg3
 		Msg3 "If you have questions please see me."
 		Msg3
