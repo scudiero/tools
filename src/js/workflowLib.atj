@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.76" // -- dscudiero -- Wed 02/27/2018 @  14:56:21.23
+wfLibVersion="1.8.77" // -- dscudiero -- Wed 03/07/2018 @ 12:16:10.52
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -1414,11 +1414,23 @@ GetAttrVal = function(data) {
 			}
 		}
 
+	// If there is no value and we are in a debug environment then return a dummy variable
+		if (retArray.length <= 0 && wfEnvIsDev) {
+			if (reqType.indexOf("col") >= 0 || optionStr.indexOf("col") >= 0) {
+				retArray.push("DUMMY-COLLEGE");
+			} else if (reqType.indexOf("dep") >= 0 || optionStr.indexOf("dep") >= 0) {
+				retArray.push("DUMMY-DEPARETMENT");
+			} else if (reqType.indexOf("subj") >= 0 || optionStr.indexOf("subj") >= 0) {
+				retArray.push("DUMMY-SUBJECT");
+			}
+		}
+
 	// Return data
 		wfDebug(5,"*** " + myName + ": Returning: " + retArray.toSource() + "<");
 		if (retArray.length > 0)
 			return retArray;
-			return false
+
+		return false;
 }; //GetAttrVal
 
 //======================================================================================================================
