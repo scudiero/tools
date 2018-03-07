@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.98" # -- dscudiero -- Fri 03/02/2018 @  8:37:48.70
+version="1.4.105" # -- dscudiero -- Wed 03/07/2018 @  9:11:05.73
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -81,6 +81,7 @@ statusLine="Loader ($version): "
 	tmpRoot=/tmp/$LOGNAME
 	[[ ! -d $tmpRoot ]] && mkdir -p $tmpRoot
 
+#echo; echo "HERE 0a HERE 0a HERE"; read
 #==================================================================================================
 # Parse arguments
 #==================================================================================================
@@ -132,6 +133,7 @@ statusLine="Loader ($version): "
 # [[ $batchMode != true && $(hostname) == 'build7.leepfrog.com' ]] && \
 # 	echo -e "\tNote: (loader) File system access from the current host has been found to be a bit slow,\n\tPatience you must have, my young padawan..." >&3
 
+#echo; echo "HERE 0b HERE 0b HERE"; read
 ## If called as ourselves, then the first token is the script name to call
 	if [[ $callPgmName == 'loader.sh' ]]; then
 		callPgmName=$(cut -d' ' -f1 <<< $scriptArgs)
@@ -148,6 +150,7 @@ statusLine="Loader ($version): "
 
 prtStatus "parse args"
 sTime=$(date "+%s")
+#echo; echo "HERE 0c HERE 0c HERE"; read
 
 #==================================================================================================
 # MAIN
@@ -199,6 +202,7 @@ sTime=$(date "+%s")
 		fi
 
 ## Import things we need to continue
+	#echo; echo "HERE 1 HERE 1 HERE"; read
 	source "$TOOLSPATH/lib/Import.sh"
 	sTime=$(date "+%s")
 	Import "$loaderIncludes"
@@ -207,8 +211,10 @@ sTime=$(date "+%s")
 	SetFileExpansion
 
 ## Load tools defaults value
+	#echo; echo "HERE 2 HERE 2 HERE"; read
 	defaultsLoaded=false
 	GetDefaultsData "$myName" -fromFiles
+	#echo; echo "HERE 3 HERE 3 HERE"; read
 
 ## Set forking limit
 	maxForkedProcesses=$maxForkedProcessesPrime
@@ -247,6 +253,7 @@ sTime=$(date "+%s")
 		export -f ColorD ColorK ColorI ColorN ColorW ColorE ColorT ColorV ColorM
 	fi
 
+#echo; echo "HERE 4 HERE 4 HERE"; read
 ## If sourced then just return
 	[[ $viaCron == true ]] && return 0
 
@@ -275,6 +282,7 @@ sTime=$(date "+%s")
 
 	## Resolve the executable file"
 		[[ -z $executeFile ]] && executeFile=$(FindExecutable "$callPgmName")
+		#echo "callPgmName = '$callPgmName', executeFile = '$executeFile'"; read
 		[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
 		prtStatus ", find file"; sTime=$(date "+%s")
 
