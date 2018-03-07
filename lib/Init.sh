@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.66 # -- dscudiero -- Mon 01/22/2018 @ 15:35:10.18
+# version=2.1.67 # -- dscudiero -- Wed 03/07/2018 @  9:28:40.33
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -160,6 +160,7 @@ function Init {
 			if [[ $(Contains "$clientEnvs" 'pvt') == false ]]; then
 				[[ $addPvt == true || $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt $clientEnvs" && defaultEnv='pvt'
 			fi
+			[[ -z $env && -n $srcEnv ]] && env="$srcEnv"
 			Prompt env "What environment/site do you wish to use?" "${clientEnvs// /,}" $defaultEnv; srcEnv=${srcEnv,,[a-z]}
 			[[ $checkProdEnv == true ]] && checkProdEnv=$env
 		fi
