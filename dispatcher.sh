@@ -13,6 +13,7 @@
 			[[ $token == 'pauseatexit' || $token == 'pauseonexit' ]] && export PAUSEATEXIT=true
 		fi
 	done
+	#echo; echo "HERE 0 HERE 0 HERE"; echo "useLocal = '$useLocal'"; read
 
 ## Make sure we have a TOOLSPATH and it is valid
 	[[ -z $TOOLSPATH ]] && TOOLSPATH="/steamboat/leepfrog/docs/tools"
@@ -45,6 +46,7 @@
 		[[ -d "$loaderDir/src" ]] && export TOOLSSRCPATH="$loaderDir/src:$TOOLSSRCPATH"
 	fi
 	export LOADER="$loaderDir/loader.sh"
+	#echo "loaderDir = '$loaderDir'"; read
 
 ## call script loader
 	loadPgm="$(basename $0)"; 
