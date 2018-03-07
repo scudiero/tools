@@ -1388,63 +1388,6 @@ GetAttrVal = function(data) {
 			colleges=wffuncs.getColleges(departments);
 		}
 
-
-	// // If the request ends in an "s" then get standard values using allcodes functions
-	// 	if (reqType.slice(-1) === "s" && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
-	// 		subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
-	// 		departments=wffuncs.getDepartments(subjects);
-	// 		colleges=wffuncs.getColleges(departments);
-	// 		wfDebug(5,"\t\tFrom wffuncs.GetXXXX function calls:")
-	// 		wfDump(5,["\t\tcolleges;"+colleges.toSource(),"\t\tdepartments;"+departments.toSource(),"\t\tsubjects;"+subjects.toSource()+"\n",]);
-	// 	}
-
-	// // If we did not find data above then see if there is any data in the tcf file
-	// 	if (subjects.length === 0) {
-	// 		wfDebug(5,"\t\twffuncs.getSubjects returned nothing, checking the '" + subjVarName + "' variable");
-	// 		subjects=getTCFValue(subjVarName, { delimiter: "\n", retarray: true });
-	// 		if (includeTCA)
-	// 			subjects=subjects.concat(getTCFValue("subject", { data: tcaData, delimiter: "\n", retarray: true }));
-	// 		wfDump(0,["\t\t" + subjVarName+" from tcfdata;"+subjects.toSource()])
-	// 	}
-	// 	if (departments.length === 0) {
-	// 		wfDebug(5,"\t\twffuncs.getDepartments returned nothing, checking the '" + deptVarName + "' variable");
-	// 		departments=getTCFValue(deptVarName, { delimiter: "\n", retarray: true });
-	// 		if (includeTCA)
-	// 			departments=departments.concat(getTCFValue("department", { data: tcaData, delimiter: "\n", retarray: true }));
-	// 		if (departments.length === 0 && subjects.length > 0) {
-	// 			resultSet=LookupCode2("dept","subj",subjects);
-	// 			if (resultSet.length > 0) {
-	// 				resultSet.forEach(function(result) {
-	// 					departments.push(result.data);
-	// 				});
-	// 			}
-	// 		}
-	// 		wfDump(0,["\t\t" + deptVarName+" from tcfdata;"+departments.toSource()])
-	// 	}
-	// 	if (colleges.length === 0) {
-	// 		wfDebug(5,"\t\twffuncs.getColleges returned nothing, checking the '" + colVarName + "' variable");
-	// 		colleges=getTCFValue(colVarName, { delimiter: "\n", retarray: true });
-	// 		if (includeTCA)
-	// 			colleges=colleges.concat(getTCFValue("college", { data: tcaData, delimiter: "\n", retarray: true }));
-	// 		if(colleges.length === 0 && subjects.length != 0) {
-	// 			resultSet=LookupCode2("cols","subj",subjects);
-	// 			if (resultSet.length > 0) {
-	// 				resultSet.forEach(function(result) {
-	// 					colleges.push(result.data);
-	// 				});
-	// 			}
-	// 		}
-	// 		if(colleges.length === 0 && departments.length != 0) {
-	// 			resultSet=LookupCode2("cols","dept",departments);
-	// 			if (resultSet.length > 0) {
-	// 				resultSet.forEach(function(result) {
-	// 					colleges.push(result.data);
-	// 				});
-	// 			}
-	// 		}
-	// 		wfDump(0,["\t\t" + colVarName+" from tcfdata;"+colleges.toSource()])
-	// 	}
-
 	// return data based on how we were called
 		var retArray=[];
 		if (reqType.indexOf("col") >= 0 || optionStr.indexOf("col") >= 0) {
@@ -1461,6 +1404,8 @@ GetAttrVal = function(data) {
 			attrFunctionName=reqType;
 			if (attrFunctionName.substring(attrFunctionName.length-1,attrFunctionName.length) === "s") attrFunctionName=attrFunctionName.substring(0,attrFunctionName.length-1)
 			attrFunctionName="Map" + attrFunctionName.substring(0,1).toUpperCase() + attrFunctionName.substring(1).toLowerCase() + "Val";
+			if (! eval("typeof " + attrFunctionName) === "function")
+				attrFunctionName="Map" + attrFunctionName.substring(0,1).toUpperCase() + "s" + attrFunctionName.substring(1).toLowerCase() + "Val";
 			if (eval("typeof " + attrFunctionName) === "function") {
 				wfDebug(5,"\t\tFound an attribute 'Map' function: " + attrFunctionName);
 				for (var ii=0,  totII=retArray.length; ii < totII; ii++) {
@@ -2481,7 +2426,7 @@ wffuncs.CheckOnDisk = function(inval, wfrule, args) {
 // 02/15/18 - dgs - Updated to automatically parse the message string to fit in the preview workflow window
 //======================================================================================================================
 wffuncs.NoWorkflow = function(inval, wfrule, args) {
-	if (typeof workflow.intestworkflow === "undefined" || !workflow.intestworkflow) return false;
+	if (typeof workflow.intestworkflow === "undefined" || !workflow.intestworkflow) return ["Administrator"];;
 
 	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
 	if (options === "" ) options = "Please complete the required form fields and try again."
@@ -2494,7 +2439,7 @@ wffuncs.NoWorkflow = function(inval, wfrule, args) {
 	});
 	print_doc(indent + 'Please contact your Courseleaf administrator for additional information.</strong><br>');
 
-	return false;
+	return ["Administrator"];
 } //wffuncs.NoWorkflow
 
 //==================================================================================================
