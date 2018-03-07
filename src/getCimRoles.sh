@@ -54,6 +54,19 @@ ParseArgsStd2 $originalArgStr
 Init 'getClient getEnv getDirs checkEnvs getCims noPreview noPublic addPvt'
 [[ -n $loadMode ]] && load=true
 [[ $load == true && -z $loadMode ]] && loadMode='merge'
+
+dump env load loadMode verify
+## Get load mode
+if [[ $env == 'test' && -z $load && $verify == true ]]; then
+	unset ans; Prompt 'ans' 'Do you wish to load the data into the roles file?' 'Yes No' 'No'; ans="${ans:0:1}"; ans="${ans,,[a-z]}"
+	if [[ $ans == y ]]; then
+		load=true
+		unset ans; Prompt 'ans' 'Please specify the load mode?' 'Merge Add Replace' 'Merge'; ans="${ans:0:1}"; ans=${ans,,[a-z]}
+		loadMode='merge'
+		[[ $ans == 'a' ]] && loadMode='add'
+		[[ $ans == 'r' ]] && loadMode='replace'
+	fi
+fi
 [[ $loadMode == 'merge' ]] && Terminate "Sorry, the '-merge' option is not supported at this time."
 
 ## Set outfile -- look for std locations
@@ -71,11 +84,6 @@ verifyArgs+=("CIMs:$cimStr")
 [[ $load == true ]] && verifyArgs+=("Load site roles:$loadMode")
 verifyContinueDefault='Yes'
 VerifyContinue "You are asking generate CIM roles for"
-
-# if [[ -e $outFile && $verify == true ]]; then
-# 	Msg3 "\nOutput file '$outFile' already exists, file renamed to:\n\t$outFile.$backupSuffix\n"
-# 	mv $outFile $outFile.$backupSuffix
-# fi
 
 #===================================================================================================
 #= Main
