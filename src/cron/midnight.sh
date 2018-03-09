@@ -322,6 +322,20 @@ case "$hostName" in
 			done
 			[[ $errorDetected == true ]] && Terminate 'One or more of the database load procedures failed, please review messages'
 
+		## Process server move updates
+			if [[ -r $TOOLSPATH/src/cron/serverMove.txt ]]; then
+				ifs="$IFS"; IFS=$'\r'; while read line; do
+					[[ ${line:0:1} == '#' ]] && continue
+					share="${line%% *}"; line="${line#* }"
+					oldHost="${line%% *}"; line="${line#* }"
+					newHost="$line"
+					Msg3 "Processing server move update in '$siteInfoTable': '$share' --> '$newHost'"
+					sqlStmt="update $siteInfoTable set host='$newHost' where share = '$share' and host='$oldHost'"
+					RunSql2 $sqlStmt
+				done < "$TOOLSPATH/src/cron/serverMove.txt"
+				IFS="$ifs"
+			fi
+			
 		 ## Create the data dump for the workwith tool
 		 	Msg3 "^Building the 'WorkWith' client data file..."
 		 	unset client
@@ -515,3 +529,4 @@ return 0
 ## 12-12-2017 @ 09.22.22 - (1.22.58)   - dscudiero - Fix problem with select statement in workwith.data picking up too much data
 ## 12-12-2017 @ 09.49.11 - (1.22.59)   - dscudiero - Cosmetic/minor change
 ## 12-12-2017 @ 10.31.44 - (1.22.61)   - dscudiero - Cosmetic/minor change
+## 03-09-2018 @ 14:25:41 - 1.22.62 - dscudiero - Add server move processing
