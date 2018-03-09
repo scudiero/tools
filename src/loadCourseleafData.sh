@@ -481,7 +481,7 @@ scriptDescription="Load Courseleaf Data"
 								[[ ${oldData:(-1)} == '|' ]] && oldData=${oldData:0:${#oldData}-1}
 								Msg3 "^^Old Data: $oldData"
 							fi
-							Info 2 1 "Found Role '$key' in the roles file, old data is null, using new data"
+							Info 0 1 "Found Role '$key' in the roles file, old data is null, using new data"
 							rolesOut["$key"]="${rolesFromSpreadsheet["$key"]}"
 							(( numModifiedRoles += 1 ))
 						fi
@@ -1079,3 +1079,4 @@ ignoreMissingPages=true
 ## 11-10-2017 @ 12.37.41 - (3.9.9)     - dscudiero - Refactor the uid to uin mapping
 ## 12-20-2017 @ 09.29.24 - (3.9.9)     - dscudiero - Added gathering of a jalot task number for updates to next and curr
 ## 12-20-2017 @ 09.34.09 - (3.9.9)     - dscudiero - Add getting jalot
+## 03-09-2018 @ 07:43:28 - 3.9.9 - dscudiero - Change message level when null roles are updated
