@@ -1,0 +1,2 @@
+#server/share oldHost newHost
+cumberland mojave build7
