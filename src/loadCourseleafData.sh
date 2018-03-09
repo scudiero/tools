@@ -457,19 +457,35 @@ scriptDescription="Load Courseleaf Data"
 			local procesingCntr=0
 			sTime=$(date "+%s")
 			for key in "${!rolesFromSpreadsheet[@]}"; do
-				## Edit role data if useUINs is on
-				if [[ $useUINs == true ]]; then
-					tmpStr="${rolesFromSpreadsheet["$key"]}"
-					memberData=${tmpStr%%|*}; key=${key%%.*}; tmpStr=${tmpStr#*|};
-					emailData=${tmpStr%%|*}; key=${key%%.*}; tmpStr=${tmpStr#*|};
-					unset tmpStr
-					tmpStr="$(SubstituteUINs $memberData)"
-					if [[ $tmpStr != $memberData ]]; then
-						rolesFromSpreadsheet["$key"]="$tmpStr|$emailData"
-						#Note  "Role: '$key' -- UIDs mapped to UINs"
-						(( numRoleMembersMappedToUIN +=1 ))
+				tmpStr="${rolesFromSpreadsheet["$key"]}"
+				memberData=${tmpStr%%|*}; key=${key%%.*}; tmpStr=${tmpStr#*|};
+				IFS=',' read -r -a memberDataArray <<< "$memberData"
+				emailData=${tmpStr%%|*}; key=${key%%.*}; tmpStr=${tmpStr#*|};
+				IFS=',' read -r -a emailDataArray <<< "$emailData"
+				## Compare the member list data to the email data, if all of the emails match the 'normal' pattern
+				## of userid@emailsuffix then clear out the emailData
+					if [[ -n $emailsuffix && ${#memberDataArray[@]} -eq ${#emailDataArray[@]} ]]; then
+						allMatch=true
+						for ((memberI=0; memberI<${#memberDataArray[@]}; memberI++)); do
+							#echo "memberDataArray[$memberI] = >${memberDataArray[$memberI]}<"
+							#echo "emailDataArray[$memberI] = >${emailDataArray[$memberI]}<"
+							tmpStr=${emailDataArray[$memberI]}; tmpStr=${tmpStr%%@$emailsuffix}
+							if [[ ${memberDataArray[$memberI]} != $tmpStr ]]; then
+								[[ $allMatch == true ]] && allMatch=false
+							fi
+						done
+						[[ $allMatch == true ]] && unset emailData
 					fi
-				fi
+
+				## Edit role data if useUINs is on
+					if [[ $useUINs == true ]]; then
+						tmpStr="$(SubstituteUINs $memberData)"
+						if [[ $tmpStr != $memberData ]]; then
+							rolesFromSpreadsheet["$key"]="$tmpStr|$emailData"
+							#Note  "Role: '$key' -- UIDs mapped to UINs"
+							(( numRoleMembersMappedToUIN +=1 ))
+						fi
+					fi
 
 				## Check spreadsheet data vs file data
 					if [[ ${rolesOut["$key"]+abc} ]]; then
@@ -889,6 +905,10 @@ ignoreMissingPages=true
 # Main
 #==================================================================================================
 ## Process spreadsheet
+	## Get the email domain suffix from the site cfg file
+	grepStr=$(ProtectedCall "grep '^emailsuffix:' $siteDir/courseleaf.cfg")
+	[[ -n $grepStr ]] && emailsuffix="${grepStr#*:}" || unset emailsuffix
+
 	[[ $client == 'internal' ]] && courseleafProgDir='pagewiz' || courseleafProgDir='courseleaf'
 	echo
 	rolesFile=$siteDir/web/$courseleafProgDir/roles.tcf
@@ -1080,3 +1100,4 @@ ignoreMissingPages=true
 ## 12-20-2017 @ 09.29.24 - (3.9.9)     - dscudiero - Added gathering of a jalot task number for updates to next and curr
 ## 12-20-2017 @ 09.34.09 - (3.9.9)     - dscudiero - Add getting jalot
 ## 03-09-2018 @ 07:43:28 - 3.9.9 - dscudiero - Change message level when null roles are updated
+## 03-09-2018 @ 09:37:54 - 3.9.9 - dscudiero - Add code to clear out the email overrides from the roles if all of the entered email addresses match the userid@emailsuffix pattern
