@@ -1,17 +1,18 @@
 //======================================================================================================================
 // ??/??/17 - dgs - initial - ??
 //======================================================================================================================
-localsteps:Program Workflow Management|groups|workflow|attributes=isUndergraduate[Is Undergraduate],isGraduate[Is Graduate],isNew[Is New],isNotNew[Is not New],isEdit[Is Edit/Change],isNotEdit[Is not Edit/Change],isDelete[Is Delete],isNotDelete[Is not Delete],isNotFirstStep[Is not the first step],fyi[FYI Only],fyiall[FYI All],todo[ToDo Item],optional[If Role Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
+localsteps:Program Workflow Management|groups|workflow|attributes=isUndergraduate[Is Undergraduate],isGraduate[Is Graduate],isNew[Is New],isNotNew[Is not New],isEdit[Is Edit/Change],isNotEdit[Is not Edit/Change],isDelete[Is Delete],isNotDelete[Is not Delete],isInactivate[Is Inactivate],isReactivate[Is Reactivate],isNotFirstStep[Is not the first step],fyi[FYI Only],fyiall[FYI All],todo[ToDo Item],optional[If Role Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
+
 
 template:custom
 pageflags:autoapprove
 
 workflow:standard|CheckOnDisk,TODO,Depts Chair,Cols Dean,Curriculum Committee fyiall,Curriculum Committee Chair,Registrar
 
-//workflow:standard|START,Workflow Library: wfLibVersion,College: Col,Department: Dept,Academic level: AcadLevel,Proposal State: ProposalState,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is New] isNew,[Is not New] isNotNew,[Is Edit/Change] isEdit,[Is not Edit/Change] isNotEdit,[Is Delete] isDelete,[Is not Delete] isNotDelete,END
+//workflow:standard|START,Workflow Library: wfLibVersion,College: Col,Department: Dept,Academic level: AcadLevel,Proposal State: ProposalState,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is New] isNew,[Is not New] isNotNew,[Is Edit/Change] isEdit,[Is not Edit/Change] isNotEdit,[Is Delete] isDelete,[Is not Delete] isNotDelete,[Is Inactivate] isInactivate,[Is Reactivate] isReactivate,END
 
 //======================================================================================================================
-// version:1.0.17 // -- dscudiero -- Wed 02/14/2018 @ 12:59:35.67
+// version:1.0.18 // -- dscudiero -- Fri 03/09/2018 @ 11:33:26.24
 //======================================================================================================================
 // Check in log
 //======================================================================================================================
