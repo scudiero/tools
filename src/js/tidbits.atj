@@ -338,6 +338,32 @@ attributes.forEach(function(attr) {
 	}
 });
 
+
+//======================================================================================================================
+//Get Roles data
+	proposalDept=GetAttrVal({request:"depts"});
+	wfDump(1,["proposalDept;"+proposalDept]);
+	var roleMembers=[];
+	var roleTcfData = load_tcf("/courseleaf/roles.tcf");
+	roleTcfData.role.forEach(function(text) {
+		if (text.name === proposalDept + " DUS") {
+			wfDump(2,["\ttext.name;" + text.name,"\ttext.members;"+text.members]);
+			roleMembers.push(text.members);
+		}
+	});
+	if (roleMembers.length) {
+		wfDump(1,["instructors;"+instructors.toSource(),"roleMembers;"+roleMembers.toSource()])
+		// Loop through roles members and instructors looking for a match
+		roleMembers[0].split(",").forEach(function(member) {
+			instructors.forEach(function(instructor) {
+				if ( member === instructor )
+					allowStep=true;
+			});
+		});
+	} else {
+		wfDebug(2,"\t\tCould not find role: "+ proposalDept + " DUS")
+	}
+
 //=================================================================================================
 // Check-in log
 // 05-09-2017 @ 13.27.42 - dscudiero - add mapping examples
