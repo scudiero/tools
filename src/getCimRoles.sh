@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.10.91 # -- dscudiero -- Tue 02/20/2018 @  8:11:29.45
+version=1.10.92 # -- dscudiero -- Tue 03/13/2018 @  8:17:54.65
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="WriteChangelogEntry"
@@ -22,7 +22,6 @@ function getCimRoles-ParseArgsStd2 { # or parseArgs-local
 	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 	myArgs+=("load|load|switch|load||script|Automatically load the roles to the site")
 	myArgs+=("replace||switch||loadMode='replace'|script|Replace all of the target sites role data")
-	myArgs+=("merge||switch||loadMode='merge'|script|Merge the role data into the sites existing role data")
 	myArgs+=("add||switch||loadMode='add'|script|Add the role data into the sites existing role data")
 	return 0
 }
@@ -53,7 +52,7 @@ ParseArgsStd2 $originalArgStr
 [[ -n $unknowArgs ]] && cimStr="$unknowArgs"
 Init 'getClient getEnv getDirs checkEnvs getCims noPreview noPublic addPvt'
 [[ -n $loadMode ]] && load=true
-[[ $load == true && -z $loadMode ]] && loadMode='merge'
+[[ $load == true && -z $loadMode ]] && loadMode='add'
 
 dump env load loadMode verify
 ## Get load mode
@@ -61,7 +60,7 @@ if [[ $env == 'test' && -z $load && $verify == true ]]; then
 	unset ans; Prompt 'ans' 'Do you wish to load the data into the roles file?' 'Yes No' 'No'; ans="${ans:0:1}"; ans="${ans,,[a-z]}"
 	if [[ $ans == y ]]; then
 		load=true
-		unset ans; Prompt 'ans' 'Please specify the load mode?' 'Merge Add Replace' 'Merge'; ans="${ans:0:1}"; ans=${ans,,[a-z]}
+		unset ans; Prompt 'ans' 'Please specify the load mode?' 'Add Replace' 'Add'; ans="${ans:0:1}"; ans=${ans,,[a-z]}
 		loadMode='merge'
 		[[ $ans == 'a' ]] && loadMode='add'
 		[[ $ans == 'r' ]] && loadMode='replace'
@@ -140,9 +139,6 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 			roleEmail="$(cut -f3 -d$'\t' <<< $line)"
 			dump -1 -n line -t roleName roleMembers roleEmail
 			case $loadMode in
-				merge)
-					Terminate "Load mode $loadMode not supported at this time"
-					;;
 				add) 
 					unset grepStr; grepStr=$(ProtectedCall "grep 'role:$roleName' $tmpRoleFile")
 					[[ -z $grepStr ]] && echo "role:$roleName|$roleMembers|$roleEmail" >> "$tmpRoleFile"
@@ -222,3 +218,4 @@ Goodbye 0
 ## 11-01-2017 @ 09.55.10 - (1.10.39)   - dscudiero - Switched to ParseArgsStd2
 ## 11-02-2017 @ 06.58.45 - (1.10.42)   - dscudiero - Switch to ParseArgsStd2
 ## 11-02-2017 @ 11.02.04 - (1.10.43)   - dscudiero - Add addPvt to the init call
+## 03-13-2018 @ 08:30:29 - 1.10.92 - dscudiero - Remove the load merge option
