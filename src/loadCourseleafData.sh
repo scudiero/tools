@@ -1,7 +1,7 @@
 #!/bin/bash
-# DO NOT AUTOVERSION
+# XO NOT AUTOVERSION
 #==================================================================================================
-version=3.9.9 # -- dscudiero -- Wed 10/04/2017 @ 16:24:16.40
+version=3.9.10 # -- dscudiero -- Tue 03/13/2018 @  8:50:24.95
 #==================================================================================================
 TrapSigs 'on'
 myIncludes='DbLog Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel2 WriteChangelogEntry'
@@ -27,14 +27,15 @@ scriptDescription="Load Courseleaf Data"
 	function loadCourseleafData-ParseArgsStd2  {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 		myArgs+=("w|workbookfile|option|workbookFile||script|The fully qualified spreadsheet file name")
+		myArgs+=("f|file|option|workbookFile||script|The fully qualified spreadsheet file name")
 		myArgs+=("skipnulls|skipnulls|switch|skipNulls||script|If a data field is null then do not write out that data to the page")
 		myArgs+=("ignore|ignoremissingPages|switch|ignoreMissingPages||script|Ignore missing catalog pages")
 		myArgs+=("noignore|noignoremissingPages|switch||ignoreMissingPages=false|script|Do not ignore missing catalog pages")
 		myArgs+=("uin|uinmap|switch|uinMap||script|Map role data UIDs to UINs even if the uses UIN flag is not set on the client record")
 		myArgs+=("nouin|nouinmap|switch||uinMap=false|script|Do not map role data UIDs to UINs")
-		myArgs+=("users|users|switch|processuserdata||script|Load user data")
-		myArgs+=("role|role|switch|processroledata||script|Load role data")
-		myArgs+=("page|page|switch|processpagedata||script|Load catalog page data")
+		myArgs+=("user|users|switch|processUserData||script|Load user data")
+		myArgs+=("role|role|switch|processRoleData||script|Load role data")
+		myArgs+=("page|page|switch|processPageData||script|Load catalog page data")
 		return 0
 	}
 	#==============================================================================================
@@ -166,6 +167,7 @@ scriptDescription="Load Courseleaf Data"
 					local key=$(cut -d '|' -f 1 <<< "$line" | cut -d ':' -f 2)
 					[[ $key == '' ]] && continue
 					local data=$(Trim $(cut -d '|' -f 2- <<< "$line"))
+					[[ ${data:(-1)} == '|' ]] && data=${data:0:${#data}-1}
 					dump -3 -n line key data
 			      	rolesFromFile+=([$key]="$data")
 			      	rolesOut+=([$key]="$data")
@@ -419,7 +421,7 @@ scriptDescription="Load Courseleaf Data"
 		Msg3 "Parsing the 'roles' data from the '$workbookSheet' worksheet ..."
 		## Get the role data from the spreadsheet
 			GetExcel2 -wb "$workbookFile" -ws "$workbookSheet"
-			## Read the header record, look for the specific columns to determin how to parse subsequent records
+			## Read the header record, look for the specific columns to determine how to parse subsequent records
 			ParseWorksheetHeader "$workbookSheet" 'name members|userlist email'
 			[[ $verboseLevel -ge 1 ]] && { for field in name members email; do dump ${field}Col; done; }
 			## Read/Parse the data rows into hash table
@@ -488,20 +490,25 @@ scriptDescription="Load Courseleaf Data"
 					fi
 
 				## Check spreadsheet data vs file data
-					if [[ ${rolesOut["$key"]+abc} ]]; then
+					if [[ ${rolesOut["$key"]+abc} ]]; then ## Check to see if the spreadsheet data is already in the rolesOut data
+						## Yes, compare the data
 						if [[ ${rolesFromSpreadsheet["$key"]} != ${rolesOut["$key"]} ]]; then
-							if [[ $oldData != '' ]]; then
+							## If different
+							oldData="${rolesOut["$key"]}"; [[ ${oldData:(-1)} == '|' ]] && oldData=${oldData:0:${#oldData}-1}
+							newData="${rolesFromSpreadsheet["$key"]}"; [[ ${newData:(-1)} == '|' ]] && newData=${newData:0:${#newData}-1}
+							if [[ -n $newData && -n $oldData ]]; then
 								WarningMsg 0 1 "Found Role '$key' in the roles file but data is different, using new data"
-								Msg3 "^^New Data: ${rolesFromSpreadsheet["$key"]}"
-								unset oldData;  oldData="${usersFromDb["$key"]}"
-								[[ ${oldData:(-1)} == '|' ]] && oldData=${oldData:0:${#oldData}-1}
-								Msg3 "^^Old Data: $oldData"
+								Msg3 "^^New Data: $newData"
+								Msg3 "^^Old Data: $newData"
+								rolesOut["$key"]="$newData"
+							elif [[ -z $oldData && -n $newData ]]; then
+								[[ -z $oldData ]] && Info 0 1 "Found Role '$key' in the roles file, old data is null, using new data"
+								rolesOut["$key"]="$oldData"							
 							fi
-							Info 0 1 "Found Role '$key' in the roles file, old data is null, using new data"
-							rolesOut["$key"]="${rolesFromSpreadsheet["$key"]}"
 							(( numModifiedRoles += 1 ))
 						fi
 					else
+						## No, just add it
 						Verbose 2 2 "New role added: $key"
 						rolesOut["$key"]="${rolesFromSpreadsheet["$key"]}"
 						(( numNewRoles += 1 ))
@@ -515,8 +522,6 @@ scriptDescription="Load Courseleaf Data"
 			done
 			#for i in "${!rolesOut[@]}"; do echo -e "\tkey: '$i', value: '${rolesOut[$i]}'"; done;
 
-
-##TODO: Replace writing of the roles data with a courseleaf step somehow
 		## Write out the role data to the role file
 			if [[ $informationOnlyMode == false ]]; then
 				if [[ $numModifiedRoles -gt 0 || $numNewRoles -gt 0 ]]; then
@@ -1101,3 +1106,4 @@ ignoreMissingPages=true
 ## 12-20-2017 @ 09.34.09 - (3.9.9)     - dscudiero - Add getting jalot
 ## 03-09-2018 @ 07:43:28 - 3.9.9 - dscudiero - Change message level when null roles are updated
 ## 03-09-2018 @ 09:37:54 - 3.9.9 - dscudiero - Add code to clear out the email overrides from the roles if all of the entered email addresses match the userid@emailsuffix pattern
+## 03-13-2018 @ 08:50:56 - 3.9.10 - dscudiero - Fix a bug merging the roles data
