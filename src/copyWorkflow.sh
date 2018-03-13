@@ -426,6 +426,12 @@ done
 		[[ $srcStructure == 'new' && $tgtStructure == 'old' ]] && Warning "The source file structure is NEW and the target structure is OLD, manual intervantion will probably be required"
 		dump -1 -t srcStructure tgtStructure
 
+		## If the target env is NEXT and there is a TODO step coded then skip
+		if [[ $tgtEnv == next ]]; then
+			grepStr=$(ProtectedCall "grep 'TODO' $srcDir/web/$cim/workflow.tcf")
+			[[ -n $grepStr ]] && { Error "Target environment is NEXT and found a 'TODO' step coded, skipping cim instance: $cim"; continue; }
+		fi
+
 		## Loop through the instance files
 		for file in $(echo "$requiredInstanceFiles $optionalInstanceFiles" | tr ',' ' '); do
 			cpyFile=/web/$cim/$file
@@ -702,3 +708,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 01-24-2018 @ 10.46.36 - 2.10.65 - dscudiero - Added additional messaging
 ## 01-24-2018 @ 10.54.40 - 2.10.66 - dscudiero - Cosmetic/minor change/Sync
 ## 01-24-2018 @ 10.55.12 - 2.10.67 - dscudiero - Cosmetic/minor change/Sync
+## 03-13-2018 @ 08:29:19 - 2.10.67 - dscudiero - Add a check for TODO workflow steps if target is NEXT
