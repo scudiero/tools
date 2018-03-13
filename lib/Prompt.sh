@@ -26,7 +26,7 @@ function Prompt {
 	dump -2 -r ; dump -2 -l promptVar promptText defaultVal validateList validateListString timeOut timerPrompt timerInterruptPrompt
 
 	declare validateListString="$(echo $validateList | tr " " ",")"
-	validateListString=${validateListString%% /*}
+	validateListString=${validateListString%%/*}
 
 	if [[ -n $defaultVal ]]; then
 		validateListString=",$validateListString,"
@@ -204,3 +204,4 @@ export -f Prompt
 ## 11-03-2017 @ 08.26.06 - ("2.1.43")  - dscudiero - Eliminate duplicate log entries
 ## 11-03-2017 @ 08.42.11 - ("2.1.44")  - dscudiero - Fix problem setting logResponse variable
 ## 03-13-2018 @ 08:31:05 - 2.1.46 - dscudiero - Add optional hidden answer values
+## 03-13-2018 @ 08:38:10 - 2.1.46 - dscudiero - Cosmetic/minor change/Sync
