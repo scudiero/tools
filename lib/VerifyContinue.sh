@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.25" # -- dscudiero -- Mon 01/22/2018 @ 10:13:06.89
+# version="2.0.26" # -- dscudiero -- Tue 03/13/2018 @ 11:13:54.61
 #===================================================================================================
 ## Make sure the user really wants to do this
 ## If the first argument is 'loop' then loop back to self if user responds with 'n'
@@ -45,7 +45,7 @@ function VerifyContinue {
 		if [[ $ans == "i" ]]; then
 			informationOnlyMode=true
 			Info 0 1 "Setting Information only mode, no data will be saved"
-		elif [[ $ans != 'v' ]]; then
+		elif [[ $ans == 'v' ]]; then
 			verboseLevel=1
 			Info 0 1 "Setting Verbose level to 1"
 		elif [[ $ans != 'y' ]]; then
@@ -71,3 +71,4 @@ export -f VerifyContinue
 ## 09-26-2017 @ 15.36.58 - ("2.0.22")  - dscudiero - Fix problem displaying the information lines
 ## 10-04-2017 @ 16.56.48 - ("2.0.23")  - dscudiero - If informationOnly mode then set default answer to yes
 ## 03-13-2018 @ 08:29:40 - 2.0.25 - dscudiero - Remove 'merge' load option, not really necessary
+## 03-13-2018 @ 11:14:30 - 2.0.26 - dscudiero - Fix if conditional checking response to prompt
