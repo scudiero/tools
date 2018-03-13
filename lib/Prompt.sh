@@ -26,6 +26,8 @@ function Prompt {
 	dump -2 -r ; dump -2 -l promptVar promptText defaultVal validateList validateListString timeOut timerPrompt timerInterruptPrompt
 
 	declare validateListString="$(echo $validateList | tr " " ",")"
+	validateListString=${validateListString%% /*}
+
 	if [[ -n $defaultVal ]]; then
 		validateListString=",$validateListString,"
 		validateListString=$(sed "s/,${defaultVal},/,\\${colorDefaultVal}${defaultVal}\\${colorDefault},/" <<< "$validateListString")
@@ -201,3 +203,4 @@ export -f Prompt
 ## 10-11-2017 @ 12.50.55 - ("2.1.37")  - dscudiero - Tweak how we add output to the log file
 ## 11-03-2017 @ 08.26.06 - ("2.1.43")  - dscudiero - Eliminate duplicate log entries
 ## 11-03-2017 @ 08.42.11 - ("2.1.44")  - dscudiero - Fix problem setting logResponse variable
+## 03-13-2018 @ 08:31:05 - 2.1.46 - dscudiero - Add optional hidden answer values
