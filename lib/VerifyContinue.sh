@@ -40,10 +40,14 @@ function VerifyContinue {
 		unset ans
 		inVerifyContinue=true
 		[[ $informationOnlyMode == true ]] && verifyContinueDefault='Yes'
-		Prompt ans "\n'Yes' to continue, 'No' to exit" 'Yes No' "$verifyContinueDefault"; ans="${ans:0:1}"; ans=${ans,,[a-z]}
+		Prompt ans "\n'Yes' to continue, 'No' to exit" 'Yes No / InformationMode Verbose' "$verifyContinueDefault"; ans="${ans:0:1}"; ans=${ans,,[a-z]}
 		inVerifyContinue=false
 		if [[ $ans == "i" ]]; then
 			informationOnlyMode=true
+			Info 0 1 "Setting Information only mode, no data will be saved"
+		elif [[ $ans != 'v' ]]; then
+			verboseLevel=1
+			Info 0 1 "Setting Verbose level to 1"
 		elif [[ $ans != 'y' ]]; then
 			Goodbye 'x'
 		fi
@@ -66,3 +70,4 @@ export -f VerifyContinue
 ## 09-25-2017 @ 16.13.26 - ("2.0.21")  - dscudiero - use Msg3
 ## 09-26-2017 @ 15.36.58 - ("2.0.22")  - dscudiero - Fix problem displaying the information lines
 ## 10-04-2017 @ 16.56.48 - ("2.0.23")  - dscudiero - If informationOnly mode then set default answer to yes
+## 03-13-2018 @ 08:29:40 - 2.0.25 - dscudiero - Remove 'merge' load option, not really necessary
