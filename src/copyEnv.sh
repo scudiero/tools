@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.31 # -- dscudiero -- Fri 01/26/2018 @ 10:43:29.68
+version=4.13.32 # -- dscudiero -- Tue 03/13/2018 @  7:19:51.37
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -225,7 +225,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 
 #==================================================================================================
 ## Check to see if all dirs exist
-	[[ -z $srcDir ]] && Terminate "Could not resolve the source directory, you may not have access."
+	[[ -z $srcDir ]] && Terminate "Could not resolve the source directory:\n\t'$srcDir'\nyou may not have access."
 	if [[ -d $tgtDir && $overlay == false  && $refresh == false ]]; then
 		Msg3
 		unset ans
@@ -680,3 +680,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 12-18-2017 @ 09.45.02 - (4.13.7)    - dscudiero - Cosmetic/minor change
 ## 01-26-2018 @ 10.42.43 - 4.13.30 - dscudiero - Tweak messaging if we cannot find the srcDir
 ## 01-26-2018 @ 10.43.36 - 4.13.31 - dscudiero - Cosmetic/minor change/Sync
+## 03-13-2018 @ 07:20:18 - 4.13.32 - dscudiero - Tweak messaging
