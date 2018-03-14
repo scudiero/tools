@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.10.92 # -- dscudiero -- Tue 03/13/2018 @  8:17:54.65
+version=1.10.93 # -- dscudiero -- Wed 03/14/2018 @ 11:32:29.54
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="WriteChangelogEntry"
@@ -54,7 +54,7 @@ Init 'getClient getEnv getDirs checkEnvs getCims noPreview noPublic addPvt'
 [[ -n $loadMode ]] && load=true
 [[ $load == true && -z $loadMode ]] && loadMode='add'
 
-dump env load loadMode verify
+dump 1 env load loadMode verify
 ## Get load mode
 if [[ $env == 'test' && -z $load && $verify == true ]]; then
 	unset ans; Prompt 'ans' 'Do you wish to load the data into the roles file?' 'Yes No' 'No'; ans="${ans:0:1}"; ans="${ans,,[a-z]}"
@@ -219,3 +219,4 @@ Goodbye 0
 ## 11-02-2017 @ 06.58.45 - (1.10.42)   - dscudiero - Switch to ParseArgsStd2
 ## 11-02-2017 @ 11.02.04 - (1.10.43)   - dscudiero - Add addPvt to the init call
 ## 03-13-2018 @ 08:30:29 - 1.10.92 - dscudiero - Remove the load merge option
+## 03-14-2018 @ 13:46:05 - 1.10.93 - dscudiero - Set debug level on debug statements
