@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.80 # -- dscudiero -- Wed 12/13/2017 @ 15:41:20.25
+version=1.2.81 # -- dscudiero -- Tue 03/13/2018 @ 11:30:51.98
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -87,7 +87,7 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 		[[ $(Contains ",${ignoreRules}," ",${ruleName},") == true ]] && return 0
 
 		if [[ $(Contains "$line" '|attr|') == true || $(Contains "$line" '|function|wfAttr|') == true || \
-			$(Contains "$line" '|function|Related|') == true || $(Contains "$line" 'AcadLevel') == true || \
+			$(Contains "$line" '|function|Related|') == true || $(Contains "$line" '|function|GetAcadLevel') == true || \
 			$(Contains "$line" 'ProposalState') == true || $(Contains "$line" 'NotifyAllApprovers') == true || \
 			$(Contains "$line" 'RelatedDepts') == true ]]; then
 			#line = >Col|attr|college_prog.code|; <
@@ -449,3 +449,4 @@ Goodbye 0 #'alert'
 ## 11-02-2017 @ 11.02.06 - (1.2.66)    - dscudiero - Add addPvt to the init call
 ## 11-13-2017 @ 16.57.23 - (1.2.79)    - dscudiero - Fix problem parsing modifiers and special modifiers
 ## 12-13-2017 @ 15.41.39 - (1.2.80)    - dscudiero - Add message where the excel template file can be found
+## 03-14-2018 @ 13:46:47 - 1.2.81 - dscudiero - Tweak looking for acadlevel for a substitution variablew
