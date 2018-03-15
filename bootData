@@ -24,7 +24,6 @@ standardIncludes='ParseArgsStd ParseArgsStd2 Hello DbLog Init Goodbye Quit Help 
 standardInteractiveIncludes="$standardIncludes Prompt VerifyContinue"
 
 classpath=(/jars/toolsUtils.jar)
-classpath+=(/jars/toolsUtils.jar)
 classpath+=(/jars/runMySql2.jar)
 classpath+=(/jars/tools.jar)
 classpath+=(/jars/commons-cli-1.4.jar)
