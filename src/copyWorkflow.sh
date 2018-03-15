@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.67 # -- dscudiero -- Wed 01/24/2018 @ 10:55:04.26
+version=2.10.68 # -- dscudiero -- Thu 03/15/2018 @ 12:59:13.43
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi"
@@ -322,6 +322,7 @@ GetDefaultsData $myName
 [[ $env != '' ]] && srcEnv=$env
 
 ParseArgsStd2 $originalArgStr
+[[ -n $unknowArgs ]] && cimStr="$unknowArgs"
 
 # Initialize instance variables
 	Init 'getClient getSrcEnv getTgtEnv getDirs checkEnvs getCims'
@@ -709,3 +710,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 01-24-2018 @ 10.54.40 - 2.10.66 - dscudiero - Cosmetic/minor change/Sync
 ## 01-24-2018 @ 10.55.12 - 2.10.67 - dscudiero - Cosmetic/minor change/Sync
 ## 03-13-2018 @ 08:29:19 - 2.10.67 - dscudiero - Add a check for TODO workflow steps if target is NEXT
+## 03-15-2018 @ 12:59:42 - 2.10.68 - dscudiero - Allow specifying cimstr as extra arguments
