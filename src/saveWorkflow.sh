@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.88 # -- dscudiero -- Thu 11/30/2017 @ 13:17:54.03
+version=2.2.91 # -- dscudiero -- Thu 03/15/2018 @ 13:42:52.25
 #====================================================================================================
 TrapSigs 'on'
 includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -26,19 +26,21 @@ scriptDescription="This script can be used to save workflow files to your person
 	# parse script specific arguments
 	# Call saveWorkflow -daemon -siteFile "$file" -all -suffix "beforeDelete-$backupSuffix -quiet -nop"
 	#==================================================================================================
-	function parseArgs-saveWorkflow {
-		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
-		argList+=(-all,1,switch,allCims,,,"Save all CIMs")
-		argList+=(-suffix,3,option,suffix,,,"suffix to add to the end of the file name")
-		argList+=(-cims,4,option,cimStr,,,"Comma seperated list of CIMS to backup")
-		argList+=(-daemon,6,switch,daemon,,,"Script being called as a daemon to auto save workflows")
-		argList+=(-siteFile,4,option,siteFile,,,"Full path of the site directory, only used in daemon mode")
+	function saveWorkflow-ParseArgsStd2  {
+		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+		myArgs+=('suffix|suffix|option|suffix||script|Suffix to add to the end of the file name')
+		myArgs+=('cims|cims|option|cimStr||script|Comma separated list of CIMS to backup')
+		myArgs+=('daemon|daemon|switch|daemon||script|Script being called as a daemon to auto save workflows')
+		myArgs+=('site|siteFile|option|siteFile||script|Full path of the site directory, only used in daemon mode')
+		return 0
 	}
-	function Goodbye-saveWorkflow  { # or Goodbye-local
+
+	function saveWorkflow-Goodbye  {
 		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
 		return 0
 	}
-	function testMode-saveWorkflow  { # or testMode-local
+
+	function saveWorkflow-testMode  { # or testMode-local
 		scriptData1="requiredInstanceFiles:workflow.tcf,cimconfig.cfg,custom.atj"
 		scriptData2="optionalInstanceFiles:workflow.cfg,workflowFuncs.atj,custom-workflow.atj,workflowFunctions.atj,workflowHelperFunctions.atj,triggers.atj"
 		scriptData3="requiredGlobalFiles:/courseleaf/cim/triggers.atj,/courseleaf/stdhtml/workflow.atj"
@@ -55,10 +57,12 @@ saveAll=false
 # Standard arg parsing and initialization
 #==================================================================================================
 helpSet="client,env,script,cims"
-GetDefaultsData $myName
-ParseArgsStd
+GetDefaultsData -f $myName
+ParseArgsStd2 $originalArgStr
+[[ -n $unknowArgs ]] && cimStr="$unknowArgs"
+
 Hello
-[[ $allCims == true ]] && allCims='allCims' || unset allCims
+[[ $allItems == true ]] && allCims='allCims' || unset allCims
 if [[ $daemon == true ]]; then
 	[[ -z $siteFile ]] && Terminate "If the -daemon flag is specified you must also specify a siteFile name"
 	data="$(ParseCourseleafFile "$siteDir")"
@@ -194,3 +198,4 @@ Goodbye 0
 ## 09-13-2017 @ 06.59.34 - (2.2.84)    - dscudiero - remove debug statements
 ## 09-13-2017 @ 11.22.19 - (2.2.84)    - dscudiero - Change the parsing of the client and env for daemon mode
 ## 11-30-2017 @ 13.26.45 - (2.2.88)    - dscudiero - Switch to use the -all flag on the GetCims call
+## 03-15-2018 @ 13:43:11 - 2.2.91 - dscudiero - Swithch to use parseArgStd2
