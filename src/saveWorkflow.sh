@@ -1,11 +1,10 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.91 # -- dscudiero -- Thu 03/15/2018 @ 13:42:52.25
+version=2.2.92 # -- dscudiero -- Thu 03/15/2018 @ 13:45:33.50
 #====================================================================================================
 TrapSigs 'on'
-includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
-includes="$includes RunSql2 ParseCourseleafFile"
-Import "$includes"
+myIncludes=""
+Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="This script can be used to save workflow files to your personal Linux home directory space"
@@ -199,3 +198,4 @@ Goodbye 0
 ## 09-13-2017 @ 11.22.19 - (2.2.84)    - dscudiero - Change the parsing of the client and env for daemon mode
 ## 11-30-2017 @ 13.26.45 - (2.2.88)    - dscudiero - Switch to use the -all flag on the GetCims call
 ## 03-15-2018 @ 13:43:11 - 2.2.91 - dscudiero - Swithch to use parseArgStd2
+## 03-15-2018 @ 13:45:40 - 2.2.92 - dscudiero - Fix imports
