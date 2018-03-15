@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.81 # -- dscudiero -- Tue 03/13/2018 @ 11:30:51.98
+version=1.2.82 # -- dscudiero -- Thu 03/15/2018 @ 12:59:09.83
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -141,6 +141,7 @@ scriptNews+=("11/01/2016 - New")
 helpSet='script,client,env'
 GetDefaultsData $myName
 ParseArgsStd2 $originalArgStr
+[[ -n $unknowArgs ]] && cimStr="$unknowArgs"
 [[ $allItems == true ]] && allCims='allCims' || unset allCims
 Init "getClient getEnv getDirs checkEnvs getCims addPvt $allCims"
 if [[ $informationModeOnly == true ]]; then
@@ -450,3 +451,4 @@ Goodbye 0 #'alert'
 ## 11-13-2017 @ 16.57.23 - (1.2.79)    - dscudiero - Fix problem parsing modifiers and special modifiers
 ## 12-13-2017 @ 15.41.39 - (1.2.80)    - dscudiero - Add message where the excel template file can be found
 ## 03-14-2018 @ 13:46:47 - 1.2.81 - dscudiero - Tweak looking for acadlevel for a substitution variablew
+## 03-15-2018 @ 12:59:57 - 1.2.82 - dscudiero - D
