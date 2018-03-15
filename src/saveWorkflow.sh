@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.92 # -- dscudiero -- Thu 03/15/2018 @ 13:45:33.50
+version=2.2.93 # -- dscudiero -- Thu 03/15/2018 @ 13:50:29.78
 #====================================================================================================
 TrapSigs 'on'
 myIncludes=""
@@ -61,7 +61,7 @@ ParseArgsStd2 $originalArgStr
 [[ -n $unknowArgs ]] && cimStr="$unknowArgs"
 
 Hello
-[[ $allItems == true ]] && allCims='allCims' || unset allCims
+[[ $allItems == true ]] && { allCims='allCims'; unset cimStr; } || unset allCims
 if [[ $daemon == true ]]; then
 	[[ -z $siteFile ]] && Terminate "If the -daemon flag is specified you must also specify a siteFile name"
 	data="$(ParseCourseleafFile "$siteDir")"
@@ -199,3 +199,4 @@ Goodbye 0
 ## 11-30-2017 @ 13.26.45 - (2.2.88)    - dscudiero - Switch to use the -all flag on the GetCims call
 ## 03-15-2018 @ 13:43:11 - 2.2.91 - dscudiero - Swithch to use parseArgStd2
 ## 03-15-2018 @ 13:45:40 - 2.2.92 - dscudiero - Fix imports
+## 03-15-2018 @ 13:51:54 - 2.2.93 - dscudiero - If -all was specified then clear the cimStr
