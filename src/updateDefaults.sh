@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.85 # -- dscudiero -- Thu 12/07/2017 @ 10:02:39.56
+version=2.0.86 # -- dscudiero -- Thu 03/15/2018 @ 10:22:23.19
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -41,6 +41,7 @@ Verbose 1 "mode = '$mode'"
 		[[ $(Contains ",$ignoreList," ",$server,") == true ]] && continue
 		ProtectedCall "cd /mnt/$server > /dev/null 2>&1"
 		[[ $(pwd) != /mnt/$server ]] && continue
+		[[ $hostName == 'build7' && $server == 'dev6' ]] && continue
 		newServers="$newServers,$server"
 	done
 	newServers=${newServers:1}
@@ -57,7 +58,6 @@ Verbose 1 "mode = '$mode'"
 		RunSql2 $sqlStmt
 
 ## PROD servers
-	unset newServers
 	unset newServers
 	for server in $(ls /mnt | grep -v '^dev' | grep -v '^auth' | grep -v '\-test$'); do
 		[[ $(Contains ",$ignoreList," ",$server,") == true ]] && continue
@@ -216,3 +216,4 @@ Goodbye 0;
 ## 12-01-2017 @ 08.33.08 - (2.0.83)    - dscudiero - ignore /mnt directories that end with -test
 ## 12-06-2017 @ 11.16.01 - (2.0.84)    - dscudiero - Refactored building the defaults data files
 ## 12-07-2017 @ 10.03.35 - (2.0.85)    - dscudiero - Add time stamp to the top comment in the generated defaults files
+## 03-15-2018 @ 10:23:05 - 2.0.86 - dscudiero - Filter out dev6 from build7 devservers
