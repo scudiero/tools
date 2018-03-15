@@ -23,6 +23,13 @@ loaderIncludes="$loaderIncludes TrapSigs RunSql2 SetFileExpansion GetDefaultsDat
 standardIncludes='ParseArgsStd ParseArgsStd2 Hello DbLog Init Goodbye Quit Help Help2 MkTmpFile'
 standardInteractiveIncludes="$standardIncludes Prompt VerifyContinue"
 
+classpath=($TOOLSPATH/jars/toolsUtils.jar)
+classpath+=($TOOLSPATH/jars/toolsUtils.jar)
+classpath+=($TOOLSPATH/jars/runMySql2.jar)
+classpath+=($TOOLSPATH/jars/tools.jar)
+classpath+=($TOOLSPATH/jars/commons-cli-1.4.jar)
+
+
 #===================================================================================================
 ## Check-in log
 #===================================================================================================
