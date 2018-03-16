@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.10.93 # -- dscudiero -- Wed 03/14/2018 @ 11:32:29.54
+version=1.10.95 # -- dscudiero -- Fri 03/16/2018 @  8:16:30.83
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="WriteChangelogEntry"
@@ -96,14 +96,19 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 	Msg3 "Using step file: $srcStepFile\n"
 	[[ -f $siteDir/web/courseleaf/localsteps/$step.html ]] && mv -f $siteDir/web/courseleaf/localsteps/$step.html $siteDir/web/courseleaf/localsteps/$step.html.bak
 	
+	## Make sure we have wffuncs defined and also import each cims workflowFuncs file
 	echo > "$siteDir/web/courseleaf/localsteps/$step.html"
+	echo '%spidercode%' > "$siteDir/web/courseleaf/localsteps/$step.html"
+	echo 'if(typeof wffuncs == "undefined")' > "$siteDir/web/courseleaf/localsteps/$step.html"
+	echo '	var wffuncs = {};' > "$siteDir/web/courseleaf/localsteps/$step.html"
+	echo '%spidercode%' > "$siteDir/web/courseleaf/localsteps/$step.html"
 	for cim in ${cimStr//,/ }; do
 		echo "%import /$cim/workflowFuncs.atj:atj%" >> "$siteDir/web/courseleaf/localsteps/$step.html"
 	done
 	cat $srcStepFile >> "$siteDir/web/courseleaf/localsteps/$step.html"
 
 	cimStr=\"$(sed 's|,|","|g' <<< $cimStr)\"
-	sed -i s"_var cims=\[''\];_var cims=\[${cimStr}\];_" $siteDir/web/courseleaf/localsteps/$step.html
+	sed -i s"_var cims=\[\];_var cims=\[${cimStr}\];_" $siteDir/web/courseleaf/localsteps/$step.html
 	sed -i s"_var env='';_var env='${env}';_" $siteDir/web/courseleaf/localsteps/$step.html
 
 	Msg3 "Running step $step...\n"
@@ -220,3 +225,4 @@ Goodbye 0
 ## 11-02-2017 @ 11.02.04 - (1.10.43)   - dscudiero - Add addPvt to the init call
 ## 03-13-2018 @ 08:30:29 - 1.10.92 - dscudiero - Remove the load merge option
 ## 03-14-2018 @ 13:46:05 - 1.10.93 - dscudiero - Set debug level on debug statements
+## 03-16-2018 @ 08:20:27 - 1.10.95 - dscudiero - Added code to make sure wffuncs is defined
