@@ -23,7 +23,7 @@ var debug=false;
 //============================================================================================================
 //Variable Declares
 //============================================================================================================
-	var cims=[];
+	var cims=["courseadmin","programadmin"];
 	if (cims.length == 0)
 		cims=['courseadmin','programadmin'];
 	var env='pvt';
@@ -233,20 +233,18 @@ if (debug) { wfDump("sisName",sisName); }
 			}
 			// Loop through wfSubRules data
 			if (cimconfigTcfData) {
-				print_doc('\n\tProcessing wfSubRules\n' );
+				print_doc('\n\t\t\tProcessing wfSubRules\n' );
 				if (cimconfigTcfData.wfSubRule) {
 					cimconfigTcfData.wfSubRule.forEach(function(text) {
 						var tmpArray=text.split('|');
 						var subRuleName=tmpArray[0];
-						if (tmpArray.length === 3) {
-							var subRuleMapType=tmpArray[1];
-							var subRuleText=tmpArray[2];
-						} else {
-							var subRuleMapType=null;
-							var subRuleText=tmpArray[1];							
-						}						
-						wfDump('\n\twfSubRule',text); wfDump('\t\tsubRuleName',subRuleName); 
-						wfDump('\t\tsubRuleMapType',subRuleMapType); wfDump('\t\tsubRuleText',subRuleText);
+						var subRuleText=tmpArray[1];
+						var subRuleText=null;
+						if (tmpArray.length === 3)
+							var subRuleMapType=tmpArray[2];
+						
+						wfDump('\n\t\t\t\twfSubRule',text); wfDump('\t\t\t\t\tsubRuleName',subRuleName); 
+						wfDump('\t\t\t\t\tsubRuleMapType',subRuleMapType); wfDump('\t\t\t\t\tsubRuleText',subRuleText);
 						// If the subrulenName is 'AdditionalSteps' then the rule is an array of steps tp add to the steps array
 						if (subRuleName.toLowerCase() === "additionalsteps" || subRuleName.toLowerCase() === "addsteps") {
 							var tmpStr=subRuleText.substr(1,subRuleText.length-2);
@@ -261,10 +259,10 @@ if (debug) { wfDump("sisName",sisName); }
 						}
 						// If we have already processed this rule then skip it
 						if (wfSubRulesHash[subRuleName] != undefined) {
-							print_doc("\t\t'" + subRuleName + "' already included above\n");
+							print_doc("\t\t\t\t'" + subRuleName + "' already included above\n");
 							return;
 						}
-						print_doc('\t\t' + subRuleName + ': ' + subRuleText + '\n');
+						print_doc('\t\t\t\t' + subRuleName + ': ' + subRuleText + '\n');
 						// If rule is an enumeration then parse off and create an object array
 						if (subRuleText.substr(0,1) === "[" ) {
 							var tmpHashArray=[];
@@ -294,15 +292,15 @@ if (debug) { wfDump("sisName",sisName); }
 						// See if we have a mapper function for this variable
 						var mapperFunctionName="Map" + subRuleName + "Val";
 						if (eval("typeof " + mapperFunctionName) === "function") {
-							print_doc("found mappping function: "+ mapperFunctionName +"\n");
 						} else {
 							var mapperFunctionName="WfDataMapper";
 							if (eval("typeof " + mapperFunctionName) === "function") {
-								print_doc("found mappping function: "+ mapperFunctionName +"\n");
 							} else {
 								mapperFunctionName=null;
 							}
 						}
+						if (mapperFunctionName != null)
+								print_doc("\t\t\t\tFound code mapping function: "+ mapperFunctionName +"\n");
 
 						mappedArray=[];
 						wfSubRulesHash[subRuleName].forEach(function(token) {
