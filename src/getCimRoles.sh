@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.10.95 # -- dscudiero -- Fri 03/16/2018 @  8:16:30.83
+version=1.10.100 # -- dscudiero -- Fri 03/16/2018 @  8:43:54.96
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="WriteChangelogEntry"
@@ -21,6 +21,7 @@ scriptDescription="Build a list of all of the roles that are potentially use in 
 function getCimRoles-ParseArgsStd2 { # or parseArgs-local
 	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 	myArgs+=("load|load|switch|load||script|Automatically load the roles to the site")
+	myArgs+=("noload|noload|switch|load|load=false|script|Automatically load the roles to the site")
 	myArgs+=("replace||switch||loadMode='replace'|script|Replace all of the target sites role data")
 	myArgs+=("add||switch||loadMode='add'|script|Add the role data into the sites existing role data")
 	return 0
@@ -98,10 +99,11 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 	
 	## Make sure we have wffuncs defined and also import each cims workflowFuncs file
 	echo > "$siteDir/web/courseleaf/localsteps/$step.html"
-	echo '%spidercode%' > "$siteDir/web/courseleaf/localsteps/$step.html"
-	echo 'if(typeof wffuncs == "undefined")' > "$siteDir/web/courseleaf/localsteps/$step.html"
-	echo '	var wffuncs = {};' > "$siteDir/web/courseleaf/localsteps/$step.html"
-	echo '%spidercode%' > "$siteDir/web/courseleaf/localsteps/$step.html"
+	echo '%spidercode%' >> "$siteDir/web/courseleaf/localsteps/$step.html"
+	echo 'if(typeof wffuncs == "undefined")' >> "$siteDir/web/courseleaf/localsteps/$step.html"
+	echo '	var wffuncs = {};' >> "$siteDir/web/courseleaf/localsteps/$step.html"
+	echo '%spidercode%' >> "$siteDir/web/courseleaf/localsteps/$step.html"
+	echo >> "$siteDir/web/courseleaf/localsteps/$step.html"
 	for cim in ${cimStr//,/ }; do
 		echo "%import /$cim/workflowFuncs.atj:atj%" >> "$siteDir/web/courseleaf/localsteps/$step.html"
 	done
@@ -114,6 +116,10 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 	Msg3 "Running step $step...\n"
 	cd $siteDir/web/courseleaf
 	./courseleaf.cgi $step /courseadmin/index.tcf > $outFile
+
+	## Check for errors
+	grepStr=$(ProtectedCall "grep 'ATJ error:' $outFile")
+	[[ -n $grepStr ]] && Terminate "Step produced an ATJ error, please review '$outFile' for additional information"
 
 	## If the user requested that the data be loaded the read data and write out to the roles.tcf file
 	if [[ $load == true ]]; then
@@ -195,7 +201,7 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 	fi
 
 
-	rm -f "$siteDir/web/courseleaf/localsteps/$step.html"
+	# rm -f "$siteDir/web/courseleaf/localsteps/$step.html"
 	[[ -f $siteDir/web/courseleaf/localsteps/$step.html.bak ]] && mv -f $siteDir/web/courseleaf/localsteps/$step.html.bak $siteDir/web/courseleaf/localsteps/$step.html
 
 #===================================================================================================
@@ -226,3 +232,4 @@ Goodbye 0
 ## 03-13-2018 @ 08:30:29 - 1.10.92 - dscudiero - Remove the load merge option
 ## 03-14-2018 @ 13:46:05 - 1.10.93 - dscudiero - Set debug level on debug statements
 ## 03-16-2018 @ 08:20:27 - 1.10.95 - dscudiero - Added code to make sure wffuncs is defined
+## 03-16-2018 @ 08:57:00 - 1.10.100 - dscudiero - Fix problem writing out step header code
