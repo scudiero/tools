@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.77" // -- dscudiero -- Wed 03/07/2018 @ 12:16:10.52
+wfLibVersion="1.8.78" // -- dscudiero -- Fri 03/16/2018 @ 10:27:07.17
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -2389,10 +2389,10 @@ wffuncs.TODO = function(inval, wfrule, args) {
 
 	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
 	if (options === "" ) options = "Awaiting final client approval."
+	var msgPrefix="*Warning*"
+	var indent=""; for (var i=0,  tot=22; i < tot; i++) { indent = indent+"&nbsp;"; }
 
-	var indent=""; for (var i=0,  tot=15; i < tot; i++) { indent = indent+"&nbsp;"; }
-
-	print_doc("<strong><em>*Note*</strong></em> -- Workflow is not yet complete:<br>")
+	print_doc("<strong><em>" + msgPrefix + "</strong></em> -- Workflow is not yet complete:<br>")
 	wfSplitString(options,96).forEach(function(text) {
 		print_doc(indent + text + "<br>")
 	});
@@ -2543,3 +2543,4 @@ var wfLibLoaded=true;
 // 02-05-2018 @ 09.34.27 - 1.8.65 - dscudiero - Fixed bug where htmltext fields were being seen as changed because non-significant markup changes were in the text.
 // 02-05-2018 @ 09.47.00 - 1.8.66 - dscudiero - Tweaking messaging
 // 02-15-2018 @ 09.33.00 - 1.8.71 - dscudiero - Updated functions that write to 'doc' to not write if not in testworkflow step.
+// 03-16-2018 @ 10:28:05 - 1.8.78 - dscudiero - Change message prefix of the TODO messages to warning
