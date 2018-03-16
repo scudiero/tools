@@ -8,12 +8,13 @@
 // 06/08/17 - dgs -	Updated roles to filter out functions unless the function is a substitution variable name
 // 08/08/17 - dgs -	Added call back to the code mapping functions if defined.
 // 08/08/17 - dgs -	Add the cim instance name to the output, if the value was mapped also include the unmapped value.
-// 08/25/17 - dgs -	make sure that we add the real departement code to the subruleshash even if it is not mapped.
+// 08/25/17 - dgs -	make sure that we add the real department code to the subruleshash even if it is not mapped.
 // 08/30/17 - dgs -	Clean up debug messaging, fix problem adding the raw step text to the output array
 // 09/13/17 - dgs -	Added 'optional' flag on the reported instance name
 // 02/19/18 - dgs - Update to handle multiple substitution variables in a single step name
 // 02/28/18 - dgs - Fixed a bug with dead code in 'Loop through the rolesOut array and add role member list and instance annotations'
 //					Added a new subrule type of 'AdditionalSetps' to add additional steps to the workflow steps array (e.g. emitted by an esig)
+// 03/16/18 - dgs - Added more robust searching for mapping functions, tweaked the wfSubRules syntax, add the where clause to query subrules if not present
 //============================================================================================================
 // Function wrapper
 (function getCimWorkflowRoles() {
@@ -22,11 +23,11 @@ var debug=false;
 //============================================================================================================
 //Variable Declares
 //============================================================================================================
-	var cims=[''];
+	var cims=[];
 	if (cims.length == 0)
 		cims=['courseadmin','programadmin'];
 	var env='pvt';
-	var version="6.3";
+	var version="6.4";
 	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
 
 	var ignoreSteps = {
@@ -235,10 +236,17 @@ if (debug) { wfDump("sisName",sisName); }
 				print_doc('\n\tProcessing wfSubRules\n' );
 				if (cimconfigTcfData.wfSubRule) {
 					cimconfigTcfData.wfSubRule.forEach(function(text) {
-						var idx1=text.indexOf("|");
-						var subRuleName=text.substr(0,idx1);
-						var subRuleText=text.substr(idx1+1);
-						wfDump('\n\twfSubRule',text); wfDump('\t\tsubRuleName',subRuleName); wfDump('\t\tsubRuleText',subRuleText);
+						var tmpArray=text.split('|');
+						var subRuleName=tmpArray[0];
+						if (tmpArray.length === 3) {
+							var subRuleMapType=tmpArray[1];
+							var subRuleText=tmpArray[2];
+						} else {
+							var subRuleMapType=null;
+							var subRuleText=tmpArray[1];							
+						}						
+						wfDump('\n\twfSubRule',text); wfDump('\t\tsubRuleName',subRuleName); 
+						wfDump('\t\tsubRuleMapType',subRuleMapType); wfDump('\t\tsubRuleText',subRuleText);
 						// If the subrulenName is 'AdditionalSteps' then the rule is an array of steps tp add to the steps array
 						if (subRuleName.toLowerCase() === "additionalsteps" || subRuleName.toLowerCase() === "addsteps") {
 							var tmpStr=subRuleText.substr(1,subRuleText.length-2);
@@ -278,16 +286,29 @@ if (debug) { wfDump("sisName",sisName); }
 							wfSubRulesHash[subRuleName]=tmpHashArray;
 						// Otherwise assume rule is a sql query on the cimcodes table
 						} else {
-							wfSubRulesHash[subRuleName]=dbquery('cimcourses',text.substr(idx1+1));
+							if (subRuleText.indexOf("and rank >= 0 and (access <> 'retired' OR access IS NULL) order by code") === 0)
+								subRuleText=subRuleText + " and rank >= 0 and (access <> 'retired' OR access IS NULL) order by code";
+							wfSubRulesHash[subRuleName]=dbquery('cimcourses',subRuleText);
 						}
 
 						// See if we have a mapper function for this variable
 						var mapperFunctionName="Map" + subRuleName + "Val";
+						if (eval("typeof " + mapperFunctionName) === "function") {
+							print_doc("found mappping function: "+ mapperFunctionName +"\n");
+						} else {
+							var mapperFunctionName="WfDataMapper";
+							if (eval("typeof " + mapperFunctionName) === "function") {
+								print_doc("found mappping function: "+ mapperFunctionName +"\n");
+							} else {
+								mapperFunctionName=null;
+							}
+						}
+
 						mappedArray=[];
 						wfSubRulesHash[subRuleName].forEach(function(token) {
-							if (eval("typeof " + mapperFunctionName) === "function") {
+							if (mapperFunctionName != null) {
 								tmpObj={};
-								eval("tmpObj.code="+ mapperFunctionName + "(\"" + token.code + "\")");
+								eval("tmpObj.code="+ mapperFunctionName + "(\"" + subRuleMapType + "\",\"" + token.code + "\")");
 								tmpObj.name=token.name;
 								tmpObj.origCode=token.code;
 								mappedArray.push(tmpObj);
