@@ -196,12 +196,11 @@ function Help {
 		done #| sort
 		echo
 		## Java
-		if [[ $(Contains "$SCRIPTINCLUDES" "RunSql2") == true && -n $javaResources ]]; then
-			local token
-			Msg3 "$(ColorK "Java resources used (via $TOOLSPATH/src/java/tools.jar):")"
-			for token in $(tr ',' ' ' <<< $javaResources); do
-				Msg3 "^$token"
-			done | sort
+		if [[ $(Contains "$SCRIPTINCLUDES" "RunSql") == true && -n $javaResources ]]; then
+			javaPgm=${runMySqlJavaPgmName:-runMySql}
+	 		jar="$TOOLSPATH/tools/jars/$javaPgm.jar"
+			Msg3 "$(ColorK "Java resources used ($jar):")"
+	 		jar -tf "$jar" | Indent
 			echo
 		fi
 		## Python
@@ -228,3 +227,4 @@ export -f Help
 ## 09-01-2017 @ 09.27.30 - (2.0.8)     - dscudiero - Add call myname-FUNCNAME function if found
 ## 09-01-2017 @ 09.38.26 - (2.0.9)     - dscudiero - Fix spelling error
 ## 09-25-2017 @ 08.14.09 - (2.1.-1)    - dscudiero - Use Msg3
+## 03-19-2018 @ 10:43:25 - 2.1.-1 - dscudiero - Change the way we display the java dependencies
