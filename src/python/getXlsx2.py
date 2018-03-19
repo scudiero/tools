@@ -171,4 +171,5 @@ for rx in range(sh.nrows):
 ## Done
 Quit()
 
-// 03-19-2018 @ 11:31:06 - 1.3.0 - dscudiero - Redo imports so there is one inport per line
+## 03-19-2018 @ 11:31:06 - 1.3.0 - dscudiero - Redo imports so there is one inport per line
+## 03-19-2018 @ 13:29:09 - 1.3.0 - dscudiero - Cosmetic/minor change/Sync
