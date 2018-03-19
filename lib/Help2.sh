@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=3.0.1 # -- dscudiero -- Mon 03/19/2018 @ 11:17:20.54
+# version=3.0.2 # -- dscudiero -- Mon 03/19/2018 @ 11:19:13.32
 #===================================================================================================
 # Display script help -- passed an array of argument definitinons, see ParseArg function
 #===================================================================================================
@@ -191,7 +191,7 @@ function Help2 {
 		done #| sort
 		echo
 		## Java
-		if [[ $(Contains "$SCRIPTINCLUDES" "RunSql2") == true && -n $javaResources ]]; then
+		if [[ $(Contains "$SCRIPTINCLUDES" "RunSql") == true && -n $javaResources ]]; then
 			javaPgm=${runMySqlJavaPgmName:-runMySql}
 	 		jar="$TOOLSPATH/tools/jars/$javaPgm.jar"
 			Msg3 "$(ColorK "Java resources used ($jar):")"
@@ -224,3 +224,4 @@ export -f Help2
 ## 09-25-2017 @ 08.14.09 - (2.1.-1)    - dscudiero - Use Msg3
 ## 11-02-2017 @ 10.27.27 - (3.0.0)     - dscudiero - Initial implimentation
 ## 03-19-2018 @ 11:17:45 - 3.0.1 - dscudiero - Update how java dependencies are calculated
+## 03-19-2018 @ 11:19:26 - 3.0.2 - dscudiero - Cosmetic/minor change/Sync
