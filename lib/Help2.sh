@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=3.0.0 # -- dscudiero -- Thu 11/02/2017 @ 10:27:07.22
+# version=3.0.1 # -- dscudiero -- Mon 03/19/2018 @ 11:17:20.54
 #===================================================================================================
 # Display script help -- passed an array of argument definitinons, see ParseArg function
 #===================================================================================================
@@ -192,11 +192,10 @@ function Help2 {
 		echo
 		## Java
 		if [[ $(Contains "$SCRIPTINCLUDES" "RunSql2") == true && -n $javaResources ]]; then
-			local token
-			Msg3 "$(ColorK "Java resources used by this script (via $TOOLSPATH/src/java/tools.jar):")"
-			for token in $(tr ',' ' ' <<< $javaResources); do
-				Msg3 "^$token"
-			done | sort
+			javaPgm=${runMySqlJavaPgmName:-runMySql}
+	 		jar="$TOOLSPATH/tools/jars/$javaPgm.jar"
+			Msg3 "$(ColorK "Java resources used ($jar):")"
+	 		jar -tf "$jar" | Indent
 			echo
 		fi
 		## Python
@@ -224,3 +223,4 @@ export -f Help2
 ## 09-01-2017 @ 09.38.26 - (2.0.9)     - dscudiero - Fix spelling error
 ## 09-25-2017 @ 08.14.09 - (2.1.-1)    - dscudiero - Use Msg3
 ## 11-02-2017 @ 10.27.27 - (3.0.0)     - dscudiero - Initial implimentation
+## 03-19-2018 @ 11:17:45 - 3.0.1 - dscudiero - Update how java dependencies are calculated
