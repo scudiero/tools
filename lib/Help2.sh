@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=3.0.2 # -- dscudiero -- Mon 03/19/2018 @ 11:19:13.32
+# version=3.0.3 # -- dscudiero -- Mon 03/19/2018 @ 12:01:09.52
 #===================================================================================================
 # Display script help -- passed an array of argument definitinons, see ParseArg function
 #===================================================================================================
@@ -200,11 +200,8 @@ function Help2 {
 		fi
 		## Python
 		if [[ $(Contains "$SCRIPTINCLUDES" "GetExcel") == true && -n $pythonResources ]]; then
-			local token
 			Msg3 "$(ColorK "Python resources used by this script:")"
-			for token in $(tr ',' ' ' <<< $pythonResources); do
-				Msg3 "^$token"
-			done | sort
+			grep '^import' "$TOOLSPATH/src/python/getXlsx2.py" | Indent
 			echo
 		fi
 	fi
@@ -225,3 +222,4 @@ export -f Help2
 ## 11-02-2017 @ 10.27.27 - (3.0.0)     - dscudiero - Initial implimentation
 ## 03-19-2018 @ 11:17:45 - 3.0.1 - dscudiero - Update how java dependencies are calculated
 ## 03-19-2018 @ 11:19:26 - 3.0.2 - dscudiero - Cosmetic/minor change/Sync
+## 03-19-2018 @ 12:01:59 - 3.0.3 - dscudiero - CHange the way we find the python dependencies
