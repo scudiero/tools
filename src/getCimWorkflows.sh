@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.82 # -- dscudiero -- Thu 03/15/2018 @ 12:59:09.83
+version=1.2.91 # -- dscudiero -- Mon 03/19/2018 @ 13:59:04.56
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -175,6 +175,9 @@ myData="Client: '$client', Env: '$env', Cims: '$cimStr' "
 #==================================================================================================
 # Main
 #==================================================================================================
+## Write out header data to the output file
+	Msg3 "\n$myName ($version) $userName @ $(date)" > $outFile
+	Msg3 "CIMs: $cimStr" >> $outFile
 
 ## Loop through CIMs
 for cim in ${cimStr//,/ }; do
@@ -264,6 +267,24 @@ for cim in ${cimStr//,/ }; do
 				done
 			fi
 
+		## Write out 'Conditionals' data
+			if [[ ${#wfrulesKeys[@]} -gt 0 ]]; then
+				cntr=1
+				Msg3 "\nConditional Definitions:" >> $outFile
+				Msg3 "This section defines the conditionals that may be applied to a step, if the conditional evaluates to true then the step will be included in the calculated workflow." >> $outFile
+				Msg3 "ALL conditionals applied to a step must evaluate to true.for that step to be included." >> $outFile
+				Msg3 "e.g. if an 'Is New' conditional is applied to a step, that step will only be included in the workflow for new proposals." >> $outFile
+				Msg3 "Note that all names are case sensitive, i.e. 'Abc' does not equal 'abc'." >> $outFile
+				Msg3 "#\tCondition\tDescription\t\tImplementation / Comment" >> $outFile
+				for i in "${wfrulesKeys[@]}"; do
+					conditionalDef="${wfrules[$i]}"
+					conditionalDef=$(sed s/'%7C'/' | '/g <<< $conditionalDef);
+					echo -e "$cntr\t$i\t$conditionalDef" >> $outFile
+					(( cntr += 1 ))
+				done
+				Msg3 "^^Found ${#wfrulesKeys[@]} Conditional rules"
+			fi
+
 		## Write out esigs data
 			if [[ ${#esigsKeys[@]} -gt 0 ]]; then
 				cntr=1
@@ -288,22 +309,6 @@ for cim in ${cimStr//,/ }; do
 					(( cntr += 1 ))
 				done
 				Msg3 "^^Found ${#voterules[@]} Vote rules"
-			fi
-
-		## Write out 'Conditionals' data
-			if [[ ${#wfrulesKeys[@]} -gt 0 ]]; then
-				cntr=1
-				Msg3 "\nConditional Definitions:" >> $outFile
-				Msg3 "This section defines the conditionals that may be applied to a step, if the conditional evaluates to true then the step will be included in the calculated workflow." >> $outFile
-				Msg3 "ALL conditionals applied to a step must evaluate to true.for that step to be included." >> $outFile
-				Msg3 "e.g. if an 'Is New' conditional is applied to a step, that step will only be included in the workflow for new proposals." >> $outFile
-				Msg3 "Note that all names are case sensitive, i.e. 'Abc' does not equal 'abc'." >> $outFile
-				Msg3 "#\tCondition\tDescription\t\tImplementation / Comment" >> $outFile
-				for i in "${wfrulesKeys[@]}"; do
-					echo -e "$cntr\t$i\t${wfrules[$i]}" >> $outFile
-					(( cntr += 1 ))
-				done
-				Msg3 "^^Found ${#wfrulesKeys[@]} Conditional rules"
 			fi
 
 		## Write out 'wforder' data
@@ -452,3 +457,4 @@ Goodbye 0 #'alert'
 ## 12-13-2017 @ 15.41.39 - (1.2.80)    - dscudiero - Add message where the excel template file can be found
 ## 03-14-2018 @ 13:46:47 - 1.2.81 - dscudiero - Tweak looking for acadlevel for a substitution variablew
 ## 03-15-2018 @ 12:59:57 - 1.2.82 - dscudiero - D
+## 03-19-2018 @ 14:00:57 - 1.2.91 - dscudiero - Translate the %7C in conditionals to |
