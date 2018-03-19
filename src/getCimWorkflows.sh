@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.91 # -- dscudiero -- Mon 03/19/2018 @ 13:59:04.56
+version=1.2.101 # -- dscudiero -- Mon 03/19/2018 @ 14:50:13.86
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -97,7 +97,8 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 			#line = >addProvost|function|AddProvost|; <
 			if [[ $(Contains "$line" '|function|') == true ]]; then
 				rtype="$(cut -d'|' -f2 <<< "$line")"
-				value="$(cut -d'|' -f3 <<< "$line")"
+				value="$(cut -d'|' -f3- <<< "$line")"
+				value="${value#;*}"
 			#line = >iffieldmatch|acad_level.code|value=UG; <
 			elif [[ $(Contains "$line" '|iffieldmatch|') == true ]]; then
 				rtype="$(cut -d'|' -f2 <<< "$line")"
@@ -203,7 +204,7 @@ for cim in ${cimStr//,/ }; do
 		declare -A wfrules ; declare -A esigs ; declare -A substitutionVars
 		Msg3 "^Parsing '$grepFile'"
 		[[ -f $tmpFile ]] && rm -f $tmpFile
-		\grep '^wfrules:\|^wforder:\|^esiglist:\|^voterules:' $grepFile >> $tmpFile
+		\grep '^wfrules:\|^wforder:\|^esiglist:\|^voterules:\|^wfUgRe:\|^wfGrRe:' $grepFile >> $tmpFile
 		unset lines; while read line; do lines+=("$line"); done < $tmpFile; [[ -f $tmpFile ]] && rm -f $tmpFile
 		for line in "${lines[@]}"; do
 			dump -1 -n line
@@ -229,10 +230,16 @@ for cim in ${cimStr//,/ }; do
 				duration="$(cut -d'|' -f3 <<< "$line")"; [[ $duration == '0' ]] && duration='none'
 				attributes="$(cut -d'|' -f4- <<< "$line")"; attributes="${attributes//;/; }"
 				voterules+=("$ruleName / \"$ruleRegex\"\tDuration: $duration, Attributes: $attributes")
+			elif [[ $ruleType == 'wfUgRe' ]]; then
+				wfUgRe="$(cut -d':' -f2- <<< "$line")"
+			elif [[ $ruleType == 'wfGrRe' ]]; then
+				wfGrRe="$(cut -d':' -f2- <<< "$line")"
 			else
 				:
 			fi
 		done
+
+		dump -1 -t wfUgRe wfGrRe
 
 		# ## Sort the hask keys arrays
 		# 	[[ -f $tmpFile ]] && rm $tmpFile
@@ -279,6 +286,8 @@ for cim in ${cimStr//,/ }; do
 				for i in "${wfrulesKeys[@]}"; do
 					conditionalDef="${wfrules[$i]}"
 					conditionalDef=$(sed s/'%7C'/' | '/g <<< $conditionalDef);
+					[[ -n $wfUgRe ]] && conditionalDef=$(sed s/'wfUgRe'/"$wfUgRe"/g <<< $conditionalDef);
+					[[ -n $wfGrRe ]] && conditionalDef=$(sed s/'wfGrRe'/"$wfGrRe"/g <<< $conditionalDef);
 					echo -e "$cntr\t$i\t$conditionalDef" >> $outFile
 					(( cntr += 1 ))
 				done
@@ -409,7 +418,9 @@ for cim in ${cimStr//,/ }; do
 				step=$(Trim "$step");
 				[[ $(Contains ",${ignoreSteps}," ",${step},") == true ]] && continue
 				conditionals=$(Trim "$conditionals");
-				modifiers=$(sed s/'optional'/'(If Exists)'/g <<< $modifiers);
+				modifiers=$(sed s/'optional'/'(If role exists)'/g <<< $modifiers);
+				modifiers=$(sed s/'fyiall'/'(Notify All)'/g <<< $modifiers);
+				modifiers=$(sed s/'fyi'/'(Notify First)'/g <<< $modifiers);
 				modifiers=$(echo $modifiers | tr -d '*');
 				echo -e "$stepCntr\t$step\t$conditionals\t$modifiers" >> $outFile
 				(( stepCntr += 1 ))
@@ -458,3 +469,4 @@ Goodbye 0 #'alert'
 ## 03-14-2018 @ 13:46:47 - 1.2.81 - dscudiero - Tweak looking for acadlevel for a substitution variablew
 ## 03-15-2018 @ 12:59:57 - 1.2.82 - dscudiero - D
 ## 03-19-2018 @ 14:00:57 - 1.2.91 - dscudiero - Translate the %7C in conditionals to |
+## 03-19-2018 @ 14:51:00 - 1.2.101 - dscudiero - Tweak the verbiage used on the modifiers
