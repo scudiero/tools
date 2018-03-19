@@ -18,12 +18,15 @@
 # 10/13/2016 - dgs - Updated to run on Python 3.x
 #					 Removed dependence on framework.py
 #==================================================================================================
-import inspect, sys, traceback
+import inspect
+import sys
+import traceback
 import os
 import argparse
 import xlrd
 import re
-import datetime, time
+import datetime
+import time
 import string
 from array import *
 
@@ -168,3 +171,4 @@ for rx in range(sh.nrows):
 ## Done
 Quit()
 
+// 03-19-2018 @ 11:31:06 - 1.3.0 - dscudiero - Redo imports so there is one inport per line
