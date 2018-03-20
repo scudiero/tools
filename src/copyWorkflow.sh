@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.68 # -- dscudiero -- Thu 03/15/2018 @ 12:59:13.43
+version=2.10.71 # -- dscudiero -- Tue 03/20/2018 @  9:17:07.67
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi"
@@ -328,18 +328,21 @@ ParseArgsStd2 $originalArgStr
 	Init 'getClient getSrcEnv getTgtEnv getDirs checkEnvs getCims'
 	dump -1 client env srcEnv srcDir tgtEnv tgtDir cimStr
 
-# If target is NEXT then source must be TEST
-	[[ $tgtEnv == 'next' && $srcEnv != 'test' ]] && Terminate "The NEXT site may only be updated from the TEST environment, please push your changes in '$srcEnv' to TEST."
+# If target is NEXT checks
+	if [[ $tgtEnv == 'next' && $srcEnv != 'test' ]]; then
+		[[ $srcEnv != 'test' ]] && Terminate "The NEXT site may only be updated from the TEST environment, please push your changes in '$srcEnv' to TEST."
+		[[ $verify == false ]] && Msg3 "Target is NEXT and verify was off, this is not allowed, setting verify to true" && verify=true
+	fi
 
 ## If pvtDir exists and src is not pvt make sure that this is what the user really wants to to
-	if [[ -d "$pvtDir" && $srcEnv != 'pvt' && $tgtEnv != 'pvt' ]]; then
-		verify=true
-		Msg3
-		Warning "You are asking to source the copy from the $(ColorW $(Upper $srcEnv)) environment but a private site ($client-$userName) was detected"
-		unset ans; Prompt ans "Are you sure" "Yes No" "Yes";
-		ans=$(Lower ${ans:0:1})
-		[[ $ans != 'y' ]] && Goodbye -1
-	fi
+	# if [[ -d "$pvtDir" && $srcEnv != 'pvt' && $tgtEnv != 'pvt' ]]; then
+	# 	verify=true
+	# 	Msg3
+	# 	Warning "You are asking to source the copy from the $(ColorW $(Upper $srcEnv)) environment but a private site ($client-$userName) was detected"
+	# 	unset ans; Prompt ans "Are you sure" "Yes No" "Yes";
+	# 	ans=$(Lower ${ans:0:1})
+	# 	[[ $ans != 'y' ]] && Goodbye -1
+	# fi
 
 ## Get update comment
 	[[ $verify == true ]] && echo
@@ -484,15 +487,26 @@ done
 [[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
 Msg3
 ## Copy the files
+	if [[ $verify == true ]]; then
+		Msg3 "The following files will be copied:"
+		for fileSpec in "${copyFileList[@]}"; do
+			Msg3 "^$(cut -d'|' -f3 <<< $fileSpec)"
+		done
+	fi
+
 	## If some files were not selected for update then as the user if they really want to copy the files
 	if [[ ${#filesNotCopied[@]} -gt 0 ]]; then
-		Warning "You asked that some changed files NOT be updated: "
+		Msg3
+		Warning "The following files $(ColorW "NOT") be updated: "
 		for file in "${filesNotCopied[@]}"; do
 			Msg3 "^$file"
 		done
 		Msg3
 		unset ans defVals; Prompt ans "Do you wish to perform a partial update to the site" 'Yes No' 'No'; ans=$(Lower ${ans:0:1});
 		[[ $ans != 'y' ]] && Warning "No files have been updated" && Goodbye 1
+	else
+		Msg3
+		unset ans defVals; Prompt ans "Do you wish to update to the '$tgtEnv' site" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1});
 	fi
 
 	if [[ ${#copyFileList[@]} -gt 0 ]]; then
@@ -711,3 +725,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 01-24-2018 @ 10.55.12 - 2.10.67 - dscudiero - Cosmetic/minor change/Sync
 ## 03-13-2018 @ 08:29:19 - 2.10.67 - dscudiero - Add a check for TODO workflow steps if target is NEXT
 ## 03-15-2018 @ 12:59:42 - 2.10.68 - dscudiero - Allow specifying cimstr as extra arguments
+## 03-20-2018 @ 09:20:20 - 2.10.71 - dscudiero - Check that verify is on if target is NEXT
