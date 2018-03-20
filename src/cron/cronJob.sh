@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.29 # -- dscudiero -- Wed 11/15/2017 @  7:08:30.60
+version=2.1.30 # -- dscudiero -- Tue 03/20/2018 @ 15:40:07.52
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -57,11 +57,13 @@ originalArgStr="$*"
 	myPath="$(dirname $executeFile)"
 	source $executeFile $scriptArgs $callScriptArgs >> "$logFile"  2>&1
 	echo -e "\t-- $hostName - $callScriptName done" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
-	mv $logFile $logFile.bak
- 	cat $logFile.bak | sed "s/\x1B\[[0-9;]*[a-zA-Z]//g" | tr -d '\007' > $logFile
-	chmod 660 "$logFile"
- 	rm $logFile.bak
-	[[ ! -d $(dirname $logFile) ]] && { touch "$(dirname $logFile)"; chmod 770 "$(dirname $logFile)"; }
+	if [[ -f $logFile ]]; then
+		mv $logFile $logFile.bak
+	 	cat $logFile.bak | sed "s/\x1B\[[0-9;]*[a-zA-Z]//g" | tr -d '\007' > $logFile
+		chmod 660 "$logFile"
+	 	rm $logFile.bak
+		[[ ! -d $(dirname $logFile) ]] && { touch "$(dirname $logFile)"; chmod 770 "$(dirname $logFile)"; }
+	fi
 	myName="$myNameSave"; myPath="$myPathSave"
 
 #=======================================================================================================================
@@ -144,3 +146,4 @@ exit 0
 ## 10-27-2017 @ 09.36.59 - (2.1.22)    - dscudiero - Set USELOCAL before resolving sript file
 ## 10-27-2017 @ 09.41.18 - (2.1.23)    - dscudiero - Remove debug stuff
 ## 11-15-2017 @ 07.08.56 - (2.1.29)    - dscudiero - Do not email on warnings
+## 03-20-2018 @ 15:40:51 - 2.1.30 - dscudiero - Only post process the log file if it exists
