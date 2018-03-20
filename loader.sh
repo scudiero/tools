@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.105" # -- dscudiero -- Wed 03/07/2018 @  9:11:05.73
+version="1.4.135" # -- dscudiero -- Tue 03/20/2018 @ 17:34:58.11
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -155,15 +155,15 @@ sTime=$(date "+%s")
 #==================================================================================================
 # MAIN
 #==================================================================================================
-## Set the CLASSPATH
+## Set the CLASSPATH 
 	sTime=$(date "+%s")
 	saveClasspath="$CLASSPATH"
-	searchDirs="$TOOLSPATH"
-	[[ $USEDEV == true && -d "$HOME/tools/jars" ]] && searchDirs="$HOME/tools"
+	searchDirs="${TOOLSPATH}/jars"
+	[[ $useDev == true || $useLocal == true ]] && [[ -d "$HOME/tools/jars" ]] && searchDirs="$HOME/tools/jars $searchDirs "
 	unset CLASSPATH
 	for searchDir in $searchDirs; do
-		for jar in $(find $searchDir/jars -mindepth 1 -maxdepth 1 -type f -name \*.jar); do
-			[[ -z $CLASSPATH ]] && CLASSPATH="$jar" || CLASSPATH="$CLASSPATH:$jar"
+		for classpath in ${classpath[@]}; do
+			[[ -f "${searchDir}/${classpath}" ]] && CLASSPATH="${CLASSPATH}:${searchDir}/${classpath}"
 		done
 	done
 	export CLASSPATH="$CLASSPATH"
@@ -202,8 +202,9 @@ sTime=$(date "+%s")
 		fi
 
 ## Import things we need to continue
-	#echo; echo "HERE 1 HERE 1 HERE"; read
+	#echo; echo "HERE 1a HERE 1a HERE"; read
 	source "$TOOLSPATH/lib/Import.sh"
+	#echo; echo "HERE 1b HERE 1b HERE"; read
 	sTime=$(date "+%s")
 	Import "$loaderIncludes"
 	prtStatus ", imports"
@@ -264,15 +265,18 @@ sTime=$(date "+%s")
 		callPgmName=$(basename $executeFile)
 		callPgmName=$(cut -d'.' -f1 <<< $callPgmName)
 	fi ## [[ ${callPgmName:0:1} == '\' ]]
+	#echo; echo "HERE 5 HERE 5 HERE"; read
 	## Check to make sure we can run
 		checkMsg=$(CheckRun $callPgmName)
 		if [[ $checkMsg != true ]]; then
 			[[ $(Contains ",$administrators," ",$userName,") != true ]] && echo && echo && Terminate "$checkMsg"
 			[[ $callPgmName != 'testsh' ]] && Terminate "$checkMsg"
 		fi
+	#echo; echo "HERE 6 HERE 6 HERE"; read
 	## Check to make sure we are authorized
 		checkMsg=$(CheckAuth $callPgmName)
 		[[ $checkMsg != true ]] && Terminate "$checkMsg"
+	#echo; echo "HERE 7 HERE 7 HERE"; read
 	## Get the users auth groups
 		[[ -z $UsersAuthGroups && -r "$TOOLSPATH/auth/$userName" ]] && UsersAuthGroups=$(cat "$TOOLSPATH/auth/$userName") || UsersAuthGroups='none'
 		prtStatus ", check run/auth"; sTime=$(date "+%s")
@@ -280,12 +284,16 @@ sTime=$(date "+%s")
 	## Check semaphore
 		[[ $(Contains ",$setSemaphoreList," ",$callPgmName," ) == true ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
 
+	#echo; echo "HERE 8 HERE 8 HERE"; read
+	#echo "callPgmName = '$callPgmName'"
+
 	## Resolve the executable file"
 		[[ -z $executeFile ]] && executeFile=$(FindExecutable "$callPgmName")
 		#echo "callPgmName = '$callPgmName', executeFile = '$executeFile'"; read
 		[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
 		prtStatus ", find file"; sTime=$(date "+%s")
-
+#echo "executeFile = '$executeFile'"
+#echo; echo "HERE 9 HERE 9 HERE"; read
 ## Call the script
 	## Initialize the log file
 		logFile=/dev/null
@@ -486,3 +494,4 @@ sTime=$(date "+%s")
 ## 11-14-2017 @ 11.58.15 - ("1.4.39")  - dscudiero - Do not touch the log directory if the logFile is /dev/null
 ## 12-01-2017 @ 09.09.59 - ("1.4.42")  - dscudiero - Remove autoRemote from the trueVars set
 ## 12-04-2017 @ 11.18.15 - ("1.4.51")  - dscudiero - Added loading of user tools.cfg file
+## 03-20-2018 @ 17:36:55 - 1.4.135 - dscudiero - Comment out debug statements
