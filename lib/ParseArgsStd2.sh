@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.20" # -- dscudiero -- Wed 12/20/2017 @  9:33:17.71
+# version="3.0.21" # -- dscudiero -- Tue 03/20/2018 @  7:49:40.23
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -46,7 +46,8 @@ function ParseArgsStd2 {
 					argShortName="${tmpStr%%|*}"; argShortName=${argShortName,,[a-z]}; tmpStr=${tmpStr#*|};
 					argLongName="${tmpStr%%|*}"; argLongName=${argLongName,,[a-z]}; tmpStr=${tmpStr#*|};
 					tmpArg="${arg,,[a-z]}"
-					[[ $tmpArg =~ ^-${argShortName} || $tmpArg =~ ^--${argLongName}$ ]] && { found=true; break; }
+					[[ $tmpArg =~ ^-${argShortName} || $tmpArg =~ ^=${argShortName} || \
+						$tmpArg =~ ^--${argLongName}$ || $tmpArg =~ ^==${argLongName} ]] && { found=true; break; }
 				done
 				[[ $found == true ]] && dump 3 -t argShortName argLongName tmpArg tmpStr found || dump 3 -t found
 			## Parse the argument
@@ -126,3 +127,4 @@ export -f ParseArgsStd2
 ## 11-02-2017 @ 10.27.46 - ("3.0.6")   - dscudiero - Seperate local argdefs from common
 ## 11-02-2017 @ 15.22.27 - ("3.0.14")  - dscudiero - Added expandEnv command type for options to expand the entered value to a full env name
 ## 12-20-2017 @ 08.31.40 - ("3.0.19")  - dscudiero - Fix a problem when the default value in the database for an option arg is 'NULL'
+## 03-20-2018 @ 08:14:45 - 3.0.21 - dscudiero - Add '=' as a valid variable prefix symbol
