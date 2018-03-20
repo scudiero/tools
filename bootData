@@ -4,7 +4,7 @@ export TOOLSDEVPATH="/home/$LOGNAME/tools"
 warehouseDb="courseleafdatawarehouse"
 warehouseDbName="$warehouseDb"
 warehouseDbHost="mdb1-host.inside.leepfrog.com"
-runMySqlJavaPgmName='runMySql2'
+runMySqlJavaPgmName='runMySql'
 
 administrators="dscudiero"
 setSemaphoreList='buildSiteInfoTable,buildClientInfoTable'
@@ -14,6 +14,11 @@ loaderIncludes="$loaderIncludes TrapSigs RunSql2 SetFileExpansion GetDefaultsDat
 
 standardIncludes='ParseArgsStd ParseArgsStd2 Hello DbLog Init Goodbye Quit Help Help2 MkTmpFile'
 standardInteractiveIncludes="$standardIncludes Prompt VerifyContinue"
+
+unset classpath
+classpath+=("WorkWith.jar")
+classpath+=("runMySql2.jar")
+classpath+=("toolsUtils.jar")
 
 #===================================================================================================
 ## Check-in log
