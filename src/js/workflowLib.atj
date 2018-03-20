@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.78" // -- dscudiero -- Fri 03/16/2018 @ 10:27:07.17
+wfLibVersion="1.8.79" // -- dscudiero -- Tue 03/20/2018 @  8:01:16.20
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -943,7 +943,7 @@ GetRelated2 = function(type,data) {
 			case "col": //Looking to return college values
 				switch (ref.format.substr(0,3)) {
 					case "col":
-						if (proposalColsStr.indexOf(ref.data) >= 0) {
+						if (","+proposalColsStr+",".indexOf(","+ref.data+",") >= 0) {
 							wfDebug(myDebugLevel,myIndent +"\tskipping ref, code ("+ ref.data +") is in proposalColsStr ("+ proposalColsStr.toSource() +")");
 						} else {
 							retToken={}
@@ -966,7 +966,7 @@ GetRelated2 = function(type,data) {
 						resultSet=LookupCode2("deptCode","colCode",[ref.data],proposalDepts);
 						break;
 					case "dep":
-						if (proposalDeptsStr.indexOf(ref.data) >= 0) {
+						if (","+proposalDeptsStr+",".indexOf(","+ref.data+",") >= 0) {
 							wfDebug(myDebugLevel,myIndent +"\tskipping ref, code ("+ ref.data +") is in proposalDepts("+ proposalDepts.toSource() +")");
 						} else {
 							retToken={}
@@ -989,7 +989,7 @@ GetRelated2 = function(type,data) {
 						resultSet=LookupCode2("subjCode","deptCode",[ref.data],proposalSubjs);
 						break;
 					case "sub":
-						if (proposalSubjsStr.indexOf(ref.data) >= 0) {
+						if (","+proposalSubjsStr+",".indexOf(","+ref.data+",") >= 0) {
 							wfDebug(myDebugLevel,myIndent +"\tskipping ref, code ("+ ref.data +") is in proposalSubjs("+ proposalSubjs.toSource() +")");
 						} else {
 							retToken={}
@@ -2544,3 +2544,4 @@ var wfLibLoaded=true;
 // 02-05-2018 @ 09.47.00 - 1.8.66 - dscudiero - Tweaking messaging
 // 02-15-2018 @ 09.33.00 - 1.8.71 - dscudiero - Updated functions that write to 'doc' to not write if not in testworkflow step.
 // 03-16-2018 @ 10:28:05 - 1.8.78 - dscudiero - Change message prefix of the TODO messages to warning
+// 03-20-2018 @ 08:15:40 - 1.8.79 - dscudiero - Fix problem in GetRelated2 checking proposal data against related data, add ',' before and after strings to prevent false positives
