@@ -22,7 +22,8 @@
 	export TOOLSPATH="$TOOLSPATH"
 
 ## Load boot data
-	[[ -r $(dirname $0)/bootData ]] && source "$(dirname $0)/bootData" || source "$TOOLSPATH/bootData"
+	source "$TOOLSPATH/bootData"
+	[[ -r "$HOME/tools/bootData" ]] && source "$HOME/tools/bootData"
 
 ## Set global variables
 	export TOOLSWAREHOUSEDB="$warehouseDb"
