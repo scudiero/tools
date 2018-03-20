@@ -25,13 +25,7 @@ wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 	wfDebug(1,'\treqType = "'+reqType+'", notMode= "'+notMode+'", options= "'+ options + '"\n');
 
 	//Initial Checks
-	try {
-		InitialChecks(["wfrule","college","department"],args)
-		if (tcfdata.college_prog[0].code != "DN")
-	 		throw "*** Failed college_prog.code is not 'DN' check";
-	 	if (tcfdata.acad_level[0].code != "GR")
-	 		throw "*** Failed tcfdata.acad_level is not 'GR' check";
-	} //try
+	try { InitialChecks(["wfrule","college","department"],args) } //try
 	catch(err) { wfDebug(1,"\t" + myName + ": " + err + "\n") ; return false; }
 
 	// Main
@@ -59,7 +53,7 @@ wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 
 
 //======================================================================================================================
-// version:2.0.11 // -- dscudiero -- Mon 11/27/2017 @  8:38:11.22
+// version:2.0.12 // -- dscudiero -- Tue 03/20/2018 @ 11:14:47.47
 //======================================================================================================================
 // Check in log
 //======================================================================================================================
