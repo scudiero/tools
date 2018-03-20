@@ -1,32 +1,19 @@
 #===================================================================================================
-export TOOLSDEVPATH="/home/dscudiero/tools"
+export TOOLSDEVPATH="/home/$LOGNAME/tools"
 
 warehouseDb="courseleafdatawarehouse"
 warehouseDbName="$warehouseDb"
 warehouseDbHost="mdb1-host.inside.leepfrog.com"
 runMySqlJavaPgmName='runMySql2'
 
-#warehouseDb="warehouse"
-#warehouseDbName="warehouse"
-#warehouseDbHost=duro.inside.leepfrog.com
-#runMySqlJavaPgmName='runMySql'
-
 administrators="dscudiero"
 setSemaphoreList='buildSiteInfoTable,buildClientInfoTable'
-
-javaResources='org.apache.commons.cli.*,java.sql.*,java.util.logging.*,java.util.*,java.io.*,java.lang.Runtime'
-pythonResources='inspect,sys,traceback,os,argparse,xlrd,re,datetime,time,string,array'
 
 loaderIncludes='Here Dump Pause Msg2 Msg3 Semaphore FindExecutable PadChar CheckRun CheckAuth SignalHandeler'
 loaderIncludes="$loaderIncludes TrapSigs RunSql2 SetFileExpansion GetDefaultsData Colors"
 
 standardIncludes='ParseArgsStd ParseArgsStd2 Hello DbLog Init Goodbye Quit Help Help2 MkTmpFile'
 standardInteractiveIncludes="$standardIncludes Prompt VerifyContinue"
-
-classpath=(/jars/toolsUtils.jar)
-classpath+=(/jars/runMySql2.jar)
-classpath+=(/jars/tools.jar)
-classpath+=(/jars/commons-cli-1.4.jar)
 
 #===================================================================================================
 ## Check-in log
