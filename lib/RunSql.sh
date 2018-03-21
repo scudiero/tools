@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.1" # -- dscudiero -- Tue 03/20/2018 @ 17:32:08.22
+# version="1.0.2" # -- dscudiero -- Wed 03/21/2018 @  7:33:44.68
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -40,7 +40,7 @@ function RunSql {
 		SetFileExpansion 'off'
 		unset resultSet
 	 	if [[ $dbType == 'mysql' ]]; then
-	 		jar="$TOOLSPATH/tools/jars/$javaPgm.jar"
+	 		jar="$TOOLSPATH/jars/$javaPgm.jar"
 	 		[[ $useLocal == true && -f $HOME/tools/jars/$javaPgm.jar ]] && jar="$HOME/tools/jars/$javaPgm.jar"
 	 		readarray -t resultSet <<< "$(java -jar $jar $sqlStmt 2>&1)"
 	 	else
@@ -64,3 +64,4 @@ export -f RunSql RunSql2
 # Check-in Log
 #===================================================================================================
 ## 03-20-2018 @ 17:36:20 - 1.0.1 - dscudiero - Added defining RunSql2 function
+## 03-21-2018 @ 07:34:01 - 1.0.2 - dscudiero - Fix problem setting default jar path
