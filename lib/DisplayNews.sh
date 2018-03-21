@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.39" # -- dscudiero -- Mon 01/08/2018 @ 14:09:00.23
+# version="2.0.40" # -- dscudiero -- Wed 03/21/2018 @  8:17:35.85
 #===================================================================================================
 # Display News
 #===================================================================================================
@@ -8,6 +8,7 @@
 # All rights reserved
 #===================================================================================================
 function DisplayNews {
+	return 0
 	local lastViewedDate lastViewedEdate displayedHeader itemNum msgText
 	newsDisplayed=false
 	[[ $noNews == true ]] && return 0
@@ -66,3 +67,4 @@ export -f DisplayNews
 ## Wed Jan  4 13:53:15 CST 2017 - dscudiero - General syncing of dev to prod
 ## 09-29-2017 @ 16.09.23 - ("2.0.7")   - dscudiero - Add RunSql2 to includes
 ## 10-02-2017 @ 15.31.52 - ("2.0.9")   - dscudiero - General syncing of dev to prod
+## 03-21-2018 @ 08:17:53 - 2.0.40 - dscudiero - Turn off news temporarially
