@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.2" # -- dscudiero -- Wed 03/21/2018 @  7:33:44.68
+# version="1.0.3" # -- dscudiero -- Wed 03/21/2018 @ 15:37:55.76
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -51,7 +51,13 @@ function RunSql {
 
  	## Check for errors
 	 	if [[ ${#resultSet[@]} -gt 0 ]]; then
-	 		[[ ${resultSet[0]} =~ .*\*Error\**. ]] && Terminate "${resultSet[0]}\n^${resultSet[1]}\n^${resultSet[2]}"
+	 		if [[ ${resultSet[0]} =~ .*\*Error\**. || ${resultSet[0]} =~ .*Exception*. ]]; then
+	 			Error "Error encountered in '$FUNCNAME' processing '${dbType^^[a-z]}' call, messages follow"
+				for ((i=0; i<${#resultSet[@]}; i++)); do
+					Msg3 "^${resultSet[$i]}"
+				done
+	 			Terminate "Error encountered in '$FUNCNAME' processing '${dbType^^[a-z]}' call"
+	 		fi
 	 	fi
 
 	return 0
@@ -65,3 +71,4 @@ export -f RunSql RunSql2
 #===================================================================================================
 ## 03-20-2018 @ 17:36:20 - 1.0.1 - dscudiero - Added defining RunSql2 function
 ## 03-21-2018 @ 07:34:01 - 1.0.2 - dscudiero - Fix problem setting default jar path
+## 03-21-2018 @ 15:38:26 - 1.0.3 - dscudiero - Add more robust error checking
