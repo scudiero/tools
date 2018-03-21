@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.136" # -- dscudiero -- Wed 03/21/2018 @ 11:30:26.92
+version="1.4.138" # -- dscudiero -- Wed 03/21/2018 @ 11:38:21.77
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -500,3 +500,4 @@ sTime=$(date "+%s")
 ## 12-04-2017 @ 11.18.15 - ("1.4.51")  - dscudiero - Added loading of user tools.cfg file
 ## 03-20-2018 @ 17:36:55 - 1.4.135 - dscudiero - Comment out debug statements
 ## 03-21-2018 @ 11:31:50 - 1.4.136 - dscudiero - Add our own java to the path
+## 03-21-2018 @ 11:38:57 - 1.4.138 - dscudiero - Cosmetic/minor change/Sync
