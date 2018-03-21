@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.135" # -- dscudiero -- Tue 03/20/2018 @ 17:34:58.11
+version="1.4.136" # -- dscudiero -- Wed 03/21/2018 @ 11:30:26.92
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -155,6 +155,10 @@ sTime=$(date "+%s")
 #==================================================================================================
 # MAIN
 #==================================================================================================
+## Add our Java to the front of the user's path
+	savePath="$PATH"
+	export PATH="$TOOLSPATH/java/bin:$PATH"
+
 ## Set the CLASSPATH 
 	sTime=$(date "+%s")
 	saveClasspath="$CLASSPATH"
@@ -495,3 +499,4 @@ sTime=$(date "+%s")
 ## 12-01-2017 @ 09.09.59 - ("1.4.42")  - dscudiero - Remove autoRemote from the trueVars set
 ## 12-04-2017 @ 11.18.15 - ("1.4.51")  - dscudiero - Added loading of user tools.cfg file
 ## 03-20-2018 @ 17:36:55 - 1.4.135 - dscudiero - Comment out debug statements
+## 03-21-2018 @ 11:31:50 - 1.4.136 - dscudiero - Add our own java to the path
