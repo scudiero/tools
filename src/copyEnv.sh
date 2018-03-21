@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.33 # -- dscudiero -- Tue 03/13/2018 @  9:49:22.94
+version=4.13.35 # -- dscudiero -- Wed 03/21/2018 @ 16:32:48.60
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -521,9 +521,20 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 	Info "Remember you can use the 'cleanDev' script to easily remove private dev sites."
 else
 	echo
-	Warning "Target of copy is '$tgtEnv', you should manually check the publising settings in $progDir.cfg"
+	Warning "Target of copy is '$tgtEnv', you should manually check the publishing settings in $progDir.cfg"
 	echo
 fi
+
+## If are copying dev or pvt to test or next or curr then make sure the leepfrog user account has been removed
+	if [[ $srcEnv == 'pvt' || $srcEnv == 'dev' ]] && [[ $tgtEnv == 'next' || $tgtEnv == 'test' || $tgtEnv == 'curr' ]]; then
+		editFile="$tgtDir/courseleaf.cfg"
+		unset grepStr; grepStr=$(ProtectedCall "grep '^user:leepfrog|0scys,btdeL||admin$' $editFile")
+		if [[ -n $grepStr ]]; then
+			fromStr="^user:leepfrog|0scys,btdeL||admin$"
+			toStr="//user:leepfrog|0scys,btdeL||admin"
+			$DOIT sed -i "s_${fromStr}_${toStr}_g" $editFile
+		fi		
+	fi
 
 ## If we have cims and user is 'dscudiero' and env = 'pvt' and onlyProduct='cim' then turn on debugging
 	if [[  -n $cimStr && $userName == 'dscudiero' && $tgtEnv == 'pvt' && $skipCat == true && $skipClss == true ]]; then
@@ -682,3 +693,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 01-26-2018 @ 10.43.36 - 4.13.31 - dscudiero - Cosmetic/minor change/Sync
 ## 03-13-2018 @ 07:20:18 - 4.13.32 - dscudiero - Tweak messaging
 ## 03-13-2018 @ 09:51:05 - 4.13.33 - dscudiero - Cosmetic/minor change/Sync
+## 03-21-2018 @ 16:33:25 - 4.13.35 - dscudiero - If copying to test, next, or curr then make sure the leepfrog account is comment out
