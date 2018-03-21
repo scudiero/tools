@@ -1,10 +1,11 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.3 # -- dscudiero -- 12/14/2016 @ 11:27:19.39
+version=1.0.4 # -- dscudiero -- Wed 03/21/2018 @ 16:48:34.99
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
-Import "$imports"
+myIncludes="Msg ProtectedCall StringFunctions RunSql"
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
 scriptDescription="Load CIM courses"
 
@@ -17,31 +18,22 @@ scriptDescription="Load CIM courses"
 #==================================================================================================
 # local functions
 #==================================================================================================
-	#==============================================================================================
-	# parse script specific arguments
-	#==============================================================================================
-	function parseArgs-loadCimCourses {
-		:
-	}
-	function Goodbye-loadCimCourses  {
-		:
-	}
 
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
 helpSet='script,client,env'
 GetDefaultsData $myName
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 Hello
 Init 'getClient getEnv getDirs checkEnvs'
 VerifyContinue "You are asking to import course for:\n\tclient: $client\n\tEnv: $env"
-Msg2
+Msg
 
 #==================================================================================================
 ## Main
 #==================================================================================================
-Msg2 "Importing courses into CIM ...\n"
+Msg "Importing courses into CIM ...\n"
 cd $srcDir/clienttransfers/cimcourses/
 if find $srcDir/clienttransfers/cimcourses/ -maxdepth 0 -empty | read
 then
@@ -49,7 +41,7 @@ then
 else
 	cd $srcDir/web/courseleaf
 	$DOIT ./courseleaf.cgi courseimportcim /courseadmin/index.html >> $tmpFile  >&1
-	Msg2 "Step output can be found in $tmpFile"
+	Msg "Step output can be found in $tmpFile"
 fi
 
 ################################################################################
