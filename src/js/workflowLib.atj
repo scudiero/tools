@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.79" // -- dscudiero -- Tue 03/20/2018 @  8:01:16.20
+wfLibVersion="1.8.80" // -- dscudiero -- Wed 03/21/2018 @ 10:34:04.91
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -787,6 +787,7 @@ GetRelated2 = function(type,data) {
 		var data=eval("dataObj." + dataAttributeName);
 
 		switch(format.toLowerCase()) {
+			case "course":
 		    case "coursecode":
 		        if (typeof wffuncs.subjFromCode == "function") {
 					ref.data=wffuncs.subjFromCode(data);
@@ -796,14 +797,19 @@ GetRelated2 = function(type,data) {
 				ref.data=ref.data.trim();
 				ref.format="subj";
 		        break;
-		    case "subjcode":
+		    case "subject" :
+		    case "subjectcode" :
+		    case "subjcode" :
 				ref.data=data;
 				ref.format="subj";
 		        break;
+		    case "department":
 		    case "deptcode":
 				ref.data=data;
 				ref.format="dept";
 		        break;
+		    case "college":
+		    case "collegeCode":
 		    case "colcode":
 				ref.data=data;
 				ref.format="col";
@@ -2545,3 +2551,4 @@ var wfLibLoaded=true;
 // 02-15-2018 @ 09.33.00 - 1.8.71 - dscudiero - Updated functions that write to 'doc' to not write if not in testworkflow step.
 // 03-16-2018 @ 10:28:05 - 1.8.78 - dscudiero - Change message prefix of the TODO messages to warning
 // 03-20-2018 @ 08:15:40 - 1.8.79 - dscudiero - Fix problem in GetRelated2 checking proposal data against related data, add ',' before and after strings to prevent false positives
+// 03-21-2018 @ 10:35:24 - 1.8.80 - dscudiero - Add additional case statements for the refType check in GetRelated2
