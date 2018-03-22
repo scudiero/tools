@@ -1,10 +1,10 @@
 #!/bin/bash
 #==================================================================================================
-version=2.4.66 # -- dscudiero -- Mon 12/11/2017 @  6:44:37.00
+version=2.4.67 # -- dscudiero -- Thu 03/22/2018 @ 12:28:48.04
 #==================================================================================================
 TrapSigs 'on'
 
-myIncludes="RunSql2 ProtectedCall StringFunctions"
+myIncludes="ProtectedCall StringFunctions"
 Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -41,7 +41,7 @@ dump -2 deleteLimitDays
 	if [[ $userId == '' ]]; then
 		Verbose 1 "Pulling employee userid data from $contactsSqliteFile...\n"
 		sqlStmt="SELECT db_email FROM employees WHERE db_isactive=\"Y\""
-		RunSql2 "$contactsSqliteFile" "$sqlStmt"
+		RunSql "$contactsSqliteFile" "$sqlStmt"
 	else
 		unset resultSet
 		Verbose 1 "Note: Using userid passed in: $userId\n"
@@ -60,9 +60,9 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 			if [[ -f $tmpFile ]]; then rm $tmpFile; fi
 			foundFiles=true
 			echo; echo > "$tmpFile"
-			Msg3 | tee -a $tmpFile
-			Msg3 "^The following private dev sites where found for userid: '$userId' on host: '$hostName'" | tee -a $tmpFile
-			Msg3 | tee -a $tmpFile
+			Msg | tee -a $tmpFile
+			Msg "^The following private dev sites where found for userid: '$userId' on host: '$hostName'" | tee -a $tmpFile
+			Msg | tee -a $tmpFile
 			for dir in "${dirsFound[@]}"; do
 				## Get the newest last modified date for the site
 				pushd "${dir%%:*}" >& /dev/null
@@ -81,20 +81,20 @@ if [[ ${#resultSet[@]} -ne 0 ]]; then
 				# 		[[ $userName = 'dscudiero' ]] && saveWorkflow $client -p -all -suffix "beforeDelete-$fileSuffix" -nop -quiet
 				# 		mv $dir $dir.DELETE
 				# 		$DOIT rm -rf $dir.DELETE &
-				# 		Msg3 "^$dir - Was marked for deleteion and is over the threshold ($accDaysOld > $deleteLimitDays), it was deleted" | tee -a $tmpFile
+				# 		Msg "^$dir - Was marked for deleteion and is over the threshold ($accDaysOld > $deleteLimitDays), it was deleted" | tee -a $tmpFile
 				# 	fi
 				# else
-					Msg3 "^^$(basename $dir) - Last modified $modDaysOld day(s) ago and last accessed $accDaysOld day(s) ago" | tee -a $tmpFile
+					Msg "^^$(basename $dir) - Last modified $modDaysOld day(s) ago and last accessed $accDaysOld day(s) ago" | tee -a $tmpFile
 				# f
 				popd >& /dev/null
 			done
 
-			Msg3 "\nRemember, you can use the 'cleanDev' script to easily remove any sites that are no longer needed." >> $tmpFile
-			Msg3 "^See https://internal.leepfrog.com/support/tools/ for additional informaton." >> $tmpFile
+			Msg "\nRemember, you can use the 'cleanDev' script to easily remove any sites that are no longer needed." >> $tmpFile
+			Msg "^See https://internal.leepfrog.com/support/tools/ for additional informaton." >> $tmpFile
 			Verbose 2 "$(dump foundFiles noEmails)"
 			if [[ $foundFiles == true && $noEmails != true ]]; then
 				Verbose "Emails sent to: $resultRec"
-				Msg3 "\n*** Please do not respond to this email, it was sent by an automated process\n" >> $tmpFile
+				Msg "\n*** Please do not respond to this email, it was sent by an automated process\n" >> $tmpFile
 				$DOIT mutt -a "$tmpFile" -s "$hostName -- Private Dev Sites - $(date +"%m-%d-%Y")" -- $emailAddr < $tmpFile
 			fi
 		fi
@@ -136,8 +136,9 @@ Goodbye 0
 ## 08-28-2017 @ 07.25.34 - (2.4.56)    - dscudiero - misc cleanup
 ## 09-05-2017 @ 08.56.58 - (2.4.57)    - dscudiero - g
 ## 09-05-2017 @ 16.22.22 - (2.4.58)    - dscudiero - Make sure there is a tmpFile
-## 10-23-2017 @ 08.10.36 - (2.4.61)    - dscudiero - Switch to Msg3
+## 10-23-2017 @ 08.10.36 - (2.4.61)    - dscudiero - Switch to Msg
 ## 10-23-2017 @ 11.57.55 - (2.4.64)    - dscudiero - Reformatted messaging
 ## 11-01-2017 @ 15.59.57 - (2.4.65)    - dscudiero - Switch to use ParseArgsStd2
 ## 11-13-2017 @ 07.36.26 - (2.4.65)    - dscudiero - Add the hostname to the email subject
 ## 12-11-2017 @ 06.45.08 - (2.4.66)    - dscudiero - Add hostname to the messaging
+## 03-22-2018 @ 12:35:32 - 2.4.67 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
