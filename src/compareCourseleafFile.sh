@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.0 # -- dscudiero -- Tue 04/25/2017 @  8:39:37.82
+version=1.0.2 # -- dscudiero -- Thu 03/22/2018 @ 12:30:33.95
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -19,13 +19,6 @@ scriptDescription="Compare workflow files"
 #==================================================================================================
 # local functions
 #==================================================================================================
-	#==================================================================================================
-	# parse script specific arguments
-	#==================================================================================================
-	function parseArgs-compareCourseleafFile {
-		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
-		argList+=(-file,4,option,file,,,"The name of the file to compare relative to siteDir")
-	}
 
 
 #==================================================================================================
@@ -39,7 +32,7 @@ GetDefaultsData
 #==================================================================================================
 helpSet='script,client,env'
 GetDefaultsData $myName
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 
 Hello
 Init "getClient getSrcEnv getTgtEnv getDirs checkEnvs noWarn"
@@ -68,7 +61,7 @@ myData="Client: '$client', file: '$file', tgtEnv: '$tgtEnv'"
 #==================================================================================================
 srcMd5=$(md5sum $srcFile | cut -f1 -d" ")
 tgtMd5=$(md5sum $tgtFile | cut -f1 -d" ")
-[[ $srcMd5 != $tgtMd5 ]] && Warning 0 1 "'${file}', files are different" || Msg2 "^^'${file}', files match"
+[[ $srcMd5 != $tgtMd5 ]] && Warning 0 1 "'${file}', files are different" || Msg "^^'${file}', files match"
 
 #==================================================================================================
 ## Done
@@ -78,3 +71,4 @@ Goodbye 0 #'alert'
 #==================================================================================================
 ## Check-in log
 ## 04-25-2017 @ 08.39.56 - (1.0.0)     - dscudiero - Update comments
+## 03-22-2018 @ 12:35:55 - 1.0.2 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
