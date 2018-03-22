@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.40" # -- dscudiero -- Wed 03/21/2018 @  8:17:35.85
+# version="2.0.41" # -- dscudiero -- Thu 03/22/2018 @ 13:33:20.47
 #===================================================================================================
 # Display News
 #===================================================================================================
@@ -12,7 +12,7 @@ function DisplayNews {
 	local lastViewedDate lastViewedEdate displayedHeader itemNum msgText
 	newsDisplayed=false
 	[[ $noNews == true ]] && return 0
-	Import 'RunSql2'
+	Import 'RunSql'
 
 	## Loop through news types
 		for newsType in tools $(tr -d '-' <<< $myName); do
@@ -21,7 +21,7 @@ function DisplayNews {
 			eval "${newsType}LastRunEDate=0"
 			## Get users last accessed time date
 				sqlStmt="select date,edate from $newsInfoTable where userName=\"$userName\" and object=\"$newsType\""
-				RunSql2 $sqlStmt
+				RunSql $sqlStmt
 				#[[ ${#resultSet[@]} -gt 0 ]] && lastViewedDate=$(echo "${resultSet[0]}" | cut -d'|' -f1) && lastViewedEDate=$(echo "${resultSet[0]}" | cut -d'|' -f2)
 				if [[ ${#resultSet[@]} -gt 0 ]]; then
 					result="${resultSet[0]}"
@@ -32,7 +32,7 @@ function DisplayNews {
 				fi
 			## Read news items from the database
 				sqlStmt="select item,date from $newsTable where edate >= \"$lastViewedEdate\" and object=\"$newsType\""
-				RunSql2 $sqlStmt
+				RunSql $sqlStmt
 				itemNum=0
 				for result in "${resultSet[@]}"; do
 					if [[ $displayedHeader == false ]]; then
@@ -53,7 +53,7 @@ function DisplayNews {
 				else
 					sqlStmt="update $newsInfoTable set date=NOW(),edate=\"$(date +%s)\" where userName=\"$userName\" and object=\"$newsType\""
 				fi
-				RunSql2 $sqlStmt
+				RunSql $sqlStmt
 		done
 			[[ $newsDisplayed == true ]] && Msg3
 	return 0
@@ -65,6 +65,7 @@ export -f DisplayNews
 #===================================================================================================
 
 ## Wed Jan  4 13:53:15 CST 2017 - dscudiero - General syncing of dev to prod
-## 09-29-2017 @ 16.09.23 - ("2.0.7")   - dscudiero - Add RunSql2 to includes
+## 09-29-2017 @ 16.09.23 - ("2.0.7")   - dscudiero - Add RunSql to includes
 ## 10-02-2017 @ 15.31.52 - ("2.0.9")   - dscudiero - General syncing of dev to prod
 ## 03-21-2018 @ 08:17:53 - 2.0.40 - dscudiero - Turn off news temporarially
+## 03-22-2018 @ 13:42:03 - 2.0.41 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
