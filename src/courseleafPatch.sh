@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.47 # -- dscudiero -- Thu 03/22/2018 @ 13:21:28.53
+version=5.5.48 # -- dscudiero -- Thu 03/22/2018 @ 13:45:30.54
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel2 EditTcfValue BackupCourseleafFile'
@@ -668,7 +668,7 @@ removeGitReposFromNext=true
 
 	if [[ $env == 'next' || $env == 'pvt' ]]; then
 		sqlStmt="Select hosting from $clientInfoTable where name=\"$client\""
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		hosting=${resultSet[0]}
 		if [[ $(Lower "$hosting") == 'client' ]]; then
 			removeGitReposFromNext=false
@@ -723,7 +723,7 @@ removeGitReposFromNext=true
 	unset purchasedProducts
 	if [[ $noCheck != true ]]; then
 		sqlStmt="select products from $clientInfoTable where name=\"$client\""
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		[[ ${#resultSet[@]} -gt 0 ]] && purchasedProducts="$Lower "${resultSet[0]}")"
 	fi
 
@@ -1823,4 +1823,5 @@ Goodbye 0 "$text1" "$text2"
 ## 12-20-2017 @ 14.45.55 - 5.5.22 - dscudiero - Fix problem where ((indentLevel++)) breaks if starting value is 0
 ## 01-24-2018 @ 10.58.48 - 5.5.44 - dscudiero - Cosmetic/minor change/Sync
 ## 01-24-2018 @ 13.33.01 - 5.5.45 - dscudiero - Move the backup site to be at the same level as the target directory.
-## 03-22-2018 @ 13:25:41 - 5.5.47 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-22-2018 @ 13:25:41 - 5.5.47 - dscudiero - Updated for Msg3/Msg, RunSql/RunSql, ParseArgStd/ParseArgStd2
+## 03-22-2018 @ 14:06:23 - 5.5.48 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
