@@ -1,6 +1,6 @@
-RunSql2 #!/bin/bash
+RunSql #!/bin/bash
 #==================================================================================================
-version=1.1.21 # -- dscudiero -- Thu 05/25/2017 @ 16:55:12.96
+version=1.1.23 # -- dscudiero -- Thu 03/22/2018 @ 13:00:18.87
 #==================================================================================================
 originalArgStr="$*"
 scriptDescription=""
@@ -12,18 +12,11 @@ scriptDescription=""
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function parseArgs-client2DaySummary  { # or parseArgs-local
-	#argList+=(-ignoreXmlFiles,7,switch,ignoreXmlFiles,,script,'Ignore extra xml files')
-	argList+=(-reportName,6,option,reportName,,script,'The origional report name')
-	argList+=(-emailAddrs,5,option,emailAddrs,,script,'Email addresses to send reports to when running in batch mode')
-	argList+=(-role,4,option,role,,script,'The role to run the report on, values in {support,salesRep,csmRep}')
-}
-function Goodbye-client2DaySummary  { # or Goodbye-local
-	SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
-	return 0
-}
-function testMode-client2DaySummary  { # or testMode-local
-	return 0
+function client2DaySummary-ParseArgsStd2  { # or parseArgs-local
+	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+	myArgs+=('email|emailAddrs|option|emailAddrs||script|Email addresses to send reports to when running in batch mode')
+	myArgs+=('report|reportName|option|emailAdreportNamedrs||script|The origional report name')
+	myArgs+=('role|role|option|role||script|The role to run the report on, values in {support,salesRep,csmRep}')
 }
 
 #==================================================================================================
@@ -46,7 +39,7 @@ roleMap['implementation']='csmRep'
 # Standard arg parsing and initialization
 #==================================================================================================
 unset client
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 [[ $reportName != '' ]] && GetDefaultsData "$reportName" "$reportsTable"
 
 [[ $client != '' ]] && orgUnit="$(TitleCase "$client")" || orgUnit='Support'
@@ -68,7 +61,7 @@ clientsDir="/mnt/internal/site/stage/web/clients"
 	unset keysArray
 	[[ $ignoreList != '' ]] && ignoreList="and name not in (\"$(sed s'/,/","/g' <<< $ignoreList)\")"
 	sqlStmt="select name,products,productsinsupport,$role from $clientInfoTable where recordStatus=\"A\" $ignoreList order by $role,name"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	for result in "${resultSet[@]}"; do
 		clientCode=$(cut -d'|' -f1 <<< $result)
 		products=$(cut -d'|' -f2 <<< $result)
@@ -114,26 +107,26 @@ clientsDir="/mnt/internal/site/stage/web/clients"
 ##  Generate output
 	dump -2 genReport
 	if [[ $genReport == true ]]; then
-		Msg2
-		Msg2 "Report: $myName"
-		Msg2 "Date: $(date)"
-		[[ $shortDescription != '' ]] && Msg2 "$shortDescription"
-		Msg2
-		Msg2 "The following client pages have not had their '$searchString' paragraphs modified from the default"
-		Msg2 "Client list based on the $warehouseDb/$clientInfoTable as of $(date)"
+		Msg
+		Msg "Report: $myName"
+		Msg "Date: $(date)"
+		[[ $shortDescription != '' ]] && Msg "$shortDescription"
+		Msg
+		Msg "The following client pages have not had their '$searchString' paragraphs modified from the default"
+		Msg "Client list based on the $warehouseDb/$clientInfoTable as of $(date)"
 
 		for key in "${keysArray[@]}"; do
 			data=${dataMap["$key"]}
 			contactInfo="$(cut -d'|' -f1 <<< "$data")"
 			data="$(cut -d'|' -f2 <<< "$data")"
-			Msg2
-			Msg2 "$key:"
+			Msg
+			Msg "$key:"
 			found=0
 			for token in $(tr ',' ' ' <<< "$data"); do
-				Msg2 "^$token"
+				Msg "^$token"
 				ProtectedCall "((found++))"
 			done
-			Msg2 "^Found $found clients"
+			Msg "^Found $found clients"
 		done
 	fi
 
@@ -149,3 +142,4 @@ Goodbye 0 #'alert'
 ## 04-17-2017 @ 07.42.20 - (1.1.12)    - dscudiero - remove import of dumpmap
 ## 05-08-2017 @ 09.13.11 - (1.1.18)    - dscudiero - filter out sites that do not have products or productsInSupport
 ## 05-26-2017 @ 06.39.23 - (1.1.21)    - dscudiero - General syncing of dev to prod
+## 03-22-2018 @ 13:02:49 - 1.1.23 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
