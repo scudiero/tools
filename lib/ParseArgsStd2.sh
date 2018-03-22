@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.21" # -- dscudiero -- Tue 03/20/2018 @  7:49:40.23
+# version="3.0.22" # -- dscudiero -- Thu 03/22/2018 @ 13:36:32.14
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -12,7 +12,7 @@ function ParseArgsStd2 {
 	# [[ -n $* ]] && ParseArgsStd2 $* || ParseArgsStd2 fred -p -nop -prod aaaa,bbbb -src t -tgt p -sally harry -cimp -file xxxxx -cimc
 	# dump -n -n client envs testMode srcEnv tgtEnv cimStr products file noPrompt noClear unknowArgs
 
-	Import "RunSql2 StringFunctions Msg3"
+	Import "RunSql StringFunctions Msg3"
 	local argDefCntr arg argType found tmpStr tmpEnv tmpArg argShortName argLongName scriptVar scriptCmd
 
 	## Make sure we have the argdefs data loaded
@@ -20,7 +20,7 @@ function ParseArgsStd2 {
 			[[ $verboseLevel -ge 3 ]] && echo -e "\t$FUNCNAME: Loading argDefs array";
 			local fields="shortName,longName,type,scriptvariable,scriptcommand,helpgroup,helptext"
 			sqlStmt="select $fields from argdefs where status=\"active\" order by seqorder ASC"
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 			for ((argDefCntr=0; argDefCntr<${#resultSet[@]}; argDefCntr++)); do
 				argDefs+=("${resultSet[$argDefCntr]}")
 			done
@@ -128,3 +128,4 @@ export -f ParseArgsStd2
 ## 11-02-2017 @ 15.22.27 - ("3.0.14")  - dscudiero - Added expandEnv command type for options to expand the entered value to a full env name
 ## 12-20-2017 @ 08.31.40 - ("3.0.19")  - dscudiero - Fix a problem when the default value in the database for an option arg is 'NULL'
 ## 03-20-2018 @ 08:14:45 - 3.0.21 - dscudiero - Add '=' as a valid variable prefix symbol
+## 03-22-2018 @ 13:42:32 - 3.0.22 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
