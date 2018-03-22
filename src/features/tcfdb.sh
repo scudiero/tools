@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.2.35 # -- dscudiero -- Thu 11/30/2017 @ 13:20:17.50
+version=1.2.36 # -- dscudiero -- Thu 03/22/2018 @ 14:21:06.28
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
@@ -295,6 +295,7 @@ return  ## We are called as a subprocess, just return to our parent
 ## Tue Mar 14 12:18:47 CDT 2017 - dscudiero - Tweak messaging
 ## 07-19-2017 @ 14.37.40 - (1.2.19)    - dscudiero - Update how the cgi files are sourced
 ## 09-22-2017 @ 07.50.23 - (1.2.32)    - dscudiero - Add to imports
-## 11-02-2017 @ 11.48.48 - (1.2.33)    - dscudiero - Switch Msg2 to Msg3
+## 11-02-2017 @ 11.48.48 - (1.2.33)    - dscudiero - Switch Msg to Msg3
 ## 11-02-2017 @ 12.06.35 - (1.2.34)    - dscudiero - Added InsertLineInFile
 ## 11-30-2017 @ 13.26.39 - (1.2.35)    - dscudiero - Switch to use the -all flag on the GetCims call
+## 03-22-2018 @ 14:36:17 - 1.2.36 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
