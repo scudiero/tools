@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.10.4 # -- dscudiero -- 01/12/2017 @ 13:15:44.86
+version=1.10.5 # -- dscudiero -- Thu 03/22/2018 @ 13:49:54.46
 #==================================================================================================
 originalArgStr="$*"
 scriptDescription="Set aliases to goto courseleaf sites"
@@ -27,7 +27,7 @@ scriptDescription="Set aliases to goto courseleaf sites"
 	[[ -d $TOOLSPATH/bin ]] && toolsDir="$TOOLSPATH/bin"
 
 	sqlStmt="select distinct name from $siteInfoTable "
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	if [[ ${#resultSet[@]} = 0 ]]; then 
 		printf "setSiteAliases: *Error* -- No records returned from query: \n\t'$sqlStmt'\nNo aliases set\n"; 
 	else
@@ -42,3 +42,4 @@ scriptDescription="Set aliases to goto courseleaf sites"
 	cd $HOME
 	return 0
 ## Wed Apr 27 15:51:58 CDT 2016 - dscudiero - Switch to use RunSql
+## 03-22-2018 @ 14:07:45 - 1.10.5 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
