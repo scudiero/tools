@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.6.66 # -- dscudiero -- Wed 03/21/2018 @  9:42:32.28
+version=2.6.67 # -- dscudiero -- Thu 03/22/2018 @ 13:22:01.59
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetCourseleafPgm PrintBanner"
@@ -38,7 +38,7 @@ Init 'getClient getEnv getDirs checkEnvs noPreview noPublic'
 #===================================================================================================
 courseLeafDir=$(GetCourseleafPgm "$siteDir" | cut -d' ' -f2)
 debugFile="$courseLeafDir/wizdebug.out"
-[[ ! -f "$debugFile" ]] && Msg2 && TerminateMsg "Could not locate wizdebug.out file:\n\t$debugFile"
+[[ ! -f "$debugFile" ]] && Msg && Terminate "Could not locate wizdebug.out file:\n\t$debugFile"
 
 [[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
 echo -e "$colorKey"
@@ -67,3 +67,4 @@ Goodbye 0
 ## 09-11-2017 @ 15.52.47 - (2.6.62)    - dscudiero - x
 ## 10-04-2017 @ 13.49.10 - (2.6.65)    - dscudiero - Tweak startup messaging
 ## 03-22-2018 @ 12:36:35 - 2.6.66 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-22-2018 @ 13:25:51 - 2.6.67 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
