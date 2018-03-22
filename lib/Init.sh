@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.67 # -- dscudiero -- Wed 03/07/2018 @  9:28:40.33
+# version=2.1.68 # -- dscudiero -- Thu 03/22/2018 @ 13:34:02.62
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -15,7 +15,7 @@
 # All rights reserved
 #===================================================================================================
 function Init {
-	myIncludes="Msg3 RunSql2 SetSiteDirs GetCims PushPop SetFileExpansion Prompt"
+	myIncludes="Msg3 RunSql SetSiteDirs GetCims PushPop SetFileExpansion Prompt"
 	Import "$standardInteractiveIncludes $myIncludes"
 
 	function MyContains { local string="$1"; local subStr="$2"; [[ "${string#*$subStr}" != "$string" ]] && echo true || echo false; return 0; }
@@ -121,7 +121,7 @@ function Init {
 				if [[ $noPublic == true ]]; then if [[ $noPreview == true ]]; then notIn="$notIn,'public'"; else notIn="$notIn'public'"; fi; fi
 				if [[ $noPreview == true || $noPublic == true ]]; then notIn="$notIn)"; fi
 				sqlStmt="select distinct env from $siteInfoTable where (name=\"$client\" or name=\"$client-test\") $notIn order by env"
-				RunSql2 $sqlStmt
+				RunSql $sqlStmt
 				if [[ ${#resultSet[@]} -eq 0 ]]; then
 					for checkEnv in pvt dev test next curr; do
 						[[ $(SetSiteDirs 'check' $checkEnv) == true ]] && clientEnvs="$clientEnvs $checkEnv"
@@ -213,7 +213,7 @@ function Init {
 				Warning "You are asking to update/overlay the $(ColorW $(Upper $checkProdEnv)) environment."
 				unset productsinsupport
 		 		sqlStmt="Select productsinsupport from $clientInfoTable where name=\"$client\""
-		 		RunSql2 $sqlStmt
+		 		RunSql $sqlStmt
 				[[ ${resultSet[0]} != 'NULL' ]] && productsinsupport="${resultSet[0]}"
 				## If client has products in support and the user is not in the support group then quit
 				[[ -n $UsersAuthGroups && -n $productsinsupport && $(Contains ",$UsersAuthGroups," ',support,') != true ]] && \
@@ -237,7 +237,7 @@ function Init {
 			## Get the products for this client
 			if [[ $noCheck != true ]]; then
 				sqlStmt="select products from $clientInfoTable where (name=\"$client\")"
-				RunSql2 $sqlStmt
+				RunSql $sqlStmt
 				if [[ ${#resultSet[@]} -gt 0 ]]; then
 					## Remove the extra vanity products from the validProducts list
 					for prod in $(tr ',' ' ' <<< ${resultSet[0]}); do
@@ -401,3 +401,4 @@ export -f Init
 ## 12-20-2017 @ 09.19.45 - (2.1.61)    - dscudiero - Added 'getJalot' as an action request
 ## 12-20-2017 @ 09.33.39 - (2.1.62)    - dscudiero - Force getJalot if updating next or curr
 ## 12-20-2017 @ 09.41.19 - (2.1.63)    - dscudiero - Cosmetic/minor change
+## 03-22-2018 @ 13:42:22 - 2.1.68 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
