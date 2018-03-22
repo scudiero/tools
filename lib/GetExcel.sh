@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.0.69" # -- dscudiero -- Wed 09/20/2017 @ 12:09:37.41
+# version="2.0.70" # -- dscudiero -- Thu 03/22/2018 @ 13:11:46.42
 #=======================================================================================================================
 # Retrieve data from a Excel xlsx spreadsheet
 # Usage: GetExcel <workBook> <workSheet>
@@ -11,7 +11,7 @@
 # All rights reserved
 #=======================================================================================================================
 function GetExcel {
-	includes='StringFunctions Msg2 Goodbye Call ProtectedCall'
+	includes='StringFunctions Msg Goodbye Call ProtectedCall'
 	Import "$includes"
 	local workBook="$1"; shift
 	local workSheet="$1"; shift
@@ -31,11 +31,11 @@ function GetExcel {
 	local grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
 	[[ $grepStr == '' ]] && grepStr=$(ProtectedCall "grep '*Error*' $tmpFile")
 	if [[ $grepStr != '' || $(tail -n 1 $tmpFile) == '-1' ]]; then
-		Msg2 $E "Could not retrieve data from workbook, please see below"
+		Error "Could not retrieve data from workbook, please see below"
 		tail -n 10 $tmpFile > $tmpFile.2
 		while read -r line; do echo -e "\t$line"; done < $tmpFile.2;
 		GetExcelCleanup
-		Msg2
+		Msg
 		Goodbye -1
 	fi
 	cat $tmpFile
@@ -57,3 +57,4 @@ function GetExcel {
 ## 05-18-2017 @ 12.13.01 - ("2.0.66")  - dscudiero - General syncing of dev to prod
 ## 05-18-2017 @ 12.35.13 - ("2.0.67")  - dscudiero - Remove the -vv from the call to getXlsx.py
 ## 09-20-2017 @ 12.09.52 - ("2.0.69")  - dscudiero - Add protectedcall to includes list
+## 03-22-2018 @ 13:16:36 - 2.0.70 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
