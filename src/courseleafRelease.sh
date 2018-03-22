@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.14 # -- dscudiero -- Tue 11/14/2017 @  8:02:27.88
+version=1.0.15 # -- dscudiero -- Wed 03/21/2018 @  9:48:44.83
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall SelectMenuNew"
@@ -16,17 +16,11 @@ scriptDescription=""
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function parseArgs-courseleafRelease  { # or parseArgs-local
-	#argList+=(-optionArg,1,option,scriptVar,,script,'Help text')
-	#argList+=(-flagArg,2,switch,scriptVar,,script,'Help text')
-	argList+=(-file,4,option,file,,script,'The file name relative to the root site directory')
-	return 0
+function courseleafRelease-Goodbye  { # or Goodbye-local
+	SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
+	return 
 }
-function Goodbye-courseleafRelease  { # or Goodbye-local
-	rm -rf $tmpRoot > /dev/null 2>&1
-	return 0
-}
-function testMode-courseleafRelease  { # or testMode-local
+function courseleafRelease-testMode  { # or testMode-local
 	client='tamu'
 	env='pvt'
 	cimStr='courseadmin'
@@ -59,7 +53,7 @@ for var in $falseVars; do eval $var=false; done
 helpSet='script'
 scriptHelpDesc="This script is used to release a new curseleaf product (CAT, CIM, CLSS) git repository for use by courseleafPatch"
 GetDefaultsData $myName
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 Hello
 
 # Get the list of available releases to release
@@ -120,3 +114,4 @@ Goodbye 0 #'alert'
 ## Wed Oct 19 10:42:46 CDT 2016 - dscudiero - fixed another reference to courseleafRefresh
 ## 04-17-2017 @ 10.31.44 - (1.0.10)    - dscudiero - fixed for selectMenuNew changes
 ## 11-14-2017 @ 08.02.56 - (1.0.14)    - dscudiero - Switch to Msg3
+## 03-22-2018 @ 12:36:05 - 1.0.15 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
