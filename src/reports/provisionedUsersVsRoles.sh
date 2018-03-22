@@ -21,18 +21,6 @@ scriptDescription=""
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function parseArgs-provisionedUsersVsRoles  { # or parseArgs-local
-	return 0
-}
-function Goodbye-provisionedUsersVsRoles  { # or Goodbye-local
-	[[ -f "$tmpFile" ]] && rm "$tmpFile"
-	return 0
-}
-export -f Goodbye-provisionedUsersVsRoles
-
-function testMode-provisionedUsersVsRoles  { # or testMode-local
-	return 0
-}
 
 #==================================================================================================
 # local functions
@@ -52,7 +40,7 @@ for var in $falseVars; do eval $var=false; done
 #==================================================================================================
 # helpSet='script,client
 GetDefaultsData $myName
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 Hello
 Init "getClient getEnv getDirs"
 
@@ -90,3 +78,4 @@ Goodbye 0 #'alert'
 #===================================================================================================
 ## Check-in log
 #===================================================================================================
+## 03-22-2018 @ 13:03:03 - 1.0.0 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
