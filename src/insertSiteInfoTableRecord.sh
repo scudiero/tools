@@ -1,10 +1,10 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.145 # -- dscudiero -- Thu 11/30/2017 @ 13:18:05.75
+version=1.1.146 # -- dscudiero -- Thu 03/22/2018 @ 13:52:26.66
 #==================================================================================================
 TrapSigs 'on'
 
-myIncludes="RunSql2 ParseCourseleafFile StringFunctions SetFileExpansion ProtectedCall GetCims"
+myIncludes="RunSql ParseCourseleafFile StringFunctions SetFileExpansion ProtectedCall GetCims"
 Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -69,7 +69,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 
 ## Remove any existing records for this client/env
 	sqlStmt="delete from $useSiteInfoTable where clientId =\"$clientId\" and env=\"$env\""
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 
 ## Insert the initial record to get the siteId set
 	fields="siteId,name,clientId,env,host,share,redhatVer,createdOn,createdBy"
@@ -81,7 +81,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 	fi
 	valueStr="NULL,\"$client\",\"$clientId\",\"$env\",\"$host\",\"$share\",\"$myRhel\",NOW(),\"$userName\""
 	sqlStmt="insert into $useSiteInfoTable ($fields) values($valueStr)"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	## Get newly inserted siteid
 	[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Could not insert seed record into $useSiteInfoTable"
 	siteId=${resultSet[0]}
@@ -90,14 +90,14 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 ## lookup urls from the clients table
 	if [[ $env == 'test' || $env == 'next' || $env == 'curr' ]]; then
 		sqlStmt="select ${env}url,${env}InternalUrl from $clientInfoTable where idx=\"$clientId\" "
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		url=\"$(cut -d'|' -f1 <<< ${resultSet[0]})\"
 		[[ $url == '"NULL"' ]] && url=NULL
 		internalUrl=\"$(cut -d'|' -f2 <<< ${resultSet[0]})\"
 		[[ $internalUrl == '"NULL"' ]] && internalUrl=NULL
 	else
 		sqlStmt="select ${env}url from $clientInfoTable where idx=\"$clientId\" "
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		url=\"${resultSet[0]}\"
 		[[ $url == '"NULL"' ]] && url=NULL
 		internalUrl=NULL
@@ -160,7 +160,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 		## Write out the record
 			setStr="url=$url,archives=$archives,googleType=$googleType"
 			sqlStmt="update $useSiteInfoTable set $setStr where siteId=\"$siteId\""
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 			return 0
 	fi #[[ $env = 'preview' || $env = 'public' ]]
 
@@ -294,7 +294,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 				if [[ -r $clUsersFile ]]; then
 					#sqlStmt='select * from sqlite_master;'
 					sqlStmt='select * from sqlite_master where type="table" and name="users";'
-					RunSql2 "$clUsersFile" "$sqlStmt"
+					RunSql "$clUsersFile" "$sqlStmt"
 					if [[ ${#resultSet[@]} -ne 0 ]]; then
 						[[ $(Contains "${resultSet[0]}" ' userid ') == true && $(Contains "${resultSet[0]}" ' email ') == true ]] && haveClusers=true
 					fi
@@ -315,7 +315,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 						## If the email address is null then look up the email address in clusers
 							if [[ $adminEmail == '' && $haveClusers == true ]]; then
 								sqlStmt="select email from users where userid=\"$adminId\";"
-								RunSql2 "$clUsersFile" "$sqlStmt"
+								RunSql "$clUsersFile" "$sqlStmt"
 								adminEmail="${resultSet[0]}"
 							fi
 						## If email is still null then set from the emailsuffix if it is not null
@@ -329,7 +329,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 						admins=${admins:1}
 						fields="idx,siteId,name,env,admins"
 						sqlStmt="insert into $useSiteAdminsTable ($fields) values(NULL,\"$siteId\",\"$client\",\"$env\",\"$admins\")"
-						RunSql2 $sqlStmt
+						RunSql $sqlStmt
 					fi
 		fi
 	fi
@@ -340,7 +340,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 	setStr="$setStr,CATedition=$catEdition,publishing=$publishTarget,degreeWorks=$degreeWorks"
 	sqlStmt="update $useSiteInfoTable set $setStr where siteId=\"$siteId\""
 	[[ $verboseLevel -gt 0 ]] && echo && echo "setStr = >$setStr<" && echo && echo "sqlStmt = >$sqlStmt<" && echo
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 
 #==================================================================================================
 ## Done
@@ -379,7 +379,7 @@ return 0
 ## Fri Oct  7 08:00:28 CDT 2016 - dscudiero - Take out the dbAcc switching logic, moved to framework RunSql
 ## Thu Dec 29 15:58:23 CST 2016 - dscudiero - Switch to use RunMySql
 ## Tue Jan  3 07:43:05 CST 2017 - dscudiero - remove debug statement
-## Thu Jan  5 13:40:42 CST 2017 - dscudiero - switch to RunSql2
+## Thu Jan  5 13:40:42 CST 2017 - dscudiero - switch to RunSql
 ## Thu Jan  5 15:50:53 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Jan  6 08:04:22 CST 2017 - dscudiero - General syncing of dev to prod
 ## Tue Jan 10 14:57:02 CST 2017 - dscudiero - Fix problem getting the correct siteId after the insert of the seed record
@@ -413,3 +413,4 @@ return 0
 ## 10-27-2017 @ 08.25.20 - (1.1.143)   - dscudiero - Switch to use Verbose
 ## 10-30-2017 @ 09.34.52 - (1.1.144)   - dscudiero - Fix problem getting the cims not clearing cims array before calling GetCims
 ## 11-30-2017 @ 13.26.41 - (1.1.145)   - dscudiero - Switch to use the -all flag on the GetCims call
+## 03-22-2018 @ 14:06:41 - 1.1.146 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
