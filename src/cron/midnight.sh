@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.62 # -- dscudiero -- Fri 01/12/2018 @ 15:10:08.68
+version=1.22.64 # -- dscudiero -- Thu 03/22/2018 @ 12:43:26.27
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -9,6 +9,7 @@ TrapSigs 'on'
 myIncludes="RunCourseLeafCgi GetCourseleafPgm Semaphore FindExecutable ProtectedCall SetFileExpansion StringFunctions"
 myIncludes="$myIncludes CalcElapsed"
 Import "$standardIncludes $myIncludes"
+
 originalArgStr="$*";
 
 #=======================================================================================================================
@@ -30,57 +31,57 @@ function Goodbye-midnight  { # or Goodbye-$myName
 
 #=======================================================================================================================
 function CleanToolsBin {
-	Msg3 $V3 "*** $FUNCNAME -- Starting ***"
+	Msg $V3 "*** $FUNCNAME -- Starting ***"
 
 	## Setup lower case 'aliases' for the TOOLSPATH/bin commands, remove any links in bin that do not have a source in src
-	Msg2; Msg3 "Processing $TOOLSPATH/bin..."
+	Msg2; Msg "Processing $TOOLSPATH/bin..."
 	ignoreFiles=",scripts,reports,"
 	cwd=$(pwd)
 	cd $TOOLSPATH/bin
 	files=$(find . -mindepth 1 -maxdepth 1 -type l -printf "%f ")
 	for file in $files; do
 		[[ $(Contains "$ignoreFiles" "$file") == true ]] && continue
-		[[ ! -f $TOOLSPATH/src/${file}.sh && ! -f $TOOLSPATH/src/${file}.py && ! -f $TOOLSPATH/src/${file}.pl ]] && Msg3 $WT1 "Removing: $file" && rm ../src/$file && continue
-		[[ $file != $(Lower "$file") ]] && Msg3 "^Makeing link: $(Lower "$file")" && ln -s ./$file ./$(Lower "$file")
+		[[ ! -f $TOOLSPATH/src/${file}.sh && ! -f $TOOLSPATH/src/${file}.py && ! -f $TOOLSPATH/src/${file}.pl ]] && Warning "Removing: $file" && rm ../src/$file && continue
+		[[ $file != $(Lower "$file") ]] && Msg "^Makeing link: $(Lower "$file")" && ln -s ./$file ./$(Lower "$file")
 	done
 	cd "$cwd"
 
-	Msg3 $V3 "*** $FUNCNAME -- Completed ***"
+	Msg $V3 "*** $FUNCNAME -- Completed ***"
 	return 0
 } #CleanToolsBin
 
 #=======================================================================================================================
 function CheckClientCount {
-	Msg3 $V3 "*** $FUNCNAME -- Starting ***"
+	Msg $V3 "*** $FUNCNAME -- Starting ***"
 	## Get number of clients in transactional
 	SetFileExpansion 'off'
 	sqlStmt="select count(*) from clients where is_active=\"Y\""
-	RunSql2 "$contactsSqliteFile" $sqlStmt
+	RunSql "$contactsSqliteFile" $sqlStmt
 	if [[ ${#resultSet[@]} -le 0 ]]; then
-		Msg3 $T "Could not retrieve clients data from '$contactsSqliteFile'"
+		Terminate "Could not retrieve clients data from '$contactsSqliteFile'"
 	else
 		tCount=${resultSet[0]}
 	fi
 	## Get number of clients in warehouse
 	sqlStmt="select count(*) from $clientInfoTable where recordstatus=\"A\""
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	if [[ ${#resultSet[@]} -le 0 ]]; then
-		Msg3 $T "Could not retrieve clients count data from '$warehouseDb.$clientInfoTable'"
+		Terminate "Could not retrieve clients count data from '$warehouseDb.$clientInfoTable'"
 	else
 		wCount=${resultSet[0]}
 	fi
 	## Get number of clients on the ignore list
 	sqlStmt="select ignoreList from $scriptsTable where name=\"buildClientInfoTable\""
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	if [[ ${#resultSet[@]} -le 0 ]]; then
-		Msg3 $T "Could not retrieve clients count data from '$warehouseDb.$clientInfoTable'"
+		Terminate "Could not retrieve clients count data from '$warehouseDb.$clientInfoTable'"
 	else
 		let numIgnore=$(grep -o "," <<< "${resultSet[0]}r" | wc -l)+1
 		let tCount=$tCount-$numIgnore
 	fi
 	SetFileExpansion
 	if [[ $tCount -gt $wCount ]]; then
-		Msg3 "$FUNCNAME: New clients found in the transactional clients table, running 'clientList' report..."
+		Msg "$FUNCNAME: New clients found in the transactional clients table, running 'clientList' report..."
 		echo true
 	else
 		echo false
@@ -92,7 +93,7 @@ function CheckClientCount {
 function BuildEmployeeTable {
 	### Get the list of columns in the transactional employees table
 		sqlStmt="pragma table_info(employees)"
-		RunSql2 "$contactsSqliteFile" $sqlStmt
+		RunSql "$contactsSqliteFile" $sqlStmt
 		unset transactionalFields transactionalColumns
 		for resultRec in "${resultSet[@]}"; do
 			transactionalColumns="$transactionalColumns,$(cut -d'|' -f2 <<< $resultRec)"
@@ -103,11 +104,11 @@ function BuildEmployeeTable {
 
 	### Clear out the employee table
 		sqlStmt="truncate ${employeeTable}"
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 
 	### Get the transactonal values, loop through them and  write out the warehouse record
 		sqlStmt="select $transactionalColumns from employees where db_isactive in (\"Y\",\"L\") order by db_employeekey"
-		RunSql2 "$contactsSqliteFile" $sqlStmt
+		RunSql "$contactsSqliteFile" $sqlStmt
 		for resultRec in "${resultSet[@]}"; do
 			fieldCntr=1; unset valuesString userid
 			for field in $(tr ',' ' ' <<< $transactionalFields); do
@@ -121,7 +122,7 @@ function BuildEmployeeTable {
 			done
 			valuesString="${valuesString:1},userid=\"$userid\""
 			sqlStmt="insert into ${employeeTable} values($valuesString)"
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 		done
 	return 0
 } #BuildEmployeeTable
@@ -130,7 +131,7 @@ function BuildEmployeeTable {
 function BuildCourseleafDataTable {
 	## Clean out the existing data
 	sqlStmt="truncate $courseleafDataTable"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 
 	## Get Courseleaf component versions
 		components=($(find $gitRepoShadow -maxdepth 1 -mindepth 1 -type d -printf "%f "))
@@ -139,7 +140,7 @@ function BuildCourseleafDataTable {
 			[[ ${#dirs[@]} -gt 0 ]] && latest=${dirs[0]} || latest='master'
 			dump -1 component latest
 			sqlStmt="insert into $courseleafDataTable values(NULL,\"$component\",NULL,\"$latest\",NOW(),\"$userName\")"
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 		done
 
 	## Get Courseleaf Reports versions
@@ -153,7 +154,7 @@ function BuildCourseleafDataTable {
 		SetFileExpansion
 		dump -1 reportsVersions
 		sqlStmt="insert into $courseleafDataTable values(NULL,\"reports\",NULL,\"$reportsVersions\",NOW(),\"$userName\")"
-		[[ -n $reportsVersions ]] && RunSql2 $sqlStmt
+		[[ -n $reportsVersions ]] && RunSql $sqlStmt
 		cd "$cwd"
 
 	## Get daily.sh versions
@@ -161,7 +162,7 @@ function BuildCourseleafDataTable {
 		dailyshVer=${dailyshVer##*=} ; dailyshVer=${dailyshVer%% *}
 		dump -1 dailyshVer
 		sqlStmt="insert into $courseleafDataTable values(NULL,\"daily.sh\",NULL,\"$dailyshVer\",NOW(),\"$userName\")"
-		[[ -n $dailyshVer ]] && RunSql2 $sqlStmt
+		[[ -n $dailyshVer ]] && RunSql $sqlStmt
 
 	## Get Courseleaf cgi versions
 		cwd=$(pwd)
@@ -178,7 +179,7 @@ function BuildCourseleafDataTable {
 			fi
 			dump -1 rhelDir cgiVer
 			sqlStmt="insert into $courseleafDataTable values(NULL,\"courseleaf.cgi\",\"$rhelDir\",\"$cgiVer\",NOW(),\"$userName\")"
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 		done
 
 	## Rebuild the page
@@ -197,7 +198,7 @@ function BuildCourseleafDataTable {
 # Standard argument parsing and initialization
 #=======================================================================================================================
 GetDefaultsData $myName
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 scriptArgs="$* -noBanners"
 logInDb=false
 
@@ -207,49 +208,49 @@ logInDb=false
 case "$hostName" in
 	mojave)
 		## Processing that we want to completed before any cron tasks on other systems have started
-			Msg3; Msg3 "Backing up database tables in $warehouseDb..."
+			Msg; Msg "Backing up database tables in $warehouseDb..."
 			mySemaphoreId=$(Semaphore 'set' $myName)
 			## Backup database tables
 			for table in $clientInfoTable $siteInfoTable $siteAdminsTable $employeeTable ; do
-				Msg3 "^$table..."
+				Msg "^$table..."
 				sqlStmt="drop table if exists ${table}Bak"
-				RunSql2 $sqlStmt
+				RunSql $sqlStmt
 				sqlStmt="create table ${table}Bak like ${table}"
-				RunSql2 $sqlStmt
+				RunSql $sqlStmt
 				SetFileExpansion 'off'
 				sqlStmt="insert ${table}Bak select * from ${table}"
-				RunSql2 $sqlStmt
+				RunSql $sqlStmt
 				SetFileExpansion
 			done
 			echo
 			Semaphore 'clear' $mySemaphoreId
-			Msg3 "...done"
+			Msg "...done"
 
 		## If this is the first day of the month then truncate the sites table to reset the siteId counter
 			if [[ $(date "+%d") = '01' ]]; then
 				sqlStmt="truncate $siteInfoTable"
-				RunSql2 $sqlStmt
+				RunSql $sqlStmt
 			fi
 
 		## Performance test
 			## Make sure we have a sites table before running perfTest
 			sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 			if [[ ${#resultSet[@]} -gt 0 ]]; then
 				pgmName="perfTest"
-				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName..."; sTime=$(date "+%s")
+				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName..."; sTime=$(date "+%s")
 				TrapSigs 'off'; FindExecutable perfTest -sh -run; TrapSigs 'on'
-				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+				Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			fi
 
 		## Copy the contacts db from internal
-			Msg3 "\nCopying contacts.sqlite files to $contactsSqliteFile..."
+			Msg "\nCopying contacts.sqlite files to $contactsSqliteFile..."
 			cp $clientsTransactionalDb/contacts.sqlite $contactsSqliteFile
 			touch $(dirname $contactsSqliteFile)/contacts.syncDate
-			Msg3 "...done"
+			Msg "...done"
 
 		## Scratch copy the skeleton shadow
-			Msg3 "\nScratch copying the skeleton shadow..."
+			Msg "\nScratch copying the skeleton shadow..."
 			chmod u+wx $skeletonRoot
 			SetFileExpansion 'on'
 			rm -rf $skeletonRoot/*
@@ -257,23 +258,23 @@ case "$hostName" in
 			rsync $rsyncOpts /mnt/dev6/web/_skeleton/* $skeletonRoot | Indent
 			SetFileExpansion
 			touch $skeletonRoot/.syncDate
-			Msg3 "^...done"
+			Msg "^...done"
 
 		## Run programs/functions
 			pgms=(buildClientInfoTable buildSiteInfoTable BuildEmployeeTable buildQaStatusTable checkCgiPermissions checkPublishSettings)
 			pgms+=(updateDefaults syncCourseleafGitRepos BuildCourseleafDataTable "cleanDev -daemon")
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
-				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
+				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
 				TrapSigs 'off'
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
 				TrapSigs 'on'
 				Semaphore 'waiton' "$pgmName" 'true'
-				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+				Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
 
 		## Rebuild the internal site pages 
-			Msg3 "\nRebuilding Internal pages"
+			Msg "\nRebuilding Internal pages"
 			RunCourseLeafCgi "$stageInternal" "-r /clients"
 			RunCourseLeafCgi "$stageInternal" "-r /support/tools"
 			RunCourseLeafCgi "$stageInternal" "-r /support/qa"
@@ -284,21 +285,21 @@ case "$hostName" in
 			reports=("qaStatusShort -email \"$qaStatusShortEmails\"" "clientTimezone -email \"$clientTimezoneEmails\"")
 			for ((i=0; i<${#reports[@]}; i++)); do
 				report="${reports[$i]}"; reportName="${report%% *}"; reportArgs="${report##* }"; [[ $reportName == $reportArgs ]] && unset reportArgs
-				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $reportName $reportArgs..."; sTime=$(date "+%s")
+				Msg "\n$(date +"%m/%d@%H:%M") - Running $reportName $reportArgs..."; sTime=$(date "+%s")
 				TrapSigs 'off'; FindExecutable scriptsAndReports -sh -run reports $report -quiet $reportArgs $scriptArgs | Indent; TrapSigs 'on'
 				Semaphore 'waiton' "$reportName" 'true'
-				Msg3 "...$reportName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+				Msg "...$reportName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
 
 		## On the last day of the month roll-up the log files
 		  	if [[ $(date +"%d") == $(date -d "$(date +"%m")/1 + 1 month - 1 day" "+%d") ]]; then
-		  		Msg3 "\n$(date +"%m/%d@%H:%M") - Rolling up monthly log files"; sTime=$(date "+%s")
+		  		Msg "\n$(date +"%m/%d@%H:%M") - Rolling up monthly log files"; sTime=$(date "+%s")
 				pushd $TOOLSPATH/Logs >& /dev/null
 				SetFileExpansion 'on'
 				tar -cvzf "$(date '+%b-%Y').tar.gz" $(date +"%m")-* --remove-files > /dev/null 2>&1
 				SetFileExpansion
 				popd  >& /dev/null
-				Msg3 "... done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+				Msg "... done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 		  	fi
 
 		 ## Check that all things ran properly, otherwise revert the databases
@@ -307,17 +308,17 @@ case "$hostName" in
 			errorDetected=false
 			for table in $clientInfoTable $siteInfoTable $siteAdminsTable $employeeTable; do
 				sqlStmt="select count(*) from $table"
-				RunSql2 $sqlStmt
+				RunSql $sqlStmt
 				if [[ ${resultSet[0]} -eq 0 ]]; then
 					Error "'$table' table is empty, reverting to original"
 					errorDetected=true
 					sqlStmt="drop table if exists ${table}"
-					RunSql2 $sqlStmt
+					RunSql $sqlStmt
 					sqlStmt="rename table ${table}Bak to ${table}"
-					RunSql2 $sqlStmt
+					RunSql $sqlStmt
 				# else
 				# 	sqlStmt="drop table if exists  ${table}Bak"
-				# 	RunSql2 $sqlStmt
+				# 	RunSql $sqlStmt
 				fi
 			done
 			[[ $errorDetected == true ]] && Terminate 'One or more of the database load procedures failed, please review messages'
@@ -329,25 +330,25 @@ case "$hostName" in
 					share="${line%% *}"; line="${line#* }"
 					oldHost="${line%% *}"; line="${line#* }"
 					newHost="$line"
-					Msg3 "Processing server move update in '$siteInfoTable': '$share' --> '$newHost'"
+					Msg "Processing server move update in '$siteInfoTable': '$share' --> '$newHost'"
 					sqlStmt="update $siteInfoTable set host='$newHost' where share = '$share' and host='$oldHost'"
-					RunSql2 $sqlStmt
+					RunSql $sqlStmt
 				done < "$TOOLSPATH/src/cron/serverMove.txt"
 				IFS="$ifs"
 			fi
 			
 		 ## Create the data dump for the workwith tool
-		 	Msg3 "^Building the 'WorkWith' client data file..."
+		 	Msg "^Building the 'WorkWith' client data file..."
 		 	unset client
 			if [[ -z $client ]]; then
 			 	[[ ! -d $(dirname "$workwithDataFile") ]] && mkdir -p "$(dirname "$workwithDataFile")"
 			 	outFile="${workwithDataFile}.new"
 			 	echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE CLIENTS/SITES TABLES IN THE DATA WAREHOUSE" > "$outFile"
 				sqlStmt="select ignoreList from $scriptsTable where name=\"buildClientInfoTable\""
-			 	RunSql2 $sqlStmt
+			 	RunSql $sqlStmt
 			 	ignoreList="${resultSet[$i]}"; ignoreList=${ignoreList##*:}; ignoreList="'${ignoreList//,/','}'"
 				sqlStmt="select name,longName,hosting,products from $clientInfoTable where recordstatus=\"A\" and name not in ($ignoreList) order by name"
-			 	RunSql2 $sqlStmt
+			 	RunSql $sqlStmt
 				for rec in "${resultSet[@]}"; do clients+=("$rec"); done
 			else
 				clients=($client)
@@ -360,7 +361,7 @@ case "$hostName" in
 				Verbose 1 "^client: $client ($i of ${#clients[@]})"
 				unset envList envListStr
 				sqlStmt="select env,host,share,cims from $siteInfoTable where name in (\"$client\",\"$client-test\") and env not in ('preview','public')"
-		 		RunSql2 $sqlStmt
+		 		RunSql $sqlStmt
 		 		if [[ ${#resultSet[@]} -gt 0 ]]; then
 					for ((ii=0; ii<${#resultSet[@]}; ii++)); do
 						envListStr="${resultSet[$ii]}"; 
@@ -380,7 +381,7 @@ case "$hostName" in
 				mv -f "$outFile" "$workwithDataFile"
 			fi
 
-			Msg3 "^...Done"
+			Msg "^...Done"
 
 			## Refresh my local warehouse
 			## [[ -x $HOME/bin/refreshDevWarehouse ]] && $HOME/bin/refreshDevWarehouse
@@ -389,14 +390,14 @@ case "$hostName" in
 
 	*) ## build7
 		## Wait until processing is release by the master process on mojave
-			Msg3 "Waiting on '$myName'..."
+			Msg "Waiting on '$myName'..."
 			Semaphore 'waiton' "$myName"
-			Msg3 "^'$myName' completed, continuing..."
+			Msg "^'$myName' completed, continuing..."
 
 		## Wait for the perftest process on mojave to complete
 			## Make sure we have a sites table before running perfTest
 			sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 			if [[ ${#resultSet[@]} -gt 0 ]]; then
 				Semaphore 'waiton' 'perftest'
 				FindExecutable perfTest -sh -run
@@ -407,12 +408,12 @@ case "$hostName" in
 			pgms=(buildSiteInfoTable checkCgiPermissions checkPublishSettings "cleanDev -daemon")
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
-				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
+				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
 				TrapSigs 'off'
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
 				TrapSigs 'on'
 				Semaphore 'waiton' "$pgmName" 'true'
-				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+				Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
 		;;
 esac
@@ -420,7 +421,7 @@ esac
 #=======================================================================================================================
 ## Bye-bye
 [[ $fork == true ]] && wait
-Msg3 "\n$(date) -- $myName: Done\n"
+Msg "\n$(date) -- $myName: Done\n"
 return 0
 
 #=======================================================================================================================
@@ -439,7 +440,7 @@ return 0
 ## Wed Jan  4 07:24:06 CST 2017 - dscudiero - ake out debug statements, modify call to perfTest
 ## Wed Jan  4 16:47:34 CST 2017 - dscudiero - Updated BuildCourseleafData table to reflect the cgi versions including the patch level
 ## Thu Jan  5 07:59:27 CST 2017 - dscudiero - Fixed syntax error introduced on last commit
-## Thu Jan  5 14:50:01 CST 2017 - dscudiero - Switch to use RunSql2
+## Thu Jan  5 14:50:01 CST 2017 - dscudiero - Switch to use RunSql
 ## Fri Jan  6 07:26:07 CST 2017 - dscudiero - Tweak messaging
 ## Tue Jan 10 12:54:12 CST 2017 - dscudiero - Add the -inPlace flag to the buildClientInfoTable call
 ## Wed Jan 11 07:00:53 CST 2017 - dscudiero - fix problem building skeleton shadow
@@ -530,3 +531,4 @@ return 0
 ## 12-12-2017 @ 09.49.11 - (1.22.59)   - dscudiero - Cosmetic/minor change
 ## 12-12-2017 @ 10.31.44 - (1.22.61)   - dscudiero - Cosmetic/minor change
 ## 03-09-2018 @ 14:25:41 - 1.22.62 - dscudiero - Add server move processing
+## 03-22-2018 @ 12:47:03 - 1.22.64 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
