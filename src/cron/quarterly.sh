@@ -1,12 +1,12 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.46 # -- dscudiero -- Wed 10/11/2017 @ 10:36:50.01
+version=2.1.47 # -- dscudiero -- Thu 03/22/2018 @ 12:45:28.42
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes="SetSiteDirs ProtectedCall SetFileExpansion RunSql2 Msg3"
+myIncludes="SetSiteDirs ProtectedCall SetFileExpansion"
 Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -20,39 +20,39 @@ function EscrowSite {
 	local tmpFile=$(MkTmpFile $FUNCNAME)
 	tarDir=$courseleafEscrowedSitesDir
 
- 	Msg3 > $tmpFile
- 	Msg3 $(date) >> $tmpFile
- 	Msg3 >> $tmpFile
- 	Msg3 "The following sites have been escrowed, the escrow files can be found at \n^'$courseleafEscrowedSitesDir'" >> $tmpFile
+ 	Msg > $tmpFile
+ 	Msg $(date) >> $tmpFile
+ 	Msg >> $tmpFile
+ 	Msg "The following sites have been escrowed, the escrow files can be found at \n^'$courseleafEscrowedSitesDir'" >> $tmpFile
 
  	for client in $(tr ',' ' ' <<< $clientList); do
-		Msg3 "^Processing client: $client" >> $tmpFile
+		Msg "^Processing client: $client" >> $tmpFile
 		SetSiteDirs
 		cd $(dirname $nextDir)
 		[[ ! -d $tarDir ]] && mkdir $tarDir
 		tarFile=$tarDir/$client@$(date +"%m-%d-%Y").tar.xz
 		[[ -f $tarFile ]] && rm -f $tarFile
 
-		Msg3 >> $tmpFile
+		Msg >> $tmpFile
 		unset dirsToTar
 		for env in test next curr public; do
 			[[ -d ./$env ]] && dirsToTar="$env $dirsToTar"
 		done
 		dirsToTar=$(Trim "$dirsToTar")
-		Msg3 "^^Tarring directories: $(echo $dirsToTar | tr ' ' ',')" >> $tmpFile
+		Msg "^^Tarring directories: $(echo $dirsToTar | tr ' ' ',')" >> $tmpFile
 
 		set +f
 		$DOIT tar -cJf $tarFile $dirsToTar; rc=$?
 		rc=$?; [[ $rc -ne 0 ]] && Terminate "Process returned a non-zero return code ($rc), Please review messages"
 		chgrp leepfrog $tarFile
 		chmod 660 $tarFile
-		Msg3 "^^Escrow file generated at: $tarFile" >> $tmpFile
+		Msg "^^Escrow file generated at: $tarFile" >> $tmpFile
 	done
 
 	## Send emails
-		Msg3 >> $tmpFile
+		Msg >> $tmpFile
 		if [[ $sendMail == true ]]; then
-			Msg3 "\nEmails sent to: $escrowEmailAddrs\n" >> $tmpFile
+			Msg "\nEmails sent to: $escrowEmailAddrs\n" >> $tmpFile
 			for emailAddr in $(tr ',' ' ' <<< $escrowEmailAddrs); do
 				mail -s "$myName: Clients escrowed" $emailAddr < $tmpFile
 			done
@@ -64,7 +64,7 @@ function EscrowSite {
 
 function RollupProcessLog {
 	## Roll up the weeks processlog db table
-	Msg3 "\n*** Processlog rollup -- Starting ***"
+	Msg "\n*** Processlog rollup -- Starting ***"
 	cd $TOOLSPATH/Logs
 	outFile="$(date '+%m-%d-%y').processLog.xls"
 	## Get the column names
@@ -92,7 +92,7 @@ function RollupProcessLog {
 	sqlStmt="truncate $processLogTable"
 	RunSql2 $sqlStmt
 	SetFileExpansion
-	Msg3 "*** Processlog rollup -- Completed ***"
+	Msg "*** Processlog rollup -- Completed ***"
 } #RollupProcessLog
 
 #=======================================================================================================================
@@ -135,5 +135,6 @@ return 0
 ## 07-17-2017 @ 14.00.52 - (2.1.42)    - dscudiero - Many updates
 ## 09-21-2017 @ 10.02.41 - (2.1.43)    - dscudiero - Add rollup of the processlog
 ## 09-21-2017 @ 10.15.16 - (2.1.44)    - dscudiero - Change the name of the tar file to reflect the quarter number
-## 09-27-2017 @ 07.52.12 - (2.1.45)    - dscudiero - Switched to msg3
+## 09-27-2017 @ 07.52.12 - (2.1.45)    - dscudiero - Switched to Msg
 ## 10-11-2017 @ 10.37.49 - (2.1.46)    - dscudiero - Switch to use FindExecutable -run
+## 03-22-2018 @ 12:47:12 - 2.1.47 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
