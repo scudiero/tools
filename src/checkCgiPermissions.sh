@@ -1,10 +1,8 @@
 #!/bin/bash
 #==================================================================================================
-version=2.2.39 # -- dscudiero -- Fri 09/15/2017 @ 10:15:45.12
+version=2.2.41 # -- dscudiero -- Thu 03/22/2018 @ 12:28:16.06
 #==================================================================================================
 TrapSigs 'on'
-includes='GetDefaultsData ParseArgsStd Hello Init Goodbye Msg2 MkTmpFile'
-Import "$includes"
 
 originalArgStr="$*"
 scriptDescription="Check cgi file permissions"
@@ -22,9 +20,10 @@ scriptDescription="Check cgi file permissions"
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-	function checkCgiPermissions-ParseArgsStd {
-		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
-		argList+=(-fix,3,switch,fix,,script,'Fix the file permissions (chmod ug+rx)')
+	function checkCgiPermissions-ParseArgsStd2  {
+		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+		myArgs+=('fix|fix|switch|fix||script|Fix the file permissions (chmod ug+rx)')
+		return 0
 	}
 
 	function checkCgiPermissions-Goodbye {
@@ -61,7 +60,7 @@ printedHeader='false'
 # Standard arg parsing and initialization
 #==================================================================================================
 GetDefaultsData $myName
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 Hello
 tmpFile=$(MkTmpFile)
 
@@ -88,17 +87,17 @@ for searchSpec in $checkFiles; do
 	for file in "${files[@]}"; do
 		if [[ $printedHeader == false ]]; then
 			[[ $fix == true ]] && connector='did' || connector='do'
-			Msg2 "\nThe following files $connector not have correct (${checkPermissions:1}) file execute permissions: " | tee -a $tmpFile
+			Msg "\nThe following files $connector not have correct (${checkPermissions:1}) file execute permissions: " | tee -a $tmpFile
 			printedHeader=true
 		fi
-		Msg2 "\n$file" | tee -a $tmpFile;
+		Msg "\n$file" | tee -a $tmpFile;
 		currentPermissions=$(ls -lc $file | awk 'BEGIN {FS=" "}{print $1}')
 		fileCtime=$(ls -lc $file | awk 'BEGIN {FS=" "}{printf "%s %s %s", $6, $7, $8}')
-		Msg2 "^Current permissions: '${currentPermissions:1}'" | tee -a $tmpFile;
-		Msg2 "^File ctime: '$fileCtime'" | tee -a $tmpFile;
+		Msg "^Current permissions: '${currentPermissions:1}'" | tee -a $tmpFile;
+		Msg "^File ctime: '$fileCtime'" | tee -a $tmpFile;
 
 		if [[ $fix == true ]]; then
-			Msg2 "^*** File permissions have been updated ***" | tee -a $tmpFile;
+			Msg "^*** File permissions have been updated ***" | tee -a $tmpFile;
 			$DOIT chmod ugo+rx $file
 		fi
 		sendMail=true
@@ -109,9 +108,9 @@ done
 if [[ $sendMail == true && $noEmails == false ]]; then
 	unset addNot
 	[[ $fix == false ]] && addNot='NOT '
-	Msg2 "\nNote: The files have ${addNot}been fixed" | tee -a $tmpFile;
-	Msg2 "\nEmails sent to: $emailAddrs" | tee -a $tmpFile
-	Msg2 "\n*** Please do not respond to this email, it was sent by an automated process\n" | tee -a $tmpFile
+	Msg "\nNote: The files have ${addNot}been fixed" | tee -a $tmpFile;
+	Msg "\nEmails sent to: $emailAddrs" | tee -a $tmpFile
+	Msg "\n*** Please do not respond to this email, it was sent by an automated process\n" | tee -a $tmpFile
 	#$DOIT mail -s "$myName found discrepancies" $emailAddrs < $tmpFile
 	$DOIT mutt -s "$myName detected Errors - $(date +"%m-%d-%Y")" -- $emailAddrs < $tmpFile
 fi
@@ -139,3 +138,4 @@ Goodbye 0
 ## Mon Feb 13 15:59:17 CST 2017 - dscudiero - Make sure we are using our own tmpFile
 ## 06-23-2017 @ 09.26.32 - (2.2.29)    - dscudiero - Add 'do not respond' to the email
 ## 09-12-2017 @ 07.35.27 - (2.2.37)    - dscudiero - Check against two different permission templates
+## 03-22-2018 @ 12:35:26 - 2.2.41 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
