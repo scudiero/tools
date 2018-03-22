@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.20 # -- dscudiero -- 02/13/2017 @ 16:08:26.11
+version=1.0.22 # -- dscudiero -- Thu 03/22/2018 @ 12:58:58.11
 #==================================================================================================
 Import GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye
 originalArgStr="$*"
@@ -14,15 +14,13 @@ scriptDescription=""
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function parseArgs-clientPrimaryContacts  { # or parseArgs-local
-	argList+=(-reportName,6,option,reportName,,script,'The origional report name')
-	argList+=(-emailAddrs,5,option,emailAddrs,,script,'Email addresses to send reports to when running in batch mode')
+function clientPrimaryContacts-ParseArgsStd2  { # or parseArgs-local
+	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+	myArgs+=('email|emailAddrs|option|emailAddrs||script|Email addresses to send reports to when running in batch mode')
+	myArgs+=('report|reportName|option|emailAdreportNamedrs||script|The origional report name')
 	return 0
 }
-function Goodbye-clientPrimaryContacts  { # or Goodbye-local
-	return 0
-}
-function testMode-clientPrimaryContacts  { # or testMode-local
+function clientPrimaryContacts-testMode  { # or testMode-local
 	[[ $userName != 'dscudiero' ]] && Msg "T You do not have sufficient permissions to run this script in 'testMode'"
 	return 0
 }
@@ -53,7 +51,7 @@ fields="$fields,contacts.title,contacts.workphone,contacts.cell,contacts.fax,con
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 
 [[ $reportName != '' ]] && GetDefaultsData "$reportName" "$reportsTable"
 Hello
@@ -62,11 +60,11 @@ Hello
 # Main
 #===================================================================================================
 ## Generate second report - folks in the contacts db that did not attend
-	Msg2 "Generating Client Contact Report..."
-	Msg2 >> $outFile; Msg2 >> $outFile; Msg2 >> $outFile
-	Msg2 "Report: Client Contact Report" >> $outFile
-	Msg2 "Date: $(date)" >> $outFile
-	Msg2 >> $outFile
+	Msg "Generating Client Contact Report..."
+	Msg >> $outFile; Msg >> $outFile; Msg >> $outFile
+	Msg "Report: Client Contact Report" >> $outFile
+	Msg "Date: $(date)" >> $outFile
+	Msg >> $outFile
 	echo -e "$header" >> $outFile
 
 	cntr=0
@@ -74,10 +72,10 @@ Hello
 	orderBy="clients.clientcode,contactrole,contacts.lastname"
 	sqlStmt="select $fields from clients,contacts where $whereClause order by $orderBy"
 
-	RunSql2 "$contactsSqliteFile" "$sqlStmt"
+	RunSql "$contactsSqliteFile" "$sqlStmt"
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		numRecs=${#resultSet[@]}
-		Msg2 "^Found $numRecs contacts records..."
+		Msg "^Found $numRecs contacts records..."
 		for result in "${resultSet[@]}"; do
 			if [[ $workBook != '' ]]; then
 				longName=$(cut -d'|' -f3 <<< $result)
@@ -87,21 +85,21 @@ Hello
 				[[ ${attendeeList["$key"]+abc} ]] && continue
 			fi
 			echo -e "$(tr '|' "\t" <<< "$result")" >> $outFile
-			[[ $cntr -ne 0 && $(($cntr % 100)) -eq 0 ]] && Msg2 "^Processed $cntr out of $numRecs..."
+			[[ $cntr -ne 0 && $(($cntr % 100)) -eq 0 ]] && Msg "^Processed $cntr out of $numRecs..."
 			let cntr=$cntr+1
 		done
 	else
 		Warning "Did not find any contacts records meeting criteria" | tee -a $outFile
 	fi
 
-	Msg2 >> $outFile
-	Msg2
-	Msg2 "Report output can be found in: '$outFile'"
+	Msg >> $outFile
+	Msg
+	Msg "Report output can be found in: '$outFile'"
 	#[[ ${#clientSet[@]} -gt 0 ]] && sendMail=true
 
 ## Send email
 	if [[ $emailAddrs != '' && $sendMail == true && batchMode == true ]]; then
-		Msg2 >> $outFile; Msg2 "Sending email(s) to: $emailAddrs">> $outFile; Msg2 >> $outFile
+		Msg >> $outFile; Msg "Sending email(s) to: $emailAddrs">> $outFile; Msg >> $outFile
 		for emailAddr in $(echo $emailAddrs | tr ',' ' '); do
 			mutt -a "$outFile" -s "$report report results: $(date +"%m-%d-%Y")" -- $emailAddr < $outFile
 		done
@@ -120,3 +118,4 @@ Goodbye 0 #'alert'
 
 
 ## Mon Feb 13 16:09:30 CST 2017 - dscudiero - make sure we have our own tmpFile
+## 03-22-2018 @ 13:02:53 - 1.0.22 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
