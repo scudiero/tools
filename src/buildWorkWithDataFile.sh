@@ -1,10 +1,10 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.122 # -- dscudiero -- Fri 01/12/2018 @ 15:39:14.50
+version=4.3.124 # -- dscudiero -- Thu 03/22/2018 @ 14:00:52.64
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes="SetSiteDirs SetFileExpansion RunSql2 StringFunctions ProtectedCall FindExecutable PushPop"
+myIncludes="SetSiteDirs SetFileExpansion RunSql StringFunctions ProtectedCall FindExecutable PushPop"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -72,17 +72,17 @@ fi
 # Main
 #=======================================================================================================================
 
-Msg3 "^Building the 'WorkWith' client data file..."
+Msg "^Building the 'WorkWith' client data file..."
 unset client
 if [[ -z $client ]]; then
  	[[ ! -d $(dirname "$workwithDataFile") ]] && mkdir -p "$(dirname "$workwithDataFile")"
  	outFile="${workwithDataFile}.new"
  	echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE CLIENTS/SITES TABLES IN THE DATA WAREHOUSE" > "$outFile"
 	sqlStmt="select ignoreList from $scriptsTable where name=\"buildClientInfoTable\""
- 	RunSql2 $sqlStmt
+ 	RunSql $sqlStmt
  	ignoreList="${resultSet[$i]}"; ignoreList=${ignoreList##*:}; ignoreList="'${ignoreList//,/','}'"
 	sqlStmt="select name,longName,hosting,products from $clientInfoTable where recordstatus=\"A\" and name not in ($ignoreList) order by name"
- 	RunSql2 $sqlStmt
+ 	RunSql $sqlStmt
 	for rec in "${resultSet[@]}"; do clients+=("$rec"); done
 else
 	clients=($client)
@@ -95,7 +95,7 @@ for ((i=0; i<${#clients[@]}; i++)); do
 	Verbose 1 "^client: $client ($i of ${#clients[@]})"
 	unset envList envListStr
 	sqlStmt="select env,host,share,cims from $siteInfoTable where name in (\"$client\",\"$client-test\") and env not in ('preview','public')"
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
 			for ((ii=0; ii<${#resultSet[@]}; ii++)); do
 				envListStr="${resultSet[$ii]}"; 
@@ -115,10 +115,11 @@ if [[ $outFile != '/dev/stdout' ]]; then
 	mv -f "$outFile" "$workwithDataFile"
 fi
 
-Msg3 "^...Done"
+Msg "^...Done"
 
 #=======================================================================================================================
 ## Bye-bye
 #=======================================================================================================================
 Goodbye 0 'alert'
 
+## 03-22-2018 @ 14:05:56 - 4.3.124 - dscudiero - [A
