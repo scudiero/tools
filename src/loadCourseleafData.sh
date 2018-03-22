@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.9.10 # -- dscudiero -- Tue 03/13/2018 @  8:50:24.95
+version=3.9.11 # -- dscudiero -- Thu 03/22/2018 @ 14:03:51.32
 #==================================================================================================
 TrapSigs 'on'
 myIncludes='DbLog Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel2 WriteChangelogEntry'
@@ -124,18 +124,18 @@ scriptDescription="Load Courseleaf Data"
 	function GetUsersDataFromDB {
 		local dbFile=$siteDir/db/clusers.sqlite
 		[[ ! -r $dbFile ]] && Terminate "Could not read the clusers database file:\n\t$dbFile"
-		Msg3 "Reading the user data from the clusers database ..."
+		Msg "Reading the user data from the clusers database ..."
 
 		local sqlLiteFields="userid,lname,fname,email"
 		SetFileExpansion 'off'
 		local sqlStmt="select * from sqlite_master where type=\"table\" and name=\"users\""
 		SetFileExpansion
-		RunSql2 "$siteDir/db/clusers.sqlite" $sqlStmt
+		RunSql "$siteDir/db/clusers.sqlite" $sqlStmt
 		[[ ${#resultSet[@]} -le 0 ]] && Terminate "Could not retrieve clusers.users table definition data from '$contactsSqliteFile'"
 		local tData="${resultSet[0]#*(}"; tData="${tData%)*}"
 		[[ $(Contains "${tData%)*}" 'uin') == true ]] && sqlLiteFields="$sqlLiteFields,uin"
 		sqlStmt="select $sqlLiteFields FROM users"
-		RunSql2 "$dbFile" "$sqlStmt"
+		RunSql "$dbFile" "$sqlStmt"
 		if [[ ${#resultSet[@]} -ne 0 ]]; then
 			for resultRec in "${resultSet[@]}"; do
 				key=${resultRec%%|*}; key=${key%%.*}
@@ -148,8 +148,8 @@ scriptDescription="Load Courseleaf Data"
 			done
 		fi
 		numUsersfromDb=${#usersFromDb[@]}
-		Msg3 "^Retrieved $numUsersfromDb records from the 'clusers' database"
-		if [[ $verboseLevel -ge 1 ]]; then Msg3 "usersFromDb:"; for i in "${!usersFromDb[@]}"; do printf "\t\t[$i] = >${usersFromDb[$i]}<\n"; done; fi
+		Msg "^Retrieved $numUsersfromDb records from the 'clusers' database"
+		if [[ $verboseLevel -ge 1 ]]; then Msg "usersFromDb:"; for i in "${!usersFromDb[@]}"; do printf "\t\t[$i] = >${usersFromDb[$i]}<\n"; done; fi
 		return 0
 	} #GetUsersDataFromDB
 
@@ -158,7 +158,7 @@ scriptDescription="Load Courseleaf Data"
 	#==================================================================================================
 	function GetRolesDataFromFile {
 		[[ $useUINs == true && $processedUserData != true ]] && Terminate "$FUNCNAME: Requesting UIN mapping but no userid sheet was provided"
-		Msg3 "Reading the roles.tcf file ..."
+		Msg "Reading the roles.tcf file ..."
 		## Get the roles data from the roles.tcf file
 			local file=$rolesFile line
 			[[ ! -r $file ]] && Terminate "Could not read the roles file: '$file'"
@@ -174,8 +174,8 @@ scriptDescription="Load Courseleaf Data"
 		      	fi
 			done < $file
 			numRolesFromFile=${#rolesFromFile[@]}
-			Msg3 "^Retrieved $numRolesFromFile records"
-			if [[ $verboseLevel -ge 1 ]]; then Msg3 "\trolesFromFile:"; for i in "${!rolesFromFile[@]}"; do printf "\t\t[$i] = >${rolesFromFile[$i]}<\n"; done; fi
+			Msg "^Retrieved $numRolesFromFile records"
+			if [[ $verboseLevel -ge 1 ]]; then Msg "\trolesFromFile:"; for i in "${!rolesFromFile[@]}"; do printf "\t\t[$i] = >${rolesFromFile[$i]}<\n"; done; fi
 		return 0
 	} #GetRolesDataFromFile
 
@@ -184,7 +184,7 @@ scriptDescription="Load Courseleaf Data"
 	#==================================================================================================
 	function GetWorkflowDataFromFile {
 		[[ $useUINs == true && $processedUserData != true ]] && Terminate "$FUNCNAME: Requesting UIN mapping but no userid sheet was provided"
-		Msg3 "Reading the workflow.tcf file ..."
+		Msg "Reading the workflow.tcf file ..."
 		## Get the roles data from the roles.tcf file
 			local file="$siteDir/web/$courseleafProgDir/workflows.tcf" line
 			[[ ! -r $file ]] && Terminate "Could not read the '$file' file"
@@ -196,8 +196,8 @@ scriptDescription="Load Courseleaf Data"
 		      	fi
 			done < $file
 			numWorkflowsFromFile=${#workflowsFromFile[@]}
-			Msg3 "^Retrieved $numWorkflowsFromFile records"
-			if [[ $verboseLevel -ge 1 ]]; then Msg3 "\tworkflowsFromFile:"; for i in "${!workflowsFromFile[@]}"; do printf "\t\t[$i] = >${workflowsFromFile[$i]}<\n"; done; fi
+			Msg "^Retrieved $numWorkflowsFromFile records"
+			if [[ $verboseLevel -ge 1 ]]; then Msg "\tworkflowsFromFile:"; for i in "${!workflowsFromFile[@]}"; do printf "\t\t[$i] = >${workflowsFromFile[$i]}<\n"; done; fi
 			echo
 		return 0
 	} #GetWorkflowDataFromFile
@@ -301,10 +301,10 @@ scriptDescription="Load Courseleaf Data"
 
 		## See if this client has special case handling for usernames
 			sqlStmt="select useridCase from $clientInfoTable where name=\"$client\""
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 			local useridCase=$(Upper ${resultSet[0]:0:1}) || useridCase='M'
 
-		Msg3 "Parsing the 'user' data from the '$workbookSheet' worksheet ..."
+		Msg "Parsing the 'user' data from the '$workbookSheet' worksheet ..."
 		## Get the user data from the spreadsheet
 			GetExcel2 -wb "$workbookFile" -ws "$workbookSheet"
 			## Read the header record, look for the specific columns to determine how to parse subsequent records
@@ -340,8 +340,8 @@ scriptDescription="Load Courseleaf Data"
 				fi
 			done
 			numUsersfromSpreadsheet=${#usersFromSpreadsheet[@]}
-			Msg3 "^Retrieved $numUsersfromSpreadsheet records from the '$workbookSheet' sheet"
-			[[ $verboseLevel -ge 1 ]] && { Msg3 "^usersFromSpreadsheet:" ; for i in "${!usersFromSpreadsheet[@]}"; do Msg3 "^^[$i] = >${usersFromSpreadsheet[$i]}<"; done; }
+			Msg "^Retrieved $numUsersfromSpreadsheet records from the '$workbookSheet' sheet"
+			[[ $verboseLevel -ge 1 ]] && { Msg "^usersFromSpreadsheet:" ; for i in "${!usersFromSpreadsheet[@]}"; do Msg "^^[$i] = >${usersFromSpreadsheet[$i]}<"; done; }
 
 		## Get the user data from the clusers database
 			GetUsersDataFromDB
@@ -350,7 +350,7 @@ scriptDescription="Load Courseleaf Data"
 			numNewUsers=0
 			numModifiedUsers=0
 			[[ $informationOnlyMode != true ]] && verb='Merging' || verb='Checking'
-			Msg3 "$verb User data..."
+			Msg "$verb User data..."
 
 			local dbFile=$siteDir/db/clusers.sqlite
 			BackupCourseleafFile $dbFile
@@ -375,16 +375,16 @@ scriptDescription="Load Courseleaf Data"
 					[[ ${newData:(-1)} == '|' ]] && newData=${newData:0:${#newData}-1}
 					if [[ $oldData != $newData ]]; then
 						WarningMsg 0 1 "Found User '$key' in the clusers database file but data is different, using new data"
-						Msg3 "^^New Data: $newData"
-						Msg3 "^^Old Data: $oldData"
+						Msg "^^New Data: $newData"
+						Msg "^^Old Data: $oldData"
 						sqlStmt="UPDATE users set lname=\"$lname\", fname=\"$fname\", email=\"$email\" where userid=\"$key\""
-						[[ $informationOnlyMode == false ]] && $DOIT RunSql2 "$dbFile" "$sqlStmt"
+						[[ $informationOnlyMode == false ]] && $DOIT RunSql "$dbFile" "$sqlStmt"
 						(( numModifiedUsers += 1 ))
 					fi
 				else
 					Verbose 1 "Adding new user: $key"
 					sqlStmt="INSERT into users values(NULL,\"$key\",\"$lname\",\"$fname\",\"$email\")"
-					[[ $informationOnlyMode == false ]] && $DOIT RunSql2 "$dbFile" "$sqlStmt"
+					[[ $informationOnlyMode == false ]] && $DOIT RunSql "$dbFile" "$sqlStmt"
 					usersFromDb["$key"]="${usersFromSpreadsheet["$key"]}"
 					Verbose 1 2 "User added: $key"
 					(( numNewUsers += 1 ))
@@ -397,13 +397,13 @@ scriptDescription="Load Courseleaf Data"
 				if [[ $procesingCntr -ne 0 && $(($procesingCntr % $notifyThreshold)) -eq 0 ]]; then
 					local elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1
 					sTime=$(date "+%s")
-					Msg3 "^Processed $procesingCntr out of $numUsersfromSpreadsheet (${elapTime}s)..."
+					Msg "^Processed $procesingCntr out of $numUsersfromSpreadsheet (${elapTime}s)..."
 				fi
 				let procesingCntr=$procesingCntr+1
 			done
 			if [[ $verboseLevel -ge 1 ]]; then 
-				Msg3 "\tMerged User list (usersFromDb):"; for i in "${!usersFromDb[@]}"; do printf "\t\t[$i] = >${usersFromDb[$i]}<\n"; done; 
-				Msg3 "\tUserid/UIN map (uidUinHash):"; for i in "${!uidUinHash[@]}"; do printf "\t\t[$i] = >${uidUinHash[$i]}<\n"; done; 
+				Msg "\tMerged User list (usersFromDb):"; for i in "${!usersFromDb[@]}"; do printf "\t\t[$i] = >${usersFromDb[$i]}<\n"; done; 
+				Msg "\tUserid/UIN map (uidUinHash):"; for i in "${!uidUinHash[@]}"; do printf "\t\t[$i] = >${uidUinHash[$i]}<\n"; done; 
 			fi
 
 		## Rebuild the appache-group file
@@ -418,7 +418,7 @@ scriptDescription="Load Courseleaf Data"
 	#==================================================================================================
 	function ProcessRoleData {
 		local workbookSheet="$1"
-		Msg3 "Parsing the 'roles' data from the '$workbookSheet' worksheet ..."
+		Msg "Parsing the 'roles' data from the '$workbookSheet' worksheet ..."
 		## Get the role data from the spreadsheet
 			GetExcel2 -wb "$workbookFile" -ws "$workbookSheet"
 			## Read the header record, look for the specific columns to determine how to parse subsequent records
@@ -444,18 +444,18 @@ scriptDescription="Load Courseleaf Data"
 				fi
 			done
 			numRolesfromSpreadsheet=${#rolesFromSpreadsheet[@]}
-			Msg3 "^Retrieved $numRolesfromSpreadsheet records from the '$workbookSheet' sheet"
-			if [[ $verboseLevel -ge 1 ]]; then Msg3 "\trolesfromSpreadsheet:"; for i in "${!rolesFromSpreadsheet[@]}"; do printf "\t\t[$i] = >${rolesFromSpreadsheet[$i]}<\n"; done; fi
+			Msg "^Retrieved $numRolesfromSpreadsheet records from the '$workbookSheet' sheet"
+			if [[ $verboseLevel -ge 1 ]]; then Msg "\trolesfromSpreadsheet:"; for i in "${!rolesFromSpreadsheet[@]}"; do printf "\t\t[$i] = >${rolesFromSpreadsheet[$i]}<\n"; done; fi
 
 		## Merge the spreadsheet data and the file data
 			GetRolesDataFromFile #Also sets rolesOut
-			if [[ $verboseLevel -ge 1 ]]; then Msg3 "\trolesOut:"; for i in "${!rolesOut[@]}"; do printf "\t\t[$i] = >${rolesOut[$i]}<\n"; done; fi
+			if [[ $verboseLevel -ge 1 ]]; then Msg "\trolesOut:"; for i in "${!rolesOut[@]}"; do printf "\t\t[$i] = >${rolesOut[$i]}<\n"; done; fi
 			numNewRoles=0
 			numModifiedRoles=0
 			numRoleMembersMappedToUIN=0
 
 			[[ $informationOnlyMode != true ]] && verb='Updating' || verb='Checking'
-			Msg3 "$verb Role data..."
+			Msg "$verb Role data..."
 			local procesingCntr=0
 			sTime=$(date "+%s")
 			for key in "${!rolesFromSpreadsheet[@]}"; do
@@ -498,8 +498,8 @@ scriptDescription="Load Courseleaf Data"
 							newData="${rolesFromSpreadsheet["$key"]}"; [[ ${newData:(-1)} == '|' ]] && newData=${newData:0:${#newData}-1}
 							if [[ -n $newData && -n $oldData ]]; then
 								WarningMsg 0 1 "Found Role '$key' in the roles file but data is different, using new data"
-								Msg3 "^^New Data: $newData"
-								Msg3 "^^Old Data: $newData"
+								Msg "^^New Data: $newData"
+								Msg "^^Old Data: $newData"
 								rolesOut["$key"]="$newData"
 							elif [[ -z $oldData && -n $newData ]]; then
 								[[ -z $oldData ]] && Info 0 1 "Found Role '$key' in the roles file, old data is null, using new data"
@@ -516,7 +516,7 @@ scriptDescription="Load Courseleaf Data"
 				if [[ $procesingCntr -ne 0 && $(($procesingCntr % $notifyThreshold)) -eq 0 ]]; then
 					elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1
 					sTime=$(date "+%s")
-					Msg3 "^Processed $procesingCntr out of $numRolesfromSpreadsheet (${elapTime}s)..."
+					Msg "^Processed $procesingCntr out of $numRolesfromSpreadsheet (${elapTime}s)..."
 				fi
 				let procesingCntr=$procesingCntr+1
 			done
@@ -525,7 +525,7 @@ scriptDescription="Load Courseleaf Data"
 		## Write out the role data to the role file
 			if [[ $informationOnlyMode == false ]]; then
 				if [[ $numModifiedRoles -gt 0 || $numNewRoles -gt 0 ]]; then
-					Msg3 "Writing out new roles.tcf file..."
+					Msg "Writing out new roles.tcf file..."
 					editFile=$rolesFile
 					BackupCourseleafFile $editFile
 					# Parse the target file to put source data in the correct location in target file.
@@ -549,14 +549,14 @@ scriptDescription="Load Courseleaf Data"
 					## Swap the files
 					mv $editFile.new $editFile
 					[[ -f $topPart ]] && rm -f $topPart; [[ -f $bottomPart ]] && rm -f $bottomPart
-					Msg3 "^$editFile written to disk"
+					Msg "^$editFile written to disk"
 				fi
 			fi
 
 		## Check the members against the user data
 			if [[ $processUserData == true ]]; then
 				numRoleMembersNotProvisoned=0
-				Msg3 "Checking Role members..."
+				Msg "Checking Role members..."
 				for key in "${!rolesOut[@]}"; do
 					members=$(cut -d '|' -f1 <<< "${rolesOut["$key"]}")
 					for member in ${members//,/ }; do
@@ -579,7 +579,7 @@ scriptDescription="Load Courseleaf Data"
 		local workbookSheet="$1"
 		[[ $useUINs == true && $processedUserData != true ]] && Terminate "$FUNCNAME: Requesting UIN mapping but no userid sheet was provided"
 		## Get the user data from the spreadsheet
-			Msg3 "Parsing the 'catalog page' data from the '$workbookSheet' worksheet ..."
+			Msg "Parsing the 'catalog page' data from the '$workbookSheet' worksheet ..."
 			GetExcel2 -wb "$workbookFile" -ws "$workbookSheet"
 			## Read the header record, look for the specific columns to determin how to parse subsequent records
 			ParseWorksheetHeader "$workbookSheet" 'path title owner workflow'
@@ -609,8 +609,8 @@ scriptDescription="Load Courseleaf Data"
 			done
 
 			numWorkflowDataFromSpreadsheet=${#workflowDataFromSpreadsheet[@]}
-			Msg3 "^Retrieved $numWorkflowDataFromSpreadsheet records from the '$workbookSheet' sheet"
-			if [[ $verboseLevel -ge 1 ]]; then Msg3 "\tworkflowDataFromSpreadsheet:"; for i in "${!workflowDataFromSpreadsheet[@]}"; do printf "\t\t[$i] = >${workflowDataFromSpreadsheet[$i]}<\n"; done; fi
+			Msg "^Retrieved $numWorkflowDataFromSpreadsheet records from the '$workbookSheet' sheet"
+			if [[ $verboseLevel -ge 1 ]]; then Msg "\tworkflowDataFromSpreadsheet:"; for i in "${!workflowDataFromSpreadsheet[@]}"; do printf "\t\t[$i] = >${workflowDataFromSpreadsheet[$i]}<\n"; done; fi
 
 			## Get the courseleaf pgmname and dir
 				cd $siteDir
@@ -635,7 +635,7 @@ scriptDescription="Load Courseleaf Data"
 			numPagesUpdated=0
 			numMembersMappedToUIN=0
 			[[ $informationOnlyMode != true ]] && verb='Updating' || verb='Checking'
-			Msg3 "^$verb catalog page data (this takes a while)..."
+			Msg "^$verb catalog page data (this takes a while)..."
 			local procesingCntr=0
 			local sTime=$(date "+%s")
 			for key in "${!workflowDataFromSpreadsheet[@]}"; do
@@ -703,11 +703,11 @@ scriptDescription="Load Courseleaf Data"
 					if [[ $procesingCntr -ne 0 && $(($procesingCntr % $notifyThreshold)) -eq 0 ]]; then
 						elapTime=$(( $(date "+%s") - $sTime )); [[ $elapTime -eq 0 ]] && elapTime=1
 						sTime=$(date "+%s")
-						Msg3 "^Processed $procesingCntr out of $numWorkflowDataFromSpreadsheet (${elapTime}s)..."
+						Msg "^Processed $procesingCntr out of $numWorkflowDataFromSpreadsheet (${elapTime}s)..."
 					fi
 					let procesingCntr=$procesingCntr+1
 			done
-			Msg3 "^$numWorkflowDataFromSpreadsheet out of $numWorkflowDataFromSpreadsheet processed"
+			Msg "^$numWorkflowDataFromSpreadsheet out of $numWorkflowDataFromSpreadsheet processed"
 	return 0
 } #ProcessCatalogPageData
 
@@ -754,7 +754,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 		useUINs=true
 	else
 		sqlStmt="select usesUINs from $clientInfoTable where name=\"$client\""
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		if [[ ${#resultSet[@]} -ne 0 ]]; then
 			result="${resultSet[0]}"
 			[[ $result == 'Y' ]] && useUINs=true && echo
@@ -808,7 +808,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 	echo
 
 ## Get the list of sheets in the workbook
-	Msg3 "^Parsing workbook..."
+	Msg "^Parsing workbook..."
 	GetExcel2 -wb "$workbookFile" -ws 'GetSheets'
 	IFS='|' read -ra sheets <<< "${resultSet[0]}"
 	unset usersSheet rolesSheet pagesSheet
@@ -946,61 +946,61 @@ ignoreMissingPages=true
 	unset changeLogLines
 	echo
 	PrintBanner "Processing Summary"
-	[[ $informationOnlyMode == true ]] && echo "" && Msg3 ">>> The Information Only flag was set, no data has been updated <<<" && echo
+	[[ $informationOnlyMode == true ]] && echo "" && Msg ">>> The Information Only flag was set, no data has been updated <<<" && echo
 
 	if [[ $processedUserData == true ]]; then
-		Msg3 "User data:"
-		Msg3 "^Retrieved $numUsersfromDb records from the clusers database"
-		Msg3 "^Retrieved $numUsersfromSpreadsheet records from $workbookFileIn"
+		Msg "User data:"
+		Msg "^Retrieved $numUsersfromDb records from the clusers database"
+		Msg "^Retrieved $numUsersfromSpreadsheet records from $workbookFileIn"
 		string="Added $numNewUsers new users"
 		[[ $informationOnlyMode == true ]] && string="$string $(ColorK "(Information Only flag was set)")"
-		Msg3 "^$string"
+		Msg "^$string"
 		[[ $numNewUsers -gt 0 ]] && changeLogLines+=("$string")
 		string="Modified $numModifiedUsers existing users"
 		[[ $informationOnlyMode == true ]] && string="$string $(ColorK "(Information Only flag was set)")"
-		Msg3 "^$string"
+		Msg "^$string"
 		[[ $numModifiedUsers -gt 0 ]] && changeLogLines+=("$string")
 	fi
 
 	[[ $processedUserData == true ]] && echo
 	if [[ $processedRoleData == true ]]; then
-		Msg3 "Role data:"
-		Msg3 "^Retrieved $numRolesFromFile records from the roles.tcf file"
-		Msg3 "^Retrieved $numRolesfromSpreadsheet records from $workbookFileIn"
+		Msg "Role data:"
+		Msg "^Retrieved $numRolesFromFile records from the roles.tcf file"
+		Msg "^Retrieved $numRolesfromSpreadsheet records from $workbookFileIn"
 
 		string="Added $numNewRoles new roles"
 		[[ $informationOnlyMode != true ]] && string="Added $numNewRoles new roles" || string="Would have add $numNewRoles new roles"
-		Msg3 "^$string"
+		Msg "^$string"
 		[[ $numNewRoles -gt 0 ]] && changeLogLines+=("$string")
 
 		[[ $informationOnlyMode != true ]] && string="Modified $numModifiedRoles existing roles" || string="Would have modified $numModifiedRoles existing roles"
-		Msg3 "^$string"
+		Msg "^$string"
 		[[ $numModifiedRoles -gt 0 ]] && changeLogLines+=("$string")
 
 		string="Mapped $numRoleMembersMappedToUIN role members from UID to UIN"
-		[[ $numRoleMembersMappedToUIN -gt 0 ]] && Msg3 "^$string" && changeLogLines+=("$string")
+		[[ $numRoleMembersMappedToUIN -gt 0 ]] && Msg "^$string" && changeLogLines+=("$string")
 
 		string="Found $numRoleMembersNotProvisoned role members not in user provisioning"
-		[[ $numRoleMembersNotProvisoned -gt 0 ]] && Msg3 "^$string" && changeLogLines+=("$string")
+		[[ $numRoleMembersNotProvisoned -gt 0 ]] && Msg "^$string" && changeLogLines+=("$string")
 	fi
 
 	[[ $processedUserData == true || $processedRoleData == true ]] && echo
 	if [[ $processedPageData == true ]]; then
-		Msg3 "Page data:"
-		Msg3 "^Retrieved $numWorkflowDataFromSpreadsheet records from $workbookFileIn"
+		Msg "Page data:"
+		Msg "^Retrieved $numWorkflowDataFromSpreadsheet records from $workbookFileIn"
 
 		[[ $informationOnlyMode != true ]] && string="Updated $numPagesUpdated pages" || string="Would have updated $numPagesUpdated pages"
-		Msg3 "^$string"
+		Msg "^$string"
 		[[ $numPagesUpdated -gt 0 ]] && changeLogLines+=("$string")
 
 		string="Mapped $numMembersMappedToUIN role members from UID to UIN"
-		[[ $numMembersMappedToUIN -gt 0 ]] && Msg3 "^$string" && changeLogLines+=("$string")
+		[[ $numMembersMappedToUIN -gt 0 ]] && Msg "^$string" && changeLogLines+=("$string")
 
 		string="$numPagesNotFound pages not found"
-		[[ $numPagesNotFound -gt 0 ]] && Msg3 "^$string" && changeLogLines+=("$string")
+		[[ $numPagesNotFound -gt 0 ]] && Msg "^$string" && changeLogLines+=("$string")
 
 		string="Pages had errors in their owner/workflow data, see below for detailed information"
-		[[ ${#membersErrors[@]} -gt 0 ]] && Msg3 "^$string" && changeLogLines+=("$string")
+		[[ ${#membersErrors[@]} -gt 0 ]] && Msg "^$string" && changeLogLines+=("$string")
 
 		## Member lookup errors
 
@@ -1008,11 +1008,11 @@ ignoreMissingPages=true
 			echo
 			WarningMsg 0 1 "Found page owner or workflow data without a defined userid or role:"
 			for key in "${!membersErrors[@]}"; do
-				Msg3 "^$(ColorW "*Warning*") -- Workflow/Owner member: '$key' not defined and used on the following pages:"
+				Msg "^$(ColorW "*Warning*") -- Workflow/Owner member: '$key' not defined and used on the following pages:"
 				tmpStr="${membersErrors["$key"]}"
 				IFSsave=$IFS; IFS='|' read -a pages <<< "${membersErrors["$key"]}"; IFS=$IFSsave
 				for page in "${pages[@]}"; do
-					Msg3 "^^'$page'"
+					Msg "^^'$page'"
 				done
 				echo
 			done
@@ -1107,3 +1107,4 @@ ignoreMissingPages=true
 ## 03-09-2018 @ 07:43:28 - 3.9.9 - dscudiero - Change message level when null roles are updated
 ## 03-09-2018 @ 09:37:54 - 3.9.9 - dscudiero - Add code to clear out the email overrides from the roles if all of the entered email addresses match the userid@emailsuffix pattern
 ## 03-13-2018 @ 08:50:56 - 3.9.10 - dscudiero - Fix a bug merging the roles data
+## 03-22-2018 @ 14:06:53 - 3.9.11 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
