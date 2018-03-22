@@ -1,6 +1,6 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
-version=1.0.19 # -- dscudiero -- Thu 05/25/2017 @ 16:58:00.20
+version=1.0.21 # -- dscudiero -- Thu 03/22/2018 @ 13:02:31.88
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -12,18 +12,12 @@ TrapSigs 'on'
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function parseArgs-catalogAudit  { # or parseArgs-local
-	argList+=(-ignoreXmlFiles,7,switch,ignoreXmlFiles,,script,'Ignore extra xml files')
-	argList+=(-fix,3,switch,fixMode,,script,'Remove the errant files')
-	argList+=(-reportName,6,option,reportName,,script,'The origional report name')
-	argList+=(-emailAddrs,5,option,emailAddrs,,script,'Email addresses to send reports to when running in batch mode')
-	return 0
-}
-function Goodbye-catalogAudit  { # or Goodbye-local
-	SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
-	return 0
-}
-function testMode-catalogAudit  { # or testMode-local
+function catalogAudit-ParseArgsStd2  { # or parseArgs-local
+	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+	myArgs+=('email|emailAddrs|option|emailAddrs||script|Email addresses to send reports to when running in batch mode')
+	myArgs+=('report|reportName|option|emailAdreportNamedrs||script|The origional report name')
+	myArgs+=('ignoreX|ignoreXmlFiles|switch|ignoreXmlFiles||script|Ignore extra xml files')
+	myArgs+=('fix|fix|switch|fixMode||script|Remove the errant files')
 	return 0
 }
 
@@ -72,7 +66,7 @@ function CheckPageDb {
 
 	local cwd=$(pwd); cd $dir
 	sqlStmt="select count(*) from livepages where path=\"$dir/index.html\""
-	RunSql2 "$siteDir/courseleaf/pagedb.dat" $sqlStmt
+	RunSql "$siteDir/courseleaf/pagedb.dat" $sqlStmt
 	[[ ${resultSet[0]} -eq 0 ]] && pagesNotInPagesDb+=("$dir")
 	cd $cwd
 
@@ -96,7 +90,7 @@ outFile=$outDir/$(date '+%Y-%m-%d-%H%M%S').txt;
 # Standard arg parsing and initialization
 #==================================================================================================
 helpSet='script,client,env'
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 [[ $reportName != '' ]] && GetDefaultsData "$reportName" "$reportsTable"
 
 Hello
@@ -127,7 +121,7 @@ myData="Client: '$client', Env: '$env', Cims: '$cimStr' "
 # Main
 #===================================================================================================
 ## Get the list of directories to ignore
-	Msg2 "Gathering courseleaf directories..."
+	Msg "Gathering courseleaf directories..."
 	[[ $ignoreList = 'NULL' ]] && unset ignoreList
 	cd $skeletonRoot/release/web
 	ignoreList+=($(find -mindepth 1 -maxdepth 1 -type d -printf "%f\n"))
@@ -154,12 +148,12 @@ myData="Client: '$client', Env: '$env', Cims: '$cimStr' "
 ## Get the list of client directories
 	unset pagesMissingTcfs pagesWithoutFiles pagesWithExtraFiles pagesNotInPagesDb
 	cntr=1
-	Msg2 "Analyzing client pages..."
+	Msg "Analyzing client pages..."
 	cd $siteDir/web
 	## Have to use tmpfile because some directry names contain spaces!
  	find -mindepth 1 $ignoreStr -o -type d -print > $tmpFile
  	numPages=$(wc -l < $tmpFile)
- 	Msg2 "^Found $numPages Pages"
+ 	Msg "^Found $numPages Pages"
  	while read -r dir; do
 		## does the client directory contain files
 		count=$(find "$dir" -mindepth 1 -maxdepth 1 -type f | wc -l)
@@ -174,7 +168,7 @@ myData="Client: '$client', Env: '$env', Cims: '$cimStr' "
 				CheckExternfiles "$dir"
 			fi
 		fi
- 		[[ $(($cntr % 100)) -eq 0 ]]  && Msg2 "^Processed $cntr pages out of $numPages..."
+ 		[[ $(($cntr % 100)) -eq 0 ]]  && Msg "^Processed $cntr pages out of $numPages..."
  		let cntr=$cntr+1
 		#[[ $cntr -eq 20 ]] && break
  	done < $tmpFile
@@ -187,57 +181,57 @@ myData="Client: '$client', Env: '$env', Cims: '$cimStr' "
 ## Generate report
 if [[ $secondaryMessagesOnly != true ]]; then
 	clear
-	Msg2 | tee -a $outFile
-	Msg2 "Report: $myName" | tee -a $outFile
-	Msg2 "Date: $(date)" | tee -a $outFile
-	Msg2 "Client: $client" | tee -a $outFile
-	Msg2 "Env: $env" | tee -a $outFile
-	[[ $ignoreXmlFiles == true ]] && Msg2 "Ignore 'extra' xml files: $ignoreXmlFiles" | tee -a $outFile
-	[[ $fix == true ]] && Msg2 "Remove errant files: $fix" | tee -a $outFile
-	Msg2 | tee -a $outFile
+	Msg | tee -a $outFile
+	Msg "Report: $myName" | tee -a $outFile
+	Msg "Date: $(date)" | tee -a $outFile
+	Msg "Client: $client" | tee -a $outFile
+	Msg "Env: $env" | tee -a $outFile
+	[[ $ignoreXmlFiles == true ]] && Msg "Ignore 'extra' xml files: $ignoreXmlFiles" | tee -a $outFile
+	[[ $fix == true ]] && Msg "Remove errant files: $fix" | tee -a $outFile
+	Msg | tee -a $outFile
 fi
 
-Msg2 | tee -a $outFile
+Msg | tee -a $outFile
 if [[ ${#pagesMissingTcfs} -gt 0 ]]; then
-	Msg2 "1) Found ${#pagesMissingTcfs[@]} pages missing .tcf files:" | tee -a $outFile
+	Msg "1) Found ${#pagesMissingTcfs[@]} pages missing .tcf files:" | tee -a $outFile
 	for dir in "${pagesMissingTcfs[@]}"; do
-		Msg2 "^${dir:1}" | tee -a $outFile
+		Msg "^${dir:1}" | tee -a $outFile
 	done
 else
-	Msg2 "1) Found no client pages missing .tcf files" | tee -a $outFile
+	Msg "1) Found no client pages missing .tcf files" | tee -a $outFile
 fi
 
-Msg2 | tee -a $outFile
+Msg | tee -a $outFile
 if [[ ${#pagesWithoutFiles} -gt 0 ]]; then
-	Msg2 "2) Found ${#pagesWithoutFiles[@]}  pages have zero files in the page directory:" | tee -a $outFile
+	Msg "2) Found ${#pagesWithoutFiles[@]}  pages have zero files in the page directory:" | tee -a $outFile
 	for dir in "${pagesWithoutFiles[@]}"; do
-		Msg2 "^${dir:1}" | tee -a $outFile
+		Msg "^${dir:1}" | tee -a $outFile
 	done
 else
-	Msg2 "2) Found no client pages with zero files" | tee -a $outFile
+	Msg "2) Found no client pages with zero files" | tee -a $outFile
 fi
 
-Msg2 | tee -a $outFile
+Msg | tee -a $outFile
 if [[ ${#pagesWithExtraFiles} -gt 0 ]]; then
-	Msg2 "3) Found ${#pagesWithExtraFiles[@]} pages have files the page directory not listed with an 'externfiles:' entry" | tee -a $outFile
+	Msg "3) Found ${#pagesWithExtraFiles[@]} pages have files the page directory not listed with an 'externfiles:' entry" | tee -a $outFile
 	for dir in "${pagesWithExtraFiles[@]}"; do
-		Msg2 "^${dir:1}" | tee -a $outFile
+		Msg "^${dir:1}" | tee -a $outFile
 	done
 else
-	Msg2 "3) Found no client pages with 'extra' files" | tee -a $outFile
+	Msg "3) Found no client pages with 'extra' files" | tee -a $outFile
 fi
 
-Msg2 | tee -a $outFile
+Msg | tee -a $outFile
 if [[ ${#pagesNotInPagesDb} -gt 0 ]]; then
-	Msg2 "4) Found ${#pagesNotInPagesDb[@]} pages are not listed in the pages db" | tee -a $outFile
+	Msg "4) Found ${#pagesNotInPagesDb[@]} pages are not listed in the pages db" | tee -a $outFile
 	for dir in "${pagesNotInPagesDb[@]}"; do
-		Msg2 "^${dir:1}" | tee -a $outFile
+		Msg "^${dir:1}" | tee -a $outFile
 	done
 else
-	Msg2 "4) Found no client pages missing from the pages db" | tee -a $outFile
+	Msg "4) Found no client pages missing from the pages db" | tee -a $outFile
 fi
 
-[[ $secondaryMessagesOnly != true ]] && Msg2 && Msg2 "Output was saved in '$outFile'"
+[[ $secondaryMessagesOnly != true ]] && Msg && Msg "Output was saved in '$outFile'"
 
 #===================================================================================================
 ## Done
@@ -252,3 +246,4 @@ Goodbye 0
 #===================================================================================================
 ## Mon Feb 13 16:09:13 CST 2017 - dscudiero - make sure we have our own tmpFile
 ## 05-26-2017 @ 06.39.10 - (1.0.19)    - dscudiero - Change cleanup code
+## 03-22-2018 @ 13:02:45 - 1.0.21 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
