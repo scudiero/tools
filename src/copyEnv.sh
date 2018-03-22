@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.35 # -- dscudiero -- Wed 03/21/2018 @ 16:32:48.60
+version=4.13.36 # -- dscudiero -- Thu 03/22/2018 @ 14:03:02.25
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -176,13 +176,13 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 ## check to see if this client is remote or on another host
 	if [[ $client != 'internal' && $client != 'lilypadu' && $noCheck != true ]]; then
 		# sqlStmt="select hosting from $clientInfoTable where name=\"$client\""
-		# RunSql2 $sqlStmt
+		# RunSql $sqlStmt
 		# clientHosting=${resultSet[0]}
 		#if [[ $clientHosting == 'leepfrog' ]]; then
 			## check to see if this client is on another host
 			[[ $env == 'test' ]] && tempClient="${client}-test" || tempClient="${client}"
 			sqlStmt="select host,share,redhatVer from $siteInfoTable where name=\"$tempClient\" and env=\"$env\""
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 			if [[ ${#resultSet[@]} -gt 0 ]]; then
 			 	clientHost=$(cut -d'|' -f1 <<< "${resultSet[0]}")
 				clientShare=$(cut -d'|' -f2 <<< "${resultSet[0]}")
@@ -191,7 +191,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 				Terminate "Could not retrieve data for client ($tempClient), env ($env) from $workflowDb.$siteInfoTable"
 			fi
 			if [[ $clientHost != $hostName ]]; then
-				Msg3 "^Copying remote directory on 'clientHost', you will be prompted for your password on that server."
+				Msg "^Copying remote directory on 'clientHost', you will be prompted for your password on that server."
 				srcDir="ssh $userName@$clientHost.leepfrog.com:$srcDir"
 				remoteCopy=true
 			fi
@@ -207,11 +207,11 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 
 	if [[ -n $overrideTarget ]]; then
 		[[ ${overrideTarget:(-1)} == '/' ]] && overrideTarget="${overrideTarget:0:${#overrideTarget}-1}"
-		[[ ! -d $overrideTarget ]] && Msg3 && Terminate "Could not locate override target diectory: '$overrideTarget'"
+		[[ ! -d $overrideTarget ]] && Msg && Terminate "Could not locate override target diectory: '$overrideTarget'"
 		tgtDir="$overrideTarget/$client-$userName"
 	fi
 	if [[ -n $forUser ]]; then
-		[[ -n $suffix ]] && Msg3 && Terminate "Cannot specify both 'forUser' and 'suffix'."
+		[[ -n $suffix ]] && Msg && Terminate "Cannot specify both 'forUser' and 'suffix'."
 		userAccount="${forUser%%/*}"
 		userPassword="${forUser##*/}"
 		[[ -z $asSite ]] && tgtDir=$(sed "s/$userName/$forUser/g" <<< $tgtDir)
@@ -227,7 +227,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 ## Check to see if all dirs exist
 	[[ -z $srcDir ]] && Terminate "Could not resolve the source directory ('$srcDir'), you may not have access."
 	if [[ -d $tgtDir && $overlay == false  && $refresh == false ]]; then
-		Msg3
+		Msg
 		unset ans
 		Warning "Target site ($tgtDir) already existes."
 		Prompt ans "Do you wish to $(ColorK 'overwrite') the existing site (Yes) or $(ColorK 'refresh') files in the existing sites site (No) ?" 'Yes No' 'Yes' 
@@ -276,9 +276,9 @@ if [[ $verify == true ]]; then
 			ans=${ans:0:1}; ans=${ans,,[a-z]}
 			if [[ $ans == 'y' ]]; then
 				SetFileExpansion 'off'
-				Msg3 "^Please specify the directories/files you wish to exclude, use '*' as a the wild card,"
-				Msg3 "^specifications are relative to siteDir, e.g. '/web/wen' without the quotes."
-				Msg3 "^To stop the prompt loop, just enter no data"
+				Msg "^Please specify the directories/files you wish to exclude, use '*' as a the wild card,"
+				Msg "^specifications are relative to siteDir, e.g. '/web/wen' without the quotes."
+				Msg "^To stop the prompt loop, just enter no data"
 				while true; do
 					MsgNoCRLF "^^==> "
 					read ignore
@@ -375,7 +375,7 @@ dump -1 skipCim skipCat skipClss skipAlso
 			forkedProcesses+=($!)
 		else
 			mv -f $tgtDir $tgtDir.bak
-			[[ -d $tgtDir.bak ]] && Msg3 "Old target directory renamed to $tgtDir.bak" || Terminate "Target directory exists and could not be renamed"
+			[[ -d $tgtDir.bak ]] && Msg "Old target directory renamed to $tgtDir.bak" || Terminate "Target directory exists and could not be renamed"
 		fi
 	fi
 
@@ -405,20 +405,20 @@ dump -1 skipCim skipCat skipClss skipAlso
 	[[ $quiet == true || $quiet == 1 ]] && rsyncVerbose='' || rsyncVerbose='vh'
 	if [[ $fullCopy == true ]]; then
 		rsyncOpts="-a$rsyncVerbose $listOnly"
-		Msg3 "Performing a FULL copy..."
+		Msg "Performing a FULL copy..."
 	else
 		rsyncOpts="-a$rsyncVerbose --prune-empty-dirs $listOnly --include-from $rsyncFilters"
 	fi
 	if [[ $remoteCopy == true ]]; then
-		Msg3 "Calling rsync to copy the files, when prompted for password, please enter your password on '$clientHost' ..."
+		Msg "Calling rsync to copy the files, when prompted for password, please enter your password on '$clientHost' ..."
 		rsyncOpts="${rsyncOpts} -e"
 	else
-		Msg3 "Calling rsync to copy the files ..."
+		Msg "Calling rsync to copy the files ..."
 	fi
 
 	previousTrapERR=$(cut -d ' ' -f3- <<< $(trap -p ERR))
 	trap - ERR
-	Msg3 "\nrsync $rsyncOpts $srcDir/ $tgtDir\n" >> $logFile
+	Msg "\nrsync $rsyncOpts $srcDir/ $tgtDir\n" >> $logFile
 	cat "$rsyncFilters" >> "$logFile"
 	rsync $rsyncOpts $srcDir/ $tgtDir
 	eval "trap $previousTrapERR"
@@ -427,7 +427,7 @@ dump -1 skipCim skipCat skipClss skipAlso
 
 if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 	# Turn off publishing
-		Msg3 "\nTurn off Publishing..."
+		Msg "\nTurn off Publishing..."
 		editFile="$tgtDir/$progDir.cfg"
 		$DOIT sed -i s'_^mapfile:production_//mapfile:production_'g "$editFile"
 		$DOIT sed -i s'_^mapfile:/navbar/production_//mapfile:/navbar/production_'g "$editFile"
@@ -437,7 +437,7 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		[[ -z $grepStr ]] && Warning "Could not locate a publishing mapfile record pointing to /dev/null, publising may still be active, please check before using clone site"
 
 	# Turn off remote authenticaton
-		Msg3 "Turn off Authentication..."
+		Msg "Turn off Authentication..."
 		$DOIT sed -i s'_^authuser:true_//authuser:true_' $tgtDir/$progDir.cfg
 		for file in default.tcf localsteps/default.tcf; do
 			$DOIT sed -i s'_^authuser:true_//authuser:true_' $tgtDir/web/$progDir/$file
@@ -447,21 +447,21 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		done
 
 	# Turn off PDF generation
-		Msg3 "Turn off PDF generation..."
+		Msg "Turn off PDF generation..."
 		$DOIT sed -i s'_^pdfeverypage:true$_//pdfeverypage:true_' $tgtDir/web/$progDir/localsteps/default.tcf
 
 	# leepfrog user account
-		Msg3 "Adding user-ids to $progDir.cfg file..."
+		Msg "Adding user-ids to $progDir.cfg file..."
 		$DOIT echo "user:$leepfrogUserId|$leepfrogPw||admin" >> $tgtDir/$progDir.cfg
-		Msg3 "^'$leepfrogUserId' added as an admin with pw: '<normal pw>'"
+		Msg "^'$leepfrogUserId' added as an admin with pw: '<normal pw>'"
 		$DOIT echo "user:test|test||" >> $tgtDir/$progDir.cfg
-		Msg3 "^'test' added as a normal user with pw: 'test'"
+		Msg "^'test' added as a normal user with pw: 'test'"
 		[[ $tmpStr != 'luc20' ]] && $DOIT echo "user:$client|$client||admin" >> $tgtDir/$progDir.cfg
 		$DOIT echo "user:$client|$client||admin" >> $tgtDir/$progDir.cfg
 		[[ -n $forUser ]] && $DOIT echo "user:$userAccount|$userPassword||admin" >> $tgtDir/$progDir.cfg
 
 	# Set nexturl so wf emails point to local instance
-		Msg3 "Changing 'nexturl' to point to local instance..."
+		Msg "Changing 'nexturl' to point to local instance..."
 		editFile="$tgtDir/web/courseleaf/localsteps/default.tcf"
 		clientToken=$(cut -d'/' -f5 <<< $tgtDir)
 		toStr="nexturl:https://$clientToken.$(cut -d '/' -f3 <<< $tgtDir).leepfrog.com"
@@ -469,11 +469,11 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		if [[ -z $grepStr ]]; then
 			unset fromStr; fromStr=$(ProtectedCall "grep '^nexturl:' $editFile")
 			fromStr=$(CleanString "$fromStr")
-			[[ -n $fromStr ]] && $DOIT sed -i s"!${fromStr}!${toStr}!" $editFile || Msg3 $WT1 "Could not set nexturl"
+			[[ -n $fromStr ]] && $DOIT sed -i s"!${fromStr}!${toStr}!" $editFile || Msg $WT1 "Could not set nexturl"
 		fi
 
 	## email override
-		Msg3 "Override email routing..."
+		Msg "Override email routing..."
 		[[ -z $email ]] && email=$userName@leepfrog.com
 		editFile=$tgtDir/email/sendnow.atj
 		unset grepStr; grepStr=$(ProtectedCall "grep ^'// DO NOT MODIFY THIS FILE' $editFile");
@@ -561,7 +561,7 @@ fi
 				fromStr="$grepStr"
 				toStr="//$grepStr"
 				$DOIT sed -i s"_^${fromStr}_${toStr}_" $editFile
-				Msg3 "^CIM instance '$cim' Workflow Management record commented out"
+				Msg "^CIM instance '$cim' Workflow Management record commented out"
 			fi
 		done
 		RunCourseLeafCgi "$srcEnv" "-r /courseleaf/index.tcf"
@@ -663,7 +663,7 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 08-31-2017 @ 16.04.18 - (4.11.100)  - dscudiero - Tweak messaging
 ## 09-05-2017 @ 12.09.32 - (4.11.101)  - dscudiero - make sure the debug items go out to the logfile
 ## 09-21-2017 @ 14.50.54 - (4.12.2)    - dscudiero - Fix bug where parseArgsStd was the wrong case
-## 09-27-2017 @ 14.21.20 - (4.12.3)    - dscudiero - Switch to Msg3
+## 09-27-2017 @ 14.21.20 - (4.12.3)    - dscudiero - Switch to Msg
 ## 09-27-2017 @ 14.53.58 - (4.12.10)   - dscudiero - Tweak messaging
 ## 09-29-2017 @ 12.57.50 - (4.12.19)   - dscudiero - update imports
 ## 09-29-2017 @ 14.27.45 - (4.12.10)   - dscudiero - Add debug statements
@@ -694,3 +694,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 03-13-2018 @ 07:20:18 - 4.13.32 - dscudiero - Tweak messaging
 ## 03-13-2018 @ 09:51:05 - 4.13.33 - dscudiero - Cosmetic/minor change/Sync
 ## 03-21-2018 @ 16:33:25 - 4.13.35 - dscudiero - If copying to test, next, or curr then make sure the leepfrog account is comment out
+## 03-22-2018 @ 14:06:14 - 4.13.36 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
