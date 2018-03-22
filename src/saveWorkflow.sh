@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.93 # -- dscudiero -- Thu 03/15/2018 @ 13:50:29.78
+version=2.2.94 # -- dscudiero -- Thu 03/22/2018 @ 14:05:17.15
 #====================================================================================================
 TrapSigs 'on'
 myIncludes=""
@@ -91,7 +91,7 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 	unset requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles
 	if [[ $scriptData1 == '' ]]; then
 		sqlStmt="select scriptData1 from $scriptsTable where name=\"copyWorkflow\""
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Could not retrieve workflow files data (scriptData1) from the $scriptsTable.";
 		scriptData="${resultSet[0]}"
 	fi
@@ -99,7 +99,7 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 
 	if [[ $scriptData2 == '' ]]; then
 		sqlStmt="select scriptData2 from $scriptsTable where name=\"copyWorkflow\""
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Could not retrieve workflow files data (scriptData1) from the $scriptsTable.";
 		scriptData="${resultSet[0]}"
 	fi
@@ -107,7 +107,7 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 
 	if [[ $scriptData3 == '' ]]; then
 		sqlStmt="select scriptData3 from $scriptsTable where name=\"copyWorkflow\""
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Could not retrieve workflow files data (scriptData1) from the $scriptsTable.";
 		scriptData="${resultSet[0]}"
 	fi
@@ -115,7 +115,7 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 
 	if [[ $scriptData4 == '' ]]; then
 		sqlStmt="select scriptData4 from $scriptsTable where name=\"copyWorkflow\""
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Could not retrieve workflow files data (scriptData1) from the $scriptsTable.";
 		scriptData="${resultSet[0]}"
 	fi
@@ -200,3 +200,4 @@ Goodbye 0
 ## 03-15-2018 @ 13:43:11 - 2.2.91 - dscudiero - Swithch to use parseArgStd2
 ## 03-15-2018 @ 13:45:40 - 2.2.92 - dscudiero - Fix imports
 ## 03-15-2018 @ 13:51:54 - 2.2.93 - dscudiero - If -all was specified then clear the cimStr
+## 03-22-2018 @ 14:07:37 - 2.2.94 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
