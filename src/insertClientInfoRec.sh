@@ -1,11 +1,11 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version=2.3.150 # -- dscudiero -- Thu 01/18/2018 @  8:19:22.46
+version=2.3.151 # -- dscudiero -- Thu 03/22/2018 @ 13:52:17.32
 #===================================================================================================
 TrapSigs 'on'
 
-myIncludes="RunSql2"
+myIncludes="RunSql"
 Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -57,7 +57,7 @@ Dump -1 -n client
 	SetFileExpansion 'off'
 	sqlStmt="select * from sqlite_master where type=\"table\" and name=\"clients\""
 	SetFileExpansion
-	RunSql2 "$contactsSqliteFile" $sqlStmt
+	RunSql "$contactsSqliteFile" $sqlStmt
 	[[ ${#resultSet[@]} -le 0 ]] && Terminate "Could not retrieve clients table definition data from '$contactsSqliteFile'"
 	unset tFields
 	tData="${resultSet[0]#*(}"; tData="${tData%)*}"
@@ -74,7 +74,7 @@ Dump -1 -n client
 ## Get the data from the clients transactional data
 	Verbose 1 "^^Getting transactional data"
 	sql="select $tFields from clients where clientcode=\"$client\" and is_active=\"Y\""
-	RunSql2 "$contactsSqliteFile" $sql
+	RunSql "$contactsSqliteFile" $sql
 	if [[ ${#resultSet[@]} -le 0 ]]; then
 		Terminate "Could not retrieve clients data from '$contactsSqliteFile'"
 	else
@@ -95,7 +95,7 @@ Dump -1 -n client
 		Verbose 1 "^^Getting primary contact data"
 		fields='contactrole,firstname,lastname,title,workphone,cell,fax,email'
 		sqlStmt="select $fields from contacts where clientkey=\"$idx\" and contactrole like \"%primary%\" order by contactrole,lastname"
-		RunSql2 "$contactsSqliteFile" $sqlStmt
+		RunSql "$contactsSqliteFile" $sqlStmt
 		for contactRec in "${resultSet[@]}"; do
 			primarycontact="$primarycontact;$(tr '|' ',' <<< $contactRec)"
 		done
@@ -110,7 +110,7 @@ Dump -1 -n client
 	numTFields=1
 	for field in $(tr ',' ' '<<< $fields); do unset $field; done
 	sqlStmt="select $tFields from contacts where clientkey=\"$idx\""
-	RunSql2 "$contactsSqliteFile" $sqlStmt
+	RunSql "$contactsSqliteFile" $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		result="${resultSet[0]}"
 		for ((cntr=1 ; cntr < $numTFields+1 ; cntr++)); do
@@ -126,7 +126,7 @@ Dump -1 -n client
 	envs="dev,qa,test,next,curr,prior,preview,public"
 	for env in $(tr ',' ' '<<< $envs); do unset ${env}url ${env}internalurl; done
 	sqlStmt="select type,domain,internal from clientsites where clientkey=$idx"
-	RunSql2 "$contactsSqliteFile" $sqlStmt
+	RunSql "$contactsSqliteFile" $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		for ((cntr=0; cntr<${#resultSet[@]}; cntr++)); do
 			result="${resultSet[$cntr]}"
@@ -145,7 +145,7 @@ Dump -1 -n client
 	dbs="clientroles,employees"
 	whereClause="clientroles.role <> '' and clientroles.employeekey=employees.db_employeekey and clientroles.clientkey=$idx"
 	sqlStmt="select $fields from $dbs where $whereClause"
-	RunSql2 "$contactsSqliteFile" $sqlStmt
+	RunSql "$contactsSqliteFile" $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		for ((cntr=0; cntr<${#resultSet[@]}; cntr++)); do
 			[[ $verboseLevel -gt 1 ]] && echo -e "\tresultSet[$cntr] = >${resultSet[$cntr]}<"
@@ -159,7 +159,7 @@ Dump -1 -n client
 ## Build insert record
 	Verbose 1 "^^Building sql statement"
 	sqlStmt="select lower(column_name),lower(column_type) from information_schema.columns where table_name=\"$useClientInfoTable\""
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	unset wFields insertVals
 	for result in "${resultSet[@]}"; do
 		dump 2 -n result
@@ -187,11 +187,11 @@ Dump -1 -n client
 	Verbose 1 "^^Inserting data"
 	## Delete old data
 		sqlStmt="delete from $useClientInfoTable where name=\"$client\""
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 	## Insert new data
 		sqlStmt="insert into $useClientInfoTable ($wFields) values($insertVals)"
 		dump 2 -n wFields -n insertVals
-		[[ $DOIT != '' || $informationOnlyMode == true ]] && Dump sqlStmt || RunSql2 $sqlStmt
+		[[ $DOIT != '' || $informationOnlyMode == true ]] && Dump sqlStmt || RunSql $sqlStmt
 
 #===================================================================================================
 # Done
@@ -219,7 +219,7 @@ return 0
 ## Thu Oct  6 16:39:44 CDT 2016 - dscudiero - Set dbAcc level to Update for db writes
 ## Thu Oct  6 16:59:15 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Fri Oct  7 08:00:18 CDT 2016 - dscudiero - Take out the dbAcc switching logic, moved to framework RunSql
-## Thu Jan  5 12:38:15 CST 2017 - dscudiero - Switch to use RunSql2
+## Thu Jan  5 12:38:15 CST 2017 - dscudiero - Switch to use RunSql
 ## Tue Jan 17 08:58:29 CST 2017 - dscudiero - x
 ## Tue Jan 17 09:12:46 CST 2017 - dscudiero - remove debug statement
 ## Tue Jan 17 09:38:03 CST 2017 - dscudiero - misc cleanup
@@ -242,3 +242,4 @@ return 0
 ## 10-31-2017 @ 11.21.08 - (2.3.129)   - dscudiero - Fix problem setting longName
 ## 11-07-2017 @ 14.34.31 - (2.3.130)   - dscudiero - Added leepday field
 ## 11-07-2017 @ 15.18.35 - (2.3.148)   - dscudiero - More generalized the additional data from contacts table support
+## 03-22-2018 @ 14:06:35 - 2.3.151 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
