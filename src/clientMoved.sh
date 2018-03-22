@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.50 # -- dscudiero -- Mon 12/04/2017 @  9:12:19.03
+version=1.0.51 # -- dscudiero -- Thu 03/22/2018 @ 13:51:28.21
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="SelectMenuNew RunCourseLeafCgi"
@@ -73,13 +73,13 @@ Init "getClient nocheck"
 unset origHost origDevShare origProdShare
 ## Get current information
 	sqlStmt="select distinct host,share from $siteInfoTable where name=\"$client\" and env=\"next\""
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		origHost=$(cut -d'|' -f1 <<< ${resultSet[0]})
 		origProdShare=$(cut -d'|' -f2 <<< ${resultSet[0]})
 	fi
 	sqlStmt="select distinct share from $siteInfoTable where name=\"$client\" and env=\"dev\""
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		origDevShare=$(cut -d'|' -f2 <<< ${resultSet[0]})
 	fi
@@ -104,7 +104,7 @@ unset origHost origDevShare origProdShare
 ## New Production Server
 	if [[ -z $newProdShare ]]; then
 		sqlStmt="Select value from defaults where name=\"prodServers\" and host=\"$newHost\""
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		defaultProdShares=${resultSet[0]}
 		if [[ $(grep -o ',' <<< "$defaultProdShares" | wc -l) -gt 1 ]]; then
 			menuList=("|New Prod Server")
@@ -123,7 +123,7 @@ unset origHost origDevShare origProdShare
 ## New Dev Server
 	if [[ -z $newDevShare ]]; then
 		sqlStmt="Select value from defaults where name=\"devServers\" and host=\"$newHost\""
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		defaultDevShares=${resultSet[0]}
 		if [[ $(grep -o ',' <<< "$defaultDevShares" | wc -l) -gt 1 ]]; then
 			menuList=("|New Dev Server")
@@ -155,16 +155,16 @@ myData="Client: '$client', New Host: '$newHost', New Dev Share: '$newDevShare', 
 
 ## Update the data warehouse
 	sqlStmt="Update $siteInfoTable set host=\"$newHost\" where name=\"$client\" and host is not null and host <> \"N/A\""
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	sqlStmt="Update $siteInfoTable set share=\"$newDevShare\" where name=\"$client\" and env=\"dev\""
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	sqlStmt="Update $siteInfoTable set share=\"$newProdShare\" where name=\"${client}\" and env not in (\"dev\",\"preview\",\"public\")"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 
 	sqlStmt="Update $siteInfoTable set host=\"$newHost\" where name=\"${client}-test\" and env=\"test\" and host is not null and host <> \"N/A\""
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	sqlStmt="Update $siteInfoTable set share=\"$newProdShare\" where name=\"${client}-test\" and env=\"test\""
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 
 	Msg3 "Data Warehouse data updated to reflect the clients new location"
 
@@ -212,3 +212,4 @@ Goodbye 0 #'alert'
 ## 12-04-2017 @ 08.25.27 - (1.0.47)    - dscudiero - Updated to add arguments for parameters and switch to Msg3
 ## 12-04-2017 @ 08.28.53 - (1.0.48)    - dscudiero - Removed the --useLocal from example script
 ## 12-04-2017 @ 09.12.35 - (1.0.50)    - dscudiero - Added updating the workwith data
+## 03-22-2018 @ 14:06:08 - 1.0.51 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
