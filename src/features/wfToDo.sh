@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.90 # -- dscudiero -- Fri 09/22/2017 @  7:35:01.37
+version=1.0.91 # -- dscudiero -- Thu 03/22/2018 @ 14:21:24.32
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
@@ -79,7 +79,7 @@ minClVer='3.5.9'
 	checkStr='^navlinks:Administration|'
 	grepStr="$(ProtectedCall "grep \"$checkStr\" $editFile")"
 	if [[ $grepStr != '' ]]; then
-		Msg2 "Found 'Administration' sectionlinks and navlinks in the console definitions"
+		Msg "Found 'Administration' sectionlinks and navlinks in the console definitions"
 		unset ans; Prompt ans "Do you wish to update these to 'CourseLeaf'" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
 		if [[ $ans == 'y' ]]; then
 			sed -i s'/navlinks:Administration|/navlinks:CourseLeaf|/g' "$editFile"
@@ -94,7 +94,7 @@ minClVer='3.5.9'
 	editFile="$tgtDir/web/courseleaf/index.tcf"
 	name='To-Do List'
 	changesMade=$(EditCourseleafConsole 'insert' "$editFile" "$name")
-	[[ $changesMade == true ]] && Msg2 "Modified: $editFile" || Terminate 0 1 "Could not edit file '$editFile':\n\t$changesMade"
+	[[ $changesMade == true ]] && Msg "Modified: $editFile" || Terminate 0 1 "Could not edit file '$editFile':\n\t$changesMade"
 
 ## Add todo to CIMs
 	echo
@@ -102,7 +102,7 @@ minClVer='3.5.9'
 	GetCims "$tgtDir"
 	echo
 	for cim in $(tr ',' ' ' <<< "$cimStr"); do
-		Msg2 "Updateing CIM: '$cim'"
+		Msg "Updateing CIM: '$cim'"
 		editFile="$tgtDir/web/$cim/workflow.tcf"
 		checkStr='^localsteps:'
 		grepStr="$(ProtectedCall "grep \"$checkStr\" $editFile")"
@@ -111,16 +111,16 @@ minClVer='3.5.9'
 	done
 
 	if [[ $changesMade == true ]]; then
-		Msg2 "Rebuilding console..."
+		Msg "Rebuilding console..."
 		RunCourseLeafCgi $tgtDir "-r /courseleaf/index.tcf"
 		unset changeLogRecs
 		changeLogRecs+=("Feature: $feature")
 		myName=$parentScript
 		WriteChangelogEntry 'changeLogRecs' "$tgtDir/changelog.txt"
-		Msg2
+		Msg
 		Pause "Feature '$currentScript': Installed, please press any key to continue"
 	else
-		Msg2
+		Msg
 		Pause "Feature '$currentScript': No changes were made"
 	fi
 
@@ -136,3 +136,4 @@ return  ## We are called as a subprocess, just return to our parent
 ## 04-06-2017 @ 10.10.14 - (1.0.62)    - dscudiero - renamed RunCourseLeafCgi, use new name
 ## 04-13-2017 @ 11.02.55 - (1.0.63)    - dscudiero - Fixed problem where we were only allowing the selection of a signel cim
 ## 09-22-2017 @ 07.50.27 - (1.0.90)    - dscudiero - Add to imports
+## 03-22-2018 @ 14:36:22 - 1.0.91 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
