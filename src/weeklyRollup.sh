@@ -1,10 +1,10 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #===================================================================================================
-version=1.0.37 # -- dscudiero -- Mon 12/18/2017 @  7:50:26.86
+version=1.0.38 # -- dscudiero -- Thu 03/22/2018 @ 13:56:58.92
 #===================================================================================================
 TrapSigs 'on'
-myIncludes="ProtectedCall RunSql2 SetFileExpansion"
+myIncludes="ProtectedCall RunSql SetFileExpansion"
 Import "$standardIncludes $myIncludes"
 originalArgStr="$*"
 scriptDescription=""
@@ -53,10 +53,10 @@ ParseArgsStd2 $originalArgStr
 # Main
 #===================================================================================================
 ## Update process counts
-	Msg3;Msg3 "^Update script usage counts -- Starting"
+	Msg;Msg "^Update script usage counts -- Starting"
 	## Get the aggregated processLog data and update counts in the scripts table.
 	sql="select name,count(*) from $processLogTable group by name order by name"
-	RunSql2 $sql
+	RunSql $sql
 	pLogRecs=(${resultSet[*]})
 	for pLogRec in ${pLogRecs[@]}; do
 		pName=$(cut -d'|' -f1 <<< $pLogRec)
@@ -64,29 +64,29 @@ ParseArgsStd2 $originalArgStr
 		dump 1 -t pName pCount
 		## Get the current count from the script record in the scripts table
 			sql="select usageCount from scripts where name=\"$pName\""
-			RunSql2 $sql
+			RunSql $sql
 			usageCount=${resultSet[0]}
 			dump 1 -t usageCount
 		## Update usage count
 			let newCount=$usageCount+$pCount
 			dump 1 -t newCount
 			sql="update $scriptsTable set usageCount=$newCount where name=\"$pName\""
-			RunSql2 $sql
+			RunSql $sql
 	done
-	Msg3 "^Update script usage counts -- Completed"
+	Msg "^Update script usage counts -- Completed"
 
 ## Roll up the weeks processlog db table
-	Msg3;Msg3 "^Processlog rollup -- Starting"
+	Msg;Msg "^Processlog rollup -- Starting"
 	cd $TOOLSPATH/Logs
 	outFile="$(date '+%m-%d-%y').processLog.xls"
 	## Get the column names
 	sqlStmt="select column_name from information_schema.columns where table_schema = \"$warehouseDb\" and table_name = \"$processLogTable\""
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	resultString="${resultSet[@]}" ; resultString=$(tr " " "\t" <<< $resultString)
 	echo "$resultString" >> $outFile
 	SetFileExpansion 'off'
 	sqlStmt="select * from $processLogTable"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		for result in "${resultSet[@]}"; do
 		 	resultString=$result; resultString=$(tr "|" "\t" <<< $resultString)
@@ -95,16 +95,16 @@ ParseArgsStd2 $originalArgStr
 		ProtectedCall "tar -cvzf \"$(date '+%m-%d-%y').processLog.tar\" $outFile --remove-files > /dev/null 2>&1"
 	fi
 	sqlStmt="truncate $processLogTable"
-	RunSql2 $sqlStmt
-	Msg3 "^Processlog rollup -- Completed"
+	RunSql $sqlStmt
+	Msg "^Processlog rollup -- Completed"
 
 ## Roll up the weeks log files
-	Msg3;Msg3 "^Rollup weekly Logs -- Starting"
+	Msg;Msg "^Rollup weekly Logs -- Starting"
 	cd $TOOLSPATH/Logs
 	[[ -d ./cronJobs ]] && ProtectedCall "rm -rf ./cronJobs"
 	ProtectedCall "tar -czf \"$(date '+%m-%d-%y').tar.gz\" * --exclude '*.gz' --exclude \"weekly*\"" #-remove-files
 	ProtectedCall "find . -maxdepth 1 -mindepth 1 -type d -type d ! -name weekly -exec rm -rf {} \; > /dev/null 2>&1"
-	Msg3 "^$myName Logs rollup -- Completed"
+	Msg "^$myName Logs rollup -- Completed"
 
 #===================================================================================================
 ## Done
@@ -121,9 +121,10 @@ Goodbye 0 #'alert'
 ## 06-05-2017 @ 08.16.04 - (1.0.27)    - dscudiero - tweak messaging
 ## 09-21-2017 @ 10.03.00 - (1.0.28)    - dscudiero - comment out the truncating of the processlog
 ## 09-25-2017 @ 07.57.52 - (1.0.29)    - dscudiero - General syncing of dev to prod
-## 10-23-2017 @ 08.30.56 - (1.0.32)    - dscudiero - Switch to Msg3
+## 10-23-2017 @ 08.30.56 - (1.0.32)    - dscudiero - Switch to Msg
 ## 11-22-2017 @ 06.25.55 - (1.0.33)    - dscudiero - Switch to parseargsstd2
 ## 11-27-2017 @ 09.45.11 - (1.0.34)    - dscudiero - Fix problem deleting the weekly log file while in use
 ## 12-11-2017 @ 06.49.36 - (1.0.35)    - dscudiero - Update code excluding the weekly cron log
 ## 12-18-2017 @ 07.46.57 - (1.0.36)    - dscudiero - Fix problem with the final rollup deleteing the log directories
 ## 12-18-2017 @ 08.04.04 - (1.0.37)    - dscudiero - Cosmetic/minor change
+## 03-22-2018 @ 14:07:55 - 1.0.38 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
