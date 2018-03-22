@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.49 # -- dscudiero -- Wed 10/18/2017 @ 16:05:00.99
+version=1.0.50 # -- dscudiero -- Wed 03/21/2018 @  9:34:28.56
 #==================================================================================================
 #= Description +===================================================================================
 # Clone a Courseleaf git repository
@@ -19,19 +19,20 @@ for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ "$(basename "${BASH_SOURCE[$i]}")"
 # Standard call back functions
 #==================================================================================================
 #==================================================================================================
-# parse script specific argumentstrap
+# parse script specific arguments 
 #==================================================================================================
-function parseArgs-cloneGitRepo {
-	# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
-	noFork=false
-	argList+=(-noFork,3,switch,noFork,,script,"Do not for off processes")
-}
-function Goodbye-cloneGitRepo  { # or Goodbye-$myName
-	SetFileExpansion 'on'
-	rm -f "$stdOut" "$stdErr" >& /dev/null
-	SetFileExpansion
-	return 0
-}
+	function cloneGitRepo-ParseArgsStd2  {
+		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+		myArgs+=('nof|noFork|switch|noFork||script|Do not for off processes')
+		return 0
+	}
+
+	function cloneGitRepo-Goodbye  { # or Goodbye-$myName
+		SetFileExpansion 'on'
+		rm -f "$stdOut" "$stdErr" >& /dev/null
+		SetFileExpansion
+		return 0
+	}
 
 #==================================================================================================
 # local functions
@@ -365,3 +366,4 @@ return 0
 ## 10-18-2017 @ 14.27.31 - (1.0.45)    - dscudiero - Cosmetic/minor change
 ## 10-18-2017 @ 15.31.00 - (1.0.47)    - dscudiero - Cosmetic/minor change
 ## 10-18-2017 @ 15.35.05 - (1.0.48)    - dscudiero - Use Msg3
+## 03-22-2018 @ 12:35:49 - 1.0.50 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
