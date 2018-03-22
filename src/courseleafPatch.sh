@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.46 # -- dscudiero -- Fri 02/16/2018 @ 13:24:16.82
+version=5.5.47 # -- dscudiero -- Thu 03/22/2018 @ 13:21:28.53
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel2 EditTcfValue BackupCourseleafFile'
@@ -285,11 +285,11 @@ cwdStart="$(pwd)"
 		echo >> $scriptFile
 
 		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
-		echo "function Msg2 {" >> $scriptFile
+		echo "function Msg {" >> $scriptFile
 		echo "	local msgText=\$(tr '^' \"\t\" <<< \"\$*\")" >> $scriptFile
 		echo "	echo -e \"\$msgText\"" >> $scriptFile
 		echo "	return 0" >> $scriptFile
-		echo "} #Msg2" >> $scriptFile
+		echo "} #Msg" >> $scriptFile
 		echo >> $scriptFile
 
 		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
@@ -472,11 +472,11 @@ cwdStart="$(pwd)"
 			echo >> $scriptFile
 
 			echo " # Archive request logs" >> $scriptFile
-			echo " 	Msg2 \"^Archiving request logs...\"" >> $scriptFile
+			echo " 	Msg \"^Archiving request logs...\"" >> $scriptFile
 			echo " 	if [[ -d \$tgtDir/requestlog ]]; then" >> $scriptFile
 			echo " 		pushd \$tgtDir/requestlog >& /dev/null" >> $scriptFile
 			echo " 		if [[ -n \$(ls) ]]; then" >> $scriptFile
-			echo " 			Msg2 \"^Archiving last requestlog directory...\"" >> $scriptFile
+			echo " 			Msg \"^Archiving last requestlog directory...\"" >> $scriptFile
 			echo " 			set +o noglob" >> $scriptFile
 			echo " 			[[ ! -d \"\$tgtDir/requestlog-archive/\" ]] && mkdir \"\$tgtDir/requestlog-archive/\"" >> $scriptFile
 			echo " 			\$DOIT tar -cJf \$tgtDir/requestlog-archive/requestlog-\$(date \"+%Y-%m-%d\").tar.bz2 * --remove-files" >> $scriptFile
@@ -487,7 +487,7 @@ cwdStart="$(pwd)"
 			echo " 	if [[ -d \$tgtDir/requestlog-archive ]]; then" >> $scriptFile
 			echo " 		pushd \$tgtDir/requestlog-archive >& /dev/null" >> $scriptFile
 			echo " 		if [[ \$(ls | grep -v 'archive') != '' ]]; then" >> $scriptFile
-			echo " 			Msg2 \"^Taring up the requestlog-archive directory...\"" >> $scriptFile
+			echo " 			Msg \"^Taring up the requestlog-archive directory...\"" >> $scriptFile
 			echo " 			pushd \$tgtDir/requestlog-archive >& /dev/null" >> $scriptFile
 			echo " 			set +o noglob" >> $scriptFile
 			echo " 			\$DOIT tar -cJf \$tgtDir/requestlog-archive/archive-\$(date \"+%Y-%m-%d\").tar.bz2 *  --exclude '*archive*' --remove-files" >> $scriptFile
@@ -508,14 +508,14 @@ cwdStart="$(pwd)"
 
 			# echo "	# Turn off pencils from the structured content draw" >> $scriptFile
 			# echo "	editFile=\"\$(dirname \$tgtDir)/curr/local/localsteps/structuredcontentdraw.html\"" >> $scriptFile
-			# echo "	Msg2 \"^Editing the \$editFile...\"" >> $scriptFile
+			# echo "	Msg \"^Editing the \$editFile...\"" >> $scriptFile
 			# echo "	[[ -f \"\$editFile\" ]] && \$DOIT sed -e '/pencil.png/ s|html|//html|' -i \"\$editFile\"" >> $scriptFile
 			# echo >> $scriptFile
 
 			# echo "	editFile=\"\$(dirname \$tgtDir)/curr/\$courseleafProgDir.cfg\"" >> $scriptFile
-			# echo "	Msg2 \"^Editing the \$editFile...\"" >> $scriptFile
+			# echo "	Msg \"^Editing the \$editFile...\"" >> $scriptFile
 			# echo "	# Set sitereadonly" >> $scriptFile
-			# echo "	Msg2 \"^^CURR site admin mode set ...\"" >> $scriptFile
+			# echo "	Msg \"^^CURR site admin mode set ...\"" >> $scriptFile
 			# echo "	\$DOIT sed -i s'_^//sitereadonly:Admin Mode:_sitereadonly:Admin Mode:_'g \"\$editFile\"" >> $scriptFile
 			# echo >> $scriptFile
 
@@ -588,7 +588,7 @@ cwdStart="$(pwd)"
 		echo "	commitComment=\"Files updated by \$userName via \$myName (\$version)\"" >> $scriptFile
 		echo "	if [[ \$targetHasGit == true ]]; then" >> $scriptFile
 		echo "		if [[ \$(CheckForChangedGitFiles \"\$tgtDir\") == true ]]; then" >> $scriptFile
-		echo "			Msg2 \"Committing changed git files in the NEXT environment...\"" >> $scriptFile
+		echo "			Msg \"Committing changed git files in the NEXT environment...\"" >> $scriptFile
 		echo "			pushd \"\$tgtDir\" &> /dev/null" >> $scriptFile
 		echo "			{ ( $DOIT git commit --all -m \"\$commitComment\"); } | Indent" >> $scriptFile
 		echo "			popd &> /dev/null" >> $scriptFile
@@ -597,7 +597,7 @@ cwdStart="$(pwd)"
 
 		echo "	if [[ -d \"\$(dirname \$tgtDir)/curr/.git\" ]]; then" >> $scriptFile
 		echo "		if [[ \$(CheckForChangedGitFiles \"$(dirname $tgtDir)/curr)\") == true ]]; then" >> $scriptFile
-		echo "			Msg2 "Committing changed git files in the CURR environment..."" >> $scriptFile
+		echo "			Msg "Committing changed git files in the CURR environment..."" >> $scriptFile
 		echo "			Pushd \"\$(dirname \$tgtDir)/curr)\"" >> $scriptFile
 		echo "			{ ( $DOIT git commit --all -m \"\$commitComment\"); } | Indent" >> $scriptFile
 		echo "			popd &> /dev/null" >> $scriptFile
@@ -1717,9 +1717,9 @@ fi
 # if [[ $nextGitFilesChanged == true || $currGitFilesChanged == true ]]; then
 # 	echo
 # 	Note "Files where changed that are under git management:"
-# 	[[ $nextGitFilesChanged == true ]] && Msg2 "^NEXT -- $tgtDir/.git"
-# 	[[ $currGitFilesChanged == true ]] && Msg2 "^CURR -- $(dirname $tgtDir)/curr/.git"
-#  	Msg2 "$(ColorN "See above for details, you should commit those changes before proceeding.")"
+# 	[[ $nextGitFilesChanged == true ]] && Msg "^NEXT -- $tgtDir/.git"
+# 	[[ $currGitFilesChanged == true ]] && Msg "^CURR -- $(dirname $tgtDir)/curr/.git"
+#  	Msg "$(ColorN "See above for details, you should commit those changes before proceeding.")"
 #  	echo
 # fi
 
@@ -1748,7 +1748,7 @@ Goodbye 0 "$text1" "$text2"
 ## Tue May 17 14:14:40 CDT 2016 - dscudiero - Set the parent directory of any .cgi file to 755
 ## Mon Jun  6 07:30:37 CDT 2016 - dscudiero - Fix wording of messages
 ## Thu Jun 16 15:37:48 CDT 2016 - dscudiero - Fix problem with getting the release date of the source
-## Tue Jun 21 12:49:50 CDT 2016 - dscudiero - Updated messaging, cgi directory selection, and moved to msg2
+## Tue Jun 21 12:49:50 CDT 2016 - dscudiero - Updated messaging, cgi directory selection, and moved to Msg
 ## Fri Jun 24 07:34:06 EDT 2016 - dscudiero - Added ignore lists to the release selection
 ## Tue Jul  5 07:23:16 CDT 2016 - dscudiero - Add error message if there are no releases to install.
 ## Tue Jul  5 07:23:53 CDT 2016 - dscudiero - Add error message if there are no releases to install.
@@ -1823,3 +1823,4 @@ Goodbye 0 "$text1" "$text2"
 ## 12-20-2017 @ 14.45.55 - 5.5.22 - dscudiero - Fix problem where ((indentLevel++)) breaks if starting value is 0
 ## 01-24-2018 @ 10.58.48 - 5.5.44 - dscudiero - Cosmetic/minor change/Sync
 ## 01-24-2018 @ 13.33.01 - 5.5.45 - dscudiero - Move the backup site to be at the same level as the target directory.
+## 03-22-2018 @ 13:25:41 - 5.5.47 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
