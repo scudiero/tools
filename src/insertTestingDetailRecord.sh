@@ -1,10 +1,10 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #==================================================================================================
-version=1.0.121 # -- dscudiero -- Thu 01/11/2018 @  8:59:00.81
+version=1.0.123 # -- dscudiero -- Thu 03/22/2018 @ 14:02:19.12
 #==================================================================================================
 TrapSigs 'on'
-myIncludes="RunSql2 GetExcel2 ProtectedCall"
+myIncludes="RunSql GetExcel2 ProtectedCall"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -61,14 +61,14 @@ dump -2 workbookFile -t clientCode product project instance
 	Verbose 1 "^^^Retrieving qaStatusKey for '$clientCode.$product.$project.$instance'..."
 	whereClause="clientCode=\"$clientCode\" and  product=\"$product\" and project=\"$project\" and instance=\"$instance\""
 	sqlStmt="select idx from $qaStatusTable where $whereClause"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	[[ ${#resultSet[@]} -eq 0 ]] && Error "Could not retrieve record key in $warehouseDb.$qaStatusTable for:\n^$whereClause" && Goodbye 'Return' && return 2
 	qastatusKey=${resultSet[0]}
 	dump -2 -t -t qastatusKey
 
 ## Check to see if we have already processed this key
 	sqlStmt="select count(*) from $qaTestingDetailsTable where qatestid=$qastatusKey"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	[[ ${resultSet[0]} -gt 0 ]] && Warning 0 2 "QaTestId '$qastatusKey' has already been processed into '$warehouseDb.$qaTestingDetailsTable', skipping file" && Goodbye 'Return' && return 1
 
 ## Read the Testing Detail Final data
@@ -79,7 +79,7 @@ dump -2 workbookFile -t clientCode product project instance
 	# if [[ $grepStr != '' || $(tail -n 1 $tmpFile) == '-1' ]]; then
 	# 	Error "Could not retrieve data from workbook, please see below"
 	# 	tail -n 20 $tmpFile 2>&1 | xargs -I{} printf "\\t%s\\n" "{}"
-	# 	Msg3
+	# 	Msg
 	# 	Goodbye -1
 	# fi
 	Verbose 1 "^^^^${#resultSet[@]} Records read from worksheet"
@@ -128,7 +128,7 @@ dump -2 workbookFile -t clientCode product project instance
 		values="NULL,$qastatusKey,$testCaseId,$description,$overallStatus,$iterationStatus,$iterationDate,$iterationPhase,$iterationPhaseQualifier"
 		values="$values,NULL,NULL,NULL,NULL"
 		sqlStmt="insert into $qaTestingDetailsTable values($values)"
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		(( insertCntr += 1))
 	done ## resultSet
 	Verbose 1 "^^^^$insertCntr records inserted into the $warehouseDb.$qaTestingDetailsTable table for qaStatus key qastatusKey"
@@ -138,7 +138,7 @@ dump -2 workbookFile -t clientCode product project instance
 	updateCntr=0
 	unset updatedList
 	sqlStmt="select distinct testcaseid from $qaTestingDetailsTable where Lower(instanceStatus) like \"%failed%\""
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		Verbose 1 "^^^^Setting 'when fixed' data for failed test case instances ($(sed "s/ /, /g" <<< ${resultSet[*]}))..."
 		## Loop through the failed records and retrieve the 'fixed on' information
@@ -149,7 +149,7 @@ dump -2 workbookFile -t clientCode product project instance
 			fields="idx,instanceDate,instancePhase,instancePhaseQualifier"
 			whereClause="Lower(instanceStatus) like \"%passed%\" and testcaseid=$failedId "
 			sqlStmt="select $fields from $qaTestingDetailsTable where $whereClause order by instanceDate DESC;"
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 			if [[ ${#resultSet[@]} -gt 0 ]]; then
 				for result in "${resultSet[@]}"; do
 					dump -2 -t result
@@ -161,7 +161,7 @@ dump -2 workbookFile -t clientCode product project instance
 				## Update the fixed data on all the testing records
 				fields="fixedDate=\"$instanceDate\", fixedPhase=\"$instancePhase\", fixedPhaseQualifier=\"$instancePhaseQualifier\""
 				sqlStmt="update $qaTestingDetailsTable set $fields where testcaseid=$failedId"
-				RunSql2 $sqlStmt
+				RunSql $sqlStmt
 				updatedList+=($failedId)
 				(( updateCntr += 1))
 			fi
@@ -190,6 +190,7 @@ dump -2 workbookFile -t clientCode product project instance
 ## 10-18-2017 @ 14.30.38 - (1.0.113)   - dscudiero - Fix who called check
 ## 10-19-2017 @ 09.42.47 - (1.0.114)   - dscudiero - Added debug arround caller check code
 ## 10-20-2017 @ 09.01.58 - (1.0.115)   - dscudiero - Fix problem in the caller check code
-## 11-01-2017 @ 07.42.33 - (1.0.117)   - dscudiero - Switch to Msg3
+## 11-01-2017 @ 07.42.33 - (1.0.117)   - dscudiero - Switch to Msg
 ## 11-08-2017 @ 07.32.09 - (1.0.118)   - dscudiero - Switch to GetExcel2
 ## 12-12-2017 @ 06.57.11 - (1.0.119)   - dscudiero - Remove 'env' from the queries
+## 03-22-2018 @ 14:06:46 - 1.0.123 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
