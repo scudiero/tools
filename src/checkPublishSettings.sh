@@ -1,11 +1,11 @@
 #!/bin/bash
 #==================================================================================================
-version=2.3.21 # -- dscudiero -- Mon 10/23/2017 @  7:35:52.91
+version=2.3.23 # -- dscudiero -- Thu 03/22/2018 @ 12:27:43.40
 #==================================================================================================
 TrapSigs 'on'
-includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye MkTmpFile'
-includes="$includes RunSql2"
-Import "$includes"
+myIncludes="ProtectedCall StringFunctions RunSql"
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
 scriptDescription="Check for more than one client site is publishing to the same location"
 
@@ -27,7 +27,7 @@ sendMail=false
 #==================================================================================================
 Hello
 GetDefaultsData $myName
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 tmpFile=$(MkTmpFile)
 
 #==================================================================================================
@@ -35,7 +35,7 @@ tmpFile=$(MkTmpFile)
 #==================================================================================================
 unset dbRecs
 sqlStmt="select name,publishing from $siteInfoTable where publishing <> \"/dev/null\" and publishing is not null  and publishing <> \"\" group by name,publishing having count(publishing) > 1"
-RunSql2 $sqlStmt
+RunSql $sqlStmt
 [[ ${#resultSet[@]} -le 0 ]] && Goodbye 0
 dbRecs=("${resultSet[@]}")
 for dbRec in "${dbRecs[@]}"; do
@@ -43,11 +43,11 @@ for dbRec in "${dbRecs[@]}"; do
 	client=$(echo $dbRec | cut -d "|" -f1)
 	publishing=$(echo $dbRec | cut -d "|" -f2)
 	sqlStmt="select distinct env from $siteInfoTable where name=\"$client\" and publishing=\"$publishing\";"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	count=${#resultSet[@]}
 	if [[ $count -ge  2 ]]; then
 		IFSSave=$IFS; IFS=$','; envs=$(echo "${resultSet[*]}" | tr "\t" " "); IFS=$IFSSave
-		Msg2 "^$client -- found multiple environments ($envs) publishing to the same locaton ($publishing)." | tee -a $tmpFile
+		Msg "^$client -- found multiple environments ($envs) publishing to the same locaton ($publishing)." | tee -a $tmpFile
 		sendMail=true
 	fi
 done
@@ -56,8 +56,8 @@ done
 ## Send out emails
 
 if [[ $sendMail == true && $noEmails == false ]]; then
-	Msg2 "\nEmails sent to: $emailAddrs\n" | tee -a $tmpFile
-	Msg2 "\n*** Please do not respond to this email, it was sent by an automated process\n" >> $tmpFile
+	Msg "\nEmails sent to: $emailAddrs\n" | tee -a $tmpFile
+	Msg "\n*** Please do not respond to this email, it was sent by an automated process\n" >> $tmpFile
 	mail -s "$myName found discrepancies" $emailAddrs < $tmpFile
 fi
 
@@ -76,6 +76,7 @@ Goodbye 0
 ## Wed Apr 27 16:18:04 CDT 2016 - dscudiero - Switch to use RunSql
 ## Thu May 12 13:15:22 CDT 2016 - dscudiero - Fix problem where sites with publishing = were being picked up
 ## Mon Oct  3 07:06:17 CDT 2016 - dscudiero - Wrap clear statement with protection
-## Mon Jan 23 12:26:59 CST 2017 - dscudiero - Fix problem using Msg not Msg2
+## Mon Jan 23 12:26:59 CST 2017 - dscudiero - Fix problem using Msg not Msg
 ## Mon Feb 13 15:59:27 CST 2017 - dscudiero - Make sure we are using our own tmpFile
 ## 10-23-2017 @ 07.36.07 - (2.3.21)    - dscudiero - Tweak messaging
+## 03-22-2018 @ 12:35:39 - 2.3.23 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
