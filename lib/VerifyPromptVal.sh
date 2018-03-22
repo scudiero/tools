@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.71" # -- dscudiero -- Tue 01/23/2018 @ 15:27:23.37
+# version="2.0.73" # -- dscudiero -- Thu 03/22/2018 @ 13:41:00.45
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -8,7 +8,7 @@
 # All rights reserved
 #===================================================================================================
 function VerifyPromptVal {
-	myIncludes="RunSql2 StartRemoteSession PushPop"
+	myIncludes="RunSql StartRemoteSession PushPop"
 	Import "$standardInteractiveIncludes $myIncludes"
 
 	local i
@@ -47,7 +47,7 @@ function VerifyPromptVal {
 			## Look for client in the clients table
 			SetFileExpansion 'off'
 			local sqlStmt="select * from $clientInfoTable where name=\"$response\" "
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 			if [[ ${#resultSet[@]} -eq 0 ]]; then
 				verifyMsg="$(Error "Client value of '$response' not found in $warehouseDb.$clientInfoTable")"
 			else
@@ -58,7 +58,7 @@ function VerifyPromptVal {
 			if [[ $verifyMsg == "" ]]; then
 				if [[ $anyClient != 'true' ]]; then
 					sqlStmt="select host from $siteInfoTable where name like \"$response%\""
-					RunSql2 $sqlStmt
+					RunSql $sqlStmt
 					[[ ${#resultSet[0]} -eq 0 ]] && verifyMsg="$(Error "Could not retrieve any records for '$response' in the $warehouseDb.$siteInfoTable")"
 					if [[ $verifyMsg == "" ]]; then
 						hostedOn="${resultSet[0]}"
@@ -68,6 +68,7 @@ function VerifyPromptVal {
 									responseSave="$response"
 									unset ans; Prompt ans "Client '$response' is hosted on '$hostedOn', Do you wish to start a session on that host" 'Yes No' 'Yes'
 									ans="${ans:0:1}"; ans=${ans,,[a-z]}
+									[[ $ans == 'n' ]] && Quit
 									response="$responseSave"
 								else
 									ans='y'
@@ -121,7 +122,7 @@ function VerifyPromptVal {
 		validProducts='cat,cim,clss'
 		if [[ $client != '' ]]; then
 			local sqlStmt="select products from $clientInfoTable where name='$client'"
-			RunSql2 "$sqlStmt"
+			RunSql "$sqlStmt"
 			[[ ${#resultSet[@]} -gt 0 ]] && validProducts="${resultSet[0]}"
 		fi
 		local ans=${response,,[a-z]}
@@ -222,7 +223,7 @@ export -f VerifyPromptVal
 #===================================================================================================
 ## Wed Jan  4 13:54:39 CST 2017 - dscudiero - General syncing of dev to prod
 ## Mon Mar  6 15:55:11 CST 2017 - dscudiero - Tweak product parsing
-## 03-30-2017 @ 15.06.14 - ("2.0.35")  - dscudiero - switch from runsql to runsql2
+## 03-30-2017 @ 15.06.14 - ("2.0.35")  - dscudiero - switch from runsql to RunSql
 ## 04-04-2017 @ 13.17.36 - ("2.0.46")  - dscudiero - Added support to verify multi value responses
 ## 04-05-2017 @ 10.08.43 - ("2.0.47")  - dscudiero - Turn off debug statements
 ## 05-19-2017 @ 14.38.31 - ("2.0.49")  - dscudiero - Set global client record when we look up client
@@ -230,9 +231,10 @@ export -f VerifyPromptVal
 ## 05-22-2017 @ 09.12.16 - ("2.0.51")  - dscudiero - Added isNumeric and isAlpha types
 ## 05-22-2017 @ 09.16.07 - ("2.0.52")  - dscudiero - General syncing of dev to prod
 ## 09-22-2017 @ 07.18.50 - ("2.0.53")  - dscudiero - Include StartRemoteSession
-## 09-29-2017 @ 16.09.19 - ("2.0.54")  - dscudiero - Add RunSql2 to includes
+## 09-29-2017 @ 16.09.19 - ("2.0.54")  - dscudiero - Add RunSql to includes
 ## 10-19-2017 @ 16.21.56 - ("2.0.55")  - dscudiero - Replace Msg2 with Msg3
 ## 11-21-2017 @ 10.43.07 - ("2.0.56")  - dscudiero - Cosmetic/minor change
 ## 12-01-2017 @ 09.14.37 - ("2.0.59")  - dscudiero - Tweak messaging for do you want to start remote session
 ## 12-04-2017 @ 11.18.38 - ("2.0.63")  - dscudiero - Fix issue with the automagic ssh to other server
 ## 12-20-2017 @ 14.17.07 - ("2.0.65")  - dscudiero - Add PushPop to the includes list
+## 03-22-2018 @ 13:42:51 - 2.0.73 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
