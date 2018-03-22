@@ -1,11 +1,11 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.73 # -- dscudiero -- Wed 01/10/2018 @  8:14:04.59
+version=1.2.74 # -- dscudiero -- Thu 03/22/2018 @ 13:58:03.30
 #=======================================================================================================================
 TrapSigs 'on'
 
-myIncludes="GetExcel2 StringFunctions RunSql2 SetFileExpansion ProtectedCall PushPop"
+myIncludes="GetExcel2 StringFunctions RunSql SetFileExpansion ProtectedCall PushPop"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -159,13 +159,13 @@ for var in $falseVars; do eval $var=false; done
 
 ## Get the primary index column name
 	sqlStmt="select column_name from information_schema.columns where table_schema=\"$warehouseDb\" and table_name=\"$qaStatusTable\"and column_key='PRI'"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	primaryKey=${resultSet[0]}
 
 ## Get all the fields in the database table
 	unset insertFields
 	sqlStmt="select column_name from information_schema.columns where table_schema=\"$warehouseDb\" and table_name=\"$qaStatusTable\" and column_name<>\"$primaryKey\""
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	for result in "${resultSet[@]}"; do
 		field=$(cut -d'|' -f1 <<< $result)
 		insertFields="$insertFields,$field"
@@ -175,7 +175,7 @@ for var in $falseVars; do eval $var=false; done
 ## Get the update fields in the database table
 	unset updateFields
 	sqlStmt="select column_name from information_schema.columns where table_schema=\"$warehouseDb\" and table_name=\"$qaStatusTable\" and is_nullable='yes' and column_name<>\"$primaryKey\""
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	for result in "${resultSet[@]}"; do
 		field=$(cut -d'|' -f1 <<< $result)
 		updateFields="$updateFields,$field"
@@ -201,14 +201,14 @@ DumpMap 2 "$(declare -p variableMap)"
 #================================================================================================================================================================
 # Main
 #================================================================================================================================================================
-Msg3; Msg3 "Retrieveing Implementation Team data from '$(basename "$cimTrackingWorkBook")/$cimTrackingWorkbookSheet'"
+Msg; Msg "Retrieveing Implementation Team data from '$(basename "$cimTrackingWorkBook")/$cimTrackingWorkbookSheet'"
 ## Disable getting resource data since the implementation will not cooperate with us on how the data is recorded
 ## GetCimPriorityData 'cimTrackingHash' "$cimTrackingWorkBook" "$cimTrackingWorkbookSheet" "$qaColumnName"
-## if [[ $verboseLevel -ge 1 ]]; then Msg3 "^cimTrackingHash:"; for i in "${!cimTrackingHash[@]}"; do printf "\t\t[$i] = >${cimTrackingHash[$i]}<\n"; done; fi
+## if [[ $verboseLevel -ge 1 ]]; then Msg "^cimTrackingHash:"; for i in "${!cimTrackingHash[@]}"; do printf "\t\t[$i] = >${cimTrackingHash[$i]}<\n"; done; fi
 
-Msg3; Msg3 "QA Tracking Root directory = '$qaTrackingRoot'"
+Msg; Msg "QA Tracking Root directory = '$qaTrackingRoot'"
 ## Loop through workbooks
-Msg3 "Scanning the directory..."
+Msg "Scanning the directory..."
 SetFileExpansion 'off'
 [[ $client != "" ]] && fileSpec="$client-*.xlsm" || fileSpec='*.xlsm'
 SetFileExpansion
@@ -229,7 +229,7 @@ for workbook in "${workbooks[@]}"; do
 		sheets="${resultSet[0]}"
 
 	[[ $(Contains "|${sheets}|" '|ProjectSummary|') != true ]] && continue
-	Msg3 "^Processing File: '$(basename $workbook)' ($fileCntr of ${#workbooks[@]})"
+	Msg "^Processing File: '$(basename $workbook)' ($fileCntr of ${#workbooks[@]})"
 
 	## Read the Project summary data
 		workSheet='ProjectSummary'
@@ -297,7 +297,7 @@ for workbook in "${workbooks[@]}"; do
 		if [[ $clientCode == '' || $product == '' || $project == '' || $instance == '' ]]; then
 			Warning "File '$workbook'\nhas insufficient data to uniquely identify QA project"
 			dump -2 -t -t clientCode product project instance
-			Msg3 "^^Skipping file"
+			Msg "^^Skipping file"
 			continue
 		fi
 
@@ -327,7 +327,7 @@ for workbook in "${workbooks[@]}"; do
 	## See if there is an existing record in the database do setup accordingly
 		whereClause="clientCode=$clientCode and product=$product and project=$project and instance=$instance"
 		sqlStmt="select $primaryKey from $qaStatusTable where $whereClause and recordStatus=\"A\""
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		if [[ ${#resultSet[@]} -eq 0 ]]; then
 			sqlAction='Insert'
 			fields="$insertFields"
@@ -359,14 +359,14 @@ for workbook in "${workbooks[@]}"; do
 
 	## Build & run sqlStmt
 		sqlStmt="$sqlAction $qaStatusTable $setClause $whereClause"
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		Verbose 1 "^^${sqlAction} of record completed"
 
 	## Populate the testing detains table if workbook is finalized
 		## Check to see if the workbook is finalized
 		if [[ $(Contains "|${sheets}|" '|TestingDetailFinal|') == true ]]; then
 			## Process the testing details records
-			Msg3 "^^Processing Testing Details data via '$workerScript'..."
+			Msg "^^Processing Testing Details data via '$workerScript'..."
 			ProtectedCall "source \"$workerScriptFile\" \"$workbook\" 'TestingDetailFinal' \"$clientCode\" \"$product\" \"$instance\" \"$project\""
 
 			if [[ $rc -ge 2 ]]; then
@@ -379,13 +379,13 @@ for workbook in "${workbooks[@]}"; do
 					## Get the key for the qastatus record
 						whereClause="clientCode=$clientCode and product=$product and project=$project and instance=$instance"
 						sqlStmt="select idx from $qaStatusTable where $whereClause"
-						RunSql2 $sqlStmt
+						RunSql $sqlStmt
 						if [[ ${#resultSet[@]} -eq 0 ]]; then
 							Error "Could not retrieve record key in $warehouseDb.$qaStatusTable for: $whereClause\nCould not set the record as deactivated"
 						else
 							qastatusKey=${resultSet[0]}
 							sqlStmt="update $qaStatusTable set recordStatus=\"D\" where idx=$qastatusKey"
-							RunSql2 $sqlStmt
+							RunSql $sqlStmt
 						fi
 				fi
 			fi
@@ -419,7 +419,7 @@ Goodbye 0 #'alert'
 ## Fri Mar 17 10:45:12 CDT 2017 - dscudiero - Fixed problem with doubly quotes strings## 03-24-2017 @ 09.10.05 - (1.1.11)    - dscudiero - General syncing of dev to prod
 ## 03-24-2017 @ 09.23.08 - (1.1.12)    - dscudiero - Fix problem setting the qastatus table record status=D
 ## 03-27-2017 @ 13.30.01 - (1.1.14)    - dscudiero - Only report on active records
-## 04-03-2017 @ 07.45.53 - (1.1.15)    - dscudiero - Switch from RunSql to RunSql2
+## 04-03-2017 @ 07.45.53 - (1.1.15)    - dscudiero - Switch from RunSql to RunSql
 ## 04-17-2017 @ 07.41.31 - (1.1.16)    - dscudiero - remove import fpr dump array, moved code to the Dump file
 ## 05-17-2017 @ 12.57.33 - (1.1.20)    - dscudiero - Fix problem parsing data for requester
 ## 05-17-2017 @ 16.08.34 - (1.1.25)    - dscudiero - Added support for the notes field
@@ -428,7 +428,7 @@ Goodbye 0 #'alert'
 ## 06-05-2017 @ 12.53.26 - (1.2.36)    - dscudiero - Add parsing for 'Next' in the cell to trigger move to next
 ## 06-19-2017 @ 07.06.59 - (1.2.37)    - dscudiero - tweak formatting
 ## 09-29-2017 @ 10.14.39 - (1.2.45)    - dscudiero - Update FindExcecutable call for new syntax
-## 10-31-2017 @ 10.57.06 - (1.2.52)    - dscudiero - Switch to GetExcel2 and Msg3
+## 10-31-2017 @ 10.57.06 - (1.2.52)    - dscudiero - Switch to GetExcel2 and Msg
 ## 10-31-2017 @ 10.58.10 - (1.2.53)    - dscudiero - Cosmetic/minor change
 ## 11-01-2017 @ 07.42.19 - (1.2.54)    - dscudiero - Updated how the helper script is called
 ## 11-01-2017 @ 15.50.22 - (1.2.55)    - dscudiero - Switch to use ParseArgsStd2
@@ -442,3 +442,4 @@ Goodbye 0 #'alert'
 ## 12-08-2017 @ 07.48.51 - (1.2.69)    - dscudiero - Updated to remove env data variable
 ## 12-08-2017 @ 07.51.33 - (1.2.70)    - dscudiero - add a mesage level to a dump statement
 ## 12-12-2017 @ 06.56.57 - (1.2.72)    - dscudiero - Fix problem with messaging if insertTestingDetail returns an error code
+## 03-22-2018 @ 14:05:43 - 1.2.74 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
