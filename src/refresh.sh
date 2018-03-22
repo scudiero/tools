@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.131 # -- dscudiero -- Wed 03/21/2018 @ 17:03:05.59
+version=1.3.132 # -- dscudiero -- Thu 03/22/2018 @ 13:51:05.85
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall PushPop SelectMenu CopyFileWithCheck BackupCourseleafFile WriteChangelogEntry"
@@ -119,7 +119,7 @@ function workwithclientdata {
 					and $siteInfoTable.env not in('prior','public','preview')"
 		groupClause="GROUP BY $clientInfoTable.name"
 	 	sqlStmt="select $fields,$serverClause,$envsClause,ifnull($siteInfoTable.cims,'') $fromClause $groupClause"
-	 	RunSql2 $sqlStmt
+	 	RunSql $sqlStmt
 	 	[[ ! -d $(dirname "$workwithDataFile") ]] && mkdir -p "$(dirname "$workwithDataFile")"
 	 	echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE CLIENTS/SITES TABLES IN THE DATA WAREHOUSE" > "${workwithDataFile}.new"
 		for ((i=0; i<${#resultSet[@]}; i++)); do
@@ -239,7 +239,7 @@ function workflowcorefiles {
 	echo
 
 	local sqlStmt="select scriptData3 from $scriptsTable where name=\"copyWorkflow\""
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Could not retrieve workflow files data (scriptData1) from the $scriptsTable.";
 	local scriptData="$(cut -d':' -f2- <<< ${resultSet[0]})"
 
@@ -376,4 +376,5 @@ Goodbye 0
 ## 11-30-2017 @ 12.42.50 - (1.3.128)   - dscudiero - Updated the vba section to reflect the new file locations
 ## 12-08-2017 @ 07.49.01 - (1.3.129)   - dscudiero - Add workwith clientData
 ## 12-08-2017 @ 09.28.00 - (1.3.130)   - dscudiero - Update sql query for workwith clientData to get all servers
-## 03-22-2018 @ 12:36:30 - 1.3.131 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-22-2018 @ 12:36:30 - 1.3.131 - dscudiero - Updated for Msg3/Msg, RunSql/RunSql, ParseArgStd/ParseArgStd2
+## 03-22-2018 @ 14:07:22 - 1.3.132 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
