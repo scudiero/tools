@@ -1,9 +1,9 @@
 #!/bin/bash
 #===================================================================================================
-version=1.0.18 # -- dscudiero -- Fri 02/02/2018 @ 10:46:28.52
+version=1.0.20 # -- dscudiero -- Thu 03/22/2018 @ 13:59:57.67
 #===================================================================================================
 TrapSigs 'on'
-myIncludes="RunSql2"
+myIncludes="RunSql"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -20,17 +20,17 @@ if [[ -n $originalArgStr ]]; then
 	for script in $originalArgStr; do
 		[[ ${script: (-3)} == '.sh' ]] && script="$(cut -d'.' -f1 <<< $script)"
 		sqlStmt="update $scriptsTable set active=\"Offline\" where name=\"$script\""
-		RunSql2 $sqlStmt
-		Msg3 "^$script is now online"
+		RunSql $sqlStmt
+		Msg "^$script is now online"
 	done
 else
-	Msg3 "Current offline scripts:"
+	Msg "Current offline scripts:"
 	sqlStmt="select name,showInScripts from $scriptsTable where active=\"Offline\" order by showInScripts,name"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	for result in ${resultSet[@]}; do 
-		Msg3 "^${result%%|*}^${result##*|}"
+		Msg "^${result%%|*}^${result##*|}"
 	done
-	Msg3
+	Msg
 fi
 
 Goodbye
@@ -43,3 +43,4 @@ Goodbye
 ## Wed Jul 27 12:41:23 CDT 2016 - dscudiero - Fix problem where it was picking up N/A scripts
 ## 10-03-2017 @ 16.13.44 - (1.0.17)    - dscudiero - Refactored to allow report on all offline scripts
 ## 02-02-2018 @ 10.46.37 - 1.0.18 - dscudiero - Add userid check
+## 03-22-2018 @ 14:07:07 - 1.0.20 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
