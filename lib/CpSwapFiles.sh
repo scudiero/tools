@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.5" # -- dscudiero -- 01/04/2017 @ 13:35:23.75
+# version="2.0.6" # -- dscudiero -- Thu 03/22/2018 @ 13:13:28.04
 #===================================================================================================
 # Copy files protected, copy the file to a different name, check if it made it, then swap names
 #===================================================================================================
@@ -20,7 +20,7 @@ function CpSwapFiles {
 	local srcMd5 tgtMd5
 
 	dump -3 -n callerLineNo file fromDir fromFile toDir toFile backupDir
-	[[ ! -r $fromFile ]] && Msg2 $TT1 "Could not find file '$fromFile'\n^^($callerLineNo)"
+	[[ ! -r $fromFile ]] && Terminate "Could not find file '$fromFile'\n^^($callerLineNo)"
 	srcMd5=$(md5sum $fromFile | cut -f1 -d" ")
 	[[ -w $toFile ]] && foundToFile=true && tgtMd5=$(md5sum $toFile | cut -f1 -d" ")
 	dump -3 foundToFile
@@ -42,7 +42,7 @@ function CpSwapFiles {
 	$DOIT cp $fromFile $tmpNewFileName
 	if [[ ! -f $tmpNewFileName ]]; then
 		$DOIT mv $tmpOrigFileName $toFile
-		Msg2 $TT1 "Could not copy file:\n^^From file:'$fromFile'\n^^To file: $toFile to find file\n^^($callerLineNo)"
+		Terminate "Could not copy file:\n^^From file:'$fromFile'\n^^To file: $toFile to find file\n^^($callerLineNo)"
 	fi
 	$DOIT mv $tmpNewFileName $toFile
 	[[ $foundToFile == true ]] && $DOIT rm -f $tmpOrigFileName
@@ -56,3 +56,4 @@ export -f CpSwapFiles
 #===================================================================================================
 
 ## Wed Jan  4 13:53:11 CST 2017 - dscudiero - General syncing of dev to prod
+## 03-22-2018 @ 13:16:26 - 2.0.6 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
