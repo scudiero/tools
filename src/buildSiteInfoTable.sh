@@ -1,10 +1,10 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.123 # -- dscudiero -- Tue 01/23/2018 @  7:16:14.28
+version=4.3.124 # -- dscudiero -- Thu 03/22/2018 @ 13:58:24.63
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes="SetSiteDirs SetFileExpansion RunSql2 StringFunctions ProtectedCall FindExecutable PushPop"
+myIncludes="SetSiteDirs SetFileExpansion RunSql StringFunctions ProtectedCall FindExecutable PushPop"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -76,9 +76,9 @@ fi
 	useSiteInfoTable="$siteInfoTable"
 	useSiteAdminsTable="$siteAdminsTable"
 	sqlStmt="select count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA=\"$warehouseDb\") AND (TABLE_NAME=\"$useSiteInfoTable\")"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	[[ ${resultSet[0]} -ne 1 ]] && Terminate "Could not locate the load table '$useSiteInfoTable'"
-	Msg3 "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
+	Msg "Loading tables: $useSiteInfoTable, $useSiteAdminsTable"
 
 #=======================================================================================================================
 # Main
@@ -91,7 +91,7 @@ fi
 		declare -A dbClients
 		sqlStmt="select clientcode,clientkey from clients where is_active = \"Y\""
 		[[ $client != '' ]] && sqlStmt="$sqlStmt and clientcode=\"$client\"";
-		RunSql2 "$contactsSqliteFile" "$sqlStmt"
+		RunSql "$contactsSqliteFile" "$sqlStmt"
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No records returned from clientcode query from:\n^$contactsSqliteFile\n^$sqlStmt"
 		for result in ${resultSet[@]}; do
 			dbClients["${result%%|*}"]="${result##*|}"
@@ -110,8 +110,8 @@ fi
 
 	if [[ $verboseLevel -ge 1 ]]; then
 		echo
-		Msg3 "dbClients:"; for i in "${!dbClients[@]}"; do printf "\t[$i] = >${dbClients[$i]}<\n"; done; echo
-		Msg3 "clientDirs:"; for i in "${!clientDirs[@]}"; do printf "\t[$i] = >${clientDirs[$i]}<\n"; done; echo
+		Msg "dbClients:"; for i in "${!dbClients[@]}"; do printf "\t[$i] = >${dbClients[$i]}<\n"; done; echo
+		Msg "clientDirs:"; for i in "${!clientDirs[@]}"; do printf "\t[$i] = >${clientDirs[$i]}<\n"; done; echo
 	fi
 	## Loop through actual clientDirs
 		declare -A foundCodes ## Has table to keep track of 'seen' client codes (because we can have xxx and xxx-test)
@@ -122,7 +122,7 @@ fi
 				(( clientCntr+=1 ))
 				client="$clientCode"
 				clientId=${dbClients[$client]}
-				[[ $batchMode != true ]] && Msg3 "Processing: $client -- $clientId (~$clientCntr/$numClients)..."
+				[[ $batchMode != true ]] && Msg "Processing: $client -- $clientId (~$clientCntr/$numClients)..."
 				## Get the envDirs, make sure we have some
 				for env in ${envList//,/ }; do unset ${env}Dir ; done
 				SetSiteDirs
@@ -137,26 +137,26 @@ fi
 					(( forkCntr+=1 )) ; (( siteCntr+=1 ))
 					foundCodes["${clientCode}.${env}"]=true
 					if [[ $fork == true && $((forkCntr%$maxForkedProcesses)) -eq 0 ]]; then
-						[[ $batchMode != true ]] && Msg3 "^Waiting on forked processes..."
+						[[ $batchMode != true ]] && Msg "^Waiting on forked processes..."
 						wait
 					fi
 				done
-				[[ $fork == true && $batchMode != true ]] && Msg3 "^Waiting on forked processes (final)..." && wait
+				[[ $fork == true && $batchMode != true ]] && Msg "^Waiting on forked processes (final)..." && wait
 			fi #[[ ${dbClients[$(basename $clientDir)]+abc} ]]
 		done #clientDir in ${clientDirs[@]}
 
 ## Wait for all the forked tasks to stop
 	if [[ $fork == true ]]; then
-		[[ $batchMode != true ]] && Msg3 "Waiting for all forked processes to complete..."
+		[[ $batchMode != true ]] && Msg "Waiting for all forked processes to complete..."
 		wait
 	fi
 
 ## Processing summary
-	Msg3
-	Msg3 "Processed $siteCntr Courseleaf site directories"
-	Msg3
+	Msg
+	Msg "Processed $siteCntr Courseleaf site directories"
+	Msg
 	sqlStmt="select count(*) from $useSiteInfoTable where host=\"$hostName\"";
-	RunSql2 "$sqlStmt"
+	RunSql "$sqlStmt"
 	if [[ ${resultSet[0]} -eq 0 ]]; then
 		Error "No records were inserted into in the ${warehouseDb}.${useSiteInfoTable} table on host '$hostName'"
 		sendMail=true
@@ -203,8 +203,8 @@ Goodbye 0 'alert'
 ## Mon Aug 22 08:59:10 CDT 2016 - dscudiero - Switch to use mutt for email
 ## Tue Oct 11 07:59:27 CDT 2016 - dscudiero - Tweak messaging
 ## Thu Dec 29 14:03:14 CST 2016 - dscudiero - switch to use RunMySql
-## Thu Jan  5 13:40:29 CST 2017 - dscudiero - switch to RunSql2
-## Thu Jan  5 14:59:40 CST 2017 - dscudiero - Switch to use RunSql2
+## Thu Jan  5 13:40:29 CST 2017 - dscudiero - switch to RunSql
+## Thu Jan  5 14:59:40 CST 2017 - dscudiero - Switch to use RunSql
 ## Thu Jan  5 15:50:37 CST 2017 - dscudiero - Strip non-ascii chars from reportsVer, remove debug statements
 ## Fri Jan  6 08:04:17 CST 2017 - dscudiero - General syncing of dev to prod
 ## Fri Jan  6 08:12:36 CST 2017 - dscudiero - Fix problem where not processing all envs for clients > 1
@@ -242,3 +242,4 @@ Goodbye 0 'alert'
 ## 11-01-2017 @ 15.50.25 - (4.3.99)    - dscudiero - Switch to use ParseArgsStd2
 ## 12-01-2017 @ 10.24.36 - (4.3.105)   - dscudiero - Fix problem when the client does not have a next site
 ## 12-20-2017 @ 06.55.52 - (4.3.119)   - dscudiero - Remove the 'set' option onthe SetSiteDirs call
+## 03-22-2018 @ 14:05:51 - 4.3.124 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
