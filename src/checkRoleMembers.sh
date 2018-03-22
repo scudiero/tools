@@ -1,10 +1,11 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.14 # -- dscudiero -- Thu 09/14/2017 @ 15:40:55.77
+version=1.0.16 # -- dscudiero -- Thu 03/22/2018 @ 12:31:47.82
 #==================================================================================================
 TrapSigs 'on'
-includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye'
-Import "$includes"
+myIncludes=""
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
 scriptDescription="Check the roles to ensure that all role members are in user provsioning"
 
@@ -21,14 +22,6 @@ scriptDescription="Check the roles to ensure that all role members are in user p
 #==================================================================================================
 # local functions
 #==================================================================================================
-	#==================================================================================================
-	# parse script specific arguments
-	#==================================================================================================
-	function parseArgs-checkRoleMembers {
-		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
-		#argList+=(-listOnly,1,switch,listOnly,,script,"Do not do copy, only list out files that would be copied")
-		:
-	}
 
 #==================================================================================================
 # Declare local variables and constants
@@ -39,7 +32,7 @@ scriptDescription="Check the roles to ensure that all role members are in user p
 #==================================================================================================
 helpSet='script,client,env'
 GetDefaultsData $myName
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 Hello
 Init 'getClient getEnv getDirs checkEnvs'
 
@@ -57,7 +50,7 @@ verifyArgs+=("Env:$(TitleCase $env)")
 verifyArgs+=("Output File:$outFile")
 verifyContinueDefault='Yes'
 VerifyContinue "You are asking to check role data for client:$client\n\tEnv: $env\n"
-Msg2
+Msg
 
 #==================================================================================================
 ## Main
@@ -71,7 +64,7 @@ Msg2
 ## Get members roles file
 	unset numFound
 	unset users
-	Msg2 "Processing Roles file..."
+	Msg "Processing Roles file..."
 	while IFS='' read -r line || [[ -n $line ]]; do
 		#role:AABS Approver|JB_Ashorn|all
 		if [[ ${line:0:5} == 'role:' ]]; then
@@ -98,12 +91,12 @@ Msg2
 		fi
 		prevUser=$user
 	done
-	Msg2 "^Found $numFound unique userids"
+	Msg "^Found $numFound unique userids"
 
 ## Process the user list
 	printedHeader=false
 	unset numFound
-	Msg2 "Processing User list..."
+	Msg "Processing User list..."
 	for user in "${users[@]}"; do
 		sqlStmt="select count(*) from users where userid=\"$user\";"
 		results=$(sqlite3 /$srcDir/db/clusers.sqlite "$sqlStmt")
@@ -111,9 +104,9 @@ Msg2
 		if [[ $results -eq 0 ]]; then
 			grep -q "user\:$user\|" "$srcDir/courseleaf.cfg"; rc=$?
 			if [[ $rc -ne 0 ]]; then
-				[[ $printedHeader == false ]] && Msg2 "The following users were not found in User Provisioning:"
+				[[ $printedHeader == false ]] && Msg "The following users were not found in User Provisioning:"
 				printedHeader=true
-				Msg2 "^$user" | tee -a $outFile
+				Msg "^$user" | tee -a $outFile
 				(( numFound +=1 ))
 			fi
 		fi
@@ -121,15 +114,21 @@ Msg2
 ## Print summary
 	echo
 	if [[ $numFound -eq 0 ]]; then
-		Msg2 "^All role members are provisioned or listed on a courseleaf.cfg user record"
+		Msg "^All role members are provisioned or listed on a courseleaf.cfg user record"
 		rm -f "$outFile" >& /dev/null
 	else
-		Msg2 "^Found $numFound users in roles that are not known"
-		Msg2 "\nOutput file: $outFile"
+		Msg "^Found $numFound users in roles that are not known"
+		Msg "\nOutput file: $outFile"
 	fi
 
 #==================================================================================================
 ## Done
 #==================================================================================================
-Goodbye 0 #'alert'## Fri Oct 14 13:37:34 CDT 2016 - dscudiero - Fix spelling problem
+Goodbye 0 #'alert'
+
+#==================================================================================================
+## Check-In Log
+#==================================================================================================
+## Fri Oct 14 13:37:34 CDT 2016 - dscudiero - Fix spelling problem
 ## 06-19-2017 @ 07.07.26 - (1.0.12)    - dscudiero - Update to check courseleaf.cfg user records also
+## 03-22-2018 @ 12:35:44 - 1.0.16 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
