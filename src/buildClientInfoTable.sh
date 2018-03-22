@@ -1,11 +1,11 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.42 # -- dscudiero -- Wed 11/01/2017 @ 15:41:30.65
+version=2.4.43 # -- dscudiero -- Thu 03/22/2018 @ 13:57:35.50
 #=======================================================================================================================
 TrapSigs 'on'
 
-myIncludes="Msg3 RunSql2 FindExecutable StringFunctions PushPop"
+myIncludes="Msg RunSql FindExecutable StringFunctions PushPop"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -79,31 +79,31 @@ ParseArgsStd2 $originalArgStr
 	else
 		[[ $inPlace == true ]] && useClientInfoTable="$clientInfoTable" || useClientInfoTable="${clientInfoTable}New"
 		sqlStmt="select clientcode from clients where is_active = \"Y\" order by clientcode"
-		RunSql2 "$contactsSqliteFile" "$sqlStmt"
+		RunSql "$contactsSqliteFile" "$sqlStmt"
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No records returned from clientcode query from '$contactsSqliteFile'"
 		for result in "${resultSet[@]}"; do
 			clients+=($result)
 		done
 	fi
 	numClients=${#clients[@]}
-	Msg3 "Found $numClients clients in transactional 'clients' table..."
-	Msg3 "Database: $warehouseDb"
-	Msg3 "Table: $useClientInfoTable"
+	Msg "Found $numClients clients in transactional 'clients' table..."
+	Msg "Database: $warehouseDb"
+	Msg "Table: $useClientInfoTable"
 
 ## Table management
 	if [[ $inPlace != true && -z $client ]]; then
 		## Create a temporary copy of the clients table, load new data to that table
-		[[ $batchMode != true ]] && Msg3 "^Creating work table '$useClientInfoTable'..."
+		[[ $batchMode != true ]] && Msg "^Creating work table '$useClientInfoTable'..."
 		sqlStmt="drop table if exists ${clientInfoTable}Bak"
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		if [[ $useClientInfoTable != $clientInfoTable ]]; then
 			sqlStmt="drop table if exists $useClientInfoTable"
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 			sqlStmt="create table $useClientInfoTable like $clientInfoTable"
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 		else 
 			sqlStmt="truncate $useClientInfoTable"
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 		fi
 	fi
 
@@ -113,50 +113,50 @@ ParseArgsStd2 $originalArgStr
 	for client in "${clients[@]}"; do
 		(( clientCntr += 1 ))
 		if [[ $(Contains ",$ignoreList," ",$client,") == true ]]; then
-			[[ $batchMode != true ]] && Msg3 "^Skipping '$client' is in the ignore list."
+			[[ $batchMode != true ]] && Msg "^Skipping '$client' is in the ignore list."
 			continue
 		fi
 		unset msgPrefix
 		[[ $fork == true ]] && msgPrefix='Forking off' || msgPrefix='Processing'
-		[[ $batchMode != true ]] && Msg3 "^$msgPrefix $client ($clientCntr / ${#clients[@]})..."
+		[[ $batchMode != true ]] && Msg "^$msgPrefix $client ($clientCntr / ${#clients[@]})..."
 		source "$workerScriptFile" "$addedCalledScriptArgs"  "$forkStr"
 		rc=$?
 		(( forkCntr+=1 ))
 		## Wait for forked process to finish, only run maxForkedProcesses at a time
 		if [[ $fork == true && $((forkCntr%$maxForkedProcesses)) -eq 0 ]]; then
-			[[ $batchMode != true ]] && Msg3 "^Waiting on forked processes...\n"
+			[[ $batchMode != true ]] && Msg "^Waiting on forked processes...\n"
 			wait
 		fi
-		[[ $fork != true && $(($clientCntr % processNotify)) -eq 0 ]] && Msg3 "\n^*** Processed $clientCntr out of $numClients\n"
+		[[ $fork != true && $(($clientCntr % processNotify)) -eq 0 ]] && Msg "\n^*** Processed $clientCntr out of $numClients\n"
 	done
 
 ## Wait for all the forked tasks to stop
 	if [[ $fork == true ]]; then
-		[[ $batchMode != true ]] && Msg3 "^Waiting for all forked processes to complete..."
+		[[ $batchMode != true ]] && Msg "^Waiting for all forked processes to complete..."
 		wait
 	fi
 
 ## Swap client tables
 	if [[ $inPlace != true ]]; then
-		[[ $batchMode != true ]] && Msg3 "^Swapping databases ..."
+		[[ $batchMode != true ]] && Msg "^Swapping databases ..."
 		sqlStmt="select count(*) from ${clientInfoTable}New"
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "New clients table has zero rows, keeping original"
 
 		sqlStmt="select count(*) from ${clientInfoTable}New"
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		if [[ ${#resultSet[@]} -ne 0 ]]; then
-			[[ $batchMode != true ]] && Msg3 "^^$clientInfoTable --> ${clientInfoTable}Bak"
+			[[ $batchMode != true ]] && Msg "^^$clientInfoTable --> ${clientInfoTable}Bak"
 			sqlStmt="rename table $clientInfoTable to ${clientInfoTable}Bak"
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 		fi
 
-		[[ $batchMode != true ]] && Msg3 "^^${clientInfoTable}New --> $clientInfoTable"
+		[[ $batchMode != true ]] && Msg "^^${clientInfoTable}New --> $clientInfoTable"
 		sqlStmt="rename table ${clientInfoTable}New to $clientInfoTable"
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 	fi
 
-	Msg3 "\nInserted $clientCntr records into $clientInfoTable"
+	Msg "\nInserted $clientCntr records into $clientInfoTable"
 
 #=======================================================================================================================
 # Done
@@ -198,3 +198,4 @@ Goodbye 0 'alert'
 ## 10-30-2017 @ 08.29.24 - (2.4.37)    - dscudiero - if the target table == source table then do not drop the table
 ## 10-31-2017 @ 11.20.47 - (2.4.39)    - dscudiero - Fix reported inserted client records
 ## 11-01-2017 @ 15.50.16 - (2.4.42)    - dscudiero - Switch to use ParseArgsStd2
+## 03-22-2018 @ 14:05:34 - 2.4.43 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
