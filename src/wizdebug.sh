@@ -1,11 +1,10 @@
 #!/bin/bash
 #==================================================================================================
-version=2.6.65 # -- dscudiero -- Wed 10/04/2017 @ 13:48:10.44
+version=2.6.66 # -- dscudiero -- Wed 03/21/2018 @  9:42:32.28
 #==================================================================================================
 TrapSigs 'on'
-includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue' #includes="$includes xxx"
-includes="$includes GetCourseleafPgm PrintBanner"
-Import "$includes"
+myIncludes="GetCourseleafPgm PrintBanner"
+Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="Monitor the log messages (courseleaf/wizdebug.out) for a CourseLeaf site"
@@ -29,10 +28,8 @@ unset client env srcEnv tgtEnv srcDir tgtDir siteDir pvtDir devDir testDir currD
 #==================================================================================================
 Hello
 helpSet='script,client,env'
-echo "Getting defaults..."
 GetDefaultsData $myName
-echo "Parsing arguments..."
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 
 Init 'getClient getEnv getDirs checkEnvs noPreview noPublic'
 
@@ -69,3 +66,4 @@ Goodbye 0
 ## 06-12-2017 @ 07.18.27 - (2.6.61)    - dscudiero - General syncing of dev to prod
 ## 09-11-2017 @ 15.52.47 - (2.6.62)    - dscudiero - x
 ## 10-04-2017 @ 13.49.10 - (2.6.65)    - dscudiero - Tweak startup messaging
+## 03-22-2018 @ 12:36:35 - 2.6.66 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
