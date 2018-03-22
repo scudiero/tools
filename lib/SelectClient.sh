@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.6" # -- dscudiero -- Thu 09/14/2017 @ 16:21:28.23
+# version="2.0.7" # -- dscudiero -- Thu 03/22/2018 @ 13:37:15.34
 #===================================================================================================
 # Display a selection list of clients, returns data in the client global variable
 #===================================================================================================
@@ -18,13 +18,13 @@ function SelectClient {
 
 	## Get the max width of client abbreviations
 	local sqlStmt="select max(length(name)) from $clientInfoTable"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	maxNameWidth=${resultSet[0]}
 
 	## Get the clients data
 	local sqlStmt="select distinct clients.name,clients.longName from $clientInfoTable,$siteInfoTable \
 	where clients.idx=sites.clientId and sites.host = \"$hostName\" order by clients.name"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	for resultRec in "${resultSet[@]}"; do
 		resultRec=$(tr "\t" "|" <<< "$resultRec" )
 
@@ -48,3 +48,4 @@ export -f SelectClient
 # Check-in Log
 #===================================================================================================
 ## Wed Jan  4 13:54:18 CST 2017 - dscudiero - General syncing of dev to prod
+## 03-22-2018 @ 13:42:43 - 2.0.7 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
