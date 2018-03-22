@@ -1,23 +1,24 @@
 ##  #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.6 # -- dscudiero -- Thu 09/14/2017 @ 12:20:17.73
+version=1.0.8 # -- dscudiero -- Wed 03/21/2018 @ 16:46:40.42
 #==================================================================================================
 #= Description +===================================================================================
 #
 #  
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgsStd Hello Init Goodbye WriteChangelogEntry' #imports="$imports "
-Import "$imports"
+myIncludes="WriteChangelogEntry"
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
 scriptDescription=""
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-	function addCourseleafLogEntry-ParseArgsStd {
-			argList+=(-jalot,3,option,jalot,,script,'Jalot task number')
-			argList+=(-comment,7,option,comment,,script,'Comment describing the reason for the update')
+	function addCourseleafLogEntry-ParseArgsStd2 {
+			myArgs+=('jalot|jalot|option|jalot||script|Jalot task number')
+			myArgs+=('comment|comment|option|comment||script|Comment describing the reason for the update')
 		return 0
 	}
 
@@ -54,16 +55,6 @@ scriptDescription=""
 # local functions
 #==================================================================================================
 
-# sqlStmt="select code from $authGroupsTable where members like \"%,$userName,%\""
-# RunSql2 $sqlStmt
-# unset usersAuthGroups
-# if [[ ${#resultSet[@]} -ne 0 ]]; then
-# 	for ((i=0; i<${#resultSet[@]}; i++)); do
-# 		usersAuthGroups="$usersAuthGroups,${resultSet[$i]}"
-# 	done
-# 	usersAuthGroups=${usersAuthGroups:1}
-# fi
-
 #==================================================================================================
 # Declare local variables and constants
 #==================================================================================================
@@ -77,7 +68,7 @@ for var in $falseVars; do eval $var=false; done
 # Standard arg parsing and initialization
 #==================================================================================================
 GetDefaultsData $myName
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 Hello
 Init "getClient getEnv getDirs checkEnvs"
 
@@ -90,7 +81,7 @@ Init "getClient getEnv getDirs checkEnvs"
 
 ## Get the file list for changed files
 unset file changedFiles
-Msg2 "Please specify the files changed"
+Msg "Please specify the files changed"
 while [[ 1 ]]; do
 	Prompt file "^file" "*optional*"
 	[[ -n "$file" ]] && changedFiles+=("$file") && unset file || break
@@ -128,3 +119,4 @@ Goodbye 0 #'alert'
 #===================================================================================================
 ## Check-in log
 #===================================================================================================
+## 03-22-2018 @ 12:34:59 - 1.0.8 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
