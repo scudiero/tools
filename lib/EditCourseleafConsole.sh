@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.30" # -- dscudiero -- 03/14/2017 @  9:12:40.93
+# version="2.0.31" # -- dscudiero -- Thu 03/22/2018 @ 13:16:07.25
 #===================================================================================================
 # Insert a new line into the courseleaf console file
 # EditCourseleafConsole <action> <targetFile> <string>
@@ -57,7 +57,7 @@ function EditCourseleafConsole {
 		grepStr="$(ProtectedCall "grep \"^//$insertRec\" $editFile")"
 		if [[ $grepStr != '' ]]; then
 			sed -i s"#^//$insertRec#$insertRec#"g $editFile
-			Msg2 "^Uncommented line: $toStr..."
+			Msg "^Uncommented line: $toStr..."
 			changesMade=true
 			echo true
 			return 0
@@ -102,3 +102,4 @@ export -f EditCourseleafConsole
 
 ## Wed Jan  4 13:53:21 CST 2017 - dscudiero - General syncing of dev to prod
 ## Tue Mar 14 09:31:40 CDT 2017 - dscudiero - Also look for commented lines in the skeleton
+## 03-22-2018 @ 13:16:30 - 2.0.31 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
