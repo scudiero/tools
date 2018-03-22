@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=3.0.3 # -- dscudiero -- Mon 03/19/2018 @ 12:01:09.52
+# version=3.0.4 # -- dscudiero -- Thu 03/22/2018 @ 13:33:43.88
 #===================================================================================================
 # Display script help -- passed an array of argument definitinons, see ParseArg function
 #===================================================================================================
@@ -10,7 +10,7 @@
 function Help2 {
 	mode="${1-normal}"
 
-	includes='Msg3 Dump StringFunctions Colors RunSql2'
+	includes='Msg3 Dump StringFunctions Colors RunSql'
 	Import "$includes"
 
 	[[ $(type -t $FUNCNAME-$myName) == 'function' ]] && $FUNCNAME-$myName 'setVarsOnly'
@@ -31,7 +31,7 @@ function Help2 {
 	echo
 
 	sqlStmt="select restrictToUsers,restrictToGroups from $scriptsTable where name=\"$myName\""
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		result="${resultSet[0]}"
 		restrictToUsers=${result%%|*}
@@ -64,7 +64,7 @@ function Help2 {
 
 	## Get the max lengths of the name and min abbreviation from the database
 		sqlStmt="select max(length(longname)),max(length(shortname)),max(length(type)) from argdefs"
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		result="${resultSet[0]}";
 		maxWidthName="${result%%|*}"; result="${result##*|}"
 		maxWidthAbbr="${result%%|*}"; result="${result##*|}"
@@ -223,3 +223,4 @@ export -f Help2
 ## 03-19-2018 @ 11:17:45 - 3.0.1 - dscudiero - Update how java dependencies are calculated
 ## 03-19-2018 @ 11:19:26 - 3.0.2 - dscudiero - Cosmetic/minor change/Sync
 ## 03-19-2018 @ 12:01:59 - 3.0.3 - dscudiero - CHange the way we find the python dependencies
+## 03-22-2018 @ 13:42:17 - 3.0.4 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
