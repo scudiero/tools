@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.94 # -- dscudiero -- Thu 03/22/2018 @ 14:05:17.15
+version=2.2.95 # -- dscudiero -- Thu 03/22/2018 @ 14:18:49.66
 #====================================================================================================
 TrapSigs 'on'
 myIncludes=""
@@ -131,7 +131,7 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 	[[ -d $backupFolder ]] && rm -rf $backupFolder || mkdir -p "$backupFolder"
 ## Insance files
 	for dir in $(echo $cimStr | tr ',' ' '); do
-		Msg2 "Saving: $dir"
+		Msg "Saving: $dir"
 		for file in $(echo "$requiredInstanceFiles $optionalInstanceFiles" | tr ',' ' '); do
 			if [[ -f $srcDir/web/$dir/$file ]]; then
 				[[ ! -d $(dirname $backupFolder/web/$dir/$file) ]] && $DOIT mkdir -p "$(dirname $backupFolder/web/$dir/$file)"
@@ -141,7 +141,7 @@ dump -1 scriptData1 scriptData2 scriptData3 scriptData4
 	done #CIMs
 
 ## Global files
-	Msg2 "Saving: System files"
+	Msg "Saving: System files"
 		for file in $(echo "$requiredGlobalFiles $optionalGlobalFiles" | tr ',' ' '); do
 			if [[ -f $srcDir/web$file ]]; then
 				[[ ! -d $(dirname $backupFolder/web$file) ]] && $DOIT mkdir -p "$(dirname $backupFolder/web$file)"
@@ -201,3 +201,4 @@ Goodbye 0
 ## 03-15-2018 @ 13:45:40 - 2.2.92 - dscudiero - Fix imports
 ## 03-15-2018 @ 13:51:54 - 2.2.93 - dscudiero - If -all was specified then clear the cimStr
 ## 03-22-2018 @ 14:07:37 - 2.2.94 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-22-2018 @ 14:36:26 - 2.2.95 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
