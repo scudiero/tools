@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.18 # -- dscudiero -- Wed 12/06/2017 @ 11:15:06.29
+version=2.2.19 # -- dscudiero -- Thu 03/22/2018 @ 12:40:35.68
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -12,7 +12,7 @@ version=2.2.18 # -- dscudiero -- Wed 12/06/2017 @ 11:15:06.29
 # 09-05-17 - dgs - Added '--ignore-date' to rsyc options in SyncSkeleton
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes='FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql2 GetPW SetFileExpansion RunSql2 ProtectedCall'
+myIncludes='FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql GetPW SetFileExpansion RunSql ProtectedCall'
 myIncludes="$myIncludes CalcElapsed"
 Import "$standardIncludes $myIncludes"
 
@@ -93,7 +93,7 @@ function CheckMonitorFiles {
 	declare -A userNotifies
 	## Get a list of currently defined monitoried files
 		sqlStmt="select file,userlist from monitorfiles where host=\"$hostName\""
-		RunSql2 "$sqlStmt"
+		RunSql "$sqlStmt"
 		monitorRecs=("${resultSet[@]}")
 
 		for monitorRec in "${monitorRecs[@]}"; do
@@ -106,11 +106,11 @@ function CheckMonitorFiles {
 				#dump -t user
 				## Check to see if the file has changed since the last time we processed this user/file combo
 				sqlStmt="select idx from $newsInfoTable where object=\"$file\" and userName=\"$user\" and edate < $lastModTime"
-				RunSql2 "$sqlStmt"
+				RunSql "$sqlStmt"
 				if [[ ${#resultSet[@]} -gt 0 ]]; then
 					## Update the checked time for this user/file combo
 					sqlStmt="update $newsInfoTable set date=NOW(),edate=\"$(date +%s)\" where idx=\"${resultSet[0]}\""
-					RunSql2 "$sqlStmt"
+					RunSql "$sqlStmt"
 					## Add to this users associateive array
 					if [[ ${userNotifies[$user]+abc} ]]; then
 						userNotifies["$user"]="${userNotifies[$user]}|$file"
@@ -144,7 +144,7 @@ function BuildToolsAuthTable() {
 
 	## Build the toolsgroups table from the role data from the stage-internal site
 		pw=$(GetPW 'stage-internal')
-		[[ $pw == '' ]] && Msg3 "T Could not lookup password for 'stage-internal' in password file.\n"
+		[[ $pw == '' ]] && Terminate "Could not lookup password for 'stage-internal' in password file.\n"
 		rolesFileURL="https://stage-internal.leepfrog.com/pagewiz/roles.tcf"
 		curl -u $userName:$pw $rolesFileURL 2>/dev/null | grep '^role:' | cut -d ":" -f 2 > $tmpFile
 		if [[ ${myRhel:0:1} -ge 6 ]]; then
@@ -156,7 +156,7 @@ function BuildToolsAuthTable() {
 		if [[ ${#roles[@]} -gt 0 ]]; then
 			## Clear out db table
 				sqlStmt="truncate $authGroupsTable"
-				RunSql2 "$sqlStmt"
+				RunSql "$sqlStmt"
 			## Insert auth records
 				i=0
 				for roleStr in "${roles[@]}"; do
@@ -166,11 +166,11 @@ function BuildToolsAuthTable() {
 					values="NULL,\"$roleCode\",\"$roleName\",\"$roleMembers\""
 					#dump -t -n roleStr -t roleCode roleName roleMembers values
 					sqlStmt="insert into $authGroupsTable values ($values)"
-					RunSql2 "$sqlStmt"
+					RunSql "$sqlStmt"
 					(( i+=1 ))
 				done
 		else
-			Msg3 "W No roles recovered from $rolesFileURL"
+			Msg "W No roles recovered from $rolesFileURL"
 		fi
 
 		[[ -f "$tmpFile" ]] && rm "$tmpFile"
@@ -186,7 +186,7 @@ case "$hostName" in
 		if [[ $(( $(date +"%-H") % 2 )) -eq 0 ]]; then
 			## Make sure we have a sites table before running perfTest
 			sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 			[[ ${#resultSet[@]} -gt 0 ]] && FindExecutable -sh -run perfTest
 		fi
 
@@ -194,26 +194,26 @@ case "$hostName" in
 			pgms=(updateDefaults CheckMonitorFiles SyncInternalDb SyncCourseleafCgis SyncSkeleton)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
-				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
+				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
 				TrapSigs 'off'
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
 				TrapSigs 'on'
 				Semaphore 'waiton' "$pgmName" 'true'
-				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+				Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
 
 			if [[ $(date "+%H") == 12 ||  $(date "+%H") == 22 ]]; then
-				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
+				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
 				TrapSigs 'off'
 				if [[ $(date "+%H") == 12 ]]; then 
-					Msg3 "\n$(date +"%m/%d@%H:%M") - Running syncCourseleafGitRepos master..."
+					Msg "\n$(date +"%m/%d@%H:%M") - Running syncCourseleafGitRepos master..."
 					TrapSigs 'off'; FindExecutable -sh -run syncCourseleafGitRepos master; TrapSigs 'on'
-					Msg3 "...syncCourseleafGitRepos done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+					Msg "...syncCourseleafGitRepos done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 				fi
 				if [[ $(date "+%H") == 22 ]]; then 
-					Msg3 "\n$(date +"%m/%d@%H:%M") - Running backupData ..."
+					Msg "\n$(date +"%m/%d@%H:%M") - Running backupData ..."
 					TrapSigs 'off'; FindExecutable -sh -uselocal -run backupData; TrapSigs 'on'
-					Msg3 "...backupData done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+					Msg "...backupData done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 					## Remove all hourly log files older than 24 hrs
 					pushd "$(dirname "$logFile")" >& /dev/null
 					find . -mtime +0 -exec rm -f '{}' \;
@@ -227,7 +227,7 @@ case "$hostName" in
 		if [[ $(( $(date +"%-H") % 2 )) -eq 0 ]]; then
 			## Make sure we have a sites table before running perfTest
 			sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 			if [[ ${#resultSet[@]} -gt 0 ]]; then
 				Semaphore 'waiton' 'perfTest'
 				FindExecutable -sh -run perfTest
@@ -238,12 +238,12 @@ case "$hostName" in
 			pgms=(CheckMonitorFiles)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
-				Msg3 "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
+				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
 				TrapSigs 'off'
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
 				TrapSigs 'on'
 				Semaphore 'waiton' "$pgmName" 'true'
-				Msg3 "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+				Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
 		;;
 esac
@@ -257,14 +257,14 @@ return 0
 # Change Log
 #========================================================================================================================
 ## Thu Dec 29 11:51:43 CST 2016 - dscudiero - x
-## Thu Dec 29 12:01:46 CST 2016 - dscudiero - Switched to use the RunSql2 java program
-## Thu Jan  5 14:49:52 CST 2017 - dscudiero - Switch to use RunSql2
+## Thu Dec 29 12:01:46 CST 2016 - dscudiero - Switched to use the RunSql java program
+## Thu Jan  5 14:49:52 CST 2017 - dscudiero - Switch to use RunSql
 ## Wed Jan 25 08:03:11 CST 2017 - dscudiero - change location of internalDb shadow
 ## Wed Jan 25 09:33:50 CST 2017 - dscudiero - pull location of internals db shadow from defaults
 ## Fri Jan 27 08:00:12 CST 2017 - dscudiero - Add perftest
 ## Fri Jan 27 14:21:16 CST 2017 - dscudiero - Add perftest summary record generation
 ## Fri Jan 27 14:29:55 CST 2017 - dscudiero - General syncing of dev to prod
-## Fri Feb  3 11:28:29 CST 2017 - dscudiero - Change Msg2; Msg3 to echo; Msg2
+## Fri Feb  3 11:28:29 CST 2017 - dscudiero - Change Msg2; Msg to echo; Msg2
 ## Mon Feb  6 09:19:58 CST 2017 - dscudiero - Remove debug message
 ## Tue Feb  7 15:15:13 CST 2017 - dscudiero - allow file expansion for the chgrp in syncskeleton
 ## Thu Feb  9 08:07:08 CST 2017 - dscudiero - Check to make sure there is a sites table before running perftest
@@ -309,3 +309,4 @@ return 0
 ## 10-27-2017 @ 08.08.03 - (2.2.16)    - dscudiero - Use CalcElapsed function to calculate elapsed times
 ## 10-30-2017 @ 07.43.44 - (2.2.17)    - dscudiero - Tweak messaging
 ## 12-06-2017 @ 11.16.14 - (2.2.18)    - dscudiero - Refactored building the defaults data files
+## 03-22-2018 @ 12:46:57 - 2.2.19 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
