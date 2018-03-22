@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.47 # -- dscudiero -- Thu 03/22/2018 @ 12:45:28.42
+version=2.1.48 # -- dscudiero -- Thu 03/22/2018 @ 13:50:38.00
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -69,12 +69,12 @@ function RollupProcessLog {
 	outFile="$(date '+%m-%d-%y').processLog.xls"
 	## Get the column names
 	sqlStmt="select column_name from information_schema.columns where table_schema = \"$warehouseDb\" and table_name = \"$processLogTable\"";
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	resultString="${resultSet[@]}" ; resultString=$(tr " " "\t" <<< $resultString)
 	echo "$resultString" >> $outFile
 	SetFileExpansion 'off'
 	sqlStmt="select * from $processLogTable"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		for result in "${resultSet[@]}"; do
 		 	resultString=$result; resultString=$(tr "|" "\t" <<< $resultString)
@@ -90,7 +90,7 @@ function RollupProcessLog {
 		ProtectedCall "tar -cvzf \"$quarter.processLog.tar\" $outFile --remove-files > /dev/null 2>&1"
 	fi
 	sqlStmt="truncate $processLogTable"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	SetFileExpansion
 	Msg "*** Processlog rollup -- Completed ***"
 } #RollupProcessLog
@@ -127,7 +127,7 @@ return 0
 # Change Log
 #========================================================================================================================
 ## Thu Dec 29 16:50:40 CST 2016 - dscudiero - Updated the code to escrow sites to generalize
-## Thu Jan  5 14:50:11 CST 2017 - dscudiero - Switch to use RunSql2
+## Thu Jan  5 14:50:11 CST 2017 - dscudiero - Switch to use RunSql
 ## Thu Feb  9 08:06:49 CST 2017 - dscudiero - make sure we are using our own tmpFile
 ## 07-17-2017 @ 07.52.31 - (2.1.33)    - dscudiero - Fix script syntax error on for statement
 ## 07-17-2017 @ 07.53.51 - (2.1.34)    - dscudiero - uncomment call to escrowClient
@@ -137,4 +137,5 @@ return 0
 ## 09-21-2017 @ 10.15.16 - (2.1.44)    - dscudiero - Change the name of the tar file to reflect the quarter number
 ## 09-27-2017 @ 07.52.12 - (2.1.45)    - dscudiero - Switched to Msg
 ## 10-11-2017 @ 10.37.49 - (2.1.46)    - dscudiero - Switch to use FindExecutable -run
-## 03-22-2018 @ 12:47:12 - 2.1.47 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-22-2018 @ 12:47:12 - 2.1.47 - dscudiero - Updated for Msg3/Msg, RunSql/RunSql, ParseArgStd/ParseArgStd2
+## 03-22-2018 @ 14:06:29 - 2.1.48 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
