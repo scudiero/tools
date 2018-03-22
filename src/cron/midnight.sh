@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.64 # -- dscudiero -- Thu 03/22/2018 @ 12:43:26.27
+version=1.22.65 # -- dscudiero -- Thu 03/22/2018 @ 14:17:51.06
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -31,10 +31,10 @@ function Goodbye-midnight  { # or Goodbye-$myName
 
 #=======================================================================================================================
 function CleanToolsBin {
-	Msg $V3 "*** $FUNCNAME -- Starting ***"
+	Verbose -3 "*** $FUNCNAME -- Starting ***"
 
 	## Setup lower case 'aliases' for the TOOLSPATH/bin commands, remove any links in bin that do not have a source in src
-	Msg2; Msg "Processing $TOOLSPATH/bin..."
+	Msg; Msg "Processing $TOOLSPATH/bin..."
 	ignoreFiles=",scripts,reports,"
 	cwd=$(pwd)
 	cd $TOOLSPATH/bin
@@ -46,13 +46,13 @@ function CleanToolsBin {
 	done
 	cd "$cwd"
 
-	Msg $V3 "*** $FUNCNAME -- Completed ***"
+	Verbose -3 "*** $FUNCNAME -- Completed ***"
 	return 0
 } #CleanToolsBin
 
 #=======================================================================================================================
 function CheckClientCount {
-	Msg $V3 "*** $FUNCNAME -- Starting ***"
+	Verbose -3 "*** $FUNCNAME -- Starting ***"
 	## Get number of clients in transactional
 	SetFileExpansion 'off'
 	sqlStmt="select count(*) from clients where is_active=\"Y\""
@@ -532,3 +532,4 @@ return 0
 ## 12-12-2017 @ 10.31.44 - (1.22.61)   - dscudiero - Cosmetic/minor change
 ## 03-09-2018 @ 14:25:41 - 1.22.62 - dscudiero - Add server move processing
 ## 03-22-2018 @ 12:47:03 - 1.22.64 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-22-2018 @ 14:36:09 - 1.22.65 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
