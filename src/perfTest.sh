@@ -8,7 +8,7 @@
 # 3) read the clients table ~900 records
 #=======================================================================================================================
 
-myIncludes="SetFileExpansion RunSql2"
+myIncludes="SetFileExpansion RunSql"
 Import "$standardInteractiveIncludes $myIncludes"
 
 mode=${1-'test'}; shift || true
@@ -16,11 +16,11 @@ count=${1-1000}; shift || true
 tmpFile="/tmp/$LOGNAME.perfTest.sh.out"
 [[ ${mode:0:1} == '-' ]] && mode="${mode:1}"
 #echo "mode = '$mode'"
-#Msg3 "$myName starting, mode=$mode, count=$count"
+#Msg "$myName starting, mode=$mode, count=$count"
 if [[ $mode == 'summary' ]]; then
         SetFileExpansion 'off'
         sqlStmt="select * from perftest where date like \"%$(date "+%m-%d-%y %H")%\" order by idx"
-        RunSql2 $sqlStmt
+        RunSql $sqlStmt
         SetFileExpansion
         #echo "\${#resultSet[@]} = '${#resultSet[@]}'"
         #echo "\${resultSet[0]} = '${resultSet[0]}'"
@@ -45,12 +45,12 @@ if [[ $mode == 'summary' ]]; then
                 valuesStr="NULL,\"\",\"$(date +'%m-%d-%y %H:%M')\"$valuesStr"
                 #dump valuesStr
                 sqlStmt="insert into perftest values($valuesStr)"
-                RunSql2 $sqlStmt
+                RunSql $sqlStmt
         fi
 else
         ## Create initial record
         sqlStmt="insert into perfTest values(NULL,\"$(cut -d'.' -f1 <<< $(hostname))\",\"$(date +'%m-%d-%y %H:%M')\",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)"
-        RunSql2 $sqlStmt
+        RunSql $sqlStmt
         idx=${resultSet[0]}
         [[ -z $idx ]] && Terminate "Could not insert record into the '$warehouseDb.perfTest' table"
 
@@ -80,7 +80,7 @@ else
                 timeM=${time%%m*} ; time=${time##*m} ; time=${time%s*}
                 sec=$(( timeM * 60 )) ; sec=$(( sec + ${time%%.*} )) ; sec="${sec}.${time##*.}"
                 sqlStmt="update perfTest set localFs$type=\"$sec\" where idx=$idx"
-                RunSql2 $sqlStmt
+                RunSql $sqlStmt
         done < $tmpFile;
 
         ## Run test using remote file systems
@@ -109,14 +109,14 @@ else
                 timeM=${time%%m*} ; time=${time##*m} ; time=${time%s*}
                 sec=$(( timeM * 60 )) ; sec=$(( sec + ${time%%.*} )) ; sec="${sec}.${time##*.}"
                 sqlStmt="update perfTest set remoteFs$type=\"$sec\" where idx=$idx"
-                RunSql2 $sqlStmt
+                RunSql $sqlStmt
         done < $tmpFile;
 
         ## Run database tests
         set -f
         sqlStmt="select * from sites where name is not null order by name"
         { time (
-                RunSql2 $sqlStmt
+                RunSql $sqlStmt
         ); } 2> $tmpFile
         while read -r line; do
                 [[ -z $line ]] && continue
@@ -126,18 +126,18 @@ else
                 timeM=${time%%m*} ; time=${time##*m} ; time=${time%s*}
                 sec=$(( timeM * 60 )) ; sec=$(( sec + ${time%%.*} )) ; sec="${sec}.${time##*.}"
                 sqlStmt="update perfTest set dbread$type=\"$sec\" where idx=$idx"
-                RunSql2 $sqlStmt
+                RunSql $sqlStmt
         done < $tmpFile;
 
         ## Cleanup
         [[ -f "/steamboat/leepfrog/docs/tools/perfTest" ]] && rm -rf "/steamboat/leepfrog/docs/tools/perfTest"
         [[ -f "$tmpFile" ]] && rm -f "$tmpFile"
 fi
-#Msg3 "$myName done"
+#Msg "$myName done"
 
 
 ## Thu Jan  5 16:36:09 CST 2017 - dscudiero - Add time stamp to the date field
-## Thu Jan 12 12:41:53 CST 2017 - dscudiero - Switch to use RunSql2
+## Thu Jan 12 12:41:53 CST 2017 - dscudiero - Switch to use RunSql
 ## Fri Jan 27 14:30:03 CST 2017 - dscudiero - Add summary mode
 ## Fri Jan 27 15:16:37 CST 2017 - dscudiero - Add debug messages
 ## Fri Feb  3 11:28:48 CST 2017 - dscudiero - Remove debug statements
@@ -149,7 +149,7 @@ fi
 ## Fri Feb 24 08:32:06 CST 2017 - dscudiero - more debug stuff
 ## Fri Feb 24 09:47:44 CST 2017 - dscudiero - remove debug statements
 ## 07-18-2017 @ 13.16.11 - dscudiero - Add start/end messages
-## 10-11-2017 @ 10.38.57 - dscudiero - switch Msg2 for Msg3
+## 10-11-2017 @ 10.38.57 - dscudiero - switch Msg2 for Msg
 ## 10-19-2017 @ 10.32.43 - dscudiero - Change the way we strip off leading zeros from the int strings
 ## 10-24-2017 @ 10.58.43 - dscudiero - Remove extra blank line in outout
 ## 10-25-2017 @ 09.14.28 - dscudiero - Turn off messages
