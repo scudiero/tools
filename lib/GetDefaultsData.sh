@@ -42,7 +42,7 @@ function GetDefaultsData {
 	fi
 
 	## Pull the data from the Db
-	Import "RunSql2"
+	Import "RunSql"
 	local sqlStmt fields field fieldCntr varName whereClause
 	scriptName="$scripts"
 
@@ -50,7 +50,7 @@ function GetDefaultsData {
 		if [[ $defaultsLoaded != true ]]; then
 			whereClause="(os=\"$osName\" or os is null) and (host=\"$hostName\" or host is null) and status=\"A\""
 			sqlStmt="select name,value from defaults where $whereClause"
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 			if [[ ${#resultSet[@]} -eq 0 ]]; then
 				Terminate "Could not retrieve common defaults data from the $warehouseDb.defaults table."
 			else
@@ -65,7 +65,7 @@ function GetDefaultsData {
 			fi
 			## Get last viewed news eDate
 			sqlStmt="select edate from $newsInfoTable where userName=\"$userName\" and object=\"$scriptName\" "
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 			[[ ${#resultSet[@]} -gt 0 ]] && lastViewedScriptNewsEdate=$(cut -d '|' -f2 <<< ${resultSet[0]})
 			defaultsLoaded=true
 		fi
@@ -79,7 +79,7 @@ function GetDefaultsData {
 			fi
 			unset $(tr ',' ' ' <<< $fields)
 			sqlStmt="select $fields from $table where name=\"$scriptName\""
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 			if [[ ${#resultSet[@]} -ne 0 ]]; then
 				fieldCntr=1
 				for field in $(tr ',' ' ' <<< $fields); do
@@ -109,3 +109,4 @@ export -f GetDefaultsData
 ## 09-28-2017 @ 16.03.08 - ("2.1.0")   - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 13.07.54 - ("2.1.-1")  - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 14.22.28 - ("2.1.-1")  - dscudiero - Change default to -fromFile
+## 03-22-2018 @ 13:42:08 - 2.1.-1 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
