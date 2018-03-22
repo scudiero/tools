@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.5" # -- dscudiero -- 01/04/2017 @ 13:48:02.29
+# version="2.0.6" # -- dscudiero -- Thu 03/22/2018 @ 14:17:07.14
 #===================================================================================================
 # Display a selection menue
 # SelectMenu <MenueItemsArrayName> <returnVariableName> <Prompt text>
@@ -51,7 +51,7 @@ function SelectMenu {
 				unset ans
 			fi
 		done
-		[[ $logFile != '' ]] && Msg2 "\n^$FUNCNAME: User selected '$ans', ${menuListArray[i]} " >> $logFile
+		[[ $logFile != '' ]] && Msg "\n^$FUNCNAME: User selected '$ans', ${menuListArray[i]} " >> $logFile
 
 	return 0
 } #SelectMenu
@@ -62,3 +62,4 @@ export -f SelectMenu
 #===================================================================================================
 
 ## Wed Jan  4 13:54:21 CST 2017 - dscudiero - General syncing of dev to prod
+## 03-22-2018 @ 14:35:59 - 2.0.6 - dscudiero - Cosmetic/minor change/Sync
