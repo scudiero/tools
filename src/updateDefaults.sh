@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.86 # -- dscudiero -- Thu 03/15/2018 @ 10:22:23.19
+version=2.0.87 # -- dscudiero -- Thu 03/22/2018 @ 13:56:25.31
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -48,14 +48,14 @@ Verbose 1 "mode = '$mode'"
 	Verbose 1 "devServers = '$newServers'"
 	## Check to see if record exists
 		sqlStmt="select count(*) from defaults where name=\"devServers\" and host=\"$hostName\" and os=\"linux\""
-		RunSql2 $sqlStmt; count=${resultSet[0]}
+		RunSql $sqlStmt; count=${resultSet[0]}
 		if [[ $count -eq 0 ]]; then
 			sqlStmt="insert into defaults values(NULL,\"devServers\",\"$newServers\",\"linux\",\"$hostName\",Now(),\"$userName\",NULL,NULL)"
 		else
 			sqlStmt="update defaults set value=\"$newServers\",updatedOn=Now(),updatedBy=\"$userName\" where name=\"devServers\" and host=\"$hostName\" and os=\"linux\""
 		fi
 		dump 1 -t sqlStmt
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 
 ## PROD servers
 	unset newServers
@@ -69,14 +69,14 @@ Verbose 1 "mode = '$mode'"
 	Verbose 1 "prodServers = '$newServers'"
 	## Check to see if record exists
 		sqlStmt="select count(*) from defaults where name=\"prodServers\" and host=\"$hostName\" and os=\"linux\""
-		RunSql2 $sqlStmt; count=${resultSet[0]}
+		RunSql $sqlStmt; count=${resultSet[0]}
 		if [[ $count -eq 0 ]]; then
 			sqlStmt="insert into defaults values(NULL,\"prodServers\",\"$newServers\",\"linux\",\"$hostName\",Now(),\"$userName\",NULL,NULL)"
 		else
 			sqlStmt="update defaults set value=\"$newServers\",updatedOn=Now(),updatedBy=\"$userName\" where name=\"prodServers\" and host=\"$hostName\" and os=\"linux\""
 		fi
 		dump 1 -t sqlStmt
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 
 ## Update rhel version.
 	rhel="$(cat /etc/redhat-release | cut -d" " -f3 | cut -d '.' -f1)"
@@ -84,7 +84,7 @@ Verbose 1 "mode = '$mode'"
 	rhel='rhel'$rhel
 	dump 1 rhel
 	sqlStmt="update defaults set value=\"$rhel\" where name=\"rhel\" and host=\"$hostName\" and os=\"linux\""
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	Verbose 1 "rhel = '$rhel'"
 
 ## Default CL version from the 'release' directory in the skeleton
@@ -93,7 +93,7 @@ Verbose 1 "mode = '$mode'"
 		defaultClVer="$(cat $skeletonRoot/release/web/courseleaf/clver.txt)"
 		dump 1 defaultClVer
 		sqlStmt="update defaults set value=\"$defaultClVer\" where name=\"defaultClVer\""
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 	else
 		Warning "Could not read file: '$skeletonRoot/release/web/courseleaf/clver.txt'"
 	fi
@@ -107,7 +107,7 @@ Verbose 1 "mode = '$mode'"
 	defaultsFile="$TOOLSDEFAULTSPATH/common"
 	Verbose 1 "\ndefaultsFile = '$defaultsFile'"
 	sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and status=\"A\" order by name"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
 		for ((ii=0; ii<${#resultSet[@]}; ii++)); do
@@ -128,7 +128,7 @@ Verbose 1 "mode = '$mode'"
 	IFS=',' read -r -a fieldsArray <<< "$fields"
 	where="where active not in (\"No\",\"Old\")"
 	sqlStmt="select $fields from scripts $where order by name"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	[[ ${#resultSet[@]} -gt 0 ]] && rm -f "$defaultsFile >& /dev/null"
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		for ((ii=0; ii<${#resultSet[@]}; ii++)); do
@@ -159,7 +159,7 @@ Verbose 1 "mode = '$mode'"
 		defaultsFile="$TOOLSDEFAULTSPATH/$host"
 		Verbose 1 "\ndefaultsFile = '$defaultsFile'"
 		sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and host=\"$host\" and status=\"A\" order by name"
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
 			echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
 			for ((ii=0; ii<${#resultSet[@]}; ii++)); do
@@ -217,3 +217,4 @@ Goodbye 0;
 ## 12-06-2017 @ 11.16.01 - (2.0.84)    - dscudiero - Refactored building the defaults data files
 ## 12-07-2017 @ 10.03.35 - (2.0.85)    - dscudiero - Add time stamp to the top comment in the generated defaults files
 ## 03-15-2018 @ 10:23:05 - 2.0.86 - dscudiero - Filter out dev6 from build7 devservers
+## 03-22-2018 @ 14:07:49 - 2.0.87 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
