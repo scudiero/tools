@@ -1,10 +1,10 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.53 # -- dscudiero -- 01/12/2017 @ 13:18:17.77
+version=2.0.54 # -- dscudiero -- Wed 03/21/2018 @ 16:37:20.17
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd' #imports="$imports "
-Import "$imports"
+myIncludes=""
+Import "$standardInteractiveIncludes $myIncludes"
 originalArgStr="$*"
 scriptDescription="Goto courseleaf site"
 
@@ -16,14 +16,10 @@ myDebug=true
 	#==================================================================================================
 	# parse script specific arguments
 	#==================================================================================================
-	function parseArgs-goto {
-		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
-		argList+=(-courseleaf,2,switch,,target='/web/courseleaf',script,"Go to .../web/courseleaf")
-		argList+=(-cimc,4,switch,,target='/web/courseadmin',script,"Go to .../web/courseadmin")
-		argList+=(-cimp,4,switch,,target='/web/programadmin',script,"Go to .../web/programadmin")
-		argList+=(-db,2,switch,,target='/db',script,"Go to .../web/programadmin")
-		argList+=(-debug,2,switch,,target='debug',script,"Start wizDebug")
-		argList+=(-clone,2,switch,,target='clone',script,"Clone the site")
+	function goto-ParseArgsStd2 {
+		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+		myArgs+=('co|courseleaf|switch||target='/web/courseleaf'|script|Go to .../web/courseleaf')
+		myArgs+=('db|db|switch||target='/db'|script|Go to .../db')
 	}
 
 #==================================================================================================
@@ -31,7 +27,7 @@ myDebug=true
 #==================================================================================================
 helpSet='script,client,env'
 GetDefaultsData $myName
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 [[ $env == '' ]] && env='dev'
 
 dump -r
@@ -41,9 +37,9 @@ dump -l myName client env target
 ## lookup client in clients database
 #==================================================================================================
 sqlStmt="select hosting from $clientInfoTable where name=\"$client\""
-RunSql2 $sqlStmt
+RunSql $sqlStmt
 if [[ ${#resultSet[@]} -eq 0 ]]; then
-	Msg2  $E "Client '$client', Env '$env' not found in warehouse.$clientInfoTable table";
+	Error "Client '$client', Env '$env' not found in warehouse.$clientInfoTable table";
 	return
 fi
 hosting=${resultSet[0]}
@@ -56,9 +52,9 @@ if [[ $hosting == 'leepfrog' ]]; then
 	[[ $env = 'test' ]] && client="$client-test" && whereClause="name=\"$client\" and env=\"test\" and host=\"$hostName\""
 	sqlStmt="select share,hosting from $siteInfoTable where $whereClause"
 	dump -l sqlStmt
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	if [[ ${#resultSet[@]} -eq 0 ]]; then
-		Msg2  $E "Client '$client', Env '$env' not found in warehouse.$siteInfoTable table";
+		Error "Client '$client', Env '$env' not found in warehouse.$siteInfoTable table";
 		return
 	fi
 	share=${resultSet[0]}
@@ -92,7 +88,7 @@ else
 			sshpass -p $remotePw ssh $remoteUser@$remoteHost
 		fi
 	else
-		Msg2 $T "Remote site and could not retrieve login information from file: \n^$pwFile."
+		Terminate "Remote site and could not retrieve login information from file: \n^$pwFile."
 	fi
 fi
 
@@ -100,3 +96,4 @@ return
 ## Wed Apr 27 15:17:07 CDT 2016 - dscudiero - Switch to use RunSql
 ## Mon Jun  6 09:30:11 CDT 2016 - dscudiero - Added support for remote sites
 ## Thu Jul 14 15:08:29 CDT 2016 - fred - Switch LOGNAME for userName
+## 03-22-2018 @ 12:36:17 - 2.0.54 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
