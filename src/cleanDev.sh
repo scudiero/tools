@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.52 # -- dscudiero -- Fri 12/08/2017 @  7:33:50.68
+version=3.5.53 # -- dscudiero -- Thu 03/22/2018 @ 14:01:33.02
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall StringFunctions PushPop"
@@ -77,7 +77,7 @@ scriptDescription="Cleanup private dev sites"
 			if [[ ${#workFiles[@]} -gt 0 ]]; then
 				[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
 				[[ ${#workFiles[@]} -eq 1 ]] && echo && Info "Only a single site was found (${workFiles[0]})" && sites=("${workFiles[0]}") && return 0
-				Msg3; Msg3; Msg3 "The following private dev sites were found for you on this host:"
+				Msg; Msg; Msg "The following private dev sites were found for you on this host:"
 				for file in "${workFiles[@]}"; do
 					[[ ${#file} -gt $maxLen ]] && maxLen=${#file}
 				done
@@ -148,36 +148,36 @@ scriptDescription="Cleanup private dev sites"
 
 		case "$requestType" in
 			m*)
-				echo; Msg3 "Marking '$file' for automatic deletion in $deleteLimitDays days..."
+				echo; Msg "Marking '$file' for automatic deletion in $deleteLimitDays days..."
 				$DOIT mv "$file" "$file".AutoDeleteNoSave
 				$DOIT touch "$file".AutoDeleteNoSave/.AutoDeleteNoSave
 				;;
 			s*)
-				echo; Msg3 "Holding '$file' as '$file'.save..."
+				echo; Msg "Holding '$file' as '$file'.save..."
 				$DOIT mv "$file" "$file".save
 				;;
 			u*)
-				echo; Msg3 "UnMarking '$file'..."
+				echo; Msg "UnMarking '$file'..."
 				newFileName=$(sed 's|.AutoDeleteNoSave||g' <<< ${workFiles[$siteId]})
 				$DOIT mv "$file" /mnt/$share/web/$newFileName
 				$DOIT rm /mnt/$share/web/$newFileName/.AutoDeleteNoSave
 				;;
 			r*)
-				echo; Msg3 "Reseting 'marked' date for '$file'..."
+				echo; Msg "Reseting 'marked' date for '$file'..."
 				$DOIT touch "$file"/.clonedFrom*
 				;;
 			y*)
 				if [[ $userName = 'dscudiero' ]]; then
 					unset ans; Prompt ans "^Do you wish to save the workflow files" 'Yes No' 'Yes' ; ans=$(Lower "${ans:0:1}")
-					[[ $ans == 'y' ]] && Msg3 "Saving workflow..." && \
+					[[ $ans == 'y' ]] && Msg "Saving workflow..." && \
 						FindExecutable scriptsAndReports -sh -run saveWorkflow $processClient -p -all -suffix "beforeDelete-$backupSuffix" -nop #-quiet
 				fi
-				echo; Msg3 "Removing '$file' offline..."
+				echo; Msg "Removing '$file' offline..."
 				if [[ $DOIT == '' ]]; then
 					mv -f "$file" "$file".BeingDeletedBy$(TitleCase "$myName")
 					(nohup rm -rf "$file".BeingDeletedBy$(TitleCase "$myName") &> /dev/null) &
 				else
-					Msg3 "*** DOIT flag is off, skipping delete ***"
+					Msg "*** DOIT flag is off, skipping delete ***"
 				fi
 				;;
 			w*)
@@ -200,7 +200,7 @@ deleteLimitDays=7
 
 ## Get the deleteLimitDays from db -- lookup from checkForPrivateDevSites script data
 sqlStmt="select scriptData1 from $scriptsTable where name=\"checkForPrivateDevSites\""
-RunSql2 $sqlStmt
+RunSql $sqlStmt
 [[ ${#resultSet[@]} -ne 0 ]] && deleteLimitDays=${resultSet[0]}
 
 #==================================================================================================
@@ -224,26 +224,26 @@ validActions='Yes No Mark Unmark ResetDate Save'
 searchStr="$userName"
 
 if [[ $daemonMode == true ]]; then
-	Msg3 "Starting $myName in daemon mode..."
+	Msg "Starting $myName in daemon mode..."
 	SetFileExpansion 'on'
 	fileList="$(ls -d /mnt/dev*/web/*-*--AutoDelete* 2> /dev/null || true)"
 	SetFileExpansion
 	for file in $fileList; do
 		file=$(tr -d ':' <<< "$file")
 		if [[ $(Contains "$file" 'WithSave') == true ]]; then
-			Msg3 "^Deleting '$(basename $file)' with workflow save"
+			Msg "^Deleting '$(basename $file)' with workflow save"
 			quiet=true
 			FindExecutable scriptsAndReports -sh -run saveWorkflow -daemon -siteFile "$file" -all -suffix "beforeDelete-$backupSuffix -quiet -nop"
 			quiet=false
-			Msg3 "^^workflow saved"
+			Msg "^^workflow saved"
 		else
-			Msg3 "^Deleting '$(basename $file)'"
+			Msg "^Deleting '$(basename $file)'"
 		fi
 		fileRm="$(sed s"/AutoDeleteWithSave/BeingDeletedBy$(TitleCase $myName)/g" <<< "$file")"
 		mv -f "$file" "$fileRm"
 		(nohup rm -rf "$fileRm" &> /dev/null) &
 	done
-	Msg3 "Ending $myName in daemon mode..."
+	Msg "Ending $myName in daemon mode..."
 	Goodbye 0
 	exit 0
 fi
@@ -255,8 +255,8 @@ while [ true == true ]; do
 	GetSites "$searchStr"
 	[[ ${#sites[@]} -eq 0 ]] && echo && Info "No files found for user: '$userName'" && break
 	for site in ${sites[@]}; do
-		[[ $site == '' ]] && Msg3 "No sites found or all sites have been processed" && Goodbye 0
-		echo; Msg3  "You are asking to process site: '$site', are you sure?"
+		[[ $site == '' ]] && Msg "No sites found or all sites have been processed" && Goodbye 0
+		echo; Msg  "You are asking to process site: '$site', are you sure?"
 		unset ans; Prompt ans " " "$validActions"; requestType=$(Lower ${ans:0:2})
 		ProcessRequest "$requestType" "$site"
 	done
@@ -317,3 +317,4 @@ Goodbye 0
 ## 10-31-2017 @ 08.15.29 - (3.5.43)    - dscudiero - Put a check in to make sure we do not run the GetSites function in batch mode
 ## 11-01-2017 @ 16.49.25 - (3.5.51)    - dscudiero - Switch to ParseArgsStd2
 ## 12-08-2017 @ 07.34.16 - (3.5.52)    - dscudiero - Replace 'Call' with FindExecutable -run
+## 03-22-2018 @ 14:06:02 - 3.5.53 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
