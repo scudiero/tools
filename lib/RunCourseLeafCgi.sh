@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.23" # -- dscudiero -- Mon 10/16/2017 @ 15:33:45.71
+# version="2.0.24" # -- dscudiero -- Thu 03/22/2018 @ 13:14:11.62
 #===================================================================================================
 # Run a courseleaf.cgi command, check outpout
 # Courseleaf.cgi $LINENO <siteDir> <command string>
@@ -19,15 +19,15 @@ function RunCourseLeafCgi {
 	pushd "$siteDir" > /dev/null
 	courseLeafPgm=$(GetCourseleafPgm | cut -d' ' -f1).cgi
 	courseLeafDir=$(GetCourseleafPgm | cut -d' ' -f2)
-	if [[ $courseLeafPgm == '.cgi' || $courseLeafDir == '' ]]; then Msg2 $T "$FUNCNAME: Could not find courseleaf executable"; fi
+	if [[ $courseLeafPgm == '.cgi' || $courseLeafDir == '' ]]; then Terminate "$FUNCNAME: Could not find courseleaf executable"; fi
 	dump -3  siteDir courseLeafPgm courseLeafDir cgiCmd
-	[[ ! -x $courseLeafDir/$courseLeafPgm ]] && Msg2 $TT1 "$FUNCNAME: Could not find $courseLeafPgm in '$courseLeafDir' trying:\n^'$cgiCmd'\n^($calledLineNo)"
+	[[ ! -x $courseLeafDir/$courseLeafPgm ]] && Terminate "$FUNCNAME: Could not find $courseLeafPgm in '$courseLeafDir' trying:\n^'$cgiCmd'\n^($calledLineNo)"
 
 	## Run command
 	cd $courseLeafDir
 	{ ( ./$courseLeafPgm $cgiCmd ); } &> $cgiOut
 	grepStr="$(ProtectedCall "grep -m 1 'ATJ error:' $cgiOut")"
-	[[ $grepStr != '' ]] && Msg2 $TT1 "$FUNCNAME: ATJ errors were reported by the step.\n^^cgi cmd: '$cgiCmd'\n^^$grepStr"
+	[[ $grepStr != '' ]] && Terminate "$FUNCNAME: ATJ errors were reported by the step.\n^^cgi cmd: '$cgiCmd'\n^^$grepStr"
 	rm -f "$cgiOut"
 	popd > /dev/null
 	return 0
@@ -50,3 +50,4 @@ export -f RunCourseLeafCgi
 ## 05-25-2017 @ 13.26.11 - ("2.0.21")  - dscudiero - Tweak how the tmpFile is assigned
 ## 09-22-2017 @ 07.50.14 - ("2.0.22")  - dscudiero - Add to imports
 ## 10-16-2017 @ 16.40.22 - ("2.0.23")  - dscudiero - Add PushPop to the includes list
+## 03-22-2018 @ 13:16:44 - 2.0.24 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
