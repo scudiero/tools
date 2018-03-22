@@ -2,7 +2,7 @@
 
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.46" # -- dscudiero -- Fri 02/02/2018 @  9:44:21.40
+# version="2.0.47" # -- dscudiero -- Thu 03/22/2018 @ 13:36:17.29
 #===================================================================================================
 # Check to see if the logged user can run this script
 # Returns true if user is authorized, otherwise it returns a message
@@ -12,7 +12,7 @@
 # All rights reserved
 #===================================================================================================
 function CheckAuth {
-	Import 'RunSql2'
+	Import 'RunSql'
 	local sqlStmt author restrictGroups
 	local scriptName=${1-$myName}
 	unset author restrictGroups
@@ -22,7 +22,7 @@ function CheckAuth {
 
 	## Get the retricted information for the script
 		sqlStmt="select author,restrictToUsers,restrictToGroups from $scriptsTable where name=\"$scriptName\""
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && echo true && return 0
 		result="${resultSet[0]}"
 		author="${result%%|*}"; result="${result#*|}";
@@ -88,3 +88,4 @@ export -f CheckAuth
 ## 02-02-2018 @ 09.26.40 - 2.0.41 - dscudiero - Comment out the author check
 ## 02-02-2018 @ 09.28.26 - 2.0.42 - dscudiero - Cosmetic/minor change/Sync
 ## 02-02-2018 @ 09.44.36 - 2.0.46 - dscudiero - Fix bug checking of the auth file existrs
+## 03-22-2018 @ 13:41:52 - 2.0.47 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
