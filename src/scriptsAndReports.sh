@@ -1,10 +1,10 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.117 # -- dscudiero -- Fri 02/02/2018 @  9:57:40.13
+version=3.13.118 # -- dscudiero -- Thu 03/22/2018 @ 13:49:39.15
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes="RunSql2 Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
+myIncludes="RunSql Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -19,14 +19,10 @@ scriptDescription="Script dispatcher"
 #=======================================================================================================================
 # Standard call back functions
 #=======================================================================================================================
-function parseArgs-scriptsAndReports {
-	# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
-	argList+=(-emailAddrs,1,option,emailAddrs,,script,'Email addresses to send reports to when running in batch mode')
-	argList+=(-noArgs,1,switch,noArgs,,script,'Do not prompt for additional arguments to send to the script/report')
-}
-function Goodbye-scriptsAndReports  { # or Goodbye-local
-	SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
-	return 0
+function scriptsAndReports-ParseArgsStd2 {
+	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+	myArgs+=('email|emailAddrs|option|emailAddrs||script|Email addresses to send reports to when running in batch mode')
+	myArgs+=('noa|noArgs|switch|noArgs||script|Do not prompt for additional arguments to send to the script/report')	
 }
 
 #=======================================================================================================================
@@ -54,7 +50,7 @@ function BuildMenuList {
 
 		sqlStmt="select $fields from $table where $whereClauseActive $whereClauseHost $whereClauseUser order by name"
 		dump -1 -p sqlStmt
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "Sorry, either no scripts are active or you do not have access to any scripts."
 
 		unset menuList
@@ -99,7 +95,7 @@ function ExecScript {
 	## Lookup detailed script info from db
 		local fields="exec,lib,scriptArgs"
 		local sqlStmt="select $fields from $scriptsTable where lower(name) =\"$(Lower $name)\" "
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		[[ ${#resultSet[0]} -eq 0 ]] &&Terminate "Could not lookup script name ('$name') in the $mySqlDb.$scriptsTable"
 		resultString=${resultSet[0]}; resultString=$(tr "\t" "|" <<< "$resultString" )
 		local fieldCntr=1
@@ -173,7 +169,7 @@ function ExecReport {
 	## Lookup detailed script info from db
 		local fields="shortDescription,type,header,db,dbType,sqlStmt,script,scriptArgs,ignoreList"
 		local sqlStmt="select $fields from $reportsTable where lower(name) =\"$(Lower $name)\" "
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		[[ ${#resultSet[0]} -eq 0 ]] && Terminate "Could not lookup report name ('$name') in the $mySqlDb.$reportsTable"
 		myData="Name: '$name' "
 		[[ $logInDb != false && $myLogRecordIdx != "" ]] && dbLog 'Update' $myLogRecordIdx "$myData"
@@ -194,7 +190,7 @@ function ExecReport {
 		## Report record defines a query
 		if [[ $type == 'query' ]]; then
 			if [[ $dbType == 'mysql' ]]; then
-				RunSql2 $sqlStmt
+				RunSql $sqlStmt
 				if [[ ${#resultSet[@]} -gt 0 ]]; then
 					resultSet=("$(tr ',' '|' <<< "$header")" "${resultSet[@]}")
 					[[ -f $tmpFile ]] && rm -f $tmpFile
@@ -265,19 +261,19 @@ mode=$(tr '[:upper:]' '[:lower:]' <<< "$1")
 ## Check to see if the first argument is a report name
 	## Is it a client name?
 	# sqlStmt="select count(*) from $clientInfoTable where LOWER(name)=\"$(Lower $1)\" and recordStatus=\"A\""
-	# RunSql2 $sqlStmt
+	# RunSql $sqlStmt
 	# count=${resultSet[0]}
 	# ## Not a client name, look for report or script name
 	# if [[ $count -eq 0 ]]; then
 	# 	if [[ $mode == 'scripts' ]]; then
 	# 		sqlStmt="select count(*) from $scriptsTable where LOWER(name)=\"$(Lower $1)\" and active=\"Yes\" and showInScripts=\"Yes\""
-	# 		RunSql2 $sqlStmt
+	# 		RunSql $sqlStmt
 	# 		count=${resultSet[0]}
 	# 		[[ $count -ne 0 ]] && script=$1 && shift && originalArgStr="$*"
 	# 	elif [[ $mode == 'reports' ]]; then
 	# 		unset report
 	# 		sqlStmt="select count(*) from $reportsTable where LOWER(name)=\"$(Lower $1)\" and active=\"Yes\""
-	# 		RunSql2 $sqlStmt
+	# 		RunSql $sqlStmt
 	# 		count=${resultSet[0]}
 	# 		[[ $count -ne 0 ]] && report=$1 && shift && originalArgStr="$*"
 	# 	fi
@@ -538,3 +534,4 @@ Goodbye 0
 ## 11-09-2017 @ 07.26.48 - (3.13.64)   - dscudiero - Remove extra blank line if batchMode
 ## 11-15-2017 @ 09.48.24 - (3.13.116)  - dscudiero - Refactored passing in reports naming data from command line, fixed scripts calling reports
 ## 02-02-2018 @ 09.57.59 - 3.13.117 - dscudiero - Tweak the sql query to make sure we take into account case
+## 03-22-2018 @ 14:07:41 - 3.13.118 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
