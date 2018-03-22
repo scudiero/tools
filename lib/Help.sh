@@ -10,7 +10,7 @@
 function Help {
 	mode="${1-normal}"
 
-	includes='Msg3 Dump StringFunctions Colors'
+	includes='Msg Dump StringFunctions Colors'
 	Import "$includes"
 
 	[[ $(type -t $FUNCNAME-$myName) == 'function' ]] && $FUNCNAME-$myName 'setVarsOnly'
@@ -19,17 +19,17 @@ function Help {
 	local myHelpSet="common,script,$(tr ' ' ',' <<< $helpSet)"
 	local tempStr="$(ColorK "Usage:") $myName"
 
-	includes='Msg3 Colors StringFunctions'
+	includes='Msg Colors StringFunctions'
 	Import "$includes"
 
 	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
 	echo; echo
-	Msg3 "$myName version: $version"
+	Msg "$myName version: $version"
 	[[ $updatesClData == 'Yes' ]] && Warning "This script updates client side data"
 	echo
 
 	sqlStmt="select restrictToUsers,restrictToGroups from $scriptsTable where name=\"$myName\""
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
 		result="${resultSet[0]}"
 		restrictToUsers=${result%%|*}
@@ -43,23 +43,23 @@ function Help {
 
 	[[ $(Contains ",$myHelpSet," ",client,") == true ]] && hasClient=true && tempStr="$tempStr [client]"
 	tempStr="$tempStr [OPTIONS]"
-	Msg3 "$tempStr"
+	Msg "$tempStr"
 	echo
 	## Print out header info
-		[[ $scriptDescription != '' ]] && Msg3 "$(ColorK "$scriptDescription.")"
-		[[ $shortDescription != '' ]] && Msg3 "$(ColorK "$shortDescription.")"
-		[[ $longDescription != '' ]] && echo && Msg3 "$longDescription" && echo
+		[[ $scriptDescription != '' ]] && Msg "$(ColorK "$scriptDescription.")"
+		[[ $shortDescription != '' ]] && Msg "$(ColorK "$shortDescription.")"
+		[[ $longDescription != '' ]] && echo && Msg "$longDescription" && echo
 		if [[ -n $scriptHelpDesc ]]; then
 			for text in "${scriptHelpDesc[@]}"; do
-				Msg3 "$text"
+				Msg "$text"
 			done
 			echo
 		else
 			[[ $(type -t $FUNCNAME-$myName) == 'function' ]] && $FUNCNAME-$myName
 			[[ $(type -t $myName-$FUNCNAME) == 'function' ]] && $myName-$FUNCNAME
 		fi
-		[[ $author != '' ]] && Msg3 "$(ColorK "Author:") $author"
-		[[ $supported != '' ]] && Msg3 "$(ColorK "Supported:") $supported"
+		[[ $author != '' ]] && Msg "$(ColorK "Author:") $author"
+		[[ $supported != '' ]] && Msg "$(ColorK "Supported:") $supported"
 
 	## Loop through them and find the max widths for the name and min name
 		local maxWidthMin=0
@@ -74,8 +74,8 @@ function Help {
 
 	echo
 	if [[ $hasClient == true ]]; then
-		Msg3 "$(ColorK "[client]:")"
-		Msg3 "^This is the client code (abbreviation) for the client that you wish to work with."
+		Msg "$(ColorK "[client]:")"
+		Msg "^This is the client code (abbreviation) for the client that you wish to work with."
 	fi
 
 	## print them out
@@ -112,58 +112,58 @@ function Help {
 		done
 
 	echo
-	Msg3 "$(ColorK "[OPTIONS]")"
+	Msg "$(ColorK "[OPTIONS]")"
 	if [[ ${#scriptOptionsArray[@]} -gt 0 || ${#scriptSwitchesArray[@]} -gt 0  ]]; then
-		Msg3 "^$(ColorU "$(ColorK "Script specific options:")")"
+		Msg "^$(ColorU "$(ColorK "Script specific options:")")"
 		## Script specific options
 		if [[ ${#scriptOptionsArray[@]} -gt 0 ]]; then
-			Msg3 "^^$(ColorK "Arguments with values (i.e. a flag with value e.g. -flag value):")"
+			Msg "^^$(ColorK "Arguments with values (i.e. a flag with value e.g. -flag value):")"
 			for msgString in "${scriptOptionsArray[@]}"; do
-				Msg3 "^$msgString"
+				Msg "^$msgString"
 			done
 			echo
 		fi
 		## Script specific switches
 		if [[ ${#scriptSwitchesArray[@]} -gt 0 ]]; then
-			Msg3 "^^$(ColorK "Arguments without values (i.e. a flag e.g. -flag):")"
+			Msg "^^$(ColorK "Arguments without values (i.e. a flag e.g. -flag):")"
 			for msgString in "${scriptSwitchesArray[@]}"; do
-				Msg3 "^$msgString"
+				Msg "^$msgString"
 			done
 			echo
 		fi
 	fi
 
-	Msg3 "^$(ColorU "$(ColorK "Tools common options:")") $(ColorW "(Note: While all options can be specified they may not have a meaning for the current script)")"
+	Msg "^$(ColorU "$(ColorK "Tools common options:")") $(ColorW "(Note: While all options can be specified they may not have a meaning for the current script)")"
 	## Common specific options
 	if [[ ${#commonOptionsArray[@]} -gt 0 ]]; then
-		Msg3 "^^$(ColorK "Arguments with values (i.e. a flag with value e.g. -flag value):")"
+		Msg "^^$(ColorK "Arguments with values (i.e. a flag with value e.g. -flag value):")"
 		for msgString in "${commonOptionsArray[@]}"; do
-			Msg3 "^$msgString"
+			Msg "^$msgString"
 		done
 		echo
 	fi
 	## Common specific switches
 	if [[ ${#commonSwitchesArray[@]} -gt 0 ]]; then
-		Msg3 "^^$(ColorK "Arguments without values (i.e. a flag e.g. -flag):")"
+		Msg "^^$(ColorK "Arguments without values (i.e. a flag e.g. -flag):")"
 		for msgString in "${commonSwitchesArray[@]}"; do
-			Msg3 "^$msgString"
+			Msg "^$msgString"
 		done
 		echo
 	fi
 
 	## print out script specific help notes
 	if [[ ${#helpNotes[@]} -gt 0 ]]; then
-		Msg3 "$(ColorK "Script specific notes:")"
+		Msg "$(ColorK "Script specific notes:")"
 		for ((cntr = 0 ; cntr < ${#helpNotes[@]} ; cntr++)); do
 			let idx=$cntr+1
-	 		Msg3 "^$idx) ${helpNotes[$cntr]}"
+	 		Msg "^$idx) ${helpNotes[$cntr]}"
 		done
 		echo
 	fi
 
 	## General help notes for all scripts
 	echo
-	Msg3 "$(ColorK "General Notes:")"
+	Msg "$(ColorK "General Notes:")"
 	local notesClient notesAlways notes
 	unset notesClient notesAlways notes
 	notesClient+=("A value of '.' may be specified for client to parse the client value from the current working directory.")
@@ -179,7 +179,7 @@ function Help {
 
 	idx=1
 	for line in "${notes[@]}"; do
-		Msg3  "^$idx) $line"
+		Msg  "^$idx) $line"
 		((idx+=1))
 	done
 	echo
@@ -190,25 +190,25 @@ function Help {
 	if [[ -n $SCRIPTINCLUDES ]]; then
 		## Scripts
 		local token
-		Msg3 "$(ColorK "Tools library modules used (via tools/lib):")"
+		Msg "$(ColorK "Tools library modules used (via tools/lib):")"
 		for token in $(tr ',' ' ' <<< $SCRIPTINCLUDES); do
-			Msg3 "^$token"
+			Msg "^$token"
 		done #| sort
 		echo
 		## Java
 		if [[ $(Contains "$SCRIPTINCLUDES" "RunSql") == true && -n $javaResources ]]; then
 			javaPgm=${runMySqlJavaPgmName:-runMySql}
 	 		jar="$TOOLSPATH/tools/jars/$javaPgm.jar"
-			Msg3 "$(ColorK "Java resources used ($jar):")"
+			Msg "$(ColorK "Java resources used ($jar):")"
 	 		jar -tf "$jar" | Indent
 			echo
 		fi
 		## Python
 		if [[ $(Contains "$SCRIPTINCLUDES" "GetExcel") == true && -n $pythonResources ]]; then
 			local token
-			Msg3 "$(ColorK "Python resources used:")"
+			Msg "$(ColorK "Python resources used:")"
 			for token in $(tr ',' ' ' <<< $pythonResources); do
-				Msg3 "^$token"
+				Msg "^$token"
 			done | sort
 			echo
 		fi
@@ -226,5 +226,6 @@ export -f Help
 ## 08-30-2017 @ 14.07.33 - (2.0.6)     - dscudiero - Tweak output format
 ## 09-01-2017 @ 09.27.30 - (2.0.8)     - dscudiero - Add call myname-FUNCNAME function if found
 ## 09-01-2017 @ 09.38.26 - (2.0.9)     - dscudiero - Fix spelling error
-## 09-25-2017 @ 08.14.09 - (2.1.-1)    - dscudiero - Use Msg3
+## 09-25-2017 @ 08.14.09 - (2.1.-1)    - dscudiero - Use Msg
 ## 03-19-2018 @ 10:43:25 - 2.1.-1 - dscudiero - Change the way we display the java dependencies
+## 03-22-2018 @ 13:42:12 - 2.1.-1 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
