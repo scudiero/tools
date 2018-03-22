@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.130 # -- dscudiero -- Fri 12/08/2017 @  9:26:46.67
+version=1.3.131 # -- dscudiero -- Wed 03/21/2018 @ 17:03:05.59
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall PushPop SelectMenu CopyFileWithCheck BackupCourseleafFile WriteChangelogEntry"
@@ -16,13 +16,6 @@ scriptDescription="Refresh courseleaf components - dispatcher"
 #==================================================================================================
 # local functions
 #==================================================================================================
-	#==================================================================================================
-	# parse script specific arguments
-	#==================================================================================================
-	function parseArgs-refresh {
-		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
-		myArgList+=(-action,3,option,refreshObj,,script,'The action you wish to perform')
-	}
 
 #==================================================================================================
 # Declare local variables and constants
@@ -71,7 +64,7 @@ function vba {
 		for project in $projectDirs; do
 			projects+=($project)
 		done
-		Msg3 "Please specify the ordinal number of the source project\n"
+		Msg "Please specify the ordinal number of the source project\n"
 		SelectMenu 'projects' 'project' '\nRefresh object ordinal(or 'x' to quit) > '
 		[[ $project == '' ]] && Goodbye 0
 
@@ -84,7 +77,7 @@ function vba {
 		verifyArgs+=("Target Application:$app")
 		VerifyContinue "You are asking to refresh an vba application:"
 
-	Msg3 "Refreshing '$app' from $project..."
+	Msg "Refreshing '$app' from $project..."
 	## Copy the application files
 		srcDir="$vbaSrcDir/Projects/$project/$project/bin/Release"
 		tgtDir=$TOOLSPATH/bin
@@ -109,7 +102,7 @@ function vba {
 		[[ -d $tgtDir/$app ]] && mv $tgtDir/$app $tgtDir/archive/$app-$(date +"%H%M%S")
 		mv -f $tgtDir/$app-new $tgtDir/$app
 	cd "$cwd"
-	Msg3 "Production '$app' refreshed from $project"
+	Msg "Production '$app' refreshed from $project"
 	return 0
 }
 
@@ -117,7 +110,7 @@ function vba {
 # workwithclientdata
 #==============================================================================================
 function workwithclientdata {
-	Msg3 "Refreshing WorkWith clientData..."
+	Msg "Refreshing WorkWith clientData..."
 	## Create the data dump for the workwith tool
 		fields="$clientInfoTable.name,$clientInfoTable.longname,$clientInfoTable.hosting,$clientInfoTable.products,$siteInfoTable.host"
 		envsClause="GROUP_CONCAT(distinct env SEPARATOR ',') as envList"
@@ -144,9 +137,9 @@ function workwithclientdata {
 function wharehousesqliteshadow {
 	if [[ ${myRhen:0:1} -gt 5 ]]; then
 		buildWarehouseSqlite
-		Msg3 "You need to copy the workflow.sqlite file\n\t$HOME/warehouse.sqlite\ne"
-		Msg3 "to the internal-stage location:\n\t$HOME/internal/stage/db/warehouse.sqlite"
-		Msg3 "From BUILD5"
+		Msg "You need to copy the workflow.sqlite file\n\t$HOME/warehouse.sqlite\ne"
+		Msg "to the internal-stage location:\n\t$HOME/internal/stage/db/warehouse.sqlite"
+		Msg "From BUILD5"
 	else
 		Terminate "This process can only be run from an rhel6 or better system"
 	fi
@@ -200,18 +193,18 @@ function cgis {
 
 		result=$(CopyFileWithCheck "$courseleafCgiSourceFile" "${siteDir}/web/courseleaf/courseleaf.cgi" 'courseleaf')
 		if [[ $result == true ]]; then
-			Msg3 "^^Updated: '/courseleaf/courseleaf.cgi' to version $courseleafCgiVer"
+			Msg "^^Updated: '/courseleaf/courseleaf.cgi' to version $courseleafCgiVer"
 		elif [[ $result == same ]]; then
-			Msg3 "^^'/courseleaf/courseleaf.cgi' is current (version: $courseleafCgiVer)"
+			Msg "^^'/courseleaf/courseleaf.cgi' is current (version: $courseleafCgiVer)"
 		else
 			Error 0 2 "Could not copy '/courseleaf/courseleaf.cgi',\n^^$result"
 		fi
 
 		result=$(CopyFileWithCheck "$ribbigCgiSourceFile" "${siteDir}/web/ribbit/index.cgi" 'courseleaf')
 		if [[ $result == true ]]; then
-			Msg3 "^^Updated: '/ribbit/index.cgi' to version $ribbitCgiVer"
+			Msg "^^Updated: '/ribbit/index.cgi' to version $ribbitCgiVer"
 		elif [[ $result == same ]]; then
-			Msg3 "^^'/ribbit/index.cgi' is current (version: $ribbitCgiVer)"
+			Msg "^^'/ribbit/index.cgi' is current (version: $ribbitCgiVer)"
 		else
 			Error 0 2 "Could not copy '/ribbit/index.cgi',\n^^$result"
 		fi
@@ -224,9 +217,9 @@ function cgis {
 				if [[ -n $grepStr ]]; then
 					result=$(CopyFileWithCheck "$ribbigCgiSourceFile" "${siteDir}/web/search/index.cgi" 'courseleaf')
 					if [[ $result == true ]]; then
-						Msg3 "^^Updated: '/ribbit/index.cgi' to version $ribbitCgiVer"
+						Msg "^^Updated: '/ribbit/index.cgi' to version $ribbitCgiVer"
 					elif [[ $result == same ]]; then
-						Msg3 "^^'/search/index.cgi' is current (version: $ribbitCgiVer)"
+						Msg "^^'/search/index.cgi' is current (version: $ribbitCgiVer)"
 					else
 						Error 0 2 "Could not copy '/search/index.cgi',\n^^$result"
 					fi
@@ -259,9 +252,9 @@ function workflowcorefiles {
 			if [[ $result == true ]]; then
 				changeLogRecs+=("Updated: $file")
 				WriteChangelogEntry 'changeLogRecs' "$srcDir/changelog.txt"
-				Msg3 "^'$file' copied"
+				Msg "^'$file' copied"
 			elif [[ $result == 'same' ]]; then
-				Msg3 "^'$file' - md5's match, no changes made"
+				Msg "^'$file' - md5's match, no changes made"
 			else
 				Terminate "Error copying file:\n^$result"
 			fi
@@ -282,7 +275,7 @@ function internalcontacts-dbshadow {
 		$DOIT chmod 770 $tgtDir/*
 		$DOIT touch $tgtDir/.syncDate
 	else
-		Msg3 "${colorWarning}This action must be run on the build5 server, starting an ssh session${colorDefault}"
+		Msg "${colorWarning}This action must be run on the build5 server, starting an ssh session${colorDefault}"
 		$DOIT ssh $userName@build5.leepfrog.com $myPath/$myName $refreshObj
 	fi
 	return 0
@@ -292,7 +285,7 @@ function internalcontacts-dbshadow {
 # wharehousesqliteshadow
 #==============================================================================================
 function clientData {
-	echo; Msg3 "*** $FUNCNAME -- Starting ***"
+	echo; Msg "*** $FUNCNAME -- Starting ***"
 	srcDir=$clientsTransactionalDb
 	tgtDir=$internalContactsDbShadow
 	SetFileExpansion 'on'
@@ -317,14 +310,14 @@ function clientData {
 # Standard arg parsing and initialization
 #==================================================================================================
 helpSet='script'
-ParseArgsStd
+ParseArgsStd2 $originalArgStr
 Hello
 echo
 
 if [[ $refreshObj == '' ]]; then
 	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
 	echo
-	Msg3 "Please specify the ordinal number of the object type you wish to refresh\n"
+	Msg "Please specify the ordinal number of the object type you wish to refresh\n"
 	SelectMenu 'refreshObjs' 'refreshObj' '\nRefresh object ordinal(or 'x' to quit) > '
 	[[ $refreshObj == '' ]] && Goodbye 0
 fi
@@ -335,7 +328,7 @@ fi
 ## call function to refresh the object
 	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear && echo
 	echo
-	Msg3 "Starting $(mapRefreshObj "$refreshObj")..."
+	Msg "Starting $(mapRefreshObj "$refreshObj")..."
 	echo
 	eval $(mapRefreshObj "$refreshObj")
 
@@ -383,3 +376,4 @@ Goodbye 0
 ## 11-30-2017 @ 12.42.50 - (1.3.128)   - dscudiero - Updated the vba section to reflect the new file locations
 ## 12-08-2017 @ 07.49.01 - (1.3.129)   - dscudiero - Add workwith clientData
 ## 12-08-2017 @ 09.28.00 - (1.3.130)   - dscudiero - Update sql query for workwith clientData to get all servers
+## 03-22-2018 @ 12:36:30 - 1.3.131 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
