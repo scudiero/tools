@@ -1,11 +1,11 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.44 # -- dscudiero -- Tue 03/20/2018 @  9:01:57.62
+version=1.2.46 # -- dscudiero -- Thu 03/22/2018 @ 12:29:59.48
 #==================================================================================================
 TrapSigs 'on'
-includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue'
-includes="$includes GetCims"
-Import "$includes"
+myIncludes="GetCims"
+Import "$standardInteractiveIncludes $myIncludes"
+
 originalArgStr="$*"
 scriptDescription="Compare workflow related files between two environments"
 
@@ -20,31 +20,23 @@ scriptDescription="Compare workflow related files between two environments"
 #==================================================================================================
 # local functions
 #==================================================================================================
-	#==================================================================================================
-	# parse script specific arguments
-	#==================================================================================================
-	function parseArgs-compareWorkflowFiles {
-		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
-		argList+=(-all,1,switch,allCims,,,"Process all CIMs")
-	}
-
 
 #==================================================================================================
 # Declare local variables and constants
 #==================================================================================================
 ## Get the files to act on from the database
-GetDefaultsData 'copyWorkflow'
+	GetDefaultsData 'copyWorkflow'
 	unset requiredInstanceFiles optionalInstanceFiles requiredGlobalFiles optionalGlobalFiles ifThenDelete
-	[[ $scriptData1 == '' ]] && Msg3 $T "'scriptData1 (requiredInstanceFiles)' is null, please check script configuration data"
+	[[ $scriptData1 == '' ]] && Terminate "'scriptData1 (requiredInstanceFiles)' is null, please check script configuration data"
 	requiredInstanceFiles="$(cut -d':' -f2- <<< $scriptData1)"
 
-	[[ $scriptData2 == '' ]] && Msg3 $T "'scriptData2 (optionalInstanceFiles)' is null, please check script configuration data"
+	[[ $scriptData2 == '' ]] && Terminate "'scriptData2 (optionalInstanceFiles)' is null, please check script configuration data"
 	optionalInstanceFiles="$(cut -d':' -f2- <<< $scriptData2)"
 
-	[[ $scriptData3 == '' ]] && Msg3 $T "'scriptData3 (requiredGlobalFiles)' is null, please check script configuration data"
+	[[ $scriptData3 == '' ]] && Terminate "'scriptData3 (requiredGlobalFiles)' is null, please check script configuration data"
 	requiredGlobalFiles="$(cut -d':' -f2- <<< $scriptData3)"
 
-	[[ $scriptData4 == '' ]] && Msg3 $T "'scriptData4 (optionalGlobalFiles)' is null, please check script configuration data"
+	[[ $scriptData4 == '' ]] && Terminate "'scriptData4 (optionalGlobalFiles)' is null, please check script configuration data"
 	optionalGlobalFiles="$(cut -d':' -f2- <<< $scriptData4)"
 
 #==================================================================================================
@@ -52,8 +44,8 @@ GetDefaultsData 'copyWorkflow'
 #==================================================================================================
 helpSet='script,client,env,cims'
 GetDefaultsData $myName
-ParseArgsStd
-[[ $allCims == true ]] && allCims='allCims' || unset allCims
+ParseArgsStd2 $originalArgStr
+[[ $allItems == true ]] && allCims='allCims' || unset allCims
 
 Hello
 Init "getClient getSrcEnv getTgtEnv getDirs checkEnvs getCims $allCims noWarn"
@@ -75,9 +67,9 @@ myData="Client: '$client', srcEnv: '$srcEnv', tgtEnv: '$tgtEnv'"
 ## Main
 #==================================================================================================
 if [[ $cimStr != '' ]]; then
-	Msg3 "Comparing CIM instance files..."
+	Msg "Comparing CIM instance files..."
 	for cim in $(tr ',' ' ' <<< $cimStr); do
-		Msg3 "\n^Checking $(Upper $cim)..."
+		Msg "\n^Checking $(Upper $cim)..."
 		foundDiff=false
 		for file in  $(tr ',' ' ' <<< "$requiredInstanceFiles $optionalInstanceFiles"); do
 			srcFile=$srcDir/web/$cim/$file
@@ -88,22 +80,22 @@ if [[ $cimStr != '' ]]; then
 
 			srcMd5=$(md5sum $srcFile | cut -f1 -d" ")
 			tgtMd5=$(md5sum $tgtFile | cut -f1 -d" ")
-			[[ $srcMd5 != $tgtMd5 ]] && Warning 0 2 "'${file}', files are different" || Msg3 "^^'${file}', files match"
+			[[ $srcMd5 != $tgtMd5 ]] && Warning 0 2 "'${file}', files are different" || Msg "^^'${file}', files match"
 		done
 	done
 fi
 
-Msg3 "\nComparing 'shared' files..."
+Msg "\nComparing 'shared' files..."
 #srcDir=$skeletonRoot/release
 for file in  $(tr ',' ' ' <<< "$requiredGlobalFiles $optionalGlobalFiles"); do
 	srcFile=$srcDir/web${file}
 	tgtFile=$tgtDir/web${file}
 	#dump -n file -t srcFile tgtFile
-	[[ ! -f $srcFile ]] && Msg3 "^^'${file}, not in source, skipping" && continue
+	[[ ! -f $srcFile ]] && Msg "^^'${file}, not in source, skipping" && continue
 	srcMd5=$(md5sum $srcFile | cut -f1 -d" ")
-	[[ ! -f $tgtFile ]] && Msg3 "^^'${file}, not in target, skipping" && continue
+	[[ ! -f $tgtFile ]] && Msg "^^'${file}, not in target, skipping" && continue
 	tgtMd5=$(md5sum $tgtFile | cut -f1 -d" ")
-	[[ $srcMd5 != $tgtMd5 ]] && Warning 0 2 "'${file}', files are different" || Msg3 "^^'${file}', $(ColorI "files match")"
+	[[ $srcMd5 != $tgtMd5 ]] && Warning 0 2 "'${file}', files are different" || Msg "^^'${file}', $(ColorI "files match")"
 done
 
 
@@ -115,4 +107,5 @@ Goodbye 0 #'alert'# 09-24-2015 -- dscudiero -- New script to compare workflow fi
 ## Wed Apr 27 16:08:26 CDT 2016 - dscudiero - Switch to use RunSql
 ## Thu Apr 28 16:27:25 CDT 2016 - dscudiero - Cleanup and modernization
 ## Wed Mar 15 10:22:27 CDT 2017 - dscudiero - Updated to compare all the files processed in copyworkflow
-## 03-20-2018 @ 09:03:02 - 1.2.44 - dscudiero - Tweak messaging, switch to Msg3
+## 03-20-2018 @ 09:03:02 - 1.2.44 - dscudiero - Tweak messaging, switch to Msg
+## 03-22-2018 @ 12:36:01 - 1.2.46 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
