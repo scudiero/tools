@@ -10,10 +10,10 @@ TrapSigs 'on'
 #=======================================================================================================================
 # Standard call back functions
 #=======================================================================================================================
-function parseArgs-qaStatus  { # or parseArgs-local
-	#argList+=(-ignoreXmlFiles,7,switch,ignoreXmlFiles,,script,'Ignore extra xml files')
-	argList+=(-long,4,switch,long,,script,'Generate the long report')
-	argList+=(-emailAddrs,5,option,emailAddrs,,script,'Email addresses to send reports to when running in batch mode')
+function qaStatus-ParseArgsStd2  { # or parseArgs-local
+	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+	myArgs+=('email|emailAddrs|option|emailAddrs||script|Email addresses to send reports to when running in batch mode')
+	myArgs+=('long|long|switch|long||script|Generate the long report')
 	return 0
 }
 function Goodbye-qaStatus  { # or Goodbye-local
@@ -40,7 +40,7 @@ GetDefaultsData
 #=======================================================================================================================
 # Standard arg parsing and initialization
 #=======================================================================================================================
-ParseArgsStd2
+ParseArgsStd2 $originalArgStr
 [[ -n $reportName ]] && GetDefaultsData "$reportName" "$reportsTable"
 [[ $long == true ]] && mode='long'
 dump -1 mode
@@ -51,7 +51,7 @@ dump -1 mode
 
 ## Get the week that priority was assigned
 	sqlStmt="select distinct implPriorityWeek from $qaStatusTable where implPriorityWeek is not null"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	[[ ${#resultSet[@]} -gt 0 ]] && implPriorityWeek="${resultSet[0]}" || unset implPriorityWeek
 
 ## Get the report data
@@ -83,7 +83,7 @@ dump -1 mode
 
 ## Get the status records
 dump -1 sqlStmt
-RunSql2 $sqlStmt
+RunSql $sqlStmt
 [[ ${#resultSet[@]} -eq 0 ]] && Terminate "No data returned from the query to the $qaStatusTable table"
 
 ## Output the report data
@@ -112,3 +112,4 @@ Goodbye 0 #'alert'
 ## 05-25-2017 @ 16.25.34 - (1.0.77)    - dscudiero - Refactoredto just send data back
 ## 08-25-2017 @ 07.42.04 - (1.0.77)    - dscudiero - Added debug statement
 ## 11-15-2017 @ 09.47.45 - (1.0.77)    - dscudiero - misc cleanup of stale arguments
+## 03-22-2018 @ 14:07:32 - 1.0.77 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
