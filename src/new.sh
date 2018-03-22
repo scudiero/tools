@@ -1,6 +1,6 @@
 #!/bin/bash
 #===================================================================================================
-version=1.2.31 # -- dscudiero -- Wed 03/21/2018 @ 17:00:21.01
+version=1.2.32 # -- dscudiero -- Thu 03/22/2018 @ 13:45:14.22
 #===================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall PushPop"
@@ -125,7 +125,7 @@ function NewScript {
 			values="${values},NULL,$ignoreList,$allowList,$emailAddrs,$scriptData1,$scriptData2,$scriptData3,$scriptData4,$scriptData5,$semaphore,NULL,$active,\"$(date +%s)\",NULL"
 			sqlStmt="insert into $scriptsTable values($values)"
 			#echo 'sqlStmt = >'$sqlStmt'<'
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 		fi
 }
 
@@ -159,7 +159,7 @@ function NewPatch {
 	values="NULL,$shortDescription,$longDescription,$clVersion,$cgiVersion,$acton,$actionTarget,$lineText,\"active\",\"$(date +%s)\",\"$userName\",NULL,NULL"
 	sqlStmt="insert into $courseleafPatchTable values($values)"
 	#echo 'sqlStmt = >'$sqlStmt'<'
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 }
 
 #===================================================================================================
@@ -205,7 +205,7 @@ function NewReport {
 	values="NULL,$name,$desc,\"$userName\",$supported,$repType,$header,$db,$dbtype,$sqlStmt,$script,$scriptArgs,$ignoreList,$allowList,$active,\"$(date +%s)\""
 	sqlStmt="insert into $reportsTable values($values)"
 	#echo 'sqlStmt = >'$sqlStmt'<'
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 	set +f
 }
 
@@ -216,7 +216,7 @@ function NewNewsItem {
 	[[ ${itemText:${#itemText}-1:1} != '.' ]] && itemText="$itemText."
 
 	sqlStmt="insert into $newsTable values(NULL,\"$objName\",\"$itemText\",NOW(),\"$(date +%s)\",\"$userName\" )"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 }
 
 #===================================================================================================
@@ -232,7 +232,7 @@ function NewDefault {
 	[[ $host == any ]] && host=NULL || host="\"$host\""
 
 	sqlStmt="insert into defaults values(NULL,$name,$value,$os,$host,\"A\",NOW(),\"$userName\",NULL,NULL)"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 }
 
 #===================================================================================================
@@ -242,7 +242,7 @@ function NewMonitorFile {
 	lastModEtime=$(stat -c %Y $file)
 	file="\"$file\""
 	sqlStmt="insert into monitorfiles values(NULL,$file,\"$hostName\",$lastModEtime,NULL)"
-	RunSql2 $sqlStmt
+	RunSql $sqlStmt
 }
 
 #===================================================================================================
@@ -308,14 +308,14 @@ function NewClient {
 	## Insert the clients record
 		unset clientId
 		sqlStmt="select idx from $clientInfoTable where name=\"$client\""
-		RunSql2 $sqlStmt
+		RunSql $sqlStmt
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
 			clientId=${resultSet[0]}
 			Msg $WT1 "Client record already exist for '$client' in the '$clientInfoTable' table"
 		else
 			$DOIT insertClientInfoRec $client -noLog -noLogInDb
 			sqlStmt="select max(idx) from $clientInfoTable"
-			RunSql2 $sqlStmt
+			RunSql $sqlStmt
 			clientId=${resultSet[0]}
 			Msg "^Created '$clientInfoTable' record for '$env'"
 
@@ -327,7 +327,7 @@ function NewClient {
 			eval siteDir="\$${env}Dir"
 			if [[ -d $siteDir ]]; then
 				sqlStmt="select siteId from $siteInfoTable where name=\"$client\" and env=\"$env\""
-				RunSql2 $sqlStmt
+				RunSql $sqlStmt
 				if [[ ${#resultSet[@]} -gt 0 ]]; then
 					Msg $WT1 "Site record already exist for '$env' in the '$siteInfoTable' table "
 				else
@@ -395,4 +395,5 @@ Msg; Msg "$objType object created"
 ## Wed Jan 11 16:41:31 CST 2017 - dscudiero - fixed import statements
 ## 09-05-2017 @ 10.09.44 - (1.2.24)    - dscudiero - change location of testsh.sh
 ## 11-14-2017 @ 07.56.56 - (1.2.30)    - dscudiero - Fix up Vba prompt and switch to Msg
-## 03-22-2018 @ 12:36:23 - 1.2.31 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-22-2018 @ 12:36:23 - 1.2.31 - dscudiero - Updated for Msg3/Msg, RunSql/RunSql, ParseArgStd/ParseArgStd2
+## 03-22-2018 @ 14:07:03 - 1.2.32 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
