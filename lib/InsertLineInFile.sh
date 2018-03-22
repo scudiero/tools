@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.13" # -- dscudiero -- 03/14/2017 @  9:29:27.43
+# version="2.0.14" # -- dscudiero -- Thu 03/22/2018 @ 13:12:35.83
 #===================================================================================================
 # Insert a line onto a file, inserts BELOW the serachLine
 # InsertLineInFile lineToInsert fileName searchLine
@@ -36,9 +36,9 @@ function InsertLineInFile {
 
 	if [[ $found == true ]]; then
 		result=$(CopyFileWithCheck "$tmpFile" "$editFile" 'courseleaf')
-		[[ $result == true || $result == 'same' ]] && echo true  || Msg2 "($FUNCNAME) $result"
+		[[ $result == true || $result == 'same' ]] && echo true  || Msg "($FUNCNAME) $result"
 	else
-		Msg2 "($FUNCNAME) Could not locate the 'after' string/line \n\t'$searchLine'"
+		Msg "($FUNCNAME) Could not locate the 'after' string/line \n\t'$searchLine'"
 		#echo '*** NOT FOUND ***' >> $stdout
 	fi
 
@@ -54,3 +54,4 @@ export -f InsertLineInFile
 ## Wed Jan  4 13:53:52 CST 2017 - dscudiero - General syncing of dev to prod
 ## Thu Feb  9 08:06:30 CST 2017 - dscudiero - make sure we are using our own tmpFile
 ## Tue Mar 14 09:31:19 CDT 2017 - dscudiero - Tweak messaging
+## 03-22-2018 @ 13:16:40 - 2.0.14 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
