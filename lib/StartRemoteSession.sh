@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-#version="2.0.13" # -- dscudiero -- Thu 03/22/2018 @ 13:15:27.48
+#version="2.0.14" # -- dscudiero -- Fri 03/23/2018 @ 16:55:25.14
 #===================================================================================================
 # Start a remote session via ssh
 # StartRemoteSession userid@domain [command]
@@ -37,7 +37,7 @@ function StartRemoteSession {
 	fi
 
 	[[ $(Contains "$remoteUserAtHost" '.') == false ]] && remoteUserAtHost="${remoteUserAtHost}.leepfrog.com"
-	#[[ $(Contains ",$slowHosts," ",$remoteHost,") == true ]] && Note "Target host has been found to be a bit slow, please be patient" && Msg3
+	#[[ $(Contains ",$slowHosts," ",$remoteHost,") == true ]] && Note "Target host has been found to be a bit slow, please be patient" && Msg
 	$commmandPrefix ssh -t $remoteUserAtHost $DISPATCHER $remoteCommand
 	return 0
 } ## StartRemoteSession
@@ -49,4 +49,5 @@ export -f StartRemoteSession
 
 ## Wed Jan  4 13:54:32 CST 2017 - dscudiero - General syncing of dev to prod
 ## 09-22-2017 @ 12.14.39 - ("2.0.12")  - dscudiero - Added to includes
-## 03-22-2018 @ 13:16:53 - 2.0.13 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-22-2018 @ 13:16:53 - 2.0.13 - dscudiero - Updated for Msg/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 16:57:26 - 2.0.14 - dscudiero - Msg3 -> Msg
