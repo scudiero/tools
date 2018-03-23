@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.118 # -- dscudiero -- Thu 03/22/2018 @ 13:49:39.15
+version=3.13.119 # -- dscudiero -- Fri 03/23/2018 @ 14:26:28.92
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -19,7 +19,7 @@ scriptDescription="Script dispatcher"
 #=======================================================================================================================
 # Standard call back functions
 #=======================================================================================================================
-function scriptsAndReports-ParseArgsStd2 {
+function scriptsAndReports-ParseArgsStd {
 	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 	myArgs+=('email|emailAddrs|option|emailAddrs||script|Email addresses to send reports to when running in batch mode')
 	myArgs+=('noa|noArgs|switch|noArgs||script|Do not prompt for additional arguments to send to the script/report')	
@@ -328,7 +328,7 @@ helpSet='script,client'
 parseQuiet=true
 GetDefaultsData $myName -fromFiles
 
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 
 [[ $newsDisplayed == true ]] && Pause "\nNews was displayed, please review and press any key to continue"
 if [[ -n $client ]]; then
@@ -535,3 +535,4 @@ Goodbye 0
 ## 11-15-2017 @ 09.48.24 - (3.13.116)  - dscudiero - Refactored passing in reports naming data from command line, fixed scripts calling reports
 ## 02-02-2018 @ 09.57.59 - 3.13.117 - dscudiero - Tweak the sql query to make sure we take into account case
 ## 03-22-2018 @ 14:07:41 - 3.13.118 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:36:12 - 3.13.119 - dscudiero - D
