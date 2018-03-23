@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.50" # -- dscudiero -- Mon 01/08/2018 @ 14:09:44.35
+# version="2.0.51" # -- dscudiero -- Fri 03/23/2018 @ 16:47:35.50
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -21,25 +21,25 @@ function Hello {
 	
 	[[ $batchMode != true ]] && echo
 	[[ $TERM == 'dumb' ]] && echo
-	[[ $noBanners != true ]] && Msg3 "$(PadChar)"
+	[[ $noBanners != true ]] && Msg "$(PadChar)"
 	date=$(date)
 
 	local checkName=$(logname 2>&1); rc=$?
 	[[ $rc -gt 0 ]] && checkName="$LOGNAME"
 
 	[[ "$version" = "" ]] && version=1.0.0
-	Msg3 "${myName} ($version) -- Date: $(date +"%a") $(date +"%m-%d-%Y @ %H.%M.%S")"
-	[[ $noBanners != true && "$myDescription" != "" ]] && Msg3 && Msg3 "$myDescription"
+	Msg "${myName} ($version) -- Date: $(date +"%a") $(date +"%m-%d-%Y @ %H.%M.%S")"
+	[[ $noBanners != true && "$myDescription" != "" ]] && Msg && Msg "$myDescription"
 	[[ $checkName != $userName ]] && userStr="Real user $checkName, Tools user: $userName" || userStr="Tools user: $userName"
-	[[ $noBanners != true ]] && Msg3 "$userStr, Host: $hostName, Database: $warehouseDb, PID: $$, PPID: $PPID"
-	[[ -n $(Trim "$originalArgStr") ]] && Msg3 "Arg String: '$originalArgStr'"
+	[[ $noBanners != true ]] && Msg "$userStr, Host: $hostName, Database: $warehouseDb, PID: $$, PPID: $PPID"
+	[[ -n $(Trim "$originalArgStr") ]] && Msg "Arg String: '$originalArgStr'"
 
-	[[ $USELOCAL == true ]] && Msg3 "$(ColorW "*** Running from a local directory")"
+	[[ $USELOCAL == true ]] && Msg "$(ColorW "*** Running from a local directory")"
 
-	[[ $testMode == true ]] && Msg3 "$(ColorW "*** Running in Testmode ***")"
-	[[ "$DOIT" != ''  ]] && Msg3 "$(ColorW "*** The 'Doit' flag is turned off, changes not committed")"
-	[[ "$informationOnlyMode" == true  ]] && Msg3 "$(ColorW "*** The 'informationOnly' flag is set, changes not committed")"
-	[[ $userName != $checkName ]] && Msg3 "$(ColorW "*** Running as user $userName ***")"
+	[[ $testMode == true ]] && Msg "$(ColorW "*** Running in Testmode ***")"
+	[[ "$DOIT" != ''  ]] && Msg "$(ColorW "*** The 'Doit' flag is turned off, changes not committed")"
+	[[ "$informationOnlyMode" == true  ]] && Msg "$(ColorW "*** The 'informationOnly' flag is set, changes not committed")"
+	[[ $userName != $checkName ]] && Msg "$(ColorW "*** Running as user $userName ***")"
 
 	[[ $batchMode != true ]] && echo
 	## Log Start in process log database
@@ -70,7 +70,7 @@ export -f Hello
 ## Fri Jan 20 13:20:56 CST 2017 - dscudiero - Do not show arguments if they are blank
 ## 06-02-2017 @ 15.24.54 - ("2.0.31")  - dscudiero - Remove the running local message
 ## 08-31-2017 @ 15.48.35 - ("2.0.32")  - dscudiero - Tweak messaging
-## 09-25-2017 @ 09.01.51 - ("2.0.34")  - dscudiero - Switch to Msg3
+## 09-25-2017 @ 09.01.51 - ("2.0.34")  - dscudiero - Switch to Msg
 ## 10-02-2017 @ 15.31.43 - ("2.0.38")  - dscudiero - commento out DisplayNews
 ## 10-03-2017 @ 13.40.27 - ("2.0.39")  - dscudiero - remove debug stuff
 ## 10-17-2017 @ 14.08.11 - ("2.0.40")  - dscudiero - Added noBanners option to streamline output in batch
@@ -79,3 +79,4 @@ export -f Hello
 ## 11-01-2017 @ 08.02.37 - ("2.0.43")  - dscudiero - Cosmetic/minor change
 ## 11-09-2017 @ 07.26.29 - ("2.0.44")  - dscudiero - Add Debug statements
 ## 11-09-2017 @ 11.09.05 - ("2.0.46")  - dscudiero - Added a runing from local message
+## 03-23-2018 @ 16:47:59 - 2.0.51 - dscudiero - Msg3 -> Msg
