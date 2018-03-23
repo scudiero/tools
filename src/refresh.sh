@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.132 # -- dscudiero -- Thu 03/22/2018 @ 13:51:05.85
+version=1.3.133 # -- dscudiero -- Fri 03/23/2018 @ 14:41:56.58
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall PushPop SelectMenu CopyFileWithCheck BackupCourseleafFile WriteChangelogEntry"
@@ -310,7 +310,7 @@ function clientData {
 # Standard arg parsing and initialization
 #==================================================================================================
 helpSet='script'
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 Hello
 echo
 
@@ -378,3 +378,4 @@ Goodbye 0
 ## 12-08-2017 @ 09.28.00 - (1.3.130)   - dscudiero - Update sql query for workwith clientData to get all servers
 ## 03-22-2018 @ 12:36:30 - 1.3.131 - dscudiero - Updated for Msg3/Msg, RunSql/RunSql, ParseArgStd/ParseArgStd2
 ## 03-22-2018 @ 14:07:22 - 1.3.132 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:35:23 - 1.3.133 - dscudiero - D
