@@ -18,7 +18,7 @@ originalArgStr="$*"
 # Standard argument parsing and initialization
 #=======================================================================================================================
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 scriptArgs="$*"
 
 #=======================================================================================================================
@@ -55,3 +55,4 @@ return 0
 ## 11-22-2017 @ 06.28.33 - (2.1.10)    - dscudiero - switch to use parsargsstd2
 ## 12-18-2017 @ 07.50.50 - (2.1.12)    - dscudiero - Tweak messaging
 ## 03-22-2018 @ 12:47:08 - 2.1.13 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:34:09 - 2.1.13 - dscudiero - D
