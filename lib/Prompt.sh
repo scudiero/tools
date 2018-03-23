@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.47" # -- dscudiero -- Fri 03/23/2018 @ 16:30:25.61
+# version="2.1.48" # -- dscudiero -- Fri 03/23/2018 @ 16:51:48.61
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -10,7 +10,7 @@
 # All rights reserved
 #===================================================================================================
 function Prompt {
-	includes='Msg3 Dump VerifyPromptVal SelectClient'
+	includes='VerifyPromptVal'
 	Import "$includes"
 	function LogResponse { echo -e "\tPrompt -- Using specified value of '${!promptVar}' for '$promptVar'" >> "$logFile"; }
 	
@@ -198,3 +198,4 @@ export -f Prompt
 ## 03-13-2018 @ 08:31:05 - 2.1.46 - dscudiero - Add optional hidden answer values
 ## 03-13-2018 @ 08:38:10 - 2.1.46 - dscudiero - Cosmetic/minor change/Sync
 ## 03-23-2018 @ 16:30:47 - 2.1.47 - dscudiero - Remove client select code
+## 03-23-2018 @ 16:52:21 - 2.1.48 - dscudiero - Msg3 -> Msg
