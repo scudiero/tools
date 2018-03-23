@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.4.67 # -- dscudiero -- Thu 03/22/2018 @ 12:28:48.04
+version=2.4.68 # -- dscudiero -- Fri 03/23/2018 @ 14:42:11.15
 #==================================================================================================
 TrapSigs 'on'
 
@@ -23,7 +23,7 @@ scriptDescription="Check for private sites and notify the user owning the sites.
 #==================================================================================================
 Hello
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 tmpFile=$(MkTmpFile)
 
 #==================================================================================================
@@ -138,7 +138,8 @@ Goodbye 0
 ## 09-05-2017 @ 16.22.22 - (2.4.58)    - dscudiero - Make sure there is a tmpFile
 ## 10-23-2017 @ 08.10.36 - (2.4.61)    - dscudiero - Switch to Msg
 ## 10-23-2017 @ 11.57.55 - (2.4.64)    - dscudiero - Reformatted messaging
-## 11-01-2017 @ 15.59.57 - (2.4.65)    - dscudiero - Switch to use ParseArgsStd2
+## 11-01-2017 @ 15.59.57 - (2.4.65)    - dscudiero - Switch to use ParseArgsStd
 ## 11-13-2017 @ 07.36.26 - (2.4.65)    - dscudiero - Add the hostname to the email subject
 ## 12-11-2017 @ 06.45.08 - (2.4.66)    - dscudiero - Add hostname to the messaging
 ## 03-22-2018 @ 12:35:32 - 2.4.67 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:32:12 - 2.4.68 - dscudiero - D
