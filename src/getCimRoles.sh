@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.10.100 # -- dscudiero -- Fri 03/16/2018 @  8:43:54.96
+version=1.10.101 # -- dscudiero -- Fri 03/23/2018 @ 14:34:48.61
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="WriteChangelogEntry"
@@ -18,7 +18,7 @@ scriptDescription="Build a list of all of the roles that are potentially use in 
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function getCimRoles-ParseArgsStd2 { # or parseArgs-local
+function getCimRoles-ParseArgsStd { # or parseArgs-local
 	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 	myArgs+=("load|load|switch|load||script|Automatically load the roles to the site")
 	myArgs+=("noload|noload|switch|load|load=false|script|Automatically load the roles to the site")
@@ -49,7 +49,7 @@ step='getCimWorkflowRoles'
 helpSet='script,client,env,cims'
 Hello
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 [[ -n $unknowArgs ]] && cimStr="$unknowArgs"
 Init 'getClient getEnv getDirs checkEnvs getCims noPreview noPublic addPvt'
 [[ -n $loadMode ]] && load=true
@@ -226,10 +226,11 @@ Goodbye 0
 ## 06-26-2017 @ 07.51.04 - (1.10.25)   - dscudiero - change cleanup to not remove the entire tmp directory
 ## 09-29-2017 @ 10.14.49 - (1.10.28)   - dscudiero - Update FindExcecutable call for new syntax
 ## 10-03-2017 @ 11.02.00 - (1.10.32)   - dscudiero - General syncing of dev to prod
-## 11-01-2017 @ 09.55.10 - (1.10.39)   - dscudiero - Switched to ParseArgsStd2
-## 11-02-2017 @ 06.58.45 - (1.10.42)   - dscudiero - Switch to ParseArgsStd2
+## 11-01-2017 @ 09.55.10 - (1.10.39)   - dscudiero - Switched to ParseArgsStd
+## 11-02-2017 @ 06.58.45 - (1.10.42)   - dscudiero - Switch to ParseArgsStd
 ## 11-02-2017 @ 11.02.04 - (1.10.43)   - dscudiero - Add addPvt to the init call
 ## 03-13-2018 @ 08:30:29 - 1.10.92 - dscudiero - Remove the load merge option
 ## 03-14-2018 @ 13:46:05 - 1.10.93 - dscudiero - Set debug level on debug statements
 ## 03-16-2018 @ 08:20:27 - 1.10.95 - dscudiero - Added code to make sure wffuncs is defined
 ## 03-16-2018 @ 08:57:00 - 1.10.100 - dscudiero - Fix problem writing out step header code
+## 03-23-2018 @ 15:34:41 - 1.10.101 - dscudiero - D
