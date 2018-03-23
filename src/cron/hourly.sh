@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.22 # -- dscudiero -- Fri 03/23/2018 @ 14:30:32.46
+version=2.2.23 # -- dscudiero -- Fri 03/23/2018 @ 16:16:28.38
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -12,8 +12,7 @@ version=2.2.22 # -- dscudiero -- Fri 03/23/2018 @ 14:30:32.46
 # 09-05-17 - dgs - Added '--ignore-date' to rsyc options in SyncSkeleton
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes='FindExecutable GetDefaultsData ParseArgsStd ParseArgs RunSql GetPW SetFileExpansion RunSql ProtectedCall'
-myIncludes="$myIncludes CalcElapsed"
+myIncludes='GetPW ProtectedCall CalcElapsed'
 Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -312,3 +311,4 @@ return 0
 ## 03-22-2018 @ 12:46:57 - 2.2.19 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 12:08:55 - 2.2.20 - dscudiero - Comment out perfTest
 ## 03-23-2018 @ 15:33:56 - 2.2.22 - dscudiero - D
+## 03-23-2018 @ 16:18:31 - 2.2.23 - dscudiero - Cleanup Includes
