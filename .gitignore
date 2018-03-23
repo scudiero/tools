@@ -7,9 +7,9 @@
 /bin/
 
 /jars/
-!/jars/WorkWith.jar
-!/jars/myPutty.jar
-!/jars/runMySql.jar
+!jars/WorkWith.jar
+!jars/myPutty.jar
+!jars/runMySql.jar
 
 /courseleafcgiShadow
 /courseleafEscrowedSites
