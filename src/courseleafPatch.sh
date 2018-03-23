@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.49 # -- dscudiero -- Fri 03/23/2018 @ 11:51:49.01
+version=5.5.50 # -- dscudiero -- Fri 03/23/2018 @ 14:39:43.99
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel EditTcfValue BackupCourseleafFile'
@@ -23,7 +23,7 @@ cwdStart="$(pwd)"
 #=======================================================================================================================
 # Standard call back functions
 #=======================================================================================================================
-	function courseleafPatch-ParseArgsStd2 {
+	function courseleafPatch-ParseArgsStd {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 		myArgs+=("adv|advance|switch|catalogAdvance||script|Advance the catalog")
 		myArgs+=("noadv|noadvance|switch|catalogAdvance|catalogAdvance=false|script|Do not advance the catalog")
@@ -648,7 +648,7 @@ removeGitReposFromNext=true
 #=======================================================================================================================
 	Hello
 	[[ $userName == 'dscudiero' && $useLocal == true ]] && GetDefaultsData "$myName" -fromFiles || GetDefaultsData "$myName"
-	ParseArgsStd2 $originalArgStr
+	ParseArgsStd $originalArgStr
 
 	displayGoodbyeSummaryMessages=true
 
@@ -1812,7 +1812,7 @@ Goodbye 0 "$text1" "$text2"
 ## 10-02-2017 @ 17.07.54 - 5.5.0 - dscudiero - Switch to GetExcel
 ## 10-03-2017 @ 07.14.03 - 5.5.0 - dscudiero - Add Alert to include list
 ## 10-16-2017 @ 16.40.53 - 5.5.0 - dscudiero - Tweak messaging when reporting the uncommitte git files
-## 11-02-2017 @ 06.58.37 - 5.5.0 - dscudiero - Switch to ParseArgsStd2
+## 11-02-2017 @ 06.58.37 - 5.5.0 - dscudiero - Switch to ParseArgsStd
 ## 11-02-2017 @ 10.27.55 - 5.5.0 - dscudiero - use help2
 ## 11-02-2017 @ 10.53.32 - 5.5.0 - dscudiero - Add addPvt to the Init call
 ## 11-30-2017 @ 13.26.33 - 5.5.0 - dscudiero - Switch to use the -all flag on the GetCims call
@@ -1826,3 +1826,4 @@ Goodbye 0 "$text1" "$text2"
 ## 03-22-2018 @ 13:25:41 - 5.5.47 - dscudiero - Updated for Msg3/Msg, RunSql/RunSql, ParseArgStd/ParseArgStd2
 ## 03-22-2018 @ 14:06:23 - 5.5.48 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 11:56:10 - 5.5.49 - dscudiero - Updated for GetExcel2/GetExcel
+## 03-23-2018 @ 15:33:41 - 5.5.50 - dscudiero - D
