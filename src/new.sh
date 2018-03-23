@@ -1,6 +1,6 @@
 #!/bin/bash
 #===================================================================================================
-version=1.2.33 # -- dscudiero -- Fri 03/23/2018 @ 14:41:33.65
+version=1.2.34 # -- dscudiero -- Fri 03/23/2018 @ 16:35:50.09
 #===================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall PushPop"
@@ -245,56 +245,56 @@ function NewMonitorFile {
 	RunSql $sqlStmt
 }
 
-#===================================================================================================
-function NewVba {	
-	local visualStudioDir projectDirs project newProject editFile editFiles renameFile renameFiles
-	visualStudioDir="$HOME/windowsStuff/documents/Visual Studio 2015/Projects"
-	[[ ! -d $visualStudioDir ]] && Msg $T "Could not locate the Visual Studio directory"
-	cwd=$(pwd)
-	cd "$visualStudioDir"
-	SetFileExpansion 'on'; projectDirs=($(ls -d -t $objName* 2> /dev/null)); SetFileExpansion
-	[[ ${#projectDirs[@]} -eq 0 ]] && Msg $T "Could not locate any matching project directories for '$objType'"
-	Msg; Msg "Please specify the ordinal number of the Project you wish to clone\n"
-	SelectMenu 'projectDirs' 'project' '\nProject ordinal(or 'x' to quit) > '
-	[[ $project == '' ]] && Goodbye 0
-	if [[ $(IsNumeric ${project: -1}) == true ]]; then
-		newProject=${project: -1}
-		(( newProject += 1 ))
-		newProject=${project:0:${#project}-1}$newProject
-	else
-		newProject=${project:0:${#project}-1}2
-	fi
-	## Create the new project directory and copy source project
-		if [[ -d $newProject ]]; then
-			unset ans; Prompt ans "The new project directory already exists, do you wish to overwrite it" 'Yes No' 'No'; ans=$(Lower ${ans:0:1})
-			[[ $ans != 'y' ]] && Goodbye 0
-			rm -rf $newProject
-		fi
-		Msg "^Creating new project directory: $newProject"
-		cp -rfp $project $newProject
-		cd $newProject
+# #===================================================================================================
+# function NewVba {	
+# 	local visualStudioDir projectDirs project newProject editFile editFiles renameFile renameFiles
+# 	visualStudioDir="$HOME/windowsStuff/documents/Visual Studio 2015/Projects"
+# 	[[ ! -d $visualStudioDir ]] && Msg $T "Could not locate the Visual Studio directory"
+# 	cwd=$(pwd)
+# 	cd "$visualStudioDir"
+# 	SetFileExpansion 'on'; projectDirs=($(ls -d -t $objName* 2> /dev/null)); SetFileExpansion
+# 	[[ ${#projectDirs[@]} -eq 0 ]] && Msg $T "Could not locate any matching project directories for '$objType'"
+# 	Msg; Msg "Please specify the ordinal number of the Project you wish to clone\n"
+# 	SelectMenu 'projectDirs' 'project' '\nProject ordinal(or 'x' to quit) > '
+# 	[[ $project == '' ]] && Goodbye 0
+# 	if [[ $(IsNumeric ${project: -1}) == true ]]; then
+# 		newProject=${project: -1}
+# 		(( newProject += 1 ))
+# 		newProject=${project:0:${#project}-1}$newProject
+# 	else
+# 		newProject=${project:0:${#project}-1}2
+# 	fi
+# 	## Create the new project directory and copy source project
+# 		if [[ -d $newProject ]]; then
+# 			unset ans; Prompt ans "The new project directory already exists, do you wish to overwrite it" 'Yes No' 'No'; ans=$(Lower ${ans:0:1})
+# 			[[ $ans != 'y' ]] && Goodbye 0
+# 			rm -rf $newProject
+# 		fi
+# 		Msg "^Creating new project directory: $newProject"
+# 		cp -rfp $project $newProject
+# 		cd $newProject
 
-	## Get the list of files that need to be edited
-		ignoreFileTypes='executable|TrueType|directory|MSVC program database|data|CDF V2 Document'
-		editFiles=($(find . -name 'packages' -prune -o -print0 | xargs -0r file | grep -E --null -v  "$ignoreFileTypes" | awk -F: '{printf "%s\0", $1}' | xargs -0 grep -l $project))
-		for editFile in "${editFiles[@]}"; do
-			Msg "^Editing file: $editFile"
-			sed -i s"/$project/$newProject/g" $editFile
-		done
+# 	## Get the list of files that need to be edited
+# 		ignoreFileTypes='executable|TrueType|directory|MSVC program database|data|CDF V2 Document'
+# 		editFiles=($(find . -name 'packages' -prune -o -print0 | xargs -0r file | grep -E --null -v  "$ignoreFileTypes" | awk -F: '{printf "%s\0", $1}' | xargs -0 grep -l $project))
+# 		for editFile in "${editFiles[@]}"; do
+# 			Msg "^Editing file: $editFile"
+# 			sed -i s"/$project/$newProject/g" $editFile
+# 		done
 
-	## Rename the top directory
-		[[ ! -d ./$newProject ]] && mv -f ./$project ./$newProject && Msg "^Renaming file: ./$project"
-	## Rename the .vs subdirectory
-		[[ ! -d ./.vs/$newProject ]] && mv -f ./.vs/$project ./.vs/$newProject && Msg "^Renaming file: ./.vs/$project"
+# 	## Rename the top directory
+# 		[[ ! -d ./$newProject ]] && mv -f ./$project ./$newProject && Msg "^Renaming file: ./$project"
+# 	## Rename the .vs subdirectory
+# 		[[ ! -d ./.vs/$newProject ]] && mv -f ./.vs/$project ./.vs/$newProject && Msg "^Renaming file: ./.vs/$project"
 
-	## Get the list of files that need to be renamed
-		renameFiles=($(find . -name 'packages' -prune -o -print | grep "$project"))
-		for renameFile in "${renameFiles[@]}"; do
-			Msg "^Renaming file: $renameFile"
-			newName=$(sed "s/$project/$newProject/g" <<< "$renameFile")
-			mv -f "$renameFile" "$newName"
-		done
-}
+# 	## Get the list of files that need to be renamed
+# 		renameFiles=($(find . -name 'packages' -prune -o -print | grep "$project"))
+# 		for renameFile in "${renameFiles[@]}"; do
+# 			Msg "^Renaming file: $renameFile"
+# 			newName=$(sed "s/$project/$newProject/g" <<< "$renameFile")
+# 			mv -f "$renameFile" "$newName"
+# 		done
+# }
 
 #===================================================================================================
 function NewClient {
@@ -342,7 +342,8 @@ function NewClient {
 #==================================================================================================
 # MAIN
 #==================================================================================================
-validTypes='script patch report newsItem default monitorFile vba client'
+# validTypes='script patch report newsItem default monitorFile vba client'
+validTypes='script patch report newsItem default client'
 GetDefaultsData $myName
 ParseArgsStd $originalArgStr
 
@@ -398,3 +399,4 @@ Msg; Msg "$objType object created"
 ## 03-22-2018 @ 12:36:23 - 1.2.31 - dscudiero - Updated for Msg3/Msg, RunSql/RunSql, ParseArgStd/ParseArgStd2
 ## 03-22-2018 @ 14:07:03 - 1.2.32 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:35:17 - 1.2.33 - dscudiero - D
+## 03-23-2018 @ 16:36:24 - 1.2.34 - dscudiero - Remove vba and monitorifilw
