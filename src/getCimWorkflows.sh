@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.101 # -- dscudiero -- Mon 03/19/2018 @ 14:50:13.86
+version=1.2.102 # -- dscudiero -- Fri 03/23/2018 @ 14:34:40.21
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -24,7 +24,7 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 	#==============================================================================================
 	# parse script specific arguments
 	#==============================================================================================
-	function getCimWorkflows-ParseArgsStd2 {
+	function getCimWorkflows-ParseArgsStd {
 		myArgs+=("w|workbookFile|option|workbookFile||help group|The fully qualified output workbook file name")
 		return 0
 	}
@@ -141,7 +141,7 @@ Hello
 scriptNews+=("11/01/2016 - New")
 helpSet='script,client,env'
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 [[ -n $unknowArgs ]] && cimStr="$unknowArgs"
 [[ $allItems == true ]] && allCims='allCims' || unset allCims
 Init "getClient getEnv getDirs checkEnvs getCims addPvt $allCims"
@@ -462,7 +462,7 @@ Goodbye 0 #'alert'
 ## 10-19-2017 @ 16.56.15 - (1.2.43)    - dscudiero - Read the cimconfig.cfg file if we cannot find the workflow.cfg file
 ## 10-20-2017 @ 08.50.19 - (1.2.60)    - dscudiero - Fix problem detectiong modifiers, reformatted output
 ## 10-31-2017 @ 10.15.04 - (1.2.62)    - dscudiero - Fixed setup of the callback functions
-## 11-02-2017 @ 06.58.49 - (1.2.65)    - dscudiero - Switch to ParseArgsStd2
+## 11-02-2017 @ 06.58.49 - (1.2.65)    - dscudiero - Switch to ParseArgsStd
 ## 11-02-2017 @ 11.02.06 - (1.2.66)    - dscudiero - Add addPvt to the init call
 ## 11-13-2017 @ 16.57.23 - (1.2.79)    - dscudiero - Fix problem parsing modifiers and special modifiers
 ## 12-13-2017 @ 15.41.39 - (1.2.80)    - dscudiero - Add message where the excel template file can be found
@@ -470,3 +470,4 @@ Goodbye 0 #'alert'
 ## 03-15-2018 @ 12:59:57 - 1.2.82 - dscudiero - D
 ## 03-19-2018 @ 14:00:57 - 1.2.91 - dscudiero - Translate the %7C in conditionals to |
 ## 03-19-2018 @ 14:51:00 - 1.2.101 - dscudiero - Tweak the verbiage used on the modifiers
+## 03-23-2018 @ 15:34:46 - 1.2.102 - dscudiero - D
