@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.83 # -- dscudiero -- Fri 03/23/2018 @ 14:38:46.11
+version=2.1.84 # -- dscudiero -- Fri 03/23/2018 @ 16:56:37.15
 #==================================================================================================
 TrapSigs 'on'
 
@@ -71,7 +71,7 @@ repos="$(echo $scriptData1 | tr ',' ' ')"
 waitCntr=1;
 for repo in $repos; do
 	unset tagsStr tags
-	[[ $batchMode != true ]] && Msg3 "\nProcessing repo: '$repo'"
+	[[ $batchMode != true ]] && Msg "\nProcessing repo: '$repo'"
 	repoDir=$gitRepoShadow/$repo
 	[[ ! -d $repoDir ]] && mkdir -p $repoDir
 	## Get the release from the master
@@ -79,12 +79,12 @@ for repo in $repos; do
 		tags+=($(echo "$tagsStr"))
 		tags+=('master')
 		for tag in "${tags[@]}"; do
-			[[ $batchMode != true ]] && Msg3 "^Checking tag: '$tag"
+			[[ $batchMode != true ]] && Msg "^Checking tag: '$tag"
 			relDir=$repoDir/$tag
 			if [[ -d $relDir  && $tag != 'master' ]]; then
-				[[ $batchMode != true ]] && Msg3 "^^Shadow repo already exists, skipping"
+				[[ $batchMode != true ]] && Msg "^^Shadow repo already exists, skipping"
 			elif [[ -d $relDir-new ]]; then
-				[[ $batchMode != true ]] && Msg3  "^^New shadow repo already exists, skipping"
+				[[ $batchMode != true ]] && Msg  "^^New shadow repo already exists, skipping"
 			else
 				if [[ $fork == true ]]; then
 					source "$workerScriptFile" "$repo" "$tag" "$gitRepoRoot/${repo}.git" "$relDir" "$addedCalledScriptArgs" &
@@ -95,14 +95,14 @@ for repo in $repos; do
 			fi
 		done
 	if [[ $fork == true && $((waitCntr%$maxForkedProcesses)) -eq 0 ]]; then
-		[[ $batchMode != true ]] && Msg3 "Waiting on forked processes..."
+		[[ $batchMode != true ]] && Msg "Waiting on forked processes..."
 		wait
 	fi
 	(( waitCntr+=1 ))
 done #repos
 
 ## Wait for forked processs to end
-	[[ $batchMode != true ]] && Msg3 "Waiting on forked processes..."
+	[[ $batchMode != true ]] && Msg "Waiting on forked processes..."
 	wait
 
 ## Tar up any new release shadows
@@ -126,13 +126,13 @@ if [[ -n $newReleases ]]; then
 	for token in ${newReleases[@]}; do
 		release="${token##*/}"
 		[[ $release == 'master' ]] && continue
-		Msg3 "^$token" | tee -a "$tmpFile"
+		Msg "^$token" | tee -a "$tmpFile"
 		sendMail=true
 	done
 fi
 if [[ $sendMail == true && $noEmails == false ]]; then
-	Msg3
-	Msg3 "Emails sent to: $(echo $emailAddrs | sed s'/,/, /'g)" | tee -a $tmpFile
+	Msg
+	Msg "Emails sent to: $(echo $emailAddrs | sed s'/,/, /'g)" | tee -a $tmpFile
 	for emailAddr in $(echo $emailAddrs | tr ',' ' '); do
 		$DOIT mutt -s "$myName found new releases" -- $emailAddr < $tmpFile
 	done
@@ -161,6 +161,7 @@ Goodbye 0 'alert'
 ## 06-13-2017 @ 08.36.40 - (2.1.72)    - dscudiero - Remove debug code
 ## 09-29-2017 @ 10.15.14 - (2.1.76)    - dscudiero - Update FindExcecutable call for new syntax
 ## 10-18-2017 @ 14.18.08 - (2.1.80)    - dscudiero - Update includes list
-## 10-18-2017 @ 15.35.13 - (2.1.81)    - dscudiero - Use Msg3
+## 10-18-2017 @ 15.35.13 - (2.1.81)    - dscudiero - Use Msg
 ## 11-02-2017 @ 06.59.00 - (2.1.82)    - dscudiero - Switch to ParseArgsStd
 ## 03-23-2018 @ 15:36:15 - 2.1.83 - dscudiero - D
+## 03-23-2018 @ 16:58:13 - 2.1.84 - dscudiero - Msg3 -> Msg
