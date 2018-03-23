@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.54 # -- dscudiero -- Wed 03/21/2018 @ 16:37:20.17
+version=2.0.55 # -- dscudiero -- Fri 03/23/2018 @ 14:34:08.50
 #==================================================================================================
 TrapSigs 'on'
 myIncludes=""
@@ -16,7 +16,7 @@ myDebug=true
 	#==================================================================================================
 	# parse script specific arguments
 	#==================================================================================================
-	function goto-ParseArgsStd2 {
+	function goto-ParseArgsStd {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 		myArgs+=('co|courseleaf|switch||target='/web/courseleaf'|script|Go to .../web/courseleaf')
 		myArgs+=('db|db|switch||target='/db'|script|Go to .../db')
@@ -27,7 +27,7 @@ myDebug=true
 #==================================================================================================
 helpSet='script,client,env'
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 [[ $env == '' ]] && env='dev'
 
 dump -r
@@ -97,3 +97,4 @@ return
 ## Mon Jun  6 09:30:11 CDT 2016 - dscudiero - Added support for remote sites
 ## Thu Jul 14 15:08:29 CDT 2016 - fred - Switch LOGNAME for userName
 ## 03-22-2018 @ 12:36:17 - 2.0.54 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:34:59 - 2.0.55 - dscudiero - D
