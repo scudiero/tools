@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.124 # -- dscudiero -- Thu 03/22/2018 @ 13:58:24.63
+version=4.3.125 # -- dscudiero -- Fri 03/23/2018 @ 14:25:53.94
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql StringFunctions ProtectedCall FindExecutable PushPop"
@@ -25,7 +25,7 @@ scriptDescription="Sync the data warehouse '$siteInfoTable' table with the trans
 #=======================================================================================================================
 # Standard call back functions
 #=======================================================================================================================
-	function buildSiteInfoTable-ParseArgsStd2 {
+	function buildSiteInfoTable-ParseArgsStd {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 		quick=false
 		myArgs+=("quick|quick|switch|quick||script|Do quickly, skip processing the admins information")
@@ -62,7 +62,7 @@ Hello
 Info "Loading script defaults..."
 GetDefaultsData $myName
 Info "Parsing arguments..."
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 if [[ $batchMode != true ]]; then
 	verifyMsg="You are asking to re-generate the data warehouse '$siteInfoTable' and "$siteAdminsTable" table"
 	[[ -n $client ]] && verifyMsg="$verifyMsg record(s) for client '$client'"
@@ -239,7 +239,8 @@ Goodbye 0 'alert'
 ## 10-30-2017 @ 08.50.42 - (4.3.84)    - dscudiero - Filter out '-test' from the clientDirs
 ## 10-31-2017 @ 08.51.21 - (4.3.85)    - dscudiero - Wrap the grep calls in a ProtectedCall
 ## 11-01-2017 @ 15.24.36 - (4.3.98)    - dscudiero - Updated client directory selection to use only server directories in the prodServer or devServers lists
-## 11-01-2017 @ 15.50.25 - (4.3.99)    - dscudiero - Switch to use ParseArgsStd2
+## 11-01-2017 @ 15.50.25 - (4.3.99)    - dscudiero - Switch to use ParseArgsStd
 ## 12-01-2017 @ 10.24.36 - (4.3.105)   - dscudiero - Fix problem when the client does not have a next site
 ## 12-20-2017 @ 06.55.52 - (4.3.119)   - dscudiero - Remove the 'set' option onthe SetSiteDirs call
 ## 03-22-2018 @ 14:05:51 - 4.3.124 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:31:44 - 4.3.125 - dscudiero - D
