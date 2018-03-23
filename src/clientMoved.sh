@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.52 # -- dscudiero -- Fri 03/23/2018 @ 14:42:32.10
+version=1.0.53 # -- dscudiero -- Fri 03/23/2018 @ 16:57:15.76
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="SelectMenuNew RunCourseLeafCgi"
@@ -13,7 +13,7 @@ scriptDescription=""
 #==================================================================================================
 # clients=$(ls /mnt/bluestone | grep -v 'test')
 # for client in $clients; do
-# 	Msg3 "Processing:" $client
+# 	Msg "Processing:" $client
 # 	clientMoved $client -newh "$newHost" -newprods "$newProdServer" -newdevs "$newDevServer" -nop -quiet
 # done
 #==================================================================================================
@@ -92,7 +92,7 @@ unset origHost origDevShare origProdShare
 				[[ $origHost != '' && $origHost == $token ]] && continue
 				menuList+=("|${token}")
 			done
-			Msg3; Msg3 "Please specify the ordinal number of the new linux host."
+			Msg; Msg "Please specify the ordinal number of the new linux host."
 			Note "If the client's new host is not listed here then the site's data has already been updated."
 			SelectMenuNew 'menuList' 'newHost' '\nHost ordinal (or 'x' to quit) > '
 			[[ $newHost == '' ]] && Goodbye 'quickquit' || newHost=$(cut -d'|' -f1 <<< $newHost)
@@ -112,7 +112,7 @@ unset origHost origDevShare origProdShare
 				#[[ $origProdShare != '' && $origProdShare == $token ]] && continue
 				menuList+=("|${token}")
 			done
-			Msg3; Msg3 "Please specify the ordinal number of the new production server:"
+			Msg; Msg "Please specify the ordinal number of the new production server:"
 			SelectMenuNew 'menuList' 'newProdShare' '\nServerHost ordinal (or 'x' to quit) > '
 			[[ $newProdShare == '' ]] && Goodbye 'quickquit' || newProdShare=$(cut -d'|' -f1 <<< $newProdShare)
 		else
@@ -131,7 +131,7 @@ unset origHost origDevShare origProdShare
 				[[ $origDevShare != '' && $origDevShare == $token ]] && continue
 				menuList+=("|${token}")
 			done
-			Msg3; Msg3 "Please specify the ordinal number of the new production server:"
+			Msg; Msg "Please specify the ordinal number of the new production server:"
 			SelectMenuNew 'menuList' 'newDevShare' '\nServerHost ordinal (or 'x' to quit) > '
 			[[ $newDevShare == '' ]] && Goodbye 'quickquit' || newDevShare=$(cut -d'|' -f1 <<< $newDevShare)
 		else
@@ -166,27 +166,27 @@ myData="Client: '$client', New Host: '$newHost', New Dev Share: '$newDevShare', 
 	sqlStmt="Update $siteInfoTable set share=\"$newProdShare\" where name=\"${client}-test\" and env=\"test\""
 	RunSql $sqlStmt
 
-	Msg3 "Data Warehouse data updated to reflect the clients new location"
+	Msg "Data Warehouse data updated to reflect the clients new location"
 
 ## Update the workwith data
 	grepStr=$(ProtectedCall "grep ^$client\\| \"$workwithDataFile\"")
 	toStr="$(sed s"/$origHost/$newHost/" <<< "$grepStr")"
 	sed -i s"/$grepStr/$toStr/" "$workwithDataFile"
-	Msg3 "WorkWith client data file updated"
+	Msg "WorkWith client data file updated"
 
 ## Re-publish the clients page
 	lfinternal=$(ProtectedCall "grep lfinternal /etc/group")
 	if [[ $lfinternal != '' ]]; then
 		if [[ $(Contains "$lfinternal" "$userName") == true ]]; then
 			RunCourseLeafCgi "$stageInternal" "-r /clients/$client"
-			Msg3 "Internal client page republished to reflect change"
+			Msg "Internal client page republished to reflect change"
 			RunCourseLeafCgi "$stageInternal" "-r /support/tools/quicklinks"
-			Msg3 "Internal quicklinks page republished to reflect change"
+			Msg "Internal quicklinks page republished to reflect change"
 		else
-			Msg3 $W "Your account does not have access to the internal site file system, skipping client page republishing, please go to the client page on the internal site and republish the client page."
+			Msg $W "Your account does not have access to the internal site file system, skipping client page republishing, please go to the client page on the internal site and republish the client page."
 		fi
 	else
-		Msg3 $W "The 'lfinternal' group was not defined in '/etc/group', skipping client page republishing, please go to the client page on the internal site and republish the client page."
+		Msg $W "The 'lfinternal' group was not defined in '/etc/group', skipping client page republishing, please go to the client page on the internal site and republish the client page."
 	fi
 
 #===================================================================================================
@@ -209,8 +209,9 @@ Goodbye 0 #'alert'
 ## Wed Oct  5 09:46:17 CDT 2016 - dscudiero - Check to see if the user has access to the internal site befor rebuilding the client pages
 ## Mon Oct 17 08:48:30 CDT 2016 - dscudiero - Removed extra set of calls to rebuild pages
 ## 04-06-2017 @ 10.09.28 - (1.0.36)    - dscudiero - renamed RunCourseLeafCgi, use new name
-## 12-04-2017 @ 08.25.27 - (1.0.47)    - dscudiero - Updated to add arguments for parameters and switch to Msg3
+## 12-04-2017 @ 08.25.27 - (1.0.47)    - dscudiero - Updated to add arguments for parameters and switch to Msg
 ## 12-04-2017 @ 08.28.53 - (1.0.48)    - dscudiero - Removed the --useLocal from example script
 ## 12-04-2017 @ 09.12.35 - (1.0.50)    - dscudiero - Added updating the workwith data
-## 03-22-2018 @ 14:06:08 - 1.0.51 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-22-2018 @ 14:06:08 - 1.0.51 - dscudiero - Updated for Msg/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:32:48 - 1.0.52 - dscudiero - D
+## 03-23-2018 @ 16:57:33 - 1.0.53 - dscudiero - Msg3 -> Msg
