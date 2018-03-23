@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.2 # -- dscudiero -- Thu 03/22/2018 @ 12:30:33.95
+version=1.0.3 # -- dscudiero -- Fri 03/23/2018 @ 14:28:36.54
 #==================================================================================================
 TrapSigs 'on'
 imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye'
@@ -32,7 +32,7 @@ GetDefaultsData
 #==================================================================================================
 helpSet='script,client,env'
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 
 Hello
 Init "getClient getSrcEnv getTgtEnv getDirs checkEnvs noWarn"
@@ -72,3 +72,4 @@ Goodbye 0 #'alert'
 ## Check-in log
 ## 04-25-2017 @ 08.39.56 - (1.0.0)     - dscudiero - Update comments
 ## 03-22-2018 @ 12:35:55 - 1.0.2 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:33:02 - 1.0.3 - dscudiero - D
