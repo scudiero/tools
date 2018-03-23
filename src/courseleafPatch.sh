@@ -1,10 +1,10 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.48 # -- dscudiero -- Thu 03/22/2018 @ 13:45:30.54
+version=5.5.49 # -- dscudiero -- Fri 03/23/2018 @ 11:51:49.01
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel2 EditTcfValue BackupCourseleafFile'
+myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel EditTcfValue BackupCourseleafFile'
 myIncludes="$myIncludes ParseCourseleafFile GetCourseleafPgm CopyFileWithCheck ArrayRef GitUtilities Alert ProtectedCall"
 Import "$standardInteractiveIncludes $myIncludes"
 
@@ -691,7 +691,7 @@ removeGitReposFromNext=true
 	[[ -r $workbookFile ]] && Note 0 1 "Using workbook: '$workbookFile'" || workbookFile="$courseleafPatchControlFile"
 	## Get the list of sheets in the workbook
 		Note 0 1 "Parsing patch control file: '$workbookFile' ($(tr ' ' '@' <<< $(cut -d'.' -f1 <<< $(stat -c "%y" $workbookFile))))..."
-		GetExcel2 -wb "$workbookFile" -ws 'GetSheets'
+		GetExcel -wb "$workbookFile" -ws 'GetSheets'
 		[[ ${#resultSet[@]} -le 0 ]] && Terminate "Could not retrieve the patcher control data from:\n'$workbookFile'"
 		sheets="${resultSet[0]}"
 
@@ -700,7 +700,7 @@ removeGitReposFromNext=true
 		for sheet in $(tr '|' ' ' <<< "$sheets"); do
 			sheet=$(Lower "$sheet")
 			[[ ${sheet:0:1} == '-' ]] && continue
-			GetExcel2 -wb "$workbookFile" -ws "$sheet"
+			GetExcel -wb "$workbookFile" -ws "$sheet"
 			[[ ${#resultSet[@]} -le 0 ]] && Terminate "Could not retrieve the patcher control data from:\n'$workbookFile'"
 			arrayName="$(tr -d '-' <<< $sheet)"
 			unset $arrayName ## Unset the sheet array
@@ -1809,7 +1809,7 @@ Goodbye 0 "$text1" "$text2"
 ## 09-20-2017 @ 15.31.32 - 5.4.17 - dscudiero - Released latest change to edit the console
 ## 09-21-2017 @ 07.06.18 - 5.4.27 - dscudiero - Comment out the refresh of the auth table
 ## 09-25-2017 @ 09.48.48 - 5.4.30 - dscudiero - Switch to Msg3
-## 10-02-2017 @ 17.07.54 - 5.5.0 - dscudiero - Switch to GetExcel2
+## 10-02-2017 @ 17.07.54 - 5.5.0 - dscudiero - Switch to GetExcel
 ## 10-03-2017 @ 07.14.03 - 5.5.0 - dscudiero - Add Alert to include list
 ## 10-16-2017 @ 16.40.53 - 5.5.0 - dscudiero - Tweak messaging when reporting the uncommitte git files
 ## 11-02-2017 @ 06.58.37 - 5.5.0 - dscudiero - Switch to ParseArgsStd2
@@ -1825,3 +1825,4 @@ Goodbye 0 "$text1" "$text2"
 ## 01-24-2018 @ 13.33.01 - 5.5.45 - dscudiero - Move the backup site to be at the same level as the target directory.
 ## 03-22-2018 @ 13:25:41 - 5.5.47 - dscudiero - Updated for Msg3/Msg, RunSql/RunSql, ParseArgStd/ParseArgStd2
 ## 03-22-2018 @ 14:06:23 - 5.5.48 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 11:56:10 - 5.5.49 - dscudiero - Updated for GetExcel2/GetExcel
