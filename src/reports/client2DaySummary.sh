@@ -1,6 +1,6 @@
 RunSql #!/bin/bash
 #==================================================================================================
-version=1.1.23 # -- dscudiero -- Thu 03/22/2018 @ 13:00:18.87
+version=1.1.24 # -- dscudiero -- Fri 03/23/2018 @ 14:36:02.50
 #==================================================================================================
 originalArgStr="$*"
 scriptDescription=""
@@ -12,7 +12,7 @@ scriptDescription=""
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function client2DaySummary-ParseArgsStd2  { # or parseArgs-local
+function client2DaySummary-ParseArgsStd  { # or parseArgs-local
 	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 	myArgs+=('email|emailAddrs|option|emailAddrs||script|Email addresses to send reports to when running in batch mode')
 	myArgs+=('report|reportName|option|emailAdreportNamedrs||script|The origional report name')
@@ -39,7 +39,7 @@ roleMap['implementation']='csmRep'
 # Standard arg parsing and initialization
 #==================================================================================================
 unset client
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 [[ $reportName != '' ]] && GetDefaultsData "$reportName" "$reportsTable"
 
 [[ $client != '' ]] && orgUnit="$(TitleCase "$client")" || orgUnit='Support'
@@ -143,3 +143,4 @@ Goodbye 0 #'alert'
 ## 05-08-2017 @ 09.13.11 - (1.1.18)    - dscudiero - filter out sites that do not have products or productsInSupport
 ## 05-26-2017 @ 06.39.23 - (1.1.21)    - dscudiero - General syncing of dev to prod
 ## 03-22-2018 @ 13:02:49 - 1.1.23 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:35:35 - 1.1.24 - dscudiero - D
