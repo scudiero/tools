@@ -1,6 +1,6 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
-version=1.0.21 # -- dscudiero -- Thu 03/22/2018 @ 13:02:31.88
+version=1.0.22 # -- dscudiero -- Fri 03/23/2018 @ 14:35:56.50
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -12,7 +12,7 @@ TrapSigs 'on'
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function catalogAudit-ParseArgsStd2  { # or parseArgs-local
+function catalogAudit-ParseArgsStd  { # or parseArgs-local
 	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 	myArgs+=('email|emailAddrs|option|emailAddrs||script|Email addresses to send reports to when running in batch mode')
 	myArgs+=('report|reportName|option|emailAdreportNamedrs||script|The origional report name')
@@ -90,7 +90,7 @@ outFile=$outDir/$(date '+%Y-%m-%d-%H%M%S').txt;
 # Standard arg parsing and initialization
 #==================================================================================================
 helpSet='script,client,env'
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 [[ $reportName != '' ]] && GetDefaultsData "$reportName" "$reportsTable"
 
 Hello
@@ -247,3 +247,4 @@ Goodbye 0
 ## Mon Feb 13 16:09:13 CST 2017 - dscudiero - make sure we have our own tmpFile
 ## 05-26-2017 @ 06.39.10 - (1.0.19)    - dscudiero - Change cleanup code
 ## 03-22-2018 @ 13:02:45 - 1.0.21 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:35:29 - 1.0.22 - dscudiero - D
