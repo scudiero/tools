@@ -1,6 +1,6 @@
 #!/bin/bash
 #===================================================================================================
-version=1.2.32 # -- dscudiero -- Thu 03/22/2018 @ 13:45:14.22
+version=1.2.33 # -- dscudiero -- Fri 03/23/2018 @ 14:41:33.65
 #===================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall PushPop"
@@ -344,7 +344,7 @@ function NewClient {
 #==================================================================================================
 validTypes='script patch report newsItem default monitorFile vba client'
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 
 Hello
 [[ "$1" != "" && ${1:0:1} != '-' ]] && objType="$1" && shift
@@ -397,3 +397,4 @@ Msg; Msg "$objType object created"
 ## 11-14-2017 @ 07.56.56 - (1.2.30)    - dscudiero - Fix up Vba prompt and switch to Msg
 ## 03-22-2018 @ 12:36:23 - 1.2.31 - dscudiero - Updated for Msg3/Msg, RunSql/RunSql, ParseArgStd/ParseArgStd2
 ## 03-22-2018 @ 14:07:03 - 1.2.32 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:35:17 - 1.2.33 - dscudiero - D
