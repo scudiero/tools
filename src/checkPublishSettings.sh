@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.3.23 # -- dscudiero -- Thu 03/22/2018 @ 12:27:43.40
+version=2.3.24 # -- dscudiero -- Fri 03/23/2018 @ 14:26:11.37
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall StringFunctions RunSql"
@@ -27,7 +27,7 @@ sendMail=false
 #==================================================================================================
 Hello
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 tmpFile=$(MkTmpFile)
 
 #==================================================================================================
@@ -80,3 +80,4 @@ Goodbye 0
 ## Mon Feb 13 15:59:27 CST 2017 - dscudiero - Make sure we are using our own tmpFile
 ## 10-23-2017 @ 07.36.07 - (2.3.21)    - dscudiero - Tweak messaging
 ## 03-22-2018 @ 12:35:39 - 2.3.23 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:32:21 - 2.3.24 - dscudiero - D
