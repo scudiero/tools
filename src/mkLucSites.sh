@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.18 # -- dscudiero -- 02/23/2017 @ 13:02:35.61
+version=1.0.19 # -- dscudiero -- Fri 03/23/2018 @ 11:41:28.47
 #==================================================================================================
 #= Description +===================================================================================
 # Make sites for the LUC conference
@@ -10,7 +10,9 @@ version=1.0.18 # -- dscudiero -- 02/23/2017 @ 13:02:35.61
 #
 #==================================================================================================
 TrapSigs 'on'
-imports='GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye' #imports="$imports "
+myIncludes="GetExcel2 PadChar StringFunctions"
+Import "$standardInteractiveIncludes $myIncludes"
+
 Import "$imports"
 originalArgStr="$*"
 scriptDescription=""
@@ -18,25 +20,10 @@ scriptDescription=""
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function parseArgs-testsh  { # or parseArgs-local
-	#argList+=(-optionArg,1,option,scriptVar,,script,'Help text')
-	#argList+=(-flagArg,2,switch,scriptVar,,script,'Help text')
-	argList+=(-file,4,option,file,,script,'The file name relative to the root site directory')
-	return 0
-}
-function Goodbye-testsh  { # or Goodbye-local
-	[[ -f "$tmpFile" ]] && rm "$tmpFile"
-	return 0
-}
-function testMode-testsh  { # or testMode-local
-	[[ $userName != 'dscudiero' ]] && Terminate "You do not have sufficient permissions to run this script in 'testMode'"
-	return 0
-}
 
 #==================================================================================================
 # local functions
 #==================================================================================================
-Import 'GetExcel PadChar StringFunctions'
 
 #==================================================================================================
 # Declare local variables and constants
@@ -57,7 +44,7 @@ GetDefaultsData $myName
 [[ -n $1 ]] && workbookSheet="$1"
 Prompt workbookFile "Please specify the input file:" "*file*"
 
-GetExcel "$workbookFile" 'GetSheets' > $tmpFile
+GetExcel2 -wb "$workbookFile" -ws 'GetSheets' > $tmpFile
 sheets=$(tail -n 1 $tmpFile | tr '|' ' ')
 Prompt workbookSheet "Please specify the worksheet:" "$(tr ' ' ',' <<< $sheets)"
 dump -1 workbookFile workbookSheet
@@ -66,7 +53,7 @@ dump -1 workbookFile workbookSheet
 # Main
 #===================================================================================================
 ## Get the list of sheets in the workbook
-GetExcel "$workbookFile" "$workbookSheet" > $tmpFile
+GetExcel2 -wb "$workbookFile" -ws "$workbookSheet"  > $tmpFile
 
 ##
 ## control|firstName|lastName|email|institution
@@ -114,3 +101,4 @@ Goodbye 0 #'alert'
 #===================================================================================================
 
 ## Thu Feb 23 13:03:18 CST 2017 - dscudiero - Add error checking on the input lines
+## 03-23-2018 @ 11:42:51 - 1.0.19 - dscudiero - Updates for GetExcel/GetExcel2
