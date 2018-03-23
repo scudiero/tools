@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.71 # -- dscudiero -- Tue 03/20/2018 @  9:17:07.67
+version=2.10.72 # -- dscudiero -- Fri 03/23/2018 @ 14:39:27.96
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi"
@@ -21,7 +21,7 @@ scriptDescription="Copy workflow files"
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-	function copyWorkflow-ParseArgsStd2  {
+	function copyWorkflow-ParseArgsStd  {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 		myArgs+=("jal|jalot|option|jalot||script|Jalot task number")
 		myArgs+=("comment|comment|option|comment||script|Comment describing the reason for the update")
@@ -321,7 +321,7 @@ GetDefaultsData $myName
 [[ $verbose == true ]] && verboseArg='-v' || unset verboseArg
 [[ $env != '' ]] && srcEnv=$env
 
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 [[ -n $unknowArgs ]] && cimStr="$unknowArgs"
 
 # Initialize instance variables
@@ -714,7 +714,7 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 10-10-2017 @ 13.33.45 - 2.10.35 - dscudiero - Take the restriction for the jalot data to be only numeric away
 ## 10-10-2017 @ 13.44.43 - 2.10.36 - dscudiero - Add default values for some questions
 ## 10-20-2017 @ 16.33.02 - 2.10.40 - dscudiero - Added code to check to make sure there is a workflow management record for the cim instance
-## 11-02-2017 @ 15.54.32 - 2.10.41 - dscudiero - Switch to ParseArgsStd2
+## 11-02-2017 @ 15.54.32 - 2.10.41 - dscudiero - Switch to ParseArgsStd
 ## 11-06-2017 @ 16.44.08 - 2.10.42 - dscudiero - Add runCourseleafCgi to the includes list
 ## 12-11-2017 @ 13.51.57 - 2.10.56 - dscudiero - Add a check of the workflow.tcf revhistorytca data between source and target
 ## 12-13-2017 @ 14.21.18 - 2.10.59 - dscudiero - Write out the backup file to the target sites attic directory
@@ -726,3 +726,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 03-13-2018 @ 08:29:19 - 2.10.67 - dscudiero - Add a check for TODO workflow steps if target is NEXT
 ## 03-15-2018 @ 12:59:42 - 2.10.68 - dscudiero - Allow specifying cimstr as extra arguments
 ## 03-20-2018 @ 09:20:20 - 2.10.71 - dscudiero - Check that verify is on if target is NEXT
+## 03-23-2018 @ 15:33:27 - 2.10.72 - dscudiero - D
