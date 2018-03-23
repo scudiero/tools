@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.2.36 # -- dscudiero -- Thu 03/22/2018 @ 14:21:06.28
+version=1.2.37 # -- dscudiero -- Fri 03/23/2018 @ 14:33:37.00
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
@@ -51,7 +51,7 @@ unset changesMade
 #==================================================================================================
 helpSet='script,client,env'
 Hello
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 Init 'getClient getEnv getDirs checkEnvs'
 tgtDir=$srcDir
 srcDir=$skeletonRoot/release
@@ -299,3 +299,4 @@ return  ## We are called as a subprocess, just return to our parent
 ## 11-02-2017 @ 12.06.35 - (1.2.34)    - dscudiero - Added InsertLineInFile
 ## 11-30-2017 @ 13.26.39 - (1.2.35)    - dscudiero - Switch to use the -all flag on the GetCims call
 ## 03-22-2018 @ 14:36:17 - 1.2.36 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:34:35 - 1.2.37 - dscudiero - D
