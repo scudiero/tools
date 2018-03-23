@@ -5,11 +5,17 @@
 /shadows/
 /dailysh/
 /bin/
+
 /jars/
+!/jars/WorkWith.jar
+!/jars/myPutty.jar
+!/jars/runMySql.jar
+
 /courseleafcgiShadow
 /courseleafEscrowedSites
 /courseleafGitRepoShadow
 /courseleafSkeletonShadow
+
 /cygwin64/
 /DBs/
 /internalContactsDbShadow
