@@ -1,7 +1,7 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.75 # -- dscudiero -- Fri 03/23/2018 @ 11:50:54.97
+version=1.2.76 # -- dscudiero -- Fri 03/23/2018 @ 14:34:16.10
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -17,7 +17,7 @@ scriptDescription="Build the '$qaStatusTable' table by parsing the workbook file
 #=======================================================================================================================
 # Standard call back functions
 #=======================================================================================================================
-function buildQaStatusTable-parseArgsStd2  { # or parseArgs-local
+function buildQaStatusTable-ParseArgsStd  { # or parseArgs-local
 	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 	return 0
 }
@@ -189,7 +189,7 @@ helpSet='script,client'
 
 Hello
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 
 [[ $batchMode != true ]] && VerifyContinue "You are asking to re-generate the data warehouse '$qaStatusTable' table"
 
@@ -431,7 +431,7 @@ Goodbye 0 #'alert'
 ## 10-31-2017 @ 10.57.06 - (1.2.52)    - dscudiero - Switch to GetExcel and Msg
 ## 10-31-2017 @ 10.58.10 - (1.2.53)    - dscudiero - Cosmetic/minor change
 ## 11-01-2017 @ 07.42.19 - (1.2.54)    - dscudiero - Updated how the helper script is called
-## 11-01-2017 @ 15.50.22 - (1.2.55)    - dscudiero - Switch to use ParseArgsStd2
+## 11-01-2017 @ 15.50.22 - (1.2.55)    - dscudiero - Switch to use ParseArgsStd
 ## 11-03-2017 @ 10.52.38 - (1.2.59)    - dscudiero - Updated because the name of the cim priority data tab in the worksheet was changed.
 ## 11-03-2017 @ 11.07.03 - (1.2.61)    - dscudiero - Fix problem parsing the resoources sheet
 ## 11-08-2017 @ 07.26.23 - (1.2.63)    - dscudiero - Added debug code
@@ -444,3 +444,4 @@ Goodbye 0 #'alert'
 ## 12-12-2017 @ 06.56.57 - (1.2.72)    - dscudiero - Fix problem with messaging if insertTestingDetail returns an error code
 ## 03-22-2018 @ 14:05:43 - 1.2.74 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 11:55:33 - 1.2.75 - dscudiero - Updated for GetExcel2/GetExcel
+## 03-23-2018 @ 15:31:35 - 1.2.76 - dscudiero - D
