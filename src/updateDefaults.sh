@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.87 # -- dscudiero -- Thu 03/22/2018 @ 13:56:25.31
+version=2.0.88 # -- dscudiero -- Fri 03/23/2018 @ 14:28:50.98
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -24,7 +24,7 @@ scriptDescription="Sync warehouse defaults table"
 # Standard arg parsing and initialization
 #==================================================================================================
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 Hello
 
 #==================================================================================================
@@ -212,9 +212,10 @@ Goodbye 0;
 ## 10-27-2017 @ 08.13.09 - (2.0.61)    - dscudiero - Added debug statements
 ## 10-27-2017 @ 09.18.20 - (2.0.62)    - dscudiero - Remove debug statements
 ## 11-01-2017 @ 12.37.43 - (2.0.80)    - dscudiero - Fixed an issue with the ignoreList
-## 11-01-2017 @ 16.49.38 - (2.0.81)    - dscudiero - Switch to ParseArgsStd2
+## 11-01-2017 @ 16.49.38 - (2.0.81)    - dscudiero - Switch to ParseArgsStd
 ## 12-01-2017 @ 08.33.08 - (2.0.83)    - dscudiero - ignore /mnt directories that end with -test
 ## 12-06-2017 @ 11.16.01 - (2.0.84)    - dscudiero - Refactored building the defaults data files
 ## 12-07-2017 @ 10.03.35 - (2.0.85)    - dscudiero - Add time stamp to the top comment in the generated defaults files
 ## 03-15-2018 @ 10:23:05 - 2.0.86 - dscudiero - Filter out dev6 from build7 devservers
 ## 03-22-2018 @ 14:07:49 - 2.0.87 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:36:20 - 2.0.88 - dscudiero - D
