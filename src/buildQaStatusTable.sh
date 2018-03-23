@@ -1,11 +1,11 @@
 #!/bin/bash
 #DX NOT AUTOVERSION
 #=======================================================================================================================
-version=1.2.74 # -- dscudiero -- Thu 03/22/2018 @ 13:58:03.30
+version=1.2.75 # -- dscudiero -- Fri 03/23/2018 @ 11:50:54.97
 #=======================================================================================================================
 TrapSigs 'on'
 
-myIncludes="GetExcel2 StringFunctions RunSql SetFileExpansion ProtectedCall PushPop"
+myIncludes="GetExcel StringFunctions RunSql SetFileExpansion ProtectedCall PushPop"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -55,7 +55,7 @@ function buildQaStatusTable-testMode  { # or testMode-local
 		dump -2 product workBook workSheet findColText
 
 		## Read the Worksheet data
-			GetExcel2 -wb "$workBook" -ws "$workSheet"
+			GetExcel -wb "$workBook" -ws "$workSheet"
 			[[ ${#resultSet[@]} -le 0 ]] && Terminate "$FUNCNAME: Could not retrieve data from workbook\n$workBook / $workSheet"
 			local result="${resultSet[0]}"; result=${result,,[a-z]} 
 
@@ -225,7 +225,7 @@ for workbook in "${workbooks[@]}"; do
 	[[ $(Contains "$workbook" 'old') == true || $(Contains "$workbook" 'bak') == true ]] && continue
 	Verbose 1 "^Checking File: $workbook"
 	## Get the list of worksheets in the workbook
-		GetExcel2 -wb "$workbook" -ws 'GetSheets'
+		GetExcel -wb "$workbook" -ws 'GetSheets'
 		sheets="${resultSet[0]}"
 
 	[[ $(Contains "|${sheets}|" '|ProjectSummary|') != true ]] && continue
@@ -234,7 +234,7 @@ for workbook in "${workbooks[@]}"; do
 	## Read the Project summary data
 		workSheet='ProjectSummary'
 		Verbose 1 "^^Parsing '$workSheet'..."
-		GetExcel2 -wb "$workbook" -ws "$workSheet"
+		GetExcel -wb "$workbook" -ws "$workSheet"
 
 	## Parse sheet data --  the variable names MUST match the data base column names
 		unset $(tr ',' ' ' <<< $insertFields)
@@ -428,7 +428,7 @@ Goodbye 0 #'alert'
 ## 06-05-2017 @ 12.53.26 - (1.2.36)    - dscudiero - Add parsing for 'Next' in the cell to trigger move to next
 ## 06-19-2017 @ 07.06.59 - (1.2.37)    - dscudiero - tweak formatting
 ## 09-29-2017 @ 10.14.39 - (1.2.45)    - dscudiero - Update FindExcecutable call for new syntax
-## 10-31-2017 @ 10.57.06 - (1.2.52)    - dscudiero - Switch to GetExcel2 and Msg
+## 10-31-2017 @ 10.57.06 - (1.2.52)    - dscudiero - Switch to GetExcel and Msg
 ## 10-31-2017 @ 10.58.10 - (1.2.53)    - dscudiero - Cosmetic/minor change
 ## 11-01-2017 @ 07.42.19 - (1.2.54)    - dscudiero - Updated how the helper script is called
 ## 11-01-2017 @ 15.50.22 - (1.2.55)    - dscudiero - Switch to use ParseArgsStd2
@@ -443,3 +443,4 @@ Goodbye 0 #'alert'
 ## 12-08-2017 @ 07.51.33 - (1.2.70)    - dscudiero - add a mesage level to a dump statement
 ## 12-12-2017 @ 06.56.57 - (1.2.72)    - dscudiero - Fix problem with messaging if insertTestingDetail returns an error code
 ## 03-22-2018 @ 14:05:43 - 1.2.74 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 11:55:33 - 1.2.75 - dscudiero - Updated for GetExcel2/GetExcel
