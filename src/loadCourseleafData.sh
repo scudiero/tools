@@ -1,10 +1,10 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.9.11 # -- dscudiero -- Thu 03/22/2018 @ 14:03:51.32
+version=3.9.12 # -- dscudiero -- Fri 03/23/2018 @ 11:51:20.08
 #==================================================================================================
 TrapSigs 'on'
-myIncludes='DbLog Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel2 WriteChangelogEntry'
+myIncludes='DbLog Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel WriteChangelogEntry'
 myIncludes="$myIncludes GetOutputFile BackupCourseleafFile ParseCourseleafFile GetCourseleafPgm RunCourseLeafCgi"
 myIncludes="$myIncludes MkTmpFile ProtectedCall PrintBanner"
 Import "$standardInteractiveIncludes $myIncludes"
@@ -306,7 +306,7 @@ scriptDescription="Load Courseleaf Data"
 
 		Msg "Parsing the 'user' data from the '$workbookSheet' worksheet ..."
 		## Get the user data from the spreadsheet
-			GetExcel2 -wb "$workbookFile" -ws "$workbookSheet"
+			GetExcel -wb "$workbookFile" -ws "$workbookSheet"
 			## Read the header record, look for the specific columns to determine how to parse subsequent records
 			ParseWorksheetHeader "$workbookSheet" 'userid first last email' 'uin'
 			[[ $verboseLevel -ge 1 ]] && { for field in userid first last email uin; do dump ${field}Col; done; }
@@ -420,7 +420,7 @@ scriptDescription="Load Courseleaf Data"
 		local workbookSheet="$1"
 		Msg "Parsing the 'roles' data from the '$workbookSheet' worksheet ..."
 		## Get the role data from the spreadsheet
-			GetExcel2 -wb "$workbookFile" -ws "$workbookSheet"
+			GetExcel -wb "$workbookFile" -ws "$workbookSheet"
 			## Read the header record, look for the specific columns to determine how to parse subsequent records
 			ParseWorksheetHeader "$workbookSheet" 'name members|userlist email'
 			[[ $verboseLevel -ge 1 ]] && { for field in name members email; do dump ${field}Col; done; }
@@ -580,7 +580,7 @@ scriptDescription="Load Courseleaf Data"
 		[[ $useUINs == true && $processedUserData != true ]] && Terminate "$FUNCNAME: Requesting UIN mapping but no userid sheet was provided"
 		## Get the user data from the spreadsheet
 			Msg "Parsing the 'catalog page' data from the '$workbookSheet' worksheet ..."
-			GetExcel2 -wb "$workbookFile" -ws "$workbookSheet"
+			GetExcel -wb "$workbookFile" -ws "$workbookSheet"
 			## Read the header record, look for the specific columns to determin how to parse subsequent records
 			ParseWorksheetHeader "$workbookSheet" 'path title owner workflow'
 			[[ $verboseLevel -ge 1 ]] && { for field in path title owner workflow; do dump ${field}Col; done; }
@@ -809,7 +809,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 
 ## Get the list of sheets in the workbook
 	Msg "^Parsing workbook..."
-	GetExcel2 -wb "$workbookFile" -ws 'GetSheets'
+	GetExcel -wb "$workbookFile" -ws 'GetSheets'
 	IFS='|' read -ra sheets <<< "${resultSet[0]}"
 	unset usersSheet rolesSheet pagesSheet
 	for sheet in "${sheets[@]}"; do
@@ -846,7 +846,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 
 	# ## If we are processing page data and role data see if the user page has uin mapping information
 	# if [[ $verify == true && $processPageData == true ]] && [[ $processPageData == true || $processRoleData == true ]]; then
-	# 	GetExcel2 -wb "$workbookFile" -ws 'GetSheets'
+	# 	GetExcel -wb "$workbookFile" -ws 'GetSheets'
 	# 	IFS='|' read -ra sheets <<< "${resultSet[0]}"
 	# fi
 
@@ -1108,3 +1108,4 @@ ignoreMissingPages=true
 ## 03-09-2018 @ 09:37:54 - 3.9.9 - dscudiero - Add code to clear out the email overrides from the roles if all of the entered email addresses match the userid@emailsuffix pattern
 ## 03-13-2018 @ 08:50:56 - 3.9.10 - dscudiero - Fix a bug merging the roles data
 ## 03-22-2018 @ 14:06:53 - 3.9.11 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 11:56:20 - 3.9.12 - dscudiero - Updated for GetExcel2/GetExcel
