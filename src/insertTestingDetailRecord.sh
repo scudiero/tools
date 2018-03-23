@@ -1,10 +1,10 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #==================================================================================================
-version=1.0.123 # -- dscudiero -- Thu 03/22/2018 @ 14:02:19.12
+version=1.0.124 # -- dscudiero -- Fri 03/23/2018 @ 11:51:03.15
 #==================================================================================================
 TrapSigs 'on'
-myIncludes="RunSql GetExcel2 ProtectedCall"
+myIncludes="RunSql GetExcel ProtectedCall"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -73,7 +73,7 @@ dump -2 workbookFile -t clientCode product project instance
 
 ## Read the Testing Detail Final data
 	Verbose 1 "^^^^Parsing '$workSheet' worksheet..."
-	GetExcel2 -wb "$workbookFile" -ws "$workSheet"
+	GetExcel -wb "$workbookFile" -ws "$workSheet"
 	# grepStr=$(ProtectedCall "grep '*Fatal Error*' $tmpFile")
 	# [[ $grepStr == '' ]] && grepStr=$(ProtectedCall "grep 'usage:' $tmpFile")
 	# if [[ $grepStr != '' || $(tail -n 1 $tmpFile) == '-1' ]]; then
@@ -191,6 +191,7 @@ dump -2 workbookFile -t clientCode product project instance
 ## 10-19-2017 @ 09.42.47 - (1.0.114)   - dscudiero - Added debug arround caller check code
 ## 10-20-2017 @ 09.01.58 - (1.0.115)   - dscudiero - Fix problem in the caller check code
 ## 11-01-2017 @ 07.42.33 - (1.0.117)   - dscudiero - Switch to Msg
-## 11-08-2017 @ 07.32.09 - (1.0.118)   - dscudiero - Switch to GetExcel2
+## 11-08-2017 @ 07.32.09 - (1.0.118)   - dscudiero - Switch to GetExcel
 ## 12-12-2017 @ 06.57.11 - (1.0.119)   - dscudiero - Remove 'env' from the queries
 ## 03-22-2018 @ 14:06:46 - 1.0.123 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 11:56:15 - 1.0.124 - dscudiero - Updated for GetExcel2/GetExcel
