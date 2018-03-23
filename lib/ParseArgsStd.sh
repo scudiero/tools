@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.23" # -- dscudiero -- Fri 03/23/2018 @ 12:01:54.13
+# version="3.0.28" # -- dscudiero -- Fri 03/23/2018 @ 15:25:24.68
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -12,7 +12,7 @@ function ParseArgsStd {
 	# [[ -n $* ]] && ParseArgsStd2 $* || ParseArgsStd2 fred -p -nop -prod aaaa,bbbb -src t -tgt p -sally harry -cimp -file xxxxx -cimc
 	# dump -n -n client envs testMode srcEnv tgtEnv cimStr products file noPrompt noClear unknowArgs
 
-	Import "RunSql StringFunctions Msg3"
+	Import "RunSql StringFunctions Msg"
 	local argDefCntr arg argType found tmpStr tmpEnv tmpArg argShortName argLongName scriptVar scriptCmd
 
 	## Make sure we have the argdefs data loaded
@@ -75,7 +75,13 @@ function ParseArgsStd {
 								;;
 						option)
 								if [[ -n $scriptCmd && ${scriptCmd,,[a-z]} != 'null' ]]; then
-									if [[ $scriptCmd == 'expandEnv' ]]; then
+									if [[ $scriptCmd == 'appendShortName' ]]; then
+										[[ -z ${!scriptVar} ]] && eval "$scriptVar=\"$argShortName\"" || eval "$scriptVar=\"${!scriptVar},$argShortName\""
+									elif [[ $scriptCmd == 'appendLongName' ]]; then
+										((argCntr++))
+										tmpStr="${!argCntr}"
+										[[ -z ${!scriptVar} ]] && eval "$scriptVar=\"$tmpStr\"" || eval "$scriptVar=\"${!scriptVar},$tmpStr\""
+									elif [[ $scriptCmd == 'expandEnv' ]]; then
 										(( argCntr++));
 										tmpStr="${!argCntr}"
 										found=false
@@ -128,4 +134,5 @@ export -f ParseArgsStd
 ## 11-02-2017 @ 15.22.27 - ("3.0.14")  - dscudiero - Added expandEnv command type for options to expand the entered value to a full env name
 ## 12-20-2017 @ 08.31.40 - ("3.0.19")  - dscudiero - Fix a problem when the default value in the database for an option arg is 'NULL'
 ## 03-20-2018 @ 08:14:45 - 3.0.21 - dscudiero - Add '=' as a valid variable prefix symbol
-## 03-22-2018 @ 13:42:32 - 3.0.22 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-22-2018 @ 13:42:32 - 3.0.22 - dscudiero - Updated for Msg/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:31:10 - 3.0.28 - dscudiero - Updated for ParseArgsStd2/ParseArgsStd
