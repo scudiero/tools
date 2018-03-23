@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.71" # -- dscudiero -- Wed 11/15/2017 @  8:25:39.17
+# version="2.0.72" # -- dscudiero -- Fri 03/23/2018 @ 16:50:46.11
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -136,7 +136,7 @@ export -f Dump dump
 # 		local lineNo="$(basename $(cut -d' ' -f2 <<< $callerData))/$(cut -d' ' -f1 <<< $callerData)"
 # 		if [[ $singleLine == true ]]; then vName=''; writeIt; fi
 # 		[[ $quit == true ]] && Quit
-# 		[[ $pause == true ]] && Msg3 && Pause '*** Dump paused script execution at $lineNo, press enter to continue ***'
+# 		[[ $pause == true ]] && Msg && Pause '*** Dump paused script execution at $lineNo, press enter to continue ***'
 
 
 # 	PopSettings "$FUNCNAME"
@@ -255,3 +255,4 @@ export -f DumpMap dumpmap dumphash
 ## 11-02-2017 @ 10.26.38 - ("2.0.66")  - dscudiero - Make i a local variable
 ## 11-02-2017 @ 11.17.50 - ("2.0.67")  - dscudiero - Switch i to myTabCntr for the tab counter
 ## 11-15-2017 @ 08.25.59 - ("2.0.71")  - dscudiero - Added -s option to send output to $stdout
+## 03-23-2018 @ 16:52:07 - 2.0.72 - dscudiero - Msg3 -> Msg
