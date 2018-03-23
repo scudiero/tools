@@ -40,7 +40,7 @@ for var in $falseVars; do eval $var=false; done
 #==================================================================================================
 # helpSet='script,client
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 Hello
 Init "getClient getEnv getDirs"
 
@@ -79,3 +79,4 @@ Goodbye 0 #'alert'
 ## Check-in log
 #===================================================================================================
 ## 03-22-2018 @ 13:03:03 - 1.0.0 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:35:52 - 1.0.0 - dscudiero - D
