@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.119 # -- dscudiero -- Fri 03/23/2018 @ 14:26:28.92
+version=3.13.120 # -- dscudiero -- Fri 03/23/2018 @ 16:55:38.27
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -33,7 +33,7 @@ function scriptsAndReports-ParseArgsStd {
 ## Build the menu list from the database
 #==================================================================================================
 function BuildMenuList {
-	Msg3 "^Building ${itemType}s list..."
+	Msg "^Building ${itemType}s list..."
 	## Eliminate things that do not work on windows if running from windows
 		[[ $TERM == 'dumb' ]] && excludeWindowsStuff="and $scriptsTable.name not in (\"wizdebug\")" || unset excludeWindowsStuff
 
@@ -165,7 +165,7 @@ function ExecReport {
 	[[ -z $additionalArgs && -n $client ]] && additionalArgs="$client"
 	local exec rc
 
-	Msg3 "^Running report '$name'..."
+	Msg "^Running report '$name'..."
 	## Lookup detailed script info from db
 		local fields="shortDescription,type,header,db,dbType,sqlStmt,script,scriptArgs,ignoreList"
 		local sqlStmt="select $fields from $reportsTable where lower(name) =\"$(Lower $name)\" "
@@ -211,7 +211,7 @@ function ExecReport {
 			if [[ $scriptArgs == '<prompt>' ]]; then
 				unset scriptArgs;
 				if [[ $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true  && $quiet != true ]]; then
-					Msg3 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
+					Msg "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
 					unset userArgs; Prompt userArgs "^Please specify parameters to be passed to '$itemName'" '*optional*' '' '4'
 				fi
 			fi
@@ -229,16 +229,16 @@ function ExecReport {
 
 		if [[ -f "$tmpFile" && $(wc -l < "$tmpFile") -gt 1 ]]; then
 			if [[ ${ignoreList,,[a-z]} == 'returnsraw' ]]; then
-				Msg3 "\n$name report run by $userName on $(date +"%m-%d-%Y") at $(date +"%H.%M.%S")" >> "$outFileXlsx"
-				Msg3 "($shortDescription)\n" >> "$outFileXlsx"
+				Msg "\n$name report run by $userName on $(date +"%m-%d-%Y") at $(date +"%H.%M.%S")" >> "$outFileXlsx"
+				Msg "($shortDescription)\n" >> "$outFileXlsx"
 				sed s"/|/\t/g" < "$tmpFile" >> "$outFileXlsx"
 				# mapfile -t resultSet < "$tmpFile"
 				# PrintColumnarData 'resultSet' '|' >> "$outFileText"
 			else
 				cp -fp "$tmpFile" "$outFileXlsx"
 			fi
-			Msg3 "\n^Report output can be found in: '$outFileXlsx'"
-			Msg3 "^(On MS windows explorer, go to '\\\\\\saugus\\$userName\\Reports\\$name\\$(basename $outFileXlsx)')"
+			Msg "\n^Report output can be found in: '$outFileXlsx'"
+			Msg "^(On MS windows explorer, go to '\\\\\\saugus\\$userName\\Reports\\$name\\$(basename $outFileXlsx)')"
 			sendMail=true
 		else
 			Warning "No data returned from report script"
@@ -301,18 +301,18 @@ if [[ $batchMode != true ]]; then
 	grep -q 'scripts="$TOOLSPATH/bin/scripts"' $HOME/.bashrc ; rc=$?
 	[[ -n $previousTrapERR ]] && eval "trap $previousTrapERR"
 	if [[ $rc -gt 0 ]]; then
-		Msg3
-		Msg3 "Do you wish to add an alias to the scripts command to your .bashrc file (recommended) ?"
-		Msg3 "This will allow you to access the scripts command in the future by simply entering 'scripts' on the Linux command line."
-		Msg3
+		Msg
+		Msg "Do you wish to add an alias to the scripts command to your .bashrc file (recommended) ?"
+		Msg "This will allow you to access the scripts command in the future by simply entering 'scripts' on the Linux command line."
+		Msg
 		unset ans; Prompt ans "Yes to add, No to skip" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
 		if [[ $ans == 'y' ]]; then
 			echo '' >> $HOME/.bashrc
 			echo "export TOOLSPATH=\"$TOOLSPATH\" ## Added by' '$myName' on $(date)" >> $HOME/.bashrc
 			echo "alias scripts=\"\$TOOLSPATH/bin/scripts\" ## Added by' '$myName' on $(date)" >> $HOME/.bashrc
-			Msg3
+			Msg
 			Info "An alias for the scripts command has been added to your '$HOME/.bashrc' file."
-			Msg3
+			Msg
 		fi
 	fi
 else
@@ -323,7 +323,7 @@ fi
 ## parse arguments
 #=======================================================================================================================
 Hello
-[[ -n $UsersAuthGroups ]] && Msg3 "^Your authorization groups: $(sed 's/,/, /g' <<< \"$UsersAuthGroups\")"
+[[ -n $UsersAuthGroups ]] && Msg "^Your authorization groups: $(sed 's/,/, /g' <<< \"$UsersAuthGroups\")"
 helpSet='script,client'
 parseQuiet=true
 GetDefaultsData $myName -fromFiles
@@ -353,17 +353,17 @@ dump -1 -p client report emailAddrs myName ${myName}LastRunDate ${myName}LastRun
 			unset itemName
 			[[ ${#menuList[@]} -eq 0 ]] && BuildMenuList
 			ProtectedCall "clear"
-			Msg3
-			Msg3 "\n^Please specify the $(ColorM '(ordinal)') number of the $itemType you wish to run, 'x' to quit."
+			Msg
+			Msg "\n^Please specify the $(ColorM '(ordinal)') number of the $itemType you wish to run, 'x' to quit."
 			[[ $newItem == true ]] && Note "0 1" "Items with an '*' are new since the last time you ran '${itemType}s'"
-			Msg3
+			Msg
 			#[[ $mode == 'scripts' && $client != '' ]] && clientStr=" (client: '$client')" || unset clientStr
 			SelectMenuNew 'menuList' 'itemName'
 			[[ -z $itemName ]] && Goodbye 'x'
 			itemName=$(cut -d ' ' -f1 <<< $itemName)
 			length=${#itemName}
 			[[ ${itemName:$length-1:1} == '*' ]] && itemName=${itemName:0:$length-1}
-			Msg3
+			Msg
 			menuDisplayed=true
 		else
 			## Otherwise use the passed in script/report
@@ -377,7 +377,7 @@ dump -1 -p client report emailAddrs myName ${myName}LastRunDate ${myName}LastRun
 			## Get additioal parms
 				unset userArgs;
 				if [[ $mode == true && $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true && $quiet != true && $noArgs != true ]]; then
-					Msg3 "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
+					Msg "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
 					unset userArgs; Prompt userArgs "^Please specify parameters to be passed to '$itemName'" '*optional*' '' '3'
 					[[ -n $userArgs ]] && scriptArgs="$userArgs $scriptArgs"
 				fi
@@ -386,12 +386,12 @@ dump -1 -p client report emailAddrs myName ${myName}LastRunDate ${myName}LastRun
 				sendMail=false
 				Exec$itemTypeCap "$itemName" "$scriptArgs" ; rc=$?
 				#TrapSigs 'on'
-				[[ $batchMode != true ]] && Msg3
+				[[ $batchMode != true ]] && Msg
 				[[ $menuDisplayed == true ]] && Pause "Please press enter to go back to '${itemType}s'"
 				unset calledViaScripts
 			## Send out emails
 				if [[ -n $emailAddrs && $mode == 'reports' && $noEmails == false && $sendMail == true ]]; then
-					Msg3 | tee -a $outFileText; Msg3 "Sending email(s) to: $emailAddrs" | tee -a $outFileText; Msg3 | tee -a "$outFileText"
+					Msg | tee -a $outFileText; Msg "Sending email(s) to: $emailAddrs" | tee -a $outFileText; Msg | tee -a "$outFileText"
 					for addr in $(tr ',' ' ' <<< "$emailAddrs"); do
 						[[ $(Contains "$addr" '@') != true ]] && addr="$addr@leepfrog.com"
 						$DOIT mutt -a "$outFileXlsx" -s "$report report results: $(date +"%m-%d-%Y")" -- $addr < "$outFileText"
@@ -500,7 +500,7 @@ Goodbye 0
 ## 06-12-2017 @ 11.30.57 - (3.12.6)    - dscudiero - tweak messaging
 ## 09-13-2017 @ 11.30.02 - (3.12.11)   - dscudiero - Update to just pull the scripts that have showinscripts=Yes
 ## 09-19-2017 @ 10.39.37 - (3.12.20)   - dscudiero - Add Pause to the includes list
-## 09-25-2017 @ 09.01.59 - (3.12.29)   - dscudiero - Switch to Msg3
+## 09-25-2017 @ 09.01.59 - (3.12.29)   - dscudiero - Switch to Msg
 ## 10-02-2017 @ 12.47.55 - (3.12.30)   - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 12.49.57 - (3.12.32)   - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 13.17.11 - (3.12.33)   - dscudiero - General syncing of dev to prod
@@ -534,5 +534,6 @@ Goodbye 0
 ## 11-09-2017 @ 07.26.48 - (3.13.64)   - dscudiero - Remove extra blank line if batchMode
 ## 11-15-2017 @ 09.48.24 - (3.13.116)  - dscudiero - Refactored passing in reports naming data from command line, fixed scripts calling reports
 ## 02-02-2018 @ 09.57.59 - 3.13.117 - dscudiero - Tweak the sql query to make sure we take into account case
-## 03-22-2018 @ 14:07:41 - 3.13.118 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-22-2018 @ 14:07:41 - 3.13.118 - dscudiero - Updated for Msg/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:36:12 - 3.13.119 - dscudiero - D
+## 03-23-2018 @ 16:58:09 - 3.13.120 - dscudiero - Msg3 -> Msg
