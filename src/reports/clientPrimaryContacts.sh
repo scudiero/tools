@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.22 # -- dscudiero -- Thu 03/22/2018 @ 12:58:58.11
+version=1.0.23 # -- dscudiero -- Fri 03/23/2018 @ 14:36:16.17
 #==================================================================================================
 Import GetDefaultsData ParseArgs ParseArgsStd Hello Init Goodbye
 originalArgStr="$*"
@@ -14,7 +14,7 @@ scriptDescription=""
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function clientPrimaryContacts-ParseArgsStd2  { # or parseArgs-local
+function clientPrimaryContacts-ParseArgsStd  { # or parseArgs-local
 	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 	myArgs+=('email|emailAddrs|option|emailAddrs||script|Email addresses to send reports to when running in batch mode')
 	myArgs+=('report|reportName|option|emailAdreportNamedrs||script|The origional report name')
@@ -51,7 +51,7 @@ fields="$fields,contacts.title,contacts.workphone,contacts.cell,contacts.fax,con
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 
 [[ $reportName != '' ]] && GetDefaultsData "$reportName" "$reportsTable"
 Hello
@@ -119,3 +119,4 @@ Goodbye 0 #'alert'
 
 ## Mon Feb 13 16:09:30 CST 2017 - dscudiero - make sure we have our own tmpFile
 ## 03-22-2018 @ 13:02:53 - 1.0.22 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:35:44 - 1.0.23 - dscudiero - D
