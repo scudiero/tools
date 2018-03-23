@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.51 # -- dscudiero -- Fri 03/23/2018 @ 14:39:04.25
+version=1.0.52 # -- dscudiero -- Fri 03/23/2018 @ 17:03:33.56
 #==================================================================================================
 #= Description +===================================================================================
 # Clone a Courseleaf git repository
@@ -67,7 +67,7 @@ chmod gu+w ${tgtDir}/${repo}
 cd $tgtDir
 
 ## Initialize the repo
-	[[ $batchMode != true ]] && Msg3 "^^Initializing the '$repo' repository (takes a while)..."
+	[[ $batchMode != true ]] && Msg "^^Initializing the '$repo' repository (takes a while)..."
 	rm -f "$stdOut" "$stdErr" >& /dev/null
 	gitCmd="git clone --depth 1 $srcDir"
 	ProtectedCall "$gitCmd" 1> $stdOut 2> $stdErr
@@ -77,7 +77,7 @@ cd $tgtDir
 
 ## Overlay the specific tagged files
 	if [[ $tag  != 'master' ]]; then
-		[[ $batchMode != true ]] && Msg3 "^^Extracting tag '$tag' from the '$repo' repository..."
+		[[ $batchMode != true ]] && Msg "^^Extracting tag '$tag' from the '$repo' repository..."
 		cd $tgtDir/$repo
 		rm -f "$stdOut" "$stdErr" >& /dev/null
 		gitCmd="git checkout --force tags/$tag"
@@ -88,7 +88,7 @@ cd $tgtDir
 	fi
 
 ## git cleanup
-	[[ $batchMode != true ]] && Msg3 "^^Cleaning up the repo..."
+	[[ $batchMode != true ]] && Msg "^^Cleaning up the repo..."
 	cd $tgtDir/$repo
 	rm -f "$stdOut" "$stdErr" >& /dev/null
 	gitCmd="git clean -fxd"
@@ -99,7 +99,7 @@ cd $tgtDir
 
 ## set the time-date stamp on the extracted files
 	if [[ $tag  == 'master' ]]; then
-		[[ $batchMode != true ]] && Msg3 "^^Restting file time stamps (again, this will take a while)..."
+		[[ $batchMode != true ]] && Msg "^^Restting file time stamps (again, this will take a while)..."
 		cd $tgtDir/$repo
 		for file in $(git ls-files | grep -v ' '); do
 			time=$(git log --pretty=format:%cd -n 1 --date=iso "$file")
@@ -122,21 +122,21 @@ cd $tgtDir
 	chmod 755 $tgtDir/$repo
 
 	if [[ $tag != 'master' && $outFile != '' ]]; then
-		[[ $batchMode != true ]] && Msg3 "^^Updating 'version file', writing out '$outFile'..."
+		[[ $batchMode != true ]] && Msg "^^Updating 'version file', writing out '$outFile'..."
 		tagFull=$(echo $tag | cut -d'.' -f 1).$(echo $tag | cut -d'.' -f 2).$(echo $tag'.0' | cut -d'.' -f 3)
 		echo "$tagFull" > $outFile
 	fi
 
 ## remove git files
 	cd $tgtDir/$repo
-	[[ $batchMode != true ]] && Msg3 "^^Removing git directory and files..."
+	[[ $batchMode != true ]] && Msg "^^Removing git directory and files..."
 	rm -rf .git*
 
 ## rename the pdfgen folder
 	if [[ $repo == 'pdfgen' ]]; then
 		cd $tgtDir
 		mv -f pdfgen pdf
-		[[ $batchMode != true ]] && Msg3 "^^Rename '$repo' folder to 'pdf'..."
+		[[ $batchMode != true ]] && Msg "^^Rename '$repo' folder to 'pdf'..."
 	fi
 
 ## Create sync file
@@ -250,7 +250,7 @@ chmod gu+w ${tgtDir}/${repo}
 cd $tgtDir
 
 ## Initialize the repo
-	[[ $batchMode != true ]] && Msg3 "^^Initializing the '$repo' repository (takes a while)..."
+	[[ $batchMode != true ]] && Msg "^^Initializing the '$repo' repository (takes a while)..."
 	rm -f "$stdOut" "$stdErr" >& /dev/null
 	gitCmd="git clone --depth 1 $srcDir"
 	ProtectedCall "$gitCmd" 1> $stdOut 2> $stdErr
@@ -260,7 +260,7 @@ cd $tgtDir
 
 ## Overlay the specific tagged files
 	if [[ $tag  != 'master' ]]; then
-		[[ $batchMode != true ]] && Msg3 "^^Extracting tag '$tag' from the '$repo' repository..."
+		[[ $batchMode != true ]] && Msg "^^Extracting tag '$tag' from the '$repo' repository..."
 		cd $tgtDir/$repo
 		rm -f "$stdOut" "$stdErr" >& /dev/null
 		gitCmd="git checkout --force tags/$tag"
@@ -271,7 +271,7 @@ cd $tgtDir
 	fi
 
 ## git cleanup
-	[[ $batchMode != true ]] && Msg3 "^^Cleaning up the repo..."
+	[[ $batchMode != true ]] && Msg "^^Cleaning up the repo..."
 	cd $tgtDir/$repo
 	rm -f "$stdOut" "$stdErr" >& /dev/null
 	gitCmd="git clean -fxd"
@@ -282,7 +282,7 @@ cd $tgtDir
 
 ## set the time-date stamp on the extracted files
 	if [[ $tag  == 'master' ]]; then
-		[[ $batchMode != true ]] && Msg3 "^^Restting file time stamps (again, this will take a while)..."
+		[[ $batchMode != true ]] && Msg "^^Restting file time stamps (again, this will take a while)..."
 		cd $tgtDir/$repo
 		for file in $(git ls-files | grep -v ' '); do
 			time=$(git log --pretty=format:%cd -n 1 --date=iso "$file")
@@ -305,21 +305,21 @@ cd $tgtDir
 	chmod 755 $tgtDir/$repo
 
 	if [[ $tag != 'master' && $outFile != '' ]]; then
-		[[ $batchMode != true ]] && Msg3 "^^Updating 'version file', writing out '$outFile'..."
+		[[ $batchMode != true ]] && Msg "^^Updating 'version file', writing out '$outFile'..."
 		tagFull=$(echo $tag | cut -d'.' -f 1).$(echo $tag | cut -d'.' -f 2).$(echo $tag'.0' | cut -d'.' -f 3)
 		echo "$tagFull" > $outFile
 	fi
 
 ## remove git files
 	cd $tgtDir/$repo
-	[[ $batchMode != true ]] && Msg3 "^^Removing git directory and files..."
+	[[ $batchMode != true ]] && Msg "^^Removing git directory and files..."
 	rm -rf .git*
 
 ## rename the pdfgen folder
 	if [[ $repo == 'pdfgen' ]]; then
 		cd $tgtDir
 		mv -f pdfgen pdf
-		[[ $batchMode != true ]] && Msg3 "^^Rename '$repo' folder to 'pdf'..."
+		[[ $batchMode != true ]] && Msg "^^Rename '$repo' folder to 'pdf'..."
 	fi
 
 ## Create sync file
@@ -365,6 +365,7 @@ return 0
 ## 10-18-2017 @ 14.25.08 - (1.0.45)    - dscudiero - Cosmetic/minor change
 ## 10-18-2017 @ 14.27.31 - (1.0.45)    - dscudiero - Cosmetic/minor change
 ## 10-18-2017 @ 15.31.00 - (1.0.47)    - dscudiero - Cosmetic/minor change
-## 10-18-2017 @ 15.35.05 - (1.0.48)    - dscudiero - Use Msg3
-## 03-22-2018 @ 12:35:49 - 1.0.50 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 10-18-2017 @ 15.35.05 - (1.0.48)    - dscudiero - Use Msg
+## 03-22-2018 @ 12:35:49 - 1.0.50 - dscudiero - Updated for Msg/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:32:55 - 1.0.51 - dscudiero - D
+## 03-23-2018 @ 17:04:40 - 1.0.52 - dscudiero - Msg3 -> Msg
