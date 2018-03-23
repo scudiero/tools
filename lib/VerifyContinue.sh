@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.26" # -- dscudiero -- Tue 03/13/2018 @ 11:13:54.61
+# version="2.0.27" # -- dscudiero -- Fri 03/23/2018 @ 16:50:21.69
 #===================================================================================================
 ## Make sure the user really wants to do this
 ## If the first argument is 'loop' then loop back to self if user responds with 'n'
@@ -16,7 +16,7 @@ function VerifyContinue {
 	if [[ $verifyPrompt == '' ]]; then verifyPrompt="$mode"; mode='loop'; fi
 	local arg tempStr
 
-	Msg3; Msg3 "$verifyPrompt"
+	Msg; Msg "$verifyPrompt"
 	if [[ ${#verifyArgs[@]} -gt 0 ]]; then
 		[[ $allItems == true ]] && verifyArgs+=("Auto process all items:$allItems")
 		[[ $force == true ]] && verifyArgs+=("Force execution:$force")
@@ -30,10 +30,10 @@ function VerifyContinue {
 			[[ $token1 == 'warning' ]] && color='ColorW' || color='ColorK'
 			tempStr="${tempStr}${dots}"
 			tempStr=${tempStr:0:$maxArgWidth+3}
-			Msg3 "^$(eval "$color \"${tempStr}\"")$(echo $arg | cut -d':' -f2-)"
+			Msg "^$(eval "$color \"${tempStr}\"")$(echo $arg | cut -d':' -f2-)"
 		done
-		[[ $testMode == true ]] && Msg3 "^$(ColorE "*** Running in Test Mode ***")"
-		[[ $informationOnlyMode == true ]] && Msg3 "^$(ColorE "*** Information only mode, no data will be modified ***")"
+		[[ $testMode == true ]] && Msg "^$(ColorE "*** Running in Test Mode ***")"
+		[[ $informationOnlyMode == true ]] && Msg "^$(ColorE "*** Information only mode, no data will be modified ***")"
 	fi
 
 	if [[ $verify == true && $quiet != true && $go != true ]]; then
@@ -52,9 +52,9 @@ function VerifyContinue {
 			Goodbye 'x'
 		fi
 	else
-		Msg3 "^$(ColorI "Info -- ")'NoPrompt' flag was set, continuing..."
+		Msg "^$(ColorI "Info -- ")'NoPrompt' flag was set, continuing..."
 	fi
-	Msg3
+	Msg
 	return 0
 } #VerifyContinue
 export -f VerifyContinue
@@ -66,9 +66,10 @@ export -f VerifyContinue
 ## 04-13-2017 @ 10.35.46 - ("2.0.12")  - dscudiero - Add ability to specify a default value
 ## 04-25-2017 @ 08.38.30 - ("2.0.13")  - dscudiero - Skip prompt if go=true
 ## 08-30-2017 @ 15.15.40 - ("2.0.16")  - dscudiero - use ColorW for warning messages
-## 09-25-2017 @ 12.26.42 - ("2.0.19")  - dscudiero - Switch to use Msg3
-## 09-25-2017 @ 16.13.26 - ("2.0.21")  - dscudiero - use Msg3
+## 09-25-2017 @ 12.26.42 - ("2.0.19")  - dscudiero - Switch to use Msg
+## 09-25-2017 @ 16.13.26 - ("2.0.21")  - dscudiero - use Msg
 ## 09-26-2017 @ 15.36.58 - ("2.0.22")  - dscudiero - Fix problem displaying the information lines
 ## 10-04-2017 @ 16.56.48 - ("2.0.23")  - dscudiero - If informationOnly mode then set default answer to yes
 ## 03-13-2018 @ 08:29:40 - 2.0.25 - dscudiero - Remove 'merge' load option, not really necessary
 ## 03-13-2018 @ 11:14:30 - 2.0.26 - dscudiero - Fix if conditional checking response to prompt
+## 03-23-2018 @ 16:52:29 - 2.0.27 - dscudiero - Msg3 -> Msg
