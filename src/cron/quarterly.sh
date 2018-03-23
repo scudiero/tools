@@ -1,12 +1,12 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.49 # -- dscudiero -- Fri 03/23/2018 @ 14:30:19.68
+version=2.1.50 # -- dscudiero -- Fri 03/23/2018 @ 16:18:10.84
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes="SetSiteDirs ProtectedCall SetFileExpansion"
+myIncludes="SetSiteDirs ProtectedCall"
 Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -140,3 +140,4 @@ return 0
 ## 03-22-2018 @ 12:47:12 - 2.1.47 - dscudiero - Updated for Msg3/Msg, RunSql/RunSql, ParseArgStd/ParseArgStd2
 ## 03-22-2018 @ 14:06:29 - 2.1.48 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:34:16 - 2.1.49 - dscudiero - D
+## 03-23-2018 @ 16:18:45 - 2.1.50 - dscudiero - D
