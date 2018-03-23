@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.6.67 # -- dscudiero -- Thu 03/22/2018 @ 13:22:01.59
+version=2.6.68 # -- dscudiero -- Fri 03/23/2018 @ 14:42:16.54
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetCourseleafPgm PrintBanner"
@@ -29,7 +29,7 @@ unset client env srcEnv tgtEnv srcDir tgtDir siteDir pvtDir devDir testDir currD
 Hello
 helpSet='script,client,env'
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 
 Init 'getClient getEnv getDirs checkEnvs noPreview noPublic'
 
@@ -68,3 +68,4 @@ Goodbye 0
 ## 10-04-2017 @ 13.49.10 - (2.6.65)    - dscudiero - Tweak startup messaging
 ## 03-22-2018 @ 12:36:35 - 2.6.66 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-22-2018 @ 13:25:51 - 2.6.67 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:36:31 - 2.6.68 - dscudiero - D
