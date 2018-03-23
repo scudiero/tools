@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.5.139 # -- dscudiero -- Thu 11/02/2017 @ 11:58:07.80
+version=1.5.140 # -- dscudiero -- Fri 03/23/2018 @ 14:28:44.36
 #==================================================================================================
 # Install a courseleaf feature on a client site
 #==================================================================================================
@@ -19,7 +19,7 @@ scriptDescription="Install a courseleaf feature to a site"
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-	function courseleafFeature-parseArgsStd2 {
+	function courseleafFeature-ParseArgsStd {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 		myArgs+=("fe|feature|option|feature||script|The feature that you want to install")
 	}
@@ -108,7 +108,7 @@ if [[ $(Contains "$featuresFiles" ",$1,") == true ]]; then
 fi
 Hello
 helpSet='script'
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 displayGoodbyeSummaryMessages=true
 Init 'getClient getEnv getDirs checkEnvs addPvt'
 
@@ -180,3 +180,4 @@ Goodbye 0 #'alert'
 ## 04-06-2017 @ 10.09.40 - (1.5.69)    - dscudiero - renamed RunCourseLeafCgi, use new name
 ## 11-02-2017 @ 11.48.55 - (1.5.138)   - dscudiero - Misc cleanup
 ## 11-02-2017 @ 12.00.52 - (1.5.139)   - dscudiero - Call --> FindExecutable
+## 03-23-2018 @ 15:33:34 - 1.5.140 - dscudiero - D
