@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.19 # -- dscudiero -- Wed 03/21/2018 @ 16:58:37.46
+version=1.2.20 # -- dscudiero -- Fri 03/23/2018 @ 14:33:26.44
 #==================================================================================================
 TrapSigs 'on'
 myIncludes=""
@@ -23,7 +23,7 @@ scriptDescription=""
 	#==============================================================================================
 	# parse script specific arguments
 	#==============================================================================================
-	function editCimFiles-ParseArgsStd2  {
+	function editCimFiles-ParseArgsStd  {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 		myArgs+=('fromStr|fromStr|option|fromStr||script|The "from string" text')
 		myArgs+=('toStr|toStr|option|toStr||script|The "to string" text')
@@ -47,7 +47,7 @@ scriptDescription=""
 #==================================================================================================
 helpSet='script,client,env'
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 
 Hello
 Msg
@@ -96,3 +96,4 @@ Goodbye 0 #'alert'
 # 10-22-2015 -- dscudiero -- Script to edit cim tso files (1.1)
 # 10-23-2015 -- dscudiero -- use ProtectedCall (1.2)
 ## 03-22-2018 @ 12:36:11 - 1.2.19 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:34:29 - 1.2.20 - dscudiero - D
