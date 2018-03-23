@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.16 # -- dscudiero -- Thu 03/22/2018 @ 12:31:47.82
+version=1.0.17 # -- dscudiero -- Fri 03/23/2018 @ 14:42:38.70
 #==================================================================================================
 TrapSigs 'on'
 myIncludes=""
@@ -32,7 +32,7 @@ scriptDescription="Check the roles to ensure that all role members are in user p
 #==================================================================================================
 helpSet='script,client,env'
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 Hello
 Init 'getClient getEnv getDirs checkEnvs'
 
@@ -132,3 +132,4 @@ Goodbye 0 #'alert'
 ## Fri Oct 14 13:37:34 CDT 2016 - dscudiero - Fix spelling problem
 ## 06-19-2017 @ 07.07.26 - (1.0.12)    - dscudiero - Update to check courseleaf.cfg user records also
 ## 03-22-2018 @ 12:35:44 - 1.0.16 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:32:32 - 1.0.17 - dscudiero - D
