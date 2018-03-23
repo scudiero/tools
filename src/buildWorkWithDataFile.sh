@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.124 # -- dscudiero -- Thu 03/22/2018 @ 14:00:52.64
+version=4.3.125 # -- dscudiero -- Fri 03/23/2018 @ 14:41:40.37
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql StringFunctions ProtectedCall FindExecutable PushPop"
@@ -25,7 +25,7 @@ scriptDescription="Sync the data warehouse '$siteInfoTable' table with the trans
 #=======================================================================================================================
 # Standard call back functions
 #=======================================================================================================================
-	function buildWorkWithDataFile-ParseArgsStd2 {
+	function buildWorkWithDataFile-ParseArgsStd {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 		quick=false
 		myArgs+=("quick|quick|switch|quick||script|Do quickly, skip processing the admins information")
@@ -62,7 +62,7 @@ Hello
 Info "Loading script defaults..."
 GetDefaultsData $myName
 Info "Parsing arguments..."
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 if [[ $batchMode != true ]]; then
 	verifyMsg="You are asking to re-generate the data warehouse 'WorkWith' client data file"
 	VerifyContinue "$verifyMsg"
@@ -123,3 +123,4 @@ Msg "^...Done"
 Goodbye 0 'alert'
 
 ## 03-22-2018 @ 14:05:56 - 4.3.124 - dscudiero - [A
+## 03-23-2018 @ 15:31:55 - 4.3.125 - dscudiero - D
