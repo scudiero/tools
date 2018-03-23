@@ -1,12 +1,12 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.41 # -- dscudiero -- Fri 03/23/2018 @ 14:31:34.87
+version=2.1.42 # -- dscudiero -- Fri 03/23/2018 @ 16:17:34.85
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes="ParseArgsStd FindExecutable StringFunctions"
+myIncludes="StringFunctions"
 Import "$standardIncludes $myIncludes"
 originalArgStr=$*
 
@@ -96,3 +96,4 @@ return 0
 ## 11-06-2017 @ 10.38.31 - (2.1.38)    - dscudiero - Fix syntax error, missiong;; closure in mojave case block
 ## 03-22-2018 @ 12:47:18 - 2.1.40 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:34:24 - 2.1.41 - dscudiero - D
+## 03-23-2018 @ 16:18:48 - 2.1.42 - dscudiero - D
