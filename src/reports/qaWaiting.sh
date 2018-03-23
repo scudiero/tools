@@ -1,5 +1,5 @@
 #!/bin/bash
-version=1.0.79 # -- dscudiero -- Thu 03/22/2018 @ 12:55:58.14
+version=1.0.80 # -- dscudiero -- Fri 03/23/2018 @ 14:36:41.04
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -10,7 +10,7 @@ TrapSigs 'on'
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function invalindCurrOrNextUrls-ParseArgsStd2  { # or parseArgs-local
+function invalindCurrOrNextUrls-ParseArgsStd  { # or parseArgs-local
 	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 	myArgs+=('email|emailAddrs|option|emailAddrs||script|Email addresses to send reports to when running in batch mode')
 	return 0
@@ -36,7 +36,7 @@ okCodes="$(cut -d':' -f2- <<< $scriptData1)"
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 [[ -n $reportName ]] && GetDefaultsData "$reportName" "$reportsTable"
 
 #===================================================================================================
@@ -133,3 +133,4 @@ Goodbye 0 #'alert'
 ## 03-27-2017 @ 13.30.18 - (1.0.75)    - dscudiero - Only report on active records
 ## 05-17-2017 @ 13.41.10 - (1.0.77)    - dscudiero - Fix sql statements
 ## 03-22-2018 @ 13:03:09 - 1.0.79 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:36:02 - 1.0.80 - dscudiero - D
