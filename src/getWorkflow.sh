@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.40 # -- dscudiero -- Fri 03/23/2018 @ 14:33:58.13
+version=1.0.41 # -- dscudiero -- Fri 03/23/2018 @ 16:56:12.36
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -65,10 +65,10 @@ Init "getClient getEnv getDirs checkEnvs addPvt"
 ## Get cim instance if wfType is cim
 	if [[ $wfType == 'proposal' && -z $cimStr ]]; then
 		allowMultiCims=false
-		Msg3 "Please select the CIM instance to use:"
+		Msg "Please select the CIM instance to use:"
 		while [[ $cimStr == '' ]]; do
 			GetCims $srcDir
-			[[ $cimStr == '' ]] && Msg3 && Msg3 $ET "You must select a CIM instance"
+			[[ $cimStr == '' ]] && Msg && Msg $ET "You must select a CIM instance"
 		done
 	fi
 
@@ -78,11 +78,11 @@ Init "getClient getEnv getDirs checkEnvs addPvt"
 		if [[ $wfType == 'page' ]]; then
 			Prompt page "What catalog page do you wish to lookup (page path from siteDir)" "*any*"
 			[[ ${page:0:1} != '/' ]] && page="/$page"
-			[[ ! -d $srcDir/web/$page ]] && Msg3 $ET1 "Could not locate '$siteDir/$page'" && unset page && continue
+			[[ ! -d $srcDir/web/$page ]] && Msg $ET1 "Could not locate '$siteDir/$page'" && unset page && continue
 			foundObj=true
 		else
 			Prompt proposal "What CIM proposal in '$cimStr' do you wish to lookup (enter key value)" "*any*"
-			[[ ! -d $srcDir/web/$cimStr/$proposal ]] && Msg3 $ET1 "Could not locate proposal key '$proposal' in '$cimStr'" && unset proposal && continue
+			[[ ! -d $srcDir/web/$cimStr/$proposal ]] && Msg $ET1 "Could not locate proposal key '$proposal' in '$cimStr'" && unset proposal && continue
 			foundObj=true
 			page="/$cimStr/$proposal"
 		fi
@@ -123,10 +123,10 @@ fi
 #===================================================================================================
 # Main
 #===================================================================================================
-Msg3
-[[ $wfType == 'proposal' ]] && Msg3 "^$client / CIM: $cimStr, Proposal: $proposal" || Msg3 "^$client / Page: $page"
-[[ $inWorkflowData != '' ]] && Msg3 $NT1 "$inWorkflowData"
-Msg3
+Msg
+[[ $wfType == 'proposal' ]] && Msg "^$client / CIM: $cimStr, Proposal: $proposal" || Msg "^$client / Page: $page"
+[[ $inWorkflowData != '' ]] && Msg $NT1 "$inWorkflowData"
+Msg
 
 ## Get the workflow preview data
 	cwd=$(pwd)
@@ -144,18 +144,18 @@ Msg3
 				## WParse 'Workflow' record
 				workflowwfType=$(cut -d':' -f1 <<< $line)
 				if [[ $workflowwfType == 'Manually Assigned Workflow' ]]; then
-					Msg3 "^^$workflowwfType"
+					Msg "^^$workflowwfType"
 					line=${line#*:</strong> }
 					line=${line%%<*}
 					IFS=',' read -r -a steps <<< "$line"
 					for step in "${steps[@]}"; do
-						Msg3 "^^^$step"
+						Msg "^^^$step"
 					done
 					break
 				else
 					line=${line#*:</strong> }
 					workflow=${line%%<*}
-					Msg3 "^^Workflow: $workflow"
+					Msg "^^Workflow: $workflow"
 					line=${line#*<ul class=\"role\">}
 				fi
 			fi
@@ -166,17 +166,17 @@ Msg3
 				[[ $(Contains "$line" '<em>FYI All</em>') == true ]] && fyiStr='fyiall'
 				line=${line##'<li><strong>'}
 				step=${line%%<*}
-				Msg3 "^^^$step $fyiStr"
+				Msg "^^^$step $fyiStr"
 			fi
 		fi
 	done < $cgiOut
 
 ## If workflow file has changed since the page/proposal was placed in workflow
 	if [[ $workflowFileEdate > $tsoEdate ]]; then
-		Msg3
+		Msg
 		Warning 0 1 "The workflow file has changed since this $wfType was placed into workflow"
-		Msg3 "^^Tso file date: $(date -d @$tsoEdate '+%D')"
-		Msg3 "^^Workflow file date: $(date -d @$workflowFileEdate '+%D @ %H:%M:%S')"
+		Msg "^^Tso file date: $(date -d @$tsoEdate '+%D')"
+		Msg "^^Workflow file date: $(date -d @$workflowFileEdate '+%D @ %H:%M:%S')"
 	fi
 
 #===================================================================================================
@@ -195,5 +195,6 @@ Goodbye 0 #'alert'
 ## 04-13-2017 @ 14.00.56 - (1.0.20)    - dscudiero - Add a default for VerifyContinue
 ## 11-02-2017 @ 06.58.54 - (1.0.26)    - dscudiero - Switch to ParseArgsStd
 ## 11-02-2017 @ 11.02.09 - (1.0.27)    - dscudiero - Add addPvt to the init call
-## 11-21-2017 @ 08.17.19 - (1.0.39)    - dscudiero - switch to Msg3
+## 11-21-2017 @ 08.17.19 - (1.0.39)    - dscudiero - switch to Msg
 ## 03-23-2018 @ 15:34:54 - 1.0.40 - dscudiero - D
+## 03-23-2018 @ 16:58:05 - 1.0.41 - dscudiero - Msg3 -> Msg
