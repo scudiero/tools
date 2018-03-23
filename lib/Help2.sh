@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=3.0.4 # -- dscudiero -- Thu 03/22/2018 @ 13:33:43.88
+# version=3.0.5 # -- dscudiero -- Fri 03/23/2018 @ 16:51:21.13
 #===================================================================================================
 # Display script help -- passed an array of argument definitinons, see ParseArg function
 #===================================================================================================
@@ -10,7 +10,7 @@
 function Help2 {
 	mode="${1-normal}"
 
-	includes='Msg3 Dump StringFunctions Colors RunSql'
+	includes='StringFunctions Colors'
 	Import "$includes"
 
 	[[ $(type -t $FUNCNAME-$myName) == 'function' ]] && $FUNCNAME-$myName 'setVarsOnly'
@@ -21,12 +21,12 @@ function Help2 {
 	local myHelpSet="common,script,$(tr ' ' ',' <<< $helpSet)"
 	local tempStr="$(ColorK "Usage:") $myName"
 
-	includes='Msg3 Colors StringFunctions'
+	includes='Msg Colors StringFunctions'
 	Import "$includes"
 
 	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
 	echo; echo
-	Msg3 "$myName version: $version"
+	Msg "$myName version: $version"
 	[[ $updatesClData == 'Yes' ]] && Warning "This script updates client side data"
 	echo
 
@@ -44,23 +44,23 @@ function Help2 {
 
 	[[ $(Contains ",$myHelpSet," ",client,") == true ]] && hasClient=true && tempStr="$tempStr [client]"
 	tempStr="$tempStr [OPTIONS]"
-	Msg3 "$tempStr"
+	Msg "$tempStr"
 	echo
 	## Print out header info
-		[[ $scriptDescription != '' ]] && Msg3 "$(ColorK "$scriptDescription.")"
-		[[ $shortDescription != '' ]] && Msg3 "$(ColorK "$shortDescription.")"
-		[[ $longDescription != '' ]] && echo && Msg3 "$longDescription" && echo
+		[[ $scriptDescription != '' ]] && Msg "$(ColorK "$scriptDescription.")"
+		[[ $shortDescription != '' ]] && Msg "$(ColorK "$shortDescription.")"
+		[[ $longDescription != '' ]] && echo && Msg "$longDescription" && echo
 		if [[ -n $scriptHelpDesc ]]; then
 			for text in "${scriptHelpDesc[@]}"; do
-				Msg3 "$text"
+				Msg "$text"
 			done
 			echo
 		else
 			[[ $(type -t $FUNCNAME-$myName) == 'function' ]] && $FUNCNAME-$myName
 			[[ $(type -t $myName-$FUNCNAME) == 'function' ]] && $myName-$FUNCNAME
 		fi
-		[[ $author != '' ]] && Msg3 "$(ColorK "Author:") $author"
-		[[ $supported != '' ]] && Msg3 "$(ColorK "Supported:") $supported"
+		[[ $author != '' ]] && Msg "$(ColorK "Author:") $author"
+		[[ $supported != '' ]] && Msg "$(ColorK "Supported:") $supported"
 
 	## Get the max lengths of the name and min abbreviation from the database
 		sqlStmt="select max(length(longname)),max(length(shortname)),max(length(type)) from argdefs"
@@ -91,11 +91,11 @@ function Help2 {
 
 	echo
 	if [[ $hasClient == true ]]; then
-		Msg3 "$(ColorK "[client]:")"
-		Msg3 "^This is the client code (abbreviation) for the client that you wish to work with."
+		Msg "$(ColorK "[client]:")"
+		Msg "^This is the client code (abbreviation) for the client that you wish to work with."
 	fi
 	echo
-	Msg3 "$(ColorK "[OPTIONS]")"
+	Msg "$(ColorK "[OPTIONS]")"
 
 	## argument header
 	argShortName="Short Name"; let shortNamePad=$maxWidthAbbr-${#argShortName};
@@ -105,8 +105,8 @@ function Help2 {
 
 	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 	if [[ ${#myArgs[@]} -gt 0 ]]; then
-		Msg3 "^$(ColorU "$(ColorK "Script specific options:")")"
-		Msg3 "^$argHeader"
+		Msg "^$(ColorU "$(ColorK "Script specific options:")")"
+		Msg "^$argHeader"
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 		for ((i=0; i<${#myArgs[@]}; i++)); do
 			tmpStr="${myArgs[$i]}"
@@ -119,14 +119,14 @@ function Help2 {
 			arghelpText="${tmpStr%%|*}"; [[ $arghelpText == 'NULL' ]] && unset arghelpText;
 			#dump -t argShortName shortNamePad argLongName longNamePad argType argVar argCmd arghelpText
 			tmpStr="${argLongName}$(PadChar ' ' $longNamePad) (${argShortName})$(PadChar ' ' $shortNamePad) ${argType}$(PadChar ' ' $typePad) -- $arghelpText"
-			Msg3 "^$tmpStr"
+			Msg "^$tmpStr"
 		done
 	fi
 
 	## Loop through the commn argument defs
-	Msg3
-	Msg3 "^$(ColorU "$(ColorK "Common tools scripts options:")")"
-	Msg3 "^$argHeader"
+	Msg
+	Msg "^$(ColorU "$(ColorK "Common tools scripts options:")")"
+	Msg "^$argHeader"
 	[[ -n $validArgs ]] && validArgsLower="${validArgs,,[a-z]}"  ## Lower case
 	#argDefs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 	for ((i=0; i<${#argDefs[@]}; i++)); do
@@ -141,22 +141,22 @@ function Help2 {
 		arghelpText="${tmpStr%%|*}"; [[ $arghelpText == 'NULL' ]] && unset arghelpText;
 		#dump -t argShortName shortNamePad argLongName longNamePad argType argVar argCmd arghelpText
 		tmpStr="${argLongName}$(PadChar ' ' $longNamePad) (${argShortName})$(PadChar ' ' $shortNamePad) ${argType}$(PadChar ' ' $typePad) -- $arghelpText"
-		Msg3 "^$tmpStr"
+		Msg "^$tmpStr"
 	done
 
 	## print out script specific help notes
 	if [[ ${#helpNotes[@]} -gt 0 ]]; then
-		Msg3 "$(ColorK "Script specific notes:")"
+		Msg "$(ColorK "Script specific notes:")"
 		for ((cntr = 0 ; cntr < ${#helpNotes[@]} ; cntr++)); do
 			let idx=$cntr+1
-	 		Msg3 "^$idx) ${helpNotes[$cntr]}"
+	 		Msg "^$idx) ${helpNotes[$cntr]}"
 		done
 		echo
 	fi
 
 	## General help notes for all scripts
 	echo
-	Msg3 "$(ColorK "General Notes:")"
+	Msg "$(ColorK "General Notes:")"
 	local notesClient notesAlways notes
 	unset notesClient notesAlways notes
 	# notesClient+=("A value of '.' may be specified for client to parse the client value from the current working directory.")
@@ -174,7 +174,7 @@ function Help2 {
 
 	idx=1
 	for line in "${notes[@]}"; do
-		Msg3  "^$idx) $line"
+		Msg  "^$idx) $line"
 		((idx+=1))
 	done
 	echo
@@ -185,22 +185,22 @@ function Help2 {
 	if [[ -n $SCRIPTINCLUDES ]]; then
 		## Scripts
 		local token
-		Msg3 "$(ColorK "Tools library modules used by this script (via tools/lib):")"
+		Msg "$(ColorK "Tools library modules used by this script (via tools/lib):")"
 		for token in $(tr ',' ' ' <<< $SCRIPTINCLUDES); do
-			Msg3 "^$token"
+			Msg "^$token"
 		done #| sort
 		echo
 		## Java
 		if [[ $(Contains "$SCRIPTINCLUDES" "RunSql") == true && -n $javaResources ]]; then
 			javaPgm=${runMySqlJavaPgmName:-runMySql}
 	 		jar="$TOOLSPATH/tools/jars/$javaPgm.jar"
-			Msg3 "$(ColorK "Java resources used ($jar):")"
+			Msg "$(ColorK "Java resources used ($jar):")"
 	 		jar -tf "$jar" | Indent
 			echo
 		fi
 		## Python
 		if [[ $(Contains "$SCRIPTINCLUDES" "GetExcel") == true && -n $pythonResources ]]; then
-			Msg3 "$(ColorK "Python resources used by this script:")"
+			Msg "$(ColorK "Python resources used by this script:")"
 			grep '^import' "$TOOLSPATH/src/python/getXlsx2.py" | Indent
 			echo
 		fi
@@ -218,9 +218,10 @@ export -f Help2
 ## 08-30-2017 @ 14.07.33 - (2.0.6)     - dscudiero - Tweak output format
 ## 09-01-2017 @ 09.27.30 - (2.0.8)     - dscudiero - Add call myname-FUNCNAME function if found
 ## 09-01-2017 @ 09.38.26 - (2.0.9)     - dscudiero - Fix spelling error
-## 09-25-2017 @ 08.14.09 - (2.1.-1)    - dscudiero - Use Msg3
+## 09-25-2017 @ 08.14.09 - (2.1.-1)    - dscudiero - Use Msg
 ## 11-02-2017 @ 10.27.27 - (3.0.0)     - dscudiero - Initial implimentation
 ## 03-19-2018 @ 11:17:45 - 3.0.1 - dscudiero - Update how java dependencies are calculated
 ## 03-19-2018 @ 11:19:26 - 3.0.2 - dscudiero - Cosmetic/minor change/Sync
 ## 03-19-2018 @ 12:01:59 - 3.0.3 - dscudiero - CHange the way we find the python dependencies
-## 03-22-2018 @ 13:42:17 - 3.0.4 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-22-2018 @ 13:42:17 - 3.0.4 - dscudiero - Updated for Msg/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 16:52:17 - 3.0.5 - dscudiero - Msg3 -> Msg
