@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.66 # -- dscudiero -- Fri 03/23/2018 @ 12:08:09.56
+version=1.22.68 # -- dscudiero -- Fri 03/23/2018 @ 14:31:07.99
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -15,15 +15,6 @@ originalArgStr="$*";
 #=======================================================================================================================
 # Standard call back functions
 #=======================================================================================================================
-function parseArgs-midnight  { # or parseArgs-$myName
-	return 0
-}
-function Goodbye-midnight  { # or Goodbye-$myName
-	SetFileExpansion 'on'
-	rm -rf /tmp/$LOGNAME* > /dev/null 2>&1
-	SetFileExpansion
-	return 0
-}
 
 #=======================================================================================================================
 # local functions
@@ -198,7 +189,7 @@ function BuildCourseleafDataTable {
 # Standard argument parsing and initialization
 #=======================================================================================================================
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 scriptArgs="$* -noBanners"
 logInDb=false
 
@@ -534,3 +525,4 @@ return 0
 ## 03-22-2018 @ 12:47:03 - 1.22.64 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-22-2018 @ 14:36:09 - 1.22.65 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 12:09:15 - 1.22.66 - dscudiero - Comment out perfTest
+## 03-23-2018 @ 15:34:02 - 1.22.68 - dscudiero - D
