@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.77" # -- dscudiero -- Fri 09/29/2017 @ 10:36:21.71
+# version="2.0.78" # -- dscudiero -- Fri 03/23/2018 @ 16:51:04.97
 #===================================================================================================
 # Process interrupts
 #===================================================================================================
@@ -8,7 +8,7 @@
 # All rights reserved
 #===================================================================================================
 function SignalHandeler {
-    includes='Msg3 Goodbye GetCallStack PadChar' #includes="$includes "
+    includes='Goodbye GetCallStack PadChar' #includes="$includes "
     Import "$includes"
 
     Verbose 3 "*** Starting: $FUNCNAME ***"
@@ -42,11 +42,11 @@ function SignalHandeler {
         message="$message,\n^$(ColorE "line($errorLineNo)"): $(ColorK "$errorLine")"
         echo -e "\n$(PadChar)"
         Error "$message";
-        Msg3 "\n^Call Stack:"
+        Msg "\n^Call Stack:"
         local IFSsave="$IFS" module callStack
         callStack="$(GetCallStack '|')"
         IFS='|' ; for module in $callStack; do
-            Msg3 "^^$module"
+            Msg "^^$module"
         done ; IFS="$IFSsave"
         echo -e "$(PadChar)\n"
     fi
@@ -70,5 +70,6 @@ export -f SignalHandeler
 ## 07-31-2017 @ 07.18.03 - ("2.0.70")  - dscudiero - Add the original arg string to the outout if an error was caught
 ## 08-03-2017 @ 07.27.40 - ("2.0.71")  - dscudiero - reformat messages
 ## 08-03-2017 @ 07.35.29 - ("2.0.72")  - dscudiero - General syncing of dev to prod
-## 09-27-2017 @ 12.41.00 - ("2.0.76")  - dscudiero - Switch to Msg3
+## 09-27-2017 @ 12.41.00 - ("2.0.76")  - dscudiero - Switch to Msg
 ## 09-29-2017 @ 12.58.39 - ("2.0.77")  - dscudiero - Change verboseMsg to Verbose
+## 03-23-2018 @ 16:52:25 - 2.0.78 - dscudiero - Msg3 -> Msg
