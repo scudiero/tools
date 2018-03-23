@@ -1,9 +1,9 @@
 #!/bin/bash
 #==================================================================================================
-version=2.2.49 # -- dscudiero -- Thu 03/22/2018 @ 14:04:29.35
+version=2.2.50 # -- dscudiero -- Fri 03/23/2018 @ 11:51:57.96
 #==================================================================================================
 TrapSigs 'on'
-myIncludes="GetOutputFile BackupCourseleafFile ProtectedCall SelectMenu GetExcel2 SetFileExpansion"
+myIncludes="GetOutputFile BackupCourseleafFile ProtectedCall SelectMenu GetExcel SetFileExpansion"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -125,7 +125,7 @@ scriptDescription="Merge role data"
 		Msg "\nParsing the roles data from the workbook file ($workbookFile)..."
 		## Parse the role data from the spreadsheet
 			workbookSheet='roles'
-			GetExcel2 -wb "$workbookFile" -ws "$workbookSheet"
+			GetExcel -wb "$workbookFile" -ws "$workbookSheet"
 		## Parse the output array
 			foundHeader=false; foundData=false
 			for ((ii=0; ii<${#resultSet[@]}; ii++)); do
@@ -346,7 +346,7 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 ## Process spreadsheet
 	if [[ $workbookFile != '' ]]; then
 		## Get the list of sheets in the workbook
-			GetExcel2 -wb "$workbookFile" -ws 'GetSheets'
+			GetExcel -wb "$workbookFile" -ws 'GetSheets'
 			sheets="${resultSet[0]}"
 			dump -1 sheets
 		## Make sure we have a 'role' sheet
@@ -545,7 +545,8 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 ## 05-26-2017 @ 12.49.39 - (2.2.21)    - dscudiero - Found an instance of Msg vs Msg2
 ## 06-07-2017 @ 07.44.14 - (2.2.22)    - dscudiero - Added BackupCourseleafFIle to the import list
 ## 09-25-2017 @ 12.26.53 - (2.2.24)    - dscudiero - Switch to use Msg
-## 10-16-2017 @ 09.06.27 - (2.2.45)    - dscudiero - Updated to use GetExcel2
+## 10-16-2017 @ 09.06.27 - (2.2.45)    - dscudiero - Updated to use GetExcel
 ## 11-02-2017 @ 06.58.56 - (2.2.47)    - dscudiero - Switch to ParseArgsStd2
 ## 11-02-2017 @ 11.02.12 - (2.2.48)    - dscudiero - Add addPvt to the init call
 ## 03-22-2018 @ 14:06:58 - 2.2.49 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 11:56:24 - 2.2.50 - dscudiero - Updated for GetExcel2/GetExcel
