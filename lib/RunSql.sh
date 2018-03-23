@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.4" # -- dscudiero -- Wed 03/21/2018 @ 15:42:01.69
+# version="1.0.5" # -- dscudiero -- Fri 03/23/2018 @ 17:01:37.38
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -32,7 +32,7 @@ function RunSql {
 	local calledBy=$(caller 0 | cut -d' ' -f2)
 	if [[ -n $DOIT || $informationOnlyMode == true ]]; then
 		local stmtType="${sqlStmt%% *}"; stmtType="${stmtType^^[a-z]}"
-		[[ $stmtType != 'SELECT' && $calledBy != 'ProcessLogger' ]] && Msg3 "$sqlStmt"
+		[[ $stmtType != 'SELECT' && $calledBy != 'ProcessLogger' ]] && Msg "$sqlStmt"
 		return 0
 	fi
 
@@ -54,7 +54,7 @@ function RunSql {
 	 		if [[ ${resultSet[0]} =~ .*\*Error\**. || ${resultSet[0]} =~ .*Exception*. ]]; then
 	 			Error "Error encountered in '$FUNCNAME' processing '${dbType^^[a-z]}' call, messages follow:"
 				for ((i=0; i<${#resultSet[@]}; i++)); do
-					Msg3 "^${resultSet[$i]}"
+					Msg "^${resultSet[$i]}"
 				done
 	 			Terminate "Error encountered in '$FUNCNAME' processing '${dbType^^[a-z]}' call"
 	 		fi
@@ -73,3 +73,4 @@ export -f RunSql RunSql2
 ## 03-21-2018 @ 07:34:01 - 1.0.2 - dscudiero - Fix problem setting default jar path
 ## 03-21-2018 @ 15:38:26 - 1.0.3 - dscudiero - Add more robust error checking
 ## 03-21-2018 @ 15:42:08 - 1.0.4 - dscudiero - Cosmetic/minor change/Sync
+## 03-23-2018 @ 17:04:30 - 1.0.5 - dscudiero - Msg3 -> Msg
