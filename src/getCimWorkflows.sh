@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.103 # -- dscudiero -- Fri 03/23/2018 @ 16:56:25.33
+version=1.2.104 # -- dscudiero -- Fri 03/23/2018 @ 17:02:47.78
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -177,21 +177,21 @@ myData="Client: '$client', Env: '$env', Cims: '$cimStr' "
 # Main
 #==================================================================================================
 ## Write out header data to the output file
-	Msg3 "\n$myName ($version) $userName @ $(date)" > $outFile
-	Msg3 "CIMs: $cimStr" >> $outFile
+	Msg "\n$myName ($version) $userName @ $(date)" > $outFile
+	Msg "CIMs: $cimStr" >> $outFile
 
 ## Loop through CIMs
 for cim in ${cimStr//,/ }; do
-	Msg3
-	Msg3 "Processing CIM instance: '$cim'"
+	Msg
+	Msg "Processing CIM instance: '$cim'"
 	grepFile="$srcDir/web/$cim/workflow.cfg"
 	if [[ ! -f $grepFile ]]; then
 		Warning "Could not locate file $(basename $grepFile), trying cimconfig.cfg"
 		grepFile="$srcDir/web/$cim/cimconfig.cfg"
 		[[ ! -f $grepFile ]] && Terminate "Could not locate file $grepFile"
 	fi
-	Msg3 "\n$(PadChar)" >> $outFile
-	Msg3 "<<< $(Upper "$cim") >>>" >> $outFile
+	Msg "\n$(PadChar)" >> $outFile
+	Msg "<<< $(Upper "$cim") >>>" >> $outFile
 
 	## Read the workflow.cfg file for the cim
 		## Get any special modifiers
@@ -202,7 +202,7 @@ for cim in ${cimStr//,/ }; do
 		## Parse off the wfrules
 		unset substitutionVars wfrules wfrulesKeys substitutionVarsKeys esigsKeys wforders
 		declare -A wfrules ; declare -A esigs ; declare -A substitutionVars
-		Msg3 "^Parsing '$grepFile'"
+		Msg "^Parsing '$grepFile'"
 		[[ -f $tmpFile ]] && rm -f $tmpFile
 		\grep '^wfrules:\|^wforder:\|^esiglist:\|^voterules:\|^wfUgRe:\|^wfGrRe:' $grepFile >> $tmpFile
 		unset lines; while read line; do lines+=("$line"); done < $tmpFile; [[ -f $tmpFile ]] && rm -f $tmpFile
@@ -253,21 +253,21 @@ for cim in ${cimStr//,/ }; do
 
 		## Debug info
 			if [[ $verboseLevel -ge 1 || $informationModeOnly == true ]]; then
-				Msg3 "^substitutionVars:"; for i in "${substitutionVarsKeys[@]}"; do echo -e "\t[$i] = >${substitutionVars[$i]}<"; done;
-				Msg3 "^esigs:"; for i in "${esigsKeys[@]}"; do echo -e "\t[$i] = >${esigs[$i]}<"; done;
-				Msg3 "^wfrules:"; for i in "${wfrulesKeys[@]}"; do echo -e "\t[$i] = >${wfrules[$i]}<"; done;
-				Msg3 "^wforders:"; for ((jj=0; jj<${#wforders[@]}; jj++)); do echo -e "\t[$jj] = >${wforders[$jj]}<"; done;
-				Msg3 "^voterules:"; for ((jj=0; jj<${#voterules[@]}; jj++)); do echo -e "\t[$jj] = >${voterules[$jj]}<"; done;
+				Msg "^substitutionVars:"; for i in "${substitutionVarsKeys[@]}"; do echo -e "\t[$i] = >${substitutionVars[$i]}<"; done;
+				Msg "^esigs:"; for i in "${esigsKeys[@]}"; do echo -e "\t[$i] = >${esigs[$i]}<"; done;
+				Msg "^wfrules:"; for i in "${wfrulesKeys[@]}"; do echo -e "\t[$i] = >${wfrules[$i]}<"; done;
+				Msg "^wforders:"; for ((jj=0; jj<${#wforders[@]}; jj++)); do echo -e "\t[$jj] = >${wforders[$jj]}<"; done;
+				Msg "^voterules:"; for ((jj=0; jj<${#voterules[@]}; jj++)); do echo -e "\t[$jj] = >${voterules[$jj]}<"; done;
 			fi
 
 		## Write out 'Substitution Vars' data
 			if [[ ${#substitutionVarsKeys[@]} -gt 0 ]]; then
 				cntr=1
-				Msg3 "\nSubstitued Variables:" >> $outFile
-				Msg3 "This section defines variables that may appear in workflow step names that will be substituted with the corresponding value in the proposal when the proposal is place into workflow." >> $outFile
-				Msg3 ".e.g. if a workflow step name is 'Dept Chair' and the current proposal value for department is 'ENG' then the resolved step name will be 'ENG Chair'" >> $outFile
-				Msg3 "Note that all names are case sensitive, i.e. 'Abc' does not equal 'abc'." >> $outFile
-				Msg3 "#\tVariable\tDescription\t\tImplementation / Comment" >> $outFile
+				Msg "\nSubstitued Variables:" >> $outFile
+				Msg "This section defines variables that may appear in workflow step names that will be substituted with the corresponding value in the proposal when the proposal is place into workflow." >> $outFile
+				Msg ".e.g. if a workflow step name is 'Dept Chair' and the current proposal value for department is 'ENG' then the resolved step name will be 'ENG Chair'" >> $outFile
+				Msg "Note that all names are case sensitive, i.e. 'Abc' does not equal 'abc'." >> $outFile
+				Msg "#\tVariable\tDescription\t\tImplementation / Comment" >> $outFile
 				for i in "${substitutionVarsKeys[@]}"; do
 					echo -e "$cntr\t$i\t${substitutionVars[$i]}" >> $outFile
 					(( cntr += 1 ))
@@ -277,12 +277,12 @@ for cim in ${cimStr//,/ }; do
 		## Write out 'Conditionals' data
 			if [[ ${#wfrulesKeys[@]} -gt 0 ]]; then
 				cntr=1
-				Msg3 "\nConditional Definitions:" >> $outFile
-				Msg3 "This section defines the conditionals that may be applied to a step, if the conditional evaluates to true then the step will be included in the calculated workflow." >> $outFile
-				Msg3 "ALL conditionals applied to a step must evaluate to true.for that step to be included." >> $outFile
-				Msg3 "e.g. if an 'Is New' conditional is applied to a step, that step will only be included in the workflow for new proposals." >> $outFile
-				Msg3 "Note that all names are case sensitive, i.e. 'Abc' does not equal 'abc'." >> $outFile
-				Msg3 "#\tCondition\tDescription\t\tImplementation / Comment" >> $outFile
+				Msg "\nConditional Definitions:" >> $outFile
+				Msg "This section defines the conditionals that may be applied to a step, if the conditional evaluates to true then the step will be included in the calculated workflow." >> $outFile
+				Msg "ALL conditionals applied to a step must evaluate to true.for that step to be included." >> $outFile
+				Msg "e.g. if an 'Is New' conditional is applied to a step, that step will only be included in the workflow for new proposals." >> $outFile
+				Msg "Note that all names are case sensitive, i.e. 'Abc' does not equal 'abc'." >> $outFile
+				Msg "#\tCondition\tDescription\t\tImplementation / Comment" >> $outFile
 				for i in "${wfrulesKeys[@]}"; do
 					conditionalDef="${wfrules[$i]}"
 					conditionalDef=$(sed s/'%7C'/' | '/g <<< $conditionalDef);
@@ -291,65 +291,65 @@ for cim in ${cimStr//,/ }; do
 					echo -e "$cntr\t$i\t$conditionalDef" >> $outFile
 					(( cntr += 1 ))
 				done
-				Msg3 "^^Found ${#wfrulesKeys[@]} Conditional rules"
+				Msg "^^Found ${#wfrulesKeys[@]} Conditional rules"
 			fi
 
 		## Write out esigs data
 			if [[ ${#esigsKeys[@]} -gt 0 ]]; then
 				cntr=1
-				Msg3 "\nEsig/Delayed Approval setup:" >> $outFile
-				Msg3 "Note that all names are case sensitive, i.e. 'Abc' does not equal 'abc'." >> $outFile
-				Msg3 "#\tStepPattern\tDescription\t\tImplementation / Comment" >> $outFile
+				Msg "\nEsig/Delayed Approval setup:" >> $outFile
+				Msg "Note that all names are case sensitive, i.e. 'Abc' does not equal 'abc'." >> $outFile
+				Msg "#\tStepPattern\tDescription\t\tImplementation / Comment" >> $outFile
 				for i in "${esigsKeys[@]}"; do
 					echo -e "$cntr\t$i\t${esigs[$i]}" >> $outFile
 					(( cntr += 1 ))
 				done
-				Msg3 "^^Found ${#esigsKeys[@]} Esig rules"
+				Msg "^^Found ${#esigsKeys[@]} Esig rules"
 			fi
 
 		## Write out 'voterules' data
 			if [[ ${#voterules[@]} -gt 0 ]]; then
 				cntr=1
-				Msg3 "\nVoting rules:" >> $outFile
-				Msg3 "Note that all names are case sensitive, i.e. 'Abc' does not equal 'abc'." >> $outFile
-				Msg3 "#\Vote Rule\t\t\tComments / Explanation" >> $outFile
+				Msg "\nVoting rules:" >> $outFile
+				Msg "Note that all names are case sensitive, i.e. 'Abc' does not equal 'abc'." >> $outFile
+				Msg "#\Vote Rule\t\t\tComments / Explanation" >> $outFile
 				for ((i=0; i<${#voterules[@]}; i++)); do
 					echo -e "$cntr\t${voterules[$i]}" >> $outFile
 					(( cntr += 1 ))
 				done
-				Msg3 "^^Found ${#voterules[@]} Vote rules"
+				Msg "^^Found ${#voterules[@]} Vote rules"
 			fi
 
 		## Write out 'wforder' data
 			if [[ ${#wforders[@]} -gt 0 ]]; then
 				cntr=1
-				Msg3 "\nWorkflow Order:" >> $outFile
-				Msg3 "This section describes the order in which workflow will be selected, note this often uses the substitution variables defined above and the" >> $outFile
-				Msg3 "proposal state information" >> $outFile
-				Msg3 "#\tWorkflow\t\t\tComments / Explanation" >> $outFile
+				Msg "\nWorkflow Order:" >> $outFile
+				Msg "This section describes the order in which workflow will be selected, note this often uses the substitution variables defined above and the" >> $outFile
+				Msg "proposal state information" >> $outFile
+				Msg "#\tWorkflow\t\t\tComments / Explanation" >> $outFile
 				for ((i=0; i<${#wforders[@]}; i++)); do
 					echo -e "$cntr\t${wforders[$i]}" >> $outFile
 					(( cntr += 1 ))
 				done
-				Msg3 "^^Found ${#wforders[@]} Workflow order rules"
+				Msg "^^Found ${#wforders[@]} Workflow order rules"
 			fi
 
 	## Write out 'workflow' data
-		Msg3 "\nWorkflow ." >> $outFile
-		Msg3 "This section defines the various workflows and the steps in those workflows." >> $outFile
-		Msg3 "The order that workflows are defined in the section is the order that the system will look for a matching workflow, the first one found will be use." >> $outFile
-		Msg3 "e.g. If there is a workflow defined as 'Dept standard' , and there is a workflow defined with the name 'ENG standard', when the proposal is put into workflow," >> $outFile
-		Msg3 "if the proposal's department is 'ENG' then the 'ENG standard' workflow will be selected." >> $outFile
-		Msg3 "Note that all names are case sensitive, i.e. 'Abc' does not equal 'abc'." >> $outFile
+		Msg "\nWorkflow ." >> $outFile
+		Msg "This section defines the various workflows and the steps in those workflows." >> $outFile
+		Msg "The order that workflows are defined in the section is the order that the system will look for a matching workflow, the first one found will be use." >> $outFile
+		Msg "e.g. If there is a workflow defined as 'Dept standard' , and there is a workflow defined with the name 'ENG standard', when the proposal is put into workflow," >> $outFile
+		Msg "if the proposal's department is 'ENG' then the 'ENG standard' workflow will be selected." >> $outFile
+		Msg "Note that all names are case sensitive, i.e. 'Abc' does not equal 'abc'." >> $outFile
 
 	## Read the workflow.tcf file for the cim
 		grepFile="$srcDir/web/$cim/workflow.tcf"
-		[[ ! -r $grepFile ]] && Msg3 E "Could not read '$grepFile', skipping $cim" && continue
-		Msg3 "^Parsing '$grepFile'"
+		[[ ! -r $grepFile ]] && Msg E "Could not read '$grepFile', skipping $cim" && continue
+		Msg "^Parsing '$grepFile'"
 
 		## Parse off the conditionals from the localsteps record
 			localsteps=$(ProtectedCall grep 'localsteps:' $grepFile)
-			[[ -z $localsteps ]] && Msg3 E "Could not retrieve 'localsteps' record from $grepFile', skipping $cim" && continue
+			[[ -z $localsteps ]] && Msg E "Could not retrieve 'localsteps' record from $grepFile', skipping $cim" && continue
 			tokenStr=$(echo $localsteps | cut -d'|' -f4)
 			tokenStr=$(echo $tokenStr | cut -d'=' -f2)
 			tokenStr=$(echo $tokenStr | cut -d';' -f1)
@@ -359,12 +359,12 @@ for cim in ${cimStr//,/ }; do
 			declare -A modifiersRef
 			declare -A conditionalsRef
 			## Write out a standard 'debug' workflow prefox
-				Msg3 "\nworkflow:<<< LEEPFROG TESTING >>>\t\t\t\t${myName} - $(date)" >> $outFile
-				Msg3 "#\tWorkflow Step\tStep Conditional(s)\tModifier(s)\tComments / Explanation" >> $outFile
-				Msg3 "^START" >> $outFile
-				Msg3 "^College 'Col'" >> $outFile
-				Msg3 "^Department 'Dept'" >> $outFile
-				Msg3 "^Subject 'Subj'" >> $outFile
+				Msg "\nworkflow:<<< LEEPFROG TESTING >>>\t\t\t\t${myName} - $(date)" >> $outFile
+				Msg "#\tWorkflow Step\tStep Conditional(s)\tModifier(s)\tComments / Explanation" >> $outFile
+				Msg "^START" >> $outFile
+				Msg "^College 'Col'" >> $outFile
+				Msg "^Department 'Dept'" >> $outFile
+				Msg "^Subject 'Subj'" >> $outFile
 
 				## Parse out conditionals and modifiers from the localsteps string
 				for token in "${tokens[@]}"; do
@@ -378,18 +378,18 @@ for cim in ${cimStr//,/ }; do
 						conditionalsRef["$keyword"]=true
 					fi
 					## Write out 'debug' workflow record
-					Msg3 "^$keywordDef\t$keyword" >> $outFile
+					Msg "^$keywordDef\t$keyword" >> $outFile
 				done
 				if [[ -n $specialModifiers ]]; then
 					for token in $(tr ',' ' ' <<< ${specialModifiers##*:}); do
 						modifiersRef["$token"]=true
 					done
 				fi
-				if [[ $verboseLevel -ge 1 ]]; then Msg3 "^modifiersRef:"; for i in "${!modifiersRef[@]}"; do printf "\t\t[$i] = >${modifiersRef[$i]}<\n"; done; fi
-				if [[ $verboseLevel -ge 1 ]]; then Msg3 "^conditionalsRef:"; for i in "${!conditionalsRef[@]}"; do printf "\t\t[$i] = >${conditionalsRef[$i]}<\n"; done; fi
+				if [[ $verboseLevel -ge 1 ]]; then Msg "^modifiersRef:"; for i in "${!modifiersRef[@]}"; do printf "\t\t[$i] = >${modifiersRef[$i]}<\n"; done; fi
+				if [[ $verboseLevel -ge 1 ]]; then Msg "^conditionalsRef:"; for i in "${!conditionalsRef[@]}"; do printf "\t\t[$i] = >${conditionalsRef[$i]}<\n"; done; fi
 
 				## Write out 'debug' workflow suffix
-				Msg3 "^END" >> $outFile
+				Msg "^END" >> $outFile
 
 	## Read the workflow.tcf file for the workflows
 		ProtectedCall grep '^workflow:' $grepFile > $tmpFile
@@ -398,8 +398,8 @@ for cim in ${cimStr//,/ }; do
 			[[ ${line:0:23} == 'workflow:standard|START' ]] && continue
 			workflow=$(echo $line | cut -d'|' -f1)
 			[[ $(Contains ",${ignoreWorkflows}," ",${workflow##*:},") == true ]] && continue
-			Msg3 "^^Parsing '$workflow'"
-			Msg3 "\n$workflow\t\t\t\t${myName} - $(date)" >> $outFile
+			Msg "^^Parsing '$workflow'"
+			Msg "\n$workflow\t\t\t\t${myName} - $(date)" >> $outFile
 			echo -e "#\tWorkflow Step\tStep Conditional(s)\tModifier(s)\tComments / Explanation" >> $outFile
 			line=$(echo $line | cut -d'|' -f2)
 			IFSSave=$IFS; IFS=','; read -r -a wfsteps <<< "$line"; IFS=$IFSSave
@@ -425,13 +425,13 @@ for cim in ${cimStr//,/ }; do
 				echo -e "$stepCntr\t$step\t$conditionals\t$modifiers" >> $outFile
 				(( stepCntr += 1 ))
 			done
-			Msg3 "^^^Found $stepCntr steps"
+			Msg "^^^Found $stepCntr steps"
 		done < $tmpFile
 done # cims
-Msg3
-Msg3 "Processed CIMs: $cimStr"
+Msg
+Msg "Processed CIMs: $cimStr"
 [[ $informationOnlyMode != true ]] && 
-	{ Msg3 "Output written to: $outFile"; Msg3 "You can create a Excel workbook using the template work sheet:\n^$TOOLSPATH/workbooks/CIMWorkflows.xltm"; } 
+	{ Msg "Output written to: $outFile"; Msg "You can create a Excel workbook using the template work sheet:\n^$TOOLSPATH/workbooks/CIMWorkflows.xltm"; } 
 [[ -f "$tmpFile" ]] && rm "$tmpFile"
 
 #==================================================================================================
@@ -471,4 +471,5 @@ Goodbye 0 #'alert'
 ## 03-19-2018 @ 14:00:57 - 1.2.91 - dscudiero - Translate the %7C in conditionals to |
 ## 03-19-2018 @ 14:51:00 - 1.2.101 - dscudiero - Tweak the verbiage used on the modifiers
 ## 03-23-2018 @ 15:34:46 - 1.2.102 - dscudiero - D
-## 03-23-2018 @ 16:57:57 - 1.2.103 - dscudiero - Msg3 -> Msg
+## 03-23-2018 @ 16:57:57 - 1.2.103 - dscudiero - Msg -> Msg
+## 03-23-2018 @ 17:04:49 - 1.2.104 - dscudiero - Msg3 -> Msg
