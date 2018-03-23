@@ -1,6 +1,6 @@
 #!/bin/bash
 #====================================================================================================
-version=2.2.95 # -- dscudiero -- Thu 03/22/2018 @ 14:18:49.66
+version=2.2.96 # -- dscudiero -- Fri 03/23/2018 @ 14:42:04.62
 #====================================================================================================
 TrapSigs 'on'
 myIncludes=""
@@ -25,7 +25,7 @@ scriptDescription="This script can be used to save workflow files to your person
 	# parse script specific arguments
 	# Call saveWorkflow -daemon -siteFile "$file" -all -suffix "beforeDelete-$backupSuffix -quiet -nop"
 	#==================================================================================================
-	function saveWorkflow-ParseArgsStd2  {
+	function saveWorkflow-ParseArgsStd  {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 		myArgs+=('suffix|suffix|option|suffix||script|Suffix to add to the end of the file name')
 		myArgs+=('cims|cims|option|cimStr||script|Comma separated list of CIMS to backup')
@@ -57,7 +57,7 @@ saveAll=false
 #==================================================================================================
 helpSet="client,env,script,cims"
 GetDefaultsData -f $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 [[ -n $unknowArgs ]] && cimStr="$unknowArgs"
 
 Hello
@@ -202,3 +202,4 @@ Goodbye 0
 ## 03-15-2018 @ 13:51:54 - 2.2.93 - dscudiero - If -all was specified then clear the cimStr
 ## 03-22-2018 @ 14:07:37 - 2.2.94 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-22-2018 @ 14:36:26 - 2.2.95 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:36:08 - 2.2.96 - dscudiero - D
