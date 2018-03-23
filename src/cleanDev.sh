@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.53 # -- dscudiero -- Thu 03/22/2018 @ 14:01:33.02
+version=3.5.54 # -- dscudiero -- Fri 03/23/2018 @ 14:41:26.97
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall StringFunctions PushPop"
@@ -20,7 +20,7 @@ scriptDescription="Cleanup private dev sites"
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-	function cleanDev-ParseArgsStd2 {
+	function cleanDev-ParseArgsStd {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 		myArgs+=("daemon|daemon|switch|daemonMode||script|Run in daemon mode to automatically delete marked sites")
 	}
@@ -208,7 +208,7 @@ RunSql $sqlStmt
 #==================================================================================================
 Hello
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 dump 1 mark delete unMark client daemonMode
 
 #==================================================================================================
@@ -315,6 +315,7 @@ Goodbye 0
 ## 10-20-2017 @ 15.49.14 - (3.5.30)    - dscudiero - Misc cleanup
 ## 10-31-2017 @ 08.10.14 - (3.5.41)    - dscudiero - If running in daemon mode the exit
 ## 10-31-2017 @ 08.15.29 - (3.5.43)    - dscudiero - Put a check in to make sure we do not run the GetSites function in batch mode
-## 11-01-2017 @ 16.49.25 - (3.5.51)    - dscudiero - Switch to ParseArgsStd2
+## 11-01-2017 @ 16.49.25 - (3.5.51)    - dscudiero - Switch to ParseArgsStd
 ## 12-08-2017 @ 07.34.16 - (3.5.52)    - dscudiero - Replace 'Call' with FindExecutable -run
 ## 03-22-2018 @ 14:06:02 - 3.5.53 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:32:40 - 3.5.54 - dscudiero - D
