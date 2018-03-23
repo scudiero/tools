@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.10.101 # -- dscudiero -- Fri 03/23/2018 @ 14:34:48.61
+version=1.10.102 # -- dscudiero -- Fri 03/23/2018 @ 17:03:54.81
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="WriteChangelogEntry"
@@ -94,7 +94,7 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 	srcStepFile="$(FindExecutable -step "$step")"
 	[[ -z $srcStepFile ]] && Terminate "Could find the step file ('$step')"
 
-	Msg3 "Using step file: $srcStepFile\n"
+	Msg "Using step file: $srcStepFile\n"
 	[[ -f $siteDir/web/courseleaf/localsteps/$step.html ]] && mv -f $siteDir/web/courseleaf/localsteps/$step.html $siteDir/web/courseleaf/localsteps/$step.html.bak
 	
 	## Make sure we have wffuncs defined and also import each cims workflowFuncs file
@@ -113,7 +113,7 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 	sed -i s"_var cims=\[\];_var cims=\[${cimStr}\];_" $siteDir/web/courseleaf/localsteps/$step.html
 	sed -i s"_var env='';_var env='${env}';_" $siteDir/web/courseleaf/localsteps/$step.html
 
-	Msg3 "Running step $step...\n"
+	Msg "Running step $step...\n"
 	cd $siteDir/web/courseleaf
 	./courseleaf.cgi $step /courseadmin/index.tcf > $outFile
 
@@ -124,11 +124,11 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 	## If the user requested that the data be loaded the read data and write out to the roles.tcf file
 	if [[ $load == true ]]; then
 		loadedStr=' '
-		Msg3 "'Load' option is active, $loadMode data..."
+		Msg "'Load' option is active, $loadMode data..."
 		roleFile=$siteDir/web/courseleaf/roles.tcf
 		tmpRoleFile=$siteDir/web/courseleaf/roles.tcf.new
 		cp -rfp "$roleFile" "${roleFile}.bak"
-		Msg3 "^Existing roles file saved as 'roles.tcf.bak'"
+		Msg "^Existing roles file saved as 'roles.tcf.bak'"
 		if  [[ $loadMode == 'replace' ]]; then
 			echo "// Loaded ($loadMode) by $userName using $myName ($version) on $(date)" > $tmpRoleFile
 			echo "template:custom" >> $tmpRoleFile
@@ -162,42 +162,42 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 		IFS="$ifs"
 
 		mv -f "$tmpRoleFile" "$roleFile"
-		Msg3 "Roles file updated"
-		Msg3 "Writing changelog.txt records..."
+		Msg "Roles file updated"
+		Msg "Writing changelog.txt records..."
 		changeLogLines+=("Roles file updated ($loadMode)")
 		WriteChangelogEntry 'changeLogLines' "$siteDir/changelog.txt" "$myName"
-		Msg3 "Logging done"
+		Msg "Logging done"
 	else
 		loadedStr=' not '
 	fi
 
-	Msg3
+	Msg
 	Note "The generated output data can be found at:"
-	Msg3 "^'$(ColorK $outFile)'"
-	Msg3 "This is a .csv file that can be loaded by Microsoft Excel, if you wish to provide"
-	Msg3 "the client a 'prettier' version you can copy this data into a .xlsx format file."
-	Msg3 "A master workflows template Excel file can be found at:"
-	Msg3 "^'$(ColorK '\\\\saugus\docs\\tools\workbooksCIMWorkflows.xltm')' (Windows)"
-	Msg3 "^'$(ColorK "$TOOLSPATH/workbooks/CIMWorkflows.xltm")' (Linux)"
-	Msg3 "You can use this file as a start if you wish."
-	Msg3
+	Msg "^'$(ColorK $outFile)'"
+	Msg "This is a .csv file that can be loaded by Microsoft Excel, if you wish to provide"
+	Msg "the client a 'prettier' version you can copy this data into a .xlsx format file."
+	Msg "A master workflows template Excel file can be found at:"
+	Msg "^'$(ColorK '\\\\saugus\docs\\tools\workbooksCIMWorkflows.xltm')' (Windows)"
+	Msg "^'$(ColorK "$TOOLSPATH/workbooks/CIMWorkflows.xltm")' (Linux)"
+	Msg "You can use this file as a start if you wish."
+	Msg
 
 	if [[ $userName == dscudiero ]]; then
-		Msg3
-		Msg3 "Workflow roles have been generated for:"
-		Msg3 "^$client / $env / $cimStr"
-		Msg3 "Attached you will find a workbook with the roles data."
-		Msg3 "^$(basename $outFile)"
-		Msg3 "The roles have${loadStr}been loaded into the $env The attached"
-		Msg3 "roles data is provided in raw tab delimited format, if you"
-		Msg3 "wish to provide the client a 'prettier' format, you can copy"
-		Msg3 "this data into a true .xlsx format file."
-		Msg3 "Fyi, the master workflows template Excel file can be found at: "
-		Msg3 '^\\\\saugus\docs\\tools\workbooksCIMWorkflows.xltm (Windows)'
-		Msg3 "You can use this file as a start if you wish."
-		Msg3
-		Msg3 "If you have questions please see me."
-		Msg3
+		Msg
+		Msg "Workflow roles have been generated for:"
+		Msg "^$client / $env / $cimStr"
+		Msg "Attached you will find a workbook with the roles data."
+		Msg "^$(basename $outFile)"
+		Msg "The roles have${loadStr}been loaded into the $env The attached"
+		Msg "roles data is provided in raw tab delimited format, if you"
+		Msg "wish to provide the client a 'prettier' format, you can copy"
+		Msg "this data into a true .xlsx format file."
+		Msg "Fyi, the master workflows template Excel file can be found at: "
+		Msg '^\\\\saugus\docs\\tools\workbooksCIMWorkflows.xltm (Windows)'
+		Msg "You can use this file as a start if you wish."
+		Msg
+		Msg "If you have questions please see me."
+		Msg
 	fi
 
 
@@ -234,3 +234,4 @@ Goodbye 0
 ## 03-16-2018 @ 08:20:27 - 1.10.95 - dscudiero - Added code to make sure wffuncs is defined
 ## 03-16-2018 @ 08:57:00 - 1.10.100 - dscudiero - Fix problem writing out step header code
 ## 03-23-2018 @ 15:34:41 - 1.10.101 - dscudiero - D
+## 03-23-2018 @ 17:04:45 - 1.10.102 - dscudiero - Msg3 -> Msg
