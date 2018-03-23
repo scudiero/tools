@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.8 # -- dscudiero -- Wed 03/21/2018 @ 16:46:40.42
+version=1.0.9 # -- dscudiero -- Fri 03/23/2018 @ 14:38:40.76
 #==================================================================================================
 #= Description +===================================================================================
 #
@@ -16,7 +16,7 @@ scriptDescription=""
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-	function addCourseleafLogEntry-ParseArgsStd2 {
+	function addCourseleafLogEntry-ParseArgsStd {
 			myArgs+=('jalot|jalot|option|jalot||script|Jalot task number')
 			myArgs+=('comment|comment|option|comment||script|Comment describing the reason for the update')
 		return 0
@@ -68,7 +68,7 @@ for var in $falseVars; do eval $var=false; done
 # Standard arg parsing and initialization
 #==================================================================================================
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 Hello
 Init "getClient getEnv getDirs checkEnvs"
 
@@ -120,3 +120,4 @@ Goodbye 0 #'alert'
 ## Check-in log
 #===================================================================================================
 ## 03-22-2018 @ 12:34:59 - 1.0.8 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:31:20 - 1.0.9 - dscudiero - D
