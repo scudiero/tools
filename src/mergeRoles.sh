@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.2.51 # -- dscudiero -- Fri 03/23/2018 @ 14:41:46.85
+version=2.2.52 # -- dscudiero -- Fri 03/23/2018 @ 16:41:41.52
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetOutputFile BackupCourseleafFile ProtectedCall SelectMenu GetExcel SetFileExpansion"
@@ -268,38 +268,44 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 			if [[ $ans == 'y' ]]; then
 				## Search for XLSx files in clientData and implimentation folders
 				if [[ -d "$localClientWorkFolder/$client" ]]; then
-					workflowSearchDir="$localClientWorkFolder/$client"
+					workbookSearchDir="$localClientWorkFolder/$client"
 				else
 					## Find out if user wants to load cat data or cim data
 					Prompt product 'Are you merging CAT or CIM data' 'cat cim' 'cat';
 					product=$(Upper $product)
 					implimentationRoot="/steamboat/leepfrog/docs/Clients/$client/Implementation"
-					if   [[ -d "$implimentationRoot/Attachments/$product/Workflow" ]]; then workflowSearchDir="$implimentationRoot/Attachments/$product/Workflow"
-					elif [[ -d "$implimentationRoot/Attachments/$product" ]]; then workflowSearchDir="$implimentationRoot/Attachments/$product"
-					elif [[ -d "$implimentationRoot/$product/Workflow" ]]; then workflowSearchDir="$implimentationRoot/$product/Workflow"
-					elif [[ -d "$implimentationRoot/$product" ]]; then workflowSearchDir="$implimentationRoot/$product"
+					if   [[ -d "$implimentationRoot/Attachments/$product/Workflow" ]]; then workbookSearchDir="$implimentationRoot/Attachments/$product/Workflow"
+					elif [[ -d "$implimentationRoot/Attachments/$product" ]]; then workbookSearchDir="$implimentationRoot/Attachments/$product"
+					elif [[ -d "$implimentationRoot/$product/Workflow" ]]; then workbookSearchDir="$implimentationRoot/$product/Workflow"
+					elif [[ -d "$implimentationRoot/$product" ]]; then workbookSearchDir="$implimentationRoot/$product"
 					fi
 				fi
-				if [[ $workflowSearchDir != '' ]]; then
-					PushSettings; set +f
-					tmpDataFile="/tmp/$userName.$myName.$$.data"
-					cd "$workflowSearchDir"
-					ProtectedCall "ls -t *.xlsx 2> /dev/null | grep -v '~' > "$tmpDataFile""
-					PopSettings
-					numLines=$(ProtectedCall "wc -l "$tmpDataFile"")
-					numLines=$(echo $(ProtectedCall "wc -l "$tmpDataFile"") | cut -d' ' -f1)
-					if [[ $numLines -gt 0 ]]; then
-						while IFS=$'\n' read -r line; do menuList+=("$line"); done < "$tmpDataFile"; rm -f "$tmpDataFile";
-						printf "\nPlease specify the $(ColorK '(ordinal)') number of the file you wish to load data from:\n(Data/.xlsx files found in '$(ColorK $workflowSearchDir)')\n\n"
-						SelectMenu 'menuList' 'selectResp' "\nFile name $(ColorK '(ordinal)') number (or 'x' to quit) > "
-						[[ $selectResp == '' ]] && Goodbye 0
-						workbookFile="$(pwd)/$selectResp"
-					else
-						Info "No .xlsx files found"
-					fi
-				[[ $workbookFile == "" ]] && Msg
-				Prompt workbookFile 'Please specify the full path to the workbook file' '*file*'
-				fi
+				# if [[ $workflowSearchDir != '' ]]; then
+				# 	PushSettings; set +f
+				# 	tmpDataFile="/tmp/$userName.$myName.$$.data"
+				# 	cd "$workflowSearchDir"
+				# 	ProtectedCall "ls -t *.xlsx 2> /dev/null | grep -v '~' > "$tmpDataFile""
+				# 	PopSettings
+				# 	numLines=$(ProtectedCall "wc -l "$tmpDataFile"")
+				# 	numLines=$(echo $(ProtectedCall "wc -l "$tmpDataFile"") | cut -d' ' -f1)
+				# 	if [[ $numLines -gt 0 ]]; then
+				# 		while IFS=$'\n' read -r line; do menuList+=("$line"); done < "$tmpDataFile"; rm -f "$tmpDataFile";
+				# 		printf "\nPlease specify the $(ColorK '(ordinal)') number of the file you wish to load data from:\n(Data/.xlsx files found in '$(ColorK $workflowSearchDir)')\n\n"
+				# 		SelectMenu 'menuList' 'selectResp' "\nFile name $(ColorK '(ordinal)') number (or 'x' to quit) > "
+				# 		[[ $selectResp == '' ]] && Goodbye 0
+				# 		workbookFile="$(pwd)/$selectResp"
+				# 	else
+				# 		Info "No .xlsx files found"
+				# 	fi
+				# [[ $workbookFile == "" ]] && Msg
+				# Prompt workbookFile 'Please specify the full path to the workbook file' '*file*'
+				# fi
+			
+				if [[ $workbookSearchDir != '' ]]; then
+					SelectFile $workbookSearchDir 'workbookFile' '*.xls*' "\nPlease specify the $(ColorK '(ordinal)') number of the Excel workbook you wish to load data from:\
+						\n(*/.xls* files found in '$(ColorK $workbookSearchDir)')\n(sorted ordered newest to oldest)\n\n"
+					workbookFile="$workbookSearchDir/$workbookFile"
+				fi	
 			fi
 		fi
 	fi
@@ -551,3 +557,4 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 ## 03-22-2018 @ 14:06:58 - 2.2.49 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 11:56:24 - 2.2.50 - dscudiero - Updated for GetExcel2/GetExcel
 ## 03-23-2018 @ 15:35:13 - 2.2.51 - dscudiero - D
+## 03-23-2018 @ 16:52:33 - 2.2.52 - dscudiero - Msg3 -> Msg
