@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.46" # -- dscudiero -- Mon 01/22/2018 @ 11:23:31.85
+# version="2.1.47" # -- dscudiero -- Fri 03/23/2018 @ 16:30:25.61
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -129,15 +129,7 @@ function Prompt {
 		done
 		dump -2 -l response
 
-		if [[ "$promptVar" == 'client' && $response == '?' ]]; then
-			Info 0 1 "Gathering data..."
-			SelectClient 'response'
-			[[ $secondaryMessagesOnly != true && $defaultValueUseNotes == true ]] && \
-					{ echo >> "$logFile"; Note 0 1 "Using selected value of '$selectResp' for 'client'"; logResponse=false; }
-			eval $promptVar=\"$response\"
-			loop=false
-
-		elif [[  "$promptVar" == 'client' && $response == 'internal' ]]; then
+		if [[  "$promptVar" == 'client' && $response == 'internal' ]]; then
 			eval $promptVar=\"$response\"
 			loop=false
 
@@ -205,3 +197,4 @@ export -f Prompt
 ## 11-03-2017 @ 08.42.11 - ("2.1.44")  - dscudiero - Fix problem setting logResponse variable
 ## 03-13-2018 @ 08:31:05 - 2.1.46 - dscudiero - Add optional hidden answer values
 ## 03-13-2018 @ 08:38:10 - 2.1.46 - dscudiero - Cosmetic/minor change/Sync
+## 03-23-2018 @ 16:30:47 - 2.1.47 - dscudiero - Remove client select code
