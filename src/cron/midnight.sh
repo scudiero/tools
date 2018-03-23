@@ -1,13 +1,12 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.68 # -- dscudiero -- Fri 03/23/2018 @ 14:31:07.99
+version=1.22.69 # -- dscudiero -- Fri 03/23/2018 @ 16:17:18.32
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes="RunCourseLeafCgi GetCourseleafPgm Semaphore FindExecutable ProtectedCall SetFileExpansion StringFunctions"
-myIncludes="$myIncludes CalcElapsed"
+myIncludes="RunCourseLeafCgi GetCourseleafPgm Semaphore ProtectedCall StringFunctions CalcElapsed"
 Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*";
@@ -526,3 +525,4 @@ return 0
 ## 03-22-2018 @ 14:36:09 - 1.22.65 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 12:09:15 - 1.22.66 - dscudiero - Comment out perfTest
 ## 03-23-2018 @ 15:34:02 - 1.22.68 - dscudiero - D
+## 03-23-2018 @ 16:18:39 - 1.22.69 - dscudiero - D
