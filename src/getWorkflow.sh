@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.39 # -- dscudiero -- Mon 11/20/2017 @ 10:01:21.14
+version=1.0.40 # -- dscudiero -- Fri 03/23/2018 @ 14:33:58.13
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -16,7 +16,7 @@ scriptDescription="This script can be used to retrieve the workflow generated fo
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function getWorkflow-ParseArgsStd2 { # or parseArgs-local
+function getWorkflow-ParseArgsStd { # or parseArgs-local
 	myArgs+=("prop|proposal|option|proposal||script|The proposal key of the CIM proposal to lookup")
 	myArgs+=("page|page|option|page||script|The CAT page to lookup")
 	return 0
@@ -46,7 +46,7 @@ unset cims cimStr
 helpSet='script,client,env,cim'
 Hello
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 dump -1 client proposal page cat cim
 
 Init "getClient getEnv getDirs checkEnvs addPvt"
@@ -193,6 +193,7 @@ Goodbye 0 #'alert'
 ## Thu Jul 14 14:04:37 CDT 2016 - dscudiero - Add page title to the verifyContinue display for cim proposals
 ## Fri Mar 10 16:48:28 CST 2017 - dscudiero - Updated verify messages
 ## 04-13-2017 @ 14.00.56 - (1.0.20)    - dscudiero - Add a default for VerifyContinue
-## 11-02-2017 @ 06.58.54 - (1.0.26)    - dscudiero - Switch to ParseArgsStd2
+## 11-02-2017 @ 06.58.54 - (1.0.26)    - dscudiero - Switch to ParseArgsStd
 ## 11-02-2017 @ 11.02.09 - (1.0.27)    - dscudiero - Add addPvt to the init call
 ## 11-21-2017 @ 08.17.19 - (1.0.39)    - dscudiero - switch to Msg3
+## 03-23-2018 @ 15:34:54 - 1.0.40 - dscudiero - D
