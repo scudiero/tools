@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.48 # -- dscudiero -- Thu 03/22/2018 @ 13:50:38.00
+version=2.1.49 # -- dscudiero -- Fri 03/23/2018 @ 14:30:19.68
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -99,7 +99,7 @@ function RollupProcessLog {
 # Standard argument parsing and initialization
 #=======================================================================================================================
 GetDefaultsData $myName
-ParseArgsStd
+ParseArgsStd $originalArgStr
 scriptArgs="$*"
 sendMail=true
 
@@ -139,3 +139,4 @@ return 0
 ## 10-11-2017 @ 10.37.49 - (2.1.46)    - dscudiero - Switch to use FindExecutable -run
 ## 03-22-2018 @ 12:47:12 - 2.1.47 - dscudiero - Updated for Msg3/Msg, RunSql/RunSql, ParseArgStd/ParseArgStd2
 ## 03-22-2018 @ 14:06:29 - 2.1.48 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:34:16 - 2.1.49 - dscudiero - D
