@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.19 # -- dscudiero -- Fri 03/23/2018 @ 11:41:28.47
+version=1.0.20 # -- dscudiero -- Fri 03/23/2018 @ 11:51:10.59
 #==================================================================================================
 #= Description +===================================================================================
 # Make sites for the LUC conference
@@ -10,7 +10,7 @@ version=1.0.19 # -- dscudiero -- Fri 03/23/2018 @ 11:41:28.47
 #
 #==================================================================================================
 TrapSigs 'on'
-myIncludes="GetExcel2 PadChar StringFunctions"
+myIncludes="GetExcel PadChar StringFunctions"
 Import "$standardInteractiveIncludes $myIncludes"
 
 Import "$imports"
@@ -44,7 +44,7 @@ GetDefaultsData $myName
 [[ -n $1 ]] && workbookSheet="$1"
 Prompt workbookFile "Please specify the input file:" "*file*"
 
-GetExcel2 -wb "$workbookFile" -ws 'GetSheets' > $tmpFile
+GetExcel -wb "$workbookFile" -ws 'GetSheets' > $tmpFile
 sheets=$(tail -n 1 $tmpFile | tr '|' ' ')
 Prompt workbookSheet "Please specify the worksheet:" "$(tr ' ' ',' <<< $sheets)"
 dump -1 workbookFile workbookSheet
@@ -53,7 +53,7 @@ dump -1 workbookFile workbookSheet
 # Main
 #===================================================================================================
 ## Get the list of sheets in the workbook
-GetExcel2 -wb "$workbookFile" -ws "$workbookSheet"  > $tmpFile
+GetExcel -wb "$workbookFile" -ws "$workbookSheet"  > $tmpFile
 
 ##
 ## control|firstName|lastName|email|institution
@@ -101,4 +101,5 @@ Goodbye 0 #'alert'
 #===================================================================================================
 
 ## Thu Feb 23 13:03:18 CST 2017 - dscudiero - Add error checking on the input lines
-## 03-23-2018 @ 11:42:51 - 1.0.19 - dscudiero - Updates for GetExcel/GetExcel2
+## 03-23-2018 @ 11:42:51 - 1.0.19 - dscudiero - Updates for GetExcel/GetExcel
+## 03-23-2018 @ 11:56:30 - 1.0.20 - dscudiero - Updated for GetExcel2/GetExcel
