@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.19 # -- dscudiero -- Thu 03/22/2018 @ 12:40:35.68
+version=2.2.20 # -- dscudiero -- Fri 03/23/2018 @ 12:07:07.11
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -183,12 +183,12 @@ function BuildToolsAuthTable() {
 case "$hostName" in
 	mojave)
 		## Run perftest on even numberd hours
-		if [[ $(( $(date +"%-H") % 2 )) -eq 0 ]]; then
-			## Make sure we have a sites table before running perfTest
-			sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
-			RunSql $sqlStmt
-			[[ ${#resultSet[@]} -gt 0 ]] && FindExecutable -sh -run perfTest
-		fi
+		# if [[ $(( $(date +"%-H") % 2 )) -eq 0 ]]; then
+		# 	## Make sure we have a sites table before running perfTest
+		# 	sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
+		# 	RunSql $sqlStmt
+		# 	[[ ${#resultSet[@]} -gt 0 ]] && FindExecutable -sh -run perfTest
+		# fi
 
 		## Run programs/functions
 			pgms=(updateDefaults CheckMonitorFiles SyncInternalDb SyncCourseleafCgis SyncSkeleton)
@@ -222,18 +222,18 @@ case "$hostName" in
 			fi
 		;;
 	*)
-		sleep 60 ## Wait for perfTest on Mojave to set its semaphore
-		## Run perftest on even numberd hours
-		if [[ $(( $(date +"%-H") % 2 )) -eq 0 ]]; then
-			## Make sure we have a sites table before running perfTest
-			sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
-			RunSql $sqlStmt
-			if [[ ${#resultSet[@]} -gt 0 ]]; then
-				Semaphore 'waiton' 'perfTest'
-				FindExecutable -sh -run perfTest
-				FindExecutable -sh -run perfTest summary
-			fi
-		fi
+		# sleep 60 ## Wait for perfTest on Mojave to set its semaphore
+		# ## Run perftest on even numberd hours
+		# if [[ $(( $(date +"%-H") % 2 )) -eq 0 ]]; then
+		# 	## Make sure we have a sites table before running perfTest
+		# 	sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
+		# 	RunSql $sqlStmt
+		# 	if [[ ${#resultSet[@]} -gt 0 ]]; then
+		# 		Semaphore 'waiton' 'perfTest'
+		# 		FindExecutable -sh -run perfTest
+		# 		FindExecutable -sh -run perfTest summary
+		# 	fi
+		# fi
 		## Run programs/functions
 			pgms=(CheckMonitorFiles)
 			for ((i=0; i<${#pgms[@]}; i++)); do
@@ -310,3 +310,4 @@ return 0
 ## 10-30-2017 @ 07.43.44 - (2.2.17)    - dscudiero - Tweak messaging
 ## 12-06-2017 @ 11.16.14 - (2.2.18)    - dscudiero - Refactored building the defaults data files
 ## 03-22-2018 @ 12:46:57 - 2.2.19 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 12:08:55 - 2.2.20 - dscudiero - Comment out perfTest
