@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.9.12 # -- dscudiero -- Fri 03/23/2018 @ 11:51:20.08
+version=3.9.13 # -- dscudiero -- Fri 03/23/2018 @ 14:34:24.70
 #==================================================================================================
 TrapSigs 'on'
 myIncludes='DbLog Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel WriteChangelogEntry'
@@ -24,7 +24,7 @@ scriptDescription="Load Courseleaf Data"
 	#==============================================================================================
 	# parse script specific arguments
 	#==============================================================================================
-	function loadCourseleafData-ParseArgsStd2  {
+	function loadCourseleafData-ParseArgsStd  {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 		myArgs+=("w|workbookfile|option|workbookFile||script|The fully qualified spreadsheet file name")
 		myArgs+=("f|file|option|workbookFile||script|The fully qualified spreadsheet file name")
@@ -740,7 +740,7 @@ Hello
 echo "Getting defaults..."
 GetDefaultsData $myName
 echo "Parsing arguments..."
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 [[ $allItems == true ]] && processUserData=true && processRoleData=true && processPageData=true
 [[ $product != '' ]] && product=$(Lower $product)
 
@@ -1098,7 +1098,7 @@ ignoreMissingPages=true
 ## 07-17-2017 @ 13.48.41 - (3.8.95)    - dscudiero - Single quote strings to ParseWorksheetHeader function
 ## 09-29-2017 @ 10.15.03 - (3.8.119)   - dscudiero - Update FindExcecutable call for new syntax
 ## 10-09-2017 @ 16.54.07 - (3.9.9)     - dscudiero - Fixed problems with the conversion to getExecl2
-## 11-02-2017 @ 12.47.27 - (3.9.9)     - dscudiero - Swtich to ParseArgsStd2
+## 11-02-2017 @ 12.47.27 - (3.9.9)     - dscudiero - Swtich to ParseArgsStd
 ## 11-03-2017 @ 08.19.41 - (3.9.9)     - dscudiero - Check to make sure we have a valid 'path' when parsing the catalog workflow sheet
 ## 11-09-2017 @ 14.15.37 - (3.9.9)     - dscudiero - Added NotifyAllApprovers
 ## 11-10-2017 @ 12.37.41 - (3.9.9)     - dscudiero - Refactor the uid to uin mapping
@@ -1109,3 +1109,4 @@ ignoreMissingPages=true
 ## 03-13-2018 @ 08:50:56 - 3.9.10 - dscudiero - Fix a bug merging the roles data
 ## 03-22-2018 @ 14:06:53 - 3.9.11 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 11:56:20 - 3.9.12 - dscudiero - Updated for GetExcel2/GetExcel
+## 03-23-2018 @ 15:35:09 - 3.9.13 - dscudiero - D
