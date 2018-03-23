@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.4.43 # -- dscudiero -- Thu 03/22/2018 @ 13:57:35.50
+version=2.4.44 # -- dscudiero -- Fri 03/23/2018 @ 14:26:19.22
 #=======================================================================================================================
 TrapSigs 'on'
 
@@ -23,7 +23,7 @@ scriptDescription="Sync the data warehouse '$clientInfoTable' table with the tra
 #=======================================================================================================================
 # Standard call back functions
 #=======================================================================================================================
-function buildClientInfoTable-ParseArgsStd2  { # or parseArgs-local
+function buildClientInfoTable-ParseArgsStd  { # or parseArgs-local
 	myArgs+=("inpl|inplace|switch|inPlace||script|Load the main clients table in place")
 	return 0
 }
@@ -58,7 +58,7 @@ addedCalledScriptArgs="-secondaryMessagesOnly"
 # Standard argument parsing and initialization
 #=======================================================================================================================
 Hello
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 [[ $batchMode != true ]] && VerifyContinue "You are asking to re-generate the data warehouse '$clientInfoTable' table"
 
 #=======================================================================================================================
@@ -197,5 +197,6 @@ Goodbye 0 'alert'
 ## 10-27-2017 @ 13.35.11 - (2.4.33)    - dscudiero - Cosmetic/minor change
 ## 10-30-2017 @ 08.29.24 - (2.4.37)    - dscudiero - if the target table == source table then do not drop the table
 ## 10-31-2017 @ 11.20.47 - (2.4.39)    - dscudiero - Fix reported inserted client records
-## 11-01-2017 @ 15.50.16 - (2.4.42)    - dscudiero - Switch to use ParseArgsStd2
+## 11-01-2017 @ 15.50.16 - (2.4.42)    - dscudiero - Switch to use ParseArgsStd
 ## 03-22-2018 @ 14:05:34 - 2.4.43 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:31:28 - 2.4.44 - dscudiero - D
