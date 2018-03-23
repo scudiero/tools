@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.82 # -- dscudiero -- Wed 11/01/2017 @ 16:47:51.18
+version=2.1.83 # -- dscudiero -- Fri 03/23/2018 @ 14:38:46.11
 #==================================================================================================
 TrapSigs 'on'
 
@@ -23,7 +23,7 @@ scriptDescription="This script can be used to sync the master toolsprod shadow o
 	#==============================================================================================
 	# parse script specific arguments
 	#==============================================================================================
-	function syncCourseleafGitRepos-parseArgsStd2 {
+	function syncCourseleafGitRepos-ParseArgsStd {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 		return 0
 	}
@@ -54,7 +54,7 @@ tmpFile=$(MkTmpFile)
 #==================================================================================================
 Hello
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 unset addedCalledScriptArgs
 [[ $verbose == true ]] && addedCalledScriptArgs="$addedCalledScriptArgs -v$verboseLevel"
 [[ $batchMode == true ]] && addedCalledScriptArgs="$addedCalledScriptArgs -batchMode"
@@ -162,4 +162,5 @@ Goodbye 0 'alert'
 ## 09-29-2017 @ 10.15.14 - (2.1.76)    - dscudiero - Update FindExcecutable call for new syntax
 ## 10-18-2017 @ 14.18.08 - (2.1.80)    - dscudiero - Update includes list
 ## 10-18-2017 @ 15.35.13 - (2.1.81)    - dscudiero - Use Msg3
-## 11-02-2017 @ 06.59.00 - (2.1.82)    - dscudiero - Switch to ParseArgsStd2
+## 11-02-2017 @ 06.59.00 - (2.1.82)    - dscudiero - Switch to ParseArgsStd
+## 03-23-2018 @ 15:36:15 - 2.1.83 - dscudiero - D
