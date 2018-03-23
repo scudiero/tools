@@ -1,6 +1,6 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
-version=1.0.29 # -- dscudiero -- Thu 03/22/2018 @ 13:58:59.09
+version=1.0.30 # -- dscudiero -- Fri 03/23/2018 @ 14:36:08.78
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -20,7 +20,7 @@ TrapSigs 'on'
 # Standard arg parsing and initialization
 #==================================================================================================
 GetDefaultsData -f $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 
 #==================================================================================================
 ## MAIN
@@ -60,3 +60,4 @@ Goodbye 'quiet'
 ## 11-08-2017 @ 12.22.21 - (1.0.13)    - dscudiero - Only return clients who have 'opted-in' (leepday=Y)
 ## 11-15-2017 @ 11.25.47 - (1.0.17)    - dscudiero - Updated to only report opted in contact records
 ## 03-22-2018 @ 14:07:27 - 1.0.29 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:35:40 - 1.0.30 - dscudiero - D
