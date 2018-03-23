@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.16 # -- dscudiero -- Fri 03/23/2018 @ 14:28:59.11
+version=1.0.17 # -- dscudiero -- Fri 03/23/2018 @ 16:55:49.38
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall SelectMenuNew"
@@ -28,9 +28,9 @@ function courseleafRelease-testMode  { # or testMode-local
 	runTest='all'
 	overWrite=true
 	verify=false
-	Msg3 $N "TestMode:"
+	Msg $N "TestMode:"
 	dump -t client env cimStr runTest overWrite verify
-	Msg3
+	Msg
 	return 0
 }
 
@@ -72,9 +72,9 @@ if [[ ${#newReleases[@]} -gt 1 ]]; then
 			menuList+=("$menuItem")
 		done
 	## Display the menu
-		Msg3
-		Msg3 "Please select the item that you wish to release:"
-		Msg3
+		Msg
+		Msg "Please select the item that you wish to release:"
+		Msg
 		SelectMenuNew 'menuList' 'selectItem' "\nRelease ordinal number $(ColorK '(ord)') (or 'x' to quit) > "
 		[[ $selectItem == '' ]] && Goodbye 0
 		product=$(cut -d'|' -f1 <<< $selectItem)
@@ -113,6 +113,7 @@ Goodbye 0 #'alert'
 ## Fri Oct 14 13:47:39 CDT 2016 - dscudiero - General syncing of dev to prod
 ## Wed Oct 19 10:42:46 CDT 2016 - dscudiero - fixed another reference to courseleafRefresh
 ## 04-17-2017 @ 10.31.44 - (1.0.10)    - dscudiero - fixed for selectMenuNew changes
-## 11-14-2017 @ 08.02.56 - (1.0.14)    - dscudiero - Switch to Msg3
-## 03-22-2018 @ 12:36:05 - 1.0.15 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 11-14-2017 @ 08.02.56 - (1.0.14)    - dscudiero - Switch to Msg
+## 03-22-2018 @ 12:36:05 - 1.0.15 - dscudiero - Updated for Msg/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:33:49 - 1.0.16 - dscudiero - D
+## 03-23-2018 @ 16:57:53 - 1.0.17 - dscudiero - Msg3 -> Msg
