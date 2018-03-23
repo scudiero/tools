@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.15 # -- dscudiero -- Wed 03/21/2018 @  9:48:44.83
+version=1.0.16 # -- dscudiero -- Fri 03/23/2018 @ 14:28:59.11
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall SelectMenuNew"
@@ -53,7 +53,7 @@ for var in $falseVars; do eval $var=false; done
 helpSet='script'
 scriptHelpDesc="This script is used to release a new curseleaf product (CAT, CIM, CLSS) git repository for use by courseleafPatch"
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 Hello
 
 # Get the list of available releases to release
@@ -115,3 +115,4 @@ Goodbye 0 #'alert'
 ## 04-17-2017 @ 10.31.44 - (1.0.10)    - dscudiero - fixed for selectMenuNew changes
 ## 11-14-2017 @ 08.02.56 - (1.0.14)    - dscudiero - Switch to Msg3
 ## 03-22-2018 @ 12:36:05 - 1.0.15 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:33:49 - 1.0.16 - dscudiero - D
