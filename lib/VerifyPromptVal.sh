@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.74" # -- dscudiero -- Fri 03/23/2018 @ 16:30:29.61
+# version="2.0.75" # -- dscudiero -- Fri 03/23/2018 @ 17:01:09.85
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -76,10 +76,10 @@ function VerifyPromptVal {
 								[[ $autoRemote == true ]] && { ans=y; unset verifyMsg; } || { ans=n; }
 							fi
 							if [[ $ans == 'y' ]]; then
-								Msg3; Info "Starting ssh session to host '$hostedOn', enter your credentials if prompted...";
+								Msg; Info "Starting ssh session to host '$hostedOn', enter your credentials if prompted...";
 								[[ $(Contains "$originalArgStr" "$response") == false ]] && commandStr="$response $originalArgStr" || commandStr="$originalArgStr"
 								StartRemoteSession "${userName}@${hostedOn}" $myName $commandStr
-								Msg3; Info "Back from remote ssh session\n"
+								Msg; Info "Back from remote ssh session\n"
 								Goodbye 0
 							fi ## [[ $ans == 'y' ]]
 						fi ## [[ $hostedOn != $hostName ]]
@@ -230,10 +230,11 @@ export -f VerifyPromptVal
 ## 05-22-2017 @ 09.16.07 - ("2.0.52")  - dscudiero - General syncing of dev to prod
 ## 09-22-2017 @ 07.18.50 - ("2.0.53")  - dscudiero - Include StartRemoteSession
 ## 09-29-2017 @ 16.09.19 - ("2.0.54")  - dscudiero - Add RunSql to includes
-## 10-19-2017 @ 16.21.56 - ("2.0.55")  - dscudiero - Replace Msg2 with Msg3
+## 10-19-2017 @ 16.21.56 - ("2.0.55")  - dscudiero - Replace Msg2 with Msg
 ## 11-21-2017 @ 10.43.07 - ("2.0.56")  - dscudiero - Cosmetic/minor change
 ## 12-01-2017 @ 09.14.37 - ("2.0.59")  - dscudiero - Tweak messaging for do you want to start remote session
 ## 12-04-2017 @ 11.18.38 - ("2.0.63")  - dscudiero - Fix issue with the automagic ssh to other server
 ## 12-20-2017 @ 14.17.07 - ("2.0.65")  - dscudiero - Add PushPop to the includes list
-## 03-22-2018 @ 13:42:51 - 2.0.73 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-22-2018 @ 13:42:51 - 2.0.73 - dscudiero - Updated for Msg/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 16:30:57 - 2.0.74 - dscudiero - D
+## 03-23-2018 @ 17:04:35 - 2.0.75 - dscudiero - Msg3 -> Msg
