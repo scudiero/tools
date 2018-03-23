@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.139" # -- dscudiero -- Wed 03/21/2018 @ 11:40:48.64
+version="1.4.140" # -- dscudiero -- Fri 03/23/2018 @ 16:42:43.12
 #===================================================================================================
 # $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
 #===================================================================================================
@@ -311,11 +311,11 @@ sTime=$(date "+%s")
 			touch "$logFile"
 			chmod 660 "$logFile"
 			chown "$userName:leepfrog" "$logFile"
-			Msg3 "$(PadChar)" > $logFile
+			Msg "$(PadChar)" > $logFile
 			[[ -n $scriptArgs ]] && scriptArgsTxt=" $scriptArgs" || unset scriptArgsTxt
-			Msg3 "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}" >> $logFile
-			Msg3 "$(PadChar)" >> $logFile
-			Msg3 >> $logFile
+			Msg "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}" >> $logFile
+			Msg "$(PadChar)" >> $logFile
+			Msg >> $logFile
 		fi
 
 	prtStatus ", logFile" sTime=$(date "+%s")
@@ -502,3 +502,4 @@ sTime=$(date "+%s")
 ## 03-21-2018 @ 11:31:50 - 1.4.136 - dscudiero - Add our own java to the path
 ## 03-21-2018 @ 11:38:57 - 1.4.138 - dscudiero - Cosmetic/minor change/Sync
 ## 03-21-2018 @ 11:41:04 - 1.4.139 - dscudiero - Turn on loading messages
+## 03-23-2018 @ 16:43:24 - 1.4.140 - dscudiero - Updates Msg3/Msg
