@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.50 # -- dscudiero -- Wed 03/21/2018 @  9:34:28.56
+version=1.0.51 # -- dscudiero -- Fri 03/23/2018 @ 14:39:04.25
 #==================================================================================================
 #= Description +===================================================================================
 # Clone a Courseleaf git repository
@@ -21,7 +21,7 @@ for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ "$(basename "${BASH_SOURCE[$i]}")"
 #==================================================================================================
 # parse script specific arguments 
 #==================================================================================================
-	function cloneGitRepo-ParseArgsStd2  {
+	function cloneGitRepo-ParseArgsStd  {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 		myArgs+=('nof|noFork|switch|noFork||script|Do not for off processes')
 		return 0
@@ -367,3 +367,4 @@ return 0
 ## 10-18-2017 @ 15.31.00 - (1.0.47)    - dscudiero - Cosmetic/minor change
 ## 10-18-2017 @ 15.35.05 - (1.0.48)    - dscudiero - Use Msg3
 ## 03-22-2018 @ 12:35:49 - 1.0.50 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:32:55 - 1.0.51 - dscudiero - D
