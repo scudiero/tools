@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.36 # -- dscudiero -- Thu 03/22/2018 @ 14:03:02.25
+version=4.13.37 # -- dscudiero -- Fri 03/23/2018 @ 14:26:48.73
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -41,7 +41,7 @@ scriptDescription="Create a cloned private dev site"
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-	function copyEnv-ParseArgsStd2 {
+	function copyEnv-ParseArgsStd {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 		myArgs+=('overl|overlay|switch|overlay||script|Overlay/Replace any existing target directories')
 		myArgs+=('refre|refresh|switch|refresh||script|Refresh any existing target directories')
@@ -118,7 +118,7 @@ lockWorkflow=false
 #==================================================================================================
 Hello
 GetDefaultsData "$myName" -fromFiles
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 [[ -n $envs && -z $srcEnv ]] && srcEnv="$env"
 
 [[ $allItems == true || $fullCopy == true ]] && cim='Yes' && overlay=false
@@ -681,7 +681,7 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 10-16-2017 @ 14.17.22 - (4.12.10)   - dscudiero - fix locking code
 ## 10-17-2017 @ 14.08.56 - (4.12.10)   - dscudiero - Added -lock option
 ## 10-19-2017 @ 10.34.19 - (4.12.10)   - dscudiero - Add PushPop to the include list
-## 11-01-2017 @ 09.55.06 - (4.13.-1)   - dscudiero - Switched to ParseArgsStd2
+## 11-01-2017 @ 09.55.06 - (4.13.-1)   - dscudiero - Switched to ParseArgsStd
 ## 11-02-2017 @ 11.01.58 - (4.13.-1)   - dscudiero - Add addPvt to the init call
 ## 11-06-2017 @ 13.32.24 - (4.13.-1)   - dscudiero - Fix setting nexturl url syntax
 ## 11-30-2017 @ 13.26.27 - (4.13.-1)   - dscudiero - Switch to use the -all flag on the GetCims call
@@ -695,3 +695,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 03-13-2018 @ 09:51:05 - 4.13.33 - dscudiero - Cosmetic/minor change/Sync
 ## 03-21-2018 @ 16:33:25 - 4.13.35 - dscudiero - If copying to test, next, or curr then make sure the leepfrog account is comment out
 ## 03-22-2018 @ 14:06:14 - 4.13.36 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:33:18 - 4.13.37 - dscudiero - D
