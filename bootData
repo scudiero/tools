@@ -9,10 +9,10 @@ runMySqlJavaPgmName='runMySql'
 administrators="dscudiero"
 setSemaphoreList='buildSiteInfoTable,buildClientInfoTable'
 
-loaderIncludes='Here Dump Pause Msg Msg2 Msg3 Semaphore FindExecutable PadChar CheckRun CheckAuth SignalHandeler'
-loaderIncludes="$loaderIncludes TrapSigs RunSql2 SetFileExpansion GetDefaultsData Colors"
+loaderIncludes='Here Dump Pause Msg Semaphore FindExecutable PadChar CheckRun CheckAuth SignalHandeler'
+loaderIncludes="$loaderIncludes TrapSigs RunSql SetFileExpansion GetDefaultsData Colors"
 
-standardIncludes='ParseArgsStd ParseArgsStd2 Hello DbLog Init Goodbye Quit Help Help2 MkTmpFile'
+standardIncludes='ParseArgsStd Hello DbLog Init Goodbye Quit Help Help2 MkTmpFile'
 standardInteractiveIncludes="$standardIncludes Prompt VerifyContinue"
 
 unset classpath
