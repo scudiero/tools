@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.0.4 # -- dscudiero -- Wed 03/21/2018 @ 16:48:34.99
+version=1.0.5 # -- dscudiero -- Fri 03/23/2018 @ 14:34:33.64
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="Msg ProtectedCall StringFunctions RunSql"
@@ -24,7 +24,7 @@ scriptDescription="Load CIM courses"
 #==================================================================================================
 helpSet='script,client,env'
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 Hello
 Init 'getClient getEnv getDirs checkEnvs'
 VerifyContinue "You are asking to import course for:\n\tclient: $client\n\tEnv: $env"
@@ -47,4 +47,4 @@ fi
 ################################################################################
 ## Bye-bye
 Goodbye 0
- 
+ ## 03-23-2018 @ 15:35:04 - 1.0.5 - dscudiero - D
