@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.73" # -- dscudiero -- Thu 03/22/2018 @ 13:41:00.45
+# version="2.0.74" # -- dscudiero -- Fri 03/23/2018 @ 16:30:29.61
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -36,8 +36,6 @@ function VerifyPromptVal {
 			SetFileExpansion
 			PopSettings "$FUNCNAME"
 			return 0
-		elif [[ ${response:0:1} == '?' ]]; then
-			SelectClient 'response'
 		elif [[ ${response:0:1} == '<' ]]; then
 			response=${response:1}
 			lenResponse=${#response}
@@ -238,3 +236,4 @@ export -f VerifyPromptVal
 ## 12-04-2017 @ 11.18.38 - ("2.0.63")  - dscudiero - Fix issue with the automagic ssh to other server
 ## 12-20-2017 @ 14.17.07 - ("2.0.65")  - dscudiero - Add PushPop to the includes list
 ## 03-22-2018 @ 13:42:51 - 2.0.73 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 16:30:57 - 2.0.74 - dscudiero - D
