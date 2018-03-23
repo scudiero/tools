@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.5.140 # -- dscudiero -- Fri 03/23/2018 @ 14:28:44.36
+version=1.5.141 # -- dscudiero -- Fri 03/23/2018 @ 16:55:43.82
 #==================================================================================================
 # Install a courseleaf feature on a client site
 #==================================================================================================
@@ -127,9 +127,9 @@ while [[ true == true ]]; do
 	if [[ $feature == '' ]]; then
 		[[ $verify != true ]] && Msg "T No value specified for feature and verify is off"
 		ProtectedCall "clear"
-		Msg3; BuildFeaturesList; Msg3
-		[[ $env != '' ]] && Msg3 "Please specify the feature you wish to install on '$client/$env':" || Msg3 "Please specify the feature you wish to install on '$client':"
-		Msg3
+		Msg; BuildFeaturesList; Msg
+		[[ $env != '' ]] && Msg "Please specify the feature you wish to install on '$client/$env':" || Msg "Please specify the feature you wish to install on '$client':"
+		Msg
 		SelectMenuNew 'features' 'feature' "\nEnter the $(ColorK '(ordinal)') number of the feature you wish to install (or 'x' to quit) > "
 		[[ $feature == '' ]] && Goodbye 0 || feature=$(cut -d' ' -f1 <<< $feature)
 	else
@@ -144,7 +144,7 @@ while [[ true == true ]]; do
 	verifyArgs+=("Client:$client")
 	verifyArgs+=("Target Env:$(TitleCase $env) ($siteDir)")
 	VerifyContinue "You are asking to install feature: '$feature':"
-	Msg3
+	Msg
 
 	## Call the feature script
 	[[ $env != '' ]] && sendEnv="-$env"
@@ -169,7 +169,7 @@ Goodbye 0 #'alert'
 ## Wed Apr 13 16:28:05 CDT 2016 - dscudiero - Pass flags on to called script
 ## Wed Apr 27 07:20:01 CDT 2016 - dscudiero - Switch from using echo to direct input variable for parsing
 ## Fri Apr 29 14:07:48 CDT 2016 - dscudiero - Refactor to loop on the main menu
-## Wed Jun  1 10:28:32 CDT 2016 - dscudiero - Switch Msg to Msg3
+## Wed Jun  1 10:28:32 CDT 2016 - dscudiero - Switch Msg to Msg
 ## Wed Jun  1 10:54:53 CDT 2016 - dscudiero - Edit out already installed features from the selection list
 ## Thu Aug  4 11:01:01 CDT 2016 - dscudiero - Added displayGoodbyeSummaryMessages=true
 ## Tue Aug 23 11:21:40 CDT 2016 - dscudiero - Updated to correctly parse output of selectMenuNew
@@ -181,3 +181,4 @@ Goodbye 0 #'alert'
 ## 11-02-2017 @ 11.48.55 - (1.5.138)   - dscudiero - Misc cleanup
 ## 11-02-2017 @ 12.00.52 - (1.5.139)   - dscudiero - Call --> FindExecutable
 ## 03-23-2018 @ 15:33:34 - 1.5.140 - dscudiero - D
+## 03-23-2018 @ 16:57:43 - 1.5.141 - dscudiero - Msg3 -> Msg
