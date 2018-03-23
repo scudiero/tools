@@ -1,5 +1,5 @@
 #!/bin/bash
-version=1.0.50 # -- dscudiero -- Thu 03/22/2018 @ 12:56:59.37
+version=1.0.51 # -- dscudiero -- Fri 03/23/2018 @ 14:36:22.22
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -11,7 +11,7 @@ TrapSigs 'on'
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function invalindCurrOrNextUrls-ParseArgsStd2  { # or parseArgs-local
+function invalindCurrOrNextUrls-ParseArgsStd  { # or parseArgs-local
 	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 	myArgs+=('email|emailAddrs|option|emailAddrs||script|Email addresses to send reports to when running in batch mode')
 	return 0
@@ -37,7 +37,7 @@ okCodes="$(cut -d':' -f2- <<< $scriptData1)"
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 [[ $reportName != '' ]] && GetDefaultsData "$reportName" "$reportsTable"
 
 #===================================================================================================
@@ -93,3 +93,4 @@ Goodbye 0 #'alert'
 #===================================================================================================
 ## Mon Feb 13 16:09:33 CST 2017 - dscudiero - make sure we have our own tmpFile
 ## 03-22-2018 @ 13:02:58 - 1.0.50 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:35:47 - 1.0.51 - dscudiero - D
