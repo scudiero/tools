@@ -1,9 +1,9 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.22 # -- dscudiero -- Fri 03/23/2018 @ 14:33:50.28
+version=2.1.23 # -- dscudiero -- Fri 03/23/2018 @ 16:56:02.73
 #==================================================================================================
 TrapSigs 'on'
-includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
+includes='GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
 includes="$includes GetCourseleafPgm"
 Import "$includes"
 
@@ -29,7 +29,7 @@ step='getCatalogPageData'
 Hello
 GetDefaultsData $myName
 ParseArgsStd $originalArgStr
-Msg3
+Msg
 Init 'getClient getEnv checkEnv getDirs'
 
 ## Set outfile -- look for std locations
@@ -70,21 +70,21 @@ cd $srcDir
 ## Find the step file to run
 	srcStepFile="$(FindExecutable -step "$step")"
 	[[ -z $srcStepFile ]] && Terminate "Could find the step file ('$step')"
-	Msg3 "Using step file: $srcStepFile"
+	Msg "Using step file: $srcStepFile"
 
 ## Copy step file to localsteps
 	cp -fP $srcStepFile $stepFile
 	chmod ug+w $stepFile
 
 ## Run the step
-	Msg3 "Running step: $step on every page (usually takes a while)..."
+	Msg "Running step: $step on every page (usually takes a while)..."
 	cd $courseLeafDir
-	Msg3 "Page Path\tPage Title\tPage Owner\tPage Workflow" > $outFile
+	Msg "Page Path\tPage Title\tPage Owner\tPage Workflow" > $outFile
 	./$courseLeafPgm.cgi -e $step / >> $outFile
 	rm $stepFile
 
-Msg3 "Output can be found in: $outFile\n"
-Msg3 "You can create a Excel workbook using the template work sheet:\n^$TOOLSPATH/workbooks/CourseleafData.xltm"
+Msg "Output can be found in: $outFile\n"
+Msg "You can create a Excel workbook using the template work sheet:\n^$TOOLSPATH/workbooks/CourseleafData.xltm"
 
 #==================================================================================================
 ## Bye-bye
@@ -97,3 +97,4 @@ Goodbye 0 'alert'
 ## 11-02-2017 @ 06.58.52 - (2.1.20)    - dscudiero - Switch to ParseArgsStd
 ## 12-13-2017 @ 15.39.36 - (2.1.21)    - dscudiero - 1
 ## 03-23-2018 @ 15:34:50 - 2.1.22 - dscudiero - D
+## 03-23-2018 @ 16:58:01 - 2.1.23 - dscudiero - Msg3 -> Msg
