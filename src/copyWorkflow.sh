@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.72 # -- dscudiero -- Fri 03/23/2018 @ 14:39:27.96
+version=2.10.73 # -- dscudiero -- Fri 03/23/2018 @ 16:56:48.32
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi"
@@ -200,20 +200,20 @@ function CheckFilesForCopy {
 		[[ $(Contains "$ignoreList" "$cpyFile") == true ]] && return 0
 		if [[ ! -f $tgtFile ]]; then
 			copyFileList+=("${srcFile}|${tgtFile}|${cpyFile}")
-			Msg3 "^^Target file does not exist, it will be copied"
+			Msg "^^Target file does not exist, it will be copied"
 		else
 			[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
-			Msg3
-			Msg3 "$(ColorK "Target File: $tgtFile")"
-			Msg3 "\n\n* * * DIFF Output start * * *"
-			Msg3 "${colorRed}< is ${srcFile}${colorDefault}"
-			Msg3 "${colorBlue}> is ${tgtFile}${colorDefault}"
+			Msg
+			Msg "$(ColorK "Target File: $tgtFile")"
+			Msg "\n\n* * * DIFF Output start * * *"
+			Msg "${colorRed}< is ${srcFile}${colorDefault}"
+			Msg "${colorBlue}> is ${tgtFile}${colorDefault}"
 			printf '=%.0s' {1..120}
-			Msg3
+			Msg
 			ProtectedCall "colordiff $srcFile $tgtFile | Indent"
-			Msg3 "${colorDefault}"
+			Msg "${colorDefault}"
 			printf '=%.0s' {1..120}
-			Msg3 "\n* * * DIFF Output end * * *\n\n"
+			Msg "\n* * * DIFF Output end * * *\n\n"
 
 			[[ $(Contains ",$setDefaultYesFiles," ",$(basename $cpyFile),") == true ]] && defVals='Yes' || defVals='No'
 			unset ans; Prompt ans "Yes to copy $cpyFile, eXit to stop" 'Yes No' "$defVals"; ans=$(Lower ${ans:0:1});
@@ -270,7 +270,7 @@ function CheckFilesForCopy {
 
 # 	## Baclup/Delete Files
 # 		for ((i = 0; i < ${#oldFiles[@]}; i++)); do
-# 		    Msg3 "^^^Backing up & Removeing: ${oldFiles[$i]}"
+# 		    Msg "^^^Backing up & Removeing: ${oldFiles[$i]}"
 # 			$DOIT BackupCourseleafFile ${oldFiles[$i]}
 # 			$DOIT rm -f ${oldFiles[$i]}
 # 		done
@@ -331,13 +331,13 @@ ParseArgsStd $originalArgStr
 # If target is NEXT checks
 	if [[ $tgtEnv == 'next' && $srcEnv != 'test' ]]; then
 		[[ $srcEnv != 'test' ]] && Terminate "The NEXT site may only be updated from the TEST environment, please push your changes in '$srcEnv' to TEST."
-		[[ $verify == false ]] && Msg3 "Target is NEXT and verify was off, this is not allowed, setting verify to true" && verify=true
+		[[ $verify == false ]] && Msg "Target is NEXT and verify was off, this is not allowed, setting verify to true" && verify=true
 	fi
 
 ## If pvtDir exists and src is not pvt make sure that this is what the user really wants to to
 	# if [[ -d "$pvtDir" && $srcEnv != 'pvt' && $tgtEnv != 'pvt' ]]; then
 	# 	verify=true
-	# 	Msg3
+	# 	Msg
 	# 	Warning "You are asking to source the copy from the $(ColorW $(Upper $srcEnv)) environment but a private site ($client-$userName) was detected"
 	# 	unset ans; Prompt ans "Are you sure" "Yes No" "Yes";
 	# 	ans=$(Lower ${ans:0:1})
@@ -355,7 +355,7 @@ ParseArgsStd $originalArgStr
 	if [[ -z $refreshSystem && -n "$requiredGlobalFiles" ]]; then
 		[[ $verify == true ]] && echo
 		defVals='Yes'
-		Msg3 "Do you wish to refresh the system level files from the skeleton or use those found in the source"
+		Msg "Do you wish to refresh the system level files from the skeleton or use those found in the source"
 		unset ans ; Prompt ans "'Yes' to refresh, 'No' to use those from the source" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
 		unset defVals
 		[[ $ans == 'y' ]] && refreshSystem=true || refreshSystem=false
@@ -384,9 +384,9 @@ for cim in ${cimStr//,/ }; do
 	tgtRevhistorytca="$(ProtectedCall "grep 'revhistorytca:' $tgtDir/web/$cim/workflow.tcf | tail -1 ")"
 	if [[ $srcRevhistorytca != $tgtRevhistorytca ]]; then
 		Warning "The base revision history tag's for the source and target are different in cim instance '$cim'"
-		Msg3 "^^ The workflow.tcf file has been modified since the source was cloned."
-		Msg3 "^^^ Source revhistorytca: $srcRevhistorytca"
-		Msg3 "^^^ Target revhistorytca: $tgtRevhistorytca"
+		Msg "^^ The workflow.tcf file has been modified since the source was cloned."
+		Msg "^^^ Source revhistorytca: $srcRevhistorytca"
+		Msg "^^^ Target revhistorytca: $tgtRevhistorytca"
 		unset ans; Prompt ans "Do you wish to continue" "Yes No" "No"; ans="$(Lower ${ans:0:1})"
 	fi
 done
@@ -418,10 +418,10 @@ done
 	[[ $informationOnly == true ]] && DOIT='echo'
 	## Force verify to on
 	verify=true
- 	Msg3 "Checking CIM instances ..."
+ 	Msg "Checking CIM instances ..."
 	for cim in $(echo $cimStr | tr ',' ' '); do
-		Msg3 "^$cim:"
-		[[ ! -d $tgtDir/web/$cim ]] && Msg3 "^Target CIM instance ($cim) does not exist, skipping" && continue
+		Msg "^$cim:"
+		[[ ! -d $tgtDir/web/$cim ]] && Msg "^Target CIM instance ($cim) does not exist, skipping" && continue
 
 		## Determin what structure the src and tgt have
 		[[ -f $srcDir/web/$cim/$checkFileNew ]] && srcStructure='new' || srcStructure='old'
@@ -444,7 +444,7 @@ done
 				[[ $(Contains "$requiredInstanceFiles" "$file") == true ]] && Terminate "Could not locate required source file: '$srcDir/$cpyFile'"
 				continue
 			fi
-			Msg3 "^^$file"
+			Msg "^^$file"
 			##  Cleanup any old backup workflow files (xxxx.yyyy, xxxx-yyyy, or ' - Copy.') in the source or target
 				#[[ $srcEnv != 'pvt' && $srcEnv != 'dev' ]] && CleanupOldFiles "$cpyFile"
 			## Copy files
@@ -455,7 +455,7 @@ done
 					if [[ $srcMd5 != $tgtMd5 ]]; then
 						$DOIT CheckFilesForCopy $file $cpyFile $srcDir $srcStructure $tgtDir $tgtStructure
 					else
-						Msg3 "^^^File MD5's match"
+						Msg "^^^File MD5's match"
 					fi
 				fi
 		done #file
@@ -464,9 +464,9 @@ done
 ## Global files
 	[[ $roles == true ]] && optionalGlobalFiles="$optionalGlobalFiles /courseleaf/roles.tcf"
 	[[ $users == true ]] && optionalGlobalFiles="$optionalGlobalFiles ../db/clusers.sqlite"
-	echo; Msg3 "Checking global/system workflow files..."
+	echo; Msg "Checking global/system workflow files..."
 	for file in $(echo "$requiredGlobalFiles $optionalGlobalFiles" | tr ',' ' '); do
-		Msg3 "^$file"
+		Msg "^$file"
 		cpyFile="/web$file"
 		##  Cleanup any old backup workflow files (xxxx.yyyy, xxxx-yyyy, or ' - Copy.') in the source or target
 			#[[ $srcEnv != 'pvt' && $srcEnv != 'dev' ]] && CleanupOldFiles "$cpyFile"
@@ -479,33 +479,33 @@ done
 				if [[ $srcMd5 != $tgtMd5 ]]; then
 					$DOIT CheckFilesForCopy $file $cpyFile $srcDir 'n/a' $tgtDir 'n/a';
 				else
-					Msg3 "^^File MD5's match"
+					Msg "^^File MD5's match"
 				fi
 			fi
 	done #System files
 
 [[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
-Msg3
+Msg
 ## Copy the files
 	if [[ $verify == true ]]; then
-		Msg3 "The following files will be copied:"
+		Msg "The following files will be copied:"
 		for fileSpec in "${copyFileList[@]}"; do
-			Msg3 "^$(cut -d'|' -f3 <<< $fileSpec)"
+			Msg "^$(cut -d'|' -f3 <<< $fileSpec)"
 		done
 	fi
 
 	## If some files were not selected for update then as the user if they really want to copy the files
 	if [[ ${#filesNotCopied[@]} -gt 0 ]]; then
-		Msg3
+		Msg
 		Warning "The following files $(ColorW "NOT") be updated: "
 		for file in "${filesNotCopied[@]}"; do
-			Msg3 "^$file"
+			Msg "^$file"
 		done
-		Msg3
+		Msg
 		unset ans defVals; Prompt ans "Do you wish to perform a partial update to the site" 'Yes No' 'No'; ans=$(Lower ${ans:0:1});
 		[[ $ans != 'y' ]] && Warning "No files have been updated" && Goodbye 1
 	else
-		Msg3
+		Msg
 		unset ans defVals; Prompt ans "Do you wish to update to the '$tgtEnv' site" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1});
 	fi
 
@@ -516,7 +516,7 @@ Msg3
 		$DOIT mkdir -p ${backupFolder}/${tgtEnv}BeforeCopy
 		$DOIT mkdir -p ${backupFolder}/${tgtEnv}AfterCopy
 		## Copy files
-		Msg3 "\nUpdating files:"
+		Msg "\nUpdating files:"
 		for fileSpec in "${copyFileList[@]}"; do
 			srcFile="$(cut -d'|' -f1 <<< $fileSpec)"
 			tgtFile="$(cut -d'|' -f2 <<< $fileSpec)"
@@ -527,7 +527,7 @@ Msg3
 			[[ -f "$tgtFile" ]] && cp -fp "$tgtFile" "$backupFolder/${tgtEnv}BeforeCopy${cpyFile}"
 			$DOIT cp -fp "$srcFile" "$backupFolder/${tgtEnv}AfterCopy${cpyFile}"
 			## Copy
-			Msg3 "^$(basename $(dirname $srcFile))/$(basename $srcFile)"
+			Msg "^$(basename $(dirname $srcFile))/$(basename $srcFile)"
 			[[ -f $tgtFile ]] && BackupCourseleafFile $tgtFile && $DOIT rm -f $tgtFile
 			[[ ! -d $(dirname "$tgtFile") ]] && $DOIT mkdir -p "$(dirname "$tgtFile")"
 			$DOIT cp -fp $srcFile $tgtFile
@@ -546,12 +546,12 @@ Msg3
 		cp -f "$tarFile" "$tgtDir/attic"
 		$DOIT rm -rf "/${backupFolder#*/}"
 		popd >& /dev/null
-		Msg3 "Backup files located at: '$tarFile'"
+		Msg "Backup files located at: '$tarFile'"
 
 		## Check the courseleaf console page
 		if [[ $tgtEnv == 'next' || $tgtEnv == 'test' ]]; then
 			updatedFile=false
-			Msg3 "Checking console workflow management entries"
+			Msg "Checking console workflow management entries"
 			editFile="$tgtDir/web/courseleaf/index.tcf"
 			## Make sure we have an active sectionlinks:CIM on the console
 			unset grepStr; grepStr=$(ProtectedCall "grep "^sectionlinks:CIM" "$editFile"")
@@ -561,7 +561,7 @@ Msg3
 					fromStr="$grepStr"
 					toStr="${grepStr:2}"
 					$DOIT sed -i s"_^${fromStr}_${toStr}_" $editFile
-					Msg3 "^Activating CIM 'section'"
+					Msg "^Activating CIM 'section'"
 					updatedFile=true
 				else
 					Warning "Could not locate the 'sectionlinks:CIM' record in\n^ '$editFile'"
@@ -576,7 +576,7 @@ Msg3
 					if [[ -n $grepStr ]]; then
 						fromStr="$grepStr"
 						toStr="${grepStr:2}"
-						Msg3 "^Activating Workflow Management for '$cim'"
+						Msg "^Activating Workflow Management for '$cim'"
 						$DOIT sed -i s"_^${fromStr}_${toStr}_" $editFile
 						updatedFile=true
 					else
@@ -588,25 +588,25 @@ Msg3
 		fi
 	else
 		## Nothing to do
-		echo; Msg3 W 0 1 "No files required updating, nothing changed"
+		echo; Msg W 0 1 "No files required updating, nothing changed"
 	fi
 
 	if [[ ${#filesNotCopied[@]} -gt 0 ]]; then
 		echo; Warning "The following changed files were NOT updated:"
 		for file in "${filesNotCopied[@]}"; do
-			Msg3 "^$file"
+			Msg "^$file"
 		done
 	fi
 
 ## Delete obsolete files
-	Msg3 "Cleaning up obsolete files"
+	Msg "Cleaning up obsolete files"
 	for cim in $(echo $cimStr | tr ',' ' '); do
 		for filePair in $ifThenDelete; do
 			checkSrcFile=$(cut -d ',' -f1 <<< $filePair); checkTgtFile=$(cut -d ',' -f2 <<< $filePair)
 			[[ ${checkSrcFile:0:1} == '/' ]] && checkSrcFile="$srcDir/web${checkSrcFile}" || checkSrcFile="$srcDir/web/$cim/${checkSrcFile}"
 			[[ ${checkTgtFile:0:1} == '/' ]] && checkTgtFile="$tgtDir/web${checkTgtFile}" || checkTgtFile="$tgtDir/web/$cim/${checkTgtFile}"
 			if [[ -f $checkSrcFile && -f $checkTgtFile ]]; then
-				Msg3 "^^^Backing up & Removeing: $checkTgtFile"
+				Msg "^^^Backing up & Removeing: $checkTgtFile"
 				$DOIT BackupCourseleafFile $checkTgtFile
 				$DOIT rm -f $checkTgtFile
 			fi
@@ -615,7 +615,7 @@ Msg3
 
 ## Write out change log entries
 	if [[ ${#copyFileList} -gt 0 ]]; then
-		Msg3 "Writing changelog.txt records..."
+		Msg "Writing changelog.txt records..."
 		## Log changes
 		[[ -n $comment ]] && changeLogLines=("$comment")
 		changeLogLines+=("Files updated from: '$srcDir'")
@@ -630,7 +630,7 @@ Msg3
 				echo -e "\t${changeLogLines[$i]}"
 			done
 		fi
-		Msg3 "Logging done"
+		Msg "Logging done"
 	fi
 
 #====================================================================================================
@@ -707,7 +707,7 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 09-05-2017 @ 08.56.49 - 2.10.5 - dscudiero - Tweaked format of warning message
 ## 09-20-2017 @ 15.31.04 - 2.10.25 - dscudiero - Updated how it handles the situation where cl or cim versions are different and copying to next
 ## 09-21-2017 @ 09.34.06 - 2.10.26 - dscudiero - UPdated includes
-## 09-27-2017 @ 14.21.34 - 2.10.27 - dscudiero - Switch to Msg3
+## 09-27-2017 @ 14.21.34 - 2.10.27 - dscudiero - Switch to Msg
 ## 10-04-2017 @ 11.29.57 - 2.10.28 - dscudiero - Do not update target file stuctures if different from source, just print a message
 ## 10-04-2017 @ 16.12.32 - 2.10.29 - dscudiero - Tweak the names of the workflow backup files
 ## 10-09-2017 @ 16.53.42 - 2.10.34 - dscudiero - Fix problem setting backup directory names
@@ -727,3 +727,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 03-15-2018 @ 12:59:42 - 2.10.68 - dscudiero - Allow specifying cimstr as extra arguments
 ## 03-20-2018 @ 09:20:20 - 2.10.71 - dscudiero - Check that verify is on if target is NEXT
 ## 03-23-2018 @ 15:33:27 - 2.10.72 - dscudiero - D
+## 03-23-2018 @ 16:57:38 - 2.10.73 - dscudiero - Msg3 -> Msg
