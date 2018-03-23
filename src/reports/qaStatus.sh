@@ -10,7 +10,7 @@ TrapSigs 'on'
 #=======================================================================================================================
 # Standard call back functions
 #=======================================================================================================================
-function qaStatus-ParseArgsStd2  { # or parseArgs-local
+function qaStatus-ParseArgsStd  { # or parseArgs-local
 	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 	myArgs+=('email|emailAddrs|option|emailAddrs||script|Email addresses to send reports to when running in batch mode')
 	myArgs+=('long|long|switch|long||script|Generate the long report')
@@ -40,7 +40,7 @@ GetDefaultsData
 #=======================================================================================================================
 # Standard arg parsing and initialization
 #=======================================================================================================================
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 [[ -n $reportName ]] && GetDefaultsData "$reportName" "$reportsTable"
 [[ $long == true ]] && mode='long'
 dump -1 mode
@@ -113,3 +113,4 @@ Goodbye 0 #'alert'
 ## 08-25-2017 @ 07.42.04 - (1.0.77)    - dscudiero - Added debug statement
 ## 11-15-2017 @ 09.47.45 - (1.0.77)    - dscudiero - misc cleanup of stale arguments
 ## 03-22-2018 @ 14:07:32 - 1.0.77 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:35:56 - 1.0.77 - dscudiero - D
