@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.11" # -- dscudiero -- Fri 01/26/2018 @  8:39:31.84
+# version="2.1.12" # -- dscudiero -- Fri 03/23/2018 @ 16:50:38.12
 #===================================================================================================
 # Common script exit
 # args:
@@ -42,7 +42,7 @@ function Goodbye {
 			;;
 		quickquit|x)
 			[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Remove' $myLogRecordIdx
-			Msg3 "\n*** $myName: Stopping at user's request ***"
+			Msg "\n*** $myName: Stopping at user's request ***"
 			[[ $$ -ne $BASHPID ]] && kill -1 $BASHPID  ## If the BASHPID != the current processid then we are in a subshell, send a HangUP signel to the subshell
 			;;
 		return|r)
@@ -51,11 +51,11 @@ function Goodbye {
 		*)
 			## If there are any forked process, then wait on them
 				if [[ ${#forkedProcesses[@]} -gt 0  && $waitOnForkedProcess == true ]]; then
-					Msg3; Msg3 "*** Waiting for ${#forkedProcesses[@]} forked processes to complete ***"
+					Msg; Msg "*** Waiting for ${#forkedProcesses[@]} forked processes to complete ***"
 					for pid in ${forkedProcesses[@]}; do
 						wait $pid;
 					done;
-					Msg3 '*** All forked process have completed ***'
+					Msg '*** All forked process have completed ***'
 				fi
 
 			## calculate epapsed time
@@ -80,42 +80,42 @@ function Goodbye {
 						local numMsgs=0
 						Alert 'off'
 						if [[ ${#summaryMsgs[@]} -gt 0 && $displayGoodbyeSummaryMessages == true ]]; then
-							Msg3
+							Msg
 							PrintBanner "Processing Summary"
-							Msg3
-							for msg in "${summaryMsgs[@]}"; do Msg3 "^$msg"; done
+							Msg
+							for msg in "${summaryMsgs[@]}"; do Msg "^$msg"; done
 							let numMsgs=$numMsgs+${#summaryMsgs[@]}
 						fi
 						if [[ ${#warningMsgs[@]} -gt 0 && $displayGoodbyeSummaryMessages == true ]]; then
-							Msg3
+							Msg
 							PrintBanner "${#warningMsgs[@]} warning message(s) were issued during processing"
-							Msg3
-							for msg in "${warningMsgs[@]}"; do Msg3 "^$msg"; done
+							Msg
+							for msg in "${warningMsgs[@]}"; do Msg "^$msg"; done
 							let numMsgs=$numMsgs+${#warningMsgs[@]}
 						fi
 						if [[ ${#errorMsgs[@]} -gt 0 && $displayGoodbyeSummaryMessages == true ]]; then
-							Msg3
+							Msg
 							PrintBanner "${#errorMsgs[@]} error message(s) were issued during processing"
-							Msg3
-							for msg in "${errorMsgs[@]}"; do Msg3 "^$msg"; done
+							Msg
+							for msg in "${errorMsgs[@]}"; do Msg "^$msg"; done
 							let numMsgs=$numMsgs+${#errorMsgs[@]}
 						fi
 						[[ $numMsgs -gt 0 ]] && printf "\n$(PadChar)\n"
 						Alert 'on'
-						Msg3
+						Msg
 
 					fi
-					[[ $DOIT != '' ]] && Msg3 "$(ColorE "*** The 'DOIT' flag is turned off, changes not committed ***")"
-					[[ $informationOnlyMode == true ]] && Msg3 "$(ColorE "*** Information only mode, no data updated ***")"
+					[[ $DOIT != '' ]] && Msg "$(ColorE "*** The 'DOIT' flag is turned off, changes not committed ***")"
+					[[ $informationOnlyMode == true ]] && Msg "$(ColorE "*** Information only mode, no data updated ***")"
 					if [[ $exitCode -eq 0 ]]; then
-						Msg3 "$(ColorK "${myName}") $(ColorI " -- $additionalText completed successfully.")"
+						Msg "$(ColorK "${myName}") $(ColorI " -- $additionalText completed successfully.")"
 					else
-						Msg3 "$(ColorK "${myName}") $(ColorE " -- $additionalText completed with errors, exit code = $exitCode\n")\a"
+						Msg "$(ColorK "${myName}") $(ColorE " -- $additionalText completed with errors, exit code = $exitCode\n")\a"
 					fi
-					[[ $logFile != '/dev/null' && $noBanners != true ]] && Msg3 "Additional details may be found in:\n^'$logFile'"
-					[[ $noBanners != true ]] && Msg3 "$date (Elapsed time: $elapTime)"
+					[[ $logFile != '/dev/null' && $noBanners != true ]] && Msg "Additional details may be found in:\n^'$logFile'"
+					[[ $noBanners != true ]] && Msg "$date (Elapsed time: $elapTime)"
 					[[ $TERM == 'dumb' && $noBanners != true ]] && echo
-					[[ $noBanners != true ]] &&  Msg3 "$(PadChar)"
+					[[ $noBanners != true ]] &&  Msg "$(PadChar)"
 				fi #not quiet noHeaders secondaryMessagesOnly
 			[[ $alert == true ]] && Alert
 	esac
@@ -127,25 +127,25 @@ function Goodbye {
 	## If running for another user, then send an email to that user
 	if [[ -n $forUser ]]; then
 		tmpFile=$(mkTmpFile)
-		Msg3 > $tmpFile
-		Msg3 "'$myName' was run in your behalf by $userName, the log is attached" >> $tmpFile
-		Msg3 >> $tmpFile
-		Msg3 "\n*** Running on behalf of user: ${forUser}, an email was sent to: ${forUser}@leepfrog.com\n"
-		Msg3 "$(PadChar)" >> $tmpFile
-		Msg3 >> $tmpFile
+		Msg > $tmpFile
+		Msg "'$myName' was run in your behalf by $userName, the log is attached" >> $tmpFile
+		Msg >> $tmpFile
+		Msg "\n*** Running on behalf of user: ${forUser}, an email was sent to: ${forUser}@leepfrog.com\n"
+		Msg "$(PadChar)" >> $tmpFile
+		Msg >> $tmpFile
 		cat "$logFile" >> $tmpFile
-		Msg3 >> $tmpFile
+		Msg >> $tmpFile
 		$DOIT mutt -a "$logFile" -s "$myName '$client' site created - $(date +"%m-%d-%Y")" -- ${forUser}@leepfrog.com < $tmpFile
 		rm -f $tmpFile
 	fi
 
 	if [[ $PAUSEATEXIT == true ]]; then
 		Alert 3
-		Msg3 "$colorKey"
-		Msg3 '*******************************************************************************'
-		Msg3 '*** Remote script excution has complete, please press enter to close window ***'
-		Msg3 '*******************************************************************************'
-		Msg3 "$colorDefault"
+		Msg "$colorKey"
+		Msg '*******************************************************************************'
+		Msg '*** Remote script excution has complete, please press enter to close window ***'
+		Msg '*******************************************************************************'
+		Msg "$colorDefault"
 		read
 	fi
 	[[ $(IsNumeric $exitCode) != true ]] && exitCode=0
@@ -196,7 +196,7 @@ export -f QUIT
 ## 09-01-2017 @ 09.27.18 - ("2.0.138") - dscudiero - Add call myname-FUNCNAME function if found
 ## 09-25-2017 @ 07.50.38 - ("2.0.140") - dscudiero - General syncing of dev to prod
 ## 09-25-2017 @ 07.57.50 - ("2.0.141") - dscudiero - General syncing of dev to prod
-## 09-25-2017 @ 09.01.41 - ("2.0.143") - dscudiero - Switch to Msg3
+## 09-25-2017 @ 09.01.41 - ("2.0.143") - dscudiero - Switch to Msg
 ## 10-02-2017 @ 16.24.58 - ("2.0.144") - dscudiero - Add PadChar to the includes list
 ## 10-16-2017 @ 12.36.07 - ("2.1.0")   - dscudiero - Add StringFunctions to includes
 ## 10-16-2017 @ 14.01.40 - ("2.1.1")   - dscudiero - If in batchmode then return vs exit
@@ -205,3 +205,4 @@ export -f QUIT
 ## 01-26-2018 @ 08.33.46 - 2.1.9 - dscudiero - Move Quit into Goodbye
 ## 01-26-2018 @ 08.38.56 - 2.1.10 - dscudiero - Also delete the tmpFile if it exits for QUIT
 ## 01-26-2018 @ 08.39.37 - 2.1.11 - dscudiero - Cosmetic/minor change/Sync
+## 03-23-2018 @ 16:52:12 - 2.1.12 - dscudiero - Msg3 -> Msg
