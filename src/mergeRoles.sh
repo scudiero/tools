@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.2.50 # -- dscudiero -- Fri 03/23/2018 @ 11:51:57.96
+version=2.2.51 # -- dscudiero -- Fri 03/23/2018 @ 14:41:46.85
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetOutputFile BackupCourseleafFile ProtectedCall SelectMenu GetExcel SetFileExpansion"
@@ -24,7 +24,7 @@ scriptDescription="Merge role data"
 	#==============================================================================================
 	# parse script specific arguments
 	#==============================================================================================
-	function mergeRoles-parseArgsStd2 {
+	function mergeRoles-ParseArgsStd {
 		myArgs+=("w|workbookFile|option|workbookFile||script|The fully qualified workbook file name")
 		myArgs+=("m|merge|switch|merge||script|Merge role data when duplicate role names are found")
 		myArgs+=("o|overlay|switch|overlay||script|Overlay role data when duplicate role names are found")
@@ -223,7 +223,7 @@ helpSet='script,client,env'
 helpNotes+=("The output is written to the $HOME/clientData/<client> directory,\n\t   if the directory does exist one will be created.")
 Hello
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 displayGoodbyeSummaryMessages=true
 Init 'getClient getSrcEnv getTgtEnv getDirs checkEnvs addPvt'
 srcEnv="$(TitleCase "$srcEnv")"
@@ -546,7 +546,8 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 ## 06-07-2017 @ 07.44.14 - (2.2.22)    - dscudiero - Added BackupCourseleafFIle to the import list
 ## 09-25-2017 @ 12.26.53 - (2.2.24)    - dscudiero - Switch to use Msg
 ## 10-16-2017 @ 09.06.27 - (2.2.45)    - dscudiero - Updated to use GetExcel
-## 11-02-2017 @ 06.58.56 - (2.2.47)    - dscudiero - Switch to ParseArgsStd2
+## 11-02-2017 @ 06.58.56 - (2.2.47)    - dscudiero - Switch to ParseArgsStd
 ## 11-02-2017 @ 11.02.12 - (2.2.48)    - dscudiero - Add addPvt to the init call
 ## 03-22-2018 @ 14:06:58 - 2.2.49 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 11:56:24 - 2.2.50 - dscudiero - Updated for GetExcel2/GetExcel
+## 03-23-2018 @ 15:35:13 - 2.2.51 - dscudiero - D
