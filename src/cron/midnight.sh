@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.65 # -- dscudiero -- Thu 03/22/2018 @ 14:17:51.06
+version=1.22.66 # -- dscudiero -- Fri 03/23/2018 @ 12:08:09.56
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -233,15 +233,15 @@ case "$hostName" in
 			fi
 
 		## Performance test
-			## Make sure we have a sites table before running perfTest
-			sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
-			RunSql $sqlStmt
-			if [[ ${#resultSet[@]} -gt 0 ]]; then
-				pgmName="perfTest"
-				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName..."; sTime=$(date "+%s")
-				TrapSigs 'off'; FindExecutable perfTest -sh -run; TrapSigs 'on'
-				Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
-			fi
+			# ## Make sure we have a sites table before running perfTest
+			# sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
+			# RunSql $sqlStmt
+			# if [[ ${#resultSet[@]} -gt 0 ]]; then
+			# 	pgmName="perfTest"
+			# 	Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName..."; sTime=$(date "+%s")
+			# 	TrapSigs 'off'; FindExecutable perfTest -sh -run; TrapSigs 'on'
+			# 	Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+			# fi
 
 		## Copy the contacts db from internal
 			Msg "\nCopying contacts.sqlite files to $contactsSqliteFile..."
@@ -394,15 +394,15 @@ case "$hostName" in
 			Semaphore 'waiton' "$myName"
 			Msg "^'$myName' completed, continuing..."
 
-		## Wait for the perftest process on mojave to complete
-			## Make sure we have a sites table before running perfTest
-			sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
-			RunSql $sqlStmt
-			if [[ ${#resultSet[@]} -gt 0 ]]; then
-				Semaphore 'waiton' 'perftest'
-				FindExecutable perfTest -sh -run
-				FindExecutable perfTest -sh -run summary
-			fi
+		# ## Wait for the perftest process on mojave to complete
+		# 	## Make sure we have a sites table before running perfTest
+		# 	sqlStmt="SELECT table_name,create_time FROM information_schema.TABLES WHERE (TABLE_SCHEMA = \"$warehouseDb\") and table_name =\"$siteInfoTable\" "
+		# 	RunSql $sqlStmt
+		# 	if [[ ${#resultSet[@]} -gt 0 ]]; then
+		# 		Semaphore 'waiton' 'perftest'
+		# 		FindExecutable perfTest -sh -run
+		# 		FindExecutable perfTest -sh -run summary
+		# 	fi
 
 		## Run programs/functions
 			pgms=(buildSiteInfoTable checkCgiPermissions checkPublishSettings "cleanDev -daemon")
@@ -533,3 +533,4 @@ return 0
 ## 03-09-2018 @ 14:25:41 - 1.22.62 - dscudiero - Add server move processing
 ## 03-22-2018 @ 12:47:03 - 1.22.64 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-22-2018 @ 14:36:09 - 1.22.65 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 12:09:15 - 1.22.66 - dscudiero - Comment out perfTest
