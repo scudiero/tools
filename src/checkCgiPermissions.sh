@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.2.41 # -- dscudiero -- Thu 03/22/2018 @ 12:28:16.06
+version=2.2.42 # -- dscudiero -- Fri 03/23/2018 @ 14:26:02.39
 #==================================================================================================
 TrapSigs 'on'
 
@@ -20,7 +20,7 @@ scriptDescription="Check cgi file permissions"
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-	function checkCgiPermissions-ParseArgsStd2  {
+	function checkCgiPermissions-ParseArgsStd  {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 		myArgs+=('fix|fix|switch|fix||script|Fix the file permissions (chmod ug+rx)')
 		return 0
@@ -60,7 +60,7 @@ printedHeader='false'
 # Standard arg parsing and initialization
 #==================================================================================================
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 Hello
 tmpFile=$(MkTmpFile)
 
@@ -139,3 +139,4 @@ Goodbye 0
 ## 06-23-2017 @ 09.26.32 - (2.2.29)    - dscudiero - Add 'do not respond' to the email
 ## 09-12-2017 @ 07.35.27 - (2.2.37)    - dscudiero - Check against two different permission templates
 ## 03-22-2018 @ 12:35:26 - 2.2.41 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:32:04 - 2.2.42 - dscudiero - D
