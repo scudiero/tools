@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.146 # -- dscudiero -- Thu 03/22/2018 @ 13:52:26.66
+version=1.1.147 # -- dscudiero -- Fri 03/23/2018 @ 16:12:58.79
 #==================================================================================================
 TrapSigs 'on'
 
@@ -22,7 +22,7 @@ for ((i=0; i<${#BASH_SOURCE[@]}; i++)); do [[ "$(basename "${BASH_SOURCE[$i]}")"
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-	function parseArgs-insertSiteInfoTableRecord {
+	function insertSiteInfoTableRecord-ParseArgsStd {
 		# argList+=(argFlag,minLen,type,scriptVariable,exCmd,helpSet,helpText)  #type in {switch,switch#,option,help}
 		argList+=(-tableName,5,option,tableName,,script,"The name of the table to load")
 		return 0
@@ -414,3 +414,4 @@ return 0
 ## 10-30-2017 @ 09.34.52 - (1.1.144)   - dscudiero - Fix problem getting the cims not clearing cims array before calling GetCims
 ## 11-30-2017 @ 13.26.41 - (1.1.145)   - dscudiero - Switch to use the -all flag on the GetCims call
 ## 03-22-2018 @ 14:06:41 - 1.1.146 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 16:18:51 - 1.1.147 - dscudiero - D
