@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.68 # -- dscudiero -- Thu 03/22/2018 @ 13:34:02.62
+# version=2.1.69 # -- dscudiero -- Fri 03/23/2018 @ 17:02:05.70
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -15,7 +15,7 @@
 # All rights reserved
 #===================================================================================================
 function Init {
-	myIncludes="Msg3 RunSql SetSiteDirs GetCims PushPop SetFileExpansion Prompt"
+	myIncludes="SetSiteDirs GetCims PushPop SetFileExpansion Prompt"
 	Import "$standardInteractiveIncludes $myIncludes"
 
 	function MyContains { local string="$1"; local subStr="$2"; [[ "${string#*$subStr}" != "$string" ]] && echo true || echo false; return 0; }
@@ -332,7 +332,7 @@ function Init {
 			if [[ $jalot == 'na' || $jalot == 'n/a' || $jalot == 0 ]]; then
 				jalot='N/A'
 			else
-				[[ $(IsNumeric $jalot) != true ]] && { Msg3 "^Jalot must be numeric or 'na', please try again" ; unset jalot; }
+				[[ $(IsNumeric $jalot) != true ]] && { Msg "^Jalot must be numeric or 'na', please try again" ; unset jalot; }
 			fi
 			[[ $noComment != true && -n $jalot && ${jalot,,[a-z]} != 'n/a' ]] && Prompt comment "Please enter the business reason for making this update:\n^" "*any*"
 		done
@@ -389,7 +389,7 @@ export -f Init
 ## 10-03-2017 @ 14.59.00 - (2.1.11)    - dscudiero - Commented out the auth check for now
 ## 10-03-2017 @ 15.46.33 - (2.1.17)    - dscudiero - Uncomment auth check for updating next sites
 ## 10-04-2017 @ 13.09.46 - (2.1.18)    - dscudiero - General syncing of dev to prod
-## 10-05-2017 @ 09.41.42 - (2.1.19)    - dscudiero - Switch to use Msg3
+## 10-05-2017 @ 09.41.42 - (2.1.19)    - dscudiero - Switch to use Msg
 ## 10-19-2017 @ 16.05.16 - (2.1.20)    - dscudiero - Add to include list
 ## 11-01-2017 @ 09.54.16 - (2.1.35)    - dscudiero - Tweak how envs are process in getenv
 ## 11-02-2017 @ 10.51.57 - (2.1.38)    - dscudiero - Add 'addPvt' option
@@ -401,4 +401,5 @@ export -f Init
 ## 12-20-2017 @ 09.19.45 - (2.1.61)    - dscudiero - Added 'getJalot' as an action request
 ## 12-20-2017 @ 09.33.39 - (2.1.62)    - dscudiero - Force getJalot if updating next or curr
 ## 12-20-2017 @ 09.41.19 - (2.1.63)    - dscudiero - Cosmetic/minor change
-## 03-22-2018 @ 13:42:22 - 2.1.68 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-22-2018 @ 13:42:22 - 2.1.68 - dscudiero - Updated for Msg/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 17:04:12 - 2.1.69 - dscudiero - Msg3 -> Msg
