@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.51 # -- dscudiero -- Thu 03/22/2018 @ 13:51:28.21
+version=1.0.52 # -- dscudiero -- Fri 03/23/2018 @ 14:42:32.10
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="SelectMenuNew RunCourseLeafCgi"
@@ -25,7 +25,7 @@ scriptDescription=""
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function clientMoved-ParseArgsStd2  { # or parseArgs-local
+function clientMoved-ParseArgsStd  { # or parseArgs-local
 		myArgs+=('newh|newhost|option|newHost||script|The new host name for the client')
 		myArgs+=('newdevs|newdevshare|option|newDevShare||script|The new dev server for the client')
 		myArgs+=('newprods|newprodshare|option|newProdShare||script|The new production server for the client')
@@ -66,7 +66,7 @@ helpSet='script,client'
 scriptHelpDesc="This script can be used to update the warehouse data when a client is moved to a new server"
 
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 Hello
 Init "getClient nocheck"
 
@@ -213,3 +213,4 @@ Goodbye 0 #'alert'
 ## 12-04-2017 @ 08.28.53 - (1.0.48)    - dscudiero - Removed the --useLocal from example script
 ## 12-04-2017 @ 09.12.35 - (1.0.50)    - dscudiero - Added updating the workwith data
 ## 03-22-2018 @ 14:06:08 - 1.0.51 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:32:48 - 1.0.52 - dscudiero - D
