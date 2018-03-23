@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.46 # -- dscudiero -- Thu 03/22/2018 @ 12:29:59.48
+version=1.2.47 # -- dscudiero -- Fri 03/23/2018 @ 14:26:39.76
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetCims"
@@ -44,7 +44,7 @@ scriptDescription="Compare workflow related files between two environments"
 #==================================================================================================
 helpSet='script,client,env,cims'
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 [[ $allItems == true ]] && allCims='allCims' || unset allCims
 
 Hello
@@ -109,3 +109,4 @@ Goodbye 0 #'alert'# 09-24-2015 -- dscudiero -- New script to compare workflow fi
 ## Wed Mar 15 10:22:27 CDT 2017 - dscudiero - Updated to compare all the files processed in copyworkflow
 ## 03-20-2018 @ 09:03:02 - 1.2.44 - dscudiero - Tweak messaging, switch to Msg
 ## 03-22-2018 @ 12:36:01 - 1.2.46 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:33:10 - 1.2.47 - dscudiero - D
