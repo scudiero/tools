@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.21 # -- dscudiero -- Wed 12/13/2017 @ 15:39:25.26
+version=2.1.22 # -- dscudiero -- Fri 03/23/2018 @ 14:33:50.28
 #==================================================================================================
 TrapSigs 'on'
 includes='Msg3 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -28,7 +28,7 @@ step='getCatalogPageData'
 #==================================================================================================
 Hello
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 Msg3
 Init 'getClient getEnv checkEnv getDirs'
 
@@ -94,5 +94,6 @@ Goodbye 0 'alert'
 ## Tue Oct 18 07:58:39 CDT 2016 - dscudiero - Add ENV to the output file name
 ## 04-13-2017 @ 14.01.07 - (2.1.13)    - dscudiero - Add a default for VerifyContinue
 ## 09-29-2017 @ 10.14.57 - (2.1.17)    - dscudiero - Update FindExcecutable call for new syntax
-## 11-02-2017 @ 06.58.52 - (2.1.20)    - dscudiero - Switch to ParseArgsStd2
+## 11-02-2017 @ 06.58.52 - (2.1.20)    - dscudiero - Switch to ParseArgsStd
 ## 12-13-2017 @ 15.39.36 - (2.1.21)    - dscudiero - 1
+## 03-23-2018 @ 15:34:50 - 2.1.22 - dscudiero - D
