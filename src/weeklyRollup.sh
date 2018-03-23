@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #===================================================================================================
-version=1.0.38 # -- dscudiero -- Thu 03/22/2018 @ 13:56:58.92
+version=1.0.39 # -- dscudiero -- Fri 03/23/2018 @ 14:38:52.41
 #===================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall RunSql SetFileExpansion"
@@ -16,7 +16,7 @@ scriptDescription=""
 #===================================================================================================
 # Standard call back functions
 #===================================================================================================
-function weeklyRollup-ParseArgsStd2  { # or parseArgs-local
+function weeklyRollup-ParseArgsStd  { # or parseArgs-local
 	#argList+=(-optionArg,1,option,scriptVar,,script,'Help text')
 	#argList+=(-flagArg,2,switch,scriptVar,,script,'Help text')
 	argList+=(-file,4,option,file,,script,'The file name relative to the root site directory')
@@ -47,7 +47,7 @@ for var in $falseVars; do eval $var=false; done
 #===================================================================================================
 Hello
 GetDefaultsData $myName
-ParseArgsStd2 $originalArgStr
+ParseArgsStd $originalArgStr
 
 #===================================================================================================
 # Main
@@ -122,9 +122,10 @@ Goodbye 0 #'alert'
 ## 09-21-2017 @ 10.03.00 - (1.0.28)    - dscudiero - comment out the truncating of the processlog
 ## 09-25-2017 @ 07.57.52 - (1.0.29)    - dscudiero - General syncing of dev to prod
 ## 10-23-2017 @ 08.30.56 - (1.0.32)    - dscudiero - Switch to Msg
-## 11-22-2017 @ 06.25.55 - (1.0.33)    - dscudiero - Switch to parseargsstd2
+## 11-22-2017 @ 06.25.55 - (1.0.33)    - dscudiero - Switch to ParseArgsStd
 ## 11-27-2017 @ 09.45.11 - (1.0.34)    - dscudiero - Fix problem deleting the weekly log file while in use
 ## 12-11-2017 @ 06.49.36 - (1.0.35)    - dscudiero - Update code excluding the weekly cron log
 ## 12-18-2017 @ 07.46.57 - (1.0.36)    - dscudiero - Fix problem with the final rollup deleteing the log directories
 ## 12-18-2017 @ 08.04.04 - (1.0.37)    - dscudiero - Cosmetic/minor change
 ## 03-22-2018 @ 14:07:55 - 1.0.38 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 03-23-2018 @ 15:36:23 - 1.0.39 - dscudiero - D
