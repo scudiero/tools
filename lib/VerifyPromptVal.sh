@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.75" # -- dscudiero -- Fri 03/23/2018 @ 17:01:09.85
+# version="2.0.76" # -- dscudiero -- Mon 03/26/2018 @ 12:55:45.82
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -78,7 +78,8 @@ function VerifyPromptVal {
 							if [[ $ans == 'y' ]]; then
 								Msg; Info "Starting ssh session to host '$hostedOn', enter your credentials if prompted...";
 								[[ $(Contains "$originalArgStr" "$response") == false ]] && commandStr="$response $originalArgStr" || commandStr="$originalArgStr"
-								StartRemoteSession "${userName}@${hostedOn}" $myName $commandStr
+								##StartRemoteSession "${userName}@${hostedOn}" $myName $commandStr
+								ssh "${userName}@${hostedOn}" $myName $commandStr
 								Msg; Info "Back from remote ssh session\n"
 								Goodbye 0
 							fi ## [[ $ans == 'y' ]]
@@ -238,3 +239,4 @@ export -f VerifyPromptVal
 ## 03-22-2018 @ 13:42:51 - 2.0.73 - dscudiero - Updated for Msg/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 16:30:57 - 2.0.74 - dscudiero - D
 ## 03-23-2018 @ 17:04:35 - 2.0.75 - dscudiero - Msg3 -> Msg
+## 03-26-2018 @ 15:51:40 - 2.0.76 - dscudiero - Switched from StartRemoteSession to just ssh
