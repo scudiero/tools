@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.69 # -- dscudiero -- Fri 03/23/2018 @ 16:17:18.32
+version=1.22.71 # -- dscudiero -- Mon 03/26/2018 @  8:46:59.41
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -270,13 +270,12 @@ case "$hostName" in
 			RunCourseLeafCgi "$stageInternal" "-r /support/qa"
 
 		## Run Reports
-			qaStatusShortEmails='sjones@leepfrog.com,mbruening@leepfrog.com,jlindeman@leepfrog.com'
-			clientTimezoneEmails='dscudiero@leepfrog.com,jlindeman@leepfrog.com'
-			reports=("qaStatusShort -email \"$qaStatusShortEmails\"" "clientTimezone -email \"$clientTimezoneEmails\"")
+			reports=("qaStatusShort -email \"${qaTeam},${qaManager},dscudiero\"")
+			reports+=("clientTimezone -email \"${supportManager},dscudiero\"")
 			for ((i=0; i<${#reports[@]}; i++)); do
-				report="${reports[$i]}"; reportName="${report%% *}"; reportArgs="${report##* }"; [[ $reportName == $reportArgs ]] && unset reportArgs
+				report="${reports[$i]}"; reportName="${report%% *}"; reportArgs="${report#* }"; [[ $reportName == $reportArgs ]] && unset reportArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $reportName $reportArgs..."; sTime=$(date "+%s")
-				TrapSigs 'off'; FindExecutable scriptsAndReports -sh -run reports $report -quiet $reportArgs $scriptArgs | Indent; TrapSigs 'on'
+				TrapSigs 'off'; FindExecutable scriptsAndReports -sh -run reports $reportName $reportArgs $scriptArgs | Indent; TrapSigs 'on'
 				Semaphore 'waiton' "$reportName" 'true'
 				Msg "...$reportName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
@@ -526,3 +525,4 @@ return 0
 ## 03-23-2018 @ 12:09:15 - 1.22.66 - dscudiero - Comment out perfTest
 ## 03-23-2018 @ 15:34:02 - 1.22.68 - dscudiero - D
 ## 03-23-2018 @ 16:18:39 - 1.22.69 - dscudiero - D
+## 03-26-2018 @ 08:47:13 - 1.22.71 - dscudiero - Fix problem calling reports
