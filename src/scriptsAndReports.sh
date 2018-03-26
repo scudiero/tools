@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.120 # -- dscudiero -- Fri 03/23/2018 @ 16:55:38.27
+version=3.13.121 # -- dscudiero -- Mon 03/26/2018 @  8:44:58.21
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -333,7 +333,7 @@ ParseArgsStd $originalArgStr
 [[ $newsDisplayed == true ]] && Pause "\nNews was displayed, please review and press any key to continue"
 if [[ -n $client ]]; then
 	[[ $mode == 'scripts' && $client != 'reports' ]] && Init 'getClient' || mode='reports'
-	[[ $mode == 'reports' ]] && { report="$unknowArgs"; itemType='report'; itemTypeCap='Report'; table=$reportsTable; }
+	[[ $mode == 'reports' ]] && { report="$client"; itemType='report'; itemTypeCap='Report'; table=$reportsTable; }
 fi
 
 dump -1 mode report script originalArgStr itemType itemTypeCap table
@@ -537,3 +537,4 @@ Goodbye 0
 ## 03-22-2018 @ 14:07:41 - 3.13.118 - dscudiero - Updated for Msg/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:36:12 - 3.13.119 - dscudiero - D
 ## 03-23-2018 @ 16:58:09 - 3.13.120 - dscudiero - Msg3 -> Msg
+## 03-26-2018 @ 08:48:13 - 3.13.121 - dscudiero - Fix setting default report name when in batchMode
