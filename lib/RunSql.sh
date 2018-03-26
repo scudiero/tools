@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.6" # -- dscudiero -- Mon 03/26/2018 @  9:00:38.58
+# version="1.0.7" # -- dscudiero -- Mon 03/26/2018 @  9:12:03.91
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -63,7 +63,7 @@ function RunSql {
 	return 0
 } #RunSql
 
-export -f RunSql RunSql2
+export -f RunSql
 
 #===================================================================================================
 # Check-in Log
@@ -74,3 +74,4 @@ export -f RunSql RunSql2
 ## 03-21-2018 @ 15:42:08 - 1.0.4 - dscudiero - Cosmetic/minor change/Sync
 ## 03-23-2018 @ 17:04:30 - 1.0.5 - dscudiero - Msg3 -> Msg
 ## 03-26-2018 @ 09:01:07 - 1.0.6 - dscudiero - Remove RunSql2 definition
+## 03-26-2018 @ 09:12:09 - 1.0.7 - dscudiero - Cosmetic/minor change/Sync
