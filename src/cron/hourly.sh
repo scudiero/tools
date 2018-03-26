@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.23 # -- dscudiero -- Fri 03/23/2018 @ 16:16:28.38
+version=2.2.25 # -- dscudiero -- Mon 03/26/2018 @  8:55:43.50
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -138,43 +138,42 @@ function CheckMonitorFiles {
 } #CheckMonitorFiles
 
 #=======================================================================================================================
-function BuildToolsAuthTable() {
-	local tmpFile=$(MkTmpFile $FUNCNAME)
+# function BuildToolsAuthTable() {
+# 	local tmpFile=$(MkTmpFile $FUNCNAME)
+# 	## Build the toolsgroups table from the role data from the stage-internal site
+# 		pw=$(GetPW 'stage-internal')
+# 		[[ $pw == '' ]] && Terminate "Could not lookup password for 'stage-internal' in password file.\n"
+# 		rolesFileURL="https://stage-internal.leepfrog.com/pagewiz/roles.tcf"
+# 		curl -u $userName:$pw $rolesFileURL 2>/dev/null | grep '^role:' | cut -d ":" -f 2 > $tmpFile
+# 		if [[ ${myRhel:0:1} -ge 6 ]]; then
+# 			readarray -t roles < $tmpFile
+# 		else 
+# 			while read line; do roles+=("$line"); done < $tmpFile
+# 		fi
 
-	## Build the toolsgroups table from the role data from the stage-internal site
-		pw=$(GetPW 'stage-internal')
-		[[ $pw == '' ]] && Terminate "Could not lookup password for 'stage-internal' in password file.\n"
-		rolesFileURL="https://stage-internal.leepfrog.com/pagewiz/roles.tcf"
-		curl -u $userName:$pw $rolesFileURL 2>/dev/null | grep '^role:' | cut -d ":" -f 2 > $tmpFile
-		if [[ ${myRhel:0:1} -ge 6 ]]; then
-			readarray -t roles < $tmpFile
-		else 
-			while read line; do roles+=("$line"); done < $tmpFile
-		fi
+# 		if [[ ${#roles[@]} -gt 0 ]]; then
+# 			## Clear out db table
+# 				sqlStmt="truncate $authGroupsTable"
+# 				RunSql "$sqlStmt"
+# 			## Insert auth records
+# 				i=0
+# 				for roleStr in "${roles[@]}"; do
+# 					roleName=$(echo $roleStr | cut -d "|" -f1)
+# 					roleCode="$(Lower $roleName | tr -d ' ')"
+# 					roleMembers=','$(echo $roleStr | cut -d "|" -f2)','
+# 					values="NULL,\"$roleCode\",\"$roleName\",\"$roleMembers\""
+# 					#dump -t -n roleStr -t roleCode roleName roleMembers values
+# 					sqlStmt="insert into $authGroupsTable values ($values)"
+# 					RunSql "$sqlStmt"
+# 					(( i+=1 ))
+# 				done
+# 		else
+# 			Msg "W No roles recovered from $rolesFileURL"
+# 		fi
 
-		if [[ ${#roles[@]} -gt 0 ]]; then
-			## Clear out db table
-				sqlStmt="truncate $authGroupsTable"
-				RunSql "$sqlStmt"
-			## Insert auth records
-				i=0
-				for roleStr in "${roles[@]}"; do
-					roleName=$(echo $roleStr | cut -d "|" -f1)
-					roleCode="$(Lower $roleName | tr -d ' ')"
-					roleMembers=','$(echo $roleStr | cut -d "|" -f2)','
-					values="NULL,\"$roleCode\",\"$roleName\",\"$roleMembers\""
-					#dump -t -n roleStr -t roleCode roleName roleMembers values
-					sqlStmt="insert into $authGroupsTable values ($values)"
-					RunSql "$sqlStmt"
-					(( i+=1 ))
-				done
-		else
-			Msg "W No roles recovered from $rolesFileURL"
-		fi
-
-		[[ -f "$tmpFile" ]] && rm "$tmpFile"
-	return 0
-} #BuildToolsAuthTable
+# 		[[ -f "$tmpFile" ]] && rm "$tmpFile"
+# 	return 0
+# } #BuildToolsAuthTable
 
 #=======================================================================================================================
 # Main
@@ -312,3 +311,4 @@ return 0
 ## 03-23-2018 @ 12:08:55 - 2.2.20 - dscudiero - Comment out perfTest
 ## 03-23-2018 @ 15:33:56 - 2.2.22 - dscudiero - D
 ## 03-23-2018 @ 16:18:31 - 2.2.23 - dscudiero - Cleanup Includes
+## 03-26-2018 @ 08:56:02 - 2.2.25 - dscudiero - Comment out BuildToolsAuthTable
