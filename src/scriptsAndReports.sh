@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.121 # -- dscudiero -- Mon 03/26/2018 @  8:44:58.21
+version=3.13.124 # -- dscudiero -- Tue 03/27/2018 @ 11:28:31.42
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -376,7 +376,7 @@ dump -1 -p client report emailAddrs myName ${myName}LastRunDate ${myName}LastRun
 		if [[ $itemName != 'reports' ]]; then
 			## Get additioal parms
 				unset userArgs;
-				if [[ $mode == true && $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true && $quiet != true && $noArgs != true ]]; then
+				if [[ $mode == 'scripts' && $(Contains ",$noArgPromptList," ",$itemName,") != true && $batchMode != true && $quiet != true && $noArgs != true ]]; then
 					Msg "^Optionally, please specify any arguments that you wish to pass to '$itemName'";
 					unset userArgs; Prompt userArgs "^Please specify parameters to be passed to '$itemName'" '*optional*' '' '3'
 					[[ -n $userArgs ]] && scriptArgs="$userArgs $scriptArgs"
@@ -538,3 +538,4 @@ Goodbye 0
 ## 03-23-2018 @ 15:36:12 - 3.13.119 - dscudiero - D
 ## 03-23-2018 @ 16:58:09 - 3.13.120 - dscudiero - Msg3 -> Msg
 ## 03-26-2018 @ 08:48:13 - 3.13.121 - dscudiero - Fix setting default report name when in batchMode
+## 03-27-2018 @ 11:29:31 - 3.13.124 - dscudiero - Fixed problem where scripts mode not displaying optional parms prompt
