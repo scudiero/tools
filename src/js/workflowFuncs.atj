@@ -26,7 +26,7 @@ wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 
 	//Initial Checks
 	try { InitialChecks(["wfrule","college","department"],args) } //try
-	catch(err) { wfDebug(1,"\t" + myName + ": " + err + "\n") ; return false; }
+	catch(err) { wfDebug(1,"\t" + myName + ": " + err) ; return false; }
 
 	// Main
  		var allowStep=false;
@@ -53,7 +53,7 @@ wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 
 
 //======================================================================================================================
-// version:2.0.12 // -- dscudiero -- Tue 03/20/2018 @ 11:14:47.47
+// version:2.0.13 // -- dscudiero -- Wed 03/28/2018 @ 12:32:50.81
 //======================================================================================================================
 // Check in log
 //======================================================================================================================
