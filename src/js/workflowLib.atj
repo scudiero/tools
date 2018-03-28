@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.80" // -- dscudiero -- Wed 03/21/2018 @ 10:34:04.91
+wfLibVersion="1.8.81" // -- dscudiero -- Wed 03/28/2018 @  8:38:36.92
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -1045,7 +1045,7 @@ GetRelated2 = function(type,data) {
 // Where:
 //		<lookupType>	- The type of data to lookup in the set {'college','department','subject'}
 // 		<givenType>		- The type of data provided for the query in the set {'college','department','subject'}
-// 		<givenData1>	- The values array for the given data
+// 		<givenData>		- The values array for the given data
 // 		<exceptData>	- optional, values array to exclude from the results
 //
 //	e.g.
@@ -1314,7 +1314,7 @@ wffuncs.wfAttr = function(inval, wfrule, args) {
 // 10/19/17 - dgs - Fix bug if resultSet is not an array
 //=======================================================================================================================
 GetAttrVal = function(data) {
-	var version='1.0.0'; var myName="GetAttrVal"; wfDebug(5,"\n*** In " + myName + " ***"); wfDump(6,["\tdata;"+data.toSource()]);
+	var version='1.0.0'; var myName="GetAttrVal"; wfDebug(5,"\t*** In " + myName + " ***"); wfDump(6,["\tdata;"+data.toSource()]);
 
 	var reqType=data.request;
 	var optionStr=data.options; 	if (optionStr === undefined) optionStr="";
@@ -1339,9 +1339,9 @@ GetAttrVal = function(data) {
 	if (optionStr.indexOf("type=") >= 0)
 		reqType=optionStr.split("=")[1];
 
-	wfDump(5,["reqType;"+reqType,"optionStr;"+optionStr,"tcaData;"+tcaData,"subjVarName;"+subjVarName,
-		"deptVarName;"+deptVarName,"colVarName;"+colVarName,"wfAllcodes;"+wfAllcodes,"includeTCA;"+includeTCA,
-		"mapValue;"+mapValue,"wfAllcodes;"+wfAllcodes,"wfCimInstance;"+wfCimInstance,"proposalOnly;"+proposalOnly]);
+	wfDump(5,["\treqType;"+reqType,"\toptionStr;"+optionStr,"\ttcaData;"+tcaData,"\tsubjVarName;"+subjVarName,
+		"\tdeptVarName;"+deptVarName,"\tcolVarName;"+colVarName,"\twfAllcodes;"+wfAllcodes,"\tincludeTCA;"+includeTCA,
+		"\tmapValue;"+mapValue,"\twfAllcodes;"+wfAllcodes,"\twfCimInstance;"+wfCimInstance,"\tproposalOnly;"+proposalOnly]);
 
 	var subjects=[], departments=[], colleges=[];
 
@@ -1349,7 +1349,7 @@ GetAttrVal = function(data) {
 		subjects=getTCFValue(subjVarName, { delimiter: "\n", retarray: true });
 		if (includeTCA)
 			subjects=subjects.concat(getTCFValue("subject", { data: tcaData, delimiter: "\n", retarray: true }));
-		wfDump(5,[subjVarName+" from tcfdata;"+subjects.toSource()])
+		wfDump(5,["\t" + subjVarName+" from tcfdata;"+subjects.toSource()])
 		if (subjects.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
 		}
@@ -1365,7 +1365,7 @@ GetAttrVal = function(data) {
 				});
 			}
 		}
-		wfDump(5,[deptVarName+" from tcfdata;"+departments.toSource()])
+		wfDump(5,["\t" + deptVarName+" from tcfdata;"+departments.toSource()])
 		if (departments.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			departments=wffuncs.getDepartments(subjects);
 		}
@@ -1389,7 +1389,7 @@ GetAttrVal = function(data) {
 				});
 			}
 		}
-		wfDump(5,[colVarName+" from tcfdata;"+colleges.toSource()])
+		wfDump(5,["\t" + colVarName+" from tcfdata;"+colleges.toSource()])
 		if (colleges.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			colleges=wffuncs.getColleges(departments);
 		}
@@ -1413,7 +1413,7 @@ GetAttrVal = function(data) {
 			if (! eval("typeof " + attrFunctionName) === "function")
 				attrFunctionName="Map" + attrFunctionName.substring(0,1).toUpperCase() + "s" + attrFunctionName.substring(1).toLowerCase() + "Val";
 			if (eval("typeof " + attrFunctionName) === "function") {
-				wfDebug(5,"\t\tFound an attribute 'Map' function: " + attrFunctionName);
+				wfDebug(5,"\t\t\tFound an attribute 'Map' function: " + attrFunctionName);
 				for (var ii=0,  totII=retArray.length; ii < totII; ii++) {
 				 	eval("retArray[" + ii + "]=" + attrFunctionName + "('" + reqType + "','" + retArray[ii] + "')");
 				}
@@ -1432,7 +1432,7 @@ GetAttrVal = function(data) {
 		}
 
 	// Return data
-		wfDebug(5,"*** " + myName + ": Returning: " + retArray.toSource() + "<");
+		wfDebug(5,"\t*** " + myName + ": Returning: " + retArray.toSource() + "<");
 		if (retArray.length > 0)
 			return retArray;
 
@@ -1442,20 +1442,21 @@ GetAttrVal = function(data) {
 //======================================================================================================================
 // Check to see if a proposal attribute is in a specified list of values
 // the attribute is determined by looking at the workflow rule name:
-//	contains 'subjin-'	then check subject value
-//	contains 'deptin-'	then check departments value
-//	contains 'colin-'	then check college value
+//	contains 'subj'	then check subject value
+//	contains 'dept'	then check departments value
+//	contains 'col'	then check college value
 // e.g:
-//	wfrules:deptIn-CHEM-PHYS-CDS-SOAN|function|AttrIn|CHEM,PHYS,CDS,SOAN; //Department code in the set as indicated
-//Note: can also include the list of departments as '-' seperated list as show above
-//
+//	wfrules:deptInCHEM_PHYS_CDS_SOAN|function|wfAttrIn|CHEM,PHYS,CDS,SOAN; //Department code in the set as indicated
+// Note: can also include the list of codes as '_' separated list in the conditional name as show above
 //======================================================================================================================
 // 05-01-17 - dgs - Initial coding -- gmu
 // 05/27-17 - dgs - Added code for 'xxxxNOTin-' requeste types
 // 07/27/17 - dgs - Tweaked debug output
 // 11/08/17 - dgs - Re-factored getting attribute data to use GetAttrVal, fixes problem if allcodes not set
+// 03/28/18 - dgs - Re-factored switching to '_' as the delimiter since '-' was causing problems in workflow management
+//					Renamed to wfAttrIn
 //======================================================================================================================
-wffuncs.AttrIn = function(inval, wfrule, args) {
+wffuncs.wfAttrIn = function(inval, wfrule, args) {
 	var version='1.0.3'; var myName=wfrule.attrname;
 	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
 
@@ -1468,24 +1469,25 @@ wffuncs.AttrIn = function(inval, wfrule, args) {
 			var options=wfrule.options.substring(0,wfrule.options.indexOf(";"));
 			if (options.length > 0) {
 				checkList=options;
+				reqType=reqType.substring(0,reqType.indexOf("in"));
 			} else {
-				checkList=wfrule.searchfor.substring(reqType.indexOf("-")+1);
-				checkList=checkList.replace("-",',');
+				checkList=wfrule.searchfor.substring(reqType.indexOf("in")+1);
+				checkList=checkList.replace("_",',');
 			}
+			checkList="," + checkList + ",";
 
 		// Which attribute should we check, get standard values
 			var valsArray=[];
-			if (reqType.indexOf("colin-") >= 0 || reqType.indexOf("colnotin-") >= 0) {
+			if (reqType.indexOf("col") >= 0) {
 				var valsArray=GetAttrVal({request:"cols", options:"includetca", tcadata: tcadata});
-			} else if (reqType.indexOf("deptin-") >= 0 || reqType.indexOf("deptnotin-") >= 0) {
+			} else if (reqType.indexOf("dept") >= 0) {
 				var valsArray=GetAttrVal({request:"depts", options:"includetca", tcadata: tcadata});
-			} else if (reqType.indexOf("subjin-") >= 0 || reqType.indexOf("subjnotin-") >= 0) {
+			} else if (reqType.indexOf("subj") >= 0) {
 				var valsArray=GetAttrVal({request:"subjs", options:"includetca", tcadata: tcadata});
 			}
 
-		wfDump(1,["reqType;"+reqType,"checkList;"+checkList,"notMode;"+notMode,"valsArray;"+valsArray.toSource()]);
-		checkList="," + checkList + ",";
-
+		wfDump(1,["reqType;"+reqType,"checkList;"+checkList,"valsArray;"+valsArray.toSource()]);
+		
 	//Initial Checks
 	try {
 		if (checkList === ",,") throw("No checkList specified in options or stepname");
@@ -1498,8 +1500,10 @@ wffuncs.AttrIn = function(inval, wfrule, args) {
  		var allowStep=false;
  		valsArray.forEach(function(token) {
 	 		//wfDump(1,["\ttoken;"+token]);
-			if (checkList.indexOf(","+token+",") >= 0)
+			if (checkList.indexOf(","+token+",") >= 0) {
+				wfDebug(1,"\tFound '" + token + "' in checklist, allowing step");
 				allowStep=true;
+			}
 		});
 
 	// Return results
@@ -1511,7 +1515,7 @@ wffuncs.AttrIn = function(inval, wfrule, args) {
 		wfDebug(1,"\t*** Skipping step, notmode: " + notMode);
 		return false
 
-} //wffuncs.AttrIn
+} //wffuncs.wfAttrIn
 
 //=================================================================================================
 // Return additional steps for all 'equiv' courses in courseref table
@@ -2552,3 +2556,4 @@ var wfLibLoaded=true;
 // 03-16-2018 @ 10:28:05 - 1.8.78 - dscudiero - Change message prefix of the TODO messages to warning
 // 03-20-2018 @ 08:15:40 - 1.8.79 - dscudiero - Fix problem in GetRelated2 checking proposal data against related data, add ',' before and after strings to prevent false positives
 // 03-21-2018 @ 10:35:24 - 1.8.80 - dscudiero - Add additional case statements for the refType check in GetRelated2
+// 03-28-2018 @ 12:38:47 - 1.8.81 - dscudiero - Tweaked debug messaging
