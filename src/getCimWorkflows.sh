@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.104 # -- dscudiero -- Fri 03/23/2018 @ 17:02:47.78
+version=1.2.110 # -- dscudiero -- Thu 03/29/2018 @ 11:58:59.10
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -284,10 +284,9 @@ for cim in ${cimStr//,/ }; do
 				Msg "Note that all names are case sensitive, i.e. 'Abc' does not equal 'abc'." >> $outFile
 				Msg "#\tCondition\tDescription\t\tImplementation / Comment" >> $outFile
 				for i in "${wfrulesKeys[@]}"; do
-					conditionalDef="${wfrules[$i]}"
-					conditionalDef=$(sed s/'%7C'/' | '/g <<< $conditionalDef);
-					[[ -n $wfUgRe ]] && conditionalDef=$(sed s/'wfUgRe'/"$wfUgRe"/g <<< $conditionalDef);
-					[[ -n $wfGrRe ]] && conditionalDef=$(sed s/'wfGrRe'/"$wfGrRe"/g <<< $conditionalDef);
+					conditionalDef=$(sed s/'%7C'/' | '/g <<< "${wfrules[$i]}");					
+					[[ -n "$wfUgRe" ]] && conditionalDef=$(sed s/'wfUgRe'/"$(sed 's/[^a-zA-Z 0-9]/\\&/g' <<< "$wfUgRe")"/g <<< $conditionalDef);
+					[[ -n "$wfGrRe" ]] && conditionalDef=$(sed s/'wfGrRe'/"$(sed 's/[^a-zA-Z 0-9]/\\&/g' <<< "$wfGrRe")"/g <<< $conditionalDef);
 					echo -e "$cntr\t$i\t$conditionalDef" >> $outFile
 					(( cntr += 1 ))
 				done
@@ -473,3 +472,4 @@ Goodbye 0 #'alert'
 ## 03-23-2018 @ 15:34:46 - 1.2.102 - dscudiero - D
 ## 03-23-2018 @ 16:57:57 - 1.2.103 - dscudiero - Msg -> Msg
 ## 03-23-2018 @ 17:04:49 - 1.2.104 - dscudiero - Msg3 -> Msg
+## 03-29-2018 @ 12:58:45 - 1.2.110 - dscudiero - Added code to escape the sed string for wfUG/GRre
