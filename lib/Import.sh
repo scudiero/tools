@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.1.21" # -- dscudiero -- Mon 01/22/2018 @  8:29:25.20
+# version="1.1.22" # -- dscudiero -- Thu 03/29/2018 @  8:12:24.22
 #===================================================================================================
 # Import need functions into the runtime environment
 #===================================================================================================
@@ -24,17 +24,17 @@ function Import {
 	[[ $USELOCAL == true && -d "$HOME/tools/lib" ]] && searchDirs="$HOME/tools/lib $searchDirs"
 
 	## Search for the include file, load the first one
-	[[ $verboseLevel -ge 2 ]] && echo -e "$caller/$FUNCNAME: searchDirs= '$searchDirs'"
-	[[ $verboseLevel -ge 2 ]] && echo -e "$caller/$FUNCNAME: includeList= '$includeList'"
+	[[ $verboseLevel -ge 4 ]] && echo -e "\t$caller/$FUNCNAME: searchDirs= '$searchDirs'"
+	[[ $verboseLevel -ge 4 ]] && echo -e "\t$caller/$FUNCNAME: includeList= '$includeList'"
 	for includeName in $includeList; do
-		[[ $verboseLevel -ge 2 ]] && echo -e "\t$caller/$FUNCNAME: includeName= '$includeName'"
+		[[ $verboseLevel -ge 3 ]] && echo -e "\t$caller/$FUNCNAME: includeName = '$includeName'"
 		[[ $(MyContains ",$SCRIPTINCLUDES," ",$includeName,") == true ]] && continue
 		#[[ "${SCRIPTINCLUDES#*$includeName,}" != "$SCRIPTINCLUDES" ]] && continue  ## i.e. SCRIPTINCLUDES contains includeName
 		found=false
 		for searchDir in $searchDirs; do
-			[[ $verboseLevel -ge 2 ]] && echo -e "\t\t$caller/$FUNCNAME: searchDir= '$searchDir'"
+			[[ $verboseLevel -ge 4 ]] && echo -e "\t\t$caller/$FUNCNAME: searchDir = '$searchDir'"
 			if [[ -r ${searchDir}/${includeName}.sh ]]; then
-				[[ $verboseLevel -ge 2 ]] && echo -e "\tImporting: '$includeName' from ${searchDir}"
+				[[ $verboseLevel -ge 4 ]] && echo -e "\tImporting: '$includeName' from ${searchDir}"
 				source ${searchDir}/${includeName}.sh
 				SCRIPTINCLUDES="$SCRIPTINCLUDES,$includeName"
 				found=true
@@ -57,3 +57,4 @@ export -f Import
 ## 10-23-2017 @ 08.30.48 - ("1.1.14")  - dscudiero - Change verbose level for messages
 ## 10-27-2017 @ 12.58.57 - ("1.1.15")  - dscudiero - Add local library if USELOCAL is truen
 ## 10-31-2017 @ 10.37.30 - ("1.1.17")  - dscudiero - Look for Imort in local
+## 03-29-2018 @ 08:38:56 - 1.1.22 - dscudiero - Change debug message levels
