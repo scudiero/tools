@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.73 # -- dscudiero -- Fri 03/23/2018 @ 16:56:48.32
+version=2.10.75 # -- dscudiero -- Thu 03/29/2018 @  9:18:13.05
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi"
@@ -332,6 +332,21 @@ ParseArgsStd $originalArgStr
 	if [[ $tgtEnv == 'next' && $srcEnv != 'test' ]]; then
 		[[ $srcEnv != 'test' ]] && Terminate "The NEXT site may only be updated from the TEST environment, please push your changes in '$srcEnv' to TEST."
 		[[ $verify == false ]] && Msg "Target is NEXT and verify was off, this is not allowed, setting verify to true" && verify=true
+		## Get update comment
+		[[ $verify == true ]] && echo
+		Prompt jalot "Please enter the jalot task number:" "*any*"
+		Prompt comment "Please enter the business reason for making this update:\n^" "*any*"
+		[[ $jalot -eq 0 ]] && jalot='N/A'
+		comment="(Task:$jalot) $comment"
+		## Get update comment
+		if [[ -z $refreshSystem && -n "$requiredGlobalFiles" ]]; then
+			[[ $verify == true ]] && echo
+			defVals='Yes'
+			Msg "Do you wish to refresh the system level files from the skeleton or use those found in the source"
+			unset ans ; Prompt ans "'Yes' to refresh, 'No' to use those from the source" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
+			unset defVals
+			[[ $ans == 'y' ]] && refreshSystem=true || refreshSystem=false
+		fi		
 	fi
 
 ## If pvtDir exists and src is not pvt make sure that this is what the user really wants to to
@@ -343,23 +358,6 @@ ParseArgsStd $originalArgStr
 	# 	ans=$(Lower ${ans:0:1})
 	# 	[[ $ans != 'y' ]] && Goodbye -1
 	# fi
-
-## Get update comment
-	[[ $verify == true ]] && echo
-	Prompt jalot "Please enter the jalot task number:" "*any*"
-	Prompt comment "Please enter the business reason for making this update:\n^" "*any*"
-	[[ $jalot -eq 0 ]] && jalot='N/A'
-	comment="(Task:$jalot) $comment"
-
-## Get update comment
-	if [[ -z $refreshSystem && -n "$requiredGlobalFiles" ]]; then
-		[[ $verify == true ]] && echo
-		defVals='Yes'
-		Msg "Do you wish to refresh the system level files from the skeleton or use those found in the source"
-		unset ans ; Prompt ans "'Yes' to refresh, 'No' to use those from the source" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
-		unset defVals
-		[[ $ans == 'y' ]] && refreshSystem=true || refreshSystem=false
-	fi
 
 ## check cim and courseleaf versions
 	unset srcClVer srcCimVer tgtClVer tgtCimVer
@@ -728,3 +726,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 03-20-2018 @ 09:20:20 - 2.10.71 - dscudiero - Check that verify is on if target is NEXT
 ## 03-23-2018 @ 15:33:27 - 2.10.72 - dscudiero - D
 ## 03-23-2018 @ 16:57:38 - 2.10.73 - dscudiero - Msg3 -> Msg
+## 03-29-2018 @ 12:57:45 - 2.10.75 - dscudiero - Only gather jalot stuff for next env
