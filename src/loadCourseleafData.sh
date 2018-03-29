@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.9.13 # -- dscudiero -- Fri 03/23/2018 @ 14:34:24.70
+version=3.9.17 # -- dscudiero -- Thu 03/29/2018 @  8:34:35.40
 #==================================================================================================
 TrapSigs 'on'
 myIncludes='DbLog Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel WriteChangelogEntry'
@@ -36,6 +36,7 @@ scriptDescription="Load Courseleaf Data"
 		myArgs+=("user|users|switch|processUserData||script|Load user data")
 		myArgs+=("role|role|switch|processRoleData||script|Load role data")
 		myArgs+=("page|page|switch|processPageData||script|Load catalog page data")
+		myArgs+=("comment|comment|option|comment||script|Comment for the action")
 		return 0
 	}
 	#==============================================================================================
@@ -232,6 +233,7 @@ scriptDescription="Load Courseleaf Data"
 			headerRow="$(Lower "$headerRow")"
 
 		# Parse the header record, getting the column numbers of the fields
+			dump -2 -t headerRow
 			IFS='|' read -r -a sheetCols <<< "$headerRow"
 			local field colVar fieldCntr subField 
 			for field in $requiredFields $optionalFields; do
@@ -374,7 +376,7 @@ scriptDescription="Load Courseleaf Data"
 					newData="${usersFromDb["$key"]}"
 					[[ ${newData:(-1)} == '|' ]] && newData=${newData:0:${#newData}-1}
 					if [[ $oldData != $newData ]]; then
-						WarningMsg 0 1 "Found User '$key' in the clusers database file but data is different, using new data"
+						Warning 0 1 "Found User '$key' in the clusers database file but data is different, using new data"
 						Msg "^^New Data: $newData"
 						Msg "^^Old Data: $oldData"
 						sqlStmt="UPDATE users set lname=\"$lname\", fname=\"$fname\", email=\"$email\" where userid=\"$key\""
@@ -401,6 +403,7 @@ scriptDescription="Load Courseleaf Data"
 				fi
 				let procesingCntr=$procesingCntr+1
 			done
+			Msg "^Processed $procesingCntr out of $numUsersfromSpreadsheet"
 			if [[ $verboseLevel -ge 1 ]]; then 
 				Msg "\tMerged User list (usersFromDb):"; for i in "${!usersFromDb[@]}"; do printf "\t\t[$i] = >${usersFromDb[$i]}<\n"; done; 
 				Msg "\tUserid/UIN map (uidUinHash):"; for i in "${!uidUinHash[@]}"; do printf "\t\t[$i] = >${uidUinHash[$i]}<\n"; done; 
@@ -497,12 +500,12 @@ scriptDescription="Load Courseleaf Data"
 							oldData="${rolesOut["$key"]}"; [[ ${oldData:(-1)} == '|' ]] && oldData=${oldData:0:${#oldData}-1}
 							newData="${rolesFromSpreadsheet["$key"]}"; [[ ${newData:(-1)} == '|' ]] && newData=${newData:0:${#newData}-1}
 							if [[ -n $newData && -n $oldData ]]; then
-								WarningMsg 0 1 "Found Role '$key' in the roles file but data is different, using new data"
+								Warning 0 1 "Found Role '$key' in the roles file but data is different, using new data"
 								Msg "^^New Data: $newData"
 								Msg "^^Old Data: $newData"
 								rolesOut["$key"]="$newData"
 							elif [[ -z $oldData && -n $newData ]]; then
-								[[ -z $oldData ]] && Info 0 1 "Found Role '$key' in the roles file, old data is null, using new data"
+								[[ $oldData != $newData ]] && Info 0 1 "Found Role '$key' in the roles file, old data is null, using new data"
 								rolesOut["$key"]="$oldData"							
 							fi
 							(( numModifiedRoles += 1 ))
@@ -520,6 +523,7 @@ scriptDescription="Load Courseleaf Data"
 				fi
 				let procesingCntr=$procesingCntr+1
 			done
+			Msg "^Processed $procesingCntr out of $numRolesfromSpreadsheet"
 			#for i in "${!rolesOut[@]}"; do echo -e "\tkey: '$i', value: '${rolesOut[$i]}'"; done;
 
 		## Write out the role data to the role file
@@ -561,7 +565,7 @@ scriptDescription="Load Courseleaf Data"
 					members=$(cut -d '|' -f1 <<< "${rolesOut["$key"]}")
 					for member in ${members//,/ }; do
 						if [[ ! ${usersFromDb["$member"]+abc} ]]; then
-							WarningMsg 0 1 "Role member '$member' use in role '$key' is not provisioned"
+							Warning 0 1 "Role member '$member' use in role '$key' is not provisioned"
 							(( numRoleMembersNotProvisoned += 1 ))
 						fi
 					done
@@ -591,9 +595,9 @@ scriptDescription="Load Courseleaf Data"
 				result="${resultSet[$ii]}"
 				key=$(cut -d '|' -f $pathCol <<< "$result")
 				[[ ${key:0:1} != '/' ]] && Warning "Invalid page path data found in data row $ii ($key), skipping data" && continue
-				[[ -z $key ]] && WarningMsg 0 1 "Work Sheet record:\n^^$result\n\tDoes not contain any path/url data, skipping" && continue
+				[[ -z $key ]] && Warning 0 1 "Work Sheet record:\n^^$result\n\tDoes not contain any path/url data, skipping" && continue
 				if [[ $key != '/' && ! -d $(dirname $siteDir/web/$key) ]]; then
-					[[ $ignoreMissingPages != true ]] && WarningMsg 0 1 "Page: '$key' Not found"
+					[[ $ignoreMissingPages != true ]] && Warning 0 1 "Page: '$key' Not found"
 					((numPagesNotFound += 1))
 					continue
 				fi
@@ -707,7 +711,7 @@ scriptDescription="Load Courseleaf Data"
 					fi
 					let procesingCntr=$procesingCntr+1
 			done
-			Msg "^$numWorkflowDataFromSpreadsheet out of $numWorkflowDataFromSpreadsheet processed"
+			Msg "^Processed $numWorkflowDataFromSpreadsheet out of $numWorkflowDataFromSpreadsheet"
 	return 0
 } #ProcessCatalogPageData
 
@@ -820,28 +824,24 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 
 [[ $processUserData == true || $processRoleData == true || $processPageData == true ]] && dataArgSpecified=true || dataArgSpecified=false
 ## What data should we load
-	if [[ $verify == true && $processUserData != true && -n $usersSheet ]]; then
-		unset ans; Prompt ans "Found a 'user' data worksheet ($usersSheet), do you wish to process that data" 'Yes No All'; ans=$(Lower ${ans:0:1})
-		[[ $ans == 'y' ]] && processUserData=true
-		[[ $ans == 'a' ]] && processUserData=true && processRoleData=true && processPageData=true
-	else
-		[[ $dataArgSpecified == false && -n $usersSheet ]] && processUserData=true
-	fi
+	if [[ $dataArgSpecified == true ]]; then
+		if [[ $verify == true && $processUserData != true && -n $usersSheet ]]; then
+			unset ans; Prompt ans "Found a 'user' data worksheet ($usersSheet), do you wish to process that data" 'Yes No All'; ans=$(Lower ${ans:0:1})
+			[[ $ans == 'y' ]] && processUserData=true
+			[[ $ans == 'a' ]] && processUserData=true && processRoleData=true && processPageData=true
+		fi
 
-	if [[ $verify == true && $processRoleData != true && -n $rolesSheet ]]; then
-		unset ans; Prompt ans "Found a 'roles' data worksheet ($rolesSheet), do you wish to process that data" 'Yes No All'; ans=$(Lower ${ans:0:1})
-		[[ $ans == 'y' ]] && processRoleData=true
-		[[ $ans == 'a' ]] && processUserData=true && processRoleData=true && processPageData=true
-	else
-		[[ $dataArgSpecified == false && -n $rolesSheet ]] && processRoleData=true
-	fi
+		if [[ $verify == true && $processRoleData != true && -n $rolesSheet ]]; then
+			unset ans; Prompt ans "Found a 'roles' data worksheet ($rolesSheet), do you wish to process that data" 'Yes No All'; ans=$(Lower ${ans:0:1})
+			[[ $ans == 'y' ]] && processRoleData=true
+			[[ $ans == 'a' ]] && processUserData=true && processRoleData=true && processPageData=true
+		fi
 
-	if [[ $verify == true && $processPageData != true && -n $pagesSheet ]]; then
-		unset ans; Prompt ans "Found a 'catalog page data' worksheet ($rolesSheet), do you wish to process that data" 'Yes No All'; ans=$(Lower ${ans:0:1})
-		[[ $ans == 'y' ]] && processPageData=true
-		[[ $ans == 'a' ]] && processUserData=true && processRoleData=true && processPageData=true
-	else
-		[[ $dataArgSpecified == false && -n $pagesSheet ]] && processPageData=true
+		if [[ $verify == true && $processPageData != true && -n $pagesSheet ]]; then
+			unset ans; Prompt ans "Found a 'catalog page data' worksheet ($rolesSheet), do you wish to process that data" 'Yes No All'; ans=$(Lower ${ans:0:1})
+			[[ $ans == 'y' ]] && processPageData=true
+			[[ $ans == 'a' ]] && processUserData=true && processRoleData=true && processPageData=true
+		fi
 	fi
 
 	# ## If we are processing page data and role data see if the user page has uin mapping information
@@ -884,9 +884,9 @@ ignoreMissingPages=true
 	[[ $processUserData == false && $processRoleData == false && $processPageData == false ]] && echo && Terminate "No actions requested, please review help text"
 
 ## If this is next or curr then get a task number
-	# if [[ $env == 'next' || $env == 'curr' ]]; then
-	# 	Init 'getJalot'
-	# fi
+	if [[ $env == 'next' || $env == 'curr' ]]; then
+		Init 'getJalot'
+	fi
 
 	verifyArgs+=("Client:$client")
 	verifyArgs+=("Env:$(TitleCase $env) ($siteDir)")
@@ -1006,7 +1006,7 @@ ignoreMissingPages=true
 
 		if [[ ${#membersErrors[@]} -gt 0 ]]; then
 			echo
-			WarningMsg 0 1 "Found page owner or workflow data without a defined userid or role:"
+			Warning 0 1 "Found page owner or workflow data without a defined userid or role:"
 			for key in "${!membersErrors[@]}"; do
 				Msg "^$(ColorW "*Warning*") -- Workflow/Owner member: '$key' not defined and used on the following pages:"
 				tmpStr="${membersErrors["$key"]}"
@@ -1110,3 +1110,4 @@ ignoreMissingPages=true
 ## 03-22-2018 @ 14:06:53 - 3.9.11 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 11:56:20 - 3.9.12 - dscudiero - Updated for GetExcel2/GetExcel
 ## 03-23-2018 @ 15:35:09 - 3.9.13 - dscudiero - D
+## 03-29-2018 @ 08:39:42 - 3.9.17 - dscudiero - Fix WarningMsg, false role data messaging
