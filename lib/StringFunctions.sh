@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.15" # -- dscudiero -- Fri 03/30/2018 @ 13:45:00.76
+# version="1.0.16" # -- dscudiero -- Fri 03/30/2018 @ 13:50:06.57
 #===================================================================================================
 # Various string manipulation functions
 #===================================================================================================
@@ -131,7 +131,7 @@ function CompareVersions {
 	local version1Orig="$1"; shift || true
 	local compareOp="$1"; shift || true
 	local version2Orig="$1"
-	dump version1Orig compareOp version2Orig
+	#dump version1Orig compareOp version2Orig
 
 	## Quick compare if 'equals' is in the compare type
 	if [[ $version1Orig == $version2Orig ]]; then
@@ -143,12 +143,12 @@ function CompareVersions {
 
 	local version1rc=$(Contains "$version1Orig" "rc")
 	local version2rc=$(Contains "$version2Orig" "rc")
-	dump version1rc version2rc
+	#dump version1rc version2rc
 
 	local version1=${version1Orig//[a-zA-Z ]/}
 	local version2=${version2Orig//[a-zA-Z ]/}
 
-	dump version1 version2
+	#dump version1 version2
 
 	local token1=$(cut -d'.' -f1 <<< $version1); token1=${token1}00; token1=${token1:0:3}
 	local token2=$(cut -d'.' -f2 <<< $version1); token2=${token2}00; token2=${token2:0:3}
@@ -159,9 +159,9 @@ function CompareVersions {
 	token2=$(cut -d'.' -f2 <<< $version2); token2=${token2}00; token2=${token2:0:3}
 	token3=$(cut -d'.' -f3 <<< $version2)
 	version2="${token1}${token2}${token3}"
-	dump version1 version2
+	#dump version1 version2
 
-	dump version1 compareOp version2
+	#dump version1 compareOp version2
 	local result
 	case "$compareOp" in
 		'ge' | 'gt')
@@ -242,3 +242,4 @@ function PrintColumnarData() {
 ## 12-20-2017 @ 15.09.53 - ("1.0.13")  - dscudiero - Added Indent++ and Indent-- functions
 ## 03-30-2018 @ 12:27:32 - 1.0.14 - dscudiero - Update CompareVersions to take into account rc releases
 ## 03-30-2018 @ 13:45:26 - 1.0.15 - dscudiero - Fix issue with lt
+## 03-30-2018 @ 13:50:18 - 1.0.16 - dscudiero - Remove debug statements
