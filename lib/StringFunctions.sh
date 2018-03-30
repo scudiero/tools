@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.13" # -- dscudiero -- Wed 12/20/2017 @ 15:09:38.35
+# version="1.0.14" # -- dscudiero -- Fri 03/30/2018 @ 12:26:45.76
 #===================================================================================================
 # Various string manipulation functions
 #===================================================================================================
@@ -119,7 +119,7 @@ function Contains {
 export -f Contains
 
 #===================================================================================================
-# Compare two segmented version strings
+# Compare two segmented version strings, takes into account 'rc' releases
 # i.e 1111.2222.3333
 # Called as
 # 	version1 operator version2
@@ -128,29 +128,56 @@ export -f Contains
 #===================================================================================================
 function CompareVersions {
 
-	local version1="$1"; shift || true
+	local version1Orig="$1"; shift || true
 	local compareOp="$1"; shift || true
-	local version2="$1"
-	local token1 token2 token3
+	local version2Orig="$1"
+	#dump version1Orig compareOp version2Orig
 
-	token1=$(cut -d'.' -f1 <<< $version1); token1=${token1}00; token1=${token1:0:3}
-	token2=$(cut -d'.' -f2 <<< $version1); token2=${token2}00; token2=${token2:0:3}
-	token3=$(cut -d'.' -f3 <<< $version1)
+	## Quick compare if 'equals' is in the compare type
+	if [[ $version1Orig == $version2Orig ]]; then
+		[[ $compareOp == 'eq' ]] && { echo true; return 0; }
+		[[ ${compareOp:1:1} == 'e' ]] && { echo true; return 0; }
+	else
+		[[ $compareOp == 'eq' ]] && { echo false; return 0; }
+	fi
+
+	local version1rc=$(Contains "$version1Orig" "rc")
+	local version2rc=$(Contains "$version2Orig" "rc")
+	#dump version1rc version2rc
+
+	local version1=${version1Orig//[a-zA-Z ]/}
+	local version2=${version2Orig//[a-zA-Z ]/}
+
+	#dump version1 version2
+
+	local token1=$(cut -d'.' -f1 <<< $version1); token1=${token1}00; token1=${token1:0:3}
+	local token2=$(cut -d'.' -f2 <<< $version1); token2=${token2}00; token2=${token2:0:3}
+	local token3=$(cut -d'.' -f3 <<< $version1)
 	version1="${token1}${token2}${token3}"
 
 	token1=$(cut -d'.' -f1 <<< $version2); token1=${token1}00; token1=${token1:0:3}
 	token2=$(cut -d'.' -f2 <<< $version2); token2=${token2}00; token2=${token2:0:3}
 	token3=$(cut -d'.' -f3 <<< $version2)
 	version2="${token1}${token2}${token3}"
+	#dump version1 version2
 
 	#dump version1 compareOp version2
+	local result
 	case "$compareOp" in
-		gt) [[ $version1 -gt $version2 ]] && echo true || echo false ;;
-		ge) [[ $version1 -ge $version2 ]] && echo true || echo false ;;
-		lt) [[ $version1 -lt $version2 ]] && echo true || echo false ;;
-		le) [[ $version1 -lt $version2 ]] && echo true || echo false ;;
-		*)  [[ $version1 -eq $version2 ]] && echo true || echo false ;;
+		'ge' | 'gt')
+			[[ $version1 -gt $version2 ]] && { echo true; return 0; }
+			[[ $version1 -lt $version2 ]] && { echo false; return 0; }
+			[[ $version1rc == true && $version2rc == false ]] && { echo true; return 0; }
+			echo false; return 0;
+			;;
+		'le' | 'lt')
+			[[ $version1 -lt $version2 ]] && { echo true; return 0; }
+			[[ $version1 -gt $version2 ]] && { echo false; return 0; }
+			[[ $version1rc == false && $version2rc == true ]] && { echo true; return 0; }
+			echo false; return 0;
+			;;
 	esac
+
 	return 0
 }
 
@@ -213,3 +240,4 @@ function PrintColumnarData() {
 ## 05-25-2017 @ 09.52.37 - ("1.0.11")  - dscudiero - remove extranious < from PrintCoumnarData
 ## 12-20-2017 @ 15.04.35 - ("1.0.12")  - dscudiero - Added ++ and -- options to the Indent function to increment/decrement the indentLevel
 ## 12-20-2017 @ 15.09.53 - ("1.0.13")  - dscudiero - Added Indent++ and Indent-- functions
+## 03-30-2018 @ 12:27:32 - 1.0.14 - dscudiero - Update CompareVersions to take into account rc releases
