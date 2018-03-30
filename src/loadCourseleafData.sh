@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.9.25 # -- dscudiero -- Fri 03/30/2018 @  9:59:09.66
+version=3.9.26 # -- dscudiero -- Fri 03/30/2018 @ 10:00:27.46
 #==================================================================================================
 TrapSigs 'on'
 myIncludes='DbLog Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel WriteChangelogEntry'
@@ -847,7 +847,6 @@ dump -1 processUserData processRoleData processPageData dataArgSpecified usersSh
 		[[ $processUserData == true && -z $usersSheet ]] && Terminate "Sorry, you specified '-users' on the command line but could not locate a 'Users' worksheet."
 		[[ $processRoleData == true && -z $rolesSheet ]] && Terminate "Sorry, you specified '-roles' on the command line but could not locate a 'Roles' worksheet."
 		[[ $processPageData == true && -z $pagesSheet ]] && Terminate "Sorry, you specified '-pages' on the command line but could not locate a 'Workflow' worksheet."
-
 	fi
 
 	# ## If we are processing page data and role data see if the user page has uin mapping information
@@ -1120,3 +1119,4 @@ ignoreMissingPages=true
 ## 03-30-2018 @ 09:39:47 - 3.9.18 - dscudiero - Comment out dataArgSpecified check, allow prompts
 ## 03-30-2018 @ 09:48:57 - 3.9.21 - dscudiero - Fix problem where we were not prompting for what data to load
 ## 03-30-2018 @ 10:00:10 - 3.9.25 - dscudiero - Add checks to make sure there is a valid worksheet in the workbook if the user has specified arguments
+## 03-30-2018 @ 10:00:42 - 3.9.26 - dscudiero - Cosmetic/minor change/Sync
