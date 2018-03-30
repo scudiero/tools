@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.9.17 # -- dscudiero -- Thu 03/29/2018 @  8:34:35.40
+version=3.9.18 # -- dscudiero -- Fri 03/30/2018 @  9:37:10.71
 #==================================================================================================
 TrapSigs 'on'
 myIncludes='DbLog Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel WriteChangelogEntry'
@@ -824,7 +824,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 
 [[ $processUserData == true || $processRoleData == true || $processPageData == true ]] && dataArgSpecified=true || dataArgSpecified=false
 ## What data should we load
-	if [[ $dataArgSpecified == true ]]; then
+	#if [[ $dataArgSpecified == true ]]; then
 		if [[ $verify == true && $processUserData != true && -n $usersSheet ]]; then
 			unset ans; Prompt ans "Found a 'user' data worksheet ($usersSheet), do you wish to process that data" 'Yes No All'; ans=$(Lower ${ans:0:1})
 			[[ $ans == 'y' ]] && processUserData=true
@@ -842,7 +842,7 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 			[[ $ans == 'y' ]] && processPageData=true
 			[[ $ans == 'a' ]] && processUserData=true && processRoleData=true && processPageData=true
 		fi
-	fi
+	#fi
 
 	# ## If we are processing page data and role data see if the user page has uin mapping information
 	# if [[ $verify == true && $processPageData == true ]] && [[ $processPageData == true || $processRoleData == true ]]; then
@@ -1111,3 +1111,4 @@ ignoreMissingPages=true
 ## 03-23-2018 @ 11:56:20 - 3.9.12 - dscudiero - Updated for GetExcel2/GetExcel
 ## 03-23-2018 @ 15:35:09 - 3.9.13 - dscudiero - D
 ## 03-29-2018 @ 08:39:42 - 3.9.17 - dscudiero - Fix WarningMsg, false role data messaging
+## 03-30-2018 @ 09:39:47 - 3.9.18 - dscudiero - Comment out dataArgSpecified check, allow prompts
