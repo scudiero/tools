@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.14" # -- dscudiero -- Fri 03/30/2018 @ 12:26:45.76
+# version="1.0.15" # -- dscudiero -- Fri 03/30/2018 @ 13:45:00.76
 #===================================================================================================
 # Various string manipulation functions
 #===================================================================================================
@@ -131,7 +131,7 @@ function CompareVersions {
 	local version1Orig="$1"; shift || true
 	local compareOp="$1"; shift || true
 	local version2Orig="$1"
-	#dump version1Orig compareOp version2Orig
+	dump version1Orig compareOp version2Orig
 
 	## Quick compare if 'equals' is in the compare type
 	if [[ $version1Orig == $version2Orig ]]; then
@@ -143,12 +143,12 @@ function CompareVersions {
 
 	local version1rc=$(Contains "$version1Orig" "rc")
 	local version2rc=$(Contains "$version2Orig" "rc")
-	#dump version1rc version2rc
+	dump version1rc version2rc
 
 	local version1=${version1Orig//[a-zA-Z ]/}
 	local version2=${version2Orig//[a-zA-Z ]/}
 
-	#dump version1 version2
+	dump version1 version2
 
 	local token1=$(cut -d'.' -f1 <<< $version1); token1=${token1}00; token1=${token1:0:3}
 	local token2=$(cut -d'.' -f2 <<< $version1); token2=${token2}00; token2=${token2:0:3}
@@ -159,21 +159,21 @@ function CompareVersions {
 	token2=$(cut -d'.' -f2 <<< $version2); token2=${token2}00; token2=${token2:0:3}
 	token3=$(cut -d'.' -f3 <<< $version2)
 	version2="${token1}${token2}${token3}"
-	#dump version1 version2
+	dump version1 version2
 
-	#dump version1 compareOp version2
+	dump version1 compareOp version2
 	local result
 	case "$compareOp" in
 		'ge' | 'gt')
 			[[ $version1 -gt $version2 ]] && { echo true; return 0; }
 			[[ $version1 -lt $version2 ]] && { echo false; return 0; }
-			[[ $version1rc == true && $version2rc == false ]] && { echo true; return 0; }
-			echo false; return 0;
+			[[ $version1rc == true && $version2rc == false ]] && { echo false; return 0; }
+			echo true; return 0;
 			;;
 		'le' | 'lt')
 			[[ $version1 -lt $version2 ]] && { echo true; return 0; }
 			[[ $version1 -gt $version2 ]] && { echo false; return 0; }
-			[[ $version1rc == false && $version2rc == true ]] && { echo true; return 0; }
+			[[ $version1rc == true && $version2rc == false ]] && { echo true; return 0; }
 			echo false; return 0;
 			;;
 	esac
@@ -241,3 +241,4 @@ function PrintColumnarData() {
 ## 12-20-2017 @ 15.04.35 - ("1.0.12")  - dscudiero - Added ++ and -- options to the Indent function to increment/decrement the indentLevel
 ## 12-20-2017 @ 15.09.53 - ("1.0.13")  - dscudiero - Added Indent++ and Indent-- functions
 ## 03-30-2018 @ 12:27:32 - 1.0.14 - dscudiero - Update CompareVersions to take into account rc releases
+## 03-30-2018 @ 13:45:26 - 1.0.15 - dscudiero - Fix issue with lt
