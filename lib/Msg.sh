@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.36" # -- dscudiero -- Mon 04/02/2018 @ 14:54:21.21
+# version="1.0.38" # -- dscudiero -- Mon 04/02/2018 @ 15:01:18.12
 #===================================================================================================
 # Usage: Msg <msgType> <msgLevel> <msgIndent> msgText
 # 	msgType: [N,I,W,E,T]
@@ -29,7 +29,14 @@ function Msg {
 			## Next token is a indent level?
 			if [[ -z $msgIndent ]]; then
 				re='^[0-9]+$'
-				[[ $1 =~ $re ]] && msgIndent="$1" && shift 1 || true
+				if [[ $1 =~ $re ]]; then 
+					msgIndent="$1" && shift 1 || true
+					if [[ ${msgIndent:0:1} == '+' ]]; then
+						let msgIndent = $indentLevel + ${msgIndent:1}
+					elif [[ ${msgIndent:0:1} == '-' ]]; then
+						let msgIndent = $indentLevel - ${msgIndent:1}
+					fi
+				fi
 			fi
 			#dump msgType msgLevel msgIndent
 		fi
@@ -102,3 +109,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 10-19-2017 @ 10.35.36 - ("1.0.33")  - dscudiero - Remove debug statements
 ## 11-09-2017 @ 14.15.05 - ("1.0.34")  - dscudiero - Added NotifyAllApprovers
 ## 04-02-2018 @ 14:54:57 - 1.0.36 - dscudiero - Make the indentLevel local to function
+## 04-02-2018 @ 15:01:42 - 1.0.38 - dscudiero - Allow specificaiton of + or - n for msgIndent
