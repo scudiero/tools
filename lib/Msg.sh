@@ -1,19 +1,19 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.35" # -- dscudiero -- Fri 03/23/2018 @ 16:45:32.60
+# version="1.0.36" # -- dscudiero -- Mon 04/02/2018 @ 14:54:21.21
 #===================================================================================================
-# Usage: Msg <msgType> <msgLevel> <indentLevel> msgText
+# Usage: Msg <msgType> <msgLevel> <msgIndent> msgText
 # 	msgType: [N,I,W,E,T]
 # 	msgLevel: integer
-# 	indentLevel: integer
+# 	msgIndent: integer
 #===================================================================================================
 function Msg {
 	[[ $quiet == true ]] && return 0
 	[[ $# -eq 0 ]] && echo && return 0
 	Import "Colors"
 	## First token is a type identifier?
-		local msgType msgLevel indentLevel msgText
-		unset msgType msgLevel indentLevel msgText
+		local msgType msgLevel msgIndent msgText
+		unset msgType msgLevel msgIndent msgText
 		if [[ $# -gt 1 ]]; then
 			[[ $1 = 'Q' || $1 = 'q' ]] && shift && echo -e "$*" && return 0
 			local re='^[n,N,i,I,w,W,e,E,t,T,v,V,l,L]$'
@@ -27,11 +27,11 @@ function Msg {
 				fi
 			fi
 			## Next token is a indent level?
-			if [[ -z $indentLevel ]]; then
+			if [[ -z $msgIndent ]]; then
 				re='^[0-9]+$'
-				[[ $1 =~ $re ]] && indentLevel="$1" && shift 1 || true
+				[[ $1 =~ $re ]] && msgIndent="$1" && shift 1 || true
 			fi
-			#dump msgType msgLevel indentLevel
+			#dump msgType msgLevel msgIndent
 		fi
 
 	## Format message
@@ -49,8 +49,8 @@ function Msg {
 		[[ $msgLevel -gt $verboseLevel ]] && return 0
 
 		## Add indention
-		if [[ -n $indentLevel && $indentLevel -gt 0 ]]; then
-			local tmpStr=$(echo "$(head -c $indentLevel < /dev/zero | tr '\0' "^")")
+		if [[ -n $msgIndent && $msgIndent -gt 0 ]]; then
+			local tmpStr=$(echo "$(head -c $msgIndent < /dev/zero | tr '\0' "^")")
 			msgText="${tmpStr}${msgText}"
 		fi
 
@@ -101,3 +101,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 10-19-2017 @ 09.01.09 - ("1.0.32")  - dscudiero - s
 ## 10-19-2017 @ 10.35.36 - ("1.0.33")  - dscudiero - Remove debug statements
 ## 11-09-2017 @ 14.15.05 - ("1.0.34")  - dscudiero - Added NotifyAllApprovers
+## 04-02-2018 @ 14:54:57 - 1.0.36 - dscudiero - Make the indentLevel local to function
