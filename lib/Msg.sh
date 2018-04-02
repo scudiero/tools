@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.38" # -- dscudiero -- Mon 04/02/2018 @ 15:01:18.12
+# version="1.0.54" # -- dscudiero -- Mon 04/02/2018 @ 15:51:35.83
 #===================================================================================================
 # Usage: Msg <msgType> <msgLevel> <msgIndent> msgText
 # 	msgType: [N,I,W,E,T]
@@ -28,21 +28,25 @@ function Msg {
 			fi
 			## Next token is a indent level?
 			if [[ -z $msgIndent ]]; then
-				re='^[0-9]+$'
+				re='^[+,-]{0,1}[0-9]$'
 				if [[ $1 =~ $re ]]; then 
 					msgIndent="$1" && shift 1 || true
 					if [[ ${msgIndent:0:1} == '+' ]]; then
-						let msgIndent = $indentLevel + ${msgIndent:1}
+						(( msgIndent = indentLevel + ${msgIndent:1} ))
 					elif [[ ${msgIndent:0:1} == '-' ]]; then
-						let msgIndent = $indentLevel - ${msgIndent:1}
+						(( msgIndent = indentLevel - ${msgIndent:1} ))
 					fi
 				fi
 			fi
-			#dump msgType msgLevel msgIndent
 		fi
-
+	
+	[[ -z $msgIndent && -n $indentLevel ]] && msgIndent=$indentLevel
+	[[ $logOnly == true ]] && msgType='L'
+	
+	dump -1 msgType msgLevel msgIndent
 	## Format message
 		msgText="$*"
+
 		case $msgType in
 			l|L) [[ -n $logFile && -w $logFile ]] && { echo -e "$msgText" >> $logFile; return 0; } ;;
 			n|N) msgText="$(ColorN "*Note*") -- $msgText" ;;
@@ -62,10 +66,8 @@ function Msg {
 		fi
 
 	## print message
-		#[[ "${msgText#*\^}" != "$msgText" ]] && msgText="$(sed s"/\^/$tabStr/g" <<< "$msgText")"
 		[[ -z $tabStr ]] && tabStr='     '
-		[[ "${msgText#*\^}" != "$msgText" ]] && msgText="${msgText//^/$tabStr}" ## Expand tab chars
-
+		msgText="${msgText//^/$tabStr}" ## Expand tab chars
 		echo -e "$msgText"
 		#[[ -n $logFile && -w $logFile ]] && echo -e "$msgText" >> "$logFile"&
 		[[ $msgType == 'T' ]] && Goodbye 3
@@ -110,3 +112,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 11-09-2017 @ 14.15.05 - ("1.0.34")  - dscudiero - Added NotifyAllApprovers
 ## 04-02-2018 @ 14:54:57 - 1.0.36 - dscudiero - Make the indentLevel local to function
 ## 04-02-2018 @ 15:01:42 - 1.0.38 - dscudiero - Allow specificaiton of + or - n for msgIndent
+## 04-02-2018 @ 16:21:58 - 1.0.54 - dscudiero - Tweak tabbing
