@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.72 # -- dscudiero -- Tue 03/27/2018 @  6:55:38.70
+version=1.22.73 # -- dscudiero -- Mon 04/02/2018 @  7:15:16.97
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -271,7 +271,6 @@ case "$hostName" in
 
 		## Run Reports
 			reports=("qaStatusShort -email \"${qaTeam},${qaManager},dscudiero\"")
-			reports+=("clientByTimezone -email \"${supportManager},dscudiero\"")
 			for ((i=0; i<${#reports[@]}; i++)); do
 				report="${reports[$i]}"; reportName="${report%% *}"; reportArgs="${report#* }"; [[ $reportName == $reportArgs ]] && unset reportArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $reportName $reportArgs..."; sTime=$(date "+%s")
@@ -527,3 +526,4 @@ return 0
 ## 03-23-2018 @ 16:18:39 - 1.22.69 - dscudiero - D
 ## 03-26-2018 @ 08:47:13 - 1.22.71 - dscudiero - Fix problem calling reports
 ## 03-27-2018 @ 06:55:57 - 1.22.72 - dscudiero - Update call to clientByTimezone report
+## 04-02-2018 @ 07:16:20 - 1.22.73 - dscudiero - Move timezone report to weekly
