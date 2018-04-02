@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.51 # -- dscudiero -- Fri 03/23/2018 @ 16:57:07.70
+version=5.5.66 # -- dscudiero -- Fri 03/30/2018 @ 14:22:52.06
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel EditTcfValue BackupCourseleafFile'
@@ -28,8 +28,8 @@ cwdStart="$(pwd)"
 		myArgs+=("adv|advance|switch|catalogAdvance||script|Advance the catalog")
 		myArgs+=("noadv|noadvance|switch|catalogAdvance|catalogAdvance=false|script|Do not advance the catalog")
 		myArgs+=("full|fulladvance|switch|fullAdvance||script|Do a full catalog advance (Copy next to curr and then advance")
-		myArgs+=("new|newest|switch|newest||script|Update each product to the newest named version")
-		myArgs+=("latest|latest|switch|newest||script|Update each product to the newest named version")
+		myArgs+=("new|newest|switch|newest||script|Update each product to the latest named version")
+		myArgs+=("latest|latest|switch|latest||script|Update each product to the latest named version")
 		myArgs+=("master|master|switch|master||script|Update each product to the current 'master' version")
 		myArgs+=("ed|edition|option|newEdition||script|The new edition value (for advance)")
 		myArgs+=("audit|audit|switch|catalogAudit||script|Run the catalog audit report as part of the process")
@@ -649,6 +649,7 @@ removeGitReposFromNext=true
 	Hello
 	[[ $userName == 'dscudiero' && $useLocal == true ]] && GetDefaultsData "$myName" -fromFiles || GetDefaultsData "$myName"
 	ParseArgsStd $originalArgStr
+	[[ -n newest ]] && latest=true
 
 	displayGoodbyeSummaryMessages=true
 
@@ -796,7 +797,12 @@ removeGitReposFromNext=true
 	unset processControl betaProducts
 	for product in $(tr ',' ' ' <<< $(Upper "$patchProducts")); do
 		productLower="$(Lower "$product")"
-		## Get the version
+
+		## Get the target sites version
+		[[ $productLower == 'cat' ]] && catVerBeforePatch="$(Lower "$(cat "$tgtDir/web/courseleaf/clver.txt")")"
+		[[ $productLower == 'cim' ]] && cimVerBeforePatch="$(Lower "$(cat "$tgtDir/web/courseleaf/cim/clver.txt")")"
+
+		## Get the source version
 		[[ $productLower == 'cat' ]] && srcDir=$gitRepoShadow/courseleaf || srcDir=$gitRepoShadow/$productLower
 		if [[ -d "$srcDir" ]]; then
 			unset fileList prodShadowVer catMasterDate cimMasterDate
@@ -806,16 +812,17 @@ removeGitReposFromNext=true
 	#master=true
 			eval ${productLower}MasterDate=\"$(date +"%m-%d-%Y @ %H.%M.%S" -r $srcDir/master/.syncDate)\"
 			eval prodMasterDate=\$${productLower}MasterDate
-			if [[ -z $newest && -z $master && -n $prodShadowVer ]]; then
+			if [[ -z $latest && -z $master && -n $prodShadowVer ]]; then
 				Msg
 				Msg "For '$(ColorK $product)', do you wish to apply the latest named version ($prodShadowVer) or the skeleton ($prodMasterDate)"
 				unset ans; Prompt ans "^'Yes' for the named version, 'No' for the skeleton" 'Yes,No' 'Yes'; ans=$(Lower "${ans:0:1}")
 				[[ $ans != 'y' ]] && prodShadowVer='master'
 			else
-				[[ -n $master || -z $prodShadowVer ]] && prodShadowVer='master'
+				[[ -n $master ]] && prodShadowVer='master'
 				Note 0 1 "Using specified value of '$prodShadowVer' for $product"
 			fi
 			unset masterVer
+
 			if [[ $prodShadowVer == 'master' && -r "$srcDir/master/$(basename $srcDir)/clver.txt" ]]; then
 				masterVer="$(Lower "$(cat "$srcDir/master/$(basename $srcDir)/clver.txt")")"
 				[[ "${masterVer: -2}" == 'rc' ]] && betaProducts="$betaProducts, $product" && masterVer="$(tr -d ' ' <<< "$masterVer")"
@@ -826,14 +833,27 @@ removeGitReposFromNext=true
 			prodShadowVer='N/A'
 			srcDir='N/A'
 		fi
+		eval ${productLower}VerAfterPatch=$prodShadowVer
 		processControl="$processControl,$productLower|$prodShadowVer|$srcDir"
 		eval "${product}Version=\"$prodShadowVer\""
+		currentVersionVar="${product}VerBeforePatch"
+		targetVersionVar="${product}VerAfterPatch"
+		[[ $(CompareVersions "${!currentVersionVar}" 'ge' "${!targetVersionVar}") == true ]] && \
+			Terminate "Sorry, requested version for '$product' (${!targetVersionVar}) is equal to \
+			or older then the current installed version (${!currentVersionVar})"
 	done
+
 	betaProducts=${betaProducts:2}
 	processControl=${processControl:1}
-	dump -2 processControl betaProducts
+	dump -1 processControl betaProducts catVerBeforePatch cimVerBeforePatch catVerAfterPatch cimVerAfterPatch
 	addAdvanceCode=false
 	GetCims "$tgtDir" -all
+
+	## Set rebuildHistoryDb if patching cim and the current cim version is less than 3.5.7
+	rebuildHistoryDb=false
+	[[ $(Contains "$products" 'cim') == true && \
+	$(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7') == true && \
+	$(CompareVersions "$cimVerBeforePatch" 'le' '3.5.7 rc') == true ]] && rebuildHistoryDb=true
 
 ## If cat is one of the products, should we advance the edition, should we audit the catalog
 	if [[ $(Contains "$patchProducts" 'cat') == true ]]; then
@@ -1473,7 +1493,11 @@ declare -A processedSpecs
 							for cim in $(echo $cimStr | tr ',' ' '); do
 								Msg "^^^Republishing /$cim/index.tcf..."
 								RunCourseLeafCgi "$tgtDir" "-r /$cim/index.tcf" | Indent | Indent
-							done
+								if [[ $rebuildHistoryDb == true ]]; then
+									Msg "^^^RebuildHistoryDb /$cim/index.tcf..."
+									RunCourseLeafCgi "$tgtDir" "rebuildHistoryDb /$cim/index.tcf" | Indent | Indent
+								fi
+							done 
 						fi
 						;;
 				esac
@@ -1564,9 +1588,6 @@ Msg "\nCross product checks..."
 			rebuildConsole=true
 			filesEdited+=("$editFile")
 		fi
-
-
-
 	else
 		Msg
 		Warning 0 2 "Could not locate '$editFile', please check the target site"
@@ -1828,3 +1849,4 @@ Goodbye 0 "$text1" "$text2"
 ## 03-23-2018 @ 11:56:10 - 5.5.49 - dscudiero - Updated for GetExcel2/GetExcel
 ## 03-23-2018 @ 15:33:41 - 5.5.50 - dscudiero - D
 ## 03-23-2018 @ 16:57:48 - 5.5.51 - dscudiero - Msg3 -> Msg
+## 04-02-2018 @ 07:15:41 - 5.5.66 - dscudiero - Move timezone report to weeky
