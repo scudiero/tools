@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.9.26 # -- dscudiero -- Fri 03/30/2018 @ 10:00:27.46
+version=3.9.27 # -- dscudiero -- Mon 04/02/2018 @ 16:21:19.92
 #==================================================================================================
 TrapSigs 'on'
 myIncludes='DbLog Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel WriteChangelogEntry'
@@ -501,8 +501,8 @@ scriptDescription="Load Courseleaf Data"
 							newData="${rolesFromSpreadsheet["$key"]}"; [[ ${newData:(-1)} == '|' ]] && newData=${newData:0:${#newData}-1}
 							if [[ -n $newData && -n $oldData ]]; then
 								Warning 0 1 "Found Role '$key' in the roles file but data is different, using new data"
-								Msg "^^New Data: $newData"
-								Msg "^^Old Data: $newData"
+								Msg "^^New Data: $newData (${rolesFromSpreadsheet["$key"]})"
+								Msg "^^Old Data: $newData (${rolesOut["$key"]})"
 								rolesOut["$key"]="$newData"
 							elif [[ -z $oldData && -n $newData ]]; then
 								[[ $oldData != $newData ]] && Info 0 1 "Found Role '$key' in the roles file, old data is null, using new data"
@@ -1120,3 +1120,4 @@ ignoreMissingPages=true
 ## 03-30-2018 @ 09:48:57 - 3.9.21 - dscudiero - Fix problem where we were not prompting for what data to load
 ## 03-30-2018 @ 10:00:10 - 3.9.25 - dscudiero - Add checks to make sure there is a valid worksheet in the workbook if the user has specified arguments
 ## 03-30-2018 @ 10:00:42 - 3.9.26 - dscudiero - Cosmetic/minor change/Sync
+## 04-02-2018 @ 16:25:30 - 3.9.27 - dscudiero - Add debug msgs
