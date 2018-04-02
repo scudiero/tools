@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.42 # -- dscudiero -- Fri 03/23/2018 @ 16:17:34.85
+version=2.1.43 # -- dscudiero -- Mon 04/02/2018 @  7:15:21.29
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -32,8 +32,9 @@ case "$hostName" in
 			qaWaitingEmails='sjones@leepfrog.com,mbruening@leepfrog.com,dscudiero@leepfrog.com'
 			toolsUsageEmails='dscudiero@leepfrog.com,jlindeman@leepfrog.com'
 
-			reports=("publishing -email \"$publishingEmails\"" "client2DaySummaries -email \"$client2DaySummariesEmails\"")
-			reports+=("qaWaiting -email \"$qaWaitingEmails\"" "toolsUsage -email \"$toolsUsageEmails\"")
+			reports=("publishing -email \"froggersupport\"" "client2DaySummaries -email \"froggersupport,dscudiero\"")
+			reports+=("qaWaiting -email \"${qaTeam},${qaManager},dscudiero\"" "toolsUsage -email \"dscudiero\"")
+			reports+=("clientByTimezone -email \"${supportManager},dscudiero\"")
 
 			for ((i=0; i<${#reports[@]}; i++)); do
 				report="${reports[$i]}"; reportName="${report%% *}"; reportArgs="${report##* }"; [[ $reportName == $reportArgs ]] && unset reportArgs
@@ -97,3 +98,4 @@ return 0
 ## 03-22-2018 @ 12:47:18 - 2.1.40 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:34:24 - 2.1.41 - dscudiero - D
 ## 03-23-2018 @ 16:18:48 - 2.1.42 - dscudiero - D
+## 04-02-2018 @ 07:15:55 - 2.1.43 - dscudiero - Move timezone report to weekly
