@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.81" // -- dscudiero -- Wed 03/28/2018 @  8:38:36.92
+wfLibVersion="1.8.82" // -- dscudiero -- Mon 04/02/2018 @  9:44:15.42
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -1348,7 +1348,7 @@ GetAttrVal = function(data) {
 	// Look to see if we have tcfdata values for subjects, departments, colleges, if not the the lookup the values
 		subjects=getTCFValue(subjVarName, { delimiter: "\n", retarray: true });
 		if (includeTCA)
-			subjects=subjects.concat(getTCFValue("subject", { data: tcaData, delimiter: "\n", retarray: true }));
+			subjects=subjects.concat(getTCFValue(subjVarName, { data: tcaData, delimiter: "\n", retarray: true }));
 		wfDump(5,["\t" + subjVarName+" from tcfdata;"+subjects.toSource()])
 		if (subjects.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
@@ -1356,7 +1356,7 @@ GetAttrVal = function(data) {
 
 		departments=getTCFValue(deptVarName, { delimiter: "\n", retarray: true });
 		if (includeTCA)
-			departments=departments.concat(getTCFValue("department", { data: tcaData, delimiter: "\n", retarray: true }));
+			departments=departments.concat(getTCFValue(deptVarName, { data: tcaData, delimiter: "\n", retarray: true }));
 		if (departments.length === 0 && subjects.length > 0) {
 			resultSet=LookupCode2("dept","subj",subjects);
 			if (resultSet.length > 0) {
@@ -1372,7 +1372,7 @@ GetAttrVal = function(data) {
 
 		colleges=getTCFValue(colVarName, { delimiter: "\n", retarray: true });
 		if (includeTCA)
-			colleges=colleges.concat(getTCFValue("college", { data: tcaData, delimiter: "\n", retarray: true }));
+			colleges=colleges.concat(getTCFValue(colVarName, { data: tcaData, delimiter: "\n", retarray: true }));
 		if(colleges.length === 0 && subjects.length != 0) {
 			resultSet=LookupCode2("cols","subj",subjects);
 			if (resultSet.length > 0) {
@@ -2557,3 +2557,4 @@ var wfLibLoaded=true;
 // 03-20-2018 @ 08:15:40 - 1.8.79 - dscudiero - Fix problem in GetRelated2 checking proposal data against related data, add ',' before and after strings to prevent false positives
 // 03-21-2018 @ 10:35:24 - 1.8.80 - dscudiero - Add additional case statements for the refType check in GetRelated2
 // 03-28-2018 @ 12:38:47 - 1.8.81 - dscudiero - Tweaked debug messaging
+// 04-02-2018 @ 10:36:45 - 1.8.82 - dscudiero - Fix problem ub getWfAttr when not using the standard names, was pulling tca data using standard names
