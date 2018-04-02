@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.66 # -- dscudiero -- Fri 03/30/2018 @ 14:22:52.06
+version=5.5.72 # -- dscudiero -- Mon 04/02/2018 @ 10:11:33.86
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel EditTcfValue BackupCourseleafFile'
@@ -90,7 +90,7 @@ cwdStart="$(pwd)"
 			done
 		fi
 		bullet=$bulletSave
-		echo -e "\t$bullet) Patch the products as per defintions in the patch control file:"
+		echo -e "\t$bullet) Patch the products as per definitions in the patch control file:"
 		echo -e "\t\t$courseleafPatchControlFile"
 		echo -e "\t$bullet) Perform cross product checks in local site"
 		(( bullet++ )) ; bulletSave=$bullet ; bullet=1
@@ -808,6 +808,8 @@ removeGitReposFromNext=true
 			unset fileList prodShadowVer catMasterDate cimMasterDate
 			fileList="$(ls -t $srcDir | grep -v .bad | grep -v master | tr "\n" " ")"
 			prodShadowVer=${fileList%% *}
+dump prodShadowVer
+
 			[[ ! -f $srcDir/master/.syncDate ]] && Terminate "Could not locate '$srcDir/master/.syncDate'. The skeleton shadow is probably being updated, please try again later"
 	#master=true
 			eval ${productLower}MasterDate=\"$(date +"%m-%d-%Y @ %H.%M.%S" -r $srcDir/master/.syncDate)\"
@@ -833,14 +835,19 @@ removeGitReposFromNext=true
 			prodShadowVer='N/A'
 			srcDir='N/A'
 		fi
+
+dump prodShadowVer
 		eval ${productLower}VerAfterPatch=$prodShadowVer
 		processControl="$processControl,$productLower|$prodShadowVer|$srcDir"
+dump processControl
 		eval "${product}Version=\"$prodShadowVer\""
-		currentVersionVar="${product}VerBeforePatch"
-		targetVersionVar="${product}VerAfterPatch"
-		[[ $(CompareVersions "${!currentVersionVar}" 'ge' "${!targetVersionVar}") == true ]] && \
-			Terminate "Sorry, requested version for '$product' (${!targetVersionVar}) is equal to \
-			or older then the current installed version (${!currentVersionVar})"
+		currentVersionVar="${product,,[a-z]}VerBeforePatch"
+		targetVersionVar="${product,,[a-z]}VerAfterPatch"
+dump currentVersionVar targetVersionVar
+
+		# [[ $(CompareVersions "${!currentVersionVar}" 'ge' "${!targetVersionVar}") == true ]] && \
+		# 	Terminate "Sorry, requested version for '$product' (${!targetVersionVar}) is equal to \
+		# 	or older then the current installed version (${!currentVersionVar})"
 	done
 
 	betaProducts=${betaProducts:2}
@@ -1850,3 +1857,4 @@ Goodbye 0 "$text1" "$text2"
 ## 03-23-2018 @ 15:33:41 - 5.5.50 - dscudiero - D
 ## 03-23-2018 @ 16:57:48 - 5.5.51 - dscudiero - Msg3 -> Msg
 ## 04-02-2018 @ 07:15:41 - 5.5.66 - dscudiero - Move timezone report to weeky
+## 04-02-2018 @ 10:12:05 - 5.5.72 - dscudiero - Comment out new code to check versions
