@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.72 # -- dscudiero -- Mon 04/02/2018 @ 10:11:33.86
+version=5.5.104 # -- dscudiero -- Mon 04/02/2018 @ 13:49:34.48
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel EditTcfValue BackupCourseleafFile'
@@ -30,7 +30,7 @@ cwdStart="$(pwd)"
 		myArgs+=("full|fulladvance|switch|fullAdvance||script|Do a full catalog advance (Copy next to curr and then advance")
 		myArgs+=("new|newest|switch|newest||script|Update each product to the latest named version")
 		myArgs+=("latest|latest|switch|latest||script|Update each product to the latest named version")
-		myArgs+=("master|master|switch|master||script|Update each product to the current 'master' version")
+		myArgs+=("skel|skeleton|switch|skeleton||script|Update each product to the current 'skeletion' version")
 		myArgs+=("ed|edition|option|newEdition||script|The new edition value (for advance)")
 		myArgs+=("audit|audit|switch|catalogAudit||script|Run the catalog audit report as part of the process")
 		myArgs+=("noaudit|noaudit|switch|catalogAudit|catalogAudit=false|script|Do not run the catalog audit report as part of the process")
@@ -650,7 +650,6 @@ removeGitReposFromNext=true
 	[[ $userName == 'dscudiero' && $useLocal == true ]] && GetDefaultsData "$myName" -fromFiles || GetDefaultsData "$myName"
 	ParseArgsStd $originalArgStr
 	[[ -n newest ]] && latest=true
-
 	displayGoodbyeSummaryMessages=true
 
 	cleanDirs="${scriptData3##*:}"
@@ -799,55 +798,51 @@ removeGitReposFromNext=true
 		productLower="$(Lower "$product")"
 
 		## Get the target sites version
-		[[ $productLower == 'cat' ]] && catVerBeforePatch="$(Lower "$(cat "$tgtDir/web/courseleaf/clver.txt")")"
-		[[ $productLower == 'cim' ]] && cimVerBeforePatch="$(Lower "$(cat "$tgtDir/web/courseleaf/cim/clver.txt")")"
-
+		[[ $productLower == 'cat' ]] && catVerBeforePatch="$(cat "$tgtDir/web/courseleaf/clver.txt")"; catVerBeforePatch=${catVerBeforePatch,,[a-z]}
+		[[ $productLower == 'cim' ]] && cimVerBeforePatch="$(cat "$tgtDir/web/courseleaf/cim/clver.txt")"; cimVerBeforePatch=${cimVerBeforePatch,,[a-z]}
 		## Get the source version
 		[[ $productLower == 'cat' ]] && srcDir=$gitRepoShadow/courseleaf || srcDir=$gitRepoShadow/$productLower
 		if [[ -d "$srcDir" ]]; then
 			unset fileList prodShadowVer catMasterDate cimMasterDate
 			fileList="$(ls -t $srcDir | grep -v .bad | grep -v master | tr "\n" " ")"
 			prodShadowVer=${fileList%% *}
-dump prodShadowVer
-
 			[[ ! -f $srcDir/master/.syncDate ]] && Terminate "Could not locate '$srcDir/master/.syncDate'. The skeleton shadow is probably being updated, please try again later"
 	#master=true
 			eval ${productLower}MasterDate=\"$(date +"%m-%d-%Y @ %H.%M.%S" -r $srcDir/master/.syncDate)\"
 			eval prodMasterDate=\$${productLower}MasterDate
-			if [[ -z $latest && -z $master && -n $prodShadowVer ]]; then
+			if [[ -z $latest && -z $skeleton && -n $prodShadowVer ]]; then
 				Msg
 				Msg "For '$(ColorK $product)', do you wish to apply the latest named version ($prodShadowVer) or the skeleton ($prodMasterDate)"
 				unset ans; Prompt ans "^'Yes' for the named version, 'No' for the skeleton" 'Yes,No' 'Yes'; ans=$(Lower "${ans:0:1}")
-				[[ $ans != 'y' ]] && prodShadowVer='master'
+				[[ $ans != 'y' ]] && prodShadowVer='skeleton/master'
 			else
-				[[ -n $master ]] && prodShadowVer='master'
+				[[ $skeleton == true ]] && prodShadowVer='skeleton/master'
 				Note 0 1 "Using specified value of '$prodShadowVer' for $product"
 			fi
 			unset masterVer
-
-			if [[ $prodShadowVer == 'master' && -r "$srcDir/master/$(basename $srcDir)/clver.txt" ]]; then
+			if [[ $prodShadowVer == 'skeleton/master' && -r "$srcDir/master/$(basename $srcDir)/clver.txt" ]]; then
 				masterVer="$(Lower "$(cat "$srcDir/master/$(basename $srcDir)/clver.txt")")"
-				[[ "${masterVer: -2}" == 'rc' ]] && betaProducts="$betaProducts, $product" && masterVer="$(tr -d ' ' <<< "$masterVer")"
+				[[ "${masterVer: -2}" == 'rc' ]] && betaProducts="$betaProducts, $product" #&& masterVer="${masterVer/rc/}"
 				eval ${productLower}MasterVer=\"$masterVer\"
-				prodShadowVer="$prodShadowVer/$masterVer"
+				prodShadowVer="$masterVer"
+				processControl="$processControl,$productLower|master|$srcDir"
+			else
+				processControl="$processControl,$productLower|$prodShadowVer|$srcDir"
 			fi
 		else
 			prodShadowVer='N/A'
 			srcDir='N/A'
 		fi
 
-dump prodShadowVer
 		eval ${productLower}VerAfterPatch=$prodShadowVer
-		processControl="$processControl,$productLower|$prodShadowVer|$srcDir"
-dump processControl
 		eval "${product}Version=\"$prodShadowVer\""
-		currentVersionVar="${product,,[a-z]}VerBeforePatch"
-		targetVersionVar="${product,,[a-z]}VerAfterPatch"
-dump currentVersionVar targetVersionVar
+		eval currentVersion="\$${product,,[a-z]}VerBeforePatch"; 
+		eval targetVersion="\$${product,,[a-z]}VerAfterPatch"
 
-		# [[ $(CompareVersions "${!currentVersionVar}" 'ge' "${!targetVersionVar}") == true ]] && \
-		# 	Terminate "Sorry, requested version for '$product' (${!targetVersionVar}) is equal to \
-		# 	or older then the current installed version (${!currentVersionVar})"
+		dump -1 currentVersion targetVersion -p
+		[[ $(CompareVersions "${currentVersion}" 'ge' "${targetVersion}") == true ]] && \
+			Terminate "Sorry, requested version for '$product' (${targetVersion}) is equal to \
+			or older then the current installed version (${currentVersion})"
 	done
 
 	betaProducts=${betaProducts:2}
@@ -858,9 +853,12 @@ dump currentVersionVar targetVersionVar
 
 	## Set rebuildHistoryDb if patching cim and the current cim version is less than 3.5.7
 	rebuildHistoryDb=false
+	#echo "\$(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7') = '$(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7')'"
+	#echo "\$(CompareVersions "$cimVerBeforePatch" 'le' '3.5.7 rc') = '$(CompareVersions "$cimVerBeforePatch" 'le' '3.5.7 rc')'"
 	[[ $(Contains "$products" 'cim') == true && \
-	$(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7') == true && \
+	$(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7 rc') == true && \
 	$(CompareVersions "$cimVerBeforePatch" 'le' '3.5.7 rc') == true ]] && rebuildHistoryDb=true
+	dump -1 rebuildHistoryDb
 
 ## If cat is one of the products, should we advance the edition, should we audit the catalog
 	if [[ $(Contains "$patchProducts" 'cat') == true ]]; then
@@ -1241,7 +1239,7 @@ declare -A processedSpecs
 		prodVer=$(cut -d '|' -f2 <<< $processSpec)
 		prodVer=${prodVer%%/*}
 		srcDir=$(cut -d '|' -f3 <<< $processSpec)
-		dump -2 -n -n processSpec product prodVer srcDir tgtDir
+		dump -1 -t product prodVer srcDir tgtDir
 		Msg "^Processing: $(Upper "$product")..."
 		if [[ $buildPatchPackage != true ]]; then
 			## Check Versions
@@ -1305,12 +1303,13 @@ declare -A processedSpecs
 							# targetSpec="${tgtDir}${specTarget}"
 							sourceSpec="${gitRepoShadow}/${specPattern%% *}${specPattern##* }/*"
 							targetSpec="${tgtDir}${specTarget}"
+							dump -1 -t -t sourceSpec targetSpec
 							unset rsyncResults
 							Indent++; RunRsync "$product" "$sourceSpec" "$targetSpec" "$specIgnoreList" "$backupDir"; Indent--
 							if [[ $rsyncResults == 'false' ]]; then
 								Msg "^^^All files are current, no files updated"
 							else
-								Msg "^^^Files updated, check log for additional information"
+								Msg "$(ColorI "^^^Files updated, check log for additional information")"
 								[[ $verboseLevel -eq 0 ]] && Msg "^^^Please check log for additional information"
 								changeLogRecs+=("${specPattern%% *} refreshed from ${specPattern##* }")
 								changesMade=true
@@ -1332,7 +1331,7 @@ declare -A processedSpecs
 							if [[ $rsyncResults == 'false' ]]; then
 								Msg "^^^All files are current, no files updated"
 							else
-								Msg "^^^Files updated, check log for additional information"
+								Msg "$(ColorI "^^^Files updated, check log for additional information")"
 								[[ $verboseLevel -eq 0 ]] && Msg "^^^Please check log for additional information"
 								changeLogRecs+=("${specPattern%% *} refreshed from the skeleton")
 								changesMade=true
@@ -1358,7 +1357,7 @@ declare -A processedSpecs
 										if [[ $rsyncResults == 'false' ]]; then
 											Msg "^^^All files are current, no files updated"
 										else
-											Msg "^^^Files updated, check log for additional information"
+											Msg "$(ColorI "^^^Files updated, check log for additional information")"
 											[[ $verboseLevel -eq 0 ]] && Msg "^^^Please check log for additional information"
 											changeLogRecs+=("${specPattern%% *} refreshed from the skeleton")
 											changesMade=true
@@ -1496,7 +1495,13 @@ declare -A processedSpecs
 					cim)
 						## Rebuild cims as necessary
 						if [[ -n $cimStr ]]; then
-							Msg "\n^^Republishing /<CIM>/index.tcf pages..."
+							rebuildHistoryDb=false
+							#echo "\$(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7') = '$(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7')'"
+							#echo "\$(CompareVersions "$cimVerBeforePatch" 'le' '3.5.7 rc') = '$(CompareVersions "$cimVerBeforePatch" 'le' '3.5.7 rc')'"
+							[[ $(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7 rc') == true && \
+							   $(CompareVersions "$cimVerBeforePatch" 'le' '3.5.7 rc') == true ]] && rebuildHistoryDb=true
+							dump -1 rebuildHistoryDb
+							Msg "\n^^Republishing /CIM instance home pages..."
 							for cim in $(echo $cimStr | tr ',' ' '); do
 								Msg "^^^Republishing /$cim/index.tcf..."
 								RunCourseLeafCgi "$tgtDir" "-r /$cim/index.tcf" | Indent | Indent
@@ -1858,3 +1863,4 @@ Goodbye 0 "$text1" "$text2"
 ## 03-23-2018 @ 16:57:48 - 5.5.51 - dscudiero - Msg3 -> Msg
 ## 04-02-2018 @ 07:15:41 - 5.5.66 - dscudiero - Move timezone report to weeky
 ## 04-02-2018 @ 10:12:05 - 5.5.72 - dscudiero - Comment out new code to check versions
+## 04-02-2018 @ 13:51:29 - 5.5.104 - dscudiero - Added code to rebuild the history db for cims
