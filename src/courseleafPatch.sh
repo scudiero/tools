@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.104 # -- dscudiero -- Mon 04/02/2018 @ 13:49:34.48
+version=5.5.105 # -- dscudiero -- Tue 04/03/2018 @  7:49:41.56
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel EditTcfValue BackupCourseleafFile'
@@ -840,7 +840,7 @@ removeGitReposFromNext=true
 		eval targetVersion="\$${product,,[a-z]}VerAfterPatch"
 
 		dump -1 currentVersion targetVersion -p
-		[[ $(CompareVersions "${currentVersion}" 'ge' "${targetVersion}") == true ]] && \
+		[[ $(CompareVersions "${currentVersion}" 'ge' "${targetVersion}") == true && $force != true ]] && \
 			Terminate "Sorry, requested version for '$product' (${targetVersion}) is equal to \
 			or older then the current installed version (${currentVersion})"
 	done
@@ -1864,3 +1864,4 @@ Goodbye 0 "$text1" "$text2"
 ## 04-02-2018 @ 07:15:41 - 5.5.66 - dscudiero - Move timezone report to weeky
 ## 04-02-2018 @ 10:12:05 - 5.5.72 - dscudiero - Comment out new code to check versions
 ## 04-02-2018 @ 13:51:29 - 5.5.104 - dscudiero - Added code to rebuild the history db for cims
+## 04-03-2018 @ 10:37:16 - 5.5.105 - dscudiero - Add force check in version compare
