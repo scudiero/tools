@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.18" # -- dscudiero -- Mon 04/02/2018 @ 15:23:32.33
+# version="1.0.20" # -- dscudiero -- Tue 04/03/2018 @ 10:35:32.38
 #===================================================================================================
 # Various string manipulation functions
 #===================================================================================================
@@ -85,17 +85,16 @@ function Indent {
 			return 0
 		fi
 
-	local line i
+	local line i tabStr
 	[[ -z $indentLevel ]] && local indentLevel=1
 
-	# for ((i=0; i<$indentLevel; i++)); do
-	# 	#local tabStr="$tabStr\t"
-	# 	local tabStr="$tabStr^"
-	# done
+	for ((i=0; i<$indentLevel; i++)); do
+		tabStr="$tabStr\t"
+	done
 
 	while read line ; do
 		#printf "$tabStr%s\n" "$line"
-		Msg 0 $indentLevel "$line"
+		echo -e  "${tabStr}${line}"
 	done
 	return
 } #Indent
@@ -246,3 +245,4 @@ function PrintColumnarData() {
 ## 03-30-2018 @ 13:45:26 - 1.0.15 - dscudiero - Fix issue with lt
 ## 03-30-2018 @ 13:50:18 - 1.0.16 - dscudiero - Remove debug statements
 ## 04-02-2018 @ 16:25:08 - 1.0.18 - dscudiero - Use Msg for indent outout
+## 04-03-2018 @ 10:36:11 - 1.0.20 - dscudiero - Use echo command in Indent
