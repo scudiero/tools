@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.105 # -- dscudiero -- Tue 04/03/2018 @  7:49:41.56
+version=5.5.110 # -- dscudiero -- Tue 04/03/2018 @ 10:57:45.51
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel EditTcfValue BackupCourseleafFile'
@@ -649,7 +649,8 @@ removeGitReposFromNext=true
 	Hello
 	[[ $userName == 'dscudiero' && $useLocal == true ]] && GetDefaultsData "$myName" -fromFiles || GetDefaultsData "$myName"
 	ParseArgsStd $originalArgStr
-	[[ -n newest ]] && latest=true
+	[[ -n $newest ]] && latest=true
+
 	displayGoodbyeSummaryMessages=true
 
 	cleanDirs="${scriptData3##*:}"
@@ -1865,3 +1866,4 @@ Goodbye 0 "$text1" "$text2"
 ## 04-02-2018 @ 10:12:05 - 5.5.72 - dscudiero - Comment out new code to check versions
 ## 04-02-2018 @ 13:51:29 - 5.5.104 - dscudiero - Added code to rebuild the history db for cims
 ## 04-03-2018 @ 10:37:16 - 5.5.105 - dscudiero - Add force check in version compare
+## 04-03-2018 @ 10:59:45 - 5.5.110 - dscudiero - Fix problem not prompting for version
