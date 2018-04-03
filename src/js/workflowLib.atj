@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.82" // -- dscudiero -- Mon 04/02/2018 @  9:44:15.42
+wfLibVersion="1.8.83" // -- dscudiero -- Tue 04/03/2018 @ 16:28:49.68
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -1908,46 +1908,28 @@ CheckChanged = function(data) {
 			wfDebug(3,"\t\tChecking changed fields...")
 			// loop through the list of changed fields and make sure they are all in the checkfields list
 			for (var key in changedHash) {
-				// check to make sure the field data really changed (i.e. scrub the data and then compare)
-				// Dump("\n\nkey",key); Dump("\ntcfdata." + key,eval("tcfdata." + key + ".toSource()"));
-				// var tcfDataStr="";
-				// var tcfData=getTCFValue(key, { delimiter: "\n", retarray: true });
-				// //Dump("\ttcfData.length",tcfData.length);
-				// for (var i=0, tot=eval(tcfData.length); i < tot; i++) {
-				// 	//Dump("\ttcfData" + "[" + i + "]",tcfData[i]);
-				// 	tcfDataStr=tcfDataStr+tcfData[i].replace(/<\/?[^>]+>/g, "").replace(/\n/g, " ").replace(/&#160;/g, " ").replace(/\s+/g, "");
-				// }
-				// //Dump("\ttcfDataStr",tcfDataStr);
-				// var tcaDataStr="";
-				// var tcaData=getTCFValue(key, { delimiter: "\n", retarray: true, data: tcadata });
-				// //Dump("\ttcaData.length",tcaData.length);
-				// for (var i=0, tot=eval(tcaData.length); i < tot; i++) {
-				// 	//Dump("\ttcaData" + "[" + i + "]",tcaData[i]);
-				// 	tcaDataStr=tcaDataStr+tcaData[i].replace(/<\/?[^>]+>/g, "").replace(/\n/g, " ").replace(/&#160;/g, " ").replace(/\s+/g, "");
-				// }
 				var tcfDataStr=eval("tcfdata." + key + ".toSource()");
 				//Dump("\n\tkey",key); Dump("\t\ttcfdata." + key,tcfDataStr);
 				tcfDataStr=tcfDataStr.replace(/<\/?[^>]+>/g, "").replace(/\n/g, " ").replace(/&#160;/g, " ").replace(/\s+/g, "");
 				//Dump("tcfDataStr",tcfDataStr)
+				if (tcadata) {
+					var tcaDataStr=eval("tcadata." + key + ".toSource()");
+					//Dump("\n\tkey",key); Dump("\t\ttcadata." + key,tcaDataStr);
+					tcaDataStr=tcaDataStr.replace(/<\/?[^>]+>/g, "").replace(/\n/g, " ").replace(/&#160;/g, " ").replace(/\s+/g, "");					
+					//Dump("\ttcaDataStr",tcaDataStr);
+					if (tcfDataStr === tcaDataStr) {
+						wfDebug(0,"\t\t\tFound field '" + key + "' changed but tcf/tca text compare as equal")
+						delete changedHash[key];
+						continue;
+					}
 
-				var tcaDataStr=eval("tcadata." + key + ".toSource()");
-				//Dump("\n\tkey",key); Dump("\t\ttcadata." + key,tcaDataStr);
-				tcaDataStr=tcaDataStr.replace(/<\/?[^>]+>/g, "").replace(/\n/g, " ").replace(/&#160;/g, " ").replace(/\s+/g, "");
-				//Dump("tcaDataStr",tcaDataStr)
-				
-				//Dump("\ttcaDataStr",tcaDataStr);
-				if (tcfDataStr === tcaDataStr) {
-					wfDebug(0,"\t\t\tFound field '" + key + "' changed but tcf/tca text compare as equal")
-					delete changedHash[key];
-					continue;
 				}
-
 				// OK, absolute check of tcf and tca data proved not equal so check to see if the changed field is in the list
 				if (changedHash.hasOwnProperty(key)) {
 					if (checkFieldsStr.indexOf(","+key+",") < 0) {
 						wfDebug(3,"\t\t\t*** Found field '" + key + "' changed and not in the check list, setting allInList=false");
 						wfDump(4,["\t\t\ttcfDataStr;"+tcfDataStr]);
-						wfDump(4,["\t\t\ttcaDataStr;"+tcaDataStr]);
+						if (tcadata) wfDump(4,["\t\t\ttcaDataStr;"+tcaDataStr]);
 						allInList=false;
 					} else {
 						wfDebug(3,"\t\t\tFound field '" + key + "' changed and in the check list");
@@ -2558,3 +2540,4 @@ var wfLibLoaded=true;
 // 03-21-2018 @ 10:35:24 - 1.8.80 - dscudiero - Add additional case statements for the refType check in GetRelated2
 // 03-28-2018 @ 12:38:47 - 1.8.81 - dscudiero - Tweaked debug messaging
 // 04-02-2018 @ 10:36:45 - 1.8.82 - dscudiero - Fix problem ub getWfAttr when not using the standard names, was pulling tca data using standard names
+// 04-03-2018 @ 16:30:07 - 1.8.83 - dscudiero - Fix a problem in CheckChanged if there is no tca data
