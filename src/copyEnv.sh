@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.37 # -- dscudiero -- Fri 03/23/2018 @ 14:26:48.73
+version=4.13.38 # -- dscudiero -- Tue 04/03/2018 @ 11:17:40.67
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -313,7 +313,7 @@ dump -1 skipCim skipCat skipClss skipAlso
 			[[ ${keepDirsHash["$dir"]+abc} ]] && continue
 			ignoreList="$ignoreList,$dir"
 		done
-		ignoreList="$ignoreList,/production-shared,/web/shared"
+		ignoreList="$ignoreList,/production-shared,/web/shared,/web/$progDir/production/"
 		SetFileExpansion
 	fi
 
@@ -696,3 +696,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 03-21-2018 @ 16:33:25 - 4.13.35 - dscudiero - If copying to test, next, or curr then make sure the leepfrog account is comment out
 ## 03-22-2018 @ 14:06:14 - 4.13.36 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:33:18 - 4.13.37 - dscudiero - D
+## 04-03-2018 @ 16:30:39 - 4.13.38 - dscudiero - Add production to the ignore list for cat
