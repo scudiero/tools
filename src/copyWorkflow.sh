@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.75 # -- dscudiero -- Thu 03/29/2018 @  9:18:13.05
+version=2.10.76 # -- dscudiero -- Wed 04/04/2018 @  7:15:35.72
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi"
@@ -329,7 +329,7 @@ ParseArgsStd $originalArgStr
 	dump -1 client env srcEnv srcDir tgtEnv tgtDir cimStr
 
 # If target is NEXT checks
-	if [[ $tgtEnv == 'next' && $srcEnv != 'test' ]]; then
+	if [[ $tgtEnv == 'next' ]]; then
 		[[ $srcEnv != 'test' ]] && Terminate "The NEXT site may only be updated from the TEST environment, please push your changes in '$srcEnv' to TEST."
 		[[ $verify == false ]] && Msg "Target is NEXT and verify was off, this is not allowed, setting verify to true" && verify=true
 		## Get update comment
@@ -727,3 +727,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 03-23-2018 @ 15:33:27 - 2.10.72 - dscudiero - D
 ## 03-23-2018 @ 16:57:38 - 2.10.73 - dscudiero - Msg3 -> Msg
 ## 03-29-2018 @ 12:57:45 - 2.10.75 - dscudiero - Only gather jalot stuff for next env
+## 04-04-2018 @ 07:17:42 - 2.10.76 - dscudiero - Fix problem not prompting for jalot task number if target is test
