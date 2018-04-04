@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.9.27 # -- dscudiero -- Mon 04/02/2018 @ 16:21:19.92
+version=3.9.28 # -- dscudiero -- Wed 04/04/2018 @ 11:21:00.81
 #==================================================================================================
 TrapSigs 'on'
 myIncludes='DbLog Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel WriteChangelogEntry'
@@ -495,17 +495,17 @@ scriptDescription="Load Courseleaf Data"
 				## Check spreadsheet data vs file data
 					if [[ ${rolesOut["$key"]+abc} ]]; then ## Check to see if the spreadsheet data is already in the rolesOut data
 						## Yes, compare the data
-						if [[ ${rolesFromSpreadsheet["$key"]} != ${rolesOut["$key"]} ]]; then
+						oldData="${rolesOut["$key"]}"; [[ ${oldData:(-1)} == '|' ]] && oldData=${oldData:0:${#oldData}-1}
+						newData="${rolesFromSpreadsheet["$key"]}"; [[ ${newData:(-1)} == '|' ]] && newData=${newData:0:${#newData}-1}
+						if [[ $oldData != $newData ]]; then
 							## If different
-							oldData="${rolesOut["$key"]}"; [[ ${oldData:(-1)} == '|' ]] && oldData=${oldData:0:${#oldData}-1}
-							newData="${rolesFromSpreadsheet["$key"]}"; [[ ${newData:(-1)} == '|' ]] && newData=${newData:0:${#newData}-1}
 							if [[ -n $newData && -n $oldData ]]; then
 								Warning 0 1 "Found Role '$key' in the roles file but data is different, using new data"
-								Msg "^^New Data: $newData (${rolesFromSpreadsheet["$key"]})"
-								Msg "^^Old Data: $newData (${rolesOut["$key"]})"
+								Msg "^^New Data: $newData"
+								Msg "^^Old Data: $oldData"
 								rolesOut["$key"]="$newData"
 							elif [[ -z $oldData && -n $newData ]]; then
-								[[ $oldData != $newData ]] && Info 0 1 "Found Role '$key' in the roles file, old data is null, using new data"
+								Info 0 1 "Found Role '$key' in the roles file, old data is null, using new data"
 								rolesOut["$key"]="$oldData"							
 							fi
 							(( numModifiedRoles += 1 ))
@@ -1121,3 +1121,4 @@ ignoreMissingPages=true
 ## 03-30-2018 @ 10:00:10 - 3.9.25 - dscudiero - Add checks to make sure there is a valid worksheet in the workbook if the user has specified arguments
 ## 03-30-2018 @ 10:00:42 - 3.9.26 - dscudiero - Cosmetic/minor change/Sync
 ## 04-02-2018 @ 16:25:30 - 3.9.27 - dscudiero - Add debug msgs
+## 04-04-2018 @ 11:21:45 - 3.9.28 - dscudiero - Tweak logic for comparing old data to new data in roles loading
