@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.83" // -- dscudiero -- Tue 04/03/2018 @ 16:28:49.68
+wfLibVersion="1.8.84" // -- dscudiero -- Wed 04/04/2018 @ 15:36:59.87
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -660,7 +660,8 @@ wffuncs.Related = function(inval, wfrule, args) {
 					"\n\tcheckChanged;"+checkChanged,"includeEcoSystemData;"+includeEcoSystemData,"ecoSystemDataTypes;"+ecoSystemDataTypes,
 					"ecoSystemInstances;"+ecoSystemInstances,"ecoSystemDataPaths;"+ecoSystemDataPaths,"ecoSystemCatDataType;"+ecoSystemCatDataType,
 					"ecoSystemDataFyi;"+ecoSystemDataFyi,
-					"formFieldVars;"+formFieldVars.toSource(),"searchString;"+searchString.toSource(),"dataMapper;"+dataMapper,
+					"formFieldVars;"+formFieldVars.toSource(),
+					"searchString;"+searchString.toSource(),"dataMapper;"+dataMapper,
 					"ignoreList;"+ignoreList]);
 
 	//==================================================================================================================
@@ -878,8 +879,8 @@ GetRelated2 = function(type,data) {
 				if (tmpArray.length > 2)
 					dataAttributeName=tmpArray[2];
 
-				wfDebug(myDebugLevel,myIndent +"\tProcessing form variable: '" + formVar + "'");
-				wfDump(myDebugLevel,[myIndent +"\tformVarFormat;"+formVarFormat,myIndent +"\tdataAttributeName;"+dataAttributeName,])
+				wfDebug(3,"\tProcessing form variable: '" + formVar + "'");
+				wfDump(3,["\tformVarFormat;"+formVarFormat,"\tdataAttributeName;"+dataAttributeName])
 
 				// Get the tcf data -- cannot use getTCFValue since we want an full array back
 				var tcfValue=[];
@@ -888,6 +889,7 @@ GetRelated2 = function(type,data) {
 					return;
 				}
 				eval ("tcfValue=tcfdata."+formVar); // jshint ignore:line
+				wfDump(3,["\t" + formVar + ";"+tcfValue.toSource()])				
 				tcfValue.forEach(function(value) {
 					ref={};
 					ref=GetRelated2.ParseRelatedData(value,formVarFormat,dataAttributeName);
@@ -1012,13 +1014,13 @@ GetRelated2 = function(type,data) {
 			if (resultSet.length > 0) {
 				//wfDump(5,["\t\tresultSet;"+resultSet.toSource()]);
 				resultSet.forEach(function(result) {
-					if (result != "" && result.hasOwnProperty("data")) {
-						if (ignoreList.indexOf("," + result.data + ",") >= 0 ) {
-							wfDebug(myDebugLevel,myIndent + "result.data '" + result.data + "' is on the ignoreList, skipping");
+					if (result != "" && result.hasOwnProperty("dbData")) {
+						if (ignoreList.indexOf("," + result.dbData + ",") >= 0 ) {
+							wfDebug(myDebugLevel,myIndent + "result.dbData '" + result.dbData + "' is on the ignoreList, skipping");
 							return;
 						}
 						retToken={};
-						retToken.data=result.data;
+						retToken.data=result.dbData;
 						retToken.source=ref.source;
 						if (Object.keys(retToken).length != 0 && typeof checkArray[retToken.data] === 'undefined') {
 							retArray.push(retToken); checkArray[retToken.data]=true;
@@ -1084,10 +1086,10 @@ function LookupCode2(lookupType,givenType,givenData,excludeData) {
 					return false;
 				break;
 				case "dep": //Given department codes, lookup colleges in cimlookup for the departments
-					sqlStmt="select distinct " + wfColVarName + " as data from cimlookup where " + wfDeptVarName + " in (\"" + givenData.join('","') + "\")"
+					sqlStmt="select distinct " + wfColVarName + " as dbData from cimlookup where " + wfDeptVarName + " in (\"" + givenData.join('","') + "\")"
 				break;
 				case "sub": //Given subject codes, lookup colleges in cimlookup by joining on the department field
-					sqlStmt="select distinct " + wfColVarName + " as data from cimlookup where " + wfDeptVarName + " in (select " + wfDeptVarName +
+					sqlStmt="select distinct " + wfColVarName + " as dbData from cimlookup where " + wfDeptVarName + " in (select " + wfDeptVarName +
 							" from cimlookup where " + wfSubjVarName + " in (\"" + givenData.join('","') + "\"))";
 			} // (givenType.toLowerCase().substr(0,3)) switch
 			break
@@ -1095,26 +1097,25 @@ function LookupCode2(lookupType,givenType,givenData,excludeData) {
 			// Given type...
 			switch (givenType.toLowerCase().substr(0,3)) {
 				case "col": //Given college codes
-					sqlStmt="select distinct " + wfDeptVarName + " as data from cimlookup where " + wfColVarName + " in (\"" + givenData.join('","') + "\")"
+					sqlStmt="select distinct " + wfDeptVarName + " as dbData from cimlookup where " + wfColVarName + " in (\"" + givenData.join('","') + "\")"
 				break;
 				case "dep":
 					wfDebug(myDebugLevel,myIndent + "*** lookup type and give data type the same, returning false");
 					return false;
 				break;
 				case "sub": //Given subject codes, lookup colleges in cimlookup by joining on the department field
-					sqlStmt="select distinct " + wfDeptVarName + " as data from cimlookup where " + wfSubjVarName + " in (\"" + givenData.join('","') + "\")"
-
+					sqlStmt="select distinct " + wfDeptVarName + " as dbData from cimlookup where " + wfSubjVarName + " in (\"" + givenData.join('","') + "\")"
 			} // (givenType.toLowerCase().substr(0,3)) switch
 			break
 		case "sub": //Lookup subject codes
 			// Given type...
 			switch (givenType.toLowerCase().substr(0,3)) {
 				case "col": //Given college codes, lookup subject in cimlookup by joining on the department field
-					sqlStmt="select distinct " + wfSubjVarName + " as data from cimlookup where " + wfDeptVarName + " in (select " + wfDeptVarName +
+					sqlStmt="select distinct " + wfSubjVarName + " as dbData from cimlookup where " + wfDeptVarName + " in (select " + wfDeptVarName +
 							" from cimlookup where " + wfColVarName + " in (\"" + givenData.join('","') + "\"))";
 				break;
 				case "dep": //Given department codes
-					sqlStmt="select distinct " + wfSubjVarName + " as data from cimlookup where " + wfDeptVarName + " in (\"" + givenData.join('","') + "\")"
+					sqlStmt="select distinct " + wfSubjVarName + " as dbData from cimlookup where " + wfDeptVarName + " in (\"" + givenData.join('","') + "\")"
 				break;
 				case "sub":
 					wfDebug(myDebugLevel,myIndent + "*** lookup type and give data type the same, returning false");
@@ -1134,9 +1135,9 @@ function LookupCode2(lookupType,givenType,givenData,excludeData) {
 	// Remove data as necessary
 	retArray=[];
 	resultSet.forEach(function(result) {
-		if (result.data === "") return;
-		if (excludeDataStr != "" && excludeDataStr.indexOf("," + result.data + ",") >= 0) {
-			wfDebug(myDebugLevel,myIndent + "result (" + result.data + ") is on the excludeData list, Skipping");
+		if (result.dbData === "") return;
+		if (excludeDataStr != "" && excludeDataStr.indexOf("," + result.dbData + ",") >= 0) {
+			wfDebug(myDebugLevel,myIndent + "result (" + result.dbData + ") is on the excludeData list, Skipping");
 			return;
 		}
 		retArray.push(result);
@@ -2541,3 +2542,4 @@ var wfLibLoaded=true;
 // 03-28-2018 @ 12:38:47 - 1.8.81 - dscudiero - Tweaked debug messaging
 // 04-02-2018 @ 10:36:45 - 1.8.82 - dscudiero - Fix problem ub getWfAttr when not using the standard names, was pulling tca data using standard names
 // 04-03-2018 @ 16:30:07 - 1.8.83 - dscudiero - Fix a problem in CheckChanged if there is no tca data
+// 04-04-2018 @ 15:38:12 - 1.8.84 - dscudiero - Fixed a strange problem where the sql queries were failing in lookup2 if the subject/department/college code happend to be 'data'
