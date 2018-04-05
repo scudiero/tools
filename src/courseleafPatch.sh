@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.110 # -- dscudiero -- Tue 04/03/2018 @ 10:57:45.51
+version=5.5.111 # -- dscudiero -- Thu 04/05/2018 @ 10:21:27.32
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel EditTcfValue BackupCourseleafFile'
@@ -729,7 +729,7 @@ removeGitReposFromNext=true
 	fi
 
 	echo
-	Prompt patchProds "What products do you wish to work with (comma separated)" "$productList,all" "$purchasedProducts"; patchProds="$(Lower "$patchProds")"
+	Prompt patchProds "What products do you wish to work with (comma separated)" "cat,cim,all" "$purchasedProducts"; patchProds="$(Lower "$patchProds")"
 	[[ $patchProds == 'all' ]] && patchProds="$productList"
 	## Check the products to make sure the client has them installed
 		unset patchProducts
@@ -1867,3 +1867,4 @@ Goodbye 0 "$text1" "$text2"
 ## 04-02-2018 @ 13:51:29 - 5.5.104 - dscudiero - Added code to rebuild the history db for cims
 ## 04-03-2018 @ 10:37:16 - 5.5.105 - dscudiero - Add force check in version compare
 ## 04-03-2018 @ 10:59:45 - 5.5.110 - dscudiero - Fix problem not prompting for version
+## 04-05-2018 @ 10:25:27 - 5.5.111 - dscudiero - Only allow the major products to be selectable for products to patch
