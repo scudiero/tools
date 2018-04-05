@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.38 # -- dscudiero -- Tue 04/03/2018 @ 11:17:40.67
+version=4.13.48 # -- dscudiero -- Thu 04/05/2018 @ 12:28:06.98
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -106,7 +106,7 @@ rsyncFilters=$(mkTmpFile 'rsyncFilters')
 refresh=false
 overlay=false
 specialSource=false
-fullCopy=false
+fullCopy=true
 unset suffix email clientHost remoteCopy
 progDir='courseleaf'
 haveCims=false
@@ -119,6 +119,7 @@ lockWorkflow=false
 Hello
 GetDefaultsData "$myName" -fromFiles
 ParseArgsStd $originalArgStr
+
 [[ -n $envs && -z $srcEnv ]] && srcEnv="$env"
 
 [[ $allItems == true || $fullCopy == true ]] && cim='Yes' && overlay=false
@@ -181,7 +182,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 		#if [[ $clientHosting == 'leepfrog' ]]; then
 			## check to see if this client is on another host
 			[[ $env == 'test' ]] && tempClient="${client}-test" || tempClient="${client}"
-			sqlStmt="select host,share,redhatVer from $siteInfoTable where name=\"$tempClient\" and env=\"$env\""
+			sqlStmt="select host,share,redhatVer from $siteInfoTable where name=\"$tempClient\""
 			RunSql $sqlStmt
 			if [[ ${#resultSet[@]} -gt 0 ]]; then
 			 	clientHost=$(cut -d'|' -f1 <<< "${resultSet[0]}")
@@ -191,7 +192,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 				Terminate "Could not retrieve data for client ($tempClient), env ($env) from $workflowDb.$siteInfoTable"
 			fi
 			if [[ $clientHost != $hostName ]]; then
-				Msg "^Copying remote directory on 'clientHost', you will be prompted for your password on that server."
+				Msg "^Copying remote directory on '$clientHost', you will be prompted for your password on that server."
 				srcDir="ssh $userName@$clientHost.leepfrog.com:$srcDir"
 				remoteCopy=true
 			fi
@@ -219,12 +220,13 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 	[[ -n $suffix ]] && tgtDir=$(sed "s/$userName/$suffix/g" <<< $tgtDir)
 
 ## if target is not pvt or dev then do a full copy
-	[[ $tgtEnv != 'pvt' && $tgtEnv != 'dev' ]] && fullCopy=true
+	[[ $tgtEnv != 'pvt' && $tgtEnv != 'dev' ]] && { Info 0 1 "You are targeting a production environment, a full copy will be done"; fullCopy=true; }
 	[[ $overlay == true && $refresh == true ]] && Terminate "Cannot specify both the -overlay and -refresh flags at the same time"
 	[[ $overlay == true ]] && cloneMode='Replace' || cloneMode='Refresh'
 
 #==================================================================================================
 ## Check to see if all dirs exist
+dump tgtDir overlay refresh -p
 	[[ -z $srcDir ]] && Terminate "Could not resolve the source directory ('$srcDir'), you may not have access."
 	if [[ -d $tgtDir && $overlay == false  && $refresh == false ]]; then
 		Msg
@@ -253,7 +255,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 
 #==================================================================================================
 ## See if there are any additional directories the user wants to skip
-if [[ $verify == true ]]; then
+if [[ $verify == true && $fullCopy != true ]]; then
 	echo
 	unset ans; Prompt ans "Do you wish to specify which file sets to EXCLUDE" 'No Yes' 'No'; ans=${ans:0:1}; ans=${ans,,[a-z]}
 	if [[ $ans == 'y' ]]; then
@@ -354,7 +356,7 @@ dump -1 skipCim skipCat skipClss skipAlso
 	[[ $skipCat == true && $fullCopy != true ]] && verifyArgs+=("Skip Cat:$skipCat")
 	[[ $skipCim == true && $fullCopy != true ]] && verifyArgs+=("Skip CIM:$skipCim")
 	[[ $skipClss == true && $fullCopy != true ]] && verifyArgs+=("Skip CLSS:$skipClss")
-	[[ $fullCopy != true ]] && verifyArgs+=("Exclude List:$tmpStr")
+	[[ $fullCopy != true ]] && verifyArgs+=("Exclude List:$tmpStr") || verifyArgs+=("Full copy:$fullCopy")
 	[[ -n $lockWorkflows ]] && verifyArgs+=("Lock workflow in target:$lockWorkflows")
 	[[ $startWizdebug == true  ]] && verifyArgs+=("Auto start wizDebug:$startWizdebug")
 
@@ -697,3 +699,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 03-22-2018 @ 14:06:14 - 4.13.36 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:33:18 - 4.13.37 - dscudiero - D
 ## 04-03-2018 @ 16:30:39 - 4.13.38 - dscudiero - Add production to the ignore list for cat
+## 04-05-2018 @ 15:24:56 - 4.13.48 - dscudiero - Make full copy more obvious, fixed issue detecting remote hosting
