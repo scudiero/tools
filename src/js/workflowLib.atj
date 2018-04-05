@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.84" // -- dscudiero -- Wed 04/04/2018 @ 15:36:59.87
+wfLibVersion="1.8.85" // -- dscudiero -- Thu 04/05/2018 @ 16:32:11.66
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -1285,7 +1285,7 @@ wffuncs.wfAttr = function(inval, wfrule, args) {
 }; //wffuncs.wfAttr
 
 //=======================================================================================================================
-// Retrive atribute code values takine into account all codes and tcf/tca values.  Passed in a data
+// Retrieve attribute code values taking into account all codes and tcf/tca values.  Passed in a data
 // object of the form { request: reqType, options: options, tcadata: tcadata } where
 //
 // Usage:
@@ -1350,7 +1350,7 @@ GetAttrVal = function(data) {
 		subjects=getTCFValue(subjVarName, { delimiter: "\n", retarray: true });
 		if (includeTCA)
 			subjects=subjects.concat(getTCFValue(subjVarName, { data: tcaData, delimiter: "\n", retarray: true }));
-		wfDump(5,["\t" + subjVarName+" from tcfdata;"+subjects.toSource()])
+		wfDump(5,["\t" + subjVarName + " from tcfdata;"+subjects.toSource()])
 		if (subjects.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
 		}
@@ -1362,11 +1362,11 @@ GetAttrVal = function(data) {
 			resultSet=LookupCode2("dept","subj",subjects);
 			if (resultSet.length > 0) {
 				resultSet.forEach(function(result) {
-					departments.push(result.data);
+					departments.push(result.dbData);
 				});
 			}
 		}
-		wfDump(5,["\t" + deptVarName+" from tcfdata;"+departments.toSource()])
+		wfDump(5,["\t" + deptVarName + " from tcfdata;"+departments.toSource()])
 		if (departments.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			departments=wffuncs.getDepartments(subjects);
 		}
@@ -1378,7 +1378,7 @@ GetAttrVal = function(data) {
 			resultSet=LookupCode2("cols","subj",subjects);
 			if (resultSet.length > 0) {
 				resultSet.forEach(function(result) {
-					colleges.push(result.data);
+					colleges.push(result.dbData);
 				});
 			}
 		}
@@ -1386,11 +1386,12 @@ GetAttrVal = function(data) {
 			resultSet=LookupCode2("cols","dept",departments);
 			if (resultSet.length > 0) {
 				resultSet.forEach(function(result) {
-					colleges.push(result.data);
+					colleges.push(result.dbData);
 				});
 			}
 		}
-		wfDump(5,["\t" + colVarName+" from tcfdata;"+colleges.toSource()])
+
+		wfDump(5,["\t" + colVarName + " from tcfdata;"+colleges.toSource()])
 		if (colleges.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			colleges=wffuncs.getColleges(departments);
 		}
@@ -2543,3 +2544,4 @@ var wfLibLoaded=true;
 // 04-02-2018 @ 10:36:45 - 1.8.82 - dscudiero - Fix problem ub getWfAttr when not using the standard names, was pulling tca data using standard names
 // 04-03-2018 @ 16:30:07 - 1.8.83 - dscudiero - Fix a problem in CheckChanged if there is no tca data
 // 04-04-2018 @ 15:38:12 - 1.8.84 - dscudiero - Fixed a strange problem where the sql queries were failing in lookup2 if the subject/department/college code happend to be 'data'
+// 04-05-2018 @ 16:33:10 - 1.8.85 - dscudiero - Fix issue in GetAttrVal caused when we changed the return attribute name from lookup2 to be dbData
