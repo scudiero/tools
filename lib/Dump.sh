@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.72" # -- dscudiero -- Fri 03/23/2018 @ 16:50:46.11
+# version="2.0.73" # -- dscudiero -- Thu 04/05/2018 @ 15:15:39.61
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -28,16 +28,21 @@ function Dump {
 		[[ $mytoken == '-q' ]] && { Quit; }
 		[[ $mytoken == '-ifme' ]] && { [[ $userName != dscudiero ]] && return 0; }
 
-		if [[ -n $tabCnt ]]; then
-			for ((myTabCntr=0; myTabCntr<$tabCnt; myTabCntr++)); do
-				[[ -z $tabStr ]] && echo -e -n "\t" || echo -e -n "$tabStr"
-			done
-		fi
 		if [[ $logOnly == true && -n $logFile ]]; then
 			[[ $dumpFirstWrite == true ]] && { echo -e "\n\n$(head -c 100 < /dev/zero | tr '\0' '=')" >> $logFile; echo "$(date)" >> $logFile;  dumpFirstWrite=false; }
 			[[ $toStdout != true ]] && outFile="$logFile" || outFile="$stdout"
+			if [[ -n $tabCnt ]]; then
+				for ((myTabCntr=0; myTabCntr<$tabCnt; myTabCntr++)); do
+					[[ -z $tabStr ]] && echo -e -n "\t"  >> "$outFile" || echo -e -n "$tabStr" >> "$outFile"
+				done
+			fi			
 			echo -e "${caller}.$mytoken = >${!mytoken}<" >> "$outFile"
 		else
+			if [[ -n $tabCnt ]]; then
+				for ((myTabCntr=0; myTabCntr<$tabCnt; myTabCntr++)); do
+					[[ -z $tabStr ]] && echo -e -n "\t" || echo -e -n "$tabStr"
+				done
+			fi
 			echo -e "${colorVerbose}${caller}${colorDefault}.$mytoken = >${!mytoken}<"
 		fi
 	done
@@ -256,3 +261,4 @@ export -f DumpMap dumpmap dumphash
 ## 11-02-2017 @ 11.17.50 - ("2.0.67")  - dscudiero - Switch i to myTabCntr for the tab counter
 ## 11-15-2017 @ 08.25.59 - ("2.0.71")  - dscudiero - Added -s option to send output to $stdout
 ## 03-23-2018 @ 16:52:07 - 2.0.72 - dscudiero - Msg3 -> Msg
+## 04-05-2018 @ 15:23:09 - 2.0.73 - dscudiero - Move the tabnation code to inside the write loops
