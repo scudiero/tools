@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.111 # -- dscudiero -- Thu 04/05/2018 @ 10:21:27.32
+version=5.5.113 # -- dscudiero -- Thu 04/05/2018 @ 10:47:20.69
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel EditTcfValue BackupCourseleafFile'
@@ -176,7 +176,7 @@ cwdStart="$(pwd)"
 		local rsyncIgnore="$1"; shift || true; [[ $rsyncIgnore == 'none' ]] && unset rsyncIgnore
 		local rsyncBackup="${1:-/dev/null}"
 		local token rsyncOpts rsyncSrc rsyncTgt rsyncOut rsyncFilters rsyncVerbose rsyncListonly rc
-		dump -2 product rsyncSrc rsyncTgt rsyncBackup
+		dump -l -t -t -t product rsyncSrc rsyncTgt rsyncIgnore rsyncBackup
 		local rsyncErr="$tmpRoot/$myName.$product.rsyncErr"
 		[[ -r $rsyncErr ]] && rm "$rsyncErr"
 
@@ -189,6 +189,7 @@ cwdStart="$(pwd)"
 			rsyncOut=$tmpRoot/$myName.$product.rsyncOut
 			[[ -e $rsyncOut ]] && rm -f "$rsyncOut"
 			rsyncOpts="-rptb$rsyncVerbose --backup-dir $rsyncBackup --prune-empty-dirs --checksum $rsyncListonly --include-from $rsyncFilters --links"
+			dump -l -t -t -t rsyncOpts
 			echo > $rsyncFilters 
 			SetFileExpansion 'off'
 			for token in $(tr '|' ' ' <<< "$rsyncIgnore"); do echo "- $token" > $rsyncFilters; done
@@ -1868,3 +1869,4 @@ Goodbye 0 "$text1" "$text2"
 ## 04-03-2018 @ 10:37:16 - 5.5.105 - dscudiero - Add force check in version compare
 ## 04-03-2018 @ 10:59:45 - 5.5.110 - dscudiero - Fix problem not prompting for version
 ## 04-05-2018 @ 10:25:27 - 5.5.111 - dscudiero - Only allow the major products to be selectable for products to patch
+## 04-05-2018 @ 11:28:11 - 5.5.113 - dscudiero - Dump out the rsync parameters to the log file
