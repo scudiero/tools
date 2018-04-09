@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.49 # -- dscudiero -- Mon 04/09/2018 @ 15:15:56.14
+version=4.13.50 # -- dscudiero -- Mon 04/09/2018 @ 16:41:19.44
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -226,7 +226,6 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 
 #==================================================================================================
 ## Check to see if all dirs exist
-dump tgtDir overlay refresh -p
 	[[ -z $srcDir ]] && Terminate "Could not resolve the source directory ('$srcDir'), you may not have access."
 	if [[ -d $tgtDir && $overlay == false  && $refresh == false ]]; then
 		Msg
@@ -701,3 +700,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 04-03-2018 @ 16:30:39 - 4.13.38 - dscudiero - Add production to the ignore list for cat
 ## 04-05-2018 @ 15:24:56 - 4.13.48 - dscudiero - Make full copy more obvious, fixed issue detecting remote hosting
 ## 04-09-2018 @ 15:16:30 - 4.13.49 - dscudiero - Make the default for fullcopy be false again
+## 04-09-2018 @ 16:41:39 - 4.13.50 - dscudiero - Remove debug statements
