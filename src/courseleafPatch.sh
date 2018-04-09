@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.134 # -- dscudiero -- Thu 04/05/2018 @ 15:20:22.45
+version=5.6.0 # -- dscudiero -- Mon 04/09/2018 @ 10:00:15.43
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel EditTcfValue BackupCourseleafFile'
@@ -13,7 +13,7 @@ scriptDescription="Refresh courseleaf product(s) from the git repository shadows
 cwdStart="$(pwd)"
 
 #=======================================================================================================================
-# Refresh a Courseleaf component from the git repo
+# Refresh a Courseleaf component(s)
 #=======================================================================================================================
 #=======================================================================================================================
 ## Copyright ©2015 David Scudiero -- all rights reserved.
@@ -870,7 +870,7 @@ removeGitReposFromNext=true
 				[[ $ans == 'y' ]] && catalogAdvance=true
 			else
 				Note 0 1 "Using specified value of '$catalogAdvance' for 'catalogAdvance'"
-				[[ $verify != true && $catalogAdvance == true && $buildPatchPackage != true ]] && \
+				[[ $verify != true && $catalogAdvance == true && $buildPatchPackage != true && -z $newEdition ]] && \
 						Info 0 1 "Specifying -noPrompt and -catalogAdvance is not allowed, continuing with prompting active" && verify=true
 			fi
 			[[ $catalogAdvance == true && $buildPatchPackage == true ]] && addAdvanceCode=true
@@ -1069,7 +1069,7 @@ fi
 
 if [[ $backup == true ]]; then
 	Msg "Backing up the target site to, this will take a while..."
-	Msg "^(Fyi, you can check the status, view/tail the log file: '$logFile')"
+	#Msg "^(Fyi, you can check the status, view/tail the log file: '$logFile')"
 	sourceSpec="$tgtDir/"
 	targetSpec="$backupSite"
 	[[ ! -d "$targetSpec" ]] && mkdir -p "$targetSpec"
@@ -1085,9 +1085,11 @@ fi
 unset filesEdited
 if [[ $catalogAdvance == true || $fullAdvance == true ]]; then
 	Msg "Catalog advance is active, advancing the '$(Upper $env)' site"
+	AitemCntr=1
 
 	# Full advance, create a new curr site
 	if [[ $fullAdvance == true ]]; then
+		FAitemCntr=1
 		# Make a copy of next sans CIMs and CLSS/WEN
 		sourceSpec="$tgtDir/"
 		targetSpec="$(dirname $tgtDir)/${env}.${backupSuffix}"
@@ -1102,42 +1104,46 @@ if [[ $catalogAdvance == true || $fullAdvance == true ]]; then
 		# fi
 		[[ ! -d "$targetSpec" ]] && mkdir -p "$targetSpec"
 		unset rsyncResults
-		Msg "^Full advance requested, making a copy of '$env' (this will take a while)..."
-		Msg "^^ '$tgtDir' --> '$(basename $targetSpec)'"
-		Msg "^^(Fyi, you can check the status, view/tail the log file: '$logFile')"
+
+		Msg "^$AitemCntr) Full advance requested making a copy of '$env' (this will take a while)..."
+		Msg "^^$FAitemCntr) Making a copy of '$env' (this will take a while)..."
+		Msg "^^^'$tgtDir' --> '$(basename $targetSpec)'"
+		#Msg "^^(Fyi, you can check the status, view/tail the log file: '$logFile')"
 		Indent++; RunRsync "$product" "$sourceSpec" "$targetSpec" "$ignoreList"; Indent--
-		Msg "^^Copy operation completed"
+		Msg "^^^Copy operation completed"
 		Alert 1
+		(( FAitemCntr++ ))
 		# Move courseadmin the attic
 		if [[ -d ${targetSpec}/web/courseadmin ]]; then
-			Msg "^Moving courseadmin to the attic..."
 			[[ ! -d  ${targetSpec}/attic ]] && mkdir -p "${targetSpec}/attic"
 			mv -f ${targetSpec}/web/courseadmin ${targetSpec}/attic/courseadmin.$(date +"%m-%d-%y")
+			Msg "^^$FAitemCntr) 'courseadmin' moved to the attic in the new CURR site"
+
+			editFile="$targetSpec/web/$courseleafProgDir/index.tcf"
+			# Edit the coursleaf/index.tcf to comment out courseadmin lines
+			sed -e '/courseadmin/ s_^_//_' -i "$editFile"
+			Msg "^^$FAitemCntr) 'courseadmin' removed from the courseleaf console"
+			(( FAitemCntr++ ))
 		fi
+
 		# Edit the coursleaf/index.tcf to remove clss/wen stuff
 		editFile="$targetSpec/web/$courseleafProgDir/index.tcf"
-		Msg "^Editing the /$courseleafProgDir/index.tcf file..."
 		sed -i s'_^sectionlinks:WEN|_//sectionlinks:WEN|_'g "$editFile"
 		sed -i s'_^navlinks:WEN|_//navlinks:WEN|_'g "$editFile"
-		Msg "^^WEN records commented out"
+		Msg "^^$FAitemCntr) WEN records commented out in the new CURR site(/web/$courseleafProgDir/index.tcf file)"
 		filesEdited+=("$editFile")
-
-		# Edit the coursleaf/index.tcf to comment out courseadmin lines
-		sed -e '/courseadmin/ s_^_//_' -i "$editFile"
-
-		# Rename courseadmin so it is no longer visible
-		[[ -d $targetSpec/web/courseadmin ]] && $DOIT mv -f "$targetSpec/web/courseadmin" "$targetSpec/web/courseadmin.$(basename $targetSpec)"
+		(( FAitemCntr++ ))
 
 		## Swap our copy of the next site with the curr site
-		Msg "^Full advance is active, swapping our copy of the NEXT site with the CURR site"
-		Msg "^^'$targetSpec' --> '$(dirname $tgtDir)/curr'"
-
-		#[[ -d $(dirname $tgtDir)/curr ]] && $DOIT mv -f "$(dirname $tgtDir)/curr" "$(dirname $tgtDir)/curr.$(cut -d '.' -f2 <<< $(basename $targetSpec))"
+		Msg "^^$FAitemCntr) Full advance is active, swapping our copy of the NEXT site with the CURR site"
+		Msg "^^^'$targetSpec' --> '$(dirname $tgtDir)/curr'"
 		if [[ -d $(dirname $tgtDir)/curr ]]; then
 			$DOIT mv -f "$(dirname $tgtDir)/curr" "$(dirname $tgtDir)/curr-${backupSuffix}"
-			Msg "^^ '$(dirname $tgtDir)/curr' --> '$(dirname $tgtDir)/curr-${backupSuffix}'"
+			Msg "^^^'$(dirname $tgtDir)/curr' --> '$(dirname $tgtDir)/curr-${backupSuffix}'"
 		fi
 		$DOIT mv -f "$targetSpec" "$(dirname $tgtDir)/curr"
+		(( FAitemCntr++ ))
+
 		## Fix the editcl login accounts
 		editFile="$(dirname $tgtDir)/curr/$courseleafProgDir.cfg"
 		sed -i s"_$client-next_$client-curr_"g "$editFile"
@@ -1145,41 +1151,45 @@ if [[ $catalogAdvance == true || $fullAdvance == true ]]; then
 		# Turn off pencils from the structured content draw
 		editFile="$localstepsDir/structuredcontentdraw.html"
 		if [[ -f "$editFile" ]] ; then
-			Msg "^Editing the 'structuredcontentdraw.html' file..."
 			sed -e '/pencil.png/ s|html|//html|' -i "$editFile"
-			Msg "^^CURR pencils turned off in structuredcontentdraw"
+			Msg "^^$FAitemCntr) Pencils turned OFF in /web/courseleaf/localsteps/structuredcontentdraw.html in the new CURR site"
 			filesEdited+=("$editFile")
 		fi
+		(( FAitemCntr++ ))
 
 		# Make sure that pdfererypage is set
 		editFile="$localstepsDir/default.tcf"
 		if [[ -f "$editFile" ]] ; then
-			Msg "^Editing the 'localsteps/default.tcf' file..."
-			sed -e '_^//pdfeverypage:true_'pdfeverypage:true_-i "$editFile"
-			sed -e '_^pdfeverypage:false_'pdfeverypage:true_-i "$editFile"
-			Msg "^^CURR pdfeverypage set on"
+			#Msg "^Editing the 'localsteps/default.tcf' file..."
+			sed -i s'_^//pdfeverypage:true_pdfeverypage:true_' "$editFile"
+			sed -i s'_^pdfeverypage:false_pdfeverypage:true_' "$editFile"
+			Msg "^^$FAitemCntr) pdfeverypage set ON (/web/courseleaf/localsteps/default.tcf) in the new CURR site"
 			filesEdited+=("$editFile")
 		fi
+		(( FAitemCntr++ ))
 
 		editFile="$(dirname $tgtDir)/curr/$courseleafProgDir.cfg"
-		Msg "^Editing the '$courseleafProgDir.cfg' file..."
-		sed -i s'_^//sitereadonly:Admin Mode:_sitereadonly:Admin Mode:_'g "$editFile"
-		Msg "^^CURR site admin mode set on"
+		#Msg "^Editing the '$courseleafProgDir.cfg' file..."
+		sed -i s'_^//sitereadonly:Admin Mode_sitereadonly:Admin Mode_g' "$editFile"
+		Msg "^^$FAitemCntr) Site admin mode set ON (/$courseleafProgDir.cfg) in the new CURR site"
 		filesEdited+=("$editFile")
+		(( FAitemCntr++ ))
 
-		Msg "^Republishing the CURR Courseleaf Console"
+		Msg "^^$FAitemCntr) Republishing the CURR Courseleaf Console"
 		RunCourseLeafCgi "$(dirname $tgtDir)/curr" -r /index.tcf
-		Msg "^^CURR site console republish completed"
+		Msg "^^^New CURR site console republish completed"
+		(( FAitemCntr++ ))
 
-		Msg "^*** The new CURR site has been created\n"
-		Msg "^The new CURR site will be republished in the background..."
 		RunCourseLeafCgi "$(dirname $tgtDir)/curr" -r &
-		Msg "^Full advance completed, current NEXT site has been copied to a new CURR site"
-
+		currRepublishPID=$!
+		Msg "^*** Full advance completed, current NEXT site has been copied to a new CURR site and"
+		Msg "^^the new CURR site is being republished in the background"
+		Msg
+		(( AitemCntr++ ))
 	fi #[[ $fullAdvance == true ]]
 
 	## Set the new edtion value
-		Msg "^Setting edition variable..."
+		Msg "^$AitemCntr) Setting edition variable..."
 		editFile="$localstepsDir/default.tcf"
 		$DOIT BackupCourseleafFile $localstepsDir/default.tcf
 		fromStr=$(ProtectedCall "grep "^edition:" $localstepsDir/default.tcf")
@@ -1188,17 +1198,19 @@ if [[ $catalogAdvance == true || $fullAdvance == true ]]; then
 		Msg "^^$fromStr --> $toStr"
 		rebuildConsole=true
 		filesEdited+=("$editFile")
+		(( AitemCntr++ ))
 
 	# Reset coursleaf statuses
-		Msg "^Reseting console status (again, this may take a while)..."
+		Msg "^$AitemCntr) Reseting console status (again, this may take a while)..."
 		Msg "^^wfstatinit..."
 		RunCourseLeafCgi $tgtDir "wfstatinit /index.html"
 		Msg "^^wfstatbuild..."
 		RunCourseLeafCgi $tgtDir "-e wfstatbuild /"
 		Alert 1
+		(( AitemCntr++ ))
 
 	# Archive request logs
-		Msg "^Archiving request logs..."
+		Msg "^$AitemCntr) Archiving request logs..."
 		if [[ -d $tgtDir/requestlog ]]; then
 			cd $tgtDir/requestlog
 			if [[ $(ls) != '' ]]; then
@@ -1219,17 +1231,19 @@ if [[ $catalogAdvance == true || $fullAdvance == true ]]; then
 				SetFileExpansion
 			fi
 		fi
+		(( AitemCntr++ ))
 
 	# Genaral cleanup
-		Msg "^Emptying files"
+		Msg "^$AitemCntr) Emptying files"
 		for file in $(echo $cleanFiles | tr ',' ' '); do
 			Msg "^^$file"
 			[[ $DOIT == '' ]] && echo > "${tgtDir}/${file}"
 			#filesEdited+=("${tgtDir}/${file}")
 		done
 		rm -f "${tgtDir}/web/courseleaf/wizdebug.*"
+		(( AitemCntr++ ))
 
-		Msg "^Emptying directories (this may take a while)"
+		Msg "^$AitemCntr) Emptying directories (this may take a while)"
 		for dir in $(echo $cleanDirs | tr ',' ' '); do
 			Msg "^^$dir"
 			if [[ -d $tgtDir/$dir ]]; then
@@ -1239,31 +1253,35 @@ if [[ $catalogAdvance == true || $fullAdvance == true ]]; then
 				SetFileExpansion
 			fi
 		done
+		(( AitemCntr++ ))
 		if [[ $removeGitReposFromNext == true ]]; then
-			Msg "^Removing .git files/directories (relative to '$tgtDir')"
+			Msg "^$AitemCntr) Removing .git files/directories (relative to '$tgtDir')"
 			cd $tgtDir
 			for dirFile in $(find -maxdepth 4 -name '*.git*'); do
 				Msg "^\t$dirFile"
 				$DOIT rm -rf $dirFile
 			done
 		fi
+		(( AitemCntr++ ))
+
 		# Make sure that pdfererypage is set off 
 		editFile="$localstepsDir/default.tcf"
 		if [[ -f "$editFile" ]] ; then
-			Msg "^Editing the 'localsteps/default.tcf' file..."
-			sed -e '_^pdfeverypage:true_'//pdfeverypage:true_-i "$editFile"
-			sed -e '_^pdfeverypage:true_'pdfeverypage:false_-i "$editFile"
-			Msg "^^CURR pdfeverypage set on"
+			Msg "^$AitemCntr) Editing the 'localsteps/default.tcf' file..."
+			sed -i s'_^pdfeverypage:true_'//pdfeverypage:true_ "$editFile"
+			sed -i s'_^pdfeverypage:true_'pdfeverypage:false_ "$editFile"
+			Msg "^pdfeverypage set OFF (/web/courseleaf/localsteps/default.tcf') in the NEXT site"
 			filesEdited+=("$editFile")
 		fi
-
+		(( AitemCntr++ ))
+		
 		editFile="$tgtDir/$courseleafProgDir.cfg"
-		Msg "^Editing the '$courseleafProgDir.cfg' file..."
-		sed -i s'_^sitereadonly:Admin Mode:_//sitereadonly:Admin Mode:_'g "$editFile"
-		Msg "^^NEXT site admin mode set on"
+		#Msg "^Editing the '$courseleafProgDir.cfg' file..."
+		sed -i s'_^sitereadonly:Admin Mode_//sitereadonly:Admin Mode_'g "$editFile"
+		Msg "^$AitemCntr) NEXT site admin mode set ON (/$courseleafProgDir.cfg)"
 		filesEdited+=("$editFile")
 
-		Msg "Catalog advance completed in NEXT"
+		Msg "*** Catalog advance completed in NEXT"
 
 fi #[[ $catalogAdvance == true || $fullAdvance == true ]] && [[ buildPatchPackage != true ]]
 
@@ -1284,7 +1302,7 @@ declare -A processedSpecs
 		prodVer=${prodVer%%/*}
 		srcDir=$(cut -d '|' -f3 <<< $processSpec)
 		dump -1 -t product prodVer srcDir tgtDir
-		Msg "^Processing: $(Upper "$product")..."
+		Msg; Msg "^Patching: $(Upper "$product")..."
 		if [[ $buildPatchPackage != true ]]; then
 			## Check Versions
 			if [[ $(Lower $prodVer) != 'master' && $force != true ]]; then
@@ -1306,6 +1324,7 @@ declare -A processedSpecs
 		fi
 		changesMade=false
 		## Run through the action records for the product
+			PitemCntr=1
 			productSpecArrayName="$product[@]"
 			productSpecArray=("${!productSpecArrayName}")
 			[[ ${#productSpecArray[@]} -le 0 ]] && Warning 0 2 "No patch file specs found for '$product', skipping" && continue
@@ -1342,7 +1361,7 @@ declare -A processedSpecs
 					backupDir=$backupRootDir/${product}${specTarget}
 					case "$(Lower "$specSource")" in
 						git)
-							Msg "\n^^Processing '$specSource' record: '${specPattern%% *} --> ${specTarget}'"
+							Msg "\n^^$PitemCntr) Processing '$specSource' record: '${specPattern%% *} --> ${specTarget}'"
 							# sourceSpec="${gitRepoShadow}/${specPattern%% *}${specPattern##* }"
 							# targetSpec="${tgtDir}${specTarget}"
 							sourceSpec="${gitRepoShadow}/${specPattern%% *}${specPattern##* }/*"
@@ -1366,7 +1385,7 @@ declare -A processedSpecs
 							fi
 							;;
 						skeleton)
-							Msg "\n^^Processing '$specSource' record: '${specPattern} --> ${specTarget}'"
+							Msg "\n^^$PitemCntr) Processing '$specSource' record: '${specPattern} --> ${specTarget}'"
 							#sourceSpec="$skeletonRoot/release${specPattern%% *}"
 							sourceSpec="$skeletonRoot/release${specPattern%% *}/*"
 							targetSpec="${tgtDir}${specTarget}"
@@ -1389,7 +1408,7 @@ declare -A processedSpecs
 							;;
 						daily.sh)
 							if [[ $processedDailysh != true ]]; then
-								Msg "\n^^Processing '$specSource' record: '${specPattern} --> ${specTarget}'"
+								Msg "\n^^$PitemCntr) Processing '$specSource' record: '${specPattern} --> ${specTarget}'"
 								grepFile="${tgtDir}${specPattern}"
 								if [[ -r $grepFile ]]; then
 									grepStr=$(ProtectedCall "grep '## Nightly cron job for client' $grepFile")
@@ -1427,7 +1446,7 @@ declare -A processedSpecs
 							processedDailysh=true
 							;;
 						cgi|searchcgi)
-							Msg "\n^^Processing '$specSource' record: '${specPattern} --> ${specTarget}'"
+							Msg "\n^^$PitemCntr) Processing '$specSource' record: '${specPattern} --> ${specTarget}'"
 							Msg "^^^courseleafCgiDirRoot: '$courseleafCgiDirRoot'" >> $logFile
 							Msg "^^^courseleafCgiSourceFile: '$courseleafCgiSourceFile'" >> $logFile
 							Msg "^^^ribbitCgiDirRoot: '$ribbitCgiDirRoot'" >> $logFile
@@ -1465,7 +1484,7 @@ declare -A processedSpecs
 						cgicommand)
 							tmpStr=$(Lower "${specTarget}")
 							if [[ -z $tmpStr ]] || [[ $tmpStr == 'always' ]] || [[ $tmpStr == 'onchangeonly' && $changesMade == true ]]; then
-								Msg "\n^^Processing '$specSource' record: '${specPattern} ${specTarget}'"
+								Msg "\n^^$PitemCntr) Processing '$specSource' record: '${specPattern} ${specTarget}'"
 								pushd "$tgtDir/web/$courseleafProgDir" >& /dev/null
 								(( indentLevel = indentLevel + 3 )) || true
 								RunCourseLeafCgi "$tgtDir" "$specPattern"
@@ -1477,7 +1496,7 @@ declare -A processedSpecs
 						command)
 							tmpStr=$(Lower "${specTarget}")
 							if [[ -z $tmpStr ]] || [[ $tmpStr == 'always' ]] || [[ $tmpStr == 'onchangeonly' && $changesMade == true ]]; then
-								Msg "\n^^Processing '$specSource' record: '${specPattern} ${specTarget}'"
+								Msg "\n^^$PitemCntr) Processing '$specSource' record: '${specPattern} ${specTarget}'"
 								Pushd "$tgtDir"
 								(( indentLevel = indentLevel + 3 )) || true
 								eval "$specPattern"
@@ -1489,7 +1508,7 @@ declare -A processedSpecs
 							;;
 						compare)
 							if [[ $buildPatchPackage != true ]]; then
-								Msg "\n^^Processing '$specSource' record: '${specPattern%% *}' --> '${specTarget}' $specIgnoreList "
+								Msg "\n^^$PitemCntr) Processing '$specSource' record: '${specPattern%% *}' --> '${specTarget}' $specIgnoreList "
 								if [[ -f "${tgtDir}${specPattern##* }" ]]; then
 									tgtFile="${tgtDir}${specPattern##* }"
 									tgtFileMd5=$(md5sum $tgtFile | cut -f1 -d" ")
@@ -1527,6 +1546,7 @@ declare -A processedSpecs
 						*) Terminate "^^Encountered and invalid processing type '$specSource'\n^$specLine"
 							;;
 					esac
+					(( PitemCntr++ ))
 			done #Process records
 			if [[ $buildPatchPackage != true ]]; then
 				case $product in
@@ -1535,17 +1555,19 @@ declare -A processedSpecs
 						Msg
 						Note 0 2 "The pages database on the target site should be rebuilt please goto $client's 'CourseLeaf Console' and use the 'Rebuld PageDB' action to rebuild the pages database."
 						Note 0 2 "The target site needs to be republished, please goto $client's 'CourseLeaf Console' and use the 'Republish Site' action to rebuild the site."
+						Msg
 						;;
 					cim)
 						## Rebuild cims as necessary
 						if [[ -n $cimStr ]]; then
+							Msg
 							rebuildHistoryDb=false
 							#echo "\$(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7') = '$(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7')'"
 							#echo "\$(CompareVersions "$cimVerBeforePatch" 'le' '3.5.7 rc') = '$(CompareVersions "$cimVerBeforePatch" 'le' '3.5.7 rc')'"
 							[[ $(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7 rc') == true && \
 							   $(CompareVersions "$cimVerBeforePatch" 'le' '3.5.7 rc') == true ]] && rebuildHistoryDb=true
 							dump -1 rebuildHistoryDb
-							Msg "\n^^Republishing /CIM instance home pages..."
+							Msg "\n^^$PitemCntr) Republishing /CIM instance home pages..."
 							for cim in $(echo $cimStr | tr ',' ' '); do
 								Msg "^^^Republishing /$cim/index.tcf..."
 								RunCourseLeafCgi "$tgtDir" "-r /$cim/index.tcf" | Indent | Indent
@@ -1553,7 +1575,8 @@ declare -A processedSpecs
 									Msg "^^^RebuildHistoryDb /$cim/index.tcf..."
 									RunCourseLeafCgi "$tgtDir" "rebuildHistoryDb /$cim/index.tcf" | Indent | Indent
 								fi
-							done 
+							done
+							(( PitemCntr++ ))
 						fi
 						;;
 				esac
@@ -1562,11 +1585,11 @@ declare -A processedSpecs
 	Msg
 	Msg "\nProduct updates completed"
 
-
 #=======================================================================================================================
 ## Cross product checks / updates
 #=======================================================================================================================
 Msg
+CPitemCntr=1
 Msg "\nCross product checks..."
 ## Check to see if there are any old formbuilder widgets
 	if [[ $client != 'internal' && -d "$locallibsDir/locallibs" ]]; then
@@ -1695,7 +1718,7 @@ Msg "\nCross product checks..."
 	fi
 
 ## Wait for the curr site to finish publising
-	Msg "Waiting for the republish of the CURR site to complete..."
+	Msg; Msg "Waiting for the republish of the new CURR site to complete..."
 	wait
 
 ## log updates in changelog.txt
@@ -1917,3 +1940,4 @@ Goodbye 0 "$text1" "$text2"
 ## 04-05-2018 @ 10:25:27 - 5.5.111 - dscudiero - Only allow the major products to be selectable for products to patch
 ## 04-05-2018 @ 11:28:11 - 5.5.113 - dscudiero - Dump out the rsync parameters to the log file
 ## 04-09-2018 @ 07:40:40 - 5.5.134 - dscudiero - Fix problem with removeing programadmin, add additional items from Melanies email
+## 04-09-2018 @ 10:08:02 - 5.6.0 - dscudiero - Fix problem with sed statement syntaz
