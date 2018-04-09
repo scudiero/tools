@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.5.113 # -- dscudiero -- Thu 04/05/2018 @ 10:47:20.69
+version=5.5.134 # -- dscudiero -- Thu 04/05/2018 @ 15:20:22.45
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel EditTcfValue BackupCourseleafFile'
@@ -61,12 +61,14 @@ cwdStart="$(pwd)"
 		nextDir="$HOME/testData/next"
 		[[ -z $products ]] && products='cat,cim'
 		noCheck=true
-		buildPatchPackage=true
+		buildPatchPackage=false
 		backup=false
 		newEdition='2011-2021'
 		catalogAdvance=true
 		catalogAudit=false
 		fullAdvance=true
+		latest=true
+		force=true
 	}
 
 	function courseleafPatch-Help  {
@@ -103,10 +105,6 @@ cwdStart="$(pwd)"
 		echo -e "\nTarget site data files potentially modified:"
 		echo -e "\tAll CourseLeaf files, no client data files"
 
-		return 0
-	}
-
-	function testsh-testMode  { # or testMode-local
 		return 0
 	}
 
@@ -176,7 +174,7 @@ cwdStart="$(pwd)"
 		local rsyncIgnore="$1"; shift || true; [[ $rsyncIgnore == 'none' ]] && unset rsyncIgnore
 		local rsyncBackup="${1:-/dev/null}"
 		local token rsyncOpts rsyncSrc rsyncTgt rsyncOut rsyncFilters rsyncVerbose rsyncListonly rc
-		dump -l -t -t -t product rsyncSrc rsyncTgt rsyncIgnore rsyncBackup
+		dump -t -t -t -l product rsyncSrc rsyncTgt rsyncIgnore rsyncBackup
 		local rsyncErr="$tmpRoot/$myName.$product.rsyncErr"
 		[[ -r $rsyncErr ]] && rm "$rsyncErr"
 
@@ -189,12 +187,13 @@ cwdStart="$(pwd)"
 			rsyncOut=$tmpRoot/$myName.$product.rsyncOut
 			[[ -e $rsyncOut ]] && rm -f "$rsyncOut"
 			rsyncOpts="-rptb$rsyncVerbose --backup-dir $rsyncBackup --prune-empty-dirs --checksum $rsyncListonly --include-from $rsyncFilters --links"
-			dump -l -t -t -t rsyncOpts
+			dump -t -t -t -l rsyncOpts
 			echo > $rsyncFilters 
 			SetFileExpansion 'off'
-			for token in $(tr '|' ' ' <<< "$rsyncIgnore"); do echo "- $token" > $rsyncFilters; done
+			for token in $(tr '|' ' ' <<< "$rsyncIgnore"); do echo "- $token" >> $rsyncFilters; done
 			echo '+ *.*' >> $rsyncFilters
 			SetFileExpansion
+			cat $rsyncFilters | Indent | Indent | Indent | Indent >> $logFile
 
 		## Do copies
 			if [[ -z $DOIT ]]; then
@@ -1094,19 +1093,27 @@ if [[ $catalogAdvance == true || $fullAdvance == true ]]; then
 		targetSpec="$(dirname $tgtDir)/${env}.${backupSuffix}"
 		[[ $env == 'pvt' ]] && targetSpec="$tgtDir/$env.$(date +"%m-%d-%y")"
 		ignoreList="/db/clwen*|/bin/clssimport-log-archive/|/web/$progDir/wen/|/web/wen/"
-		if [[ -n $cimStr && $cimStr != 'programadmin' ]]; then
-			tmpStr=$(sed s"/,programadmin//"g <<< $cimStr)
-			ignoreList="$ignoreList|$(tr ',' '|' <<< "$tmpStr")"
-		fi
+		# # Add the cim directories (except programadmin) to the ignore list
+		# if [[ ${#cims[@]} -gt 0 ]]; then
+		# 	for cim in ${cims[@]}; do
+		# 		[[ $cim == 'programadmin' ]] && continue
+		# 		ignoreList="$ignoreList|/web/$cim/"
+		# 	done
+		# fi
 		[[ ! -d "$targetSpec" ]] && mkdir -p "$targetSpec"
 		unset rsyncResults
-		Msg "^Full advance requested, making a copy of '$env' to sans CIMs/CLSS (this will take a while)..."
+		Msg "^Full advance requested, making a copy of '$env' (this will take a while)..."
 		Msg "^^ '$tgtDir' --> '$(basename $targetSpec)'"
-		Msg "^(Fyi, you can check the status, view/tail the log file: '$logFile')"
+		Msg "^^(Fyi, you can check the status, view/tail the log file: '$logFile')"
 		Indent++; RunRsync "$product" "$sourceSpec" "$targetSpec" "$ignoreList"; Indent--
 		Msg "^^Copy operation completed"
 		Alert 1
-
+		# Move courseadmin the attic
+		if [[ -d ${targetSpec}/web/courseadmin ]]; then
+			Msg "^Moving courseadmin to the attic..."
+			[[ ! -d  ${targetSpec}/attic ]] && mkdir -p "${targetSpec}/attic"
+			mv -f ${targetSpec}/web/courseadmin ${targetSpec}/attic/courseadmin.$(date +"%m-%d-%y")
+		fi
 		# Edit the coursleaf/index.tcf to remove clss/wen stuff
 		editFile="$targetSpec/web/$courseleafProgDir/index.tcf"
 		Msg "^Editing the /$courseleafProgDir/index.tcf file..."
@@ -1138,19 +1145,37 @@ if [[ $catalogAdvance == true || $fullAdvance == true ]]; then
 		# Turn off pencils from the structured content draw
 		editFile="$localstepsDir/structuredcontentdraw.html"
 		if [[ -f "$editFile" ]] ; then
-			Msg "^Editing the structuredcontentdraw.html file..."
+			Msg "^Editing the 'structuredcontentdraw.html' file..."
 			sed -e '/pencil.png/ s|html|//html|' -i "$editFile"
-			Msg "^^CURR pencils turned off in structuredcontentdraw ..."
+			Msg "^^CURR pencils turned off in structuredcontentdraw"
+			filesEdited+=("$editFile")
+		fi
+
+		# Make sure that pdfererypage is set
+		editFile="$localstepsDir/default.tcf"
+		if [[ -f "$editFile" ]] ; then
+			Msg "^Editing the 'localsteps/default.tcf' file..."
+			sed -e '_^//pdfeverypage:true_'pdfeverypage:true_-i "$editFile"
+			sed -e '_^pdfeverypage:false_'pdfeverypage:true_-i "$editFile"
+			Msg "^^CURR pdfeverypage set on"
 			filesEdited+=("$editFile")
 		fi
 
 		editFile="$(dirname $tgtDir)/curr/$courseleafProgDir.cfg"
-		Msg "^Editing the $editFile file..."
+		Msg "^Editing the '$courseleafProgDir.cfg' file..."
 		sed -i s'_^//sitereadonly:Admin Mode:_sitereadonly:Admin Mode:_'g "$editFile"
-		Msg "^^CURR site admin mode set ..."
+		Msg "^^CURR site admin mode set on"
 		filesEdited+=("$editFile")
 
+		Msg "^Republishing the CURR Courseleaf Console"
+		RunCourseLeafCgi "$(dirname $tgtDir)/curr" -r /index.tcf
+		Msg "^^CURR site console republish completed"
+
 		Msg "^*** The new CURR site has been created\n"
+		Msg "^The new CURR site will be republished in the background..."
+		RunCourseLeafCgi "$(dirname $tgtDir)/curr" -r &
+		Msg "^Full advance completed, current NEXT site has been copied to a new CURR site"
+
 	fi #[[ $fullAdvance == true ]]
 
 	## Set the new edtion value
@@ -1202,6 +1227,8 @@ if [[ $catalogAdvance == true || $fullAdvance == true ]]; then
 			[[ $DOIT == '' ]] && echo > "${tgtDir}/${file}"
 			#filesEdited+=("${tgtDir}/${file}")
 		done
+		rm -f "${tgtDir}/web/courseleaf/wizdebug.*"
+
 		Msg "^Emptying directories (this may take a while)"
 		for dir in $(echo $cleanDirs | tr ',' ' '); do
 			Msg "^^$dir"
@@ -1220,8 +1247,23 @@ if [[ $catalogAdvance == true || $fullAdvance == true ]]; then
 				$DOIT rm -rf $dirFile
 			done
 		fi
+		# Make sure that pdfererypage is set off 
+		editFile="$localstepsDir/default.tcf"
+		if [[ -f "$editFile" ]] ; then
+			Msg "^Editing the 'localsteps/default.tcf' file..."
+			sed -e '_^pdfeverypage:true_'//pdfeverypage:true_-i "$editFile"
+			sed -e '_^pdfeverypage:true_'pdfeverypage:false_-i "$editFile"
+			Msg "^^CURR pdfeverypage set on"
+			filesEdited+=("$editFile")
+		fi
 
-		Msg "Catalog advance completed"
+		editFile="$tgtDir/$courseleafProgDir.cfg"
+		Msg "^Editing the '$courseleafProgDir.cfg' file..."
+		sed -i s'_^sitereadonly:Admin Mode:_//sitereadonly:Admin Mode:_'g "$editFile"
+		Msg "^^NEXT site admin mode set on"
+		filesEdited+=("$editFile")
+
+		Msg "Catalog advance completed in NEXT"
 
 fi #[[ $catalogAdvance == true || $fullAdvance == true ]] && [[ buildPatchPackage != true ]]
 
@@ -1233,7 +1275,7 @@ Msg
 unset changeLogRecs processedDailysh skipProducts cgiCommands unixCommands
 [[ -n $comment ]] && changeLogRecs+=("$comment")
 declare -A processedSpecs
-## Refresh proucts
+## Refresh products
 	for processSpec in $(tr ',' ' ' <<< $processControl); do
 		dump -1 -n processSpec
 		product=$(cut -d '|' -f1 <<< $processSpec)
@@ -1652,6 +1694,10 @@ Msg "\nCross product checks..."
 		offline=false
 	fi
 
+## Wait for the curr site to finish publising
+	Msg "Waiting for the republish of the CURR site to complete..."
+	wait
+
 ## log updates in changelog.txt
 	WriteChangelogEntry 'changeLogRecs' "$tgtDir/changelog.txt"
 
@@ -1870,3 +1916,4 @@ Goodbye 0 "$text1" "$text2"
 ## 04-03-2018 @ 10:59:45 - 5.5.110 - dscudiero - Fix problem not prompting for version
 ## 04-05-2018 @ 10:25:27 - 5.5.111 - dscudiero - Only allow the major products to be selectable for products to patch
 ## 04-05-2018 @ 11:28:11 - 5.5.113 - dscudiero - Dump out the rsync parameters to the log file
+## 04-09-2018 @ 07:40:40 - 5.5.134 - dscudiero - Fix problem with removeing programadmin, add additional items from Melanies email
