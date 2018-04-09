@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.48 # -- dscudiero -- Thu 04/05/2018 @ 12:28:06.98
+version=4.13.49 # -- dscudiero -- Mon 04/09/2018 @ 15:15:56.14
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -106,7 +106,7 @@ rsyncFilters=$(mkTmpFile 'rsyncFilters')
 refresh=false
 overlay=false
 specialSource=false
-fullCopy=true
+fullCopy=false
 unset suffix email clientHost remoteCopy
 progDir='courseleaf'
 haveCims=false
@@ -700,3 +700,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 03-23-2018 @ 15:33:18 - 4.13.37 - dscudiero - D
 ## 04-03-2018 @ 16:30:39 - 4.13.38 - dscudiero - Add production to the ignore list for cat
 ## 04-05-2018 @ 15:24:56 - 4.13.48 - dscudiero - Make full copy more obvious, fixed issue detecting remote hosting
+## 04-09-2018 @ 15:16:30 - 4.13.49 - dscudiero - Make the default for fullcopy be false again
