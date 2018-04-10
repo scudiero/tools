@@ -17,8 +17,8 @@
 
 ## Make sure we have a TOOLSPATH and it is valid
 	[[ -z $TOOLSPATH ]] && TOOLSPATH="/steamboat/leepfrog/docs/tools"
-	[[ ! -d $TOOLSPATH ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but is not a directory, cannot continue\n" && exit -1
-	[[ ! -r $TOOLSPATH/bootData ]] && echo -e "\n*Error* -- $myName: Global variable 'TOOLSPATH' is set but you cannot access the boot record, cannot continue\n" && exit -1
+	[[ ! -d $TOOLSPATH ]] && echo -e "\n*Error* -- dispatcher: Global variable 'TOOLSPATH' is set but is not a directory, cannot continue\n" && exit -1
+	[[ ! -r $TOOLSPATH/bootData ]] && echo -e "\n*Error* -- dispatcher: Global variable 'TOOLSPATH' is set but you cannot access the boot record, cannot continue\n" && exit -1
 	export TOOLSPATH="$TOOLSPATH"
 
 ## Load boot data
