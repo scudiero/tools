@@ -1,9 +1,9 @@
 #!/bin/bash
 #==================================================================================================
-version=2.2.52 # -- dscudiero -- Fri 03/23/2018 @ 16:41:41.52
+version=2.2.53 # -- dscudiero -- Mon 03/26/2018 @ 16:54:59.91
 #==================================================================================================
 TrapSigs 'on'
-myIncludes="GetOutputFile BackupCourseleafFile ProtectedCall SelectMenu GetExcel SetFileExpansion"
+myIncludes="GetOutputFile BackupCourseleafFile ProtectedCall GetExcel SetFileExpansion"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -279,28 +279,7 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 					elif [[ -d "$implimentationRoot/$product/Workflow" ]]; then workbookSearchDir="$implimentationRoot/$product/Workflow"
 					elif [[ -d "$implimentationRoot/$product" ]]; then workbookSearchDir="$implimentationRoot/$product"
 					fi
-				fi
-				# if [[ $workflowSearchDir != '' ]]; then
-				# 	PushSettings; set +f
-				# 	tmpDataFile="/tmp/$userName.$myName.$$.data"
-				# 	cd "$workflowSearchDir"
-				# 	ProtectedCall "ls -t *.xlsx 2> /dev/null | grep -v '~' > "$tmpDataFile""
-				# 	PopSettings
-				# 	numLines=$(ProtectedCall "wc -l "$tmpDataFile"")
-				# 	numLines=$(echo $(ProtectedCall "wc -l "$tmpDataFile"") | cut -d' ' -f1)
-				# 	if [[ $numLines -gt 0 ]]; then
-				# 		while IFS=$'\n' read -r line; do menuList+=("$line"); done < "$tmpDataFile"; rm -f "$tmpDataFile";
-				# 		printf "\nPlease specify the $(ColorK '(ordinal)') number of the file you wish to load data from:\n(Data/.xlsx files found in '$(ColorK $workflowSearchDir)')\n\n"
-				# 		SelectMenu 'menuList' 'selectResp' "\nFile name $(ColorK '(ordinal)') number (or 'x' to quit) > "
-				# 		[[ $selectResp == '' ]] && Goodbye 0
-				# 		workbookFile="$(pwd)/$selectResp"
-				# 	else
-				# 		Info "No .xlsx files found"
-				# 	fi
-				# [[ $workbookFile == "" ]] && Msg
-				# Prompt workbookFile 'Please specify the full path to the workbook file' '*file*'
-				# fi
-			
+				fi			
 				if [[ $workbookSearchDir != '' ]]; then
 					SelectFile $workbookSearchDir 'workbookFile' '*.xls*' "\nPlease specify the $(ColorK '(ordinal)') number of the Excel workbook you wish to load data from:\
 						\n(*/.xls* files found in '$(ColorK $workbookSearchDir)')\n(sorted ordered newest to oldest)\n\n"
@@ -558,3 +537,4 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 ## 03-23-2018 @ 11:56:24 - 2.2.50 - dscudiero - Updated for GetExcel2/GetExcel
 ## 03-23-2018 @ 15:35:13 - 2.2.51 - dscudiero - D
 ## 03-23-2018 @ 16:52:33 - 2.2.52 - dscudiero - Msg3 -> Msg
+## 04-11-2018 @ 14:57:01 - 2.2.53 - dscudiero - Added wfHello, tweaked wfDebug & wfDump
