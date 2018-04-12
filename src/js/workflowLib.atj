@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.85" // -- dscudiero -- Thu 04/05/2018 @ 16:32:11.66
+wfLibVersion="1.8.86" // -- dscudiero -- Wed 04/11/2018 @ 14:55:44.35
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -83,6 +83,7 @@ if (typeof wfLibLoaded === "undefined") {
 
 	// Get/Set Global variables
 		var wfDebugLevel=0;
+		var wfNestLevel=0;
 		var	wfDebugEnvs='dev';
 		var	wfColVarName='college';
 		var	wfDeptVarName='department';
@@ -2173,6 +2174,31 @@ GetEnv = function(env) {
 
 
 //==================================================================================================
+// Formatted hello message from a function
+//==================================================================================================
+// 04/10/18 - dgs - Initial
+//==================================================================================================
+function wfHello(msgLevel,inval,wfrule,args){
+	returnObj={ myName:"", myOpts:"", myRequest:"", myNotMode:false };
+	if (wfNestLevel === 0) wfDebug(1,"");
+	if (typeof wfrule != 'undefined') {
+		returnObj.myName=wfrule.attrname;
+		text=" called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "'";
+		var options=wfrule.options;	options=options.substring(0, options.indexOf(';'));
+		returnObj.myOpts=options;
+		returnObj.myRequest=wfrule.searchfor.toLowerCase();
+		if (returnObj.myRequest.indexOf('not') >= 0 || options.toLowerCase().indexOf('notmode') >= 0)
+			returnObj.myNotMode=true;	
+	} else {
+		returnObj.myName=inval;
+		var text="";
+	}
+	wfDebug(msgLevel,"*** Starting: " + returnObj.myName + text);
+	wfDump(0,["reqType;"+returnObj.myRequest,"options;"+returnObj.myOpts,"notMode;"+returnObj.myNotMode],";","horizontal quote");
+	return returnObj;
+}
+
+//==================================================================================================
 // Quick formatted print of a variable
 //==================================================================================================
 function Dump(varName,varValue) { print_debug(varName + " = " + varValue.toSource() + "\n"); } //Dump
@@ -2187,11 +2213,11 @@ function here(id) { Here(id); }
 // string 		-- The text to print
 // mode 		-- The mode ('S' for screen, 'D' for wizdebug), default is 'D'
 //==================================================================================================
-// 07/22/16 -- dgs -- Initial
-// 08/30/16	-- dgs -- Added msglevel
+// 07/22/16 - dgs - Initial
+// 08/30/16	- dgs - Added msglevel
+// 04/10/18 - dgs - Added indent level and global indention
 //==================================================================================================
-var wfDumpTabLevel=0;
-function wfDebug(msgLevel,text,mode){
+function wfDebug(msgLevel,text,mode,indentLevel){
 	// Should we run
 	if (typeof wfDebugEnvs === "undefined") return;
 	if (typeof wfDebugEnvs === "") return;
@@ -2200,13 +2226,20 @@ function wfDebug(msgLevel,text,mode){
 	// Set variables if this is not a full call
 	if (typeof msgLevel != 'number') {
 		text=msgLevel;
-		msgLevel=0
+		msgLevel=0;
 	}
 	if (msgLevel > wfDebugLevel) return;
 
 	// set Mode
-		if (typeof mode === 'undefined') mode="D"
+		if (typeof mode === 'undefined') mode="D";
 		mode=mode.toUpperCase();
+
+	// Set indention
+		if (typeof indentLevel === 'undefined') indentLevel=wfNestLevel;
+		for (var i=0, tot=indentLevel; i < tot; i++) {
+		  text="\t" + text;
+		}
+
 	// Print message
 		if ( mode == 'D' || mode == 'B' )
 			print_debug(text + ' \n');
@@ -2215,7 +2248,7 @@ function wfDebug(msgLevel,text,mode){
 			print_doc("&nbsp;&nbsp;&nbsp;" + text + ' <br>');
 		}
 	return;
-} //Debug
+} //wfDebug
 
 //=================================================================================================
 // Formatted print an list of variables, is passed 3 arguments:
@@ -2226,7 +2259,7 @@ function wfDebug(msgLevel,text,mode){
 // 07/22/16 -- dgs -- Initial
 // 08/30/16	-- dgs -- Added msglevel
 //==================================================================================================
-function wfDump(msgLevel,varList,delimiter){
+function wfDump(msgLevel,varList,delimiter,options){
 	// Shoud we run
 	if (typeof wfDebugEnvs === "undefined") return;
 	if (typeof wfDebugEnvs === "") return;
@@ -2239,22 +2272,43 @@ function wfDump(msgLevel,varList,delimiter){
 	}
 	if (msgLevel > wfDebugLevel) return;
 
-	var showAsSource=false
+	var showAsSource=false;
+	var horizontal=false;
+	var stringStart=">";
+	var stringEnd="<";
 	if (typeof varList != 'object') { print_debug("*Error* -- wfDump: invalid argument type\n"); return;}
 	if (typeof delimiter === 'undefined') delimiter=";"
-	if (delimiter.toLowerCase().substr(0,1) === "s") {
-		showAsSource=true
-		delimiter=";"
+	if (typeof options != 'undefined') {
+		options=options.toLowerCase();
+		if (options.indexOf('source') >=0)
+			showAsSource=true;
+		if (options.indexOf('hor') >=0)
+			horizontal=true;
+		if (options.indexOf('quote') >=0) {
+			stringStart="'";
+			stringEnd="'";		}
 	}
 
+	var outString="";
     varList.forEach(function(v) {
     	var tokenArray=v.split(delimiter);
+    	var varName=tokenArray[0];
     	if (showAsSource) {
-     		wfDebug("\t"+ tokenArray[0] + ' = >' + tokenArray[1].toSource() + '<');
+    		var varValue=tokenArray[1].toSource()
     	} else {
-    		wfDebug("\t"+ tokenArray[0] + ' = >' + tokenArray[1] + '<');
+    		var varValue=stringStart + tokenArray[1] + stringEnd;
+    	}
+    	if (!horizontal) {
+    		wfDebug(msgLevel,"\t" + varName + " = " + varValue );
+    	} else {
+    		outString=outString + ", " + varName + " = " + varValue;
     	}
     });
+    if (horizontal) {
+    	outString=outString.substring(2);
+    	wfDebug(msgLevel,"\t" + outString);
+    }
+
 } //wfDump
 
 //==============================================================================================
@@ -2545,3 +2599,4 @@ var wfLibLoaded=true;
 // 04-03-2018 @ 16:30:07 - 1.8.83 - dscudiero - Fix a problem in CheckChanged if there is no tca data
 // 04-04-2018 @ 15:38:12 - 1.8.84 - dscudiero - Fixed a strange problem where the sql queries were failing in lookup2 if the subject/department/college code happend to be 'data'
 // 04-05-2018 @ 16:33:10 - 1.8.85 - dscudiero - Fix issue in GetAttrVal caused when we changed the return attribute name from lookup2 to be dbData
+// 04-12-2018 @ 12:20:14 - 1.8.86 - dscudiero - Added wfHello, refactored wfDebug
