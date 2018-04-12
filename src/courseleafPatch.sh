@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.6.0 # -- dscudiero -- Mon 04/09/2018 @ 10:00:15.43
+version=5.6.14 # -- dscudiero -- Thu 04/12/2018 @ 14:43:37.83
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel EditTcfValue BackupCourseleafFile'
@@ -141,6 +141,7 @@ cwdStart="$(pwd)"
 				;;
 		esac
 		prodVer=${prodVer%% *} ; prodVer=${prodVer%%rc*}
+
 		echo "$prodVer"
 		return 0
 	} #GetVersion
@@ -799,8 +800,17 @@ removeGitReposFromNext=true
 		productLower="$(Lower "$product")"
 
 		## Get the target sites version
-		[[ $productLower == 'cat' ]] && catVerBeforePatch="$(cat "$tgtDir/web/courseleaf/clver.txt")"; catVerBeforePatch=${catVerBeforePatch,,[a-z]}
-		[[ $productLower == 'cim' ]] && cimVerBeforePatch="$(cat "$tgtDir/web/courseleaf/cim/clver.txt")"; cimVerBeforePatch=${cimVerBeforePatch,,[a-z]}
+		if [[ $productLower == 'cat' ]]; then
+			catVerBeforePatch="$(GetVersion 'cat' "$tgtDir")"
+			[[ -z $catVerBeforePatch ]] && catVerBeforePatch='00.00.00'
+		fi
+
+		if [[ $productLower == 'cim' ]]; then
+			cimVerBeforePatch="$(GetVersion 'cim' "$tgtDir")"
+			[[ -z $cimVerBeforePatch ]] && cimVerBeforePatch='00.00.00'
+		fi
+		Dump -1 -n catVerBeforePatch cimVerBeforePatch
+
 		## Get the source version
 		[[ $productLower == 'cat' ]] && srcDir=$gitRepoShadow/courseleaf || srcDir=$gitRepoShadow/$productLower
 		if [[ -d "$srcDir" ]]; then
@@ -839,27 +849,23 @@ removeGitReposFromNext=true
 		eval "${product}Version=\"$prodShadowVer\""
 		eval currentVersion="\$${product,,[a-z]}VerBeforePatch"; 
 		eval targetVersion="\$${product,,[a-z]}VerAfterPatch"
-
-		dump -1 currentVersion targetVersion -p
+		dump -1 currentVersion targetVersion
 		[[ $(CompareVersions "${currentVersion}" 'ge' "${targetVersion}") == true && $force != true ]] && \
 			Terminate "Sorry, requested version for '$product' (${targetVersion}) is equal to \
 			or older then the current installed version (${currentVersion})"
 	done
-
 	betaProducts=${betaProducts:2}
 	processControl=${processControl:1}
-	dump -1 processControl betaProducts catVerBeforePatch cimVerBeforePatch catVerAfterPatch cimVerAfterPatch
+	dump -1 processControl betaProducts catVerBeforePatch cimVerBeforePatch catVerAfterPatch cimVerAfterPatch -p
 	addAdvanceCode=false
 	GetCims "$tgtDir" -all
 
 	## Set rebuildHistoryDb if patching cim and the current cim version is less than 3.5.7
 	rebuildHistoryDb=false
-	#echo "\$(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7') = '$(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7')'"
-	#echo "\$(CompareVersions "$cimVerBeforePatch" 'le' '3.5.7 rc') = '$(CompareVersions "$cimVerBeforePatch" 'le' '3.5.7 rc')'"
 	[[ $(Contains "$products" 'cim') == true && \
 	$(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7 rc') == true && \
 	$(CompareVersions "$cimVerBeforePatch" 'le' '3.5.7 rc') == true ]] && rebuildHistoryDb=true
-	dump -1 rebuildHistoryDb
+	dump -1 rebuildHistoryDb -p
 
 ## If cat is one of the products, should we advance the edition, should we audit the catalog
 	if [[ $(Contains "$patchProducts" 'cat') == true ]]; then
@@ -1560,13 +1566,6 @@ declare -A processedSpecs
 					cim)
 						## Rebuild cims as necessary
 						if [[ -n $cimStr ]]; then
-							Msg
-							rebuildHistoryDb=false
-							#echo "\$(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7') = '$(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7')'"
-							#echo "\$(CompareVersions "$cimVerBeforePatch" 'le' '3.5.7 rc') = '$(CompareVersions "$cimVerBeforePatch" 'le' '3.5.7 rc')'"
-							[[ $(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7 rc') == true && \
-							   $(CompareVersions "$cimVerBeforePatch" 'le' '3.5.7 rc') == true ]] && rebuildHistoryDb=true
-							dump -1 rebuildHistoryDb
 							Msg "\n^^$PitemCntr) Republishing /CIM instance home pages..."
 							for cim in $(echo $cimStr | tr ',' ' '); do
 								Msg "^^^Republishing /$cim/index.tcf..."
@@ -1941,3 +1940,4 @@ Goodbye 0 "$text1" "$text2"
 ## 04-05-2018 @ 11:28:11 - 5.5.113 - dscudiero - Dump out the rsync parameters to the log file
 ## 04-09-2018 @ 07:40:40 - 5.5.134 - dscudiero - Fix problem with removeing programadmin, add additional items from Melanies email
 ## 04-09-2018 @ 10:08:02 - 5.6.0 - dscudiero - Fix problem with sed statement syntaz
+## 04-12-2018 @ 14:44:53 - 5.6.14 - dscudiero - Fix problem when the target site does not have a clver.txt file
