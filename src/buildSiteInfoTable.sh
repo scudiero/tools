@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.127 # -- dscudiero -- Mon 03/26/2018 @ 12:44:55.22
+version=4.3.128 # -- dscudiero -- Thu 04/12/2018 @ 12:18:20.62
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql StringFunctions ProtectedCall FindExecutable PushPop"
@@ -96,21 +96,17 @@ fi
 		for result in ${resultSet[@]}; do
 			dbClients["${result%%|*}"]="${result##*|}"
 		done
-Here 0
-Dump cient prodServers
+
 	## Get the list of actual directories pulling only those in a production server share
 		SetFileExpansion 'on'
 		if [[ -z $client ]]; then
-Here 0
 			clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | sort | grep "${prodServers//,/\|}"))
 		else
-Here 1
 			#clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 -not -name '*-test' 2> /dev/null | grep "${prodServers//,/\|}" | grep $client || true))
 			clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep "${prodServers//,/\|}" | grep $client || true))
 		fi
 		SetFileExpansion
 		numClients=${#clientDirs[@]}
-Dump numClients -p
 
 	if [[ $verboseLevel -ge 1 ]]; then
 		echo
@@ -249,3 +245,4 @@ Goodbye 0 'alert'
 ## 03-22-2018 @ 14:05:51 - 4.3.124 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:31:44 - 4.3.125 - dscudiero - D
 ## 03-26-2018 @ 12:51:29 - 4.3.127 - dscudiero - Misc cleanup
+## 04-12-2018 @ 12:18:40 - 4.3.128 - dscudiero - Remove debug
