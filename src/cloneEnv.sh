@@ -1,16 +1,19 @@
 ##  #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.10 # -- dscudiero -- Mon 10/02/2017 @ 14:05:51.95
+version=1.0.11 # -- dscudiero -- Fri 04/13/2018 @  9:55:11.72
 #==================================================================================================
 # Quick call to scriptsAndReports
 #==================================================================================================
 Import 'FindExecutable'
+originalArgStr="$*"
+
 executeFile=$(FindExecutable 'copyEnv')
+
 [[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
 myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 myPath="$(dirname $executeFile)"
-source $executeFile -tgtEnv pvt $scriptArgs
+source $executeFile -tgtEnv pvt $originalArgStr
 
 #==================================================================================================
 # Check-in Log
@@ -21,3 +24,4 @@ source $executeFile -tgtEnv pvt $scriptArgs
 ## 09-29-2017 @ 15.34.10 - (1.0.5)     - dscudiero - Switch to use FineExecutable vs Call
 ## 09-29-2017 @ 16.14.36 - (1.0.8)     - dscudiero - Remove debug stuff
 ## 10-02-2017 @ 14.07.00 - (1.0.10)    - dscudiero - Check to make sure the executeFile has a value and is readable
+## 04-13-2018 @ 09:56:05 - 1.0.11 - dscudiero - Pass input script args on to copyEnv
