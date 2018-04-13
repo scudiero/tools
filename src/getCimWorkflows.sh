@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.110 # -- dscudiero -- Thu 03/29/2018 @ 11:58:59.10
+version=1.2.124 # -- dscudiero -- Fri 04/13/2018 @  8:59:11.37
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -82,27 +82,26 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 		local line="$1"; shift
 		local description="$*"
 		local rtype value tmpStr
-		dump -2 -t ruleName line description
+		dump -2 line -t ruleName description
 
 		[[ $(Contains ",${ignoreRules}," ",${ruleName},") == true ]] && return 0
 
 		if [[ $(Contains "$line" '|attr|') == true || $(Contains "$line" '|function|wfAttr|') == true || \
 			$(Contains "$line" '|function|Related|') == true || $(Contains "$line" '|function|GetAcadLevel') == true || \
 			$(Contains "$line" 'ProposalState') == true || $(Contains "$line" 'NotifyAllApprovers') == true || \
-			$(Contains "$line" 'RelatedDepts') == true ]]; then
+			$(Contains "$line" 'RelatedDepts') == true || \
+			$(Contains "$wfOverrideSubstitutionVars" ",${ruleName^^[a-z]},") == true ]]; then
 			#line = >Col|attr|college_prog.code|; <
 			substitutionVars[$ruleName]="$description\t\tattr{$(cut -d'|' -f3 <<< "$line")}"
 			substitutionVarsKeys+=($ruleName)
 		else
+			rtype="$(cut -d'|' -f2 <<< "$line")"
+			value="$(cut -d'|' -f3- <<< "$line")"
 			#line = >addProvost|function|AddProvost|; <
 			if [[ $(Contains "$line" '|function|') == true ]]; then
-				rtype="$(cut -d'|' -f2 <<< "$line")"
-				value="$(cut -d'|' -f3- <<< "$line")"
 				value="${value#;*}"
 			#line = >iffieldmatch|acad_level.code|value=UG; <
 			elif [[ $(Contains "$line" '|iffieldmatch|') == true ]]; then
-				rtype="$(cut -d'|' -f2 <<< "$line")"
-				value="$(cut -d'|' -f3- <<< "$line")"
 				value=$(tr -d ';' <<< "$value")
 			else
 				Warning "Unknown rule type: '$line'"
@@ -172,10 +171,10 @@ VerifyContinue "You are asking to generate a workflow spreadsheet for"
 myData="Client: '$client', Env: '$env', Cims: '$cimStr' "
 [[ $logInDb != false && $myLogRecordIdx != "" ]] && dbLog 'data' $myLogRecordIdx "$myData"
 
-
 #==================================================================================================
 # Main
 #==================================================================================================
+SetFileExpansion 'off'
 ## Write out header data to the output file
 	Msg "\n$myName ($version) $userName @ $(date)" > $outFile
 	Msg "CIMs: $cimStr" >> $outFile
@@ -197,7 +196,12 @@ for cim in ${cimStr//,/ }; do
 		## Get any special modifiers
 			specialModifiers=$(ProtectedCall grep 'wfSpecialModifiers:' $grepFile)
 			[[ -n $specialModifiers ]] && myModifiers="${specialModifiers##*:},$stdModifiers" || myModifiers="$stdModifiers"
-			myModifiers="$(Upper "$myModifiers")"
+			myModifiers="${myModifiers^^[a-z]}"
+
+		## Get any over rided substitution variable names
+			wfOverrideSubstitutionVars=$(ProtectedCall grep 'wfOverrideSubstitutionVars:' $grepFile)
+			[[ -n $wfOverrideSubstitutionVars ]] && wfOverrideSubstitutionVars="${wfOverrideSubstitutionVars##*:}"
+			wfOverrideSubstitutionVars=",${wfOverrideSubstitutionVars^^[a-z]},"
 
 		## Parse off the wfrules
 		unset substitutionVars wfrules wfrulesKeys substitutionVarsKeys esigsKeys wforders
@@ -272,6 +276,7 @@ for cim in ${cimStr//,/ }; do
 					echo -e "$cntr\t$i\t${substitutionVars[$i]}" >> $outFile
 					(( cntr += 1 ))
 				done
+				Msg "^^Found ${#substitutionVars[@]} Substitutiuon variables"
 			fi
 
 		## Write out 'Conditionals' data
@@ -392,6 +397,7 @@ for cim in ${cimStr//,/ }; do
 
 	## Read the workflow.tcf file for the workflows
 		ProtectedCall grep '^workflow:' $grepFile > $tmpFile
+		SetFileExpansion 'off'
 		while read -r line; do
 			dump -1 -n -t line
 			[[ ${line:0:23} == 'workflow:standard|START' ]] && continue
@@ -426,6 +432,7 @@ for cim in ${cimStr//,/ }; do
 			done
 			Msg "^^^Found $stepCntr steps"
 		done < $tmpFile
+		SetFileExpansion
 done # cims
 Msg
 Msg "Processed CIMs: $cimStr"
@@ -473,3 +480,4 @@ Goodbye 0 #'alert'
 ## 03-23-2018 @ 16:57:57 - 1.2.103 - dscudiero - Msg -> Msg
 ## 03-23-2018 @ 17:04:49 - 1.2.104 - dscudiero - Msg3 -> Msg
 ## 03-29-2018 @ 12:58:45 - 1.2.110 - dscudiero - Added code to escape the sed string for wfUG/GRre
+## 04-13-2018 @ 09:10:24 - 1.2.124 - dscudiero - Added override substitution variables, fixed but where '*' were getting expanded on output
