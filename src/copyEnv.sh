@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.50 # -- dscudiero -- Mon 04/09/2018 @ 16:41:19.44
+version=4.13.51 # -- dscudiero -- Fri 04/13/2018 @  9:57:52.12
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -53,7 +53,7 @@ scriptDescription="Create a cloned private dev site"
 		myArgs+=('skipcl|skipclss|switch|skipClss||script|Skip CLSS/WEN instance files')
 		myArgs+=('skipwe|skipwen|switch|skipClss||script|Skip CLSS/WEN instance files')
 		myArgs+=('skipal|skipalso|switch|skipClss||script|Additional directories and or files to ignore| comma separated list')
-		myArgs+=('deb|debug|switch|startWizdebug||script|Automatically start a wizDebug session after the copy')
+		myArgs+=('debug|debug|switch|startWizdebug||script|Automatically start a wizDebug session after the copy')
 		myArgs+=('lock|lock|option|lockWorkflows||script|Lock the specified workflow(s) in the source environment')
 		myArgs+=('as|asSite|option|asSite||script|The name to give the new site, i.e. tgtDir-asSite')
 	}
@@ -701,3 +701,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 04-05-2018 @ 15:24:56 - 4.13.48 - dscudiero - Make full copy more obvious, fixed issue detecting remote hosting
 ## 04-09-2018 @ 15:16:30 - 4.13.49 - dscudiero - Make the default for fullcopy be false again
 ## 04-09-2018 @ 16:41:39 - 4.13.50 - dscudiero - Remove debug statements
+## 04-13-2018 @ 09:58:16 - 4.13.51 - dscudiero - Change short abbrevition for the debug option to be debug
