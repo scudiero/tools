@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.124 # -- dscudiero -- Fri 04/13/2018 @  8:59:11.37
+version=1.2.129 # -- dscudiero -- Fri 04/13/2018 @  9:43:20.99
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -57,19 +57,14 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 		local line="$1"; shift
 		local description="$*"
 		local stepName value tmpStr
-		dump -2 -t ruleName line description
 
-		#line = >UCCGCPREP|UCC & GC Preparers|function|UCCGCPrepsEsig|; <
+		#line = >UCCGCPREP|UCC & GC Preparers|function|UCCGCPrepsEsig|; // Emits comment<
 		stepName="$(cut -d'|' -f2 <<< "$line")"
 		value="$(cut -d'|' -f4 <<< "$line")"
-		dump -2 -t stepName value
-		if [[ ${esigs[$stepName]+abc} ]]; then
-			tmpStr="${esigs["$stepName"]}"
-			esigs["$stepName"]="$tmpStr ; function{$value}"
-		else
-			esigs["$stepName"]="$description\t\tfunction{$value}"
-			esigsKeys+=("$stepName")
-		fi
+		dump -2 -n -t line -t -t ruleName line description stepName value
+
+		esigs["$ruleName"]="${ruleName} / ${stepName}\t${description}\t\tfunction{$value}"
+		esigsKeys+=("$ruleName")
 
 		return 0
 	} ## ParseEsig
@@ -303,9 +298,9 @@ for cim in ${cimStr//,/ }; do
 				cntr=1
 				Msg "\nEsig/Delayed Approval setup:" >> $outFile
 				Msg "Note that all names are case sensitive, i.e. 'Abc' does not equal 'abc'." >> $outFile
-				Msg "#\tStepPattern\tDescription\t\tImplementation / Comment" >> $outFile
+				Msg "#\tEsigName / Step Match String\tDescription\t\tImplementation / Comment" >> $outFile
 				for i in "${esigsKeys[@]}"; do
-					echo -e "$cntr\t$i\t${esigs[$i]}" >> $outFile
+					echo -e "$cntr\t${esigs[$i]}" >> $outFile
 					(( cntr += 1 ))
 				done
 				Msg "^^Found ${#esigsKeys[@]} Esig rules"
@@ -481,3 +476,4 @@ Goodbye 0 #'alert'
 ## 03-23-2018 @ 17:04:49 - 1.2.104 - dscudiero - Msg3 -> Msg
 ## 03-29-2018 @ 12:58:45 - 1.2.110 - dscudiero - Added code to escape the sed string for wfUG/GRre
 ## 04-13-2018 @ 09:10:24 - 1.2.124 - dscudiero - Added override substitution variables, fixed but where '*' were getting expanded on output
+## 04-13-2018 @ 09:46:10 - 1.2.129 - dscudiero - Reformat output for esigs
