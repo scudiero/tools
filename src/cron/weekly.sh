@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.43 # -- dscudiero -- Mon 04/02/2018 @  7:15:21.29
+version=2.1.44 # -- dscudiero -- Mon 04/16/2018 @  7:39:56.26
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -27,14 +27,14 @@ scriptArgs="$* -noBanners"
 case "$hostName" in
 	mojave)
 		## Run Reports
-			publishingEmails='froggersupport@leepfrog.com'
-			client2DaySummariesEmails='froggersupport@leepfrog.com'
-			qaWaitingEmails='sjones@leepfrog.com,mbruening@leepfrog.com,dscudiero@leepfrog.com'
-			toolsUsageEmails='dscudiero@leepfrog.com,jlindeman@leepfrog.com'
+			# publishingEmails='froggersupport@leepfrog.com'
+			# client2DaySummariesEmails='froggersupport@leepfrog.com'
+			# qaWaitingEmails='sjones@leepfrog.com,mbruening@leepfrog.com,dscudiero@leepfrog.com'
+			# toolsUsageEmails='dscudiero@leepfrog.com,jlindeman@leepfrog.com'
 
 			reports=("publishing -email \"froggersupport\"" "client2DaySummaries -email \"froggersupport,dscudiero\"")
 			reports+=("qaWaiting -email \"${qaTeam},${qaManager},dscudiero\"" "toolsUsage -email \"dscudiero\"")
-			reports+=("clientByTimezone -email \"${supportManager},dscudiero\"")
+			reports+=("clientByTimezone -role 'support' -email \"${supportManager},dscudiero\"")
 
 			for ((i=0; i<${#reports[@]}; i++)); do
 				report="${reports[$i]}"; reportName="${report%% *}"; reportArgs="${report##* }"; [[ $reportName == $reportArgs ]] && unset reportArgs
@@ -99,3 +99,4 @@ return 0
 ## 03-23-2018 @ 15:34:24 - 2.1.41 - dscudiero - D
 ## 03-23-2018 @ 16:18:48 - 2.1.42 - dscudiero - D
 ## 04-02-2018 @ 07:15:55 - 2.1.43 - dscudiero - Move timezone report to weekly
+## 04-16-2018 @ 07:40:33 - 2.1.44 - dscudiero - Fix call to client2daysummary report, pass in role
