@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.2.129 # -- dscudiero -- Fri 04/13/2018 @  9:43:20.99
+version=1.3.-1 # -- dscudiero -- Mon 04/16/2018 @  8:42:14.33
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -371,6 +371,7 @@ for cim in ${cimStr//,/ }; do
 					#[[ $(Contains ",$(Upper "${modifiers},${specialModifiers}")," ",$Upper($keyword),") == true ]] && continue
 					keywordDef=${token##*[}
 					keywordDef="$(Upper "[${keywordDef##*[}")"
+					dump -1 token keywordDef
 					if [[ $(Contains ",$myModifiers," ",$(Upper "$keyword"),") == true ]] ; then
 						modifiersRef["$keyword"]=true
 					else
@@ -477,3 +478,4 @@ Goodbye 0 #'alert'
 ## 03-29-2018 @ 12:58:45 - 1.2.110 - dscudiero - Added code to escape the sed string for wfUG/GRre
 ## 04-13-2018 @ 09:10:24 - 1.2.124 - dscudiero - Added override substitution variables, fixed but where '*' were getting expanded on output
 ## 04-13-2018 @ 09:46:10 - 1.2.129 - dscudiero - Reformat output for esigs
+## 04-17-2018 @ 07:29:40 - 1.3.-1 - dscudiero - Added roles columns
