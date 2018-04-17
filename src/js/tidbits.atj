@@ -113,7 +113,7 @@ in wfrules
 
 //Regular Expression testing
 var courseNumber=getTCFValue('course_number');
-var regex=/^[0-3]\d{2}\w{0,1}$/i 						//Note that this is not a string, there are no quotes arround the value
+var regex=/^[0-3]\d{2}\w{0,1}$/i 						//Note that this is not a string, there are no quotes around the value
 if (regex.test(courseNumber)) {
 	Here(1);
 }
