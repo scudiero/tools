@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.3" # -- dscudiero -- Wed 04/18/2018 @  9:32:35.26
+version="1.5.4" # -- dscudiero -- Wed 04/18/2018 @ 13:41:13.18
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -16,7 +16,7 @@ function fastDump {
 		echo -e "\t$token = >${!token}<"; 
 	done
 }
-[[ $(/usr/bin/logname 2>&1) == $me && $DEBUG == true ]] && echo -e "\n*** In $myName ($version)"
+[[ $(/usr/bin/logname 2>&1) == $me && $DEBUG == true ]] && echo -e "\n*** In $myName ($version)\n\t\$* = >$*<"
 
 ## Parse through arguments looking for keywords
 	useLocal=false
@@ -124,3 +124,4 @@ exit
 ## 09-28-2017 @ 09.02.58 - dscudiero - Add setting of TOOLSDEFAULTSPATH
 ## 10-16-2017 @ 13.56.18 - dscudiero - Comment out loader log statements
 ## 04-18-2018 @ 09:34:07 - 1.5.3 - dscudiero - Refactored to add useDev
+## 04-18-2018 @ 13:41:25 - 1.5.4 - dscudiero - Add debug statements
