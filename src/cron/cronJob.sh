@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.30 # -- dscudiero -- Tue 03/20/2018 @ 15:40:07.52
+version=2.1.31 # -- dscudiero -- Tue 04/17/2018 @ 16:58:22.81
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -47,7 +47,7 @@ originalArgStr="$*"
 
 #=======================================================================================================================
 ## Run the executable(s)
-	export USELOCAL=true
+	export USEDEV=true
 	executeFile=$(FindExecutable "$callScriptName" '-cron')
 	echo -e "\t-- $hostName - Starting $callScriptName from '$executeFile', Args: $scriptArgs $callScriptArgs" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	echo -e "\n$(date) -- Calling script '$callScriptName':\n\t$executeFile $callScriptArgs\n" > "$logFile"
@@ -147,3 +147,4 @@ exit 0
 ## 10-27-2017 @ 09.41.18 - (2.1.23)    - dscudiero - Remove debug stuff
 ## 11-15-2017 @ 07.08.56 - (2.1.29)    - dscudiero - Do not email on warnings
 ## 03-20-2018 @ 15:40:51 - 2.1.30 - dscudiero - Only post process the log file if it exists
+## 04-18-2018 @ 09:36:43 - 2.1.31 - dscudiero - Switched to use toolsDev
