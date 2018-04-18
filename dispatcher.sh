@@ -1,25 +1,43 @@
 #!/bin/bash
+## XO NOT AUTOVERSION
+#===================================================================================================
+version="1.5.3" # -- dscudiero -- Wed 04/18/2018 @  9:32:35.26
+#===================================================================================================
+# Copyright 2016 David Scudiero -- all rights reserved.
+# All rights reserved
+#===================================================================================================
+
+myName='dispatcher'
+me='dscudiero'
+function fastDump { 
+	[[ $(/usr/bin/logname 2>&1) != $me || $DEBUG != true ]] && return 0
+	local token ans; for token in $*; do 
+		[[ $token == -p ]] && { echo -e "\n*** Paused, press enter to continue ***"; read ans; [[ -n $ans ]] && exit; } || \
+		echo -e "\t$token = >${!token}<"; 
+	done
+}
+[[ $(/usr/bin/logname 2>&1) == $me && $DEBUG == true ]] && echo -e "\n*** In $myName ($version)"
 
 ## Parse through arguments looking for keywords
 	useLocal=false
+	useDev=false
 	pauseAtExit=false
 	viaCron=false
 	for token in $*; do
 		if [[ ${token:0:2} == '--' ]]; then
 			token="${token:2}" ; token=${token,,[a-z]}
-			[[ $token == 'viacron' ]] && viaCron=true
-			[[ $token == 'uselocal' ]] && useLocal=true
-			[[ $token == 'pauseatexit' || $token == 'pauseonexit' ]] && export PAUSEATEXIT=true
-			[[ $token == 'pauseatexit' || $token == 'pauseonexit' ]] && export PAUSEATEXIT=true
+			[[ $token == 'viacron' ]] && { viaCron=true; shift || true; }
+			[[ $token == 'uselocal' ]] && { useLocal=true; shift || true; }
+			[[ $token == 'usedev' ]] && { useDev=true; shift || true; }
+			[[ $token == 'pauseatexit' || $token == 'pauseonexit' ]] && { export PAUSEATEXIT=true; shift || true; }
 		fi
 	done
-	#echo; echo "HERE 0 HERE 0 HERE"; echo "useLocal = '$useLocal'"; read
+	fastDump viacron useLocal useDev PAUSEATEXIT
 
 ## Make sure we have a TOOLSPATH and it is valid
-	[[ -z $TOOLSPATH ]] && TOOLSPATH="/steamboat/leepfrog/docs/tools"
+	[[ -z $TOOLSPATH ]] && echo -e "\n*Error* -- dispatcher: Global variable 'TOOLSPATH' is not set, cannot continue\n" && exit -1
 	[[ ! -d $TOOLSPATH ]] && echo -e "\n*Error* -- dispatcher: Global variable 'TOOLSPATH' is set but is not a directory, cannot continue\n" && exit -1
 	[[ ! -r $TOOLSPATH/bootData ]] && echo -e "\n*Error* -- dispatcher: Global variable 'TOOLSPATH' is set but you cannot access the boot record, cannot continue\n" && exit -1
-	export TOOLSPATH="$TOOLSPATH"
 
 ## Load boot data
 	source "$TOOLSPATH/bootData"
@@ -39,24 +57,37 @@
 
 	export TOOLSDEFAULTSPATH="$TOOLSPATH/shadows/toolsDefaults"
 
-## Find the loader
+## Parse off the script to call name
+	unset scriptArgs
+	loadPgm="$(basename $0)"; 
+	[[ $loadPgm == 'dispatcher.sh' ]] && { loadPgm="$1"; shift || true; }
+	[[ $loadPgm == 'testsh' ]] && { scriptArgs=' --noLog --noLogInDb'; useLocal=true; }
+
+## Find the loader based on passed arguments
 	loaderDir="$TOOLSPATH"
-	if [[ $useLocal == true && -r $HOME/tools/loader.sh ]]; then
-		loaderDir="$HOME/tools"
+	unset USEDEV USELOCAL
+	if [[ $useLocal == true || $useDev == true ]]; then
+		[[ $useLocal == true && $useDev == true ]] && unset useDev
+		if [[ $useDev == true && -r "$TOOLSDEVPATH" ]]; then
+			loaderDir="$TOOLSDEVPATH"
+		elif [[ $useLocal == true && -r $HOME/tools/loader.sh  ]]; then
+			loaderDir="$HOME/tools"
+		fi
 		[[ -d "$loaderDir/lib" ]] && export TOOLSLIBPATH="$loaderDir/lib:$TOOLSLIBPATH"
 		[[ -d "$loaderDir/src" ]] && export TOOLSSRCPATH="$loaderDir/src:$TOOLSSRCPATH"
 	fi
+	export USEDEV=$useDev
+	export USELOCAL=$useLocal
 	export LOADER="$loaderDir/loader.sh"
-	#echo "loaderDir = '$loaderDir'"; read
 
 ## call script loader
-	loadPgm="$(basename $0)"; 
-	[[ $loadPgm == 'dispatcher.sh' ]] && { loadPgm="$1"; shift || true; }
+	fastDump loaderDir USEDEV USELOCAL loadPgm
 	if [[ $viaCron == true ]]; then
 		source "$loaderDir/loader.sh" $loadPgm --batchMode $*
 		return 0
 	else
-		source "$loaderDir/loader.sh" $loadPgm $*
+		[[ $(/usr/bin/logname 2>&1) == $me && $DEBUG == true ]] && echo -e "\n\tsource $loaderDir/loader.sh $loadPgm $scriptArgs $*"; fastDump -p;
+		source "$loaderDir/loader.sh" $loadPgm $scriptArgs $*
 	fi
 
 exit
@@ -92,3 +123,4 @@ exit
 ## 09-08-2017 @ 16.28.53 - dscudiero - Check for the --useLocal directive as the first token before using local loader
 ## 09-28-2017 @ 09.02.58 - dscudiero - Add setting of TOOLSDEFAULTSPATH
 ## 10-16-2017 @ 13.56.18 - dscudiero - Comment out loader log statements
+## 04-18-2018 @ 09:34:07 - 1.5.3 - dscudiero - Refactored to add useDev
