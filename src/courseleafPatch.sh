@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.6.14 # -- dscudiero -- Thu 04/12/2018 @ 14:43:37.83
+version=5.6.16 # -- dscudiero -- Wed 04/18/2018 @  7:15:29.66
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel EditTcfValue BackupCourseleafFile'
@@ -648,7 +648,7 @@ removeGitReposFromNext=true
 # Standard argument parsing and initialization
 #=======================================================================================================================
 	Hello
-	[[ $userName == 'dscudiero' && $useLocal == true ]] && GetDefaultsData "$myName" -fromFiles || GetDefaultsData "$myName"
+	GetDefaultsData -f "$myName"
 	ParseArgsStd $originalArgStr
 	[[ -n $newest ]] && latest=true
 
@@ -1941,3 +1941,4 @@ Goodbye 0 "$text1" "$text2"
 ## 04-09-2018 @ 07:40:40 - 5.5.134 - dscudiero - Fix problem with removeing programadmin, add additional items from Melanies email
 ## 04-09-2018 @ 10:08:02 - 5.6.0 - dscudiero - Fix problem with sed statement syntaz
 ## 04-12-2018 @ 14:44:53 - 5.6.14 - dscudiero - Fix problem when the target site does not have a clver.txt file
+## 04-18-2018 @ 09:36:18 - 5.6.16 - dscudiero - Cleaned up GetDefaultsData call
