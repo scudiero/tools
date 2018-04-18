@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.47" # -- dscudiero -- Fri 10/27/2017 @ 13:28:02.73
+# version="1.2.49" # -- dscudiero -- Wed 04/18/2018 @  9:26:21.43
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -37,25 +37,27 @@ function FindExecutable {
 	    [[ $1 =~ ^-st|--step$ ]] && { mode='step'; searchRoot="${mode}s"; shift 1 || true; continue; }
 	    [[ $1 =~ ^-re|--report$ ]] && { mode='report'; searchRoot="${mode}s"; shift 1 || true; continue; }
 	    [[ $1 =~ ^-ru|--run$ ]] && { runScript=true; shift 1 || true; continue; }
-	    [[ $1 =~ ^-use|--uselocal$ ]] && { useLocal=true; shift 1 || true; continue; }
+	    [[ $1 =~ ^-uselocal|--uselocal$ ]] && { useLocal=true; shift 1 || true; continue; }
+	    [[ $1 =~ ^-usedev|--usedev$ ]] && { useDev=true; shift 1 || true; continue; }
 	    [[ -z $fileName && ${1:0:1} != '-' ]] && fileName="$1" || scriptArgs="$scriptArgs $1"
 	    shift 1 || true
 	done
 
 	## Search for the file
 	if [[ $mode == 'lib' ]]; then
-		[[ -n $TOOLSLIBPATH ]] && searchDirs="$(tr ':' ' ' <<< $TOOLSLIBPATH)" || searchDirs="$TOOLSPATH/lib"
+ 		searchDirs="$TOOLSPATH/lib"
 		[[ $useDev == true && -n $TOOLSDEVPATH && -d "$TOOLSDEVPATH/lib" ]] && searchDirs="$TOOLSDEVPATH/lib $searchDirs"
 		[[ $useLocal == true && -d "$HOME/tools/lib" ]] && searchDirs="$HOME/tools/lib $searchDirs"
 		searchTokens="bash:sh cpp:cpp"
 	else
-		[[ -n $TOOLSSRCPATH ]] && searchDirs="$(tr ':' ' ' <<< $TOOLSSRCPATH)" || searchDirs="$TOOLSPATH/src"
+		searchDirs="$TOOLSPATH/src"
 		[[ $useDev == true && -n $TOOLSDEVPATH && -d "$TOOLSDEVPATH/src" ]] && searchDirs="$TOOLSDEVPATH/src $searchDirs"
 		[[ $useLocal == true && -d "$HOME/tools/src" ]] && searchDirs="$HOME/tools/src $searchDirs"
 		searchTokens="bash:sh python:py java:class steps:html report:sh cron:sh"
 	fi
 	#Dump -t fileName mode searchRoot searchTokens searchDirs scriptArgs
 
+	## Search for the file based in the searchDirs based on the searchTokens
 	for dir in $searchDirs; do
 		#Dump -t dir
 		for token in $(tr ',' ' ' <<< "$searchTokens"); do
@@ -114,3 +116,4 @@ export -f FindExecutable
 ## 10-18-2017 @ 13.48.16 - ("1.2.33")  - dscudiero - Set myName and myPath if running a the found file
 ## 10-23-2017 @ 07.56.04 - ("1.2.34")  - dscudiero - change the min abbreviation for file to be -file
 ## 10-27-2017 @ 13.28.25 - ("1.2.47")  - dscudiero - Cosmetic/minor change
+## 04-18-2018 @ 09:34:45 - 1.2.49 - dscudiero - Refactored setting searchdirs
