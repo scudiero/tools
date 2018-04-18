@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.20 # -- dscudiero -- Fri 03/23/2018 @ 11:51:10.59
+version=1.0.21 # -- dscudiero -- Tue 04/17/2018 @ 16:59:40.63
 #==================================================================================================
 #= Description +===================================================================================
 # Make sites for the LUC conference
@@ -72,7 +72,7 @@ while read line; do
 	siteName="${fName}${lName}"
 	userId=${userEmail%%@*}
 	dump -1 -t line -t fName lName siteName userId institution
-	copyEnv --useLocal $passWord -nocheck -src p -tgt p -asSite $siteName -forUser $userId/$passWord -nop
+	copyEnv --useDev $passWord -nocheck -src p -tgt p -asSite $siteName -forUser $userId/$passWord -nop
 
 	echo | tee -a $stdout
 	echo -e "$(TitleCase "$fName") $(TitleCase "$lName") \t--\t $institution" | tee -a $stdout
@@ -103,3 +103,4 @@ Goodbye 0 #'alert'
 ## Thu Feb 23 13:03:18 CST 2017 - dscudiero - Add error checking on the input lines
 ## 03-23-2018 @ 11:42:51 - 1.0.19 - dscudiero - Updates for GetExcel/GetExcel
 ## 03-23-2018 @ 11:56:30 - 1.0.20 - dscudiero - Updated for GetExcel2/GetExcel
+## 04-18-2018 @ 09:36:59 - 1.0.21 - dscudiero - Switched to use toolsDev
