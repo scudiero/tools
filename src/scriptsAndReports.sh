@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.124 # -- dscudiero -- Tue 03/27/2018 @ 11:28:31.42
+version=3.13.126 # -- dscudiero -- Wed 04/18/2018 @  9:40:41.27
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -323,7 +323,6 @@ fi
 ## parse arguments
 #=======================================================================================================================
 Hello
-[[ -n $UsersAuthGroups ]] && Msg "^Your authorization groups: $(sed 's/,/, /g' <<< \"$UsersAuthGroups\")"
 helpSet='script,client'
 parseQuiet=true
 GetDefaultsData $myName -fromFiles
@@ -354,6 +353,7 @@ dump -1 -p client report emailAddrs myName ${myName}LastRunDate ${myName}LastRun
 			[[ ${#menuList[@]} -eq 0 ]] && BuildMenuList
 			ProtectedCall "clear"
 			Msg
+			[[ -n $UsersAuthGroups ]] && Msg "^Your authorization groups are $(sed 's/,/, /g' <<< \"$UsersAuthGroups\")"
 			Msg "\n^Please specify the $(ColorM '(ordinal)') number of the $itemType you wish to run, 'x' to quit."
 			[[ $newItem == true ]] && Note "0 1" "Items with an '*' are new since the last time you ran '${itemType}s'"
 			Msg
@@ -539,3 +539,4 @@ Goodbye 0
 ## 03-23-2018 @ 16:58:09 - 3.13.120 - dscudiero - Msg3 -> Msg
 ## 03-26-2018 @ 08:48:13 - 3.13.121 - dscudiero - Fix setting default report name when in batchMode
 ## 03-27-2018 @ 11:29:31 - 3.13.124 - dscudiero - Fixed problem where scripts mode not displaying optional parms prompt
+## 04-18-2018 @ 09:41:36 - 3.13.126 - dscudiero - Moved the 'your authoriation groups are' message
