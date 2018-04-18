@@ -1,5 +1,5 @@
 #===================================================================================================
-export TOOLSDEVPATH="/home/$LOGNAME/tools"
+export TOOLSDEVPATH="$(dirname "$TOOLSPATH")/toolsDev"
 
 warehouseDb="courseleafdatawarehouse"
 warehouseDbName="$warehouseDb"
