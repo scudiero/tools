@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.8" # -- dscudiero -- Tue 04/17/2018 @ 16:54:10.32
+# version="1.0.9" # -- dscudiero -- Wed 04/18/2018 @  9:37:43.16
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -41,7 +41,7 @@ function RunSql {
 		unset resultSet
 	 	if [[ $dbType == 'mysql' ]]; then
 	 		jar="$TOOLSPATH/jars/$javaPgm.jar"
-	 		[[ $useDev == true && -f $(basename "$TOOLSPATH")/jars/$javaPgm.jar ]] && jar="$(basename "$TOOLSPATH")/jars/$javaPgm.jar"
+	 		[[ $useDev == true && -f $TOOLSDEVPATH/jars/$javaPgm.jar ]] && jar="$(basename "$TOOLSPATH")/jars/$javaPgm.jar"
 	 		[[ $useLocal == true && -f $HOME/tools/jars/$javaPgm.jar ]] && jar="$HOME/tools/jars/$javaPgm.jar"
 	 		readarray -t resultSet <<< "$(java -jar $jar $sqlStmt 2>&1)"
 	 	else
@@ -77,3 +77,4 @@ export -f RunSql
 ## 03-26-2018 @ 09:01:07 - 1.0.6 - dscudiero - Remove RunSql2 definition
 ## 03-26-2018 @ 09:12:09 - 1.0.7 - dscudiero - Cosmetic/minor change/Sync
 ## 04-18-2018 @ 09:35:54 - 1.0.8 - dscudiero - Added toolsdev support
+## 04-18-2018 @ 09:38:01 - 1.0.9 - dscudiero - Use the TOOLSDEVPATH variable
