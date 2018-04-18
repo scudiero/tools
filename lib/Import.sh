@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.1.22" # -- dscudiero -- Thu 03/29/2018 @  8:12:24.22
+# version="1.1.23" # -- dscudiero -- Tue 04/17/2018 @ 16:51:56.44
 #===================================================================================================
 # Import need functions into the runtime environment
 #===================================================================================================
@@ -20,8 +20,9 @@ function Import {
 		return 0
 	}
 
-	[[ -z $TOOLSLIBPATH ]] && searchDirs="$TOOLSPATH/lib" || searchDirs="$( tr ':' ' ' <<< $TOOLSLIBPATH)"
-	[[ $USELOCAL == true && -d "$HOME/tools/lib" ]] && searchDirs="$HOME/tools/lib $searchDirs"
+	searchDirs="$TOOLSPATH/lib"
+	[[ $useDev == true && -n $TOOLSDEVPATH && -d "$TOOLSDEVPATH/lib" ]] && searchDirs="$TOOLSDEVPATH/lib $searchDirs"
+	[[ $useLocal == true && -d "$HOME/tools/lib" ]] && searchDirs="$HOME/tools/lib $searchDirs"
 
 	## Search for the include file, load the first one
 	[[ $verboseLevel -ge 4 ]] && echo -e "\t$caller/$FUNCNAME: searchDirs= '$searchDirs'"
@@ -58,3 +59,4 @@ export -f Import
 ## 10-27-2017 @ 12.58.57 - ("1.1.15")  - dscudiero - Add local library if USELOCAL is truen
 ## 10-31-2017 @ 10.37.30 - ("1.1.17")  - dscudiero - Look for Imort in local
 ## 03-29-2018 @ 08:38:56 - 1.1.22 - dscudiero - Change debug message levels
+## 04-18-2018 @ 09:35:18 - 1.1.23 - dscudiero - Added TOOLSDEVPATH
