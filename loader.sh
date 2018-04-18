@@ -1,14 +1,14 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.1" # -- dscudiero -- Wed 04/18/2018 @  9:28:27.30
+version="1.5.2" # -- dscudiero -- Wed 04/18/2018 @ 13:40:57.87
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
 loaderArgs="$*"
 myName='loader'
-[[ $(/usr/bin/logname 2>&1) == $me && $DEBUG == true ]] && echo -e "\n*** In $myName ($version)"
+[[ $(/usr/bin/logname 2>&1) == $me && $DEBUG == true ]] && echo -e "\n*** In $myName ($version)\n\t\$* = >$*<"
 
 #==================================================================================================
 # Local Functions
@@ -482,3 +482,4 @@ sTime=$(date "+%s")
 ## 03-21-2018 @ 11:41:04 - 1.4.139 - dscudiero - Turn on loading messages
 ## 03-23-2018 @ 16:43:24 - 1.4.140 - dscudiero - Updates Msg3/Msg
 ## 04-18-2018 @ 09:34:25 - 1.5.1 - dscudiero - Refactored to use useDev
+## 04-18-2018 @ 13:41:36 - 1.5.2 - dscudiero - D
