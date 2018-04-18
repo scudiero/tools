@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.31 # -- dscudiero -- Tue 04/17/2018 @ 16:58:22.81
+version=2.1.32 # -- dscudiero -- Wed 04/18/2018 @ 13:36:29.48
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -15,6 +15,7 @@ originalArgStr="$*"
 	export TOOLSPATH='/steamboat/leepfrog/docs/tools'
 	[[ -d '/steamboat/leepfrog/docs/toolsNew' ]] && export TOOLSPATH='/steamboat/leepfrog/docs/toolsNew'
 	dispatcher="$TOOLSPATH/dispatcher.sh"
+	export DEBUG=true
 
 #=======================================================================================================================
 # Parse Args
@@ -32,9 +33,9 @@ originalArgStr="$*"
 
 #=======================================================================================================================
 ## Initialize the runtime env
-	##echo -e "\t-- $hostName - sourcing '$dispatcher'" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
+	echo -e "\t-- $hostName - sourcing '$dispatcher'" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	source "$dispatcher" --viaCron ## Setup the environment
-	#3echo -e "\t\t-- $hostName - back from dispatcher" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
+	echo -e "\t\t-- $hostName - back from dispatcher" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 
 #=======================================================================================================================
 ## Set the jobs the log file
@@ -148,3 +149,4 @@ exit 0
 ## 11-15-2017 @ 07.08.56 - (2.1.29)    - dscudiero - Do not email on warnings
 ## 03-20-2018 @ 15:40:51 - 2.1.30 - dscudiero - Only post process the log file if it exists
 ## 04-18-2018 @ 09:36:43 - 2.1.31 - dscudiero - Switched to use toolsDev
+## 04-18-2018 @ 13:36:50 - 2.1.32 - dscudiero - Turn on debug statements
