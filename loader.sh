@@ -1,15 +1,14 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.4.140" # -- dscudiero -- Fri 03/23/2018 @ 16:42:43.12
-#===================================================================================================
-# $callPgmName "$executeFile" ${executeFile##*.} "$libs" $scriptArgs
+version="1.5.1" # -- dscudiero -- Wed 04/18/2018 @  9:28:27.30
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
 loaderArgs="$*"
 myName='loader'
+[[ $(/usr/bin/logname 2>&1) == $me && $DEBUG == true ]] && echo -e "\n*** In $myName ($version)"
 
 #==================================================================================================
 # Local Functions
@@ -107,50 +106,38 @@ statusLine="Loader ($version): "
 
 ## Parse off my arguments
 	unset scriptArgs myVerbose useDev useLocal noLog noLogInDb batchMode useDevDb myVerbose myQuiet viaCron
-	[[ $USELOCAL == true ]] && useLocal=true
+	[[ -z $USEDEV ]] && unset useDev || useDev=$USEDEV
+	[[ -z $USELOCAL ]] && unset useLocal || useLocal=$USELOCAL
+	
 	while [[ -n $@ ]]; do
 		if [[ ${1:0:2} == '--' ]]; then
 			myArg="${1:2}" ; myArg=${myArg,,[a-z]}
 			[[ ${myArg:0:1} == 'v' ]] && myVerbose=true
-			[[ $myArg == 'usedev' ]] && useDev=true
-			[[ $myArg == 'uselocal' ]] && useLocal=true
 			[[ $myArg == 'nolog' ]] && noLog=true && noLogInDb=true
 			[[ $myArg == 'nologindb' ]] && noLognDb=true
 			[[ $myArg == 'batchmode' ]] && batchMode=true && myQuiet=true
 			[[ $myArg == 'devdb' || $myArg == 'usedevdb' ]] && useDevDb=true
 			[[ $myArg == 'quiet' ]] && myQuiet=true
 			[[ $myArg == 'viacron' ]] && viaCron=true
-			[[ $myArg == 'pauseatexit' || $myArg == 'pauseonexit' ]] && export PAUSEATEXIT=true
 		else
 		 	scriptArgs="$scriptArgs $1"
 		fi
 		shift
 	done
-	export USELOCAL=$useLocal
 	scriptArgs=${scriptArgs:1} ## Strip off leading blank
 
 ## Hello
 # [[ $batchMode != true && $(hostname) == 'build7.leepfrog.com' ]] && \
 # 	echo -e "\tNote: (loader) File system access from the current host has been found to be a bit slow,\n\tPatience you must have, my young padawan..." >&3
 
-#echo; echo "HERE 0b HERE 0b HERE"; read
 ## If called as ourselves, then the first token is the script name to call
 	if [[ $callPgmName == 'loader.sh' ]]; then
 		callPgmName=$(cut -d' ' -f1 <<< $scriptArgs)
 		[[ $callPgmName == $scriptArgs ]] && unset scriptArgs || scriptArgs=$(cut -d' ' -f2- <<< $scriptArgs)
 	fi
 
-## Overrides
-	[[ ${callPgmName:0:4} == 'test' ]] && noLog=true && noLogInDb=true && useLocal=true && export USELOCAL=true
-	[[ $useLocal == true ]] && export USELOCAL=true
-	if [[ $useDev == true ]]; then
-		export USEDEV=true
-		[[ $userName != 'dscudiero' ]] && echo "*Warning* -- ($myName) Using the tools development directories"
-	fi
-
 prtStatus "parse args"
 sTime=$(date "+%s")
-#echo; echo "HERE 0c HERE 0c HERE"; read
 
 #==================================================================================================
 # MAIN
@@ -159,18 +146,18 @@ sTime=$(date "+%s")
 	savePath="$PATH"
 	export PATH="$TOOLSPATH/java/bin:$PATH"
 
-## Set the CLASSPATH 
-	sTime=$(date "+%s")
-	saveClasspath="$CLASSPATH"
-	searchDirs="${TOOLSPATH}/jars"
-	[[ $useDev == true || $useLocal == true ]] && [[ -d "$HOME/tools/jars" ]] && searchDirs="$HOME/tools/jars $searchDirs "
-	unset CLASSPATH
-	for searchDir in $searchDirs; do
-		for classpath in ${classpath[@]}; do
-			[[ -f "${searchDir}/${classpath}" ]] && CLASSPATH="${CLASSPATH}:${searchDir}/${classpath}"
-		done
-	done
-	export CLASSPATH="$CLASSPATH"
+# ## Set the CLASSPATH 
+# 	sTime=$(date "+%s")
+# 	saveClasspath="$CLASSPATH"
+# 	searchDirs="${TOOLSPATH}/jars"
+# 	[[ $useDev == true || $useLocal == true ]] && [[ -d "$HOME/tools/jars" ]] && searchDirs="$HOME/tools/jars $searchDirs "
+# 	unset CLASSPATH
+# 	for searchDir in $searchDirs; do
+# 		for classpath in ${classpath[@]}; do
+# 			[[ -f "${searchDir}/${classpath}" ]] && CLASSPATH="${CLASSPATH}:${searchDir}/${classpath}"
+# 		done
+# 	done
+# 	export CLASSPATH="$CLASSPATH"
 
 ## Initialize the runtime environment
 	TERM=${TERM:-dumb}
@@ -206,9 +193,7 @@ sTime=$(date "+%s")
 		fi
 
 ## Import things we need to continue
-	#echo; echo "HERE 1a HERE 1a HERE"; read
 	source "$TOOLSPATH/lib/Import.sh"
-	#echo; echo "HERE 1b HERE 1b HERE"; read
 	sTime=$(date "+%s")
 	Import "$loaderIncludes"
 	prtStatus ", imports"
@@ -216,10 +201,8 @@ sTime=$(date "+%s")
 	SetFileExpansion
 
 ## Load tools defaults value
-	#echo; echo "HERE 2 HERE 2 HERE"; read
 	defaultsLoaded=false
 	GetDefaultsData "$myName" -fromFiles
-	#echo; echo "HERE 3 HERE 3 HERE"; read
 
 ## Set forking limit
 	maxForkedProcesses=$maxForkedProcessesPrime
@@ -258,7 +241,6 @@ sTime=$(date "+%s")
 		export -f ColorD ColorK ColorI ColorN ColorW ColorE ColorT ColorV ColorM
 	fi
 
-#echo; echo "HERE 4 HERE 4 HERE"; read
 ## If sourced then just return
 	[[ $viaCron == true ]] && return 0
 
@@ -269,18 +251,18 @@ sTime=$(date "+%s")
 		callPgmName=$(basename $executeFile)
 		callPgmName=$(cut -d'.' -f1 <<< $callPgmName)
 	fi ## [[ ${callPgmName:0:1} == '\' ]]
-	#echo; echo "HERE 5 HERE 5 HERE"; read
+
 	## Check to make sure we can run
 		checkMsg=$(CheckRun $callPgmName)
 		if [[ $checkMsg != true ]]; then
 			[[ $(Contains ",$administrators," ",$userName,") != true ]] && echo && echo && Terminate "$checkMsg"
 			[[ $callPgmName != 'testsh' ]] && Terminate "$checkMsg"
 		fi
-	#echo; echo "HERE 6 HERE 6 HERE"; read
+
 	## Check to make sure we are authorized
 		checkMsg=$(CheckAuth $callPgmName)
 		[[ $checkMsg != true ]] && Terminate "$checkMsg"
-	#echo; echo "HERE 7 HERE 7 HERE"; read
+
 	## Get the users auth groups
 		[[ -z $UsersAuthGroups && -r "$TOOLSPATH/auth/$userName" ]] && UsersAuthGroups=$(cat "$TOOLSPATH/auth/$userName") || UsersAuthGroups='none'
 		prtStatus ", check run/auth"; sTime=$(date "+%s")
@@ -288,16 +270,12 @@ sTime=$(date "+%s")
 	## Check semaphore
 		[[ $(Contains ",$setSemaphoreList," ",$callPgmName," ) == true ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
 
-	#echo; echo "HERE 8 HERE 8 HERE"; read
-	#echo "callPgmName = '$callPgmName'"
-
 	## Resolve the executable file"
 		[[ -z $executeFile ]] && executeFile=$(FindExecutable "$callPgmName")
-		#echo "callPgmName = '$callPgmName', executeFile = '$executeFile'"; read
 		[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
 		prtStatus ", find file"; sTime=$(date "+%s")
-#echo "executeFile = '$executeFile'"
-#echo; echo "HERE 9 HERE 9 HERE"; read
+		fastDump callPgmName executeFile -p
+		
 ## Call the script
 	## Initialize the log file
 		logFile=/dev/null
@@ -503,3 +481,4 @@ sTime=$(date "+%s")
 ## 03-21-2018 @ 11:38:57 - 1.4.138 - dscudiero - Cosmetic/minor change/Sync
 ## 03-21-2018 @ 11:41:04 - 1.4.139 - dscudiero - Turn on loading messages
 ## 03-23-2018 @ 16:43:24 - 1.4.140 - dscudiero - Updates Msg3/Msg
+## 04-18-2018 @ 09:34:25 - 1.5.1 - dscudiero - Refactored to use useDev
