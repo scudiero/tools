@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.51" # -- dscudiero -- Fri 03/23/2018 @ 16:47:35.50
+# version="2.0.52" # -- dscudiero -- Tue 04/17/2018 @ 16:33:40.77
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -34,7 +34,8 @@ function Hello {
 	[[ $noBanners != true ]] && Msg "$userStr, Host: $hostName, Database: $warehouseDb, PID: $$, PPID: $PPID"
 	[[ -n $(Trim "$originalArgStr") ]] && Msg "Arg String: '$originalArgStr'"
 
-	[[ $USELOCAL == true ]] && Msg "$(ColorW "*** Running from a local directory")"
+	[[ $USEDEV == true ]] && Msg "$(ColorW "*** Running from the 'toolsDev' directory")"
+	[[ $USELOCAL == true ]] && Msg "$(ColorW "*** Running from your local tools directory")"
 
 	[[ $testMode == true ]] && Msg "$(ColorW "*** Running in Testmode ***")"
 	[[ "$DOIT" != ''  ]] && Msg "$(ColorW "*** The 'Doit' flag is turned off, changes not committed")"
@@ -80,3 +81,4 @@ export -f Hello
 ## 11-09-2017 @ 07.26.29 - ("2.0.44")  - dscudiero - Add Debug statements
 ## 11-09-2017 @ 11.09.05 - ("2.0.46")  - dscudiero - Added a runing from local message
 ## 03-23-2018 @ 16:47:59 - 2.0.51 - dscudiero - Msg3 -> Msg
+## 04-18-2018 @ 09:35:01 - 2.0.52 - dscudiero - Added USEDEV message
