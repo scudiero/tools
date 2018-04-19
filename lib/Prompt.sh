@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.48" # -- dscudiero -- Fri 03/23/2018 @ 16:51:48.61
+# version="2.1.64" # -- dscudiero -- Thu 04/19/2018 @ 13:06:08.17
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -85,16 +85,16 @@ function Prompt {
 					dump -2 -t promptText timedRead timerPrompt timerInterruptPrompt
 					if [[ $timedRead == false ]]; then
 					 	echo -en "$promptText > "
-						read response; rc=$?
+						set +e; read response; rc=$?,set -e
 					else
 						[[ -n $promptText ]] && echo -e "$promptText"
 						for ((tCntr=0; tCntr<$timeOut; tCntr++)); do
 							[[ -n $defaultVal ]] && echo -en "$timerPrompt $(ColorK "$((timeOut - tCntr))") seconds using the default value: $(ColorK "'$defaultVal'")\r" || \
 													echo -en "$timerPrompt $(ColorK "$((timeOut - tCntr))") seconds\r"
-							read -t 1 response; rc=$?
+							set +e; read -t 1 response; rc=$?; set -e
 							if [[ $rc -eq 0 ]]; then
 								if [[ -z $response ]]; then
-									echo -en "$timerInterruptPrompt > "
+									echo -en "\n$timerInterruptPrompt > "
 									read response
 								else
 									[[ $response = 'x' ]] && unset response && break
@@ -103,7 +103,6 @@ function Prompt {
 							fi
 							[[ $rc -gt 0 && $tCntr -ge $maxReadTimeout ]] && echo && Terminate "Read operation timed out after the maximum time of $maxReadTimeout seconds" && exit
 						done
-						echo >> "$logFile"; echo -en "$timerPrompt $(ColorK "0") seconds\r"; echo
 						if [[ -z $response ]]; then
 							[[ -n $defaultVal ]] && { echo >> "$logFile"; Note 0 1 "Read timed out, using default value '$defaultVal' for '$promptVar'"; logResponse=false; }
 							eval $promptVar=\"$defaultVal\"
@@ -199,3 +198,4 @@ export -f Prompt
 ## 03-13-2018 @ 08:38:10 - 2.1.46 - dscudiero - Cosmetic/minor change/Sync
 ## 03-23-2018 @ 16:30:47 - 2.1.47 - dscudiero - Remove client select code
 ## 03-23-2018 @ 16:52:21 - 2.1.48 - dscudiero - Msg3 -> Msg
+## 04-19-2018 @ 13:07:51 - 2.1.64 - dscudiero - Fix problem where script was exiting when read timmed out
