@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.2" # -- dscudiero -- Wed 04/18/2018 @ 13:40:57.87
+version="1.5.3" # -- dscudiero -- Thu 04/19/2018 @  7:12:28.67
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -108,6 +108,7 @@ statusLine="Loader ($version): "
 	unset scriptArgs myVerbose useDev useLocal noLog noLogInDb batchMode useDevDb myVerbose myQuiet viaCron
 	[[ -z $USEDEV ]] && unset useDev || useDev=$USEDEV
 	[[ -z $USELOCAL ]] && unset useLocal || useLocal=$USELOCAL
+	[[ -z $VIACRON ]] && unset viaCron || viaCron=$VIACRON
 	
 	while [[ -n $@ ]]; do
 		if [[ ${1:0:2} == '--' ]]; then
@@ -118,7 +119,6 @@ statusLine="Loader ($version): "
 			[[ $myArg == 'batchmode' ]] && batchMode=true && myQuiet=true
 			[[ $myArg == 'devdb' || $myArg == 'usedevdb' ]] && useDevDb=true
 			[[ $myArg == 'quiet' ]] && myQuiet=true
-			[[ $myArg == 'viacron' ]] && viaCron=true
 		else
 		 	scriptArgs="$scriptArgs $1"
 		fi
@@ -483,3 +483,4 @@ sTime=$(date "+%s")
 ## 03-23-2018 @ 16:43:24 - 1.4.140 - dscudiero - Updates Msg3/Msg
 ## 04-18-2018 @ 09:34:25 - 1.5.1 - dscudiero - Refactored to use useDev
 ## 04-18-2018 @ 13:41:36 - 1.5.2 - dscudiero - D
+## 04-19-2018 @ 07:13:18 - 1.5.3 - dscudiero - Re-factor how we detect viaCron
