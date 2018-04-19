@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.4" # -- dscudiero -- Wed 04/18/2018 @ 13:41:13.18
+version="1.5.5" # -- dscudiero -- Thu 04/19/2018 @  7:11:28.06
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -79,6 +79,7 @@ function fastDump {
 	export USEDEV=$useDev
 	export USELOCAL=$useLocal
 	export LOADER="$loaderDir/loader.sh"
+	export VIACRON=$viaCron
 
 ## call script loader
 	fastDump loaderDir USEDEV USELOCAL loadPgm
@@ -125,3 +126,4 @@ exit
 ## 10-16-2017 @ 13.56.18 - dscudiero - Comment out loader log statements
 ## 04-18-2018 @ 09:34:07 - 1.5.3 - dscudiero - Refactored to add useDev
 ## 04-18-2018 @ 13:41:25 - 1.5.4 - dscudiero - Add debug statements
+## 04-19-2018 @ 07:12:56 - 1.5.5 - dscudiero - Re-factor how we detect viaCron
