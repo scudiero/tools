@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.4" # -- dscudiero -- Thu 04/19/2018 @  8:05:00.75
+version="1.5.5" # -- dscudiero -- Thu 04/19/2018 @ 12:06:04.11
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -256,7 +256,7 @@ sTime=$(date "+%s")
 	## Check to make sure we can run
 		checkMsg=$(CheckRun $callPgmName)
 		if [[ $checkMsg != true ]]; then
-			[[ $(Contains ",$administrators," ",$userName,") != true ]] && echo && echo && Terminate "$checkMsg"
+			[[ $(Contains ",$administrators," ",$userName,") != true ]] && { echo; echo; Terminate "$checkMsg"; } || { echo; echo; Info "$checkMsg"; } 
 			[[ $callPgmName != 'testsh' ]] && Terminate "$checkMsg"
 		fi
 
@@ -486,3 +486,4 @@ sTime=$(date "+%s")
 ## 04-18-2018 @ 13:41:36 - 1.5.2 - dscudiero - D
 ## 04-19-2018 @ 07:13:18 - 1.5.3 - dscudiero - Re-factor how we detect viaCron
 ## 04-19-2018 @ 08:11:10 - 1.5.4 - dscudiero - Add debug statements
+## 04-19-2018 @ 12:06:48 - 1.5.5 - dscudiero - Display checkRun messages if admins
