@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.64" # -- dscudiero -- Thu 04/19/2018 @ 13:06:08.17
+# version="2.1.65" # -- dscudiero -- Thu 04/19/2018 @ 13:09:01.36
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -85,7 +85,7 @@ function Prompt {
 					dump -2 -t promptText timedRead timerPrompt timerInterruptPrompt
 					if [[ $timedRead == false ]]; then
 					 	echo -en "$promptText > "
-						set +e; read response; rc=$?,set -e
+						set +e; read response; rc=$?; set -e
 					else
 						[[ -n $promptText ]] && echo -e "$promptText"
 						for ((tCntr=0; tCntr<$timeOut; tCntr++)); do
@@ -199,3 +199,4 @@ export -f Prompt
 ## 03-23-2018 @ 16:30:47 - 2.1.47 - dscudiero - Remove client select code
 ## 03-23-2018 @ 16:52:21 - 2.1.48 - dscudiero - Msg3 -> Msg
 ## 04-19-2018 @ 13:07:51 - 2.1.64 - dscudiero - Fix problem where script was exiting when read timmed out
+## 04-19-2018 @ 13:09:11 - 2.1.65 - dscudiero - Cosmetic/minor change/Sync
