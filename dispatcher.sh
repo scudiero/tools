@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.7" # -- dscudiero -- Thu 04/19/2018 @  8:48:55.40
+version="1.5.10" # -- dscudiero -- Thu 04/19/2018 @  9:04:49.69
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -35,12 +35,10 @@ function fastDump {
 	fastDump viaCron useLocal useDev PAUSEATEXIT
 
 ## Make sure we have a TOOLSPATH and it is valid
-if [[ $LOGNAME == 'dscudiero' ]]; then
-	echo "HERE 1 HERE 1 HERE"
 	if [[ -z $TOOLSPATH ]]; then
 		export TOOLSPATH='/steamboat/leepfrog/docs/tools'
 		previousTrapERR=$(trap -p ERR | cut -d ' ' -f3-) ; trap - ERR ; set +e
-		grep -q 'scripts="$TOOLSPATH/bin/scripts"' $HOME/.bashrc ; rc=$?
+		grep -q '^scripts="$TOOLSPATH/bin/scripts"' $HOME/.bashrc ; rc=$?
 		[[ -n $previousTrapERR ]] && eval "trap $previousTrapERR"
 		if [[ $rc -gt 0 ]]; then
 			echo -e "\nDo you wish to add an alias to the scripts command to your .bashrc file (recommended) ?"
@@ -58,7 +56,6 @@ if [[ $LOGNAME == 'dscudiero' ]]; then
 		[[ ! -d $TOOLSPATH ]] && echo -e "\n*Error* -- dispatcher: Global variable 'TOOLSPATH' is set but is not a directory, cannot continue\n" && exit -1
 		[[ ! -r $TOOLSPATH/bootData ]] && echo -e "\n*Error* -- dispatcher: Global variable 'TOOLSPATH' is set but you cannot access the boot record, cannot continue\n" && exit -1
 	fi
-fi
 
 ## Load boot data
 	source "$TOOLSPATH/bootData"
@@ -150,3 +147,4 @@ exit
 ## 04-19-2018 @ 07:12:56 - 1.5.5 - dscudiero - Re-factor how we detect viaCron
 ## 04-19-2018 @ 08:02:56 - 1.5.6 - dscudiero - Fix debug statement
 ## 04-19-2018 @ 08:57:19 - 1.5.7 - dscudiero - Add debug statements
+## 04-19-2018 @ 09:07:41 - 1.5.10 - dscudiero - Add updating of the users .bashrc file if TOOLSPATH is not set
