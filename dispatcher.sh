@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.6" # -- dscudiero -- Thu 04/19/2018 @  8:02:46.27
+version="1.5.7" # -- dscudiero -- Thu 04/19/2018 @  8:48:55.40
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -35,9 +35,30 @@ function fastDump {
 	fastDump viaCron useLocal useDev PAUSEATEXIT
 
 ## Make sure we have a TOOLSPATH and it is valid
-	[[ -z $TOOLSPATH ]] && echo -e "\n*Error* -- dispatcher: Global variable 'TOOLSPATH' is not set, cannot continue\n" && exit -1
-	[[ ! -d $TOOLSPATH ]] && echo -e "\n*Error* -- dispatcher: Global variable 'TOOLSPATH' is set but is not a directory, cannot continue\n" && exit -1
-	[[ ! -r $TOOLSPATH/bootData ]] && echo -e "\n*Error* -- dispatcher: Global variable 'TOOLSPATH' is set but you cannot access the boot record, cannot continue\n" && exit -1
+if [[ $LOGNAME == 'dscudiero' ]]; then
+	echo "HERE 1 HERE 1 HERE"
+	if [[ -z $TOOLSPATH ]]; then
+		export TOOLSPATH='/steamboat/leepfrog/docs/tools'
+		previousTrapERR=$(trap -p ERR | cut -d ' ' -f3-) ; trap - ERR ; set +e
+		grep -q 'scripts="$TOOLSPATH/bin/scripts"' $HOME/.bashrc ; rc=$?
+		[[ -n $previousTrapERR ]] && eval "trap $previousTrapERR"
+		if [[ $rc -gt 0 ]]; then
+			echo -e "\nDo you wish to add an alias to the scripts command to your .bashrc file (recommended) ?"
+			echo -e "(Recommended, this will allow you to access the scripts command in the future by simply entering 'scripts' on the Linux command line)"
+			echo -en "\nYes to add, No to skip > "
+			read ans; ans=${ans,,[a-z]};
+			if [[ ${ans:0:1} == 'y' ]]; then
+				echo '' >> $HOME/.bashrc
+				echo "export TOOLSPATH=\"$TOOLSPATH\" ## Added by' '$myName' on $(date)" >> $HOME/.bashrc
+				echo "alias scripts=\"\$TOOLSPATH/bin/scripts\" ## Added by' '$myName' on $(date)" >> $HOME/.bashrc
+				echo -e "\nAn alias for the scripts command has been added to your '$HOME/.bashrc' file.\n"
+			fi
+		fi
+	else
+		[[ ! -d $TOOLSPATH ]] && echo -e "\n*Error* -- dispatcher: Global variable 'TOOLSPATH' is set but is not a directory, cannot continue\n" && exit -1
+		[[ ! -r $TOOLSPATH/bootData ]] && echo -e "\n*Error* -- dispatcher: Global variable 'TOOLSPATH' is set but you cannot access the boot record, cannot continue\n" && exit -1
+	fi
+fi
 
 ## Load boot data
 	source "$TOOLSPATH/bootData"
@@ -128,3 +149,4 @@ exit
 ## 04-18-2018 @ 13:41:25 - 1.5.4 - dscudiero - Add debug statements
 ## 04-19-2018 @ 07:12:56 - 1.5.5 - dscudiero - Re-factor how we detect viaCron
 ## 04-19-2018 @ 08:02:56 - 1.5.6 - dscudiero - Fix debug statement
+## 04-19-2018 @ 08:57:19 - 1.5.7 - dscudiero - Add debug statements
