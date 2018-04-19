@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.3" # -- dscudiero -- Thu 04/19/2018 @  7:12:28.67
+version="1.5.4" # -- dscudiero -- Thu 04/19/2018 @  8:05:00.75
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -125,6 +125,7 @@ statusLine="Loader ($version): "
 		shift
 	done
 	scriptArgs=${scriptArgs:1} ## Strip off leading blank
+	fastDump noLog noLognDb batchMode usedevdb myQuiet USELOCAL USEDEV VIACRON PAUSEATEXIT scriptArgs
 
 ## Hello
 # [[ $batchMode != true && $(hostname) == 'build7.leepfrog.com' ]] && \
@@ -484,3 +485,4 @@ sTime=$(date "+%s")
 ## 04-18-2018 @ 09:34:25 - 1.5.1 - dscudiero - Refactored to use useDev
 ## 04-18-2018 @ 13:41:36 - 1.5.2 - dscudiero - D
 ## 04-19-2018 @ 07:13:18 - 1.5.3 - dscudiero - Re-factor how we detect viaCron
+## 04-19-2018 @ 08:11:10 - 1.5.4 - dscudiero - Add debug statements
