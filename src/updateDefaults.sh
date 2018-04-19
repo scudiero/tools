@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.89 # -- dscudiero -- Thu 04/19/2018 @ 11:01:42.21
+version=2.0.90 # -- dscudiero -- Thu 04/19/2018 @ 11:06:04.56
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -109,6 +109,7 @@ Verbose 1 "mode = '$mode'"
 	sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and status=\"A\" order by name"
 	RunSql $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 ]]; then
+		[[ -f ${defaultsFile}.bak ]] && mv -f "$defaultsFile" "${defaultsFile}.bak"
 		echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
 		for ((ii=0; ii<${#resultSet[@]}; ii++)); do
 			result="${resultSet[$ii]}"
@@ -137,6 +138,7 @@ Verbose 1 "mode = '$mode'"
 			name=${result%%|*}
 			[[ ${name:0:1} == '_' ]] && continue
 			defaultsFile="$TOOLSDEFAULTSPATH/$name"
+			[[ -f ${defaultsFile}.bak ]] && mv -f "$defaultsFile" "${defaultsFile}.bak"
 			Verbose 1 "defaultsFile = '$defaultsFile'"
 			echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
 			fieldCntr=1
@@ -157,6 +159,7 @@ Verbose 1 "mode = '$mode'"
 	Verbose 1 "Updating host specific defaults files"
 	for host in ${linuxHosts//,/ }; do
 		defaultsFile="$TOOLSDEFAULTSPATH/$host"
+		[[ -f ${defaultsFile}.bak ]] && mv -f "$defaultsFile" "${defaultsFile}.bak"
 		Verbose 1 "\ndefaultsFile = '$defaultsFile'"
 		sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and host=\"$host\" and status=\"A\" order by name"
 		RunSql $sqlStmt
@@ -220,3 +223,4 @@ Goodbye 0;
 ## 03-22-2018 @ 14:07:49 - 2.0.87 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:36:20 - 2.0.88 - dscudiero - D
 ## 04-19-2018 @ 11:02:38 - 2.0.89 - dscudiero - Change permissions on defaults files
+## 04-19-2018 @ 11:06:39 - 2.0.90 - dscudiero - Make backups of the defaults files before writing out new ones
