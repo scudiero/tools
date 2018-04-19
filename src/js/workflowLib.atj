@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.86" // -- dscudiero -- Wed 04/11/2018 @ 14:55:44.35
+wfLibVersion="1.8.87" // -- dscudiero -- Thu 04/19/2018 @  9:52:43.62
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -1472,7 +1472,6 @@ wffuncs.wfAttrIn = function(inval, wfrule, args) {
 			var options=wfrule.options.substring(0,wfrule.options.indexOf(";"));
 			if (options.length > 0) {
 				checkList=options;
-				reqType=reqType.substring(0,reqType.indexOf("in"));
 			} else {
 				checkList=wfrule.searchfor.substring(reqType.indexOf("in")+1);
 				checkList=checkList.replace("_",',');
@@ -1483,7 +1482,7 @@ wffuncs.wfAttrIn = function(inval, wfrule, args) {
 			var valsArray=[];
 			if (reqType.indexOf("col") >= 0) {
 				var valsArray=GetAttrVal({request:"cols", options:"includetca", tcadata: tcadata});
-			} else if (reqType.indexOf("dept") >= 0) {
+			} else if (reqType.indexOf("dept") >= 0 || reqType.indexOf("department") >= 0) {
 				var valsArray=GetAttrVal({request:"depts", options:"includetca", tcadata: tcadata});
 			} else if (reqType.indexOf("subj") >= 0) {
 				var valsArray=GetAttrVal({request:"subjs", options:"includetca", tcadata: tcadata});
@@ -1519,6 +1518,7 @@ wffuncs.wfAttrIn = function(inval, wfrule, args) {
 		return false
 
 } //wffuncs.wfAttrIn
+
 
 //=================================================================================================
 // Return additional steps for all 'equiv' courses in courseref table
@@ -2600,3 +2600,4 @@ var wfLibLoaded=true;
 // 04-04-2018 @ 15:38:12 - 1.8.84 - dscudiero - Fixed a strange problem where the sql queries were failing in lookup2 if the subject/department/college code happend to be 'data'
 // 04-05-2018 @ 16:33:10 - 1.8.85 - dscudiero - Fix issue in GetAttrVal caused when we changed the return attribute name from lookup2 to be dbData
 // 04-12-2018 @ 12:20:14 - 1.8.86 - dscudiero - Added wfHello, refactored wfDebug
+// 04-19-2018 @ 09:53:37 - 1.8.87 - dscudiero - Updated wfAttrIn to check for 'department' and not parse reqType on 'in' if options are passed
