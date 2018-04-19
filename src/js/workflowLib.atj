@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.87" // -- dscudiero -- Thu 04/19/2018 @  9:52:43.62
+wfLibVersion="1.8.88" // -- dscudiero -- Thu 04/19/2018 @ 10:22:52.50
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -138,7 +138,7 @@ if (typeof wfLibLoaded === "undefined") {
 				wfProposalMode='DELETE'
 			var d = new Date();
 			var prtStr="\n" + Array(40).join("=") + " " + d.toString() + " " + Array(40).join("=") +
-						"\n<<< Loading workflowFuncs.atj, proposal mode is " + wfProposalMode;
+						"\nLoading workflowLib.atj (" + wfLibVersion + "), proposal mode is " + wfProposalMode + "\n";
 			if ( wfDebugLevel > 0 ) print_debug("\n\n\n\n\n\n\n\n" + prtStr);
 		}
 		if (wfEnvIsDev) {
@@ -2601,3 +2601,4 @@ var wfLibLoaded=true;
 // 04-05-2018 @ 16:33:10 - 1.8.85 - dscudiero - Fix issue in GetAttrVal caused when we changed the return attribute name from lookup2 to be dbData
 // 04-12-2018 @ 12:20:14 - 1.8.86 - dscudiero - Added wfHello, refactored wfDebug
 // 04-19-2018 @ 09:53:37 - 1.8.87 - dscudiero - Updated wfAttrIn to check for 'department' and not parse reqType on 'in' if options are passed
+// 04-19-2018 @ 11:02:16 - 1.8.88 - dscudiero - Tweak messaging
