@@ -1,5 +1,7 @@
 #===================================================================================================
-export TOOLSDEVPATH="$(dirname "$TOOLSPATH")/toolsDev"
+
+[[ -f $(dirname "$TOOLSPATH")/toolsDev/bootData ]] && export TOOLSDEVPATH="$(dirname "$TOOLSPATH")/toolsDev" || export TOOLSDEVPATH=''
+[[ -f $HOME/tools/bootData ]] && export TOOLSLOCALPATH="$HOME/tools/" || export TOOLSLOCALPATH=''
 
 warehouseDb="courseleafdatawarehouse"
 warehouseDbName="$warehouseDb"
@@ -15,10 +17,10 @@ loaderIncludes="$loaderIncludes TrapSigs RunSql SetFileExpansion GetDefaultsData
 standardIncludes='ParseArgsStd Hello DbLog Init Goodbye Quit Help Help2 MkTmpFile'
 standardInteractiveIncludes="$standardIncludes Prompt VerifyContinue"
 
-unset classpath
-classpath+=("WorkWith.jar")
-classpath+=("runMySql2.jar")
-classpath+=("toolsUtils.jar")
+#unset classpath
+#classpath+=("WorkWith.jar")
+#classpath+=("runMySql2.jar")
+#classpath+=("toolsUtils.jar")
 
 #===================================================================================================
 ## Check-in log
