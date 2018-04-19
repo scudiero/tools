@@ -2,7 +2,7 @@
 
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.14" # -- dscudiero -- Thu 03/22/2018 @ 13:36:09.32
+# version="2.0.15" # -- dscudiero -- Thu 04/19/2018 @ 12:13:01.81
 #===================================================================================================
 ## Check to see if the current excution environment supports script execution
 ## Returns 1 in $? if user is authorized, otherwise it returns 0
@@ -28,7 +28,7 @@ function CheckRun {
 		sqlStmt="select active from $scriptsTable where name=\"$script\" and (host=\"$hostName\" or host is null) and (os=\"$osName\" or os is null)"
 		RunSql $sqlStmt
 		[[ ${#resultSet[@]} -eq 0 ]] && echo true && return 0 ## Not in the table
-		[[ ${resultSet[0]} != 'Yes' && ${resultSet[0]} == 'N/A' ]] && echo "Script '$script' is currently offline/inactive, please try again later." && return 0
+		[[ ${resultSet[0]} != 'Yes' && ${resultSet[0]} != 'N/A' ]] && echo "Script '$script' is currently offline/inactive, please try again later." && return 0
 
 		echo true
 		return 0 
@@ -46,3 +46,4 @@ export -f CheckRun
 ## 09-29-2017 @ 13.29.43 - ("2.0.12")  - dscudiero - Include RunSql
 ## 09-29-2017 @ 13.30.36 - ("2.0.13")  - dscudiero - General syncing of dev to prod
 ## 03-22-2018 @ 13:41:58 - 2.0.14 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 04-19-2018 @ 12:13:47 - 2.0.15 - dscudiero - Fix problem checking for offline
