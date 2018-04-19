@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.5" # -- dscudiero -- Thu 04/19/2018 @ 12:06:04.11
+version="1.5.11" # -- dscudiero -- Thu 04/19/2018 @ 12:21:24.19
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -254,10 +254,15 @@ sTime=$(date "+%s")
 	fi ## [[ ${callPgmName:0:1} == '\' ]]
 
 	## Check to make sure we can run
+
 		checkMsg=$(CheckRun $callPgmName)
 		if [[ $checkMsg != true ]]; then
-			[[ $(Contains ",$administrators," ",$userName,") != true ]] && { echo; echo; Terminate "$checkMsg"; } || { echo; echo; Info "$checkMsg"; } 
-			[[ $callPgmName != 'testsh' ]] && Terminate "$checkMsg"
+			if [[ $(Contains ",$administrators," ",$userName,") == true ]]; then
+				echo; echo; Warning "$checkMsg"; echo;
+			else
+				echo; echo; Terminate "$checkMsg"; 
+				[[ $callPgmName != 'testsh' ]] && Terminate "$checkMsg"
+			fi
 		fi
 
 	## Check to make sure we are authorized
@@ -487,3 +492,4 @@ sTime=$(date "+%s")
 ## 04-19-2018 @ 07:13:18 - 1.5.3 - dscudiero - Re-factor how we detect viaCron
 ## 04-19-2018 @ 08:11:10 - 1.5.4 - dscudiero - Add debug statements
 ## 04-19-2018 @ 12:06:48 - 1.5.5 - dscudiero - Display checkRun messages if admins
+## 04-19-2018 @ 12:22:09 - 1.5.11 - dscudiero - Fix problem continuing for admins if script is offline
