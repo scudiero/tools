@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.5" # -- dscudiero -- Thu 04/19/2018 @  7:11:28.06
+version="1.5.6" # -- dscudiero -- Thu 04/19/2018 @  8:02:46.27
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -32,7 +32,7 @@ function fastDump {
 			[[ $token == 'pauseatexit' || $token == 'pauseonexit' ]] && { export PAUSEATEXIT=true; shift || true; }
 		fi
 	done
-	fastDump viacron useLocal useDev PAUSEATEXIT
+	fastDump viaCron useLocal useDev PAUSEATEXIT
 
 ## Make sure we have a TOOLSPATH and it is valid
 	[[ -z $TOOLSPATH ]] && echo -e "\n*Error* -- dispatcher: Global variable 'TOOLSPATH' is not set, cannot continue\n" && exit -1
@@ -127,3 +127,4 @@ exit
 ## 04-18-2018 @ 09:34:07 - 1.5.3 - dscudiero - Refactored to add useDev
 ## 04-18-2018 @ 13:41:25 - 1.5.4 - dscudiero - Add debug statements
 ## 04-19-2018 @ 07:12:56 - 1.5.5 - dscudiero - Re-factor how we detect viaCron
+## 04-19-2018 @ 08:02:56 - 1.5.6 - dscudiero - Fix debug statement
