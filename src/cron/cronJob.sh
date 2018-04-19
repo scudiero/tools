@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.32 # -- dscudiero -- Wed 04/18/2018 @ 13:36:29.48
+version=2.1.33 # -- dscudiero -- Thu 04/19/2018 @ 10:01:50.15
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -15,7 +15,7 @@ originalArgStr="$*"
 	export TOOLSPATH='/steamboat/leepfrog/docs/tools'
 	[[ -d '/steamboat/leepfrog/docs/toolsNew' ]] && export TOOLSPATH='/steamboat/leepfrog/docs/toolsNew'
 	dispatcher="$TOOLSPATH/dispatcher.sh"
-	export DEBUG=true
+	#export DEBUG=true
 
 #=======================================================================================================================
 # Parse Args
@@ -150,3 +150,4 @@ exit 0
 ## 03-20-2018 @ 15:40:51 - 2.1.30 - dscudiero - Only post process the log file if it exists
 ## 04-18-2018 @ 09:36:43 - 2.1.31 - dscudiero - Switched to use toolsDev
 ## 04-18-2018 @ 13:36:50 - 2.1.32 - dscudiero - Turn on debug statements
+## 04-19-2018 @ 10:02:00 - 2.1.33 - dscudiero - Turn off debug
