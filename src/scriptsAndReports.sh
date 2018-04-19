@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.126 # -- dscudiero -- Wed 04/18/2018 @  9:40:41.27
+version=3.13.127 # -- dscudiero -- Thu 04/19/2018 @  9:09:52.57
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -294,34 +294,9 @@ noArgPromptList="_clearClientValue_"
 unset scriptArgs
 
 #=======================================================================================================================
-## Check to see the user has access to the 'scripts' program, if not then add one to their .bashrc file
-#=======================================================================================================================
-if [[ $batchMode != true ]]; then
-	previousTrapERR=$(trap -p ERR | cut -d ' ' -f3-) ; trap - ERR ; set +e
-	grep -q 'scripts="$TOOLSPATH/bin/scripts"' $HOME/.bashrc ; rc=$?
-	[[ -n $previousTrapERR ]] && eval "trap $previousTrapERR"
-	if [[ $rc -gt 0 ]]; then
-		Msg
-		Msg "Do you wish to add an alias to the scripts command to your .bashrc file (recommended) ?"
-		Msg "This will allow you to access the scripts command in the future by simply entering 'scripts' on the Linux command line."
-		Msg
-		unset ans; Prompt ans "Yes to add, No to skip" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
-		if [[ $ans == 'y' ]]; then
-			echo '' >> $HOME/.bashrc
-			echo "export TOOLSPATH=\"$TOOLSPATH\" ## Added by' '$myName' on $(date)" >> $HOME/.bashrc
-			echo "alias scripts=\"\$TOOLSPATH/bin/scripts\" ## Added by' '$myName' on $(date)" >> $HOME/.bashrc
-			Msg
-			Info "An alias for the scripts command has been added to your '$HOME/.bashrc' file."
-			Msg
-		fi
-	fi
-else
-	[[ -z ${script}${report} ]] && Terminate "Running in batchMode and no value specified for report/script"
-fi
-
-#=======================================================================================================================
 ## parse arguments
 #=======================================================================================================================
+[[ $batchMode == true  && -z ${script}${report} ]] && Terminate "Running in batchMode and no value specified for report/script"
 Hello
 helpSet='script,client'
 parseQuiet=true
@@ -540,3 +515,4 @@ Goodbye 0
 ## 03-26-2018 @ 08:48:13 - 3.13.121 - dscudiero - Fix setting default report name when in batchMode
 ## 03-27-2018 @ 11:29:31 - 3.13.124 - dscudiero - Fixed problem where scripts mode not displaying optional parms prompt
 ## 04-18-2018 @ 09:41:36 - 3.13.126 - dscudiero - Moved the 'your authoriation groups are' message
+## 04-19-2018 @ 09:10:19 - 3.13.127 - dscudiero - Pull out code that updated users .bashrc file, moved to dispatcher
