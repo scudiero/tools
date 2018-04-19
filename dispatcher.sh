@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.10" # -- dscudiero -- Thu 04/19/2018 @  9:04:49.69
+version="1.5.34" # -- dscudiero -- Thu 04/19/2018 @ 16:47:51.69
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -12,7 +12,7 @@ me='dscudiero'
 function fastDump { 
 	[[ $(/usr/bin/logname 2>&1) != $me || $DEBUG != true ]] && return 0
 	local token ans; for token in $*; do 
-		[[ $token == -p ]] && { echo -e "\n*** Paused, press enter to continue ***"; read ans; [[ -n $ans ]] && exit; } || \
+		[[ $token == -p ]] && { echo -e "\n*** Paused, press enter to continue ***"; read ans; [[ -n $ans ]] && exit || continue; }
 		echo -e "\t$token = >${!token}<"; 
 	done
 }
@@ -23,16 +23,19 @@ function fastDump {
 	useDev=false
 	pauseAtExit=false
 	viaCron=false
-	for token in $*; do
+	dispatcherArgs="$*"
+	fastDump dispatcherArgs
+	for token in $dispatcherArgs; do
 		if [[ ${token:0:2} == '--' ]]; then
-			token="${token:2}" ; token=${token,,[a-z]}
-			[[ $token == 'viacron' ]] && { viaCron=true; shift || true; }
-			[[ $token == 'uselocal' ]] && { useLocal=true; shift || true; }
-			[[ $token == 'usedev' ]] && { useDev=true; shift || true; }
-			[[ $token == 'pauseatexit' || $token == 'pauseonexit' ]] && { export PAUSEATEXIT=true; shift || true; }
+			token="${token:2}"
+			[[ ${token,,[a-z]} == 'viacron' ]] && { viaCron=true; dispatcherArgs=${dispatcherArgs/--$token/}; }
+			[[ ${token,,[a-z]} == 'uselocal' ]] && { useLocal=true; dispatcherArgs=${dispatcherArgs/--$token/}; }
+			[[ ${token,,[a-z]} == 'usedev' ]] && { useDev=true; dispatcherArgs=${dispatcherArgs/--$token/}; }
+			[[ ${token,,[a-z]} == 'pauseatexit' || $token == 'pauseonexit' ]] && { export PAUSEATEXIT=true; dispatcherArgs=${dispatcherArgs/--$token/}; }
 		fi
 	done
-	fastDump viaCron useLocal useDev PAUSEATEXIT
+	fastDump dispatcherArgs viaCron useLocal useDev PAUSEATEXIT; 
+
 
 ## Make sure we have a TOOLSPATH and it is valid
 	if [[ -z $TOOLSPATH ]]; then
@@ -76,10 +79,11 @@ function fastDump {
 	export TOOLSDEFAULTSPATH="$TOOLSPATH/shadows/toolsDefaults"
 
 ## Parse off the script to call name
-	unset scriptArgs
+	scriptArgs="$dispatcherArgs"
 	loadPgm="$(basename $0)"; 
 	[[ $loadPgm == 'dispatcher.sh' ]] && { loadPgm="$1"; shift || true; }
-	[[ $loadPgm == 'testsh' ]] && { scriptArgs=' --noLog --noLogInDb'; useLocal=true; }
+
+	[[ $loadPgm == 'testsh' ]] && { scriptArgs="$scriptArgs --noLog --noLogInDb"; useLocal=true; }
 
 ## Find the loader based on passed arguments
 	loaderDir="$TOOLSPATH"
@@ -100,13 +104,14 @@ function fastDump {
 	export VIACRON=$viaCron
 
 ## call script loader
-	fastDump loaderDir USEDEV USELOCAL loadPgm
+	scriptArgs=${scriptArgs/$loadPgm/}
+	fastDump loaderDir USEDEV USELOCAL loadPgm scriptArgs
 	if [[ $viaCron == true ]]; then
-		source "$loaderDir/loader.sh" $loadPgm --batchMode $*
+		source "$loaderDir/loader.sh" $loadPgm --batchMode $scriptArgs
 		return 0
 	else
-		[[ $(/usr/bin/logname 2>&1) == $me && $DEBUG == true ]] && echo -e "\n\tsource $loaderDir/loader.sh $loadPgm $scriptArgs $*"; fastDump -p;
-		source "$loaderDir/loader.sh" $loadPgm $scriptArgs $*
+		[[ $(/usr/bin/logname 2>&1) == $me && $DEBUG == true ]] && echo -e "\n\tsource $loaderDir/loader.sh $loadPgm $scriptArgs"; fastDump -p;
+		source "$loaderDir/loader.sh" $loadPgm $scriptArgs
 	fi
 
 exit
@@ -148,3 +153,4 @@ exit
 ## 04-19-2018 @ 08:02:56 - 1.5.6 - dscudiero - Fix debug statement
 ## 04-19-2018 @ 08:57:19 - 1.5.7 - dscudiero - Add debug statements
 ## 04-19-2018 @ 09:07:41 - 1.5.10 - dscudiero - Add updating of the users .bashrc file if TOOLSPATH is not set
+## 04-19-2018 @ 16:51:32 - 1.5.34 - dscudiero - Fix problem parsing -- arguments not removing string from the args passed on to the dispatched script
