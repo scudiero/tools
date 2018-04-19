@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.88 # -- dscudiero -- Fri 03/23/2018 @ 14:28:50.98
+version=2.0.89 # -- dscudiero -- Thu 04/19/2018 @ 11:01:42.21
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -117,7 +117,7 @@ Verbose 1 "mode = '$mode'"
 			echo "$name=\"$value\"" >> "$defaultsFile"
 		done
 		chgrp 'leepfrog' "$defaultsFile"
-		chmod 750 "$defaultsFile"
+		chmod 640 "$defaultsFile"
 	else
 		Warning "Could not retrieve defaults data for 'common' from the data warehouse\n\tsqlStmt = >$sqlStmt<"
 	fi
@@ -148,7 +148,7 @@ Verbose 1 "mode = '$mode'"
 			done
 		done
 		chgrp 'leepfrog' "$defaultsFile"
-		chmod 750 "$defaultsFile"
+		chmod 640 "$defaultsFile"
 	else
 		Warning "Could not retrieve defaults data for 'scripts' from the data warehouse\n\tsqlStmt = >$sqlStmt<"
 	fi
@@ -219,3 +219,4 @@ Goodbye 0;
 ## 03-15-2018 @ 10:23:05 - 2.0.86 - dscudiero - Filter out dev6 from build7 devservers
 ## 03-22-2018 @ 14:07:49 - 2.0.87 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:36:20 - 2.0.88 - dscudiero - D
+## 04-19-2018 @ 11:02:38 - 2.0.89 - dscudiero - Change permissions on defaults files
