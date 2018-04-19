@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.11" # -- dscudiero -- Thu 04/19/2018 @ 12:21:24.19
+version="1.5.15" # -- dscudiero -- Thu 04/19/2018 @ 16:49:45.44
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -109,23 +109,37 @@ statusLine="Loader ($version): "
 	[[ -z $USEDEV ]] && unset useDev || useDev=$USEDEV
 	[[ -z $USELOCAL ]] && unset useLocal || useLocal=$USELOCAL
 	[[ -z $VIACRON ]] && unset viaCron || viaCron=$VIACRON
-	
-	while [[ -n $@ ]]; do
-		if [[ ${1:0:2} == '--' ]]; then
-			myArg="${1:2}" ; myArg=${myArg,,[a-z]}
-			[[ ${myArg:0:1} == 'v' ]] && myVerbose=true
-			[[ $myArg == 'nolog' ]] && noLog=true && noLogInDb=true
-			[[ $myArg == 'nologindb' ]] && noLognDb=true
-			[[ $myArg == 'batchmode' ]] && batchMode=true && myQuiet=true
-			[[ $myArg == 'devdb' || $myArg == 'usedevdb' ]] && useDevDb=true
-			[[ $myArg == 'quiet' ]] && myQuiet=true
-		else
-		 	scriptArgs="$scriptArgs $1"
+
+	for token in $loaderArgs; do
+		if [[ ${token:0:2} == '--' ]]; then
+			token="${token:2}" ; token=${token,,[a-z]}
+			[[ ${token,,[a-z]} == 'nolog' ]] && { noLog=true && noLogInDb=true; dispatcherArgs=${*/$token/}; }
+			[[ ${token,,[a-z]} == 'nologindb' ]] && { noLogInDb=true; dispatcherArgs=${*/$token/}; }
+			[[ ${token,,[a-z]} == 'batchmode' ]] && { batchMode=true && myQuiet=true; dispatcherArgs=${*/$token/}; }
+			[[ ${token,,[a-z]} == 'devdb' ]] && { useDevDb=true; dispatcherArgs=${*/$token/}; }
+			[[ ${token,,[a-z]} == 'usedevdb' ]] && { useDevDb=true; dispatcherArgs=${*/$token/}; }
+			[[ ${token,,[a-z]} == 'quiet' ]] && { myQuiet=true; dispatcherArgs=${*/$token/}; }
 		fi
-		shift
 	done
-	scriptArgs=${scriptArgs:1} ## Strip off leading blank
-	fastDump noLog noLognDb batchMode usedevdb myQuiet USELOCAL USEDEV VIACRON PAUSEATEXIT scriptArgs
+echo; fastDump loaderArgs; echo
+
+
+	# while [[ -n $@ ]]; do
+	# 	if [[ ${1:0:2} == '--' ]]; then
+	# 		myArg="${1:2}" ; myArg=${myArg,,[a-z]}
+	# 		[[ ${myArg:0:1} == 'v' ]] && myVerbose=true
+	# 		[[ $myArg == 'nolog' ]] && noLog=true && noLogInDb=true
+	# 		[[ $myArg == 'nologindb' ]] && noLognDb=true
+	# 		[[ $myArg == 'batchmode' ]] && batchMode=true && myQuiet=true
+	# 		[[ $myArg == 'devdb' || $myArg == 'usedevdb' ]] && useDevDb=true
+	# 		[[ $myArg == 'quiet' ]] && myQuiet=true
+	# 	else
+	# 	 	scriptArgs="$scriptArgs $1"
+	# 	fi
+	# 	shift
+	# done
+	# scriptArgs=${scriptArgs:1} ## Strip off leading blank
+	fastDump callPgmName noLog noLognDb batchMode usedevdb myQuiet USELOCAL USEDEV VIACRON PAUSEATEXIT loaderArgs
 
 ## Hello
 # [[ $batchMode != true && $(hostname) == 'build7.leepfrog.com' ]] && \
@@ -133,10 +147,13 @@ statusLine="Loader ($version): "
 
 ## If called as ourselves, then the first token is the script name to call
 	if [[ $callPgmName == 'loader.sh' ]]; then
-		callPgmName=$(cut -d' ' -f1 <<< $scriptArgs)
-		[[ $callPgmName == $scriptArgs ]] && unset scriptArgs || scriptArgs=$(cut -d' ' -f2- <<< $scriptArgs)
+		callPgmName=$(cut -d' ' -f1 <<< $loaderArgs)
+		[[ $callPgmName == $loaderArgs ]] && unset loaderArgs || loaderArgs=$(cut -d' ' -f2- <<< $loaderArgs)
 	fi
-
+	loaderArgs=${loaderArgs/$callPgmName/}
+echo
+fastDump callPgmName loaderArgs
+echo
 prtStatus "parse args"
 sTime=$(date "+%s")
 
@@ -296,8 +313,8 @@ sTime=$(date "+%s")
 			chmod 660 "$logFile"
 			chown "$userName:leepfrog" "$logFile"
 			Msg "$(PadChar)" > $logFile
-			[[ -n $scriptArgs ]] && scriptArgsTxt=" $scriptArgs" || unset scriptArgsTxt
-			Msg "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${scriptArgsTxt}" >> $logFile
+			[[ -n $loaderArgs ]] && loaderArgsTxt=" $loaderArgs" || unset loaderArgsTxt
+			Msg "$myName:\n^$executeFile\n^$(date)\n^^${callPgmName}${loaderArgsTxt}" >> $logFile
 			Msg "$(PadChar)" >> $logFile
 			Msg >> $logFile
 		fi
@@ -312,7 +329,7 @@ sTime=$(date "+%s")
 		TrapSigs 'off'
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
 		[[ $(cut -d' ' -f1 <<< $(wc -l "$executeFile")) -eq 0 ]] && Terminate "Execution file ($executeFile) is empty"
-		source $executeFile $scriptArgs 2>&1 | tee -a $logFile; rc=$?
+		source $executeFile $loaderArgs 2>&1 | tee -a $logFile; rc=$?
 		[[ $logFile != '/dev/null' ]] && touch "$(dirname $logFile)"
 
 ## Should never get here but just in case
@@ -493,3 +510,4 @@ sTime=$(date "+%s")
 ## 04-19-2018 @ 08:11:10 - 1.5.4 - dscudiero - Add debug statements
 ## 04-19-2018 @ 12:06:48 - 1.5.5 - dscudiero - Display checkRun messages if admins
 ## 04-19-2018 @ 12:22:09 - 1.5.11 - dscudiero - Fix problem continuing for admins if script is offline
+## 04-19-2018 @ 16:52:01 - 1.5.15 - dscudiero - Fixed problem passing -- arguments on to the called script
