@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.15" # -- dscudiero -- Thu 04/19/2018 @ 16:49:45.44
+version="1.5.16" # -- dscudiero -- Fri 04/20/2018 @  7:20:42.22
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -151,9 +151,7 @@ echo; fastDump loaderArgs; echo
 		[[ $callPgmName == $loaderArgs ]] && unset loaderArgs || loaderArgs=$(cut -d' ' -f2- <<< $loaderArgs)
 	fi
 	loaderArgs=${loaderArgs/$callPgmName/}
-echo
-fastDump callPgmName loaderArgs
-echo
+	fastDump callPgmName loaderArgs
 prtStatus "parse args"
 sTime=$(date "+%s")
 
@@ -511,3 +509,4 @@ sTime=$(date "+%s")
 ## 04-19-2018 @ 12:06:48 - 1.5.5 - dscudiero - Display checkRun messages if admins
 ## 04-19-2018 @ 12:22:09 - 1.5.11 - dscudiero - Fix problem continuing for admins if script is offline
 ## 04-19-2018 @ 16:52:01 - 1.5.15 - dscudiero - Fixed problem passing -- arguments on to the called script
+## 04-20-2018 @ 07:21:09 - 1.5.16 - dscudiero - Remove debug
