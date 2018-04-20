@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.33 # -- dscudiero -- Thu 04/19/2018 @ 10:01:50.15
+version=2.1.34 # -- dscudiero -- Fri 04/20/2018 @ 10:25:56.04
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -57,7 +57,7 @@ originalArgStr="$*"
 	myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 	myPath="$(dirname $executeFile)"
 	source $executeFile $scriptArgs $callScriptArgs >> "$logFile"  2>&1
-	echo -e "\t-- $hostName - $callScriptName done" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
+	echo -e "\t-- $hostName - Back from $callScriptName" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	if [[ -f $logFile ]]; then
 		mv $logFile $logFile.bak
 	 	cat $logFile.bak | sed "s/\x1B\[[0-9;]*[a-zA-Z]//g" | tr -d '\007' > $logFile
@@ -69,6 +69,7 @@ originalArgStr="$*"
 
 #=======================================================================================================================
 ## Scan the logFile looking for errors
+	echo -e "\t-- $hostName - Checking Log" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	## Turn off error traps
 	set +eE ; trap - ERR
 	## If logFile is empty then just remove it, otherwise scan for errors
@@ -90,8 +91,8 @@ originalArgStr="$*"
 					break
 				fi
 			done
-			[[ -f $tmpFile1 ]] && rm -f $tmpFile1
-			[[ -f $tmpFile2 ]] && rm -f $tmpFile2
+			[[ -f $tmpFile1 ]] && rm -f "$tmpFile1"
+			[[ -f $tmpFile2 ]] && rm -f "$tmpFile2"
 		fi
 	fi
 
@@ -103,6 +104,7 @@ originalArgStr="$*"
 	fi
 
 #=======================================================================================================================
+echo -e "\t-- $hostName - $callScriptName done" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 exit 0
 #=======================================================================================================================
 # Check-in Log
@@ -151,3 +153,4 @@ exit 0
 ## 04-18-2018 @ 09:36:43 - 2.1.31 - dscudiero - Switched to use toolsDev
 ## 04-18-2018 @ 13:36:50 - 2.1.32 - dscudiero - Turn on debug statements
 ## 04-19-2018 @ 10:02:00 - 2.1.33 - dscudiero - Turn off debug
+## 04-20-2018 @ 10:26:38 - 2.1.34 - dscudiero - Add more status messaging
