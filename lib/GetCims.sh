@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.44" # -- dscudiero -- Thu 12/14/2017 @ 15:45:00.65
+# version="2.0.45" # -- dscudiero -- Fri 04/20/2018 @  7:55:17.12
 #===================================================================================================
 # Get CIMs
 #===================================================================================================
@@ -40,7 +40,7 @@ function GetCims {
 	fi
 	dump -3 -t siteDir allowMultiCims suffix validVals
 
-	[[ ! -d $siteDir/web ]] && Terminate "($FUNCNAME) Could not locate siteDir:\n^'$siteDir/web'"
+	[[ ! -d $siteDir/web ]] && { unset cims cimStr; return 0; }
 	Pushd "$siteDir/web"
 	cimDirsStr=$(ProtectedCall "find -mindepth 2 -maxdepth 2 -type f -name cimconfig.cfg -printf '%h\n' | sort")
 	unset cimDirs
@@ -104,3 +104,4 @@ export -f GetCims
 ## 12-11-2017 @ 11.46.41 - ("2.0.42")  - dscudiero - Added PushPop to the includes list
 ## 12-11-2017 @ 16.26.50 - ("2.0.43")  - dscudiero - Filter out cim imstances with '_' in the name
 ## 12-14-2017 @ 15.46.53 - ("2.0.44")  - dscudiero - Only set siteDir if it is null on parg parsing
+## 04-20-2018 @ 07:56:12 - 2.0.45 - dscudiero - Do not terminate if we cannot find the passed in siteDir, just return nothing.
