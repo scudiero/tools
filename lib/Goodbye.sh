@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.12" # -- dscudiero -- Fri 03/23/2018 @ 16:50:38.12
+# version="2.1.13" # -- dscudiero -- Fri 04/20/2018 @  7:22:18.45
 #===================================================================================================
 # Common script exit
 # args:
@@ -140,12 +140,13 @@ function Goodbye {
 	fi
 
 	if [[ $PAUSEATEXIT == true ]]; then
-		Alert 3
+
 		Msg "$colorKey"
 		Msg '*******************************************************************************'
 		Msg '*** Remote script excution has complete, please press enter to close window ***'
 		Msg '*******************************************************************************'
 		Msg "$colorDefault"
+		Alert 3
 		read
 	fi
 	[[ $(IsNumeric $exitCode) != true ]] && exitCode=0
@@ -206,3 +207,4 @@ export -f QUIT
 ## 01-26-2018 @ 08.38.56 - 2.1.10 - dscudiero - Also delete the tmpFile if it exits for QUIT
 ## 01-26-2018 @ 08.39.37 - 2.1.11 - dscudiero - Cosmetic/minor change/Sync
 ## 03-23-2018 @ 16:52:12 - 2.1.12 - dscudiero - Msg3 -> Msg
+## 04-20-2018 @ 07:22:36 - 2.1.13 - dscudiero - Move the alert for pauseonexit
