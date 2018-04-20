@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.34" # -- dscudiero -- Thu 04/19/2018 @ 16:47:51.69
+version="1.5.35" # -- dscudiero -- Fri 04/20/2018 @ 16:00:28.29
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -32,6 +32,7 @@ function fastDump {
 			[[ ${token,,[a-z]} == 'uselocal' ]] && { useLocal=true; dispatcherArgs=${dispatcherArgs/--$token/}; }
 			[[ ${token,,[a-z]} == 'usedev' ]] && { useDev=true; dispatcherArgs=${dispatcherArgs/--$token/}; }
 			[[ ${token,,[a-z]} == 'pauseatexit' || $token == 'pauseonexit' ]] && { export PAUSEATEXIT=true; dispatcherArgs=${dispatcherArgs/--$token/}; }
+			[[ ${token,,[a-z]} == 'debug' ]] && { export DEBUG=true; dispatcherArgs=${dispatcherArgs/--$token/}; }
 		fi
 	done
 	fastDump dispatcherArgs viaCron useLocal useDev PAUSEATEXIT; 
@@ -154,3 +155,4 @@ exit
 ## 04-19-2018 @ 08:57:19 - 1.5.7 - dscudiero - Add debug statements
 ## 04-19-2018 @ 09:07:41 - 1.5.10 - dscudiero - Add updating of the users .bashrc file if TOOLSPATH is not set
 ## 04-19-2018 @ 16:51:32 - 1.5.34 - dscudiero - Fix problem parsing -- arguments not removing string from the args passed on to the dispatched script
+## 04-20-2018 @ 16:00:51 - 1.5.35 - dscudiero - Add --debug option
