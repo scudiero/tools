@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.16" # -- dscudiero -- Fri 04/20/2018 @  7:20:42.22
+version="1.5.17" # -- dscudiero -- Fri 04/20/2018 @ 11:17:38.02
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -121,24 +121,6 @@ statusLine="Loader ($version): "
 			[[ ${token,,[a-z]} == 'quiet' ]] && { myQuiet=true; dispatcherArgs=${*/$token/}; }
 		fi
 	done
-echo; fastDump loaderArgs; echo
-
-
-	# while [[ -n $@ ]]; do
-	# 	if [[ ${1:0:2} == '--' ]]; then
-	# 		myArg="${1:2}" ; myArg=${myArg,,[a-z]}
-	# 		[[ ${myArg:0:1} == 'v' ]] && myVerbose=true
-	# 		[[ $myArg == 'nolog' ]] && noLog=true && noLogInDb=true
-	# 		[[ $myArg == 'nologindb' ]] && noLognDb=true
-	# 		[[ $myArg == 'batchmode' ]] && batchMode=true && myQuiet=true
-	# 		[[ $myArg == 'devdb' || $myArg == 'usedevdb' ]] && useDevDb=true
-	# 		[[ $myArg == 'quiet' ]] && myQuiet=true
-	# 	else
-	# 	 	scriptArgs="$scriptArgs $1"
-	# 	fi
-	# 	shift
-	# done
-	# scriptArgs=${scriptArgs:1} ## Strip off leading blank
 	fastDump callPgmName noLog noLognDb batchMode usedevdb myQuiet USELOCAL USEDEV VIACRON PAUSEATEXIT loaderArgs
 
 ## Hello
@@ -510,3 +492,4 @@ sTime=$(date "+%s")
 ## 04-19-2018 @ 12:22:09 - 1.5.11 - dscudiero - Fix problem continuing for admins if script is offline
 ## 04-19-2018 @ 16:52:01 - 1.5.15 - dscudiero - Fixed problem passing -- arguments on to the called script
 ## 04-20-2018 @ 07:21:09 - 1.5.16 - dscudiero - Remove debug
+## 04-20-2018 @ 11:17:53 - 1.5.17 - dscudiero - Remove debug statements
