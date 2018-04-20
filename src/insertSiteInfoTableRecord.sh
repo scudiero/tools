@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.147 # -- dscudiero -- Fri 03/23/2018 @ 16:12:58.79
+version=1.1.148 # -- dscudiero -- Fri 04/20/2018 @  8:02:34.99
 #==================================================================================================
 TrapSigs 'on'
 
@@ -107,7 +107,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 ## See if the site has google search installed
 	unset googleType
 	grepFile=$(dirname $siteDir)/$env/web/ribbit/fsinjector.rjs
-	if [[ -f $grepFile ]]; then
+	if [[ -r $grepFile ]]; then
 		googleType=$(ProtectedCall "grep '^var googletype' $grepFile | grep -v null")
 		[[ -n $googleType ]] && googleType=$(cut -d"=" -f2 <<< $googleType | tr -d "'" | tr -d ";" | tr -d " ")
 	fi
@@ -123,7 +123,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 			# Get archive path from the next env.
 			grepFile=$(dirname $siteDir)/$checkEnv/web/courseleaf/localsteps/default.tcf
 			dump -2 -n checkEnv grepFile
-			if [[ -f $grepFile ]]; then
+			if [[ -r $grepFile ]]; then
 				archiveRoot=$(cut -d":" -f2 <<< $(ProtectedCall "grep '^archiveroot:' $grepFile"));
 				if [[ -n $archiveRoot ]]; then
 					archiveRoot=$(tr -d "[:space:]" <<< $archiveRoot | tr -d "[:blank:]")
@@ -415,3 +415,4 @@ return 0
 ## 11-30-2017 @ 13.26.41 - (1.1.145)   - dscudiero - Switch to use the -all flag on the GetCims call
 ## 03-22-2018 @ 14:06:41 - 1.1.146 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 16:18:51 - 1.1.147 - dscudiero - D
+## 04-20-2018 @ 08:03:23 - 1.1.148 - dscudiero - Only grep files if they are readable
