@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.51 # -- dscudiero -- Fri 04/13/2018 @  9:57:52.12
+version=4.13.52 # -- dscudiero -- Mon 04/23/2018 @ 11:29:28.92
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -514,8 +514,10 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		done
 
 	## touch clone data and source file in root
-		$DOIT rm -f $tgtDir/.clonedFrom-* > /dev/null 2>&1
-		$DOIT touch $tgtDir/.clonedFrom-$env
+		if [[ $tgtEnv == 'pvt' ]]; then
+			$DOIT rm -f $tgtDir/.clonedFrom-* > /dev/null 2>&1
+			$DOIT echo env > $tgtDir/.clonedFrom
+		fi
 
 	echo
 	Info "To act on private dev sites within the 'scripts' family of scripts you should specify 'pvt' as the environment name."
@@ -702,3 +704,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 04-09-2018 @ 15:16:30 - 4.13.49 - dscudiero - Make the default for fullcopy be false again
 ## 04-09-2018 @ 16:41:39 - 4.13.50 - dscudiero - Remove debug statements
 ## 04-13-2018 @ 09:58:16 - 4.13.51 - dscudiero - Change short abbrevition for the debug option to be debug
+## 04-23-2018 @ 11:30:00 - 4.13.52 - dscudiero - Write the env data out to the .clonedFrom file
