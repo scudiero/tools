@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.6.24 # -- dscudiero -- Mon 04/23/2018 @ 12:52:36.39
+version=5.6.25 # -- dscudiero -- Mon 04/23/2018 @ 14:56:16.99
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel EditTcfValue BackupCourseleafFile'
@@ -820,7 +820,7 @@ removeGitReposFromNext=true
 			[[ ! -f $srcDir/master/.syncDate ]] && Terminate "Could not locate '$srcDir/master/.syncDate'. The skeleton shadow is probably being updated, please try again later"
 
 #TODO: Hack to force the cat patch version to 3.5.10 till because of the new process
-[[ product == 'cat' ]] && prodShadowVer='3.5.10'
+[[ $product == 'cat' ]] && prodShadowVer='3.5.10'
 #master=true
 
 			eval ${productLower}MasterDate=\"$(date +"%m-%d-%Y @ %H.%M.%S" -r $srcDir/master/.syncDate) / $(cat $srcDir/master/courseleaf/clver.txt) \"
@@ -1948,3 +1948,4 @@ Goodbye 0 "$text1" "$text2"
 ## 04-18-2018 @ 09:36:18 - 5.6.16 - dscudiero - Cleaned up GetDefaultsData call
 ## 04-23-2018 @ 10:43:27 - 5.6.23 - dscudiero - Force the cat release to 3.5.10 for latest
 ## 04-23-2018 @ 12:52:57 - 5.6.24 - dscudiero - Only force version for cat
+## 04-23-2018 @ 14:56:45 - 5.6.25 - dscudiero - Fix problem with product in a if statement missing the $
