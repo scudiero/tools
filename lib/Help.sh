@@ -30,7 +30,7 @@ function Help {
 
 	sqlStmt="select restrictToUsers,restrictToGroups from $scriptsTable where name=\"$myName\""
 	RunSql $sqlStmt
-	if [[ ${#resultSet[@]} -gt 0 ]]; then
+	if [[ -n ${resultSet[0]} ]]; then
 		result="${resultSet[0]}"
 		restrictToUsers=${result%%|*}
 		restrictToGroups=${result##*|}
@@ -229,3 +229,4 @@ export -f Help
 ## 09-25-2017 @ 08.14.09 - (2.1.-1)    - dscudiero - Use Msg
 ## 03-19-2018 @ 10:43:25 - 2.1.-1 - dscudiero - Change the way we display the java dependencies
 ## 03-22-2018 @ 13:42:12 - 2.1.-1 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 04-23-2018 @ 09:38:49 - 2.1.-1 - dscudiero - Cosmetic/minor change/Sync
