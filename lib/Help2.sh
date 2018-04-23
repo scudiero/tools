@@ -32,7 +32,7 @@ function Help2 {
 
 	sqlStmt="select restrictToUsers,restrictToGroups from $scriptsTable where name=\"$myName\""
 	RunSql $sqlStmt
-	if [[ ${#resultSet[@]} -gt 0 ]]; then
+	if [[ -n ${resultSet[0]} ]]; then
 		result="${resultSet[0]}"
 		restrictToUsers=${result%%|*}
 		restrictToGroups=${result##*|}
@@ -225,3 +225,4 @@ export -f Help2
 ## 03-19-2018 @ 12:01:59 - 3.0.3 - dscudiero - CHange the way we find the python dependencies
 ## 03-22-2018 @ 13:42:17 - 3.0.4 - dscudiero - Updated for Msg/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 16:52:17 - 3.0.5 - dscudiero - Msg3 -> Msg
+## 04-23-2018 @ 09:39:12 - 3.0.5 - dscudiero - Cosmetic/minor change/Sync
