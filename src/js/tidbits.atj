@@ -224,7 +224,25 @@ if (CheckChanged(diffdata,allowChangedFields,'any',true)) {
 		resultSet.forEach(function(result) {
 		});
 	}
-// 04-03-2017 @ 10.54.45 - dscudiero - Add new info for regex
+
+
+
+=============================================================================================================================================
+// Nesting functions
+	if (!allowStep){
+		wfNestLevel++;
+		wfrule.attrname="IsEmphOrShortCert";
+		result=wffuncs.IsEmphOrShortCert(inval, wfrule, args)
+		wfNestLevel--;
+		if (result) {
+			wfDebug(1,"\tProgram is for a short cert, allow step")
+			allowStep=true;
+		}
+	}
+
+
+
+
 
 //=================================================================================================
 // Set the department code by looking up the 'descrshort' field in the 'acad_org_tbl' table
@@ -366,6 +384,7 @@ attributes.forEach(function(attr) {
 
 //=================================================================================================
 // Check-in log
+// 04-03-2017 @ 10.54.45 - dscudiero - Add new info for regex
 // 05-09-2017 @ 13.27.42 - dscudiero - add mapping examples
 // 05-11-2017 @ 14.54.54 - dscudiero - add example of parsing options
 // 05-15-2017 @ 10.25.26 - dscudiero - update sqlquery exmample
