@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.3" # -- dscudiero -- Mon 08/07/2017 @ 11:13:27.76
+# version="1.0.4" # -- dscudiero -- Tue 04/24/2018 @  9:59:48.93
 #===================================================================================================
 # Various git utilities
 #===================================================================================================
@@ -54,7 +54,26 @@ function CheckGitRepoFiles {
 } ##CheckGitRepoFiles
 export -f CheckGitRepoFiles
 
+#=======================================================================================================================
+# Check to see if a file is in the local git
+# Usage: CheckIfFileInGit <gitRepoFile> <fileName>
+# Returns: true / false
+#=======================================================================================================================
+function CheckIfFileInGit {
+	local gitRepo="$1"
+	local file="$2"
+	local found=false
+	[[ ${file:0:1} == '/' ]] && file=${file:1}
+	Pushd "$tgtDir"
+	[[ -n $(ProtectedCall "git ls-tree --full-tree -r --name-only HEAD | grep $file") ]] && found=true
+	Popd
+	echo $found
+	return 0
+} #CheckIfFileInGit
+export -f CheckIfFileInGit
+
 #===================================================================================================
 # Check-in Log
 #===================================================================================================
 ## 08-07-2017 @ 11.13.53 - ("1.0.3")   - dscudiero - Optionaly return the list of new or changed files
+## 04-24-2018 @ 11:20:57 - 1.0.4 - dscudiero - Add CheciIfFileInGit function
