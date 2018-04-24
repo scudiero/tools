@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.28" # -- dscudiero -- Fri 03/23/2018 @ 15:25:24.68
+# version="3.0.30" # -- dscudiero -- Tue 04/24/2018 @ 10:14:28.87
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -46,8 +46,7 @@ function ParseArgsStd {
 					argShortName="${tmpStr%%|*}"; argShortName=${argShortName,,[a-z]}; tmpStr=${tmpStr#*|};
 					argLongName="${tmpStr%%|*}"; argLongName=${argLongName,,[a-z]}; tmpStr=${tmpStr#*|};
 					tmpArg="${arg,,[a-z]}"
-					[[ $tmpArg =~ ^-${argShortName} || $tmpArg =~ ^=${argShortName} || \
-						$tmpArg =~ ^--${argLongName}$ || $tmpArg =~ ^==${argLongName} ]] && { found=true; break; }
+					[[ $tmpArg =~ ^-${argShortName} || $tmpArg =~ ^--${argLongName}$ || $tmpArg =~ ^-${argLongName} ]] && { found=true; break; }
 				done
 				[[ $found == true ]] && dump 3 -t argShortName argLongName tmpArg tmpStr found || dump 3 -t found
 			## Parse the argument
@@ -56,6 +55,7 @@ function ParseArgsStd {
 					argType="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"
 					scriptVar="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"
 					scriptCmd="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"
+					[[ $scriptCmd == 'NULL' ]] && unset scriptCmd
 					dump 3 -t2 arg argType scriptVar scriptCmd
 					case $argType in
 						switch|flag) 
@@ -136,3 +136,4 @@ export -f ParseArgsStd
 ## 03-20-2018 @ 08:14:45 - 3.0.21 - dscudiero - Add '=' as a valid variable prefix symbol
 ## 03-22-2018 @ 13:42:32 - 3.0.22 - dscudiero - Updated for Msg/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:31:10 - 3.0.28 - dscudiero - Updated for ParseArgsStd2/ParseArgsStd
+## 04-24-2018 @ 11:21:24 - 3.0.30 - dscudiero - Addd code to ignore scriptCmd if db returns 'NULL'
