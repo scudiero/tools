@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.70 # -- dscudiero -- Tue 04/24/2018 @ 11:23:45.88
+# version=2.1.71 # -- dscudiero -- Tue 04/24/2018 @ 11:58:07.91
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -15,7 +15,7 @@
 # All rights reserved
 #===================================================================================================
 function Init {
-	if [[ $fastInit == true ]] && return 0
+	[[ $fastInit == true ]] && return 0
 	myIncludes="SetSiteDirs GetCims PushPop SetFileExpansion Prompt"
 	Import "$standardInteractiveIncludes $myIncludes"
 
@@ -405,3 +405,4 @@ export -f Init
 ## 03-22-2018 @ 13:42:22 - 2.1.68 - dscudiero - Updated for Msg/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 17:04:12 - 2.1.69 - dscudiero - Msg3 -> Msg
 ## 04-24-2018 @ 11:24:04 - 2.1.70 - dscudiero - Bail out if fastInit is set
+## 04-24-2018 @ 11:58:35 - 2.1.71 - dscudiero - Remive 'if' from the fastInit check
