@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.6.26 # -- dscudiero -- Mon 04/23/2018 @ 14:59:22.23
+version=5.6.27 # -- dscudiero -- Tue 04/24/2018 @  8:01:21.07
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel EditTcfValue BackupCourseleafFile'
@@ -1721,8 +1721,7 @@ Msg "\nCross product checks..."
 	fi
 
 ## Wait for the curr site to finish publising
-	Msg; Msg "Waiting for the republish of the new CURR site to complete..."
-	wait
+	[[ $fullAdvance == true ]] && { Msg; Msg "Waiting for the republish of the new CURR site to complete..."; wait; }
 
 ## log updates in changelog.txt
 	WriteChangelogEntry 'changeLogRecs' "$tgtDir/changelog.txt"
@@ -1950,3 +1949,4 @@ Goodbye 0 "$text1" "$text2"
 ## 04-23-2018 @ 12:52:57 - 5.6.24 - dscudiero - Only force version for cat
 ## 04-23-2018 @ 14:56:45 - 5.6.25 - dscudiero - Fix problem with product in a if statement missing the $
 ## 04-23-2018 @ 14:59:59 - 5.6.26 - dscudiero - Fixed if statement comparing against lower caseproduct
+## 04-24-2018 @ 08:14:38 - 5.6.27 - dscudiero - Wrap the wait for curr republish in an if fulladvance check
