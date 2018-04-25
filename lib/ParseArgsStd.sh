@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.30" # -- dscudiero -- Tue 04/24/2018 @ 10:14:28.87
+# version="3.0.35" # -- dscudiero -- Tue 04/24/2018 @ 14:31:48.58
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -58,7 +58,7 @@ function ParseArgsStd {
 					[[ $scriptCmd == 'NULL' ]] && unset scriptCmd
 					dump 3 -t2 arg argType scriptVar scriptCmd
 					case $argType in
-						switch|flag) 
+						switch|flag)
 								[[ -n $scriptVar && -z $scriptCmd ]] && eval "$scriptVar=true"
 								if [[ -n $scriptCmd ]]; then
 									if [[ $scriptCmd == 'appendShortName' ]]; then
@@ -74,6 +74,7 @@ function ParseArgsStd {
 								[[ -n $scriptVar ]] && { eval "$scriptVar=${arg:2}"; }
 								;;
 						option)
+								[[ -n $scriptVar ]] && { (( argCntr++)); eval "$scriptVar=\"${!argCntr}\""; }
 								if [[ -n $scriptCmd && ${scriptCmd,,[a-z]} != 'null' ]]; then
 									if [[ $scriptCmd == 'appendShortName' ]]; then
 										[[ -z ${!scriptVar} ]] && eval "$scriptVar=\"$argShortName\"" || eval "$scriptVar=\"${!scriptVar},$argShortName\""
@@ -90,9 +91,9 @@ function ParseArgsStd {
 											#[[ $tmpStr =~ ^${tmpEnv} ]] && { echo "HERE HERE HERE HERE"; foune=true; break; }
 										done
 										[[ $found == true ]] && eval "$scriptVar=\"$tmpEnv\"";
+									else
+										 eval "$scriptCmd"
 									fi
-								else
-									[[ -n $scriptVar ]] && { (( argCntr++)); eval "$scriptVar=\"${!argCntr}\""; }
 								fi
 								;;
 					esac
@@ -137,3 +138,4 @@ export -f ParseArgsStd
 ## 03-22-2018 @ 13:42:32 - 3.0.22 - dscudiero - Updated for Msg/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:31:10 - 3.0.28 - dscudiero - Updated for ParseArgsStd2/ParseArgsStd
 ## 04-24-2018 @ 11:21:24 - 3.0.30 - dscudiero - Addd code to ignore scriptCmd if db returns 'NULL'
+## 04-25-2018 @ 11:52:57 - 3.0.35 - dscudiero - Update to allow for scriptCmd on options
