@@ -1,5 +1,10 @@
 
 =============================================================================================================================================
+todo
+	'todo' consumes the step, so if an fyi is also wanted then the fyi/fyiall needs to appear before the 'todo' modifier.
+	i.e.   Some Step Name fyi todo
+
+=============================================================================================================================================
 tcfview.onDataLoad = function(data, args) {
 	//preserve justification cycle attr
 	if(data.newphasetwo && data.newphasetwo.length && (!data.justification || !data.justification.length)
