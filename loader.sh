@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.17" # -- dscudiero -- Fri 04/20/2018 @ 11:17:38.02
+version="1.5.18" # -- dscudiero -- Wed 04/25/2018 @ 11:51:45.46
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -119,6 +119,7 @@ statusLine="Loader ($version): "
 			[[ ${token,,[a-z]} == 'devdb' ]] && { useDevDb=true; dispatcherArgs=${*/$token/}; }
 			[[ ${token,,[a-z]} == 'usedevdb' ]] && { useDevDb=true; dispatcherArgs=${*/$token/}; }
 			[[ ${token,,[a-z]} == 'quiet' ]] && { myQuiet=true; dispatcherArgs=${*/$token/}; }
+			[[ ${token,,[a-z]} == 'reload' ]] && { unset defaultsLoaded; dispatcherArgs=${*/$token/}; }
 		fi
 	done
 	fastDump callPgmName noLog noLognDb batchMode usedevdb myQuiet USELOCAL USEDEV VIACRON PAUSEATEXIT loaderArgs
@@ -493,3 +494,4 @@ sTime=$(date "+%s")
 ## 04-19-2018 @ 16:52:01 - 1.5.15 - dscudiero - Fixed problem passing -- arguments on to the called script
 ## 04-20-2018 @ 07:21:09 - 1.5.16 - dscudiero - Remove debug
 ## 04-20-2018 @ 11:17:53 - 1.5.17 - dscudiero - Remove debug statements
+## 04-25-2018 @ 11:52:08 - 1.5.18 - dscudiero - Add --reload option
