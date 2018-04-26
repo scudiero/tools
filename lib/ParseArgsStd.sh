@@ -1,6 +1,6 @@
-## DO NOT AUTOVERSION
+## xO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.38" # -- dscudiero -- Wed 04/25/2018 @ 15:40:56.63
+# version="3.0.55" # -- dscudiero -- Thu 04/26/2018 @ 16:13:17.62
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -13,7 +13,7 @@ function ParseArgsStd {
 	# dump -n -n client envs testMode srcEnv tgtEnv cimStr products file noPrompt noClear unknowArgs
 
 	Import "RunSql StringFunctions Msg"
-	local argDefCntr arg argType found tmpStr tmpEnv tmpArg argShortName argLongName scriptVar scriptCmd
+	local argDefCntr arg argType found tmpStr tmpEnv tmpArg argShortName argLongName scriptVar scriptCmd tmpCntr nextToken
 
 	#verboseLevel=3
 
@@ -77,25 +77,34 @@ function ParseArgsStd {
 								[[ -n $scriptVar ]] && { eval "$scriptVar=${arg:2}"; }
 								;;
 						option)
-								[[ -n $scriptVar ]] && { (( argCntr++)); eval "$scriptVar=\"${!argCntr}\""; }
-								if [[ -n $scriptCmd && ${scriptCmd,,[a-z]} != 'null' ]]; then
-									if [[ $scriptCmd == 'appendShortName' ]]; then
-										[[ -z ${!scriptVar} ]] && eval "$scriptVar=\"$argShortName\"" || eval "$scriptVar=\"${!scriptVar},$argShortName\""
-									elif [[ $scriptCmd == 'appendLongName' ]]; then
-										((argCntr++))
-										tmpStr="${!argCntr}"
-										[[ -z ${!scriptVar} ]] && eval "$scriptVar=\"$tmpStr\"" || eval "$scriptVar=\"${!scriptVar},$tmpStr\""
-									elif [[ $scriptCmd == 'expandEnv' ]]; then
-										(( argCntr++));
-										tmpStr="${!argCntr}"
-										found=false
-										for tmpEnv in ${courseleafDevEnvs//,/ } ${courseleafProdEnvs//,/ }; do
-											[[ $tmpEnv =~ ^${tmpStr} ]] && { found=true; break; }
-											#[[ $tmpStr =~ ^${tmpEnv} ]] && { echo "HERE HERE HERE HERE"; foune=true; break; }
-										done
-										[[ $found == true ]] && eval "$scriptVar=\"$tmpEnv\"";
-									else
-										 eval "$scriptCmd"
+								let tmpCntr=$argCntr+1
+								eval "nextToken=\"${!tmpCntr}\""
+								if [[ ${nextToken:0:1} != '-' ]]; then
+									local consumedNext=false
+									if [[ -n $scriptCmd && ${scriptCmd,,[a-z]} != 'null' ]]; then
+										if [[ $scriptCmd == 'appendShortName' ]]; then
+											[[ -z ${!scriptVar} ]] && eval "$scriptVar=\"$argShortName\"" || eval "$scriptVar=\"${!scriptVar},$argShortName\""
+										elif [[ $scriptCmd == 'appendLongName' ]]; then
+											#((argCntr++))
+											#tmpStr="${!argCntr}"
+											[[ -z ${!scriptVar} ]] && eval "$scriptVar=\"$nextToken\"" || eval "$scriptVar=\"${!scriptVar},$nextToken\""
+											consumedNext=true
+										elif [[ $scriptCmd == 'expandEnv' ]]; then
+											#(( argCntr++));
+											#tmpStr="${!argCntr}"
+											found=false
+											for tmpEnv in ${courseleafDevEnvs//,/ } ${courseleafProdEnvs//,/ }; do
+												[[ $tmpEnv =~ ^${nextToken} ]] && { found=true; break; }
+												#[[ $tmpStr =~ ^${tmpEnv} ]] && { echo "HERE HERE HERE HERE"; foune=true; break; }
+											done
+											[[ $found == true ]] && { eval "$scriptVar=\"$tmpEnv\""; consumedNext=true; }
+										else
+											 eval "$scriptCmd"
+										fi
+									fi
+									if [[ -n $scriptVar && $consumed != true ]]; then
+										(( argCntr++))
+										eval "$scriptVar=\"${!argCntr}\""
 									fi
 								fi
 								;;
@@ -143,3 +152,4 @@ export -f ParseArgsStd
 ## 04-24-2018 @ 11:21:24 - 3.0.30 - dscudiero - Addd code to ignore scriptCmd if db returns 'NULL'
 ## 04-25-2018 @ 11:52:57 - 3.0.35 - dscudiero - Update to allow for scriptCmd on options
 ## 04-26-2018 @ 08:33:26 - 3.0.38 - dscudiero - If we do not parse off a logname from the argDev the set it to the shortname
+## 04-26-2018 @ 16:54:55 - 3.0.55 - dscudiero - Fix problem if the arg type is option and no data provided by user
