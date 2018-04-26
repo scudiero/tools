@@ -1,6 +1,6 @@
-## XO NOT AUTOVERSION
+## DO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.35" # -- dscudiero -- Tue 04/24/2018 @ 14:31:48.58
+# version="3.0.38" # -- dscudiero -- Wed 04/25/2018 @ 15:40:56.63
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -14,6 +14,8 @@ function ParseArgsStd {
 
 	Import "RunSql StringFunctions Msg"
 	local argDefCntr arg argType found tmpStr tmpEnv tmpArg argShortName argLongName scriptVar scriptCmd
+
+	#verboseLevel=3
 
 	## Make sure we have the argdefs data loaded
 		if [[ ${#argDefs} -eq 0 ]]; then
@@ -45,6 +47,7 @@ function ParseArgsStd {
 					tmpStr="${allArgDefs[$argDefCntr]}"
 					argShortName="${tmpStr%%|*}"; argShortName=${argShortName,,[a-z]}; tmpStr=${tmpStr#*|};
 					argLongName="${tmpStr%%|*}"; argLongName=${argLongName,,[a-z]}; tmpStr=${tmpStr#*|};
+					[[ -z $argLongName ]] && argLongName="$argShortName"
 					tmpArg="${arg,,[a-z]}"
 					[[ $tmpArg =~ ^-${argShortName} || $tmpArg =~ ^--${argLongName}$ || $tmpArg =~ ^-${argLongName} ]] && { found=true; break; }
 				done
@@ -139,3 +142,4 @@ export -f ParseArgsStd
 ## 03-23-2018 @ 15:31:10 - 3.0.28 - dscudiero - Updated for ParseArgsStd2/ParseArgsStd
 ## 04-24-2018 @ 11:21:24 - 3.0.30 - dscudiero - Addd code to ignore scriptCmd if db returns 'NULL'
 ## 04-25-2018 @ 11:52:57 - 3.0.35 - dscudiero - Update to allow for scriptCmd on options
+## 04-26-2018 @ 08:33:26 - 3.0.38 - dscudiero - If we do not parse off a logname from the argDev the set it to the shortname
