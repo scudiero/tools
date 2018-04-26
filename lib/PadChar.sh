@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.17" # -- dscudiero -- Thu 11/02/2017 @  8:43:12.39
+# version="2.0.20" # -- dscudiero -- Thu 04/26/2018 @ 12:48:21.08
 #===================================================================================================
 # Get a sting of a char repeated n times
 # PadChar <char> <count>
@@ -9,15 +9,15 @@
 # All rights reserved
 #===================================================================================================
 function PadChar {
-	local char="$1"; shift
+	local char="$1"; shift || true
 	local len=$1
 	local re='^[0-9]+$'
-	[[ $len -eq 0 ]] && echo '' && return 0
+	#[[ -z $len || $len -eq 0 ]] && echo '' && return 0
 
 	[[ ${char:1} =~ $re ]] && len=$char && unset char
-	[[ $char == '' ]] && char='='
+	[[ -z $char ]] && char='='
 
-	if [[ $len == '' ]]; then
+	if [[ -z $len ]]; then
 		[[ $TERM == 'xterm' ]] && len=$(stty size </dev/tty | cut -d' ' -f2) || len=80
 	fi
 
@@ -54,3 +54,4 @@ export -f PadString
 ## 09-01-2017 @ 08.18.04 - ("2.0.15")  - dscudiero - Allow the pad char to be a string
 ## 09-01-2017 @ 09.27.42 - ("2.0.16")  - dscudiero - restore PadChar
 ## 11-02-2017 @ 10.27.20 - ("2.0.17")  - dscudiero - Initial implimentation
+## 04-26-2018 @ 12:49:46 - 2.0.20 - dscudiero - Comment out line where we stop if the len is not set
