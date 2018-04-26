@@ -7,6 +7,8 @@ warehouseDb="courseleafdatawarehouse"
 warehouseDbName="$warehouseDb"
 warehouseDbHost="mdb1-host.inside.leepfrog.com"
 runMySqlJavaPgmName='runMySql'
+mySqlUtils='runMySql'
+excelUtils='excelUtils'
 
 administrators="dscudiero"
 setSemaphoreList='buildSiteInfoTable,buildClientInfoTable'
