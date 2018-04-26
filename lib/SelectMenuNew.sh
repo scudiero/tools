@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.16" # -- dscudiero -- Tue 04/25/2017 @ 14:39:53.87
+# version="2.0.28" # -- dscudiero -- Tue 04/24/2018 @ 16:19:17.92
 #===================================================================================================
 # Display a selection menue
 # SelectMenuNew <MenueItemsArrayName> <returnVariableName> <Prompt text>
@@ -58,13 +58,12 @@ function SelectMenuNew {
 				maxWidth=${maxWidths[$i]}
 				menuItem=$menuItem${tmpStr:0:$maxWidth+1}
 			done
-			dump -3 menuItem
 
 			if [[ $ordinalInData == true ]]; then
 				key="$(cut -d' ' -f1 <<< $menuItem)"
 				menuItem="$(Trim "$(cut -d' ' -f2- <<< "$menuItem")")"
 			else
-				((menuItemsCntr++))
+				((menuItemsCntr++)) || true
 				key=$menuItemsCntr
 			fi
 			menuItems[$key]="$menuItem"
@@ -115,7 +114,9 @@ function SelectMenuNew {
 			[[ ${ans:0:1} == 'r' ]] && eval $returnVarName='REFRESHLIST' && return 0
 
 			if [[ ${menuItems["$ans"]+abc} ]]; then
-				[[ $(Lower ${returnVarName:(-2)}) == 'id' ]] && Here 2 && eval $returnVarName=\"$ans\" || eval $returnVarName=\"${menuItems[$ans]}\"
+
+				[[ $(Lower ${returnVarName:(-2)}) == 'id' ]] && retVal="$ans" || retVal="${menuItems[$ans]}"
+				eval $returnVarName=\"$(Trim "$retVal")\"
 			else
 				let length=${#validVals}-2
 				printf "${tabStr}$(ColorE *Error*) -- Invalid selection, '$ans', valid value in ${validVals:1:$length}, please try again > "
@@ -132,3 +133,4 @@ function SelectMenuNew {
 ## Thu Feb 16 06:59:22 CST 2017 - dscudiero - Added an option to pull the ordinals from the input data
 ## 04-17-2017 @ 10.31.12 - ("2.0.15")  - dscudiero - fix issue when returning data for xxxxId variables
 ## 04-25-2017 @ 14.40.09 - ("2.0.16")  - dscudiero - Remove debug stuff
+## 04-26-2018 @ 08:33:54 - 2.0.28 - dscudiero - Remove debug statement
