@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.54" # -- dscudiero -- Mon 04/02/2018 @ 15:51:35.83
+# version="1.0.55" # -- dscudiero -- Wed 04/25/2018 @ 15:31:52.71
 #===================================================================================================
 # Usage: Msg <msgType> <msgLevel> <msgIndent> msgText
 # 	msgType: [N,I,W,E,T]
@@ -43,7 +43,7 @@ function Msg {
 	[[ -z $msgIndent && -n $indentLevel ]] && msgIndent=$indentLevel
 	[[ $logOnly == true ]] && msgType='L'
 	
-	dump -1 msgType msgLevel msgIndent
+	dump 4 msgType msgLevel msgIndent
 	## Format message
 		msgText="$*"
 
@@ -113,3 +113,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 04-02-2018 @ 14:54:57 - 1.0.36 - dscudiero - Make the indentLevel local to function
 ## 04-02-2018 @ 15:01:42 - 1.0.38 - dscudiero - Allow specificaiton of + or - n for msgIndent
 ## 04-02-2018 @ 16:21:58 - 1.0.54 - dscudiero - Tweak tabbing
+## 04-26-2018 @ 08:32:32 - 1.0.55 - dscudiero - Change debug message levels
