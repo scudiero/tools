@@ -1,48 +1,45 @@
 #!/bin/bash
-# XO NOT AUTOVERSION
+# DO NOT AUTOVERSION
 #=======================================================================================================================
-version=5.6.17 # -- dscudiero -- Thu 04/19/2018 @ 13:52:31.88
+version=6.0.0 # -- dscudiero -- Tue 04/24/2018 @ 10:16:13.84
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes='RunCourseLeafCgi WriteChangelogEntry GetCims GetSiteDirNoCheck GetExcel EditTcfValue BackupCourseleafFile'
-myIncludes="$myIncludes ParseCourseleafFile GetCourseleafPgm CopyFileWithCheck ArrayRef GitUtilities Alert ProtectedCall"
+myIncludes='GetExcel CourseleafUtilities SelectMenuNew CopyFileWithCheck ArrayRef GitUtilities Alert ProtectedCall'
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="Refresh courseleaf product(s) from the git repository shadows ($gitRepoShadow)"
 cwdStart="$(pwd)"
 
-Here 0
-Dump originalArgStr
-Pause
-Quit
-
-
 #=======================================================================================================================
-# Refresh a Courseleaf component(s)
+# Refresh/Patch Courseleaf component(s)
 #=======================================================================================================================
 #=======================================================================================================================
-## Copyright ©2015 David Scudiero -- all rights reserved.
-## 07-09-15 -- 	dgs - Initial coding
-## 07-28-15 -- 	dgs - Use my own select function
+## Copyright ©2018 David Scudiero -- all rights reserved.
 #=======================================================================================================================
 #=======================================================================================================================
 # Standard call back functions
 #=======================================================================================================================
-	function courseleafPatch-ParseArgsStd {
+	function courseleafPatchNew-ParseArgsStd {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
-		myArgs+=("adv|advance|switch|catalogAdvance||script|Advance the catalog")
+
+		myArgs+=("current|current|switch|current|source='current'|script|Update each product from the current released version")
+		myArgs+=("named|namedrelease|option|namedRelease|source='named'|script|Update the product from the specific named version (i.e. git tag)")
+		myArgs+=("tag|namedrelease|option|namedRelease|source='named'|script|Update the product from the specific named version (i.e. git tag)")
+		myArgs+=("branch|branch|option|branch|source='branch'|script|Update the product from the specific git brach (git branch)")
+		myArgs+=("master|master|switch|master|source='master'|script|Update each product from the current skeleton version (aka git tag 'master'")
+		myArgs+=("skeleton|skeleton|switch|master|source='master'|script|Update each product from the current skeleton version (aka git tag 'master'")
+
+		myArgs+=("advance|advance|switch|catalogAdvance||script|Advance the catalog")
 		myArgs+=("noadv|noadvance|switch|catalogAdvance|catalogAdvance=false|script|Do not advance the catalog")
 		myArgs+=("full|fulladvance|switch|fullAdvance||script|Do a full catalog advance (Copy next to curr and then advance")
-		myArgs+=("new|newest|switch|newest||script|Update each product to the latest named version")
-		myArgs+=("latest|latest|switch|latest||script|Update each product to the latest named version")
-		myArgs+=("skel|skeleton|switch|skeleton||script|Update each product to the current 'skeletion' version")
 		myArgs+=("ed|edition|option|newEdition||script|The new edition value (for advance)")
+
 		myArgs+=("audit|audit|switch|catalogAudit||script|Run the catalog audit report as part of the process")
 		myArgs+=("noaudit|noaudit|switch|catalogAudit|catalogAudit=false|script|Do not run the catalog audit report as part of the process")
+
 		myArgs+=("noback|nobackup|switch|backup|backup=false|script|Do not create a backup of the target site before any actions")
 		myArgs+=("build|buildpatchpackage|switch|buildPatchPackage||script|Build the remote patching package for remote sites")
-		myArgs+=("package|package|switch|buildPatchPackage||script|Build the remote patching package for remote sites")
 		#myArgs+=("offline|offline|switch|offline||script|Take the target site offline during processing")
 	}
 
@@ -73,7 +70,7 @@ Quit
 		catalogAdvance=true
 		catalogAudit=false
 		fullAdvance=true
-		latest=true
+		current=true
 		force=true
 	}
 
@@ -81,7 +78,7 @@ Quit
 		helpSet='client,env' # can also include any of {env,cim,cat,clss}, 'script' and 'common' automatically addeed
 		[[ $1 == 'setVarsOnly' ]] && return 0
 
-		echo -e "This script can be used to refresh/patch a courseleaf site to the latest version of code for the patched products."
+		echo -e "This script can be used to refresh/patch a product in a courseleaf site."
 		echo -e "\nThe actions performed are:"
 		bullet=1; echo -e "\t$bullet) If requested, backup the target site"
 		(( bullet++ )) ; echo -e "\t$bullet) If 'Advance' is requested then"
@@ -118,55 +115,6 @@ Quit
 #=======================================================================================================================
 # local functions
 #=======================================================================================================================
-	#===================================================================================================================
-	# Get the version of a product
-	#===================================================================================================================
-	function GetVersion {
-		local product=$1
-		local siteDir=$2
-		local verFile prodVer
-
-		case "$product" in
-			cat)
-				verFile="$siteDir/web/courseleaf/clver.txt"						## A normal siteDir
-				[[ ! -r $verFile ]] && verFile="$siteDir/courseleaf/clver.txt"	## a git repo shadow
-				if [[ -r $verFile ]]; then
-					prodVer=$(cut -d":" -f2 <<< $(cat $verFile))
-				else
-					verFile=$siteDir/web/courseleaf/default.tcf 				## look in the /courseleaf/default.tcf file
-					if [[ -r $verFile ]]; then
-						prodVer=$(ProtectedCall "grep '^clver:' $verFile");
-						prodVer=$(cut -d":" -f2 <<< $prodVer);
-					fi
-				fi
-				;;
-			cim)
-				verFile="$siteDir/web/courseleaf/cim/clver.txt"				## A normal siteDir
-				[[ ! -r $verFile ]] && verFile="$siteDir/cim/clver.txt" 	## a git repo shadow
-				[[ -r $verFile ]] && prodVer=$(cut -d":" -f2 <<< $(cat $verFile))
-				;;
-		esac
-		prodVer=${prodVer%% *} ; prodVer=${prodVer%%rc*}
-
-		echo "$prodVer"
-		return 0
-	} #GetVersion
-
-	#=======================================================================================================================
-	# Check to see if a file is in the local git
-	#=======================================================================================================================
-	function CheckIfFileInGit {
-		local gitRepo="$1"
-		local file="$2"
-		local found=false
-		[[ ${file:0:1} == '/' ]] && file=${file:1}
-		Pushd "$tgtDir"
-		[[ -n $(ProtectedCall "git ls-tree --full-tree -r --name-only HEAD | grep $file") ]] && found=true
-		Popd
-		echo $found
-		return 0
-	}
-
 	#===================================================================================================================
 	#=Run rsync
 	## Returns 	'true' <rsync output file>	if files where updated
@@ -227,425 +175,12 @@ Quit
 		return 0
 	} #RunRsync
 
-	#===================================================================================================================
-	# Build the remote packaging script
-	#===================================================================================================================
-	function BuildScriptFile {
-		local scriptFile="$1"
-		[[ -z $scriptFile ]] && Terminate "$FUNCNAME called without a scriptFile name"
-		echo "#!/bin/bash" > $scriptFile
-		echo "# Script file generated by $userName via $myName($version) at $backupSuffix" >> $scriptFile
-		echo "myName=\"$myName-remotePatchScript\"; version=\"1.1.0\" ; DOIT=''" >> $scriptFile
-		echo >> $scriptFile
-		echo "clear" >> $scriptFile
-		echo "echo -e \"\n\"" >> $scriptFile
-		echo >> $scriptFile
-		echo "##=======================================================================================================" >> $scriptFile
-		echo "function RunRsync {" >> $scriptFile
-		echo "	local rsyncSrc=\"\$1\"; shift" >> $scriptFile
-		echo "	local rsyncTgt=\"\$1\"; shift" >> $scriptFile
-		echo "	local rsyncIgnore=\"\$1\"; shift" >> $scriptFile
-		echo "	local rsyncBackup=\"\${1:-/dev/null}\"" >> $scriptFile
-		echo "	local token rsyncOpts rsyncFilters rsyncVerbose rsyncListonly rc" >> $scriptFile
-		echo "	local tmpRoot=\"/tmp/$myName\"" >> $scriptFile
-		echo "	## Set rsync options" >> $scriptFile
-		echo "		[[ ! -d \$rsyncBackup && \$rsyncBackup != '/dev/null' ]] && mkdir -p \$rsyncBackup" >> $scriptFile
-		echo "		rsyncFilters=\$tmpRoot.rsyncFilters" >> $scriptFile
-		echo "		rsyncOpts=\"-rptvb --backup-dir \$rsyncBackup --prune-empty-dirs --checksum --include-from \"\$rsyncFilters\" --links\"" >> $scriptFile
-		echo "	echo > \"\$rsyncFilters\"" >> $scriptFile
-		echo "	set -f ## Set file expansion off" >> $scriptFile
-		echo "	for token in \$(tr '|' ' ' <<< \"\$rsyncIgnore\"); do" >> $scriptFile
-		echo "		echo \"- \$token\" >> \"\$rsyncFilters\"" >> $scriptFile
-		echo "	done" >> $scriptFile
-		echo "	echo '+ *.*' >> \"\$rsyncFilters\"" >> $scriptFile
-		#echo "cat \"\$rsyncFilters\"" >> $scriptFile
-		echo "	## Do copies" >> $scriptFile
-		echo "		echo" >> $scriptFile
-		echo "		rsync \$rsyncOpts \"\$rsyncSrc\" \"\$rsyncTgt\"" >> $scriptFile
-		echo "		if [[ \$? -ne 0 ]]; then" >> $scriptFile
-		echo "			echo -e \"\tErrors reported from the rsync operation:\"" >> $scriptFile
-		echo "			[[ -f \"\$rsyncFilters\" ]] && rm -f \"\$rsyncFilters\"" >> $scriptFile
-		echo "			exit 3" >> $scriptFile
-		echo "		fi" >> $scriptFile
-		echo "		echo" >> $scriptFile
-		echo "	[[ -f \"\$rsyncFilters\" ]] && rm -f \"\$rsyncFilters\"" >> $scriptFile
-		echo "	return 0" >> $scriptFile
-		echo "} # RunRsync" >> $scriptFile
-		echo >> $scriptFile
-
-		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
-		echo "function Contains {" >> $scriptFile
-		echo "	local string=\"\$1\"" >> $scriptFile
-		echo "	local substring=\"\$2\"" >> $scriptFile
-		echo "	local testStr=\${string#*\$substring}" >> $scriptFile
-		echo "	[[ "\$testStr" != "\$string" ]] && echo true || echo false" >> $scriptFile
-		echo "	return 0" >> $scriptFile
-		echo "} #Contains" >> $scriptFile
-		echo >> $scriptFile
-
-		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
-		echo "function IsNumeric {" >> $scriptFile
-		echo "	local reNum='^[0-9]+\$'" >> $scriptFile
-		echo "	[[ \$1 =~ \$reNum ]] && echo true || echo false" >> $scriptFile
-		echo "	return 0" >> $scriptFile
-		echo "} #IsNumeric" >> $scriptFile
-		echo >> $scriptFile
-
-		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
-		echo "function Msg {" >> $scriptFile
-		echo "	local msgText=\$(tr '^' \"\t\" <<< \"\$*\")" >> $scriptFile
-		echo "	echo -e \"\$msgText\"" >> $scriptFile
-		echo "	return 0" >> $scriptFile
-		echo "} #Msg" >> $scriptFile
-		echo >> $scriptFile
-
-		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
-		echo "function Error {" >> $scriptFile
-		echo "	local msgText=\"*Error* -- \$msgText\"" >> $scriptFile
-		echo "	msgText=\$(tr '^' \"\t\" <<< \"\$*\")" >> $scriptFile
-		echo "	echo -e \"\$msgText\"" >> $scriptFile
-		echo "} #Error" >> $scriptFile
-		echo >> $scriptFile
-
-		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
-		echo "function Terminate {" >> $scriptFile
-		echo "	local msgText=\"*Fatal Error* -- \$msgText\"" >> $scriptFile
-		echo "	msgText=\$(tr '^' \"\t\" <<< \"\$*\")" >> $scriptFile
-		echo "	echo -e \"\$msgText\"" >> $scriptFile
-		echo "	exit -1" >> $scriptFile
-		echo "} #Terminate" >> $scriptFile
-		echo >> $scriptFile
-
-		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
-		echo "function CheckForChangedGitFiles {" >> $scriptFile
-		echo "	local repo=\"$1\"" >> $scriptFile
-		echo "	[[ ! -d "\$repo/.git" ]] && echo 'Not a git repository' && return 0" >> $scriptFile
-		echo "	local nonCommittedFiles" >> $scriptFile
-		echo "	pushd \"\$repo\" &> /dev/null" >> $scriptFile
-		echo "	nonCommittedFiles=\$(git status -s)" >> $scriptFile
-		echo "	popd &> /dev/null" >> $scriptFile
-		echo "	[[ -z \$nonCommittedFiles ]] && echo false || echo true" >> $scriptFile
-		echo "	return 0" >> $scriptFile
-		echo "} ##CheckForChangedGitFiles" >> $scriptFile
-		echo >> $scriptFile
-
-		echo "##-------------------------------------------------------------------------------------------------------" >> $scriptFile
-		echo "function Indent {" >> $scriptFile
-		echo "	local indentLevel=\${1:-0}" >> $scriptFile
-		echo "	local line i tabStr" >> $scriptFile
-		echo "	for ((i=0; i<\$indentLevel; i++)); do" >> $scriptFile
-		echo "		tabStr=\"\$tabStr\t\"" >> $scriptFile
-		echo "	done" >> $scriptFile
-		echo "	while read line ; do" >> $scriptFile
-		echo "		printf \"\$tabStr%s\\n\" "\$line"" >> $scriptFile
-		echo "	done" >> $scriptFile
-		echo "	return" >> $scriptFile
-		echo "} #Indent" >> $scriptFile
-		echo >> $scriptFile
-
-		echo "##=======================================================================================================" >> $scriptFile
-		echo "##=======================================================================================================" >> $scriptFile
-		echo "## Parse arguments" >> $scriptFile
-		echo "##=======================================================================================================" >> $scriptFile
-		echo "argString=\"\$*\"" >> $scriptFile
-		echo "unset tmpStr" >> $scriptFile
-		echo "for token in \$argString; do" >> $scriptFile
-		echo "	case \$token in" >> $scriptFile
-		echo "		'-x' )" >> $scriptFile
-		echo "			DOIT='echo '" >> $scriptFile
-		echo "			;;" >> $scriptFile
-		echo "			*)" >> $scriptFile
-		echo "			tmpStr=\"\$tmpStr \$token\"" >> $scriptFile
-		echo "	esac" >> $scriptFile
-		echo "	argString=\"\${tmpStr:1}\"" >> $scriptFile
-		echo "done" >> $scriptFile
-		echo >> $scriptFile
-
-		echo "##=======================================================================================================" >> $scriptFile
-		echo "## M A I N" >> $scriptFile
-		echo "##=======================================================================================================" >> $scriptFile
-		echo "echo -e \"\\n$myName: \$version \\n\"" >> $scriptFile
-		echo "courseleafProgDir=\"$courseleafProgDir\"" >> $scriptFile
-		echo "unset clHome" >> $scriptFile
-		echo "if [[ -n \$argString ]]; then" >> $scriptFile
-		echo "	clHome=\"\$argString\"" >> $scriptFile
-		echo "elif [[ -d /var/www/$client ]]; then" >> $scriptFile
-		echo "	clHome=\"/var/www/$client\"" >> $scriptFile
-		echo "elif [[ -d /var/www/CourseLeaf ]]; then" >> $scriptFile
-		echo "	clHome=\"/var/www/CourseLeaf\"" >> $scriptFile
-		echo "elif [[ -d /var/www/courseleaf ]]; then" >> $scriptFile
-		echo "	clHome=\"/var/www/courseleaf\"" >> $scriptFile
-		if [[ $testMode == true ]]; then
-			echo "elif [[ -d \$HOME/testData ]]; then" >> $scriptFile
-			echo "	clHome=\"\$HOME/testData\"" >> $scriptFile
-		fi
-		echo "fi" >> $scriptFile
-		echo >> $scriptFile
-
-		echo "if [[ -n \$clHome && -d "\$clHome" ]]; then" >> $scriptFile
-		echo "	echo -en \"Found CourseLeaf installation at: '\$clHome', is that correct  ('yes' or 'no') > \"" >> $scriptFile
-		echo "	read ans" >> $scriptFile
-		echo "	[[ -z \$ans ]] && ans='y'" >> $scriptFile
-		echo "	ans=\$(tr '[:upper:]' '[:lower:]' <<< \${ans:0:1})" >> $scriptFile
-		echo "	[[ \$ans != 'y' ]] && unset clHome" >> $scriptFile
-		echo "fi" >> $scriptFile
-		echo "if [[ -z \$clHome ]]; then" >> $scriptFile
-		echo "	echo -e \"\nPlease specify the full path to the CourseLeaf home directory (i.e. where 'next' and 'curr' are located)\"" >> $scriptFile
-		echo "	echo -en \"\t > \"" >> $scriptFile
-		echo "	read clHome" >> $scriptFile
-		echo "fi" >> $scriptFile
-		echo >> $scriptFile
-
-		echo "[[ \${clHome: (-1)} == '/' ]] && clHome=\${clHome:0:(-1)}" >> $scriptFile
-		echo >> $scriptFile
-		echo "[[ ! -d \"\$clHome/next\" ]] && echo Terminate \"Could not find a 'next' directory, the specified location is not a CourseLeaf home directory, stopping\"" >> $scriptFile
-		echo "echo -e \"\\nPatch/Advance CourseLeaf Home NEXT instance: '\$clHome/next' \\n\\tPatch source data: '\$(pwd)'\" " >> $scriptFile
-		echo "tgtDir=\"\$clHome/next\"" >> $scriptFile
-		echo "dirSuffix=\"\$(date +\"%m-%d-%Y@%H.%M.%S\")\"" >> $scriptFile
-		echo "srcDir=\"\$(pwd)\"" >> $scriptFile
-		echo >> $scriptFile
-
-		## Check to see if the config file is writeable
-		# echo "cfgFile=\"\$tgtDir/$courseleafProgDir.cfg\"" >> $scriptFile
-		# echo "[[ ! -w \$cfgFile ]] && [[ $addAdvanceCode == true ]] && Terminate \"Could not write to file: '\$cfgFile'\"" >> $scriptFile
-		# echo >> $scriptFile
-		## Does the target directory have a git repository
-		echo "targetHasGit=false" >> $scriptFile
-		echo "[[ -d $tgtDir/.git ]] && targetHasGit=true" >> $scriptFile
-
-		echo "## Check to see if the targetDir is a git repo, if so make sure there are no active files that have not been pushed." >> $scriptFile
-		echo "if [[ \$targetHasGit == true ]]; then" >> $scriptFile
-		echo "	[[ \$(CheckForChangedGitFiles \"\$tgtDir\") == true ]] && Terminate \"The target site has non-tracked or non-committed files, processing cannot continue\"" >> $scriptFile
-		echo "fi" >> $scriptFile
-		if [[ $addAdvanceCode == true ]]; then
-			echo "## Advance active, Check to see if the CURR is a git repo, if so make sure there are no active files that have not been pushed." >> $scriptFile
-			echo "if [[ -d \"\$(dirname \$tgtDir)/curr/.git\" ]]; then" >> $scriptFile
-			echo "	[[ \$(CheckForChangedGitFiles \"\$(dirname \$tgtDir)/curr)\") == true ]] && \\" >> $scriptFile
-			echo "			Terminate \"Full advance is active and the 'curr' site has non-tracked or non-committed files, processing cannot continue\"" >> $scriptFile
-			echo "fi" >> $scriptFile
-		fi
-
-		#===================================================================================================================
-		## Advance the CURR site
-		echo "newEdition=\"$newEdition\"" >> $scriptFile
-		echo "echo" >> $scriptFile
-		echo "unset ans" >> $scriptFile
-		echo "until [[ -n \$ans ]]; do" >> $scriptFile
-		echo "	echo -en \"Do you wish to continue with the patch/advance ('yes' or 'no') > \"" >> $scriptFile
-		echo "	read ans" >> $scriptFile
-		echo "	ans=\$(tr '[:upper:]' '[:lower:]' <<< \${ans:0:1})" >> $scriptFile
-		echo "	[[ \$ans != 'y' && \$ans != 'n' ]] && echo -e \"\\t*Error* -- Invalid response, please try again\" && unset ans" >> $scriptFile
-		echo "done" >> $scriptFile
-		echo "[[ \$ans != 'y' ]] && echo -e \"\\nStopping\\n\" && exit 1" >> $scriptFile
-		echo "clear" >> $scriptFile
-		echo "echo -e \"\n\"" >> $scriptFile
-
-		if [[ $addAdvanceCode == true ]]; then
-			echo -e "\\n#========================================================================================================" >> $scriptFile
-			echo -e "\\n# Full advance of the site" >> $scriptFile
-			echo "	sourceSpec=\"\$tgtDir\"" >> $scriptFile
-			echo "	targetSpec=\"\$tgtDir-\$dirSuffix\"" >> $scriptFile
-			echo "	echo -e \"\\nAdvancing NEXT, new catalog edition is '\$newEdition'...\"" >> $scriptFile
-			echo "	if [[ ! -d \"\$targetSpec\" ]]; then" >> $scriptFile
-			echo "		echo -e \"\\n\\tMaking a copy of the current 'NEXT' sans CIMs/CLSS (this will take a while)...\"" >> $scriptFile
-			echo "		echo -e \"\\t\\t'\$sourceSpec'\\t--> '\$targetSpec'\"" >> $scriptFile
-			echo "		ignoreList='/db/clwen*,/bin/clssimport-log-archive/,/web/courseleaf/wen/,/web/wen/'" >> $scriptFile
-			[[ -n $cimStr ]] && ignoreList="$ignoreList|$(tr ',' '|' <<< "$cimStr")"
-			echo "		[[ ! -d \"\$targetSpec\" ]] && \$DOIT mkdir -p \"\$targetSpec\"" >> $scriptFile
-			echo " 		[[ -n \$DOIT ]] && echo \"sourceSpec = '\$sourceSpec'\" && echo \"targetSpec = '\$targetSpec'\" && echo \"ignoreList = '\$ignoreList'\"" >> $scriptFile
-			echo "		\$DOIT RunRsync \"\$sourceSpec/\" \"\$targetSpec\" \"\$ignoreList\"" >> $scriptFile
-			echo "		echo -e \"\\tRsync operation completed\\a\\n\"" >> $scriptFile
-			echo "		touch \"\${targetSpec}/.$myName.$LOGNAME.advance\"   " >> $scriptFile
-			echo "		echo -e \"\\t\\t'\$sourceSpec'\\t--> '\$targetSpec'\"" >> $scriptFile
-
-
-
-			echo "	else" >> $scriptFile
-			echo "		echo -e \"\\t*Error* -- Target location (\$targetSpec) already exists, cannot create clone, Stopping\\n\"" >> $scriptFile
-			echo "		exit 3" >> $scriptFile
-			echo "	fi" >> $scriptFile
-
-			echo "	# Edit the coursleaf/index.tcf to remove clss/wen stuff" >> $scriptFile
-			echo "	editFile="\$targetSpec/web/courseleaf/index.tcf"" >> $scriptFile
-			echo "	\$DOIT sed -i s'_^sectionlinks:WEN|_//sectionlinks:WEN|_'g "\$editFile"" >> $scriptFile
-			echo "	\$DOIT sed -i s'_^navlinks:WEN|_//navlinks:WEN|_'g "\$editFile"" >> $scriptFile
-			echo "	\$DOIT sed -e '/courseadmin/ s_^_//_' -i "\$editFile"" >> $scriptFile
-			echo "	[[ -d \"\$tgtDir/web/courseadmin\" ]] && \$DOIT mv -f \"\$tgtDir/web/courseadmin\" \"\$tgtDir/web/courseadmin.\$dirSuffix\"" >> $scriptFile
-
-			echo "	echo -e \"\\tRebuilding CourseLeaf Console\"" >> $scriptFile
-			echo "	pushd \"\$targetSpec/web/courseleaf\" >& /dev/null" >> $scriptFile
-			echo "	\$DOIT ./courseleaf.cgi -r /courseleaf/index.html | xargs -I{} echo -e \"\\t\\t{}\"" >> $scriptFile
-			echo "	popd >& /dev/null" >> $scriptFile
-			echo >> $scriptFile
-
-			echo " # Archive request logs" >> $scriptFile
-			echo " 	Msg \"^Archiving request logs...\"" >> $scriptFile
-			echo " 	if [[ -d \$tgtDir/requestlog ]]; then" >> $scriptFile
-			echo " 		pushd \$tgtDir/requestlog >& /dev/null" >> $scriptFile
-			echo " 		if [[ -n \$(ls) ]]; then" >> $scriptFile
-			echo " 			Msg \"^Archiving last requestlog directory...\"" >> $scriptFile
-			echo " 			set +o noglob" >> $scriptFile
-			echo " 			[[ ! -d \"\$tgtDir/requestlog-archive/\" ]] && mkdir \"\$tgtDir/requestlog-archive/\"" >> $scriptFile
-			echo " 			\$DOIT tar -cJf \$tgtDir/requestlog-archive/requestlog-\$(date \"+%Y-%m-%d\").tar.bz2 * --remove-files" >> $scriptFile
-			echo " 			set -o noglob" >> $scriptFile
-			echo " 		fi" >> $scriptFile
-			echo " 		popd >& /dev/null" >> $scriptFile
-			echo " 	fi" >> $scriptFile
-			echo " 	if [[ -d \$tgtDir/requestlog-archive ]]; then" >> $scriptFile
-			echo " 		pushd \$tgtDir/requestlog-archive >& /dev/null" >> $scriptFile
-			echo " 		if [[ \$(ls | grep -v 'archive') != '' ]]; then" >> $scriptFile
-			echo " 			Msg \"^Taring up the requestlog-archive directory...\"" >> $scriptFile
-			echo " 			pushd \$tgtDir/requestlog-archive >& /dev/null" >> $scriptFile
-			echo " 			set +o noglob" >> $scriptFile
-			echo " 			\$DOIT tar -cJf \$tgtDir/requestlog-archive/archive-\$(date \"+%Y-%m-%d\").tar.bz2 *  --exclude '*archive*' --remove-files" >> $scriptFile
-			echo " 			set -o noglob" >> $scriptFile
-			echo " 		popd >& /dev/null" >> $scriptFile
-			echo " 		fi" >> $scriptFile
-			echo " 	fi" >> $scriptFile
-			echo >> $scriptFile
-
-			echo "	## Swap our copy of the next site with the curr site" >> $scriptFile
-			echo "	echo -e \"\\tSwapping our clone of the NEXT site with the CURR site\"" >> $scriptFile
-			echo "	if [[ -d \"\$(dirname \$tgtDir)/curr\" ]]; then" >> $scriptFile
-			echo "		echo -e \"\\t\\t '\$(dirname \$tgtDir)/curr\' --> '\$(dirname \$tgtDir)/curr-\$dirSuffix'\"" >> $scriptFile
-			echo "		\$DOIT mv -f \"\$(dirname \$tgtDir)/curr\" \"\$(dirname \$tgtDir)/curr-\$dirSuffix\"" >> $scriptFile
-			echo "	fi" >> $scriptFile
-			echo >> $scriptFile
-			echo "	\$DOIT mv -f \"\$targetSpec\" \"\$(dirname \$tgtDir)/curr\"" >> $scriptFile
-
-			# echo "	# Turn off pencils from the structured content draw" >> $scriptFile
-			# echo "	editFile=\"\$(dirname \$tgtDir)/curr/local/localsteps/structuredcontentdraw.html\"" >> $scriptFile
-			# echo "	Msg \"^Editing the \$editFile...\"" >> $scriptFile
-			# echo "	[[ -f \"\$editFile\" ]] && \$DOIT sed -e '/pencil.png/ s|html|//html|' -i \"\$editFile\"" >> $scriptFile
-			# echo >> $scriptFile
-
-			# echo "	editFile=\"\$(dirname \$tgtDir)/curr/\$courseleafProgDir.cfg\"" >> $scriptFile
-			# echo "	Msg \"^Editing the \$editFile...\"" >> $scriptFile
-			# echo "	# Set sitereadonly" >> $scriptFile
-			# echo "	Msg \"^^CURR site admin mode set ...\"" >> $scriptFile
-			# echo "	\$DOIT sed -i s'_^//sitereadonly:Admin Mode:_sitereadonly:Admin Mode:_'g \"\$editFile\"" >> $scriptFile
-			# echo >> $scriptFile
-
-			echo "	echo -e \"\\n*** The new CURR site has been created, the old site was renamed to 'curr.\$dirSuffix'\"" >> $scriptFile
-			echo "	echo -e \"\\n\\t*** Note: The new CURR site needs to be republished, please goto the 'CourseLeaf Console'\"" >> $scriptFile
-			echo "	echo -e \"\\tand use the 'Republish Site' action to rebuild the site.\"" >> $scriptFile
-			echo >> $scriptFile
-		fi ## catalogAdvance
-
-		#===================================================================================================================
-		## Patch the next site
-		echo -e "\\n#========================================================================================================" >> $scriptFile
-		echo "echo -e \"\\nPatching the NEXT site...\\n\"" >> $scriptFile
-		echo "cd \"\$srcDir\"" >> $scriptFile
-		echo "	sourceSpec=\"\$srcDir/\"" >> $scriptFile
-		echo "	targetSpec=\"\$tgtDir/\"" >> $scriptFile
-		echo " 	[[ \$DOIT != '' ]] && echo \"sourceSpec = '\$sourceSpec'\"" >> $scriptFile
-		echo " 	[[ \$DOIT != '' ]] && echo \"targetSpec = '\$targetSpec'\"" >> $scriptFile
-		echo "	pushd \"\$targetSpec\" >& /dev/null" >> $scriptFile
-		echo " 		setOwner=\"\$(stat -c \"%U\" ./courseleaf.cfg)\"" >> $scriptFile
-		echo " 		setGroup=\"\$(stat -c \"%G\" ./courseleaf.cfg)\"" >> $scriptFile
-		echo "	popd >& /dev/null" >> $scriptFile
-		echo "	if [[ \$setOwner != 'UNKNOWN' && \$setGroup != 'UNKNOWN' ]]; then" >> $scriptFile
-		echo "		echo -e \"\\tSetting source files ownership to \${setOwner}:\${setGroup}' (again, this will take a while)...\"" >> $scriptFile
-		echo "		\$DOIT chown -R \${setOwner}:\${setGroup} \$(pwd)" >> $scriptFile
-		echo " 	else" >> $scriptFile
-		echo "		echo -e \"\\t*Warning* -- Could not set file ownership, either owner or group were 'UNKNOWN' \"" >> $scriptFile
-		echo " 	fi" >> $scriptFile
-		echo "	\$DOIT chmod 750 ./web/courseleaf" >> $scriptFile
-		echo "	\$DOIT chmod 750 ./web/ribbit" >> $scriptFile
-		echo "	backupDir=\"\$targetSpec/attic/prePatch--\$(date +\"%m-%d-%y\")\"" >> $scriptFile
-		echo "	mkdir -p \"\$backupDir\"" >> $scriptFile
-		echo "	ignoreList='*.tar.gz|README|$(basename $scriptFile)'" >> $scriptFile
-		echo "	echo -e \"\\tSyncing files via rsync (again, this will take a while)...\"" >> $scriptFile
-		echo " 	[[ \$DOIT != '' ]] && echo \"sourceSpec = '\$sourceSpec'\"" >> $scriptFile
-		echo " 	[[ \$DOIT != '' ]] && echo \"targetSpec = '\$targetSpec'\"" >> $scriptFile
-		echo " 	[[ \$DOIT != '' ]] && echo \"ignoreList = '\$ignoreList'\"" >> $scriptFile
-		echo "	\$DOIT RunRsync \"\$sourceSpec\" \"\$targetSpec\" \"\$ignoreList\" \"\$backupDir\"" >> $scriptFile
-		echo "	echo -e \"\\tRsync operation completed\\a\"" >> $scriptFile
-		echo "	touch \"\${targetSpec}/.$myName.$LOGNAME.patched\"   " >> $scriptFile
-		echo >> $scriptFile
-		echo -e "\\n#========================================================================================================" >> $scriptFile
-		## Log changes
-		echo "\$DOIT echo -e \"\\n\$LOGNAME\\t\$(date) via $myName(\$version)\" >> \"\${targetSpec}changelog.txt\""  >> $scriptFile
-		echo "\$DOIT echo -e \"\\tpatchPachage: $tarFile\" >> \"\${targetSpec}changelog.txt\""  >> $scriptFile
-
-		[[ $(Contains "$patchProducts" 'cat') == true ]] && echo "\$DOIT echo -e \"\\tCourseLeaf refreshed to '$CATVersion'\" >> \"\${targetSpec}changelog.txt\""  >> $scriptFile
-		[[ $(Contains "$patchProducts" 'cim') == true ]] && echo "\$DOIT echo -e \"\\tCIM refreshed to '$CIMVersion'\" >> \"\${targetSpec}changelog.txt\""  >> $scriptFile
-		[[ -n $cgiVer ]] && echo "\$DOIT echo -e \"\\tCGIs refreshed to '$cgiVer'\" >> \"\${targetSpec}changelog.txt\""  >> $scriptFile
-		echo >> $scriptFile
-
-		## If CAT was refreshed rebuild console and approver page
-		if [[ $(Contains ",$patchProducts," ',cat,') == true ]]; then
-			echo "echo -e \"\\tRebuilding CourseLeaf Console and approver pages\"" >> $scriptFile
-			echo "pushd \"\$tgtDir/web/courseleaf\" >& /dev/null" >> $scriptFile
-			echo "\$DOIT ./courseleaf.cgi -r /courseleaf/index.html | xargs -I{} echo -e \"\\t\\t{}\"" >> $scriptFile
-			echo "\$DOIT ./courseleaf.cgi -r /courseleaf/approve/index.html | xargs -I{} echo -e \"\\t\\t{}\"" >> $scriptFile
-			echo "popd >& /dev/null" >> $scriptFile
-		fi
-		## If CIM was refreshed then rebuild cims
-		if [[ $(Contains ",$patchProducts," ',cim,') == true && -n $cimStr ]]; then
-			echo "pushd \"\$tgtDir/web/courseleaf\" >& /dev/null" >> $scriptFile
-			for cim in $(echo $cimStr | tr ',' ' '); do
-				echo "\$DOIT ./courseleaf.cgi -r /$cim/index.tcf" >> $scriptFile
-			done
-			echo "popd >& /dev/null" >> $scriptFile
-		fi
-		echo >> $scriptFile
-		echo "## If the target site is a git repo then check for changed files" >> $scriptFile
-		echo "	commitComment=\"Files updated by \$userName via \$myName (\$version)\"" >> $scriptFile
-		echo "	if [[ \$targetHasGit == true ]]; then" >> $scriptFile
-		echo "		if [[ \$(CheckForChangedGitFiles \"\$tgtDir\") == true ]]; then" >> $scriptFile
-		echo "			Msg \"Committing changed git files in the NEXT environment...\"" >> $scriptFile
-		echo "			pushd \"\$tgtDir\" &> /dev/null" >> $scriptFile
-		echo "			{ ( $DOIT git commit --all -m \"\$commitComment\"); } | Indent" >> $scriptFile
-		echo "			popd &> /dev/null" >> $scriptFile
-		echo "		fi" >> $scriptFile
-		echo "	fi" >> $scriptFile
-
-		echo "	if [[ -d \"\$(dirname \$tgtDir)/curr/.git\" ]]; then" >> $scriptFile
-		echo "		if [[ \$(CheckForChangedGitFiles \"$(dirname $tgtDir)/curr)\") == true ]]; then" >> $scriptFile
-		echo "			Msg "Committing changed git files in the CURR environment..."" >> $scriptFile
-		echo "			Pushd \"\$(dirname \$tgtDir)/curr)\"" >> $scriptFile
-		echo "			{ ( $DOIT git commit --all -m \"\$commitComment\"); } | Indent" >> $scriptFile
-		echo "			popd &> /dev/null" >> $scriptFile
-		echo "		fi" >> $scriptFile
-		echo "	fi" >> $scriptFile
-
-		## If CAT was refreshed print notifications for the user to perform followup actios
-		if [[ $(Contains ",$patchProducts," ',cat,') == true ]]; then
-			echo "echo -e \"\\n\\t*** Note: Local git managed files may need to be updated, please go to the 'local' git repository and 'pull' the latest data\"" >> $scriptFile
-			echo "echo -e \"\t***       to ensure the local git repository is in sync with the Leepfrog master repository.\"" >> $scriptFile
-			echo "echo -e \"\\n\\t*** Note: The NEXT site needs to be republished, please go to the 'CourseLeaf Console'\"" >> $scriptFile
-			echo "echo -e \"\\tand use the 'Republish Site' action to rebuild the site.\"" >> $scriptFile
-		fi
-		if [[ $filesCommitted == true ]]; then
-			echo "echo -e \"\\n\\t*Note* -- Remember, you need to refresh any changed 'non-core' files by performing a pull operation on the local git repository\"" >> $scriptFile
-			[[ $(Contains ",$patchProducts," ',cat,') == true ]] && echo "echo -e \"\t\tThis should be done before you republish the site\"" >> $scriptFile
-		fi
-		##  All done
-		echo -e "\\n#========================================================================================================" >> $scriptFile
-		echo "echo -e \"\\n*** Patching operation completed\"" >> $scriptFile
-		[[ $(Contains "$patchProducts" 'cat') == true ]] && echo "echo -e \"\\tCourseLeaf refreshed to '$CATVersion'\"" >> $scriptFile
-		[[ $(Contains "$patchProducts" 'cim') == true ]] && echo "echo -e \"\\tCIM refreshed to '$CIMVersion'\"" >> $scriptFile
-		[[ -n $cgiVer ]] && echo "echo -e \"\\tCGIs refreshed to '$cgiVer'\"" >> $scriptFile
-
-		if [[ $addAdvanceCode == true ]]; then
-			echo "echo -e \"\\tNEXT site advanced, new edition: '\$newEdition'\"" >> $scriptFile
-			echo "echo -e \"\\tNEXT site copied to the CURR site, origional CURR site saved at: 'curr.\$dirSuffix\"" >> $scriptFile
-		fi
-
-		echo "echo -e \"\\n*** \$myName operation completed\"" >> $scriptFile
-		echo "echo -e \"\\a\\n\"" >> $scriptFile
-		echo "exit 0" >> $scriptFile
-
-		return 0
-	} ## BuildScriptFile
 
 
 #=======================================================================================================================
 # Declare local variables and constants
 #=======================================================================================================================
-unset backup backupSite buildPatchPackage
+unset backup backupSite buildPatchPackage source
 tmpFile=$(mkTmpFile)
 rebuildConsole=false
 removeGitReposFromNext=true
@@ -656,12 +191,13 @@ removeGitReposFromNext=true
 	Hello
 	GetDefaultsData -f "$myName"
 	ParseArgsStd $originalArgStr
-	[[ -n $newest ]] && latest=true
+	Dump 1 originalArgStr -t products current namedRelease branch skeleton catalogAdvance fullAdvance newEdition \
+			catalogAudit backup buildPatchPackage fastInit source -p
 
 	displayGoodbyeSummaryMessages=true
-
 	cleanDirs="${scriptData3##*:}"
 	cleanFiles="${scriptData4##*:}"
+	[[ $allItems == true && -z $products ]] && products='all'
 
 	[[ $informationOnlyMode == true ]] && Warning 0 1 "The 'informationOnlyMode' flag is turned on, files will not be copied"
 	if [[ $testMode != true ]]; then
@@ -670,103 +206,51 @@ removeGitReposFromNext=true
 			GetSiteDirNoCheck $client
 			[[ -z $siteDir ]] && Terminate "Nocheck option active, could not resolve target site directory"
 		else
-			Init 'getClient getEnv getDirs checkDirs noPreview noPublic checkProdEnv addPvt'
-		fi
-	fi
-
-	if [[ $env == 'next' || $env == 'pvt' ]]; then
-		sqlStmt="Select hosting from $clientInfoTable where name=\"$client\""
-		RunSql $sqlStmt
-		hosting=${resultSet[0]}
-		if [[ $(Lower "$hosting") == 'client' ]]; then
-			removeGitReposFromNext=false
-			if [[ -z $buildPatchPackage ]]; then
-				[[ $verify == false ]] && Info 0 1 "Specifying -noPrompt for remote clients is not allowed, continuing with prompting active" && verify=true
-				Msg
-				Msg "The client host's their own instance of CourseLeaf locally."
-				unset ans; Prompt ans "Do you wish to generate a patchPackage to send to the client" 'Yes No' 'Yes'; ans=$(Lower "${ans:0:1}")
-				[[ $ans == 'y' ]] && buildPatchPackage=true || buildPatchPackage=false
-				Msg
+			if [[ $fastInit == true ]]; then
+				SetSiteDirs
+			else
+				Init 'getClient getEnv getDirs checkDirs noPreview noPublic checkProdEnv addPvt'
 			fi
 		fi
-	fi #[[ $env == 'next' ]]
-
-	[[ $buildPatchPackage == true ]] && packageDir="$tmpRoot/$myName-$client/packageDir" && mkdir -p "$packageDir/web/courseleaf"
-
-	[[ $allItems == true && -z $products ]] && products='all'
-	# Read in the control file, build the product arrays
-	workbookFile="$HOME/tools/workbooks/$(basename $courseleafPatchControlFile)"
-	[[ -r $workbookFile ]] && Note 0 1 "Using workbook: '$workbookFile'" || workbookFile="$courseleafPatchControlFile"
-	## Get the list of sheets in the workbook
-		Note 0 1 "Parsing patch control file: '$workbookFile' ($(tr ' ' '@' <<< $(cut -d'.' -f1 <<< $(stat -c "%y" $workbookFile))))..."
-		GetExcel -wb "$workbookFile" -ws 'GetSheets'
-		[[ ${#resultSet[@]} -le 0 ]] && Terminate "Could not retrieve the patcher control data from:\n'$workbookFile'"
-		sheets="${resultSet[0]}"
-
-	## Read in the data for each product into a hash table
-		unset productList
-		for sheet in $(tr '|' ' ' <<< "$sheets"); do
-			sheet=$(Lower "$sheet")
-			[[ ${sheet:0:1} == '-' ]] && continue
-			GetExcel -wb "$workbookFile" -ws "$sheet"
-			[[ ${#resultSet[@]} -le 0 ]] && Terminate "Could not retrieve the patcher control data from:\n'$workbookFile'"
-			arrayName="$(tr -d '-' <<< $sheet)"
-			unset $arrayName ## Unset the sheet array
-			[[ $sheet != 'all' ]] && productList="$productList,$sheet"
-			for ((i=0; i<${#resultSet[@]}; i++)); do
-				[[ -z ${resultSet[$i]}|| ${resultSet[$i]} == '|||' ]] && continue
-				token="$(Lower "$(cut -d'|' -f1 <<< "${resultSet[$i]}")")"
-				[[ $token == '' || $token == 'source' || $token == 'note:' || ${token:0:1} == '#' || ${token:0:2} == '//' ]] && continue
-				dump -2 -t -t line
-				eval "$arrayName+=(\"${resultSet[$i]}\")"
-			done
-			#tmpArrayName="$arrayName[@]" ; tmpArray=("${!tmpArrayName}"); for ((jj=0; jj<${#tmpArray[@]}; jj++)); do echo -e "\t $arrayName [$jj] = >${tmpArray[$jj]}<"; done
-		done
-		productList="${productList:1}"
-
-	## Get the products to patch
-	[[ -n $products ]] && patchProds="$products"
-	dump -2 productList
-
-	unset purchasedProducts
-	if [[ $noCheck != true ]]; then
-		sqlStmt="select products from $clientInfoTable where name=\"$client\""
-		RunSql $sqlStmt
-		[[ ${#resultSet[@]} -gt 0 ]] && purchasedProducts="$Lower "${resultSet[0]}")"
 	fi
 
-	echo
-	Prompt patchProds "What products do you wish to work with (comma separated)" "cat,cim,all" "$purchasedProducts"; patchProds="$(Lower "$patchProds")"
-	[[ $patchProds == 'all' ]] && patchProds="$productList"
-	## Check the products to make sure the client has them installed
-		unset patchProducts
-		[[ $noCheck != true  && -z $purchasedProducts ]] && Warning 0 1 "The specified client ($client) does not have any products registered for it in the clients database."
-		if [[ -n $purchasedProducts ]]; then
-			for token in $(tr ',' ' ' <<< "$patchProds"); do
-				found=false
-				[[ ${token:0:2} == 'ca' ]] && token='cat'
-				[[ ${token:0:2} == 'ci' ]] && token='cim'
-				[[ $token == 'cgis' ]] && found=true
-				for token2 in $(tr ',' ' ' <<< "$purchasedProducts"); do
-					[[ $token == ${token2:0:${#token}} ]] && found=true && break
-				done
-				[[ $found != true && $(Contains ',cat,cim,clss,' ",$token,") == true ]] && Warning 0 1 "This client does not have product '$token' registered in the clients database"
-				patchProducts="$patchProducts,$token"
-			done
-			patchProducts="${patchProducts:1}"
-		else
-			patchProducts="$patchProds"
-		fi
-
-	tgtDir="$siteDir"
-	[[ $client == 'internal' ]] && courseleafProgDir='pagewiz' || courseleafProgDir='courseleaf'
+	# if [[ $env == 'next' || $env == 'pvt' ]]; then
+	# 	sqlStmt="Select hosting from $clientInfoTable where name=\"$client\""
+	# 	RunSql $sqlStmt
+	# 	hosting=${resultSet[0]}
+	# 	if [[ $(Lower "$hosting") == 'client' ]]; then
+	# 		removeGitReposFromNext=false
+	# 		if [[ -z $buildPatchPackage ]]; then
+	# 			[[ $verify == false ]] && Info 0 1 "Specifying -noPrompt for remote clients is not allowed, continuing with prompting active" && verify=true
+	# 			Msg
+	# 			Msg "The client host's their own instance of CourseLeaf locally."
+	# 			unset ans; Prompt ans "Do you wish to generate a patchPackage to send to the client" 'Yes No' 'Yes'; ans=$(Lower "${ans:0:1}")
+	# 			[[ $ans == 'y' ]] && buildPatchPackage=true || buildPatchPackage=false
+	# 			Msg
+	# 		fi
+	# 	fi
+	# fi #[[ $env == 'next' ]]
+	#
+	# [[ $buildPatchPackage == true ]] && packageDir="$tmpRoot/$myName-$client/packageDir" && mkdir -p "$packageDir/web/courseleaf"
 
 
-	## Check to see if the config file is writeable
+	## Get the products to patch
+		[[ -z $products ]] && echo
+		Prompt products "What products do you wish to patch (comma separated)" "cat,cim,cgis,all";
+		[[ $products == 'all' ]] && products='cat,cim'
+		products="${products// /}"
+		[[ $(Contains "$products" ',') == true && ($source == 'named' || $source == 'branch') ]] && Terminate "Sorry, you cannot specify multiple products when asking to source the patch from 'Named Release' or 'Branch'" 
+
+	## Set the target information
+		tgtDir="$siteDir"
+		[[ -z $tgtEnv ]] && tgtEnv="$env"
+		[[ $client == 'internal' ]] && courseleafProgDir='pagewiz' || courseleafProgDir='courseleaf'
+
+		## Make sure the target config file is writable if we are advancing
 		cfgFile="$tgtDir/$courseleafProgDir.cfg"
 		[[ ! -w $cfgFile ]] && [[ $catalogAdvance == true || $fullAdvance == true || $offline == true ]] && Terminate "*Error* -- Could not write to file: '$cfgFile'"
 
-	## Find the localsteps directory using the mapfile entry
+		## Find the target localsteps directory using the mapfile entry in courseleaf.cfg
 		unset localstepsDir
 		grepStr=$(ProtectedCall "grep '^mapfile:localsteps' \"$cfgFile\""); grepStr=${grepStr##*|}
 		if [[ -n $grepStr ]]; then
@@ -781,7 +265,7 @@ removeGitReposFromNext=true
 		fi
 		[[ ! -d $localstepsDir ]] && Terminate "Could not resolve the 'localsteps' directory"
 
-	## Find the locallibs directory using the mapfile entry
+		## Find the target locallibs directory using the mapfile entry
 		unset locallibsDir
 		grepStr=$(ProtectedCall "grep '^mapfile:locallibs' \"$cfgFile\""); grepStr=${grepStr##*|}
 		if [[ -n $grepStr ]]; then
@@ -795,15 +279,63 @@ removeGitReposFromNext=true
 			[[ ! -d $locallibsDir ]] && unset locallibsDir
 		fi
 		[[ ! -d $locallibsDir && $client != 'internal' ]] && Warning "Could not resolve the 'locallibs' directory, updates and checks will be skipped"
+	
+	## Determine the source information
+	for product in ${products//,/ }; do
+		dump product
+		[[ $product == 'cat' ]] && gitDir="/mnt/dev6/web/git/courseleaf.git" || gitDir="/mnt/dev6/web/git/${product,,[a-z]}.git"
+		if [[ -z $source ]]; then
+			Msg "\nFor '$(ColorK $product)', What source do you wish to use for the patch:"
 
-#=======================================================================================================================
-##[[ $client == 'internal' ]] && Terminate "Sorry, the internal site is not supported at this time"
-	[[ -z $tgtDir ]] && tgtDir="$siteDir"
-	[[ -z $tgtEnv ]] && tgtEnv="$env"
-	## Get the products that the user wants to patch
+			if [[ $(Contains "$products" ',') == true ]]; then
+				Msg "^$(ColorK \'C\') for Current Release or $(ColorK \'M\') for the 'master' branch (aka whats in the skeleton)"
+				unset ans; Prompt ans "Source" "C,M" "C"
+			else
+				Msg "^$(ColorK \'C\') for Current Release, $(ColorK \'N\') for Specific named release,$(ColorK \'B\') for Specific git branch, or $(ColorK \'M\') for the 'master' branch (aka whats in the skeleton)"
+				unset ans; Prompt ans "Source" "C,N,B,M" "C"
+			fi 
+			ans="${ans:0:1}"
+			case "${ans^^[a-z]}" in
+				N)	## Get the named release
+					menuList=("|Git Release (tag)")
+					for token in $(git --git-dir="$gitDir" tag | tr '\r\n' ' '); do
+						[[ $token == '*' ]] && continue
+						menuList+=("|${token}")
+					done
+					Msg "\nPlease select the release (tag) you wish to use for the patch source:"
+					SelectMenuNew 'menuList' 'namedRelease' '\nGit tag ordinal (or 'x' to quit) > '		
+					source='named'
+					;;
+				B)	## Get the git branches
+					menuList=("|Git Branch")
+					for token in $(git --git-dir="$gitDir" branch | tr '\r\n' ' '); do
+						[[ $token == '*' ]] && continue
+						menuList+=("|${token}")
+					done
+					Msg "\nPlease select the git branch you wish to use for the patch source:"
+					SelectMenuNew 'menuList' 'branch' '\nGit tag ordinal (or 'x' to quit) > '		
+					source='branch'
+					;;
+				M)	## Master
+					sourceDir=''
+					source='branch'
+					branch='master'
+					;;
+				*)	## Current release
+## TODO
+					sourceDir=''
+					source='named'
+					source='current'
+					;;
+			esac
+		fi #[[ -z $source ]]
+		eval ${product}Source=\"$source\" 
+	done #products
+
+
+Quit
+
 	unset processControl betaProducts
-	for product in $(tr ',' ' ' <<< $(Upper "$patchProducts")); do
-		productLower="$(Lower "$product")"
 
 		## Get the target sites version
 		if [[ $productLower == 'cat' ]]; then
@@ -818,13 +350,18 @@ removeGitReposFromNext=true
 		Dump -1 -n catVerBeforePatch cimVerBeforePatch
 
 		## Get the source version
+skeletonRoot='/mnt/dev6/web/_skeleton/release'
+
+
+
+
+
 		[[ $productLower == 'cat' ]] && srcDir=$gitRepoShadow/courseleaf || srcDir=$gitRepoShadow/$productLower
 		if [[ -d "$srcDir" ]]; then
 			unset fileList prodShadowVer catMasterDate cimMasterDate
 			fileList="$(ls -t $srcDir | grep -v .bad | grep -v master | tr "\n" " ")"
 			prodShadowVer=${fileList%% *}
-			[[ ! -f $srcDir/master/.syncDate ]] && Terminate "Could not locate '$srcDir/master/.syncDate'. The skeleton shadow is probably being updated, please try again later"
-	#master=true
+
 			eval ${productLower}MasterDate=\"$(date +"%m-%d-%Y @ %H.%M.%S" -r $srcDir/master/.syncDate)\"
 			eval prodMasterDate=\$${productLower}MasterDate
 			if [[ -z $latest && -z $skeleton && -n $prodShadowVer ]]; then
@@ -859,7 +396,7 @@ removeGitReposFromNext=true
 		[[ $(CompareVersions "${currentVersion}" 'ge' "${targetVersion}") == true && $force != true ]] && \
 			Terminate "Sorry, requested version for '$product' (${targetVersion}) is equal to \
 			or older then the current installed version (${currentVersion})"
-	done
+	done # products
 	betaProducts=${betaProducts:2}
 	processControl=${processControl:1}
 	dump -1 processControl betaProducts catVerBeforePatch cimVerBeforePatch catVerAfterPatch cimVerAfterPatch -p
@@ -988,7 +525,7 @@ else
 	verifyArgs+=("Client:$client")
     verifyArgs+=("Target Env:$(TitleCase $env) ($tgtDir)")
 fi
-verifyArgs+=("Products:$patchProducts")
+verifyArgs+=("Products:$products")
 for token in $(tr ',' ' ' <<< $processControl); do
 	tmpStr1="$(cut -d '|' -f1 <<< "$token")"
 	[[ $tmpStr1 == 'rc' ]] && continue
@@ -1053,8 +590,8 @@ fi
 #=======================================================================================================================
 # Log run
 #=======================================================================================================================
-myData="Client: '$client', Products: '$patchProducts', tgtEnv: '$env' $processControl"
-[[ $noCheck == true ]] && myData="Target Path, $tgtDir, Products: '$patchProducts' $processControl"
+myData="Client: '$client', Products: '$products', tgtEnv: '$env' $processControl"
+[[ $noCheck == true ]] && myData="Target Path, $tgtDir, Products: '$products' $processControl"
 [[ $catalogAdvance == true ]] && myData="$myData New Edition: $newEdition"
 [[ $catalogAudit == true ]] && myData="$myData catalog audit"
 [[ $buildPatchPackage == true ]] && myData="$myData Build patchPackage"
@@ -1948,3 +1485,4 @@ Goodbye 0 "$text1" "$text2"
 ## 04-09-2018 @ 10:08:02 - 5.6.0 - dscudiero - Fix problem with sed statement syntaz
 ## 04-12-2018 @ 14:44:53 - 5.6.14 - dscudiero - Fix problem when the target site does not have a clver.txt file
 ## 04-18-2018 @ 09:36:18 - 5.6.16 - dscudiero - Cleaned up GetDefaultsData call
+## 04-26-2018 @ 09:04:02 - 6.0.0 - dscudiero - Cosmetic/minor change/Sync
