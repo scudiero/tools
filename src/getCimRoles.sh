@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.10.102 # -- dscudiero -- Fri 03/23/2018 @ 17:03:54.81
+version=1.11.1 # -- dscudiero -- Wed 04/25/2018 @ 16:29:34.54
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="WriteChangelogEntry"
@@ -22,8 +22,8 @@ function getCimRoles-ParseArgsStd { # or parseArgs-local
 	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 	myArgs+=("load|load|switch|load||script|Automatically load the roles to the site")
 	myArgs+=("noload|noload|switch|load|load=false|script|Automatically load the roles to the site")
-	myArgs+=("replace||switch||loadMode='replace'|script|Replace all of the target sites role data")
-	myArgs+=("add||switch||loadMode='add'|script|Add the role data into the sites existing role data")
+	myArgs+=("replace|replace|switch||loadMode='replace'|script|Replace all of the target sites role data")
+	myArgs+=("add|add|switch||loadMode='add'|script|Add the role data into the sites existing role data")
 	return 0
 }
 function getCimRoles-Goodbye { # or Goodbye-local
@@ -235,3 +235,4 @@ Goodbye 0
 ## 03-16-2018 @ 08:57:00 - 1.10.100 - dscudiero - Fix problem writing out step header code
 ## 03-23-2018 @ 15:34:41 - 1.10.101 - dscudiero - D
 ## 03-23-2018 @ 17:04:45 - 1.10.102 - dscudiero - Msg3 -> Msg
+## 04-26-2018 @ 08:34:15 - 1.11.1 - dscudiero - Add longNames to argDefs
