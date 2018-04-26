@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.88" // -- dscudiero -- Thu 04/19/2018 @ 10:22:52.50
+wfLibVersion="1.8.89" // -- dscudiero -- Wed 04/25/2018 @ 13:58:59.34
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -904,7 +904,7 @@ GetRelated2 = function(type,data) {
 				if (tcaData != {}) {
 					var tcaValue=[];
 					if (typeof eval("tcadata."+formVar) === "undefined" ) {
-						wfDebug(myDebugLevel,myIndent +"\t\t*** Variable " + formVar + " is not defined in the tcf file, skipping");
+						wfDebug(myDebugLevel,myIndent +"\t\t*** Variable " + formVar + " is not defined in the tca file, skipping");
 						return;
 					}
 					eval ("tcaValue=tcadata."+formVar); // jshint ignore:line
@@ -979,7 +979,7 @@ GetRelated2 = function(type,data) {
 							wfDebug(myDebugLevel,myIndent +"\tskipping ref, code ("+ ref.data +") is in proposalDepts("+ proposalDepts.toSource() +")");
 						} else {
 							retToken={}
-							retToken.data=ref.data;
+							retToken.dbData=ref.data;
 							retToken.source=ref.source;
 							resultSet.push(retToken);
 						}
@@ -1002,7 +1002,7 @@ GetRelated2 = function(type,data) {
 							wfDebug(myDebugLevel,myIndent +"\tskipping ref, code ("+ ref.data +") is in proposalSubjs("+ proposalSubjs.toSource() +")");
 						} else {
 							retToken={}
-							retToken.data=ref.data;
+							retToken.dbData=ref.data;
 							retToken.source=ref.source;
 							resultSet.push(retToken);
 						}
@@ -2602,3 +2602,4 @@ var wfLibLoaded=true;
 // 04-12-2018 @ 12:20:14 - 1.8.86 - dscudiero - Added wfHello, refactored wfDebug
 // 04-19-2018 @ 09:53:37 - 1.8.87 - dscudiero - Updated wfAttrIn to check for 'department' and not parse reqType on 'in' if options are passed
 // 04-19-2018 @ 11:02:16 - 1.8.88 - dscudiero - Tweak messaging
+// 04-26-2018 @ 08:34:58 - 1.8.89 - dscudiero - Fix problem in lookup2, changed data atribut from 'data' to 'dbData'
