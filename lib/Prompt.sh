@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.65" # -- dscudiero -- Thu 04/19/2018 @ 13:09:01.36
+# version="2.1.66" # -- dscudiero -- Mon 04/30/2018 @ 12:51:48.81
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -23,7 +23,7 @@ function Prompt {
 	declare timerPrompt=${1:-"Timed prompt, please press enter to provide a response, otherwise processing will continue in"}; shift || true
 	[[ ${promptText:0:1} == '^' ]] && timerPrompt="^$timerPrompt"
 	declare timerInterruptPrompt=${1:-"$promptText"}; shift || true
-	dump -2 -r ; dump -2 -l promptVar promptText defaultVal validateList validateListString timeOut timerPrompt timerInterruptPrompt
+	dump -2 -l promptVar promptText defaultVal validateList validateListString timeOut timerPrompt timerInterruptPrompt
 
 	declare validateListString="$(echo $validateList | tr " " ",")"
 	validateListString=${validateListString%%/*}
@@ -200,3 +200,4 @@ export -f Prompt
 ## 03-23-2018 @ 16:52:21 - 2.1.48 - dscudiero - Msg3 -> Msg
 ## 04-19-2018 @ 13:07:51 - 2.1.64 - dscudiero - Fix problem where script was exiting when read timmed out
 ## 04-19-2018 @ 13:09:11 - 2.1.65 - dscudiero - Cosmetic/minor change/Sync
+## 04-30-2018 @ 12:52:43 - 2.1.66 - dscudiero - Remove debug statements
