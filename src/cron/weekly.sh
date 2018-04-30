@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.45 # -- dscudiero -- Mon 04/23/2018 @  9:25:03.92
+version=2.1.46 # -- dscudiero -- Mon 04/30/2018 @  7:12:10.05
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -28,7 +28,8 @@ case "$hostName" in
 	mojave)
 		## Run Reports
 			reports=("publishing -email \"froggersupport\"")
-			reports+=("qaWaiting -email \"${qaTeam},${qaManager},dscudiero\"" "toolsUsage -email \"dscudiero\"")
+			reports+=("qaWaiting -email \"${qaTeam},${qaManager},dscudiero\"" 
+			reports+=("toolsUsage -email \"${toolsManager},dscudiero\"")
 			reports+=("clientByTimezone -role 'support' -email \"${supportManager},dscudiero\"")
 
 			for ((i=0; i<${#reports[@]}; i++)); do
@@ -96,3 +97,4 @@ return 0
 ## 04-02-2018 @ 07:15:55 - 2.1.43 - dscudiero - Move timezone report to weekly
 ## 04-16-2018 @ 07:40:33 - 2.1.44 - dscudiero - Fix call to client2daysummary report, pass in role
 ## 04-23-2018 @ 09:36:32 - 2.1.45 - dscudiero - Remove the 2day summary report
+## 04-30-2018 @ 07:12:55 - 2.1.46 - dscudiero - Add toolsManager to toolsUsage report
