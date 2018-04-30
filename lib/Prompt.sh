@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.66" # -- dscudiero -- Mon 04/30/2018 @ 12:51:48.81
+# version="2.1.67" # -- dscudiero -- Mon 04/30/2018 @ 13:42:12.15
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -8,7 +8,7 @@
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
-#===================================================================================================
+#===================================================================================================F
 function Prompt {
 	includes='VerifyPromptVal'
 	Import "$includes"
@@ -40,7 +40,7 @@ function Prompt {
 
 	[[ -z $promptText ]] && promptText="Please specify a value for '$promptVar'"
 	[[ -n $validateListString ]] && promptText="$promptText ($validateListString)"
-	dump -2 -r ; dump -2 -l promptVar promptText defaultVal validateList validateListString timeOut timerPrompt timerInterruptPrompt inVerifyContinue
+	dump -2 -l promptVar promptText defaultVal validateList validateListString timeOut timerPrompt timerInterruptPrompt inVerifyContinue
 
 	local respFirstChar rc readTimeOutOpt
 	local numTabs=0
@@ -201,3 +201,4 @@ export -f Prompt
 ## 04-19-2018 @ 13:07:51 - 2.1.64 - dscudiero - Fix problem where script was exiting when read timmed out
 ## 04-19-2018 @ 13:09:11 - 2.1.65 - dscudiero - Cosmetic/minor change/Sync
 ## 04-30-2018 @ 12:52:43 - 2.1.66 - dscudiero - Remove debug statements
+## 04-30-2018 @ 13:42:28 - 2.1.67 - dscudiero - Remove debug statement
