@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.56" # -- dscudiero -- Tue 05/01/2018 @ 11:12:50.84
+# version="1.0.57" # -- dscudiero -- Tue 05/01/2018 @ 11:15:38.96
 #===================================================================================================
 # Usage: Msg <msgType> <msgLevel> <msgIndent> msgText
 # 	msgType: [N,I,W,E,T]
@@ -17,7 +17,7 @@ function Msg {
 		if [[ $# -gt 1 ]]; then
 			[[ $1 = 'Q' || $1 = 'q' ]] && shift && echo -e "$*" && return 0
 			local re='^[n,N,i,I,w,W,e,E,t,T,v,V,l,L]$'
-			[[ ${1#-} =~ $re ]] && msgType="$1" && shift 1 || true
+			[[ ${1#-} =~ $re ]] && msgType="${1:0:1}" && shift 1 || true
 			if [[ -z $msgLevel ]]; then
 				## First/Next token is a msg level?
 				re='^[0-9]+$'
@@ -115,3 +115,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 04-02-2018 @ 16:21:58 - 1.0.54 - dscudiero - Tweak tabbing
 ## 04-26-2018 @ 08:32:32 - 1.0.55 - dscudiero - Change debug message levels
 ## 05-01-2018 @ 11:13:12 - 1.0.56 - dscudiero - Allow '-' in front of message type
+## 05-01-2018 @ 11:16:37 - 1.0.57 - dscudiero - Tweak msgtype determination, use first char onlye
