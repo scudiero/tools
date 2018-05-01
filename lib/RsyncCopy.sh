@@ -19,7 +19,7 @@ function RsyncCopy {
 	local ignoreList="$1"; shift || true; [[ $ignoreList == 'none' ]] && unset ignoreList
 	local backupDir="${1:-/dev/null}"
 	local token rsyncOpts source target rsyncOut rsyncFilters rsyncVerbose rsyncListonly rc
-	dump -3 source target ignoreList backupDir
+	dump source target ignoreList backupDir | Indent | Indent >> "$logFile"
 
 	local tmpFile=$(mkTmpFile)
 	local rsyncFilters="$(dirname $tmpFile)/$FUNCNAME.rsyncFilters"
@@ -30,32 +30,36 @@ function RsyncCopy {
 	[[ -f $rsyncErr ]] && rm -f "$rsyncErr"
 	[[ -f $tmpFile ]] && rm -f "$tmpFile"
 
-
 	[[ ! -d $backupDir && $backupDir != '/dev/null' ]] && $DOIT mkdir -p $backupDir
 
 	## Set rsync options
 		rsyncOpts='-rptb'
 		[[ $quiet != true ]] && rsyncOpts="${rsyncOpts}v"
 		[[ $informationOnlyMode == true || -n $DOIT ]] && rsyncOpts="${rsyncOpts} --dry-run"
-		rsyncOpts="-rptb$rsyncVerbose --backup-dir $backupDir --prune-empty-dirs --checksum $rsyncListonly --include-from $rsyncFilters --links"
-		dump -3 rsyncOpts
+		rsyncOpts="$rsyncOpts --backup-dir $backupDir --prune-empty-dirs --checksum $rsyncListonly --include-from $rsyncFilters --links"
+		dump rsyncOpts | Indent | Indent >> "$logFile"
 
 	## Build the filters file
-		echo > $rsyncFilters 
+		[[ -f $rsyncFilters ]] && rm -f "$rsyncFilters"
 		SetFileExpansion 'off'
 		for token in $(tr '|' ' ' <<< "$ignoreList"); do echo "- $token" >> $rsyncFilters; done
 		echo '+ *.*' >> $rsyncFilters
 		SetFileExpansion
-		cat $rsyncFilters | Indent | Indent | Indent | Indent >> $logFile
+		Indent ++ 2; cat $rsyncFilters | Indent >> $logFile; Indent -- 2
 
 	## Call rsync
+		Pushd "$target"
 		SetFileExpansion 'on'
-		[[ $verboseLevel -eq 0 ]] && rsyncStdout="/dev/null" || rsyncStdout="/dev/stdout"
-		rsync $rsyncOpts $source $target 2>$rsyncErr | Indent | tee -a "$rsyncOut" "$logFile" > "$rsyncStdout"
+		#[[ $verboseLevel -eq 0 ]] && rsyncStdout="/dev/null" || rsyncStdout="/dev/stdout"
+		#rsync $rsyncOpts $source $target >$rsyncErr | Indent | tee -a "$rsyncOut" "$logFile" > "$rsyncStdout"
+		rsync $rsyncOpts $source $target &> "$rsyncOut"
 		rsyncRc=$?
+		dump rsyncRc | Indent | Indent >> "$logFile"
 		SetFileExpansion
+		Popd "$target"
 	    if [[ $rsyncRc -eq 0 ]]; then
 	       [[ $(wc -l < $rsyncOut) -gt 4 ]] && rsyncResults="true" || rsyncResults="false"
+	       	cat "$rsyncOut" | Indent | Indent >> "$logFile"
 			rm -f "$rsyncOut" "$rsyncErr" "$rsyncFilters"
 		else
 			Msg "^Errors reported from the rsync operation:"
@@ -69,6 +73,7 @@ function RsyncCopy {
 			Terminate "Stopping processing"
 	    fi
 
+	    echo $rsyncResults
 	return 0
 } #RunRsync
 export -f RsyncCopy
@@ -76,3 +81,4 @@ export -f RsyncCopy
 #===================================================================================================
 # Check-in Log
 #===================================================================================================
+## 05-01-2018 @ 16:14:23 - 1.0.0 - dscudiero - Updated to allow rsync output to go out to the logFile
