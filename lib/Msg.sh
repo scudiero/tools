@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.57" # -- dscudiero -- Tue 05/01/2018 @ 11:15:38.96
+# version="1.0.58" # -- dscudiero -- Tue 05/01/2018 @ 11:52:34.71
 #===================================================================================================
 # Usage: Msg <msgType> <msgLevel> <msgIndent> msgText
 # 	msgType: [N,I,W,E,T]
@@ -11,31 +11,27 @@ function Msg {
 	[[ $quiet == true ]] && return 0
 	[[ $# -eq 0 ]] && echo && return 0
 	Import "Colors"
+
 	## First token is a type identifier?
 		local msgType msgLevel msgIndent msgText
-		unset msgType msgLevel msgIndent msgText
 		if [[ $# -gt 1 ]]; then
-			[[ $1 = 'Q' || $1 = 'q' ]] && shift && echo -e "$*" && return 0
-			local re='^[n,N,i,I,w,W,e,E,t,T,v,V,l,L]$'
-			[[ ${1#-} =~ $re ]] && msgType="${1:0:1}" && shift 1 || true
-			if [[ -z $msgLevel ]]; then
-				## First/Next token is a msg level?
-				re='^[0-9]+$'
-				if [[ $1 =~ $re ]]; then
-					msgLevel="$1"
-					shift 1 || true
-				fi
-			fi
+			local firstChar=${1#-}; firstChar="${firstChar:0:1}"; firstChar="${firstChar,,[a-z]}"
+			[[ $1 = 'q' ]] && shift && echo -e "$*" && return 0
+			local re='^[n,i,w,e,t,v,l]$'
+			[[ $firstChar =~ $re ]] && { msgType="$firstChar"; shift 1 || true; }
+
+			## First/Next token is a msg level?
+			re='^[0-9]+$'
+			[[ $1 =~ $re ]] && { msgLevel="$1"; shift 1 || true; }
+
 			## Next token is a indent level?
-			if [[ -z $msgIndent ]]; then
-				re='^[+,-]{0,1}[0-9]$'
-				if [[ $1 =~ $re ]]; then 
-					msgIndent="$1" && shift 1 || true
-					if [[ ${msgIndent:0:1} == '+' ]]; then
-						(( msgIndent = indentLevel + ${msgIndent:1} ))
-					elif [[ ${msgIndent:0:1} == '-' ]]; then
-						(( msgIndent = indentLevel - ${msgIndent:1} ))
-					fi
+			re='^[+,-]{0,1}[0-9]$'
+			if [[ $1 =~ $re ]]; then 
+				msgIndent="$1" && shift 1 || true
+				if [[ ${msgIndent:0:1} == '+' ]]; then
+					(( msgIndent = indentLevel + ${msgIndent:1} ))
+				elif [[ ${msgIndent:0:1} == '-' ]]; then
+					(( msgIndent = indentLevel - ${msgIndent:1} ))
 				fi
 			fi
 		fi
@@ -46,15 +42,14 @@ function Msg {
 	dump 4 msgType msgLevel msgIndent
 	## Format message
 		msgText="$*"
-
 		case $msgType in
-			l|L) [[ -n $logFile && -w $logFile ]] && { echo -e "$msgText" >> $logFile; return 0; } ;;
-			n|N) msgText="$(ColorN "*Note*") -- $msgText" ;;
-			i|I) msgText="$(ColorI "*Info*") -- $msgText" ;;
-			w|W) msgText="$(ColorW "*Warning*") -- $msgText\a" ;;
-			e|E) msgText="$(ColorE "*Error*") -- $msgText\a" ;;
-			t|T) msgText="$(ColorT "*Fatal Error*") -- $msgText\a" ;;
-			v|V) [[ $msgLevel -lt $verboseLevel && -n $logFile && -w $logFile ]] && { echo -e "$msgText" >> $logFile; return 0; } 
+			l) [[ -n $logFile && -w $logFile ]] && { echo -e "$msgText" >> $logFile; return 0; } ;;
+			n) msgText="$(ColorN "*Note*") -- $msgText" ;;
+			i) msgText="$(ColorI "*Info*") -- $msgText" ;;
+			w) msgText="$(ColorW "*Warning*") -- $msgText\a" ;;
+			e) msgText="$(ColorE "*Error*") -- $msgText\a" ;;
+			t) msgText="$(ColorT "*Fatal Error*") -- $msgText\a" ;;
+			v) [[ $msgLevel -lt $verboseLevel && -n $logFile && -w $logFile ]] && { echo -e "$msgText" >> $logFile; return 0; } 
 				msgText="$(ColorV)$msgText" ;;
 		esac
 		[[ $msgLevel -gt $verboseLevel ]] && return 0
@@ -70,7 +65,7 @@ function Msg {
 		msgText="${msgText//^/$tabStr}" ## Expand tab chars
 		echo -e "$msgText"
 		#[[ -n $logFile && -w $logFile ]] && echo -e "$msgText" >> "$logFile"&
-		[[ $msgType == 'T' ]] && Goodbye 3
+		[[ $msgType == 't' ]] && Goodbye 3
 
 	return 0
 }
@@ -116,3 +111,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 04-26-2018 @ 08:32:32 - 1.0.55 - dscudiero - Change debug message levels
 ## 05-01-2018 @ 11:13:12 - 1.0.56 - dscudiero - Allow '-' in front of message type
 ## 05-01-2018 @ 11:16:37 - 1.0.57 - dscudiero - Tweak msgtype determination, use first char onlye
+## 05-01-2018 @ 11:53:02 - 1.0.58 - dscudiero - Fix problem parsing off the msgtype if passed
