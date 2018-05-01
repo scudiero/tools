@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.20" # -- dscudiero -- Tue 04/03/2018 @ 10:35:32.38
+# version="1.0.21" # -- dscudiero -- Tue 05/01/2018 @  8:39:36.26
 #===================================================================================================
 # Various string manipulation functions
 #===================================================================================================
@@ -78,16 +78,18 @@ export -f IsAlpha
 
 #===================================================================================================
 function Indent {
+	local line i tabStr
+	local count=${2:-1}
 	## Special rquest to inclrease/decrease the indentLevel
-		[[ $1 = '++' ]] && { ((indentLevel++))||true; return 0; }
-		if [[ $1 = '--' ]]; then 
-			[[ $indentLevel -gt 0 ]] && ((indentLevel--))||true
+		if [[ $1 = '++' || $1 = '--' ]]; then
+			for ((i=0; i<$count; i++)); do
+				[[ $1 = '++' ]] && ((indentLevel++))||true
+				[[ $1 = '--' && $indentLevel -gt 0 ]] && ((indentLevel--))||true
+			done
 			return 0
 		fi
 
-	local line i tabStr
 	[[ -z $indentLevel ]] && local indentLevel=1
-
 	for ((i=0; i<$indentLevel; i++)); do
 		tabStr="$tabStr\t"
 	done
@@ -246,3 +248,4 @@ function PrintColumnarData() {
 ## 03-30-2018 @ 13:50:18 - 1.0.16 - dscudiero - Remove debug statements
 ## 04-02-2018 @ 16:25:08 - 1.0.18 - dscudiero - Use Msg for indent outout
 ## 04-03-2018 @ 10:36:11 - 1.0.20 - dscudiero - Use echo command in Indent
+## 05-01-2018 @ 08:42:42 - 1.0.21 - dscudiero - Add a count parameter to Indent ++ and -
