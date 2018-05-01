@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.73" # -- dscudiero -- Thu 04/05/2018 @ 15:15:39.61
+# version="2.0.74" # -- dscudiero -- Tue 05/01/2018 @ 14:24:58.04
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -29,7 +29,7 @@ function Dump {
 		[[ $mytoken == '-ifme' ]] && { [[ $userName != dscudiero ]] && return 0; }
 
 		if [[ $logOnly == true && -n $logFile ]]; then
-			[[ $dumpFirstWrite == true ]] && { echo -e "\n\n$(head -c 100 < /dev/zero | tr '\0' '=')" >> $logFile; echo "$(date)" >> $logFile;  dumpFirstWrite=false; }
+			#[[ $dumpFirstWrite == true ]] && { echo -e "\n\n$(head -c 100 < /dev/zero | tr '\0' '=')" >> $logFile; echo "$(date)" >> $logFile;  dumpFirstWrite=false; }
 			[[ $toStdout != true ]] && outFile="$logFile" || outFile="$stdout"
 			if [[ -n $tabCnt ]]; then
 				for ((myTabCntr=0; myTabCntr<$tabCnt; myTabCntr++)); do
@@ -262,3 +262,4 @@ export -f DumpMap dumpmap dumphash
 ## 11-15-2017 @ 08.25.59 - ("2.0.71")  - dscudiero - Added -s option to send output to $stdout
 ## 03-23-2018 @ 16:52:07 - 2.0.72 - dscudiero - Msg3 -> Msg
 ## 04-05-2018 @ 15:23:09 - 2.0.73 - dscudiero - Move the tabnation code to inside the write loops
+## 05-01-2018 @ 16:13:39 - 2.0.74 - dscudiero - Remove the forced banner when sending out to log only
