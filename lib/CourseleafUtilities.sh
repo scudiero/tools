@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.31" # -- dscudiero -- Tue 05/01/2018 @ 16:44:26.55
+# version="1.0.32" # -- dscudiero -- Wed 05/02/2018 @ 16:44:50.27
 #===================================================================================================
 # Various data manipulation functions for courseleaf things
 #===================================================================================================
@@ -115,35 +115,44 @@ export -f GetCourseleafPgm
 
 #===================================================================================================
 # Backup a courseleaf file, copy to the 'attic' creating directories as necessary
-# Usage: BackupCourseleafFile <fileName>
+# Usage: BackupCourseleafFile <fileName> [<backupDirectory>]
 #	Expects the variable 'client' to be set
 #	Parses the courseleaf site data from the passed in file name using ParseCourseleafFile
+#	If no backup directory is specified then a default of 
+#		'${clientRoot}/attic/$myName/$userName.$backupSuffix' 
+#	will be used
 # Returns: none
 #===================================================================================================
 function BackupCourseleafFile {
 	[[ $DOIT != '' || $listOnly == true || $informationOnlyMode == true ]] && return 0
 	local file=$1; shift || true
 	[[ ! -r $file ]] && return 0
+	local backupDir=$1; shift || true
 
-	local client=$(ParseCourseleafFile "$file" | cut -d ' ' -f1)
-	local clientRoot=$(ParseCourseleafFile "$file" | cut -d ' ' -f3)
-	local fileEnd=$(ParseCourseleafFile "$file" | cut -d ' ' -f4)
-	local backupRoot="${clientRoot}/attic/$myName/$userName.$backupSuffix"
-	[[ ! -d $backupRoot ]] && mkdir -p $backupRoot
-	local bakFile="${backupRoot}${fileEnd}"
+	## Parse the file name
+	local data="$(ParseCourseleafFile "$file")"
+	local client="${data%% *}"; data="${data#* }"
+	local env="${data%% *}"; data="${data#* }"
+	local clientRoot="${data%% *}"; data="${data#* }"
+	local fileEnd="${data%% *}"; data="${data#* }"
+	#dump file client env clientRoot fileEnd
+
+	## Set backup location
+	[[ -z $backupDir ]] && backupDir="${clientRoot}/attic/$myName/$userName.$backupSuffix"
+	[[ ! -d $backupDir ]] && mkdir -p $backupDir
+	local bakFile="${backupDir}${fileEnd}"
 
 	if [[ -f $file ]]; then
-		[[ ! -d $(dirname $bakFile) ]] && mkdir -p $(dirname $bakFile)
-		cp -fp $file $bakFile
+		[[ ! -d $(dirname $bakFile) ]] && $DOIT mkdir -p $(dirname $bakFile)
+		$DOIT cp -fp $file $bakFile
 	elif [[ -d $file ]]; then
 		[[ ! -d $bakFile ]] && $DOIT mkdir -p $bakFile
-		cp -rfp $file $bakFile
+		$DOIT cp -rfp $file $bakFile
 	fi
 
 	return 0
 } #BackupCourseleafFile
 export -f BackupCourseleafFile
-
 #===================================================================================================
 # Run a courseleaf.cgi command, check output for atj errors
 # Usage: RunCourseLeafCgi <siteDir> <commandString> 
@@ -597,3 +606,4 @@ export -f GetCims
 #===================================================================================================
 # Check-in Log
 #===================================================================================================
+## 05-02-2018 @ 16:45:23 - 1.0.32 - dscudiero - Re-factor BackupCourseleafFile, allow passing in of the backup directory name
