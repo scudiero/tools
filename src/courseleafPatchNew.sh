@@ -62,7 +62,7 @@ cwdStart="$(pwd)"
 		client='wisc'
 		env='pvt'
 		siteDir="/mnt/dev6/web/wisc-dscudiero"
-		[[ -z $products ]] && products='cat'
+		[[ -z $products ]] && products='cat,cim'
 		noCheck=true
 		buildPatchPackage=false
 		backup=false
@@ -70,9 +70,8 @@ cwdStart="$(pwd)"
 		fullAdvance=false
 		newEdition='2011-2021'
 		catalogAudit=false
-		source='named'
-		namedRelease='3.5.11'
-		force=true
+		source='master'
+		#namedRelease='3.5.11'
 	}
 
 	function courseleafPatchNew-Help  {
@@ -858,7 +857,7 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 	[[ -n $processSpec ]] && sourceModifier="$processSpec"
 	dump -1 -t product source processSpec sourceModifier
 	Indent ++
-	Msg; Msg "Patching: ${product^^[a-z]}..."
+	Msg; Msg "Patching: $(ColorK "${product^^[a-z]}")..."
 	patchItemNum=1
 	changesMade=false
 	## Run through the action records for the product
@@ -891,9 +890,8 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 					msgStr="$msgStr --> ${specTarget}'"; Msg; Msg "$msgStr"; Indent ++
 					if [[ -z $specOptions ]]; then
 						[[ $source == 'current' ]] && specOptions="??????"  #OTOD
-						[[ $source == 'named' ]] && specOptions="$sourceModifier"
-						[[ $source == 'master' ]] && specOptions="branch master"
-						[[ $source == 'branch' ]] && specOptions="branch $sourceModifier"
+						[[ $source == 'master' ]] && specOptions="master"
+						[[ $source == 'named' || $source == 'branch' ]] && specOptions="$sourceModifier"
 					fi
 					backupDir="$backupRootDir/${specTarget}"; mkdir -p "$backupDir"
 					doit=true
@@ -907,7 +905,12 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 						fi
 						processedDailysh=true
 					fi
-					[[ $doit == true ]] && { processGitRecord "${specSource}" "$specTarget" "$specOptions"; changesMade=true; }
+					if [[ $doit == true ]]; then 
+						gitResults=$(processGitRecord "${specSource}" "$specTarget" "$specOptions")
+						[[ $gitResults == true ]] && Note "Files were updated, please check log for additional information" || \
+													Msg "All files are current, no files updated"
+						changesMade=true
+						fi
 					performedAction=true
 					;;
 				rsync)
@@ -921,7 +924,7 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 						backupDir="${backupRootDir}$(dirname "${specTarget}")"; mkdir -p "$backupDir"
 						rsyncResults="$(RsyncCopy "$specSource" "$(dirname "${tgtDir}${specTarget}")" 'none' "$backupDir" )"
 						if [[ $rsyncResults == true ]]; then
-							Msg "Files were synchronized, please check log for additional information"
+							Note "Files were synchronized, please check log for additional information"
 							changesMade=true
 						elif [[ $rsyncResults == false ]]; then
 							Msg "All files are current, no files updated"
@@ -953,7 +956,7 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 						backupDir="$(dirname "${backupRootDir}${specTarget}")"; mkdir -p "$backupDir"
 							[[ -f ${tgtDir}${specTarget} ]] && cp -fp "${tgtDir}${specTarget}" "$backupDir"
 							cp -fp "$srcFile" "${tgtDir}${specTarget}"
-							[[ -n $srcFileVer ]] && Msg "'${specTarget}' updated to version: $srcFileVer" || Msg "'${specTarget}' updated"
+							[[ -n $srcFileVer ]] && Note "'${specTarget}' updated to version: $srcFileVer" || Note "'${specTarget}' updated"
 							changesMade=true
 						else
 							Msg "All files are current, no files updated"
@@ -967,7 +970,20 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 					if [[ -z $specOptions ]] || [[ ${specOptions,,[a-z]} == 'always' ]] || \
 						[[ ${specOptions,,[a-z]} == 'onchangeonly' && $changesMade == true ]]; then
 						msgStr="$msgStr  ${specTarget} ($specOptions)'"; Msg; Msg "$msgStr"; Indent ++
-						RunCourseLeafCgi "$tgtDir" "$specSource $specTarget"
+						if [[ ${specTarget,,[a-z]} == '<allCims>' ]]; then
+							if [[ -n $cimStr ]]; then
+								for cim in $(echo $cimStr | tr ',' ' '); do
+									Msg "^Republishing /$cim/index.tcf..."
+									RunCourseLeafCgi "$tgtDir" "-r /$cim/index.tcf" | Indent | Indent
+									if [[ $rebuildHistoryDb == true ]]; then
+										Msg "^^^RebuildHistoryDb /$cim/index.tcf..."
+										RunCourseLeafCgi "$tgtDir" "rebuildHistoryDb /$cim/index.tcf" | Indent | Indent
+									fi
+								done
+							fi
+						else
+							RunCourseLeafCgi "$tgtDir" "$specSource $specTarget"
+						fi						
 						performedAction=true
 					fi
 					;;
@@ -1034,7 +1050,6 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 				Indent --
 			fi
 		done #Process records
-
 	Msg "*** ${product^^[a-z]} updates completed ***"
 done ## processSpec (aka products)
 Indent --
