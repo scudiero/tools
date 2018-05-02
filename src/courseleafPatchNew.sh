@@ -4,21 +4,12 @@
 version=6.0.0 # -- dscudiero -- Tue 04/24/2018 @ 10:16:13.84
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes='ExcelUtilities CourseleafUtilities SelectMenuNew CopyFileWithCheck ArrayRef GitUtilities Alert ProtectedCall'
+myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew CopyFileWithCheck ArrayRef GitUtilities Alert ProtectedCall'
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="Refresh courseleaf product(s) from the git repository shadows ($gitRepoShadow)"
 cwdStart="$(pwd)"
-
-echo "***TODO TODO TODO ***"
-#originalArgStr="wisc -pvt $originalArgStr"
-originalArgStr="wisc -pvt -products cat -named 3.5.11 -noAdvance -noAudit $originalArgStr"
-#originalArgStr="wisc -pvt -products cat,cim -master -noAdvance -noAudit $originalArgStr"
-
-#TODO
-skeletonRoot='/mnt/dev6/web/_skeleton/release'
-
 
 #=======================================================================================================================
 # Refresh/Patch Courseleaf component(s)
@@ -52,7 +43,7 @@ skeletonRoot='/mnt/dev6/web/_skeleton/release'
 		#myArgs+=("offline|offline|switch|offline||script|Take the target site offline during processing")
 	}
 
-	function courseleafPatch-Goodbye  {
+	function courseleafPatchNew-Goodbye  {
 		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
 		## If we took the site offline, then put it back online
 		if [[ $offline == true ]]; then
@@ -66,24 +57,24 @@ skeletonRoot='/mnt/dev6/web/_skeleton/release'
 		fi
 	}
 
-	function courseleafPatch-testMode {
-		client='apus'
-		env='next'
-		siteDir="$HOME/testData/next"
-		nextDir="$HOME/testData/next"
-		[[ -z $products ]] && products='cat,cim'
+	function courseleafPatchNew-testMode {
+		client='wisc'
+		env='pvt'
+		siteDir="/mnt/dev6/web/wisc-dscudiero"
+		[[ -z $products ]] && products='cat'
 		noCheck=true
 		buildPatchPackage=false
 		backup=false
+		catalogAdvance=false
+		fullAdvance=false
 		newEdition='2011-2021'
-		catalogAdvance=true
 		catalogAudit=false
-		fullAdvance=true
-		current=true
+		source='named'
+		namedRelease='3.5.11'
 		force=true
 	}
 
-	function courseleafPatch-Help  {
+	function courseleafPatchNew-Help  {
 		helpSet='client,env' # can also include any of {env,cim,cat,clss}, 'script' and 'common' automatically addeed
 		[[ $1 == 'setVarsOnly' ]] && return 0
 
@@ -146,13 +137,15 @@ function AdditionalCatalogPrompts {
 			[[ $verify == false && -z $newEdition ]] && Info 0 1 "'newEdition' does not have a value and the '-noPrompt' flag was included, continuing with prompting active" && verify=true
 			if [[ -z $newEdition ]]; then
 				## Get the current edition from the defults.tcf file
-				unset grepStr
-				currentEdition=$(ProtectedCall "grep "^edition:" $localstepsDir/default.tcf" | cut -d':' -f2)
-				currentEdition=$(tr -d '\040\011\012\015' <<< "$currentEdition")
-				## Set the new edition and prompt user
+				if [[ -f $localstepsDir/default.tcf ]]; then
+					unset grepStr
+					currentEdition=$(ProtectedCall "grep "^edition:" $localstepsDir/default.tcf" | cut -d':' -f2)
+					currentEdition=$(tr -d '\040\011\012\015' <<< "$currentEdition")
+				fi
+					## Set the new edition and prompt user
 				Note 0 1 "^Current CAT edition is: '$currentEdition'."
 				unset defaultNewEdition
-				if [[ $currentEdition != '' && $currentEdition != *'migration'* ]]; then
+				if [[ -n $currentEdition && $currentEdition != *'migration'* ]]; then
 					if [[ $(Contains "$currentEdition" '-') == true ]]; then
 						fromYear=$(echo $currentEdition | cut -d'-' -f1)
 						toYear=$(echo $currentEdition | cut -d'-' -f2)
@@ -189,125 +182,10 @@ function AdditionalCatalogPrompts {
 	return 0
 } #AdditionalCatalogPrompts
 
-#=======================================================================================================================
-# Process a git patch record
-# Usage processGitRecord <git repo name> <target directory> <git tag name>
-#=======================================================================================================================
-function processGitRecord {
-	local repoName="$1"; shift || true
-	local specTarget="$1"; shift || true
-	local gitTag="$1"; shift || true
-	local branch ans
-
-	[[ $gitTag == 'branch' ]] && { branch="$1"; shift || true; gitTag="$branch"; } ## Branches and tags are treated the same
-	local checkRepoStatus repoSrc gitCmd tmpCntr editFile gitCmdOut gitFilesUpdated backupCntr srcFile backupFile packageFile
-	Dump -1 repoName specTarget gitTag branch
-
-	checkRepoStatus=true
-	if [[ ! -d $tgtDir/${specTarget}/.git ]]; then
-		Msg "^^The target site does not have a .git directory for '$repoName', creating a local git repository, this may take a while..."
-		## Clone a repo from the master
-		repoSrc="$gitRepoRoot/$repoName.git"
-		[[ ! -d $repoSrc ]] && Terminate 0 2 "Could not locate a source .git repository for this request, repository:\n^$repoSrc"
-		Indent ++; Indent ++; 
-		gitCmd="git clone --mirror \"$repoSrc\" \"${tgtDir}${specTarget}/.git\"";
-Here 0
-		ProtectedCall "$gitCmd" | Indent;
-Here 1
-		Indent --; Indent --;
-Here 2
-
-
-		## Make the local git repo a real worktree, need to hack the config file since our git is so down level
-		editFile="$tgtDir/${specTarget}/.git/config"
-		sed -i s"/bare = true/bare = false/" "$editFile"
-
-		## Commit all of the local git files so we start from scratch
-		gitCmd="git commit --all -m \"$myName - $gitTag initial\"";
-		ProtectedCall "$gitCmd" &> /dev/null ;
-
-		checkRepoStatus=false
-	fi
-	Pushd "$tgtDir/${specTarget}"
-	## See if there are any modifications to files in the local git repo
-	if [[ $checkRepoStatus == true ]]; then
-		gitCmd="git status -s"
-		unset gitCmdOut; gitCmdOut=$(ProtectedCall "$gitCmd")
-		if [[ -n $gitCmdOut ]]; then
-			Warning 0 2 "There are changes to tracked file(s) in the target git repository:"
-			unset tmpArray; readarray -t tmpArray <<< "${gitCmdOut}"
-			for ((tmpCntr=0; tmpCntr<${#tmpArray[@]}; tmpCntr++)); do
-				Msg 0 3 "${tmpArray[$tmpCntr]}"
-			done
-			[[ $verify != true && $batchMode != true ]] && verify=true
-			echo
-			Prompt ans '^^Do you wish to continue, local mods will be lost?' 'Yes No' 'No'; ans=${ans:0:1}; ans=${ans,,[a-z]}
-			[[ $ans != 'y' ]] && { Msg; Warning "Terminating early, the target site may inconsistent code"; Goodbye -3; }
-		fi
-	fi
-
-	## Get the list of files that will change with the checkout
-	gitCmd="git diff --name-only $gitTag"
-	unset gitCmdOut; gitCmdOut=$(ProtectedCall "$gitCmd")
-	## Do we have anything to update?
-	if [[ -n $gitCmdOut ]]; then
-		readarray -t gitFilesUpdated <<< "${gitCmdOut}"
-		## Make backup copies of the files we are going to update
-			Msg 0 +1 "Archiving ${#gitFilesUpdated[@]} files..."
-			for ((backupCntr=0; backupCntr<${#gitFilesUpdated[@]}; backupCntr++)); do
-				mkdir -p "${backupRootDir}${specTarget}/$(dirname "${gitFilesUpdated[$backupCntr]}")"
-				srcFile="${tgtDir}${specTarget}/${gitFilesUpdated[$backupCntr]}" 
-				backupFile="${backupRootDir}${specTarget}/${gitFilesUpdated[$backupCntr]}"
-				[[ -r $srcFile ]] && cp -rfp "$srcFile" "$backupFile"
-			done
-		## Update files from the git repo
-			Msg 0 +1 "Updating ${#gitFilesUpdated[@]} files (via git checkout)..."
-			for ((tmpCntr=1; tmpCntr<3; tmpCntr++)); do Indent ++; done
-			gitCmd="git reset --hard --quiet"; ## Update git repo data
-			ProtectedCall "$gitCmd" | Indent
-			gitCmd="git clean -d --force --quiet -x"; ## Ignore untracked files
-			ProtectedCall "$gitCmd" | Indent
-			gitCmd="git checkout --force --quiet $gitTag"; ## Update git files
-			ProtectedCall "$gitCmd" | Indent;
-			for ((tmpCntr=1; tmpCntr<3; tmpCntr++)); do Indent --; done
-			## If we are going to generate a patch package then write the chnged files to the staging directory
-			for ((backupCntr=0; backupCntr<${#gitFilesUpdated[@]}; backupCntr++)); do
-				Msg L "\n\t\t$repoName.git ($gitTag) -- ${specTarget}/${gitFilesUpdated[$backupCntr]}"
-				if [[ $buildPatchPackage == true ]]; then
-					mkdir -p "${packageDir}${specTarget}/$(dirname "${gitFilesUpdated[$backupCntr]}")"
-					srcFile="${tgtDir}${specTarget}/${gitFilesUpdated[$backupCntr]}" 
-					packageFile="${packageDir}${specTarget}/${gitFilesUpdated[$backupCntr]}"
-					Msg L "\t\t\t${gitFilesUpdated[$backupCntr]}"
-					cp -rfp "$srcFile" "$backupFile"
-				fi
-			done
-	else
-		Msg "All files are current, no files updated"
-	fi
-	Popd
-	return 0
-} ## processGitRecord
-
-#=======================================================================================================================
-# Process a skeleton patch record
-# Usage processRsyncRecord <skeleton directory> <target directory>
-#=======================================================================================================================
-function processRsyncRecord {
-	local srcSpec="$1"; shift || true
-	local tgtSpec="$1"; shift || true
-	local rsyncOpts="-rptv --dry-run --exclude *.git* --exclude \*wen\*"
-	logOnly=true; 
-	Msg; Msg "'$skeletonRoot/$srcSpec' --> '$tgtDir'"
-	rsync $rsyncOpts "$skeletonRoot/$srcSpec" "$tgtDir" | head --lines=-3 | tail --lines=+3 | Indent
-	unset logOnly
-	return 0
-}
-
 ##======================================================================================================================
 ## Advance catalog
 ##======================================================================================================================
 function catalogAdvance {
-
 	Msg "Catalog advance is active, advancing the '$(Upper $env)' site"
 	AitemCntr=1
 
@@ -511,6 +389,98 @@ function catalogAdvance {
 } ## catalogAdvance
 
 #=======================================================================================================================
+# Process a git patch record
+# Usage processGitRecord <git repo name> <target directory> <git tag name>
+#=======================================================================================================================
+function processGitRecord {
+	local repoName="$1"; shift || true
+	local specTarget="$1"; shift || true
+	local gitTag="$1"; shift || true
+	local branch ans
+
+	[[ $gitTag == 'branch' ]] && { branch="$1"; shift || true; gitTag="$branch"; } ## Branches and tags are treated the same
+	local checkRepoStatus repoSrc gitCmd tmpCntr editFile gitCmdOut gitFilesUpdated bCntr srcFile backupFile packageFile
+	Dump -1 repoName specTarget gitTag branch
+
+	checkRepoStatus=true
+	if [[ ! -d $tgtDir/${specTarget}/.git ]]; then
+		Msg "The target site does not have a .git directory for '$repoName', creating a local git repository, this may take a while..."
+		## Clone a repo from the master
+		repoSrc="$gitRepoRoot/$repoName.git"
+		[[ ! -d $repoSrc ]] && Terminate 0 2 "Could not locate a source .git repository for this request, repository:\n^$repoSrc"
+		gitCmd="git clone --mirror \"$repoSrc\" \"${tgtDir}${specTarget}/.git\"";
+		ProtectedCall "$gitCmd" | Indent
+
+		## Make the local git repo a real worktree, need to hack the config file since our git is so down level
+		editFile="$tgtDir/${specTarget}/.git/config"
+		sed -i s"/bare = true/bare = false/" "$editFile"
+
+		## Commit all of the local git files so we start from scratch
+		gitCmd="git commit --all -m \"$myName - $gitTag initial\"";
+		ProtectedCall "$gitCmd" &> /dev/null ;
+
+		checkRepoStatus=false
+	fi
+	Pushd "$tgtDir/${specTarget}"
+	## See if there are any modifications to files in the local git repo
+	if [[ $checkRepoStatus == true ]]; then
+		gitCmd="git status -s"
+		unset gitCmdOut; gitCmdOut=$(ProtectedCall "$gitCmd")
+		if [[ -n $gitCmdOut ]]; then
+			Warning 0 2 "There are changes to tracked file(s) in the target git repository:"
+			unset tmpArray; readarray -t tmpArray <<< "${gitCmdOut}"
+			for ((tmpCntr=0; tmpCntr<${#tmpArray[@]}; tmpCntr++)); do
+				Msg 0 +1 "${tmpArray[$tmpCntr]}"
+			done
+			[[ $verify != true && $batchMode != true ]] && verify=true
+			echo
+			Prompt ans '^^Do you wish to continue, local mods will be lost?' 'Yes No' 'No'; ans=${ans:0:1}; ans=${ans,,[a-z]}
+			[[ $ans != 'y' ]] && { Msg; Warning "Terminating early, the target site may inconsistent code"; Goodbye -3; }
+		fi
+	fi
+
+	## Get the list of files that will change with the checkout
+	gitCmd="git diff --name-only $gitTag"
+	unset gitCmdOut; gitCmdOut=$(ProtectedCall "$gitCmd")
+	## Do we have anything to update?
+	if [[ -n $gitCmdOut ]]; then
+		readarray -t gitFilesUpdated <<< "${gitCmdOut}"
+		## Make backup copies of the files we are going to update
+			Msg "Archiving ${#gitFilesUpdated[@]} files..."
+			for ((bCntr=0; bCntr<${#gitFilesUpdated[@]}; bCntr++)); do
+				mkdir -p "${backupRootDir}${specTarget}/$(dirname "${gitFilesUpdated[$bCntr]}")"
+				srcFile="${tgtDir}${specTarget}/${gitFilesUpdated[$bCntr]}" 
+				backupFile="${backupRootDir}${specTarget}/${gitFilesUpdated[$bCntr]}"
+				[[ -r $srcFile ]] && cp -rfp "$srcFile" "$backupFile"
+				Log "^$srcFile"
+			done
+		## Update local files from the git repo via checkout
+			Msg "Updating ${#gitFilesUpdated[@]} files (via git checkout)..."
+			gitCmd="git reset --hard --quiet"; ## Update git repo data
+			ProtectedCall "$gitCmd" | Indent
+			gitCmd="git checkout --force --quiet $gitTag"; ## Update git files
+			ProtectedCall "$gitCmd" | Indent;
+# 			## If we are going to generate a patch package then write the chnged files to the staging directory
+# 			for ((bCntr=0; bCntr<${#gitFilesUpdated[@]}; bCntr++)); do
+# 				Msg L "\n\t\t$repoName.git ($gitTag) -- ${specTarget}/${gitFilesUpdated[$bCntr]}"
+# 				if [[ $buildPatchPackage == true ]]; then
+# 					mkdir -p "${packageDir}${specTarget}/$(dirname "${gitFilesUpdated[$bCntr]}")"
+# 					srcFile="${tgtDir}${specTarget}/${gitFilesUpdated[$bCntr]}" 
+# 					packageFile="${packageDir}${specTarget}/${gitFilesUpdated[$bCntr]}"
+# 					Msg L "\t\t\t${gitFilesUpdated[$bCntr]}"
+# 					cp -rfp "$srcFile" "$backupFile"
+# 				fi
+# 			done
+	else
+		Msg "All files are current, no files updated"
+	fi
+	Popd
+	return 0
+} ## processGitRecord
+
+#=======================================================================================================================
+# MAIN
+#=======================================================================================================================
 # Declare local variables and constants
 #=======================================================================================================================
 unset backup backupSite buildPatchPackage source
@@ -524,6 +494,11 @@ removeGitReposFromNext=true
 Hello
 GetDefaultsData -f "$myName"
 ParseArgsStd $originalArgStr
+
+#TODO
+skeletonRoot='/mnt/dev6/web/_skeleton/release'
+patchControl="/mnt/internal/site/stage/db/courseleafPatch.sqlite"
+dump skeletonRoot patchControl -n
 
 displayGoodbyeSummaryMessages=true
 cleanDirs="${scriptData3##*:}"
@@ -568,8 +543,6 @@ Dump -1 originalArgStr -t client env products current namedRelease branch skelet
 #
 # [[ $buildPatchPackage == true ]] && packageDir="$tmpRoot/$myName-$client/packageDir" && mkdir -p "$packageDir/web/courseleaf"
 
-patchControl="/mnt/internal/site/stage/db/courseleafPatch.sqlite"
-
 ## Get the patch-able products
 	sqlStmt="select distinct product from productPatches"
 	RunSql "$patchControl" $sqlStmt
@@ -597,34 +570,33 @@ patchControl="/mnt/internal/site/stage/db/courseleafPatch.sqlite"
 		Terminate "*Error* -- Could not write to file: '$cfgFile'"
 
 	## Find the target localsteps directory using the mapfile entry in courseleaf.cfg
-	unset localstepsDir
-	grepStr=$(ProtectedCall "grep '^mapfile:localsteps' \"$cfgFile\""); grepStr=${grepStr##*|}
+	grepStr=$(ProtectedCall "grep '^mapfile:localsteps' \"$cfgFile\"")
 	if [[ -n $grepStr ]]; then
+		grepStr=${grepStr##*|}
 		pushd $tgtDir/web/$courseleafProgDir >& /dev/null
 		cd $grepStr
 		localstepsDir="$(pwd)"
 		popd >& /dev/null
+	else
+		localstepsDir="$tgtDir/web/$courseleafProgDir/localsteps"
 	fi
-	if [[ ! -f $localstepsDir/default.tcf ]]; then
-		localstepsDir=$tgtDir/web/$courseleafProgDir/localsteps
-		[[ ! -f $localstepsDir/default.tcf ]] && unset localstepsDir
-	fi
-	[[ ! -d $localstepsDir ]] && Terminate "Could not resolve the 'localsteps' directory"
+	[[ ! -f $localstepsDir/default.tcf ]] && \
+			{ Warning 0 1 "Could not resolve the 'localsteps' directory, updates and checks will be skipped"; unset localstepsDir; }
 
 	## Find the target locallibs directory using the mapfile entry
 	unset locallibsDir
-	grepStr=$(ProtectedCall "grep '^mapfile:locallibs' \"$cfgFile\""); grepStr=${grepStr##*|}
+	grepStr=$(ProtectedCall "grep '^mapfile:locallibs' \"$cfgFile\"")
 	if [[ -n $grepStr ]]; then
+		grepStr=${grepStr##*|}
 		pushd $tgtDir/web/$courseleafProgDir >& /dev/null
 		cd $grepStr
 		locallibsDir="$(pwd)"
 		popd >& /dev/null
-	fi
-	if [[ ! -d $locallibsDir ]]; then
+	else
 		locallibsDir=$tgtDir/web/$courseleafProgDir/locallibs
-		[[ ! -d $locallibsDir ]] && unset locallibsDir
 	fi
-	[[ ! -d $locallibsDir && $client != 'internal' ]] && Warning 0 1 "Could not resolve the 'locallibs' directory, updates and checks will be skipped"
+	[[ ! -d $locallibsDir && $client != 'internal' ]] && \
+		{ Warning 0 1 "Could not resolve the 'locallibs' directory, updates and checks will be skipped"; unset locallibsDir; }
 
 ## Determine the source information
 unset processControl
@@ -633,6 +605,7 @@ for product in ${products//,/ }; do
 	if [[ $product == 'cat' ]]; then
 		gitDir="/mnt/dev6/web/git/courseleaf.git"
 		AdditionalCatalogPrompts
+		[[ $advance == true && -z $localstepsDir ]] && Terminate "Requesting a catalog advance but the localsteps directory could not be located"
 	fi
 
 	if [[ -z $source ]]; then
@@ -714,8 +687,6 @@ dump -1 source namedRelease branch catVerBeforePatch cimVerAfterPatch clssVerBef
 # 	$(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7 rc') == true && \
 # 	$(CompareVersions "$cimVerBeforePatch" 'le' '3.5.7 rc') == true ]] && rebuildHistoryDb=true
 # 	dump -1 rebuildHistoryDb -p
-
-##TODO
 
 ## Get the cgis information
 	courseleafCgiDirRoot="$skeletonRoot/web/courseleaf"
@@ -876,11 +847,6 @@ fi
 ##======================================================================================================================
 ## Patch catalog
 ##======================================================================================================================
-if [[ -z patchableProducts ]]; then
-	# Read in the control file, build the list of patch-able products
-	Note 0 1 "Retrieving the patch control data from the patch control file (takes about 1 minute)...\n"
-	GetPatchControlData 'data'
-fi
 [[ -n $forUser ]] && Msg "Patching the '${forUser}/$(Upper $env)' site..." || Msg "Patching the '$(Upper $env)' site..."
 unset changeLogRecs processedDailysh skipProducts cgiCommands unixCommands
 [[ -n $comment ]] && changeLogRecs+=("$comment")
@@ -893,10 +859,12 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 	source="${processSpec%%|*}"; processSpec="${processSpec#*|}"
 	[[ -n $processSpec ]] && sourceModifier="$processSpec"
 	dump -1 -t product source processSpec sourceModifier
-	Msg; Msg "^Patching: $(Upper "$product")..."
+	Indent ++
+	Msg; Msg "Patching: ${product^^[a-z]}..."
+	patchItemNum=1
 	changesMade=false
 	## Run through the action records for the product
-		sqlStmt="select recordType,sourceSpec,targetSpec,option from productPatches where lower(product)=\"$product\" and status=\"A\" order by orderInProduct"
+		sqlStmt="select recordType,sourceSpec,targetSpec,option from productPatches where lower(product)=\"$product\" and status=\"Y\" order by orderInProduct"
 		RunSql "$patchControl" $sqlStmt
 		[[ ${#resultSet[@]} -le 0 || -z ${resultSet[0]} ]] && Warning 0 2 "No patch file specs found for '$product', skipping" && continue
 		for ((ii=0; ii<${#resultSet[@]}; ii++)); do
@@ -907,99 +875,172 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 				[[ ${processedSpecs["$mapKey"]+abc} ]] && continue
 			processedSpecs["$mapKey"]=true
 			recordType="${specLine%%|*}"; specLine="${specLine#*|}"
-			specPattern="${specLine%%|*}"; specLine="${specLine#*|}"
+			specSource="${specLine%%|*}"; specLine="${specLine#*|}"
 			specTarget="${specLine%%|*}"; specLine="${specLine#*|}"
 			specOptions="${specLine%%|*}"; specLine="${specLine#*|}"
 			## Perform string substitutions
-			specPattern=$(sed "s/<progDir>/$courseleafProgDir/g" <<< $specPattern)
+			specSource=$(sed "s/<progDir>/$courseleafProgDir/g" <<< $specSource)
 			specTarget=$(sed "s/<progDir>/$courseleafProgDir/g" <<< $specTarget)
-			dump -2 -t -t -t recordType specPattern specTarget specOptions
+			dump -2 -t -t -t recordType specSource specTarget specOptions
 
 			## Process record
-				backupDir=$backupRootDir/${product}${specTarget}
-
-				Indent ++; Msg;
-				msgStr="Processing '$recordType' record: '${specPattern%% *}" 
-				[[ -n $specOptions ]] && msgStr="$msgStr ($specOptions)"
-
-				case "${recordType,,[a-z]}" in
-					git)
-						msgStr="$msgStr --> ${specTarget}'"; Msg "$msgStr"; Indent ++
-						if [[ -z $specOptions ]]; then
-#TODO
-							[[ $source == 'current' ]] && specOptions="??????"
-							[[ $source == 'named' ]] && specOptions="$sourceModifier"
-							[[ $source == 'master' ]] && specOptions="branch master"
-							[[ $source == 'branch' ]] && specOptions="branch $sourceModifier"
-						fi
-						processGitRecord "${specPattern%% *}" "$specTarget" "$specOptions"
-						Indent --; Msg "'$recordType' record processing completed"; Indent --
-						;;
-					rsync)
-						msgStr="$msgStr --> ${specTarget}'"; Msg "$msgStr"; Indent ++
-						[[ $specOptions == 'skeleton' ]] && specPattern="${skeletonRoot}/$specPattern"
-
-						echo processRsyncRecord "$specPattern" "$specTarget"
-
-						Indent --; Msg "'$recordType' record processing completed"; Indent --
-						;;
-					daily.sh)
-						if [[ $processedDailysh != true ]]; then
-							echo "TBD"
+			Indent ++
+			msgStr="$patchItemNum) Processing '$recordType' record: '${specSource}"
+			performedAction=false
+			case "${recordType,,[a-z]}" in
+				git)
+					[[ -n $specOptions ]] && msgStr="$msgStr ($specOptions)"
+					msgStr="$msgStr --> ${specTarget}'"; Msg; Msg "$msgStr"; Indent ++
+					if [[ -z $specOptions ]]; then
+						[[ $source == 'current' ]] && specOptions="??????"  #OTOD
+						[[ $source == 'named' ]] && specOptions="$sourceModifier"
+						[[ $source == 'master' ]] && specOptions="branch master"
+						[[ $source == 'branch' ]] && specOptions="branch $sourceModifier"
+					fi
+					backupDir="$backupRootDir/${specTarget}"; mkdir -p "$backupDir"
+					doit=true
+					## Special processing if this is a dailysh request
+					if [[ ${specSource,,[a-z]} == 'dailysh' && $processedDailysh != true ]]; then
+						## Check to make sure we have a new daily.sh file in the target
+						grepFile="${tgtDir}${specTarget}/daily.sh"
+						if [[ -r $grepFile ]]; then
+							grepStr=$(ProtectedCall "grep '## Nightly cron job for client' $grepFile")
+							[[ -z $grepStr ]] && doit=false
 						fi
 						processedDailysh=true
-						;;
-					cgi|searchcgi)
-							echo "TBD"
-							## If record type is 'searchCgi' then make sure that this client has the new focussearch
-							if [[ ${recordType,,[a-z]} == 'searchcgi' && ! -f ${tgtDir}/web/search/results.tcf ]]; then
-								grepFile="${tgtDir}/web/search/index.tcf"
-								[[ -r $grepFile ]] && [[ -z $(ProtectedCall "grep '^template:catsearch' $grepFile") ]] && continue
+					fi
+					[[ $doit == true ]] && { processGitRecord "${specSource}" "$specTarget" "$specOptions"; changesMade=true; }
+					performedAction=true
+					;;
+				rsync)
+					[[ -n $specOptions ]] && msgStr="$msgStr ($specOptions)"
+					[[ -z $specTarget ]] && specTarget="$specSource"
+					msgStr="$msgStr --> ${specTarget}'"; Msg; Msg "$msgStr"; Indent ++
+					[[ $specOptions == 'skeleton' ]] && specSource="${skeletonRoot}$specSource"
+					if [[ ! -d "$specSource" ]]; then
+						"Error, '$specSource' is not a directory, rsync action is only valid for directories, skipping action"
+					else
+						backupDir="$backupRootDir/${specTarget}"; mkdir -p "$backupDir"
+						rsyncResult=$(RsyncCopy "$specSource" "$(dirname "${tgtDir}${specTarget}")")
+						if [[ $rsyncResult == true ]]; then
+							Msg "Files were synchronized, please check log for additional information"
+							changesMade=true
+						elif [[ $rsyncResult == false ]]; then
+							Msg "All files are current, no files updated"
+						else
+							Msg "RsyncCopy ended with errors"
+						fi
+					fi
+					performedAction=true
+					;;
+				cpfile)
+					## If record type is 'searchCgi' then make sure that this client has the new focussearch
+					# if [[ ${recordType,,[a-z]} == 'searchcgi' && ! -f ${tgtDir}/web/search/results.tcf ]]; then
+					# 	grepFile="${tgtDir}/web/search/index.tcf"
+					# 	[[ -r $grepFile ]] && [[ -z $(ProtectedCall "grep '^template:catsearch' $grepFile") ]] && continue
+					# fi
+					msgStr="$msgStr  ${specTarget}'"; Msg; Msg "$msgStr"; Indent ++
+					unset srcFile srcFileVer
+					if [[ $specOptions == 'cgi' ]]; then
+						srcFile="$courseleafCgiSourceFile"; srcFileVer="$courseleafCgiVer"
+						[[ $specSource != 'courseleaf' ]] && { srcFile="$ribbitCgiSourceFile"; srcFileVer="$ribbitCgiVer"; }
+					elif [[ $specOptions == 'skeletion' ]]; then
+						srcFile="${skeletonRoot}${specSource}"
+					fi
+					if [[ -f $srcFile ]]; then
+						srcFileMd5=$(md5sum $srcFile);
+						unset tgtFileMd5
+						[[ -f ${tgtDir}${specTarget} ]] && tgtFileMd5=$(md5sum ${tgtDir}${specTarget})
+						if [[ ${srcFileMd5%% *} != ${tgtFileMd5%% *} ]]; then
+						backupDir="$(dirname "${backupRootDir}${specTarget}")"; mkdir -p "$backupDir"
+							[[ -f ${tgtDir}${specTarget} ]] && cp -fp "${tgtDir}${specTarget}" "$backupDir"
+							cp -fp "$srcFile" "${tgtDir}${specTarget}"
+							[[ -n $srcFileVer ]] && Msg "'${specTarget}' updated to version: $srcFileVer" || Msg "'${specTarget}' updated"
+							changesMade=true
+						else
+							Msg "All files are current, no files updated"
+						fi
+					else
+						Warning "Source file '$srcFile' not found, skipping file copy"
+					fi
+					performedAction=true
+					;;
+				cgicommand)
+					if [[ -z $specOptions ]] || [[ ${specOptions,,[a-z]} == 'always' ]] || \
+						[[ ${specOptions,,[a-z]} == 'onchangeonly' && $changesMade == true ]]; then
+						msgStr="$msgStr  ${specTarget} ($specOptions)'"; Msg; Msg "$msgStr"; Indent ++
+						RunCourseLeafCgi "$tgtDir" "$specSource $specTarget"
+						performedAction=true
+					fi
+					;;
+				command)
+					if [[ -z $specOptions ]] || [[ ${specOptions,,[a-z]} == 'always' ]] || \
+						[[ ${specOptions,,[a-z]} == 'onchangeonly' && $changesMade == true ]]; then
+						msgStr="$msgStr  ${specTarget} ($specOptions)'"; Msg; Msg "$msgStr"; Indent ++
+						Pushd "$tgtDir"
+						eval "${specSource} ${specTarget}" | Indent
+						[[ $? -eq 0 ]] && changeLogRecs+=("Executed unix command: '$specSource'") || \
+							Error "Command returned a non-zero condition code"
+						Popd
+						#[[ $buildPatchPackage == true ]] && unixCommands+=("$specSource")
+						performedAction=true
+					fi
+					;;
+				compare)
+					msgStr="$msgStr  ${specTarget} ($specOptions)'"; Msg; Msg "$msgStr"; Indent ++
+					if [[ -f "${tgtDir}${specSource}" ]]; then
+						tgtFile="${tgtDir}${specSource##* }"
+						tgtFileMd5=$(md5sum $tgtFile)
+						[[ $specTarget == 'skeleton' ]] && compareToFile="$skeletonRoot${specSource##* }"
+						if [[ -f $compareToFile ]]; then
+							cmpFileMd5=$(md5sum $compareToFile)
+							if [[ ${tgtFileMd5%% *} != ${cmpFileMd5%% *} ]]; then
+								[[ $specOptions == 'warning' ]] && Warning "'${specSource##* }' file is different than the skeleton file"
+								[[ $specOptions == 'error' ]] && Error "'${specSource##* }' file is different than the skeleton file"
+								Indent ++
+								Msg "${colorRed}< is ${compareToFile}${colorDefault}"
+								Msg "${colorBlue}> is ${tgtFile}${colorDefault}"
+								ProtectedCall "colordiff $compareToFile $tgtFile | Indent"
+								Msg "$colorDefault"
+								Indent --
+							else
+								Msg "^File is current"
 							fi
-
-
-						;;
-					cgicommand)
-							echo "TBD"
-						;;
-					command)
-						tmpStr=$(Lower "${specTarget}")
-						if [[ -z $tmpStr ]] || [[ $tmpStr == 'always' ]] || [[ $tmpStr == 'onchangeonly' && $changesMade == true ]]; then
-							Msg "\n^^Processing '$specSource' record: '${specPattern} ${specTarget}'"
-							Pushd "$tgtDir"
-							(( indentLevel = indentLevel + 3 )) || true
-							eval "$specPattern"
-							[[ $? -eq 0 ]] && changeLogRecs+=("Executed unix command: '$specPattern'") || \
-								Error "Command returned a non-zero condition code"
-							(( indentLevel = $indentLevel - 3 )) || true
-							Popd
-							[[ $buildPatchPackage == true ]] && unixCommands+=("$specPattern")
-						fi						;;
-					compare)
-							echo "TBD"
-						;;
-					include)
-						echo "TBD"
-						# ## Insert the include process steps into the current productSpec Array
-						# for ((jj=0; jj<$cntr+1; jj++)); do tmpArray+=("${productSpecArray[$jj]}"); done  ## Front part of existing productSpecArray
-						# for jj in $(IndirKeys "$(Lower "${specPattern%% *}")"); do tmpArray+=("$(IndirVal "$(Lower "${specPattern%% *}")" $jj)"); done  ## Inculde steps
-						# for ((jj=$cntr+1; jj<${#productSpecArray[@]}; jj++)); do tmpArray+=("${productSpecArray[$jj]}"); done ## Back part of existing productSpecArray
-						# unset productSpecArray
-						# for jj in $(IndirKeys tmpArray); do productSpecArray+=("$(IndirVal tmpArray $jj)"); done  ## Inculde steps
-						# #for ((jj=0; jj<${#productSpecArray[@]}; jj++)); do echo "productSpecArray[$jj] = >${productSpecArray[$jj]}<"; done; Pause
-						;;
-					*) Terminate "^^Encountered and invalid processing type '$recordType'\n^$specLine"
-						;;
-				esac
-				Indent --
+						else
+							Warning 0 +1 "Source file '$compareToFile', not found.  Cannot compare"
+						fi
+					fi
+					performedAction=true
+					;;
+				include)
+					for ((i2=$ii+1; i2<${#resultSet[@]}; i2++)); do remaining+=("${resultSet[$i2]}"); done
+					sqlStmt="select recordType,sourceSpec,targetSpec,option from productPatches where lower(product)=\"$specSource\" and status=\"Y\" order by orderInProduct"
+					RunSql "$patchControl" $sqlStmt
+					if [[ ${#resultSet[@]} -le 0 || -z ${resultSet[0]} ]]; then
+						Warning 0 2 "No patch file specs found for '$specSource', skipping"
+					else
+						for ((i2=0; i2<${#resultSet[@]}; i2++)); do remaining+=("${resultSet[$i2]}"); done
+						unset resultSet
+						for rec in "${remaining[@]}"; do resultSet+=("$rec"); done
+					fi
+					#for ((i=0; i<${#resultSet[@]}; i++)); do echo "resultSet[$i] = >${resultSet[$i]}<"; done
+					ii=-1
+					;;
+				*) Terminate "^^Encountered and invalid processing type '$recordType'\n^$specLine"
+					;;
+			esac
+			Indent --
+			if [[ $performedAction == true ]]; then
 				Msg "'$recordType' record processing completed"
+				((patchItemNum++))
 				Indent --
+			fi
 		done #Process records
-
-
+	Msg "*** ${product^^[a-z]} updates completed ***"
 done ## processSpec (aka products)
+Indent --
 Msg
-Msg "\n *** Product updates completed ***"
+Msg "\n*** All Product updates completed ***"
 
 Quit
 

@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.29" # -- dscudiero -- Tue 04/24/2018 @  9:52:09.14
+# version="1.0.31" # -- dscudiero -- Tue 05/01/2018 @ 16:44:26.55
 #===================================================================================================
 # Various data manipulation functions for courseleaf things
 #===================================================================================================
@@ -102,7 +102,7 @@ function GetCourseleafPgm {
 			echo "$token" "$checkDir/$token"
 			cd $cwd
 			return 0
-		elif [[ -x $(pwd)/web/$token/$token.cgi ]]; then
+		elif [[ -x $checkDir/web/$token/$token.cgi ]]; then
 			echo "$token" "$checkDir/web/$token"
 			cd $cwd
 			return 0
