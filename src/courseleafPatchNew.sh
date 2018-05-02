@@ -4,7 +4,8 @@
 version=6.0.0 # -- dscudiero -- Tue 04/24/2018 @ 10:16:13.84
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew CopyFileWithCheck ArrayRef GitUtilities Alert ProtectedCall'
+myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
+myIncludes="$myIncludes WriteChangelogEntry"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -1033,6 +1034,7 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 				Indent --
 			fi
 		done #Process records
+
 	Msg "*** ${product^^[a-z]} updates completed ***"
 done ## processSpec (aka products)
 Indent --
@@ -1190,81 +1192,6 @@ Msg "\nCross product checks..."
 	$DOIT rm -rf $backupRootDir
 	SetFileExpansion
 	Popd
-
-# ## If the target is curr site is a git repo and there are uncommitted changes then commit the changes
-# if [[ $targetHasGit == true ]]; then
-# 	Msg
-# 	Msg "Checking git repositories..."
-# 	commitComment="File committed by $userName via $myName"
-# 	for token in NEXT CURR; do
-# 		[[ $token == 'NEXT' ]] && gitDir="$tgtDir" || gitDir="$(dirname $tgtDir)/curr"
-# 		unset gitFiles hasChangedGitFiles newGitFiles changedGitFiles
-# 		gitFiles="$(CheckGitRepoFiles "$gitDir" 'returnFileList')"
-# 		hasChangedGitFiles="${gitFiles%%;*}"
-# 		gitFiles="${gitFiles#*;}"
-# 		newGitFiles="${gitFiles%%;*}"
-# 		changedGitFiles="${gitFiles##*;}"
-# 		if [[ $hasChangedGitFiles == true && -n $changedGitFiles ]]; then
-# 			Msg "^Committing changed git files in the $token environment..."
-# 			Pushd "$gitDir"
-# 			for file in $(tr ',' ' ' <<< "$changedGitFiles"); do
-# 				Msg "^^$file"
-# 				(( indentLevel = indentLevel + 2 )) || true
-# 				{ ( $DOIT git commit $file -m "$commitComment"); } | Indent
-# 				(( indentLevel = indentLevel - 2 )) || true
-# 			done
-# 			Popd
-# 		fi
-# 		if [[ $hasChangedGitFiles == true && -n $newGitFiles ]]; then
-# 			Warning 0 3 "The $token environment has the non-tracked files, they were ignored..."
-# 			for file in $(tr ',' ' ' <<< "$newGitFiles"); do
-# 				Msg "^^$file"
-# 			done
-# 		fi
-# 		Msg
-# 	done
-# fi
-
-# ## Get the list of files that have changed in the git repository if it exists, if found the commit them
-# if [[ $buildPatchPackage == true ]]; then
-# 	Pushd "$packageDir"
-# 	## Create the patch scrpt
-# 		tarFile="patch$(TitleCase $client)--$backupSuffix.tar.gz"
-# 		Msg "\nBuilding remote patch script..."
-# 		scriptFile="./patch$(TitleCase $client).sh"
-# 		BuildScriptFile "$scriptFile"
-# 		chmod 777 "$scriptFile"
-
-# 	## Create the readme file
-# 		echo "" > 'README'
-# 		echo -e "After untaring the package:" >> 'README'
-# 		echo -e "\t1) cd to the directory where you untared the file" >> 'README'
-# 		echo -e "\t2) Run the command '$scriptFile'" >> 'README'
-# 		echo "" >> 'README'
-
-# 	## Create the patch tar file
-# 		Msg "^Building the remote patch package..."
-# 		SetFileExpansion 'on'
-# 		tar -cpzf "../$tarFile" --remove-files ./*
-# 		SetFileExpansion
-# 		rm -rf "$packageDir"
-
-# 	## Calculate output directory
-# 		if [[ -d $localClientWorkFolder ]]; then
-# 			outDir="$localClientWorkFolder"
-# 			[[ $client != '' ]] && outDir="$outDir/$client"
-# 		elif [[ $client != '' && -d "$clientDocs/$client" ]]; then
-# 			outDir="$clientDocs/$client"
-# 			[[ -d $outDir/Implementation ]] && outDir="$outDir/Implementation"
-# 			[[ -d $outDir/Attachments ]] && outDir="$outDir/Attachments"
-# 		else
-# 			outDir=$HOME/$myName
-# 		fi
-# 		[[ ! -d $outDir ]] && $DOIT mkdir -p "$outDir"
-# 	Popd
-# 	mv -f "$(dirname $packageDir)/$tarFile" "$outDir"
-# 	Msg "^The Patch package file has been created and can be found at \n^'$outDir/$tarFile'"
-# fi
 
 ## Tell the user what to do if there are problems
 	Msg
