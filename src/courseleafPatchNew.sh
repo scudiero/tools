@@ -205,13 +205,11 @@ function catalogAdvance {
 		# 	done
 		# fi
 		[[ ! -d "$targetSpec" ]] && mkdir -p "$targetSpec"
-		unset rsyncResults
-
 		Msg "^$AitemCntr) Full advance requested making a copy of '$env' (this will take a while)..."
 		Msg "^^$FAitemCntr) Making a copy of '$env' (this will take a while)..."
 		Msg "^^^'$tgtDir' --> '$(basename $targetSpec)'"
 		#Msg "^^(Fyi, you can check the status, view/tail the log file: '$logFile')"
-		Indent++; RunRsync "$product" "$sourceSpec" "$targetSpec" "$ignoreList"; Indent--
+		Indent++; RsyncCopy "$sourceSpec" "$targetSpec" "$ignoreList"; Indent--
 		Msg "^^^Copy operation completed"
 		Alert 1
 		(( FAitemCntr++ ))
@@ -449,9 +447,9 @@ function processGitRecord {
 			Msg "Archiving ${#gitFilesUpdated[@]} files..."
 			for ((bCntr=0; bCntr<${#gitFilesUpdated[@]}; bCntr++)); do
 				mkdir -p "${backupRootDir}${specTarget}/$(dirname "${gitFilesUpdated[$bCntr]}")"
-				srcFile="${tgtDir}${specTarget}/${gitFilesUpdated[$bCntr]}" 
+				srcFile="${tgtDir}${specTarget}/${gitFilesUpdated[$bCntr]}"
 				backupFile="${backupRootDir}${specTarget}/${gitFilesUpdated[$bCntr]}"
-				[[ -r $srcFile ]] && cp -rfp "$srcFile" "$backupFile"
+				[[ -r $srcFile ]] && cp -fp "$srcFile" "$backupFile"
 				Log "^$srcFile"
 			done
 		## Update local files from the git repo via checkout
@@ -828,13 +826,12 @@ if [[ $offline == true ]]; then
 fi
 
 if [[ $backup == true ]]; then
-	Msg "Backing up the target site to, this will take a while..."
+	Msg "Backing up the entire target site, this will take a while..."
 	Msg "^(Fyi, id you are the impatient type, you can check the status, view/tail the log file: '$logFile')"
 	sourceSpec="$tgtDir/"
 	targetSpec="$backupSite"
 	[[ ! -d "$targetSpec" ]] && mkdir -p "$targetSpec"
-	unset rsyncResults
-	Indent++; RunRsync 'tgtSiteBackup' "$sourceSpec" "$targetSpec"; Indent--
+	Indent++; RsyncCopy "$sourceSpec" "$targetSpec"; Indent--
 	Msg "^...Backup completed"
 	Alert 1
 fi
@@ -918,17 +915,17 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 					msgStr="$msgStr --> ${specTarget}'"; Msg; Msg "$msgStr"; Indent ++
 					[[ $specOptions == 'skeleton' ]] && specSource="${skeletonRoot}$specSource"
 					if [[ ! -d "$specSource" ]]; then
-						"Error, '$specSource' is not a directory, rsync action is only valid for directories, skipping action"
+						Error "'$specSource' is not a directory, rsync action is only valid for directories, skipping action"
 					else
-						backupDir="$backupRootDir/${specTarget}"; mkdir -p "$backupDir"
-						rsyncResult=$(RsyncCopy "$specSource" "$(dirname "${tgtDir}${specTarget}")")
-						if [[ $rsyncResult == true ]]; then
+						backupDir="${backupRootDir}$(dirname "${specTarget}")"; mkdir -p "$backupDir"
+						rsyncResults="$(RsyncCopy "$specSource" "$(dirname "${tgtDir}${specTarget}")" 'none' "$backupDir" )"
+						if [[ $rsyncResults == true ]]; then
 							Msg "Files were synchronized, please check log for additional information"
 							changesMade=true
-						elif [[ $rsyncResult == false ]]; then
+						elif [[ $rsyncResults == false ]]; then
 							Msg "All files are current, no files updated"
 						else
-							Msg "RsyncCopy ended with errors"
+							Msg "RsyncCopy ended with errors: $rsyncResults"
 						fi
 					fi
 					performedAction=true
@@ -1042,8 +1039,6 @@ Indent --
 Msg
 Msg "\n*** All Product updates completed ***"
 
-Quit
-
 #=======================================================================================================================
 ## Cross product checks / updates
 #=======================================================================================================================
@@ -1051,7 +1046,7 @@ Msg
 CPitemCntr=1
 Msg "\nCross product checks..."
 ## Check to see if there are any old formbuilder widgets
-	if [[ $client != 'internal' && -d "$locallibsDir/locallibs" ]]; then
+	if [[ $client != 'internal' && -n $locallibsDir && -d "$locallibsDir/locallibs" ]]; then
 		checkDir="$locallibsDir/locallibs/widgets"
 		fileCount=$(ls "$checkDir" 2> /dev/null | grep 'banner_' | wc -l)
 		[[ $fileCount -gt 0 ]] && Warning 0 1 "Found 'banner' widgets in '$checkDir', these are probably deprecated, please ask a CIM developer to evaluate."
@@ -1062,12 +1057,12 @@ Msg "\nCross product checks..."
 ## Check /ribbit/getcourse.rjs file
 	checkFile="$tgtDir/web/ribbit/getcourse.rjs"
 	if [[ -f "$checkFile" ]]; then
-		skelDate=$(date +%s -r $skeletonRoot/release/web/ribbit/getcourse.rjs)
+		skelDate=$(date +%s -r $skeletonRoot/web/ribbit/getcourse.rjs)
 		fileDate=$(date +%s -r $tgtDir/web/ribbit/getcourse.rjs)
 		if [[ $skelDate -gt $fileDate ]]; then
 			echo
 			text="The time date stamp of the file '$tgtDir/web/ribbit/getcourse.rjs' is less "
-			text="$text than the time date stamp of the file in the skeleton, you should complare the files and merge"
+			text="$text than the time date stamp of the file in the skeleton, you should compare the files and merge"
 			text="$text any required changes into '$tgtDir/web/ribbit/getcourse.rjs'."
 			Warning 0 1 "$text"
 		fi
@@ -1103,6 +1098,7 @@ Msg "\nCross product checks..."
 			rebuildConsole=true
 			filesEdited+=("$editFile")
 		fi
+
 		fromStr='localsteps:links|links|links'
 		toStr='// localsteps:links|links|links'
 		grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
@@ -1185,91 +1181,90 @@ Msg "\nCross product checks..."
 
 ## tar up the backup files
 	tarFile="$myName-$(date +"%m-%d-%y@%H-%M-%S").tar.gz"
-	cd $backupRootDir
-	PushSettings
+	Pushd $backupRootDir
 	SetFileExpansion 'off'
 	ProtectedCall "tar -czf $tarFile * --exclude '*.gz' --remove-files"
-	PopSettings
 	[[ -f ../$tarFile ]] && rm -f ../$tarFile
 	$DOIT mv $tarFile ..
 	cd ..
 	$DOIT rm -rf $backupRootDir
 	SetFileExpansion
-
-## If the target or curr site is a git repo and there are uncommitted changes then commit the changes
-	if [[ $targetHasGit == true ]]; then
-		Msg
-		Msg "Checking git repositories..."
-		commitComment="File committed by $userName via $myName"
-		for token in NEXT CURR; do
-			[[ $token == 'NEXT' ]] && gitDir="$tgtDir" || gitDir="$(dirname $tgtDir)/curr"
-			unset gitFiles hasChangedGitFiles newGitFiles changedGitFiles
-			gitFiles="$(CheckGitRepoFiles "$gitDir" 'returnFileList')"
-			hasChangedGitFiles="${gitFiles%%;*}"
-			gitFiles="${gitFiles#*;}"
-			newGitFiles="${gitFiles%%;*}"
-			changedGitFiles="${gitFiles##*;}"
-			if [[ $hasChangedGitFiles == true && -n $changedGitFiles ]]; then
-				Msg "^Committing changed git files in the $token environment..."
-				Pushd "$gitDir"
-				for file in $(tr ',' ' ' <<< "$changedGitFiles"); do
-					Msg "^^$file"
-					(( indentLevel = indentLevel + 2 )) || true
-					{ ( $DOIT git commit $file -m "$commitComment"); } | Indent
-					(( indentLevel = indentLevel - 2 )) || true
-				done
-				Popd
-			fi
-			if [[ $hasChangedGitFiles == true && -n $newGitFiles ]]; then
-				Warning 0 3 "The $token environment has the non-tracked files, they were ignored..."
-				for file in $(tr ',' ' ' <<< "$newGitFiles"); do
-					Msg "^^$file"
-				done
-			fi
-			Msg
-		done
-	fi
-
-## Get the list of files that have changed in the git repository if it exists, if found the commit them
-if [[ $buildPatchPackage == true ]]; then
-	Pushd "$packageDir"
-	## Create the patch scrpt
-		tarFile="patch$(TitleCase $client)--$backupSuffix.tar.gz"
-		Msg "\nBuilding remote patch script..."
-		scriptFile="./patch$(TitleCase $client).sh"
-		BuildScriptFile "$scriptFile"
-		chmod 777 "$scriptFile"
-
-	## Create the readme file
-		echo "" > 'README'
-		echo -e "After untaring the package:" >> 'README'
-		echo -e "\t1) cd to the directory where you untared the file" >> 'README'
-		echo -e "\t2) Run the command '$scriptFile'" >> 'README'
-		echo "" >> 'README'
-
-	## Create the patch tar file
-		Msg "^Building the remote patch package..."
-		SetFileExpansion 'on'
-		tar -cpzf "../$tarFile" --remove-files ./*
-		SetFileExpansion
-		rm -rf "$packageDir"
-
-	## Calculate output directory
-		if [[ -d $localClientWorkFolder ]]; then
-			outDir="$localClientWorkFolder"
-			[[ $client != '' ]] && outDir="$outDir/$client"
-		elif [[ $client != '' && -d "$clientDocs/$client" ]]; then
-			outDir="$clientDocs/$client"
-			[[ -d $outDir/Implementation ]] && outDir="$outDir/Implementation"
-			[[ -d $outDir/Attachments ]] && outDir="$outDir/Attachments"
-		else
-			outDir=$HOME/$myName
-		fi
-		[[ ! -d $outDir ]] && $DOIT mkdir -p "$outDir"
 	Popd
-	mv -f "$(dirname $packageDir)/$tarFile" "$outDir"
-	Msg "^The Patch package file has been created and can be found at \n^'$outDir/$tarFile'"
-fi
+
+# ## If the target is curr site is a git repo and there are uncommitted changes then commit the changes
+# if [[ $targetHasGit == true ]]; then
+# 	Msg
+# 	Msg "Checking git repositories..."
+# 	commitComment="File committed by $userName via $myName"
+# 	for token in NEXT CURR; do
+# 		[[ $token == 'NEXT' ]] && gitDir="$tgtDir" || gitDir="$(dirname $tgtDir)/curr"
+# 		unset gitFiles hasChangedGitFiles newGitFiles changedGitFiles
+# 		gitFiles="$(CheckGitRepoFiles "$gitDir" 'returnFileList')"
+# 		hasChangedGitFiles="${gitFiles%%;*}"
+# 		gitFiles="${gitFiles#*;}"
+# 		newGitFiles="${gitFiles%%;*}"
+# 		changedGitFiles="${gitFiles##*;}"
+# 		if [[ $hasChangedGitFiles == true && -n $changedGitFiles ]]; then
+# 			Msg "^Committing changed git files in the $token environment..."
+# 			Pushd "$gitDir"
+# 			for file in $(tr ',' ' ' <<< "$changedGitFiles"); do
+# 				Msg "^^$file"
+# 				(( indentLevel = indentLevel + 2 )) || true
+# 				{ ( $DOIT git commit $file -m "$commitComment"); } | Indent
+# 				(( indentLevel = indentLevel - 2 )) || true
+# 			done
+# 			Popd
+# 		fi
+# 		if [[ $hasChangedGitFiles == true && -n $newGitFiles ]]; then
+# 			Warning 0 3 "The $token environment has the non-tracked files, they were ignored..."
+# 			for file in $(tr ',' ' ' <<< "$newGitFiles"); do
+# 				Msg "^^$file"
+# 			done
+# 		fi
+# 		Msg
+# 	done
+# fi
+
+# ## Get the list of files that have changed in the git repository if it exists, if found the commit them
+# if [[ $buildPatchPackage == true ]]; then
+# 	Pushd "$packageDir"
+# 	## Create the patch scrpt
+# 		tarFile="patch$(TitleCase $client)--$backupSuffix.tar.gz"
+# 		Msg "\nBuilding remote patch script..."
+# 		scriptFile="./patch$(TitleCase $client).sh"
+# 		BuildScriptFile "$scriptFile"
+# 		chmod 777 "$scriptFile"
+
+# 	## Create the readme file
+# 		echo "" > 'README'
+# 		echo -e "After untaring the package:" >> 'README'
+# 		echo -e "\t1) cd to the directory where you untared the file" >> 'README'
+# 		echo -e "\t2) Run the command '$scriptFile'" >> 'README'
+# 		echo "" >> 'README'
+
+# 	## Create the patch tar file
+# 		Msg "^Building the remote patch package..."
+# 		SetFileExpansion 'on'
+# 		tar -cpzf "../$tarFile" --remove-files ./*
+# 		SetFileExpansion
+# 		rm -rf "$packageDir"
+
+# 	## Calculate output directory
+# 		if [[ -d $localClientWorkFolder ]]; then
+# 			outDir="$localClientWorkFolder"
+# 			[[ $client != '' ]] && outDir="$outDir/$client"
+# 		elif [[ $client != '' && -d "$clientDocs/$client" ]]; then
+# 			outDir="$clientDocs/$client"
+# 			[[ -d $outDir/Implementation ]] && outDir="$outDir/Implementation"
+# 			[[ -d $outDir/Attachments ]] && outDir="$outDir/Attachments"
+# 		else
+# 			outDir=$HOME/$myName
+# 		fi
+# 		[[ ! -d $outDir ]] && $DOIT mkdir -p "$outDir"
+# 	Popd
+# 	mv -f "$(dirname $packageDir)/$tarFile" "$outDir"
+# 	Msg "^The Patch package file has been created and can be found at \n^'$outDir/$tarFile'"
+# fi
 
 ## Tell the user what to do if there are problems
 	Msg

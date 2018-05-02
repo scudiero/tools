@@ -48,6 +48,7 @@ function RsyncCopy {
 		Indent ++ 2; cat $rsyncFilters | Indent >> $logFile; Indent -- 2
 
 	## Call rsync
+		[[ ! -d $target ]] && mkdir -p "$target"
 		Pushd "$target"
 		SetFileExpansion 'on'
 		#[[ $verboseLevel -eq 0 ]] && rsyncStdout="/dev/null" || rsyncStdout="/dev/stdout"
