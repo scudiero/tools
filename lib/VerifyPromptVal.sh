@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.76" # -- dscudiero -- Mon 03/26/2018 @ 12:55:45.82
+# version="2.0.78" # -- dscudiero -- Thu 05/03/2018 @ 14:10:06.99
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -118,21 +118,22 @@ function VerifyPromptVal {
 
 	## Product(s)
 	if [[ ${promptVar:0:7} == 'product' && $verifyMsg == '' ]]; then
-		validProducts='cat,cim,clss'
-		if [[ $client != '' ]]; then
-			local sqlStmt="select products from $clientInfoTable where name='$client'"
-			RunSql "$sqlStmt"
-			[[ ${#resultSet[@]} -gt 0 ]] && validProducts="${resultSet[0]}"
+		if [[ -z $validateList ]]; then
+			if [[ $client != '' ]]; then
+				local sqlStmt="select products from $clientInfoTable where name='$client'"
+				RunSql "$sqlStmt"
+				[[ ${#resultSet[@]} -gt 0 && -n ${resultSet[0]} ]] && validateList="${resultSet[0]}"
+			fi
 		fi
 		local ans=${response,,[a-z]}
 		if [[ $allowMultiple != true && $(Contains "$ans" ",") == true ]]; then
 			verifyMsg=$(Error "$promptVar' does not allow for multiple values, valid values is one in {$validProducts}")
 		else
-			[[ $ans == 'all' ]] && ans="$validProducts" && response="$ans"
+			[[ $ans == 'all' ]] && { ans="$validateList"; response="$ans"; }
 			local i j found foundAll=false
 			for i in $(tr ',' ' ' <<< $ans); do
 				found=false
-				for j in $(tr ',' ' ' <<< $validProducts); do
+				for j in $(tr ',' ' ' <<< $validateList); do
 					[[ $i == $j ]] && found=true && break;
 				done
 				[[ $found == false ]] && foundAll=false || foundAll=true
@@ -240,3 +241,4 @@ export -f VerifyPromptVal
 ## 03-23-2018 @ 16:30:57 - 2.0.74 - dscudiero - D
 ## 03-23-2018 @ 17:04:35 - 2.0.75 - dscudiero - Msg3 -> Msg
 ## 03-26-2018 @ 15:51:40 - 2.0.76 - dscudiero - Switched from StartRemoteSession to just ssh
+## 05-03-2018 @ 14:21:25 - 2.0.78 - dscudiero - Fix issue setting validValues in the products section
