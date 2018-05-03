@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.34" # -- dscudiero -- Thu 05/03/2018 @  8:25:34.19
+# version="1.0.35" # -- dscudiero -- Thu 05/03/2018 @ 14:27:37.46
 #===================================================================================================
 # Various data manipulation functions for courseleaf things
 #===================================================================================================
@@ -19,7 +19,7 @@
 		local verFile prodVer
 
 		case "$product" in
-			cat)
+			cat|courseleaf)
 				verFile="$siteDir/web/courseleaf/clver.txt"						## A normal siteDir
 				[[ ! -r $verFile ]] && verFile="$siteDir/courseleaf/clver.txt"	## a git repo shadow
 				if [[ -r $verFile ]]; then
@@ -609,3 +609,4 @@ export -f GetCims
 #===================================================================================================
 ## 05-02-2018 @ 16:45:23 - 1.0.32 - dscudiero - Re-factor BackupCourseleafFile, allow passing in of the backup directory name
 ## 05-03-2018 @ 08:26:09 - 1.0.34 - dscudiero - Change how we parse off the client and env data
+## 05-03-2018 @ 14:27:56 - 1.0.35 - dscudiero - Allow 'courseleaf' as a product
