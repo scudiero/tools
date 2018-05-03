@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.56" # -- dscudiero -- Tue 05/01/2018 @ 11:56:23.82
+# version="1.0.57" # -- dscudiero -- Thu 05/03/2018 @  9:32:27.22
 #===================================================================================================
 # Usage: Msg <msgType> <msgLevel> <msgIndent> msgText
 # 	msgType: [N,I,W,E,T]
@@ -53,7 +53,7 @@ function Msg {
 			i) msgText="$(ColorI "*Info*") -- $msgText" ;;
 			w) msgText="$(ColorW "*Warning*") -- $msgText\a" ;;
 			e) msgText="$(ColorE "*Error*") -- $msgText\a" ;;
-			t) msgText="$(ColorT "*Fatal Error*") -- $msgText\a" ;;
+			t) msgText="\n$(ColorT "*Fatal Error*") -- $msgText\a" ;;
 			v) [[ $msgLevel -lt $verboseLevel && -n $logFile && -w $logFile ]] && { echo -e "$msgText" >> $logFile; return 0; } 
 				msgText="$(ColorV)$msgText" ;;
 		esac
@@ -232,3 +232,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 04-26-2018 @ 08:32:32 - 1.0.55 - dscudiero - Change debug message levels
 ## 05-01-2018 @ 11:13:12 - 1.0.56 - dscudiero - Allow '-' in front of message type
 ## 05-01-2018 @ 11:56:48 - 1.0.56 - dscudiero - Tweak msgtype processing
+## 05-03-2018 @ 09:32:54 - 1.0.57 - dscudiero - Add a new line before a fatal message
