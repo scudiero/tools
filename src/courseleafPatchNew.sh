@@ -972,9 +972,9 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 						prodVer="$(GetProductVersion $product "$tgtDir")"
 						eval "${product}VerAfter=\"$prodVer\""
 						if [[ $gitResults == true ]]; then
-							tmpBefore="${product}VerBefore"; tmpBefore="${!tmpBefore}"; [[ -z tmpBefore ]] && tmpBefore='N/A'
+							tmpBefore="${product}VerBefore"; tmpBefore="${!tmpBefore}"; [[ -z $tmpBefore ]] && tmpBefore='N/A'
 							tmpAfter="${product}VerAfter"; tmpAfter="${!tmpAfter}"
-							Msg "Original '${product^^[a-z]}' version: $tmpBefore, New '$product' version: $tmpAfter" 
+							Msg "Original '${product^^[a-z]}' version: $tmpBefore, New '${product^^[a-z]}' version: $tmpAfter" 
 						fi
 					fi
 					performedAction=true
