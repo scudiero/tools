@@ -970,7 +970,7 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 					if [[ $specSource == $product || $specSource == 'courseleaf' ]]; then
 						prodVer="$(GetProductVersion $product "$tgtDir")"
 						eval "${product}VerAfter=\"$prodVer\""
-						[[ $gitResults == true ]] && Msg "New '$product' version: ${product}VerAfter" 
+						[[ $gitResults == true ]] && Msg "Origional '$product' version: ${product}VerBefore, New '$product' version: ${product}VerAfter" 
 					fi
 					performedAction=true
 					;;
