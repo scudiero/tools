@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.32" # -- dscudiero -- Wed 05/02/2018 @ 16:44:50.27
+# version="1.0.33" # -- dscudiero -- Thu 05/03/2018 @  8:04:47.87
 #===================================================================================================
 # Various data manipulation functions for courseleaf things
 #===================================================================================================
@@ -124,7 +124,7 @@ export -f GetCourseleafPgm
 # Returns: none
 #===================================================================================================
 function BackupCourseleafFile {
-	[[ $DOIT != '' || $listOnly == true || $informationOnlyMode == true ]] && return 0
+	[[ $informationOnlyMode == true ]] && return 0
 	local file=$1; shift || true
 	[[ ! -r $file ]] && return 0
 	local backupDir=$1; shift || true
@@ -138,8 +138,8 @@ function BackupCourseleafFile {
 	#dump file client env clientRoot fileEnd
 
 	## Set backup location
-	[[ -z $backupDir ]] && backupDir="${clientRoot}/attic/$myName/$userName.$backupSuffix"
-	[[ ! -d $backupDir ]] && mkdir -p $backupDir
+	[[ -z $backupDir ]] && backupDir="${clientRoot}/attic/$myName/$userName.$backupSuffix"	
+	[[ ! -d $backupDir ]] && $DOIT mkdir -p $backupDir
 	local bakFile="${backupDir}${fileEnd}"
 
 	if [[ -f $file ]]; then
@@ -152,7 +152,7 @@ function BackupCourseleafFile {
 
 	return 0
 } #BackupCourseleafFile
-export -f BackupCourseleafFile
+
 #===================================================================================================
 # Run a courseleaf.cgi command, check output for atj errors
 # Usage: RunCourseLeafCgi <siteDir> <commandString> 
@@ -607,3 +607,4 @@ export -f GetCims
 # Check-in Log
 #===================================================================================================
 ## 05-02-2018 @ 16:45:23 - 1.0.32 - dscudiero - Re-factor BackupCourseleafFile, allow passing in of the backup directory name
+## 05-03-2018 @ 08:05:00 - 1.0.33 - dscudiero - Cosmetic/minor change/Sync
