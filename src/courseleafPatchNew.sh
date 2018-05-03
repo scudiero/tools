@@ -268,6 +268,7 @@ function processGitRecord {
 			ProtectedCall "$gitCmd" | Indent
 			gitCmd="git checkout --force --quiet $gitTag"; ## Update git files
 			ProtectedCall "$gitCmd" | Indent;
+
 # 			## If we are going to generate a patch package then write the chnged files to the staging directory
 # 			for ((bCntr=0; bCntr<${#gitFilesUpdated[@]}; bCntr++)); do
 # 				Msg L "\n\t\t$repoName.git ($gitTag) -- ${specTarget}/${gitFilesUpdated[$bCntr]}"
@@ -971,7 +972,7 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 						prodVer="$(GetProductVersion $product "$tgtDir")"
 						eval "${product}VerAfter=\"$prodVer\""
 						if [[ $gitResults == true ]]; then
-							tmpBefore="${product}VerBefore"; tmpBefore="${!tmpBefore}"
+							tmpBefore="${product}VerBefore"; tmpBefore="${!tmpBefore}"; [[ -z tmpBefore ]] && tmpBefore='N/A'
 							tmpAfter="${product}VerAfter"; tmpAfter="${!tmpAfter}"
 							Msg "Original '${product^^[a-z]}' version: $tmpBefore, New '$product' version: $tmpAfter" 
 						fi
