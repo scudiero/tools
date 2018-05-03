@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.33" # -- dscudiero -- Thu 05/03/2018 @  8:04:47.87
+# version="1.0.34" # -- dscudiero -- Thu 05/03/2018 @  8:25:34.19
 #===================================================================================================
 # Various data manipulation functions for courseleaf things
 #===================================================================================================
@@ -202,13 +202,14 @@ function WriteCourseleafChangelogEntry {
 	local logger=${3-$myName}
 	[[ ! -f "$logFile" ]] && touch "$logFile"
 
-	local clientDataLogFile clientSummaryLogFile
-	local usersClientLogFile="/dev/null"
-	local usersActivityLog="/dev/null"
+	local clientDataLogFile clientSummaryLogFile usersClientLogFile="/dev/null" usersActivityLog="/dev/null"
 
+	## Parse the file name
 	local data=$(ParseCourseleafFile "$logFile")
-	local client=$(cut -d' ' -f1 <<< "$data")
-	local env=$(cut -d' ' -f2 <<< "$data")
+	local client="${data%% *}"; data="${data#* }"
+	local env="${data%% *}"; data="${data#* }"
+	local clientRoot="${data%% *}"; data="${data#* }"
+	local fileEnd="${data%% *}"; data="${data#* }"
 
 	[[ $env == 'pvt' || $env == 'dev' ]] && return 0
 	[[ $env == 'test' ]] && client=${client%-*}
@@ -607,4 +608,4 @@ export -f GetCims
 # Check-in Log
 #===================================================================================================
 ## 05-02-2018 @ 16:45:23 - 1.0.32 - dscudiero - Re-factor BackupCourseleafFile, allow passing in of the backup directory name
-## 05-03-2018 @ 08:05:00 - 1.0.33 - dscudiero - Cosmetic/minor change/Sync
+## 05-03-2018 @ 08:26:09 - 1.0.34 - dscudiero - Change how we parse off the client and env data
