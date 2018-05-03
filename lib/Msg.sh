@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.57" # -- dscudiero -- Thu 05/03/2018 @  9:32:27.22
+# version="1.0.59" # -- dscudiero -- Thu 05/03/2018 @ 15:12:31.83
 #===================================================================================================
 # Usage: Msg <msgType> <msgLevel> <msgIndent> msgText
 # 	msgType: [N,I,W,E,T]
@@ -46,8 +46,8 @@ function Msg {
 	dump 4 msgType msgLevel msgIndent
 	## Format message
 		msgText="$*"
-
-		case ${msgType,,[a-z]} in
+		msgType="${msgType:0:1}"; msgType="${msgType,,[a-z]}"
+		case $msgType in
 			l) [[ -n $logFile && -w $logFile ]] && { echo -e "$msgText" >> $logFile; return 0; } ;;
 			n) msgText="$(ColorN "*Note*") -- $msgText" ;;
 			i) msgText="$(ColorI "*Info*") -- $msgText" ;;
@@ -68,9 +68,9 @@ function Msg {
 	## print message
 		[[ -z $tabStr ]] && tabStr='     '
 		msgText="${msgText//^/$tabStr}" ## Expand tab chars
-		echo -e "$msgText"
+		[[ $msgType  == 'l' ]] && echo -e "$msgText" >> $logFile || echo -e "$msgText"
 		#[[ -n $logFile && -w $logFile ]] && echo -e "$msgText" >> "$logFile"&
-		[[ ${msgType,,[a-z]} == 't' ]] && Goodbye 3
+		[[ $msgType == 't' ]] && Goodbye 3
 
 	return 0
 }
@@ -233,3 +233,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 05-01-2018 @ 11:13:12 - 1.0.56 - dscudiero - Allow '-' in front of message type
 ## 05-01-2018 @ 11:56:48 - 1.0.56 - dscudiero - Tweak msgtype processing
 ## 05-03-2018 @ 09:32:54 - 1.0.57 - dscudiero - Add a new line before a fatal message
+## 05-03-2018 @ 15:13:03 - 1.0.59 - dscudiero - Tweak how we process log only messages, do tab expansion
