@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.59" # -- dscudiero -- Thu 05/03/2018 @ 15:12:31.83
+# version="1.0.60" # -- dscudiero -- Thu 05/03/2018 @ 15:40:42.10
 #===================================================================================================
 # Usage: Msg <msgType> <msgLevel> <msgIndent> msgText
 # 	msgType: [N,I,W,E,T]
@@ -48,7 +48,6 @@ function Msg {
 		msgText="$*"
 		msgType="${msgType:0:1}"; msgType="${msgType,,[a-z]}"
 		case $msgType in
-			l) [[ -n $logFile && -w $logFile ]] && { echo -e "$msgText" >> $logFile; return 0; } ;;
 			n) msgText="$(ColorN "*Note*") -- $msgText" ;;
 			i) msgText="$(ColorI "*Info*") -- $msgText" ;;
 			w) msgText="$(ColorW "*Warning*") -- $msgText\a" ;;
@@ -234,3 +233,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 05-01-2018 @ 11:56:48 - 1.0.56 - dscudiero - Tweak msgtype processing
 ## 05-03-2018 @ 09:32:54 - 1.0.57 - dscudiero - Add a new line before a fatal message
 ## 05-03-2018 @ 15:13:03 - 1.0.59 - dscudiero - Tweak how we process log only messages, do tab expansion
+## 05-03-2018 @ 15:41:32 - 1.0.60 - dscudiero - Remove the 'l' processing record from the case statement
