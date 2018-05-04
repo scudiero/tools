@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.38" # -- dscudiero -- Fri 05/04/2018 @  9:55:17.73
+# version="1.0.39" # -- dscudiero -- Fri 05/04/2018 @  9:57:40.32
 #===================================================================================================
 # Various data manipulation functions for database things
 #===================================================================================================
@@ -53,7 +53,7 @@ function getTableColumns {
 				ifsSave="$IFS"; IFS=',' read -ra tmpArray <<< "$data"
 				eval "$returnCountVar=\"${#tmpArray[@]}\""
 				for column in "${tmpArray[@]}"; do
-					[[ ${columncolumn:0:1} == ' ' ]] && column="${column:1}"
+					[[ ${column:0:1} == ' ' ]] && column="${column:1}"
 			    	columns="$columns,${column%% *}"
 				done
 			else
@@ -78,3 +78,4 @@ export -f getTableColumns
 # Check-in Log
 #===================================================================================================
 ## 05-04-2018 @ 09:51:42 - 1.0.37 - dscudiero - Fix problem for sqlite databases someting returning one record and sometimes on record per column
+## 05-04-2018 @ 09:58:09 - 1.0.39 - dscudiero - Fix variable name columncolumn -> column
