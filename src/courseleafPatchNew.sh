@@ -66,7 +66,7 @@ cwdStart="$(pwd)"
 		env='pvt'
 		siteDir="/mnt/dev6/web/wisc-dscudiero"
 		products='cat,cim'
-		buildPatchPackage=false
+		buildPatchPackage=true
 		backup=false
 		catalogAdvance=false
 		fullAdvance=false
@@ -98,7 +98,7 @@ cwdStart="$(pwd)"
 		fi
 		bullet=$bulletSave
 		echo -e "\t$bullet) Patch the products as per definitions in the patch control file:"
-		echo -e "\t\t$courseleafPatchControlFile"
+		echo -e "\t\t$courseleafpatchControlDbFile"
 		echo -e "\t$bullet) Perform cross product checks in local site"
 		(( bullet++ )) ; bulletSave=$bullet ; bullet=1
 		(( bullet++ )) ; echo -e "\t\t$bullet) Check for old formbuilder widgets"
@@ -258,8 +258,7 @@ function processGitRecord {
 			for ((bCntr=0; bCntr<${#gitFilesUpdated[@]}; bCntr++)); do
 				mkdir -p "${backupRootDir}${specTarget}/$(dirname "${gitFilesUpdated[$bCntr]}")"
 				srcFile="${tgtDir}${specTarget}/${gitFilesUpdated[$bCntr]}"
-				backupFile="${backupRootDir}${specTarget}/${gitFilesUpdated[$bCntr]}"
-				[[ -r $srcFile ]] && cp -fp "$srcFile" "$backupFile"
+				[[ -r $srcFile ]] && cp -fp "$srcFile" "${backupRootDir}${specTarget}/${gitFilesUpdated[$bCntr]}"
 				Log "^$srcFile"
 			done
 		## Update local files from the git repo via checkout
@@ -269,17 +268,18 @@ function processGitRecord {
 			gitCmd="git checkout --force --quiet $gitTag"; ## Update git files
 			ProtectedCall "$gitCmd" | Indent;
 
-# 			## If we are going to generate a patch package then write the chnged files to the staging directory
-# 			for ((bCntr=0; bCntr<${#gitFilesUpdated[@]}; bCntr++)); do
-# 				Msg L "\n\t\t$repoName.git ($gitTag) -- ${specTarget}/${gitFilesUpdated[$bCntr]}"
-# 				if [[ $buildPatchPackage == true ]]; then
-# 					mkdir -p "${packageDir}${specTarget}/$(dirname "${gitFilesUpdated[$bCntr]}")"
-# 					srcFile="${tgtDir}${specTarget}/${gitFilesUpdated[$bCntr]}" 
-# 					packageFile="${packageDir}${specTarget}/${gitFilesUpdated[$bCntr]}"
-# 					Msg L "\t\t\t${gitFilesUpdated[$bCntr]}"
-# 					cp -rfp "$srcFile" "$backupFile"
-# 				fi
-# 			done
+			## If we are going to generate a patch package then write the changed files to the staging directory
+			if buildPatchPackage == true ]]; then 
+				for ((bCntr=0; bCntr<${#gitFilesUpdated[@]}; bCntr++)); do
+					Msg L "\n\t\t$repoName.git ($gitTag) -- ${specTarget}/${gitFilesUpdated[$bCntr]}"
+					if [[ $buildPatchPackage == true ]]; then
+						mkdir -p "${packageRootDir}${specTarget}/$(dirname "${gitFilesUpdated[$bCntr]}")"
+						srcFile="${tgtDir}${specTarget}/${gitFilesUpdated[$bCntr]}" 
+						packageFile="${packageRootDir}${specTarget}/${gitFilesUpdated[$bCntr]}"
+						[[ -r $srcFile ]] && cp -fp "$srcFile" "${packageRootDir}${specTarget}/${gitFilesUpdated[$bCntr]}"
+					fi
+				done
+			fi
 
 		gitResults=true
 	fi
@@ -304,6 +304,26 @@ function backupFile {
 } ## backupFile
 
 #=======================================================================================================================
+# Copy a file to the remote patching collection
+#=======================================================================================================================
+function cpToPackageDir {
+	local file="$1"; shift || true
+	local packageDir="${1:-$packageRootDir}"
+
+	## Parse the file name
+	local data="$(ParseCourseleafFile "$file")"
+	local client="${data%% *}"; data="${data#* }"
+	local env="${data%% *}"; data="${data#* }"
+	local clientRoot="${data%% *}"; data="${data#* }"
+	local fileEnd="${data%% *}"; data="${data#* }"
+
+	cp -fp "$file" "${packageDir}${fileEnd}"
+
+	return 0
+
+} ## cpToPackageDir
+
+#=======================================================================================================================
 # MAIN
 #=======================================================================================================================
 # Declare local variables and constants
@@ -323,8 +343,8 @@ ParseArgsStd $originalArgStr
 
 #TODO
 skeletonRoot='/mnt/dev6/web/_skeleton/release'
-patchControl="/mnt/internal/site/stage/db/courseleafPatch.sqlite"
-dump skeletonRoot patchControl -n
+patchControlDb="/mnt/internal/site/stage/db/courseleafPatch.sqlite"
+dump skeletonRoot patchControlDb -n
 
 displayGoodbyeSummaryMessages=true
 cleanDirs="${scriptData3##*:}"
@@ -372,29 +392,23 @@ Dump 1 originalArgStr -t client env products current namedRelease branch skeleto
 		fi
 	fi
 
-# if [[ $env == 'next' || $env == 'pvt' ]]; then
-# 	sqlStmt="Select hosting from $clientInfoTable where name=\"$client\""
-# 	RunSql $sqlStmt
-# 	hosting=${resultSet[0]}
-# 	if [[ $(Lower "$hosting") == 'client' ]]; then
-# 		removeGitReposFromNext=false
-# 		if [[ -z $buildPatchPackage ]]; then
-# 			[[ $verify == false ]] && Info 0 1 "Specifying -noPrompt for remote clients is not allowed, continuing with prompting active" && verify=true
-# 			Msg
-# 			Msg "The client host's their own instance of CourseLeaf locally."
-# 			unset ans; Prompt ans "Do you wish to generate a patchPackage to send to the client" 'Yes No' 'Yes'; ans=$(Lower "${ans:0:1}")
-# 			[[ $ans == 'y' ]] && buildPatchPackage=true || buildPatchPackage=false
-# 			Msg
-# 		fi
-# 	fi
-# fi #[[ $env == 'next' ]]
-#
-# [[ $buildPatchPackage == true ]] && packageDir="$tmpRoot/$myName-$client/packageDir" && mkdir -p "$packageDir/web/courseleaf"
+if [[ $env == 'next' || $env == 'pvt' ]]; then
+	sqlStmt="Select hosting from $clientInfoTable where name=\"$client\""
+	RunSql $sqlStmt
+	hosting=${resultSet[0]}; hosting="${hosting,,[a-z]}"
+	if [[ -n $hosting && != 'leepfrog' ]]; then
+		Prompt buildPatchPackage "This client ($client) is hosted off site, do you wish to build a remote patching package ?" 'Yes,No' 'Yes'
+		ans="${buildPatchPackage:0:1}"; ans=${ans,,[a-z]}
+		[[ $ans == 'y' ]] && buildPatchPackage=true
+	fi
+fi #[[ $env == 'next' ]]
+
+dump buildPatchPackage -p
 
 ## Get the patch-able products
 	unset patchableProducts
 	sqlStmt="select distinct product from productPatches"
-	RunSql "$patchControl" $sqlStmt
+	RunSql "$patchControlDb" $sqlStmt
 	for ((i=0; i<${#resultSet[@]}; i++)); do
 		patchableProducts="$patchableProducts,${resultSet[$i]}"
 	done
@@ -561,6 +575,10 @@ dump -1 source namedRelease branch catVerBeforePatch cimVerAfterPatch clssVerBef
 ## Backup root
 	backupRootDir="$tgtDir/attic/$myName.$(date +"%m-%d-%Y@%H.%M.%S").prePatch"
 	mkdir -p "$backupRootDir"
+
+## Remote package file collector
+	packageRootDir="$tgtDir/attic/$myName.$(date +"%m-%d-%Y@%H.%M.%S").remotePatch"
+	mkdir -p "$packageRootDir"
 
 ## Does the target directory have a git repository
 	[[ -d $tgtDir/.git ]] && targetHasGit=true || targetHasGit=false
@@ -916,7 +934,7 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 	changesMade=false
 	## Run through the action records for the product
 		sqlStmt="select recordType,sourceSpec,targetSpec,option from productPatches where lower(product)=\"$product\" and status=\"Y\" order by orderInProduct"
-		RunSql "$patchControl" $sqlStmt
+		RunSql "$patchControlDb" $sqlStmt
 		[[ ${#resultSet[@]} -le 0 || -z ${resultSet[0]} ]] && Warning 0 2 "No patch file specs found for '$product', skipping" && continue
 		for ((ii=0; ii<${#resultSet[@]}; ii++)); do
 			specLine="${resultSet[$ii]}"
@@ -997,6 +1015,7 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 						else
 							Msg "RsyncCopy ended with errors: $rsyncResults"
 						fi
+						buildPatchPackage == true ]] && RsyncCopy "$specSource" "$(dirname "${packageRootDir}${specTarget}")" &
 					fi
 					performedAction=true
 					;;
@@ -1014,9 +1033,10 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 						unset tgtFileMd5
 						[[ -f ${tgtDir}${specTarget} ]] && tgtFileMd5=$(md5sum ${tgtDir}${specTarget})
 						if [[ ${srcFileMd5%% *} != ${tgtFileMd5%% *} ]]; then
-						backupDir="$(dirname "${backupRootDir}${specTarget}")"; mkdir -p "$backupDir"
+							backupDir="$(dirname "${backupRootDir}${specTarget}")"; mkdir -p "$backupDir"
 							[[ -f ${tgtDir}${specTarget} ]] && cp -fp "${tgtDir}${specTarget}" "$backupDir"
 							cp -fp "$srcFile" "${tgtDir}${specTarget}"
+							[[ buildPatchPackage == true ]] && cpToPackageDir "$srcFile"
 							[[ -n $srcFileVer ]] && Note "'${specTarget}' updated to version: $srcFileVer" || Note "'${specTarget}' updated"
 							changesMade=true
 						else
@@ -1062,7 +1082,7 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 						[[ $? -eq 0 ]] && changeLogRecs+=("Executed unix command: '$specSource'") || \
 							Error "Command returned a non-zero condition code"
 						Popd
-						#[[ $buildPatchPackage == true ]] && unixCommands+=("$specSource")
+						[[ $buildPatchPackage == true ]] && unixCommands+=("$specSource")
 						performedAction=true
 					fi
 					;;
@@ -1095,7 +1115,7 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 				include)
 					for ((i2=$ii+1; i2<${#resultSet[@]}; i2++)); do remaining+=("${resultSet[$i2]}"); done
 					sqlStmt="select recordType,sourceSpec,targetSpec,option from productPatches where lower(product)=\"$specSource\" and status=\"Y\" order by orderInProduct"
-					RunSql "$patchControl" $sqlStmt
+					RunSql "$patchControlDb" $sqlStmt
 					if [[ ${#resultSet[@]} -le 0 || -z ${resultSet[0]} ]]; then
 						Warning 0 2 "No patch file specs found for '$specSource', skipping"
 					else
@@ -1165,6 +1185,7 @@ Msg "\nCross product checks..."
 		if [[ -n $grepStr ]]; then
 			backupFile "$editFile" "$backupDir"
 			sed -i s"!^$fromStr!$toStr!" $editFile
+			[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
 			updateFile="/$courseleafProgDir/index.tcf"
 			changeLogRecs+=("$updateFile updated to change title")
 			Msg "^Updated '$updateFile' to change 'title:Catalog Console' to 'title:CourseLeaf Console'"
@@ -1176,6 +1197,7 @@ Msg "\nCross product checks..."
 		if [[ -n $grepStr ]]; then
 			backupFile "$editFile" "$backupDir"
 			sed -i s"!^$fromStr!$toStr!" $editFile
+			[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
 			updateFile="/$courseleafProgDir/index.tcf"
 			changeLogRecs+=("$updateFile updated to change title")
 			Msg "^Updated '$updateFile' to remove 'Refresh System'"
@@ -1188,6 +1210,7 @@ Msg "\nCross product checks..."
 		if [[ -n $grepStr ]]; then
 			backupFile "$editFile" "$backupDir"
 			sed -i s"!^$fromStr!$toStr!" $editFile
+			[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
 			updateFile="/$courseleafProgDir/index.tcf"
 			changeLogRecs+=("$updateFile updated to change title")
 			Msg "^Updated '$updateFile' to remove 'localsteps:links|links|links"
@@ -1200,6 +1223,7 @@ Msg "\nCross product checks..."
 		if [[ -n $grepStr ]]; then
 			backupFile "$editFile" "$backupDir"
 			sed -i s"!^$fromStr!$toStr!" $editFile
+			[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
 			updateFile="/$courseleafProgDir/index.tcf"
 			changeLogRecs+=("$updateFile updated to change title")
 			Msg "^Updated '$updateFile' to remove 'localsteps:links|links|links"
@@ -1220,6 +1244,7 @@ Msg "\nCross product checks..."
 			if [[ -n $grepStr ]]; then
 				backupFile "$editFile" "$backupDir"
 				sed -i "/^$fromStr/d" $editFile
+				[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
 			fi
 		fi
 	fi
@@ -1231,7 +1256,7 @@ Msg "\nCross product checks..."
 		editFile="$cfgFile"
 		fromStr=$(ProtectedCall "grep '^db:fsinjector|sqlite|' $editFile")
 		toStr='db:fsinjector|sqlite|/ribbit/fsinjector.sqlite'
-		backupFile "$editFile" "$backupDir"
+		[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
 		sed -i s"_^${fromStr}_${toStr}_" "$editFile"
 		Msg "^Updated '$editFile' to change changed the mapfile record for 'db:fsinjector' to point to the ribbit directory"
 	fi
@@ -1440,3 +1465,4 @@ Goodbye 0 "$text1" "$text2"
 ## 04-12-2018 @ 14:44:53 - 5.6.14 - dscudiero - Fix problem when the target site does not have a clver.txt file
 ## 04-18-2018 @ 09:36:18 - 5.6.16 - dscudiero - Cleaned up GetDefaultsData call
 ## 04-26-2018 @ 09:04:02 - 6.0.0 - dscudiero - Cosmetic/minor change/Sync
+## 05-04-2018 @ 09:55:43 - 6.0.0 - dscudiero - Rename to DatabaseUtilities.sh
