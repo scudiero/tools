@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.39" # -- dscudiero -- Fri 05/04/2018 @  9:57:40.32
+# version="1.0.41" # -- dscudiero -- Fri 05/04/2018 @ 10:02:48.52
 #===================================================================================================
 # Various data manipulation functions for database things
 #===================================================================================================
@@ -19,7 +19,6 @@
 #	getTableColumns 'contacts' "$contactsSqliteFile" 'numFields' 'fields'
 #	getTableColumns 'sites' "warehouse" 'numFields' 'fields'
 #============================================================================================================================================
-
 function getTableColumns {
 	Import 'SetFileExpansion RunSql'
 
@@ -27,7 +26,7 @@ function getTableColumns {
 	local database="$1"; shift || true
 	local returnCountVar="${1:-numColumns}"; shift || true
 	local returnColumnsVar="${1:-columns}"; shift || true
-	local sqlStmt columns column ifsSave tmpArray
+	local sqlStmt columns column ifsSave tmpArray count
 	dump 3 table database returnColumnsVar returnCountVar
 
 	SetFileExpansion 'off'
@@ -51,7 +50,7 @@ function getTableColumns {
 			if [[ ${#resultSet[@]} -eq 1 ]]; then
 				data="${resultSet[0]#*(}"; data="${data%)*}"
 				ifsSave="$IFS"; IFS=',' read -ra tmpArray <<< "$data"
-				eval "$returnCountVar=\"${#tmpArray[@]}\""
+				count=${#tmpArray[@]}
 				for column in "${tmpArray[@]}"; do
 					[[ ${column:0:1} == ' ' ]] && column="${column:1}"
 			    	columns="$columns,${column%% *}"
@@ -62,6 +61,7 @@ function getTableColumns {
 					column="${resultSet[$i]}"; column="${column:1}"; column="${column%%|*}"; column="${column//\`/}"
 					columns="$columns,${column%% *}"
 				done
+				let count=${#resultSet[@]}-2
 			fi
 		fi
 	fi
@@ -69,6 +69,7 @@ function getTableColumns {
 
 	columns="${columns:1}"
 	eval "$returnColumnsVar=\"\$columns\""
+	eval "$returnCountVar=\"$count\""
 
 	return 0
 } #getTableColumns
@@ -79,3 +80,4 @@ export -f getTableColumns
 #===================================================================================================
 ## 05-04-2018 @ 09:51:42 - 1.0.37 - dscudiero - Fix problem for sqlite databases someting returning one record and sometimes on record per column
 ## 05-04-2018 @ 09:58:09 - 1.0.39 - dscudiero - Fix variable name columncolumn -> column
+## 05-04-2018 @ 10:03:21 - 1.0.41 - dscudiero - Fix bug setting count value for sqlite multiple records
