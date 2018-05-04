@@ -36,8 +36,8 @@ for (var i=0,  tot=myArray.length; i < tot; i++) {
 }
 
 //Loop through array using forEach
-resultSet.forEach(function(text) {
-	print_debug('text = ' + text.toSource() + '\n');
+resultSet.forEach(function(token) {
+	print_debug('token = ' + token.toSource() + '\n');
 });
 
 // Loop through the variable list with break
