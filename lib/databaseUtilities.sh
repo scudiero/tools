@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.36" # -- dscudiero -- Fri 05/04/2018 @  9:03:32.85
+# version="1.0.37" # -- dscudiero -- Fri 05/04/2018 @  9:51:05.28
 #===================================================================================================
 # Various data manipulation functions for database things
 #===================================================================================================
@@ -27,7 +27,8 @@ function getTableColumns {
 	local database="$1"; shift || true
 	local returnCountVar="${1:-numColumns}"; shift || true
 	local returnColumnsVar="${1:-columns}"; shift || true
-	local sqlStmt columns token ifsSave tmpArray
+	local sqlStmt columns column ifsSave tmpArray
+	dump 3 table database returnColumnsVar returnCountVar
 
 	SetFileExpansion 'off'
 	if [[ $database == 'warehouse' ]]; then
@@ -46,13 +47,22 @@ function getTableColumns {
 			RunSql "$database" $sqlStmt
 			[[ ${#resultSet[@]} -le 0 || -z ${resultSet[0]} ]] && Terminate "Could not retrieve '$table' definition data from '$database'"
 			unset columns
-			data="${resultSet[0]#*(}"; data="${data%)*}"
-			ifsSave="$IFS"; IFS=',' read -ra tmpArray <<< "$data"
-			eval "$returnCountVar=\"${#tmpArray[@]}\""
-			for token in "${tmpArray[@]}"; do
-				[[ ${token:0:1} == ' ' ]] && token="${token:1}"
-		    	columns="$columns,${token%% *}"
-			done
+			## If only one row returned then we just have a list of columns,
+			if [[ ${#resultSet[@]} -eq 1 ]]; then
+				data="${resultSet[0]#*(}"; data="${data%)*}"
+				ifsSave="$IFS"; IFS=',' read -ra tmpArray <<< "$data"
+				eval "$returnCountVar=\"${#tmpArray[@]}\""
+				for column in "${tmpArray[@]}"; do
+					[[ ${columncolumn:0:1} == ' ' ]] && column="${column:1}"
+			    	columns="$columns,${column%% *}"
+				done
+			else
+				## otherwise it is an array with each field on its own record
+				for ((i=1; i<${#resultSet[@]}-1; i++)); do
+					column="${resultSet[$i]}"; column="${column:1}"; column="${column%%|*}"; column="${column//\`/}"
+					columns="$columns,${column%% *}"
+				done
+			fi
 		fi
 	fi
 	SetFileExpansion
@@ -62,9 +72,9 @@ function getTableColumns {
 
 	return 0
 } #getTableColumns
-
 export -f getTableColumns
 
 #===================================================================================================
 # Check-in Log
 #===================================================================================================
+## 05-04-2018 @ 09:51:42 - 1.0.37 - dscudiero - Fix problem for sqlite databases someting returning one record and sometimes on record per column
