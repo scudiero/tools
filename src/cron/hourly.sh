@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.25 # -- dscudiero -- Mon 03/26/2018 @  8:55:43.50
+version=2.2.26 # -- dscudiero -- Fri 05/04/2018 @ 13:31:32.60
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -176,6 +176,49 @@ function CheckMonitorFiles {
 # } #BuildToolsAuthTable
 
 #=======================================================================================================================
+# Sync the courseleaf patch control table from internal to the data warehouse
+#=======================================================================================================================
+function SyncCourseleafPatchTable() {
+	local numfields fields 
+	Import 'DatabaseUtilities SetFileExpansion RunSql'
+
+	getTableColumns "$patchesTable" 'warehouse' 'numFields' 'fields'
+
+	## Make a copy of the table
+		sqlStmt="drop table if exists ${patchesTable}New"
+		RunSql $sqlStmt
+		sqlStmt="create table ${patchesTable}New like ${patchesTable}"
+		RunSql $sqlStmt
+
+	## Load the data from the transactional table into the new table
+		## Get transactional data
+		SetFileExpansion 'off'
+		sqlStmt='select * from productPatches'
+		RunSql "$patchControlDb" $sqlStmt
+		SetFileExpansion
+		for rec in "${resultSet[@]}"; do dataRecs+=("$rec"); done
+		## Insert into warehouse table
+		for ((i=0; i<${#dataRecs[@]}; i++)); do
+			sqlStmt="insert into ${patchesTable}New ($fields) values("
+			data="${dataRecs[$i]}"; #data="${data#*|}"
+			#sqlStmt="${sqlStmt}null,\"${data//|/","}\")"
+			sqlStmt="${sqlStmt}\"${data//|/","}\")"
+			RunSql $sqlStmt
+		done
+
+	## Swap tables
+		sqlStmt="drop table if exists ${patchesTable}Bak"
+		RunSql $sqlStmt
+		sqlStmt="rename table $patchesTable to ${patchesTable}Bak"
+		RunSql $sqlStmt
+		sqlStmt="rename table ${patchesTable}New to $patchesTable"
+		RunSql $sqlStmt
+
+
+	return 0
+} #SyncCourseleafPatchTable
+
+#=======================================================================================================================
 # Main
 #=======================================================================================================================
 case "$hostName" in
@@ -189,7 +232,7 @@ case "$hostName" in
 		# fi
 
 		## Run programs/functions
-			pgms=(updateDefaults CheckMonitorFiles SyncInternalDb SyncCourseleafCgis SyncSkeleton)
+			pgms=(updateDefaults SyncCourseleafPatchTable CheckMonitorFiles SyncInternalDb SyncCourseleafCgis SyncSkeleton)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -312,3 +355,4 @@ return 0
 ## 03-23-2018 @ 15:33:56 - 2.2.22 - dscudiero - D
 ## 03-23-2018 @ 16:18:31 - 2.2.23 - dscudiero - Cleanup Includes
 ## 03-26-2018 @ 08:56:02 - 2.2.25 - dscudiero - Comment out BuildToolsAuthTable
+## 05-04-2018 @ 13:32:00 - 2.2.26 - dscudiero - Added SyncCourseleafPatchTable function
