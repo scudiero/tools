@@ -16,7 +16,7 @@
 function RsyncCopy {
 	local source="$1"; shift || true
 	local target="$1"; shift || true
-	local ignoreList="$1"; shift || true; [[ $ignoreList == 'none' ]] && unset ignoreList
+	local ignoreList="${1:-none}"; shift || true; [[ $ignoreList == 'none' ]] && unset ignoreList
 	local backupDir="${1:-/dev/null}"
 	local token rsyncOpts source target rsyncOut rsyncFilters rsyncVerbose rsyncListonly rc
 	dump source target ignoreList backupDir | Indent | Indent >> "$logFile"
@@ -83,3 +83,4 @@ export -f RsyncCopy
 # Check-in Log
 #===================================================================================================
 ## 05-01-2018 @ 16:14:23 - 1.0.0 - dscudiero - Updated to allow rsync output to go out to the logFile
+## 05-04-2018 @ 07:03:46 - 1.0.0 - dscudiero - Add a default value for ignoreList
