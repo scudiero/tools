@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.91" // -- dscudiero -- Mon 05/07/2018 @  9:17:57.62
+wfLibVersion="1.8.91" // -- dscudiero -- Mon 05/07/2018 @  9:24:10.78
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -365,9 +365,7 @@ wffuncs.CheckAcadLevel = function(inval, wfrule, args) {
 
 	// Main
  		var allowStep=false;
-
 		optionStr.split(";").forEach(function(token) {
-			print_debug('token = ' + token.toSource() + '\n');
 			expression=token.split(",");
 			checkVal=getTCFValue(expression[0]);
 			reStr=getTCFValue(expression[1]);
@@ -2611,4 +2609,4 @@ var wfLibLoaded=true;
 // 04-19-2018 @ 11:02:16 - 1.8.88 - dscudiero - Tweak messaging
 // 04-26-2018 @ 08:34:58 - 1.8.89 - dscudiero - Fix problem in lookup2, changed data atribut from 'data' to 'dbData'
 // 05-07-2018 @ 08:10:37 - 1.8.90 - dscudiero - Fix bug in related expansion if type is college and data is college
-// 05-07-2018 @ 09:22:05 - 1.8.91 - dscudiero - Add ability to specify multiple check expressions in CheckAcadLevel
+// 05-07-2018 @ 09:25:20 - 1.8.91 - dscudiero - Remove debug statements from CheckAcadLevel
