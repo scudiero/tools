@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.90" // -- dscudiero -- Mon 05/07/2018 @  8:09:41.22
+wfLibVersion="1.8.91" // -- dscudiero -- Mon 05/07/2018 @  9:17:57.62
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -337,9 +337,11 @@ ProposalState = function() {
 //
 //		wfrules:isUndergraduate|function|checkAcadLevel|course_number,wfUgRe; //Proposal for an Undergraduate course
 //		wfrules:isGraduate|function|checkAcadLevel|course_number,wfGrRe; //Proposal for an Graduate course
+//		wfrules:isUndergraduateOrisGraduate|function|checkAcadLevel|course_number,wfUgRe;course_number,wfGrRe; //Proposal for an Undergraduate or Graduate course
 //
 // i.e.
-//		wfrules:isGraduate|function|checkAcadLevel|<variable to check>,<regular expression tcfdata variable name>;
+//		wfrules:isGraduate|function|checkAcadLevel|<variable to check>,<regular expression tcfdata variable name>
+//													[;<variable to check>,<regular expression tcfdata variable name>];
 //
 // looks up the value of 'tcfdata.<regular expression tcfdata variable name>' and uses that to build a regular expression
 // object to test against the value of 'tcfdata.<variable to check>'
@@ -352,7 +354,7 @@ ProposalState = function() {
 wffuncs.CheckAcadLevel = function(inval, wfrule, args) {
 	var myName=wfrule.attrname;
 	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
-	var optionStr=wfrule.options; optionStr=optionStr.substring(0, optionStr.indexOf(';')); options=optionStr.split(',')
+	var optionStr=wfrule.options; optionStr=optionStr.substring(0, optionStr.lastIndexOf(';')); options=optionStr.split(',')
 	var retArray=[];
 
 	var reqType=wfrule.searchfor.toLowerCase();
@@ -363,14 +365,19 @@ wffuncs.CheckAcadLevel = function(inval, wfrule, args) {
 
 	// Main
  		var allowStep=false;
-		checkVal=getTCFValue(options[0]);
-		reStr=getTCFValue(options[1]);
-		if ( reStr.charAt(0) === '/')
-			reStr=reStr.substr(1, reStr.length-2)
-		var re = new RegExp(reStr, "i");
-		wfDump(1,["checkVal;"+checkVal,"reStr;"+reStr,"re;"+re.toSource()])
-		if (re.test(checkVal))
-			allowStep=true;
+
+		optionStr.split(";").forEach(function(token) {
+			print_debug('token = ' + token.toSource() + '\n');
+			expression=token.split(",");
+			checkVal=getTCFValue(expression[0]);
+			reStr=getTCFValue(expression[1]);
+			if ( reStr.charAt(0) === '/')
+				reStr=reStr.substr(1, reStr.length-2)
+			var re = new RegExp(reStr, "i");
+			wfDump(1,["checkVal;"+checkVal,"reStr;"+reStr,"re;"+re.toSource()])
+			if (re.test(checkVal))
+				allowStep=true;
+		});
 
 	// Return results
 		if (notMode) allowStep=!allowStep;
@@ -2604,3 +2611,4 @@ var wfLibLoaded=true;
 // 04-19-2018 @ 11:02:16 - 1.8.88 - dscudiero - Tweak messaging
 // 04-26-2018 @ 08:34:58 - 1.8.89 - dscudiero - Fix problem in lookup2, changed data atribut from 'data' to 'dbData'
 // 05-07-2018 @ 08:10:37 - 1.8.90 - dscudiero - Fix bug in related expansion if type is college and data is college
+// 05-07-2018 @ 09:22:05 - 1.8.91 - dscudiero - Add ability to specify multiple check expressions in CheckAcadLevel
