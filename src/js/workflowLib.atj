@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.89" // -- dscudiero -- Wed 04/25/2018 @ 13:58:59.34
+wfLibVersion="1.8.90" // -- dscudiero -- Mon 05/07/2018 @  8:09:41.22
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -956,7 +956,7 @@ GetRelated2 = function(type,data) {
 							wfDebug(myDebugLevel,myIndent +"\tskipping ref, code ("+ ref.data +") is in proposalColsStr ("+ proposalColsStr.toSource() +")");
 						} else {
 							retToken={}
-							retToken.data=ref.data;
+							retToken.dbData=ref.data;
 							retToken.source=ref.source;
 							resultSet.push(retToken);
 						}
@@ -2603,3 +2603,4 @@ var wfLibLoaded=true;
 // 04-19-2018 @ 09:53:37 - 1.8.87 - dscudiero - Updated wfAttrIn to check for 'department' and not parse reqType on 'in' if options are passed
 // 04-19-2018 @ 11:02:16 - 1.8.88 - dscudiero - Tweak messaging
 // 04-26-2018 @ 08:34:58 - 1.8.89 - dscudiero - Fix problem in lookup2, changed data atribut from 'data' to 'dbData'
+// 05-07-2018 @ 08:10:37 - 1.8.90 - dscudiero - Fix bug in related expansion if type is college and data is college
