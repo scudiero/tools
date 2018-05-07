@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.35" # -- dscudiero -- Thu 05/03/2018 @ 14:27:37.46
+# version="1.0.43" # -- dscudiero -- Mon 05/07/2018 @ 13:28:20.40
 #===================================================================================================
 # Various data manipulation functions for courseleaf things
 #===================================================================================================
@@ -135,7 +135,7 @@ function BackupCourseleafFile {
 	local env="${data%% *}"; data="${data#* }"
 	local clientRoot="${data%% *}"; data="${data#* }"
 	local fileEnd="${data%% *}"; data="${data#* }"
-	#dump file client env clientRoot fileEnd
+	#dump file -t client env clientRoot fileEnd
 
 	## Set backup location
 	[[ -z $backupDir ]] && backupDir="${clientRoot}/attic/$myName/$userName.$backupSuffix"	
@@ -143,11 +143,11 @@ function BackupCourseleafFile {
 	local bakFile="${backupDir}${fileEnd}"
 
 	if [[ -f $file ]]; then
-		[[ ! -d $(dirname $bakFile) ]] && $DOIT mkdir -p $(dirname $bakFile)
-		$DOIT cp -fp $file $bakFile
+		[[ ! -d $(dirname $bakFile) ]] && $DOIT mkdir -p "$(dirname $bakFile)"
+		$DOIT cp -fp "$file" "$bakFile"
 	elif [[ -d $file ]]; then
-		[[ ! -d $bakFile ]] && $DOIT mkdir -p $bakFile
-		$DOIT cp -rfp $file $bakFile
+		[[ ! -d $bakFile ]] && $DOIT mkdir -p "$bakFile"
+		$DOIT cp -rfp "$file" "$bakFile"
 	fi
 
 	return 0
@@ -610,3 +610,4 @@ export -f GetCims
 ## 05-02-2018 @ 16:45:23 - 1.0.32 - dscudiero - Re-factor BackupCourseleafFile, allow passing in of the backup directory name
 ## 05-03-2018 @ 08:26:09 - 1.0.34 - dscudiero - Change how we parse off the client and env data
 ## 05-03-2018 @ 14:27:56 - 1.0.35 - dscudiero - Allow 'courseleaf' as a product
+## 05-07-2018 @ 14:24:27 - 1.0.43 - dscudiero - Cosmetic/minor change/Sync
