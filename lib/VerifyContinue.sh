@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.27" # -- dscudiero -- Fri 03/23/2018 @ 16:50:21.69
+# version="2.0.28" # -- dscudiero -- Tue 05/08/2018 @ 13:26:45.10
 #===================================================================================================
 ## Make sure the user really wants to do this
 ## If the first argument is 'loop' then loop back to self if user responds with 'n'
@@ -18,7 +18,7 @@ function VerifyContinue {
 
 	Msg; Msg "$verifyPrompt"
 	if [[ ${#verifyArgs[@]} -gt 0 ]]; then
-		[[ $allItems == true ]] && verifyArgs+=("Auto process all items:$allItems")
+		#[[ $allItems == true ]] && verifyArgs+=("Auto process all items:$allItems")
 		[[ $force == true ]] && verifyArgs+=("Force execution:$force")
 
 		local maxArgWidth
@@ -73,3 +73,4 @@ export -f VerifyContinue
 ## 03-13-2018 @ 08:29:40 - 2.0.25 - dscudiero - Remove 'merge' load option, not really necessary
 ## 03-13-2018 @ 11:14:30 - 2.0.26 - dscudiero - Fix if conditional checking response to prompt
 ## 03-23-2018 @ 16:52:29 - 2.0.27 - dscudiero - Msg3 -> Msg
+## 05-08-2018 @ 13:27:21 - 2.0.28 - dscudiero - Remove the 'Auto process all items message
