@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.73 # -- dscudiero -- Tue 05/08/2018 @  7:44:50.03
+# version=2.1.75 # -- dscudiero -- Tue 05/08/2018 @ 11:01:45.30
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -225,6 +225,8 @@ function Init {
 				getJalot=true
 			fi
 		fi
+		[[ -n $envs && -z $env ]] && env="$envs"
+		[[ -n $env && -z $envs ]] && envs="$env"
 	fi
 	dump -3 clientEnvs env envs srcEnv tgtEnv -n
 
@@ -407,3 +409,4 @@ export -f Init
 ## 04-24-2018 @ 11:24:04 - 2.1.70 - dscudiero - Bail out if fastInit is set
 ## 04-24-2018 @ 11:58:35 - 2.1.71 - dscudiero - Remive 'if' from the fastInit check
 ## 05-08-2018 @ 08:13:28 - 2.1.73 - dscudiero - Add a message if fastInit is active
+## 05-08-2018 @ 11:51:42 - 2.1.75 - dscudiero - Set env variable if envs has a value and vice versa
