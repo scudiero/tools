@@ -5,14 +5,16 @@ version=6.0.0 # -- dscudiero -- Tue 04/24/2018 @ 10:16:13.84
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
-myIncludes="$myIncludes WriteChangelogEntry"
+myIncludes="$myIncludes SetSiteDirs WriteChangelogEntry"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="Refresh courseleaf product(s) from the git repository shadows ($gitRepoShadow)"
 cwdStart="$(pwd)"
 
-#originalArgStr="wisc -pvt -products 'cat,cim' -master -fastInit"
+#TODO
+#originalArgStr="wisc -pvt -products cat,cim -current -noAdvance -noBackup -noAudit -fastInit $originalArgStr"
+#dump originalArgStr
 
 #=======================================================================================================================
 # Refresh/Patch Courseleaf component(s)
@@ -63,9 +65,9 @@ cwdStart="$(pwd)"
 
 	function courseleafPatchNew-testMode {
 		client='wisc'
-		env='pvt'
+		envs='pvt'
 		siteDir="/mnt/dev6/web/wisc-dscudiero"
-		products='cat,cim'
+		products='all'
 		buildPatchPackage=true
 		backup=false
 		catalogAdvance=false
@@ -256,28 +258,21 @@ function processGitRecord {
 		## Make backup copies of the files we are going to update
 			Msg "Archiving ${#gitFilesUpdated[@]} files..."
 			for ((bCntr=0; bCntr<${#gitFilesUpdated[@]}; bCntr++)); do
-				mkdir -p "${backupRootDir}${specTarget}/$(dirname "${gitFilesUpdated[$bCntr]}")"
 				srcFile="${tgtDir}${specTarget}/${gitFilesUpdated[$bCntr]}"
-				[[ -r $srcFile ]] && cp -fp "$srcFile" "${backupRootDir}${specTarget}/${gitFilesUpdated[$bCntr]}"
+				[[ -r $srcFile ]] && backupFile "$srcFile" "${backupRootDir}"
 				Log "^$srcFile"
 			done
 		## Update local files from the git repo via checkout
-			Msg "Updating ${#gitFilesUpdated[@]} files (via git checkout)..."
+			Msg "Updating files (via git checkout)..."
 			gitCmd="git reset --hard --quiet"; ## Update git repo data
 			ProtectedCall "$gitCmd" | Indent
 			gitCmd="git checkout --force --quiet $gitTag"; ## Update git files
 			ProtectedCall "$gitCmd" | Indent;
-
 			## If we are going to generate a patch package then write the changed files to the staging directory
-			if buildPatchPackage == true ]]; then 
+			if [[ $buildPatchPackage == true ]]; then 
 				for ((bCntr=0; bCntr<${#gitFilesUpdated[@]}; bCntr++)); do
 					Msg L "\n\t\t$repoName.git ($gitTag) -- ${specTarget}/${gitFilesUpdated[$bCntr]}"
-					if [[ $buildPatchPackage == true ]]; then
-						mkdir -p "${packageRootDir}${specTarget}/$(dirname "${gitFilesUpdated[$bCntr]}")"
-						srcFile="${tgtDir}${specTarget}/${gitFilesUpdated[$bCntr]}" 
-						packageFile="${packageRootDir}${specTarget}/${gitFilesUpdated[$bCntr]}"
-						[[ -r $srcFile ]] && cp -fp "$srcFile" "${packageRootDir}${specTarget}/${gitFilesUpdated[$bCntr]}"
-					fi
+					cpToPackageDir "${tgtDir}${specTarget}/${gitFilesUpdated[$bCntr]}"
 				done
 			fi
 
@@ -316,7 +311,9 @@ function cpToPackageDir {
 	local env="${data%% *}"; data="${data#* }"
 	local clientRoot="${data%% *}"; data="${data#* }"
 	local fileEnd="${data%% *}"; data="${data#* }"
+	#dump -n file -t client env clientRoot fileEnd packageDir
 
+	mkdir -p "$(dirname "${packageDir}${fileEnd}")"
 	cp -fp "$file" "${packageDir}${fileEnd}"
 
 	return 0
@@ -324,7 +321,9 @@ function cpToPackageDir {
 } ## cpToPackageDir
 
 #=======================================================================================================================
+#=======================================================================================================================
 # MAIN
+#=======================================================================================================================
 #=======================================================================================================================
 # Declare local variables and constants
 #=======================================================================================================================
@@ -343,8 +342,7 @@ ParseArgsStd $originalArgStr
 
 #TODO
 skeletonRoot='/mnt/dev6/web/_skeleton/release'
-patchControlDb="/mnt/internal/site/stage/db/courseleafPatch.sqlite"
-dump skeletonRoot patchControlDb -n
+dump skeletonRoot -n
 
 displayGoodbyeSummaryMessages=true
 cleanDirs="${scriptData3##*:}"
@@ -358,21 +356,20 @@ if [[ $testMode != true ]]; then
 		GetSiteDirNoCheck $client
 		[[ -z $siteDir ]] && Terminate "Nocheck option active, could not resolve target site directory"
 	else
-		if [[ $fastInit == true ]]; then
-			SetSiteDirs
-		else
-			Init 'getClient getEnv getDirs checkDirs noPreview noPublic checkProdEnv addPvt'
-		fi
+		Init 'getClient getEnv getDirs checkDirs noPreview noPublic checkProdEnv addPvt'
+		SetSiteDirs
 	fi
 	[[ $env == 'next' || $env == 'curr' ]] && Init 'getJalot'
 fi
-Dump 1 originalArgStr -t client env products current namedRelease branch skeleton catalogAdvance fullAdvance newEdition \
-		catalogAudit backup buildPatchPackage fastInit source rollBack -p
+eval "siteDir=\"\$${envs}Dir\""
+
+Dump 1 originalArgStr -t client env envs products current namedRelease branch skeleton catalogAdvance fullAdvance newEdition \
+		catalogAudit backup buildPatchPackage fastInit source rollBack siteDir -p
 
 ## Is this a rollback requests
 	if [[ $rollBack == true && batchMode != true ]]; then
 		SetFileExpansion 'on'
-		tarFile="$(ls -t $siteDir/attic/*.tar.gz | head -1)"
+		tarFile="$(ls -t $siteDir/attic/*.prePatch.tar.gz | head -1)"
 		SetFileExpansion
 		patchDate=${tarFile#*$myName-}; patchDate=${patchDate%%@*};
 		patchTime=${tarFile#*@}; patchTime=${patchTime%%.*}; patchTime=${patchTime//-/:};
@@ -396,32 +393,34 @@ if [[ $env == 'next' || $env == 'pvt' ]]; then
 	sqlStmt="Select hosting from $clientInfoTable where name=\"$client\""
 	RunSql $sqlStmt
 	hosting=${resultSet[0]}; hosting="${hosting,,[a-z]}"
-	if [[ -n $hosting && != 'leepfrog' ]]; then
+	if [[ -n $hosting && $hosting != 'leepfrog' ]]; then
 		Prompt buildPatchPackage "This client ($client) is hosted off site, do you wish to build a remote patching package ?" 'Yes,No' 'Yes'
 		ans="${buildPatchPackage:0:1}"; ans=${ans,,[a-z]}
 		[[ $ans == 'y' ]] && buildPatchPackage=true
 	fi
 fi #[[ $env == 'next' ]]
 
-dump buildPatchPackage -p
-
 ## Get the patch-able products
 	unset patchableProducts
-	sqlStmt="select distinct product from productPatches"
-	RunSql "$patchControlDb" $sqlStmt
+	sqlStmt="select distinct product from $patchesTable"
+	RunSql $sqlStmt
 	for ((i=0; i<${#resultSet[@]}; i++)); do
 		patchableProducts="$patchableProducts,${resultSet[$i]}"
 	done
 	patchableProducts="${patchableProducts:1}"
 
 ## Get the products to patch
+	[[ $allItems == true ]] && products="$patchableProducts"
 	[[ -z $products ]] && echo
-	Prompt products "What products do you wish to patch (comma separated)" "$patchableProducts,all" "${patchableProducts%%,*}"
-	[[ $products == 'all' ]] && products="${patchableProducts//cgis/}"
-	products="${products// /}"
+	Prompt products "What products do you wish to patch (comma separated)" "${patchableProducts//,/ } all" "${patchableProducts%%,*}"
+	
+	products="${products//cgis/}"; products="${products// /,}"
+	[[ ${products:0:1} == ',' ]] && products="${products:1}"
+	[[ ${products:$((${#products}-1)):1} == ',' ]] && products="${products:0:$((${#products}-1))}"
+
 	if [[ $(Contains "$products" ',') == true ]]; then
-		[[($source == 'named' || $source == 'branch') ]] && Terminate "Sorry, you cannot specify multiple products when asking to source the patch from 'Named Release' or 'Branch'" 
-		products="${products//cgis/}"
+		[[($source == 'named' || $source == 'branch') ]] && \
+		Terminate "Sorry, you cannot specify multiple products when asking to source the patch from 'Named Release' or 'Branch'" 
 	fi
 
 ## Set the target information
@@ -464,7 +463,8 @@ dump buildPatchPackage -p
 		{ Warning 0 1 "Could not resolve the 'locallibs' directory, updates and checks will be skipped"; unset locallibsDir; }
 
 ## Determine the source information
-unset processControl
+unset processControl sourceIn
+
 for product in ${products//,/ }; do
 	gitDir="/mnt/dev6/web/git/${product,,[a-z]}.git"
 	if [[ $product == 'cat' ]]; then
@@ -473,8 +473,9 @@ for product in ${products//,/ }; do
 		[[ $advance == true && -z $localstepsDir ]] && Terminate "Requesting a catalog advance but the localsteps directory could not be located"
 	fi
 
+	[[ -n $sourceIn ]] && source="$sourceIn"
 	if [[ -z $source ]]; then
-		Msg "\nFor '$(ColorK $product)', What source data do you wish to use for the patch:"
+		Msg "\nFor '$(ColorK ${product^^[a-z]})', What source data do you wish to use for the patch:"
 		if [[ $(Contains "$products" ',') == true ]]; then
 			Msg "^$(ColorK \'C\') for Current Release\n^$(ColorK \'M\') for the 'master' branch (aka what's in the skeleton)"
 			unset ans; Prompt ans "Source" "C,M" "C"
@@ -482,10 +483,24 @@ for product in ${products//,/ }; do
 			Msg "^$(ColorK \'C\') for Current Release, \n^$(ColorK \'N\') for Specific named release, \
 				\n^$(ColorK \'B\') for Specific git branch, or \n^$(ColorK \'M\') for the 'master' branch (aka what's in the skeleton)"
 			unset ans; Prompt ans "Which source ?" "C,N,B,M" "C"
-		fi 
+		fi
 		ans="${ans:0:1}"
-		case "${ans^^[a-z]}" in
-			N)	## Get the named release
+		if [[ ${ans,,[a-z]} == 'n' ]]; then
+			source='named'
+		elif [[ ${ans,,[a-z]} == 'b' ]]; then
+			source='branch'
+		elif [[ ${ans,,[a-z]} == 'm' ]]; then
+			source='master'
+		else
+			source='current' 
+		fi
+	else 
+		sourceIn="$source"
+	fi	
+
+	case "${source,,[a-z]}" in
+		named)	## Get the named release
+			if [[ -z $namedRelease ]]; then
 				menuList=("|Git Release (tag)")
 				for token in $(git --git-dir="$gitDir" tag | tr '\r\n' ' '); do
 					[[ $token == '*' ]] && continue
@@ -493,9 +508,10 @@ for product in ${products//,/ }; do
 				done
 				Msg "\nPlease select the release (tag) you wish to use for the patch source:"
 				SelectMenuNew 'menuList' 'namedRelease' '\nGit tag ordinal (or 'x' to quit) > '
-				source='named'
-				;;
-			B)	## Get the git branches
+			fi
+			;;
+		branch)	## Get the git branches
+			if [[ -z $branch ]]; then
 				menuList=("|Git Branch")
 				for token in $(git --git-dir="$gitDir" branch | tr '\r\n' ' '); do
 					[[ $token == '*' ]] && continue
@@ -503,35 +519,40 @@ for product in ${products//,/ }; do
 				done
 				Msg "\nPlease select the git branch you wish to use for the patch source:"
 				SelectMenuNew 'menuList' 'branch' '\nGit tag ordinal (or 'x' to quit) > '		
-				source='branch'
-				;;
-			M)	## Master
-				sourceDir=''
-				source='branch'
-				branch='master'
-				;;
-			*)	## Current release
-## TODO, TBD from Ben
-				sourceDir=''
-				source='named'
-				source='current'
-				;;
-		esac
-		## Get the target sites version
-		eval ${product}Source=\"$source\" 
-		eval "${product}VerBeforePatch=\"\$(GetProductVersion $product "$tgtDir")\""
-		[[ -z \$${product}VerBeforePatch ]] && eval "${product}VerBeforePatch='00.00.00'"
-		processControl="$processControl,$product|$source|${namedRelease}${branch}"
-		unset source branch namedRelease
-	else
-		eval ${product}Source=\"$source\" 
-		eval "${product}VerBeforePatch=\"\$(GetProductVersion $product "$tgtDir")\""
-		[[ -z \$${product}VerBeforePatch ]] && eval "${product}VerBeforePatch='00.00.00'"
-		processControl="$processControl,$product|$source|${namedRelease}${branch}"
-	fi #[[ -z $source ]]
+			fi
+			;;
+		master)	## Master
+			sourceDir=''
+			source='branch'
+			branch='master'
+			;;
+		*)	## Current release
+			## Get the release tag from the patch control database
+			sqlStmt="select option from $patchesTable where product=\"$product\" and recordType=\"currentRelease\""
+			RunSql $sqlStmt
+			[[ ${#resultSet[@]} -eq 0 || -z ${resultSet[0]} ]] && \
+				Terminate "Sorry, 'current' was requested as the source but could not lookup the version from the '$patchesTable' database."
+			sourceDir=''
+			source='current'
+			namedRelease="${resultSet[0]}"
+			;;
+	esac
+	## Get the target sites version, set processControl record
+	eval ${product}Source=\"$source\" 
+	eval "${product}VerBeforePatch=\"\$(GetProductVersion $product "$tgtDir")\""
+	[[ -z \$${product}VerBeforePatch ]] && eval "${product}VerBeforePatch='00.00.00'"
+	processControl+=("$product|$source|${namedRelease}${branch}")
+	unset source namedRelease branch
 done #products
-processControl="${processControl:1}"
-dump -1 source namedRelease branch catVerBeforePatch cimVerAfterPatch clssVerBeforePatch processControl -p
+
+if [[ $verboseLevel -ge 1 ]]; then
+	dump source namedRelease branch catVerBeforePatch cimVerBeforePatch clssVerBeforePatch
+	Msg "\${#processControl[@]} = '${#processControl[@]}'"
+	for ((xx=0; xx<${#processControl[@]}; xx++)); do
+		Msg "^processControl[$xx] = >${processControl[$xx]}<"
+	done
+	Pause
+fi
 
 ## Should we backup the target site
 	if [[ $env == 'next' || $env == 'curr' ]]; then
@@ -543,14 +564,6 @@ dump -1 source namedRelease branch catVerBeforePatch cimVerAfterPatch clssVerBef
 		# Prompt offline "Do you wish to take the site offline during the patching process" 'Yes No' 'Yes'; offline=$(Lower ${offline:0:1})
 		# [[ $offline == 'y' ]] && offline=true || offline=false
 	fi
-
-#TODO
-# ## Set rebuildHistoryDb if patching cim and the current cim version is less than 3.5.7
-# 	rebuildHistoryDb=false
-# 	[[ $(Contains "$products" 'cim') == true && \
-# 	$(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7 rc') == true && \
-# 	$(CompareVersions "$cimVerBeforePatch" 'le' '3.5.7 rc') == true ]] && rebuildHistoryDb=true
-# 	dump -1 rebuildHistoryDb -p
 
 ## Get the cgis information
 	courseleafCgiDirRoot="$skeletonRoot/web/courseleaf"
@@ -601,9 +614,8 @@ else
 	verifyArgs+=("Client:$client")
     verifyArgs+=("Target Env:$(TitleCase $env) ($tgtDir)")
 fi
-verifyArgs+=("Products:$products")
-#processControl="$product|$source|${namedRelease}${branch}"
-for token in $(tr ',' ' ' <<< $processControl); do
+verifyArgs+=("Product(s):${products//,/, }")
+for token in "${processControl[@]}"; do
 	product="${token%%|*}"; token="${token#*|}"
 	source="${token%%|*}"; token="${token#*|}"	
 	[[ -z $token ]] && verifyArgs+=("^$product, source: $source") || verifyArgs+=("^$product, source: $source / $token")
@@ -628,6 +640,8 @@ fi
 #[[ -n $betaProducts ]] && [[ $env == 'next' || $env == 'curr' ]] && Msg && Warning "You are asking to refresh to beta/rc version of the software for: $betaProducts"
 
 VerifyContinue "You are asking to refresh CourseLeaf code files:"
+ProtectedCall "clear"
+Msg
 
 #=======================================================================================================================
 ## Check to see if the targetDir is a git repo, if so make sure there are no active files that have not been pushed.
@@ -913,7 +927,7 @@ fi
 ##======================================================================================================================
 ## Patch catalog
 ##======================================================================================================================
-unset changeLogRecs processedDailysh skipProducts cgiCommands unixCommands
+unset changeLogRecs processedDailysh skipProducts cgiCommands unixCommands 
 [[ -n $comment ]] && changeLogRecs+=("$comment")
 declare -A processedSpecs
 ## Refresh the products
@@ -933,8 +947,10 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 	patchItemNum=1
 	changesMade=false
 	## Run through the action records for the product
-		sqlStmt="select recordType,sourceSpec,targetSpec,option from productPatches where lower(product)=\"$product\" and status=\"Y\" order by orderInProduct"
-		RunSql "$patchControlDb" $sqlStmt
+		fields="recordType,sourceSpec,targetSpec,option"
+		whereClause="lower(product)=\"$product\" and recordType<>\"currentRelease\" and status=\"Y\" order by orderInProduct"
+		sqlStmt="select $fields from $patchesTable where $whereClause"
+		RunSql $sqlStmt
 		[[ ${#resultSet[@]} -le 0 || -z ${resultSet[0]} ]] && Warning 0 2 "No patch file specs found for '$product', skipping" && continue
 		for ((ii=0; ii<${#resultSet[@]}; ii++)); do
 			specLine="${resultSet[$ii]}"
@@ -1015,7 +1031,7 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 						else
 							Msg "RsyncCopy ended with errors: $rsyncResults"
 						fi
-						buildPatchPackage == true ]] && RsyncCopy "$specSource" "$(dirname "${packageRootDir}${specTarget}")" &
+						[[ buildPatchPackage == true ]] && RsyncCopy "$specSource" "$(dirname "${packageRootDir}${specTarget}")" &
 					fi
 					performedAction=true
 					;;
@@ -1036,7 +1052,7 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 							backupDir="$(dirname "${backupRootDir}${specTarget}")"; mkdir -p "$backupDir"
 							[[ -f ${tgtDir}${specTarget} ]] && cp -fp "${tgtDir}${specTarget}" "$backupDir"
 							cp -fp "$srcFile" "${tgtDir}${specTarget}"
-							[[ buildPatchPackage == true ]] && cpToPackageDir "$srcFile"
+							[[ buildPatchPackage == true ]] && cpToPackageDir "${tgtDir}${specTarget}"
 							[[ -n $srcFileVer ]] && Note "'${specTarget}' updated to version: $srcFileVer" || Note "'${specTarget}' updated"
 							changesMade=true
 						else
@@ -1059,16 +1075,20 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 								for cim in $(echo $cimStr | tr ',' ' '); do
 									Msg "^Republishing /$cim/index.tcf..."
 									RunCourseLeafCgi "$tgtDir" "-r /$cim/index.tcf" | Indent | Indent
+									cgiCommands+=("./courseleaf.cgi -r /$cim")
 									## Should we rebuild the cim history database 
 									if [[ $(CompareVersions "$cimVerAfterPatch" 'ge' '3.5.7 rc') == true && \
 										$(CompareVersions "$cimVerBeforePatch" 'le' '3.5.7 rc') == true ]]; then
 										Msg "^RebuildHistoryDb /$cim/index.tcf..."
 										RunCourseLeafCgi "$tgtDir" "rebuildHistoryDb /$cim/index.tcf" | Indent | Indent
+										cgiCommands+=("./courseleaf.cgi rebuildHistoryDb /$cim/index.tcf")
 									fi
 								done
 							fi
 						else
 							RunCourseLeafCgi "$tgtDir" "$specSource $specTarget"
+							cgiCommands+=("./courseleaf.cgi $specSource $specTarget")
+
 						fi						
 						performedAction=true
 					fi
@@ -1114,8 +1134,10 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 					;;
 				include)
 					for ((i2=$ii+1; i2<${#resultSet[@]}; i2++)); do remaining+=("${resultSet[$i2]}"); done
-					sqlStmt="select recordType,sourceSpec,targetSpec,option from productPatches where lower(product)=\"$specSource\" and status=\"Y\" order by orderInProduct"
-					RunSql "$patchControlDb" $sqlStmt
+					fields="recordType,sourceSpec,targetSpec,option"
+					whereClause="where lower(product)=\"$specSource\" and recordType<>\"currentRelease\" and status=\"Y\" order by orderInProduct"
+					sqlStmt="select $fields from $patchesTable where $whereClause"
+					RunSql $sqlStmt
 					if [[ ${#resultSet[@]} -le 0 || -z ${resultSet[0]} ]]; then
 						Warning 0 2 "No patch file specs found for '$specSource', skipping"
 					else
@@ -1156,7 +1178,6 @@ Msg "\nCross product checks..."
 		fileCount=$(ls "$checkDir" 2> /dev/null | grep 'psoft_' | wc -l)
 		[[ $fileCount -gt 0 ]] && Warning 0 1 "Found 'psoft' widgets in '$checkDir', these are probably deprecated, please ask a CIM developer to evaluate."
 	fi
-
 ## Check /ribbit/getcourse.rjs file
 	checkFile="$tgtDir/web/ribbit/getcourse.rjs"
 	if [[ -f "$checkFile" ]]; then
@@ -1170,13 +1191,12 @@ Msg "\nCross product checks..."
 			Warning 0 1 "$text"
 		fi
 	fi
-
 ## Edit the console page
 ##	1) change title to 'CourseLeaf Console' (requested by Mike 02/09/17)
 ## 	2) remove 'System Refresh' (requested by Mike Miller 09/13/17)
 ## 	3) remove 'localsteps:links|links|links' (requested by Mike Miller 09/13/17)
 ## 	4) Add 'navlinks:CAT|Rebuild Course Bubbles and Search Results'
-
+	Msg "^Checking /web/$courseleafProgDir/index.tcf..."
 	editFile="$tgtDir/web/$courseleafProgDir/index.tcf"
 	if [[ -w "$editFile" ]]; then
 		fromStr='title:Catalog Console'
@@ -1191,6 +1211,7 @@ Msg "\nCross product checks..."
 			Msg "^Updated '$updateFile' to change 'title:Catalog Console' to 'title:CourseLeaf Console'"
 			rebuildConsole=true
 		fi
+
 		fromStr='navlinks:CAT|Refresh System|refreshsystem'
 		toStr='// navlinks:CAT|Refresh System|refreshsystem'
 		grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
@@ -1216,6 +1237,7 @@ Msg "\nCross product checks..."
 			Msg "^Updated '$updateFile' to remove 'localsteps:links|links|links"
 			rebuildConsole=true
 		fi
+
 		#navlinks:CAT|Rebuild Course Bubbles and Search Results|mkfscourses^^<h4>Rebuild Course Bubbles and Search Results</h4>Rebuild the course description pop-up bubbles, and also search results.^steptitle=Rebuilding Course Bubbles and Search Results
 		fromStr='localsteps:links|links|links'
 		toStr='// localsteps:links|links|links'
@@ -1236,6 +1258,7 @@ Msg "\nCross product checks..."
 
 ## Edit /localsteps/default.tcf
 	##	1) Remove uploadurl from the default.tcf file(requested by Ben 04/05/18)
+	Msg "^Checking $localstepsDir/default.tcf..."
 	if [[ $(CompareVersions "$(GetProductVersion 'cat' "$siteDir")" 'ge' '3.5.10') == true ]]; then
 		editFile="$localstepsDir/default.tcf"
 		if [[ -f "$editFile" ]]; then
@@ -1251,6 +1274,7 @@ Msg "\nCross product checks..."
 
 ## Move / move fsinjector.sqlite to the ribbit folder (requested by Mike 06/03/17)
 	checkFile="$tgtDir/web/ribbit/fsinjector.sqlite"
+	Msg "^Checking /web/ribbit/fsinjector.sqlite..."
 	if [[ ! -f $checkFile ]]; then
 		[[ -f "$tgtDir/db/fsinjector.sqlite" ]] && mv -f "$tgtDir/db/fsinjector.sqlite" "$checkFile"
 		editFile="$cfgFile"
@@ -1309,16 +1333,61 @@ Msg "\nCross product checks..."
 	WriteChangelogEntry 'changeLogRecs' "$tgtDir/changelog.txt"
 
 ## tar up the backup files
-	tarFile="$myName-$(date +"%m-%d-%y@%H-%M-%S").tar.gz"
-	Pushd $backupRootDir
+	Msg
+	Msg "Generating the backup tar file..."
+	backupTarFile="$myName-$(date +"%m-%d-%y@%H-%M-%S").prePatch.tar.gz"
+	Pushd "$backupRootDir"
 	SetFileExpansion 'off'
-	ProtectedCall "tar -czf $tarFile * --exclude '*.gz' --remove-files"
-	[[ -f ../$tarFile ]] && rm -f ../$tarFile
-	$DOIT mv $tarFile ..
+	ProtectedCall "tar -czf $backupTarFile * --exclude '*.gz' --remove-files" &> /dev/null
+	[[ -f ../$backupTarFile ]] && rm -f "../$backupTarFile"
+	$DOIT mv "$backupTarFile" ..
 	cd ..
-	$DOIT rm -rf $backupRootDir
+	$DOIT rm -rf "$backupRootDir"
 	SetFileExpansion
 	Popd
+
+## tar up the remote package files
+	if [[ $buildPatchPackage == true ]]; then
+		patchTarFile="$myName-$(date +"%m-%d-%y@%H-%M-%S").patch.tar.gz"
+		Msg "Generating the remote patch tar file..."
+		Msg "" > "$packageRootDir/README"
+		Msg "Please follow the following instructions to install this patch, if you have questions please contact your CourseLeaf support rep." >> "$packageRootDir/README" 
+		Msg "" >> "$packageRootDir/README" 
+		Msg "^1) Download the tar file and copy it to the site root directory" >> "$packageRootDir/README"
+		Msg "^^(i.e. just before the 'web' directory)" >> "$packageRootDir/README"
+		Msg "" >> "$packageRootDir/README"
+		Msg "^2) cd to the above directory " >> "$packageRootDir/README"
+		Msg "" >> "$packageRootDir/README"
+		Msg "^3) Un-tar the file (e.g. tar -xvf ./$patchTarFile)" >> "$packageRootDir/README"
+		Msg "^^(e.g. tar -xvf <tarFileName>)" >> "$packageRootDir/README"
+		Msg "" >> "$packageRootDir/README"
+		if [[ ${#unixCommands[@]} -ne 0 ]]; then
+			Msg "^4) Run the following commands from the command line:" >> "$packageRootDir/README"
+			for ((i=0; i<${#unixCommands[@]}; i++)); do
+				Msg "^^${unixCommands[$i]}" >> "$packageRootDir/README"
+			done
+			Msg "" >> "$packageRootDir/README"
+		fi
+		if [[ ${#cgiCommands[@]} -ne 0 ]]; then
+			Msg "^5) cd to the courseleaf directory just under the web directory and run the following courseleaf commands:" >> "$packageRootDir/README"
+			Msg "^^(i.e. cd ./web/courseleaf)" >> "$packageRootDir/README"
+			for ((i=0; i<${#cgiCommands[@]}; i++)); do
+				Msg "^^${cgiCommands[$i]}" >> "$packageRootDir/README"
+			done
+			Msg "" >> "$packageRootDir/README"
+		fi
+		Pushd "$packageRootDir"
+		SetFileExpansion 'off'
+		ProtectedCall "tar -czf $patchTarFile * --exclude '*.gz' --remove-files" &> /dev/null
+		[[ -f ../$patchTarFile ]] && rm -f "../$patchTarFile"
+		$DOIT mv "$patchTarFile" ..
+		cd ..
+		$DOIT rm -rf "$packageRootDir"
+		SetFileExpansion
+		Popd
+		Note "A remote patch file was created and located at '$patchTarFile'"
+		Note "Additional install information can be found in the README file in the patch tar"
+	fi
 
 ## Product messages
 	if [[ $(Contains ",$products," ',cat,') == true ]]; then
