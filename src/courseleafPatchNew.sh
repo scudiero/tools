@@ -943,7 +943,7 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 	dump -1 -t product ${product}VerBefore source processSpec sourceModifier
 
 	Indent ++
-	Msg; Msg "Patching: $(ColorK "${product^^[a-z]}")..."
+	Msg; Msg "Patching: $(ColorK "${product^^[a-z]}") (--> '$source / $sourceModifier') ..."
 	patchItemNum=1
 	changesMade=false
 	## Run through the action records for the product
