@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.49" # -- dscudiero -- Wed 04/18/2018 @  9:26:21.43
+# version="1.2.53" # -- dscudiero -- Tue 05/08/2018 @ 14:38:30.96
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -32,7 +32,7 @@ function FindExecutable {
 	    [[ $1 =~ ^-cr|--cron$ ]] && { mode='cron'; searchRoot="${mode}"; shift 1 || true; continue; }
 	    [[ $1 =~ ^-j|--java$ ]] && { mode='java'; searchRoot="${mode}"; shift 1 || true; continue; }
 
-	    [[ $1 =~ ^-pa|--patch$ ]] && { mode='patch'; searchRoot="${mode}s"; shift 1 || true; continue; }
+	    [[ $1 =~ ^-pa|--patch$ ]] && { mode='patch'; searchRoot="${mode}es"; shift 1 || true; continue; }
 	    [[ $1 =~ ^-fe|--feature$ ]] && { mode='feature'; searchRoot="${mode}s"; shift 1 || true; continue; }
 	    [[ $1 =~ ^-st|--step$ ]] && { mode='step'; searchRoot="${mode}s"; shift 1 || true; continue; }
 	    [[ $1 =~ ^-re|--report$ ]] && { mode='report'; searchRoot="${mode}s"; shift 1 || true; continue; }
@@ -55,23 +55,23 @@ function FindExecutable {
 		[[ $useLocal == true && -d "$HOME/tools/src" ]] && searchDirs="$HOME/tools/src $searchDirs"
 		searchTokens="bash:sh python:py java:class steps:html report:sh cron:sh"
 	fi
-	#Dump -t fileName mode searchRoot searchTokens searchDirs scriptArgs
+Dump -t fileName mode searchRoot searchTokens searchDirs scriptArgs > $stdout
 
 	## Search for the file based in the searchDirs based on the searchTokens
 	for dir in $searchDirs; do
-		#Dump -t dir
+Dump -t dir >> $stdout
 		for token in $(tr ',' ' ' <<< "$searchTokens"); do
 			type="${token%%:*}"; ext="${token##*:}"
-			#Dump -t2 type ext
+Dump -t2 type ext >> $stdout
 			[[ -n $searchRoot ]] && checkFile="$dir/$searchRoot/${fileName}.${ext}" || checkFile="$dir/${fileName}.${ext}"
-			#Dump -t3 checkFile
+Dump -t3 checkFile >> $stdout
 			[[ -r "$checkFile" ]] && { found=true; break; } || unset checkFile
 		done
 		[[ $found == true ]] && break
 	done
 
 	executeFile="$checkFile" 
-	#Dump -t executeFile >> $stdout
+Dump -t executeFile >> $stdout
 
 	if [[ $runScript == true ]]; then
 		#Dump -t scriptArgs

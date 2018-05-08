@@ -1385,8 +1385,8 @@ Msg "\nCross product checks..."
 		$DOIT rm -rf "$packageRootDir"
 		SetFileExpansion
 		Popd
-		Note "A remote patch file was created and located at '$patchTarFile'"
-		Note "Additional install information can be found in the README file in the patch tar"
+		Note 0 1 "A remote patch file was created and located at '$patchTarFile'."
+		Note 0 1 "Additional install information can be found in the README file in the patch tar."
 	fi
 
 ## Product messages
