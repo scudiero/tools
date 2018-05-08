@@ -931,7 +931,9 @@ unset changeLogRecs processedDailysh skipProducts cgiCommands unixCommands
 [[ -n $comment ]] && changeLogRecs+=("$comment")
 declare -A processedSpecs
 ## Refresh the products
-for processSpec in $(tr ',' ' ' <<< $processControl); do
+
+for ((pcCntr=0; pcCntr<${#processControl[@]}; pcCntr++)); do
+	processSpec="${processControl[$pcCntr]}"
 	unset product source sourceModifier
 	dump -1 -n processSpec
 	product="${processSpec%%|*}"; processSpec="${processSpec#*|}"
@@ -943,7 +945,9 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 	dump -1 -t product ${product}VerBefore source processSpec sourceModifier
 
 	Indent ++
-	Msg; Msg "Patching: $(ColorK "${product^^[a-z]}") (--> '$source / $sourceModifier') ..."
+	Msg; 
+	[[ -n $sourceModifier ]] && Msg "Patching: $(ColorK "${product^^[a-z]}") (to $source / $sourceModifier) ..." || \
+								Msg "Patching: $(ColorK "${product^^[a-z]}") (to $source) ..."
 	patchItemNum=1
 	changesMade=false
 	## Run through the action records for the product
@@ -1149,11 +1153,7 @@ for processSpec in $(tr ',' ' ' <<< $processControl); do
 					;;
 			esac
 			Indent --
-			if [[ $performedAction == true ]]; then
-				#Msg "^'$recordType' record processing completed"
-				((patchItemNum++))
-				Indent --
-			fi
+			[[ $performedAction == true ]] && { ((patchItemNum++)); Indent --; }
 		done #Process records
 	Msg
 	Msg "*** ${product^^[a-z]} updates completed ***"
