@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.78" # -- dscudiero -- Thu 05/03/2018 @ 14:10:06.99
+# version="2.0.86" # -- dscudiero -- Tue 05/08/2018 @ 11:50:47.77
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -127,9 +127,9 @@ function VerifyPromptVal {
 		fi
 		local ans=${response,,[a-z]}
 		if [[ $allowMultiple != true && $(Contains "$ans" ",") == true ]]; then
-			verifyMsg=$(Error "$promptVar' does not allow for multiple values, valid values is one in {$validProducts}")
+			verifyMsg=$(Error "$promptVar' does not allow for multiple values, valid values is one in ${validateList// /, }")
 		else
-			[[ $ans == 'all' ]] && { ans="$validateList"; response="$ans"; }
+			[[ $ans == 'all' || $ans == 'a' ]] && { ans="${validateList// all/}"; response="$ans"; }
 			local i j found foundAll=false
 			for i in $(tr ',' ' ' <<< $ans); do
 				found=false
@@ -147,7 +147,7 @@ function VerifyPromptVal {
 					[[ $ans == 'y' ]] && foundAll=true
 				fi
 			fi
-			[[ $foundAll == false ]] && verifyMsg=$(Error "Value of '$response' not valid for '$promptVar', valid values in {$validProducts}")
+			[[ $foundAll == false ]] && verifyMsg=$(Error "Value of '$response' not valid for '$promptVar', valid values in {${validateList// /, }}")
 		fi
 		[[ $verifyMsg == '' ]] && verifyMsg=true
 	fi ## Product(s)
@@ -242,3 +242,4 @@ export -f VerifyPromptVal
 ## 03-23-2018 @ 17:04:35 - 2.0.75 - dscudiero - Msg3 -> Msg
 ## 03-26-2018 @ 15:51:40 - 2.0.76 - dscudiero - Switched from StartRemoteSession to just ssh
 ## 05-03-2018 @ 14:21:25 - 2.0.78 - dscudiero - Fix issue setting validValues in the products section
+## 05-08-2018 @ 11:53:16 - 2.0.86 - dscudiero - Update how we deal with 'all' answers for products
