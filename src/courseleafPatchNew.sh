@@ -1139,7 +1139,7 @@ for ((pcCntr=0; pcCntr<${#processControl[@]}; pcCntr++)); do
 				include)
 					for ((i2=$ii+1; i2<${#resultSet[@]}; i2++)); do remaining+=("${resultSet[$i2]}"); done
 					fields="recordType,sourceSpec,targetSpec,option"
-					whereClause="where lower(product)=\"$specSource\" and recordType<>\"currentRelease\" and status=\"Y\" order by orderInProduct"
+					whereClause="lower(product)=\"$specSource\" and recordType<>\"currentRelease\" and status=\"Y\" order by orderInProduct"
 					sqlStmt="select $fields from $patchesTable where $whereClause"
 					RunSql $sqlStmt
 					if [[ ${#resultSet[@]} -le 0 || -z ${resultSet[0]} ]]; then
