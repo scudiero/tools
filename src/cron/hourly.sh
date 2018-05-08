@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.26 # -- dscudiero -- Fri 05/04/2018 @ 13:31:32.60
+version=2.2.27 # -- dscudiero -- Tue 05/08/2018 @  8:13:11.70
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -193,7 +193,7 @@ function SyncCourseleafPatchTable() {
 	## Load the data from the transactional table into the new table
 		## Get transactional data
 		SetFileExpansion 'off'
-		sqlStmt='select * from productPatches'
+		sqlStmt="select * from $patchesTable"
 		RunSql "$patchControlDb" $sqlStmt
 		SetFileExpansion
 		for rec in "${resultSet[@]}"; do dataRecs+=("$rec"); done
@@ -213,8 +213,6 @@ function SyncCourseleafPatchTable() {
 		RunSql $sqlStmt
 		sqlStmt="rename table ${patchesTable}New to $patchesTable"
 		RunSql $sqlStmt
-
-
 	return 0
 } #SyncCourseleafPatchTable
 
@@ -356,3 +354,4 @@ return 0
 ## 03-23-2018 @ 16:18:31 - 2.2.23 - dscudiero - Cleanup Includes
 ## 03-26-2018 @ 08:56:02 - 2.2.25 - dscudiero - Comment out BuildToolsAuthTable
 ## 05-04-2018 @ 13:32:00 - 2.2.26 - dscudiero - Added SyncCourseleafPatchTable function
+## 05-08-2018 @ 08:14:10 - 2.2.27 - dscudiero - Update syncCourseLeafPatchTable to chage name of the transactional db
