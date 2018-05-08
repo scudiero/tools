@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.53" # -- dscudiero -- Tue 05/08/2018 @ 14:38:30.96
+# version="1.2.54" # -- dscudiero -- Tue 05/08/2018 @ 16:02:48.31
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -55,23 +55,23 @@ function FindExecutable {
 		[[ $useLocal == true && -d "$HOME/tools/src" ]] && searchDirs="$HOME/tools/src $searchDirs"
 		searchTokens="bash:sh python:py java:class steps:html report:sh cron:sh"
 	fi
-Dump -t fileName mode searchRoot searchTokens searchDirs scriptArgs > $stdout
+	#Dump -t fileName mode searchRoot searchTokens searchDirs scriptArgs > $stdout
 
 	## Search for the file based in the searchDirs based on the searchTokens
 	for dir in $searchDirs; do
-Dump -t dir >> $stdout
+		#Dump -t dir >> $stdout
 		for token in $(tr ',' ' ' <<< "$searchTokens"); do
 			type="${token%%:*}"; ext="${token##*:}"
-Dump -t2 type ext >> $stdout
+			#Dump -t2 type ext >> $stdout
 			[[ -n $searchRoot ]] && checkFile="$dir/$searchRoot/${fileName}.${ext}" || checkFile="$dir/${fileName}.${ext}"
-Dump -t3 checkFile >> $stdout
+			#Dump -t3 checkFile >> $stdout
 			[[ -r "$checkFile" ]] && { found=true; break; } || unset checkFile
 		done
 		[[ $found == true ]] && break
 	done
 
 	executeFile="$checkFile" 
-Dump -t executeFile >> $stdout
+	#Dump -t executeFile >> $stdout
 
 	if [[ $runScript == true ]]; then
 		#Dump -t scriptArgs
@@ -117,3 +117,4 @@ export -f FindExecutable
 ## 10-23-2017 @ 07.56.04 - ("1.2.34")  - dscudiero - change the min abbreviation for file to be -file
 ## 10-27-2017 @ 13.28.25 - ("1.2.47")  - dscudiero - Cosmetic/minor change
 ## 04-18-2018 @ 09:34:45 - 1.2.49 - dscudiero - Refactored setting searchdirs
+## 05-08-2018 @ 16:03:49 - 1.2.54 - dscudiero - Remove debug statements
