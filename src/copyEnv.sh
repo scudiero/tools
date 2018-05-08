@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.53 # -- dscudiero -- Tue 04/24/2018 @ 13:05:17.83
+version=4.13.55 # -- dscudiero -- Tue 05/08/2018 @ 13:44:51.95
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -421,7 +421,7 @@ dump -1 skipCim skipCat skipClss skipAlso
 	trap - ERR
 	Msg "\nrsync $rsyncOpts $srcDir/ $tgtDir\n" >> $logFile
 	cat "$rsyncFilters" >> "$logFile"
-	rsync $rsyncOpts $srcDir/ $tgtDir
+	Indent ++; rsync $rsyncOpts $srcDir/ $tgtDir | Indent; Indent --
 	eval "trap $previousTrapERR"
 
 	[[ -f $rsyncFilters ]] && rm $rsyncFilters
@@ -706,3 +706,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 04-13-2018 @ 09:58:16 - 4.13.51 - dscudiero - Change short abbrevition for the debug option to be debug
 ## 04-23-2018 @ 11:30:00 - 4.13.52 - dscudiero - Write the env data out to the .clonedFrom file
 ## 04-24-2018 @ 13:06:12 - 4.13.53 - dscudiero - Fix echo statement for env to .clonedFrom, missing the $
+## 05-08-2018 @ 13:49:15 - 4.13.55 - dscudiero - Indent the output from rsync
