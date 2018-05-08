@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.67" # -- dscudiero -- Mon 04/30/2018 @ 13:42:12.15
+# version="2.1.75" # -- dscudiero -- Tue 05/08/2018 @ 11:51:09.41
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -23,9 +23,7 @@ function Prompt {
 	declare timerPrompt=${1:-"Timed prompt, please press enter to provide a response, otherwise processing will continue in"}; shift || true
 	[[ ${promptText:0:1} == '^' ]] && timerPrompt="^$timerPrompt"
 	declare timerInterruptPrompt=${1:-"$promptText"}; shift || true
-	dump -2 -l promptVar promptText defaultVal validateList validateListString timeOut timerPrompt timerInterruptPrompt
-
-	declare validateListString="$(echo $validateList | tr " " ",")"
+	declare validateListString="${validateList// /,}"
 	validateListString=${validateListString%%/*}
 
 	if [[ -n $defaultVal ]]; then
@@ -33,6 +31,7 @@ function Prompt {
 		validateListString=$(sed "s/,${defaultVal},/,\\${colorDefaultVal}${defaultVal}\\${colorDefault},/" <<< "$validateListString")
 		validateListString="${validateListString:1:${#validateListString}-2}"
 	fi
+	dump 2 -L promptVar promptText defaultVal validateList validateListString timeOut timerPrompt timerInterruptPrompt
 
 	if [[ $inVerifyContinue != true ]]; then
 		[[ -n $validateListString ]] && validateListString="$validateListString, or 'X' to quit" || validateListString="'X' to quit"
@@ -202,3 +201,4 @@ export -f Prompt
 ## 04-19-2018 @ 13:09:11 - 2.1.65 - dscudiero - Cosmetic/minor change/Sync
 ## 04-30-2018 @ 12:52:43 - 2.1.66 - dscudiero - Remove debug statements
 ## 04-30-2018 @ 13:42:28 - 2.1.67 - dscudiero - Remove debug statement
+## 05-08-2018 @ 11:52:43 - 2.1.75 - dscudiero - Change some tr calls to direct variable edits
