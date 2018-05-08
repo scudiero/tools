@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.75" # -- dscudiero -- Tue 05/08/2018 @ 11:51:09.41
+# version="2.1.77" # -- dscudiero -- Tue 05/08/2018 @ 15:12:54.44
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -25,6 +25,8 @@ function Prompt {
 	declare timerInterruptPrompt=${1:-"$promptText"}; shift || true
 	declare validateListString="${validateList// /,}"
 	validateListString=${validateListString%%/*}
+	[[ ${validateListString:$((${#validateListString}-1)):1} == ',' ]] && validateListString="${validateListString:0:$((${#validateListString}-1))}"
+
 
 	if [[ -n $defaultVal ]]; then
 		validateListString=",$validateListString,"
@@ -202,3 +204,4 @@ export -f Prompt
 ## 04-30-2018 @ 12:52:43 - 2.1.66 - dscudiero - Remove debug statements
 ## 04-30-2018 @ 13:42:28 - 2.1.67 - dscudiero - Remove debug statement
 ## 05-08-2018 @ 11:52:43 - 2.1.75 - dscudiero - Change some tr calls to direct variable edits
+## 05-08-2018 @ 15:15:32 - 2.1.77 - dscudiero - Remove trailing comma from validateString
