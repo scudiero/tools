@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.71 # -- dscudiero -- Tue 04/24/2018 @ 11:58:07.91
+# version=2.1.73 # -- dscudiero -- Tue 05/08/2018 @  7:44:50.03
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -15,7 +15,7 @@
 # All rights reserved
 #===================================================================================================
 function Init {
-	[[ $fastInit == true ]] && return 0
+	[[ $fastInit == true ]] && { Note 0 1 "'fastInit' is active, skipping argument validation"; return 0; }
 	myIncludes="SetSiteDirs GetCims PushPop SetFileExpansion Prompt"
 	Import "$standardInteractiveIncludes $myIncludes"
 
@@ -406,3 +406,4 @@ export -f Init
 ## 03-23-2018 @ 17:04:12 - 2.1.69 - dscudiero - Msg3 -> Msg
 ## 04-24-2018 @ 11:24:04 - 2.1.70 - dscudiero - Bail out if fastInit is set
 ## 04-24-2018 @ 11:58:35 - 2.1.71 - dscudiero - Remive 'if' from the fastInit check
+## 05-08-2018 @ 08:13:28 - 2.1.73 - dscudiero - Add a message if fastInit is active
