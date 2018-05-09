@@ -218,9 +218,9 @@ Pause
 		editFile="$tgtDir/${specTarget}/.git/config"
 		sed -i s"/bare = true/bare = false/" "$editFile"
 
-		## Commit all of the local git files so we start from scratch
-		gitCmd="git commit --all -m \"$myName - $gitTag initial\"";
-		ProtectedCall "$gitCmd" #&> /dev/null
+		# ## Commit all of the local git files so we start from scratch
+		# gitCmd="git commit --all -m \"$myName - $gitTag initial\"";
+		# ProtectedCall "$gitCmd" #&> /dev/null
 Pause
 		checkRepoStatus=false
 	fi
