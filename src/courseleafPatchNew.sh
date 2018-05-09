@@ -213,17 +213,18 @@ function processGitRecord {
 		[[ ! -d $repoSrc ]] && Terminate 0 2 "Could not locate a source .git repository for this request, repository:\n^$repoSrc"
 		gitCmd="git clone --mirror \"$repoSrc\" \"${tgtDir}${specTarget}/.git\"";
 		ProtectedCall "$gitCmd" | Indent
-
+Pause
 		## Make the local git repo a real worktree, need to hack the config file since our git is so down level
 		editFile="$tgtDir/${specTarget}/.git/config"
 		sed -i s"/bare = true/bare = false/" "$editFile"
 
 		## Commit all of the local git files so we start from scratch
 		gitCmd="git commit --all -m \"$myName - $gitTag initial\"";
-		ProtectedCall "$gitCmd" &> /dev/null ;
-
+		ProtectedCall "$gitCmd" #&> /dev/null
+Pause
 		checkRepoStatus=false
 	fi
+	
 	Pushd "$tgtDir/${specTarget}"
 	## See if there are any modifications to files in the local git repo
 	if [[ $checkRepoStatus == true ]]; then
