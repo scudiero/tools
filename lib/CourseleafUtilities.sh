@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.43" # -- dscudiero -- Mon 05/07/2018 @ 13:28:20.40
+# version="1.0.44" # -- dscudiero -- Thu 05/10/2018 @ 15:25:53.57
 #===================================================================================================
 # Various data manipulation functions for courseleaf things
 #===================================================================================================
@@ -141,6 +141,7 @@ function BackupCourseleafFile {
 	[[ -z $backupDir ]] && backupDir="${clientRoot}/attic/$myName/$userName.$backupSuffix"	
 	[[ ! -d $backupDir ]] && $DOIT mkdir -p $backupDir
 	local bakFile="${backupDir}${fileEnd}"
+dump backFile
 
 	if [[ -f $file ]]; then
 		[[ ! -d $(dirname $bakFile) ]] && $DOIT mkdir -p "$(dirname $bakFile)"
@@ -611,3 +612,4 @@ export -f GetCims
 ## 05-03-2018 @ 08:26:09 - 1.0.34 - dscudiero - Change how we parse off the client and env data
 ## 05-03-2018 @ 14:27:56 - 1.0.35 - dscudiero - Allow 'courseleaf' as a product
 ## 05-07-2018 @ 14:24:27 - 1.0.43 - dscudiero - Cosmetic/minor change/Sync
+## 05-10-2018 @ 15:26:21 - 1.0.44 - dscudiero - Add debug
