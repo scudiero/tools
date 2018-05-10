@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.14" # -- dscudiero -- Thu 05/10/2018 @  8:29:55.48
+# version="2.1.15" # -- dscudiero -- Thu 05/10/2018 @  8:32:11.63
 #===================================================================================================
 # Common script exit
 # args:
@@ -141,6 +141,7 @@ function Goodbye {
 
 	if [[ $PAUSEATEXIT == true && $exitCode != 'x' ]]; then
 		Msg "$colorKey"
+dump exitCode
 		Msg '*******************************************************************************'
 		Msg '*** Remote script excution has complete, please press enter to close window ***'
 		Msg '*******************************************************************************'
@@ -208,3 +209,4 @@ export -f QUIT
 ## 03-23-2018 @ 16:52:12 - 2.1.12 - dscudiero - Msg3 -> Msg
 ## 04-20-2018 @ 07:22:36 - 2.1.13 - dscudiero - Move the alert for pauseonexit
 ## 05-10-2018 @ 08:30:40 - 2.1.14 - dscudiero - Do not put up banner if PAUSONEXIT and user requested to terminate the script
+## 05-10-2018 @ 08:32:19 - 2.1.15 - dscudiero - Cosmetic/minor change/Sync
