@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.74" # -- dscudiero -- Tue 05/01/2018 @ 14:24:58.04
+# version="2.0.75" # -- dscudiero -- Thu 05/10/2018 @ 16:52:21.08
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -21,12 +21,12 @@ function Dump {
 			continue
 		fi
 		[[ ${mytoken:0:2} == '-t' ]] && { tabCnt=${mytoken:2}; tabCnt=${tabCnt:-1}; continue; }
-		[[ $mytoken == '-n' ]] && { echo -e -n "\n"; continue; }
-		[[ $mytoken == '-l' ]] && { logOnly=true; shift; continue; }
-		[[ $mytoken == '-s' ]] && { logOnly=true; toStdout=true; shift; continue; }
-		[[ $mytoken == '-p' ]] && { pause=true; continue; }
-		[[ $mytoken == '-q' ]] && { Quit; }
-		[[ $mytoken == '-ifme' ]] && { [[ $userName != dscudiero ]] && return 0; }
+		[[ ${mytoken,,[a-z]} == '-n' ]] && { echo -e -n "\n"; continue; }
+		[[ ${mytoken,,[a-z]} == '-l' ]] && { logOnly=true; shift; continue; }
+		[[ ${mytoken,,[a-z]} == '-s' ]] && { logOnly=true; toStdout=true; shift; continue; }
+		[[ ${mytoken,,[a-z]} == '-p' ]] && { pause=true; continue; }
+		[[ ${mytoken,,[a-z]} == '-q' ]] && { Quit; }
+		[[ ${mytoken,,[a-z]} == '-ifme' ]] && { [[ $userName != dscudiero ]] && return 0; }
 
 		if [[ $logOnly == true && -n $logFile ]]; then
 			#[[ $dumpFirstWrite == true ]] && { echo -e "\n\n$(head -c 100 < /dev/zero | tr '\0' '=')" >> $logFile; echo "$(date)" >> $logFile;  dumpFirstWrite=false; }
@@ -52,102 +52,6 @@ function Dump {
 } ## Dump
 function dump { Dump $* ; }
 export -f Dump dump
-
-
-# dumpFirstWrite=true
-# function DumpS {
-# 	declare lowervName
-# 	local singleLine=false quit=false pause=false logit=false tabs='' dumpLogFile=$HOME/stdout.txt vName vVal prefix mytoken
-
-# 	PushSettings "$FUNCNAME"
-# 	set +xv # Turn off trace
-
-# 	## Process our own special directives
-# 		if [[ $(Lower $1) == 'if' || $(Lower $1) == 'is' ]]; then
-# 			shift ; mytoken1="$1" ; shift
-# 			[[ $userName != $mytoken1 ]] && return 0
-# 			shift
-# 		elif [[ $(Lower $1) == 'ifme' || $(Lower $1) == 'isme' ]]; then
-# 			[[ $userName != 'dscudiero' ]] && return 0
-# 			shift
-# 		elif [[ $(Lower $1) == 'singleline' || $(Lower $1) == 'oneline' ]]; then
-# 			singleLine=true
-# 			shift
-# 		fi
-
-# 	writeIt() {
-# 		local writeItVar="$1"
-# 		local writeItVal="$2"
-# 		local sep writeItOutStr
-# 		[[ $singleLine == true && -n $writeItVar ]] && sep=', ' || sep='\n'
-# 		local prefix=''
-# 		[[ $caller != 'source' ]] && prefix="$(ColorV "$myName.$caller")."
-# 		local varStr="$(ColorN "$writeItVar")"
-
-# 		[[ -n $writeItVar ]] && writeItOutStr="${prefix}${varStr} = >${writeItVal}<${sep}" || writeItOutStr="$sep"
-# 		#[[ ${writeItOutStr: (-2)} == ",\n" ]] && writeItOutStr="${writeItOutStr:0:${#writeItOutStr}-2}\n"
-
-# 		if [[ $logit == false ]]; then
-# 			echo -en "${tabs}${writeItOutStr}";
-# 		elif [[ -w $dumpLogFile ]]; then
-# 			[[ $dumpFirstWrite == true ]] && echo $(date) >> $dumpLogFile && dumpFirstWrite=false
-# 			echo -en "$tabs$writeItOutStr" >> $dumpLogFile
-# 		fi
-# 		return 0
-# 	} #writeIt
-
-# 	## Loop through arguments
-# 		local debugVarArray=($*)
-# 		for debugVar in ${debugVarArray[@]};do
-# 			vName=$debugVar; lowervName=$(Lower $vName)
-# 			if [[ ${vName:0:1} == '-' ]]; then
-# 				if [[ $lowervName == '-r' ]]; then
-# 					echo > $dumpLogFile
-# 				elif [[ $lowervName == '-s' ]]; then
-# 					singleLine=true
-# 				elif [[ $lowervName == '-o' ]]; then
-# 					singleLine=true
-# 				elif [[ $lowervName == '-l' ]]; then
-# 					logit=true
-# 				elif [[ $lowervName == '-t' ]]; then
-# 					tabs="\t"$tabs
-# 				elif [[ $lowervName == '-q' ]]; then
-# 					quit=true
-# 				elif [[ $lowervName == '-p' ]]; then
-# 					pause=true
-# 				elif [[ $lowervName == '-n' ]]; then
-# 					writeIt;
-# 				elif [[ $lowervName == '-m' ]]; then
-# 					writeIt 'msg'
-# 				else
-# 					local re='^[0-9]+$'
-# 					if [[ ${vName:1} =~ $re ]]; then
-# 						local msgLevel=${vName:1}
-# 						[[ $msgLevel -gt $verboseLevel ]] && return 0
-# 					fi
-# 				fi
-# 			else
-# 				if [[ $vName == 'pwd' ]]; then vVal="$(pwd)"
-# 				else vVal=${!vName}
-# 				fi
-# 				caller=${FUNCNAME[1]}
-# 				[[ $(Lower $caller) == 'dump' ]] && caller=${FUNCNAME[2]}
-# 				writeIt $vName "$vVal"
-# 			fi
-# 		done
-
-# 	## Write it out and or quit
-# 		local callerData="$(caller)"
-# 		local lineNo="$(basename $(cut -d' ' -f2 <<< $callerData))/$(cut -d' ' -f1 <<< $callerData)"
-# 		if [[ $singleLine == true ]]; then vName=''; writeIt; fi
-# 		[[ $quit == true ]] && Quit
-# 		[[ $pause == true ]] && Msg && Pause '*** Dump paused script execution at $lineNo, press enter to continue ***'
-
-
-# 	PopSettings "$FUNCNAME"
-# 	return 0
-
-# } #DumpS
 
 #===================================================================================================
 # TODO tick marks
@@ -263,3 +167,4 @@ export -f DumpMap dumpmap dumphash
 ## 03-23-2018 @ 16:52:07 - 2.0.72 - dscudiero - Msg3 -> Msg
 ## 04-05-2018 @ 15:23:09 - 2.0.73 - dscudiero - Move the tabnation code to inside the write loops
 ## 05-01-2018 @ 16:13:39 - 2.0.74 - dscudiero - Remove the forced banner when sending out to log only
+## 05-10-2018 @ 16:52:41 - 2.0.75 - dscudiero - Lower case args before checking
