@@ -1,7 +1,7 @@
 #!/bin/bash
 #DO NOT AUTPVERSION
 #===================================================================================================
-version=1.0.39 # -- dscudiero -- Fri 03/23/2018 @ 14:38:52.41
+version=1.0.40 # -- dscudiero -- Thu 05/10/2018 @ 14:32:23.27
 #===================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall RunSql SetFileExpansion"
@@ -75,28 +75,28 @@ ParseArgsStd $originalArgStr
 	done
 	Msg "^Update script usage counts -- Completed"
 
-## Roll up the weeks processlog db table
-	Msg;Msg "^Processlog rollup -- Starting"
-	cd $TOOLSPATH/Logs
-	outFile="$(date '+%m-%d-%y').processLog.xls"
-	## Get the column names
-	sqlStmt="select column_name from information_schema.columns where table_schema = \"$warehouseDb\" and table_name = \"$processLogTable\""
-	RunSql $sqlStmt
-	resultString="${resultSet[@]}" ; resultString=$(tr " " "\t" <<< $resultString)
-	echo "$resultString" >> $outFile
-	SetFileExpansion 'off'
-	sqlStmt="select * from $processLogTable"
-	RunSql $sqlStmt
-	if [[ ${#resultSet[@]} -gt 0 ]]; then
-		for result in "${resultSet[@]}"; do
-		 	resultString=$result; resultString=$(tr "|" "\t" <<< $resultString)
-		 	echo "$resultString" >> $outFile
-		done
-		ProtectedCall "tar -cvzf \"$(date '+%m-%d-%y').processLog.tar\" $outFile --remove-files > /dev/null 2>&1"
-	fi
-	sqlStmt="truncate $processLogTable"
-	RunSql $sqlStmt
-	Msg "^Processlog rollup -- Completed"
+# ## Roll up the weeks processlog db table
+# 	Msg;Msg "^Processlog rollup -- Starting"
+# 	cd $TOOLSPATH/Logs
+# 	outFile="$(date '+%m-%d-%y').processLog.xls"
+# 	## Get the column names
+# 	sqlStmt="select column_name from information_schema.columns where table_schema = \"$warehouseDb\" and table_name = \"$processLogTable\""
+# 	RunSql $sqlStmt
+# 	resultString="${resultSet[@]}" ; resultString=$(tr " " "\t" <<< $resultString)
+# 	echo "$resultString" >> $outFile
+# 	SetFileExpansion 'off'
+# 	sqlStmt="select * from $processLogTable"
+# 	RunSql $sqlStmt
+# 	if [[ ${#resultSet[@]} -gt 0 ]]; then
+# 		for result in "${resultSet[@]}"; do
+# 		 	resultString=$result; resultString=$(tr "|" "\t" <<< $resultString)
+# 		 	echo "$resultString" >> $outFile
+# 		done
+# 		ProtectedCall "tar -cvzf \"$(date '+%m-%d-%y').processLog.tar\" $outFile --remove-files > /dev/null 2>&1"
+# 	fi
+# 	sqlStmt="truncate $processLogTable"
+# 	RunSql $sqlStmt
+# 	Msg "^Processlog rollup -- Completed"
 
 ## Roll up the weeks log files
 	Msg;Msg "^Rollup weekly Logs -- Starting"
@@ -129,3 +129,4 @@ Goodbye 0 #'alert'
 ## 12-18-2017 @ 08.04.04 - (1.0.37)    - dscudiero - Cosmetic/minor change
 ## 03-22-2018 @ 14:07:55 - 1.0.38 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:36:23 - 1.0.39 - dscudiero - D
+## 05-10-2018 @ 14:32:43 - 1.0.40 - dscudiero - Commented out the processLog rollup section
