@@ -2,7 +2,7 @@
 
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.48" # -- dscudiero -- Thu 04/19/2018 @ 15:18:15.69
+# version="2.0.49" # -- dscudiero -- Thu 05/10/2018 @ 11:03:54.47
 #===================================================================================================
 # Check to see if the logged user can run this script
 # Returns true if user is authorized, otherwise it returns a message
@@ -30,8 +30,8 @@ function CheckAuth {
 		restrictToGroups="$result"
 		#dump UsersAuthGroups author restrictToUsers restrictToGroups
 
-	# ## If this is the author the let them run
-	# 	[[ $author == $userName ]] && { echo true; return 0; }
+	## If this is the author the let them run
+		[[ $author == $userName ]] && { echo true; return 0; }
 
 	## If there is restrictToUsers data then check
 		found=false
@@ -90,3 +90,4 @@ export -f CheckAuth
 ## 02-02-2018 @ 09.44.36 - 2.0.46 - dscudiero - Fix bug checking of the auth file existrs
 ## 03-22-2018 @ 13:41:52 - 2.0.47 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 04-19-2018 @ 15:19:08 - 2.0.48 - dscudiero - Re-factore checking sql query results = 0
+## 05-10-2018 @ 11:04:10 - 2.0.49 - dscudiero - Turn on the author check again
