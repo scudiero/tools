@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=6.0.2 # -- dscudiero -- Thu 05/10/2018 @ 13:00:11.80
+version=6.0.3 # -- dscudiero -- Thu 05/10/2018 @ 15:25:59.45
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -277,6 +277,7 @@ function backupFile {
 
 	## Check to see if we have processed this file already
 	if [[ ! ${backedupFiles["$file"]+abc} ]]; then
+dump file backupDir
 		BackupCourseleafFile "$file" "$backupDir"
 		backedupFiles["$file"]=true
 	fi
@@ -1488,3 +1489,4 @@ Goodbye 0 "$text1" "$text2"
 ## 05-10-2018 @ 11:49:57 - 6.0.0 - dscudiero - Added removing cimloaderurl
 ## 05-10-2018 @ 12:13:32 - 6.0.1 - dscudiero - Moved setting of skeletonRoot after parsing args
 ## 05-10-2018 @ 14:13:35 - 6.0.2 - dscudiero - Only copy the .gitignore file if it is found
+## 05-10-2018 @ 15:26:31 - 6.0.3 - dscudiero - Add debug
