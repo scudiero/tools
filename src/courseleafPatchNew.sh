@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=6.0.1 # -- dscudiero -- Thu 05/10/2018 @ 12:12:49.18
+version=6.0.2 # -- dscudiero -- Thu 05/10/2018 @ 13:00:11.80
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -208,7 +208,7 @@ function processGitRecord {
 		local srcGitFile="$skeletonRoot/$specTarget/.git"
 		[[ ! -d $srcGitFile ]] && Terminate 0 2 "Could not locate a source .git directory for this request, repository: $repoSrc\n^srcGitFile: $srcGitFile"
 		cp -frp "${srcGitFile}" '.'
-		cp -fp "${srcGitFile}ignore" '.'
+		[[ -f "${srcGitFile}ignore" ]] && cp -fp "${srcGitFile}ignore" '.'
 		## Make the local git repo a real worktree, need to hack the config file since our git is so down level.  Need this for git diff to work
 		sed -i s"/bare = true/bare = false/" "$tgtDir/${specTarget}/.git/config"
 		Msg "^Local repository created"
@@ -1487,3 +1487,4 @@ Goodbye 0 "$text1" "$text2"
 ## 05-10-2018 @ 09:24:02 - 6.0.0 - dscudiero - Resynce, many changes
 ## 05-10-2018 @ 11:49:57 - 6.0.0 - dscudiero - Added removing cimloaderurl
 ## 05-10-2018 @ 12:13:32 - 6.0.1 - dscudiero - Moved setting of skeletonRoot after parsing args
+## 05-10-2018 @ 14:13:35 - 6.0.2 - dscudiero - Only copy the .gitignore file if it is found
