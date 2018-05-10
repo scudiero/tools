@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.15" # -- dscudiero -- Thu 05/10/2018 @  8:32:11.63
+# version="2.1.20" # -- dscudiero -- Thu 05/10/2018 @  8:49:55.10
 #===================================================================================================
 # Common script exit
 # args:
@@ -25,7 +25,7 @@ function Goodbye {
 	local token=$(cut -d' ' -f1 <<< $additionalText)
 	local token="${token,,[a-z]}"
 	[[ $token == 'alert' ]] && alert=true && shift && additionalText=$*
-	[[ "$exitCode" = "" ]] && exitCode=0
+	[[ -z $exitCode ]] && exitCode=0
 
 	## Call script specific goodbye script if defined
 		[[ $(type -t $FUNCNAME-$myName) == 'function' ]] && $FUNCNAME-$myName "$exitCode"
@@ -38,85 +38,86 @@ function Goodbye {
 	case $exitCode in
 		quiet)
 			[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Remove' $myLogRecordIdx
-			[[ $$ -ne $BASHPID ]] && kill -1 $BASHPID  ## If the BASHPID != the current processid then we are in a subshell, send a HangUP signel to the subshell
+			[[ $$ -ne $BASHPID && $PAUSEATEXIT != true ]] && kill -1 $BASHPID  ## If the BASHPID != the current processid then we are in a subshell, send a HangUP signal to the subshell
 			;;
 		quickquit|x)
 			[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Remove' $myLogRecordIdx
 			Msg "\n*** $myName: Stopping at user's request ***"
-			[[ $$ -ne $BASHPID ]] && kill -1 $BASHPID  ## If the BASHPID != the current processid then we are in a subshell, send a HangUP signel to the subshell
+			[[ $$ -ne $BASHPID && $PAUSEATEXIT != true ]] && kill -1 $BASHPID  ## If the BASHPID != the current processid then we are in a subshell, send a HangUP signal to the subshell
+			Here 1a
 			;;
 		return|r)
 			secondaryMessagesOnly=true
 			;;
 		*)
 			## If there are any forked process, then wait on them
-				if [[ ${#forkedProcesses[@]} -gt 0  && $waitOnForkedProcess == true ]]; then
-					Msg; Msg "*** Waiting for ${#forkedProcesses[@]} forked processes to complete ***"
-					for pid in ${forkedProcesses[@]}; do
-						wait $pid;
-					done;
-					Msg '*** All forked process have completed ***'
-				fi
+			if [[ ${#forkedProcesses[@]} -gt 0  && $waitOnForkedProcess == true ]]; then
+				Msg; Msg "*** Waiting for ${#forkedProcesses[@]} forked processes to complete ***"
+				for pid in ${forkedProcesses[@]}; do
+					wait $pid;
+				done;
+				Msg '*** All forked process have completed ***'
+			fi
 
 			## calculate epapsed time
-				if [[ epochStime != "" ]]; then
-					epochEtime=$(date +%s)
-					endTime=$(date '+%Y-%m-%d %H:%M:%S')
-					elapSeconds=$(( epochEtime - epochStime ))
-					eHr=$(( elapSeconds / 3600 ))
-					elapSeconds=$(( elapSeconds - eHr * 3600 ))
-					eMin=$(( elapSeconds / 60 ))
-					elapSeconds=$(( elapSeconds - eMin * 60 ))
-					eSec=$elapSeconds
-					elapTime=$(printf "%02dh %02dm %02ds" $eHr $eMin $eSec)
-				fi
+			if [[ epochStime != "" ]]; then
+				epochEtime=$(date +%s)
+				endTime=$(date '+%Y-%m-%d %H:%M:%S')
+				elapSeconds=$(( epochEtime - epochStime ))
+				eHr=$(( elapSeconds / 3600 ))
+				elapSeconds=$(( elapSeconds - eHr * 3600 ))
+				eMin=$(( elapSeconds / 60 ))
+				elapSeconds=$(( elapSeconds - eMin * 60 ))
+				eSec=$elapSeconds
+				elapTime=$(printf "%02dh %02dm %02ds" $eHr $eMin $eSec)
+			fi
 
 			## print goodbye message
-				date=$(date)
-				#dump quiet noHeaders secondaryMessagesOnly exitCode
-				if [[ $quiet != true && $noHeaders != true && $secondaryMessagesOnly != true ]]; then
-					if [[ $exitCode -ne -1 ]]; then
-						## Standard messages
-						local numMsgs=0
-						Alert 'off'
-						if [[ ${#summaryMsgs[@]} -gt 0 && $displayGoodbyeSummaryMessages == true ]]; then
-							Msg
-							PrintBanner "Processing Summary"
-							Msg
-							for msg in "${summaryMsgs[@]}"; do Msg "^$msg"; done
-							let numMsgs=$numMsgs+${#summaryMsgs[@]}
-						fi
-						if [[ ${#warningMsgs[@]} -gt 0 && $displayGoodbyeSummaryMessages == true ]]; then
-							Msg
-							PrintBanner "${#warningMsgs[@]} warning message(s) were issued during processing"
-							Msg
-							for msg in "${warningMsgs[@]}"; do Msg "^$msg"; done
-							let numMsgs=$numMsgs+${#warningMsgs[@]}
-						fi
-						if [[ ${#errorMsgs[@]} -gt 0 && $displayGoodbyeSummaryMessages == true ]]; then
-							Msg
-							PrintBanner "${#errorMsgs[@]} error message(s) were issued during processing"
-							Msg
-							for msg in "${errorMsgs[@]}"; do Msg "^$msg"; done
-							let numMsgs=$numMsgs+${#errorMsgs[@]}
-						fi
-						[[ $numMsgs -gt 0 ]] && printf "\n$(PadChar)\n"
-						Alert 'on'
+			date=$(date)
+			#dump quiet noHeaders secondaryMessagesOnly exitCode
+			if [[ $quiet != true && $noHeaders != true && $secondaryMessagesOnly != true ]]; then
+				if [[ $exitCode -ne -1 ]]; then
+					## Standard messages
+					local numMsgs=0
+					Alert 'off'
+					if [[ ${#summaryMsgs[@]} -gt 0 && $displayGoodbyeSummaryMessages == true ]]; then
 						Msg
+						PrintBanner "Processing Summary"
+						Msg
+						for msg in "${summaryMsgs[@]}"; do Msg "^$msg"; done
+						let numMsgs=$numMsgs+${#summaryMsgs[@]}
+					fi
+					if [[ ${#warningMsgs[@]} -gt 0 && $displayGoodbyeSummaryMessages == true ]]; then
+						Msg
+						PrintBanner "${#warningMsgs[@]} warning message(s) were issued during processing"
+						Msg
+						for msg in "${warningMsgs[@]}"; do Msg "^$msg"; done
+						let numMsgs=$numMsgs+${#warningMsgs[@]}
+					fi
+					if [[ ${#errorMsgs[@]} -gt 0 && $displayGoodbyeSummaryMessages == true ]]; then
+						Msg
+						PrintBanner "${#errorMsgs[@]} error message(s) were issued during processing"
+						Msg
+						for msg in "${errorMsgs[@]}"; do Msg "^$msg"; done
+						let numMsgs=$numMsgs+${#errorMsgs[@]}
+					fi
+					[[ $numMsgs -gt 0 ]] && printf "\n$(PadChar)\n"
+					Alert 'on'
+					Msg
 
-					fi
-					[[ $DOIT != '' ]] && Msg "$(ColorE "*** The 'DOIT' flag is turned off, changes not committed ***")"
-					[[ $informationOnlyMode == true ]] && Msg "$(ColorE "*** Information only mode, no data updated ***")"
-					if [[ $exitCode -eq 0 ]]; then
-						Msg "$(ColorK "${myName}") $(ColorI " -- $additionalText completed successfully.")"
-					else
-						Msg "$(ColorK "${myName}") $(ColorE " -- $additionalText completed with errors, exit code = $exitCode\n")\a"
-					fi
-					[[ $logFile != '/dev/null' && $noBanners != true ]] && Msg "Additional details may be found in:\n^'$logFile'"
-					[[ $noBanners != true ]] && Msg "$date (Elapsed time: $elapTime)"
-					[[ $TERM == 'dumb' && $noBanners != true ]] && echo
-					[[ $noBanners != true ]] &&  Msg "$(PadChar)"
-				fi #not quiet noHeaders secondaryMessagesOnly
+				fi
+				[[ $DOIT != '' ]] && Msg "$(ColorE "*** The 'DOIT' flag is turned off, changes not committed ***")"
+				[[ $informationOnlyMode == true ]] && Msg "$(ColorE "*** Information only mode, no data updated ***")"
+				if [[ $exitCode -eq 0 ]]; then
+					Msg "$(ColorK "${myName}") $(ColorI " -- $additionalText completed successfully.")"
+				else
+					Msg "$(ColorK "${myName}") $(ColorE " -- $additionalText completed with errors, exit code = $exitCode\n")\a"
+				fi
+				[[ $logFile != '/dev/null' && $noBanners != true ]] && Msg "Additional details may be found in:\n^'$logFile'"
+				[[ $noBanners != true ]] && Msg "$date (Elapsed time: $elapTime)"
+				[[ $TERM == 'dumb' && $noBanners != true ]] && echo
+				[[ $noBanners != true ]] &&  Msg "$(PadChar)"
+			fi #not quiet noHeaders secondaryMessagesOnly
 			[[ $alert == true ]] && Alert
 	esac
 
@@ -141,7 +142,6 @@ function Goodbye {
 
 	if [[ $PAUSEATEXIT == true && $exitCode != 'x' ]]; then
 		Msg "$colorKey"
-dump exitCode
 		Msg '*******************************************************************************'
 		Msg '*** Remote script excution has complete, please press enter to close window ***'
 		Msg '*******************************************************************************'
@@ -210,3 +210,4 @@ export -f QUIT
 ## 04-20-2018 @ 07:22:36 - 2.1.13 - dscudiero - Move the alert for pauseonexit
 ## 05-10-2018 @ 08:30:40 - 2.1.14 - dscudiero - Do not put up banner if PAUSONEXIT and user requested to terminate the script
 ## 05-10-2018 @ 08:32:19 - 2.1.15 - dscudiero - Cosmetic/minor change/Sync
+## 05-10-2018 @ 09:16:32 - 2.1.20 - dscudiero - Do not show the promptonexiet banner of user is stopping the script
