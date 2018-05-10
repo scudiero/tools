@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.35" # -- dscudiero -- Fri 04/20/2018 @ 16:00:28.29
+version="1.5.36" # -- dscudiero -- Thu 05/10/2018 @ 14:59:09.04
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -10,6 +10,7 @@ version="1.5.35" # -- dscudiero -- Fri 04/20/2018 @ 16:00:28.29
 myName='dispatcher'
 me='dscudiero'
 function fastDump { 
+	return 0
 	[[ $(/usr/bin/logname 2>&1) != $me || $DEBUG != true ]] && return 0
 	local token ans; for token in $*; do 
 		[[ $token == -p ]] && { echo -e "\n*** Paused, press enter to continue ***"; read ans; [[ -n $ans ]] && exit || continue; }
@@ -156,3 +157,4 @@ exit
 ## 04-19-2018 @ 09:07:41 - 1.5.10 - dscudiero - Add updating of the users .bashrc file if TOOLSPATH is not set
 ## 04-19-2018 @ 16:51:32 - 1.5.34 - dscudiero - Fix problem parsing -- arguments not removing string from the args passed on to the dispatched script
 ## 04-20-2018 @ 16:00:51 - 1.5.35 - dscudiero - Add --debug option
+## 05-10-2018 @ 14:59:31 - 1.5.36 - dscudiero - Comment out fastdump
