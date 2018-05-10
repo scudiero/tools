@@ -1,7 +1,7 @@
 #!/bin/bash
-# DO NOT AUTOVERSION
+# XO NOT AUTOVERSION
 #=======================================================================================================================
-version=6.0.0 # -- dscudiero -- Tue 04/24/2018 @ 10:16:13.84
+version=6.0.0 # -- dscudiero -- Thu 05/10/2018 @ 11:49:17.13
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -1211,6 +1211,13 @@ Msg "\nCross product checks..."
 				sed -i "/^$fromStr/d" $editFile
 				[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
 			fi
+			fromStr='cimuploadurl:'
+			grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
+			if [[ -n $grepStr ]]; then
+				backupFile "$editFile" "$backupDir"
+				sed -i "/^$fromStr/d" $editFile
+				[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
+			fi
 		fi
 	fi
 
@@ -1478,3 +1485,4 @@ Goodbye 0 "$text1" "$text2"
 ## 04-26-2018 @ 09:04:02 - 6.0.0 - dscudiero - Cosmetic/minor change/Sync
 ## 05-04-2018 @ 09:55:43 - 6.0.0 - dscudiero - Rename to DatabaseUtilities.sh
 ## 05-10-2018 @ 09:24:02 - 6.0.0 - dscudiero - Resynce, many changes
+## 05-10-2018 @ 11:49:57 - 6.0.0 - dscudiero - Added removing cimloaderurl
