@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=6.0.0 # -- dscudiero -- Thu 05/10/2018 @ 11:49:17.13
+version=6.0.1 # -- dscudiero -- Thu 05/10/2018 @ 12:12:49.18
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -318,7 +318,6 @@ tmpFile=$(mkTmpFile)
 rebuildConsole=false
 removeGitReposFromNext=true
 declare -A backedupFiles
-skeletonRoot='/mnt/dev6/web/_skeleton/release'
 
 #=======================================================================================================================
 # Standard argument parsing and initialization
@@ -326,6 +325,7 @@ skeletonRoot='/mnt/dev6/web/_skeleton/release'
 Hello
 GetDefaultsData -f "$myName"
 ParseArgsStd $originalArgStr
+skeletonRoot='/mnt/dev6/web/_skeleton/release'
 
 displayGoodbyeSummaryMessages=true
 cleanDirs="${scriptData3##*:}"
@@ -1486,3 +1486,4 @@ Goodbye 0 "$text1" "$text2"
 ## 05-04-2018 @ 09:55:43 - 6.0.0 - dscudiero - Rename to DatabaseUtilities.sh
 ## 05-10-2018 @ 09:24:02 - 6.0.0 - dscudiero - Resynce, many changes
 ## 05-10-2018 @ 11:49:57 - 6.0.0 - dscudiero - Added removing cimloaderurl
+## 05-10-2018 @ 12:13:32 - 6.0.1 - dscudiero - Moved setting of skeletonRoot after parsing args
