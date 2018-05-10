@@ -12,10 +12,6 @@ originalArgStr="$*"
 scriptDescription="Refresh courseleaf product(s) from the git repository shadows ($gitRepoShadow)"
 cwdStart="$(pwd)"
 
-#TODO
-#originalArgStr="wisc -pvt -products cat,cim -current -noAdvance -noBackup -noAudit -fastInit $originalArgStr"
-#dump originalArgStr
-
 #=======================================================================================================================
 # Refresh/Patch Courseleaf component(s)
 #=======================================================================================================================
@@ -33,7 +29,6 @@ cwdStart="$(pwd)"
 		myArgs+=("tag|namedrelease|option|namedRelease|source='named'|script|Update the product from the specific named version (i.e. git tag)")
 		myArgs+=("branch|branch|option|branch|source='branch'|script|Update the product from the specific git brach (git branch)")
 		myArgs+=("master|master|switch|master|source='master'|script|Update each product from the current skeleton version (aka git tag 'master'")
-		myArgs+=("skeleton|skeleton|switch|master|source='master'|script|Update each product from the current skeleton version (aka git tag 'master'")
 
 		myArgs+=("advance|advance|switch|catalogAdvance||script|Advance the catalog")
 		myArgs+=("noadv|noadvance|switch|catalogAdvance|catalogAdvance=false|script|Do not advance the catalog")
@@ -43,6 +38,7 @@ cwdStart="$(pwd)"
 		myArgs+=("audit|audit|switch|catalogAudit||script|Run the catalog audit report as part of the process")
 		myArgs+=("noaudit|noaudit|switch|catalogAudit|catalogAudit=false|script|Do not run the catalog audit report as part of the process")
 
+		myArgs+=("back|backup|switch|backup|backup=true|script|Create a full backup of the target site before any actions")
 		myArgs+=("noback|nobackup|switch|backup|backup=false|script|Do not create a backup of the target site before any actions")
 		myArgs+=("build|buildpatchpackage|switch|buildPatchPackage||script|Build the remote patching package for remote sites")
 		myArgs+=("rollback|rollback|switch|rollBack||script|Roll back the previous patch")
@@ -205,28 +201,19 @@ function processGitRecord {
 	local checkRepoStatus repoSrc gitCmd tmpCntr editFile gitCmdOut gitFilesUpdated bCntr srcFile backupFile packageFile
 	Dump 1 repoName specTarget gitTag branch
 
-	checkRepoStatus=true
-	if [[ ! -d $tgtDir/${specTarget}/.git ]]; then
-		Msg "The target site does not have a .git directory for '$repoName', creating a local git repository, this may take a while..."
-		## Clone a repo from the master
-		repoSrc="$gitRepoRoot/$repoName.git"
-		[[ ! -d $repoSrc ]] && Terminate 0 2 "Could not locate a source .git repository for this request, repository:\n^$repoSrc"
-		gitCmd="git clone --mirror \"$repoSrc\" \"${tgtDir}${specTarget}/.git\"";
-		ProtectedCall "$gitCmd" | Indent
-
-		## Make the local git repo a real worktree, need to hack the config file since our git is so down level
-		editFile="$tgtDir/${specTarget}/.git/config"
-		sed -i s"/bare = true/bare = false/" "$editFile"
-		
-		## Commit all of the local git files so we start from scratch
-		gitCmd="git commit --all -m \"$myName - $gitTag initial\"";
-		ProtectedCall "$gitCmd" #&> /dev/null
-		checkRepoStatus=false
-	fi
-	
 	Pushd "$tgtDir/${specTarget}"
-	## See if there are any modifications to files in the local git repo
-	if [[ $checkRepoStatus == true ]]; then
+	## Check to see if we have a .git directory for this directory, if not then copy from the skeleton
+	if [[ ! -d $tgtDir/${specTarget}/.git ]]; then
+		Msg "The target site does not have a .git repository for '$repoName', creating from the skeleton, this will take a while..."
+		local srcGitFile="$skeletonRoot/$specTarget/.git"
+		[[ ! -d $srcGitFile ]] && Terminate 0 2 "Could not locate a source .git directory for this request, repository: $repoSrc\n^srcGitFile: $srcGitFile"
+		cp -frp "${srcGitFile}" '.'
+		cp -fp "${srcGitFile}ignore" '.'
+		## Make the local git repo a real worktree, need to hack the config file since our git is so down level.  Need this for git diff to work
+		sed -i s"/bare = true/bare = false/" "$tgtDir/${specTarget}/.git/config"
+		Msg "^Local repository created"
+	else
+		## See if there are any modifications to files in the local git repo
 		gitCmd="git status -s"
 		unset gitCmdOut; gitCmdOut=$(ProtectedCall "$gitCmd")
 		if [[ -n $gitCmdOut ]]; then
@@ -259,14 +246,14 @@ function processGitRecord {
 			Msg "Archiving ${#gitFilesUpdated[@]} files..."
 			for ((bCntr=0; bCntr<${#gitFilesUpdated[@]}; bCntr++)); do
 				srcFile="${tgtDir}${specTarget}/${gitFilesUpdated[$bCntr]}"
-				[[ -r $srcFile ]] && backupFile "$srcFile" "${backupRootDir}"
+				# [[ -r $srcFile ]] && backupFile "$srcFile" "${backupRootDir}"
 				Log "^$srcFile"
 			done
 		## Update local files from the git repo via checkout
-			Msg "Updating files (via git checkout)..."
+			Msg "Updating ${#gitFilesUpdated[@]} files (via git checkout)..."
 			gitCmd="git reset --hard --quiet"; ## Update git repo data
 			ProtectedCall "$gitCmd" | Indent
-			gitCmd="git checkout --force --quiet $gitTag"; ## Update git files
+			gitCmd="git checkout --force --quiet $gitTag &> /dev/null"; ## Update git files
 			ProtectedCall "$gitCmd" | Indent;
 			## If we are going to generate a patch package then write the changed files to the staging directory
 			if [[ $buildPatchPackage == true ]]; then 
@@ -275,7 +262,6 @@ function processGitRecord {
 					cpToPackageDir "${tgtDir}${specTarget}/${gitFilesUpdated[$bCntr]}"
 				done
 			fi
-
 		gitResults=true
 	fi
 	Popd
@@ -332,6 +318,7 @@ tmpFile=$(mkTmpFile)
 rebuildConsole=false
 removeGitReposFromNext=true
 declare -A backedupFiles
+skeletonRoot='/mnt/dev6/web/_skeleton/release'
 
 #=======================================================================================================================
 # Standard argument parsing and initialization
@@ -339,10 +326,6 @@ declare -A backedupFiles
 Hello
 GetDefaultsData -f "$myName"
 ParseArgsStd $originalArgStr
-
-#TODO
-skeletonRoot='/mnt/dev6/web/_skeleton/release'
-dump skeletonRoot -n
 
 displayGoodbyeSummaryMessages=true
 cleanDirs="${scriptData3##*:}"
@@ -481,7 +464,7 @@ for product in ${products//,/ }; do
 			unset ans; Prompt ans "Source" "C,M" "C"
 		else
 			Msg "^$(ColorK \'C\') for Current Release, \n^$(ColorK \'N\') for Specific named release, \
-				\n^$(ColorK \'B\') for Specific git branch, or \n^$(ColorK \'M\') for the 'master' branch (aka what's in the skeleton)"
+				\n^$(ColorK \'B\') for Specific git branch, or \n^$(ColorK \'M\') for the 'master' branch"
 			unset ans; Prompt ans "Which source ?" "C,N,B,M" "C"
 		fi
 		ans="${ans:0:1}"
@@ -590,11 +573,7 @@ fi
 	mkdir -p "$backupRootDir"
 
 ## Remote package file collector
-	packageRootDir="$tgtDir/attic/$myName.$(date +"%m-%d-%Y@%H.%M.%S").remotePatch"
-	mkdir -p "$packageRootDir"
-
-## Does the target directory have a git repository
-	[[ -d $tgtDir/.git ]] && targetHasGit=true || targetHasGit=false
+	[[ $buildPatchPackage == true ]] && { packageRootDir="$tgtDir/attic/$myName.$(date +"%m-%d-%Y@%H.%M.%S").remotePatch"; mkdir -p "$packageRootDir"; }
 
 ## Set the backup site
 unset backupSite
@@ -631,7 +610,6 @@ fi
 [[ -n $courseleafCgiVer ]] && verifyArgs+=("New courseleaf.cgi version:$courseleafCgiVer")
 [[ -n $ribbitCgiVer ]] && verifyArgs+=("New ribbit.cgi version:$ribbitCgiVer")
 [[ -n $dailyShVer ]] && verifyArgs+=("New daily.sh version:$dailyShVer")
-[[ $targetHasGit == true ]] && verifyArgs+=("Target directory git:$targetHasGit")
 [[ $backup == true ]] && verifyArgs+=("Backup site:$backup, backup directory: '$backupSite'")
 [[ $offline == true ]] && verifyArgs+=("Take site offline:$offline")
 [[ $buildPatchPackage == true ]] && verifyArgs+=("Build Patch Package:$buildPatchPackage")
@@ -642,42 +620,6 @@ fi
 VerifyContinue "You are asking to refresh CourseLeaf code files:"
 ProtectedCall "clear"
 Msg
-
-#=======================================================================================================================
-## Check to see if the targetDir is a git repo, if so make sure there are no active files that have not been pushed.
-#=======================================================================================================================
-if [[ $targetHasGit == true ]]; then
-	Msg "Checking target git repositories..."
-	hasNonCommittedFiles=false
-	for token in NEXT CURR; do
-		[[ $token == 'NEXT' ]] && checkTgtGitDir="$tgtDir" || checkTgtGitDir="$(dirname $tgtDir)/curr"
-		if [[ -d $checkTgtGitDir ]]; then
-			unset gitFiles hasChangedGitFiles newGitFiles changedGitFiles
-			gitFiles="$(CheckGitRepoFiles "$checkTgtGitDir" 'returnFileList')"
-			hasChangedGitFiles="${gitFiles%%;*}"
-			gitFiles="${gitFiles#*;}"
-			newGitFiles="${gitFiles%%;*}"
-			changedGitFiles="${gitFiles##*;}"
-			if [[ $hasChangedGitFiles == true && -n $changedGitFiles ]]; then
-				Error 0 1 "The $token environment has the following non-committed files:"
-				Pushd "$checkTgtGitDir"
-				for file in $(tr ',' ' ' <<< "$changedGitFiles"); do
-					Msg "^^$file"
-				done
-				hasNonCommittedFiles=true
-				Popd
-			fi
-			if [[ $hasChangedGitFiles == true && -n $newGitFiles ]]; then
-				Warning 0 1 "The $token environment has the non-tracked files, they will be ignored..."
-				for file in $(tr ',' ' ' <<< "$newGitFiles"); do
-					Msg "^^$file"
-				done
-			fi
-			Msg
-		fi
-	done
-fi
-[[ $hasNonCommittedFiles == true ]] && Terminate "Non-committed files found in a git repository, processing cannot continue"
 
 #=======================================================================================================================
 # Log run
@@ -1535,3 +1477,4 @@ Goodbye 0 "$text1" "$text2"
 ## 04-18-2018 @ 09:36:18 - 5.6.16 - dscudiero - Cleaned up GetDefaultsData call
 ## 04-26-2018 @ 09:04:02 - 6.0.0 - dscudiero - Cosmetic/minor change/Sync
 ## 05-04-2018 @ 09:55:43 - 6.0.0 - dscudiero - Rename to DatabaseUtilities.sh
+## 05-10-2018 @ 09:24:02 - 6.0.0 - dscudiero - Resynce, many changes
