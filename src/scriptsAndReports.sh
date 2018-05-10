@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.127 # -- dscudiero -- Thu 04/19/2018 @  9:09:52.57
+version=3.13.130 # -- dscudiero -- Thu 05/10/2018 @ 14:10:04.26
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -159,7 +159,8 @@ function ExecScript {
 ## Execute a report
 #==================================================================================================
 function ExecReport {
-	local name=${1,,[a-z]}; shift
+	#local name=${1,,[a-z]}; shift
+	local name="$1"; shift || true
 	local additionalArgs="$*"
 	[[ -n ${additionalArgs}${client} ]] && additionalArgs="$client $additionalArgs"
 	[[ -z $additionalArgs && -n $client ]] && additionalArgs="$client"
@@ -234,11 +235,13 @@ function ExecReport {
 				sed s"/|/\t/g" < "$tmpFile" >> "$outFileXlsx"
 				# mapfile -t resultSet < "$tmpFile"
 				# PrintColumnarData 'resultSet' '|' >> "$outFileText"
+				outFile="$outFileXlsx"
 			else
-				cp -fp "$tmpFile" "$outFileXlsx"
+				outFile="$outFileText"
+				cp -fp "$tmpFile" "$outFileText"
 			fi
-			Msg "\n^Report output can be found in: '$outFileXlsx'"
-			Msg "^(On MS windows explorer, go to '\\\\\\saugus\\$userName\\Reports\\$name\\$(basename $outFileXlsx)')"
+			Msg "\n^Report output can be found in: '$outFile'"
+			Msg "^(On MS windows explorer, go to '\\\\\\saugus\\$userName\\Reports\\$name\\$(basename $outFile)')"
 			sendMail=true
 		else
 			Warning "No data returned from report script"
@@ -516,3 +519,4 @@ Goodbye 0
 ## 03-27-2018 @ 11:29:31 - 3.13.124 - dscudiero - Fixed problem where scripts mode not displaying optional parms prompt
 ## 04-18-2018 @ 09:41:36 - 3.13.126 - dscudiero - Moved the 'your authoriation groups are' message
 ## 04-19-2018 @ 09:10:19 - 3.13.127 - dscudiero - Pull out code that updated users .bashrc file, moved to dispatcher
+## 05-10-2018 @ 14:14:00 - 3.13.130 - dscudiero - Tweak output files for reports
