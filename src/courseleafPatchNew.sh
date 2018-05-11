@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=6.0.11 # -- dscudiero -- Fri 05/11/2018 @  8:02:01.55
+version=6.0.13 # -- dscudiero -- Fri 05/11/2018 @  8:27:55.71
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -1060,14 +1060,17 @@ for ((pcCntr=0; pcCntr<${#processControl[@]}; pcCntr++)); do
 						if [[ -f $compareToFile ]]; then
 							cmpFileMd5=$(md5sum $compareToFile)
 							if [[ ${tgtFileMd5%% *} != ${cmpFileMd5%% *} ]]; then
-								[[ $specOptions == 'warning' ]] && Warning "'${specSource##* }' file is different than the skeleton file"
-								[[ $specOptions == 'error' ]] && Error "'${specSource##* }' file is different than the skeleton file"
-								Indent ++
-								Msg "${colorRed}< is ${compareToFile}${colorDefault}"
-								Msg "${colorBlue}> is ${tgtFile}${colorDefault}"
-								ProtectedCall "colordiff $compareToFile $tgtFile | Indent"
-								Msg "$colorDefault"
-								Indent --
+								msgLevel='Warning'
+								[[  ${specOptions,,[a-z]} == 'error' ]] && msgLevel='Errof'
+								$msgLevel "'${specSource##* }' file is different than the skeleton file, you should consult with development if the file should be updated"
+								if [[ $(Contains "${specOptions,,[a-z]}" 'only') != true ]]; then
+									Indent ++
+									Msg "${colorRed}< is ${compareToFile}${colorDefault}"
+									Msg "${colorBlue}> is ${tgtFile}${colorDefault}"
+									ProtectedCall "colordiff $compareToFile $tgtFile | Indent"
+									Msg "$colorDefault"
+									Indent --
+								fi
 							else
 								Msg "^File is current"
 							fi
@@ -1489,3 +1492,4 @@ Goodbye 0 "$text1" "$text2"
 ## 05-10-2018 @ 14:13:35 - 6.0.2 - dscudiero - Only copy the .gitignore file if it is found
 ## 05-10-2018 @ 15:26:31 - 6.0.3 - dscudiero - Add debug
 ## 05-11-2018 @ 08:04:55 - 6.0.11 - dscudiero - Fix bug overriding the gitTag
+## 05-11-2018 @ 08:37:06 - 6.0.13 - dscudiero - Change messaging from 'compare' operation
