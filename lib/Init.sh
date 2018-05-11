@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.75 # -- dscudiero -- Tue 05/08/2018 @ 11:01:45.30
+# version=2.1.76 # -- dscudiero -- Fri 05/11/2018 @  9:18:09.23
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -16,7 +16,7 @@
 #===================================================================================================
 function Init {
 	[[ $fastInit == true ]] && { Note 0 1 "'fastInit' is active, skipping argument validation"; return 0; }
-	myIncludes="SetSiteDirs GetCims PushPop SetFileExpansion Prompt"
+	myIncludes="SetSiteDirs CourseleafUtilities PushPop SetFileExpansion Prompt"
 	Import "$standardInteractiveIncludes $myIncludes"
 
 	function MyContains { local string="$1"; local subStr="$2"; [[ "${string#*$subStr}" != "$string" ]] && echo true || echo false; return 0; }
@@ -410,3 +410,4 @@ export -f Init
 ## 04-24-2018 @ 11:58:35 - 2.1.71 - dscudiero - Remive 'if' from the fastInit check
 ## 05-08-2018 @ 08:13:28 - 2.1.73 - dscudiero - Add a message if fastInit is active
 ## 05-08-2018 @ 11:51:42 - 2.1.75 - dscudiero - Set env variable if envs has a value and vice versa
+## 05-11-2018 @ 09:19:34 - 2.1.76 - dscudiero - Change includes from GetCims to CourseleafUtilities
