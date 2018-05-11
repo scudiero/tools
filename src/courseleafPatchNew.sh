@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=6.0.3 # -- dscudiero -- Thu 05/10/2018 @ 15:25:59.45
+version=6.0.11 # -- dscudiero -- Fri 05/11/2018 @  8:02:01.55
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -199,7 +199,7 @@ function processGitRecord {
 
 	[[ $gitTag == 'branch' ]] && { branch="$1"; shift || true; gitTag="$branch"; } ## Branches and tags are treated the same
 	local checkRepoStatus repoSrc gitCmd tmpCntr editFile gitCmdOut gitFilesUpdated bCntr srcFile backupFile packageFile
-	Dump 1 repoName specTarget gitTag branch
+	Dump 1 repoName specTarget gitTag branch -p
 
 	Pushd "$tgtDir/${specTarget}"
 	## Check to see if we have a .git directory for this directory, if not then copy from the skeleton
@@ -250,9 +250,10 @@ function processGitRecord {
 				Log "^$srcFile"
 			done
 		## Update local files from the git repo via checkout
-			Msg "Updating ${#gitFilesUpdated[@]} files (via git checkout)..."
+			Msg "Updating ${#gitFilesUpdated[@]} files (via git checkout '$gitTag')..."
 			gitCmd="git reset --hard --quiet"; ## Update git repo data
 			ProtectedCall "$gitCmd" | Indent
+			[[ $verboseLevel -eq 0 ]] && gitCmd="git checkout --force --quiet $gitTag &> /dev/null" || gitCmd="git checkout --force $gitTag"
 			gitCmd="git checkout --force --quiet $gitTag &> /dev/null"; ## Update git files
 			ProtectedCall "$gitCmd" | Indent;
 			## If we are going to generate a patch package then write the changed files to the staging directory
@@ -277,7 +278,7 @@ function backupFile {
 
 	## Check to see if we have processed this file already
 	if [[ ! ${backedupFiles["$file"]+abc} ]]; then
-dump file backupDir
+dump -ifMe file backupDir
 		BackupCourseleafFile "$file" "$backupDir"
 		backedupFiles["$file"]=true
 	fi
@@ -901,10 +902,11 @@ for ((pcCntr=0; pcCntr<${#processControl[@]}; pcCntr++)); do
 		[[ ${#resultSet[@]} -le 0 || -z ${resultSet[0]} ]] && Warning 0 2 "No patch file specs found for '$product', skipping" && continue
 		for ((ii=0; ii<${#resultSet[@]}; ii++)); do
 			specLine="${resultSet[$ii]}"
-			dump -2 -t -t specLine
+			dump 2 -t -t specLine
 			## Check to see if we have already processed this spec
 				mapKey="${specLine// }"
 				[[ ${processedSpecs["$mapKey"]+abc} ]] && continue
+
 			processedSpecs["$mapKey"]=true
 			recordType="${specLine%%|*}"; specLine="${specLine#*|}"
 			specSource="${specLine%%|*}"; specLine="${specLine#*|}"
@@ -913,7 +915,7 @@ for ((pcCntr=0; pcCntr<${#processControl[@]}; pcCntr++)); do
 			## Perform string substitutions
 			specSource=$(sed "s/<progDir>/$courseleafProgDir/g" <<< $specSource)
 			specTarget=$(sed "s/<progDir>/$courseleafProgDir/g" <<< $specTarget)
-			dump -2 -t -t -t recordType specSource specTarget specOptions
+			dump 2 -t -t -t recordType specSource specTarget specOptions
 
 			## Process record
 			Indent ++
@@ -923,11 +925,7 @@ for ((pcCntr=0; pcCntr<${#processControl[@]}; pcCntr++)); do
 				git)
 					msgStr="$msgStr --> ${specTarget}'"; [[ -n $specOptions ]] && msgStr="$msgStr ($specOptions)"
 					Msg; Msg "$msgStr"; Indent ++
-					if [[ -z $specOptions ]]; then
-						[[ $source == 'current' ]] && specOptions="??????"  #OTOD
-						[[ $source == 'master' ]] && specOptions="master"
-						[[ $source == 'named' || $source == 'branch' ]] && specOptions="$sourceModifier"
-					fi
+					[[ -z $specOptions ]] && specOptions="$sourceModifier"
 					backupDir="$backupRootDir/${specTarget}"; mkdir -p "$backupDir"
 					doit=true
 					## Special processing if this is a dailysh request
@@ -1146,7 +1144,7 @@ Msg "\nCross product checks..."
 		toStr='title:CourseLeaf Console'
 		grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
 		if [[ -n $grepStr ]]; then
-			backupFile "$editFile" "$backupDir"
+			backupFile "$editFile" "$backupRootDir"
 			sed -i s"!^$fromStr!$toStr!" $editFile
 			[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
 			updateFile="/$courseleafProgDir/index.tcf"
@@ -1159,7 +1157,7 @@ Msg "\nCross product checks..."
 		toStr='// navlinks:CAT|Refresh System|refreshsystem'
 		grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
 		if [[ -n $grepStr ]]; then
-			backupFile "$editFile" "$backupDir"
+			backupFile "$editFile" "$backupRootDir"
 			sed -i s"!^$fromStr!$toStr!" $editFile
 			[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
 			updateFile="/$courseleafProgDir/index.tcf"
@@ -1172,7 +1170,7 @@ Msg "\nCross product checks..."
 		toStr='// localsteps:links|links|links'
 		grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
 		if [[ -n $grepStr ]]; then
-			backupFile "$editFile" "$backupDir"
+			backupFile "$editFile" "$backupRootDir"
 			sed -i s"!^$fromStr!$toStr!" $editFile
 			[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
 			updateFile="/$courseleafProgDir/index.tcf"
@@ -1186,7 +1184,7 @@ Msg "\nCross product checks..."
 		toStr='// localsteps:links|links|links'
 		grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
 		if [[ -n $grepStr ]]; then
-			backupFile "$editFile" "$backupDir"
+			backupFile "$editFile" "$backupRootDir"
 			sed -i s"!^$fromStr!$toStr!" $editFile
 			[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
 			updateFile="/$courseleafProgDir/index.tcf"
@@ -1208,14 +1206,14 @@ Msg "\nCross product checks..."
 			fromStr='uploadurl:'
 			grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
 			if [[ -n $grepStr ]]; then
-				backupFile "$editFile" "$backupDir"
+				backupFile "$editFile" "$backupRootDir"
 				sed -i "/^$fromStr/d" $editFile
 				[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
 			fi
 			fromStr='cimuploadurl:'
 			grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
 			if [[ -n $grepStr ]]; then
-				backupFile "$editFile" "$backupDir"
+				backupFile "$editFile" "$backupRootDir"
 				sed -i "/^$fromStr/d" $editFile
 				[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
 			fi
@@ -1250,7 +1248,7 @@ Msg "\nCross product checks..."
 			if [[ $(CompareVersions "$checkCgiVer" 'le' "$tgtVer") == true ]]; then
 				Msg "^Found a 'special' courseleaf cgi directory ($checkDir) and the version of that cgi ($checkCgiVer) is less than the target version ($tgtVer).  Removing the directory"
 				BackupCourseleafFile "$tgtDir/web/$courseleafProgDir/$checkDir" "$backupRootDir"
-				backupFile "$tgtDir/web/$courseleafProgDir/$checkDir" "$backupDir"
+				backupFile "$tgtDir/web/$courseleafProgDir/$checkDir" "$backupRootDir"
 				rm -f $tgtDir/web/$courseleafProgDir/$checkDir
 				changeLogRecs+=("Removed '$tgtDir/web/$courseleafProgDir/$checkDir'")
 			fi
@@ -1490,3 +1488,4 @@ Goodbye 0 "$text1" "$text2"
 ## 05-10-2018 @ 12:13:32 - 6.0.1 - dscudiero - Moved setting of skeletonRoot after parsing args
 ## 05-10-2018 @ 14:13:35 - 6.0.2 - dscudiero - Only copy the .gitignore file if it is found
 ## 05-10-2018 @ 15:26:31 - 6.0.3 - dscudiero - Add debug
+## 05-11-2018 @ 08:04:55 - 6.0.11 - dscudiero - Fix bug overriding the gitTag
