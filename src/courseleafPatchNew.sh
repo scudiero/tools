@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=6.0.13 # -- dscudiero -- Fri 05/11/2018 @  8:27:55.71
+version=6.0.14 # -- dscudiero -- Fri 05/11/2018 @  8:45:39.06
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -513,7 +513,7 @@ for product in ${products//,/ }; do
 			;;
 		*)	## Current release
 			## Get the release tag from the patch control database
-			sqlStmt="select option from $patchesTable where product=\"$product\" and recordType=\"currentRelease\""
+			sqlStmt="select concat(sourceSpec,targetSpec,option) from $patchesTable where product=\"$product\" and recordType=\"currentRelease\""
 			RunSql $sqlStmt
 			[[ ${#resultSet[@]} -eq 0 || -z ${resultSet[0]} ]] && \
 				Terminate "Sorry, 'current' was requested as the source but could not lookup the version from the '$patchesTable' database."
@@ -1493,3 +1493,4 @@ Goodbye 0 "$text1" "$text2"
 ## 05-10-2018 @ 15:26:31 - 6.0.3 - dscudiero - Add debug
 ## 05-11-2018 @ 08:04:55 - 6.0.11 - dscudiero - Fix bug overriding the gitTag
 ## 05-11-2018 @ 08:37:06 - 6.0.13 - dscudiero - Change messaging from 'compare' operation
+## 05-11-2018 @ 08:46:33 - 6.0.14 - dscudiero - Allow specification of the current release to be in any of the columns in the row as long as the recordType is 'currentRelease'
