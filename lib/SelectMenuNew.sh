@@ -1,12 +1,12 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.28" # -- dscudiero -- Tue 04/24/2018 @ 16:19:17.92
+# version="2.1.1" # -- dscudiero -- Fri 05/11/2018 @ 14:47:58.58
 #===================================================================================================
-# Display a selection menue
+# Display a selection menu
 # SelectMenuNew <MenueItemsArrayName> <returnVariableName> <Prompt text>
 # First line of the array is the header, first char of the header is the data delimiter
 #
-# If lst 2 chars of the returnVariableName is 'ID' then will return the ordinal number of the
+# If first 2 chars of the returnVariableName is 'ID' then will return the ordinal number of the
 # response, otherwise the input line responding to the ordinal selected will be returned
 #===================================================================================================
 # 03-8-16 - dgs - initial
@@ -15,14 +15,24 @@
 # All rights reserved
 #===================================================================================================
 function SelectMenuNew {
-	local menuListArrayName=$1[@]
-	local menuListArray=("${!menuListArrayName}"); shift
-	local returnVarName=$1; shift
-	local menuPrompt=$*
-	local screenWidth=80
-	[[ $TERM != '' && $TERM != 'dumb' ]] && screenWidth=$(stty size </dev/tty | cut -d' ' -f2)
-	#let screenWidth=$screenWidth+12
+	local menuListArrayName returnVarName menuPrompt allowMultiples=false allowRange=false screenWidth=80
 	local i printStr tmpStr length validVals numCols=0 ordinalInData=false
+    ## Parse arguments
+        until [[ -z "$*" ]]; do
+            case ${1:0:2} in
+                -m ) allowMultiples=true ;;
+                -r ) allowRange=true ;;
+                *  )
+                    [[ -z $menuListArrayName ]] && { menuListArrayName=$1[@]; menuListArray=("${!menuListArrayName}"); shift || true; continue; }
+                    [[ -z $returnVarName ]] && { returnVarName="$1"; shift || true; continue; }
+                    menuPrompt="$menuPrompt $1"
+                    ;;
+            esac
+            shift || true
+        done
+		dump 2 menuListArrayName returnVarName menuPrompt allowMultiples allowRange
+
+	[[ $TERM != '' && $TERM != 'dumb' ]] && { screenWidth=$(stty size </dev/tty); screenWidth="${screenWidth#* }"; }
 
 	## Parse header
 		local header="${menuListArray[0]}"
@@ -104,25 +114,43 @@ function SelectMenuNew {
 
 		## Print prompt
 		echo -ne "$menuPrompt"
-		[[ $ordinalInData != true ]] && validVals=",{1-$i},"
+		[[ $ordinalInData != true ]] && validVals="{1-$i}" || unset validVals
 
 	## Loop on response
-		unset ans
+		unset ans retVal invalidVals
 		while [[ $ans == '' ]]; do
 			read ans; ans=$(Lower $ans)
 			[[ ${ans:0:1} == 'x' || ${ans:0:1} == 'q' ]] && eval $returnVarName='' && return 0
 			[[ ${ans:0:1} == 'r' ]] && eval $returnVarName='REFRESHLIST' && return 0
 
-			if [[ ${menuItems["$ans"]+abc} ]]; then
+			## If ans contains a '-' and allow renge is set then expand the range
+			if [[ $(Contains "$ans" '-' ) == true && $allowRange == true ]]; then
+				local front=${ans%%-*}; lowerIdx=${front: -1}
+				local back=${ans##*-}; upperIdx=${back:0:1}
+				for ((iix=$lowerIdx+1; iix<$upperIdx; iix++)); do
+					front="$front,$iix"
+				done
+				ans="$front,$back"
+			fi
+			## Check responses
+			foundAll=true
+			for token in ${ans//,/ }; do
+				if [[ ${menuItems["$token"]+abc} ]]; then
+					token="$(Trim "${menuItems[$token]}")"; 
+					retVal="$retVal|$token"
+				else
+					foundAll=false
+				fi
+			done
 
-				[[ $(Lower ${returnVarName:(-2)}) == 'id' ]] && retVal="$ans" || retVal="${menuItems[$ans]}"
-				eval $returnVarName=\"$(Trim "$retVal")\"
-			else
-				let length=${#validVals}-2
-				printf "${tabStr}$(ColorE *Error*) -- Invalid selection, '$ans', valid value in ${validVals:1:$length}, please try again > "
-				unset ans
+			if [[ $foundAll != true ]]; then
+				printf "${tabStr}$(ColorE *Error*) -- Invalid selection, '$ans', valid value in $validVals, please try again > "
+				unset ans invalidVals
 			fi
 		done
+		## Return the data in the named variable
+		[[ ${retVal:0:1} == '|' ]] && retVal="${retVal:1}"
+		eval $returnVarName=\"$(Trim $retVal)\"
 } #SelectMenuNew
 
 #===================================================================================================
@@ -134,3 +162,4 @@ function SelectMenuNew {
 ## 04-17-2017 @ 10.31.12 - ("2.0.15")  - dscudiero - fix issue when returning data for xxxxId variables
 ## 04-25-2017 @ 14.40.09 - ("2.0.16")  - dscudiero - Remove debug stuff
 ## 04-26-2018 @ 08:33:54 - 2.0.28 - dscudiero - Remove debug statement
+## 05-14-2018 @ 08:29:56 - 2.1.1 - dscudiero - Add ability to specify ranges
