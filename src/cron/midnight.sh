@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.74 # -- dscudiero -- Wed 04/04/2018 @  6:54:35.61
+version=1.22.75 # -- dscudiero -- Mon 05/14/2018 @  8:27:21.26
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -270,7 +270,7 @@ case "$hostName" in
 			RunCourseLeafCgi "$stageInternal" "-r /support/qa"
 
 		## Run Reports
-			reports=("qaStatusShort -email \"${qaTeam},${qaManager}\"")
+			reports=("qaStatusShort -email \"${qaTeam}\"")
 			for ((i=0; i<${#reports[@]}; i++)); do
 				report="${reports[$i]}"; reportName="${report%% *}"; reportArgs="${report#* }"; [[ $reportName == $reportArgs ]] && unset reportArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $reportName $reportArgs..."; sTime=$(date "+%s")
@@ -528,3 +528,4 @@ return 0
 ## 03-27-2018 @ 06:55:57 - 1.22.72 - dscudiero - Update call to clientByTimezone report
 ## 04-02-2018 @ 07:16:20 - 1.22.73 - dscudiero - Move timezone report to weekly
 ## 04-04-2018 @ 06:55:25 - 1.22.74 - dscudiero - Remove me from the qsShort report email
+## 05-14-2018 @ 08:31:03 - 1.22.75 - dscudiero - Don't send reports to qaManager
