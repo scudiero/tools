@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.75 # -- dscudiero -- Mon 05/14/2018 @  8:27:21.26
+version=1.22.76 # -- dscudiero -- Mon 05/14/2018 @  9:52:55.45
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -270,14 +270,14 @@ case "$hostName" in
 			RunCourseLeafCgi "$stageInternal" "-r /support/qa"
 
 		## Run Reports
-			reports=("qaStatusShort -email \"${qaTeam}\"")
-			for ((i=0; i<${#reports[@]}; i++)); do
-				report="${reports[$i]}"; reportName="${report%% *}"; reportArgs="${report#* }"; [[ $reportName == $reportArgs ]] && unset reportArgs
-				Msg "\n$(date +"%m/%d@%H:%M") - Running $reportName $reportArgs..."; sTime=$(date "+%s")
-				TrapSigs 'off'; FindExecutable scriptsAndReports -sh -run reports $reportName $reportArgs $scriptArgs | Indent; TrapSigs 'on'
-				Semaphore 'waiton' "$reportName" 'true'
-				Msg "...$reportName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
-			done
+			# reports=("qaStatusShort -email \"${qaTeam}\"")
+			# for ((i=0; i<${#reports[@]}; i++)); do
+			# 	report="${reports[$i]}"; reportName="${report%% *}"; reportArgs="${report#* }"; [[ $reportName == $reportArgs ]] && unset reportArgs
+			# 	Msg "\n$(date +"%m/%d@%H:%M") - Running $reportName $reportArgs..."; sTime=$(date "+%s")
+			# 	TrapSigs 'off'; FindExecutable scriptsAndReports -sh -run reports $reportName $reportArgs $scriptArgs | Indent; TrapSigs 'on'
+			# 	Semaphore 'waiton' "$reportName" 'true'
+			# 	Msg "...$reportName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+			# done
 
 		## On the last day of the month roll-up the log files
 		  	if [[ $(date +"%d") == $(date -d "$(date +"%m")/1 + 1 month - 1 day" "+%d") ]]; then
@@ -529,3 +529,4 @@ return 0
 ## 04-02-2018 @ 07:16:20 - 1.22.73 - dscudiero - Move timezone report to weekly
 ## 04-04-2018 @ 06:55:25 - 1.22.74 - dscudiero - Remove me from the qsShort report email
 ## 05-14-2018 @ 08:31:03 - 1.22.75 - dscudiero - Don't send reports to qaManager
+## 05-14-2018 @ 09:53:21 - 1.22.76 - dscudiero - Comment out reports
