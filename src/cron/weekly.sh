@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.47 # -- dscudiero -- Mon 05/07/2018 @ 10:31:18.99
+version=2.1.48 # -- dscudiero -- Mon 05/14/2018 @  8:26:26.40
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -29,8 +29,7 @@ case "$hostName" in
 		## Run Reports
 			reports=("publishing -email \"froggersupport\"")
 			reports+=("qaWaiting -email \"${qaTeam},${qaManager},dscudiero\"")
-			reports+=("toolsUsage -email \"${toolsManager},dscudiero\"")
-			reports+=("clientByTimezone -role 'support' -email \"${supportManager},dscudiero\"")
+			#reports+=("toolsUsage -email \"${toolsManager},dscudiero\"")
 
 			for ((i=0; i<${#reports[@]}; i++)); do
 				report="${reports[$i]}"; reportName="${report%% *}"; reportArgs="${report##* }"; [[ $reportName == $reportArgs ]] && unset reportArgs
@@ -99,3 +98,4 @@ return 0
 ## 04-23-2018 @ 09:36:32 - 2.1.45 - dscudiero - Remove the 2day summary report
 ## 04-30-2018 @ 07:12:55 - 2.1.46 - dscudiero - Add toolsManager to toolsUsage report
 ## 05-07-2018 @ 10:32:07 - 2.1.47 - dscudiero - Fix syntax error, missing ) line 23
+## 05-14-2018 @ 08:31:34 - 2.1.48 - dscudiero - Dont send out timeZone and toolsUsage reports
