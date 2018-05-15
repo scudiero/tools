@@ -1,10 +1,11 @@
 #!/bin/bash
+#DO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.78 # -- dscudiero -- Thu 09/14/2017 @ 16:48:38.06
+version=1.1.01 # -- dscudiero -- Fri 05/11/2018 @  9:38:34.16
 #==================================================================================================
 TrapSigs 'on'
-includes='Msg2 Dump GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile' #includes="$includes xxx"
-Import "$includes"
+myIncludes="SelectMenuNew CopyFileWithCheck"
+Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="This script will run automated workflow test cases"
@@ -16,17 +17,16 @@ scriptDescription="This script will run automated workflow test cases"
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-function parseArgs-testWorkflow  { # or parseArgs-local
-	#argList+=(-optionArg,1,option,scriptVar,,script,'Help text')
-	#argList+=(-flagArg,2,switch,scriptVar,,script,'Help text')
-	argList+=(-instance,8,option,cimInstance,,script,'The name of the CIM instance to be tested')
-	argList+=(-group,3,option,group,,script,'The name of the test group to be run')
-	argList+=(-runTest,3,option,runTest,,script,'The name of the test that is to be run')
-	argList+=(-over,4,switch,overWrite,,script,'Over write the test proposal folder if present')
-	argList+=(-noStopFirst,4,switch,noStopFirst,,script,'Stop on the first error detected')
+function wfTest-ParseArgsStd  {
+	myArgs+=('instance|instance|option|instance||script|The name of the CIM instance to be tested')
+	#myArgs+=('g|group|option|group||script|The name of the test group to be run')
+	myArgs+=('r|runTests|option|runTests||script|The comma seperated list pf test names to run')
+	myArgs+=('over|overWrite|switch|overWrite||script|Over write the test proposal folder if present')
+	myArgs+=('noS|noStopFirst|switch|noStopFirst||script|Do not stop on the first error detected')
 	return 0
 }
-function Goodbye-testWorkflow  { # or Goodbye-local
+
+function wfTest-Goodbye  { # or Goodbye-local
 	rm -rf $tmpRoot > /dev/null 2>&1
 	for instance in $(tr ',' ' ' <<< $cimStr); do
 		proposalDir="$siteDir/web/$instance/$tempProposalId"
@@ -34,17 +34,18 @@ function Goodbye-testWorkflow  { # or Goodbye-local
 	done
 	return 0
 }
-function testMode-testWorkflow  { # or testMode-local
+
+function wfTest-testMode  { # or testMode-local
 	xmlFile="$myPath/workflowTest.xml"
 	client='tamu'
 	env='pvt'
 	cimStr='courseadmin'
-	runTest='all'
+	runTests='all'
 	overWrite=true
 	verify=false
-	Msg2 $N "TestMode:"
-	dump -t client env cimStr runTest overWrite verify
-	Msg2
+	Msg $N "TestMode:"
+	dump -t client env cimStr runTests overWrite verify
+	Msg
 	return 0
 }
 
@@ -67,7 +68,7 @@ function ParseXmlFile {
 	local xmlFile="$1"
 	local instance test inSetup inExpect varName varValue tmpStr1 tmpStr2 group
 
-	[[ ! -r "$xmlFile" ]] && Msg2 $T "Could not locate a '$myName.xml' file in\n^$xmlFile"
+	[[ ! -r "$xmlFile" ]] && Msg $T "Could not locate a '$myName.xml' file in\n^$xmlFile"
 	## Parse the XML file
 	commentBlock=false
 	while read line; do
@@ -161,11 +162,11 @@ function ParseXmlFile {
 	done < "$xmlFile"
 
 	if [[ $verboseLevel -ge 2 ]]; then
-		Msg2; for instance in "${instances[@]}"; do dump instance; done
-		Msg2; for group in "${groups[@]}"; do dump group; done
-		Msg2; for test in "${tests[@]}"; do dump test; done
-		Msg2; Msg2 "setup[] ="; for key in "${!setup[@]}"; do echo -e "\t[$key] = >${setup[$key]}<"; done
-		Msg2; Msg2 "expect[] ="' '; for key in "${!expect[@]}"; do echo -e "\t[$key] = >${expect[$key]}<"; done
+		Msg; for instance in "${instances[@]}"; do dump instance; done
+		Msg; for group in "${groups[@]}"; do dump group; done
+		Msg; for test in "${tests[@]}"; do dump test; done
+		Msg; Msg "setup[] ="; for key in "${!setup[@]}"; do echo -e "\t[$key] = >${setup[$key]}<"; done
+		Msg; Msg "expect[] ="' '; for key in "${!expect[@]}"; do echo -e "\t[$key] = >${expect[$key]}<"; done
 	fi
 
 	return 0
@@ -214,8 +215,6 @@ declare -A setup
 declare -A expect
 previewStep='testworkflow'
 cgiOut=$(mkTmpFile).cgiOut
-tempProposalId=$(cut -d':' -f2- <<< $scriptData1)
-[[ $tempProposalId == "" ]] && Msg $T "Could not resolve tempProposalId from defaults"
 
 #==================================================================================================
 # Standard arg parsing and initialization
@@ -224,86 +223,62 @@ tempProposalId=$(cut -d':' -f2- <<< $scriptData1)
 	helpSet='script,client,env'
 	scriptHelpDesc="This script can be used to test CIM instances.  Tests are defined in a xml file in the cim instance root directory"
 
-	GetDefaultsData $myName
-	ParseArgsStd
 	Hello
-	[[ $cimInstance != '' ]] && cimStr="$cimInstance"
+	GetDefaultsData -f $myName
+	ParseArgsStd $originalArgStr
+	[[ -n $file ]] && xmlFile="$file"
+
+	initTokens='getClient getEnv getDirs checkEnvs'
+	[[ -n $instance ]] && cimStr="$instance" || initTokens="$initTokens getCim"
 	onlyCimsWithTestFile=true
-	Init "getClient getEnv getDirs checkEnvs getCim"
+	Init "$initTokens"
 	instance="$cimStr"
-	dump -2 siteDir instance
 	[[ $noStopFirst == true ]] && stopFirst=false
 
+	tempProposalId="${scriptData1##*:}"
+	[[ -z $tempProposalId ]] && Terminate "Could not resolve tempProposalId from defaults"
+
 ## Parse xml file
-	if [[ $xmlFile == '' ]]; then
-		[[ -f "$siteDir/web/$cimStr/workflowTest.xml" ]] && xmlFile="$siteDir/web/$cimStr/workflowTest.xml"
-		[[ -f "$siteDir/web/$cimStr/workflowtest.xml" ]] && xmlFile="$siteDir/web/$cimStr/workflowtest.xml"
-		[[ -f "$siteDir/web/$cimStr/wfTest.xml" ]] && xmlFile="$siteDir/web/$cimStr/wfTest.xml"
-		[[ -f "$siteDir/web/$cimStr/wftest.xml" ]] && xmlFile="$siteDir/web/$cimStr/wftest.xml"
-	fi
-	Msg2 "Parsing the XML file: '$xmlFile'"
+	[[ -z $xmlFile && -f "$siteDir/web/$cimStr/$myName.xml" ]] && xmlFile="$siteDir/web/$cimStr/wfTest.xml"
+	Msg
+	Msg "Parsing the XML file: '$xmlFile'"
 	ParseXmlFile "$xmlFile"
 
-## Get which instances(s) to run
-	if [[ ${#instances[@]} -gt 0 && $instance == '' ]]; then
-		unset menuList instancesString
-		menuList+=("|Test Name")
-		for token in ${instances[@]}; do
-			menuList+=("|$token")
-			instancesString="$instancesString,$test"
-		done
-		instancesString=${instancesString:1}
-		menuList+=("|All")
-		Msg2; Msg2 "Please select the CIM instance that you wish to test, enter the ordinal number:"; Msg2
-		SelectMenuNew 'menuList' 'instance' "\nPlease enter the ordinal of the instance to test $(ColorK '(ord)') (or 'x' to quit) > "
-	fi
+# ## Get which groups to run
+# 	if [[ ${#groups[@]} -gt 0 && $group == '' ]]; then
+# 		unset menuList
+# 		menuList+=("|Test Name")
+# 		for token in ${groups[@]}; do
+# 			if [[ ${test:0:${#instance}} == $instance ]]; then
+# 				test="$(cut -d'.' -f2 <<< $test)"
+# 				menuList+=("|$test")
+# 				runTeststring="$runTeststring,$test"
+# 			fi
+# 		done
+# 		menuList+=("|All")
+# 		runTeststring=${runTeststring:1}
+# 	fi
 
-dump -p instance
-
-	if [[ ${#groups[@]} -gt 0 && $group == '' ]]; then
-		unset menuList
-		menuList+=("|Test Name")
-		for token in ${groups[@]}; do
-			if [[ ${test:0:${#instance}} == $instance ]]; then
-				test="$(cut -d'.' -f2 <<< $test)"
-				menuList+=("|$test")
-				runTestsString="$runTestsString,$test"
-			fi
-		done
-		menuList+=("|All")
-		runTestsString=${runTestsString:1}
-	fi
-
-
-
-
-	unset menuList runTestsString
+## Get which tests to run
+	unset menuList runTeststring
 	menuList+=("|Test Name")
 	for test in ${tests[@]}; do
 		if [[ ${test:0:${#instance}} == $instance ]]; then
 			test="$(cut -d'.' -f2 <<< $test)"
 			menuList+=("|$test")
-			runTestsString="$runTestsString,$test"
+			allTests="$allTests,$test"
 		fi
 	done
 	menuList+=("|All")
-	runTestsString=${runTestsString:1}
-
-	[[ $runTest != '' && $(Contains ",$runTestsString,all," ",$runTest,") == false ]] && Msg2 $E "Value specified for -run is not valid for this instance." && unset runTest
-	if [[ $runTest == '' ]]; then
-		[[ $verify != true ]] && Msg2 $T "No value specified for '-run' and verify is off"
-		Msg2; Msg2 "Please select the test that you wish to run, enter the ordinal number:"; Msg2
-		SelectMenuNew 'menuList' 'runTest' "\nPlease enter the ordinal of the test to run $(ColorK '(ord)') (or 'x' to quit) > "
-		[[ $runTest == '' ]] && Goodbye 0 || runTest=$(cut -d'|' -f1 <<< $runTest)
+	allTests=${allTests:1}
+	
+	if [[ -z $runTests ]]; then
+		[[ $verify != true ]] && Msg $T "No value specified for '-run' and verify is off"
+		Msg; Msg "Please select the test(s) that you wish to run, enter the ordinal number:"; Msg
+		SelectMenuNew -m -r 'menuList' 'runTests' "\nPlease enter the ordinal(s) of the test(s) to run $(ColorK '(ord)') (or 'x' to quit) > "
+		[[ -z $runTests ]] && Goodbye 0
+		runTests="${runTests//|/,}"
 	fi
-
-	unset runTests
-	if [[ $(Lower "$runTest") == 'all' ]]; then
-		for test in $(tr ',' ' ' <<< $runTestsString); do runTests+=("$test"); done
-	else
-		runTests+=("$runTest")
-	fi
-	runTestsString=$(printf '%s ' "${runTests[@]}"); runTestsString=${runTestsString:0:${#runTestsString}-1}
 
 ## Verify continue with the user
 	unset verifyArgs
@@ -311,13 +286,14 @@ dump -p instance
 	verifyArgs+=("Env:$(TitleCase $env) ($siteDir)")
 	verifyArgs+=("CIM Instance:$instance")
 	verifyArgs+=("Test Definition File:$xmlFile")
-	verifyArgs+=("Test(s):$(sed s'/ /, /g' <<< $runTestsString)")
+	verifyArgs+=("Test(s):${runTests//,/, }")
 	verifyArgs+=("Stop First:$stopFirst")
 	[[ $overWrite == true ]] && verifyArgs+=("Over Write:$overWrite")
-	VerifyContinue "You are asking to generate a workflow spreadsheet for"
+	verifyContinueDefault='Yes'
+	VerifyContinue "You are asking to run workflow tests for"
 
 ## Log Start
-	myData="Client: '$client', Env: '$env', Cim: '$instance', Tests: '$runTestsString'"
+	myData="Client: '$client', Env: '$env', Cim: '$instance', Tests: '$allTests'"
 	[[ $logInDb != false && $myLogRecordIdx != "" ]] && dbLog 'data' $myLogRecordIdx "$myData"
 
 #===================================================================================================
@@ -338,18 +314,18 @@ dump -p instance
 		fi
 		[[ $ans == 'y' ]] && rm -rf $proposalDir || Goodbye -1
 	fi
+	dump 1 proposalDir proposalTcfFile proposalTcaFile
 	mkdir -p $proposalDir
 	touch "$siteDir/web/$instance/$tempProposalId/.$myName"
-	dump -2 proposalDir proposalTcfFile proposalTcaFile
 
-## Setp & run tests
-for test in ${runTests[@]}; do
-	Msg2
-	#Msg2 $V1 "$(PadChar)"
-	Msg2 "Running test: $instance.$test"
-	dump -2 -t instance test
+## Run the tests
+[[ ${runTests,,[a-z]} == 'all' ]] && runTests="$allTests"
+for test in ${runTests//,/ }; do
+	Msg
+	#Msg $V1 "$(PadChar)"
+	Msg "Running test: $instance.$test"
 	## Build the temp proposal file at location $tempProposalId
-		Msg2 $V1 "^Initializing variables, building temporary proposal..."
+		Msg $V1 "^Initializing variables, building temporary proposal..."
 		setupTcfdata="${setup["$instance.$test.tcfdata"]}"
 		setupTcadata="${setup["$instance.$test.tcadata"]}"
 		setupWorkflow="${setup["$instance.$test.workflow"]}"
@@ -358,11 +334,11 @@ for test in ${runTests[@]}; do
 
 	## If the test setup specifies a workflow then write that workflow out to the workflow file
 		if [[ $setupWorkflow != '' ]]; then
-			Msg2 $V1 "^Build temporary workflow.tcf file..."
+			Msg $V1 "^Build temporary workflow.tcf file..."
 			unset wfStepsArray
 			workflowFile="$siteDir/web/$cimStr/workflow.tcf"
 			unset cpMsg; cpMsg=$(CopyFileWithCheck "$workflowFile" "$workflowFile.bak")
-			[[ $cpMsg != true && $cpMsg != 'same' ]] && Msg2 $T "Could not make a copy of the workflow file:\n\t$cpMsg"
+			[[ $cpMsg != true && $cpMsg != 'same' ]] && Msg $T "Could not make a copy of the workflow file:\n\t$cpMsg"
 			echo 'workflow:'$setupWorkflow\|$(tr '|' ',' <<< $setupWorkflowSteps) > "$workflowFile"
 		fi
 
@@ -397,7 +373,7 @@ for test in ${runTests[@]}; do
 		done
 
 	## Run the preview workflow step
-		Msg2 $V1 "^Running step: '$previewStep'..."
+		Msg $V1 "^Running step: '$previewStep'..."
 		cd $siteDir/web/courseleaf
 		./courseleaf.cgi $previewStep /$instance/$tempProposalId > $cgiOut
 		cd $cwd
@@ -406,9 +382,9 @@ for test in ${runTests[@]}; do
 		unset actualWorkflow
 		ParseTestworkflowOut "$cgiOut"
 		if [[ $verboseLevel -ge 2 ]]; then
-			Msg2; Msg2 "actualWorkflow:"
+			Msg; Msg "actualWorkflow:"
 			for line in "${actualWorkflow[@]}"; do Dump -1 -t line; done
-			Msg2
+			Msg
 		fi
 		let numStepsActual=${#actualWorkflow[@]}-1
 
@@ -416,16 +392,16 @@ for test in ${runTests[@]}; do
 		testStatus='Success'
 		## Workflow name
 		if [[ ${expect[$instance.$test.workflow]} == ${actualWorkflow[0]} ]]; then
-			Msg2 $V1 "^^Workflow Name: OK (${expect[$instance.$test.workflow]})"
+			Msg $V1 "^^Workflow Name: OK (${expect[$instance.$test.workflow]})"
 		else
-			Msg2 $ET2 "Workflow is not as expected: \n^^^Expected: '${expect[$instance.$test.workflow]}'\n^^^Actual: '${actualWorkflow[0]}'"
+			Msg $ET2 "Workflow is not as expected: \n^^^Expected: '${expect[$instance.$test.workflow]}'\n^^^Actual: '${actualWorkflow[0]}'"
 			errorDetected=true
 			continue
 		fi
 		## Check number of steps
 			expectedSteps="${expect[$instance.$test.steps]}"
 		let numStepsExpected=$(grep -o "|" <<< "$expectedSteps" | wc -l)+1
-			[[ $numStepsExpected -ne $numStepsActual ]] && errorDetected=true && Msg2 $ET2 "Step count error, Number expected: $numStepsExpected, Number actual workflow: $numStepsActual"
+			[[ $numStepsExpected -ne $numStepsActual ]] && errorDetected=true && Msg $ET2 "Step count error, Number expected: $numStepsExpected, Number actual workflow: $numStepsActual"
 		## Workflow steps
 		for ((cntr=1; cntr<${#actualWorkflow[@]}; cntr++)); do
 			unset aStep eStep
@@ -433,24 +409,24 @@ for test in ${runTests[@]}; do
 			eStep="$(cut -d'|' -f$cntr <<< "$expectedSteps")"
 			#dump aStep eStep
 			if [[ "$aStep" != "$eStep" ]]; then
-				Msg2 $ET2 "Step #$cntr is not as expected. \n^^^Expected: '$eStep'\n^^^Actual: '$aStep'"
+				Msg $ET2 "Step #$cntr is not as expected. \n^^^Expected: '$eStep'\n^^^Actual: '$aStep'"
 				testStatus='Failed'
 			else
-				Msg2  $V1 "^^Step #$cntr is as expected ($eStep)"
+				Msg  $V1 "^^Step #$cntr is as expected ($eStep)"
 			fi
 		done
 		if [[ $testStatus == 'Success' ]]; then
-			Msg2 $V1 ' ';
-			Msg2 "Test '$instance.$test' completed successfully"
+			Msg $V1 ' ';
+			Msg "Test '$instance.$test' completed successfully"
 			echo -e "\t$instance.$test completed successfully" >> $testLogFile
 		else
 			errorDetected=true
-			Msg2 $E "Test '$instance.$test' failed, proposal file (.../$tempProposalId/index.tcf) contents:"
+			Msg $E "Test '$instance.$test' failed, proposal file (.../$tempProposalId/index.tcf) contents:"
 			cat $proposalTcfFile | xargs -I{} echo -e "\t\t{}"
-			Msg2 $E "Test '$instance.$test' failed, workflow file contents:"
+			Msg $E "Test '$instance.$test' failed, workflow file contents:"
 			cat $workflowFile | xargs -I{} echo -e "\t\t{}"
 			echo -e "\t$instance.$test failed" >> $testLogFile
-			Msg2 $V1 ' ';
+			Msg $V1 ' ';
 		fi
 
 		## Cleanup
@@ -459,11 +435,11 @@ for test in ${runTests[@]}; do
 		## Restore the backup of the workflow file
 		if [[ $setupWorkflow != '' ]]; then
 			unset cpMsg; cpMsg=$(CopyFileWithCheck "$workflowFile.bak" "$workflowFile")
-			[[ $cpMsg != true && $cpMsg != 'same' ]] && Msg2 $T "Could not restore the workflow file, backup copy is at:\n^$workflowFile.bak:\n\t$cpMsg"
+			[[ $cpMsg != true && $cpMsg != 'same' ]] && Msg $T "Could not restore the workflow file, backup copy is at:\n^$workflowFile.bak:\n\t$cpMsg"
 			rm -rf "$workflowFile.bak"
 		fi
 
-		[[ $errorDetected == true && $stopFirst == true ]] && Msg2 "Stop on First flag was specified, stopping." && break
+		[[ $errorDetected == true && $stopFirst == true ]] && Msg "Stop on First flag was specified, stopping." && break
 
 done # test in tests
 
@@ -474,7 +450,7 @@ done # test in tests
 
 
 #===================================================================================================
-## Examle test file, stored as 'wfTests.xml' in the CIM instance root
+## Example test file, stored as 'wfTests.xml' in the CIM instance root
 #===================================================================================================
 # <!-- ------------------------------------------------------------------------- -->
 # <!-- Automated test patterns for workflow -->
@@ -554,3 +530,4 @@ done # test in tests
 ## Tue Aug 23 11:22:35 CDT 2016 - dscudiero - Updated to correctly parse output of selectMenuNew
 ## Mon Sep 12 14:24:46 CDT 2016 - dscudiero - Fix preview workflow parsing since Mike added Proposal Key
 ## Mon Sep 12 16:41:04 CDT 2016 - dscudiero - General syncing of dev to prod
+## 05-15-2018 @ 08:15:37 - 1.1.01 - dscudiero - Sync
