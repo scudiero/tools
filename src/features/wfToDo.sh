@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.91 # -- dscudiero -- Thu 03/22/2018 @ 14:21:24.32
+version=1.0.92 # -- dscudiero -- Wed 05/16/2018 @ 15:43:33.41
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
@@ -124,6 +124,8 @@ minClVer='3.5.9'
 		Pause "Feature '$currentScript': No changes were made"
 	fi
 
+[[ -x $HOME/bin/logit ]] && $HOME/bin/logit -cl "${client:--}" -e "${tgtEnv:--}" -ca 'features' "$myName - Installed $currentScript"
+
 #==================================================================================================
 ## Done
 #==================================================================================================
@@ -137,3 +139,4 @@ return  ## We are called as a subprocess, just return to our parent
 ## 04-13-2017 @ 11.02.55 - (1.0.63)    - dscudiero - Fixed problem where we were only allowing the selection of a signel cim
 ## 09-22-2017 @ 07.50.27 - (1.0.90)    - dscudiero - Add to imports
 ## 03-22-2018 @ 14:36:22 - 1.0.91 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 05-16-2018 @ 15:45:54 - 1.0.92 - dscudiero - Added activityLog logging
