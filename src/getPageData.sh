@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.1.23 # -- dscudiero -- Fri 03/23/2018 @ 16:56:02.73
+version=2.1.24 # -- dscudiero -- Wed 05/16/2018 @ 15:40:08.04
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -86,6 +86,8 @@ cd $srcDir
 Msg "Output can be found in: $outFile\n"
 Msg "You can create a Excel workbook using the template work sheet:\n^$TOOLSPATH/workbooks/CourseleafData.xltm"
 
+[[ -x $HOME/bin/logit ]] && $HOME/bin/logit -cl "${client:--}" -e "${env:--}" -ca 'workflow' "$myName - Generated CAT workflow worksheet"
+
 #==================================================================================================
 ## Bye-bye
 #==================================================================================================
@@ -98,3 +100,4 @@ Goodbye 0 'alert'
 ## 12-13-2017 @ 15.39.36 - (2.1.21)    - dscudiero - 1
 ## 03-23-2018 @ 15:34:50 - 2.1.22 - dscudiero - D
 ## 03-23-2018 @ 16:58:01 - 2.1.23 - dscudiero - Msg3 -> Msg
+## 05-16-2018 @ 15:46:15 - 2.1.24 - dscudiero - Added activityLog logging
