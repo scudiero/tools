@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.35" # -- dscudiero -- Wed 11/01/2017 @ 10:25:51.78
+# version="2.0.38" # -- dscudiero -- Wed 05/16/2018 @ 14:20:08.61
 #===================================================================================================
 # Write a 'standard' format courseleaf changelog.txt
 # args: "logFileName" ${lineArray[@]}
@@ -30,7 +30,7 @@ function WriteChangelogEntry {
 	local client=$(cut -d' ' -f1 <<< "$data")
 	local env=$(cut -d' ' -f2 <<< "$data")
 
-	[[ $env == 'pvt' || $env == 'dev' ]] && return 0
+#	[[ $env == 'pvt' || $env == 'dev' ]] && return 0
 	[[ $env == 'test' ]] && client=${client%-*}
 
 	## If there is a clientData folder then write out to there also
@@ -72,3 +72,4 @@ export -f WriteChangelogEntry
 ## 09-25-2017 @ 16.01.28 - ("2.0.33")  - dscudiero - add debug statement
 ## 10-31-2017 @ 14.41.54 - ("2.0.34")  - dscudiero - Remove debug stuff
 ## 11-01-2017 @ 10.27.11 - ("2.0.35")  - dscudiero - Do not write out log entries for pvt or dev sits
+## 05-16-2018 @ 14:21:01 - 2.0.38 - dscudiero - Fix call to local logit sript
