@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.0.46 # -- dscudiero -- Thu 03/22/2018 @ 14:20:43.19
+version=1.0.47 # -- dscudiero -- Wed 05/16/2018 @ 15:42:48.36
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
@@ -127,6 +127,9 @@ feature=$currentScript
 		Pause "Feature '$currentScript': No changes were made"
 	fi
 
+[[ -x $HOME/bin/logit ]] && $HOME/bin/logit -cl "${client:--}" -e "${tgtEnv:--}" -ca 'features' "$myName - Installed $currentScript"
+
+
 #==================================================================================================
 ## Done
 #==================================================================================================
@@ -137,3 +140,4 @@ return  ## We are called as a subprocess, just return to our parent
 #==================================================================================================## 04-06-2017 @ 10.10.05 - (1.0.34)    - dscudiero - renamed RunCourseLeafCgi, use new name
 ## 09-22-2017 @ 07.50.19 - (1.0.45)    - dscudiero - Add to imports
 ## 03-22-2018 @ 14:36:13 - 1.0.46 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 05-16-2018 @ 15:45:44 - 1.0.47 - dscudiero - Added activityLog logging
