@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=1.2.38 # -- dscudiero -- Fri 03/23/2018 @ 17:05:34.49
+version=1.2.39 # -- dscudiero -- Wed 05/16/2018 @ 15:42:44.96
 #==================================================================================================
 # NOTE: intended to be sourced from the courseleafFeature script, must run in the address space
 # of the caller.  Expects values to be set for client, env, siteDir
@@ -284,6 +284,8 @@ changeLogRecs+=("Feature: $feature")
 		Pause "Feature '$currentScript': No changes were made"
 	fi
 
+[[ -x $HOME/bin/logit ]] && $HOME/bin/logit -cl "${client:--}" -e "${tgtEnv:--}" -ca 'features' "$myName - Installed $feature"
+
 #==================================================================================================
 ## Done
 #==================================================================================================
@@ -301,3 +303,4 @@ return  ## We are called as a subprocess, just return to our parent
 ## 03-22-2018 @ 14:36:17 - 1.2.36 - dscudiero - Updated for Msg/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:34:35 - 1.2.37 - dscudiero - D
 ## 03-23-2018 @ 17:05:44 - 1.2.38 - dscudiero - Msg3 -> Msg
+## 05-16-2018 @ 15:45:49 - 1.2.39 - dscudiero - Added activityLog logging
