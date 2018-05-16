@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.91" // -- dscudiero -- Mon 05/07/2018 @  9:24:10.78
+wfLibVersion="1.8.92" // -- dscudiero -- Tue 05/15/2018 @ 14:35:22.18
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -2436,9 +2436,10 @@ function wfSplitString (string, size) {
 // 08-28-17 - dgs - Initial coding -
 // 09/05/17 - dgs - Added 'Workflow is not complete' prefex text and adjusted spacing
 // 02/15/18 - dgs - Updated to automatically parse the message string to fit in the preview workflow window
+// 05/15/18 - dgs - Implemented list format
 //======================================================================================================================
 wffuncs.TODO = function(inval, wfrule, args) {
-	if (typeof workflow.intestworkflow === "undefined" || !workflow.intestworkflow) return false;
+	//if (typeof workflow.intestworkflow === "undefined" || !workflow.intestworkflow) return false;
 
 	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
 	if (options === "" ) options = "Awaiting final client approval."
@@ -2446,9 +2447,17 @@ wffuncs.TODO = function(inval, wfrule, args) {
 	var indent=""; for (var i=0,  tot=22; i < tot; i++) { indent = indent+"&nbsp;"; }
 
 	print_doc("<strong><em>" + msgPrefix + "</strong></em> -- Workflow is not yet complete:<br>")
-	wfSplitString(options,96).forEach(function(text) {
+	tmpArray=options.split(":");
+	wfSplitString(tmpArray[0] + ":",90).forEach(function(text) {
 		print_doc(indent + text + "<br>")
 	});
+	if (tmpArray.length > 1) {
+		tmpArray=tmpArray[1].split(",")
+		tmpArray.forEach(function(text) {
+			print_doc(indent + "&nbsp;" + "&nbsp;" + "&nbsp;" + "&nbsp;-- " + text + "<br>")
+		});
+	}
+
 	print_doc(indent + 'Please contact your Courseleaf administrator for additional information.</strong><br>');
 
 	return false;
@@ -2610,3 +2619,4 @@ var wfLibLoaded=true;
 // 04-26-2018 @ 08:34:58 - 1.8.89 - dscudiero - Fix problem in lookup2, changed data atribut from 'data' to 'dbData'
 // 05-07-2018 @ 08:10:37 - 1.8.90 - dscudiero - Fix bug in related expansion if type is college and data is college
 // 05-07-2018 @ 09:25:20 - 1.8.91 - dscudiero - Remove debug statements from CheckAcadLevel
+// 05-16-2018 @ 09:23:20 - 1.8.92 - dscudiero - Update TODO to allow formatting of a list of items
