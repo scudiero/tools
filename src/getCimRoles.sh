@@ -200,6 +200,7 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 		Msg
 	fi
 
+	[[ -x $HOME/bin/logit ]] && $HOME/bin/logit -cl "${client:--}" -e "${env:--}" -ca 'workflow' '$myName - Generated CIM roles worksheet' 
 
 	# rm -f "$siteDir/web/courseleaf/localsteps/$step.html"
 	[[ -f $siteDir/web/courseleaf/localsteps/$step.html.bak ]] && mv -f $siteDir/web/courseleaf/localsteps/$step.html.bak $siteDir/web/courseleaf/localsteps/$step.html
@@ -236,3 +237,4 @@ Goodbye 0
 ## 03-23-2018 @ 15:34:41 - 1.10.101 - dscudiero - D
 ## 03-23-2018 @ 17:04:45 - 1.10.102 - dscudiero - Msg3 -> Msg
 ## 04-26-2018 @ 08:34:15 - 1.11.1 - dscudiero - Add longNames to argDefs
+## 05-16-2018 @ 15:46:00 - 1.11.1 - dscudiero - Added activityLog logging
