@@ -1,14 +1,9 @@
 #!/bin/bash
-version=1.0.-1 # -- dscudiero -- Wed 05/16/2018 @ 16:21:27.17
+version=1.0.11 # -- dscudiero -- Wed 05/16/2018 @ 16:49:46.03
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
 
-#= Description +===================================================================================
-# Get a report of all QA projects that are waiting
-#==================================================================================================
-
-echo "HERE HERE HERE HERE"
 #==================================================================================================
 # Declare local variables and constants
 #==================================================================================================
@@ -17,7 +12,7 @@ outDir=/home/$userName/Reports/$myName
 outFile=$outDir/$(date '+%Y-%m-%d-%H%M%S').txt
 
 GetDefaultsData
-Init "getClient getEnv"
+Init "getClient"
 
 #==================================================================================================
 # Standard arg parsing and initialization
@@ -37,23 +32,20 @@ ParseArgsStd $originalArgStr
 	[[ -n $shortDescription ]] && Msg "$shortDescription"
 	Msg
 
-	startDate=$(date --date '7 days ago' '+%s')
-
 ## Report workflow activity for a client
 	whereClause="client=\"$client\" and catagory=\"workflow\""
-	sqlStmt="user,env,jalot,text,date from $activityLogTable where $whereClause order by date DESC;"
+	sqlStmt="select user,env,jalot,text,date from $activityLogTable where $whereClause order by date DESC"
 	RunSql $sqlStmt
 	Msg; Msg "Workflow related activities for '$client'"
-	maxNameWidth=0
-	unset names counts
+	Msg '\tUser     \tEnv\tJalot\tDate                \tActivity'
 	for ((i=0; i<${#resultSet[@]}; i++)); do 
 		result="${resultSet[$i]}"
-		user="${result%%|*}"; result="$result{#*|}"
-		env="${result%%|*}"; result="$result{#*|}"
-		jalot="${result%%|*}"; result="$result{#*|}"
-		text="${result%%|*}"; result="$result{#*|}"
-		date="${result%%|*}"; result="$result{#*|}"
-		dump user env jalot text date
+		user="${result%%|*}"; result="${result#*|}"; user="$user          "
+		env="${result%%|*}"; result="${result#*|}"
+		jalot="${result%%|*}"; result="${result#*|}" ; [[ $jalot == 'NULL' ]] && unset jalot
+		text="${result%%|*}"; result="${result#*|}"
+		date="${result%%|*}"; result="${result#*|}"
+		Msg "\t${user:0:9}\t$env\t$jalot\t${date:0:19}\t$text"
 	done
 
 
@@ -75,3 +67,4 @@ Goodbye 0 #'alert'
 ## Check-in log
 #===================================================================================================
 ## 05-16-2018 @ 16:21:28 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
+## 05-16-2018 @ 16:53:00 - 1.0.11 - dscudiero - Initial checking
