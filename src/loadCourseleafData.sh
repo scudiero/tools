@@ -1034,6 +1034,9 @@ ignoreMissingPages=true
 		WriteChangelogEntry 'changeLogLines' "$siteDir/changelog.txt"
 	fi
 
+	[[ -x $HOME/bin/logit ]] && $HOME/bin/logit -cl "${client:--}" -e "${env:--}" -ca 'workflow' "$myName - Loaded workflow data"
+
+
 #==================================================================================================
 ## Done
 #==================================================================================================
@@ -1122,3 +1125,4 @@ ignoreMissingPages=true
 ## 03-30-2018 @ 10:00:42 - 3.9.26 - dscudiero - Cosmetic/minor change/Sync
 ## 04-02-2018 @ 16:25:30 - 3.9.27 - dscudiero - Add debug msgs
 ## 04-04-2018 @ 11:21:45 - 3.9.28 - dscudiero - Tweak logic for comparing old data to new data in roles loading
+## 05-16-2018 @ 15:46:21 - 3.9.28 - dscudiero - Added activityLog logging
