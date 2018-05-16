@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.-1 # -- dscudiero -- Mon 04/16/2018 @  8:42:14.33
+version=1.3.0 # -- dscudiero -- Wed 05/16/2018 @ 15:40:06.74
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -436,6 +436,10 @@ Msg "Processed CIMs: $cimStr"
 	{ Msg "Output written to: $outFile"; Msg "You can create a Excel workbook using the template work sheet:\n^$TOOLSPATH/workbooks/CIMWorkflows.xltm"; } 
 [[ -f "$tmpFile" ]] && rm "$tmpFile"
 
+[[ -x $HOME/bin/logit ]] && $HOME/bin/logit -cl "${client:--}" -e "${env:--}" -ca 'workflow' "$myName - Generated CIM workflow worksheet"
+
+
+
 #==================================================================================================
 ## Done
 #==================================================================================================
@@ -479,3 +483,4 @@ Goodbye 0 #'alert'
 ## 04-13-2018 @ 09:10:24 - 1.2.124 - dscudiero - Added override substitution variables, fixed but where '*' were getting expanded on output
 ## 04-13-2018 @ 09:46:10 - 1.2.129 - dscudiero - Reformat output for esigs
 ## 04-17-2018 @ 07:29:40 - 1.3.-1 - dscudiero - Added roles columns
+## 05-16-2018 @ 15:46:08 - 1.3.0 - dscudiero - Added activityLog logging
