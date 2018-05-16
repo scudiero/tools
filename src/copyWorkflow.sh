@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.77 # -- dscudiero -- Wed 05/16/2018 @ 15:40:10.33
+version=2.10.78 # -- dscudiero -- Wed 05/16/2018 @ 16:00:32.13
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi"
@@ -631,7 +631,7 @@ Msg
 		Msg "Logging done"
 	fi
 
-[[ -x $HOME/bin/logit ]] && $HOME/bin/logit -cl "${client:--}" -e "${tgtEnv:--}" -ca 'workflow' "$myName - Copied workflow data"
+[[ -x $HOME/bin/logit ]] && $HOME/bin/logit -cl "${client:--}" -e "${tgtEnv:--}" -ca 'workflow' -j "$jalot" "$myName - Copied workflow data"
 
 
 #====================================================================================================
@@ -732,3 +732,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 03-29-2018 @ 12:57:45 - 2.10.75 - dscudiero - Only gather jalot stuff for next env
 ## 04-04-2018 @ 07:17:42 - 2.10.76 - dscudiero - Fix problem not prompting for jalot task number if target is test
 ## 05-16-2018 @ 15:45:31 - 2.10.77 - dscudiero - Added activityLog logging
+## 05-16-2018 @ 16:01:27 - 2.10.78 - dscudiero - Add jalot to local logging
