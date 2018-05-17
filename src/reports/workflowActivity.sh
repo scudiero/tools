@@ -1,5 +1,5 @@
 #!/bin/bash
-version=1.0.11 # -- dscudiero -- Wed 05/16/2018 @ 16:49:46.03
+version=1.0.12 # -- dscudiero -- Thu 05/17/2018 @  8:48:25.36
 originalArgStr="$*"
 scriptDescription=""
 TrapSigs 'on'
@@ -33,7 +33,7 @@ ParseArgsStd $originalArgStr
 	Msg
 
 ## Report workflow activity for a client
-	whereClause="client=\"$client\" and catagory=\"workflow\""
+	whereClause="client=\"$client\" and category=\"workflow\""
 	sqlStmt="select user,env,jalot,text,date from $activityLogTable where $whereClause order by date DESC"
 	RunSql $sqlStmt
 	Msg; Msg "Workflow related activities for '$client'"
@@ -68,3 +68,4 @@ Goodbye 0 #'alert'
 #===================================================================================================
 ## 05-16-2018 @ 16:21:28 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
 ## 05-16-2018 @ 16:53:00 - 1.0.11 - dscudiero - Initial checking
+## 05-17-2018 @ 08:49:09 - 1.0.12 - dscudiero - Fix spelling error
