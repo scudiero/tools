@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.11.2 # -- dscudiero -- Wed 05/16/2018 @ 15:49:40.62
+version=1.11.6 # -- dscudiero -- Thu 05/17/2018 @ 11:12:46.88
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="WriteChangelogEntry"
@@ -70,10 +70,10 @@ fi
 [[ $loadMode == 'merge' ]] && Terminate "Sorry, the '-merge' option is not supported at this time."
 
 ## Set outfile -- look for std locations
-outFile=/home/$userName/$client-$env-CIM_Roles.csv
+outFile=/home/$userName/$client-$env-CIM_Roles.txt
 if [[ -d $localClientWorkFolder ]]; then
 	if [[ ! -d $localClientWorkFolder/$client ]]; then mkdir -p $localClientWorkFolder/$client; fi
-	outFile=$localClientWorkFolder/$client/$client-$env-CimRoles.csv
+	outFile=$localClientWorkFolder/$client/$client-$env-CimRoles.txt
 fi
 
 ## Make sure user wants to continue
@@ -174,9 +174,9 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 	Msg
 	Note "The generated output data can be found at:"
 	Msg "^'$(ColorK $outFile)'"
-	Msg "This is a .csv file that can be loaded by Microsoft Excel, if you wish to provide"
-	Msg "the client a 'prettier' version you can copy this data into a .xlsx format file."
-	Msg "A master workflows template Excel file can be found at:"
+	Msg "This is a tab delimited data file that can be loaded by Microsoft Excel worksheet"
+	Msg "if you wish, you can provide a 'prettier' worksheet by copying this data into a .xlsx"
+	Msg "format file.  The master workflows template Excel file can be found at:"
 	Msg "^'$(ColorK '\\\\saugus\docs\\tools\workbooksCIMWorkflows.xltm')' (Windows)"
 	Msg "^'$(ColorK "$TOOLSPATH/workbooks/CIMWorkflows.xltm")' (Linux)"
 	Msg "You can use this file as a start if you wish."
@@ -239,3 +239,4 @@ Goodbye 0
 ## 04-26-2018 @ 08:34:15 - 1.11.1 - dscudiero - Add longNames to argDefs
 ## 05-16-2018 @ 15:46:00 - 1.11.1 - dscudiero - Added activityLog logging
 ## 05-16-2018 @ 15:50:42 - 1.11.2 - dscudiero - Cosmetic/minor change/Sync
+## 05-17-2018 @ 11:13:14 - 1.11.6 - dscudiero - Change instructional text
