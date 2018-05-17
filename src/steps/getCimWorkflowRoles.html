@@ -27,7 +27,7 @@ var debug=false;
 	if (cims.length == 0)
 		cims=['courseadmin','programadmin'];
 	var env='pvt';
-	var version="6.4";
+	var version="6.5";
 	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
 
 	var ignoreSteps = {
@@ -486,10 +486,10 @@ for (var i1=0, tot=rolesOut.length; i1 < tot; i1++) {
 if (debug) { print_doc("\nWrite the putput to stdout...\n"); }
 // Header
 	print_doc('\n' + Array(120).join("=") + '\nCLIENT DATA\n');
-	print_doc("Role Name\tRole Members (Comma separated userids)\tEmail Override (Please see above)\tSubstitution variables/values (FYI only, not used by workflow)\n");
 	header.forEach(function(text) {
 		print_doc(text + '\n');
 	});
+	print_doc("Role Name\tRole Members (Comma separated userids)\tEmail Override (Please see above)\tSubstitution variables/values (FYI only, not used by workflow)\n");
 // Roles
 	rolesOut=rolesOut.sort();
 	rolesOut.forEach(function(text) {
