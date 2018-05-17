@@ -27,7 +27,7 @@ var debug=false;
 	if (cims.length == 0)
 		cims=['courseadmin','programadmin'];
 	var env='pvt';
-	var version="6.5";
+	var version="6.6";
 	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
 
 	var ignoreSteps = {
@@ -183,7 +183,7 @@ if (debug) { wfDump("sisName",sisName); }
 	cims.forEach(function(cim) {
 		var workflowTcfData = load_tcf('/' + cim + '/workflow.tcf');
 		if (workflowTcfData) {
-			print_doc('\t\tProcessing cim: ' + cim);
+			print_doc('\tProcessing cim: ' + cim + "\n");
 
 			//pull off list of conditional attributes from the localsteps data
 				str=workflowTcfData.localsteps[0].params.replace('attributes=','');
