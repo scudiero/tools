@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=6.0.14 # -- dscudiero -- Fri 05/11/2018 @  8:45:39.06
+version=6.0.21 # -- dscudiero -- Thu 05/17/2018 @ 10:28:55.12
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -198,15 +198,15 @@ function processGitRecord {
 	set gitResults=false
 
 	[[ $gitTag == 'branch' ]] && { branch="$1"; shift || true; gitTag="$branch"; } ## Branches and tags are treated the same
-	local checkRepoStatus repoSrc gitCmd tmpCntr editFile gitCmdOut gitFilesUpdated bCntr srcFile backupFile packageFile
+	local checkRepoStatus gitCmd tmpCntr gitCmdOut gitFilesUpdated bCntr srcFile backupFile packageFile
 	Dump 1 repoName specTarget gitTag branch -p
 
 	Pushd "$tgtDir/${specTarget}"
 	## Check to see if we have a .git directory for this directory, if not then copy from the skeleton
 	if [[ ! -d $tgtDir/${specTarget}/.git ]]; then
+		local srcGitFile="${skeletonRoot}${specTarget}/.git"
 		Msg "The target site does not have a .git repository for '$repoName', creating from the skeleton, this will take a while..."
-		local srcGitFile="$skeletonRoot/$specTarget/.git"
-		[[ ! -d $srcGitFile ]] && Terminate 0 2 "Could not locate a source .git directory for this request, repository: $repoSrc\n^srcGitFile: $srcGitFile"
+		[[ ! -d $srcGitFile ]] && Terminate 0 2 "Could not locate a source .git directory for this request, repository: $repoName\n^srcGitFile: $srcGitFile"
 		cp -frp "${srcGitFile}" '.'
 		[[ -f "${srcGitFile}ignore" ]] && cp -fp "${srcGitFile}ignore" '.'
 		## Make the local git repo a real worktree, need to hack the config file since our git is so down level.  Need this for git diff to work
@@ -254,7 +254,6 @@ function processGitRecord {
 			gitCmd="git reset --hard --quiet"; ## Update git repo data
 			ProtectedCall "$gitCmd" | Indent
 			[[ $verboseLevel -eq 0 ]] && gitCmd="git checkout --force --quiet $gitTag &> /dev/null" || gitCmd="git checkout --force $gitTag"
-			gitCmd="git checkout --force --quiet $gitTag &> /dev/null"; ## Update git files
 			ProtectedCall "$gitCmd" | Indent;
 			## If we are going to generate a patch package then write the changed files to the staging directory
 			if [[ $buildPatchPackage == true ]]; then 
@@ -266,6 +265,7 @@ function processGitRecord {
 		gitResults=true
 	fi
 	Popd
+Pause
 	return 0
 } ## processGitRecord
 
@@ -278,7 +278,7 @@ function backupFile {
 
 	## Check to see if we have processed this file already
 	if [[ ! ${backedupFiles["$file"]+abc} ]]; then
-dump -ifMe file backupDir
+		dump -ifMe file backupDir
 		BackupCourseleafFile "$file" "$backupDir"
 		backedupFiles["$file"]=true
 	fi
@@ -327,7 +327,7 @@ declare -A backedupFiles
 Hello
 GetDefaultsData -f "$myName"
 ParseArgsStd $originalArgStr
-skeletonRoot='/mnt/dev6/web/_skeleton/release'
+skeletonRoot='/steamboat/leepfrog/clskel/release'
 
 displayGoodbyeSummaryMessages=true
 cleanDirs="${scriptData3##*:}"
@@ -612,6 +612,7 @@ fi
 [[ -n $courseleafCgiVer ]] && verifyArgs+=("New courseleaf.cgi version:$courseleafCgiVer")
 [[ -n $ribbitCgiVer ]] && verifyArgs+=("New ribbit.cgi version:$ribbitCgiVer")
 [[ -n $dailyShVer ]] && verifyArgs+=("New daily.sh version:$dailyShVer")
+verifyArgs+=("skeleton Root:$skeletonRoot")
 [[ $backup == true ]] && verifyArgs+=("Backup site:$backup, backup directory: '$backupSite'")
 [[ $offline == true ]] && verifyArgs+=("Take site offline:$offline")
 [[ $buildPatchPackage == true ]] && verifyArgs+=("Build Patch Package:$buildPatchPackage")
@@ -890,8 +891,14 @@ for ((pcCntr=0; pcCntr<${#processControl[@]}; pcCntr++)); do
 
 	Indent ++
 	Msg; 
-	[[ -n $sourceModifier ]] && Msg "Patching: $(ColorK "${product^^[a-z]}") (to $source / $sourceModifier) ..." || \
-								Msg "Patching: $(ColorK "${product^^[a-z]}") (to $source) ..."
+	if [[ -n $sourceModifier ]]; then
+		Msg "Patching: $(ColorK "${product^^[a-z]}") (to $source / $sourceModifier) ..."
+		changeLogRecs+=("${product^^[a-z]} (to $source / $sourceModifier)")
+	else
+		Msg "Patching: $(ColorK "${product^^[a-z]}") (to $source) ..."
+		changeLogRecs+=("${product^^[a-z]} (to $source)")
+
+	fi
 	patchItemNum=1
 	changesMade=false
 	## Run through the action records for the product
@@ -1494,3 +1501,4 @@ Goodbye 0 "$text1" "$text2"
 ## 05-11-2018 @ 08:04:55 - 6.0.11 - dscudiero - Fix bug overriding the gitTag
 ## 05-11-2018 @ 08:37:06 - 6.0.13 - dscudiero - Change messaging from 'compare' operation
 ## 05-11-2018 @ 08:46:33 - 6.0.14 - dscudiero - Allow specification of the current release to be in any of the columns in the row as long as the recordType is 'currentRelease'
+## 05-17-2018 @ 11:23:53 - 6.0.21 - dscudiero - Misc cleanup
