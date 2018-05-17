@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.11.6 # -- dscudiero -- Thu 05/17/2018 @ 11:12:46.88
+version=1.11.7 # -- dscudiero -- Thu 05/17/2018 @ 11:53:20.77
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="WriteChangelogEntry"
@@ -200,7 +200,7 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 		Msg
 	fi
 
-	[[ -x $HOME/bin/logit ]] && $HOME/bin/logit -cl "${client:--}" -e "${env:--}" -ca 'workflow' "$myName - Generated CIM roles worksheet"
+	[[ -x $HOME/bin/logit ]] && $HOME/bin/logit -cl "${client:--}" -e "${env:--}" -ca 'workflow' "$myName - Generated CIM roles worksheet, roles loaded: $load"
 
 	# rm -f "$siteDir/web/courseleaf/localsteps/$step.html"
 	[[ -f $siteDir/web/courseleaf/localsteps/$step.html.bak ]] && mv -f $siteDir/web/courseleaf/localsteps/$step.html.bak $siteDir/web/courseleaf/localsteps/$step.html
@@ -240,3 +240,4 @@ Goodbye 0
 ## 05-16-2018 @ 15:46:00 - 1.11.1 - dscudiero - Added activityLog logging
 ## 05-16-2018 @ 15:50:42 - 1.11.2 - dscudiero - Cosmetic/minor change/Sync
 ## 05-17-2018 @ 11:13:14 - 1.11.6 - dscudiero - Change instructional text
+## 05-17-2018 @ 11:53:48 - 1.11.7 - dscudiero - Added loaded to the logit message
