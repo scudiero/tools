@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.92" // -- dscudiero -- Tue 05/15/2018 @ 14:35:22.18
+wfLibVersion="1.8.93" // -- dscudiero -- Thu 05/17/2018 @  7:41:55.91
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -2500,7 +2500,7 @@ wffuncs.CheckOnDisk = function(inval, wfrule, args) {
 // 02/15/18 - dgs - Updated to automatically parse the message string to fit in the preview workflow window
 //======================================================================================================================
 wffuncs.NoWorkflow = function(inval, wfrule, args) {
-	if (typeof workflow.intestworkflow === "undefined" || !workflow.intestworkflow) return ["Administrator"];;
+	//if (typeof workflow.intestworkflow === "undefined" || !workflow.intestworkflow) return ["Administrator"];;
 
 	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
 	if (options === "" ) options = "Please complete the required form fields and try again."
@@ -2620,3 +2620,4 @@ var wfLibLoaded=true;
 // 05-07-2018 @ 08:10:37 - 1.8.90 - dscudiero - Fix bug in related expansion if type is college and data is college
 // 05-07-2018 @ 09:25:20 - 1.8.91 - dscudiero - Remove debug statements from CheckAcadLevel
 // 05-16-2018 @ 09:23:20 - 1.8.92 - dscudiero - Update TODO to allow formatting of a list of items
+// 05-17-2018 @ 08:48:51 - 1.8.93 - dscudiero - Allow messages from NoWorkflow
