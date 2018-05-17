@@ -52,11 +52,11 @@ var debug=false;
 	header.push("Instructions -- Please read before completing, if you have questions please contact your Client Services Manager");
 	header.push("   1 - Please provide information for only those roles that will actually be active in the workflow.");
 	header.push("       If a role is not going to be used in the workflow then please DELETE the line from the spreadsheet.");
-	header.push("")
+	header.push("");
 	header.push("   2 - Role Members -- Userids should be separated with commas, no blanks please.  If your institution uses user ID NUMBERS");
 	header.push("       (UINs) as your login id then please specify the UIN for this data, failure to do so will result in a");
 	header.push("       non-functional role.");
-	header.push("")
+	header.push("");
 	header.push("   3 - Email Override -- Note: This data field only applies to \'approver\' steps in the workflow, not \'fyi\' or \'fyiall\' steps.");
 	header.push("       - Leave to blank to notify only the first individual in the userid list.");
 	header.push("       - Set to \'all\' to notify all individuals in the userid list.  Note if the role has an \'fyiall\' directive");
@@ -65,7 +65,7 @@ var debug=false;
 	header.push("       - Otherwise the specified address will be used for emails for this role.  you only need to specify if you want");
 	header.push("         Note: You should only need to specify if you want a different email than what would be normally used for the");
 	header.push("         users in the role.  Please do not specify if you are NOT overriding the normal user email addresses.");
-	header.push("")
+	header.push("");
 	header.push("Notes:");
 	header.push("   1) Data for college, department, and subject code values is pulled from the data provided in the CIM \'codes\' table.");
 	header.push("   2) If any particular role is not going to be used (e.g. the department does not have a Chair),");
@@ -74,8 +74,7 @@ var debug=false;
 	header.push("   4) Order is alphabetic by step name before substitution.");
 	header.push("   5) Roles below are a composite of all roles from work flows in: " + cims + ".");
 	header.push("   6) Any user accounts listed in the roles are expected to be pre-provisioned and will not be created by the load script.");
-	header.push("")
-	header.push("Role Name\tRole Members (Comma separated userids)\tEmail Override (Please see above)\tSubstitution variables/values (FYI only, not used by workflow)");
+	header.push("");
 
 //============================================================================================================
 //# Helper Functions
@@ -487,6 +486,7 @@ for (var i1=0, tot=rolesOut.length; i1 < tot; i1++) {
 if (debug) { print_doc("\nWrite the putput to stdout...\n"); }
 // Header
 	print_doc('\n' + Array(120).join("=") + '\nCLIENT DATA\n');
+	print_doc("Role Name\tRole Members (Comma separated userids)\tEmail Override (Please see above)\tSubstitution variables/values (FYI only, not used by workflow)\n");
 	header.forEach(function(text) {
 		print_doc(text + '\n');
 	});
