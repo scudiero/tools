@@ -174,11 +174,11 @@ if (debug) { wfDump("sisName",sisName); }
 	print_doc("If you wish, you can copy the data below the header 'CLIENT DATA' into an .xlsx file\n");
 	print_doc("before you send to the client, if you just send this file to the client you should\n");
 	print_doc("remove all lines up to and including the 'CLIENT DATA' line.\n\n");
-	print_doc("\t" + myName + "version: " + version + "\n");
-	print_doc("\t" + new Date() + "\n");
+	print_doc(myName + " version: " + version + "\n");
+	print_doc(new Date() + "\n");
+	print_doc('Environment: ' + env + '\n');
 
 // Build a list of workflow steps from cims workflow.tcf files (see cims definition)
-	print_doc('\n\tEnvironment: ' + env + '\n');
  	var idx, str, steps=[], conditionals=[], functions=[], tempArray=[], errorDetected=false, wfSubRulesHash=[], stepsHash=[];
 	cims.forEach(function(cim) {
 		var workflowTcfData = load_tcf('/' + cim + '/workflow.tcf');
@@ -232,7 +232,7 @@ if (debug) { wfDump("sisName",sisName); }
 			}
 			// Loop through wfSubRules data
 			if (cimconfigTcfData) {
-				print_doc('\n\t\t\tProcessing wfSubRules\n' );
+				if (debug) {print_doc('\n\t\t\tProcessing wfSubRules\n' )};
 				if (cimconfigTcfData.wfSubRule) {
 					cimconfigTcfData.wfSubRule.forEach(function(text) {
 						var tmpArray=text.split('|');
@@ -258,10 +258,10 @@ if (debug) { wfDump("sisName",sisName); }
 						}
 						// If we have already processed this rule then skip it
 						if (wfSubRulesHash[subRuleName] != undefined) {
-							print_doc("\t\t\t\t'" + subRuleName + "' already included above\n");
+							if (debug) {print_doc("\t\t\t\t'" + subRuleName + "' already included above\n")};
 							return;
 						}
-						print_doc('\t\t\t\t' + subRuleName + ': ' + subRuleText + '\n');
+						if (debug) {print_doc('\t\t\t\t' + subRuleName + ': ' + subRuleText + '\n')};
 						// If rule is an enumeration then parse off and create an object array
 						if (subRuleText.substr(0,1) === "[" ) {
 							var tmpHashArray=[];
@@ -318,10 +318,10 @@ if (debug) { wfDump("sisName",sisName); }
 
 					}); // cimconfigTcfData.wfSubRule.forEach
 				} else {
-					print_doc('\n\t* Warning * -- could not find any wfSubRules defined in ' + cim + ' cimconfig.cfg file.\n\tStopping\n\n');
+					print_doc('\n* Warning * -- could not find any wfSubRules defined in ' + cim + ' cimconfig.cfg file.\nStopping\n\n');
 				}
 			} else {
-				print_doc('\n\t* Error * -- could not load /' + cim + '/cimconfig.cfg  or /workflow.cfg file.\n\tStopping\n\n');
+				print_doc('\n* Error * -- could not load /' + cim + '/cimconfig.cfg  or /workflow.cfg file.\nStopping\n\n');
 				errorDetected=true;
 			}
 		}
