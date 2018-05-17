@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.3.0 # -- dscudiero -- Wed 05/16/2018 @ 15:40:06.74
+version=1.3.3 # -- dscudiero -- Thu 05/17/2018 @ 11:22:25.62
 #==================================================================================================
 TrapSigs 'on'
 includes='GetDefaultsData ParseArgsStd Hello DbLog Init Goodbye VerifyContinue MkTmpFile'
@@ -142,7 +142,7 @@ Init "getClient getEnv getDirs checkEnvs getCims addPvt $allCims"
 if [[ $informationModeOnly == true ]]; then
 	outFile='/dev/null'
 else
-	[[ -n $workbookFile ]] && outFile="$workbookFile" || outFile="$(GetOutputFile "$client" "$env" "$product" "xls")"
+	[[ -n $workbookFile ]] && outFile="$workbookFile" || outFile="$(GetOutputFile "$client" "$env" "$product" "txt")"
 fi
 
 unset ignoreRules ignoreSteps ignoreWorkflows
@@ -430,10 +430,22 @@ for cim in ${cimStr//,/ }; do
 		done < $tmpFile
 		SetFileExpansion
 done # cims
+
 Msg
 Msg "Processed CIMs: $cimStr"
-[[ $informationOnlyMode != true ]] && 
-	{ Msg "Output written to: $outFile"; Msg "You can create a Excel workbook using the template work sheet:\n^$TOOLSPATH/workbooks/CIMWorkflows.xltm"; } 
+if [[ $informationOnlyMode != true ]]; then
+	Msg
+	Note "The generated output data can be found at:"
+	Msg "^'$(ColorK $outFile)'"
+	Msg "This is a tab delimited data file that can be loaded by Microsoft Excel worksheet"
+	Msg "if you wish, you can provide a 'prettier' worksheet by copying this data into a .xlsx"
+	Msg "format file.  The master workflows template Excel file can be found at:"
+	Msg "^'$(ColorK '\\\\saugus\docs\\tools\workbooksCIMWorkflows.xltm')' (Windows)"
+	Msg "^'$(ColorK "$TOOLSPATH/workbooks/CIMWorkflows.xltm")' (Linux)"
+	Msg "You can use this file as a starting point if you wish."
+	Msg
+fi
+
 [[ -f "$tmpFile" ]] && rm "$tmpFile"
 
 [[ -x $HOME/bin/logit ]] && $HOME/bin/logit -cl "${client:--}" -e "${env:--}" -ca 'workflow' "$myName - Generated CIM workflow worksheet"
@@ -484,3 +496,4 @@ Goodbye 0 #'alert'
 ## 04-13-2018 @ 09:46:10 - 1.2.129 - dscudiero - Reformat output for esigs
 ## 04-17-2018 @ 07:29:40 - 1.3.-1 - dscudiero - Added roles columns
 ## 05-16-2018 @ 15:46:08 - 1.3.0 - dscudiero - Added activityLog logging
+## 05-17-2018 @ 11:22:50 - 1.3.3 - dscudiero - Add instructions on how to use the output file
