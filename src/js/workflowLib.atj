@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.93" // -- dscudiero -- Thu 05/17/2018 @  7:41:55.91
+wfLibVersion="1.8.94" // -- dscudiero -- Mon 05/21/2018 @  9:19:32.58
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -151,6 +151,21 @@ if (typeof wfLibLoaded === "undefined") {
 //======================================================================================================================
 // COMMON FUNCTIONS
 //======================================================================================================================
+
+//======================================================================================================================
+// Return the step with "wfGetCimInstanceName" replaced with the cim instance name sans "admin" and with the first letter capitalized
+//======================================================================================================================
+wffuncs.wfGetCimInstanceName = function(inval, wfrule, args)  {
+	var me=wfHello(1,inval, wfrule, args); // me={ myName:"", myOpts:"", myRequest:"", myNotMode:false };
+	var wfCimInstance=tcfdata.pagename[0].replace(/^\/([^\/]*)\/.*/, "/$1/");
+	wfCimInstance=wfCimInstance.replace(/\//g, "");
+	wfCimInstance=wfCimInstance.replace("admin","");
+
+	wfCimInstance=wfCimInstance.charAt(0).toUpperCase() + wfCimInstance.slice(1);
+	wfDump(0,["\twfCimInstance;"+wfCimInstance]);
+	wfDebug(0,"*** returning: " + inval.replace(wfrule.ifregex,wfCimInstance));
+	return [inval.replace(wfrule.regex,wfCimInstance)];
+} //wffuncs.wfGetCimInstanceName
 
 //======================================================================================================================
 // Check to see if two arrays are the same
@@ -2621,3 +2636,4 @@ var wfLibLoaded=true;
 // 05-07-2018 @ 09:25:20 - 1.8.91 - dscudiero - Remove debug statements from CheckAcadLevel
 // 05-16-2018 @ 09:23:20 - 1.8.92 - dscudiero - Update TODO to allow formatting of a list of items
 // 05-17-2018 @ 08:48:51 - 1.8.93 - dscudiero - Allow messages from NoWorkflow
+// 05-21-2018 @ 12:31:04 - 1.8.94 - dscudiero - Added wfGetCimInstanceName
