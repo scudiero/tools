@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.27 # -- dscudiero -- Tue 05/08/2018 @  8:13:11.70
+version=2.2.28 # -- dscudiero -- Fri 05/11/2018 @ 13:56:05.40
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -59,6 +59,7 @@ function SyncCourseleafCgis {
 # Synchronize the skeleton shadow with master
 function SyncSkeleton {
 	srcDir=/mnt/dev6/web/_skeleton
+	#srcDir=/steamboat/leepfrog/clskel
 	tgtDir=$skeletonRoot
 
 	chmod 770 $tgtDir
@@ -355,3 +356,4 @@ return 0
 ## 03-26-2018 @ 08:56:02 - 2.2.25 - dscudiero - Comment out BuildToolsAuthTable
 ## 05-04-2018 @ 13:32:00 - 2.2.26 - dscudiero - Added SyncCourseleafPatchTable function
 ## 05-08-2018 @ 08:14:10 - 2.2.27 - dscudiero - Update syncCourseLeafPatchTable to chage name of the transactional db
+## 05-21-2018 @ 07:22:15 - 2.2.28 - dscudiero - Switch to clskel
