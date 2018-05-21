@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.94" // -- dscudiero -- Mon 05/21/2018 @  9:19:32.58
+wfLibVersion="1.8.95" // -- dscudiero -- Mon 05/21/2018 @ 15:08:02.26
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -2165,6 +2165,10 @@ GetProposalMode = function() {
 
 }; //GetProposalMode
 
+wffuncs.GetProposalMode = function(inval,wfrule,args) {
+	return [inval.replace(wfrule.regex,GetProposalMode())]
+}; //wffuncs.GetProposalMode
+
 //==================================================================================================
 // Check execution environment, passed one argument 'env' that can hav values 'dev' or 'test'
 // compares execution url (host) against arg and if there is a match then returns true, otherwise
@@ -2214,7 +2218,7 @@ function wfHello(msgLevel,inval,wfrule,args){
 		var text="";
 	}
 	wfDebug(msgLevel,"*** Starting: " + returnObj.myName + text);
-	wfDump(0,["reqType;"+returnObj.myRequest,"options;"+returnObj.myOpts,"notMode;"+returnObj.myNotMode],";","horizontal quote");
+	wfDump(1,["reqType;"+returnObj.myRequest,"options;"+returnObj.myOpts,"notMode;"+returnObj.myNotMode],";","horizontal quote");
 	return returnObj;
 }
 
@@ -2637,3 +2641,4 @@ var wfLibLoaded=true;
 // 05-16-2018 @ 09:23:20 - 1.8.92 - dscudiero - Update TODO to allow formatting of a list of items
 // 05-17-2018 @ 08:48:51 - 1.8.93 - dscudiero - Allow messages from NoWorkflow
 // 05-21-2018 @ 12:31:04 - 1.8.94 - dscudiero - Added wfGetCimInstanceName
+// 05-21-2018 @ 15:12:38 - 1.8.95 - dscudiero - Add wffuncsGetProposalMode
