@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.28 # -- dscudiero -- Fri 05/11/2018 @ 13:56:05.40
+version=2.2.29 # -- dscudiero -- Mon 05/21/2018 @ 12:42:35.17
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -231,7 +231,8 @@ case "$hostName" in
 		# fi
 
 		## Run programs/functions
-			pgms=(updateDefaults SyncCourseleafPatchTable CheckMonitorFiles SyncInternalDb SyncCourseleafCgis SyncSkeleton)
+			#pgms=(updateDefaults SyncCourseleafPatchTable CheckMonitorFiles SyncInternalDb SyncCourseleafCgis SyncSkeleton)
+			pgms=(updateDefaults SyncCourseleafPatchTable CheckMonitorFiles SyncInternalDb)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -242,14 +243,14 @@ case "$hostName" in
 				Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
 
-			if [[ $(date "+%H") == 12 ||  $(date "+%H") == 22 ]]; then
-				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
-				TrapSigs 'off'
-				if [[ $(date "+%H") == 12 ]]; then 
-					Msg "\n$(date +"%m/%d@%H:%M") - Running syncCourseleafGitRepos master..."
-					TrapSigs 'off'; FindExecutable -sh -run syncCourseleafGitRepos master; TrapSigs 'on'
-					Msg "...syncCourseleafGitRepos done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
-				fi
+			if [[ $(date "+%H") == 12 || $(date "+%H") == 22 ]]; then
+				# Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
+				# TrapSigs 'off'
+				# if [[ $(date "+%H") == 12 ]]; then 
+				# 	Msg "\n$(date +"%m/%d@%H:%M") - Running syncCourseleafGitRepos master..."
+				# 	TrapSigs 'off'; FindExecutable -sh -run syncCourseleafGitRepos master; TrapSigs 'on'
+				# 	Msg "...syncCourseleafGitRepos done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+				# fi
 				if [[ $(date "+%H") == 22 ]]; then 
 					Msg "\n$(date +"%m/%d@%H:%M") - Running backupData ..."
 					TrapSigs 'off'; FindExecutable -sh -uselocal -run backupData; TrapSigs 'on'
@@ -357,3 +358,4 @@ return 0
 ## 05-04-2018 @ 13:32:00 - 2.2.26 - dscudiero - Added SyncCourseleafPatchTable function
 ## 05-08-2018 @ 08:14:10 - 2.2.27 - dscudiero - Update syncCourseLeafPatchTable to chage name of the transactional db
 ## 05-21-2018 @ 07:22:15 - 2.2.28 - dscudiero - Switch to clskel
+## 05-21-2018 @ 12:42:55 - 2.2.29 - dscudiero - Comment out the git syncing sturr
