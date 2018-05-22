@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.10" # -- dscudiero -- Thu 04/19/2018 @  8:10:37.59
+# version="1.0.28" # -- dscudiero -- Tue 05/22/2018 @ 12:25:36.79
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -30,10 +30,11 @@ function RunSql {
 	[[ ${sqlAction:0:5} != 'mysql' && ${sqlStmt:${#sqlStmt}:1} != ';' ]] && sqlStmt="$sqlStmt;"
 
 	local calledBy=$(caller 0 | cut -d' ' -f2)
+	## If infoMode and not a 'select' then skip it
+
 	if [[ -n $DOIT || $informationOnlyMode == true ]]; then
-		local stmtType="${sqlStmt%% *}"; stmtType="${stmtType^^[a-z]}"
-		[[ $stmtType != 'SELECT' && $calledBy != 'ProcessLogger' ]] && Msg "$sqlStmt"
-		return 0
+		local stmtType="${sqlStmt%% *}"; stmtType="${stmtType^,,[a-z]}"
+		[[ $stmtType != 'select' && $calledBy != 'ProcessLogger' ]] && { Msg "$sqlStmt" ; Here rs0; return 0; }
 	fi
 
 	# ## Run the query, put output into the resultSet array
@@ -79,3 +80,4 @@ export -f RunSql
 ## 04-18-2018 @ 09:35:54 - 1.0.8 - dscudiero - Added toolsdev support
 ## 04-18-2018 @ 09:38:01 - 1.0.9 - dscudiero - Use the TOOLSDEVPATH variable
 ## 04-19-2018 @ 08:11:01 - 1.0.10 - dscudiero - Tweak statement setting jar file if useDev
+## 05-22-2018 @ 14:07:39 - 1.0.28 - dscudiero - Fix problem with information only mode
