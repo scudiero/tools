@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.28" # -- dscudiero -- Tue 05/08/2018 @ 13:26:45.10
+# version="2.0.32" # -- dscudiero -- Tue 05/22/2018 @  8:38:46.87
 #===================================================================================================
 ## Make sure the user really wants to do this
 ## If the first argument is 'loop' then loop back to self if user responds with 'n'
@@ -11,6 +11,8 @@
 
 function VerifyContinue {
 	[[ $secondaryMessagesOnly == true ]] && return 0
+	Import 'ArrayRef'
+
 	local mode="$1"
 	local verifyPrompt="$2"
 	if [[ $verifyPrompt == '' ]]; then verifyPrompt="$mode"; mode='loop'; fi
@@ -21,17 +23,35 @@ function VerifyContinue {
 		#[[ $allItems == true ]] && verifyArgs+=("Auto process all items:$allItems")
 		[[ $force == true ]] && verifyArgs+=("Force execution:$force")
 
-		local maxArgWidth
-		for arg in "${verifyArgs[@]}"; do tempStr=$(echo $arg | cut -d':' -f1); [[ ${#tempStr} -gt $maxArgWidth ]] && maxArgWidth=${#tempStr}; done
-		dots=$(PadChar '.' $maxArgWidth)
-		for arg in "${verifyArgs[@]}"; do
-			tempStr="$(echo $arg | cut -d':' -f1)"
-			local token1="$(echo $arg | cut -d':' -f1)" ; token1=${token1,,[a-z]}
-			[[ $token1 == 'warning' ]] && color='ColorW' || color='ColorK'
-			tempStr="${tempStr}${dots}"
-			tempStr=${tempStr:0:$maxArgWidth+3}
-			Msg "^$(eval "$color \"${tempStr}\"")$(echo $arg | cut -d':' -f2-)"
+		local maxArgWidth arg argStr argVal argL argValL tmpStr iii
+		# for arg in "${verifyArgs[@]}"; do tempStr=$(echo $arg | cut -d':' -f1); [[ ${#tempStr} -gt $maxArgWidth ]] && maxArgWidth=${#tempStr}; done
+		# dots=$(PadChar '.' $maxArgWidth)
+		# for arg in "${verifyArgs[@]}"; do
+		# 	tempStr="$(echo $arg | cut -d':' -f1)"
+		# 	local token1="$(echo $arg | cut -d':' -f1)" ; token1=${token1,,[a-z]}
+		# 	[[ $token1 == 'warning' ]] && color='ColorW' || color='ColorK'
+		# 	tempStr="${tempStr}${dots}"
+		# 	tempStr=${tempStr:0:$maxArgWidth+3}
+		# 	Msg "^$(eval "$color \"${tempStr}\"")$(echo $arg | cut -d':' -f2-)"
+		# done
+		
+		for argStr in "${verifyArgs[@]}"; do tmpStr=${argStr%%:*}; [[ ${#tmpStr} -gt $maxArgWidth ]] && maxArgWidth=${#tmpStr}; done
+		dots=$(PadChar '.' $maxArgWidth); (( maxArgWidth = $maxArgWidth + 3 )); blanks=$(PadChar ' ' $maxArgWidth)
+
+		for argStr in "${verifyArgs[@]}"; do
+			arg="${argStr%%:*}"; argL="${arg,,[a-z]}"; argVal="${argStr##*:}"; argValL="${argVal,,[a-z]}";
+			if [[ ${argL:${#argL}-3:${#argL}} == '(s)' ]]; then
+				tmpStr="${arg}${dots}"; tmpStr=${tmpStr:0:$maxArgWidth}
+				Msg "^$(ColorK "${tmpStr}")" 
+				for iii in $(IndirKeys $argVal); do
+				    Msg "^${blanks}$(IndirVal $argVal $iii)"
+				done
+			else
+				tmpStr="${arg}${dots}"; tmpStr=${tmpStr:0:$maxArgWidth}
+				[[ ${argL:0:7} == 'warning' ]] && Msg "^$(ColorW "${tmpStr}")${argVal}" || Msg "^$(ColorK "${tmpStr}")${argVal}" 
+			fi
 		done
+
 		[[ $testMode == true ]] && Msg "^$(ColorE "*** Running in Test Mode ***")"
 		[[ $informationOnlyMode == true ]] && Msg "^$(ColorE "*** Information only mode, no data will be modified ***")"
 	fi
@@ -74,3 +94,4 @@ export -f VerifyContinue
 ## 03-13-2018 @ 11:14:30 - 2.0.26 - dscudiero - Fix if conditional checking response to prompt
 ## 03-23-2018 @ 16:52:29 - 2.0.27 - dscudiero - Msg3 -> Msg
 ## 05-08-2018 @ 13:27:21 - 2.0.28 - dscudiero - Remove the 'Auto process all items message
+## 05-22-2018 @ 08:39:47 - 2.0.32 - dscudiero - Add displaying array values vertically
