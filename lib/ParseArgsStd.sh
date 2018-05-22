@@ -1,6 +1,6 @@
 ## xO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.55" # -- dscudiero -- Thu 04/26/2018 @ 16:13:17.62
+# version="3.0.65" # -- dscudiero -- Tue 05/22/2018 @ 12:59:51.23
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -41,6 +41,7 @@ function ParseArgsStd {
 		for ((argCntr=1; argCntr<=$#; argCntr++)); do
 			arg="${!argCntr}"
 			dump 3 -n arg
+
 			# Loop through the allArgDefs array to see if we have a match
 				found=false
 				for ((argDefCntr=0; argDefCntr<${#allArgDefs[@]}; argDefCntr++)); do
@@ -95,20 +96,20 @@ function ParseArgsStd {
 											found=false
 											for tmpEnv in ${courseleafDevEnvs//,/ } ${courseleafProdEnvs//,/ }; do
 												[[ $tmpEnv =~ ^${nextToken} ]] && { found=true; break; }
-												#[[ $tmpStr =~ ^${tmpEnv} ]] && { echo "HERE HERE HERE HERE"; foune=true; break; }
 											done
 											[[ $found == true ]] && { eval "$scriptVar=\"$tmpEnv\""; consumedNext=true; }
 										else
 											 eval "$scriptCmd"
 										fi
 									fi
-									if [[ -n $scriptVar && $consumed != true ]]; then
+									if [[ -n $scriptVar && $consumedNext != true ]]; then
 										(( argCntr++))
 										eval "$scriptVar=\"${!argCntr}\""
 									fi
 								fi
 								;;
 					esac
+					#[[ $consumedNext == true ]] && (( argCntr++ ))
 				else
 					[[ -z $client && ${arg:0:1} != '-' ]] && { client="$arg"; continue; }
 				    unknowArgs="$unknowArgs,$arg"
@@ -118,7 +119,7 @@ function ParseArgsStd {
 				# argCmd="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"
 				# argHelpGrp="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"
 				# arghelpText="${tmpStr%%|*}"
-		done
+		done ## args
 
 	[[ -n $unknowArgs ]] && unknowArgs="${unknowArgs:1}"
 
@@ -153,3 +154,4 @@ export -f ParseArgsStd
 ## 04-25-2018 @ 11:52:57 - 3.0.35 - dscudiero - Update to allow for scriptCmd on options
 ## 04-26-2018 @ 08:33:26 - 3.0.38 - dscudiero - If we do not parse off a logname from the argDev the set it to the shortname
 ## 04-26-2018 @ 16:54:55 - 3.0.55 - dscudiero - Fix problem if the arg type is option and no data provided by user
+## 05-22-2018 @ 14:06:53 - 3.0.65 - dscudiero - Fix a problem processing expEnv directive
