@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.2.53 # -- dscudiero -- Mon 03/26/2018 @ 16:54:59.91
+version=2.3.0 # -- dscudiero -- Tue 05/22/2018 @ 14:06:07.01
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetOutputFile BackupCourseleafFile ProtectedCall GetExcel SetFileExpansion"
@@ -40,7 +40,6 @@ scriptDescription="Merge role data"
 		[[ -f $stepFile ]] && rm -f $stepFile
 		[[ -f $backupStepFile ]] && mv -f $backupStepFile $stepFile
 		[[ -f "$tmpDataFile" ]] && rm -f "$tmpDataFile"
-		[[ -f $logFile && $outFile != '' ]] && cp -fp "$logFile" "$outFile"
 		return 0
 	}
 
@@ -64,16 +63,16 @@ scriptDescription="Merge role data"
 		local string="$1"
 
 		## blanks before commas
-		string=$(echo "$string" | sed 's/ ,/,/g')
+		string=$(sed 's/ ,/,/g' <<< "$string" )
 
 		## blanks after commas
-		string=$(echo "$string" | sed 's/, /,/g')
+		string=$(sed 's/, /,/g' <<< "$string" )
 
 		## Strip leading blanks. tabs. commas
-		string=$(echo "$string" | sed 's/^[ ,\t]*//g')
+		string=$(sed 's/^[ ,\t]*//g' <<< "$string" )
 
 		## Strip trailing blanks. tabs. commas
-		string=$(echo "$string" | sed 's/[ ,\t]*$//g')
+		string=$(sed 's/[ ,\t]*$//g' <<< "$string" )
 
 		echo "$string"
 		return 0
@@ -90,7 +89,6 @@ scriptDescription="Merge role data"
 		echo $(echo ${mergeArray[@]} | tr ' ' ',')
 		return 0
 	}
-
 
 	#==================================================================================================
 	# Get the roles data from the file
@@ -222,18 +220,14 @@ declare -A membersErrors
 helpSet='script,client,env'
 helpNotes+=("The output is written to the $HOME/clientData/<client> directory,\n\t   if the directory does exist one will be created.")
 Hello
-GetDefaultsData $myName
+GetDefaultsData -f $myName
 ParseArgsStd $originalArgStr
+dump -1 client env envs srcEnv tgtEnv -q
+
 displayGoodbyeSummaryMessages=true
 Init 'getClient getSrcEnv getTgtEnv getDirs checkEnvs addPvt'
 srcEnv="$(TitleCase "$srcEnv")"
 tgtEnv="$(TitleCase "$tgtEnv")"
-
-## Information only mode
- 	[[ $informationOnlyMode == true ]] && Warning "'informationOnlyMode' flag is set, no data will be modified."
-
-## Set output file
-	outFile="$(GetOutputFile "$client" "$env" "$product")"
 
 ## Findout if we should merge or overlay role data
 	unset mergeMode
@@ -245,7 +239,7 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 		Prompt ans "'Yes' = 'merge', 'No' = 'overlay'" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
 		[[ $ans == 'y' ]] && mergeMode='merge' || mergeMode='overlay'
 	else
-		Note "Using specified value of '$mergeMode' for 'mergeMode'"
+		[[ -n $mergeMode ]] && Note "Using specified value of '$mergeMode' for 'mergeMode'"
 	fi
 
 ## Find out if this client uses UINs
@@ -309,6 +303,16 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 ## set default values
 	[[ $useUINs == '' ]] && useUINs='N/A'
 
+## output file
+	unset outFile
+	## Set outfile -- look for std locations
+	outFile="/home/$userName/$client-$srcEnv-$tgtEnv-CIM_Roles.txt"
+	if [[ -d $localClientWorkFolder ]]; then
+		if [[ ! -d $localClientWorkFolder/$client ]]; then mkdir -p "$localClientWorkFolder/$client"; fi
+		outFile="$localClientWorkFolder/$client/$client-$srcEnv-$tgtEnv-CIM_Roles.txt"
+	fi
+	echo -e "Role name\t'$srcEnv' site member list\t'$srcEnv' site email\t'$tgtEnv' site member list\t'$tgtEnv' site email" > "$outFile"
+
 ## Verify processing
 	verifyArgs+=("Client:$client")
 	verifyArgs+=("Source Env:$(TitleCase $srcEnv) ($srcDir)")
@@ -316,18 +320,16 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 	[[ $workbookFile != '' ]] && verifyArgs+=("Input file:$workbookFileStr")
 	verifyArgs+=("Map UIDs to UINs:$useUINs")
 	verifyArgs+=("Role combination rule:$mergeMode")
-	verifyArgs+=("Output File:$outFile")
+	[[ -n $outFile ]] && verifyArgs+=("Output File:$outFile")
 	VerifyContinue "You are asking to update CourseLeaf data"
 
-	dump -1 client srcEnv srcDir tgtEnv tgtDir useUINs
+	dump -1 client srcEnv srcDir tgtEnv tgtDir useUINs outFile
 	myData="Client: '$client', SrcEnv: '$srcEnv', TgtEnv: '$tgtEnv', File: '$workbookFile' "
 	[[ $logInDb != false && $myLogRecordIdx != "" ]] && dbLog 'data' $myLogRecordIdx "$myData"
-
 
 #==================================================================================================
 # Main
 #==================================================================================================
-
 ## Process spreadsheet
 	if [[ $workbookFile != '' ]]; then
 		## Get the list of sheets in the workbook
@@ -356,8 +358,17 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 ## Merge role file data
 	Msg "\nMerging the '$srcEnv' roles into the '$tgtEnv' roles ..."
 	unset numDifferentFromSrc addedFromSrc
-	## Prime roles out array with the tgt file data.
+	## Prime roles out hash with the tgt file data.
 	for key in "${!rolesFromTgtFile[@]}"; do rolesOut["$key"]="${rolesFromTgtFile["$key"]}"; done
+	## Loop through target hash and report on any roles not found in the source
+	for key in "${!rolesFromTgtFile[@]}"; do
+		if [[ !${rolesFromSrcFile["$key"]+abc} ]]; then
+			Info 0 1 "Role '$key' found in $tgtEnv but not in $srcEnv"
+			echo -e "${key}\t\t\t$(echo ${rolesFromTgtFile["$key"]} | cut -d'|' -f1)\t$(echo ${rolesFromTgtFile["$key"]} | cut -d'|' -f2)" >> "$outFile"
+		fi
+	done
+
+	## Loop through source hash and see if it is in the target hash, if yes then compare
 	for key in "${!rolesFromSrcFile[@]}"; do
 		if [[ ${rolesOut["$key"]+abc} ]]; then
 			if [[ ${rolesFromSrcFile["$key"]} != ${rolesOut["$key"]} ]]; then
@@ -389,10 +400,13 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 					rolesOut["//$key"]="${rolesFromSrcFile["$key"]}   <-- Pre-merge $srcEnv value"
 					Msg "^^Keeping existing ($tgtEnv) data."
 				fi
-				(( numDifferentFromSrc += 1 ))
+				echo -e "${key}\t$(echo ${rolesFromSrcFile["$key"]} | cut -d'|' -f1)\t$(echo ${rolesFromSrcFile["$key"]} | cut -d'|' -f2)$(echo ${rolesFromTgtFile["$key"]} | cut -d'|' -f1)\t$(echo ${rolesFromTgtFile["$key"]} | cut -d'|' -f2)" >> "$outFile"
+				(( numDifferentFromSrc += 1 ))					
 			fi
 		else
+			Note 0 1 "Role '$key' found in $srcEnv but not in $tgtEnv, adding to $tgtEnv"
 			rolesOut["$key"]="${rolesFromSrcFile["$key"]}"
+			echo -e "${key}\t$(echo ${rolesFromSrcFile["$key"]} | cut -d'|' -f1)\t$(echo ${rolesFromSrcFile["$key"]} | cut -d'|' -f2)\t\t" >> "$outFile"
 			(( addedFromSrc += 1 ))
 		fi
 	done;
@@ -508,7 +522,10 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 	fi
 	summaryMsgs+=("")
 	summaryMsgs+=("${#rolesOut[@]} Merged Records")
-	#[[ $informationOnlyMode == false ]] && summaryMsgs+=("$tgtEnv roles.tcf file written ($tgtDir/web/courseleaf/roles.tcf)") || \
+
+	summaryMsgs+=("")
+	summaryMsgs+=("Data comparison workbook file: $outFile")
+	[[ $informationOnlyMode == false ]] && { summaryMsgs+=(""); summaryMsgs+=("$tgtEnv roles.tcf file written ($tgtDir/web/courseleaf/roles.tcf)"); }
 
 #==================================================================================================
 ## Done
@@ -538,3 +555,4 @@ tgtEnv="$(TitleCase "$tgtEnv")"
 ## 03-23-2018 @ 15:35:13 - 2.2.51 - dscudiero - D
 ## 03-23-2018 @ 16:52:33 - 2.2.52 - dscudiero - Msg3 -> Msg
 ## 04-11-2018 @ 14:57:01 - 2.2.53 - dscudiero - Added wfHello, tweaked wfDebug & wfDump
+## 05-22-2018 @ 14:08:14 - 2.3.0 - dscudiero - Create a comparison file as outout
