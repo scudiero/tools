@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=6.0.22 # -- dscudiero -- Mon 05/21/2018 @  7:21:32.62
+version=6.0.34 # -- dscudiero -- Wed 05/23/2018 @ 14:17:42.09
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -459,14 +459,26 @@ for product in ${products//,/ }; do
 
 	[[ -n $sourceIn ]] && source="$sourceIn"
 	if [[ -z $source ]]; then
+		## Get the current and skeleton release version values
+			sqlStmt="select concat(sourceSpec,targetSpec,option) from $patchesTable where product=\"$product\" and recordType=\"currentRelease\""
+			RunSql $sqlStmt
+			[[ ${#resultSet[@]} -eq 0 || -z ${resultSet[0]} ]] && \
+				Terminate "Sorry, 'current' was requested as the source but could not lookup the version from the '$patchesTable' database."
+			currentRelease="${resultSet[0]}"
+
+			skeletonRelease=$(GetProductVersion "$product" "$skeletonRoot")
+
 		Msg "\nFor '$(ColorK ${product^^[a-z]})', What source data do you wish to use for the patch:"
 		if [[ $(Contains "$products" ',') == true ]]; then
-			Msg "^$(ColorK \'C\') for Current Release\n^$(ColorK \'M\') for the 'master' branch (aka what's in the skeleton)"
+			Msg "^$(ColorK \'Current\') to use what development has designated as the 'current' release ($currentRelease), or\
+				\n^$(ColorK \'Master\')  to use the 'master' branch ($skeletonRelease)"
 			unset ans; Prompt ans "Source" "C,M" "C"
 		else
-			Msg "^$(ColorK \'C\') for Current Release, \n^$(ColorK \'N\') for Specific named release, \
-				\n^$(ColorK \'B\') for Specific git branch, or \n^$(ColorK \'M\') for the 'master' branch"
-			unset ans; Prompt ans "Which source ?" "C,N,B,M" "C"
+			Msg "^$(ColorK \'Current\') to use what development has designated as the 'current' release ($currentRelease) or, \
+				\n^$(ColorK \'Named\')   to use a specific named release (selection) or, \
+				\n^$(ColorK \'Branch\')  to use a specific git branch (selection), or \
+				\n^$(ColorK \'Master\')  to use the 'master' branch ($skeletonRelease)"
+			unset ans; Prompt ans "Which source ?" "Current,Named,Branch,Master" "Current"
 		fi
 		ans="${ans:0:1}"
 		if [[ ${ans,,[a-z]} == 'n' ]]; then
@@ -511,14 +523,9 @@ for product in ${products//,/ }; do
 			branch='master'
 			;;
 		*)	## Current release
-			## Get the release tag from the patch control database
-			sqlStmt="select concat(sourceSpec,targetSpec,option) from $patchesTable where product=\"$product\" and recordType=\"currentRelease\""
-			RunSql $sqlStmt
-			[[ ${#resultSet[@]} -eq 0 || -z ${resultSet[0]} ]] && \
-				Terminate "Sorry, 'current' was requested as the source but could not lookup the version from the '$patchesTable' database."
 			sourceDir=''
 			source='current'
-			namedRelease="${resultSet[0]}"
+			namedRelease="$currentRelease"
 			;;
 	esac
 	## Get the target sites version, set processControl record
@@ -1502,3 +1509,4 @@ Goodbye 0 "$text1" "$text2"
 ## 05-11-2018 @ 08:46:33 - 6.0.14 - dscudiero - Allow specification of the current release to be in any of the columns in the row as long as the recordType is 'currentRelease'
 ## 05-17-2018 @ 11:23:53 - 6.0.21 - dscudiero - Misc cleanup
 ## 05-21-2018 @ 07:21:48 - 6.0.22 - dscudiero - Remove debug statements
+## 05-23-2018 @ 14:19:46 - 6.0.34 - dscudiero - Added currentVersion and skeletonVersion to the source prompt text
