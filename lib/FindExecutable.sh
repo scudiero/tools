@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.54" # -- dscudiero -- Tue 05/08/2018 @ 16:02:48.31
+# version="1.2.57" # -- dscudiero -- Wed 05/23/2018 @ 10:01:14.71
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -36,6 +36,7 @@ function FindExecutable {
 	    [[ $1 =~ ^-fe|--feature$ ]] && { mode='feature'; searchRoot="${mode}s"; shift 1 || true; continue; }
 	    [[ $1 =~ ^-st|--step$ ]] && { mode='step'; searchRoot="${mode}s"; shift 1 || true; continue; }
 	    [[ $1 =~ ^-re|--report$ ]] && { mode='report'; searchRoot="${mode}s"; shift 1 || true; continue; }
+	    [[ $1 =~ ^-wf|--wftest$ ]] && { mode='wfTest'; searchRoot="${mode}s"; shift 1 || true; continue; }
 	    [[ $1 =~ ^-ru|--run$ ]] && { runScript=true; shift 1 || true; continue; }
 	    [[ $1 =~ ^-uselocal|--uselocal$ ]] && { useLocal=true; shift 1 || true; continue; }
 	    [[ $1 =~ ^-usedev|--usedev$ ]] && { useDev=true; shift 1 || true; continue; }
@@ -53,7 +54,7 @@ function FindExecutable {
 		searchDirs="$TOOLSPATH/src"
 		[[ $useDev == true && -n $TOOLSDEVPATH && -d "$TOOLSDEVPATH/src" ]] && searchDirs="$TOOLSDEVPATH/src $searchDirs"
 		[[ $useLocal == true && -d "$HOME/tools/src" ]] && searchDirs="$HOME/tools/src $searchDirs"
-		searchTokens="bash:sh python:py java:class steps:html report:sh cron:sh"
+		searchTokens="bash:sh python:py java:class steps:html report:sh cron:sh wftests:wftest"
 	fi
 	#Dump -t fileName mode searchRoot searchTokens searchDirs scriptArgs > $stdout
 
@@ -118,3 +119,4 @@ export -f FindExecutable
 ## 10-27-2017 @ 13.28.25 - ("1.2.47")  - dscudiero - Cosmetic/minor change
 ## 04-18-2018 @ 09:34:45 - 1.2.49 - dscudiero - Refactored setting searchdirs
 ## 05-08-2018 @ 16:03:49 - 1.2.54 - dscudiero - Remove debug statements
+## 05-23-2018 @ 10:01:40 - 1.2.57 - dscudiero - Added wftests file type
