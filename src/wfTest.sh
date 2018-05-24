@@ -10,6 +10,8 @@ Import "$standardInteractiveIncludes $myIncludes"
 originalArgStr="$*"
 scriptDescription="This script will run automated workflow test cases"
 
+dump originalArgStr -q
+
 #= Description +===================================================================================
 # Run automated test cases for workflow in a CIM insance
 # See 'Examle test file' below
@@ -19,8 +21,8 @@ scriptDescription="This script will run automated workflow test cases"
 #==================================================================================================
 function wfTest-ParseArgsStd  {
 	myArgs+=('instance|instance|option|instance||script|The name of the CIM instance to be tested')
-	#myArgs+=('g|group|option|group||script|The name of the test group to be run')
-	myArgs+=('r|runTests|option|runTests||script|The comma seperated list pf test names to run')
+	myArgs+=('runtests|runTests|option|runTests||script|The comma seperated list of test names to run')
+	myArgs+=('rungroups|runGroups|option|runGroups||script|The comma seperated list of test groups to run')
 	myArgs+=('over|overWrite|switch|overWrite||script|Over write the test proposal folder if present')
 	myArgs+=('noS|noStopFirst|switch|noStopFirst||script|Do not stop on the first error detected')
 	return 0
@@ -49,128 +51,142 @@ function wfTest-testMode  { # or testMode-local
 	return 0
 }
 
-#==================================================================================================
+#=======================================================================================================================
 # local functions
-#==================================================================================================
-#==================================================================================================
-# Parse the xml file, returns the following hash tables
-# setup["$instance.$test.vars"]
-# setup["$instance.$test.workflow"]
-# expect["$instance.$test.vars"]
-# expect["$instance.$test.workflow"]
-#
-# '.vars' 		contains a string of the form '<varName> varValue|<varName> varValue|<varName> varValue|...'
-# '.steps' 		contains a string of the form '<step>|<step>|...'
-# '.workflow'	contains a string of the form '<workflowName>'
-#
-#==================================================================================================
-function ParseXmlFile {
-	local xmlFile="$1"
-	local instance test inSetup inExpect varName varValue tmpStr1 tmpStr2 group
+#=======================================================================================================================
 
-	[[ ! -r "$xmlFile" ]] && Msg $T "Could not locate a '$myName.xml' file in\n^$xmlFile"
-	## Parse the XML file
-	commentBlock=false
+#=======================================================================================================================
+# Parse the data file, 
+# Usage ParseTestFile $fileName $cimInstance
+# 	cimInstance defaults to 'courseadmin'
+#
+# Returns the following: testHash, instances, groups, tests 
+# - testHash has keys as follows: 
+#		"${instanceName}.${groupName}.${testName}.setup.['workflow' | 'steps' | 'tcfdata' | 'tcadata' ]
+#		"${instanceName}.${groupName}.${testName}.expects.['workflow' | 'steps' ]
+# - instances is an array of instance names found
+# - groups is an array of group names found
+# - tests is an array of test names found
+#
+# Additionally an 'testKeys' array is returned that lists the hash table keys in the order found
+# Steps and tcf/tca data elements are separated with a '^' character
+#
+# The data file may include 'import:' directives, if specified it is the file name.  The named file is looked for in 
+# 1) The current cim instance directory or 2) the tools/src/wfTests directory
+#=======================================================================================================================
+function ParseTestDataFile {
+	local testFile="$1"; shift || true
+	local cim="${1:-courseadmin}"
+
+	local line importFile lines recType recData recDataType instance cim
+	local workflow steps tcfdatas tcadatas 
+
+	## Read in the data file, processing any imports
+	Verbose -2 "^Reading file: $testFile"
 	while read line; do
-		line=$(Trim "$(tr -d '\011\012\015' <<< "$line")")
-		[[ $line == '' || ${line:0:2} == '//' ]] && continue
-		[[ ${line:0:4} == '<!--' && ${line:(-3)} == '-->' ]] && continue
-		[[ ${line:0:4} == '<!--' ]] && commentBlock=true && continue
-		[[ ${line:0:3} == '-->' || ${line:(-3)} == '-->' ]] && commentBlock=false && continue
-		[[ $commentBlock == true ]] && continue
-		dump -3 -t line
-		xml+=("$line")
-		if [[ $(Contains "$line" '<instance name=') == true ]]; then
-			instance=$(cut -d'"' -f2 <<< $line) && instances+=($instance)
-		elif [[ $(Contains "$line" '</instance>') == true ]]; then
-			unset instance
-		elif [[ $(Contains "$line" '<group name=') == true ]]; then
-			group=$(cut -d'"' -f2- <<< $line)
-			group=$(cut -d'"' -f1 <<< $group)
-			groups+=("$instance.$group")
-		elif [[ $(Contains "$line" '</group>') == true ]]; then
-			unset group
-		elif [[ $(Contains "$line" '<test name=') == true ]]; then
-			test=$(cut -d'"' -f2- <<< $line)
-			test=$(cut -d'"' -f1 <<< $test)
-			[[ $group != '' ]] && key="$instance.$group.$test" || key="$instance.$test"
-			tests+=($key)
-		elif [[ $(Contains "$line" '</test>') == true ]]; then
-			unset test
-		elif [[ $(Contains "$line" '<setup>') == true ]]; then
-			inSetup=true
-		elif [[ $(Contains "$line" '</setup>') == true ]]; then
-			inSetup=false
-		elif [[ $(Contains "$line" '<expect>') == true ]]; then
-			inExpect=true
-		elif [[ $(Contains "$line" '</expect>') == true ]]; then
-			inExpect=false
-		## <tcfdata>
-		elif [[ $inSetup == true &&  $(Contains "$line" '<tcfdata name="') == true ]]; then
-			varName=$(cut -d'"' -f2 <<< $line)
-			varValue=$(cut -d'"' -f4 <<< $line)
-			tmpStr1="$varName $varValue"
-			[[ $group != '' ]] && key="$instance.$group.$test" || key="$instance.$test"
-			if [[ ${setup["$key.tcfdata"]+abc} ]]; then
-				tmpStr2="${setup["$key.tcfdata"]}"
-				setup["$key.tcfdata"]="$tmpStr2|$tmpStr1"
+		line="${line:0:${#line}-1}"; line="${line//\011}"
+		[[ ${line:0:2} == '//' ]] && continue
+		if [[ ${line%%:*} == 'import' ]]; then
+			importFile="${line##*:}"; [[ ${importFile:0:1} == ' ' ]] && importFile="${importFile:1}"
+			[[ -r $siteDir/web/$cim/${importFile}.wftest ]] && importFile="$siteDir/web/$cim/$importFile" || importFile="$(FindExecutable -wftest $importFile)"
+			if [[ -r $importFile ]]; then
+				Verbose -2 "^Importing file: $importFile"
+				while read importLine; do
+					importLine="${importLine:0:${#importLine}-1}"; importLine="${importLine//\011}"
+					[[ ${importLine:0:2} == '//' ]] && continue
+					lines+=("$importLine")	
+				done < "$importFile"
 			else
-				setup["$key.tcfdata"]="$tmpStr1"
+				Terminate "Could not locate importFile '$importFile'"
 			fi
-		## <tcadata>
-		elif [[ $inSetup == true &&  $(Contains "$line" '<tcadata name="') == true ]]; then
-			varName=$(cut -d'"' -f2 <<< $line)
-			varValue=$(cut -d'"' -f4 <<< $line)
-			tmpStr1="$varName $varValue"
-			[[ $group != '' ]] && key="$instance.$group.$test" || key="$instance.$test"
-			if [[ ${setup["$key.tcadata"]+abc} ]]; then
-				tmpStr2="${setup["$key.tcadata"]}"
-				setup["$key.tcadata"]="$tmpStr2|$tmpStr1"
-			else
-				setup["$key.tcadata"]="$tmpStr1"
-			fi
-		## <workflow>
-		elif [[ $inSetup == true &&  $(Contains "$line" '<workflow name="') == true ]]; then
-			workflow=$(cut -d'"' -f2 <<< $line)
-			[[ $group != '' ]] && key="$instance.$group.$test" || key="$instance.$test"
-			setup["$key.workflow"]="$workflow"
+		else
+			lines+=("$line")
+		fi
+	done < $testFile
 
-		elif [[ $inSetup == true &&  $(Contains "$line" '<step>') == true ]]; then
-			step="$(cut -d'>' -f2 <<< $line | cut -d'<' -f1)"
-			[[ $group != '' ]] && key="$instance.$group.$test" || key="$instance.$test"
-			if [[ ${setup["$key.steps"]+abc} ]]; then
-				tmpStr2="${setup["$key.steps"]}"
-				setup["$key.steps"]="$tmpStr2|$step"
-			else
-				setup["$key.steps"]="$step"
-			fi
-		elif [[ $inExpect == true &&  $(Contains "$line" '<workflow>') == true ]]; then
-			workflow=$(cut -d'>' -f2 <<< $line | cut -d'<' -f1)
-			[[ $group != '' ]] && key="$instance.$group.$test" || key="$instance.$test"
-			expect["$key.workflow"]="$workflow"
-		## <step>
-		elif [[ $inExpect == true &&  $(Contains "$line" '<step>') == true ]]; then
-			step="$(cut -d'>' -f2 <<< $line | cut -d'<' -f1)"
-			[[ $group != '' ]] && key="$instance.$group.$test" || key="$instance.$test"
-			if [[ ${expect["$key.steps"]+abc} ]]; then
-				tmpStr2="${expect["$keyt.steps"]}"
-				expect["$key.steps"]="$tmpStr2|$step"
-			else
-				expect["$key.steps"]="$step"
-			fi
-		fi #End of parse checks
-	done < "$xmlFile"
+	unset instances groups tests
+	unset testName setupWorkflow setupSteps setupTcfDatas setupTcaDatas expectWorkflow expectSteps testKeys
+	for line in "${lines[@]}"; do
+		[[ -z $line ]] && continue
+		recType="${line%%:*}"; recData="${line#*:}"; [[ ${recData:0:1} == ' ' ]] && recData="${recData:1}"
+		recDataType="${recData%% *}"; [[ ${recDataType:0:1} == ' ' ]] && recDataType="${recDataType:1}"
+		recData="${recData#* }"; [[ ${recData:0:1} == ' ' ]] && recData="${recData:1}"
+		dump -2 -n line -t recType recData recDataType
 
-	if [[ $verboseLevel -ge 2 ]]; then
-		Msg; for instance in "${instances[@]}"; do dump instance; done
-		Msg; for group in "${groups[@]}"; do dump group; done
-		Msg; for test in "${tests[@]}"; do dump test; done
-		Msg; Msg "setup[] ="; for key in "${!setup[@]}"; do echo -e "\t[$key] = >${setup[$key]}<"; done
-		Msg; Msg "expect[] ="' '; for key in "${!expect[@]}"; do echo -e "\t[$key] = >${expect[$key]}<"; done
-	fi
+		case ${recType,,[a-z]} in
+			'instance')
+					instanceName="$recDataType"; [[ ${instanceName:0:1} == ' ' ]] && instanceName="${instanceName:1}"
+					## Add to the instances array if not seen before
+					found=false
+					for instance in "${instances[@]}"; do  [[ $instance == $instanceName ]] && found=true; done
+					[[ $found == false ]] && instances+=("$instanceName")
+					groupName='none'
+				;;
+			'group')
+					groupName="$recDataType"; [[ ${groupName:0:1} == ' ' ]] && groupName="${groupName:1}"
+					## Add to the groups array if not seen before
+					found=false
+					for group in "${groups[@]}"; do  [[ $group == $groupName ]] && found=true; done
+					[[ $found == false ]] && groups+=("$groupName")
+				;;
+			'test')
+					testName="$recDataType"; [[ ${testName:0:1} == ' ' ]] && testName="${testName:1}"
+					## Add to the tests array if not seen before
+					found=false
+					for test in "${tests[@]}"; do  [[ $test == $testName ]] && found=true; done
+					[[ $found == false ]] && tests+=("$testName")
+				;;
+			'testend')
+					#keyRoot="${instanceName}.${groupName}.${testName}"
+					keyRoot="${groupName}.${testName}"
+					[[ ${testHash["$keyRoot"]+abc} ]] && Terminate "Found duplicate test name ($keyRoot)" 
+					testHash["$keyRoot"]=true; testKeys+=("$keyRoot")
+					testHash["$keyRoot.setup.workflow"]="$setupWorkflow"; testKeys+=("$keyRoot.setup.workflow")
+					testHash["$keyRoot.setup.steps"]="$setupSteps"; testKeys+=("$keyRoot.setup.steps")
+					testHash["$keyRoot.setup.tcfdata"]="$setupTcfDatas"; testKeys+=("$keyRoot.setup.tcfdata")
+					testHash["$keyRoot.setup.tcadata"]="$setupTcaDatas"; testKeys+=("$keyRoot.setup.tcadata")
+					testHash["$keyRoot.expect.workflow"]="$expectWorkflow"; testKeys+=("$keyRoot.expect.workflow")
+					testHash["$keyRoot.expect.steps"]="$expectSteps"; testKeys+=("$keyRoot.expect.steps")
+					[[ ${groupTests["$groupName"]+abc} ]] && groupTests["$groupName"]="${groupTests[$groupName]},$testName" || groupTests["$groupName"]="$testName"
+					unset testName setupWorkflow setupSteps setupTcfDatas setupTcaDatas expectWorkflow expectSteps
+				;;
+			'setup')
+				subType="$recDataType"
+				#dump -t -t subType
+				case ${subType,,[a-z]} in
+					'workflow')
+						setupWorkflow="${recData#*:}"; [[ ${setupWorkflow:0:1} == ' ' ]] && setupWorkflow="${setupWorkflow:1}"
+						;;
+					'step')
+						[[ -z $setupSteps ]] && setupSteps="${recData}" || setupSteps="${setupSteps},${recData}"
+						;;
+					'tcfdata')
+						[[ -z $setupTcfDatas ]] && setupTcfDatas="${recData}" || setupTcfDatas="${setupTcfDatas}^${recData}"
+						;;
+					'tcadata')
+						[[ -z $setupTcaDatas ]] && setupTcaDatas="${recData}" || setupTcaDatas="${setupTcaDatas}^${recData}"
+						;;
+					*) 	Terminate "Encountered invalid subType ($subType) for record type ($recDataType) in data source: '$line'"
+				esac
+				;;
+			'expect')
+				subType="$recDataType"
+				case ${subType,,[a-z]} in
+					'workflow')
+						expectWorkflow="${recData#*:}"; [[ ${expectWorkflow:0:1} == ' ' ]] && expectWorkflow="${expectWorkflow:1}"
+						;;
+					'step')
+						[[ -z $expectSteps ]] && expectSteps="${recData}" || expectSteps="${expectSteps},${recData}"
+						;;
+					*) 	Terminate "Encountered invalid subType ($subType) for record type ($recDataType) in data source: '$line'"
+				esac
+				;;
+			*) 	Terminate "Encountered invalid record type in data source: '$line'"
+		esac
+	done
 
 	return 0
-}
+} ## ParseTestDataFile
 
 #==================================================================================================
 # Parse the output of the testworkflow step
@@ -211,6 +227,7 @@ for var in $falseVars; do eval $var=false; done
 
 unset instances groups tests steps
 inSetup=false; inExpect=false;
+declare -A testHash groupTests
 declare -A setup
 declare -A expect
 previewStep='testworkflow'
@@ -223,9 +240,14 @@ cgiOut=$(mkTmpFile).cgiOut
 	helpSet='script,client,env'
 	scriptHelpDesc="This script can be used to test CIM instances.  Tests are defined in a xml file in the cim instance root directory"
 
+dump originalArgStr
 	Hello
 	GetDefaultsData -f $myName
+verboseLevel=3
 	ParseArgsStd $originalArgStr
+verboseLevel=0
+dump file -q
+
 	[[ -n $file ]] && xmlFile="$file"
 
 	initTokens='getClient getEnv getDirs checkEnvs'
@@ -238,46 +260,81 @@ cgiOut=$(mkTmpFile).cgiOut
 	tempProposalId="${scriptData1##*:}"
 	[[ -z $tempProposalId ]] && Terminate "Could not resolve tempProposalId from defaults"
 
-## Parse xml file
-	[[ -z $xmlFile && -f "$siteDir/web/$cimStr/$myName.xml" ]] && xmlFile="$siteDir/web/$cimStr/wfTest.xml"
-	Msg
-	Msg "Parsing the XML file: '$xmlFile'"
-	ParseXmlFile "$xmlFile"
+## Parse data file
 
-# ## Get which groups to run
-# 	if [[ ${#groups[@]} -gt 0 && $group == '' ]]; then
-# 		unset menuList
-# 		menuList+=("|Test Name")
-# 		for token in ${groups[@]}; do
-# 			if [[ ${test:0:${#instance}} == $instance ]]; then
-# 				test="$(cut -d'.' -f2 <<< $test)"
-# 				menuList+=("|$test")
-# 				runTeststring="$runTeststring,$test"
-# 			fi
-# 		done
-# 		menuList+=("|All")
-# 		runTeststring=${runTeststring:1}
-# 	fi
+	[[ -n $file ]] && dataFile="$file" || dataFile="$siteDir/web/$instance/${myName}s"
+	if [[ -r $dataFile ]]; then
+		Msg "Parsing the $myName data file: '$dataFile'"
+	else
+		unset dataFile
+		Msg
+		Msg "Please specify the name of the test definitions data file, name is relative to '$siteDir/web/$instance'"
+		while [[ -z $dataFile ]]; do
+			Prompt dataFile "^Data file name" "*any*";
+			[[ -r "$siteDir/web/$instance/$dataFile" ]] && dataFile="$siteDir/web/$instance/$dataFile" || unset dataFile
+		done
+	fi
+	ParseTestDataFile "$dataFile" "$instance"
+
+	if [[ $verboseLevel -ge 2 ]]; then
+		echo;echo "\${#instances[@]} = '${#instances[@]}'"; for ((xx=0; xx<${#instances[@]}; xx++)); do echo "instances[$xx] = >${instances[$xx]}<"; done
+		echo;echo "\${#groups[@]} = '${#groups[@]}'"; for ((xx=0; xx<${#groups[@]}; xx++)); do echo "groups[$xx] = >${groups[$xx]}<"; done
+		echo;echo "\${#tests[@]} = '${#tests[@]}'"; for ((xx=0; xx<${#tests[@]}; xx++)); do echo "tests[$xx] = >${tests[$xx]}<"; done
+		echo; echo "testHash:"; for mapCtr in "${testKeys[@]}"; do echo -e "\tkey: '$mapCtr', value: '${testHash[$mapCtr]}'"; done
+		echo; echo "groupTests:"; for mapCtr in "${!groupTests[@]}"; do echo -e "\tkey: '$mapCtr', value: '${groupTests[$mapCtr]}'"; done
+	fi
+
+## Get which groups to run
+	if [[ -z $runGroups && -z $runTests && $verify == true && $allItems != true ]]; then
+		unset menuList allGroups
+		menuList+=('|Group')
+		for group in "${groups[@]}"; do
+			menuList+=("|$group")
+		done
+		menuList+=("|All")
+		Msg; Msg "Please select the 'groups' that you wish to run, enter the ordinal number(s):"; Msg
+		SelectMenuNew -m -r 'menuList' 'runGroups' "\nPlease enter the ordinal(s) of the groups(s) to run $(ColorK '(ord)') (or 'x' to quit) > "
+		[[ -z $runGroups ]] && Goodbye 0
+		runGroups="${runGroups//|/,}"
+	fi
+	if [[ ${runGroups,,[a-z]} == 'all' || $allItems == true ]]; then
+		runGroups=(${groups[*]})
+	else
+		tmpStr="${runGroups//,/ }"
+		unset runGroups
+		for group in $tmpStr; do
+			runGroups+=("$group")
+		done
+	fi
 
 ## Get which tests to run
-	unset menuList runTeststring
-	menuList+=("|Test Name")
-	for test in ${tests[@]}; do
-		if [[ ${test:0:${#instance}} == $instance ]]; then
-			test="$(cut -d'.' -f2 <<< $test)"
-			menuList+=("|$test")
-			allTests="$allTests,$test"
-		fi
+	for group in ${groups[@]}; do
+		tmpStr="${groupTests[$group]}"
+		for test in ${tmpStr//,/ }; do
+			allTests+=("$group.$test")
+		done 
 	done
-	menuList+=("|All")
-	allTests=${allTests:1}
-	
-	if [[ -z $runTests ]]; then
-		[[ $verify != true ]] && Msg $T "No value specified for '-run' and verify is off"
-		Msg; Msg "Please select the test(s) that you wish to run, enter the ordinal number:"; Msg
-		SelectMenuNew -m -r 'menuList' 'runTests' "\nPlease enter the ordinal(s) of the test(s) to run $(ColorK '(ord)') (or 'x' to quit) > "
-		[[ -z $runTests ]] && Goodbye 0
-		runTests="${runTests//|/,}"
+
+	if [[ -z $runTests && $verify == true && $allItems != true ]]; then
+		unset menuList allTests
+		menuList+=('|Group|Test')
+		for menuItem in "${allTests[@]}"; do
+			menuList+=("|${menuItem%%.*}|${menuItem##*.}")
+		done
+		if [[ $allItems != true ]]; then
+			menuList+=("|All")
+			Msg; Msg "Please select the test(s) that you wish to run, enter the ordinal number(s):"; Msg
+			SelectMenuNew -m -r 'menuList' 'runTests' "\nPlease enter the ordinal(s) of the test(s) to run $(ColorK '(ord)') (or 'x' to quit) > "
+			[[ -z $runTests ]] && Goodbye 0
+		runTests="${runTests//|/,}"; runTests="${runTests// /.}"
+		fi
+	fi
+	if [[ ${runTests,,[a-z]} == 'all.all'  || $allItems == true  ]]; then
+		runTests=(${allTests[*]})
+	else
+		for test in ${runTests//,/ }; do
+			runTests+=("$test")
+		done
 	fi
 
 ## Verify continue with the user
@@ -285,8 +342,9 @@ cgiOut=$(mkTmpFile).cgiOut
 	verifyArgs+=("Client:$client")
 	verifyArgs+=("Env:$(TitleCase $env) ($siteDir)")
 	verifyArgs+=("CIM Instance:$instance")
-	verifyArgs+=("Test Definition File:$xmlFile")
-	verifyArgs+=("Test(s):${runTests//,/, }")
+	verifyArgs+=("Test Definition File:$dataFile")
+	verifyArgs+=("Group(s):runGroups")
+	verifyArgs+=("Test(s):runTests")
 	verifyArgs+=("Stop First:$stopFirst")
 	[[ $overWrite == true ]] && verifyArgs+=("Over Write:$overWrite")
 	verifyContinueDefault='Yes'
@@ -319,11 +377,27 @@ cgiOut=$(mkTmpFile).cgiOut
 	touch "$siteDir/web/$instance/$tempProposalId/.$myName"
 
 ## Run the tests
-[[ ${runTests,,[a-z]} == 'all' ]] && runTests="$allTests"
-for test in ${runTests//,/ }; do
-	Msg
-	#Msg $V1 "$(PadChar)"
-	Msg "Running test: $instance.$test"
+for ((i=0; i<${#runTests[@]}; i++)); do
+for keyRoot in "${runTests[@]}"; do
+	setupWorkflow="${testHash[$keyRoot.setup.workflow]}"
+	setupSteps="${testHash[$keyRoot.setup.steps]}"
+	setupTcfdata="${testHash[$keyRoot.setup.tcfdata]}"
+	setupTcadata="${testHash[$keyRoot.setup.tcadata]}"
+	expectWorkflow="${testHash[$keyRoot.expect.workflow]}"
+	expectSteps="${testHash[$keyRoot.expect.steps]}"
+	dump 1 -n -t keyRoot -t2 setupWorkflow setupSteps setupTcfData setupTcadata expectWorkflow expectSteps
+
+
+
+
+done
+Quit
+	test="${runTests[$i]}"
+	instance="${test%%.*}" ; test="${test#*.}"
+	group="${test%%.*}" ; test="${test#*.}"
+	test="${test%%.*}" ; test="${test#*.}"	
+
+	Msg "Running test: $instance.$group.$test"
 	## Build the temp proposal file at location $tempProposalId
 		Msg $V1 "^Initializing variables, building temporary proposal..."
 		setupTcfdata="${setup["$instance.$test.tcfdata"]}"
@@ -374,18 +448,25 @@ for test in ${runTests//,/ }; do
 
 	## Run the preview workflow step
 		Msg $V1 "^Running step: '$previewStep'..."
-		cd $siteDir/web/courseleaf
+		Pushd "$siteDir/web/courseleaf"
+dump instance tempProposalId -p
 		./courseleaf.cgi $previewStep /$instance/$tempProposalId > $cgiOut
-		cd $cwd
+		Popd
+
+echo "cat $cgiOut"
+cat $cgiOut
+Pause
 
 	## Parse the step output
 		unset actualWorkflow
 		ParseTestworkflowOut "$cgiOut"
+dump numStepsActual -p
+
 		if [[ $verboseLevel -ge 2 ]]; then
 			Msg; Msg "actualWorkflow:"
 			for line in "${actualWorkflow[@]}"; do Dump -1 -t line; done
 			Msg
-		fi
+		fi 
 		let numStepsActual=${#actualWorkflow[@]}-1
 
 	## Complare actual workflow vs expected
@@ -531,3 +612,4 @@ done # test in tests
 ## Mon Sep 12 14:24:46 CDT 2016 - dscudiero - Fix preview workflow parsing since Mike added Proposal Key
 ## Mon Sep 12 16:41:04 CDT 2016 - dscudiero - General syncing of dev to prod
 ## 05-15-2018 @ 08:15:37 - 1.1.01 - dscudiero - Sync
+## 05-24-2018 @ 08:50:09 - 1.1.01 - dscudiero - Cosmetic/minor change/Sync
