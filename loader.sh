@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.18" # -- dscudiero -- Wed 04/25/2018 @ 11:51:45.46
+version="1.5.19" # -- dscudiero -- Thu 05/24/2018 @  8:36:55.53
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -133,7 +133,7 @@ statusLine="Loader ($version): "
 		callPgmName=$(cut -d' ' -f1 <<< $loaderArgs)
 		[[ $callPgmName == $loaderArgs ]] && unset loaderArgs || loaderArgs=$(cut -d' ' -f2- <<< $loaderArgs)
 	fi
-	loaderArgs=${loaderArgs/$callPgmName/}
+	#loaderArgs=${loaderArgs/$callPgmName/}
 	fastDump callPgmName loaderArgs
 prtStatus "parse args"
 sTime=$(date "+%s")
@@ -495,3 +495,4 @@ sTime=$(date "+%s")
 ## 04-20-2018 @ 07:21:09 - 1.5.16 - dscudiero - Remove debug
 ## 04-20-2018 @ 11:17:53 - 1.5.17 - dscudiero - Remove debug statements
 ## 04-25-2018 @ 11:52:08 - 1.5.18 - dscudiero - Add --reload option
+## 05-24-2018 @ 08:51:03 - 1.5.19 - dscudiero - Comment out code that edited out the callPgmName ~ 136
