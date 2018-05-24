@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.19" # -- dscudiero -- Thu 05/24/2018 @  8:36:55.53
+version="1.5.22" # -- dscudiero -- Thu 05/24/2018 @  9:20:03.48
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -133,8 +133,8 @@ statusLine="Loader ($version): "
 		callPgmName=$(cut -d' ' -f1 <<< $loaderArgs)
 		[[ $callPgmName == $loaderArgs ]] && unset loaderArgs || loaderArgs=$(cut -d' ' -f2- <<< $loaderArgs)
 	fi
-	#loaderArgs=${loaderArgs/$callPgmName/}
 	fastDump callPgmName loaderArgs
+
 prtStatus "parse args"
 sTime=$(date "+%s")
 
@@ -304,7 +304,8 @@ sTime=$(date "+%s")
 	## Call program function
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
-		#(source $executeFile $scriptArgs) 2>&1 | tee -a $logFile; rc=$?
+		## Strip off first token if it is $myName
+		loaderArgs="${loaderArgs#$myName }"
 		prtStatus ", calling"
 		[[ $batchMode != true && $myQuiet != true ]] && echo
 		TrapSigs 'off'
@@ -496,3 +497,4 @@ sTime=$(date "+%s")
 ## 04-20-2018 @ 11:17:53 - 1.5.17 - dscudiero - Remove debug statements
 ## 04-25-2018 @ 11:52:08 - 1.5.18 - dscudiero - Add --reload option
 ## 05-24-2018 @ 08:51:03 - 1.5.19 - dscudiero - Comment out code that edited out the callPgmName ~ 136
+## 05-24-2018 @ 09:23:34 - 1.5.22 - dscudiero - Tweak code that removes the loadPgmName
