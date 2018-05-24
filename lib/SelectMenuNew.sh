@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.1" # -- dscudiero -- Fri 05/11/2018 @ 14:47:58.58
+# version="2.1.2" # -- dscudiero -- Thu 05/24/2018 @  9:24:51.78
 #===================================================================================================
 # Display a selection menu
 # SelectMenuNew <MenueItemsArrayName> <returnVariableName> <Prompt text>
@@ -123,7 +123,7 @@ function SelectMenuNew {
 			[[ ${ans:0:1} == 'x' || ${ans:0:1} == 'q' ]] && eval $returnVarName='' && return 0
 			[[ ${ans:0:1} == 'r' ]] && eval $returnVarName='REFRESHLIST' && return 0
 
-			## If ans contains a '-' and allow renge is set then expand the range
+			## If ans contains a '-' and allow range is set then expand the range
 			if [[ $(Contains "$ans" '-' ) == true && $allowRange == true ]]; then
 				local front=${ans%%-*}; lowerIdx=${front: -1}
 				local back=${ans##*-}; upperIdx=${back:0:1}
@@ -163,3 +163,4 @@ function SelectMenuNew {
 ## 04-25-2017 @ 14.40.09 - ("2.0.16")  - dscudiero - Remove debug stuff
 ## 04-26-2018 @ 08:33:54 - 2.0.28 - dscudiero - Remove debug statement
 ## 05-14-2018 @ 08:29:56 - 2.1.1 - dscudiero - Add ability to specify ranges
+## 05-24-2018 @ 09:26:44 - 2.1.2 - dscudiero - Fix spelling
