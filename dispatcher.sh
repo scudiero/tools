@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.36" # -- dscudiero -- Thu 05/10/2018 @ 14:59:09.04
+version="1.5.39" # -- dscudiero -- Thu 05/24/2018 @  8:47:33.81
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -10,7 +10,6 @@ version="1.5.36" # -- dscudiero -- Thu 05/10/2018 @ 14:59:09.04
 myName='dispatcher'
 me='dscudiero'
 function fastDump { 
-	return 0
 	[[ $(/usr/bin/logname 2>&1) != $me || $DEBUG != true ]] && return 0
 	local token ans; for token in $*; do 
 		[[ $token == -p ]] && { echo -e "\n*** Paused, press enter to continue ***"; read ans; [[ -n $ans ]] && exit || continue; }
@@ -106,8 +105,9 @@ function fastDump {
 	export VIACRON=$viaCron
 
 ## call script loader
-	scriptArgs=${scriptArgs/$loadPgm/}
 	fastDump loaderDir USEDEV USELOCAL loadPgm scriptArgs
+	#scriptArgs=${scriptArgs/$loadPgm/}
+	#fastDump scriptArgs
 	if [[ $viaCron == true ]]; then
 		source "$loaderDir/loader.sh" $loadPgm --batchMode $scriptArgs
 		return 0
@@ -158,3 +158,4 @@ exit
 ## 04-19-2018 @ 16:51:32 - 1.5.34 - dscudiero - Fix problem parsing -- arguments not removing string from the args passed on to the dispatched script
 ## 04-20-2018 @ 16:00:51 - 1.5.35 - dscudiero - Add --debug option
 ## 05-10-2018 @ 14:59:31 - 1.5.36 - dscudiero - Comment out fastdump
+## 05-24-2018 @ 08:49:37 - 1.5.39 - dscudiero - Remove code that edits out the loadPgm name ~ 109
