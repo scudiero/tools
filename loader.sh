@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.28" # -- dscudiero -- Fri 05/25/2018 @  9:08:12.61
+version="1.5.31" # -- dscudiero -- Fri 05/25/2018 @ 11:06:57.62
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -264,14 +264,41 @@ sTime=$(date "+%s")
 				[[ $callPgmName != 'testsh' ]] && Terminate "$checkMsg"
 			fi
 		fi
+
+	## Cache scripts data
+		declare -A ScriptsAuthData
+		if [[ -z ${!ScriptsAuthData[@]} ]]; then
+			sqlStmt="select name, author,restrictToUsers,restrictToGroups from $scriptsTable where active=\"Yes\""
+			RunSql $sqlStmt
+			[[ ${#resultSet[@]} -eq 0 || -z ${resultSet[0]} ]] && { echo true; return 0; }
+			for result in "${resultSet[@]}"; do
+				name="${result%%|*}"; result=${result#*|}
+				ScriptsAuthData["${name}.author"]="${result%%|*}"; result=${result#*|};
+				[[ ${ScriptsAuthData["${name}.author"]} == 'NULL' ]] && unset ScriptsAuthData["${name}.author"]
+
+				ScriptsAuthData["${name}.restrictToUsers"]="${result%%|*}"; result=${result#*|};
+				[[ ${ScriptsAuthData["${name}.restrictToUsers"]} == 'NULL' ]] && unset ScriptsAuthData["${name}.restrictToUsers"] || \
+					ScriptsAuthData["${name}.restrictToUsers"]="${ScriptsAuthData["${name}.restrictToUsers"]}, productowners"
+
+				ScriptsAuthData["${name}.restrictToGroups"]="${result%%|*}"; result=${result#*|};
+				[[ ${ScriptsAuthData["${name}.restrictToGroups"]} == 'NULL' ]] && unset ScriptsAuthData["${name}.restrictToGroups"]
+			done
+		fi
+
+	## Cache users auth groups
+		[[ -z $UsersAuthGroups && -r "$TOOLSPATH/auth/$userName" ]] && UsersAuthGroups=$(cat "$TOOLSPATH/auth/$userName") || UsersAuthGroups='none'
+		prtStatus ", check run/auth"; sTime=$(date "+%s")
 		
 	## Check to make sure we are authorized
 		checkMsg=$(CheckAuth $callPgmName)
-		[[ $checkMsg != true ]] && Terminate "$checkMsg"
-
-	## Get the users auth groups
-		[[ -z $UsersAuthGroups && -r "$TOOLSPATH/auth/$userName" ]] && UsersAuthGroups=$(cat "$TOOLSPATH/auth/$userName") || UsersAuthGroups='none'
-		prtStatus ", check run/auth"; sTime=$(date "+%s")
+		if [[ -n $checkMsg && $checkMsg != true ]]; then
+			if [[ $(Contains ",$administrators," ",$userName,") == true ]]; then
+				echo; echo; Warning "$checkMsg"; echo;
+			else
+				echo; echo; Terminate "$checkMsg"; 
+				[[ $callPgmName != 'testsh' ]] && Terminate "$checkMsg"
+			fi
+		fi
 
 	## Check semaphore
 		[[ $(Contains ",$setSemaphoreList," ",$callPgmName," ) == true ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
@@ -500,3 +527,4 @@ sTime=$(date "+%s")
 ## 04-25-2018 @ 11:52:08 - 1.5.18 - dscudiero - Add --reload option
 ## 05-24-2018 @ 08:51:03 - 1.5.19 - dscudiero - Comment out code that edited out the callPgmName ~ 136
 ## 05-24-2018 @ 09:23:34 - 1.5.22 - dscudiero - Tweak code that removes the loadPgmName
+## 05-25-2018 @ 11:40:57 - 1.5.31 - dscudiero - Add code to cache the script authorization data
