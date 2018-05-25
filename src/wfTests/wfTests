@@ -1,0 +1,8 @@
+//=========================================================================	
+// Common test definitions to test proposal state conditionals
+// Instances: all
+//=========================================================================
+instance: programadmin
+	import: stdVarSubstitutions
+	import: proposalState
+//=========================================================================	

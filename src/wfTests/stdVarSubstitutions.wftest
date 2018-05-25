@@ -1,0 +1,54 @@
+//=========================================================================	
+// Common test definitions to test proposal state conditionals
+// Instances: all
+//=========================================================================
+instance: courseadmin
+	group:variableSubstitution
+		test:SubjSubstitution
+			setup: workflow standard
+			setup: step START
+			setup: step College: 'Col'
+			setup: step Department: 'Dept'
+			setup: step Subject: 'Subj'
+			setup: step END
+			setup: tcfdata subject:XXX
+
+			expect: workflow standard
+			expect: step START
+			expect: step Subject: 'XXX'
+			expect: step END
+		testEnd
+
+instance:any
+	group:variableSubstitution
+		test:ColSubstitution
+			setup: workflow standard
+			setup: step START
+			setup: step College: 'Col'
+			setup: step Department: 'Dept'
+			setup: step Subject: Subj
+			setup: step END
+			setup: tcfdata college:XXX
+
+			expect: workflow standard
+			expect: step START
+			expect: step College: 'XXX'
+			expect: step END
+		testEnd
+
+		test:DeptSubstitution
+			setup: workflow standard
+			setup: step START
+			setup: step College: 'Col'
+			setup: step Department: 'Dept'
+			setup: step Subject: Subj
+			setup: step END
+			setup: tcfdata department:XXX
+
+			expect: workflow standard
+			expect: step START
+			expect: step Department: 'XXX'
+			expect: step END
+		testEnd
+
+//=========================================================================

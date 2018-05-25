@@ -1,0 +1,151 @@
+//=========================================================================	
+// Common test definitions to test proposal state conditionals
+// Instances: all
+//=========================================================================
+instance: any
+	group: proposalState
+		test:IsNew
+			setup: workflow standard
+			setup: step START
+			setup: step Is New isNew
+			setup: step Is not New isNotNew
+			setup: step Is Edit isEdit
+			setup: step Is not Edit isNotEdit
+			setup: step Is Delete isDelete
+			setup: step Is not Delete isNotDelete
+			setup: step END
+			setup: tcfdata newrecord:true
+
+			expect: workflow standard
+			expect: step START
+			expect: step Is New isNew
+			expect: step Is not Edit isNotEdit
+			expect: step Is not Delete isNotDelete
+			expect: step END
+		testEnd
+
+
+		test:IsNotNew
+			setup: workflow standard
+			setup: step START
+			setup: step Is New isNew
+			setup: step Is not New isNotNew
+			setup: step Is Edit isEdit
+			setup: step Is not Edit isNotEdit
+			setup: step Is Delete isDelete
+			setup: step Is not Delete isNotDelete
+			setup: step END
+			setup: tcfdata deleterec:true
+
+			expect: workflow standard
+			expect: step START
+			expect: step Is not New isNotNew
+			expect: step Is not Edit isNotEdit
+			expect: step Is Delete
+			expect: step END
+		testEnd
+
+		test:IsEdit
+			setup: workflow standard
+			setup: step START
+			setup: step Is New isNew
+			setup: step Is not New isNotNew
+			setup: step Is Edit isEdit
+			setup: step Is not Edit isNotEdit
+			setup: step Is Delete isDelete
+			setup: step Is not Delete isNotDelete
+			setup: step END
+
+			expect: workflow standard
+			expect: step Is New isNew
+			expect: step Is not New isNotNew
+			expect: step Is Edit isEdit
+			expect: step Is not Edit isNotEdit
+			expect: step Is Delete isDelete
+			expect: step Is not Delete isNotDelete
+			expect: step END
+		testEnd
+
+		test:IsNotEdit
+			setup: workflow standard
+			setup: step START
+			setup: step Is New isNew
+			setup: step Is not New isNotNew
+			setup: step Is Edit isEdit
+			setup: step Is not Edit isNotEdit
+			setup: step Is Delete isDelete
+			setup: step Is not Delete isNotDelete
+			setup: step END
+			setup: tcfdata newrecord:true
+
+			expect: step START
+			expect: workflow standard
+			expect: step Is New isNew
+			expect: step Is Edit isEdit
+			expect: step Is not Edit isNotEdit
+			expect: step Is not Delete isNotDelete
+			expect: step END
+		testEnd
+
+		test:IsDelete
+			setup: workflow standard
+			setup: step START
+			setup: step Is New isNew
+			setup: step Is not New isNotNew
+			setup: step Is Edit isEdit
+			setup: step Is not Edit isNotEdit
+			setup: step Is Delete isDelete
+			setup: step Is not Delete isNotDelete
+			setup: step END
+			setup: tcfdata deleterec:true
+
+			expect: workflow standard
+			expect: step START
+			expect: step Is not New isNotNew
+			expect: step Is not Edit isNotEdit
+			expect: step Is Delete isDelete
+			expect: step END
+		testEnd
+
+		test:IsNotDelete
+			setup: workflow standard
+			setup: step START
+			setup: step Is New isNew
+			setup: step Is not New isNotNew
+			setup: step Is Edit isEdit
+			setup: step Is not Edit isNotEdit
+			setup: step Is Delete isDelete
+			setup: step Is not Delete isNotDelete
+			setup: step END
+
+			expect: workflow standard
+			expect: step START
+			expect: step Is New isNew
+			expect: step Is not Edit isNotEdit
+			expect: step Is not Delete isNotDelete
+			expect: step END
+		testEnd
+
+		test:IsReactivate
+			setup: workflow standard
+			setup: step START
+			setup: step Is New isNew
+			setup: step Is not New isNotNew
+			setup: step Is Edit isEdit
+			setup: step Is not Edit isNotEdit
+			setup: step Is Delete isDelete
+			setup: step Is not Delete isNotDelete
+			setup: step Is Inactivate isInactivate
+			setup: step Is Reactivate isReactivate
+			setup: step END
+			setup: tcfdata reactivate:true
+
+			expect: step START
+			expect: step Is not New isNotNew
+			expect: step Is not Edit isNotEdit
+			expect: step Is not Delete isNotDelete
+			expect: step Is Reactivate isReactivate
+			expect: step END
+		testEnd
+
+//=========================================================================
