@@ -1,12 +1,12 @@
 #!/bin/bash
 #===================================================================================================
-version=1.0.26 # -- dscudiero -- Thu 03/22/2018 @ 13:58:40.20
+version=1.0.28 # -- dscudiero -- Fri 05/25/2018 @  8:52:43.36
 #===================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql"
 Import "$standardInteractiveIncludes $myIncludes"
 
-originalArgStr="$*"
+originalArgStr="$*"; originalArgStr="${originalArgStr#$myName }"
 scriptDescription="Bring a tools script online"
 
 #===================================================================================================
@@ -18,19 +18,9 @@ GetDefaultsData $myName
 
 if [[ -n $originalArgStr ]]; then
 	for script in $originalArgStr; do
-		[[ ${script: (-3)} == '.sh' ]] && script="$(cut -d'.' -f1 <<< $script)"
-		sqlStmt="update $scriptsTable set active=\"Yes\" where name=\"$script\""
-		RunSql $sqlStmt
-		Msg "^$script is now online"
+		[[ -f "$TOOLSPATH/bin/${script%.*}.offline" ]] && rm -f "$TOOLSPATH/bin/${script%.*}.offline"
+		Msg "^$script is now offline"
 	done
-else
-	Msg "Current online scripts:"
-	sqlStmt="select name,showInScripts from $scriptsTable where active=\"Yes\" order by showInScripts,name"
-	RunSql $sqlStmt
-	for result in ${resultSet[@]}; do
-		Msg "^${result%%|*}^${result##*|}" 
-	done
-	Msg
 fi
 
 Goodbye
@@ -43,3 +33,20 @@ Goodbye
 ## 10-03-2017 @ 16.14.01 - (1.0.23)    - dscudiero - Refactored to allow for report of all online scripts
 ## 02-02-2018 @ 10.46.41 - 1.0.24 - dscudiero - D
 ## 03-22-2018 @ 14:07:12 - 1.0.26 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+
+
+if [[ -n $originalArgStr ]]; then
+	for script in $originalArgStr; do
+		[[ -f "$TOOLSPATH/bin/${script%.*}.offline" ]] && rm -f "$TOOLSPATH/bin/${script%.*}.offline"
+		Msg "^$script is now offline"
+	done
+else
+	Msg "Current offline scripts:"
+	files=("$(ls $TOOLSPATH/bin/*.offline)")
+	for file in "${files[@]}"; do
+		file="${file%.*}"
+		Msg "^${file##*/}"
+	done
+	Msg
+fi
+## 05-25-2018 @ 09:14:19 - 1.0.28 - dscudiero - Re-factor to use .offline files
