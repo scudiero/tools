@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.31" # -- dscudiero -- Fri 05/25/2018 @ 11:06:57.62
+version="1.5.32" # -- dscudiero -- Fri 05/25/2018 @ 15:07:41.67
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -293,7 +293,8 @@ sTime=$(date "+%s")
 		checkMsg=$(CheckAuth $callPgmName)
 		if [[ -n $checkMsg && $checkMsg != true ]]; then
 			if [[ $(Contains ",$administrators," ",$userName,") == true ]]; then
-				echo; echo; Warning "$checkMsg"; echo;
+				echo; echo; Warning "$checkMsg"; echo
+				Pause
 			else
 				echo; echo; Terminate "$checkMsg"; 
 				[[ $callPgmName != 'testsh' ]] && Terminate "$checkMsg"
@@ -528,3 +529,4 @@ sTime=$(date "+%s")
 ## 05-24-2018 @ 08:51:03 - 1.5.19 - dscudiero - Comment out code that edited out the callPgmName ~ 136
 ## 05-24-2018 @ 09:23:34 - 1.5.22 - dscudiero - Tweak code that removes the loadPgmName
 ## 05-25-2018 @ 11:40:57 - 1.5.31 - dscudiero - Add code to cache the script authorization data
+## 05-25-2018 @ 15:08:06 - 1.5.32 - dscudiero - Pause if there is an authorization error and the user is an administrator
