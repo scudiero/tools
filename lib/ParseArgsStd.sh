@@ -1,6 +1,6 @@
 ## xO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.65" # -- dscudiero -- Tue 05/22/2018 @ 12:59:51.23
+# version="3.0.70" # -- dscudiero -- Fri 05/25/2018 @  7:59:30.99
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -86,13 +86,9 @@ function ParseArgsStd {
 										if [[ $scriptCmd == 'appendShortName' ]]; then
 											[[ -z ${!scriptVar} ]] && eval "$scriptVar=\"$argShortName\"" || eval "$scriptVar=\"${!scriptVar},$argShortName\""
 										elif [[ $scriptCmd == 'appendLongName' ]]; then
-											#((argCntr++))
-											#tmpStr="${!argCntr}"
 											[[ -z ${!scriptVar} ]] && eval "$scriptVar=\"$nextToken\"" || eval "$scriptVar=\"${!scriptVar},$nextToken\""
 											consumedNext=true
 										elif [[ $scriptCmd == 'expandEnv' ]]; then
-											#(( argCntr++));
-											#tmpStr="${!argCntr}"
 											found=false
 											for tmpEnv in ${courseleafDevEnvs//,/ } ${courseleafProdEnvs//,/ }; do
 												[[ $tmpEnv =~ ^${nextToken} ]] && { found=true; break; }
@@ -109,7 +105,7 @@ function ParseArgsStd {
 								fi
 								;;
 					esac
-					#[[ $consumedNext == true ]] && (( argCntr++ ))
+					[[ $consumedNext == true ]] && (( argCntr++ ))
 				else
 					[[ -z $client && ${arg:0:1} != '-' ]] && { client="$arg"; continue; }
 				    unknowArgs="$unknowArgs,$arg"
@@ -155,3 +151,4 @@ export -f ParseArgsStd
 ## 04-26-2018 @ 08:33:26 - 3.0.38 - dscudiero - If we do not parse off a logname from the argDev the set it to the shortname
 ## 04-26-2018 @ 16:54:55 - 3.0.55 - dscudiero - Fix problem if the arg type is option and no data provided by user
 ## 05-22-2018 @ 14:06:53 - 3.0.65 - dscudiero - Fix a problem processing expEnv directive
+## 05-25-2018 @ 08:01:30 - 3.0.70 - dscudiero - Fid problem processing expandEnv type arguments
