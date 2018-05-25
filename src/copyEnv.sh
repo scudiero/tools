@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.55 # -- dscudiero -- Tue 05/08/2018 @ 13:44:51.95
+version=4.13.62 # -- dscudiero -- Fri 05/25/2018 @ 16:32:46.93
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -130,7 +130,7 @@ if [[ -n products ]]; then
 	[[ $(Contains "$products" 'cim') == true ]] && skipCat=true && skipCim=false && skipClss=true && unset skipAlso
 	[[ $(Contains "$products" 'clss') == true ]] && skipCat=true && skipCim=true && skipClss=false && unset skipAlso
 fi
-dump -2 -n client envs products fullCopy overlay suffix email skipCat skipCim skipClss skipAlso
+dump 1 -n client envs products fullCopy overlay suffix email skipCat skipCim skipClss skipAlso -p
 
 ## Resolve data based on passed in client, handle special cases
 	tmpStr="${client:0:5}"; tmpStr=${tmpStr,,[a-z]}
@@ -350,7 +350,7 @@ dump -1 skipCim skipCat skipClss skipAlso
 	verifyArgs+=("Client:$client")
 	verifyArgs+=("Source Env:$(TitleCase $srcEnv)   $(ColorV "($srcDir)")")
 	verifyArgs+=("Target Env:$(TitleCase $tgtEnv)   $(ColorV "($tgtDir)")")
-	tmpStr=$(sed "s/,/, /g" <<< $ignoreList)
+	tmpStr=$(sed "s/,/\n\t\t /g" <<< $ignoreList)
 	[[ -n $forUser ]] && verifyArgs+=("For User:$forUser")
 	[[ $skipCat == true && $fullCopy != true ]] && verifyArgs+=("Skip Cat:$skipCat")
 	[[ $skipCim == true && $fullCopy != true ]] && verifyArgs+=("Skip CIM:$skipCim")
@@ -707,3 +707,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 04-23-2018 @ 11:30:00 - 4.13.52 - dscudiero - Write the env data out to the .clonedFrom file
 ## 04-24-2018 @ 13:06:12 - 4.13.53 - dscudiero - Fix echo statement for env to .clonedFrom, missing the $
 ## 05-08-2018 @ 13:49:15 - 4.13.55 - dscudiero - Indent the output from rsync
+## 05-25-2018 @ 16:39:22 - 4.13.62 - dscudiero - Change debug levels on messages
