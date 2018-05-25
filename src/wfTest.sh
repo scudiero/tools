@@ -1,7 +1,7 @@
 #!/bin/bash
-#DO NOT AUTOVERSION
+#XO NOT AUTOVERSION
 #==================================================================================================
-version=1.1.01 # -- dscudiero -- Fri 05/11/2018 @  9:38:34.16
+version=2.0.0 # -- dscudiero -- Fri 05/25/2018 @ 16:21:09.11
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="SelectMenuNew CopyFileWithCheck"
@@ -9,8 +9,6 @@ Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="This script will run automated workflow test cases"
-
-dump originalArgStr -q
 
 #= Description +===================================================================================
 # Run automated test cases for workflow in a CIM insance
@@ -78,11 +76,11 @@ function ParseTestDataFile {
 	local testFile="$1"; shift || true
 	local cim="${1:-courseadmin}"
 
-	local line importFile lines recType recData recDataType instance cim
+	local line importFile lines recType recData recDataType instance
 	local workflow steps tcfdatas tcadatas 
 
 	## Read in the data file, processing any imports
-	Verbose -2 "^Reading file: $testFile"
+	Verbose 2 "^Reading file: $testFile"
 	while read line; do
 		line="${line:0:${#line}-1}"; line="${line//\011}"
 		[[ ${line:0:2} == '//' ]] && continue
@@ -90,7 +88,7 @@ function ParseTestDataFile {
 			importFile="${line##*:}"; [[ ${importFile:0:1} == ' ' ]] && importFile="${importFile:1}"
 			[[ -r $siteDir/web/$cim/${importFile}.wftest ]] && importFile="$siteDir/web/$cim/$importFile" || importFile="$(FindExecutable -wftest $importFile)"
 			if [[ -r $importFile ]]; then
-				Verbose -2 "^Importing file: $importFile"
+				Verbose 2 "^Importing file: $importFile"
 				while read importLine; do
 					importLine="${importLine:0:${#importLine}-1}"; importLine="${importLine//\011}"
 					[[ ${importLine:0:2} == '//' ]] && continue
@@ -105,7 +103,7 @@ function ParseTestDataFile {
 	done < $testFile
 
 	unset instances groups tests
-	unset testName setupWorkflow setupSteps setupTcfDatas setupTcaDatas expectWorkflow expectSteps testKeys
+	unset testName setupWorkflow setupSteps setupTcfData setupTcaData expectWorkflow expectSteps testKeys
 	for line in "${lines[@]}"; do
 		[[ -z $line ]] && continue
 		recType="${line%%:*}"; recData="${line#*:}"; [[ ${recData:0:1} == ' ' ]] && recData="${recData:1}"
@@ -116,13 +114,15 @@ function ParseTestDataFile {
 		case ${recType,,[a-z]} in
 			'instance')
 					instanceName="$recDataType"; [[ ${instanceName:0:1} == ' ' ]] && instanceName="${instanceName:1}"
+					[[ $instanceName != 'any' && $instanceName != $cim ]] && continue
 					## Add to the instances array if not seen before
-					found=false
-					for instance in "${instances[@]}"; do  [[ $instance == $instanceName ]] && found=true; done
-					[[ $found == false ]] && instances+=("$instanceName")
+					# found=false
+					# for instance in "${instances[@]}"; do  [[ $instance == $instanceName ]] && found=true; done
+					# [[ $found == false ]] && instances+=("$instanceName")
 					groupName='none'
 				;;
 			'group')
+					[[ $instanceName != 'any' && $instanceName != $cim ]] && continue
 					groupName="$recDataType"; [[ ${groupName:0:1} == ' ' ]] && groupName="${groupName:1}"
 					## Add to the groups array if not seen before
 					found=false
@@ -130,53 +130,59 @@ function ParseTestDataFile {
 					[[ $found == false ]] && groups+=("$groupName")
 				;;
 			'test')
+					[[ $instanceName != 'any' && $instanceName != $cim ]] && continue
 					testName="$recDataType"; [[ ${testName:0:1} == ' ' ]] && testName="${testName:1}"
 					## Add to the tests array if not seen before
 					found=false
 					for test in "${tests[@]}"; do  [[ $test == $testName ]] && found=true; done
 					[[ $found == false ]] && tests+=("$testName")
+
 				;;
 			'testend')
+					[[ $instanceName != 'any' && $instanceName != $cim ]] && continue
 					#keyRoot="${instanceName}.${groupName}.${testName}"
 					keyRoot="${groupName}.${testName}"
-					[[ ${testHash["$keyRoot"]+abc} ]] && Terminate "Found duplicate test name ($keyRoot)" 
-					testHash["$keyRoot"]=true; testKeys+=("$keyRoot")
-					testHash["$keyRoot.setup.workflow"]="$setupWorkflow"; testKeys+=("$keyRoot.setup.workflow")
-					testHash["$keyRoot.setup.steps"]="$setupSteps"; testKeys+=("$keyRoot.setup.steps")
-					testHash["$keyRoot.setup.tcfdata"]="$setupTcfDatas"; testKeys+=("$keyRoot.setup.tcfdata")
-					testHash["$keyRoot.setup.tcadata"]="$setupTcaDatas"; testKeys+=("$keyRoot.setup.tcadata")
-					testHash["$keyRoot.expect.workflow"]="$expectWorkflow"; testKeys+=("$keyRoot.expect.workflow")
-					testHash["$keyRoot.expect.steps"]="$expectSteps"; testKeys+=("$keyRoot.expect.steps")
+					[[ ${testHash["$keyRoot"]+abc} ]] && alreadyExists=true || alreadyExists=false
+
+					testHash["$keyRoot"]=true; [[ $alreadyExists == false ]] && testKeys+=("$keyRoot")
+					testHash["$keyRoot.setup.workflow"]="$setupWorkflow"; [[ $alreadyExists == false ]] && testKeys+=("$keyRoot.setup.workflow")
+					testHash["$keyRoot.setup.steps"]="$setupSteps"; [[ $alreadyExists == false ]] && testKeys+=("$keyRoot.setup.steps")
+					testHash["$keyRoot.setup.tcfdata"]="$setupTcfData"; [[ $alreadyExists == false ]] && testKeys+=("$keyRoot.setup.tcfdata")
+					testHash["$keyRoot.setup.tcadata"]="$setupTcaData"; [[ $alreadyExists == false ]] && testKeys+=("$keyRoot.setup.tcadata")
+					testHash["$keyRoot.expect.workflow"]="$expectWorkflow"; [[ $alreadyExists == false ]] && testKeys+=("$keyRoot.expect.workflow")
+					testHash["$keyRoot.expect.steps"]="$expectSteps"; [[ $alreadyExists == false ]] && testKeys+=("$keyRoot.expect.steps")
 					[[ ${groupTests["$groupName"]+abc} ]] && groupTests["$groupName"]="${groupTests[$groupName]},$testName" || groupTests["$groupName"]="$testName"
-					unset testName setupWorkflow setupSteps setupTcfDatas setupTcaDatas expectWorkflow expectSteps
+					unset testName setupWorkflow setupSteps setupTcfData setupTcaData expectWorkflow expectSteps
 				;;
 			'setup')
+				[[ $instanceName != 'any' && $instanceName != $cim ]] && continue
 				subType="$recDataType"
 				#dump -t -t subType
 				case ${subType,,[a-z]} in
 					'workflow')
-						setupWorkflow="${recData#*:}"; [[ ${setupWorkflow:0:1} == ' ' ]] && setupWorkflow="${setupWorkflow:1}"
+						[[ -z $setupWorkflow ]] && setupWorkflow="$recData" || setupWorkflow="${setupWorkflow}^${recData}"
 						;;
 					'step')
-						[[ -z $setupSteps ]] && setupSteps="${recData}" || setupSteps="${setupSteps},${recData}"
+						[[ -z $setupSteps ]] && setupSteps="$recData" || setupSteps="${setupSteps}^${recData}"
 						;;
 					'tcfdata')
-						[[ -z $setupTcfDatas ]] && setupTcfDatas="${recData}" || setupTcfDatas="${setupTcfDatas}^${recData}"
+						[[ -z $setupTcfData ]] && setupTcfData="${recData}" || setupTcfData="${setupTcfData}^${recData}"
 						;;
 					'tcadata')
-						[[ -z $setupTcaDatas ]] && setupTcaDatas="${recData}" || setupTcaDatas="${setupTcaDatas}^${recData}"
+						[[ -z $setupTcaData ]] && setupTcaData="${recData}" || setupTcaData="${setupTcaData}^${recData}"
 						;;
 					*) 	Terminate "Encountered invalid subType ($subType) for record type ($recDataType) in data source: '$line'"
 				esac
 				;;
 			'expect')
+				[[ $instanceName != 'any' && $instanceName != $cim ]] && continue
 				subType="$recDataType"
 				case ${subType,,[a-z]} in
 					'workflow')
-						expectWorkflow="${recData#*:}"; [[ ${expectWorkflow:0:1} == ' ' ]] && expectWorkflow="${expectWorkflow:1}"
+						[[ -z $expectWorkflow ]] && expectWorkflow="$recData" || expectWorkflow="${expectWorkflow}^${recData}"
 						;;
 					'step')
-						[[ -z $expectSteps ]] && expectSteps="${recData}" || expectSteps="${expectSteps},${recData}"
+						[[ -z $expectSteps ]] && expectSteps="${recData}" || expectSteps="${expectSteps}^${recData}"
 						;;
 					*) 	Terminate "Encountered invalid subType ($subType) for record type ($recDataType) in data source: '$line'"
 				esac
@@ -199,6 +205,7 @@ function ParseTestworkflowOut {
 	while read -r line; do
 		## Workflow record
 		if [[ $(Contains "$line" 'Workflow:') == true ]]; then
+			#line=${line##*Workflow:</strong> }
 			line=${line##*Workflow:</strong> }
 			workflow=${line%%<*}
 			actualWorkflow+=("$workflow")
@@ -231,6 +238,7 @@ declare -A testHash groupTests
 declare -A setup
 declare -A expect
 previewStep='testworkflow'
+#previewStep='wfTestWorkflow'
 cgiOut=$(mkTmpFile).cgiOut
 
 #==================================================================================================
@@ -240,15 +248,9 @@ cgiOut=$(mkTmpFile).cgiOut
 	helpSet='script,client,env'
 	scriptHelpDesc="This script can be used to test CIM instances.  Tests are defined in a xml file in the cim instance root directory"
 
-dump originalArgStr
 	Hello
 	GetDefaultsData -f $myName
-verboseLevel=3
 	ParseArgsStd $originalArgStr
-verboseLevel=0
-dump file -q
-
-	[[ -n $file ]] && xmlFile="$file"
 
 	initTokens='getClient getEnv getDirs checkEnvs'
 	[[ -n $instance ]] && cimStr="$instance" || initTokens="$initTokens getCim"
@@ -261,11 +263,8 @@ dump file -q
 	[[ -z $tempProposalId ]] && Terminate "Could not resolve tempProposalId from defaults"
 
 ## Parse data file
-
 	[[ -n $file ]] && dataFile="$file" || dataFile="$siteDir/web/$instance/${myName}s"
-	if [[ -r $dataFile ]]; then
-		Msg "Parsing the $myName data file: '$dataFile'"
-	else
+	if [[ ! -r $dataFile ]]; then
 		unset dataFile
 		Msg
 		Msg "Please specify the name of the test definitions data file, name is relative to '$siteDir/web/$instance'"
@@ -274,14 +273,16 @@ dump file -q
 			[[ -r "$siteDir/web/$instance/$dataFile" ]] && dataFile="$siteDir/web/$instance/$dataFile" || unset dataFile
 		done
 	fi
+	Msg "Parsing the $myName data file: '$dataFile'"
 	ParseTestDataFile "$dataFile" "$instance"
 
 	if [[ $verboseLevel -ge 2 ]]; then
-		echo;echo "\${#instances[@]} = '${#instances[@]}'"; for ((xx=0; xx<${#instances[@]}; xx++)); do echo "instances[$xx] = >${instances[$xx]}<"; done
+		#echo;echo "\${#instances[@]} = '${#instances[@]}'"; for ((xx=0; xx<${#instances[@]}; xx++)); do echo "instances[$xx] = >${instances[$xx]}<"; done
 		echo;echo "\${#groups[@]} = '${#groups[@]}'"; for ((xx=0; xx<${#groups[@]}; xx++)); do echo "groups[$xx] = >${groups[$xx]}<"; done
 		echo;echo "\${#tests[@]} = '${#tests[@]}'"; for ((xx=0; xx<${#tests[@]}; xx++)); do echo "tests[$xx] = >${tests[$xx]}<"; done
 		echo; echo "testHash:"; for mapCtr in "${testKeys[@]}"; do echo -e "\tkey: '$mapCtr', value: '${testHash[$mapCtr]}'"; done
 		echo; echo "groupTests:"; for mapCtr in "${!groupTests[@]}"; do echo -e "\tkey: '$mapCtr', value: '${groupTests[$mapCtr]}'"; done
+		Pause
 	fi
 
 ## Get which groups to run
@@ -300,11 +301,8 @@ dump file -q
 	if [[ ${runGroups,,[a-z]} == 'all' || $allItems == true ]]; then
 		runGroups=(${groups[*]})
 	else
-		tmpStr="${runGroups//,/ }"
-		unset runGroups
-		for group in $tmpStr; do
-			runGroups+=("$group")
-		done
+		runGroups="${runGroups//,/ }"
+		readarray -t runGroups <<< "$runGroups"
 	fi
 
 ## Get which tests to run
@@ -332,9 +330,7 @@ dump file -q
 	if [[ ${runTests,,[a-z]} == 'all.all'  || $allItems == true  ]]; then
 		runTests=(${allTests[*]})
 	else
-		for test in ${runTests//,/ }; do
-			runTests+=("$test")
-		done
+		IFS=',' read -ra runTests <<< "$runTests"
 	fi
 
 ## Verify continue with the user
@@ -343,7 +339,7 @@ dump file -q
 	verifyArgs+=("Env:$(TitleCase $env) ($siteDir)")
 	verifyArgs+=("CIM Instance:$instance")
 	verifyArgs+=("Test Definition File:$dataFile")
-	verifyArgs+=("Group(s):runGroups")
+	[[ -n $runGroups ]] && verifyArgs+=("Group(s):runGroups")
 	verifyArgs+=("Test(s):runTests")
 	verifyArgs+=("Stop First:$stopFirst")
 	[[ $overWrite == true ]] && verifyArgs+=("Over Write:$overWrite")
@@ -368,7 +364,7 @@ dump file -q
 		if [[ $overWrite == true ]]; then
 			ans='y'
 		else
-			unset ans; Prompt ans "^Found an existing proposal directory with key=$tempProposalId, do you wish to overwrite" "Yes No"; ans=$(Lower ${ans:0:1})
+			unset ans; Prompt ans "^Found an existing proposal directory with key=$tempProposalId, do you wish to overwrite" "Yes No" "Yes"; ans=$(Lower ${ans:0:1})
 		fi
 		[[ $ans == 'y' ]] && rm -rf $proposalDir || Goodbye -1
 	fi
@@ -377,7 +373,7 @@ dump file -q
 	touch "$siteDir/web/$instance/$tempProposalId/.$myName"
 
 ## Run the tests
-for ((i=0; i<${#runTests[@]}; i++)); do
+#for ((i=0; i<${#runTests[@]}; i++)); do
 for keyRoot in "${runTests[@]}"; do
 	setupWorkflow="${testHash[$keyRoot.setup.workflow]}"
 	setupSteps="${testHash[$keyRoot.setup.steps]}"
@@ -387,33 +383,22 @@ for keyRoot in "${runTests[@]}"; do
 	expectSteps="${testHash[$keyRoot.expect.steps]}"
 	dump 1 -n -t keyRoot -t2 setupWorkflow setupSteps setupTcfData setupTcadata expectWorkflow expectSteps
 
-
-
-
-done
-Quit
-	test="${runTests[$i]}"
-	instance="${test%%.*}" ; test="${test#*.}"
-	group="${test%%.*}" ; test="${test#*.}"
-	test="${test%%.*}" ; test="${test#*.}"	
-
-	Msg "Running test: $instance.$group.$test"
-	## Build the temp proposal file at location $tempProposalId
-		Msg $V1 "^Initializing variables, building temporary proposal..."
-		setupTcfdata="${setup["$instance.$test.tcfdata"]}"
-		setupTcadata="${setup["$instance.$test.tcadata"]}"
-		setupWorkflow="${setup["$instance.$test.workflow"]}"
-		setupWorkflowSteps="${setup["$instance.$test.steps"]}"
-		dump -2 -t setupTcfdata setupTcadata setupWorkflow setupWorkflowSteps
-
+	Msg; Msg "Running test: $instance.$(ColorK "$keyRoot")"
 	## If the test setup specifies a workflow then write that workflow out to the workflow file
-		if [[ $setupWorkflow != '' ]]; then
-			Msg $V1 "^Build temporary workflow.tcf file..."
-			unset wfStepsArray
-			workflowFile="$siteDir/web/$cimStr/workflow.tcf"
+		if [[ -n $setupWorkflow || -n $setupSteps ]]; then
+			unset workflowOutLine
+			workflowFile="$siteDir/web/$instance/workflow.tcf"
 			unset cpMsg; cpMsg=$(CopyFileWithCheck "$workflowFile" "$workflowFile.bak")
 			[[ $cpMsg != true && $cpMsg != 'same' ]] && Msg $T "Could not make a copy of the workflow file:\n\t$cpMsg"
-			echo 'workflow:'$setupWorkflow\|$(tr '|' ',' <<< $setupWorkflowSteps) > "$workflowFile"
+			[[ -z $setupWorkflow ]] && setupWorkflow='standard'
+			workflowOutLine="workflow:${setupWorkflow}|"
+			unset workflowSteps
+			IFS='^' read -ra workflowSteps <<< "$setupSteps"
+			for step in "${workflowSteps[@]}"; do
+				workflowOutLine="${workflowOutLine}${step},"
+			done
+			echo "${workflowOutLine:0:${#workflowOutLine}-1}" > "$workflowFile"
+			# echo; echo "======================================================================"; echo "cat $workflowFile"; cat $workflowFile
 		fi
 
 	## Initalize the proposal index.tcf file
@@ -425,89 +410,78 @@ Quit
 
 	## Write data to the proposal index.tcf/tca files
 		unset tcfData tcaData tcaDataOut
-		IFS='|' read -ra tcfData <<< "$setupTcfdata"
-		IFS='|' read -ra tcaData <<< "$setupTcadata"
-		for tcfVar in "${tcfData[@]}"; do
-			tcfVarName=$(cut -d' ' -f1 <<< "$tcfVar")
-			tcfVarVal=$(cut -d' ' -f2- <<< "$tcfVar")
-			if [[ $tcfVarVal != '' ]]; then
-				tcfLine="$tcfVarName:$tcfVarVal"
-			    dump -2 -t tcfVarName tcfVarVal tcfLine
-			    echo "$tcfLine" >> $proposalTcfFile
-			fi
-			## Now check if we have a tcadata override value
-			foundTca=false
-			for tcaVar in "${tcaData[@]}"; do
-				tcaVarName=$(cut -d' ' -f1 <<< "$tcaVar")
-				tcaVarVal=$(cut -d' ' -f2- <<< "$tcaVar")
-				tcaLine="$tcaVarName:$tcaVarVal"
-				[[ $tcaVarName == $tcfVarName ]] && foundTca=true && break
-			done
-			[[ $foundTca == true ]] && echo "$tcaLine" >> $proposalTcaFile || echo "$tcfLine" >> $proposalTcaFile
+		IFS='^' read -ra tcfData <<< "$setupTcfdata"
+		IFS='^' read -ra tcaData <<< "$setupTcadata"
+		for tcfLine in "${tcfData[@]}"; do
+			echo "$tcfLine" >> $proposalTcfFile
 		done
+		# echo; echo "======================================================================"; echo "cat $proposalTcfFile"; cat $proposalTcfFile
+
+		for tcaLine in "${tcaData[@]}"; do
+			echo "$tcaLine" >> $proposalTcaFile
+		done
+		# echo; echo "======================================================================"; echo "cat $proposalTcaFile"; cat $proposalTcaFile
 
 	## Run the preview workflow step
-		Msg $V1 "^Running step: '$previewStep'..."
+		Verbose 1 "^Running step: '$previewStep'..."
 		Pushd "$siteDir/web/courseleaf"
-dump instance tempProposalId -p
 		./courseleaf.cgi $previewStep /$instance/$tempProposalId > $cgiOut
 		Popd
+		# echo; echo "======================================================================"; echo "cat $cgiOut"; cat $cgiOut
 
-echo "cat $cgiOut"
-cat $cgiOut
-Pause
-
-	## Parse the step output
+		Verbose 1 "^Parsing step output..."
 		unset actualWorkflow
 		ParseTestworkflowOut "$cgiOut"
-dump numStepsActual -p
-
 		if [[ $verboseLevel -ge 2 ]]; then
-			Msg; Msg "actualWorkflow:"
-			for line in "${actualWorkflow[@]}"; do Dump -1 -t line; done
+			Msg; Msg "actualWorkflow (${#actualWorkflow[@]}):"
+			for line in "${actualWorkflow[@]}"; do Dump -t line; done
 			Msg
-		fi 
-		let numStepsActual=${#actualWorkflow[@]}-1
+		fi		
 
 	## Complare actual workflow vs expected
 		testStatus='Success'
 		## Workflow name
-		if [[ ${expect[$instance.$test.workflow]} == ${actualWorkflow[0]} ]]; then
-			Msg $V1 "^^Workflow Name: OK (${expect[$instance.$test.workflow]})"
+
+		if [[ ${testHash["$keyRoot.expect.workflow"]} == ${actualWorkflow[0]} ]]; then
+			Verbose 1 "^^Workflow Name: OK (${testHash["$keyRoot.expect.workflow"]})"
 		else
-			Msg $ET2 "Workflow is not as expected: \n^^^Expected: '${expect[$instance.$test.workflow]}'\n^^^Actual: '${actualWorkflow[0]}'"
+			Error 0 2 "Workflow is not as expected: \n^^^Expected: '${testHash["$keyRoot.expect.workflow"]}'\n^^^Actual: '${actualWorkflow[0]}'"
 			errorDetected=true
 			continue
 		fi
+
 		## Check number of steps
-			expectedSteps="${expect[$instance.$test.steps]}"
-		let numStepsExpected=$(grep -o "|" <<< "$expectedSteps" | wc -l)+1
-			[[ $numStepsExpected -ne $numStepsActual ]] && errorDetected=true && Msg $ET2 "Step count error, Number expected: $numStepsExpected, Number actual workflow: $numStepsActual"
+			expectedSteps="${testHash["$keyRoot.expect.steps"]}"
+			IFS='^' read -ra expectedSteps <<< "$expectedSteps"
+
+			[[ ${#expectedSteps[@]} -ne ${#actualWorkflow[@]}-1 ]] && errorDetected=true && 
+				Error 0 2 "Step count error, Number expected: ${#expectedSteps[@]}, Number actual workflow: ${#actualWorkflow[@]}-1"
+
 		## Workflow steps
 		for ((cntr=1; cntr<${#actualWorkflow[@]}; cntr++)); do
 			unset aStep eStep
 			aStep="${actualWorkflow[$cntr]}"
-			eStep="$(cut -d'|' -f$cntr <<< "$expectedSteps")"
+			eStep="${expectedSteps[$cntr-1]}"
 			#dump aStep eStep
+
 			if [[ "$aStep" != "$eStep" ]]; then
-				Msg $ET2 "Step #$cntr is not as expected. \n^^^Expected: '$eStep'\n^^^Actual: '$aStep'"
+				Error 0 2 "Step #$cntr is not as expected. \n^^^Expected: '$eStep'\n^^^Actual: '$aStep'"
 				testStatus='Failed'
 			else
-				Msg  $V1 "^^Step #$cntr is as expected ($eStep)"
+				Verbose 1 "^^Step #$cntr is as expected ($eStep)"
 			fi
 		done
 		if [[ $testStatus == 'Success' ]]; then
-			Msg $V1 ' ';
-			Msg "Test '$instance.$test' completed successfully"
-			echo -e "\t$instance.$test completed successfully" >> $testLogFile
+			Msg "Test '$keyRoot' completed successfully"
+			echo -e "\t'$keyRoot' completed successfully" >> $testLogFile
 		else
 			errorDetected=true
-			Msg $E "Test '$instance.$test' failed, proposal file (.../$tempProposalId/index.tcf) contents:"
+			Error "Test '$keyRoot' failed, proposal file (.../$tempProposalId/index.tcf) contents:"
 			cat $proposalTcfFile | xargs -I{} echo -e "\t\t{}"
-			Msg $E "Test '$instance.$test' failed, workflow file contents:"
+			Error "Test '$keyRoot' failed, workflow file contents:"
 			cat $workflowFile | xargs -I{} echo -e "\t\t{}"
-			echo -e "\t$instance.$test failed" >> $testLogFile
-			Msg $V1 ' ';
+			echo -e "\t'$keyRoot' failed" >> $testLogFile
+			Verbose 1 ' ';
 		fi
 
 		## Cleanup
@@ -533,71 +507,7 @@ done # test in tests
 #===================================================================================================
 ## Example test file, stored as 'wfTests.xml' in the CIM instance root
 #===================================================================================================
-# <!-- ------------------------------------------------------------------------- -->
-# <!-- Automated test patterns for workflow -->
-# <!-- Please see xxxx -->
-# <!-- DO NOT DELETE/MODIFY THIS FILE WITHOUT CONTACTING David Scudiero -->
-# <!-- ------------------------------------------------------------------------- -->
-# <?xml version="1.0" encoding="UTF-8"?>
-# <wftest>
-# 	<instance name="courseadmin">
-# 		<test name="IsGraduate">
-# 			<setup>
-# 				<workflow name="standard">
-# 				<step>START</step>
-# 				<step>[Is Graduate] isGraduate</step>
-# 				<step>END</step>
-# 				<var name="acad_level" value="GR">
-# 			</setup>
-# 			<expect>
-# 				<workflow>standard</workflow>
-# 				<step>START</step>
-# 				<step>[Is GradXuate]</step>
-# 				<step>END</step>
-# 			</expect>
-# 		</test>
-# 		<test name="IsUndergraduate">
-# 			<setup>
-# 				<workflow name="standard">
-# 				<step>START</step>
-# 				<step>[Is Undergraduate] isUndergraduate</step>
-# 				<step>END</step>
-# 				<var name="acad_level" value="UG">
-# 			</setup>
-# 			<expect>
-# 				<workflow>standard</workflow>
-# 				<step>START</step>
-# 				<step>[Is Undergraduate]</step>
-# 				<step>END</step>
-# 			</expect>
-# 		</test>
-# 		<test name="Test2">
-# 			<setup>
-# 				<tcfdata name="college" value="SB">
-# 				<tcfdata name="department" value="BIOL">
-# 				<tcfdata name="subject" value="BIOL">
-# 				<tcfdata name="code" value="BIOL 101">
-# 				<tcfdata name="acad_level" value="UG">
-# 				<tcfdata name="gened_type" value="*">
-# 				<tcfdata name="newrecord" value="true">
-# 				//tcfdata that is different from tcadata
-# 				<tcadata name="college" value="BL">
-# 			</setup>
-# 			<expect>
-# 				<workflow>LEEPFROG TESTING</workflow>
-# 				<step>College: SB</step>
-# 				<step>Department: BIOL</step>
-# 				<step>Subject: BIOL</step>
-# 				<step>Academic Level: UG</step>
-# 				<step>[Is Undergraduate]</step>
-# 				<step>[Is NOT Writing or Communications]</step>
-# 				<step>[New Course]</step>
-# 			</expect>
-# 		</test>
-#
-# 	</instance>
-#
-# <wftest>
+
 
 #===================================================================================================
 ## Check-in log
@@ -613,3 +523,4 @@ done # test in tests
 ## Mon Sep 12 16:41:04 CDT 2016 - dscudiero - General syncing of dev to prod
 ## 05-15-2018 @ 08:15:37 - 1.1.01 - dscudiero - Sync
 ## 05-24-2018 @ 08:50:09 - 1.1.01 - dscudiero - Cosmetic/minor change/Sync
+## 05-25-2018 @ 16:21:52 - 2.0.0 - dscudiero - Numerious updates refactored the data files
