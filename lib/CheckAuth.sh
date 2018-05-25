@@ -2,7 +2,7 @@
 
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.69" # -- dscudiero -- Fri 05/25/2018 @ 11:05:22.50
+# version="2.0.73" # -- dscudiero -- Fri 05/25/2018 @ 15:01:07.66
 #===================================================================================================
 # Check to see if the logged user can run this script
 # Returns true if user is authorized, otherwise it returns a message
@@ -18,7 +18,6 @@ function CheckAuth {
 
 	[[ -z $UsersAuthGroups && -r "$TOOLSPATH/auth/$userName" ]] && UsersAuthGroups=$(cat "$TOOLSPATH/auth/$userName")
 	[[ -z $UsersAuthGroups ]] && UsersAuthGroups='none' 
-
 
 	## If this is the author the let them run
 		if [[ ${ScriptsAuthData["${scriptName}.author"]+abc} ]]; then
@@ -40,6 +39,9 @@ function CheckAuth {
 					[[ $restrictToGroup == $group ]] && { echo true; return 0; }
 				done
 			done
+		else 
+			echo true
+			return 0
 		fi
 
 	## User is not authorized
@@ -72,3 +74,4 @@ export -f CheckAuth
 ## 04-19-2018 @ 15:19:08 - 2.0.48 - dscudiero - Re-factore checking sql query results = 0
 ## 05-10-2018 @ 11:04:10 - 2.0.49 - dscudiero - Turn on the author check again
 ## 05-25-2018 @ 11:41:36 - 2.0.69 - dscudiero - Re-factor to use the ScriptAuthData hash
+## 05-25-2018 @ 15:02:04 - 2.0.73 - dscudiero - Fix problem with false positives if there is no restricttogroup data
