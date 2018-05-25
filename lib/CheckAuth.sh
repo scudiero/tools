@@ -2,7 +2,7 @@
 
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.49" # -- dscudiero -- Thu 05/10/2018 @ 11:03:54.47
+# version="2.0.69" # -- dscudiero -- Fri 05/25/2018 @ 11:05:22.50
 #===================================================================================================
 # Check to see if the logged user can run this script
 # Returns true if user is authorized, otherwise it returns a message
@@ -13,57 +13,37 @@
 #===================================================================================================
 function CheckAuth {
 	Import 'RunSql'
-	local sqlStmt author restrictGroups
+	local sqlStmt author restrictToGroup restrictGroups
 	local scriptName=${1-$myName}
-	unset author restrictGroups
 
 	[[ -z $UsersAuthGroups && -r "$TOOLSPATH/auth/$userName" ]] && UsersAuthGroups=$(cat "$TOOLSPATH/auth/$userName")
 	[[ -z $UsersAuthGroups ]] && UsersAuthGroups='none' 
 
-	## Get the retricted information for the script
-		sqlStmt="select author,restrictToUsers,restrictToGroups from $scriptsTable where name=\"$scriptName\""
-		RunSql $sqlStmt
-		[[ -z ${resultSet[0]} ]] && echo true && return 0
-		result="${resultSet[0]}"
-		author="${result%%|*}"; result="${result#*|}";
-		restrictToUsers="${result%%|*}"; result="${result#*|}";
-		restrictToGroups="$result"
-		#dump UsersAuthGroups author restrictToUsers restrictToGroups
 
 	## If this is the author the let them run
-		[[ $author == $userName ]] && { echo true; return 0; }
+		if [[ ${ScriptsAuthData["${scriptName}.author"]+abc} ]]; then
+			[[ ${ScriptsAuthData["${scriptName}.author"]} == $userName ]] && { echo true; return 0; }
+		fi
 
 	## If there is restrictToUsers data then check
-		found=false
-		if [[ -n $restrictToUsers && ${restrictToUsers^^[a-z]} != 'NULL' ]]; then
+		if [[ ${ScriptsAuthData["${scriptName}.restrictToUsers"]+abc} ]]; then
 			for restrictToUser in ${restrictToUsers//,/ }; do
-				[[ $restrictToUser == $userName ]] && found=true && break
+				[[ $restrictToUser == $userName ]] && { echo true; return 0; }
 			done
 		fi
 
 	## If there is restrictToGroups data then check
-		if [[ $found == false ]]; then
-			found=false
-			if [[ -n $restrictToGroups && ${restrictToGroups^^[a-z]} != 'NULL' ]]; then
-				for group in ${UsersAuthGroups//,/ }; do
-					for restrictToGroup in ${restrictToGroups//,/ }; do
-						[[ $restrictToGroup == $group ]] && found=true && break
-					done
-					[[ $found == true ]] && break
+		if [[ ${ScriptsAuthData["${scriptName}.restrictToGroups"]+abc} ]]; then
+			restrictToGroups="${ScriptsAuthData["${scriptName}.restrictToGroups"]}"
+			for group in ${UsersAuthGroups//,/ }; do
+				for restrictToGroup in ${restrictToGroups//,/ }; do
+					[[ $restrictToGroup == $group ]] && { echo true; return 0; }
 				done
-			else
-				found=true
-			fi
+			done
 		fi
 
-	## User is authorized
-	if [[ $found == true ]]; then
-		echo true
-		return 0
-	fi
-
 	## User is not authorized
-	echo "Sorry, you do not have permissions to run '$scriptName', the script is restricted to groups: '${restrictToGroups//,/, }'.  FYI, you are in these groups: '${UsersAuthGroups//,/, }'"
+	echo -e "\nSorry, you do not have permissions to run '$scriptName', the script is restricted to groups: '${restrictToGroups//,/, }'.\nFYI, you are in these groups: '${UsersAuthGroups//,/, }'"
 	return 0
 
 } #CheckAuth
@@ -91,3 +71,4 @@ export -f CheckAuth
 ## 03-22-2018 @ 13:41:52 - 2.0.47 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 04-19-2018 @ 15:19:08 - 2.0.48 - dscudiero - Re-factore checking sql query results = 0
 ## 05-10-2018 @ 11:04:10 - 2.0.49 - dscudiero - Turn on the author check again
+## 05-25-2018 @ 11:41:36 - 2.0.69 - dscudiero - Re-factor to use the ScriptAuthData hash
