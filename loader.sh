@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.22" # -- dscudiero -- Thu 05/24/2018 @  9:20:03.48
+version="1.5.28" # -- dscudiero -- Fri 05/25/2018 @  9:08:12.61
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -243,6 +243,9 @@ sTime=$(date "+%s")
 ## If sourced then just return
 	[[ $viaCron == true ]] && return 0
 
+	prtStatus ", customizations"
+	sTime=$(date "+%s")
+
 ## Resolve the script file to run
 	## Were we passed in a fully qualified file name
 	if [[ ${callPgmName:0:1} == '/' ]]; then
@@ -252,9 +255,8 @@ sTime=$(date "+%s")
 	fi ## [[ ${callPgmName:0:1} == '\' ]]
 
 	## Check to make sure we can run
-
 		checkMsg=$(CheckRun $callPgmName)
-		if [[ $checkMsg != true ]]; then
+		if [[ -n $checkMsg && $checkMsg != true ]]; then
 			if [[ $(Contains ",$administrators," ",$userName,") == true ]]; then
 				echo; echo; Warning "$checkMsg"; echo;
 			else
@@ -262,7 +264,7 @@ sTime=$(date "+%s")
 				[[ $callPgmName != 'testsh' ]] && Terminate "$checkMsg"
 			fi
 		fi
-
+		
 	## Check to make sure we are authorized
 		checkMsg=$(CheckAuth $callPgmName)
 		[[ $checkMsg != true ]] && Terminate "$checkMsg"
@@ -305,7 +307,7 @@ sTime=$(date "+%s")
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
 		## Strip off first token if it is $myName
-		loaderArgs="${loaderArgs#$myName }"
+		[[ $loaderArgs == $myName ]] && unset loaderArgs || loaderArgs="${loaderArgs#$myName }"
 		prtStatus ", calling"
 		[[ $batchMode != true && $myQuiet != true ]] && echo
 		TrapSigs 'off'
