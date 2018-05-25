@@ -1,6 +1,6 @@
 #!/bin/bash
 #===================================================================================================
-version=1.0.20 # -- dscudiero -- Thu 03/22/2018 @ 13:59:57.67
+version=1.0.42 # -- dscudiero -- Fri 05/25/2018 @  9:11:21.20
 #===================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql"
@@ -8,6 +8,7 @@ Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
 scriptDescription="Take a tools script offline or display the current scripts offline"
+dump originalArgStr
 
 #===================================================================================================
 ## turn a script offline -- i.e. create an .offline file
@@ -18,17 +19,16 @@ GetDefaultsData $myName
 
 if [[ -n $originalArgStr ]]; then
 	for script in $originalArgStr; do
-		[[ ${script: (-3)} == '.sh' ]] && script="$(cut -d'.' -f1 <<< $script)"
-		sqlStmt="update $scriptsTable set active=\"Offline\" where name=\"$script\""
-		RunSql $sqlStmt
-		Msg "^$script is now online"
+		Here 0
+		echo touch "$TOOLSPATH/bin/${script%.*}.offline"
+		touch "$TOOLSPATH/bin/${script%.*}.offline"
+		Msg "^$script is now offline"
 	done
 else
 	Msg "Current offline scripts:"
-	sqlStmt="select name,showInScripts from $scriptsTable where active=\"Offline\" order by showInScripts,name"
-	RunSql $sqlStmt
-	for result in ${resultSet[@]}; do 
-		Msg "^${result%%|*}^${result##*|}"
+	for file in $(ls $TOOLSPATH/bin/*.offline 2> /dev/null); do
+		file="${file%.*}"
+		Msg "^${file##*/}"
 	done
 	Msg
 fi
@@ -44,3 +44,4 @@ Goodbye
 ## 10-03-2017 @ 16.13.44 - (1.0.17)    - dscudiero - Refactored to allow report on all offline scripts
 ## 02-02-2018 @ 10.46.37 - 1.0.18 - dscudiero - Add userid check
 ## 03-22-2018 @ 14:07:07 - 1.0.20 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 05-25-2018 @ 09:13:53 - 1.0.42 - dscudiero - Re-factor to use .offline files
