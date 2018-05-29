@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.76 # -- dscudiero -- Fri 05/11/2018 @  9:18:09.23
+# version=2.1.103 # -- dscudiero -- Tue 05/29/2018 @ 12:55:12.08
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -101,109 +101,48 @@ function Init {
 
 	## Process env and envs
 	if [[ $getEnv == true || $getSrcEnv == true || $getTgtEnv == true ]]; then
-		unset clientEnvs
-		if [[ $noCheck == true ]]; then
-			unset tmpStr
-			[[ $getSrcEnv == true ]] && tmpStr="$(ColorK 'Source')"
-			[[ $getTgtEnv == true ]] && tmpStr="$(ColorK 'Target')"
-			Warning "Requiring a environment value and 'noCheck' flag was set"
-			clientEnvs="$courseleafDevEnvs,$courseleafProdEnvs"
-			[[ $noPreview == true ]] && clientEnvs=$(sed s"/,preview//"g <<< $clientEnvs)
-			[[ $noPublic == true ]] && clientEnvs=$(sed s"/,public//"g <<< $clientEnvs)
-		else
-			if [[ $client == '*' || $client == 'all' || $client == '.' ]]; then
-				clientEnvs="$courseleafDevEnvs,$courseleafProdEnvs"
-				[[ $noPreview == true ]] && clientEnvs=$(sed s"/,preview//"g <<< $clientEnvs)
-				[[ $noPublic == true ]] && clientEnvs=$(sed s"/,public//"g <<< $clientEnvs)
-			else
-				unset notIn
-				if [[ $noPreview == true || $noPublic == true ]]; then notIn='and env not in('; fi
-				if [[ $noPreview == true ]]; then notIn="$notIn'preview'"; fi
-				if [[ $noPublic == true ]]; then if [[ $noPreview == true ]]; then notIn="$notIn,'public'"; else notIn="$notIn'public'"; fi; fi
-				if [[ $noPreview == true || $noPublic == true ]]; then notIn="$notIn)"; fi
-				sqlStmt="select distinct env from $siteInfoTable where (name=\"$client\" or name=\"$client-test\") $notIn order by env"
-				RunSql $sqlStmt
-				if [[ ${#resultSet[@]} -eq 0 ]]; then
-					for checkEnv in pvt dev test next curr; do
-						[[ $(SetSiteDirs 'check' $checkEnv) == true ]] && clientEnvs="$clientEnvs $checkEnv"
-					done
-				else
-					for result in "${resultSet[@]}"; do
-						clientEnvs="$clientEnvs $result"
-					done
-					clientEnvs=${clientEnvs:1}
-					[[ $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt $clientEnvs"
-				fi
-			fi
-			## If we have an envs variable that is not null then make sure all that are specified are valid
-			if [[ -n $envs ]]; then
-				if [[ $envs == 'all' ]]; then
-					envs="${clientEnvs//all/}"; envs="${envs//,,/,}"
-				else
-					local i tmpEnvs
-					tmpEnvs="$envs"; unset envs
-					for i in ${tmpEnvs//,/ }; do [[ $(MyContains "$clientEnvs" "$i") == true ]] && envs="$envs,$i"; done
-					envs="${envs:1}"
-				fi
-				env="${envs%% *}"
-			fi
-		fi
+		[[ ${clientData["${client}.envs"]+abc} ]] && clientEnvs="${clientData["${client}.envs"]}" || clientEnvs="$courseleafDevEnvs,$courseleafProdEnvs"
+		clientEnvs="${clientEnvs/,preview}"
+		clientEnvs="${clientEnvs/,public}"
+		[[ $noCheck == true ]] && Warning "Requiring a environment value and 'noCheck' flag was set"
 
+		## Generic get env
 		if [[ $getEnv == true ]]; then
 			unset promptModifer varSuffix
 			if [[ $allowMultiEnvs == true ]]; then
 				[[ -n $env && -z $envs ]] && envs="$env" && unset env
 				varSuffix='s'
 				promptModifer=" (comma separated)"
-				clientEnvs="all $clientEnvs"
+				clientEnvs="$clientEnvs,all"
 			fi
-			unset defaultEnv
-			if [[ $(Contains "$clientEnvs" 'pvt') == false ]]; then
-				[[ $addPvt == true || $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt $clientEnvs" && defaultEnv='pvt'
-			fi
+			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt' || unset defaultEnv
 			[[ -z $env && -n $srcEnv ]] && env="$srcEnv"
-			Prompt env "What environment/site do you wish to use?" "${clientEnvs// /,}" $defaultEnv; srcEnv=${srcEnv,,[a-z]}
+			Prompt env "What environment/site do you wish to use?" "${clientEnvs}" $defaultEnv; srcEnv=${srcEnv,,[a-z]}
 			[[ $checkProdEnv == true ]] && checkProdEnv=$env
 		fi
 
 		if [[ $getSrcEnv == true ]]; then
 			[[ -z $srcEnv && -n $env ]] && srcEnv="$env"
 			[[ -z $srcEnv && -n $envs ]] && srcEnv="$envs"
-			clientEnvsSave="$clientEnvs"
-			clientEnvs="$clientEnvs skel"
 			[[ -n $tgtEnv ]] && { clientEnvs="$(Trim "${clientEnvs//$tgtEnv/}")"; clientEnvs="${clientEnvs//,,/,}"; }
-			unset defaultEnv
-			if [[ $(Contains "$clientEnvs" 'pvt') == false ]]; then
-				[[ $addPvt == true || $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt $clientEnvs" && defaultEnv='pvt'
-			fi
+			clientEnvs="$clientEnvs skel"
+			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt' || unset defaultEnv
 			Prompt srcEnv "What $(ColorK 'source') environment/site do you wish to use?" "${clientEnvs// /,}" $defaultEnv; srcEnv=${srcEnv,,[a-z]}
-			clientEnvs="$clientEnvsSave"
 			[[ $checkProdEnv == true ]] && checkProdEnv=$srcEnv
+			[[ ${clientData["${client}.${srcEnv}.siteDir"]]+abc} ]] && srcDir="${clientData["${client}.${srcEnv}.siteDir"]}"
+			[[ $srcEnv == 'skel' ]] && srcDir="$skeletonRoot/release"		
 		fi
 
 		if [[ $getTgtEnv == true ]]; then
 			[[ -z $tgtEnv && -n $env && $srcEnv != $env ]] && tgtEnv="$env"
 			[[ -z $tgtEnv && -n $envs && $srcEnv != $envs ]] && tgtEnv="$envs"
 			[[ -n $srcEnv ]] && { clientEnvs="$(Trim "${clientEnvs//$srcEnv/}")"; clientEnvs="${clientEnvs//,,/,}"; }
-			unset defaultEnv
-			if [[ $(Contains "$clientEnvs" 'pvt') == false ]]; then
-				[[ $addPvt == true || $(SetSiteDirs 'check' 'pvt') == true ]] && clientEnvs="pvt $clientEnvs"
-			fi
-			[[ -z $defaultEnv && $(Contains "$clientEnvs" 'test') == true ]] && defaultEnv='test'
+			clientEnvs="$(Trim "${clientEnvs//skel/}")"; clientEnvs="${clientEnvs//,,/,}";
+			[[ -z $defaultEnv && $(Contains "$clientEnvs" 'test') == true ]] && defaultEnv='test' || unset defaultEnv
 			Prompt tgtEnv "What $(ColorK 'target') environment/site do you wish to use?" "${clientEnvs// /,}" $defaultEnv; srcEnv=${srcEnv,,[a-z]}
-			[[ $checkProdEnv == true ]] && checkProdEnv=$tgtEnv
+			[[ $checkProdEnv == true ]] && checkProdEnv=$tgtEnv	
+			[[ ${clientData["${client}.${tgtEnv}.siteDir"]+abc} ]] && tgtDir="${clientData["${client}.${tgtEnv}.siteDir"]}"		
 		fi
-
-		# if [[ -n $srcEnv ]]; then
-		# 	for j in $(echo pvt $clientEnvs skel | tr ',' ' '); do
-		# 		[[ $srcEnv == ${j:0:${#srcEnv}} ]] && srcEnv="$j" && break;
-		# 	done
-		# fi
-		# if [[ -n $tgtEnv ]]; then
-		# 	for j in $(echo $clientEnvs | tr ',' ' '); do
-		# 		[[ $tgtEnv == ${j:0:${#tgtEnv}} ]] && tgtEnv="$j" && break;
-		# 	done
-		# fi
 
 		## Check to see if check production env is on and we are working in a next or curr environment, if yes then verify that
 		## the user has authorization to modify a produciton environment.
@@ -212,14 +151,12 @@ function Init {
 				verify=true
 				echo
 				Warning "You are asking to update/overlay the $(ColorW $(Upper $checkProdEnv)) environment."
-				unset productsinsupport
-		 		sqlStmt="Select productsinsupport from $clientInfoTable where name=\"$client\""
-		 		RunSql $sqlStmt
-				[[ ${resultSet[0]} != 'NULL' ]] && productsinsupport="${resultSet[0]}"
-				## If client has products in support and the user is not in the support group then quit
-				[[ -n $UsersAuthGroups && -n $productsinsupport && $(Contains ",$UsersAuthGroups," ',support,') != true ]] && \
+				if [[ ${clientData["${client}.productsInSupport"]+abc} ]]; then
+					## If client has products in support and the user is not in the support group then quit
+					[[ $(Contains ",$UsersAuthGroups," ',support,') != true ]] && \
 		 				Terminate "The client has products in support ($productsinsupport), please contact the support person assigned to this client to update the '$env' site"
-		 		[[ -n productsinsupport ]] && Info 0 1 "FYI, the client has the following products in production: '$productsinsupport'"
+					Info 0 1 "FYI, the client has the following products in production: '${clientData["${client}.productsInSupport"]}'"
+				fi
 				unset ans; Prompt ans "Are you sure" "Yes No"; ans=${ans:0:1}; ans=${ans,,[a-z]}
 				[[ $ans != 'y' ]] && Goodbye -1
 				getJalot=true
@@ -233,31 +170,18 @@ function Init {
 	#===================================================================================================
 	## get products
 	if [[ $getProducts == true && -n $client ]]; then
+		unset validProducts
 		if [[ $client == '*' || $client == 'all' || $client == '.' ]]; then
-			validProducts="$(tr ',' ' ' <<< $(Upper "$courseleafProducts"))"
+			validProducts="$courseleafProducts"
 		else
-			unset validProducts
-			## Get the products for this client
-			if [[ $noCheck != true ]]; then
-				sqlStmt="select products from $clientInfoTable where (name=\"$client\")"
-				RunSql $sqlStmt
-				if [[ ${#resultSet[@]} -gt 0 ]]; then
-					## Remove the extra vanity products from the validProducts list
-					for prod in $(tr ',' ' ' <<< ${resultSet[0]}); do
-						[[ ${prod:0:3} == 'cat' || ${prod:0:3} == 'cim' ]] && [[ $prod != ${prod:0:3} ]] && continue
-						validProducts="$validProducts,$prod"
-					done
-					[[ ${validProducts:0:1} == ',' ]] && validProducts=${validProducts:1}
-					validProducts="$(tr ',' ' ' <<< $validProducts)"
-				fi
-			else
-				validProducts='cat cim'
-			fi
+			[[ ${clientData["${client}.products"]+abc} ]] && validProducts="${clientData["${client}.products"]}"
 		fi
+		[[ $noCheck == true ]] && validProducts='cat cim'
+
 		unset promptModifer
 		[[ $allowMultiProds == true ]] && prodVar='products' && promptModifer=" (comma separated)" || prodVar='product'
 		## If there is only one product for this client then us it, otherwise prompt user
-		prodCnt=$(grep -o ' ' <<< "$validProducts" | wc -l)
+		prodCnt=$(grep -o ',' <<< "$validProducts" | wc -l)
 		if [[ $prodCnt -gt 0 ]]; then
 			Prompt $prodVar "What $prodVar do you wish to work with$promptModifer?" "$validProducts all"
 			prodVar=${prodVar,,[a-z]}; 
@@ -411,3 +335,4 @@ export -f Init
 ## 05-08-2018 @ 08:13:28 - 2.1.73 - dscudiero - Add a message if fastInit is active
 ## 05-08-2018 @ 11:51:42 - 2.1.75 - dscudiero - Set env variable if envs has a value and vice versa
 ## 05-11-2018 @ 09:19:34 - 2.1.76 - dscudiero - Change includes from GetCims to CourseleafUtilities
+## 05-29-2018 @ 13:20:45 - 2.1.103 - dscudiero - Refactored to limite direct usage of the data warehouse
