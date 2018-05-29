@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.32" # -- dscudiero -- Fri 05/25/2018 @ 15:07:41.67
+version="1.5.34" # -- dscudiero -- Tue 05/29/2018 @  9:09:49.53
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -334,6 +334,7 @@ sTime=$(date "+%s")
 	## Call program function
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
+		declare -A clientData
 		## Strip off first token if it is $myName
 		[[ $loaderArgs == $myName ]] && unset loaderArgs || loaderArgs="${loaderArgs#$myName }"
 		prtStatus ", calling"
@@ -530,3 +531,4 @@ sTime=$(date "+%s")
 ## 05-24-2018 @ 09:23:34 - 1.5.22 - dscudiero - Tweak code that removes the loadPgmName
 ## 05-25-2018 @ 11:40:57 - 1.5.31 - dscudiero - Add code to cache the script authorization data
 ## 05-25-2018 @ 15:08:06 - 1.5.32 - dscudiero - Pause if there is an authorization error and the user is an administrator
+## 05-29-2018 @ 13:17:35 - 1.5.34 - dscudiero - Add declaration or the clientData hash table
