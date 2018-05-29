@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.34" # -- dscudiero -- Tue 05/29/2018 @  9:09:49.53
+version="1.5.36" # -- dscudiero -- Tue 05/29/2018 @ 16:42:16.65
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -13,15 +13,16 @@ myName='loader'
 #==================================================================================================
 # Local Functions
 #==================================================================================================
-	function prtStatus {
-		# [[ $batchMode == true || $userName != 'dscudiero' ]] && return 0
-		[[ $batchMode == true ]] && return 0
-		local elapTime=$(( $(date "+%s") - $sTime ))
-		[[ $elapTime -eq 0 ]] && elapTime=1
-		statusLine="${statusLine}${1}: ${elapTime}s"
-		>&3 echo -n -e "${statusLine}\r"
-		return 0
-	}
+	# function prtStatus {
+	# 	return 0
+	# 	[[ $batchMode == true || $userName != 'dscudiero' ]] && return 0
+	# 	[[ $batchMode == true ]] && return 0
+	# 	local elapTime=$(( $(date "+%s") - $sTime ))
+	# 	[[ $elapTime -eq 0 ]] && elapTime=1
+	# 	statusLine="${statusLine}${1}: ${elapTime}s"
+	# 	>&3 echo -n -e "${statusLine}\r"
+	# 	return 0
+	# }
 
 #==================================================================================================
 # Process the exit from the sourced script
@@ -62,8 +63,8 @@ function CleanUp {
 # Initialize local variables
 #==================================================================================================
 [[ "${BASH_SOURCE[0]}" != "${0}" ]] && calledViaSource=true || calledViaSource=false
-sTime=$(date "+%s")
-statusLine="Loader ($version): "
+# sTime=$(date "+%s")
+# statusLine="Loader ($version): "
 ## Initialize file descriptor 3 to be stdout unless redirected by caller
 	if [[ -t 0 ]]; then # Im running interactive
 		if { ! >&3; } 2> /dev/null; then exec 3<> /dev/tty ; fi
@@ -87,7 +88,7 @@ statusLine="Loader ($version): "
 ## Initial Checks
 	[[ -z $TOOLSPATH ]] && echo -e "\n*Error* -- The TOOLSPATH environment value has not been set, cannot continue\n" && exit -3
 
-	sTime=$(date "+%s")
+	# sTime=$(date "+%s")
 	if [[ "$0" != "-bash" ]]; then
 		callPgmName=$(basename "$1")
 		shift
@@ -122,7 +123,7 @@ statusLine="Loader ($version): "
 			[[ ${token,,[a-z]} == 'reload' ]] && { unset defaultsLoaded; dispatcherArgs=${*/$token/}; }
 		fi
 	done
-	fastDump callPgmName noLog noLognDb batchMode usedevdb myQuiet USELOCAL USEDEV VIACRON PAUSEATEXIT loaderArgs
+	#fastDump callPgmName noLog noLognDb batchMode usedevdb myQuiet USELOCAL USEDEV VIACRON PAUSEATEXIT loaderArgs
 
 ## Hello
 # [[ $batchMode != true && $(hostname) == 'build7.leepfrog.com' ]] && \
@@ -133,10 +134,10 @@ statusLine="Loader ($version): "
 		callPgmName=$(cut -d' ' -f1 <<< $loaderArgs)
 		[[ $callPgmName == $loaderArgs ]] && unset loaderArgs || loaderArgs=$(cut -d' ' -f2- <<< $loaderArgs)
 	fi
-	fastDump callPgmName loaderArgs
+	#fastDump callPgmName loaderArgs
 
-prtStatus "parse args"
-sTime=$(date "+%s")
+# prtStatus "parse args"
+# sTime=$(date "+%s")
 
 #==================================================================================================
 # MAIN
@@ -193,10 +194,10 @@ sTime=$(date "+%s")
 
 ## Import things we need to continue
 	source "$TOOLSPATH/lib/Import.sh"
-	sTime=$(date "+%s")
+	# sTime=$(date "+%s")
 	Import "$loaderIncludes"
-	prtStatus ", imports"
-	sTime=$(date "+%s")
+	# prtStatus ", imports"
+	# sTime=$(date "+%s")
 	SetFileExpansion
 
 ## Load tools defaults value
@@ -243,8 +244,8 @@ sTime=$(date "+%s")
 ## If sourced then just return
 	[[ $viaCron == true ]] && return 0
 
-	prtStatus ", customizations"
-	sTime=$(date "+%s")
+	# prtStatus ", customizations"
+	# sTime=$(date "+%s")
 
 ## Resolve the script file to run
 	## Were we passed in a fully qualified file name
@@ -287,7 +288,7 @@ sTime=$(date "+%s")
 
 	## Cache users auth groups
 		[[ -z $UsersAuthGroups && -r "$TOOLSPATH/auth/$userName" ]] && UsersAuthGroups=$(cat "$TOOLSPATH/auth/$userName") || UsersAuthGroups='none'
-		prtStatus ", check run/auth"; sTime=$(date "+%s")
+		# prtStatus ", check run/auth"; sTime=$(date "+%s")
 		
 	## Check to make sure we are authorized
 		checkMsg=$(CheckAuth $callPgmName)
@@ -307,8 +308,8 @@ sTime=$(date "+%s")
 	## Resolve the executable file"
 		[[ -z $executeFile ]] && executeFile=$(FindExecutable "$callPgmName")
 		[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
-		prtStatus ", find file"; sTime=$(date "+%s")
-		fastDump callPgmName executeFile -p
+		# prtStatus ", find file"; sTime=$(date "+%s")
+		#fastDump callPgmName executeFile -p
 		
 ## Call the script
 	## Initialize the log file
@@ -330,14 +331,14 @@ sTime=$(date "+%s")
 			Msg >> $logFile
 		fi
 
-	prtStatus ", logFile" sTime=$(date "+%s")
+	# prtStatus ", logFile" sTime=$(date "+%s")
 	## Call program function
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
 		declare -A clientData
 		## Strip off first token if it is $myName
 		[[ $loaderArgs == $myName ]] && unset loaderArgs || loaderArgs="${loaderArgs#$myName }"
-		prtStatus ", calling"
+		# prtStatus ", calling"
 		[[ $batchMode != true && $myQuiet != true ]] && echo
 		TrapSigs 'off'
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
@@ -532,3 +533,4 @@ sTime=$(date "+%s")
 ## 05-25-2018 @ 11:40:57 - 1.5.31 - dscudiero - Add code to cache the script authorization data
 ## 05-25-2018 @ 15:08:06 - 1.5.32 - dscudiero - Pause if there is an authorization error and the user is an administrator
 ## 05-29-2018 @ 13:17:35 - 1.5.34 - dscudiero - Add declaration or the clientData hash table
+## 05-29-2018 @ 16:43:55 - 1.5.36 - dscudiero - Comment out debug stuff
