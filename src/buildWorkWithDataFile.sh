@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.126 # -- dscudiero -- Tue 05/29/2018 @ 11:30:44.72
+version=4.3.127 # -- dscudiero -- Tue 05/29/2018 @ 11:51:30.06
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql StringFunctions ProtectedCall FindExecutable PushPop"
@@ -92,7 +92,7 @@ fi
 for ((i=0; i<${#clients[@]}; i++)); do
 	clientRec="${clients[$i]}"
 	client=${clientRec%%|*}
-	Verbose 1 "^client: $client ($i of ${#clients[@]})"
+	[[ $batchMode != true ]] && Msg "^client: $client ($i of ${#clients[@]})"
 	unset envList envListStr
 	sqlStmt="select env,host,share,cims from $siteInfoTable where name in (\"$client\",\"$client-test\") and env not in ('preview','public')"
 		RunSql $sqlStmt
@@ -125,3 +125,4 @@ Goodbye 0 'alert'
 ## 03-22-2018 @ 14:05:56 - 4.3.124 - dscudiero - [A
 ## 03-23-2018 @ 15:31:55 - 4.3.125 - dscudiero - D
 ## 05-29-2018 @ 11:31:17 - 4.3.126 - dscudiero - Add productsInSupport
+## 05-29-2018 @ 11:51:56 - 4.3.127 - dscudiero - Print out breadcrumbs is not batch
