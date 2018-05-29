@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.103 # -- dscudiero -- Tue 05/29/2018 @ 12:55:12.08
+# version=2.1.108 # -- dscudiero -- Tue 05/29/2018 @ 14:35:56.91
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -117,6 +117,7 @@ function Init {
 			fi
 			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt' || unset defaultEnv
 			[[ -z $env && -n $srcEnv ]] && env="$srcEnv"
+			[[ -z $env && -n $envs ]] && env="$envs"
 			Prompt env "What environment/site do you wish to use?" "${clientEnvs}" $defaultEnv; srcEnv=${srcEnv,,[a-z]}
 			[[ $checkProdEnv == true ]] && checkProdEnv=$env
 		fi
@@ -336,3 +337,4 @@ export -f Init
 ## 05-08-2018 @ 11:51:42 - 2.1.75 - dscudiero - Set env variable if envs has a value and vice versa
 ## 05-11-2018 @ 09:19:34 - 2.1.76 - dscudiero - Change includes from GetCims to CourseleafUtilities
 ## 05-29-2018 @ 13:20:45 - 2.1.103 - dscudiero - Refactored to limite direct usage of the data warehouse
+## 05-29-2018 @ 14:36:18 - 2.1.108 - dscudiero - Fix bug if env is passed in in script args
