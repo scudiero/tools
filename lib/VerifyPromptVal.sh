@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.86" # -- dscudiero -- Tue 05/08/2018 @ 11:50:47.77
+# version="2.0.90" # -- dscudiero -- Tue 05/29/2018 @ 12:10:44.31
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -42,49 +42,81 @@ function VerifyPromptVal {
 			response=${response:0:$lenResponse-1}
 			checkClient=false
 		else
-			## Look for client in the clients table
-			SetFileExpansion 'off'
-			local sqlStmt="select * from $clientInfoTable where name=\"$response\" "
-			RunSql $sqlStmt
-			if [[ ${#resultSet[@]} -eq 0 ]]; then
-				verifyMsg="$(Error "Client value of '$response' not found in $warehouseDb.$clientInfoTable")"
+			## Load the clientData hash from the client data file
+			## utoledo|University of Toledo|leepfrog|cat,cati,cim|
+			## 	curr-build7/mesaverde#NULL;dev-build7/dev7#courseadmin,miscadmin,programadmin;
+			## 	next-build7/mesaverde#NULL;test-build7/mesaverde#courseadmin,miscadmin,programadmin
+			local grepStr="$(ProtectedCall "grep \"^${response}|\" $workwithDataFile")"
+			if [[ -n $grepStr ]]; then
+				local dataStr="${grepStr%|*}";
+				clientData["${response}.code"]="${dataStr%%|*}"; dataStr="${dataStr#*|}"
+				clientData["${response}.longName"]="${dataStr%%|*}"; dataStr="${dataStr#*|}"
+				clientData["${response}.hosting"]="${dataStr%%|*}"; dataStr="${dataStr#*|}"
+				clientData["${response}.products"]="${dataStr%%|*}"; dataStr="${dataStr#*|}"
+				clientData["${response}.productsInSupport"]="${dataStr%%|*}"; dataStr="${dataStr#*|}"
+				local envsStr="${grepStr##*|}" envStr prevEnvsStr envs clientDataKeys
+
+				while [[ true ]]; do
+					local envStr="${envsStr%%;*}"; envsStr="${envsStr#*;}"
+					local env="${envStr%%-*}"; envStr="${envStr#*-}"
+					local envs="$envs,$env"
+					local host="${envStr%%/*}"; envStr="${envStr#*/}"
+					clientData["${response}.${env}.host"]="$host"
+					envStr="${envStr/\#/|}"
+					local server="${envStr%%|*}"; envStr="${envStr#*|}"
+					clientData["${response}.${env}.server"]="$server"
+					local cims="$envStr"; [[ $cims == 'NULL' ]] && unset cims
+					clientData["${response}.${env}.cims"]="$cims"
+					[[ $env == test ]] && clientData["${response}.${env}.siteDir"]="/mnt/$server/${response}-test/$env" || \
+											clientData["${response}.${env}.siteDir"]="/mnt/$server/$response/$env"
+					[[ ! -d ${clientData["${response}.${env}.siteDir"]} ]] && unset clientData["${response}.${env}.siteDir"]
+					[[ $envsStr == $prevEnvsStr ]] && break || prevEnvsStr="$envsStr"
+
+				done
+				## Do we have a pvt site
+				if [[ ${clientData["${response}.dev.host"]} == $hostName && ${clientData["${response}.dev.server"]+abc} ]]; then
+					if [[ -d /mnt/${clientData["${response}.dev.server"]}/web/${response}-${userName} ]]; then
+						clientData["${response}.pvt.host"]="${clientData["${client}.dev.host"]}"
+						clientData["${response}.pvt.server"]="${clientData["${client}.dev.server"]}"
+						clonedFrom="$(cat "/mnt/${clientData["${response}.dev.server"]}/web/${response}-${userName}/.clonedFrom")"
+						clientData["${response}.pvt.clonedFrom"]="$clonedFrom"
+						clientData["${response}.pvt.cims"]="${clientData["${response}.${clonedFrom}.cims"]}"
+						clientData["${response}.pvt.siteDir"]="/mnt/$server/${response}-${userName}"
+						envs="$envs,pvt"
+					fi
+				fi
+				clientData["${response}.host"]="$host"
+				clientData["${response}.envs"]="${envs:1}"
 			else
-				ClientData="${resultSet[0]}"
+				verifyMsg="$(Error "Client value of '$response' not found in '$workwithDataFile'")"
 			fi
-			SetFileExpansion
 			## OK found client, now make sure it is valid for the current host
 			if [[ $verifyMsg == "" ]]; then
 				if [[ $anyClient != 'true' ]]; then
-					sqlStmt="select host from $siteInfoTable where name like \"$response%\""
-					RunSql $sqlStmt
-					[[ ${#resultSet[0]} -eq 0 ]] && verifyMsg="$(Error "Could not retrieve any records for '$response' in the $warehouseDb.$siteInfoTable")"
-					if [[ $verifyMsg == "" ]]; then
-						hostedOn="${resultSet[0]}"
-						if [[ $hostedOn != $hostName ]]; then
-							if [[ $verify == true ]]; then
-								if [[ $autoRemote != true ]]; then
-									responseSave="$response"
-									unset ans; Prompt ans "Client '$response' is hosted on '$hostedOn', Do you wish to start a session on that host" 'Yes No' 'Yes'
-									ans="${ans:0:1}"; ans=${ans,,[a-z]}
-									[[ $ans == 'n' ]] && Quit
-									response="$responseSave"
-								else
-									ans='y'
-								fi
+					if [[ ${clientData["${response}.host"]+abc} && ${clientData["${response}.host"]} != $hostName ]]; then
+						if [[ $verify == true ]]; then
+							if [[ $autoRemote != true ]]; then
+								responseSave="$response"
+								unset ans; Prompt ans "Client '$response' is hosted on '${clientData["${response}.host"]}', \
+													Do you wish to start a session on that host" 'Yes No' 'Yes'
+								ans="${ans:0:1}"; ans=${ans,,[a-z]}
+								[[ $ans == 'n' ]] && Quit
+								response="$responseSave"
 							else
-								verifyMsg="$(Error "Client value of '$response' is not valid on this host ('$hostName') it is hosted on '$hostedOn' ")"
-								[[ $autoRemote == true ]] && { ans=y; unset verifyMsg; } || { ans=n; }
+								ans='y'
 							fi
-							if [[ $ans == 'y' ]]; then
-								Msg; Info "Starting ssh session to host '$hostedOn', enter your credentials if prompted...";
-								[[ $(Contains "$originalArgStr" "$response") == false ]] && commandStr="$response $originalArgStr" || commandStr="$originalArgStr"
-								##StartRemoteSession "${userName}@${hostedOn}" $myName $commandStr
-								ssh "${userName}@${hostedOn}" $myName $commandStr
-								Msg; Info "Back from remote ssh session\n"
-								Goodbye 0
-							fi ## [[ $ans == 'y' ]]
-						fi ## [[ $hostedOn != $hostName ]]
-					fi ## [[ $verifyMsg == "" ]]
+						else
+							verifyMsg="$(Error "Client value of '$response' is not valid on this host ('$hostName') it is hosted on '${clientData["${response}.host"]}' ")"
+							[[ $autoRemote == true ]] && { ans=y; unset verifyMsg; } || { ans=n; }
+						fi
+						if [[ $ans == 'y' ]]; then
+							Msg; Info "Starting ssh session to host '${clientData["${response}.host"]}', enter your credentials if prompted...";
+							[[ $(Contains "$originalArgStr" "$response") == false ]] && commandStr="$response $originalArgStr" || commandStr="$originalArgStr"
+							ssh "${userName}@${clientData["${response}.host"]}" $myName $commandStr
+							Msg; Info "Back from remote ssh session\n"
+							Goodbye 0
+						fi ## [[ $ans == 'y' ]]
+					fi ## Have host value != current host
 				fi ## [[ $anyClient != 'true' ]]
 			fi ## [[ $verifyMsg == "" ]]
 		fi ## [[ ${response:0:1} == '?' ]];
@@ -243,3 +275,4 @@ export -f VerifyPromptVal
 ## 03-26-2018 @ 15:51:40 - 2.0.76 - dscudiero - Switched from StartRemoteSession to just ssh
 ## 05-03-2018 @ 14:21:25 - 2.0.78 - dscudiero - Fix issue setting validValues in the products section
 ## 05-08-2018 @ 11:53:16 - 2.0.86 - dscudiero - Update how we deal with 'all' answers for products
+## 05-29-2018 @ 13:20:53 - 2.0.90 - dscudiero - Refactored to limite direct usage of the data warehouse
