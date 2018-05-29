@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version=4.3.125 # -- dscudiero -- Fri 03/23/2018 @ 14:41:40.37
+version=4.3.126 # -- dscudiero -- Tue 05/29/2018 @ 11:30:44.72
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql StringFunctions ProtectedCall FindExecutable PushPop"
@@ -81,7 +81,7 @@ if [[ -z $client ]]; then
 	sqlStmt="select ignoreList from $scriptsTable where name=\"buildClientInfoTable\""
  	RunSql $sqlStmt
  	ignoreList="${resultSet[$i]}"; ignoreList=${ignoreList##*:}; ignoreList="'${ignoreList//,/','}'"
-	sqlStmt="select name,longName,hosting,products from $clientInfoTable where recordstatus=\"A\" and name not in ($ignoreList) order by name"
+	sqlStmt="select name,longName,hosting,products,productsInSupport from $clientInfoTable where recordstatus=\"A\" and name not in ($ignoreList) order by name"
  	RunSql $sqlStmt
 	for rec in "${resultSet[@]}"; do clients+=("$rec"); done
 else
@@ -124,3 +124,4 @@ Goodbye 0 'alert'
 
 ## 03-22-2018 @ 14:05:56 - 4.3.124 - dscudiero - [A
 ## 03-23-2018 @ 15:31:55 - 4.3.125 - dscudiero - D
+## 05-29-2018 @ 11:31:17 - 4.3.126 - dscudiero - Add productsInSupport
