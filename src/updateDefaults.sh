@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.90 # -- dscudiero -- Thu 04/19/2018 @ 11:06:04.56
+version=2.0.92 # -- dscudiero -- Wed 05/30/2018 @ 11:18:18.09
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -178,7 +178,55 @@ Verbose 1 "mode = '$mode'"
 		fi
 	done
 
-touch "$TOOLSDEFAULTSPATH"
+## Set time stamp on the defaults directory
+	touch "$TOOLSDEFAULTSPATH"
+
+## Write out a file with script information for the scripts that do not have restrictions
+	fields="name,length(name),shortDescription,length(shortDescription)"
+	whereClause="showInScripts = \"Yes\" and active=\"Yes\""
+	sqlStmt="select $fields from $scriptsTable where $whereClause and restrictToGroups is null order by name"
+	RunSql $sqlStmt
+	echo -e "\tcommon"
+	outFile="$TOOLSPATH/auth/common"
+	[[ -f $outFile ]] && outFile="$outFile.new"
+	for ((i=0; i<${#resultSet[@]}; i++)); do
+		result="${resultSet[$i]}"
+		echo "$result" >> "$outFile"
+	done
+	[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
+	chmod 740 "${outFile%.*}"
+
+## Get a list of groups used in restrictToGroups fields
+	declare -A groupHash 
+	sqlStmt="select restrictToGroups from $scriptsTable where restrictToGroups is not null"
+	RunSql $sqlStmt
+	for ((i=0; i<${#resultSet[@]}; i++)); do
+		result="${resultSet[$i]}"
+		for group in ${result//,/ }; do
+			[[ ${groupHash["$group"]+abc} ]] && continue
+			groupHash["$group"]=true
+		done
+	done
+
+## Write out a file with script information for the scripts that have restrictions
+	for key in "${!groupHash[@]}"; do
+		echo -e "\t$key"
+		outFile="$TOOLSPATH/auth/$key"
+		[[ -f $outFile ]] && outFile="$outFile.new"
+		sqlStmt="select $fields from $scriptsTable where $whereClause and restrictToGroups like \"%$key%\" order by name"
+		RunSql $sqlStmt
+		for ((i=0; i<${#resultSet[@]}; i++)); do
+			result="${resultSet[$i]}"
+			echo "$result" >> "$outFile" 
+		done
+		[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
+		chmod 740 "${outFile%.*}"
+	done;
+
+## Set time stamp on the auth directory
+	touch "$TOOLSPATH/auth"
+
+
 
 Goodbye 0;
 #==================================================================================================
@@ -224,3 +272,4 @@ Goodbye 0;
 ## 03-23-2018 @ 15:36:20 - 2.0.88 - dscudiero - D
 ## 04-19-2018 @ 11:02:38 - 2.0.89 - dscudiero - Change permissions on defaults files
 ## 04-19-2018 @ 11:06:39 - 2.0.90 - dscudiero - Make backups of the defaults files before writing out new ones
+## 05-30-2018 @ 11:18:52 - 2.0.92 - dscudiero - Add updating of the groups/scripts data files
