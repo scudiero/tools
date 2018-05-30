@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.108 # -- dscudiero -- Tue 05/29/2018 @ 14:35:56.91
+# version=2.1.120 # -- dscudiero -- Wed 05/30/2018 @ 12:07:12.52
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -24,9 +24,9 @@ function Init {
 	PushSettings "$FUNCNAME"
 	SetFileExpansion 'off'
 
-	local trueVars='noPreview noPublic addPvt'
+	local trueVars='noPreview noPublic'
 	local falseVars='getClient anyClient getProducts getCims getEnv getSrcEnv getTgtEnv getDirs checkEnvs'
-	falseVars="$falseVars allowMulti allowMultiProds allowMultiEnvs allowMultiCims checkProdEnv noWarn getjalot"
+	falseVars="$falseVars allowMulti allowMultiProds allowMultiEnvs allowMultiCims checkProdEnv noWarn getjalot addPvt addSkel"
 	for var in $trueVars; do eval $var=true; done
 	for var in $falseVars; do eval $var=false; done
 
@@ -57,6 +57,8 @@ function Init {
 		[[ $token == 'checkprodenv' ]] && checkProdEnv=true
 		[[ $token == 'nowarn' ]] && noWarn=true
 		[[ $token == 'getjalot' ]] && getJalot=true
+		[[ $token == 'addpvt' ]] && addPvt=true
+		[[ $token == 'addskel' ]] && addSkel=true
 	done
 	dump -3 -t -t parseStr getClient getEnv getDirs checkEnvs getProducts getCims allCims noPreview noPublic getJalot
 
@@ -105,6 +107,7 @@ function Init {
 		clientEnvs="${clientEnvs/,preview}"
 		clientEnvs="${clientEnvs/,public}"
 		[[ $noCheck == true ]] && Warning "Requiring a environment value and 'noCheck' flag was set"
+		# [[ $addPvt == true ]] && clientEnvs="${clientEnvs},pvt"
 
 		## Generic get env
 		if [[ $getEnv == true ]]; then
@@ -118,7 +121,7 @@ function Init {
 			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt' || unset defaultEnv
 			[[ -z $env && -n $srcEnv ]] && env="$srcEnv"
 			[[ -z $env && -n $envs ]] && env="$envs"
-			Prompt env "What environment/site do you wish to use?" "${clientEnvs}" $defaultEnv; srcEnv=${srcEnv,,[a-z]}
+			Prompt env "What environment/site do you wish to use?" "$clientEnvs" $defaultEnv; srcEnv=${srcEnv,,[a-z]}
 			[[ $checkProdEnv == true ]] && checkProdEnv=$env
 		fi
 
@@ -126,12 +129,13 @@ function Init {
 			[[ -z $srcEnv && -n $env ]] && srcEnv="$env"
 			[[ -z $srcEnv && -n $envs ]] && srcEnv="$envs"
 			[[ -n $tgtEnv ]] && { clientEnvs="$(Trim "${clientEnvs//$tgtEnv/}")"; clientEnvs="${clientEnvs//,,/,}"; }
-			clientEnvs="$clientEnvs skel"
+			[[ $addSkel == true ]] && clientEnvs="$clientEnvs,skel"
 			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt' || unset defaultEnv
-			Prompt srcEnv "What $(ColorK 'source') environment/site do you wish to use?" "${clientEnvs// /,}" $defaultEnv; srcEnv=${srcEnv,,[a-z]}
+			[[ ${clientEnvs:${#clientEnvs}-1:1} == ',' ]] && clientEnvs="${clientEnvs:0:${#clientEnvs}-1}"
+			Prompt srcEnv "What $(ColorK 'source') environment/site do you wish to use?" "$clientEnvs" $defaultEnv; srcEnv=${srcEnv,,[a-z]}
 			[[ $checkProdEnv == true ]] && checkProdEnv=$srcEnv
 			[[ ${clientData["${client}.${srcEnv}.siteDir"]]+abc} ]] && srcDir="${clientData["${client}.${srcEnv}.siteDir"]}"
-			[[ $srcEnv == 'skel' ]] && srcDir="$skeletonRoot/release"		
+			[[ $srcEnv == 'skel' ]] && srcDir="$skeletonRoot/release"	
 		fi
 
 		if [[ $getTgtEnv == true ]]; then
@@ -140,7 +144,9 @@ function Init {
 			[[ -n $srcEnv ]] && { clientEnvs="$(Trim "${clientEnvs//$srcEnv/}")"; clientEnvs="${clientEnvs//,,/,}"; }
 			clientEnvs="$(Trim "${clientEnvs//skel/}")"; clientEnvs="${clientEnvs//,,/,}";
 			[[ -z $defaultEnv && $(Contains "$clientEnvs" 'test') == true ]] && defaultEnv='test' || unset defaultEnv
-			Prompt tgtEnv "What $(ColorK 'target') environment/site do you wish to use?" "${clientEnvs// /,}" $defaultEnv; srcEnv=${srcEnv,,[a-z]}
+			[[ $addPvt == true ]] && clientEnvs="${clientEnvs},pvt"
+			[[ ${clientEnvs:${#clientEnvs}-1:1} == ',' ]] && clientEnvs="${clientEnvs:0:${#clientEnvs}-1}"
+			Prompt tgtEnv "What $(ColorK 'target') environment/site do you wish to use?" "$clientEnvs" $defaultEnv; srcEnv=${srcEnv,,[a-z]}
 			[[ $checkProdEnv == true ]] && checkProdEnv=$tgtEnv	
 			[[ ${clientData["${client}.${tgtEnv}.siteDir"]+abc} ]] && tgtDir="${clientData["${client}.${tgtEnv}.siteDir"]}"		
 		fi
@@ -338,3 +344,4 @@ export -f Init
 ## 05-11-2018 @ 09:19:34 - 2.1.76 - dscudiero - Change includes from GetCims to CourseleafUtilities
 ## 05-29-2018 @ 13:20:45 - 2.1.103 - dscudiero - Refactored to limite direct usage of the data warehouse
 ## 05-29-2018 @ 14:36:18 - 2.1.108 - dscudiero - Fix bug if env is passed in in script args
+## 05-30-2018 @ 12:10:10 - 2.1.120 - dscudiero - Fix problem setting clientEnvs
