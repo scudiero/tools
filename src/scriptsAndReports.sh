@@ -1,7 +1,7 @@
 #!/bin/bash
 # DX NOT AUTOVERSION
 #=======================================================================================================================
-version=3.13.130 # -- dscudiero -- Thu 05/10/2018 @ 14:10:04.26
+version=3.13.131 # -- dscudiero -- Wed 05/30/2018 @ 12:47:04.66
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors PushPop SetFileExpansion FindExecutable SelectMenuNew ProtectedCall Pause"
@@ -123,7 +123,7 @@ function ExecScript {
 		logFileSave="$logFile"
 		logFile=/dev/null
 		if [[ $noLog != true ]]; then
-			logFile=${logsRoot}${name}/$userName--$backupSuffix.log
+			logFile="${logsRoot}${name}/$userName--$(date +"%m-%d-%Y@%H.%M.%S").log"
 			[[ -e $logFile ]] && rm -f "$logFile"
 			if [[ ! -d $(dirname $logFile) ]]; then
 				mkdir -p "$(dirname $logFile)"
@@ -520,3 +520,4 @@ Goodbye 0
 ## 04-18-2018 @ 09:41:36 - 3.13.126 - dscudiero - Moved the 'your authoriation groups are' message
 ## 04-19-2018 @ 09:10:19 - 3.13.127 - dscudiero - Pull out code that updated users .bashrc file, moved to dispatcher
 ## 05-10-2018 @ 14:14:00 - 3.13.130 - dscudiero - Tweak output files for reports
+## 05-30-2018 @ 12:48:16 - 3.13.131 - dscudiero - Name the script logFile from the current time date inf, not backupSuffix
