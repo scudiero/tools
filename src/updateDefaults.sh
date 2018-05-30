@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.92 # -- dscudiero -- Wed 05/30/2018 @ 11:18:18.09
+version=2.0.93 # -- dscudiero -- Wed 05/30/2018 @ 12:53:40.93
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -182,11 +182,11 @@ Verbose 1 "mode = '$mode'"
 	touch "$TOOLSDEFAULTSPATH"
 
 ## Write out a file with script information for the scripts that do not have restrictions
-	fields="name,length(name),shortDescription,length(shortDescription)"
+	fields="name,shortDescription"
 	whereClause="showInScripts = \"Yes\" and active=\"Yes\""
 	sqlStmt="select $fields from $scriptsTable where $whereClause and restrictToGroups is null order by name"
 	RunSql $sqlStmt
-	echo -e "\tcommon"
+	#echo -e "\tcommon"
 	outFile="$TOOLSPATH/auth/common"
 	[[ -f $outFile ]] && outFile="$outFile.new"
 	for ((i=0; i<${#resultSet[@]}; i++)); do
@@ -210,7 +210,7 @@ Verbose 1 "mode = '$mode'"
 
 ## Write out a file with script information for the scripts that have restrictions
 	for key in "${!groupHash[@]}"; do
-		echo -e "\t$key"
+		#echo -e "\t$key"
 		outFile="$TOOLSPATH/auth/$key"
 		[[ -f $outFile ]] && outFile="$outFile.new"
 		sqlStmt="select $fields from $scriptsTable where $whereClause and restrictToGroups like \"%$key%\" order by name"
@@ -273,3 +273,4 @@ Goodbye 0;
 ## 04-19-2018 @ 11:02:38 - 2.0.89 - dscudiero - Change permissions on defaults files
 ## 04-19-2018 @ 11:06:39 - 2.0.90 - dscudiero - Make backups of the defaults files before writing out new ones
 ## 05-30-2018 @ 11:18:52 - 2.0.92 - dscudiero - Add updating of the groups/scripts data files
+## 05-30-2018 @ 12:54:04 - 2.0.93 - dscudiero - Comment out the echo statements
