@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.90" # -- dscudiero -- Tue 05/29/2018 @ 12:10:44.31
+# version="2.0.91" # -- dscudiero -- Wed 05/30/2018 @ 11:58:32.12
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -78,9 +78,11 @@ function VerifyPromptVal {
 					if [[ -d /mnt/${clientData["${response}.dev.server"]}/web/${response}-${userName} ]]; then
 						clientData["${response}.pvt.host"]="${clientData["${client}.dev.host"]}"
 						clientData["${response}.pvt.server"]="${clientData["${client}.dev.server"]}"
-						clonedFrom="$(cat "/mnt/${clientData["${response}.dev.server"]}/web/${response}-${userName}/.clonedFrom")"
-						clientData["${response}.pvt.clonedFrom"]="$clonedFrom"
-						clientData["${response}.pvt.cims"]="${clientData["${response}.${clonedFrom}.cims"]}"
+						if [[ -r "/mnt/${clientData["${response}.dev.server"]}/web/${response}-${userName}/.clonedFrom" ]]; then 
+							clonedFrom="$(cat "/mnt/${clientData["${response}.dev.server"]}/web/${response}-${userName}/.clonedFrom")"
+							clientData["${response}.pvt.clonedFrom"]="$clonedFrom"
+							clientData["${response}.pvt.cims"]="${clientData["${response}.${clonedFrom}.cims"]}"
+						fi
 						clientData["${response}.pvt.siteDir"]="/mnt/$server/${response}-${userName}"
 						envs="$envs,pvt"
 					fi
@@ -276,3 +278,4 @@ export -f VerifyPromptVal
 ## 05-03-2018 @ 14:21:25 - 2.0.78 - dscudiero - Fix issue setting validValues in the products section
 ## 05-08-2018 @ 11:53:16 - 2.0.86 - dscudiero - Update how we deal with 'all' answers for products
 ## 05-29-2018 @ 13:20:53 - 2.0.90 - dscudiero - Refactored to limite direct usage of the data warehouse
+## 05-30-2018 @ 11:58:56 - 2.0.91 - dscudiero - Do not check .clonedFrom file if not found
