@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.93 # -- dscudiero -- Wed 05/30/2018 @ 12:53:40.93
+version=2.0.95 # -- dscudiero -- Wed 05/30/2018 @ 13:07:25.62
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -182,7 +182,7 @@ Verbose 1 "mode = '$mode'"
 	touch "$TOOLSDEFAULTSPATH"
 
 ## Write out a file with script information for the scripts that do not have restrictions
-	fields="name,shortDescription"
+	fields="keyId,name,shortDescription"
 	whereClause="showInScripts = \"Yes\" and active=\"Yes\""
 	sqlStmt="select $fields from $scriptsTable where $whereClause and restrictToGroups is null order by name"
 	RunSql $sqlStmt
@@ -274,3 +274,4 @@ Goodbye 0;
 ## 04-19-2018 @ 11:06:39 - 2.0.90 - dscudiero - Make backups of the defaults files before writing out new ones
 ## 05-30-2018 @ 11:18:52 - 2.0.92 - dscudiero - Add updating of the groups/scripts data files
 ## 05-30-2018 @ 12:54:04 - 2.0.93 - dscudiero - Comment out the echo statements
+## 05-30-2018 @ 13:08:06 - 2.0.95 - dscudiero - Add keyId to the output data
