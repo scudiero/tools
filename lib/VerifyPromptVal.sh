@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.91" # -- dscudiero -- Wed 05/30/2018 @ 11:58:32.12
+# version="2.0.92" # -- dscudiero -- Wed 05/30/2018 @ 12:08:34.99
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -83,7 +83,7 @@ function VerifyPromptVal {
 							clientData["${response}.pvt.clonedFrom"]="$clonedFrom"
 							clientData["${response}.pvt.cims"]="${clientData["${response}.${clonedFrom}.cims"]}"
 						fi
-						clientData["${response}.pvt.siteDir"]="/mnt/$server/${response}-${userName}"
+						clientData["${response}.pvt.siteDir"]="/mnt/${clientData["${response}.dev.server"]}/${response}-${userName}"
 						envs="$envs,pvt"
 					fi
 				fi
@@ -279,3 +279,4 @@ export -f VerifyPromptVal
 ## 05-08-2018 @ 11:53:16 - 2.0.86 - dscudiero - Update how we deal with 'all' answers for products
 ## 05-29-2018 @ 13:20:53 - 2.0.90 - dscudiero - Refactored to limite direct usage of the data warehouse
 ## 05-30-2018 @ 11:58:56 - 2.0.91 - dscudiero - Do not check .clonedFrom file if not found
+## 05-30-2018 @ 12:10:35 - 2.0.92 - dscudiero - Fix problem setting the pvt siteDir
