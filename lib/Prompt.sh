@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.77" # -- dscudiero -- Tue 05/08/2018 @ 15:12:54.44
+# version="2.1.78" # -- dscudiero -- Thu 05/31/2018 @  9:55:52.24
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -90,8 +90,8 @@ function Prompt {
 					else
 						[[ -n $promptText ]] && echo -e "$promptText"
 						for ((tCntr=0; tCntr<$timeOut; tCntr++)); do
-							[[ -n $defaultVal ]] && echo -en "$timerPrompt $(ColorK "$((timeOut - tCntr))") seconds using the default value: $(ColorK "'$defaultVal'")\r" || \
-													echo -en "$timerPrompt $(ColorK "$((timeOut - tCntr))") seconds\r"
+							[[ -n $defaultVal ]] && echo -en "$timerPrompt $(ColorM "$((timeOut - tCntr))") seconds using the default value: $(ColorM "'$defaultVal'")\r" || \
+													echo -en "$timerPrompt $(ColorM "$((timeOut - tCntr))") seconds\r"
 							set +e; read -t 1 response; rc=$?; set -e
 							if [[ $rc -eq 0 ]]; then
 								if [[ -z $response ]]; then
@@ -205,3 +205,4 @@ export -f Prompt
 ## 04-30-2018 @ 13:42:28 - 2.1.67 - dscudiero - Remove debug statement
 ## 05-08-2018 @ 11:52:43 - 2.1.75 - dscudiero - Change some tr calls to direct variable edits
 ## 05-08-2018 @ 15:15:32 - 2.1.77 - dscudiero - Remove trailing comma from validateString
+## 05-31-2018 @ 10:00:30 - 2.1.78 - dscudiero - Changed color of the timeout timer
