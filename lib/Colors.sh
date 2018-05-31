@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.29" # -- dscudiero -- Mon 10/02/2017 @ 13:28:39.07
+# version="2.0.30" # -- dscudiero -- Wed 05/30/2018 @ 16:37:46.68
 #===================================================================================================
 # Setup default colors functions and values
 #===================================================================================================
@@ -40,6 +40,7 @@ function Colors {
 		colorNote=$colorGreen
 		colorVerbose=$colorGrey
 		colorMenu=$colorGreen
+		colorMenu=$colorPurple
 	fi
 
 	# function ColorE { local string="$*"; echo "${colorError}${string}${colorDefault}"; }
@@ -77,3 +78,4 @@ export -f Colors ColorE ColorI ColorT ColorK ColorV ColorN ColorU ColorB
 ## 05-24-2017 @ 13.30.23 - ("2.0.15")  - dscudiero - Strip off the -test for test environments
 ## 09-22-2017 @ 11.27.52 - ("2.0.28")  - dscudiero - Added ColorW
 ## 10-02-2017 @ 13.46.26 - ("2.0.29")  - dscudiero - General syncing of dev to prod
+## 05-31-2018 @ 09:21:37 - 2.0.30 - dscudiero - Changed default color for menues
