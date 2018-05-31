@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.61" # -- dscudiero -- Thu 05/03/2018 @ 16:29:36.46
+# version="1.0.65" # -- dscudiero -- Thu 05/31/2018 @  7:23:52.82
 #===================================================================================================
 # Usage: Msg <msgType> <msgLevel> <msgIndent> msgText
 # 	msgType: [N,I,W,E,T]
@@ -16,7 +16,7 @@ function Msg {
 		unset msgType msgLevel msgIndent msgText
 		if [[ $# -gt 1 ]]; then
 			[[ $1 = 'Q' || $1 = 'q' ]] && shift && echo -e "$*" && return 0
-			local re='^[n,N,i,I,w,W,e,E,t,T,v,V,l,L]$'
+			local re='^[n,N,i,I,w,W,e,E,t,T,v,V,l,L,p,P]$'
 			[[ $1 =~ $re ]] && msgType="$1" && shift 1 || true
 			if [[ -z $msgLevel ]]; then
 				## First/Next token is a msg level?
@@ -67,7 +67,13 @@ function Msg {
 	## print message
 		[[ -z $tabStr ]] && tabStr='     '
 		msgText="${msgText//^/$tabStr}" ## Expand tab chars
-		[[ $msgType  == 'l' ]] && echo -e "$msgText" >> $logFile || echo -e "$msgText"
+		if [[ $msgType  == 'l' ]]; then
+			echo -e "$msgText" >> $logFile
+		elif [[ $msgType  == 'p' ]]; then
+			echo -en "$msgText"
+		else
+			echo -e "$msgText"
+		fi
 		#[[ -n $logFile && -w $logFile ]] && echo -e "$msgText" >> "$logFile"&
 		[[ $msgType == 't' ]] && Goodbye 3
 
@@ -119,3 +125,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 05-03-2018 @ 15:13:03 - 1.0.59 - dscudiero - Tweak how we process log only messages, do tab expansion
 ## 05-03-2018 @ 15:41:32 - 1.0.60 - dscudiero - Remove the 'l' processing record from the case statement
 ## 05-03-2018 @ 16:30:04 - 1.0.61 - dscudiero - Cosmetic/minor change/Sync
+## 05-31-2018 @ 09:22:03 - 1.0.65 - dscudiero - Added 'P' (Prompt) message type
