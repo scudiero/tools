@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.95 # -- dscudiero -- Wed 05/30/2018 @ 13:07:25.62
+version=2.0.97 # -- dscudiero -- Thu 05/31/2018 @ 16:35:14.25
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -186,7 +186,6 @@ Verbose 1 "mode = '$mode'"
 	whereClause="showInScripts = \"Yes\" and active=\"Yes\""
 	sqlStmt="select $fields from $scriptsTable where $whereClause and restrictToGroups is null order by name"
 	RunSql $sqlStmt
-	#echo -e "\tcommon"
 	outFile="$TOOLSPATH/auth/common"
 	[[ -f $outFile ]] && outFile="$outFile.new"
 	for ((i=0; i<${#resultSet[@]}; i++)); do
@@ -210,7 +209,6 @@ Verbose 1 "mode = '$mode'"
 
 ## Write out a file with script information for the scripts that have restrictions
 	for key in "${!groupHash[@]}"; do
-		#echo -e "\t$key"
 		outFile="$TOOLSPATH/auth/$key"
 		[[ -f $outFile ]] && outFile="$outFile.new"
 		sqlStmt="select $fields from $scriptsTable where $whereClause and restrictToGroups like \"%$key%\" order by name"
@@ -222,6 +220,19 @@ Verbose 1 "mode = '$mode'"
 		[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
 		chmod 740 "${outFile%.*}"
 	done;
+
+## Write out a file with reports information
+	outFile="$TOOLSPATH/auth/reports"
+	[[ -f $outFile ]] && outFile="$outFile.new"
+	fields="keyId,name,shortDescription,type,header,sqlStmt,script,scriptArgs"
+	sqlStmt="select $fields from $reportsTable where active=\"Yes\" order by name"
+	RunSql $sqlStmt
+	for ((i=0; i<${#resultSet[@]}; i++)); do
+		result="${resultSet[$i]}"
+		echo "$result" >> "$outFile" 
+	done
+	[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
+	chmod 740 "${outFile%.*}"
 
 ## Set time stamp on the auth directory
 	touch "$TOOLSPATH/auth"
@@ -275,3 +286,4 @@ Goodbye 0;
 ## 05-30-2018 @ 11:18:52 - 2.0.92 - dscudiero - Add updating of the groups/scripts data files
 ## 05-30-2018 @ 12:54:04 - 2.0.93 - dscudiero - Comment out the echo statements
 ## 05-30-2018 @ 13:08:06 - 2.0.95 - dscudiero - Add keyId to the output data
+## 05-31-2018 @ 16:35:33 - 2.0.97 - dscudiero - Add reports
