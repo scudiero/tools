@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=2.0.19 # -- dscudiero -- Thu 05/31/2018 @ 16:09:39.30
+version=2.0.22 # -- dscudiero -- Fri 06/01/2018 @ 10:10:09.51
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors FindExecutable SelectMenu ProtectedCall Pause"
@@ -67,13 +67,13 @@ scriptDescription="Script dispatcher"
 	function runScript {
 		local name=$1; shift
 		local userArgs="$1"
-		local field fieldVal tmpStr lib
+		local field fieldVal tmpStr lib exec args
 
-		local data="${scriptsHash["$scriptName"]}"
-		data="${data#*|}"; data="${data#*|}"; data="${data#*|}";
-		local exec="${data%%|*}"; data="${data#*|}"
-		local lib="${data%%|*}"; data="${data#*|}"; 
-		local args="${data%%|*}";
+		# local data="${scriptsHash["$scriptName"]}"
+		# data="${data#*|}"; data="${data#*|}"; data="${data#*|}";
+		# local exec="${data%%|*}"; data="${data#*|}"
+		# local lib="${data%%|*}"; data="${data#*|}"; 
+		# local args="${data%%|*}";
 
 		[[ -n $args ]] && scriptArgs="$userArgs $args" || scriptArgs="$userArgs"
 
@@ -82,7 +82,8 @@ scriptDescription="Script dispatcher"
 				name="${exec%% *}"; args="${exec#* }"
 				[[ $args != $name ]] && scriptArgs="$args $scriptArgs"
 			fi
-
+			dump 2 name
+			
 		## Find the exedcutable
 			executeFile=$(FindExecutable '-source' "$name")
 			[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
@@ -195,3 +196,4 @@ scriptNameIn="$client"
 [[ -n $pathSave ]] && export PATH="$pathSave"
 Goodbye 0
 ## 06-01-2018 @ 09:34:59 - 2.0.19 - dscudiero - Copy full scripts functionality and make standaole
+## 06-01-2018 @ 10:10:56 - 2.0.22 - dscudiero - Fix problem because we did not add exec,lib,args to the scripts data
