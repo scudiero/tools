@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.97 # -- dscudiero -- Thu 05/31/2018 @ 16:35:14.25
+version=2.0.98 # -- dscudiero -- Fri 06/01/2018 @ 10:06:13.80
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -193,6 +193,7 @@ Verbose 1 "mode = '$mode'"
 		echo "$result" >> "$outFile"
 	done
 	[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
+	chgrp leepfrog "${outFile%.*}"
 	chmod 740 "${outFile%.*}"
 
 ## Get a list of groups used in restrictToGroups fields
@@ -218,6 +219,7 @@ Verbose 1 "mode = '$mode'"
 			echo "$result" >> "$outFile" 
 		done
 		[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
+		chgrp leepfrog "${outFile%.*}"
 		chmod 740 "${outFile%.*}"
 	done;
 
@@ -232,6 +234,7 @@ Verbose 1 "mode = '$mode'"
 		echo "$result" >> "$outFile" 
 	done
 	[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
+	chgrp leepfrog "${outFile%.*}"
 	chmod 740 "${outFile%.*}"
 
 ## Set time stamp on the auth directory
@@ -287,3 +290,4 @@ Goodbye 0;
 ## 05-30-2018 @ 12:54:04 - 2.0.93 - dscudiero - Comment out the echo statements
 ## 05-30-2018 @ 13:08:06 - 2.0.95 - dscudiero - Add keyId to the output data
 ## 05-31-2018 @ 16:35:33 - 2.0.97 - dscudiero - Add reports
+## 06-01-2018 @ 10:06:41 - 2.0.98 - dscudiero - Add chgrp commands on the scripts and reports files
