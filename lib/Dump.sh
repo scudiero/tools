@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.75" # -- dscudiero -- Thu 05/10/2018 @ 16:52:21.08
+# version="2.0.78" # -- dscudiero -- Fri 06/01/2018 @  9:33:02.32
 #===================================================================================================
 # Quick dump a list of variables
 #===================================================================================================
@@ -35,15 +35,17 @@ function Dump {
 				for ((myTabCntr=0; myTabCntr<$tabCnt; myTabCntr++)); do
 					[[ -z $tabStr ]] && echo -e -n "\t"  >> "$outFile" || echo -e -n "$tabStr" >> "$outFile"
 				done
-			fi			
-			echo -e "${caller}.$mytoken = >${!mytoken}<" >> "$outFile"
+			fi
+			[[ $mytoken == 'cwd' || $mytoken == 'pwd' ]] && echo -e "${caller}.cwd = >$(pwd)<" >> "$outFile" \
+														 || echo -e "${caller}.$mytoken = >${!mytoken}<" >> "$outFile"
 		else
 			if [[ -n $tabCnt ]]; then
 				for ((myTabCntr=0; myTabCntr<$tabCnt; myTabCntr++)); do
 					[[ -z $tabStr ]] && echo -e -n "\t" || echo -e -n "$tabStr"
 				done
 			fi
-			echo -e "${colorVerbose}${caller}${colorDefault}.$mytoken = >${!mytoken}<"
+			[[ $mytoken == 'cwd' || $mytoken == 'pwd' ]] && echo -e "${colorVerbose}${caller}${colorDefault}.cwd = >$(pwd)<" \
+														 || echo -e "${colorVerbose}${caller}${colorDefault}.$mytoken = >${!mytoken}<"
 		fi
 	done
 
@@ -168,3 +170,4 @@ export -f DumpMap dumpmap dumphash
 ## 04-05-2018 @ 15:23:09 - 2.0.73 - dscudiero - Move the tabnation code to inside the write loops
 ## 05-01-2018 @ 16:13:39 - 2.0.74 - dscudiero - Remove the forced banner when sending out to log only
 ## 05-10-2018 @ 16:52:41 - 2.0.75 - dscudiero - Lower case args before checking
+## 06-01-2018 @ 09:33:37 - 2.0.78 - dscudiero - Add cwd/pwd option
