@@ -53,6 +53,7 @@ function RsyncCopy {
 		SetFileExpansion 'on'
 		#[[ $verboseLevel -eq 0 ]] && rsyncStdout="/dev/null" || rsyncStdout="/dev/stdout"
 		#rsync $rsyncOpts $source $target >$rsyncErr | Indent | tee -a "$rsyncOut" "$logFile" > "$rsyncStdout"
+		dump pwd | Indent | Indent >> "$logFile"
 		rsync $rsyncOpts $source $target &> "$rsyncOut"
 		rsyncRc=$?
 		dump rsyncRc | Indent | Indent >> "$logFile"
@@ -84,3 +85,4 @@ export -f RsyncCopy
 #===================================================================================================
 ## 05-01-2018 @ 16:14:23 - 1.0.0 - dscudiero - Updated to allow rsync output to go out to the logFile
 ## 05-04-2018 @ 07:03:46 - 1.0.0 - dscudiero - Add a default value for ignoreList
+## 06-01-2018 @ 09:34:03 - 1.0.0 - dscudiero - Add debug statements
