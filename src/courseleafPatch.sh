@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=6.0.34 # -- dscudiero -- Wed 05/23/2018 @ 14:17:42.09
+version=6.0.60 # -- dscudiero -- Fri 06/01/2018 @  9:26:19.89
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -208,7 +208,7 @@ function processGitRecord {
 		Msg "The target site does not have a .git repository for '$repoName', creating from the skeleton, this will take a while..."
 		[[ ! -d $srcGitFile ]] && Terminate 0 2 "Could not locate a source .git directory for this request, repository: $repoName\n^srcGitFile: $srcGitFile"
 		cp -frp "${srcGitFile}" '.'
-		[[ -f "${srcGitFile}ignore" ]] && cp -fp "${srcGitFile}ignore" '.'
+		[[ -f ".${srcGitFile}ignore" ]] && cp -fp ".${srcGitFile}ignore" '.'
 		## Make the local git repo a real worktree, need to hack the config file since our git is so down level.  Need this for git diff to work
 		sed -i s"/bare = true/bare = false/" "$tgtDir/${specTarget}/.git/config"
 		Msg "^Local repository created"
@@ -926,8 +926,8 @@ for ((pcCntr=0; pcCntr<${#processControl[@]}; pcCntr++)); do
 			specTarget="${specLine%%|*}"; specLine="${specLine#*|}"
 			specOptions="${specLine%%|*}"; specLine="${specLine#*|}"
 			## Perform string substitutions
-			specSource=$(sed "s/<progDir>/$courseleafProgDir/g" <<< $specSource)
-			specTarget=$(sed "s/<progDir>/$courseleafProgDir/g" <<< $specTarget)
+				specSource=$(sed "s/<progDir>/$courseleafProgDir/g" <<< $specSource)
+				specTarget=$(sed "s/<progDir>/$courseleafProgDir/g" <<< $specTarget)
 			dump 2 -t -t -t recordType specSource specTarget specOptions
 
 			## Process record
@@ -954,9 +954,12 @@ for ((pcCntr=0; pcCntr<${#processControl[@]}; pcCntr++)); do
 					if [[ $doit == true ]]; then
 						unset gitResults
 						processGitRecord "${specSource}" "$specTarget" "$specOptions"
-						[[ $gitResults == true ]] && Note "Files were updated, please check log for additional information" || \
-													Msg "All files are current, no files updated"
-						changesMade=true
+						if [[ $gitResults == true ]]; then
+							Note "Files were updated, please check log for additional information"
+							changesMade=true
+						else
+							Msg "All files are current, no files updated"
+						fi
 					fi
 
 					## If this is the primary repo then get the product version	
@@ -1022,11 +1025,12 @@ for ((pcCntr=0; pcCntr<${#processControl[@]}; pcCntr++)); do
 					performedAction=true
 					;;
 				cgicommand)
-					if [[ -z $specOptions ]] || [[ ${specOptions,,[a-z]} == 'always' ]] || \
-						[[ ${specOptions,,[a-z]} == 'onchangeonly' && $changesMade == true ]]; then
-						msgStr="$msgStr ${specTarget}"
-						[[ -n $specOptions ]] && msgStr="$msgStr ($specOptions)"
-						Msg; Msg "$msgStr"; Indent ++
+					specOptions="${specOptions,,[a-z]}"
+					msgStr="$msgStr ${specTarget}"
+					[[ -n $specOptions ]] && msgStr="$msgStr ($specOptions)"
+					Msg; Msg "$msgStr"; Indent ++
+					if [[ -z $specOptions ]] || [[ $specOptions == 'always' ]] || \
+					   [[ $specOptions == 'onchangeonly' && $changesMade == true ]]; then
 						if [[ ${specTarget,,[a-z]} == '<allcims>' ]]; then
 							GetCims "$tgtDir" -all
 							if [[ -n $cimStr ]]; then
@@ -1046,23 +1050,27 @@ for ((pcCntr=0; pcCntr<${#processControl[@]}; pcCntr++)); do
 						else
 							RunCourseLeafCgi "$tgtDir" "$specSource $specTarget"
 							cgiCommands+=("./courseleaf.cgi $specSource $specTarget")
-
 						fi						
-						performedAction=true
+					else
+						Msg "Command skipped, conditions ($specOptions) not met";	
 					fi
+					performedAction=true
 					;;
 				command)
-					if [[ -z $specOptions ]] || [[ ${specOptions,,[a-z]} == 'always' ]] || \
-						[[ ${specOptions,,[a-z]} == 'onchangeonly' && $changesMade == true ]]; then
-						msgStr="$msgStr  ${specTarget} ($specOptions)'"; Msg; Msg "$msgStr"; Indent ++
+ 					specOptions="${specOptions,,[a-z]}"
+					msgStr="$msgStr  ${specTarget} ($specOptions)'"; Msg; Msg "$msgStr"; Indent ++
+					if [[ -z $specOptions ]] || [[ $specOptions == 'always' ]] || \
+					   [[ $specOptions == 'onchangeonly' && $changesMade == true ]]; then 
 						Pushd "$tgtDir"
-						eval "${specSource} ${specTarget}" | Indent
-						[[ $? -eq 0 ]] && changeLogRecs+=("Executed unix command: '$specSource'") || \
-							Error "Command returned a non-zero condition code"
+						eval "${specSource}" | Indent
+						[[ $? -eq 0 ]] && { changeLogRecs+=("Executed unix command: '$specSource'"); Msg "Command executed successfully"; } \
+									   || Error "Command returned a non-zero condition code"
 						Popd
 						[[ $buildPatchPackage == true ]] && unixCommands+=("$specSource")
-						performedAction=true
+					else
+						Msg "Command skipped, conditions ($specOptions) not met";
 					fi
+					performedAction=true
 					;;
 				compare)
 					msgStr="$msgStr  ${specTarget} ($specOptions)'"; Msg; Msg "$msgStr"; Indent ++
@@ -1270,6 +1278,7 @@ Msg "\nCross product checks..."
 			fi
 		fi
 	done
+
 #=======================================================================================================================
 
 ## If we took the site offline, then put it back online
@@ -1510,3 +1519,4 @@ Goodbye 0 "$text1" "$text2"
 ## 05-17-2018 @ 11:23:53 - 6.0.21 - dscudiero - Misc cleanup
 ## 05-21-2018 @ 07:21:48 - 6.0.22 - dscudiero - Remove debug statements
 ## 05-23-2018 @ 14:19:46 - 6.0.34 - dscudiero - Added currentVersion and skeletonVersion to the source prompt text
+## 06-01-2018 @ 09:34:17 - 6.0.60 - dscudiero - Added messaging
