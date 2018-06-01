@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=2.1.120 # -- dscudiero -- Wed 05/30/2018 @ 12:07:12.52
+# version=2.1.124 # -- dscudiero -- Fri 06/01/2018 @ 11:26:09.80
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -192,8 +192,7 @@ function Init {
 		if [[ $prodCnt -gt 0 ]]; then
 			Prompt $prodVar "What $prodVar do you wish to work with$promptModifer?" "$validProducts all"
 			prodVar=${prodVar,,[a-z]}; 
-			eval $prodVar=\$$prodVar
-			[[ $prodVar == 'all' ]] && eval $prodVar=$validProducts
+			[[ $prodVar == 'all' ]] && eval $prodVar="${validProducts// /,}" || eval $prodVar=\$$prodVar
 		else
 			Note 0 1 "Only one value valid for '$prodVar', using '$validProducts'"
 			prodVar=${validProducts,,[a-z]}; 
@@ -345,3 +344,4 @@ export -f Init
 ## 05-29-2018 @ 13:20:45 - 2.1.103 - dscudiero - Refactored to limite direct usage of the data warehouse
 ## 05-29-2018 @ 14:36:18 - 2.1.108 - dscudiero - Fix bug if env is passed in in script args
 ## 05-30-2018 @ 12:10:10 - 2.1.120 - dscudiero - Fix problem setting clientEnvs
+## 06-01-2018 @ 11:26:58 - 2.1.124 - dscudiero - In product processioing, if all then comma delmite the values
