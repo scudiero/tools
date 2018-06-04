@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.95" # -- dscudiero -- Fri 06/01/2018 @ 11:31:49.29
+# version="2.0.96" # -- dscudiero -- Mon 06/04/2018 @  8:54:35.89
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -9,7 +9,7 @@
 #===================================================================================================
 function VerifyPromptVal {
 	myIncludes="RunSql StartRemoteSession PushPop"
-	Import "$standardInteractiveIncludes $myIncludes"
+	Import "$myIncludes"
 
 	local i
 	PushSettings "$FUNCNAME"
@@ -282,3 +282,4 @@ export -f VerifyPromptVal
 ## 05-30-2018 @ 12:10:35 - 2.0.92 - dscudiero - Fix problem setting the pvt siteDir
 ## 05-31-2018 @ 15:46:49 - 2.0.93 - dscudiero - Fix problem setting pvt site name
 ## 06-04-2018 @ 08:51:41 - 2.0.95 - dscudiero - Change the way 'all' as an answer for products is processed
+## 06-04-2018 @ 09:14:27 - 2.0.96 - dscudiero - Tweak includes
