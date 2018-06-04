@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.93" # -- dscudiero -- Thu 05/31/2018 @ 15:44:48.22
+# version="2.0.95" # -- dscudiero -- Fri 06/01/2018 @ 11:31:49.29
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -163,7 +163,7 @@ function VerifyPromptVal {
 		if [[ $allowMultiple != true && $(Contains "$ans" ",") == true ]]; then
 			verifyMsg=$(Error "$promptVar' does not allow for multiple values, valid values is one in ${validateList// /, }")
 		else
-			[[ $ans == 'all' || $ans == 'a' ]] && { ans="${validateList// all/}"; response="$ans"; }
+			[[ $ans == 'all' || $ans == 'a' ]] && { ans="${validateList// all/}"; ans="${ans// /,}"; response="$ans"; }
 			local i j found foundAll=false
 			for i in $(tr ',' ' ' <<< $ans); do
 				found=false
@@ -281,3 +281,4 @@ export -f VerifyPromptVal
 ## 05-30-2018 @ 11:58:56 - 2.0.91 - dscudiero - Do not check .clonedFrom file if not found
 ## 05-30-2018 @ 12:10:35 - 2.0.92 - dscudiero - Fix problem setting the pvt siteDir
 ## 05-31-2018 @ 15:46:49 - 2.0.93 - dscudiero - Fix problem setting pvt site name
+## 06-04-2018 @ 08:51:41 - 2.0.95 - dscudiero - Change the way 'all' as an answer for products is processed
