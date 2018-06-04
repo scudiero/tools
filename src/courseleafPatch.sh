@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=6.0.60 # -- dscudiero -- Fri 06/01/2018 @  9:26:19.89
+version=6.0.68 # -- dscudiero -- Fri 06/01/2018 @ 11:54:26.78
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -28,7 +28,8 @@ cwdStart="$(pwd)"
 		myArgs+=("named|namedrelease|option|namedRelease|source='named'|script|Update the product from the specific named version (i.e. git tag)")
 		myArgs+=("tag|namedrelease|option|namedRelease|source='named'|script|Update the product from the specific named version (i.e. git tag)")
 		myArgs+=("branch|branch|option|branch|source='branch'|script|Update the product from the specific git brach (git branch)")
-		myArgs+=("master|master|switch|master|source='master'|script|Update each product from the current skeleton version (aka git tag 'master'")
+		myArgs+=("master|master|switch|master|source='master'|script|Update each product from the current skeleton version (aka git tag 'master')")
+		myArgs+=("cgis|cgis|switch|products|appendShortName|script|Update the cgis")
 
 		myArgs+=("advance|advance|switch|catalogAdvance||script|Advance the catalog")
 		myArgs+=("noadv|noadvance|switch|catalogAdvance|catalogAdvance=false|script|Do not advance the catalog")
@@ -394,11 +395,10 @@ fi #[[ $env == 'next' ]]
 	patchableProducts="${patchableProducts:1}"
 
 ## Get the products to patch
-	[[ $allItems == true ]] && products="$patchableProducts"
+	[[ $allItems == true ]] && { products="$patchableProducts"; products="${products//cgis/}"; products="${products// /,}"; }
 	[[ -z $products ]] && echo
 	Prompt products "What products do you wish to patch (comma separated)" "${patchableProducts//,/ } all" "${patchableProducts%%,*}"
-	
-	products="${products//cgis/}"; products="${products// /,}"
+
 	[[ ${products:0:1} == ',' ]] && products="${products:1}"
 	[[ ${products:$((${#products}-1)):1} == ',' ]] && products="${products:0:$((${#products}-1))}"
 
@@ -457,42 +457,46 @@ for product in ${products//,/ }; do
 		[[ $advance == true && -z $localstepsDir ]] && Terminate "Requesting a catalog advance but the localsteps directory could not be located"
 	fi
 
-	[[ -n $sourceIn ]] && source="$sourceIn"
-	if [[ -z $source ]]; then
-		## Get the current and skeleton release version values
-			sqlStmt="select concat(sourceSpec,targetSpec,option) from $patchesTable where product=\"$product\" and recordType=\"currentRelease\""
-			RunSql $sqlStmt
-			[[ ${#resultSet[@]} -eq 0 || -z ${resultSet[0]} ]] && \
-				Terminate "Sorry, 'current' was requested as the source but could not lookup the version from the '$patchesTable' database."
-			currentRelease="${resultSet[0]}"
+	if [[ $product == 'cgis' ]]; then
+		source='current'
+	else
+		[[ -n $sourceIn ]] && source="$sourceIn"
+		if [[ -z $source ]]; then
+			## Get the current and skeleton release version values
+				sqlStmt="select concat(sourceSpec,targetSpec,option) from $patchesTable where product=\"$product\" and recordType=\"currentRelease\""
+				RunSql $sqlStmt
+				[[ ${#resultSet[@]} -eq 0 || -z ${resultSet[0]} ]] && \
+					Terminate "Sorry, 'current' was requested as the source but could not lookup the version from the '$patchesTable' database."
+				currentRelease="${resultSet[0]}"
 
-			skeletonRelease=$(GetProductVersion "$product" "$skeletonRoot")
+				skeletonRelease=$(GetProductVersion "$product" "$skeletonRoot")
 
-		Msg "\nFor '$(ColorK ${product^^[a-z]})', What source data do you wish to use for the patch:"
-		if [[ $(Contains "$products" ',') == true ]]; then
-			Msg "^$(ColorK \'Current\') to use what development has designated as the 'current' release ($currentRelease), or\
-				\n^$(ColorK \'Master\')  to use the 'master' branch ($skeletonRelease)"
-			unset ans; Prompt ans "Source" "C,M" "C"
-		else
-			Msg "^$(ColorK \'Current\') to use what development has designated as the 'current' release ($currentRelease) or, \
-				\n^$(ColorK \'Named\')   to use a specific named release (selection) or, \
-				\n^$(ColorK \'Branch\')  to use a specific git branch (selection), or \
-				\n^$(ColorK \'Master\')  to use the 'master' branch ($skeletonRelease)"
-			unset ans; Prompt ans "Which source ?" "Current,Named,Branch,Master" "Current"
+			Msg "\nFor '$(ColorK ${product^^[a-z]})', What source data do you wish to use for the patch:"
+			if [[ $(Contains "$products" ',') == true ]]; then
+				Msg "^$(ColorK \'Current\') to use what development has designated as the 'current' release ($currentRelease), or\
+					\n^$(ColorK \'Master\')  to use the 'master' branch ($skeletonRelease)"
+				unset ans; Prompt ans "Source" "C,M" "C"
+			else
+				Msg "^$(ColorK \'Current\') to use what development has designated as the 'current' release ($currentRelease) or, \
+					\n^$(ColorK \'Named\')   to use a specific named release (selection) or, \
+					\n^$(ColorK \'Branch\')  to use a specific git branch (selection), or \
+					\n^$(ColorK \'Master\')  to use the 'master' branch ($skeletonRelease)"
+				unset ans; Prompt ans "Which source ?" "Current,Named,Branch,Master" "Current"
+			fi
+			ans="${ans:0:1}"
+			if [[ ${ans,,[a-z]} == 'n' ]]; then
+				source='named'
+			elif [[ ${ans,,[a-z]} == 'b' ]]; then
+				source='branch'
+			elif [[ ${ans,,[a-z]} == 'm' ]]; then
+				source='master'
+			else
+				source='current' 
+			fi
+		else 
+			sourceIn="$source"
 		fi
-		ans="${ans:0:1}"
-		if [[ ${ans,,[a-z]} == 'n' ]]; then
-			source='named'
-		elif [[ ${ans,,[a-z]} == 'b' ]]; then
-			source='branch'
-		elif [[ ${ans,,[a-z]} == 'm' ]]; then
-			source='master'
-		else
-			source='current' 
-		fi
-	else 
-		sourceIn="$source"
-	fi	
+	fi
 
 	case "${source,,[a-z]}" in
 		named)	## Get the named release
@@ -1520,3 +1524,4 @@ Goodbye 0 "$text1" "$text2"
 ## 05-21-2018 @ 07:21:48 - 6.0.22 - dscudiero - Remove debug statements
 ## 05-23-2018 @ 14:19:46 - 6.0.34 - dscudiero - Added currentVersion and skeletonVersion to the source prompt text
 ## 06-01-2018 @ 09:34:17 - 6.0.60 - dscudiero - Added messaging
+## 06-04-2018 @ 08:52:26 - 6.0.68 - dscudiero - Added checking for sourceIn
