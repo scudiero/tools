@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=6.0.68 # -- dscudiero -- Fri 06/01/2018 @ 11:54:26.78
+version=6.0.74 # -- dscudiero -- Mon 06/04/2018 @  9:12:51.26
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -21,7 +21,7 @@ cwdStart="$(pwd)"
 #=======================================================================================================================
 # Standard call back functions
 #=======================================================================================================================
-	function courseleafPatchNew-ParseArgsStd {
+	function courseleafPatch-ParseArgsStd {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
 
 		myArgs+=("current|current|switch|current|source='current'|script|Update each product from the current released version")
@@ -46,7 +46,7 @@ cwdStart="$(pwd)"
 		#myArgs+=("offline|offline|switch|offline||script|Take the target site offline during processing")
 	}
 
-	function courseleafPatchNew-Goodbye  {
+	function courseleafPatch-Goodbye  {
 		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
 		## If we took the site offline, then put it back online
 		if [[ $offline == true ]]; then
@@ -60,7 +60,7 @@ cwdStart="$(pwd)"
 		fi
 	}
 
-	function courseleafPatchNew-testMode {
+	function courseleafPatch-testMode {
 		client='wisc'
 		envs='pvt'
 		siteDir="/mnt/dev6/web/wisc-dscudiero"
@@ -75,7 +75,7 @@ cwdStart="$(pwd)"
 		#namedRelease='3.5.11'
 	}
 
-	function courseleafPatchNew-Help  {
+	function courseleafPatch-Help  {
 		helpSet='client,env' # can also include any of {env,cim,cat,clss}, 'script' and 'common' automatically addeed
 		[[ $1 == 'setVarsOnly' ]] && return 0
 
@@ -1525,3 +1525,4 @@ Goodbye 0 "$text1" "$text2"
 ## 05-23-2018 @ 14:19:46 - 6.0.34 - dscudiero - Added currentVersion and skeletonVersion to the source prompt text
 ## 06-01-2018 @ 09:34:17 - 6.0.60 - dscudiero - Added messaging
 ## 06-04-2018 @ 08:52:26 - 6.0.68 - dscudiero - Added checking for sourceIn
+## 06-04-2018 @ 09:14:50 - 6.0.74 - dscudiero - Fix call-back function names
