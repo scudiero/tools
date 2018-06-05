@@ -7,7 +7,7 @@ myIncludes="RunSql"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"; originalArgStr="${originalArgStr#$myName }"
-scriptDescription="Bring a tools script online"
+scriptDescription="Bring a tools script on-line"
 
 #===================================================================================================
 ## turn a script offline -- i.e. create an .offline file
@@ -19,7 +19,7 @@ GetDefaultsData $myName
 if [[ -n $originalArgStr ]]; then
 	for script in $originalArgStr; do
 		[[ -f "$TOOLSPATH/bin/${script%.*}.offline" ]] && rm -f "$TOOLSPATH/bin/${script%.*}.offline"
-		Msg "^$script is now offline"
+		Msg "^$script is now on-line"
 	done
 fi
 
@@ -50,3 +50,4 @@ else
 	Msg
 fi
 ## 05-25-2018 @ 09:14:19 - 1.0.28 - dscudiero - Re-factor to use .offline files
+## 06-05-2018 @ 15:14:41 - 1.0.28 - dscudiero - Cosmetic/minor change/Sync
