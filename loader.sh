@@ -258,11 +258,10 @@ function CleanUp {
 	## Check to make sure we can run
 		checkMsg=$(CheckRun $callPgmName)
 		if [[ -n $checkMsg && $checkMsg != true ]]; then
-			if [[ $(Contains ",$administrators," ",$userName,") == true ]]; then
-				echo; echo; Warning "$checkMsg"; echo;
+			if [[ $(Contains ",$administrators," ",X$userName,") == true ]]; then
+				echo; echo; Warning "$checkMsg"; echo; Pause;
 			else
-				echo; echo; Terminate "$checkMsg"; 
-				[[ $callPgmName != 'testsh' ]] && Terminate "$checkMsg"
+				[[ $callPgmName != 'testsh' ]] && { echo; echo; Terminate "$checkMsg"; }
 			fi
 		fi
 
@@ -293,7 +292,7 @@ function CleanUp {
 	## Check to make sure we are authorized
 		checkMsg=$(CheckAuth $callPgmName)
 		if [[ -n $checkMsg && $checkMsg != true ]]; then
-			if [[ $(Contains ",$administrators," ",X$userName,") == true ]]; then
+			if [[ $(Contains ",$administrators," ",$userName,") == true ]]; then
 				echo; echo; Warning "$checkMsg"; echo
 				Pause
 			else
@@ -534,3 +533,4 @@ function CleanUp {
 ## 05-29-2018 @ 13:17:35 - 1.5.34 - dscudiero - Add declaration or the clientData hash table
 ## 05-29-2018 @ 16:43:55 - 1.5.36 - dscudiero - Comment out debug stuff
 ## 06-05-2018 @ 13:59:24 - 1.5.36 - dscudiero - Add debug
+## 06-05-2018 @ 14:09:01 - 1.5.36 - dscudiero - Add a pause statement if admin and checkRun failes
