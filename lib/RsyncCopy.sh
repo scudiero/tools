@@ -18,7 +18,7 @@ function RsyncCopy {
 	local target="$1"; shift || true
 	local ignoreList="${1:-none}"; shift || true; [[ $ignoreList == 'none' ]] && unset ignoreList
 	local backupDir="${1:-/dev/null}"
-	local token rsyncOpts source target rsyncOut rsyncFilters rsyncVerbose rsyncListonly rc
+	local token rsyncOpts source target rsyncOut rsyncFilters rsyncVerbose rc
 	dump source target ignoreList backupDir | Indent | Indent >> "$logFile"
 
 	local tmpFile=$(mkTmpFile)
@@ -33,16 +33,18 @@ function RsyncCopy {
 	[[ ! -d $backupDir && $backupDir != '/dev/null' ]] && $DOIT mkdir -p $backupDir
 
 	## Set rsync options
-		rsyncOpts='-rptb'
+		rsyncOpts='-rptcmb' ## r=recursive, p=permissions, t=times, -c=checksums, m=ignoreImptyDirs, b=backup
 		[[ $quiet != true ]] && rsyncOpts="${rsyncOpts}v"
-		[[ $informationOnlyMode == true || -n $DOIT ]] && rsyncOpts="${rsyncOpts} --dry-run"
-		rsyncOpts="$rsyncOpts --backup-dir $backupDir --prune-empty-dirs --checksum $rsyncListonly --include-from $rsyncFilters --links"
+		[[ $informationOnlyMode == true || -n $DOIT ]] && rsyncOpts="${rsyncOpts}n" # n=dryRun
+		rsyncOpts="$rsyncOpts --backup-dir=$backupDir --include-from=$rsyncFilters --links"
 		dump rsyncOpts | Indent | Indent >> "$logFile"
 
 	## Build the filters file
 		[[ -f $rsyncFilters ]] && rm -f "$rsyncFilters"
 		SetFileExpansion 'off'
 		for token in $(tr '|' ' ' <<< "$ignoreList"); do echo "- $token" >> $rsyncFilters; done
+		echo '+ *' >> $rsyncFilters
+		echo '+ .*' >> $rsyncFilters
 		echo '+ *.*' >> $rsyncFilters
 		SetFileExpansion
 		Indent ++ 2; cat $rsyncFilters | Indent >> $logFile; Indent -- 2
@@ -86,3 +88,4 @@ export -f RsyncCopy
 ## 05-01-2018 @ 16:14:23 - 1.0.0 - dscudiero - Updated to allow rsync output to go out to the logFile
 ## 05-04-2018 @ 07:03:46 - 1.0.0 - dscudiero - Add a default value for ignoreList
 ## 06-01-2018 @ 09:34:03 - 1.0.0 - dscudiero - Add debug statements
+## 06-05-2018 @ 15:23:25 - 1.0.0 - dscudiero - Tweaked rsync call amd default include statements
