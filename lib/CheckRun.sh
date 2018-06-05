@@ -20,7 +20,7 @@ function CheckRun {
 		grepOut=$(cat /etc/group | grep leepfrog: | grep $userName)
 		[[ grepOut == '' ]] && echo "Your userid ($userName) is not in the 'leepfrog' linux group.\nPlease contact the System Admin team and ask them to add you to the group." return 0
 	## Check to see if the script is offline
-		[[ -f "$TOOLSPATH/bin/${myName}.offline" ]] && { echo "Script '$script' is currently offline/inactive, please try again later."; return 0; }
+		[[ -f "$TOOLSPATH/bin/${script}.offline" ]] && { echo "Script '$script' is currently offline/inactive, please try again later."; return 0; }
 
 	echo true
 	return 0 
@@ -41,3 +41,4 @@ export -f CheckRun
 ## 04-19-2018 @ 12:13:47 - 2.0.15 - dscudiero - Fix problem checking for offline
 ## 04-19-2018 @ 15:12:34 - 2.0.16 - dscudiero - Fix problem where the sql query was returning ''
 ## 05-25-2018 @ 09:19:36 - 2.0.26 - dscudiero - Switch to checking for .offline files to speed up loading
+## 06-05-2018 @ 13:54:50 - 2.0.26 - dscudiero - Fix problem using myName instead of 'script' in the checking
