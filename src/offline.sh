@@ -7,8 +7,7 @@ myIncludes="RunSql"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
-scriptDescription="Take a tools script offline or display the current scripts offline"
-dump originalArgStr
+scriptDescription="Take a tools script off-line or display the current scripts off-line"
 
 #===================================================================================================
 ## turn a script offline -- i.e. create an .offline file
@@ -19,7 +18,6 @@ GetDefaultsData $myName
 
 if [[ -n $originalArgStr ]]; then
 	for script in $originalArgStr; do
-		Here 0
 		echo touch "$TOOLSPATH/bin/${script%.*}.offline"
 		touch "$TOOLSPATH/bin/${script%.*}.offline"
 		Msg "^$script is now offline"
@@ -45,3 +43,4 @@ Goodbye
 ## 02-02-2018 @ 10.46.37 - 1.0.18 - dscudiero - Add userid check
 ## 03-22-2018 @ 14:07:07 - 1.0.20 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 05-25-2018 @ 09:13:53 - 1.0.42 - dscudiero - Re-factor to use .offline files
+## 06-05-2018 @ 15:14:19 - 1.0.42 - dscudiero - Cosmetic/minor change/Sync
