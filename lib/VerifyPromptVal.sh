@@ -181,7 +181,7 @@ function VerifyPromptVal {
 					[[ $ans == 'y' ]] && foundAll=true
 				fi
 			fi
-			[[ $foundAll == false ]] && verifyMsg=$(Error "Value of '$response' not valid for '$promptVar', valid values in {${validateList// /, }}")
+			[[ $foundAll == false ]] && verifyMsg=$(Error "Value of '$response' not valid for '$promptVar', valid values in {${validateList// /, }} (1)")
 		fi
 		[[ $verifyMsg == '' ]] && verifyMsg=true
 	fi ## Product(s)
@@ -239,7 +239,7 @@ function VerifyPromptVal {
 					[[ $answer == $checkStr ]] && PopSettings && verifyMsg=true && SetFileExpansion && return 0
 				done
 			fi
-			verifyMsg=$(Error "Value of '$response' not valid for '$promptVar', valid values in {$validateListString}")
+			verifyMsg=$(Error "Value of '$response' not valid for '$promptVar', valid values in {$validateListString} (2)")
 		fi
 		processedRequest=true
 	fi ## Everything else
@@ -283,3 +283,4 @@ export -f VerifyPromptVal
 ## 05-31-2018 @ 15:46:49 - 2.0.93 - dscudiero - Fix problem setting pvt site name
 ## 06-04-2018 @ 08:51:41 - 2.0.95 - dscudiero - Change the way 'all' as an answer for products is processed
 ## 06-04-2018 @ 09:14:27 - 2.0.96 - dscudiero - Tweak includes
+## 06-05-2018 @ 11:10:39 - 2.0.96 - dscudiero - Cosmetic/minor change/Sync
