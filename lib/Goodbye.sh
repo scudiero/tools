@@ -113,7 +113,7 @@ function Goodbye {
 				else
 					Msg "$(ColorK "${myName}") $(ColorE " -- $additionalText completed with errors, exit code = $exitCode\n")\a"
 				fi
-				[[ $logFile != '/dev/null' && $noBanners != true ]] && Msg "Additional details may be found in:\n^'$logFile'"
+				[[ -n $logFile && $logFile != '/dev/null' && $noBanners != true ]] && Msg "Additional details may be found in:\n^'$logFile'"
 				[[ $noBanners != true ]] && Msg "$date (Elapsed time: $elapTime)"
 				[[ $TERM == 'dumb' && $noBanners != true ]] && echo
 				[[ $noBanners != true ]] &&  Msg "$(PadChar)"
@@ -211,3 +211,4 @@ export -f QUIT
 ## 05-10-2018 @ 08:30:40 - 2.1.14 - dscudiero - Do not put up banner if PAUSONEXIT and user requested to terminate the script
 ## 05-10-2018 @ 08:32:19 - 2.1.15 - dscudiero - Cosmetic/minor change/Sync
 ## 05-10-2018 @ 09:16:32 - 2.1.20 - dscudiero - Do not show the promptonexiet banner of user is stopping the script
+## 06-05-2018 @ 14:08:30 - 2.1.20 - dscudiero - Do not print logFile message if logFile is not set
