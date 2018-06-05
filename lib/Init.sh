@@ -104,6 +104,8 @@ function Init {
 	## Process env and envs
 	if [[ $getEnv == true || $getSrcEnv == true || $getTgtEnv == true ]]; then
 		[[ ${clientData["${client}.envs"]+abc} ]] && clientEnvs="${clientData["${client}.envs"]}" || clientEnvs="$courseleafDevEnvs,$courseleafProdEnvs"
+echo;Here 0
+dump clientEnvs
 		clientEnvs="${clientEnvs/,preview}"
 		clientEnvs="${clientEnvs/,public}"
 		[[ $noCheck == true ]] && Warning "Requiring a environment value and 'noCheck' flag was set"
@@ -126,9 +128,12 @@ function Init {
 		fi
 
 		if [[ $getSrcEnv == true ]]; then
+echo;Here 1
+dump clientEnvs tgtEnv
 			[[ -z $srcEnv && -n $env ]] && srcEnv="$env"
 			[[ -z $srcEnv && -n $envs ]] && srcEnv="$envs"
-			[[ -n $tgtEnv ]] && { clientEnvs="$(Trim "${clientEnvs//$tgtEnv/}")"; clientEnvs="${clientEnvs//,,/,}"; }
+			[[ -z $srcEnv && -n $tgtEnv ]] && { clientEnvs="$(Trim "${clientEnvs//$tgtEnv/}")"; clientEnvs="${clientEnvs//,,/,}"; }
+
 			[[ $addSkel == true ]] && clientEnvs="$clientEnvs,skel"
 			[[ $(Contains "$clientEnvs" 'pvt') == true ]] && defaultEnv='pvt' || unset defaultEnv
 			[[ ${clientEnvs:${#clientEnvs}-1:1} == ',' ]] && clientEnvs="${clientEnvs:0:${#clientEnvs}-1}"
@@ -139,9 +144,11 @@ function Init {
 		fi
 
 		if [[ $getTgtEnv == true ]]; then
+echo;Here 2
+dump clientEnvs srcEnv
 			[[ -z $tgtEnv && -n $env && $srcEnv != $env ]] && tgtEnv="$env"
 			[[ -z $tgtEnv && -n $envs && $srcEnv != $envs ]] && tgtEnv="$envs"
-			[[ -n $srcEnv ]] && { clientEnvs="$(Trim "${clientEnvs//$srcEnv/}")"; clientEnvs="${clientEnvs//,,/,}"; }
+			[[ -z $tgtEnv && -n $srcEnv ]] && { clientEnvs="$(Trim "${clientEnvs//$srcEnv/}")"; clientEnvs="${clientEnvs//,,/,}"; }
 			clientEnvs="$(Trim "${clientEnvs//skel/}")"; clientEnvs="${clientEnvs//,,/,}";
 			[[ -z $defaultEnv && $(Contains "$clientEnvs" 'test') == true ]] && defaultEnv='test' || unset defaultEnv
 			[[ $addPvt == true ]] && clientEnvs="${clientEnvs},pvt"
@@ -345,3 +352,4 @@ export -f Init
 ## 05-29-2018 @ 14:36:18 - 2.1.108 - dscudiero - Fix bug if env is passed in in script args
 ## 05-30-2018 @ 12:10:10 - 2.1.120 - dscudiero - Fix problem setting clientEnvs
 ## 06-01-2018 @ 11:26:58 - 2.1.124 - dscudiero - In product processioing, if all then comma delmite the values
+## 06-05-2018 @ 11:05:50 - 2.1.124 - dscudiero - Fix problem setting valid values for srcEnv and tgtEnv
