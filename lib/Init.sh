@@ -104,8 +104,6 @@ function Init {
 	## Process env and envs
 	if [[ $getEnv == true || $getSrcEnv == true || $getTgtEnv == true ]]; then
 		[[ ${clientData["${client}.envs"]+abc} ]] && clientEnvs="${clientData["${client}.envs"]}" || clientEnvs="$courseleafDevEnvs,$courseleafProdEnvs"
-echo;Here 0
-dump clientEnvs
 		clientEnvs="${clientEnvs/,preview}"
 		clientEnvs="${clientEnvs/,public}"
 		[[ $noCheck == true ]] && Warning "Requiring a environment value and 'noCheck' flag was set"
@@ -128,8 +126,6 @@ dump clientEnvs
 		fi
 
 		if [[ $getSrcEnv == true ]]; then
-echo;Here 1
-dump clientEnvs tgtEnv
 			[[ -z $srcEnv && -n $env ]] && srcEnv="$env"
 			[[ -z $srcEnv && -n $envs ]] && srcEnv="$envs"
 			[[ -z $srcEnv && -n $tgtEnv ]] && { clientEnvs="$(Trim "${clientEnvs//$tgtEnv/}")"; clientEnvs="${clientEnvs//,,/,}"; }
@@ -144,8 +140,6 @@ dump clientEnvs tgtEnv
 		fi
 
 		if [[ $getTgtEnv == true ]]; then
-echo;Here 2
-dump clientEnvs srcEnv
 			[[ -z $tgtEnv && -n $env && $srcEnv != $env ]] && tgtEnv="$env"
 			[[ -z $tgtEnv && -n $envs && $srcEnv != $envs ]] && tgtEnv="$envs"
 			[[ -z $tgtEnv && -n $srcEnv ]] && { clientEnvs="$(Trim "${clientEnvs//$srcEnv/}")"; clientEnvs="${clientEnvs//,,/,}"; }
@@ -353,3 +347,4 @@ export -f Init
 ## 05-30-2018 @ 12:10:10 - 2.1.120 - dscudiero - Fix problem setting clientEnvs
 ## 06-01-2018 @ 11:26:58 - 2.1.124 - dscudiero - In product processioing, if all then comma delmite the values
 ## 06-05-2018 @ 11:05:50 - 2.1.124 - dscudiero - Fix problem setting valid values for srcEnv and tgtEnv
+## 06-05-2018 @ 11:10:11 - 2.1.124 - dscudiero - Cosmetic/minor change/Sync
