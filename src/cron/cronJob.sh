@@ -86,7 +86,8 @@ originalArgStr="$*"
 			tmpFile2="$tmpFile1.msg"
 			for token in error invalid; do
 				\grep -i "$token" "$logFile" > $tmpFile1; rc=$?
-				if [[ $rc -eq 0 ]]; then
+				tmpString=$(wc -l $tmpFile1); count="${tmpString%% *}"
+				if [[ $count -gt 0 ]]; then
 					echo -e "\nFound error token '$token' in the logfile \n\t"$logFile"\nfor $callScriptName\n" > $tmpFile2
 					while read -r line; do
 						[[ ${line:0:1} == '*' ]] && echo >> $tmpFile2
@@ -96,8 +97,7 @@ originalArgStr="$*"
 					break
 				fi
 			done
-			[[ -f $tmpFile1 ]] && rm -f "$tmpFile1"
-			[[ -f $tmpFile2 ]] && rm -f "$tmpFile2"
+			[[ -f $tmpFile1 ]] && rm -f "$tmpFile1" "$tmpFile2" &> /dev/null
 		fi
 	fi
 
@@ -161,3 +161,4 @@ exit 0
 ## 04-20-2018 @ 10:26:38 - 2.1.34 - dscudiero - Add more status messaging
 ## 04-24-2018 @ 11:22:59 - 2.1.35 - dscudiero - Comment out useDEV
 ## 05-23-2018 @ 12:48:04 - 2.1.36 - dscudiero - Add our java to the PATH
+## 06-05-2018 @ 07:28:04 - 2.1.36 - dscudiero - Change the logic to detect errors
