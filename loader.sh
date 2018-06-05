@@ -259,7 +259,7 @@ function CleanUp {
 		checkMsg=$(CheckRun $callPgmName)
 		if [[ -n $checkMsg && $checkMsg != true ]]; then
 			if [[ $(Contains ",$administrators," ",$userName,") == true ]]; then
-				echo; echo; Warning "$checkMsg"; echo; Pause;
+				echo; echo; Warning "$checkMsg"; echo; Alert 2;
 			else
 				[[ $callPgmName != 'testsh' ]] && { echo; echo; Terminate "$checkMsg"; }
 			fi
@@ -535,3 +535,4 @@ function CleanUp {
 ## 06-05-2018 @ 13:59:24 - 1.5.36 - dscudiero - Add debug
 ## 06-05-2018 @ 14:09:01 - 1.5.36 - dscudiero - Add a pause statement if admin and checkRun failes
 ## 06-05-2018 @ 15:23:33 - 1.5.36 - dscudiero - Cosmetic/minor change/Sync
+## 06-05-2018 @ 16:56:54 - 1.5.36 - dscudiero - Cosmetic/minor change/Sync
