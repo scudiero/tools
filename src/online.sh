@@ -12,9 +12,9 @@ scriptDescription="Bring a tools script on-line"
 #===================================================================================================
 ## turn a script offline -- i.e. create an .offline file
 #===================================================================================================
-GetDefaultsData $myName
-
 [[ $(Contains "$administrators" "$userName") != true ]] && Terminate "You do not have sufficient permissions to run this scrip"
+
+GetDefaultsData $myName
 
 if [[ -n $originalArgStr ]]; then
 	for script in $originalArgStr; do
@@ -35,3 +35,4 @@ Goodbye
 ## 05-25-2018 @ 09:14:19 - 1.0.28 - dscudiero - Re-factor to use .offline files
 ## 06-05-2018 @ 15:14:41 - 1.0.28 - dscudiero - Cosmetic/minor change/Sync
 ## 06-05-2018 @ 15:21:23 - 1.0.28 - dscudiero - Cosmetic/minor change/Sync
+## 06-06-2018 @ 07:38:14 - 1.0.28 - dscudiero - Cosmetic/minor change/Sync
