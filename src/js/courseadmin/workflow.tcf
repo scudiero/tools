@@ -1,4 +1,6 @@
 //======================================================================================================================
+// version:"2.0.0"  -- dscudiero -- Wed 06/06/2018 @ 13:35:29
+//======================================================================================================================
 // ??/??/18 - dgs - initial - ??
 //======================================================================================================================
 localsteps:Course Workflow Management|groups|workflow|attributes=isUndergraduate[Is Undergraduate],isGraduate[Is Graduate],isGenEd[Is General Education],isNew[New Course],isNotNew[Not New],isEdit[Course Change],isNotEdit[Not Course Change],isDelete[Course Delete],isNotDelete[Not Course Delete],isInactivate[Is Inactivate],isReactivate[Is Reactivate],isNotFirstStep[Is not the first step],fyi[FYI Only],fyiall[FYI All],todo[ToDo Item],optional[If Role Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
