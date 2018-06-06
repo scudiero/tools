@@ -24,7 +24,7 @@ function VerifyPromptVal {
 		verifyMsg=true
 		SetFileExpansion
 		PopSettings "$FUNCNAME"
-		return 0F
+		return 0
 	fi
 
 	## Client
@@ -284,3 +284,4 @@ export -f VerifyPromptVal
 ## 06-04-2018 @ 08:51:41 - 2.0.95 - dscudiero - Change the way 'all' as an answer for products is processed
 ## 06-04-2018 @ 09:14:27 - 2.0.96 - dscudiero - Tweak includes
 ## 06-05-2018 @ 11:10:39 - 2.0.96 - dscudiero - Cosmetic/minor change/Sync
+## 06-06-2018 @ 07:53:07 - 2.0.96 - dscudiero - Cosmetic/minor change/Sync
