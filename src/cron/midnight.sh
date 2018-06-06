@@ -239,17 +239,6 @@ case "$hostName" in
 			touch $(dirname $contactsSqliteFile)/contacts.syncDate
 			Msg "...done"
 
-		## Scratch copy the skeleton shadow
-			Msg "\nScratch copying the skeleton shadow..."
-			chmod u+wx $skeletonRoot
-			SetFileExpansion 'on'
-			rm -rf $skeletonRoot/*
-			rsyncOpts="-a --prune-empty-dirs"
-			rsync $rsyncOpts /mnt/dev6/web/_skeleton/* $skeletonRoot | Indent
-			SetFileExpansion
-			touch $skeletonRoot/.syncDate
-			Msg "^...done"
-
 		## Run programs/functions
 			pgms=(buildClientInfoTable buildSiteInfoTable BuildEmployeeTable buildQaStatusTable checkCgiPermissions checkPublishSettings)
 			pgms+=(updateDefaults syncCourseleafGitRepos BuildCourseleafDataTable "cleanDev -daemon")
@@ -530,3 +519,4 @@ return 0
 ## 04-04-2018 @ 06:55:25 - 1.22.74 - dscudiero - Remove me from the qsShort report email
 ## 05-14-2018 @ 08:31:03 - 1.22.75 - dscudiero - Don't send reports to qaManager
 ## 05-14-2018 @ 09:53:21 - 1.22.76 - dscudiero - Comment out reports
+## 06-06-2018 @ 07:05:43 - 1.22.76 - dscudiero - Remove the building of the skeleton shadow
