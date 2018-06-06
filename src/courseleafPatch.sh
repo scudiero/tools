@@ -26,7 +26,7 @@ cwdStart="$(pwd)"
 
 		myArgs+=("current|current|switch|current|source='current'|script|Update each product from the current released version")
 		myArgs+=("named|namedrelease|option|namedRelease|source='named'|script|Update the product from the specific named version (i.e. git tag)")
-		myArgs+=("tag|namedrelease|option|namedRelease|source='named'|script|Update the product from the specific named version (i.e. git tag)")
+		myArgs+=("tag|tag|option|namedRelease|source='named'|script|Update the product from the specific named version (i.e. git tag)")
 		myArgs+=("branch|branch|option|branch|source='branch'|script|Update the product from the specific git brach (git branch)")
 		myArgs+=("master|master|switch|master|source='master'|script|Update each product from the current skeleton version (aka git tag 'master')")
 		myArgs+=("cgis|cgis|switch|products|appendShortName|script|Update the cgis")
@@ -1530,3 +1530,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-04-2018 @ 08:52:26 - 6.0.68 - dscudiero - Added checking for sourceIn
 ## 06-04-2018 @ 09:14:50 - 6.0.74 - dscudiero - Fix call-back function names
 ## 06-06-2018 @ 07:28:03 - 6.0.74 - dscudiero - Fix problem rsyncing courseleaf/images, don't change target dir
+## 06-06-2018 @ 07:42:40 - 6.0.74 - dscudiero - Cosmetic/minor change/Sync
