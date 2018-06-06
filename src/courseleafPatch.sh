@@ -338,15 +338,37 @@ cleanFiles="${scriptData4##*:}"
 if [[ $testMode != true ]]; then
 	if [[ $noCheck == true ]]; then
 		Init 'getClient checkProdEnv'
-		GetSiteDirNoCheck $client
-		[[ -z $siteDir ]] && Terminate "Nocheck option active, could not resolve target site directory"
+		siteDir="$client"
+		[[ ! -d $siteDir ]] && Terminate "'noCheck' option is active and the directory specified does not exist"
+		client="$(basename $siteDir)"
+		if  [[ $(Contains "$siteDir" '/test/') == true ]]; then env='test';
+		elif  [[ $(Contains "$siteDir" '/next/') == true ]]; then env='next';
+		elif  [[ $(Contains "$siteDir" '/curr/') == true ]]; then env='curr';
+		elif  [[ $(Contains "$client" "-$userName") == true ]]; then { env='pvt'; client="${client%-*}"; }
+		else env='dev';
+		fi
+		if [[ $informationOnlyMode != true ]] && [[ $env == 'next' || $env == 'curr' ]]; then
+		 	if [[ $noWarn != true ]]; then
+				verify=true
+				echo
+				Warning "You are asking to update/overlay the $(ColorW $(Upper $env)) environment."
+				if [[ ${clientData["${client}.productsInSupport"]+abc} ]]; then
+					## If client has products in support and the user is not in the support group then quit
+					[[ $(Contains ",$UsersAuthGroups," ',support,') != true ]] && \
+		 				Terminate "The client has products in support ($productsinsupport), please contact the support person assigned to this client to update the '$env' site"
+					Info 0 1 "FYI, the client has the following products in production: '${clientData["${client}.productsInSupport"]}'"
+				fi
+				unset ans; Prompt ans "Are you sure" "Yes No"; ans=${ans:0:1}; ans=${ans,,[a-z]}
+				[[ $ans != 'y' ]] && Goodbye -1
+			fi
+		fi
 	else
 		Init 'getClient getEnv getDirs checkDirs noPreview noPublic checkProdEnv addPvt'
 		SetSiteDirs
+		eval "siteDir=\"\$${envs}Dir\""
 	fi
 	[[ $env == 'next' || $env == 'curr' ]] && Init 'getJalot'
 fi
-eval "siteDir=\"\$${envs}Dir\""
 
 Dump 1 originalArgStr -t client env envs products current namedRelease branch skeleton catalogAdvance fullAdvance newEdition \
 		catalogAudit backup buildPatchPackage fastInit source rollBack siteDir -p
@@ -1531,3 +1553,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-04-2018 @ 09:14:50 - 6.0.74 - dscudiero - Fix call-back function names
 ## 06-06-2018 @ 07:28:03 - 6.0.74 - dscudiero - Fix problem rsyncing courseleaf/images, don't change target dir
 ## 06-06-2018 @ 07:42:40 - 6.0.74 - dscudiero - Cosmetic/minor change/Sync
+## 06-06-2018 @ 08:26:40 - 6.0.74 - dscudiero - Update how we process the -noCheck option
