@@ -3,7 +3,7 @@
 version=1.0.42 # -- dscudiero -- Fri 05/25/2018 @  9:11:21.20
 #===================================================================================================
 TrapSigs 'on'
-myIncludes="RunSql"
+myIncludes="SetFileExpansion"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -24,10 +24,12 @@ if [[ -n $originalArgStr ]]; then
 	done
 else
 	Msg "Current offline scripts:"
+	SetFileExpansion 'on'
 	for file in $(ls $TOOLSPATH/bin/*.offline 2> /dev/null); do
 		file="${file%.*}"
 		Msg "^${file##*/}"
 	done
+	SetFileExpansion
 	Msg
 fi
 
@@ -44,3 +46,4 @@ Goodbye
 ## 03-22-2018 @ 14:07:07 - 1.0.20 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 05-25-2018 @ 09:13:53 - 1.0.42 - dscudiero - Re-factor to use .offline files
 ## 06-05-2018 @ 15:14:19 - 1.0.42 - dscudiero - Cosmetic/minor change/Sync
+## 06-06-2018 @ 07:34:50 - 1.0.42 - dscudiero - Turn file expansion on if no args past
