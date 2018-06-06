@@ -987,7 +987,10 @@ for ((pcCntr=0; pcCntr<${#processControl[@]}; pcCntr++)); do
 						Error "'$specSource' is not a directory, rsync action is only valid for directories, skipping action"
 					else
 						backupDir="${backupRootDir}$(dirname "${specTarget}")"; mkdir -p "$backupDir"
-						rsyncResults="$(RsyncCopy "$specSource" "$(dirname "${tgtDir}${specTarget}")" 'none' "$backupDir" )"
+						## Kludge because for some reason if the base name of the target is <progDir> then rsync does not add the directory
+						rsyncTarget="${tgtDir}$(dirname $specTarget)"
+						[[ $(basename $rsyncTarget) == "$courseleafProgDir" ]] && rsyncTarget="${tgtDir}${specTarget}";
+						rsyncResults="$(RsyncCopy "$specSource" "$rsyncTarget" 'none' "$backupDir" )"
 						if [[ $rsyncResults == true ]]; then
 							Note "Files were synchronized, please check log for additional information"
 							changesMade=true
@@ -996,7 +999,7 @@ for ((pcCntr=0; pcCntr<${#processControl[@]}; pcCntr++)); do
 						else
 							Msg "RsyncCopy ended with errors: $rsyncResults"
 						fi
-						[[ buildPatchPackage == true ]] && RsyncCopy "$specSource" "$(dirname "${packageRootDir}${specTarget}")" &
+						[[ buildPatchPackage == true ]] && RsyncCopy "$specSource" "$rsyncTarget" &
 					fi
 					performedAction=true
 					;;
@@ -1526,3 +1529,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-01-2018 @ 09:34:17 - 6.0.60 - dscudiero - Added messaging
 ## 06-04-2018 @ 08:52:26 - 6.0.68 - dscudiero - Added checking for sourceIn
 ## 06-04-2018 @ 09:14:50 - 6.0.74 - dscudiero - Fix call-back function names
+## 06-06-2018 @ 07:28:03 - 6.0.74 - dscudiero - Fix problem rsyncing courseleaf/images, don't change target dir
