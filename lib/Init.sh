@@ -68,22 +68,47 @@ function Init {
 		local checkClient; unset checkClient
 		if [[ $noCheck == true ]]; then
 			[[ $testMode != true ]] && Warning "Requiring a client value and 'noCheck' flag was set"
-			checkClient='noCheck';
+			Prompt client 'Please specify the full path of the site directory' '*dir*';
+		else
+			Prompt client 'What client do you wish to work with?';
 		fi
-		Prompt client 'What client do you wish to work with?' "$checkClient";
-		Client="$client"; client=${client,,[a-z]}
+		client=${client,,[a-z]}
 		if [[ $client == '.' ]]; then
 			client=$(basename $(pwd))
 			if [[ $client == 'qa' || $client == 'test' || $client == 'next' || $client == 'curr'  || $client == 'preview'  || $client == 'public' ]]; then
 				pushd $(pwd)
 				cd ..
-				Client=$(basename $(pwd)); client=${client,,[a-z]}
+				client=$(basename $(pwd)); client=${client,,[a-z]}
 				popd
 			fi
 			getEnv=false; getSrcEnv=false; getTgtEnv=false; getDirs=false; checkEnvs=false
 			srcDir="$(pwd)/web"
 		fi
 		#[[ $client == '*' || $client == 'all' || $client == '.' ]] && PopSettings "$FUNCNAME" && return 0
+	fi
+
+	## If noCheck is active then assume the current value for client is a fully specified directory name
+	if [[ $noCheck == true ]]; then
+		siteDir="$client"
+		[[ ! -d $siteDir ]] && Terminate "'noCheck' option is active and the directory specified does not exist"
+		client="$(basename $siteDir)"
+		[[ $(Contains "$client" "-$userName") == true ]] && { env='pvt'; client="${client%-*}"; }
+
+		## scan passed in directory and set env
+		if [[ -z $env ]]; then
+			## Is this a 'dev' site?
+			for token in ${devServers//,/ }; do
+				[[ $(Contains "$siteDir" "/$token/") == true ]] && { env='dev'; break; }
+			done
+			## Is this a 'prod' site?
+			if [[ -z $env ]]; then
+				for env in ${courseleafProdEnvs//,/ }; do
+					[[ $(Contains "$siteDir" "/$env/") == true ]] && break;
+				done
+			fi
+		fi
+		[[ $getSrcEnv == true ]] && srcEnv="$env"
+		[[ $getTgtEnv == true ]] && tgtEnv="$env"
 	fi
 
 	## Special processing for the 'internal' site
@@ -212,7 +237,8 @@ function Init {
 		[[ -z $pvtDir && -n $devDir ]] && pvtDir="$(sed s/$client/$client-$userName/g <<< $devDir)"
 		[[ -z $pvtDir ]] && pvtDir="/mnt/$defaultDevServer/web/$client-$userName"
 	fi
-	[[ -n $env ]] && eval siteDir="\$${env}Dir" || unset siteDir
+	[[ -n $env && -z $siteDir ]] && eval siteDir="\$${env}Dir" # || unset siteDir
+
 	dump -3 env pvtDir devDir testDir nextDir currDir previewDir publicDir skelDir siteDir checkEnvs
 
 	#===================================================================================================
@@ -248,7 +274,9 @@ function Init {
 		dump -3 tgtDir
 	fi
 
-	siteDir="$srcDir"
+	## Set siteDir
+	[[ -n $srcDir && -z $siteDir ]] && siteDir="$srcDir"
+	[[ -n $tgtDir && -z $siteDir ]] && siteDir="$tgtDir"
 
 	#===================================================================================================
 	## find CIMs
@@ -348,3 +376,4 @@ export -f Init
 ## 06-01-2018 @ 11:26:58 - 2.1.124 - dscudiero - In product processioing, if all then comma delmite the values
 ## 06-05-2018 @ 11:05:50 - 2.1.124 - dscudiero - Fix problem setting valid values for srcEnv and tgtEnv
 ## 06-05-2018 @ 11:10:11 - 2.1.124 - dscudiero - Cosmetic/minor change/Sync
+## 06-06-2018 @ 10:52:15 - 2.1.124 - dscudiero - Incorporate the client nocheck logic
