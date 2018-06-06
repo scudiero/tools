@@ -28,7 +28,7 @@ function VerifyPromptVal {
 	fi
 
 	## Client
-	if [[ $promptVar == 'client' && $verifyMsg == '' ]]; then
+	if [[ $promptVar == 'client' && $verifyMsg == '' && $noCheck != true ]]; then
 		if [[ $response == '*' || $response == 'all' ]]; then
 			[[ $response == '*' ]] && response='all'
 			eval $promptVar=$response
@@ -285,3 +285,4 @@ export -f VerifyPromptVal
 ## 06-04-2018 @ 09:14:27 - 2.0.96 - dscudiero - Tweak includes
 ## 06-05-2018 @ 11:10:39 - 2.0.96 - dscudiero - Cosmetic/minor change/Sync
 ## 06-06-2018 @ 07:53:07 - 2.0.96 - dscudiero - Cosmetic/minor change/Sync
+## 06-06-2018 @ 10:50:58 - 2.0.96 - dscudiero - Skip checking for client if noCheck is on
