@@ -94,6 +94,11 @@ for ext in validExtensions:
 		found = True
 		break
 
+## If we find the string 'DO NOT AUTOVERSION' then quit
+grepStr=grep("DO NOT AUTOVERSION", fullName, False, True)
+if len(grepStr) > 0:
+	found=False
+
 if found:
 	assignmentDelim="="
 	quoteStr="\""
@@ -138,3 +143,4 @@ if found:
 		## Edit file
 		sed(fullName, fromStr, toStr)
 		Msg("New version: " + newVersion)
+## 06-07-2018 @ 12:12:39 - 2.1.4 - dscudiero - Add code to detect "DO NOT AUTOVERSION"
