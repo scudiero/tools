@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.78" # -- dscudiero -- Thu 05/31/2018 @  9:55:52.24
+version="2.1.85" # -- dscudiero -- Fri 08/06/2018 @ 08:51:18
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -83,7 +83,7 @@ function Prompt {
 				[[ -n $promptText ]] && promptText="$(sed "s/\^/$tabStr/g" <<< $promptText)"
 				[[ -n $timerPrompt ]] && timerPrompt="$(sed "s/\^/$tabStr/g" <<< $timerPrompt)"
 				[[ -n $timerInterruptPrompt ]] && timerInterruptPrompt="$(sed "s/\^/$tabStr/g" <<< $timerInterruptPrompt)"
-					dump -2 -t promptText timedRead timerPrompt timerInterruptPrompt
+					dump -2 -l -t promptText timedRead timerPrompt timerInterruptPrompt
 					if [[ $timedRead == false ]]; then
 					 	echo -en "$promptText > "
 						set +e; read response; rc=$?; set -e
@@ -125,15 +125,15 @@ function Prompt {
 			[[ -n $response && $validateList == '*any*' ]] && { eval $promptVar=\"$response\"; LogResponse; return 0; }
 			[[ $validateList == '*optional*' ]] && { eval $promptVar=\"$response\"; LogResponse; return 0; }
 			[[ -z $response && $validateList == '*optional*' ]] && { eval unset $promptVar; LogResponse; return 0; }
-			[[ -n $response && $noCheck == true ]] && { eval $promptVar=\"$response\"; LogResponse; return 0; }
+			[[ -n $response && $noCheck == true && $promptVar == 'client' ]] && { eval $promptVar=\"$response\"; LogResponse; return 0; }
 		done
 		dump -2 -l response
 
-		if [[  "$promptVar" == 'client' && $response == 'internal' ]]; then
+		if [[  $promptVar == 'client' && $response == 'internal' ]]; then
 			eval $promptVar=\"$response\"
 			loop=false
 
-		elif [[ "$validateList" == '' && "$promptVar" != 'client' && "${promptVar:0:7}" != 'product' ]]; then
+		elif [[ -z $validateList && $promptVar != 'client' && ${promptVar:0:7} != 'product' ]]; then
 			eval $promptVar=\"$response\"
 			loop=false
 		else
@@ -161,7 +161,7 @@ function Prompt {
 					done
 				fi
 				eval $promptVar=\"$response\"
-				[[ $hadValue == true && $secondaryMessagesOnly != true && $defaultValueUseNotes == true ]] && \
+				[[ $hadValue == true && $secondaryMessagesOnly != true && $defaultValueUseNotes == true && $promptVar != 'client' && $noCheck != true ]] && \
 							{ echo >> "$logFile"; Note 0 1 "Using specified value of '$response' for '$promptVar'"; logResponse=false; }
 				loop=false
 			fi
@@ -206,3 +206,4 @@ export -f Prompt
 ## 05-08-2018 @ 11:52:43 - 2.1.75 - dscudiero - Change some tr calls to direct variable edits
 ## 05-08-2018 @ 15:15:32 - 2.1.77 - dscudiero - Remove trailing comma from validateString
 ## 05-31-2018 @ 10:00:30 - 2.1.78 - dscudiero - Changed color of the timeout timer
+## 06-08-2018 @ 08:52:55 - 2.1.85 - dscudiero - Fix bug where we were bugging out early for 'client/nocheck'
