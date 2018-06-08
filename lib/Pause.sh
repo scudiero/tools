@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.13" # -- dscudiero -- Tue 10/24/2017 @  8:50:43.24
+version="2.0.14" # -- dscudiero -- Fri 08/06/2018 @ 09:17:49
 #===================================================================================================
 # Pause execution
 #===================================================================================================
@@ -21,7 +21,7 @@ function Pause {
 	ans='junk'
 	while [[ $ans != '' ]]; do
 		unset ans; read ans; ans=$(Lower ${ans:0:1});
-		[[ "$ans" == 'x' ]] && Goodbye 'quickquit'
+		[[ "$ans" == 'x' ]] && { verboseLevel=0; Goodbye 'quickquit'; }
 		[[ "$ans" == '?' ]] && echo -e "Stack trace:" && echo -e '\t%s\n' "${FUNCNAME[@]}"
 		[[ "$ans" == 'v' ]] && set -xv
 	done
@@ -39,3 +39,4 @@ export -f Pause
 ## Thu Mar 16 12:59:42 CDT 2017 - dscudiero - Switch to use echo vs printf
 ## 06-22-2017 @ 12.04.50 - ("2.0.10")  - dscudiero - Add caller and callers line number to the prompt
 ## 06-23-2017 @ 08.27.31 - ("2.0.11")  - dscudiero - Only add the caller info if no string was passed in
+## 06-08-2018 @ 09:29:28 - 2.0.14 - dscudiero - Set verboseLevel=0 if the user is bailing
