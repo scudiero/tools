@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.1.2" # -- dscudiero -- Fri 08/06/2018 @ 08:16:28
+version="2.1.3" # -- dscudiero -- Fri 08/06/2018 @ 08:19:36
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -11,7 +11,7 @@ function VerifyPromptVal {
 	myIncludes="RunSql StartRemoteSession PushPop"
 	Import "$myIncludes"
 
-[[ $userName == 'dscudiero' ]] && { Here PV1 > $stdout; echo "promptVar = '$promptVar" >> $stdout; }
+[[ $userName == 'dscudiero' ]] && { Here PV1 > $stdout; echo "promptVar = '$promptVar'" >> $stdout; }
 
 	local i
 	PushSettings "$FUNCNAME"
@@ -154,11 +154,8 @@ function VerifyPromptVal {
 
 	## Product(s)
 [[ $userName == 'dscudiero' ]] && { Here PV2 >> $stdout; }
-
 	if [[ ${promptVar:0:7} == 'product' && -z $verifyMsg ]]; then
-[[ $userName == 'dscudiero' ]] && { \
-	Here PV3 >> $stdout; echo "promptVar = '$promptVar" >> $stdout; echo "allowMultiple = '$allowMultiple" >> $stdout; echo "response = '$response" >> $stdout; \
-}
+[[ $userName == 'dscudiero' ]] && { Here PV3 >> $stdout; echo "allowMultiple = '$allowMultiple'" >> $stdout; echo "response = '$response'" >> $stdout; }
 		if [[ -z $validateList ]]; then
 			if [[ -n $client ]]; then
 				local sqlStmt="select products from $clientInfoTable where name='$client'"
@@ -167,7 +164,7 @@ function VerifyPromptVal {
 			fi
 		fi
 		local ans=${response,,[a-z]}
-[[ $userName == 'dscudiero' ]] && { echo "ans = '$ans" >> $stdout; }
+[[ $userName == 'dscudiero' ]] && { echo "ans = '$ans'" >> $stdout; }
 		if [[ $allowMultiple != true && $(Contains "$ans" ",") == true ]]; then
 			verifyMsg=$(Error "$promptVar' does not allow for multiple values, valid values is one in ${validateList// /, }")
 		else
@@ -298,3 +295,4 @@ export -f VerifyPromptVal
 ## 06-08-2018 @ 08:00:31 - 2.0.99 - dscudiero - Add debug
 ## 06-08-2018 @ 08:11:02 - 2.1.1 - dscudiero - Add debug
 ## 06-08-2018 @ 08:16:44 - 2.1.2 - dscudiero - Add debug
+## 06-08-2018 @ 08:19:50 - 2.1.3 - dscudiero - Cosmetic/minor change/Sync
