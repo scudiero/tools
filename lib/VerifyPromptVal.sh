@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.1.3" # -- dscudiero -- Fri 08/06/2018 @ 08:19:36
+version="2.1.4" # -- dscudiero -- Fri 08/06/2018 @ 08:23:22
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -153,7 +153,7 @@ function VerifyPromptVal {
 	fi ## Envs(s)
 
 	## Product(s)
-[[ $userName == 'dscudiero' ]] && { Here PV2 >> $stdout; }
+[[ $userName == 'dscudiero' ]] && { Here PV2 >> $stdout; echo "promptVar = '$promptVar'" >> $stdout;  echo "verifyMsg = '$verifyMsg'" >> $stdout; }
 	if [[ ${promptVar:0:7} == 'product' && -z $verifyMsg ]]; then
 [[ $userName == 'dscudiero' ]] && { Here PV3 >> $stdout; echo "allowMultiple = '$allowMultiple'" >> $stdout; echo "response = '$response'" >> $stdout; }
 		if [[ -z $validateList ]]; then
@@ -296,3 +296,4 @@ export -f VerifyPromptVal
 ## 06-08-2018 @ 08:11:02 - 2.1.1 - dscudiero - Add debug
 ## 06-08-2018 @ 08:16:44 - 2.1.2 - dscudiero - Add debug
 ## 06-08-2018 @ 08:19:50 - 2.1.3 - dscudiero - Cosmetic/minor change/Sync
+## 06-08-2018 @ 08:27:02 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
