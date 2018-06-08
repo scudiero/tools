@@ -85,58 +85,58 @@ function SyncSkeleton {
 	return 0
 } #SyncSkeleton
 
-#=======================================================================================================================
-# Check Monitored files for changes
-function CheckMonitorFiles {
-	local tmpFile=$(MkTmpFile $FUNCNAME)
+# #=======================================================================================================================
+# # Check Monitored files for changes
+# function CheckMonitorFiles {
+# 	local tmpFile=$(MkTmpFile $FUNCNAME)
 
-	declare -A userNotifies
-	## Get a list of currently defined monitoried files
-		sqlStmt="select file,userlist from monitorfiles where host=\"$hostName\""
-		RunSql "$sqlStmt"
-		monitorRecs=("${resultSet[@]}")
+# 	declare -A userNotifies
+# 	## Get a list of currently defined monitoried files
+# 		sqlStmt="select file,userlist from monitorfiles where host=\"$hostName\""
+# 		RunSql "$sqlStmt"
+# 		monitorRecs=("${resultSet[@]}")
 
-		for monitorRec in "${monitorRecs[@]}"; do
-			#dump -n monitorRec
-			file=$(cut -d'|' -f1 <<< $monitorRec)
-			lastModTime=$(stat -c %Y $file)
-			userList=$(cut -d'|' -f2 <<< $monitorRec)
-			## Loop through the users in the userList
-			for user in $(tr ',' ' ' <<< $userList); do
-				#dump -t user
-				## Check to see if the file has changed since the last time we processed this user/file combo
-				sqlStmt="select idx from $newsInfoTable where object=\"$file\" and userName=\"$user\" and edate < $lastModTime"
-				RunSql "$sqlStmt"
-				if [[ ${#resultSet[@]} -gt 0 ]]; then
-					## Update the checked time for this user/file combo
-					sqlStmt="update $newsInfoTable set date=NOW(),edate=\"$(date +%s)\" where idx=\"${resultSet[0]}\""
-					RunSql "$sqlStmt"
-					## Add to this users associateive array
-					if [[ ${userNotifies[$user]+abc} ]]; then
-						userNotifies["$user"]="${userNotifies[$user]}|$file"
-					else
-						userNotifies["$user"]="$file"
-					fi
-				fi
-			done ## users
-		done ## monitor files
+# 		for monitorRec in "${monitorRecs[@]}"; do
+# 			#dump -n monitorRec
+# 			file=$(cut -d'|' -f1 <<< $monitorRec)
+# 			lastModTime=$(stat -c %Y $file)
+# 			userList=$(cut -d'|' -f2 <<< $monitorRec)
+# 			## Loop through the users in the userList
+# 			for user in $(tr ',' ' ' <<< $userList); do
+# 				#dump -t user
+# 				## Check to see if the file has changed since the last time we processed this user/file combo
+# 				sqlStmt="select idx from $newsInfoTable where object=\"$file\" and userName=\"$user\" and edate < $lastModTime"
+# 				RunSql "$sqlStmt"
+# 				if [[ ${#resultSet[@]} -gt 0 ]]; then
+# 					## Update the checked time for this user/file combo
+# 					sqlStmt="update $newsInfoTable set date=NOW(),edate=\"$(date +%s)\" where idx=\"${resultSet[0]}\""
+# 					RunSql "$sqlStmt"
+# 					## Add to this users associateive array
+# 					if [[ ${userNotifies[$user]+abc} ]]; then
+# 						userNotifies["$user"]="${userNotifies[$user]}|$file"
+# 					else
+# 						userNotifies["$user"]="$file"
+# 					fi
+# 				fi
+# 			done ## users
+# 		done ## monitor files
 
-	## Send out the emails
-		## Loop throug the associateive array
-		for key in "${!userNotifies[@]}"; do
-			#echo -e "[$key] = >${userNotifies[$key]}<\n"
-			echo -e "The following monitored files have changed:" > $tmpFile
-			echo -e >> $tmpFile
-			for file in $(tr '|' ' '<<< ${userNotifies[$key]}); do
-				echo -e "\t$file" >> $tmpFile
-			done
-			echo -e >> $tmpFile
-			$DOIT mutt -F $tmpFile.2 -s "File Monitor Notice" -- $user@leepfrog.com < $tmpFile
-		done;
+# 	## Send out the emails
+# 		## Loop throug the associateive array
+# 		for key in "${!userNotifies[@]}"; do
+# 			#echo -e "[$key] = >${userNotifies[$key]}<\n"
+# 			echo -e "The following monitored files have changed:" > $tmpFile
+# 			echo -e >> $tmpFile
+# 			for file in $(tr '|' ' '<<< ${userNotifies[$key]}); do
+# 				echo -e "\t$file" >> $tmpFile
+# 			done
+# 			echo -e >> $tmpFile
+# 			$DOIT mutt -F $tmpFile.2 -s "File Monitor Notice" -- $user@leepfrog.com < $tmpFile
+# 		done;
 
-	[[ -f "$tmpFile" ]] && rm "$tmpFile"
-	return 0
-} #CheckMonitorFiles
+# 	[[ -f "$tmpFile" ]] && rm "$tmpFile"
+# 	return 0
+# } #CheckMonitorFiles
 
 #=======================================================================================================================
 # function BuildToolsAuthTable() {
@@ -187,7 +187,7 @@ function SyncCourseleafPatchTable() {
 	grepStr=$(ProtectedCall "grep db:courseleafPatch $internalSiteRoot/stage/pagewiz.cfg")
 	[[ -z $grepStr ]] && { Error "Could not locate the db definition record for courseleafPatch in '$internalSiteRoot/stage/pagewiz.cfg'"; return 0; }
 	
-	dbFile="${internalSiteRoot}${grepStr##*|}"
+	dbFile="${internalSiteRoot}/stage${grepStr##*|}"
 	getTableColumns "$patchesTable" 'warehouse' 'numFields' 'fields'
 
 	## Make a copy of the warehouse table 
@@ -366,3 +366,4 @@ return 0
 ## 05-21-2018 @ 12:42:55 - 2.2.29 - dscudiero - Comment out the git syncing sturr
 ## 06-08-2018 @ 10:15:28 - 2.2.31 - dscudiero - Lookup the locaion of the patch control db from the internal stage config file
 ## 06-08-2018 @ 13:04:37 - 2.2.32 - dscudiero - Remove debug
+## 06-08-2018 @ 14:15:34 - 2.2.32 - dscudiero - Fix name of the database file
