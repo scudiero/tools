@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=2.0.98 # -- dscudiero -- Fri 06/01/2018 @ 10:06:13.80
+version="2.0.99" # -- dscudiero -- Fri 08/06/2018 @ 14:50:47
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -226,7 +226,7 @@ Verbose 1 "mode = '$mode'"
 ## Write out a file with reports information
 	outFile="$TOOLSPATH/auth/reports"
 	[[ -f $outFile ]] && outFile="$outFile.new"
-	fields="keyId,name,shortDescription,type,header,sqlStmt,script,scriptArgs"
+	fields="keyId,name,shortDescription,type,header,sqlStmt,script,scriptArgs,ignoreList"
 	sqlStmt="select $fields from $reportsTable where active=\"Yes\" order by name"
 	RunSql $sqlStmt
 	for ((i=0; i<${#resultSet[@]}; i++)); do
@@ -291,3 +291,4 @@ Goodbye 0;
 ## 05-30-2018 @ 13:08:06 - 2.0.95 - dscudiero - Add keyId to the output data
 ## 05-31-2018 @ 16:35:33 - 2.0.97 - dscudiero - Add reports
 ## 06-01-2018 @ 10:06:41 - 2.0.98 - dscudiero - Add chgrp commands on the scripts and reports files
+## 06-08-2018 @ 14:51:26 - 2.0.99 - dscudiero - Add ignorelist to data assigined to the reports object
