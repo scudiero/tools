@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.31" # -- dscudiero -- Fri 08/06/2018 @ 10:14:10
+version="2.2.32" # -- dscudiero -- Fri 08/06/2018 @ 13:04:20
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -184,7 +184,7 @@ function SyncCourseleafPatchTable() {
 	Import 'DatabaseUtilities SetFileExpansion RunSql'
 
 	## Get the transactional database file from the internal stage config file
-	grepStr=$(ProtectedCall "grep db:courseleafPatchX $internalSiteRoot/stage/pagewiz.cfg")
+	grepStr=$(ProtectedCall "grep db:courseleafPatch $internalSiteRoot/stage/pagewiz.cfg")
 	[[ -z $grepStr ]] && { Error "Could not locate the db definition record for courseleafPatch in '$internalSiteRoot/stage/pagewiz.cfg'"; return 0; }
 	
 	dbFile="${internalSiteRoot}${grepStr##*|}"
@@ -237,7 +237,7 @@ case "$hostName" in
 
 		## Run programs/functions
 			#pgms=(updateDefaults SyncCourseleafPatchTable CheckMonitorFiles SyncInternalDb SyncCourseleafCgis SyncSkeleton)
-			pgms=(updateDefaults SyncCourseleafPatchTable CheckMonitorFiles SyncInternalDb)
+			pgms=(updateDefaults SyncCourseleafPatchTable SyncInternalDb)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -365,3 +365,4 @@ return 0
 ## 05-21-2018 @ 07:22:15 - 2.2.28 - dscudiero - Switch to clskel
 ## 05-21-2018 @ 12:42:55 - 2.2.29 - dscudiero - Comment out the git syncing sturr
 ## 06-08-2018 @ 10:15:28 - 2.2.31 - dscudiero - Lookup the locaion of the patch control db from the internal stage config file
+## 06-08-2018 @ 13:04:37 - 2.2.32 - dscudiero - Remove debug
