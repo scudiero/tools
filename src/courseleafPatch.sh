@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="6.0.80" # -- dscudiero -- Thu 07/06/2018 @ 09:53:01
+version="6.0.92" # -- dscudiero -- Fri 08/06/2018 @ 09:14:47
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -23,7 +23,7 @@ cwdStart="$(pwd)"
 #=======================================================================================================================
 	function courseleafPatch-ParseArgsStd {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
-
+Here 1
 		myArgs+=("current|current|switch|current|source='current'|script|Update each product from the current released version")
 		myArgs+=("named|namedrelease|option|namedRelease|source='named'|script|Update the product from the specific named version (i.e. git tag)")
 		myArgs+=("tag|tag|option|namedRelease|source='named'|script|Update the product from the specific named version (i.e. git tag)")
@@ -330,6 +330,11 @@ declare -A backedupFiles
 Hello
 GetDefaultsData -f "$myName"
 ParseArgsStd $originalArgStr
+
+verboseLevel=0
+dump env envs source -q
+
+
 skeletonRoot='/steamboat/leepfrog/clskel/release'
 
 displayGoodbyeSummaryMessages=true
@@ -392,10 +397,9 @@ fi #[[ $env == 'next' ]]
 	patchableProducts="${patchableProducts:1}"
 
 ## Get the products to patch
-	[[ $allItems == true ]] && { products="$patchableProducts"; products="${products//cgis/}"; products="${products// /,}"; }
+	[[ $allItems == true ]] && { products="$patchableProducts"; products="${products// /,}"; }
 	[[ -z $products ]] && echo
-	Prompt products "What products do you wish to patch (comma separated)" "${patchableProducts//,/ } all" "${patchableProducts%%,*}"
-
+	Prompt products "What products do you wish to patch (comma separated)" "${patchableProducts//,/ } all" "${patchableProducts%%,*}" 
 	[[ ${products:0:1} == ',' ]] && products="${products:1}"
 	[[ ${products:$((${#products}-1)):1} == ',' ]] && products="${products:0:$((${#products}-1))}"
 
@@ -918,8 +922,8 @@ for ((pcCntr=0; pcCntr<${#processControl[@]}; pcCntr++)); do
 			specLine="${resultSet[$ii]}"
 			dump 2 -t -t specLine
 			## Check to see if we have already processed this spec
-				mapKey="${specLine// }"
-				[[ ${processedSpecs["$mapKey"]+abc} ]] && continue
+			mapKey="${specLine// }"
+			[[ ${processedSpecs["$mapKey"]+abc} ]] && { Msg; Note 0 2 "Skipping step: '$recordType' record: '${specSource}, it was already applied"; continue; }
 
 			processedSpecs["$mapKey"]=true
 			recordType="${specLine%%|*}"; specLine="${specLine#*|}"
@@ -1530,3 +1534,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-06-2018 @ 07:42:40 - 6.0.74 - dscudiero - Cosmetic/minor change/Sync
 ## 06-06-2018 @ 08:26:40 - 6.0.74 - dscudiero - Update how we process the -noCheck option
 ## 06-07-2018 @ 09:55:36 - 6.0.80 - dscudiero - Pull the nocheck functionality, now in Init
+## 06-08-2018 @ 09:30:01 - 6.0.92 - dscudiero - Tweak products parsing
