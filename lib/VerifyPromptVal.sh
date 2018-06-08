@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.96" # -- dscudiero -- Mon 06/04/2018 @  8:54:35.89
+version="2.0.99" # -- dscudiero -- Fri 08/06/2018 @ 07:59:40
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -28,7 +28,7 @@ function VerifyPromptVal {
 	fi
 
 	## Client
-	if [[ $promptVar == 'client' && $verifyMsg == '' && $noCheck != true ]]; then
+	if [[ $promptVar == 'client' && -z $verifyMsg && $noCheck != true ]]; then
 		if [[ $response == '*' || $response == 'all' ]]; then
 			[[ $response == '*' ]] && response='all'
 			eval $promptVar=$response
@@ -122,11 +122,11 @@ function VerifyPromptVal {
 				fi ## [[ $anyClient != 'true' ]]
 			fi ## [[ $verifyMsg == "" ]]
 		fi ## [[ ${response:0:1} == '?' ]];
-		[[ $verifyMsg == '' ]] && verifyMsg=true
+		[[ -z $verifyMsg ]] && verifyMsg=true
 	fi ## Client
 
 	## Envs(s)
-	if [[ $${promptVar:0:3} == 'env' && $verifyMsg == '' ]]; then
+	if [[ $${promptVar:0:3} == 'env' && -z $verifyMsg ]]; then
 		local answer=${response,,[a-z]}
 		if [[ $allowMultiple != true && $(Contains "$answer" ",") == true ]]; then
 			verifyMsg=$(Error "$promptVar' does not allow for multiple values, valid values is one in {$validateList}")
@@ -143,23 +143,25 @@ function VerifyPromptVal {
 				fi
 			done
 			if [[ $foundAll == false ]]; then
-				[[ $badList != '' ]] && badList=${badList:1}
+				[[ -n $badList ]] && badList=${badList:1}
 				verifyMsg=$(Error "Value of '$(ColorE "$badList")' not valid for '$promptVar', valid values in $(ColorK "{$validateList}")")
 			fi
 		fi
-		[[ $verifyMsg == '' ]] && verifyMsg=true
+		[[ -z $verifyMsg ]] && verifyMsg=true
 	fi ## Envs(s)
 
 	## Product(s)
-	if [[ ${promptVar:0:7} == 'product' && $verifyMsg == '' ]]; then
+	if [[ ${promptVar:0:7} == 'product' && -z $verifyMsg ]]; then
+[[ $userName == 'dscudiero' ]] && { Here PV > $stdout; dump -l validateList allowMultiple response; }
 		if [[ -z $validateList ]]; then
-			if [[ $client != '' ]]; then
+			if [[ -n $client ]]; then
 				local sqlStmt="select products from $clientInfoTable where name='$client'"
 				RunSql "$sqlStmt"
 				[[ ${#resultSet[@]} -gt 0 && -n ${resultSet[0]} ]] && validateList="${resultSet[0]}"
 			fi
 		fi
 		local ans=${response,,[a-z]}
+[[ $userName == 'dscudiero' ]] && { dump -l ans; }
 		if [[ $allowMultiple != true && $(Contains "$ans" ",") == true ]]; then
 			verifyMsg=$(Error "$promptVar' does not allow for multiple values, valid values is one in ${validateList// /, }")
 		else
@@ -183,36 +185,37 @@ function VerifyPromptVal {
 			fi
 			[[ $foundAll == false ]] && verifyMsg=$(Error "Value of '$response' not valid for '$promptVar', valid values in {${validateList// /, }} (1)")
 		fi
-		[[ $verifyMsg == '' ]] && verifyMsg=true
+		[[ -z $verifyMsg ]] && verifyMsg=true
 	fi ## Product(s)
+[[ $userName == 'dscudiero' ]] && { dump -l response; }
 
 	## File
-	if [[ $(Contains "$validateListString" '*file*') == true && $verifyMsg == '' ]]; then
+	if [[ $(Contains "$validateListString" '*file*') == true && -z $verifyMsg ]]; then
 		[[ ! -r $response ]] && verifyMsg=$(Error "File '$response' does not exist") || unset validateListString
-		[[ $verifyMsg == '' ]] && verifyMsg=true
+		[[ -z $verifyMsg ]] && verifyMsg=true
 	fi ## File
 
 	## Dir
-	if [[ $(Contains "$validateListString" '*dir*') == true && $verifyMsg == '' ]]; then
+	if [[ $(Contains "$validateListString" '*dir*') == true && -z $verifyMsg ]]; then
 		[[ ! -d $response ]] && verifyMsg=$(Error "Directory '$response' does not exist") || unset validateListString
-		[[ $verifyMsg == '' ]] && verifyMsg=true
+		[[ -z $verifyMsg ]] && verifyMsg=true
 	fi ## Dir
 
 	## isNumeric
-	if [[ $(Contains "$validateListString" '*isNumeric*') == true && $verifyMsg == '' ]]; then
+	if [[ $(Contains "$validateListString" '*isNumeric*') == true && -z $verifyMsg ]]; then
 		[[ $(IsNumeric "$response") != true ]] && verifyMsg=$(Error "Response must be numeric characters") || unset validateListString
-		[[ $verifyMsg == '' ]] && verifyMsg=true
+		[[ -z $verifyMsg ]] && verifyMsg=true
 	fi ## isNumeric
 
 	## isAlpha
-	if [[ $(Contains "$validateListString" '*isAlpha*') == true && $verifyMsg == '' ]]; then
+	if [[ $(Contains "$validateListString" '*isAlpha*') == true && -z $verifyMsg ]]; then
 		[[ $(IsAlpha "$response") != true ]] && verifyMsg=$(Error "Response must be alpahbetic characters") || unset validateListString
-		[[ $verifyMsg == '' ]] && verifyMsg=true
+		[[ -z $verifyMsg ]] && verifyMsg=true
 	fi ## isAlpha
 
 	## Everything else
-	if [[ $verifyMsg == '' ]]; then
-		if [[ $validateListString == '' ]]; then
+	if [[ -z $verifyMsg ]]; then
+		if [[ -z $validateListString ]]; then
 			eval $promptVar=$response
 		else
 			local answer=${response,,[a-z]}
@@ -244,7 +247,7 @@ function VerifyPromptVal {
 		processedRequest=true
 	fi ## Everything else
 
-	[[ $verifyMsg == '' ]] && verifyMsg=true
+	[[ -z $verifyMsg ]] && verifyMsg=true
 	SetFileExpansion
 	PopSettings "$FUNCNAME"
 	return 0
@@ -286,3 +289,4 @@ export -f VerifyPromptVal
 ## 06-05-2018 @ 11:10:39 - 2.0.96 - dscudiero - Cosmetic/minor change/Sync
 ## 06-06-2018 @ 07:53:07 - 2.0.96 - dscudiero - Cosmetic/minor change/Sync
 ## 06-06-2018 @ 10:50:58 - 2.0.96 - dscudiero - Skip checking for client if noCheck is on
+## 06-08-2018 @ 08:00:31 - 2.0.99 - dscudiero - Add debug
