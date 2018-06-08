@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.99" # -- dscudiero -- Fri 08/06/2018 @ 07:59:40
+version="2.1.1" # -- dscudiero -- Fri 08/06/2018 @ 08:10:47
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -10,6 +10,8 @@ version="2.0.99" # -- dscudiero -- Fri 08/06/2018 @ 07:59:40
 function VerifyPromptVal {
 	myIncludes="RunSql StartRemoteSession PushPop"
 	Import "$myIncludes"
+
+[[ $userName == 'dscudiero' ]] && { Here PV > $stdout; dump -l promptVar response; }
 
 	local i
 	PushSettings "$FUNCNAME"
@@ -152,7 +154,7 @@ function VerifyPromptVal {
 
 	## Product(s)
 	if [[ ${promptVar:0:7} == 'product' && -z $verifyMsg ]]; then
-[[ $userName == 'dscudiero' ]] && { Here PV > $stdout; dump -l validateList allowMultiple response; }
+[[ $userName == 'dscudiero' ]] && { Here PV2 >> $stdout; dump -l validateList allowMultiple response; }
 		if [[ -z $validateList ]]; then
 			if [[ -n $client ]]; then
 				local sqlStmt="select products from $clientInfoTable where name='$client'"
@@ -290,3 +292,4 @@ export -f VerifyPromptVal
 ## 06-06-2018 @ 07:53:07 - 2.0.96 - dscudiero - Cosmetic/minor change/Sync
 ## 06-06-2018 @ 10:50:58 - 2.0.96 - dscudiero - Skip checking for client if noCheck is on
 ## 06-08-2018 @ 08:00:31 - 2.0.99 - dscudiero - Add debug
+## 06-08-2018 @ 08:11:02 - 2.1.1 - dscudiero - Add debug
