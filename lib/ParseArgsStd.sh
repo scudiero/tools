@@ -1,6 +1,6 @@
 ## xO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.70" # -- dscudiero -- Fri 05/25/2018 @  7:59:30.99
+version="3.0.74" # -- dscudiero -- Fri 08/06/2018 @ 09:34:24
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -117,7 +117,7 @@ function ParseArgsStd {
 				# arghelpText="${tmpStr%%|*}"
 		done ## args
 
-	[[ -n $unknowArgs ]] && unknowArgs="${unknowArgs:1}"
+	[[ -n $unknowArgs ]] && { unknowArgs="${unknowArgs:1}"; Warning 0 1 "Argument processing found unknown arguments: '${unknowArgs//,/, }'"; }
 
 	## Misc special processing
 		[[ $fork == true ]] && forkStr='&' || unset forkStr
@@ -152,3 +152,4 @@ export -f ParseArgsStd
 ## 04-26-2018 @ 16:54:55 - 3.0.55 - dscudiero - Fix problem if the arg type is option and no data provided by user
 ## 05-22-2018 @ 14:06:53 - 3.0.65 - dscudiero - Fix a problem processing expEnv directive
 ## 05-25-2018 @ 08:01:30 - 3.0.70 - dscudiero - Fid problem processing expandEnv type arguments
+## 06-08-2018 @ 09:34:47 - 3.0.74 - dscudiero - Report on any unknow arguments
