@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="6.0.92" # -- dscudiero -- Fri 08/06/2018 @ 09:14:47
+version="6.0.93" # -- dscudiero -- Fri 08/06/2018 @ 09:43:19
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -23,7 +23,6 @@ cwdStart="$(pwd)"
 #=======================================================================================================================
 	function courseleafPatch-ParseArgsStd {
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
-Here 1
 		myArgs+=("current|current|switch|current|source='current'|script|Update each product from the current released version")
 		myArgs+=("named|namedrelease|option|namedRelease|source='named'|script|Update the product from the specific named version (i.e. git tag)")
 		myArgs+=("tag|tag|option|namedRelease|source='named'|script|Update the product from the specific named version (i.e. git tag)")
@@ -1535,3 +1534,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-06-2018 @ 08:26:40 - 6.0.74 - dscudiero - Update how we process the -noCheck option
 ## 06-07-2018 @ 09:55:36 - 6.0.80 - dscudiero - Pull the nocheck functionality, now in Init
 ## 06-08-2018 @ 09:30:01 - 6.0.92 - dscudiero - Tweak products parsing
+## 06-08-2018 @ 10:19:23 - 6.0.93 - dscudiero - Remove debug statements
