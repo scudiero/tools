@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.20" # -- dscudiero -- Thu 05/10/2018 @  8:49:55.10
+version="2.1.21" # -- dscudiero -- Fri 08/06/2018 @ 15:05:51
 #===================================================================================================
 # Common script exit
 # args:
@@ -126,7 +126,7 @@ function Goodbye {
 	[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'End' $myLogRecordIdx
 
 	## If running for another user, then send an email to that user
-	if [[ -n $forUser ]]; then
+	if [[ -n $forUser && $exitCode != 'quiet' ]]; then
 		tmpFile=$(mkTmpFile)
 		Msg > $tmpFile
 		Msg "'$myName' was run in your behalf by $userName, the log is attached" >> $tmpFile
@@ -140,7 +140,7 @@ function Goodbye {
 		rm -f $tmpFile
 	fi
 
-	if [[ $PAUSEATEXIT == true && $exitCode != 'x' ]]; then
+	if [[ $PAUSEATEXIT == true && $exitCode != 'x' && $exitCode != 'quiet' ]]; then
 		Msg "$colorKey"
 		Msg '*******************************************************************************'
 		Msg '*** Remote script excution has complete, please press enter to close window ***'
@@ -212,3 +212,4 @@ export -f QUIT
 ## 05-10-2018 @ 08:32:19 - 2.1.15 - dscudiero - Cosmetic/minor change/Sync
 ## 05-10-2018 @ 09:16:32 - 2.1.20 - dscudiero - Do not show the promptonexiet banner of user is stopping the script
 ## 06-05-2018 @ 14:08:30 - 2.1.20 - dscudiero - Do not print logFile message if logFile is not set
+## 06-08-2018 @ 15:10:45 - 2.1.21 - dscudiero - Add ! quiet to some items
