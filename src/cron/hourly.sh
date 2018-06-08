@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.2.29 # -- dscudiero -- Mon 05/21/2018 @ 12:42:35.17
+version="2.2.31" # -- dscudiero -- Fri 08/06/2018 @ 10:14:10
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -183,9 +183,14 @@ function SyncCourseleafPatchTable() {
 	local numfields fields 
 	Import 'DatabaseUtilities SetFileExpansion RunSql'
 
+	## Get the transactional database file from the internal stage config file
+	grepStr=$(ProtectedCall "grep db:courseleafPatchX $internalSiteRoot/stage/pagewiz.cfg")
+	[[ -z $grepStr ]] && { Error "Could not locate the db definition record for courseleafPatch in '$internalSiteRoot/stage/pagewiz.cfg'"; return 0; }
+	
+	dbFile="${internalSiteRoot}${grepStr##*|}"
 	getTableColumns "$patchesTable" 'warehouse' 'numFields' 'fields'
 
-	## Make a copy of the table
+	## Make a copy of the warehouse table 
 		sqlStmt="drop table if exists ${patchesTable}New"
 		RunSql $sqlStmt
 		sqlStmt="create table ${patchesTable}New like ${patchesTable}"
@@ -195,7 +200,7 @@ function SyncCourseleafPatchTable() {
 		## Get transactional data
 		SetFileExpansion 'off'
 		sqlStmt="select * from $patchesTable"
-		RunSql "$patchControlDb" $sqlStmt
+		RunSql "$dbFile" $sqlStmt
 		SetFileExpansion
 		for rec in "${resultSet[@]}"; do dataRecs+=("$rec"); done
 		## Insert into warehouse table
@@ -359,3 +364,4 @@ return 0
 ## 05-08-2018 @ 08:14:10 - 2.2.27 - dscudiero - Update syncCourseLeafPatchTable to chage name of the transactional db
 ## 05-21-2018 @ 07:22:15 - 2.2.28 - dscudiero - Switch to clskel
 ## 05-21-2018 @ 12:42:55 - 2.2.29 - dscudiero - Comment out the git syncing sturr
+## 06-08-2018 @ 10:15:28 - 2.2.31 - dscudiero - Lookup the locaion of the patch control db from the internal stage config file
