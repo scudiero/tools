@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.78" # -- dscudiero -- Fri 03/23/2018 @ 16:51:04.97
+version="2.0.79" # -- dscudiero -- Fri 08/06/2018 @ 15:20:43
 #===================================================================================================
 # Process interrupts
 #===================================================================================================
@@ -27,6 +27,7 @@ function SignalHandeler {
             ;;
         EXIT|SIGEXIT|SIGHUP|SIGTERM)
             unset message
+            errorCode='quiet'
             ;;
         SIGINT|SIGQUIT)
             message="$FUNCNAME: Trapped signal: '$sig' in module '$myName'\n^Script '$myName' is terminating at user's request"
@@ -73,3 +74,4 @@ export -f SignalHandeler
 ## 09-27-2017 @ 12.41.00 - ("2.0.76")  - dscudiero - Switch to Msg
 ## 09-29-2017 @ 12.58.39 - ("2.0.77")  - dscudiero - Change verboseMsg to Verbose
 ## 03-23-2018 @ 16:52:25 - 2.0.78 - dscudiero - Msg3 -> Msg
+## 06-11-2018 @ 09:25:24 - 2.0.79 - dscudiero - Add error code = quiet for HUP processing
