@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=1.22.76 # -- dscudiero -- Mon 05/14/2018 @  9:52:55.45
+version="1.22.77" # -- dscudiero -- Mon 11/06/2018 @ 16:50:17
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -324,7 +324,7 @@ case "$hostName" in
 				sqlStmt="select ignoreList from $scriptsTable where name=\"buildClientInfoTable\""
 			 	RunSql $sqlStmt
 			 	ignoreList="${resultSet[$i]}"; ignoreList=${ignoreList##*:}; ignoreList="'${ignoreList//,/','}'"
-				sqlStmt="select name,longName,hosting,products from $clientInfoTable where recordstatus=\"A\" and name not in ($ignoreList) order by name"
+				sqlStmt="select name,longName,hosting,products,productsinsupport from $clientInfoTable where recordstatus=\"A\" and name not in ($ignoreList) order by name"
 			 	RunSql $sqlStmt
 				for rec in "${resultSet[@]}"; do clients+=("$rec"); done
 			else
@@ -520,3 +520,4 @@ return 0
 ## 05-14-2018 @ 08:31:03 - 1.22.75 - dscudiero - Don't send reports to qaManager
 ## 05-14-2018 @ 09:53:21 - 1.22.76 - dscudiero - Comment out reports
 ## 06-06-2018 @ 07:05:43 - 1.22.76 - dscudiero - Remove the building of the skeleton shadow
+## 06-11-2018 @ 16:50:52 - 1.22.77 - dscudiero - Added productsinsupport to the workwith data
