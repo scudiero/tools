@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.1.21" # -- dscudiero -- Fri 08/06/2018 @ 15:05:51
+version="2.1.26" # -- dscudiero -- Mon 11/06/2018 @ 09:20:03
 #===================================================================================================
 # Common script exit
 # args:
@@ -124,7 +124,6 @@ function Goodbye {
 	## Write end record to db log
 	[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Update' $myLogRecordIdx 'exitCode' "$exitCode"
 	[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'End' $myLogRecordIdx
-
 	## If running for another user, then send an email to that user
 	if [[ -n $forUser && $exitCode != 'quiet' ]]; then
 		tmpFile=$(mkTmpFile)
@@ -150,7 +149,7 @@ function Goodbye {
 		read
 	fi
 	[[ $(IsNumeric $exitCode) != true ]] && exitCode=0
-	if [[ $secondaryMessagesOnly == true || $batchMode == true ]]; then
+	if [[ $secondaryMessagesOnly == true || $batchMode == true  || $exitCode == 'quiet' ]]; then
 		secondaryMessagesOnly=false
 		return 0
 	else
@@ -213,3 +212,4 @@ export -f QUIT
 ## 05-10-2018 @ 09:16:32 - 2.1.20 - dscudiero - Do not show the promptonexiet banner of user is stopping the script
 ## 06-05-2018 @ 14:08:30 - 2.1.20 - dscudiero - Do not print logFile message if logFile is not set
 ## 06-08-2018 @ 15:10:45 - 2.1.21 - dscudiero - Add ! quiet to some items
+## 06-11-2018 @ 09:24:49 - 2.1.26 - dscudiero - Add quiet to use return to exit
