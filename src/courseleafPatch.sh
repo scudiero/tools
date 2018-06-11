@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="6.0.93" # -- dscudiero -- Fri 08/06/2018 @ 09:43:19
+version="6.0.94" # -- dscudiero -- Mon 11/06/2018 @ 16:27:48
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -329,10 +329,6 @@ declare -A backedupFiles
 Hello
 GetDefaultsData -f "$myName"
 ParseArgsStd $originalArgStr
-
-verboseLevel=0
-dump env envs source -q
-
 
 skeletonRoot='/steamboat/leepfrog/clskel/release'
 
@@ -1535,3 +1531,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-07-2018 @ 09:55:36 - 6.0.80 - dscudiero - Pull the nocheck functionality, now in Init
 ## 06-08-2018 @ 09:30:01 - 6.0.92 - dscudiero - Tweak products parsing
 ## 06-08-2018 @ 10:19:23 - 6.0.93 - dscudiero - Remove debug statements
+## 06-11-2018 @ 16:28:10 - 6.0.94 - dscudiero - Remove debug code
