@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version="2.0.99" # -- dscudiero -- Fri 08/06/2018 @ 14:50:47
+version="2.1.2" # -- dscudiero -- Mon 11/06/2018 @ 08:24:11
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -35,135 +35,89 @@ mode="$client"
 
 Verbose 1 "mode = '$mode'"
 
-## DEV servers
-	unset newServers
-	for server in $(ls /mnt | grep '^dev' | grep -v '\-test$'); do
-		[[ $(Contains ",$ignoreList," ",$server,") == true ]] && continue
-		ProtectedCall "cd /mnt/$server > /dev/null 2>&1"
-		[[ $(pwd) != /mnt/$server ]] && continue
-		[[ $hostName == 'build7' && $server == 'dev6' ]] && continue
-		newServers="$newServers,$server"
-	done
-	newServers=${newServers:1}
-	Verbose 1 "devServers = '$newServers'"
-	## Check to see if record exists
-		sqlStmt="select count(*) from defaults where name=\"devServers\" and host=\"$hostName\" and os=\"linux\""
-		RunSql $sqlStmt; count=${resultSet[0]}
-		if [[ $count -eq 0 ]]; then
-			sqlStmt="insert into defaults values(NULL,\"devServers\",\"$newServers\",\"linux\",\"$hostName\",Now(),\"$userName\",NULL,NULL)"
-		else
-			sqlStmt="update defaults set value=\"$newServers\",updatedOn=Now(),updatedBy=\"$userName\" where name=\"devServers\" and host=\"$hostName\" and os=\"linux\""
-		fi
-		dump 1 -t sqlStmt
-		RunSql $sqlStmt
-
-## PROD servers
-	unset newServers
-	for server in $(ls /mnt | grep -v '^dev' | grep -v '^auth' | grep -v '\-test$'); do
-		[[ $(Contains ",$ignoreList," ",$server,") == true ]] && continue
-		ProtectedCall "cd /mnt/$server > /dev/null 2>&1"
-		[[ $(pwd) != /mnt/$server ]] && Here 1 && continue
-		newServers="$newServers,$server"
-	done
-	newServers=${newServers:1}
-	Verbose 1 "prodServers = '$newServers'"
-	## Check to see if record exists
-		sqlStmt="select count(*) from defaults where name=\"prodServers\" and host=\"$hostName\" and os=\"linux\""
-		RunSql $sqlStmt; count=${resultSet[0]}
-		if [[ $count -eq 0 ]]; then
-			sqlStmt="insert into defaults values(NULL,\"prodServers\",\"$newServers\",\"linux\",\"$hostName\",Now(),\"$userName\",NULL,NULL)"
-		else
-			sqlStmt="update defaults set value=\"$newServers\",updatedOn=Now(),updatedBy=\"$userName\" where name=\"prodServers\" and host=\"$hostName\" and os=\"linux\""
-		fi
-		dump 1 -t sqlStmt
-		RunSql $sqlStmt
-
-## Update rhel version.
-	rhel="$(cat /etc/redhat-release | cut -d" " -f3 | cut -d '.' -f1)"
-	[[ $(IsNumeric ${rhel:0:1}) != true ]] && rhel=$(cat /etc/redhat-release | cut -d" " -f4 | cut -d '.' -f1)
-	rhel='rhel'$rhel
-	dump 1 rhel
-	sqlStmt="update defaults set value=\"$rhel\" where name=\"rhel\" and host=\"$hostName\" and os=\"linux\""
-	RunSql $sqlStmt
-	Verbose 1 "rhel = '$rhel'"
-
-## Default CL version from the 'release' directory in the skeleton
-	unset defaultClVer
-	if [[ -r $skeletonRoot/release/web/courseleaf/clver.txt ]]; then
-		defaultClVer="$(cat $skeletonRoot/release/web/courseleaf/clver.txt)"
-		dump 1 defaultClVer
-		sqlStmt="update defaults set value=\"$defaultClVer\" where name=\"defaultClVer\""
-		RunSql $sqlStmt
-	else
-		Warning "Could not read file: '$skeletonRoot/release/web/courseleaf/clver.txt'"
-	fi
-	Verbose 1 "defaultClVer = '$defaultClVer'"
-
-#==================================================================================================
-## Write out the defaults files
-#==================================================================================================
-## Common tools defaults data
-	Verbose 1 "Updating common defaults files"
-	defaultsFile="$TOOLSDEFAULTSPATH/common"
-	Verbose 1 "\ndefaultsFile = '$defaultsFile'"
-	sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and status=\"A\" order by name"
-	RunSql $sqlStmt
-	if [[ ${#resultSet[@]} -gt 0 ]]; then
-		[[ -f ${defaultsFile}.bak ]] && mv -f "$defaultsFile" "${defaultsFile}.bak"
-		echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
-		for ((ii=0; ii<${#resultSet[@]}; ii++)); do
-			result="${resultSet[$ii]}"
-			name=${result%%|*}
-			value=${result##*|}
-			echo "$name=\"$value\"" >> "$defaultsFile"
+if [[ -z $mode || $mode == 'servers' ]]; then
+	Verbose 1 "Updating servers data"
+	## DEV servers
+		unset newServers
+		for server in $(ls /mnt | grep '^dev' | grep -v '\-test$'); do
+			[[ $(Contains ",$ignoreList," ",$server,") == true ]] && continue
+			ProtectedCall "cd /mnt/$server > /dev/null 2>&1"
+			[[ $(pwd) != /mnt/$server ]] && continue
+			[[ $hostName == 'build7' && $server == 'dev6' ]] && continue
+			newServers="$newServers,$server"
 		done
-		chgrp 'leepfrog' "$defaultsFile"
-		chmod 640 "$defaultsFile"
-	else
-		Warning "Could not retrieve defaults data for 'common' from the data warehouse\n\tsqlStmt = >$sqlStmt<"
-	fi
+		newServers=${newServers:1}
+		Verbose 1 "devServers = '$newServers'"
+		## Check to see if record exists
+			sqlStmt="select count(*) from defaults where name=\"devServers\" and host=\"$hostName\" and os=\"linux\""
+			RunSql $sqlStmt; count=${resultSet[0]}
+			if [[ $count -eq 0 ]]; then
+				sqlStmt="insert into defaults values(NULL,\"devServers\",\"$newServers\",\"linux\",\"$hostName\",Now(),\"$userName\",NULL,NULL)"
+			else
+				sqlStmt="update defaults set value=\"$newServers\",updatedOn=Now(),updatedBy=\"$userName\" where name=\"devServers\" and host=\"$hostName\" and os=\"linux\""
+			fi
+			dump 1 -t sqlStmt
+			RunSql $sqlStmt
 
-## Script defaults data
-	Verbose 1 "Updating script defaults files"
-	fields="name,ignoreList,allowList,emailAddrs,scriptData1,scriptData2,scriptData3,scriptData4,scriptData5,setSemaphore,waitOn"
-	IFS=',' read -r -a fieldsArray <<< "$fields"
-	where="where active not in (\"No\",\"Old\")"
-	sqlStmt="select $fields from scripts $where order by name"
-	RunSql $sqlStmt
-	[[ ${#resultSet[@]} -gt 0 ]] && rm -f "$defaultsFile >& /dev/null"
-	if [[ ${#resultSet[@]} -gt 0 ]]; then
-		for ((ii=0; ii<${#resultSet[@]}; ii++)); do
-			unset result
-			result="${resultSet[$ii]}"
-			name=${result%%|*}
-			[[ ${name:0:1} == '_' ]] && continue
-			defaultsFile="$TOOLSDEFAULTSPATH/$name"
-			[[ -f ${defaultsFile}.bak ]] && mv -f "$defaultsFile" "${defaultsFile}.bak"
-			Verbose 1 "defaultsFile = '$defaultsFile'"
-			echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
-			fieldCntr=1
-			for ((ij=1; ij<${#fieldsArray[@]}; ij++)); do
-				field=${fieldsArray[$ij]}
-				(( fieldCntr++ ))
-				value="$(cut -d'|' -f$fieldCntr <<< "$result")"
-				[[ $value == 'NULL' || $value == '' ]] && echo "unset $field" >> "$defaultsFile" || echo "$field=\"$value\"" >> "$defaultsFile"
-			done
+	## PROD servers
+		unset newServers
+		for server in $(ls /mnt | grep -v '^dev' | grep -v '^auth' | grep -v '\-test$'); do
+			[[ $(Contains ",$ignoreList," ",$server,") == true ]] && continue
+			ProtectedCall "cd /mnt/$server > /dev/null 2>&1"
+			[[ $(pwd) != /mnt/$server ]] && Here 1 && continue
+			newServers="$newServers,$server"
 		done
-		chgrp 'leepfrog' "$defaultsFile"
-		chmod 640 "$defaultsFile"
-	else
-		Warning "Could not retrieve defaults data for 'scripts' from the data warehouse\n\tsqlStmt = >$sqlStmt<"
-	fi
+		newServers=${newServers:1}
+		Verbose 1 "prodServers = '$newServers'"
+		## Check to see if record exists
+			sqlStmt="select count(*) from defaults where name=\"prodServers\" and host=\"$hostName\" and os=\"linux\""
+			RunSql $sqlStmt; count=${resultSet[0]}
+			if [[ $count -eq 0 ]]; then
+				sqlStmt="insert into defaults values(NULL,\"prodServers\",\"$newServers\",\"linux\",\"$hostName\",Now(),\"$userName\",NULL,NULL)"
+			else
+				sqlStmt="update defaults set value=\"$newServers\",updatedOn=Now(),updatedBy=\"$userName\" where name=\"prodServers\" and host=\"$hostName\" and os=\"linux\""
+			fi
+			dump 1 -t sqlStmt
+			RunSql $sqlStmt
+fi
 
-## Host specific tools defaults data
-	Verbose 1 "Updating host specific defaults files"
-	for host in ${linuxHosts//,/ }; do
-		defaultsFile="$TOOLSDEFAULTSPATH/$host"
-		[[ -f ${defaultsFile}.bak ]] && mv -f "$defaultsFile" "${defaultsFile}.bak"
+if [[ -z $mode || $mode == 'versions' ]]; then
+	Verbose 1 "Updating versions data"
+	## Update rhel version.
+		rhel="$(cat /etc/redhat-release | cut -d" " -f3 | cut -d '.' -f1)"
+		[[ $(IsNumeric ${rhel:0:1}) != true ]] && rhel=$(cat /etc/redhat-release | cut -d" " -f4 | cut -d '.' -f1)
+		rhel='rhel'$rhel
+		dump 1 rhel
+		sqlStmt="update defaults set value=\"$rhel\" where name=\"rhel\" and host=\"$hostName\" and os=\"linux\""
+		RunSql $sqlStmt
+		Verbose 1 "rhel = '$rhel'"
+
+	## Default CL version from the 'release' directory in the skeleton
+		unset defaultClVer
+		if [[ -r $skeletonRoot/release/web/courseleaf/clver.txt ]]; then
+			defaultClVer="$(cat $skeletonRoot/release/web/courseleaf/clver.txt)"
+			dump 1 defaultClVer
+			sqlStmt="update defaults set value=\"$defaultClVer\" where name=\"defaultClVer\""
+			RunSql $sqlStmt
+		else
+			Warning "Could not read file: '$skeletonRoot/release/web/courseleaf/clver.txt'"
+		fi
+		Verbose 1 "defaultClVer = '$defaultClVer'"
+fi
+
+if [[ -z $mode || $mode == 'defaults' ]]; then
+	Verbose 1 "Updating defaults data"
+	#==================================================================================================
+	## Write out the defaults files
+	#==================================================================================================
+	## Common tools defaults data
+		Verbose 1 "Updating common defaults files"
+		defaultsFile="$TOOLSDEFAULTSPATH/common"
 		Verbose 1 "\ndefaultsFile = '$defaultsFile'"
-		sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and host=\"$host\" and status=\"A\" order by name"
+		sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and status=\"A\" order by name"
 		RunSql $sqlStmt
 		if [[ ${#resultSet[@]} -gt 0 ]]; then
+			[[ -f ${defaultsFile}.bak ]] && mv -f "$defaultsFile" "${defaultsFile}.bak"
 			echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
 			for ((ii=0; ii<${#resultSet[@]}; ii++)); do
 				result="${resultSet[$ii]}"
@@ -172,47 +126,123 @@ Verbose 1 "mode = '$mode'"
 				echo "$name=\"$value\"" >> "$defaultsFile"
 			done
 			chgrp 'leepfrog' "$defaultsFile"
-			chmod 750 "$defaultsFile"
+			chmod 640 "$defaultsFile"
 		else
-			Info "Could not retrieve defaults data for '$host' from the data warehouse\n\tsqlStmt = >$sqlStmt<"
+			Warning "Could not retrieve defaults data for 'common' from the data warehouse\n\tsqlStmt = >$sqlStmt<"
 		fi
-	done
 
-## Set time stamp on the defaults directory
-	touch "$TOOLSDEFAULTSPATH"
+	## Script defaults data
+		Verbose 1 "Updating script defaults files"
+		fields="name,ignoreList,allowList,emailAddrs,scriptData1,scriptData2,scriptData3,scriptData4,scriptData5,setSemaphore,waitOn"
+		IFS=',' read -r -a fieldsArray <<< "$fields"
+		where="where active not in (\"No\",\"Old\")"
+		sqlStmt="select $fields from scripts $where order by name"
+		RunSql $sqlStmt
+		[[ ${#resultSet[@]} -gt 0 ]] && rm -f "$defaultsFile >& /dev/null"
+		if [[ ${#resultSet[@]} -gt 0 ]]; then
+			for ((ii=0; ii<${#resultSet[@]}; ii++)); do
+				unset result
+				result="${resultSet[$ii]}"
+				name=${result%%|*}
+				[[ ${name:0:1} == '_' ]] && continue
+				defaultsFile="$TOOLSDEFAULTSPATH/$name"
+				[[ -f ${defaultsFile}.bak ]] && mv -f "$defaultsFile" "${defaultsFile}.bak"
+				Verbose 1 "defaultsFile = '$defaultsFile'"
+				echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
+				fieldCntr=1
+				for ((ij=1; ij<${#fieldsArray[@]}; ij++)); do
+					field=${fieldsArray[$ij]}
+					(( fieldCntr++ ))
+					value="$(cut -d'|' -f$fieldCntr <<< "$result")"
+					[[ $value == 'NULL' || $value == '' ]] && echo "unset $field" >> "$defaultsFile" || echo "$field=\"$value\"" >> "$defaultsFile"
+				done
+			done
+			chgrp 'leepfrog' "$defaultsFile"
+			chmod 640 "$defaultsFile"
+		else
+			Warning "Could not retrieve defaults data for 'scripts' from the data warehouse\n\tsqlStmt = >$sqlStmt<"
+		fi
 
-## Write out a file with script information for the scripts that do not have restrictions
-	fields="keyId,name,shortDescription"
-	whereClause="showInScripts = \"Yes\" and active=\"Yes\""
-	sqlStmt="select $fields from $scriptsTable where $whereClause and restrictToGroups is null order by name"
-	RunSql $sqlStmt
-	outFile="$TOOLSPATH/auth/common"
-	[[ -f $outFile ]] && outFile="$outFile.new"
-	for ((i=0; i<${#resultSet[@]}; i++)); do
-		result="${resultSet[$i]}"
-		echo "$result" >> "$outFile"
-	done
-	[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
-	chgrp leepfrog "${outFile%.*}"
-	chmod 740 "${outFile%.*}"
-
-## Get a list of groups used in restrictToGroups fields
-	declare -A groupHash 
-	sqlStmt="select restrictToGroups from $scriptsTable where restrictToGroups is not null"
-	RunSql $sqlStmt
-	for ((i=0; i<${#resultSet[@]}; i++)); do
-		result="${resultSet[$i]}"
-		for group in ${result//,/ }; do
-			[[ ${groupHash["$group"]+abc} ]] && continue
-			groupHash["$group"]=true
+	## Host specific tools defaults data
+		Verbose 1 "Updating host specific defaults files"
+		for host in ${linuxHosts//,/ }; do
+			defaultsFile="$TOOLSDEFAULTSPATH/$host"
+			[[ -f ${defaultsFile}.bak ]] && mv -f "$defaultsFile" "${defaultsFile}.bak"
+			Verbose 1 "\ndefaultsFile = '$defaultsFile'"
+			sqlStmt="select name,value from defaults where (os is NUll or os in (\"linux\")) and host=\"$host\" and status=\"A\" order by name"
+			RunSql $sqlStmt
+			if [[ ${#resultSet[@]} -gt 0 ]]; then
+				echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE DEFAULTS TABLE IN THE DATA WAREHOUSE" > "$defaultsFile"
+				for ((ii=0; ii<${#resultSet[@]}; ii++)); do
+					result="${resultSet[$ii]}"
+					name=${result%%|*}
+					value=${result##*|}
+					echo "$name=\"$value\"" >> "$defaultsFile"
+				done
+				chgrp 'leepfrog' "$defaultsFile"
+				chmod 750 "$defaultsFile"
+			else
+				Info "Could not retrieve defaults data for '$host' from the data warehouse\n\tsqlStmt = >$sqlStmt<"
+			fi
 		done
-	done
 
-## Write out a file with script information for the scripts that have restrictions
-	for key in "${!groupHash[@]}"; do
-		outFile="$TOOLSPATH/auth/$key"
+	## Set time stamp on the defaults directory
+		touch "$TOOLSDEFAULTSPATH"
+
+fi
+
+if [[ -z $mode || $mode == 'scripts' ]]; then
+	Verbose 1 "Updating scripts data"
+	## Write out a file with script information for the scripts that do not have restrictions
+		fields="keyId,name,shortDescription"
+		whereClause="showInScripts = \"Yes\" and active=\"Yes\""
+		sqlStmt="select $fields from $scriptsTable where $whereClause and restrictToGroups is null order by name"
+		RunSql $sqlStmt
+		outFile="$TOOLSPATH/auth/common"
 		[[ -f $outFile ]] && outFile="$outFile.new"
-		sqlStmt="select $fields from $scriptsTable where $whereClause and restrictToGroups like \"%$key%\" order by name"
+		for ((i=0; i<${#resultSet[@]}; i++)); do
+			result="${resultSet[$i]}"
+			echo "$result" >> "$outFile"
+		done
+		[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
+		chgrp leepfrog "${outFile%.*}"
+		chmod 740 "${outFile%.*}"
+
+	## Get a list of groups used in restrictToGroups fields
+		declare -A groupHash 
+		sqlStmt="select restrictToGroups from $scriptsTable where restrictToGroups is not null"
+		RunSql $sqlStmt
+		for ((i=0; i<${#resultSet[@]}; i++)); do
+			result="${resultSet[$i]}"
+			for group in ${result//,/ }; do
+				[[ ${groupHash["$group"]+abc} ]] && continue
+				groupHash["$group"]=true
+			done
+		done
+
+	## Write out a file with script information for the scripts that have restrictions
+		for key in "${!groupHash[@]}"; do
+			outFile="$TOOLSPATH/auth/$key"
+			[[ -f $outFile ]] && outFile="$outFile.new"
+			sqlStmt="select $fields from $scriptsTable where $whereClause and restrictToGroups like \"%$key%\" order by name"
+			RunSql $sqlStmt
+			for ((i=0; i<${#resultSet[@]}; i++)); do
+				result="${resultSet[$i]}"
+				echo "$result" >> "$outFile" 
+			done
+			[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
+			chgrp leepfrog "${outFile%.*}"
+			chmod 740 "${outFile%.*}"
+		done
+fi
+
+if [[ -z $mode || $mode == 'reports' ]]; then
+	Verbose 1 "Updating reports information"
+	## Write out a file with reports information
+		outFile="$TOOLSPATH/auth/reports"
+		[[ -f $outFile ]] && outFile="$outFile.new"
+		fields="keyId,name,shortDescription,type,header,sqlStmt,script,scriptArgs,ignoreList"
+		sqlStmt="select $fields from $reportsTable where active=\"Yes\" order by name"
 		RunSql $sqlStmt
 		for ((i=0; i<${#resultSet[@]}; i++)); do
 			result="${resultSet[$i]}"
@@ -221,25 +251,10 @@ Verbose 1 "mode = '$mode'"
 		[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
 		chgrp leepfrog "${outFile%.*}"
 		chmod 740 "${outFile%.*}"
-	done;
 
-## Write out a file with reports information
-	outFile="$TOOLSPATH/auth/reports"
-	[[ -f $outFile ]] && outFile="$outFile.new"
-	fields="keyId,name,shortDescription,type,header,sqlStmt,script,scriptArgs,ignoreList"
-	sqlStmt="select $fields from $reportsTable where active=\"Yes\" order by name"
-	RunSql $sqlStmt
-	for ((i=0; i<${#resultSet[@]}; i++)); do
-		result="${resultSet[$i]}"
-		echo "$result" >> "$outFile" 
-	done
-	[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
-	chgrp leepfrog "${outFile%.*}"
-	chmod 740 "${outFile%.*}"
-
-## Set time stamp on the auth directory
-	touch "$TOOLSPATH/auth"
-
+	## Set time stamp on the auth directory
+		touch "$TOOLSPATH/auth"
+fi
 
 
 Goodbye 0;
@@ -292,3 +307,4 @@ Goodbye 0;
 ## 05-31-2018 @ 16:35:33 - 2.0.97 - dscudiero - Add reports
 ## 06-01-2018 @ 10:06:41 - 2.0.98 - dscudiero - Add chgrp commands on the scripts and reports files
 ## 06-08-2018 @ 14:51:26 - 2.0.99 - dscudiero - Add ignorelist to data assigined to the reports object
+## 06-11-2018 @ 08:27:10 - 2.1.2 - dscudiero - Add mode processing and messages
