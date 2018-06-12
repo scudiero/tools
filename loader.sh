@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.36" # -- dscudiero -- Tue 05/29/2018 @ 16:42:16.65
+version="1.5.47" # -- dscudiero -- Tue 12/06/2018 @ 08:16:29
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -113,17 +113,16 @@ function CleanUp {
 
 	for token in $loaderArgs; do
 		if [[ ${token:0:2} == '--' ]]; then
-			token="${token:2}" ; token=${token,,[a-z]}
-			[[ ${token,,[a-z]} == 'nolog' ]] && { noLog=true && noLogInDb=true; dispatcherArgs=${*/$token/}; }
-			[[ ${token,,[a-z]} == 'nologindb' ]] && { noLogInDb=true; dispatcherArgs=${*/$token/}; }
-			[[ ${token,,[a-z]} == 'batchmode' ]] && { batchMode=true && myQuiet=true; dispatcherArgs=${*/$token/}; }
-			[[ ${token,,[a-z]} == 'devdb' ]] && { useDevDb=true; dispatcherArgs=${*/$token/}; }
-			[[ ${token,,[a-z]} == 'usedevdb' ]] && { useDevDb=true; dispatcherArgs=${*/$token/}; }
-			[[ ${token,,[a-z]} == 'quiet' ]] && { myQuiet=true; dispatcherArgs=${*/$token/}; }
-			[[ ${token,,[a-z]} == 'reload' ]] && { unset defaultsLoaded; dispatcherArgs=${*/$token/}; }
+			[[ ${token,,[a-z]} == '--nolog' ]] && { noLog=true && noLogInDb=true; loaderArgs=${*/$token/}; }
+			[[ ${token,,[a-z]} == '--nologindb' ]] && { noLogInDb=true; loaderArgs=${*/$token/}; }
+			[[ ${token,,[a-z]} == '--batchmode' ]] && { batchMode=true && myQuiet=true; loaderArgs=${*/$token/}; }
+			[[ ${token,,[a-z]} == '--devdb' ]] && { useDevDb=true; loaderArgs=${*/$token/}; }
+			[[ ${token,,[a-z]} == '--usedevdb' ]] && { useDevDb=true; loaderArgs=${*/$token/}; }
+			[[ ${token,,[a-z]} == '--quiet' ]] && { myQuiet=true; loaderArgs=${*/$token/}; }
+			[[ ${token,,[a-z]} == '--reload' ]] && { unset defaultsLoaded; loaderArgs=${*/$token/}; }
 		fi
 	done
-	#fastDump callPgmName noLog noLognDb batchMode usedevdb myQuiet USELOCAL USEDEV VIACRON PAUSEATEXIT loaderArgs
+	#fastDump callPgmName noLog noLogInDb batchMode usedevdb myQuiet USELOCAL USEDEV VIACRON PAUSEATEXIT loaderArgs
 
 ## Hello
 # [[ $batchMode != true && $(hostname) == 'build7.leepfrog.com' ]] && \
@@ -285,10 +284,21 @@ function CleanUp {
 			done
 		fi
 
-	## Cache users auth groups
-		[[ -z $UsersAuthGroups && -r "$TOOLSPATH/auth/$userName" ]] && UsersAuthGroups=$(cat "$TOOLSPATH/auth/$userName") || UsersAuthGroups='none'
-		# prtStatus ", check run/auth"; sTime=$(date "+%s")
-		
+	## Cache users auth groups and restrictedScripts list
+		if [[ -z $UsersAuthGroups ]]; then
+			if [[ -r "$TOOLSPATH/auth/$userName" ]]; then
+				unset UsersRestrictedScripts
+				readarray -t tmpArray < "$TOOLSPATH/auth/$userName"
+				UsersAuthGroups="${tmpArray[0]}"
+				for ((i=1; i<${#tmpArray[@]}; i++)); do
+					str="${tmpArray[$i]}"; str="${str//[$'\t\r\n']}"
+					UsersRestrictedScripts+=("$str")
+				done
+			else
+				UsersAuthGroups='none'
+			fi
+		fi
+
 	## Check to make sure we are authorized
 		checkMsg=$(CheckAuth $callPgmName)
 		if [[ -n $checkMsg && $checkMsg != true ]]; then
@@ -536,3 +546,4 @@ function CleanUp {
 ## 06-05-2018 @ 14:09:01 - 1.5.36 - dscudiero - Add a pause statement if admin and checkRun failes
 ## 06-05-2018 @ 15:23:33 - 1.5.36 - dscudiero - Cosmetic/minor change/Sync
 ## 06-05-2018 @ 16:56:54 - 1.5.36 - dscudiero - Cosmetic/minor change/Sync
+## 06-12-2018 @ 08:18:06 - 1.5.47 - dscudiero - Fix bug / optomiz parameter parsing
