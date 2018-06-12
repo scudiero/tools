@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.2.1" # -- dscudiero -- Mon 11/06/2018 @ 16:44:02
+version="2.2.2" # -- dscudiero -- Tue 12/06/2018 @ 07:03:05
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -184,13 +184,12 @@ function Init {
 				verify=true
 				echo
 				Warning "You are asking to update/overlay the $(ColorW $(Upper $checkProdEnv)) environment."
-				# if [[ ${clientData["${client}.productsInSupport"]+abc} ]]; then
-				# 	## If client has products in support and the user is not in the support group then quit
-				# 	[[ $(Contains ",$UsersAuthGroups," ',support,') != true ]] && \
-		 	# 			Terminate "The client has products in support (${clientData["${client}.productsInSupport"]}), \
-		 	# 						please contact the support person assigned to this client to update the '$env' site"
-				# 	Info 0 1 "FYI, the client has the following products in production: '${clientData["${client}.productsInSupport"]}'"
-				# fi
+				if [[ ${clientData["${client}.productsInSupport"]+abc} ]]; then
+					## If client has products in support and the user is not in the support group then quit
+					[[ $(Contains ",$UsersAuthGroups," ',support,') != true ]] && \
+		 				Terminate "The client has products in support (${clientData["${client}.productsInSupport"]}), please contact the support person assigned to this client to update the '$env' site"
+					Info 0 1 "FYI, the client has the following products in production: '${clientData["${client}.productsInSupport"]}'"
+				fi
 				unset ans; Prompt ans "Are you sure" "Yes No"; ans=${ans:0:1}; ans=${ans,,[a-z]}
 				[[ $ans != 'y' ]] && Goodbye -1
 				getJalot=true
@@ -379,3 +378,4 @@ export -f Init
 ## 06-05-2018 @ 11:10:11 - 2.1.124 - dscudiero - Cosmetic/minor change/Sync
 ## 06-06-2018 @ 10:52:15 - 2.1.124 - dscudiero - Incorporate the client nocheck logic
 ## 06-11-2018 @ 16:44:42 - 2.2.1 - dscudiero - Commented out the products in support checks
+## 06-12-2018 @ 07:03:32 - 2.2.2 - dscudiero - Add products in support check back in
