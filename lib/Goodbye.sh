@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.1.26" # -- dscudiero -- Mon 11/06/2018 @ 09:20:03
+version="2.1.27" # -- dscudiero -- Wed 13/06/2018 @ 13:33:53
 #===================================================================================================
 # Common script exit
 # args:
@@ -125,7 +125,7 @@ function Goodbye {
 	[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Update' $myLogRecordIdx 'exitCode' "$exitCode"
 	[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'End' $myLogRecordIdx
 	## If running for another user, then send an email to that user
-	if [[ -n $forUser && $exitCode != 'quiet' ]]; then
+	if [[ -n $forUser && $exitCode != 'quiet' && $logFile != '/dev/null' ]]; then
 		tmpFile=$(mkTmpFile)
 		Msg > $tmpFile
 		Msg "'$myName' was run in your behalf by $userName, the log is attached" >> $tmpFile
@@ -213,3 +213,4 @@ export -f QUIT
 ## 06-05-2018 @ 14:08:30 - 2.1.20 - dscudiero - Do not print logFile message if logFile is not set
 ## 06-08-2018 @ 15:10:45 - 2.1.21 - dscudiero - Add ! quiet to some items
 ## 06-11-2018 @ 09:24:49 - 2.1.26 - dscudiero - Add quiet to use return to exit
+## 06-13-2018 @ 13:43:28 - 2.1.27 - dscudiero - Add check to make sure logfile is not /dev/null if running forUser
