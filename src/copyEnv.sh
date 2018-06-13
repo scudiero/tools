@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=4.13.78 # -- dscudiero -- Fri 06/01/2018 @ 10:59:20.21
+version="4.13.79" # -- dscudiero -- Wed 13/06/2018 @ 13:52:03
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -116,9 +116,9 @@ lockWorkflow=false
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-Hello
 GetDefaultsData "$myName" -fromFiles
 ParseArgsStd $originalArgStr
+Hello
 
 [[ -n $envs && -z $srcEnv ]] && srcEnv="$env"
 
@@ -699,3 +699,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 05-08-2018 @ 13:49:15 - 4.13.55 - dscudiero - Indent the output from rsync
 ## 05-25-2018 @ 16:39:22 - 4.13.62 - dscudiero - Change debug levels on messages
 ## 06-01-2018 @ 11:00:32 - 4.13.78 - dscudiero - Use the clientData hash to get the client data
+## 06-13-2018 @ 13:52:33 - 4.13.79 - dscudiero - Cosmetic/minor change/Sync
