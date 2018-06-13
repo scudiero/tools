@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.22.77" # -- dscudiero -- Mon 11/06/2018 @ 16:50:17
+version="1.22.78" # -- dscudiero -- Wed 13/06/2018 @ 10:17:29
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -93,7 +93,8 @@ function BuildEmployeeTable {
 		transactionalFields=${transactionalFields:1}
 
 	### Clear out the employee table
-		sqlStmt="truncate ${employeeTable}"
+		#sqlStmt="truncate $employeeTable"
+		sqlStmt="delete * from $employeeTable"
 		RunSql $sqlStmt
 
 	### Get the transactonal values, loop through them and  write out the warehouse record
@@ -350,7 +351,7 @@ case "$hostName" in
 					done
 		 		fi
 		 		clientRec="$clientRec|${envList:1}"
-				echo "$clientRec" >> "$outFile"
+				echo "${clientRec//NULL/}" >> "$outFile"
 			done
 
 			if [[ $outFile != '/dev/stdout' ]]; then
@@ -521,3 +522,4 @@ return 0
 ## 05-14-2018 @ 09:53:21 - 1.22.76 - dscudiero - Comment out reports
 ## 06-06-2018 @ 07:05:43 - 1.22.76 - dscudiero - Remove the building of the skeleton shadow
 ## 06-11-2018 @ 16:50:52 - 1.22.77 - dscudiero - Added productsinsupport to the workwith data
+## 06-13-2018 @ 10:27:06 - 1.22.78 - dscudiero - Remove NULL from the client record before being written out
