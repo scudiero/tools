@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.1.6" # -- dscudiero -- Fri 08/06/2018 @ 08:48:03
+version="2.1.10" # -- dscudiero -- Wed 13/06/2018 @ 13:48:18
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -73,17 +73,36 @@ function VerifyPromptVal {
 					[[ $envsStr == $prevEnvsStr ]] && break || prevEnvsStr="$envsStr"
 
 				done
-				## Do we have a pvt site
+				## Do we have a pvt site, use dev info if we have it
+				unset pvtDir
 				if [[ ${clientData["${response}.dev.host"]} == $hostName && ${clientData["${response}.dev.server"]+abc} ]]; then
-					if [[ -d /mnt/${clientData["${response}.dev.server"]}/web/${response}-${userName} ]]; then
-						clientData["${response}.pvt.host"]="${clientData["${client}.dev.host"]}"
-						clientData["${response}.pvt.server"]="${clientData["${client}.dev.server"]}"
-						if [[ -r "/mnt/${clientData["${response}.dev.server"]}/web/${response}-${userName}/.clonedFrom" ]]; then 
-							clonedFrom="$(cat "/mnt/${clientData["${response}.dev.server"]}/web/${response}-${userName}/.clonedFrom")"
+					[[ -d /mnt/${clientData["${response}.dev.server"]}/web/${response}-${userName} ]] && 
+						pvtDir="/mnt/${clientData["${response}.dev.server"]}/web/${response}-${userName}"
+
+					clientData["${response}.pvt.host"]="${clientData["${client}.dev.host"]}"
+					clientData["${response}.pvt.server"]="${clientData["${client}.dev.server"]}"
+					if [[ -r "$pvtDir/.clonedFrom" ]]; then 
+						clonedFrom="$(cat "$pvtDir/.clonedFrom")"
+						clientData["${response}.pvt.clonedFrom"]="$clonedFrom"
+						clientData["${response}.pvt.cims"]="${clientData["${response}.${clonedFrom}.cims"]}"
+					fi
+					clientData["${response}.pvt.siteDir"]="$pvtDir"
+					envs="$envs,pvt"
+				else
+					## Search for pvt dir
+					for server in ${devServers//,/ }; do
+						dump -3 -t server
+						[[ -d "/mnt/$server/web/$client-$userName" ]] && { pvtDir="/mnt/$server/web/$client-$userName"; break; }
+					done
+					if [[ -n $pvtDir ]]; then
+						clientData["${response}.pvt.host"]="$hostName"
+						clientData["${response}.pvt.server"]="$server"
+						if [[ -r "$pvtDir/.clonedFrom" ]]; then 
+							clonedFrom="$(cat "$pvtDir/.clonedFrom")"
 							clientData["${response}.pvt.clonedFrom"]="$clonedFrom"
 							clientData["${response}.pvt.cims"]="${clientData["${response}.${clonedFrom}.cims"]}"
 						fi
-						clientData["${response}.pvt.siteDir"]="/mnt/${clientData["${response}.dev.server"]}/web/${response}-${userName}"
+						clientData["${response}.pvt.siteDir"]="$pvtDir"
 						envs="$envs,pvt"
 					fi
 				fi
@@ -292,3 +311,4 @@ export -f VerifyPromptVal
 ## 06-08-2018 @ 08:19:50 - 2.1.3 - dscudiero - Cosmetic/minor change/Sync
 ## 06-08-2018 @ 08:27:02 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
 ## 06-08-2018 @ 08:52:18 - 2.1.6 - dscudiero - Remove debug code
+## 06-13-2018 @ 13:50:15 - 2.1.10 - dscudiero - Added code to set client pvt data if the client does not have a dev site
