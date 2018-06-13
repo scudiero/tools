@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version=2.0.22 # -- dscudiero -- Fri 06/01/2018 @ 10:10:09.51
+version="2.0.23" # -- dscudiero -- Wed 13/06/2018 @ 13:52:21
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors FindExecutable SelectMenu ProtectedCall Pause"
@@ -137,10 +137,10 @@ declare -A scriptsHash
 ## parse arguments
 #=======================================================================================================================
 helpSet='script,client'
-Hello
 GetDefaultsData $myName -fromFiles
 ParseArgsStd $originalArgStr
 scriptArgs="$unknowArgs"
+Hello
 
 scriptNameIn="$client"
 [[ -z $scriptNameIn && $batchMode == true ]] && Terminate "Running in batchMode and no value specified for report/script"
@@ -197,3 +197,4 @@ scriptNameIn="$client"
 Goodbye 0
 ## 06-01-2018 @ 09:34:59 - 2.0.19 - dscudiero - Copy full scripts functionality and make standaole
 ## 06-01-2018 @ 10:10:56 - 2.0.22 - dscudiero - Fix problem because we did not add exec,lib,args to the scripts data
+## 06-13-2018 @ 13:52:37 - 2.0.23 - dscudiero - Cosmetic/minor change/Sync
