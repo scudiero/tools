@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.2.2" # -- dscudiero -- Tue 12/06/2018 @ 07:03:05
+version="2.2.4" # -- dscudiero -- Wed 13/06/2018 @ 10:31:09
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -184,7 +184,7 @@ function Init {
 				verify=true
 				echo
 				Warning "You are asking to update/overlay the $(ColorW $(Upper $checkProdEnv)) environment."
-				if [[ ${clientData["${client}.productsInSupport"]+abc} ]]; then
+				if [[ ${clientData["${client}.productsInSupport"]+abc} && -n ${clientData["${client}.productsInSupport"]} ]]; then
 					## If client has products in support and the user is not in the support group then quit
 					[[ $(Contains ",$UsersAuthGroups," ',support,') != true ]] && \
 		 				Terminate "The client has products in support (${clientData["${client}.productsInSupport"]}), please contact the support person assigned to this client to update the '$env' site"
@@ -379,3 +379,4 @@ export -f Init
 ## 06-06-2018 @ 10:52:15 - 2.1.124 - dscudiero - Incorporate the client nocheck logic
 ## 06-11-2018 @ 16:44:42 - 2.2.1 - dscudiero - Commented out the products in support checks
 ## 06-12-2018 @ 07:03:32 - 2.2.2 - dscudiero - Add products in support check back in
+## 06-13-2018 @ 10:33:12 - 2.2.4 - dscudiero - Do not check productsInSupport if null
