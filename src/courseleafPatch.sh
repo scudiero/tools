@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="6.0.94" # -- dscudiero -- Mon 11/06/2018 @ 16:27:48
+version="6.0.96" # -- dscudiero -- Wed 13/06/2018 @ 13:42:11
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -326,9 +326,9 @@ declare -A backedupFiles
 #=======================================================================================================================
 # Standard argument parsing and initialization
 #=======================================================================================================================
-Hello
 GetDefaultsData -f "$myName"
 ParseArgsStd $originalArgStr
+Hello
 
 skeletonRoot='/steamboat/leepfrog/clskel/release'
 
@@ -1532,3 +1532,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-08-2018 @ 09:30:01 - 6.0.92 - dscudiero - Tweak products parsing
 ## 06-08-2018 @ 10:19:23 - 6.0.93 - dscudiero - Remove debug statements
 ## 06-11-2018 @ 16:28:10 - 6.0.94 - dscudiero - Remove debug code
+## 06-13-2018 @ 13:50:29 - 6.0.96 - dscudiero - Switch order for Hello
