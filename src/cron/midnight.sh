@@ -93,9 +93,8 @@ function BuildEmployeeTable {
 		transactionalFields=${transactionalFields:1}
 
 	### Clear out the employee table
-		#sqlStmt="truncate $employeeTable"
-		sqlStmt="delete * from $employeeTable"
-		RunSql $sqlStmt
+			sqlStmt="truncate ${employeeTable}"
+			RunSql $sqlStmt
 
 	### Get the transactonal values, loop through them and  write out the warehouse record
 		sqlStmt="select $transactionalColumns from employees where db_isactive in (\"Y\",\"L\") order by db_employeekey"
@@ -115,6 +114,7 @@ function BuildEmployeeTable {
 			sqlStmt="insert into ${employeeTable} values($valuesString)"
 			RunSql $sqlStmt
 		done
+
 	return 0
 } #BuildEmployeeTable
 
@@ -523,3 +523,4 @@ return 0
 ## 06-06-2018 @ 07:05:43 - 1.22.76 - dscudiero - Remove the building of the skeleton shadow
 ## 06-11-2018 @ 16:50:52 - 1.22.77 - dscudiero - Added productsinsupport to the workwith data
 ## 06-13-2018 @ 10:27:06 - 1.22.78 - dscudiero - Remove NULL from the client record before being written out
+## 06-14-2018 @ 07:14:14 - 1.22.78 - dscudiero - Go back to truncate
