@@ -107,7 +107,7 @@ if found:
 	if fileExt == "tcf" or fileExt == "cfg" or fileExt == "atj":
 		assignmentDelim=":"
 		commentChar=""
-	elif fileName == "workflowLib" and fileExt == "atj"
+	elif fileName == "workflowLib" and fileExt == "atj":
 		verStr="wfLibVersion"
 		commentChar="//"
 
@@ -149,3 +149,4 @@ if found:
 		Msg("New version: " + newVersion)
 ## 06-07-2018 @ 12:12:39 - 2.1.4 - dscudiero - Add code to detect "DO NOT AUTOVERSION"
 ## 06-14-2018 @ 09:51:55 - 2.1.4 - dscudiero - Add special processing for workflowLib.atj
+## 06-14-2018 @ 09:57:29 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
