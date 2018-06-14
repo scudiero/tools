@@ -100,12 +100,16 @@ if len(grepStr) > 0:
 	found=False
 
 if found:
+	verStr="version"
 	assignmentDelim="="
 	quoteStr="\""
 	commentChar="#"
 	if fileExt == "tcf" or fileExt == "cfg" or fileExt == "atj":
 		assignmentDelim=":"
 		commentChar=""
+	elif fileName == "workflowLib" and fileExt == "atj"
+		verStr="wfLibVersion"
+		commentChar="//"
 
 	if verbosity > 0:
 		Msg("assignmentDelim = '" + assignmentDelim + "'")
@@ -113,7 +117,7 @@ if found:
 		Msg("commentChar = '" + commentChar + "'")
 
 	## Get the version data from the file
-	grepStr=grep("version"+assignmentDelim, fullName, False, True)
+	grepStr=grep(verStr+assignmentDelim, fullName, False, True)
 	if len(grepStr) > 0:
 		if verbosity > 0: Msg("grepStr = '" + str(grepStr[0]) + "'" )
 		fromStr=grepStr[0]
@@ -144,3 +148,4 @@ if found:
 		sed(fullName, fromStr, toStr)
 		Msg("New version: " + newVersion)
 ## 06-07-2018 @ 12:12:39 - 2.1.4 - dscudiero - Add code to detect "DO NOT AUTOVERSION"
+## 06-14-2018 @ 09:51:55 - 2.1.4 - dscudiero - Add special processing for workflowLib.atj
