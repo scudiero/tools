@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.9.1" // -- dscudiero -- Thu 06/14/2018 @ 10:16:12
+wfLibVersion="1.9.11" // -- dscudiero -- Thu 06/14/2018 @ 12:43:09
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -2199,7 +2199,6 @@ GetEnv = function(env) {
 	return '*unknown*';
 } //EnvIs
 
-
 //==================================================================================================
 // Formatted hello message from a function
 //==================================================================================================
@@ -2208,6 +2207,13 @@ GetEnv = function(env) {
 function wfHello(msgLevel,inval,wfrule,args){
 	returnObj={ myName:"", myOpts:"", myRequest:"", myNotMode:false };
 	if (wfNestLevel === 0) wfDebug(1,"");
+	
+	if (typeof inval != 'undefined') {
+		// Make a private copy of inval
+		var myJSON=JSON.stringify(inval);
+		returnObj.myInval=JSON.parse(myJSON);
+	}
+
 	if (typeof wfrule != 'undefined') {
 		returnObj.myName=wfrule.attrname;
 		text=" called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "'";
@@ -2215,11 +2221,26 @@ function wfHello(msgLevel,inval,wfrule,args){
 		returnObj.myOpts=options;
 		returnObj.myRequest=wfrule.searchfor.toLowerCase();
 		if (returnObj.myRequest.indexOf('not') >= 0 || options.toLowerCase().indexOf('notmode') >= 0)
-			returnObj.myNotMode=true;	
+			returnObj.myNotMode=true;
+		
+		// Make a private copy of wfrule
+		var myJSON=JSON.stringify(wfrule);
+		var myWfrule=JSON.parse(myJSON);
+		myWfrule.regex=wfrule.regex;
+		myWfrule.ifregex=wfrule.ifregex;
+		returnObj.myWfrule=myWfrule;
+		
 	} else {
+		// Make a private copy of inval
 		returnObj.myName=inval;
 		var text="";
 	}
+
+	if (typeof args != 'undefined') {	
+		var myJSON=JSON.stringify(args);
+		returnObj.myArgs=JSON.parse(myJSON);
+	}
+
 	wfDebug(msgLevel,"*** Starting: " + returnObj.myName + text);
 	wfDump(msgLevel,["reqType;"+returnObj.myRequest,"options;"+returnObj.myOpts,"notMode;"+returnObj.myNotMode],";","horizontal quote");
 	return returnObj;
@@ -2233,7 +2254,9 @@ function wfHello(msgLevel,inval,wfrule,args){
 wffuncs.wfBreadCrumbs = function(inval, wfrule, args) {
 	var me=wfHello(99, inval, wfrule, args); // me={ myName:"", myOpts:"", myRequest:"", myNotMode:false };
 
-	wfDebug(1,"\n\n")
+	if (me.myRequest == "start") 
+		wfDebug(1,"\n\n")
+	
 	wfDebug(1,Array(10).join("=") + " " + me.myRequest.toUpperCase() + " " + Array(110).join("="))
 
 	return false
@@ -2661,4 +2684,4 @@ var wfLibLoaded=true;
 // 05-21-2018 @ 12:31:04 - 1.8.94 - dscudiero - Added wfGetCimInstanceName
 // 05-21-2018 @ 15:12:38 - 1.8.95 - dscudiero - Add wffuncsGetProposalMode
 // 06-14-2018 @ 10:12:35 - 1.8.98 - dscudiero - Tweaked messaging, added wfBreadCrumbs function
-// 06-14-2018 @ 10:19:44 - 1.9.1 - dscudiero - Cosmetic/minor change/Sync
+// 06-14-2018 @ 12:43:51 - 1.9.11 - dscudiero - Add creaton of local copies of passed args to the Hello function
