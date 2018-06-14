@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.98" // -- dscudiero -- Thu 06/14/2018 @ 10:11:45
+wfLibVersion="1.9.1" // -- dscudiero -- Thu 06/14/2018 @ 10:16:12
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -2234,7 +2234,7 @@ wffuncs.wfBreadCrumbs = function(inval, wfrule, args) {
 	var me=wfHello(99, inval, wfrule, args); // me={ myName:"", myOpts:"", myRequest:"", myNotMode:false };
 
 	wfDebug(1,"\n\n")
-	wfDebug(1,Array(10).join("=") + " " + me.myRequest.toUpperCase() + " " + Array(70).join("="))
+	wfDebug(1,Array(10).join("=") + " " + me.myRequest.toUpperCase() + " " + Array(110).join("="))
 
 	return false
 } //wffuncs.wfBreadCrumbs
@@ -2661,3 +2661,4 @@ var wfLibLoaded=true;
 // 05-21-2018 @ 12:31:04 - 1.8.94 - dscudiero - Added wfGetCimInstanceName
 // 05-21-2018 @ 15:12:38 - 1.8.95 - dscudiero - Add wffuncsGetProposalMode
 // 06-14-2018 @ 10:12:35 - 1.8.98 - dscudiero - Tweaked messaging, added wfBreadCrumbs function
+// 06-14-2018 @ 10:19:44 - 1.9.1 - dscudiero - Cosmetic/minor change/Sync
