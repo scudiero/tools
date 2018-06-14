@@ -40,7 +40,6 @@ function Colors {
 		colorNote=$colorGreen
 		colorVerbose=$colorGrey
 		colorMenu=$colorGreen
-		colorMenu=$colorPurple
 	fi
 
 	# function ColorE { local string="$*"; echo "${colorError}${string}${colorDefault}"; }
@@ -79,3 +78,4 @@ export -f Colors ColorE ColorI ColorT ColorK ColorV ColorN ColorU ColorB
 ## 09-22-2017 @ 11.27.52 - ("2.0.28")  - dscudiero - Added ColorW
 ## 10-02-2017 @ 13.46.26 - ("2.0.29")  - dscudiero - General syncing of dev to prod
 ## 05-31-2018 @ 09:21:37 - 2.0.30 - dscudiero - Changed default color for menues
+## 06-14-2018 @ 14:53:56 - 2.0.30 - dscudiero - Make the menu colors green for Scotta
