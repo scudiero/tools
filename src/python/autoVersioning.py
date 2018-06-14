@@ -104,14 +104,15 @@ if found:
 	assignmentDelim="="
 	quoteStr="\""
 	commentChar="#"
-	if fileExt == "tcf" or fileExt == "cfg" or fileExt == "atj":
-		assignmentDelim=":"
-		commentChar=""
-	elif fileName == "workflowLib" and fileExt == "atj":
+	if fileName == "workflowLib" and fileExt == "atj":
+		Msg("HERE HERE HERE")
 		verStr="wfLibVersion"
 		commentChar="//"
-
+	elif fileExt == "tcf" or fileExt == "cfg" or fileExt == "atj":
+		assignmentDelim=":"
+		commentChar=""
 	if verbosity > 0:
+		Msg("verStr = '" + verStr + "'")
 		Msg("assignmentDelim = '" + assignmentDelim + "'")
 		Msg("quoteStr = '" + quoteStr + "'")
 		Msg("commentChar = '" + commentChar + "'")
@@ -128,9 +129,10 @@ if found:
 		if verbosity > 0: Msg("version = '" + str(version) + "'" )
 		versionParts=version.split(".")
 
-		Msg("versionParts[0] = '" + versionParts[0] + "'")
-		Msg("versionParts[1] = '" + versionParts[1] + "'")
-		Msg("versionParts[2] = '" + versionParts[2] + "'")
+		# Msg("len(versionParts) = '" + str(len(versionParts)) + "'")
+		# Msg("versionParts[0] = '" + versionParts[0] + "'")
+		# Msg("versionParts[1] = '" + versionParts[1] + "'")
+		# Msg("versionParts[2] = '" + versionParts[2] + "'")
 
 		## Increment the editCount number, if editCount is 99 then increment the version and set editCount to 0
 		if int(versionParts[2]) < 99:
@@ -140,9 +142,9 @@ if found:
 		if verbosity > 0: Msg("newVersion = '" + newVersion + "'")
 
 		## build the sed 'to' string
-		toStr="version" + assignmentDelim + quoteStr + newVersion + quoteStr + " " + commentChar + " -- " + userName + " -- " 
-		toStr=toStr + datetime.datetime.today().strftime('%a %d/%m/%Y @ %H:%M:%S')
-		if fileExt == "tcf" or fileExt == "cfg" or fileExt == "atj":
+		toStr=verStr + assignmentDelim + quoteStr + newVersion + quoteStr + " " + commentChar + " -- " + userName + " -- " 
+		toStr=toStr + datetime.datetime.today().strftime('%a %m/%d/%Y @ %H:%M:%S')
+		if fileExt == "tcf" or fileExt == "cfg" or fileExt == "atj" and fileName != "workflowLib":
 			toStr="// " + toStr 
 
 		if verbosity > 0: Msg("fromStr = >" + fromStr + "<")
@@ -155,3 +157,4 @@ if found:
 ## 06-14-2018 @ 09:51:55 - 2.1.4 - dscudiero - Add special processing for workflowLib.atj
 ## 06-14-2018 @ 09:57:29 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
 ## 06-14-2018 @ 10:00:17 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
+## 06-14-2018 @ 10:17:55 - 2.1.4 - dscudiero - Added Special processing for workflowLib
