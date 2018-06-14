@@ -105,7 +105,6 @@ if found:
 	quoteStr="\""
 	commentChar="#"
 	if fileName == "workflowLib" and fileExt == "atj":
-		Msg("HERE HERE HERE")
 		verStr="wfLibVersion"
 		commentChar="//"
 	elif fileExt == "tcf" or fileExt == "cfg" or fileExt == "atj":
@@ -164,3 +163,4 @@ if found:
 ## 06-14-2018 @ 10:00:17 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
 ## 06-14-2018 @ 10:17:55 - 2.1.4 - dscudiero - Added Special processing for workflowLib
 ## 06-14-2018 @ 10:19:49 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
+## 06-14-2018 @ 12:44:11 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
