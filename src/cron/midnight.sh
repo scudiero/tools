@@ -241,8 +241,8 @@ case "$hostName" in
 			Msg "...done"
 
 		## Run programs/functions
-			pgms=(buildClientInfoTable buildSiteInfoTable BuildEmployeeTable buildQaStatusTable checkCgiPermissions checkPublishSettings)
-			pgms+=(updateDefaults syncCourseleafGitRepos BuildCourseleafDataTable "cleanDev -daemon")
+			pgms=(loadAuthData buildClientInfoTable buildSiteInfoTable BuildEmployeeTable buildQaStatusTable checkCgiPermissions)
+			pgms+=(checkPublishSettings updateDefaults syncCourseleafGitRepos BuildCourseleafDataTable "cleanDev -daemon")
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -524,3 +524,4 @@ return 0
 ## 06-11-2018 @ 16:50:52 - 1.22.77 - dscudiero - Added productsinsupport to the workwith data
 ## 06-13-2018 @ 10:27:06 - 1.22.78 - dscudiero - Remove NULL from the client record before being written out
 ## 06-14-2018 @ 07:14:14 - 1.22.78 - dscudiero - Go back to truncate
+## 06-14-2018 @ 17:02:02 - 1.22.78 - dscudiero - Add loadAuthData to the list of programs to run on mojave
