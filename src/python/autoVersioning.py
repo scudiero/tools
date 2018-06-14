@@ -128,6 +128,10 @@ if found:
 		if verbosity > 0: Msg("version = '" + str(version) + "'" )
 		versionParts=version.split(".")
 
+		Msg("versionParts[0] = '" + versionParts[0] + "'")
+		Msg("versionParts[1] = '" + versionParts[1] + "'")
+		Msg("versionParts[2] = '" + versionParts[2] + "'")
+
 		## Increment the editCount number, if editCount is 99 then increment the version and set editCount to 0
 		if int(versionParts[2]) < 99:
 			newVersion = versionParts[0] + "." + versionParts[1] + "." + str(int(versionParts[2]) + 1)
@@ -150,3 +154,4 @@ if found:
 ## 06-07-2018 @ 12:12:39 - 2.1.4 - dscudiero - Add code to detect "DO NOT AUTOVERSION"
 ## 06-14-2018 @ 09:51:55 - 2.1.4 - dscudiero - Add special processing for workflowLib.atj
 ## 06-14-2018 @ 09:57:29 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
+## 06-14-2018 @ 10:00:17 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
