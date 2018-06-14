@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.8.95" // -- dscudiero -- Mon 05/21/2018 @ 15:08:02.26
+wfLibVersion="1.8.98" // -- dscudiero -- Thu 06/14/2018 @ 10:11:45
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -136,10 +136,13 @@ if (typeof wfLibLoaded === "undefined") {
 				wfProposalMode='NEW'
 			if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
 				wfProposalMode='DELETE'
-			var d = new Date();
-			var prtStr="\n" + Array(40).join("=") + " " + d.toString() + " " + Array(40).join("=") +
-						"\nLoading workflowLib.atj (" + wfLibVersion + "), proposal mode is " + wfProposalMode + "\n";
-			if ( wfDebugLevel > 0 ) print_debug("\n\n\n\n\n\n\n\n" + prtStr);
+			if ( wfDebugLevel > 0 ) {
+				var d = new Date();
+				print_debug("\n\n\n\n\n\n\n\n")
+				print_debug(Array(120).join("=") + "\n");
+				print_debug("== Loading workflowLib.atj (" + wfLibVersion + "), proposal mode is " + wfProposalMode + "\t\t\t" + d.toString() + "\n");
+				print_debug(Array(120).join("=") + "\n");
+			}
 		}
 		if (wfEnvIsDev) {
 			if (typeof wfDebug === 'function')
@@ -2218,9 +2221,24 @@ function wfHello(msgLevel,inval,wfrule,args){
 		var text="";
 	}
 	wfDebug(msgLevel,"*** Starting: " + returnObj.myName + text);
-	wfDump(1,["reqType;"+returnObj.myRequest,"options;"+returnObj.myOpts,"notMode;"+returnObj.myNotMode],";","horizontal quote");
+	wfDump(msgLevel,["reqType;"+returnObj.myRequest,"options;"+returnObj.myOpts,"notMode;"+returnObj.myNotMode],";","horizontal quote");
 	return returnObj;
 }
+
+//======================================================================================================================
+// Write out a separator line in the debug file
+//======================================================================================================================
+// 06-14-18 - dgs - Initial coding
+//======================================================================================================================
+wffuncs.wfBreadCrumbs = function(inval, wfrule, args) {
+	var me=wfHello(99, inval, wfrule, args); // me={ myName:"", myOpts:"", myRequest:"", myNotMode:false };
+
+	wfDebug(1,"\n\n")
+	wfDebug(1,Array(10).join("=") + " " + me.myRequest.toUpperCase() + " " + Array(70).join("="))
+
+	return false
+} //wffuncs.wfBreadCrumbs
+
 
 //==================================================================================================
 // Quick formatted print of a variable
@@ -2642,3 +2660,4 @@ var wfLibLoaded=true;
 // 05-17-2018 @ 08:48:51 - 1.8.93 - dscudiero - Allow messages from NoWorkflow
 // 05-21-2018 @ 12:31:04 - 1.8.94 - dscudiero - Added wfGetCimInstanceName
 // 05-21-2018 @ 15:12:38 - 1.8.95 - dscudiero - Add wffuncsGetProposalMode
+// 06-14-2018 @ 10:12:35 - 1.8.98 - dscudiero - Tweaked messaging, added wfBreadCrumbs function
