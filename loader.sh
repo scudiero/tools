@@ -217,7 +217,7 @@ function CleanUp {
 		foundToolsSection=false
 		ifsSave="$IFS"; IFS=$'\n'; while read -r line; do
 			line=$(tr -d '\011\012\015' <<< "$line")
-			[[ -z $line || ${line:0:1} == '#' ]] && continue
+			[[ -z $line || ${line:0:1} == '#' || ${line:0:2} == '//' ]] && continue
 			[[ ${line:0:7} == '[tools]' ]] && foundToolsSection=true && continue
 			[[ $foundToolsSection != true ]] && continue
 			[[ $foundToolsSection == true && ${line:0:1} == '[' ]] && break
@@ -547,3 +547,4 @@ function CleanUp {
 ## 06-05-2018 @ 15:23:33 - 1.5.36 - dscudiero - Cosmetic/minor change/Sync
 ## 06-05-2018 @ 16:56:54 - 1.5.36 - dscudiero - Cosmetic/minor change/Sync
 ## 06-12-2018 @ 08:18:06 - 1.5.47 - dscudiero - Fix bug / optomiz parameter parsing
+## 06-14-2018 @ 15:19:51 - 1.5.47 - dscudiero - Treat // as a comment line in the config file
