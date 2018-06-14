@@ -153,8 +153,14 @@ if found:
 		## Edit file
 		sed(fullName, fromStr, toStr)
 		Msg("New version: " + newVersion)
+
+
+##======================================================================================================================
+## Check in log
+##======================================================================================================================
 ## 06-07-2018 @ 12:12:39 - 2.1.4 - dscudiero - Add code to detect "DO NOT AUTOVERSION"
 ## 06-14-2018 @ 09:51:55 - 2.1.4 - dscudiero - Add special processing for workflowLib.atj
 ## 06-14-2018 @ 09:57:29 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
 ## 06-14-2018 @ 10:00:17 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
 ## 06-14-2018 @ 10:17:55 - 2.1.4 - dscudiero - Added Special processing for workflowLib
+## 06-14-2018 @ 10:19:49 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
