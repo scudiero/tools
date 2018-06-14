@@ -38,15 +38,15 @@ function NewScript {
 	[[ ! -d $HOME/bin ]] && Msg $T "Could not find local bin directory\n"
 
 	## Parse file extension
-		fileExt=$(echo $file | cut -d'.' -f2)
+		fileExt="${file##*.}"
 		[[ $fileExt == "$file" ]] && fileExt='sh'
-		linkFile=$(echo $file | cut -d'.' -f1)
+		linkFile="${file%%.*}"
 		doCopy=true
 	## Check for existing files
 		[[ -f $localToolsDir/${linkFile}.${fileExt} ]] && Msg $T "File '$localToolsDir/${linkFile}.${fileExt}' already exists"
 		[[ ! -f $localToolsDir/src/test${fileExt}.${fileExt} ]] && Msg $T "Could not locate prototype file '$localToolsDir/src/test${fileExt}.${fileExt}'"
 		if [[ -h $TOOLSPATH/bin/$linkFile ]]; then
-			unset ans; Prompt ans "Found a pre-esiting file '$TOOLSPATH/bin/$linkFile, do you wish to overwrite" 'Yes No' 'No'; ans=$(Lower ${ans:0:1})
+			unset ans; Prompt ans "Found a pre-existing file '$TOOLSPATH/bin/$linkFile, do you wish to overwrite" 'Yes No' 'No'; ans=$(Lower ${ans:0:1})
 			[[ $ans == 'n' ]] && doCopy=false
 			Msg $T "found pre-existing link file '$TOOLSPATH/bin/$linkFile'"
 		fi
@@ -59,14 +59,16 @@ function NewScript {
 			sed -i s"_${fromStr}_${toStr}_g" $localToolsDir/src/${linkFile}.${fileExt}
 			Msg "^File '$file' -- copied from '$localToolsDir/src/test${fileExt}.${fileExt}'"
 		fi
-
 	## Create link
 		if [[ ! -f $linkFile ]]; then
 			cwd="$(pwd)";
-			cd $HOME/bin ;
-			ln -s $TOOLSPATH/src/dispatcher $linkFile; cd "$cwd"
-			Msg "^File '$file' -- created '$linkFile' symbolic link in '$HOME/bin' to '$TOOLSPATH/src/dispatcher'"
+			cd $TOOLSPATH/bin ;
+			ln -s "../dispatcher.sh" "$linkFile"
+			ln -s "./$linkFile" "${linkFile,,[a-z]}"
+			Msg "^File '$file' -- created '$linkFile' symbolic link in '$TOOLSPATH/bin' to '$TOOLSPATH/src/dispatcher'"
+			cd "$cwd"
 		fi
+
 
 	## Create db entry
 	unset ans; Prompt ans "Do you want to create a entry in the scripts db for '$linkFile'" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
@@ -91,38 +93,45 @@ function NewScript {
 			ignoreList=NULL; allowList=NULL; emailAddrs=NULL; scriptData1=NULL; scriptData2=NULL; scriptData3=NULL; scriptData4=NULL; scriptData5=NULL
 			if [[ $ans == 'y' ]]; then
 				Prompt ignoreList "\tIgnore List" '*optional*'
-				[[ $ignoreList != '' ]] && ignoreList="\"$ignoreList\"
+				[[ -n $ignoreList ]] && ignoreList="\"$ignoreList\"
 				Prompt allowList "\tAllow List" '*optional*'
-				[[ $allowList != '' ]] && allowList="\"$allowList\"
+				[[ -n $allowList ]] && allowList="\"$allowList\"
 				Prompt emailAddrs "\tEmail addresses" '*optional*'
-				[[ $emailAddrs != '' ]] && emailAddrs="\"$emailAddrs\""
+				[[ -n $emailAddrs ]] && emailAddrs="\"$emailAddrs\""
 				Prompt scriptData1 "\tScript Data 1" '*optional*'
-				[[ $scriptData1 != '' ]] && scriptData1="\"$scriptData1\""
+				[[ -n $scriptData1 ]] && scriptData1="\"$scriptData1\""
 				Prompt scriptData2 "\tScript Data 2" '*optional*'
-				[[ $scriptData2 != '' ]] && scriptData2="\"$scriptData2\""
+				[[ -n $scriptData2 ]] && scriptData2="\"$scriptData2\""
 				Prompt scriptData3 "\tScript Data 2" '*optional*'
-				[[ $scriptData3 != '' ]] && scriptData2="\"$scriptData3\""
+				[[ -n $scriptData3 ]] && scriptData2="\"$scriptData3\""
 				Prompt scriptData4 "\tScript Data 2" '*optional*'
-				[[ $scriptData4 != '' ]] && scriptData2="\"$scriptData4\""
+				[[ -n $scriptData4 ]] && scriptData2="\"$scriptData4\""
 				Prompt scriptData5 "\tScript Data 2" '*optional*'
-				[[ $scriptData5 != '' ]] && scriptData2="\"$scriptData5\""
+				[[ -n $scriptData5 ]] && scriptData2="\"$scriptData5\""
 			fi
-			[[ $ignoreList == '' ]] && ignoreList=NULL
-			[[ $allowList == '' ]] && allowList=NULL
-			[[ $emailAddrs == '' ]] && emailAddrs=NULL
-			[[ $scriptData1 == '' ]] && scriptData1=NULL
-			[[ $scriptData2 == '' ]] && scriptData2=NULL
-			[[ $scriptData3 == '' ]] && scriptData3=NULL
-			[[ $scriptData4 == '' ]] && scriptData4=NULL
-			[[ $scriptData5 == '' ]] && scriptData5=NULL
+			[[ -n $ignoreList ]] && ignoreList=NULL
+			[[ -n $allowList ]] && allowList=NULL
+			[[ -n $emailAddrs ]] && emailAddrs=NULL
+			[[ -n $scriptData1  ]] && scriptData1=NULL
+			[[ -n $scriptData2  ]] && scriptData2=NULL
+			[[ -n $scriptData3  ]] && scriptData3=NULL
+			[[ -n $scriptData4  ]] && scriptData4=NULL
+			[[ -n $scriptData5  ]] && scriptData5=NULL
 
 			Prompt semaphore "\tSet Semaphore" 'Yes No' 'No'
 			semaphore="\"$semaphore\""
+
 			Prompt active "\tActive" 'Yes No' 'No'
 			active="\"$active\""
 
+			Prompt updatesClData "\tUpdates Courseleaf data" 'Yes No' 'No'
+			[[ -n $updatesClData ]] && updatesClData="\"$updatesClData\"" || updatesClData=NULL
+
+			Prompt showInScripts "\tShow in scripts" 'Yes No' 'No'
+			[[ -n $showInScripts ]] && showInScripts="\"$showInScripts\"" || showInScripts=NULL
+
 			values="NULL,$name,$desc,NULL,\"$userName\",$supported,\"$osName\",NULL,$restrictToUsers,$restrictToGroups,$execName,$libs"
-			values="${values},NULL,$ignoreList,$allowList,$emailAddrs,$scriptData1,$scriptData2,$scriptData3,$scriptData4,$scriptData5,$semaphore,NULL,$active,\"$(date +%s)\",NULL"
+			values="${values},NULL,$ignoreList,$allowList,$emailAddrs,$scriptData1,$scriptData2,$scriptData3,$scriptData4,$scriptData5,$semaphore,NULL,$updatesClData,$active,$showInScripts,\"$(date +%s)\",NULL"
 			sqlStmt="insert into $scriptsTable values($values)"
 			#echo 'sqlStmt = >'$sqlStmt'<'
 			RunSql $sqlStmt
@@ -346,10 +355,9 @@ function NewClient {
 validTypes='script patch report newsItem default client'
 GetDefaultsData $myName
 ParseArgsStd $originalArgStr
-
 Hello
-[[ "$1" != "" && ${1:0:1} != '-' ]] && objType="$1" && shift
-[[ "$1" != "" && ${1:0:1} != '-' ]] && objName="$1" && shift
+[[ -n "$1" && ${1:0:1} != '-' ]] && objType="$1" && shift || true
+[[ -n "$1" && ${1:0:1} != '-' ]] && objName="$1" && shift || true
 
 Prompt objType "Please specify the object type" "$validTypes"; objType=$(TitleCase $objType)
 [[ $(Lower $objType) == 'script' ]] && objType='Script'
@@ -370,6 +378,10 @@ Msg; Msg "$objType object created"
 ## Bye-bye
 #==================================================================================================
 	Goodbye 0
+
+#==================================================================================================
+## Check-in log
+#==================================================================================================
 ## Wed Apr 20 11:10:19 CDT 2016 - dscudiero - fix problem if user does not specify any parameters
 ## Tue Apr 26 06:54:51 CDT 2016 - dscudiero - Updated new patch
 ## Wed Apr 27 16:01:18 CDT 2016 - dscudiero - Switch to use RunSql
@@ -400,3 +412,4 @@ Msg; Msg "$objType object created"
 ## 03-22-2018 @ 14:07:03 - 1.2.32 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:35:17 - 1.2.33 - dscudiero - D
 ## 03-23-2018 @ 16:36:24 - 1.2.34 - dscudiero - Remove vba and monitorifilw
+## 06-14-2018 @ 14:29:30 - 1.2.34 - dscudiero - Fix problem creating new scripts
