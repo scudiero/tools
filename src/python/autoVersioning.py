@@ -88,18 +88,19 @@ if verbosity > 0:
 	Msg("verbosity = '" + str(verbosity) + "'\n")
 
 validExtensions=["sh","py","tcf","cfg","atj"]
-found = False
+okToRun = False
 for ext in validExtensions:
 	if fileExt == ext: 
-		found = True
+		okToRun = True
 		break
 
 ## If we find the string 'DO NOT AUTOVERSION' then quit
 grepStr=grep("DO NOT AUTOVERSION", fullName, False, True)
 if len(grepStr) > 0:
-	found=False
+	okToRun=False
 
-if found:
+if okToRun:
+	Msg("Processing...")
 	verStr="version"
 	assignmentDelim="="
 	quoteStr="\""
@@ -164,3 +165,4 @@ if found:
 ## 06-14-2018 @ 10:17:55 - 2.1.4 - dscudiero - Added Special processing for workflowLib
 ## 06-14-2018 @ 10:19:49 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
 ## 06-14-2018 @ 12:44:11 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
+## 06-14-2018 @ 14:30:16 - 2.1.4 - dscudiero - Add messaging
