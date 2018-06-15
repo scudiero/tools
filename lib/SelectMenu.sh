@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.0" # -- dscudiero -- Thu 05/31/2018 @  9:21:03.49
+version="1.0.4" # -- dscudiero -- Fri 06/15/2018 @ 09:13:30
 #===================================================================================================
 # Display a selection menu
 # Usage: [options] selectMeue menuItemsArrayName returnVariableName [promptText]
@@ -90,6 +90,7 @@ function SelectMenu {
 			ordinal="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"
 			validVals="${validVals},${ordinal}"
 			if [[ $i -eq $startAt ]]; then ## i.e. the header record
+				key="${ordinal}"
 				ordinal="${ordinal}$(PadChar "$delim" ${maxWidths[0]})"
 				menuItem="${ordinal:0:${maxWidths[0]}}"
 				menuItem="$(ColorU "${menuItem:0:${#menuItem}-2}")  "
@@ -162,3 +163,4 @@ export -f SelectMenu
 # Check-in Log
 #===================================================================================================
 ## 05-31-2018 @ 09:22:22 - 1.0.0 - dscudiero - Re-factored to allow for faster menu draws
+## 06-15-2018 @ 13:37:03 - 1.0.4 - dscudiero - Fix problem not setting the key if processing the banner record
