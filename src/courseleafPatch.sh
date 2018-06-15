@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="6.0.96" # -- dscudiero -- Wed 13/06/2018 @ 13:42:11
+version="6.1.3" # -- dscudiero -- Fri 06/15/2018 @ 10:19:02
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -563,12 +563,21 @@ fi
 	[[ -f "$courseleafCgiDirRoot/courseleaf-$useRhel.cgi" ]] && courseleafCgiSourceFile="$courseleafCgiDirRoot/courseleaf-$useRhel.cgi"
 	courseleafCgiVer="$($courseleafCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
 	dump -1 courseleafCgiSourceFile courseleafCgiVer
+	[[ -z $courseleafCgiVer ]] && Terminate "Courseleaf cgi did not return version data, source ($ribbitCgiSourceFile) is suspect."
 
 	ribbitCgiDirRoot="$skeletonRoot/web/ribbit"
 	ribbitCgiSourceFile="$ribbitCgiDirRoot/index.cgi"
 	[[ -f "$ribbitCgiDirRoot/index-$useRhel.cgi" ]] && ribbitCgiSourceFile="$ribbitCgiDirRoot/index-$useRhel.cgi"
 	ribbitCgiVer="$($ribbitCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
 	dump -1 ribbitCgiSourceFile ribbitCgiVer
+	[[ -z $ribbitCgiVer ]] && Terminate "Ribbit cgi did not return version data, source ($ribbitCgiSourceFile) is suspect."
+
+	searchCgiDirRoot="$skeletonRoot/web/search"
+	searchCgiSourceFile="$searchCgiDirRoot/index.cgi"
+	[[ -f "$searchCgiDirRoot/index-$useRhel.cgi" ]] && searchCgiSourceFile="$searchCgiDirRoot/index-$useRhel.cgi"
+	searchCgiVer="$($searchCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
+	dump -1 searchCgiSourceFile searchCgiVer
+	[[ -z $searchCgiVer ]] && Terminate "Search cgi did not return version data, source ($searchCgiSourceFile) is suspect."
 
 ## Get the daily.sh version
 	dailyShourceFile="$skeletonRoot/bin/daily.sh"
@@ -615,8 +624,10 @@ if [[ $catalogAdvance == true ]]; then
 fi
 [[ $catalogAudit == true ]] && verifyArgs+=("Catalog Audit:$catalogAudit")
 
-[[ -n $courseleafCgiVer ]] && verifyArgs+=("New courseleaf.cgi version:$courseleafCgiVer")
-[[ -n $ribbitCgiVer ]] && verifyArgs+=("New ribbit.cgi version:$ribbitCgiVer")
+[[ -n $courseleafCgiVer ]] && verifyArgs+=("New 'courseleaf' cgi version:$courseleafCgiVer (<skeleton>/$(basename $(dirname $courseleafCgiSourceFile))/$(basename $courseleafCgiSourceFile))")
+[[ -n $ribbitCgiVer ]] && verifyArgs+=("New 'ribbit' cgi version:$ribbitCgiVer (<skeleton>/$(basename $(dirname $ribbitCgiSourceFile))/$(basename $ribbitCgiSourceFile))")
+[[ -n $searchCgiVer ]] && verifyArgs+=("New 'search' cgi version:$searchCgiVer (<skeleton>/$(basename $(dirname $searchCgiSourceFile))/$(basename $searchCgiSourceFile))")
+
 [[ -n $dailyShVer ]] && verifyArgs+=("New daily.sh version:$dailyShVer")
 verifyArgs+=("skeleton Root:$skeletonRoot")
 [[ $backup == true ]] && verifyArgs+=("Backup site:$backup, backup directory: '$backupSite'")
@@ -1533,3 +1544,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-08-2018 @ 10:19:23 - 6.0.93 - dscudiero - Remove debug statements
 ## 06-11-2018 @ 16:28:10 - 6.0.94 - dscudiero - Remove debug code
 ## 06-13-2018 @ 13:50:29 - 6.0.96 - dscudiero - Switch order for Hello
+## 06-15-2018 @ 11:19:31 - 6.1.3 - dscudiero - Sanity check the cgi files before patching, stop if bad
