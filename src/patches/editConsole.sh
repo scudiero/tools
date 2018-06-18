@@ -7,7 +7,7 @@ version=1.0.-1 # -- dscudiero -- 10/20/2016 @ 14:58:14.98
 # Note: This script cannot be run standalone, it is meant to be sourced by the courseleafPatch script
 # Note: This file is sourced by the courseleafPatch script, please be careful
 #=======================================================================================================================
-scriptDescription="Edit the console page"
+scriptDescription="Check/Edit the console page"
 
 ## Edit the console page
 ##	1) change title to 'CourseLeaf Console' (requested by Mike 02/09/17)
@@ -17,6 +17,7 @@ scriptDescription="Edit the console page"
 editFile="$tgtDir/web/$courseleafProgDir/index.tcf"
 if [[ -w "$editFile" ]]; then
 	Msg; Msg "^$CPitemCntr) $scriptDescription..."
+	changesMade=false
 	fromStr='title:Catalog Console'
 	toStr='title:CourseLeaf Console'
 	grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
@@ -28,6 +29,7 @@ if [[ -w "$editFile" ]]; then
 		changeLogRecs+=("$updateFile updated to change title")
 		Msg "^^Updated '$updateFile' to change 'title:Catalog Console' to 'title:CourseLeaf Console'"
 		rebuildConsole=true
+		changesMade=true
 	fi
 
 	fromStr='navlinks:CAT|Refresh System|refreshsystem'
@@ -41,6 +43,7 @@ if [[ -w "$editFile" ]]; then
 		changeLogRecs+=("$updateFile updated to change title")
 		Msg "^^Updated '$updateFile' to remove 'Refresh System'"
 		rebuildConsole=true
+		changesMade=true
 	fi
 
 	fromStr='localsteps:links|links|links'
@@ -54,6 +57,7 @@ if [[ -w "$editFile" ]]; then
 		changeLogRecs+=("$updateFile updated to change title")
 		Msg "^^Updated '$updateFile' to remove 'localsteps:links|links|links"
 		rebuildConsole=true
+		changesMade=true
 	fi
 
 	#navlinks:CAT|Rebuild Course Bubbles and Search Results|mkfscourses^^<h4>Rebuild Course Bubbles and Search Results</h4>Rebuild the course description pop-up bubbles, and also search results.^steptitle=Rebuilding Course Bubbles and Search Results
@@ -68,7 +72,9 @@ if [[ -w "$editFile" ]]; then
 		changeLogRecs+=("$updateFile updated to change title")
 		Msg "^^Updated '$updateFile' to remove 'localsteps:links|links|links"
 		rebuildConsole=true
+		changesMade=true
 	fi
+	[[ $changesMade != true ]] && Msg "^^No changes made"
 	((CPitemCntr++))
 else
 	Msg
@@ -80,3 +86,4 @@ fi
 #=======================================================================================================================
 ## 06-18-2018 @ 08:28:27 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
 ## 06-18-2018 @ 08:30:52 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
+## 06-18-2018 @ 15:50:24 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
