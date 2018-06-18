@@ -11,8 +11,9 @@ scriptDescription="Rebuild console & approve pages"
 
 ## Rebuild console & approve pages
 if [[ $rebuildConsole == true ]]; then
-	Msg "^$CPitemCntr) $scriptDescription..."
+	Msg; Msg "^$CPitemCntr) $scriptDescription..."
 	RunCourseLeafCgi "$tgtDir" "-r /$courseleafProgDir/index.html" | Indent | Indent
 	RunCourseLeafCgi "$tgtDir" "-r /$courseleafProgDir/approve/index.html" | Indent | Indent
 	((CPitemCntr++))
 fi
+## 06-18-2018 @ 08:28:37 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
