@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.47" # -- dscudiero -- Tue 12/06/2018 @ 08:16:29
+version="1.5.58" # -- dscudiero -- Fri 06/15/2018 @ 07:52:18
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -264,51 +264,29 @@ function CleanUp {
 			fi
 		fi
 
-	## Cache scripts data
-		declare -A ScriptsAuthData
-		if [[ -z ${!ScriptsAuthData[@]} ]]; then
-			sqlStmt="select name, author,restrictToUsers,restrictToGroups from $scriptsTable where active=\"Yes\""
-			RunSql $sqlStmt
-			[[ ${#resultSet[@]} -eq 0 || -z ${resultSet[0]} ]] && { echo true; return 0; }
-			for result in "${resultSet[@]}"; do
-				name="${result%%|*}"; result=${result#*|}
-				ScriptsAuthData["${name}.author"]="${result%%|*}"; result=${result#*|};
-				[[ ${ScriptsAuthData["${name}.author"]} == 'NULL' ]] && unset ScriptsAuthData["${name}.author"]
-
-				ScriptsAuthData["${name}.restrictToUsers"]="${result%%|*}"; result=${result#*|};
-				[[ ${ScriptsAuthData["${name}.restrictToUsers"]} == 'NULL' ]] && unset ScriptsAuthData["${name}.restrictToUsers"] || \
-					ScriptsAuthData["${name}.restrictToUsers"]="${ScriptsAuthData["${name}.restrictToUsers"]}, productowners"
-
-				ScriptsAuthData["${name}.restrictToGroups"]="${result%%|*}"; result=${result#*|};
-				[[ ${ScriptsAuthData["${name}.restrictToGroups"]} == 'NULL' ]] && unset ScriptsAuthData["${name}.restrictToGroups"]
-			done
-		fi
-
-	## Cache users auth groups and restrictedScripts list
+	## Cache users auth groups and scripts list
 		if [[ -z $UsersAuthGroups ]]; then
-			if [[ -r "$TOOLSPATH/auth/$userName" ]]; then
-				unset UsersRestrictedScripts
-				readarray -t tmpArray < "$TOOLSPATH/auth/$userName"
-				UsersAuthGroups="${tmpArray[0]}"
-				for ((i=1; i<${#tmpArray[@]}; i++)); do
+			if [[ -r "${authShadowDir}/${userName}" ]]; then
+				unset UsersScripts UsersScriptsStr
+				readarray -t tmpArray < "${authShadowDir}/${userName}"
+				UsersAuthGroups="${tmpArray[1]}"
+				UsersScriptsStr="${tmpArray[2]}"
+				for ((i=3; i<${#tmpArray[@]}; i++)); do
 					str="${tmpArray[$i]}"; str="${str//[$'\t\r\n']}"
-					UsersRestrictedScripts+=("$str")
+					UsersScripts+=("$str")
 				done
 			else
 				UsersAuthGroups='none'
 			fi
 		fi
+		# Dump UsersAuthGroups UsersScriptsStr
+		# for ((xx=0; xx<${#UsersScripts[@]}; xx++)); do echo "UsersScripts[$xx] = >${UsersScripts[$xx]}<"; done
 
 	## Check to make sure we are authorized
-		checkMsg=$(CheckAuth $callPgmName)
-		if [[ -n $checkMsg && $checkMsg != true ]]; then
-			if [[ $(Contains ",$administrators," ",$userName,") == true ]]; then
-				echo; echo; Warning "$checkMsg"; echo
-				Pause
-			else
-				[[ $callPgmName != 'testsh' ]] && { echo; echo; Terminate "$checkMsg"; }
-			fi
-		fi
+		[[ $(Contains ",$UsersScriptsStr," ",$callPgmName,") != true ]] && \
+			{ echo; echo; Terminate "Sorry, you do not have authorization to run script '$callPgmName'. \
+			You are in the following authorization groups: ${UsersAuthGroups//,/, }.  \
+			\n\t\t Please contact your supervisor or '$administrators' for additional information."; }
 
 	## Check semaphore
 		[[ $(Contains ",$setSemaphoreList," ",$callPgmName," ) == true ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
@@ -526,12 +504,12 @@ function CleanUp {
 ## 03-21-2018 @ 11:38:57 - 1.4.138 - dscudiero - Cosmetic/minor change/Sync
 ## 03-21-2018 @ 11:41:04 - 1.4.139 - dscudiero - Turn on loading messages
 ## 03-23-2018 @ 16:43:24 - 1.4.140 - dscudiero - Updates Msg3/Msg
-## 04-18-2018 @ 09:34:25 - 1.5.1 - dscudiero - Refactored to use useDev
+## 04-18-2018 @ 09:34:25 - 1.5.1 - dscudiero - Re factored to use useDev
 ## 04-18-2018 @ 13:41:36 - 1.5.2 - dscudiero - D
 ## 04-19-2018 @ 07:13:18 - 1.5.3 - dscudiero - Re-factor how we detect viaCron
 ## 04-19-2018 @ 08:11:10 - 1.5.4 - dscudiero - Add debug statements
 ## 04-19-2018 @ 12:06:48 - 1.5.5 - dscudiero - Display checkRun messages if admins
-## 04-19-2018 @ 12:22:09 - 1.5.11 - dscudiero - Fix problem continuing for admins if script is offline
+## 04-19-2018 @ 12:22:09 - 1.5.11 - dscudiero - Fix problem continuing for admins if script is off-line
 ## 04-19-2018 @ 16:52:01 - 1.5.15 - dscudiero - Fixed problem passing -- arguments on to the called script
 ## 04-20-2018 @ 07:21:09 - 1.5.16 - dscudiero - Remove debug
 ## 04-20-2018 @ 11:17:53 - 1.5.17 - dscudiero - Remove debug statements
@@ -543,8 +521,9 @@ function CleanUp {
 ## 05-29-2018 @ 13:17:35 - 1.5.34 - dscudiero - Add declaration or the clientData hash table
 ## 05-29-2018 @ 16:43:55 - 1.5.36 - dscudiero - Comment out debug stuff
 ## 06-05-2018 @ 13:59:24 - 1.5.36 - dscudiero - Add debug
-## 06-05-2018 @ 14:09:01 - 1.5.36 - dscudiero - Add a pause statement if admin and checkRun failes
+## 06-05-2018 @ 14:09:01 - 1.5.36 - dscudiero - Add a pause statement if admin and checkRun failed
 ## 06-05-2018 @ 15:23:33 - 1.5.36 - dscudiero - Cosmetic/minor change/Sync
 ## 06-05-2018 @ 16:56:54 - 1.5.36 - dscudiero - Cosmetic/minor change/Sync
-## 06-12-2018 @ 08:18:06 - 1.5.47 - dscudiero - Fix bug / optomiz parameter parsing
+## 06-12-2018 @ 08:18:06 - 1.5.47 - dscudiero - Fix bug / optimize parameter parsing
 ## 06-14-2018 @ 15:19:51 - 1.5.47 - dscudiero - Treat // as a comment line in the config file
+## 06-18-2018 @ 08:12:39 - 1.5.58 - dscudiero - Refactor authorization checks
