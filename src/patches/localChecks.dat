@@ -1,0 +1,11 @@
+##==================================================================================
+## This is an ordered list of 'patch' files that should be applied by 
+## courseleafPatch as part of the patching process
+##==================================================================================
+checkFormbuilderWidgets
+checkribbitGetCourseRjs
+editConsole
+editLocalstepsDefaultTcf
+moveFsinjectorSqlite
+rebuildPages
+removeSpecialCgis
