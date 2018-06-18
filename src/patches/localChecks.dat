@@ -4,6 +4,7 @@
 ##==================================================================================
 checkFormbuilderWidgets
 checkribbitGetCourseRjs
+checkFopVersion
 editConsole
 editLocalstepsDefaultTcf
 moveFsinjectorSqlite
