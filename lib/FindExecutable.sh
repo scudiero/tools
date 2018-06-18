@@ -54,25 +54,25 @@ function FindExecutable {
 		searchDirs="$TOOLSPATH/src"
 		[[ $useDev == true && -n $TOOLSDEVPATH && -d "$TOOLSDEVPATH/src" ]] && searchDirs="$TOOLSDEVPATH/src $searchDirs"
 		[[ $useLocal == true && -d "$HOME/tools/src" ]] && searchDirs="$HOME/tools/src $searchDirs"
-		searchTokens="bash:sh python:py java:class steps:html report:sh cron:sh wftests:wftest"
+		searchTokens="bash:sh python:py java:class steps:html report:sh cron:sh wftests:wftest data:dat text:txt"
 	fi
 	#Dump -t fileName mode searchRoot searchTokens searchDirs scriptArgs > $stdout
 
 	## Search for the file based in the searchDirs based on the searchTokens
 	for dir in $searchDirs; do
-		#Dump -t dir >> $stdout
+		Dump 1 -t dir >> $stdout
 		for token in $(tr ',' ' ' <<< "$searchTokens"); do
 			type="${token%%:*}"; ext="${token##*:}"
-			#Dump -t2 type ext >> $stdout
+			Dump 1 -t2 type ext >> $stdout
 			[[ -n $searchRoot ]] && checkFile="$dir/$searchRoot/${fileName}.${ext}" || checkFile="$dir/${fileName}.${ext}"
-			#Dump -t3 checkFile >> $stdout
+			Dump 1 -t3 checkFile >> $stdout
 			[[ -r "$checkFile" ]] && { found=true; break; } || unset checkFile
 		done
 		[[ $found == true ]] && break
 	done
 
 	executeFile="$checkFile" 
-	#Dump -t executeFile >> $stdout
+	Dump 1 -t executeFile >> $stdout
 
 	if [[ $runScript == true ]]; then
 		#Dump -t scriptArgs
@@ -120,3 +120,4 @@ export -f FindExecutable
 ## 04-18-2018 @ 09:34:45 - 1.2.49 - dscudiero - Refactored setting searchdirs
 ## 05-08-2018 @ 16:03:49 - 1.2.54 - dscudiero - Remove debug statements
 ## 05-23-2018 @ 10:01:40 - 1.2.57 - dscudiero - Added wftests file type
+## 06-18-2018 @ 08:12:05 - 1.2.57 - dscudiero - Added types of dat and txt
