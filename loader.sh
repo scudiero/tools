@@ -283,10 +283,12 @@ function CleanUp {
 		# for ((xx=0; xx<${#UsersScripts[@]}; xx++)); do echo "UsersScripts[$xx] = >${UsersScripts[$xx]}<"; done
 
 	## Check to make sure we are authorized
-		[[ $(Contains ",$UsersScriptsStr," ",$callPgmName,") != true ]] && \
-			{ echo; echo; Terminate "Sorry, you do not have authorization to run script '$callPgmName'. \
-			You are in the following authorization groups: ${UsersAuthGroups//,/, }.  \
-			\n\t\t Please contact your supervisor or '$administrators' for additional information."; }
+		if [[ $callPgmName != 'scripts' ]]; then
+			[[ $(Contains ",$UsersScriptsStr," ",$callPgmName,") != true ]] && \
+				{ echo; echo; Terminate "Sorry, you do not have authorization to run script '$callPgmName'. \
+				You are in the following authorization groups: ${UsersAuthGroups//,/, }.  \
+				\n\t\t Please contact your supervisor or '$administrators' for additional information."; }
+		fi
 
 	## Check semaphore
 		[[ $(Contains ",$setSemaphoreList," ",$callPgmName," ) == true ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
@@ -527,3 +529,4 @@ function CleanUp {
 ## 06-12-2018 @ 08:18:06 - 1.5.47 - dscudiero - Fix bug / optimize parameter parsing
 ## 06-14-2018 @ 15:19:51 - 1.5.47 - dscudiero - Treat // as a comment line in the config file
 ## 06-18-2018 @ 08:12:39 - 1.5.58 - dscudiero - Refactor authorization checks
+## 06-18-2018 @ 10:11:44 - 1.5.58 - dscudiero - Do not check auth if script being loaded is 'scripts'
