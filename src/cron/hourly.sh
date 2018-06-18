@@ -176,51 +176,51 @@ function SyncSkeleton {
 # 	return 0
 # } #BuildToolsAuthTable
 
-#=======================================================================================================================
-# Sync the courseleaf patch control table from internal to the data warehouse
-#=======================================================================================================================
-function SyncCourseleafPatchTable() {
-	local numfields fields 
-	Import 'DatabaseUtilities SetFileExpansion RunSql'
+# #=======================================================================================================================
+# # Sync the courseleaf patch control table from internal to the data warehouse
+# #=======================================================================================================================
+# function SyncCourseleafPatchTable() {
+# 	local numfields fields 
+# 	Import 'DatabaseUtilities SetFileExpansion RunSql'
 
-	## Get the transactional database file from the internal stage config file
-	grepStr=$(ProtectedCall "grep db:courseleafPatch $internalSiteRoot/stage/pagewiz.cfg")
-	[[ -z $grepStr ]] && { Error "Could not locate the db definition record for courseleafPatch in '$internalSiteRoot/stage/pagewiz.cfg'"; return 0; }
+# 	## Get the transactional database file from the internal stage config file
+# 	grepStr=$(ProtectedCall "grep db:courseleafPatch $internalSiteRoot/stage/pagewiz.cfg")
+# 	[[ -z $grepStr ]] && { Error "Could not locate the db definition record for courseleafPatch in '$internalSiteRoot/stage/pagewiz.cfg'"; return 0; }
 	
-	dbFile="${internalSiteRoot}/stage${grepStr##*|}"
-	getTableColumns "$patchesTable" 'warehouse' 'numFields' 'fields'
+# 	dbFile="${internalSiteRoot}/stage${grepStr##*|}"
+# 	getTableColumns "$patchesTable" 'warehouse' 'numFields' 'fields'
 
-	## Make a copy of the warehouse table 
-		sqlStmt="drop table if exists ${patchesTable}New"
-		RunSql $sqlStmt
-		sqlStmt="create table ${patchesTable}New like ${patchesTable}"
-		RunSql $sqlStmt
+# 	## Make a copy of the warehouse table 
+# 		sqlStmt="drop table if exists ${patchesTable}New"
+# 		RunSql $sqlStmt
+# 		sqlStmt="create table ${patchesTable}New like ${patchesTable}"
+# 		RunSql $sqlStmt
 
-	## Load the data from the transactional table into the new table
-		## Get transactional data
-		SetFileExpansion 'off'
-		sqlStmt="select * from $patchesTable"
-		RunSql "$dbFile" $sqlStmt
-		SetFileExpansion
-		for rec in "${resultSet[@]}"; do dataRecs+=("$rec"); done
-		## Insert into warehouse table
-		for ((i=0; i<${#dataRecs[@]}; i++)); do
-			sqlStmt="insert into ${patchesTable}New ($fields) values("
-			data="${dataRecs[$i]}"; #data="${data#*|}"
-			#sqlStmt="${sqlStmt}null,\"${data//|/","}\")"
-			sqlStmt="${sqlStmt}\"${data//|/","}\")"
-			RunSql $sqlStmt
-		done
+# 	## Load the data from the transactional table into the new table
+# 		## Get transactional data
+# 		SetFileExpansion 'off'
+# 		sqlStmt="select * from $patchesTable"
+# 		RunSql "$dbFile" $sqlStmt
+# 		SetFileExpansion
+# 		for rec in "${resultSet[@]}"; do dataRecs+=("$rec"); done
+# 		## Insert into warehouse table
+# 		for ((i=0; i<${#dataRecs[@]}; i++)); do
+# 			sqlStmt="insert into ${patchesTable}New ($fields) values("
+# 			data="${dataRecs[$i]}"; #data="${data#*|}"
+# 			#sqlStmt="${sqlStmt}null,\"${data//|/","}\")"
+# 			sqlStmt="${sqlStmt}\"${data//|/","}\")"
+# 			RunSql $sqlStmt
+# 		done
 
-	## Swap tables
-		sqlStmt="drop table if exists ${patchesTable}Bak"
-		RunSql $sqlStmt
-		sqlStmt="rename table $patchesTable to ${patchesTable}Bak"
-		RunSql $sqlStmt
-		sqlStmt="rename table ${patchesTable}New to $patchesTable"
-		RunSql $sqlStmt
-	return 0
-} #SyncCourseleafPatchTable
+# 	## Swap tables
+# 		sqlStmt="drop table if exists ${patchesTable}Bak"
+# 		RunSql $sqlStmt
+# 		sqlStmt="rename table $patchesTable to ${patchesTable}Bak"
+# 		RunSql $sqlStmt
+# 		sqlStmt="rename table ${patchesTable}New to $patchesTable"
+# 		RunSql $sqlStmt
+# 	return 0
+# } #SyncCourseleafPatchTable
 
 #=======================================================================================================================
 # Main
@@ -236,8 +236,8 @@ case "$hostName" in
 		# fi
 
 		## Run programs/functions
-			#pgms=(updateDefaults SyncCourseleafPatchTable CheckMonitorFiles SyncInternalDb SyncCourseleafCgis SyncSkeleton)
-			pgms=(updateDefaults SyncCourseleafPatchTable SyncInternalDb)
+			#pgms=(updateDefaults loadPatchData CheckMonitorFiles SyncInternalDb SyncCourseleafCgis SyncSkeleton)
+			pgms=(updateDefaults loadPatchData SyncInternalDb)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -367,3 +367,4 @@ return 0
 ## 06-08-2018 @ 10:15:28 - 2.2.31 - dscudiero - Lookup the locaion of the patch control db from the internal stage config file
 ## 06-08-2018 @ 13:04:37 - 2.2.32 - dscudiero - Remove debug
 ## 06-08-2018 @ 14:15:34 - 2.2.32 - dscudiero - Fix name of the database file
+## 06-18-2018 @ 15:50:12 - 2.2.32 - dscudiero - Pull out refresh patches data, call loadPatchData script
