@@ -1149,149 +1149,13 @@ Msg "\n*** All requested product updates completed ***"
 Msg
 CPitemCntr=1
 Msg "\nCross product checks..."
-## Check to see if there are any old formbuilder widgets
-	if [[ $client != 'internal' && -n $locallibsDir && -d "$locallibsDir/locallibs" ]]; then
-		checkDir="$locallibsDir/locallibs/widgets"
-		fileCount=$(ls "$checkDir" 2> /dev/null | grep 'banner_' | wc -l)
-		[[ $fileCount -gt 0 ]] && Warning 0 1 "Found 'banner' widgets in '$checkDir', these are probably deprecated, please ask a CIM developer to evaluate."
-		fileCount=$(ls "$checkDir" 2> /dev/null | grep 'psoft_' | wc -l)
-		[[ $fileCount -gt 0 ]] && Warning 0 1 "Found 'psoft' widgets in '$checkDir', these are probably deprecated, please ask a CIM developer to evaluate."
-	fi
-## Check /ribbit/getcourse.rjs file
-	checkFile="$tgtDir/web/ribbit/getcourse.rjs"
-	if [[ -f "$checkFile" ]]; then
-		skelDate=$(date +%s -r $skeletonRoot/web/ribbit/getcourse.rjs)
-		fileDate=$(date +%s -r $tgtDir/web/ribbit/getcourse.rjs)
-		if [[ $skelDate -gt $fileDate ]]; then
-			echo
-			text="The time date stamp of the file '$tgtDir/web/ribbit/getcourse.rjs' is less "
-			text="$text than the time date stamp of the file in the skeleton, you should compare the files and merge"
-			text="$text any required changes into '$tgtDir/web/ribbit/getcourse.rjs'."
-			Warning 0 1 "$text"
-		fi
-	fi
-## Edit the console page
-##	1) change title to 'CourseLeaf Console' (requested by Mike 02/09/17)
-## 	2) remove 'System Refresh' (requested by Mike Miller 09/13/17)
-## 	3) remove 'localsteps:links|links|links' (requested by Mike Miller 09/13/17)
-## 	4) Add 'navlinks:CAT|Rebuild Course Bubbles and Search Results'
-	Msg "^Checking /web/$courseleafProgDir/index.tcf..."
-	editFile="$tgtDir/web/$courseleafProgDir/index.tcf"
-	if [[ -w "$editFile" ]]; then
-		fromStr='title:Catalog Console'
-		toStr='title:CourseLeaf Console'
-		grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
-		if [[ -n $grepStr ]]; then
-			backupFile "$editFile" "$backupRootDir"
-			sed -i s"!^$fromStr!$toStr!" $editFile
-			[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
-			updateFile="/$courseleafProgDir/index.tcf"
-			changeLogRecs+=("$updateFile updated to change title")
-			Msg "^Updated '$updateFile' to change 'title:Catalog Console' to 'title:CourseLeaf Console'"
-			rebuildConsole=true
-		fi
-
-		fromStr='navlinks:CAT|Refresh System|refreshsystem'
-		toStr='// navlinks:CAT|Refresh System|refreshsystem'
-		grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
-		if [[ -n $grepStr ]]; then
-			backupFile "$editFile" "$backupRootDir"
-			sed -i s"!^$fromStr!$toStr!" $editFile
-			[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
-			updateFile="/$courseleafProgDir/index.tcf"
-			changeLogRecs+=("$updateFile updated to change title")
-			Msg "^Updated '$updateFile' to remove 'Refresh System'"
-			rebuildConsole=true
-		fi
-
-		fromStr='localsteps:links|links|links'
-		toStr='// localsteps:links|links|links'
-		grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
-		if [[ -n $grepStr ]]; then
-			backupFile "$editFile" "$backupRootDir"
-			sed -i s"!^$fromStr!$toStr!" $editFile
-			[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
-			updateFile="/$courseleafProgDir/index.tcf"
-			changeLogRecs+=("$updateFile updated to change title")
-			Msg "^Updated '$updateFile' to remove 'localsteps:links|links|links"
-			rebuildConsole=true
-		fi
-
-		#navlinks:CAT|Rebuild Course Bubbles and Search Results|mkfscourses^^<h4>Rebuild Course Bubbles and Search Results</h4>Rebuild the course description pop-up bubbles, and also search results.^steptitle=Rebuilding Course Bubbles and Search Results
-		fromStr='localsteps:links|links|links'
-		toStr='// localsteps:links|links|links'
-		grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
-		if [[ -n $grepStr ]]; then
-			backupFile "$editFile" "$backupRootDir"
-			sed -i s"!^$fromStr!$toStr!" $editFile
-			[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
-			updateFile="/$courseleafProgDir/index.tcf"
-			changeLogRecs+=("$updateFile updated to change title")
-			Msg "^Updated '$updateFile' to remove 'localsteps:links|links|links"
-			rebuildConsole=true
-		fi
-	else
-		Msg
-		Warning 0 2 "Could not locate '$editFile', please check the target site"
-	fi
-
-## Edit /localsteps/default.tcf
-	##	1) Remove uploadurl from the default.tcf file(requested by Ben 04/05/18)
-	Msg "^Checking $localstepsDir/default.tcf..."
-	if [[ $(CompareVersions "$(GetProductVersion 'cat' "$siteDir")" 'ge' '3.5.10') == true ]]; then
-		editFile="$localstepsDir/default.tcf"
-		if [[ -f "$editFile" ]]; then
-			fromStr='uploadurl:'
-			grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
-			if [[ -n $grepStr ]]; then
-				backupFile "$editFile" "$backupRootDir"
-				sed -i "/^$fromStr/d" $editFile
-				[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
-			fi
-			fromStr='cimuploadurl:'
-			grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
-			if [[ -n $grepStr ]]; then
-				backupFile "$editFile" "$backupRootDir"
-				sed -i "/^$fromStr/d" $editFile
-				[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
-			fi
-		fi
-	fi
-
-## Move / move fsinjector.sqlite to the ribbit folder (requested by Mike 06/03/17)
-	checkFile="$tgtDir/web/ribbit/fsinjector.sqlite"
-	Msg "^Checking /web/ribbit/fsinjector.sqlite..."
-	if [[ ! -f $checkFile ]]; then
-		[[ -f "$tgtDir/db/fsinjector.sqlite" ]] && mv -f "$tgtDir/db/fsinjector.sqlite" "$checkFile"
-		editFile="$cfgFile"
-		fromStr=$(ProtectedCall "grep '^db:fsinjector|sqlite|' $editFile")
-		toStr='db:fsinjector|sqlite|/ribbit/fsinjector.sqlite'
-		[[ buildPatchPackage == true ]] && cpToPackageDir "$editFile"
-		sed -i s"_^${fromStr}_${toStr}_" "$editFile"
-		Msg "^Updated '$editFile' to change changed the mapfile record for 'db:fsinjector' to point to the ribbit directory"
-	fi
-
-## Rebuild console & approve pages
-	if [[ $rebuildConsole == true ]]; then
-		Msg "^Republishing CourseLeaf console & approve pages..."
-		RunCourseLeafCgi "$tgtDir" "-r /$courseleafProgDir/index.html" | Indent
-		RunCourseLeafCgi "$tgtDir" "-r /$courseleafProgDir/approve/index.html" | Indent
-	fi
-
-## Check to see if there are any 'special' cgis installed, see if they are still necessary
-	tgtVer="$($tgtDir/web/$courseleafProgDir/$courseleafProgDir.cgi -v 2> /dev/null | cut -d" " -f3)"
-	for checkDir in tcfdb; do
-		if [[ -f $tgtDir/web/$courseleafProgDir/$checkDir/courseleaf.cgi ]]; then
-			checkCgiVer="$($tgtDir/web/$courseleafProgDir/$checkDir/$courseleafProgDir.cgi -v 2> /dev/null | cut -d" " -f3)"
-			if [[ $(CompareVersions "$checkCgiVer" 'le' "$tgtVer") == true ]]; then
-				Msg "^Found a 'special' courseleaf cgi directory ($checkDir) and the version of that cgi ($checkCgiVer) is less than the target version ($tgtVer).  Removing the directory"
-				BackupCourseleafFile "$tgtDir/web/$courseleafProgDir/$checkDir" "$backupRootDir"
-				backupFile "$tgtDir/web/$courseleafProgDir/$checkDir" "$backupRootDir"
-				rm -f $tgtDir/web/$courseleafProgDir/$checkDir
-				changeLogRecs+=("Removed '$tgtDir/web/$courseleafProgDir/$checkDir'")
-			fi
-		fi
-	done
+## Get the list of patches to apply from the '$myName.sh' file then run them in order retrieved
+readarray -t localChecks < $(FindExecutable localChecks -patch)
+for patch in "${localChecks[@]}"; do
+	[[ ${patch:0:1} == '#' || ${patch:0:2} == '//' ]] && continue
+	patch="$(tr -d '\r\n' <<< "$patch")"
+ 	FindExecutable $patch -patch -run
+done
 
 #=======================================================================================================================
 
@@ -1545,3 +1409,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-11-2018 @ 16:28:10 - 6.0.94 - dscudiero - Remove debug code
 ## 06-13-2018 @ 13:50:29 - 6.0.96 - dscudiero - Switch order for Hello
 ## 06-15-2018 @ 11:19:31 - 6.1.3 - dscudiero - Sanity check the cgi files before patching, stop if bad
+## 06-18-2018 @ 08:15:40 - 6.1.3 - dscudiero - Updated to the use that patch scriptilets for local checks
