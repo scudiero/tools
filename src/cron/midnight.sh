@@ -317,52 +317,7 @@ case "$hostName" in
 			
 		 ## Create the data dump for the workwith tool
 		 	Msg "^Building the 'WorkWith' client data file..."
-		 	unset client
-			if [[ -z $client ]]; then
-			 	[[ ! -d $(dirname "$workwithDataFile") ]] && mkdir -p "$(dirname "$workwithDataFile")"
-			 	outFile="${workwithDataFile}.new"
-			 	echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE CLIENTS/SITES TABLES IN THE DATA WAREHOUSE" > "$outFile"
-				sqlStmt="select ignoreList from $scriptsTable where name=\"buildClientInfoTable\""
-			 	RunSql $sqlStmt
-			 	ignoreList="${resultSet[$i]}"; ignoreList=${ignoreList##*:}; ignoreList="'${ignoreList//,/','}'"
-				sqlStmt="select name,longName,hosting,products,productsinsupport from $clientInfoTable where recordstatus=\"A\" and name not in ($ignoreList) order by name"
-			 	RunSql $sqlStmt
-				for rec in "${resultSet[@]}"; do clients+=("$rec"); done
-			else
-				clients=($client)
-				outFile="/dev/stdout"
-			fi
-
-			for ((i=0; i<${#clients[@]}; i++)); do
-				clientRec="${clients[$i]}"
-				client=${clientRec%%|*}
-				Verbose 1 "^client: $client ($i of ${#clients[@]})"
-				unset envList envListStr
-				sqlStmt="select env,host,share,cims from $siteInfoTable where name in (\"$client\",\"$client-test\") and env not in ('preview','public')"
-		 		RunSql $sqlStmt
-		 		if [[ ${#resultSet[@]} -gt 0 ]]; then
-					for ((ii=0; ii<${#resultSet[@]}; ii++)); do
-						envListStr="${resultSet[$ii]}"; 
-						env=${envListStr%%|*}; envListStr="${envListStr#*|}"
-						host=${envListStr%%|*}; envListStr="${envListStr#*|}"
-						server=${envListStr%%|*}; envListStr="${envListStr#*|}"
-						envListStr="${envListStr//\|/:}"
-						envList="$envList;$env-$host/$server#$envListStr"
-					done
-		 		fi
-		 		clientRec="$clientRec|${envList:1}"
-				echo "${clientRec//NULL/}" >> "$outFile"
-			done
-
-			if [[ $outFile != '/dev/stdout' ]]; then
-				[[ -f "$workwithDataFile" ]] && mv -f "$workwithDataFile" "${workwithDataFile}.bak"
-				mv -f "$outFile" "$workwithDataFile"
-			fi
-
-			Msg "^...Done"
-
-			## Refresh my local warehouse
-			## [[ -x $HOME/bin/refreshDevWarehouse ]] && $HOME/bin/refreshDevWarehouse
+		 	FindExecutable loadWorkwithData -sh -run
 
 		;; ## mojave
 
@@ -525,3 +480,4 @@ return 0
 ## 06-13-2018 @ 10:27:06 - 1.22.78 - dscudiero - Remove NULL from the client record before being written out
 ## 06-14-2018 @ 07:14:14 - 1.22.78 - dscudiero - Go back to truncate
 ## 06-14-2018 @ 17:02:02 - 1.22.78 - dscudiero - Add loadAuthData to the list of programs to run on mojave
+## 06-18-2018 @ 09:43:46 - 1.22.78 - dscudiero - Pull load workwith data code out and call the loadWorkwithData script
