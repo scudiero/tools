@@ -89,7 +89,7 @@ scriptDescription="Script dispatcher"
 				if [[ $(Contains ",$administrators," ",$userName,") == true ]]; then
 					echo; Warning "$checkMsg"; echo; Alert 2;
 				else
-					[[ $name != 'testsh' ]] && { echo; Terminate "$checkMsg"; }
+					[[ $name != 'testsh' ]] && { echo; Error "$checkMsg"; return 0; }
 				fi
 			fi
 
@@ -210,3 +210,4 @@ Goodbye 0
 ## 06-18-2018 @ 08:13:08 - 2.0.70 - dscudiero - Change how menu item calculation
 ## 06-18-2018 @ 10:51:28 - 2.0.70 - dscudiero - Filter out the scripts wint showInScripts = No
 ## 06-18-2018 @ 16:14:35 - 2.0.70 - dscudiero - Check if we can run the selected script
+## 06-18-2018 @ 16:16:53 - 2.0.70 - dscudiero - Cosmetic/minor change/Sync
