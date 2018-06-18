@@ -12,7 +12,7 @@ scriptDescription="Edit /web/<progDir>/localsteps/default.tcf"
 
 ##	1) Remove uploadurl from the default.tcf file(requested by Ben 04/05/18)
 if [[ $(CompareVersions "$(GetProductVersion 'cat' "$siteDir")" 'ge' '3.5.10') == true ]]; then
-	Msg "^$CPitemCntr) $scriptDescription..."
+	Msg; Msg "^$CPitemCntr) $scriptDescription..."
 	editFile="$localstepsDir/default.tcf"
 	if [[ -f "$editFile" ]]; then
 		fromStr='uploadurl:'
@@ -32,3 +32,4 @@ if [[ $(CompareVersions "$(GetProductVersion 'cat' "$siteDir")" 'ge' '3.5.10') =
 	fi
 	((CPitemCntr++))
 fi
+## 06-18-2018 @ 08:28:30 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
