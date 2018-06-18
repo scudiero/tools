@@ -12,7 +12,7 @@ scriptDescription="Check /web/ribbit/getcourse.rjs file"
 
 checkFile="$tgtDir/web/ribbit/getcourse.rjs"
 if [[ -f "$checkFile" ]]; then
-	Msg "^$CPitemCntr) $scriptDescription..."
+	Msg; Msg "^$CPitemCntr) $scriptDescription..."
 	skelDate=$(date +%s -r $skeletonRoot/web/ribbit/getcourse.rjs)
 	fileDate=$(date +%s -r $tgtDir/web/ribbit/getcourse.rjs)
 	if [[ $skelDate -gt $fileDate ]]; then
@@ -23,3 +23,4 @@ if [[ -f "$checkFile" ]]; then
 	fi
 	((CPitemCntr++))
 fi
+## 06-18-2018 @ 08:28:24 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
