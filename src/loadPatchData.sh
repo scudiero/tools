@@ -87,12 +87,13 @@ fi
 ## Load the data from the transactional table into the new table
 	## Get transactional data
 	SetFileExpansion 'off'
-	sqlStmt="select * from $patchesTable"
+	sqlStmt="select * from patchControl"
 	RunSql "$dbFile" $sqlStmt
 	SetFileExpansion
 	for rec in "${resultSet[@]}"; do dataRecs+=("$rec"); done
 	## Insert into warehouse table
 	for ((i=0; i<${#dataRecs[@]}; i++)); do
+
 		sqlStmt="insert into ${patchesTable}New ($fields) values("
 		data="${dataRecs[$i]}"; #data="${data#*|}"
 		#sqlStmt="${sqlStmt}null,\"${data//|/","}\")"
@@ -120,3 +121,4 @@ Goodbye 0 #'alert'
 #============================================================================================================================================
 ## 06-18-2018 @ 10:49:14 - 1.0.-1 - dscudiero - Allow passing in a userid name to update
 ## 06-18-2018 @ 15:19:04 - 1.0.-1 - dscudiero - Initial load
+## 06-18-2018 @ 15:32:23 - 1.0.-1 - dscudiero - Change the name of the transactional table
