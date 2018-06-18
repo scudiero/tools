@@ -23,4 +23,9 @@ if [[ ! -f $checkFile ]]; then
 	Msg "^^Updated '$editFile' to change changed the mapfile record for 'db:fsinjector' to point to the ribbit directory"
 	((CPitemCntr++))
 fi
+
+#=======================================================================================================================
+## Check-in Log
+#=======================================================================================================================
 ## 06-18-2018 @ 08:28:34 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
+## 06-18-2018 @ 08:30:59 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
