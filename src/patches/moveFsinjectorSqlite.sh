@@ -13,7 +13,7 @@ scriptDescription="Move fsinjector.sqlite to the ribbit folder"
 ## Requested by Mike 06/03/17
 checkFile="$tgtDir/web/ribbit/fsinjector.sqlite"
 if [[ ! -f $checkFile ]]; then
-	Msg "^Checking /web/ribbit/fsinjector.sqlite..."
+	Msg; Msg "^Checking /web/ribbit/fsinjector.sqlite..."
 	[[ -f "$tgtDir/db/fsinjector.sqlite" ]] && mv -f "$tgtDir/db/fsinjector.sqlite" "$checkFile"
 	editFile="$cfgFile"
 	fromStr=$(ProtectedCall "grep '^db:fsinjector|sqlite|' $editFile")
@@ -23,3 +23,4 @@ if [[ ! -f $checkFile ]]; then
 	Msg "^^Updated '$editFile' to change changed the mapfile record for 'db:fsinjector' to point to the ribbit directory"
 	((CPitemCntr++))
 fi
+## 06-18-2018 @ 08:28:34 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
