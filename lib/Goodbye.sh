@@ -43,8 +43,8 @@ function Goodbye {
 		quickquit|x)
 			[[ $myLogRecordIdx != '' && $noLogInDb != true ]] && ProcessLogger 'Remove' $myLogRecordIdx
 			Msg "\n*** $myName: Stopping at user's request ***"
-			[[ $$ -ne $BASHPID && $PAUSEATEXIT != true ]] && kill -1 $BASHPID  ## If the BASHPID != the current processid then we are in a subshell, send a HangUP signal to the subshell
-			Here 1a
+			## If the BASHPID != the current processid then we are in a subshell, send a HangUP signal to the subshell
+			[[ $$ -ne $BASHPID && $PAUSEATEXIT != true ]] && { Msg "Waiting for co-process $BASHPID to end"; kill -1 $BASHPID; }
 			;;
 		return|r)
 			secondaryMessagesOnly=true
@@ -214,3 +214,4 @@ export -f QUIT
 ## 06-08-2018 @ 15:10:45 - 2.1.21 - dscudiero - Add ! quiet to some items
 ## 06-11-2018 @ 09:24:49 - 2.1.26 - dscudiero - Add quiet to use return to exit
 ## 06-13-2018 @ 13:43:28 - 2.1.27 - dscudiero - Add check to make sure logfile is not /dev/null if running forUser
+## 06-18-2018 @ 10:46:38 - 2.1.27 - dscudiero - Add message about waiting for parent process to end
