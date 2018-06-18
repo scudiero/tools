@@ -188,53 +188,52 @@ if [[ -z $mode || $mode == 'defaults' ]]; then
 
 	## Set time stamp on the defaults directory
 		touch "$TOOLSDEFAULTSPATH"
-
 fi
 
-if [[ -z $mode || $mode == 'scripts' ]]; then
-	Verbose 1 "Updating scripts data"
-	## Write out a file with script information for the scripts that do not have restrictions
-		fields="keyId,name,shortDescription"
-		whereClause="showInScripts = \"Yes\" and active=\"Yes\""
-		sqlStmt="select $fields from $scriptsTable where $whereClause and restrictToGroups is null order by name"
-		RunSql $sqlStmt
-		outFile="$TOOLSPATH/auth/common"
-		[[ -f $outFile ]] && outFile="$outFile.new"
-		for ((i=0; i<${#resultSet[@]}; i++)); do
-			result="${resultSet[$i]}"
-			echo "$result" >> "$outFile"
-		done
-		[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
-		chgrp leepfrog "${outFile%.*}"
-		chmod 740 "${outFile%.*}"
+# if [[ -z $mode || $mode == 'scripts' ]]; then
+# 	Verbose 1 "Updating scripts data"
+# 	## Write out a file with script information for the scripts that do not have restrictions
+# 		fields="keyId,name,shortDescription"
+# 		whereClause="showInScripts = \"Yes\" and active=\"Yes\""
+# 		sqlStmt="select $fields from $scriptsTable where $whereClause and restrictToGroups is null order by name"
+# 		RunSql $sqlStmt
+# 		outFile="$TOOLSPATH/auth/common"
+# 		[[ -f $outFile ]] && outFile="$outFile.new"
+# 		for ((i=0; i<${#resultSet[@]}; i++)); do
+# 			result="${resultSet[$i]}"
+# 			echo "$result" >> "$outFile"
+# 		done
+# 		[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
+# 		chgrp leepfrog "${outFile%.*}"
+# 		chmod 740 "${outFile%.*}"
 
-	## Get a list of groups used in restrictToGroups fields
-		declare -A groupHash 
-		sqlStmt="select restrictToGroups from $scriptsTable where restrictToGroups is not null"
-		RunSql $sqlStmt
-		for ((i=0; i<${#resultSet[@]}; i++)); do
-			result="${resultSet[$i]}"
-			for group in ${result//,/ }; do
-				[[ ${groupHash["$group"]+abc} ]] && continue
-				groupHash["$group"]=true
-			done
-		done
+# 	## Get a list of groups used in restrictToGroups fields
+# 		declare -A groupHash 
+# 		sqlStmt="select restrictToGroups from $scriptsTable where restrictToGroups is not null"
+# 		RunSql $sqlStmt
+# 		for ((i=0; i<${#resultSet[@]}; i++)); do
+# 			result="${resultSet[$i]}"
+# 			for group in ${result//,/ }; do
+# 				[[ ${groupHash["$group"]+abc} ]] && continue
+# 				groupHash["$group"]=true
+# 			done
+# 		done
 
-	## Write out a file with script information for the scripts that have restrictions
-		for key in "${!groupHash[@]}"; do
-			outFile="$TOOLSPATH/auth/$key"
-			[[ -f $outFile ]] && outFile="$outFile.new"
-			sqlStmt="select $fields from $scriptsTable where $whereClause and restrictToGroups like \"%$key%\" order by name"
-			RunSql $sqlStmt
-			for ((i=0; i<${#resultSet[@]}; i++)); do
-				result="${resultSet[$i]}"
-				echo "$result" >> "$outFile" 
-			done
-			[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
-			chgrp leepfrog "${outFile%.*}"
-			chmod 740 "${outFile%.*}"
-		done
-fi
+# 	## Write out a file with script information for the scripts that have restrictions
+# 		for key in "${!groupHash[@]}"; do
+# 			outFile="$TOOLSPATH/auth/$key"
+# 			[[ -f $outFile ]] && outFile="$outFile.new"
+# 			sqlStmt="select $fields from $scriptsTable where $whereClause and restrictToGroups like \"%$key%\" order by name"
+# 			RunSql $sqlStmt
+# 			for ((i=0; i<${#resultSet[@]}; i++)); do
+# 				result="${resultSet[$i]}"
+# 				echo "$result" >> "$outFile" 
+# 			done
+# 			[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
+# 			chgrp leepfrog "${outFile%.*}"
+# 			chmod 740 "${outFile%.*}"
+# 		done
+# fi
 
 if [[ -z $mode || $mode == 'reports' ]]; then
 	Verbose 1 "Updating reports information"
@@ -308,3 +307,4 @@ Goodbye 0;
 ## 06-01-2018 @ 10:06:41 - 2.0.98 - dscudiero - Add chgrp commands on the scripts and reports files
 ## 06-08-2018 @ 14:51:26 - 2.0.99 - dscudiero - Add ignorelist to data assigined to the reports object
 ## 06-11-2018 @ 08:27:10 - 2.1.2 - dscudiero - Add mode processing and messages
+## 06-18-2018 @ 09:00:15 - 2.1.2 - dscudiero - Comment out the script section
