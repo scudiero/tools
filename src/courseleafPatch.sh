@@ -563,21 +563,21 @@ fi
 	[[ -f "$courseleafCgiDirRoot/courseleaf-$useRhel.cgi" ]] && courseleafCgiSourceFile="$courseleafCgiDirRoot/courseleaf-$useRhel.cgi"
 	courseleafCgiVer="$($courseleafCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
 	dump -1 courseleafCgiSourceFile courseleafCgiVer
-	[[ -z $courseleafCgiVer ]] && Terminate "Courseleaf cgi did not return version data, source ($ribbitCgiSourceFile) is suspect."
+	[[ -z $courseleafCgiVer ]] && Terminate "Courseleaf cgi ($basename "searchCgiSourceFile")) did not return version data, source ($ribbitCgiSourceFile) is suspect."
 
 	ribbitCgiDirRoot="$skeletonRoot/web/ribbit"
 	ribbitCgiSourceFile="$ribbitCgiDirRoot/index.cgi"
 	[[ -f "$ribbitCgiDirRoot/index-$useRhel.cgi" ]] && ribbitCgiSourceFile="$ribbitCgiDirRoot/index-$useRhel.cgi"
 	ribbitCgiVer="$($ribbitCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
 	dump -1 ribbitCgiSourceFile ribbitCgiVer
-	[[ -z $ribbitCgiVer ]] && Terminate "Ribbit cgi did not return version data, source ($ribbitCgiSourceFile) is suspect."
+	[[ -z $ribbitCgiVer ]] && Terminate "Ribbit cgi ($basename "searchCgiSourceFile")) did not return version data, source ($ribbitCgiSourceFile) is suspect."
 
 	searchCgiDirRoot="$skeletonRoot/web/search"
 	searchCgiSourceFile="$searchCgiDirRoot/index.cgi"
 	[[ -f "$searchCgiDirRoot/index-$useRhel.cgi" ]] && searchCgiSourceFile="$searchCgiDirRoot/index-$useRhel.cgi"
 	searchCgiVer="$($searchCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
 	dump -1 searchCgiSourceFile searchCgiVer
-	[[ -z $searchCgiVer ]] && Terminate "Search cgi did not return version data, source ($searchCgiSourceFile) is suspect."
+	[[ -z $searchCgiVer ]] && Terminate "Search cgi ($basename "searchCgiSourceFile")) did not return version data, source ($searchCgiSourceFile) is suspect."
 
 ## Get the daily.sh version
 	dailyShourceFile="$skeletonRoot/bin/daily.sh"
@@ -1410,3 +1410,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-13-2018 @ 13:50:29 - 6.0.96 - dscudiero - Switch order for Hello
 ## 06-15-2018 @ 11:19:31 - 6.1.3 - dscudiero - Sanity check the cgi files before patching, stop if bad
 ## 06-18-2018 @ 08:15:40 - 6.1.3 - dscudiero - Updated to the use that patch scriptilets for local checks
+## 06-18-2018 @ 08:20:03 - 6.1.3 - dscudiero - Tweak messaging
