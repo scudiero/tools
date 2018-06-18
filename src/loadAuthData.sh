@@ -59,9 +59,18 @@ declare -A userData scriptsData
 GetDefaultsData -f $myName
 ParseArgsStd $originalArgStr
 Hello
+user="$client"
 
 if [[ $batchMode != true ]]; then
-	unset ans; Prompt ans "You are asking to reload the tools 'Auth', do you wish to continue" 'Yes No'; ans="${ans:0:1}"; ans="${ans,,[a-z]}"
+	unset ans
+	if [[ -n $client ]] ; then
+		Prompt ans "You are asking to reload the tools 'Auth' data for '$client', do you wish to continue" 'Yes No';
+		whereClause="$auth2userTable.empKey=$employeeTable.employeekey and substr(email,1,instr(email,'@')-1) = \"$client\""
+	else
+		Prompt ans "You are asking to reload the tools 'Auth', do you wish to continue" 'Yes No';
+		whereClause="$auth2userTable.empKey=$employeeTable.employeekey"
+	fi
+	ans="${ans:0:1}"; ans="${ans,,[a-z]}"
 	[[ $ans != 'y' ]] && Goodbye 3
 fi
 
@@ -69,7 +78,7 @@ fi
 # Main
 #============================================================================================================================================
 ## Build a list of the users that are in any auth group
-	sqlStmt="select distinct empKey,substr(email,1,instr(email,'@')-1) from $auth2userTable,$employeeTable where $auth2userTable.empKey=$employeeTable.employeekey"
+	sqlStmt="select distinct empKey,substr(email,1,instr(email,'@')-1) from $auth2userTable,$employeeTable where $whereClause"
 	RunSql $sqlStmt
 	for result in "${resultSet[@]}"; do 
 		users+=("$result")
@@ -98,7 +107,8 @@ fi
 ## build the user/scripts map
 	Verbose 1 "\nBuilding the user/scripts data map..."
 	## Get the script data
-	sqlStmt="select keyId,name,restrictToUsers,restrictToGroups,author,shortDescription from $scriptsTable where active=\"Yes\" order by name"
+	fields="keyId,name,restrictToUsers,restrictToGroups,author,shortDescription,showInScripts"
+	sqlStmt="select $fields from $scriptsTable where active=\"Yes\" order by name"
 	RunSql $sqlStmt
 	for result in "${resultSet[@]}"; do 
 		result="${result//NULL/}"; result="${result//null/}";
@@ -108,9 +118,10 @@ fi
 		restrictToUsers="${result%%|*}"; result="${result#*|}"
 		restrictToGroups="${result%%|*}"; result="${result#*|}"
 		author="${result%%|*}"; result="${result#*|}"
-		shortDesc="$result"
-		Dump 2 -t scriptId scriptName restrictToUsers restrictToGroups author shortDesc
-		recData="${scriptId}|${scriptName}|${shortDesc}"
+		showInScripts="${result%%|*}"; result="${result#*|}"
+		shortDesc="${result%%|*}"; result="${result#*|}"
+		Dump 2 -t scriptId scriptName restrictToUsers restrictToGroups author showInScripts shortDesc
+		recData="${scriptId}|${scriptName}|${showInScripts}|${shortDesc}"
 		scriptsData["$scriptName"]="$recData"
 
 		## Add script to authors script list
@@ -208,3 +219,4 @@ Goodbye 0 #'alert'
 #============================================================================================================================================
 ## Check-in log
 #============================================================================================================================================
+## 06-18-2018 @ 10:49:14 - 1.0.-1 - dscudiero - Allow passing in a userid name to update
