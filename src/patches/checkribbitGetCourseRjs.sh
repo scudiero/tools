@@ -19,7 +19,7 @@ if [[ -f "$checkFile" ]]; then
 		text="The time date stamp of the file '$tgtDir/web/ribbit/getcourse.rjs'\n\tis less "
 		text="$text than the time date stamp of the file in the skeleton, you should compare the files and merge"
 		text="$text \n\tany required changes into  sites file."
-		Warning 0 1 "$text"
+		Warning 0 2 "$text"
 	fi
 	((CPitemCntr++))
 fi
@@ -30,3 +30,4 @@ fi
 ## 06-18-2018 @ 08:28:24 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
 ## 06-18-2018 @ 08:30:48 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
 ## 06-18-2018 @ 15:50:19 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
+## 06-18-2018 @ 15:52:13 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
