@@ -322,6 +322,9 @@ tmpFile=$(mkTmpFile)
 rebuildConsole=false
 removeGitReposFromNext=true
 declare -A backedupFiles
+displayGoodbyeSummaryMessages=true
+skeletonRoot="${skeletonRoot}/release"
+
 
 #=======================================================================================================================
 # Standard argument parsing and initialization
@@ -330,9 +333,6 @@ GetDefaultsData -f "$myName"
 ParseArgsStd $originalArgStr
 Hello
 
-skeletonRoot='/steamboat/leepfrog/clskel/release'
-
-displayGoodbyeSummaryMessages=true
 cleanDirs="${scriptData3##*:}"
 cleanFiles="${scriptData4##*:}"
 [[ $allItems == true && -z $products ]] && products='all'
@@ -1413,3 +1413,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-18-2018 @ 08:20:03 - 6.1.3 - dscudiero - Tweak messaging
 ## 06-18-2018 @ 08:21:32 - 6.1.3 - dscudiero - Cosmetic/minor change/Sync
 ## 06-18-2018 @ 08:22:45 - 6.1.3 - dscudiero - Cosmetic/minor change/Sync
+## 06-18-2018 @ 12:27:51 - 6.1.3 - dscudiero - Remove the skeletionRoot override
