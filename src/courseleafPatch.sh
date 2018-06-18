@@ -563,21 +563,21 @@ fi
 	[[ -f "$courseleafCgiDirRoot/courseleaf-$useRhel.cgi" ]] && courseleafCgiSourceFile="$courseleafCgiDirRoot/courseleaf-$useRhel.cgi"
 	courseleafCgiVer="$($courseleafCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
 	dump -1 courseleafCgiSourceFile courseleafCgiVer
-	[[ -z $courseleafCgiVer ]] && Terminate "Courseleaf cgi ($(basename "searchCgiSourceFile")) did not return version data, source ($ribbitCgiSourceFile) is suspect."
+	[[ -z $courseleafCgiVer ]] && Terminate "Courseleaf cgi ($(basename "$searchCgiSourceFile")) did not return version data, source ($ribbitCgiSourceFile) is suspect."
 
 	ribbitCgiDirRoot="$skeletonRoot/web/ribbit"
 	ribbitCgiSourceFile="$ribbitCgiDirRoot/index.cgi"
 	[[ -f "$ribbitCgiDirRoot/index-$useRhel.cgi" ]] && ribbitCgiSourceFile="$ribbitCgiDirRoot/index-$useRhel.cgi"
 	ribbitCgiVer="$($ribbitCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
 	dump -1 ribbitCgiSourceFile ribbitCgiVer
-	[[ -z $ribbitCgiVer ]] && Terminate "Ribbit cgi ($(basename "searchCgiSourceFile")) did not return version data, source ($ribbitCgiSourceFile) is suspect."
+	[[ -z $ribbitCgiVer ]] && Terminate "Ribbit cgi ($(basename "$searchCgiSourceFile")) did not return version data, source ($ribbitCgiSourceFile) is suspect."
 
 	searchCgiDirRoot="$skeletonRoot/web/search"
 	searchCgiSourceFile="$searchCgiDirRoot/index.cgi"
 	[[ -f "$searchCgiDirRoot/index-$useRhel.cgi" ]] && searchCgiSourceFile="$searchCgiDirRoot/index-$useRhel.cgi"
 	searchCgiVer="$($searchCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
 	dump -1 searchCgiSourceFile searchCgiVer
-	[[ -z $searchCgiVer ]] && Terminate "Search cgi ($(basename "searchCgiSourceFile")) did not return version data, source ($searchCgiSourceFile) is suspect."
+	[[ -z $searchCgiVer ]] && Terminate "Search cgi ($(basename "$searchCgiSourceFile")) did not return version data, source ($searchCgiSourceFile) is suspect."
 
 ## Get the daily.sh version
 	dailyShourceFile="$skeletonRoot/bin/daily.sh"
@@ -1412,3 +1412,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-18-2018 @ 08:15:40 - 6.1.3 - dscudiero - Updated to the use that patch scriptilets for local checks
 ## 06-18-2018 @ 08:20:03 - 6.1.3 - dscudiero - Tweak messaging
 ## 06-18-2018 @ 08:21:32 - 6.1.3 - dscudiero - Cosmetic/minor change/Sync
+## 06-18-2018 @ 08:22:45 - 6.1.3 - dscudiero - Cosmetic/minor change/Sync
