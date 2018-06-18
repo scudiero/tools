@@ -76,9 +76,6 @@ function FindExecutable {
 
 	if [[ $runScript == true ]]; then
 		#Dump -t scriptArgs
-
-[[ $userName == 'dscudiero' ]] && dump fileName executeFile
-
 		[[ -z "$executeFile" || ! -r "$executeFile" ]] && Terminate "$FUNCNAME: Run options active and could not find execution file, fileName='$fileName'"
 		[[ -f "$TOOLSPATH/bin/${fileName}.offline" ]] && Terminate "$FUNCNAME: Script '$script' is currently offline/inactive, please try again later."
 		myNameSave="$myName"; myPathSave="$myPath"
@@ -128,3 +125,4 @@ export -f FindExecutable
 ## 06-18-2018 @ 09:01:44 - 1.2.57 - dscudiero - Comment out debug statements
 ## 06-18-2018 @ 16:03:11 - 1.2.57 - dscudiero - Check if sript to run in soffline
 ## 06-18-2018 @ 16:05:56 - 1.2.57 - dscudiero - Cosmetic/minor change/Sync
+## 06-18-2018 @ 16:14:21 - 1.2.57 - dscudiero - Remove debug statement
