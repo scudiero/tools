@@ -16,7 +16,7 @@ scriptDescription="Edit the console page"
 ## 	4) Add 'navlinks:CAT|Rebuild Course Bubbles and Search Results'
 editFile="$tgtDir/web/$courseleafProgDir/index.tcf"
 if [[ -w "$editFile" ]]; then
-	Msg "^$CPitemCntr) $scriptDescription..."
+	Msg; Msg "^$CPitemCntr) $scriptDescription..."
 	fromStr='title:Catalog Console'
 	toStr='title:CourseLeaf Console'
 	grepStr=$(ProtectedCall "grep '^$fromStr' $editFile")
@@ -74,3 +74,4 @@ else
 	Msg
 	Warning 0 2 "Could not locate '$editFile', please check the target site"
 fi
+## 06-18-2018 @ 08:28:27 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
