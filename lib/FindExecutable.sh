@@ -77,6 +77,7 @@ function FindExecutable {
 	if [[ $runScript == true ]]; then
 		#Dump -t scriptArgs
 		[[ -z "$executeFile" || ! -r "$executeFile" ]] && Terminate "$FUNCNAME: Run options active and could not find execution file, fileName='$fileName'"
+		[[ -f "$TOOLSPATH/bin/${fileName}.offline" ]] && Terminate "$FUNCNAME: Script '$script' is currently offline/inactive, please try again later."
 		myNameSave="$myName"; myPathSave="$myPath"
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
@@ -122,3 +123,4 @@ export -f FindExecutable
 ## 05-23-2018 @ 10:01:40 - 1.2.57 - dscudiero - Added wftests file type
 ## 06-18-2018 @ 08:12:05 - 1.2.57 - dscudiero - Added types of dat and txt
 ## 06-18-2018 @ 09:01:44 - 1.2.57 - dscudiero - Comment out debug statements
+## 06-18-2018 @ 16:03:11 - 1.2.57 - dscudiero - Check if sript to run in soffline
