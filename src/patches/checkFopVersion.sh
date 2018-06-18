@@ -10,7 +10,7 @@ version=1.0.-1 # -- dscudiero -- 10/20/2016 @ 14:58:14.98
 scriptDescription="Check fop versions"
 
 ## Retrieve the fop version from skel and tgt
-grepStr=$(ProtectedCall "grep '/usr/local/*/fop' $skeletonRoot/bin/fop")
+grepStr=$(ProtectedCall "grep '/usr/local/*/fop' ${skeletonRoot}/release/bin/fop")
 skelFopVer=${grepStr##*/fop-}; skelFopVer=${skelFopVer%%/*}
 grepStr=$(ProtectedCall "grep '/usr/local/*/fop' $tgtDir/bin/fop | grep -v ^[#] ")
 tgtFopVer=${grepStr%%/fop *}; tgtFopVer=${tgtFopVer##*/}; tgtFopVer=${tgtFopVer#*-};
@@ -25,4 +25,4 @@ fi
 
 #=======================================================================================================================
 ## Check-in Log
-#=======================================================================================================================
+#=======================================================================================================================## 06-18-2018 @ 15:19:20 - 1.0.-1 - dscudiero - Fix references to skeletonRoot
