@@ -8,8 +8,7 @@ version=1.0.0 # -- dscudiero -- 10/20/2016 @ 14:58:14.98
 #
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes="Msg ProtectedCall StringFunctions RunSql"
-Import "$standardInteractiveIncludes $myIncludes"
+Import "$standardInteractiveIncludes"
 
 originalArgStr="$*"
 scriptDescription=""
@@ -32,7 +31,7 @@ scriptDescription=""
 		[[ $1 == 'setVarsOnly' ]] && return 0
 
 		[[ -z $* ]] && return 0
-		echo -e "This script can be used to copy workflow related files from one environment to another."
+		echo -e "This script can be used to ctypey workflow related files from one environment to another."
 		echo -e "\nThe actions performed are:"
 		bullet=1; echo -e "\t$bullet) Action 1"
 		(( bullet++ )); echo -e "\t$bullet) Action 2"
@@ -69,38 +68,23 @@ for var in $falseVars; do eval $var=false; done
 GetDefaultsData -f $myName
 ParseArgsStd $originalArgStr
 Hello
-
-unset type; Prompt type "What type of data do you wish to reload" 'Defaults Auth Workwith'; type=${type:0:1}; type="${type,,[a-z]}"
-
-case $type in
-	d) 	
-		Here 1
-		;;
-	a)
-		Here 2
-		;;
-	w)
-		Here 3
-		;;
-esac
-
-
-
-# unset verifyArgs
-# verifyArgs+=("Client:$client")
-# verifyArgs+=("Env:$(TitleCase $env)")
-# verifyArgs+=("CIMs:$cimStr")
-# verifyArgs+=("Output File:$outFile")
-# verifyContinueDefault='Yes'
-# VerifyContinue "You are asking to generate a workflow spreadsheet for"
-#
-# myData="Client: '$client', Env: '$env', Cims: '$cimStr' "
-# [[ $logInDb != false && $myLogRecordIdx != "" ]] && ProcessLogger 'Update' $myLogRecordIdx 'data' "$myData"
+type="$client"
 
 #============================================================================================================================================
 # Main
 #============================================================================================================================================
-
+Prompt type "What type of data do you wish to reload" 'Defaults Auth Workwith'; type=${type:0:1}; type="${type,,[a-z]}"
+case $type in
+	d) 	## Defaults
+ 		FindExecutable updateDefaults -src -run defaults -v1
+		;;
+	a)  ## Auth
+ 		FindExecutable loadAuthData -src -run -v1
+		;;
+	w)  ## Workwith
+ 		FindExecutable loadWorkwithData -src -run -v1
+		;;
+esac
 
 #============================================================================================================================================
 #============================================================================================================================================
@@ -111,3 +95,4 @@ Goodbye 0 #'alert'
 #============================================================================================================================================
 ## Check-in log
 #============================================================================================================================================
+## 06-18-2018 @ 09:44:07 - 1.0.0 - dscudiero - Initial put
