@@ -83,6 +83,16 @@ scriptDescription="Script dispatcher"
 			fi
 			dump 2 name
 			
+		## Check to make sure we can run
+			checkMsg=$(CheckRun $name)
+			if [[ -n $checkMsg && $checkMsg != true ]]; then
+				if [[ $(Contains ",$administrators," ",$userName,") == true ]]; then
+					echo; Warning "$checkMsg"; echo; Alert 2;
+				else
+					[[ $name != 'testsh' ]] && { echo; Terminate "$checkMsg"; }
+				fi
+			fi
+
 		## Find the exedcutable
 			executeFile=$(FindExecutable '-source' "$name")
 			[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
@@ -199,3 +209,4 @@ Goodbye 0
 ## 06-13-2018 @ 13:52:37 - 2.0.23 - dscudiero - Cosmetic/minor change/Sync
 ## 06-18-2018 @ 08:13:08 - 2.0.70 - dscudiero - Change how menu item calculation
 ## 06-18-2018 @ 10:51:28 - 2.0.70 - dscudiero - Filter out the scripts wint showInScripts = No
+## 06-18-2018 @ 16:14:35 - 2.0.70 - dscudiero - Check if we can run the selected script
