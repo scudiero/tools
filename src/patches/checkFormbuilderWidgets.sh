@@ -11,7 +11,7 @@ version=1.0.-1 # -- dscudiero -- 10/20/2016 @ 14:58:14.98
 scriptDescription="Check to see if there are any old formbuilder widgets"
 
 if [[ $client != 'internal' && -n $locallibsDir && -d "$locallibsDir/locallibs" ]]; then
-	Msg "^$CPitemCntr) $scriptDescription..."
+	Msg; Msg "^$CPitemCntr) $scriptDescription..."
 	checkDir="$locallibsDir/locallibs/widgets"
 	fileCount=$(ls "$checkDir" 2> /dev/null | grep 'banner_' | wc -l)
 	[[ $fileCount -gt 0 ]] && Warning 0 1 "Found 'banner' widgets in '$checkDir', these are probably deprecated, please ask a CIM developer to evaluate."
@@ -19,3 +19,4 @@ if [[ $client != 'internal' && -n $locallibsDir && -d "$locallibsDir/locallibs" 
 	[[ $fileCount -gt 0 ]] && Warning 0 1 "Found 'psoft' widgets in '$checkDir', these are probably deprecated, please ask a CIM developer to evaluate."
 	((CPitemCntr++))
 fi
+## 06-18-2018 @ 08:28:19 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
