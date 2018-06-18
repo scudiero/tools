@@ -8,7 +8,7 @@ version=1.0.-1 # -- dscudiero -- 10/20/2016 @ 14:58:14.98
 #
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes="Msg ProtectedCall StringFunctions RunSql"
+myIncludes="DatabaseUtilities SetFileExpansion"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -30,19 +30,8 @@ scriptDescription=""
 	function loadPatchData-Help  {
 		helpSet='client,env' # can also include any of {env,src,tgt,prod,cim,cat,clss}, 'script' and 'common' automatically addeed
 		[[ $1 == 'setVarsOnly' ]] && return 0
-
 		[[ -z $* ]] && return 0
-		echo -e "This script can be used to copy workflow related files from one environment to another."
-		echo -e "\nThe actions performed are:"
-		bullet=1; echo -e "\t$bullet) Action 1"
-		(( bullet++ )); echo -e "\t$bullet) Action 2"
-		echo -e "\nTarget site data files potentially modified:"
-		echo -e "\tfile 1"
-		echo -e "\tfile 2"
-# or
-# 		if [[ -n "$someArrayVariable" ]]; then
-# 			for file in $(tr ',' ' ' <<< $someArrayVariable); do echo -e "\t\t- $file"; done
-# 		fi
+		echo -e "This script can be used to refresh the tools 'auth' data shadow ($authShadowDir) from the database data."
 		return 0
 	}
 
@@ -62,73 +51,65 @@ trueVars=''
 falseVars=''
 for var in $trueVars; do eval $var=true; done
 for var in $falseVars; do eval $var=false; done
+unset numfields fields
 
 #=======================================================================================================================
 # Standard arg parsing and initialization
 #=======================================================================================================================
-# helpSet='client,env' # can also include any of {env,src,tgt,prod,cim,cat,clss}, 'script' and 'common' automatically addeed
-# scriptHelpDesc+=("This script can be used to ...")
-# scriptHelpDesc+=("Line 2")
-# scriptHelpDesc+=("^Line 3")
-# scriptHelpDesc+=("\nTarget site data files potentially modified:")
-# scriptHelpDesc+=("^As above")
-# helpNotes+=('1) If the noPrompt flag is active then the local repo will always be refreshed from the')
-# helpNotes+=('   master before the copy step.')
-#
-
 GetDefaultsData -f $myName
 ParseArgsStd $originalArgStr
 Hello
+user="$client"
 
-# Init "getClient getEnv getDirs checkEnvs getCims checkProdEnv"
-#
-## Set outfile -- look for std locations
-# if [[ -d $localClientWorkFolder ]]; then
-# 	if [[ ! -d $localClientWorkFolder/$client ]]; then mkdir $localClientWorkFolder/$client; fi
-# 	outFile=$localClientWorkFolder/$client/$client-$env-CatalogPageData.xls
-# else
-# 	outFile=/home/$userName/$client-$env-CatalogPageData.xls
-# fi
-# unset verifyArgs
-# verifyArgs+=("Client:$client")
-# verifyArgs+=("Env:$(TitleCase $env)")
-# verifyArgs+=("CIMs:$cimStr")
-# verifyArgs+=("Output File:$outFile")
-# verifyContinueDefault='Yes'
-# VerifyContinue "You are asking to generate a workflow spreadsheet for"
-#
-# myData="Client: '$client', Env: '$env', Cims: '$cimStr' "
-# [[ $logInDb != false && $myLogRecordIdx != "" ]] && ProcessLogger 'Update' $myLogRecordIdx 'data' "$myData"
+if [[ $batchMode != true ]]; then
+	unset ans
+	Prompt ans "You are asking to reload the courseleafPatch control data, do you wish to continue" 'Yes No';
+	ans="${ans:0:1}"; ans="${ans,,[a-z]}"
+	[[ $ans != 'y' ]] && Goodbye 3
+fi
 
 #============================================================================================================================================
 # Main
 #============================================================================================================================================
-#============================================================================================================================================
-# [[ $warehouseDb != 'warehouseDev' ]] && mySqlConnectString="$(sed s"/warehouse/$warehouseDev/"g <<< $mySqlConnectString)"
-# export warehouseDb='warehouseDev'
-#============================================================================================================================================
+## Get the transactional database file from the internal stage config file
+	grepStr=$(ProtectedCall "grep db:courseleafPatch $internalSiteRoot/stage/pagewiz.cfg")
+	[[ -z $grepStr ]] && { Error "Could not locate the db definition record for courseleafPatch in '$internalSiteRoot/stage/pagewiz.cfg'"; return 0; }
+	
+	dbFile="${internalSiteRoot}/stage${grepStr##*|}"
+	getTableColumns "$patchesTable" 'warehouse' 'numFields' 'fields'
 
-#/usr/bin/tee fo.xml | /bin/nice /usr/local/fop-2.1/fop -a -c fop.xconf -fo - -pdf - 2>foperr<
-#/usr/bin/tee fo.xml | /usr/local/fop/fop -a -c fop.xconf -fo - -pdf - 2>foperr<
+## Make a copy of the warehouse table 
+	sqlStmt="drop table if exists ${patchesTable}New"
+	RunSql $sqlStmt
+	sqlStmt="create table ${patchesTable}New like ${patchesTable}"
+	RunSql $sqlStmt
 
+## Load the data from the transactional table into the new table
+	## Get transactional data
+	SetFileExpansion 'off'
+	sqlStmt="select * from $patchesTable"
+	RunSql "$dbFile" $sqlStmt
+	SetFileExpansion
+	for rec in "${resultSet[@]}"; do dataRecs+=("$rec"); done
+	## Insert into warehouse table
+	for ((i=0; i<${#dataRecs[@]}; i++)); do
+		sqlStmt="insert into ${patchesTable}New ($fields) values("
+		data="${dataRecs[$i]}"; #data="${data#*|}"
+		#sqlStmt="${sqlStmt}null,\"${data//|/","}\")"
+		sqlStmt="${sqlStmt}\"${data//|/","}\")"
+		RunSql $sqlStmt
+	done
 
+## Swap tables
+	sqlStmt="drop table if exists ${patchesTable}Bak"
+	RunSql $sqlStmt
+	sqlStmt="rename table $patchesTable to ${patchesTable}Bak"
+	RunSql $sqlStmt
+	sqlStmt="rename table ${patchesTable}New to $patchesTable"
+	RunSql $sqlStmt
 
-skeletonRoot="${skeletonRoot}/release"
-tgtDir='/mnt/dev6/web/wisc-dscudiero'
+	return 0
 
-## Retrieve the fop version from skel and tgt
-grepStr=$(ProtectedCall "grep '/usr/local/*/fop' $skeletonRoot/bin/fop")
-skelFopVer=${grepStr##*/fop-}; skelFopVer=${skelFopVer%%/*}
-grepStr=$(ProtectedCall "grep '/usr/local/*/fop' $tgtDir/bin/fop | grep -v ^[#] ")
-tgtFopVer=${grepStr%%/fop *}; tgtFopVer=${tgtFopVer##*/}; tgtFopVer=${tgtFopVer#*-};
-
-## If not the same then notify
-[[ $tgtFopVer != $skelFopVer ]] && \
-	Warning 0 1 "The fop version called in the /bin/fop file ($tgtFopVer) is not the same as the skeleton ($skelFopVer)\n\
-	\tPlease contact Mark Jones"
-
-
-#============================================================================================================================================
 #============================================================================================================================================
 ## Done
 #============================================================================================================================================
@@ -137,3 +118,5 @@ Goodbye 0 #'alert'
 #============================================================================================================================================
 ## Check-in log
 #============================================================================================================================================
+## 06-18-2018 @ 10:49:14 - 1.0.-1 - dscudiero - Allow passing in a userid name to update
+## 06-18-2018 @ 15:19:04 - 1.0.-1 - dscudiero - Initial load
