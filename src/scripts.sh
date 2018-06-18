@@ -38,6 +38,8 @@ scriptDescription="Script dispatcher"
 			## Find the max widths of each column for SelectMenu
 			menuItems=();
 			for token in "${UsersScripts[@]}"; do
+				showInScripts="${token##*|}"; token="${token%|*}"
+				[[ $showInScripts != 'Yes' ]] && continue
 				dump 2 -n token
 				unset menuItem
 				for ((i=1; i<${#columns[@]}+1; i++)); do
@@ -50,10 +52,10 @@ scriptDescription="Script dispatcher"
 				done
 				menuItems+=("${menuItem:1}")
 			done
-			menuItems=("$header" "${menuItems[@]}");
+			menuItems=('Ordinal|Script Name|Script Description' "${menuItems[@]}");
 			menuItems=("$maxLenCol1|$maxLenCol2|$maxLenCol3" "${menuItems[@]}");
 			menuItems=('|' "${menuItems[@]}")
-			# for ((xx=0; xx<${#menuItems[@]}; xx++)); do echo "menuItems[$xx] = >${menuItems[$xx]}<"; done; Pause
+			#for ((xx=0; xx<${#menuItems[@]}; xx++)); do echo "menuItems[$xx] = >${menuItems[$xx]}<"; done; Pause
 
 		return 0
 	} #BuildMenuArray
@@ -196,3 +198,4 @@ Goodbye 0
 ## 06-01-2018 @ 10:10:56 - 2.0.22 - dscudiero - Fix problem because we did not add exec,lib,args to the scripts data
 ## 06-13-2018 @ 13:52:37 - 2.0.23 - dscudiero - Cosmetic/minor change/Sync
 ## 06-18-2018 @ 08:13:08 - 2.0.70 - dscudiero - Change how menu item calculation
+## 06-18-2018 @ 10:51:28 - 2.0.70 - dscudiero - Filter out the scripts wint showInScripts = No
