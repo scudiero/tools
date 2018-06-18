@@ -13,7 +13,7 @@ scriptDescription="Check /web/ribbit/getcourse.rjs file"
 checkFile="$tgtDir/web/ribbit/getcourse.rjs"
 if [[ -f "$checkFile" ]]; then
 	Msg; Msg "^$CPitemCntr) $scriptDescription..."
-	skelDate=$(date +%s -r $skeletonRoot/web/ribbit/getcourse.rjs)
+	skelDate=$(date +%s -r ${skeletonRoot}/release/web/ribbit/getcourse.rjs)
 	fileDate=$(date +%s -r $tgtDir/web/ribbit/getcourse.rjs)
 	if [[ $skelDate -gt $fileDate ]]; then
 		text="The time date stamp of the file '$tgtDir/web/ribbit/getcourse.rjs'\n\tis less "
@@ -29,3 +29,4 @@ fi
 #=======================================================================================================================
 ## 06-18-2018 @ 08:28:24 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
 ## 06-18-2018 @ 08:30:48 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
+## 06-18-2018 @ 15:50:19 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
