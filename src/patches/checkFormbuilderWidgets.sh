@@ -19,4 +19,9 @@ if [[ $client != 'internal' && -n $locallibsDir && -d "$locallibsDir/locallibs" 
 	[[ $fileCount -gt 0 ]] && Warning 0 1 "Found 'psoft' widgets in '$checkDir', these are probably deprecated, please ask a CIM developer to evaluate."
 	((CPitemCntr++))
 fi
+
+#=======================================================================================================================
+## Check-in Log
+#=======================================================================================================================
 ## 06-18-2018 @ 08:28:19 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
+## 06-18-2018 @ 08:30:45 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
