@@ -60,19 +60,19 @@ function FindExecutable {
 
 	## Search for the file based in the searchDirs based on the searchTokens
 	for dir in $searchDirs; do
-		Dump 1 -t dir >> $stdout
+		#Dump -t dir >> $stdout
 		for token in $(tr ',' ' ' <<< "$searchTokens"); do
 			type="${token%%:*}"; ext="${token##*:}"
-			Dump 1 -t2 type ext >> $stdout
+			#Dump -t2 type ext >> $stdout
 			[[ -n $searchRoot ]] && checkFile="$dir/$searchRoot/${fileName}.${ext}" || checkFile="$dir/${fileName}.${ext}"
-			Dump 1 -t3 checkFile >> $stdout
+			#Dump -t3 checkFile >> $stdout
 			[[ -r "$checkFile" ]] && { found=true; break; } || unset checkFile
 		done
 		[[ $found == true ]] && break
 	done
 
 	executeFile="$checkFile" 
-	Dump 1 -t executeFile >> $stdout
+	#Dump -t executeFile >> $stdout
 
 	if [[ $runScript == true ]]; then
 		#Dump -t scriptArgs
@@ -121,3 +121,4 @@ export -f FindExecutable
 ## 05-08-2018 @ 16:03:49 - 1.2.54 - dscudiero - Remove debug statements
 ## 05-23-2018 @ 10:01:40 - 1.2.57 - dscudiero - Added wftests file type
 ## 06-18-2018 @ 08:12:05 - 1.2.57 - dscudiero - Added types of dat and txt
+## 06-18-2018 @ 09:01:44 - 1.2.57 - dscudiero - Comment out debug statements
