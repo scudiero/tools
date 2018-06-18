@@ -207,7 +207,7 @@ function processGitRecord {
 	Pushd "$tgtDir/${specTarget}"
 	## Check to see if we have a .git directory for this directory, if not then copy from the skeleton
 	if [[ ! -d $tgtDir/${specTarget}/.git ]]; then
-		local srcGitFile="${skeletonRoot}${specTarget}/.git"
+		local srcGitFile="${skeletonRoot}/release${specTarget}/.git"
 		Msg "The target site does not have a .git repository for '$repoName', creating from the skeleton, this will take a while..."
 		[[ ! -d $srcGitFile ]] && Terminate 0 2 "Could not locate a source .git directory for this request, repository: $repoName\n^srcGitFile: $srcGitFile"
 		cp -frp "${srcGitFile}" '.'
@@ -323,8 +323,6 @@ rebuildConsole=false
 removeGitReposFromNext=true
 declare -A backedupFiles
 displayGoodbyeSummaryMessages=true
-skeletonRoot="${skeletonRoot}/release"
-
 
 #=======================================================================================================================
 # Standard argument parsing and initialization
@@ -465,7 +463,7 @@ for product in ${products//,/ }; do
 					Terminate "Sorry, 'current' was requested as the source but could not lookup the version from the '$patchesTable' database."
 				currentRelease="${resultSet[0]}"
 
-				skeletonRelease=$(GetProductVersion "$product" "$skeletonRoot")
+				skeletonRelease=$(GetProductVersion "$product" "${skeletonRoot}/release")
 
 			Msg "\nFor '$(ColorK ${product^^[a-z]})', What source data do you wish to use for the patch:"
 			if [[ $(Contains "$products" ',') == true ]]; then
@@ -557,7 +555,7 @@ fi
 	fi
 
 ## Get the cgis information
-	courseleafCgiDirRoot="$skeletonRoot/web/courseleaf"
+	courseleafCgiDirRoot="${skeletonRoot}/release/web/courseleaf"
 	useRhel="rhel${myRhel:0:1}"
 	courseleafCgiSourceFile="$courseleafCgiDirRoot/courseleaf.cgi"
 	[[ -f "$courseleafCgiDirRoot/courseleaf-$useRhel.cgi" ]] && courseleafCgiSourceFile="$courseleafCgiDirRoot/courseleaf-$useRhel.cgi"
@@ -565,14 +563,14 @@ fi
 	dump -1 courseleafCgiSourceFile courseleafCgiVer
 	[[ -z $courseleafCgiVer ]] && Terminate "Courseleaf cgi ($(basename "$searchCgiSourceFile")) did not return version data, source ($ribbitCgiSourceFile) is suspect."
 
-	ribbitCgiDirRoot="$skeletonRoot/web/ribbit"
+	ribbitCgiDirRoot="${skeletonRoot}/release/web/ribbit"
 	ribbitCgiSourceFile="$ribbitCgiDirRoot/index.cgi"
 	[[ -f "$ribbitCgiDirRoot/index-$useRhel.cgi" ]] && ribbitCgiSourceFile="$ribbitCgiDirRoot/index-$useRhel.cgi"
 	ribbitCgiVer="$($ribbitCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
 	dump -1 ribbitCgiSourceFile ribbitCgiVer
 	[[ -z $ribbitCgiVer ]] && Terminate "Ribbit cgi ($(basename "$searchCgiSourceFile")) did not return version data, source ($ribbitCgiSourceFile) is suspect."
 
-	searchCgiDirRoot="$skeletonRoot/web/search"
+	searchCgiDirRoot="${skeletonRoot}/release/web/search"
 	searchCgiSourceFile="$searchCgiDirRoot/index.cgi"
 	[[ -f "$searchCgiDirRoot/index-$useRhel.cgi" ]] && searchCgiSourceFile="$searchCgiDirRoot/index-$useRhel.cgi"
 	searchCgiVer="$($searchCgiSourceFile -v  2> /dev/null | cut -d" " -f3)"
@@ -580,7 +578,7 @@ fi
 	[[ -z $searchCgiVer ]] && Terminate "Search cgi ($(basename "$searchCgiSourceFile")) did not return version data, source ($searchCgiSourceFile) is suspect."
 
 ## Get the daily.sh version
-	dailyShourceFile="$skeletonRoot/bin/daily.sh"
+	dailyShourceFile="${skeletonRoot}/release/bin/daily.sh"
 	dailyShVer=$(ProtectedCall "grep -m 1 \"^version=\" $dailyShourceFile")
 	dailyShVer=${dailyShVer%% *}; dailyShVer=${dailyShVer##*=};
 	dump -1 dailyShourceFile dailyShVer
@@ -629,7 +627,7 @@ fi
 [[ -n $searchCgiVer ]] && verifyArgs+=("New 'search' cgi version:$searchCgiVer (<skeleton>/$(basename $(dirname $searchCgiSourceFile))/$(basename $searchCgiSourceFile))")
 
 [[ -n $dailyShVer ]] && verifyArgs+=("New daily.sh version:$dailyShVer")
-verifyArgs+=("skeleton Root:$skeletonRoot")
+verifyArgs+=("skeleton Root:${skeletonRoot}/release")
 [[ $backup == true ]] && verifyArgs+=("Backup site:$backup, backup directory: '$backupSite'")
 [[ $offline == true ]] && verifyArgs+=("Take site offline:$offline")
 [[ $buildPatchPackage == true ]] && verifyArgs+=("Build Patch Package:$buildPatchPackage")
@@ -989,7 +987,7 @@ for ((pcCntr=0; pcCntr<${#processControl[@]}; pcCntr++)); do
 					[[ -z $specTarget ]] && specTarget="$specSource"
 					msgStr="$msgStr --> ${specTarget}'"; [[ -n $specOptions ]] && msgStr="$msgStr ($specOptions)"
 					Msg; Msg "$msgStr"; Indent ++
-					[[ $specOptions == 'skeleton' ]] && specSource="${skeletonRoot}$specSource"
+					[[ $specOptions == 'skeleton' ]] && specSource="${skeletonRoot}/release${specSource}"
 					if [[ ! -d "$specSource" ]]; then
 						Error "'$specSource' is not a directory, rsync action is only valid for directories, skipping action"
 					else
@@ -1017,7 +1015,7 @@ for ((pcCntr=0; pcCntr<${#processControl[@]}; pcCntr++)); do
 						srcFile="$courseleafCgiSourceFile"; srcFileVer="$courseleafCgiVer"
 						[[ $specSource != 'courseleaf' ]] && { srcFile="$ribbitCgiSourceFile"; srcFileVer="$ribbitCgiVer"; }
 					elif [[ $specOptions == 'skeletion' ]]; then
-						srcFile="${skeletonRoot}${specSource}"
+						srcFile="${skeletonRoot}/release${specSource}"
 					fi
 					if [[ -f $srcFile ]]; then
 						srcFileMd5=$(md5sum $srcFile);
@@ -1091,7 +1089,7 @@ for ((pcCntr=0; pcCntr<${#processControl[@]}; pcCntr++)); do
 					if [[ -f "${tgtDir}${specSource}" ]]; then
 						tgtFile="${tgtDir}${specSource##* }"
 						tgtFileMd5=$(md5sum $tgtFile)
-						[[ $specTarget == 'skeleton' ]] && compareToFile="$skeletonRoot${specSource##* }"
+						[[ $specTarget == 'skeleton' ]] && compareToFile="${skeletonRoot}/release${specSource##* }"
 						if [[ -f $compareToFile ]]; then
 							cmpFileMd5=$(md5sum $compareToFile)
 							if [[ ${tgtFileMd5%% *} != ${cmpFileMd5%% *} ]]; then
@@ -1414,3 +1412,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-18-2018 @ 08:21:32 - 6.1.3 - dscudiero - Cosmetic/minor change/Sync
 ## 06-18-2018 @ 08:22:45 - 6.1.3 - dscudiero - Cosmetic/minor change/Sync
 ## 06-18-2018 @ 12:27:51 - 6.1.3 - dscudiero - Remove the skeletionRoot override
+## 06-18-2018 @ 15:18:37 - 6.1.3 - dscudiero - Fix references to skeletonRoot
