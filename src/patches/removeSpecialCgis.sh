@@ -15,7 +15,7 @@ for checkDir in tcfdb; do
 	if [[ -f $tgtDir/web/$courseleafProgDir/$checkDir/courseleaf.cgi ]]; then
 		checkCgiVer="$($tgtDir/web/$courseleafProgDir/$checkDir/$courseleafProgDir.cgi -v 2> /dev/null | cut -d" " -f3)"
 		if [[ $(CompareVersions "$checkCgiVer" 'le' "$tgtVer") == true ]]; then
-			Msg "^^Found a 'special' courseleaf cgi directory ($checkDir)\n\tand the version of that cgi ($checkCgiVer) is less than the target version ($tgtVer).\n\tRemoving the directory"
+			Msg; Msg "^^Found a 'special' courseleaf cgi directory ($checkDir)\n\tand the version of that cgi ($checkCgiVer) is less than the target version ($tgtVer).\n\tRemoving the directory"
 			BackupCourseleafFile "$tgtDir/web/$courseleafProgDir/$checkDir" "$backupRootDir"
 			backupFile "$tgtDir/web/$courseleafProgDir/$checkDir" "$backupRootDir"
 			rm -f $tgtDir/web/$courseleafProgDir/$checkDir
@@ -23,3 +23,4 @@ for checkDir in tcfdb; do
 		fi
 	fi
 done
+## 06-18-2018 @ 08:28:39 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
