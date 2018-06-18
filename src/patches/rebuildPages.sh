@@ -16,4 +16,9 @@ if [[ $rebuildConsole == true ]]; then
 	RunCourseLeafCgi "$tgtDir" "-r /$courseleafProgDir/approve/index.html" | Indent | Indent
 	((CPitemCntr++))
 fi
+
+#=======================================================================================================================
+## Check-in Log
+#=======================================================================================================================
 ## 06-18-2018 @ 08:28:37 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
+## 06-18-2018 @ 08:31:02 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
