@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version="2.0.23" # -- dscudiero -- Wed 13/06/2018 @ 13:52:21
+version="2.0.70" # -- dscudiero -- Fri 06/15/2018 @ 09:13:42
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors FindExecutable SelectMenu ProtectedCall Pause"
@@ -25,38 +25,35 @@ scriptDescription="Script dispatcher"
 	## Build the menu list from the database
 	#==================================================================================================
 	function BuildMenuArray {
-		## Build scripts hash from the data files
-			unset scriptsKeys 
-			maxKeyIdLen=7
-			maxScriptNameLen=11
-			maxScriptDescLen=18
-
-			dump 2 UsersAuthGroups
-			for group in common ${UsersAuthGroups//,/ }; do
-				dump 2 -n group
-				ifs="$IFS"; IFS=$'\r'; while read line; do
-					dump 2 -t line
-					keyId="${line%%|*}"; line="${line#*|}"
-					script="${line%%|*}"; line="${line#*|}"
-					desc="${line%%|*}"; line="${line#*|}"					
-					[[ $script == 'wizdebug' && $TERM == 'dumb' ]] && continue
-					[[ ${scriptsHash["$script"]+abc} ]] && continue
-					[[ ${#keyId} -gt $maxKeyIdLen ]] && maxKeyIdLen=${#keyId}
-					[[ ${#script} -gt $maxScriptNameLen ]] && maxScriptNameLen=${#script}
-					[[ ${#desc} -gt $maxScriptDescLen ]] && maxScriptDescLen=${#desc}
-					scriptsKeys+=($script)
-					scriptsHash["$script"]="${keyId}|${script}|${desc}"
-				done < "$TOOLSPATH/auth/$group"
-				IFS="$ifs"
-			done
-			menuItems=();
-			menuItems+=("|");
-			menuItems+=("$maxKeyIdLen|$maxScriptNameLen|$maxScriptDescLen");
-			menuItems+=("Ordinal|Script Name|Script Description");
-			for key in $(printf "%s\n" "${scriptsKeys[@]}" | sort -u); do
-				menuItems+=("${scriptsHash[$key]}");
+		## Build menu items list from the users UsersScripts array
+			local columns headers token subToken maxLen i
+			columns=('Ordinal' 'Script Name' 'Script Description')
+			for ((i=1; i<${#columns[@]}+1; i++)); do 
+				eval "local maxLenCol$i"
+				eval "maxLenCol$i=${#columns[$i-1]}"
+				header="$header|${columns[$i-1]}"
 			done;
-			DumpArray 2 menuItems[@]
+			header="${header:1}"
+
+			## Find the max widths of each column for SelectMenu
+			menuItems=();
+			for token in "${UsersScripts[@]}"; do
+				dump 2 -n token
+				unset menuItem
+				for ((i=1; i<${#columns[@]}+1; i++)); do
+					subToken="${token%%|*}"; token="${token#*|}";
+					eval "col${i}data=${#subToken}";
+					eval "maxLen=\$maxLenCol$i"
+					[[ ${#subToken} -gt $maxLen ]] && { eval "maxLenCol$i=${#subToken}"; }
+					dump 2 -t i subToken -t maxLen maxLenCol$i
+					menuItem="$menuItem|$subToken"
+				done
+				menuItems+=("${menuItem:1}")
+			done
+			menuItems=("$header" "${menuItems[@]}");
+			menuItems=("$maxLenCol1|$maxLenCol2|$maxLenCol3" "${menuItems[@]}");
+			menuItems=('|' "${menuItems[@]}")
+			# for ((xx=0; xx<${#menuItems[@]}; xx++)); do echo "menuItems[$xx] = >${menuItems[$xx]}<"; done; Pause
 
 		return 0
 	} #BuildMenuArray
@@ -198,3 +195,4 @@ Goodbye 0
 ## 06-01-2018 @ 09:34:59 - 2.0.19 - dscudiero - Copy full scripts functionality and make standaole
 ## 06-01-2018 @ 10:10:56 - 2.0.22 - dscudiero - Fix problem because we did not add exec,lib,args to the scripts data
 ## 06-13-2018 @ 13:52:37 - 2.0.23 - dscudiero - Cosmetic/minor change/Sync
+## 06-18-2018 @ 08:13:08 - 2.0.70 - dscudiero - Change how menu item calculation
