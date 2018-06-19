@@ -280,7 +280,6 @@ function backupFile {
 
 	## Check to see if we have processed this file already
 	if [[ ! ${backedupFiles["$file"]+abc} ]]; then
-		dump -ifMe file backupDir
 		BackupCourseleafFile "$file" "$backupDir"
 		backedupFiles["$file"]=true
 	fi
@@ -1414,3 +1413,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-18-2018 @ 12:27:51 - 6.1.3 - dscudiero - Remove the skeletionRoot override
 ## 06-18-2018 @ 15:18:37 - 6.1.3 - dscudiero - Fix references to skeletonRoot
 ## 06-18-2018 @ 15:50:40 - 6.1.3 - dscudiero - Cosmetic/minor change/Sync
+## 06-19-2018 @ 10:36:02 - 6.1.3 - dscudiero - Remove debug statement
