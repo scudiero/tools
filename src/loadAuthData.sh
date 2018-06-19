@@ -61,6 +61,7 @@ ParseArgsStd $originalArgStr
 Hello
 user="$client"
 
+whereClause="$auth2userTable.empKey=$employeeTable.employeekey"
 if [[ $batchMode != true ]]; then
 	unset ans
 	if [[ -n $client ]] ; then
@@ -68,7 +69,6 @@ if [[ $batchMode != true ]]; then
 		whereClause="$auth2userTable.empKey=$employeeTable.employeekey and substr(email,1,instr(email,'@')-1) = \"$client\""
 	else
 		Prompt ans "You are asking to reload the tools 'Auth', do you wish to continue" 'Yes No';
-		whereClause="$auth2userTable.empKey=$employeeTable.employeekey"
 	fi
 	ans="${ans:0:1}"; ans="${ans,,[a-z]}"
 	[[ $ans != 'y' ]] && Goodbye 3
@@ -220,3 +220,4 @@ Goodbye 0 #'alert'
 ## Check-in log
 #============================================================================================================================================
 ## 06-18-2018 @ 10:49:14 - 1.0.-1 - dscudiero - Allow passing in a userid name to update
+## 06-19-2018 @ 07:06:58 - 1.0.-1 - dscudiero - Make sure the whereClause is set when running in batchmode
