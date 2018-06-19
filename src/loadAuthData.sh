@@ -61,12 +61,10 @@ ParseArgsStd $originalArgStr
 Hello
 user="$client"
 
-whereClause="$auth2userTable.empKey=$employeeTable.employeekey"
 if [[ $batchMode != true ]]; then
 	unset ans
 	if [[ -n $client ]] ; then
 		Prompt ans "You are asking to reload the tools 'Auth' data for '$client', do you wish to continue" 'Yes No';
-		whereClause="$auth2userTable.empKey=$employeeTable.employeekey and substr(email,1,instr(email,'@')-1) = \"$client\""
 	else
 		Prompt ans "You are asking to reload the tools 'Auth', do you wish to continue" 'Yes No';
 	fi
@@ -77,7 +75,14 @@ fi
 #============================================================================================================================================
 # Main
 #============================================================================================================================================
-## Build a list of the users that are in any auth group
+
+if [[ -n $client ]] ; then
+	whereClause="$auth2userTable.empKey=$employeeTable.employeekey and substr(email,1,instr(email,'@')-1) = \"$client\""
+else
+	whereClause="$auth2userTable.empKey=$employeeTable.employeekey"
+fi
+
+## Build a list of the users of interest
 	sqlStmt="select distinct empKey,substr(email,1,instr(email,'@')-1) from $auth2userTable,$employeeTable where $whereClause"
 	RunSql $sqlStmt
 	for result in "${resultSet[@]}"; do 
@@ -221,3 +226,4 @@ Goodbye 0 #'alert'
 #============================================================================================================================================
 ## 06-18-2018 @ 10:49:14 - 1.0.-1 - dscudiero - Allow passing in a userid name to update
 ## 06-19-2018 @ 07:06:58 - 1.0.-1 - dscudiero - Make sure the whereClause is set when running in batchmode
+## 06-19-2018 @ 15:33:10 - 1.0.-1 - dscudiero - Re-factor how we set the whereClause to work with the workwith tool
