@@ -85,11 +85,12 @@ else
 fi
 
 ## Build a list of the users of interest
-	sqlStmt="select distinct empKey,substr(email,1,instr(email,'@')-1) from $auth2userTable,$employeeTable where $whereClause"
+	sqlStmt="select distinct empKey,substr(email,1,instr(email,'@')-1) from $auth2userTable,$employeeTable where $whereClause order by empKey"
 	RunSql $sqlStmt
 	for result in "${resultSet[@]}"; do 
 		users+=("$result")
 	done
+	#echo; echo "\${#users[@]} = '${#users[@]}'"; for ((xx=0; xx<${#users[@]}; xx++)); do echo "users[$xx] = >${users[$xx]}<"; done; Pause
 
 ## Build the user/authgroup map
 	Verbose 1 "\nBuilding the authGroup data map..."
@@ -97,8 +98,11 @@ fi
 	sqlStmt="select code,groupId from $authGroupTable"
 	RunSql $sqlStmt
 	for result in "${resultSet[@]}"; do 
-		groupCode="${result%%|*}"
-		groupId="${result##*|}"
+		groupData+=("$result")
+	done
+	for groupRec in "${groupData[@]}"; do 
+		groupCode="${groupRec%%|*}"
+		groupId="${groupRec##*|}"
 		Verbose 1 "^$groupCode"
 		Dump 2 groupCode groupId
 		## Get the users in this group
@@ -110,6 +114,7 @@ fi
 														userData["$userid.authGroups"]="$groupId|$groupCode"
 		done
 	done
+	#echo; for mapCtr in "${!userData[@]}"; do echo -e "\tkey: '$mapCtr', value: '${userData[$mapCtr]}'"; done; Pause
 
 ## build the user/scripts map
 	Verbose 1 "\nBuilding the user/scripts data map..."
@@ -178,11 +183,11 @@ fi
 			done ## group in restrictToGroups
 		fi
 	done ## All scripts
+	#echo;echo; for mapCtr in "${!userData[@]}"; do echo -e "\tkey: '$mapCtr', value: '${userData[$mapCtr]}'"; done; Pause
 
 ## Write out the auth files
 	Verbose 1 "\nWriting out the auth shadow files..."
 	for user in "${users[@]}"; do
-dump user
 		if [[ ${userData["$user.authGroups"]+abc} ]]; then
 			Verbose 1 "^$user"
 			unset authGroups userScripts
@@ -235,3 +240,4 @@ Goodbye 0 #'alert'
 ## 06-19-2018 @ 15:39:24 - 1.0.-1 - dscudiero - Tweak messaging
 ## 06-19-2018 @ 15:42:50 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
 ## 06-19-2018 @ 15:45:50 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
+## 06-19-2018 @ 16:26:18 - 1.0.-1 - dscudiero - Comment out debug
