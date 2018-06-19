@@ -180,8 +180,10 @@ fi
 	done ## All scripts
 
 ## Write out the auth files
+	Verbose 1 "\nWriting out the auth shadow files..."
 	for user in "${users[@]}"; do
 		if [[ ${userData["$user.authGroups"]+abc} ]]; then
+			Verbose 1 "^$user"
 			unset authGroups userScripts
 			aData="${userData["$user.authGroups"]}"
 			aData="$(printf '%s\n' ${aData//,/ } | sort -u)"
@@ -230,3 +232,4 @@ Goodbye 0 #'alert'
 ## 06-19-2018 @ 07:06:58 - 1.0.-1 - dscudiero - Make sure the whereClause is set when running in batchmode
 ## 06-19-2018 @ 15:33:10 - 1.0.-1 - dscudiero - Re-factor how we set the whereClause to work with the workwith tool
 ## 06-19-2018 @ 15:39:24 - 1.0.-1 - dscudiero - Tweak messaging
+## 06-19-2018 @ 15:42:50 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
