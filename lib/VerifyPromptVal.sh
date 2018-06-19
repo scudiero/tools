@@ -92,7 +92,7 @@ function VerifyPromptVal {
 					## Search for pvt dir
 					for server in ${devServers//,/ }; do
 						dump -3 -t server
-						[[ -d "/mnt/$server/web/$client-$userName" ]] && { pvtDir="/mnt/$server/web/$client-$userName"; break; }
+						[[ -d "/mnt/$server/web/$response-$userName" ]] && { pvtDir="/mnt/$server/web/$response-$userName"; break; }
 					done
 					if [[ -n $pvtDir ]]; then
 						clientData["${response}.pvt.host"]="$hostName"
@@ -312,3 +312,4 @@ export -f VerifyPromptVal
 ## 06-08-2018 @ 08:27:02 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
 ## 06-08-2018 @ 08:52:18 - 2.1.6 - dscudiero - Remove debug code
 ## 06-13-2018 @ 13:50:15 - 2.1.10 - dscudiero - Added code to set client pvt data if the client does not have a dev site
+## 06-19-2018 @ 12:28:38 - 2.1.10 - dscudiero - Fix bug finding the pvt site if there is no dev site
