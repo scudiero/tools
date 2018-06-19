@@ -77,8 +77,10 @@ fi
 #============================================================================================================================================
 
 if [[ -n $client ]] ; then
+	Verbose 1 "\nProcessing user '$client'..."
 	whereClause="$auth2userTable.empKey=$employeeTable.employeekey and substr(email,1,instr(email,'@')-1) = \"$client\""
 else
+	Verbose 1 "\nProcessing all users..."
 	whereClause="$auth2userTable.empKey=$employeeTable.employeekey"
 fi
 
@@ -227,3 +229,4 @@ Goodbye 0 #'alert'
 ## 06-18-2018 @ 10:49:14 - 1.0.-1 - dscudiero - Allow passing in a userid name to update
 ## 06-19-2018 @ 07:06:58 - 1.0.-1 - dscudiero - Make sure the whereClause is set when running in batchmode
 ## 06-19-2018 @ 15:33:10 - 1.0.-1 - dscudiero - Re-factor how we set the whereClause to work with the workwith tool
+## 06-19-2018 @ 15:39:24 - 1.0.-1 - dscudiero - Tweak messaging
