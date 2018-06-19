@@ -8,7 +8,6 @@
 # Copyright 2106 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-
 function VerifyContinue {
 	[[ $secondaryMessagesOnly == true ]] && return 0
 	Import 'ArrayRef'
@@ -23,31 +22,20 @@ function VerifyContinue {
 		#[[ $allItems == true ]] && verifyArgs+=("Auto process all items:$allItems")
 		[[ $force == true ]] && verifyArgs+=("Force execution:$force")
 
-		local maxArgWidth arg argStr argVal argL argValL tmpStr iii
-		# for arg in "${verifyArgs[@]}"; do tempStr=$(echo $arg | cut -d':' -f1); [[ ${#tempStr} -gt $maxArgWidth ]] && maxArgWidth=${#tempStr}; done
-		# dots=$(PadChar '.' $maxArgWidth)
-		# for arg in "${verifyArgs[@]}"; do
-		# 	tempStr="$(echo $arg | cut -d':' -f1)"
-		# 	local token1="$(echo $arg | cut -d':' -f1)" ; token1=${token1,,[a-z]}
-		# 	[[ $token1 == 'warning' ]] && color='ColorW' || color='ColorK'
-		# 	tempStr="${tempStr}${dots}"
-		# 	tempStr=${tempStr:0:$maxArgWidth+3}
-		# 	Msg "^$(eval "$color \"${tempStr}\"")$(echo $arg | cut -d':' -f2-)"
-		# done
-		
+		local maxArgWidth arg argStr argVal argL argValL tmpStr iii	
 		for argStr in "${verifyArgs[@]}"; do tmpStr=${argStr%%:*}; [[ ${#tmpStr} -gt $maxArgWidth ]] && maxArgWidth=${#tmpStr}; done
 		dots=$(PadChar '.' $maxArgWidth); (( maxArgWidth = $maxArgWidth + 3 )); blanks=$(PadChar ' ' $maxArgWidth)
 
 		for argStr in "${verifyArgs[@]}"; do
 			arg="${argStr%%:*}"; argL="${arg,,[a-z]}"; argVal="${argStr##*:}"; argValL="${argVal,,[a-z]}";
+			[[ ${arg:0:1} == '!' ]] && tmpStr="${arg:1}" || tmpStr="${arg}${dots}";
+			[[ ${tmpStr:0:1} == '^' ]] && { tmpStr=${tmpStr:0:$maxArgWidth-${#tabStr}+1}; } || { tmpStr=${tmpStr:0:$maxArgWidth}; }
 			if [[ ${argL:${#argL}-3:${#argL}} == '(s)' ]]; then
-				tmpStr="${arg}${dots}"; tmpStr=${tmpStr:0:$maxArgWidth}
 				Msg "^$(ColorK "${tmpStr}")" 
 				for iii in $(IndirKeys $argVal); do
 				    Msg "^${blanks}$(IndirVal $argVal $iii)"
 				done
 			else
-				tmpStr="${arg}${dots}"; tmpStr=${tmpStr:0:$maxArgWidth}
 				[[ ${argL:0:7} == 'warning' ]] && Msg "^$(ColorW "${tmpStr}")${argVal}" || Msg "^$(ColorK "${tmpStr}")${argVal}" 
 			fi
 		done
@@ -95,3 +83,4 @@ export -f VerifyContinue
 ## 03-23-2018 @ 16:52:29 - 2.0.27 - dscudiero - Msg3 -> Msg
 ## 05-08-2018 @ 13:27:21 - 2.0.28 - dscudiero - Remove the 'Auto process all items message
 ## 05-22-2018 @ 08:39:47 - 2.0.32 - dscudiero - Add displaying array values vertically
+## 06-19-2018 @ 11:19:41 - 2.0.32 - dscudiero - Add formatting for title lines and align elements with leading tabs
