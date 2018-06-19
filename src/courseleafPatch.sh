@@ -605,7 +605,7 @@ if [[ $noCheck == true ]]; then
 	verifyArgs+=("Target Path:$tgtDir")
 else
 	verifyArgs+=("Client:$client")
-    verifyArgs+=("Target Env:$(TitleCase $env) ($tgtDir)")
+    verifyArgs+=("Target Env:${env^^[a-z]} ($tgtDir)")
 fi
 verifyArgs+=("Product(s):${products//,/, }")
 for token in "${processControl[@]}"; do
@@ -1414,3 +1414,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-18-2018 @ 15:18:37 - 6.1.3 - dscudiero - Fix references to skeletonRoot
 ## 06-18-2018 @ 15:50:40 - 6.1.3 - dscudiero - Cosmetic/minor change/Sync
 ## 06-19-2018 @ 10:36:02 - 6.1.3 - dscudiero - Remove debug statement
+## 06-19-2018 @ 11:20:01 - 6.1.3 - dscudiero - Make env upper case in verifyArgs
