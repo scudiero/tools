@@ -611,7 +611,7 @@ verifyArgs+=("!Product(s):${products//,/, }")
 for token in "${processControl[@]}"; do
 	product="${token%%|*}"; token="${token#*|}"
 	source="${token%%|*}"; token="${token#*|}"	
-	[[ -z $token ]] && verifyArgs+=("^$product, source: $source") || verifyArgs+=("^$product, source: $source / $token")
+	[[ -z $token ]] && verifyArgs+=("^$product, source:$source") || verifyArgs+=("^$product, source:$source / $token")
 done
 
 if [[ $catalogAdvance == true ]]; then
@@ -1416,3 +1416,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-19-2018 @ 10:36:02 - 6.1.3 - dscudiero - Remove debug statement
 ## 06-19-2018 @ 11:20:01 - 6.1.3 - dscudiero - Make env upper case in verifyArgs
 ## 06-19-2018 @ 11:36:11 - 6.1.3 - dscudiero - Cosmetic/minor change/Sync
+## 06-19-2018 @ 11:40:27 - 6.1.3 - dscudiero - Cosmetic/minor change/Sync
