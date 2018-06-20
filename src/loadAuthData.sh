@@ -1,8 +1,5 @@
 #!/bin/bash
 #DO NOT AUTOVERSION
-
-Goodbye 0
-
 #=======================================================================================================================
 version=1.0.-1 # -- dscudiero -- 10/20/2016 @ 14:58:14.98
 #=======================================================================================================================
@@ -121,7 +118,18 @@ for user in "${userList[@]}"; do
 		#sqlStmt="$sqlStmt (select authKey from $auth2userTable where empKey= in"
 		#sqlStmt="$sqlStmt (select employeekey from $employeeTable where substr(email,1,instr(email,'@')-1)=\"${user%|*}\")))"
 		sqlStmt="$sqlStmt or author=\"${user%|*}\" or restrictToUsers like \"%${user%|*}%\""
+		sqlStmt="$sqlStmt or keyId not in (select distinct scriptKey from $auth2scriptTable)"
 		RunSql $sqlStmt
+		## Generate a comma separated list of script names
+		[[ ${#resultSet[@]} -eq 0 || ${resultSet[0]} == "" ]] && continue
+		for result in "${resultSet[@]}"; do
+			result="${result#*|}"; result="${result%%|*}";
+			[[ -z $scriptListStr ]] && scriptListStr="$result" || scriptListStr="${scriptListStr},${result}"
+		done
+		scriptListStr="$(printf '%s\n' ${scriptListStr//,/ } | sort -u | tr "\n" ' ')"
+		echo "$scriptListStr" >> "${outFile}.new"
+
+		## Write out the script detail information
 		[[ ${#resultSet[@]} -eq 0 || ${resultSet[0]} == "" ]] && continue
 		for result in "${resultSet[@]}"; do
 			echo "$result" >> "${outFile}.new"
@@ -153,3 +161,4 @@ Goodbye 0 #'alert'
 ## 06-19-2018 @ 16:26:18 - 1.0.-1 - dscudiero - Comment out debug
 ## 06-20-2018 @ 15:59:26 - 1.0.-1 - dscudiero - Re-factored to use the warehouse auth tables
 ## 06-20-2018 @ 16:03:49 - 1.0.-1 - dscudiero - Comment out script
+## 06-20-2018 @ 16:32:08 - 1.0.-1 - dscudiero - Add section to write out the scriptname string
