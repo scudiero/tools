@@ -126,8 +126,8 @@ for user in "${userList[@]}"; do
 			result="${result#*|}"; result="${result%%|*}";
 			[[ -z $scriptListStr ]] && scriptListStr="$result" || scriptListStr="${scriptListStr},${result}"
 		done
-		scriptListStr="$(printf '%s\n' ${scriptListStr//,/ } | sort -u | tr "\n" ' ')"
-		echo "$scriptListStr" >> "${outFile}.new"
+		scriptListStr="$(printf '%s\n' ${scriptListStr//,/ } | sort -u | tr "\n" ',')"
+		echo "${scriptListStr:0:${#scriptListStr}-1}" >> "${outFile}.new"
 
 		## Write out the script detail information
 		[[ ${#resultSet[@]} -eq 0 || ${resultSet[0]} == "" ]] && continue
@@ -162,3 +162,4 @@ Goodbye 0 #'alert'
 ## 06-20-2018 @ 15:59:26 - 1.0.-1 - dscudiero - Re-factored to use the warehouse auth tables
 ## 06-20-2018 @ 16:03:49 - 1.0.-1 - dscudiero - Comment out script
 ## 06-20-2018 @ 16:32:08 - 1.0.-1 - dscudiero - Add section to write out the scriptname string
+## 06-20-2018 @ 16:35:53 - 1.0.-1 - dscudiero - Strip off trailing comma from scriptsListStr
