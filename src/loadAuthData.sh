@@ -61,6 +61,8 @@ ParseArgsStd $originalArgStr
 Hello
 user="$client"
 
+scriptsTable='scriptsNew'
+
 if [[ $batchMode != true ]]; then
 	unset ans
 	if [[ -n $client ]] ; then
@@ -75,7 +77,6 @@ fi
 #============================================================================================================================================
 # Main
 #============================================================================================================================================
-
 if [[ -n $client ]] ; then
 	Verbose 1 "\nProcessing user '$client'..."
 	whereClause="$auth2userTable.empKey=$employeeTable.employeekey and substr(email,1,instr(email,'@')-1) = \"$client\""
@@ -84,147 +85,53 @@ else
 	whereClause="$auth2userTable.empKey=$employeeTable.employeekey"
 fi
 
-## Build a list of the users of interest
-	sqlStmt="select distinct empKey,substr(email,1,instr(email,'@')-1) from $auth2userTable,$employeeTable where $whereClause order by empKey"
+## Get a list of users
+	Verbose 1 "\nBuilding the users list..."
+	sqlStmt="select distinct employeekey,substr(email,1,instr(email,'@')-1) from $auth2userTable,$employeeTable where $whereClause order by employeekey"
 	RunSql $sqlStmt
-	for result in "${resultSet[@]}"; do 
-		users+=("$result")
-	done
-	#echo; echo "\${#users[@]} = '${#users[@]}'"; for ((xx=0; xx<${#users[@]}; xx++)); do echo "users[$xx] = >${users[$xx]}<"; done; Pause
+	unset userList; for rec in "${resultSet[@]}"; do userList+=("$rec"); done
+## Loop through the user list
 
-## Build the user/authgroup map
-	Verbose 1 "\nBuilding the authGroup data map..."
-	## Get the list of auth groups
-	sqlStmt="select code,groupId from $authGroupTable"
-	RunSql $sqlStmt
-	for result in "${resultSet[@]}"; do 
-		groupData+=("$result")
-	done
-	for groupRec in "${groupData[@]}"; do 
-		groupCode="${groupRec%%|*}"
-		groupId="${groupRec##*|}"
-		Verbose 1 "^$groupCode"
-		Dump 2 groupCode groupId
-		## Get the users in this group
-		sqlStmt="select empKey,userid from $auth2userTable where authKey=$groupId"
+Verbose 1 "\nProcessing users..."
+for user in "${userList[@]}"; do
+	Verbose 1 "\t$user..."
+	outFile="${authShadowDir}/${user#*|}"
+	
+	## Get the list of groups this user is in
+		sqlStmt="select code from $authGroupTable where groupId in (select authKey from auth2user where empKey=${user%|*})"
 		RunSql $sqlStmt
-		for result in "${resultSet[@]}"; do 
-			userid="${result%%|*}|${result##*|}"
-			[[ ${userData["$userid.authGroups"]+abc} ]] && userData["$userid.authGroups"]="${userData["$userid.authGroups"]},$groupId|$groupCode" || \
-														userData["$userid.authGroups"]="$groupId|$groupCode"
+		unset groupListStr
+		for result in "${resultSet[@]}"; do
+			[[ -z $groupListStr ]] && groupListStr="$result" || groupListStr="$groupListStr,$result"
 		done
-	done
-	#echo; for mapCtr in "${!userData[@]}"; do echo -e "\tkey: '$mapCtr', value: '${userData[$mapCtr]}'"; done; Pause
+		[[ -z $groupListStr ]] && continue
 
-## build the user/scripts map
-	Verbose 1 "\nBuilding the user/scripts data map..."
-	## Get the script data
-	fields="keyId,name,restrictToUsers,restrictToGroups,author,shortDescription,showInScripts"
-	sqlStmt="select $fields from $scriptsTable where active=\"Yes\" order by name"
-	RunSql $sqlStmt
-	for result in "${resultSet[@]}"; do 
-		result="${result//NULL/}"; result="${result//null/}";
-		Dump 2 -n result
-		scriptId="${result%%|*}"; result="${result#*|}"
-		scriptName="${result%%|*}"; result="${result#*|}"
-		restrictToUsers="${result%%|*}"; result="${result#*|}"
-		restrictToGroups="${result%%|*}"; result="${result#*|}"
-		author="${result%%|*}"; result="${result#*|}"
-		showInScripts="${result%%|*}"; result="${result#*|}"
-		shortDesc="${result%%|*}"; result="${result#*|}"
-		Dump 2 -t scriptId scriptName restrictToUsers restrictToGroups author showInScripts shortDesc
-		recData="${scriptId}|${scriptName}|${showInScripts}|${shortDesc}"
-		scriptsData["$scriptName"]="$recData"
+	## Write out initial records to the outFile
+		[[ -f $outFile ]] && cp -fp "$outFile" "${outFile}.bak"
+		echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE AUTH TABLES IN THE DATA WAREHOUSE" > "${outFile}.new"
+		echo "$groupListStr" >> "${outFile}.new"
+	
+	## Get the list of scripts this user has access to, add them to the file
+		sqlStmt="select keyId,name,description,showInScripts from $scriptsTable where keyId in"
+		sqlStmt="$sqlStmt (select scriptKey from $auth2scriptTable where groupKey in"
+		sqlStmt="$sqlStmt (select authKey from $auth2userTable where empKey=${user%|*}))"
+		#sqlStmt="$sqlStmt (select authKey from $auth2userTable where empKey= in"
+		#sqlStmt="$sqlStmt (select employeekey from $employeeTable where substr(email,1,instr(email,'@')-1)=\"${user%|*}\")))"
+		sqlStmt="$sqlStmt or author=\"${user%|*}\" or restrictToUsers like \"%${user%|*}%\""
+		RunSql $sqlStmt
+		[[ ${#resultSet[@]} -eq 0 || ${resultSet[0]} == "" ]] && continue
+		for result in "${resultSet[@]}"; do
+			echo "$result" >> "${outFile}.new"
+		done
+		#echo;echo "Pause...";read junk
 
-		## Add script to authors script list
-		for user in "${users[@]}"; do
-			if [[ ${user#*|} == $author ]]; then
-				[[ ${userData["$user.scripts"]+abc} ]] && \
-					userData["$user.scripts"]="${userData["$user.scripts"]},$scriptName" || \
-					userData["$user.scripts"]="$scriptName"
-				break
-			fi
-		done	
+ 	## Cleanup and set ownership/permissions
+	 	rm -f "$outFile"
+	 	mv -f "${outFile}.new" "$outFile"
+		chmod 640 "$outFile"
+		chown "$userName:leepfrog" "$outFile"
 
-		## Process scripts with no restrictTo data
-		if [[ -z $restrictToUsers && -z $restrictToGroups ]]; then
-			for user in "${users[@]}"; do
-				[[ ${userData["$user.scripts"]+abc} ]] && \
-					userData["$user.scripts"]="${userData["$user.scripts"]},$scriptName" || \
-					userData["$user.scripts"]="$scriptName"
-			done
-		## Process restrictToUsers information
-		elif [[ -n $restrictToUsers ]]; then
-			for user in ${restrictToUsers//,/ }; do
-				user="${user#*|}"
-				[[ -z $user ]] && continue
-				[[ ${userData["$user.scripts"]+abc} ]] && \
-					userData["$user.scripts"]="${userData["$user.scripts"]},$scriptName" || \
-					userData["$user.scripts"]="$scriptName"
-			done
-		## Process restricToGroups information			
-		elif [[ -n $restrictToGroups ]]; then
-			for group in ${restrictToGroups//,/ }; do
-				[[ -z $group ]] && continue
-				## OK loop through the userData array and find users in this group
-				for user in "${users[@]}"; do
-					if [[ ${userData["$user.authGroups"]+abc} ]]; then
-						data="${userData["$user.authGroups"]}"
-						for token in ${data//,/ }; do
-							token="${token#*|}"
-							if [[ ${token#*|} == $group ]]; then
-								[[ ${userData["$user.scripts"]+abc} ]] && \
-										userData["$user.scripts"]="${userData["$user.scripts"]},$scriptName" || \
-										userData["$user.scripts"]="$scriptName"
-							fi
-						done ## Users groups
-					fi
-				done ## User in the group
-			done ## group in restrictToGroups
-		fi
-	done ## All scripts
-	#echo;echo; for mapCtr in "${!userData[@]}"; do echo -e "\tkey: '$mapCtr', value: '${userData[$mapCtr]}'"; done; Pause
-
-## Write out the auth files
-	Verbose 1 "\nWriting out the auth shadow files..."
-	for user in "${users[@]}"; do
-		if [[ ${userData["$user.authGroups"]+abc} ]]; then
-			Verbose 1 "^$user"
-			unset authGroups userScripts
-			aData="${userData["$user.authGroups"]}"
-			aData="$(printf '%s\n' ${aData//,/ } | sort -u)"
-			sData="${userData["$user.scripts"]}"
-			sData="$(printf '%s\n' ${sData//,/ } | sort -u)"
-			user="${user#*|}";
-			Verbose 1 "^$user"
-			for token in ${aData//,/ }; do
-				authGroups="$authGroups,${token#*|}"
-			done
-			authGroups="${authGroups:1}"
-			for token in ${sData//,/ }; do
-				userScripts="$userScripts,${token#*|}"
-			done
-			userScripts="${userScripts:1}"
-		 	outFile="${authShadowDir}/${user}"
-		 	[[ -f $outFile ]] && cp -fp "$outFile" "${outFile}.bak"
-		 	## Header
-		 	echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE CLIENTS/SITES TABLES IN THE DATA WAREHOUSE" > "${outFile}.new"
-		 	## list of groups
-		 	echo "${authGroups}" >> "${outFile}.new"
-		 	## List of scripts
-		 	echo "${userScripts}" >> "${outFile}.new"
-		 	## Scripts details
-		 	for scriptName in ${userScripts//,/ }; do
-		 		echo "${scriptsData["$scriptName"]}" >> "${outFile}.new"
-		 	done
-		 	## Cleanup and set ownership/permissions
-		 	rm -f "$outFile"
-		 	mv -f "${outFile}.new" "$outFile"
-			chmod 640 "$outFile"
-			chown "$userName:leepfrog" "$outFile"
-		fi
-		Dump 2 -t authGroups userScripts
-	done
+done
 
 #============================================================================================================================================
 ## Done
@@ -241,3 +148,4 @@ Goodbye 0 #'alert'
 ## 06-19-2018 @ 15:42:50 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
 ## 06-19-2018 @ 15:45:50 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
 ## 06-19-2018 @ 16:26:18 - 1.0.-1 - dscudiero - Comment out debug
+## 06-20-2018 @ 15:59:26 - 1.0.-1 - dscudiero - Re-factored to use the warehouse auth tables
