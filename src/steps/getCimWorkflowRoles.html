@@ -16,6 +16,7 @@
 //					Added a new subrule type of 'AdditionalSetps' to add additional steps to the workflow steps array (e.g. emitted by an esig)
 // 03/16/18 - dgs - Added more robust searching for mapping functions, tweaked the wfSubRules syntax, add the where clause to query subrules if not present
 // 06/07/18 - dgs - Make sure that subRuleMapType is set
+// 06/22/18 - dgs - Fixed bug process functions, cleaned up how final output lines are generated
 //============================================================================================================
 // Function wrapper
 (function getCimWorkflowRoles() {
@@ -28,7 +29,7 @@ var debug=false;
 	if (cims.length == 0)
 		cims=['courseadmin','programadmin'];
 	var env='pvt';
-	var version="6.7";
+	var version="6.8";
 	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
 
 	var ignoreSteps = {
@@ -195,7 +196,10 @@ if (debug) { wfDump("sisName",sisName); }
 					text=text.substr(0,idx1);
 					conditionals.push(text);
 				});//str.split
-				if (debug) {print_doc("\nconditionals: " + conditionals.toSource() + "\n\n" );}
+				if (debug) {
+					print_doc("\n\t\tFound " + conditionals.length + " conditionals/modifiers:\n" );
+					conditionals.forEach(function(text) { print_doc("\t\t\t" + text + "\n" ); });
+				}
 
 			//Get a list of workflow rules that are function calls
 				var configTcfData=load_tcf('/' + cim + '/workflow.cfg');
@@ -205,22 +209,29 @@ if (debug) { wfDump("sisName",sisName); }
 				    // skip loop if the property is from prototype
 				    if (!wfrules.hasOwnProperty(key)) continue;
 				    //var tmpObj = wfrules[key];
-				    if (wfrules[key].type === "function" && wfrules[key].attrname != "wfAttr")
-				    	functions.push(wfrules[key].searchfor)
+				    if (wfrules[key].type === "function" && wfrules[key].attrname != "wfAttr") {
+				    	functions.push(wfrules[key].attrname)
+				    }
 				}
-				if (debug) {print_doc("\nfunctions: " + functions.toSource() + "\n\n" );}
+				if (debug) {
+					print_doc("\n\t\tFound " + functions.length + " functions:\n" );
+					functions.forEach(function(text) { print_doc("\t\t\t" + text + "\n" ); });
+				}
 
 			//pull off workflow steps and add to master list
 				workflows=workflowTcfData.workflow;
+				if (debug) {print_doc("\n\t\tFound " + workflows.length + " workflows:\n" );}
 				workflows.forEach(function(text) {
 					tempArray=[];
 					tempArray = text.members.split(',');
+					if (debug) {print_doc("\t\t\t'" + text.name + "',   " + tempArray.length + " steps\n" );}
 					tempArray.forEach(function(step) {
 						var tmpArray=step.split(" ");
 						if (! ignoreSteps[tmpArray[0].toLowerCase()] ) {
 							var tmpObj={};
 							tmpObj.stepData=step;
 							tmpObj.cimInstance=cim;
+							tmpObj.workflow=text.name;
 							steps.push(tmpObj);
 						}
 					});//steps
@@ -233,8 +244,8 @@ if (debug) { wfDump("sisName",sisName); }
 			}
 			// Loop through wfSubRules data
 			if (cimconfigTcfData) {
-				if (debug) {print_doc('\n\t\t\tProcessing wfSubRules\n' )};
 				if (cimconfigTcfData.wfSubRule) {
+					if (debug) {print_doc("\n\t\tFound " + cimconfigTcfData.wfSubRule.length + " wfSubRules:\n" );}
 					cimconfigTcfData.wfSubRule.forEach(function(text) {
 						var tmpArray=text.split('|');
 						var subRuleName=tmpArray[0];
@@ -243,9 +254,7 @@ if (debug) { wfDump("sisName",sisName); }
 						subRuleMapType=subRuleName;
 						if (tmpArray.length === 3)
 							var subRuleMapType=tmpArray[2];
-						
-						wfDump('\n\t\t\t\twfSubRule',text); wfDump('\t\t\t\t\tsubRuleName',subRuleName); 
-						wfDump('\t\t\t\t\tsubRuleMapType',subRuleMapType); wfDump('\t\t\t\t\tsubRuleText',subRuleText);
+						wfDump('\t\t\twfSubRule',text); 
 						// If the subrulenName is 'AdditionalSteps' then the rule is an array of steps tp add to the steps array
 						if (subRuleName.toLowerCase() === "additionalsteps" || subRuleName.toLowerCase() === "addsteps") {
 							var tmpStr=subRuleText.substr(1,subRuleText.length-2);
@@ -263,7 +272,6 @@ if (debug) { wfDump("sisName",sisName); }
 							if (debug) {print_doc("\t\t\t\t'" + subRuleName + "' already included above\n")};
 							return;
 						}
-						if (debug) {print_doc('\t\t\t\t' + subRuleName + ': ' + subRuleText + '\n')};
 						// If rule is an enumeration then parse off and create an object array
 						if (subRuleText.substr(0,1) === "[" ) {
 							var tmpHashArray=[];
@@ -292,7 +300,6 @@ if (debug) { wfDump("sisName",sisName); }
 
 						// See if we have a mapper function for this variable
 						var mapperFunctionName="Map" + subRuleName + "Val";
-
 						if (eval("typeof " + mapperFunctionName) === "function") {
 						} else {
 							var mapperFunctionName="WfDataMapper";
@@ -300,7 +307,6 @@ if (debug) { wfDump("sisName",sisName); }
 								mapperFunctionName=null;
 							}
 						}
-
 						if (mapperFunctionName != null && debug)
 							print_doc("\t\t\t\tFound code mapping function: "+ mapperFunctionName +" for: " + subRuleName + "/" + subRuleMapType + "\n");
 
@@ -330,18 +336,6 @@ if (debug) { wfDump("sisName",sisName); }
 		}
 	}); //cims.forEach(function(cim)
 
-	if (debug) {
-		print_doc('\n\nFound ' + Object.keys(wfSubRulesHash).length + ' subRules...\n');
-		for (var i2=0,  tot=Object.keys(wfSubRulesHash).length; i2 < tot; i2++) {
-			wfDump("\n\twfSubRulesHash[" + Object.keys(wfSubRulesHash)[i2] + "]",wfSubRulesHash[Object.keys(wfSubRulesHash)[i2]].toSource())
-		}
-		wfDump('');
-		print_doc('\n\nFound ' + steps.length + ' steps...\n');
-		for (var i2=0,  tot=steps.length; i2 < tot; i2++) {
-			wfDump("\tsteps[" + i2 + "]",steps[i2].toSource())
-		}
-		wfDump('');
-	}
 	if (errorDetected) {
 		print_doc('\n*Error* --- Errors detected.\nStopping\n');
 		return false;
@@ -352,37 +346,38 @@ if (debug) { wfDump("sisName",sisName); }
 	conditionals=RemoveDupes(conditionals);
 	conditionals.reverse();
 	if (debug) {
-		print_doc('Found ' + steps.length + ' steps...\n'); 
-		steps.forEach(function(text) {
-			print_doc('\tstep >' + text.toSource() + '<\n');
-		});//steps
-		print_doc('\n');
-		print_doc('Found ' + conditionals.length + ' step conditionals...\n'); 
-		conditionals.forEach(function(text) {
-			print_doc('\tconditional >' + text.toSource() + '<\n');
-		});//conditionals
-		print_doc('\n');
+		print_doc('\n\t\tFound ' + steps.length + ' steps before pre-processing...\n');
+		steps.forEach(function(step) { print_doc('\t\t\tstep >' + step.toSource() + '<\n');});//steps
 	}
-	// Pre-process the steps array: 1) remove the conditionals strings from the steps, 2)remove the steps that are function calls, 3) Combine cimInstance data for duplicate steps, 4) remove dups
+
+	// Pre-process the steps array: 
+	// 	1) Remove the conditionals strings from the steps, 
+	// 	2) Remove the steps that are function calls, 
+	// 	3) Combine cimInstance data for duplicate steps, 
+	// 	4) Remove duplicates
 		steps.sort(compare);
 		for (var i=0,  tot=steps.length; i < tot; i++) {
 			var stepData=steps[i].stepData
+			// Check if this is an optional step, if yes then add '/optiona' to the step description string
+			steps[i].optional=false;
 			if (stepData.indexOf("optional") > 0) {
 				steps[i].optional=true;
-				steps[i].cimInstance=steps[i].cimInstance + "/optional";
+				//steps[i].cimInstance=steps[i].cimInstance + "/optional";
 			}
+			// Remove conditionals
 			conditionals.forEach(function(conditional) {
 				stepData=stepData.replace(conditional,'').trim();
 			});
 			steps[i].stepData=stepData;
-			// functions
+			// Remove undefined functions
 			for (var j=0,  tot2=functions.length; j < tot2; j++) {
-				if (steps[i].stepData.indexOf(functions[j]) >= 0 && wfSubRulesHash[functions[j]] == undefined) {
+				if (steps[i].stepData.indexOf(functions[j] + " ") >= 0 && wfSubRulesHash[functions[j]] == undefined) {
 					steps[i].stepData='' ; steps[i].cimInstance=''
 					break;
 				}
 			}
 		}
+
 		// Remove empty records and duplicates
 		var tmpArray=[], tmpStepData='', tmpStepDataPrev='', tmpInstancePrev='';
 		for (var i=0,  tot=steps.length; i < tot; i++) {
@@ -400,33 +395,36 @@ if (debug) { wfDump("sisName",sisName); }
 		}
 		steps=tmpArray;
 		if (debug) {
-			print_doc('\nFound ' + steps.length + ' steps...\n');
-			print_doc('\nSteps after pre-processing:\n');
+			print_doc('\n\t\tHave ' + steps.length + ' steps remaining after before pre-processing...\n');
 			steps.forEach(function(step) {
-				print_doc('\tstep >' + step.toSource() + '<\n');
+				print_doc('\t\t\tstep >' + step.toSource() + '<\n');
 			});//steps
-			print_doc('\n');
 		}
 
 //============================================================================================================
 //# Main
 //============================================================================================================
 // Loop through the steps, substitute values and build initial output roles array
-
 var rolesOut=steps;
 var instanceData="";
 var editString="";
+var variableData="";
+var workflowData="";
+var optionalData="";
 var madeSubstitution=false;
 var startLoopAt=0;
 
-if (debug) { print_doc("\nLoop through the steps, substitute values and build initial output roles array...\n"); }
+if (debug) { print_doc("\n\tLoop through the steps, substitute values and build initial output roles array...\n"); }
 for (var i1=startLoopAt; i1 < rolesOut.length; i1++) {
 	firstPassForThisStep=true;
-	if (debug) { print_doc("rolesOut[" + i1 + "] = >" + rolesOut[i1].toSource() + "<\n"); }
+	if (debug) { print_doc("\trolesOut[" + i1 + "] = >" + rolesOut[i1].toSource() + "<\n"); }
 	if (rolesOut[i1].stepData === "") continue
 	editString=rolesOut[i1].stepData;
 	instanceData=rolesOut[i1].cimInstance;
 	variableData=rolesOut[i1].subVariables;
+	workflowData=rolesOut[i1].workflow;
+	optionalData=rolesOut[i1].optional;
+
 	madeSubstitution=false;
 	for (var i2=0,  tot=Object.keys(wfSubRulesHash).length; i2 < tot; i2++) {
 		key = Object.keys(wfSubRulesHash)[i2];
@@ -445,7 +443,8 @@ for (var i1=startLoopAt; i1 < rolesOut.length; i1++) {
 						if (variableData.indexOf(key)<0) 
 							variableData=variableData + ", " + key;
 					}
-				rolesOut.push({ stepData:editString, cimInstance:instanceData,subVariables:variableData }); // Add edited role string to the bottom of the array 
+				// Add edited role string to the bottom of the array
+				rolesOut.push({ stepData:editString, cimInstance:instanceData, subVariables:variableData , workflow:workflowData, optional:optionalData}); 
 			}); //wfSubRulesHash[key].forEach
 			rolesOut.splice(i1,1); i1--; //Remove the template role from rolesOut
 		}
@@ -455,7 +454,7 @@ for (var i1=startLoopAt; i1 < rolesOut.length; i1++) {
 } //tot=rolesOut.length
 
 // Loop through the rolesOut array and add role member list and instance annotations
-if (debug) { print_doc("\nLoop through the rolesOut array and add role member list and instance annotations...\n"); }
+if (debug) { print_doc("\n\tLoop through the rolesOut array and add role member list and instance annotations...\n"); }
 var haveStep=[];
 rolesOut=rolesOut.sort();
 for (var i1=0, tot=rolesOut.length; i1 < tot; i1++) {
@@ -463,6 +462,8 @@ for (var i1=0, tot=rolesOut.length; i1 < tot; i1++) {
 	editString=rolesOut[i1].stepData;
 	instanceData=rolesOut[i1].cimInstance;
 	variableData=rolesOut[i1].subVariables;
+	workflowData=rolesOut[i1].workflow;
+	optionalData=rolesOut[i1].optional;
 
 	if (haveStep[editString] != undefined)
 		continue;
@@ -475,14 +476,15 @@ for (var i1=0, tot=rolesOut.length; i1 < tot; i1++) {
 		if (editString.indexOf("\t") < 0 ) { editString=editString + "\t\t\t" }
 	}
 	//Add the substituted variable info
-	if (editString.indexOf("(") < 0 ) {
-		if (typeof variableData != "undefined")  {
-			rolesOut[i1]=editString + "(" +instanceData + " -- " + variableData + ")";
-		} else {
-			rolesOut[i1]=editString + "(" +instanceData + ")";
-		}
+	var tmpStr=instanceData;
+	if (workflowData != undefined)
+		tmpStr=tmpStr + "/" + workflowData; 
+	if (variableData != undefined)
+		tmpStr=tmpStr + " -- " + variableData;
+	if (optionalData)
+		tmpStr=tmpStr + "/If Exists";
 
-	}
+	rolesOut[i1]=editString + "(" + tmpStr + ")";
 }
 
 //Write the putput to stdout
