@@ -92,7 +92,7 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 
 #= Run the step
 	srcStepFile="$(FindExecutable -step "$step")"
-	[[ -z $srcStepFile ]] && Terminate "Could find the step file ('$step')"
+	[[ -z $srcStepFile ]] && Terminate "Could find the source step file ('$step')"
 
 	Msg "Using step file: $srcStepFile\n"
 	[[ -f $siteDir/web/courseleaf/localsteps/$step.html ]] && mv -f $siteDir/web/courseleaf/localsteps/$step.html $siteDir/web/courseleaf/localsteps/$step.html.bak
@@ -202,7 +202,7 @@ cimStr=$(echo $cimStr | tr -d ' ' )
 
 	[[ -x $HOME/bin/logit ]] && $HOME/bin/logit -cl "${client:--}" -e "${env:--}" -ca 'workflow' "$myName - Generated CIM roles worksheet, roles loaded: $load"
 
-	# rm -f "$siteDir/web/courseleaf/localsteps/$step.html"
+	rm -f "$siteDir/web/courseleaf/localsteps/$step.html"
 	[[ -f $siteDir/web/courseleaf/localsteps/$step.html.bak ]] && mv -f $siteDir/web/courseleaf/localsteps/$step.html.bak $siteDir/web/courseleaf/localsteps/$step.html
 
 #===================================================================================================
@@ -241,3 +241,4 @@ Goodbye 0
 ## 05-16-2018 @ 15:50:42 - 1.11.2 - dscudiero - Cosmetic/minor change/Sync
 ## 05-17-2018 @ 11:13:14 - 1.11.6 - dscudiero - Change instructional text
 ## 05-17-2018 @ 11:53:48 - 1.11.7 - dscudiero - Added loaded to the logit message
+## 06-22-2018 @ 11:34:22 - 1.11.7 - dscudiero - Delete step file at the end
