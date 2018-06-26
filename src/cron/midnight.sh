@@ -118,68 +118,68 @@ function BuildEmployeeTable {
 	return 0
 } #BuildEmployeeTable
 
-#=======================================================================================================================
-function BuildCourseleafDataTable {
-	## Clean out the existing data
-	sqlStmt="truncate $courseleafDataTable"
-	RunSql $sqlStmt
+# #=======================================================================================================================
+# function BuildCourseleafDataTable {
+# 	## Clean out the existing data
+# 	sqlStmt="truncate $courseleafDataTable"
+# 	RunSql $sqlStmt
 
-	## Get Courseleaf component versions
-		components=($(find $gitRepoShadow -maxdepth 1 -mindepth 1 -type d -printf "%f "))
-		for component in "${components[@]}"; do
-			dirs=($(ls -t $gitRepoShadow/$component | ProtectedCall "grep -v master"))
-			[[ ${#dirs[@]} -gt 0 ]] && latest=${dirs[0]} || latest='master'
-			dump -1 component latest
-			sqlStmt="insert into $courseleafDataTable values(NULL,\"$component\",NULL,\"$latest\",NOW(),\"$userName\")"
-			RunSql $sqlStmt
-		done
+# 	## Get Courseleaf component versions
+# 		components=($(find $gitRepoShadow -maxdepth 1 -mindepth 1 -type d -printf "%f "))
+# 		for component in "${components[@]}"; do
+# 			dirs=($(ls -t $gitRepoShadow/$component | ProtectedCall "grep -v master"))
+# 			[[ ${#dirs[@]} -gt 0 ]] && latest=${dirs[0]} || latest='master'
+# 			dump -1 component latest
+# 			sqlStmt="insert into $courseleafDataTable values(NULL,\"$component\",NULL,\"$latest\",NOW(),\"$userName\")"
+# 			RunSql $sqlStmt
+# 		done
 
-	## Get Courseleaf Reports versions
-		cwd=$(pwd)
-		cd "$courseleafReportsRoot"
-		SetFileExpansion 'on';
-		local reportsVersions=$(ls -d -t * 2> /dev/null | cut -d $'\n' -f1);
-		cd $courseleafReportsRoot/$reportsVersions
-		reportsVersions=$(ls -d -t * 2> /dev/null | cut -d $'\n' -f1);
-		reportsVersions=$(cut -d'.' -f1-3 <<< $reportsVersions)
-		SetFileExpansion
-		dump -1 reportsVersions
-		sqlStmt="insert into $courseleafDataTable values(NULL,\"reports\",NULL,\"$reportsVersions\",NOW(),\"$userName\")"
-		[[ -n $reportsVersions ]] && RunSql $sqlStmt
-		cd "$cwd"
+# 	## Get Courseleaf Reports versions
+# 		cwd=$(pwd)
+# 		cd "$courseleafReportsRoot"
+# 		SetFileExpansion 'on';
+# 		local reportsVersions=$(ls -d -t * 2> /dev/null | cut -d $'\n' -f1);
+# 		cd $courseleafReportsRoot/$reportsVersions
+# 		reportsVersions=$(ls -d -t * 2> /dev/null | cut -d $'\n' -f1);
+# 		reportsVersions=$(cut -d'.' -f1-3 <<< $reportsVersions)
+# 		SetFileExpansion
+# 		dump -1 reportsVersions
+# 		sqlStmt="insert into $courseleafDataTable values(NULL,\"reports\",NULL,\"$reportsVersions\",NOW(),\"$userName\")"
+# 		[[ -n $reportsVersions ]] && RunSql $sqlStmt
+# 		cd "$cwd"
 
-	## Get daily.sh versions
-		dailyshVer=$(ProtectedCall "grep 'version=' $skeletonRoot/release/bin/daily.sh")
-		dailyshVer=${dailyshVer##*=} ; dailyshVer=${dailyshVer%% *}
-		dump -1 dailyshVer
-		sqlStmt="insert into $courseleafDataTable values(NULL,\"daily.sh\",NULL,\"$dailyshVer\",NOW(),\"$userName\")"
-		[[ -n $dailyshVer ]] && RunSql $sqlStmt
+# 	## Get daily.sh versions
+# 		dailyshVer=$(ProtectedCall "grep 'version=' $skeletonRoot/release/bin/daily.sh")
+# 		dailyshVer=${dailyshVer##*=} ; dailyshVer=${dailyshVer%% *}
+# 		dump -1 dailyshVer
+# 		sqlStmt="insert into $courseleafDataTable values(NULL,\"daily.sh\",NULL,\"$dailyshVer\",NOW(),\"$userName\")"
+# 		[[ -n $dailyshVer ]] && RunSql $sqlStmt
 
-	## Get Courseleaf cgi versions
-		cwd=$(pwd)
-		cd $cgisRoot
-		for rhelDir in $(ls | grep '^rhel[0-9]$'); do
-			dirs=($(ls -c ./$rhelDir | ProtectedCall "grep -v prev_ver"))
-			[[ ${#dirs[@]} -gt 0 ]] && latest=${dirs[0]} || latest='master'
-			if [[ $latest != 'master' ]]; then
-				cd $rhelDir/$latest
-				[[ -r ./courseleaf.log ]] && cgiVer=$(cat courseleaf.log | cut -d'|' -f5) || cgiVer=$latest
-				cd $cgisRoot
-			else
-				cgiVer=$latest
-			fi
-			dump -1 rhelDir cgiVer
-			sqlStmt="insert into $courseleafDataTable values(NULL,\"courseleaf.cgi\",\"$rhelDir\",\"$cgiVer\",NOW(),\"$userName\")"
-			RunSql $sqlStmt
-		done
+# 	## Get Courseleaf cgi versions
+# 		cwd=$(pwd)
+# 		cd $cgisRoot
+# 		for rhelDir in $(ls | grep '^rhel[0-9]$'); do
+# 			dirs=($(ls -c ./$rhelDir | ProtectedCall "grep -v prev_ver"))
+# 			[[ ${#dirs[@]} -gt 0 ]] && latest=${dirs[0]} || latest='master'
+# 			if [[ $latest != 'master' ]]; then
+# 				cd $rhelDir/$latest
+# 				[[ -r ./courseleaf.log ]] && cgiVer=$(cat courseleaf.log | cut -d'|' -f5) || cgiVer=$latest
+# 				cd $cgisRoot
+# 			else
+# 				cgiVer=$latest
+# 			fi
+# 			dump -1 rhelDir cgiVer
+# 			sqlStmt="insert into $courseleafDataTable values(NULL,\"courseleaf.cgi\",\"$rhelDir\",\"$cgiVer\",NOW(),\"$userName\")"
+# 			RunSql $sqlStmt
+# 		done
 
-	## Rebuild the page
-		cwd=$(pwd)
-		cd /mnt/internal/site/stage/web/pagewiz
-		$DOIT ./pagewiz.cgi -r /support/courseleafData
-		cd $cwd
-	return 0
-} #BuildCourseleafDataTable
+# 	## Rebuild the page
+# 		cwd=$(pwd)
+# 		cd /mnt/internal/site/stage/web/pagewiz
+# 		$DOIT ./pagewiz.cgi -r /support/courseleafData
+# 		cd $cwd
+# 	return 0
+# } #BuildCourseleafDataTable
 
 #=======================================================================================================================
 # Declare local variables and constants
@@ -242,7 +242,7 @@ case "$hostName" in
 
 		## Run programs/functions
 			pgms=(loadAuthData buildClientInfoTable buildSiteInfoTable BuildEmployeeTable buildQaStatusTable checkCgiPermissions)
-			pgms+=(checkPublishSettings updateDefaults syncCourseleafGitRepos BuildCourseleafDataTable "cleanDev -daemon")
+			pgms+=(checkPublishSettings updateDefaults "cleanDev -daemon")
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -481,3 +481,4 @@ return 0
 ## 06-14-2018 @ 07:14:14 - 1.22.78 - dscudiero - Go back to truncate
 ## 06-14-2018 @ 17:02:02 - 1.22.78 - dscudiero - Add loadAuthData to the list of programs to run on mojave
 ## 06-18-2018 @ 09:43:46 - 1.22.78 - dscudiero - Pull load workwith data code out and call the loadWorkwithData script
+## 06-26-2018 @ 15:23:12 - 1.22.78 - dscudiero - Comment out code to update the courseleafDataTable
