@@ -43,17 +43,17 @@ function SyncInternalDb {
 
 #=======================================================================================================================
 # Synchronize the courseleaf cgi's  shadow with master
-function SyncCourseleafCgis {
-	srcDir=/mnt/dev6/web/cgi
-	tgtDir=$cgisRoot
-	rsync -aq $srcDir/ $tgtDir 2>&1
-	chmod 750 $tgtDir
-	touch $tgtDir/.syncDate
-	SetFileExpansion 'on'
-	cwd=$(pwd); cd $tgtDir; chgrp -R leepfrog *; chgrp leepfrog .*; cd "$cwd"
-	SetFileExpansion
-	return 0
-}
+# function SyncCourseleafCgis {
+# 	srcDir=/mnt/dev6/web/cgi
+# 	tgtDir=$cgisRoot
+# 	rsync -aq $srcDir/ $tgtDir 2>&1
+# 	chmod 750 $tgtDir
+# 	touch $tgtDir/.syncDate
+# 	SetFileExpansion 'on'
+# 	cwd=$(pwd); cd $tgtDir; chgrp -R leepfrog *; chgrp leepfrog .*; cd "$cwd"
+# 	SetFileExpansion
+# 	return 0
+# }
 
 #=======================================================================================================================
 # Synchronize the skeleton shadow with master
@@ -368,3 +368,4 @@ return 0
 ## 06-08-2018 @ 13:04:37 - 2.2.32 - dscudiero - Remove debug
 ## 06-08-2018 @ 14:15:34 - 2.2.32 - dscudiero - Fix name of the database file
 ## 06-18-2018 @ 15:50:12 - 2.2.32 - dscudiero - Pull out refresh patches data, call loadPatchData script
+## 06-26-2018 @ 15:22:39 - 2.2.32 - dscudiero - Remove references to SyncCourseleafCgis
