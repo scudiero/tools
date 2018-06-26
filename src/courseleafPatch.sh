@@ -9,7 +9,7 @@ myIncludes="$myIncludes SetSiteDirs WriteChangelogEntry"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
-scriptDescription="Refresh courseleaf product(s) from the git repository shadows ($gitRepoShadow)"
+scriptDescription="Refresh courseleaf product(s)"
 cwdStart="$(pwd)"
 
 #=======================================================================================================================
@@ -1417,3 +1417,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-19-2018 @ 11:20:01 - 6.1.3 - dscudiero - Make env upper case in verifyArgs
 ## 06-19-2018 @ 11:36:11 - 6.1.3 - dscudiero - Cosmetic/minor change/Sync
 ## 06-19-2018 @ 11:40:27 - 6.1.3 - dscudiero - Cosmetic/minor change/Sync
+## 06-26-2018 @ 15:22:06 - 6.1.3 - dscudiero - Cosmetic/minor change/Sync
