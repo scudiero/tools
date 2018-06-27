@@ -1,6 +1,6 @@
 ## xO NOT AUTOVERSION
 #===================================================================================================
-version="3.0.74" # -- dscudiero -- Fri 08/06/2018 @ 09:34:24
+# version="3.0.74" # -- dscudiero -- Fri 08/06/2018 @ 09:34:24
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -153,3 +153,4 @@ export -f ParseArgsStd
 ## 05-22-2018 @ 14:06:53 - 3.0.65 - dscudiero - Fix a problem processing expEnv directive
 ## 05-25-2018 @ 08:01:30 - 3.0.70 - dscudiero - Fid problem processing expandEnv type arguments
 ## 06-08-2018 @ 09:34:47 - 3.0.74 - dscudiero - Report on any unknow arguments
+## 06-27-2018 @ 12:13:23 - 3.0.74 - dscudiero - Comment out the version= line
