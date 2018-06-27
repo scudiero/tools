@@ -283,7 +283,7 @@ function CleanUp {
 		# for ((xx=0; xx<${#UsersScripts[@]}; xx++)); do echo "UsersScripts[$xx] = >${UsersScripts[$xx]}<"; done
 
 	## Check to make sure we are authorized
-		if [[ $callPgmName != 'scripts' ]]; then
+		if [[ $callPgmName != 'scripts' && $callPgmName != 'testsh' ]]; then
 			[[ $(Contains ",$UsersScriptsStr," ",$callPgmName,") != true ]] && \
 				{ echo; echo; Terminate "Sorry, you do not have authorization to run script '$callPgmName'. \
 				You are in the following authorization groups: ${UsersAuthGroups//,/, }.  \
@@ -530,3 +530,4 @@ function CleanUp {
 ## 06-14-2018 @ 15:19:51 - 1.5.47 - dscudiero - Treat // as a comment line in the config file
 ## 06-18-2018 @ 08:12:39 - 1.5.58 - dscudiero - Refactor authorization checks
 ## 06-18-2018 @ 10:11:44 - 1.5.58 - dscudiero - Do not check auth if script being loaded is 'scripts'
+## 06-27-2018 @ 14:08:15 - 1.5.58 - dscudiero - Do not check auth if script name is testsh
