@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.0.14" # -- dscudiero -- Fri 08/06/2018 @ 09:17:49
+# version="2.0.14" # -- dscudiero -- Fri 08/06/2018 @ 09:17:49
 #===================================================================================================
 # Pause execution
 #===================================================================================================
@@ -40,3 +40,4 @@ export -f Pause
 ## 06-22-2017 @ 12.04.50 - ("2.0.10")  - dscudiero - Add caller and callers line number to the prompt
 ## 06-23-2017 @ 08.27.31 - ("2.0.11")  - dscudiero - Only add the caller info if no string was passed in
 ## 06-08-2018 @ 09:29:28 - 2.0.14 - dscudiero - Set verboseLevel=0 if the user is bailing
+## 06-27-2018 @ 12:13:28 - 2.0.14 - dscudiero - Comment out the version= line
