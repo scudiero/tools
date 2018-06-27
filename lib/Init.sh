@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.2.4" # -- dscudiero -- Wed 13/06/2018 @ 10:31:09
+# version="2.2.4" # -- dscudiero -- Wed 13/06/2018 @ 10:31:09
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -380,3 +380,4 @@ export -f Init
 ## 06-11-2018 @ 16:44:42 - 2.2.1 - dscudiero - Commented out the products in support checks
 ## 06-12-2018 @ 07:03:32 - 2.2.2 - dscudiero - Add products in support check back in
 ## 06-13-2018 @ 10:33:12 - 2.2.4 - dscudiero - Do not check productsInSupport if null
+## 06-27-2018 @ 12:13:17 - 2.2.4 - dscudiero - Comment out the version= line
