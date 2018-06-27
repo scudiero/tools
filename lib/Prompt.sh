@@ -105,7 +105,7 @@ function Prompt {
 							[[ $rc -gt 0 && $tCntr -ge $maxReadTimeout ]] && echo && Terminate "Read operation timed out after the maximum time of $maxReadTimeout seconds" && exit
 						done
 						if [[ -z $response ]]; then
-							[[ -n $defaultVal ]] && { echo >> "$logFile"; Note 0 1 "Read timed out, using default value '$defaultVal' for '$promptVar'"; logResponse=false; }
+							[[ -n $defaultVal ]] && { echo >> "$logFile"; echo; Note 0 1 "Read timed out, using default value '$defaultVal' for '$promptVar'"; logResponse=false; }
 							eval $promptVar=\"$defaultVal\"
 							LogResponse
 							return 0
@@ -208,3 +208,4 @@ export -f Prompt
 ## 05-31-2018 @ 10:00:30 - 2.1.78 - dscudiero - Changed color of the timeout timer
 ## 06-08-2018 @ 08:52:55 - 2.1.85 - dscudiero - Fix bug where we were bugging out early for 'client/nocheck'
 ## 06-27-2018 @ 12:13:32 - 2.1.85 - dscudiero - Comment out the version= line
+## 06-27-2018 @ 15:20:41 - 2.1.85 - dscudiero - Fix a problem with the prompt text being overwritted for timed promptes
