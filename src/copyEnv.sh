@@ -121,16 +121,17 @@ ParseArgsStd $originalArgStr
 Hello
 
 [[ -n $envs && -z $srcEnv ]] && srcEnv="$env"
-
-[[ $allItems == true || $fullCopy == true ]] && cim='Yes' && overlay=false
+[[ $allItems == true || $fullCopy == true ]] && overlay=false
 
 addPvt=true
-if [[ -n products ]]; then
-	[[ $(Contains "$products" 'cat') == true ]] && skipCat=false && skipCim=true && skipClss=true && unset skipAlso
-	[[ $(Contains "$products" 'cim') == true ]] && skipCat=true && skipCim=false && skipClss=true && unset skipAlso
-	[[ $(Contains "$products" 'clss') == true ]] && skipCat=true && skipCim=true && skipClss=false && unset skipAlso
+
+if [[ -n $products ]]; then
+	skipCat=true; skipCim=true; skipClss=true; unset skipAlso;
+	[[ $(Contains "$products" 'cat') == true ]] && skipCat=false
+	[[ $(Contains "$products" 'cim') == true ]] && skipCim=false
+	[[ $(Contains "$products" 'clss') == true ]] && skipClss=false
 fi
-dump 1 -n client envs products fullCopy overlay suffix email skipCat skipCim skipClss skipAlso -p
+dump 1 -n client envs product products fullCopy overlay suffix email skipCat skipCim skipClss skipAlso -p
 
 ## Resolve data based on passed in client, handle special cases
 	tmpStr="${client:0:5}"; tmpStr=${tmpStr,,[a-z]}
@@ -249,14 +250,17 @@ if [[ $verify == true && $fullCopy != true ]]; then
 	unset ans; Prompt ans "Do you wish to specify which file sets to EXCLUDE" 'No Yes' 'No'; ans=${ans:0:1}; ans=${ans,,[a-z]}
 	if [[ $ans == 'y' ]]; then
 		if [[ -z $skipCat ]]; then
+			echo
 			unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') Client CAT files" 'No,Yes' 'No' '3'; ans=${ans:0:1}; ans=${ans,,[a-z]}
 			[[ $ans == 'y' ]] && skipCat=true
 		fi
 		if [[ -z $skipCim && $haveCims == true ]]; then
+			echo
 			unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CIM & CIM instances" 'No,Yes' 'No' '3'; ans=${ans:0:1}; ans=${ans,,[a-z]}
 			[[ $ans == 'y' ]] && skipCim=true
 		fi
 		if [[ -z $skipClss && $haveClss == true ]]; then
+			echo
 			unset ans; Prompt ans "Do you wish to $(ColorK 'EXCLUDE') CLSS/WEN" 'No,Yes' 'No' '3'; ans=${ans:0:1}; ans=${ans,,[a-z]}
 			[[ $ans == 'y' ]] && skipClss=true
 		fi
@@ -700,3 +704,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 05-25-2018 @ 16:39:22 - 4.13.62 - dscudiero - Change debug levels on messages
 ## 06-01-2018 @ 11:00:32 - 4.13.78 - dscudiero - Use the clientData hash to get the client data
 ## 06-13-2018 @ 13:52:33 - 4.13.79 - dscudiero - Cosmetic/minor change/Sync
+## 06-27-2018 @ 15:21:16 - 4.13.79 - dscudiero - Cleaned up logic that examines the products string
