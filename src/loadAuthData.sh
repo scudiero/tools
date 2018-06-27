@@ -117,7 +117,7 @@ for user in "${userList[@]}"; do
 		# #sqlStmt="$sqlStmt (select employeekey from $employeeTable where substr(email,1,instr(email,'@')-1)=\"${user%|*}\")))"
 		# sqlStmt="$sqlStmt or author=\"${user%|*}\" or restrictToUsers like \"%${user%|*}%\""
 		# sqlStmt="$sqlStmt or keyId not in (select distinct scriptKey from $auth2scriptTable)"
-		sqlStmt="select distinct keyId,name,description,showInScripts from scriptsNew where (keyId in \
+		sqlStmt="select distinct keyId,name,description,showInScripts from $scriptsTable where (keyId in \
 		((select scriptKey from auth2script where groupKey in \
 		(select authKey  from auth2user where empKey in \
 		(select employeekey from employee where substr(email,1,instr(email,'@')-1)=\"${user#*|}\"))))\
@@ -173,3 +173,4 @@ Goodbye 0 #'alert'
 ## 06-20-2018 @ 16:35:53 - 1.0.-1 - dscudiero - Strip off trailing comma from scriptsListStr
 ## 06-26-2018 @ 16:04:44 - 1.0.-1 - dscudiero - Update the sql to find the users scripts
 ## 06-27-2018 @ 07:15:24 - 1.0.-1 - dscudiero - Take out overrided to scriptsNew
+## 06-27-2018 @ 07:17:27 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
