@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.0.4" # -- dscudiero -- Fri 06/15/2018 @ 09:13:30
+# version="1.0.4" # -- dscudiero -- Fri 06/15/2018 @ 09:13:30
 #===================================================================================================
 # Display a selection menu
 # Usage: [options] selectMeue menuItemsArrayName returnVariableName [promptText]
@@ -164,3 +164,4 @@ export -f SelectMenu
 #===================================================================================================
 ## 05-31-2018 @ 09:22:22 - 1.0.0 - dscudiero - Re-factored to allow for faster menu draws
 ## 06-15-2018 @ 13:37:03 - 1.0.4 - dscudiero - Fix problem not setting the key if processing the banner record
+## 06-27-2018 @ 12:13:36 - 1.0.4 - dscudiero - Comment out the version= line
