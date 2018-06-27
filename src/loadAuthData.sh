@@ -64,7 +64,7 @@ user="$client"
 if [[ $batchMode != true ]]; then
 	unset ans
 	if [[ -n $client ]] ; then
-		Prompt ans "You are asking to reload the tools 'Auth' data for '$client', do you wish to continue" 'Yes No';
+		Prompt ans "You are asking to reload the tools 'Auth' data for '$client', do you wish to continue" 'Yes No' 'Yes';
 	else
 		Prompt ans "You are asking to reload the tools 'Auth', do you wish to continue" 'Yes No';
 	fi
@@ -88,15 +88,17 @@ fi
 	sqlStmt="select distinct employeekey,substr(email,1,instr(email,'@')-1) from $auth2userTable,$employeeTable where $whereClause order by employeekey"
 	RunSql $sqlStmt
 	unset userList; for rec in "${resultSet[@]}"; do userList+=("$rec"); done
-## Loop through the user list
 
+## Loop through the user list
 Verbose 1 "\nProcessing users..."
-for user in "${userList[@]}"; do
-	Verbose 1 "\t$user..."
+for userRec in "${userList[@]}"; do
+	empKey="${userRec%|*}"
+	user="${userRec#*|}"
+	Verbose 1 "^$user ($empKey)..."
 	outFile="${authShadowDir}/${user#*|}"
 	
 	## Get the list of groups this user is in
-		sqlStmt="select code from $authGroupTable where groupId in (select authKey from auth2user where empKey=${user%|*})"
+		sqlStmt="select code from $authGroupTable where groupId in (select authKey from auth2user where empKey=$empKey)"
 		RunSql $sqlStmt
 		unset groupListStr
 		for result in "${resultSet[@]}"; do
@@ -119,24 +121,27 @@ for user in "${userList[@]}"; do
 		# sqlStmt="$sqlStmt or keyId not in (select distinct scriptKey from $auth2scriptTable)"
 		sqlStmt="select distinct keyId,name,description,showInScripts from $scriptsTable where (keyId in \
 		((select scriptKey from auth2script where groupKey in \
-		(select authKey  from auth2user where empKey in \
-		(select employeekey from employee where substr(email,1,instr(email,'@')-1)=\"${user#*|}\"))))\
+		(select authKey from auth2user where empKey in \
+		(select employeekey from employee where substr(email,1,instr(email,'@')-1)=\"$user\"))))\
 		or \
 		(keyId in (select scriptKey from user2script where empKey in \
-		(select employeekey from employee where substr(email,1,instr(email,'@')-1)=\"${user#*|}\")))) \
+		(select employeekey from employee where substr(email,1,instr(email,'@')-1)=\"$user\")))) \
 		order by name"
 		#and \
 		#showInScripts=\"Yes\" \
 		RunSql $sqlStmt
 		## Generate a comma separated list of script names
+		Verbose 1 "^^Found ${#resultSet[@]} script records..."
 		[[ ${#resultSet[@]} -eq 0 || ${resultSet[0]} == "" ]] && continue
+		unset scriptListStr
 		for result in "${resultSet[@]}"; do
 			result="${result#*|}"; result="${result%%|*}";
-			[[ -z $scriptListStr ]] && scriptListStr="$result" || scriptListStr="${scriptListStr},${result}"
+			Verbose 1 "^^^$result"
+			scriptListStr="${scriptListStr},${result}"
 		done
+		scriptListStr="${scriptListStr:1}"
 		scriptListStr="$(printf '%s\n' ${scriptListStr//,/ } | sort -u | tr "\n" ',')"
 		echo "${scriptListStr:0:${#scriptListStr}-1}" >> "${outFile}.new"
-
 		## Write out the script detail information
 		[[ ${#resultSet[@]} -eq 0 || ${resultSet[0]} == "" ]] && continue
 		for result in "${resultSet[@]}"; do
@@ -174,3 +179,4 @@ Goodbye 0 #'alert'
 ## 06-26-2018 @ 16:04:44 - 1.0.-1 - dscudiero - Update the sql to find the users scripts
 ## 06-27-2018 @ 07:15:24 - 1.0.-1 - dscudiero - Take out overrided to scriptsNew
 ## 06-27-2018 @ 07:17:27 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
+## 06-27-2018 @ 07:58:41 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
