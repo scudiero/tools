@@ -61,8 +61,6 @@ ParseArgsStd $originalArgStr
 Hello
 user="$client"
 
-scriptsTable='scriptsNew'
-
 if [[ $batchMode != true ]]; then
 	unset ans
 	if [[ -n $client ]] ; then
@@ -174,3 +172,4 @@ Goodbye 0 #'alert'
 ## 06-20-2018 @ 16:32:08 - 1.0.-1 - dscudiero - Add section to write out the scriptname string
 ## 06-20-2018 @ 16:35:53 - 1.0.-1 - dscudiero - Strip off trailing comma from scriptsListStr
 ## 06-26-2018 @ 16:04:44 - 1.0.-1 - dscudiero - Update the sql to find the users scripts
+## 06-27-2018 @ 07:15:24 - 1.0.-1 - dscudiero - Take out overrided to scriptsNew
