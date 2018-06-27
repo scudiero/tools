@@ -79,7 +79,7 @@ scriptDescription="Extracts workflow data in a format that facilitates pasteing 
 		local rtype value tmpStr
 		dump -2 line -t ruleName description
 
-		[[ $(Contains ",${ignoreRules}," ",${ruleName},") == true ]] && return 0
+		[[ $(Contains ",${ignoreRules^^[a-z]}," ",${ruleName^^[a-z]},") == true ]] && return 0
 
 		if [[ $(Contains "$line" '|attr|') == true || $(Contains "$line" '|function|wfAttr|') == true || \
 			$(Contains "$line" '|function|Related|') == true || $(Contains "$line" '|function|GetAcadLevel') == true || \
@@ -155,9 +155,9 @@ unset verifyArgs
 verifyArgs+=("Client:$client")
 verifyArgs+=("Env:$(TitleCase $env) ($srcDir)")
 verifyArgs+=("CIMs:$cimStr")
-verifyArgs+=("IgnoreRules:$ignoreRules")
-verifyArgs+=("IgnoreSteps:$ignoreSteps")
-verifyArgs+=("IgnoreWorkflows:$ignoreWorkflows")
+verifyArgs+=("IgnoreRules:${ignoreRules//,/, }")
+verifyArgs+=("IgnoreSteps:${ignoreSteps//,/, }")
+verifyArgs+=("IgnoreWorkflows:${ignoreWorkflows//,/, }")
 
 verifyArgs+=("Output File:$outFile")
 verifyContinueDefault='Yes'
@@ -406,6 +406,7 @@ for cim in ${cimStr//,/ }; do
 			dump -1 -n -t line
 			[[ ${line:0:23} == 'workflow:standard|START' ]] && continue
 			workflow=$(echo $line | cut -d'|' -f1)
+
 			[[ $(Contains ",${ignoreWorkflows}," ",${workflow##*:},") == true ]] && continue
 			Msg "^^Parsing '$workflow'"
 			Msg "\n$workflow\t\t\t\t${myName} - $(date)" >> "$outFile"
@@ -425,11 +426,11 @@ for cim in ${cimStr//,/ }; do
 					fi
 				done
 				step=$(Trim "$step");
-				[[ $(Contains ",${ignoreSteps}," ",${step},") == true ]] && continue
+				[[ $(Contains ",${ignoreSteps^^[a-z]}," ",${step^^[a-z]},") == true ]] && continue
 				conditionals=$(Trim "$conditionals");
 				modifiers=$(sed s/'optional'/'(If role exists)'/g <<< $modifiers);
-				modifiers=$(sed s/'fyiall'/'(Notify All)'/g <<< $modifiers);
-				modifiers=$(sed s/'fyi'/'(Notify First)'/g <<< $modifiers);
+				modifiers=$(sed s/'fyiall'/'(Notify all in role member list)'/g <<< $modifiers);
+				modifiers=$(sed s/'fyi'/'(Notify first in role member list)'/g <<< $modifiers);
 				modifiers=$(echo $modifiers | tr -d '*');
 				echo -e "$stepCntr\t$step\t$conditionals\t$modifiers" >> "$outFile"
 				(( stepCntr += 1 ))
@@ -506,3 +507,4 @@ Goodbye 0 #'alert'
 ## 05-16-2018 @ 15:46:08 - 1.3.0 - dscudiero - Added activityLog logging
 ## 05-17-2018 @ 11:22:50 - 1.3.3 - dscudiero - Add instructions on how to use the output file
 ## 06-05-2018 @ 10:02:07 - 1.3.3 - dscudiero - Misc cleanup
+## 06-27-2018 @ 12:14:00 - 1.3.3 - dscudiero - Comment out the version= line
