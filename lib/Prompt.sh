@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.1.85" # -- dscudiero -- Fri 08/06/2018 @ 08:51:18
+# version="2.1.85" # -- dscudiero -- Fri 08/06/2018 @ 08:51:18
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -207,3 +207,4 @@ export -f Prompt
 ## 05-08-2018 @ 15:15:32 - 2.1.77 - dscudiero - Remove trailing comma from validateString
 ## 05-31-2018 @ 10:00:30 - 2.1.78 - dscudiero - Changed color of the timeout timer
 ## 06-08-2018 @ 08:52:55 - 2.1.85 - dscudiero - Fix bug where we were bugging out early for 'client/nocheck'
+## 06-27-2018 @ 12:13:32 - 2.1.85 - dscudiero - Comment out the version= line
