@@ -11,6 +11,8 @@ import datetime, time
 # import string
 # from array import *
 
+#print("HERE 0 HERE 0 HERE 0 HERE")
+
 #==================================================================================================
 # Constants / initial checks
 #==================================================================================================
@@ -70,7 +72,6 @@ parser.add_argument("fileExt", nargs="?", help="The extension of the file")
 parser.add_argument("-v","--verbosity", default=0, action="count", help="Debug informaton, -vv for more info.")
 
 args=parser.parse_args()
-
 fullName=args.fullName
 filePath=args.filePath
 fileName=args.fileName
@@ -100,7 +101,6 @@ if len(grepStr) > 0:
 	okToRun=False
 
 if okToRun:
-	Msg("Processing...")
 	verStr="version"
 	assignmentDelim="="
 	quoteStr="\""
@@ -142,6 +142,9 @@ if okToRun:
 		if verbosity > 0: Msg("newVersion = '" + newVersion + "'")
 
 		## build the sed 'to' string
+
+		if fromStr[0:len(commentChar)] == commentChar:
+			verStr = commentChar + " " + verStr
 		toStr=verStr + assignmentDelim + quoteStr + newVersion + quoteStr + " " + commentChar + " -- " + userName + " -- " 
 		toStr=toStr + datetime.datetime.today().strftime('%a %m/%d/%Y @ %H:%M:%S')
 		if fileExt == "tcf" or fileExt == "cfg" or fileExt == "atj" and fileName != "workflowLib":
@@ -153,6 +156,8 @@ if okToRun:
 		## Edit file
 		sed(fullName, fromStr, toStr)
 		Msg("New version: " + newVersion)
+else:
+	Msg("Skipping")
 
 
 ##======================================================================================================================
@@ -166,3 +171,4 @@ if okToRun:
 ## 06-14-2018 @ 10:19:49 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
 ## 06-14-2018 @ 12:44:11 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
 ## 06-14-2018 @ 14:30:16 - 2.1.4 - dscudiero - Add messaging
+## 06-27-2018 @ 15:52:01 - 2.1.4 - dscudiero - Fix problem of stripping off leading comment char if it is there on the version record
