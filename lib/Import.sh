@@ -28,8 +28,8 @@ function Import {
 	[[ $verboseLevel -ge 4 ]] && echo -e "\t$caller/$FUNCNAME: searchDirs= '$searchDirs'"
 	[[ $verboseLevel -ge 4 ]] && echo -e "\t$caller/$FUNCNAME: includeList= '$includeList'"
 	for includeName in $includeList; do
-		[[ $verboseLevel -ge 3 ]] && echo -e "\t$caller/$FUNCNAME: includeName = '$includeName'"
 		[[ $(MyContains ",$SCRIPTINCLUDES," ",$includeName,") == true ]] && continue
+		[[ $verboseLevel -ge 3 ]] && echo -e "\t$caller/$FUNCNAME: includeName = '$includeName'"
 		#[[ "${SCRIPTINCLUDES#*$includeName,}" != "$SCRIPTINCLUDES" ]] && continue  ## i.e. SCRIPTINCLUDES contains includeName
 		found=false
 		for searchDir in $searchDirs; do
@@ -60,3 +60,4 @@ export -f Import
 ## 10-31-2017 @ 10.37.30 - ("1.1.17")  - dscudiero - Look for Imort in local
 ## 03-29-2018 @ 08:38:56 - 1.1.22 - dscudiero - Change debug message levels
 ## 04-18-2018 @ 09:35:18 - 1.1.23 - dscudiero - Added TOOLSDEVPATH
+## 06-27-2018 @ 14:07:59 - 1.1.23 - dscudiero - Do not print out the import name if it has already been imported
