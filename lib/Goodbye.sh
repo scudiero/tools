@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.1.27" # -- dscudiero -- Wed 13/06/2018 @ 13:33:53
+# version="2.1.27" # -- dscudiero -- Wed 13/06/2018 @ 13:33:53
 #===================================================================================================
 # Common script exit
 # args:
@@ -216,3 +216,4 @@ export -f QUIT
 ## 06-13-2018 @ 13:43:28 - 2.1.27 - dscudiero - Add check to make sure logfile is not /dev/null if running forUser
 ## 06-18-2018 @ 10:46:38 - 2.1.27 - dscudiero - Add message about waiting for parent process to end
 ## 06-18-2018 @ 10:48:42 - 2.1.27 - dscudiero - Cosmetic/minor change/Sync
+## 06-27-2018 @ 12:13:05 - 2.1.27 - dscudiero - Comment out the version= line
