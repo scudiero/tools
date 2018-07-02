@@ -95,6 +95,7 @@ fi
 			if [[ $option != 'master' ]]; then
 				Pushd "$gitRepoRoot/${product}.git"
 				tags="$(ProtectedCall "git tag" | tr '\n' ' ')"
+				Popd
 				## Loop through the tags to make sure the specified value is correct
 				found=false
 				for tag in $tags; do
@@ -145,3 +146,4 @@ Goodbye 0 #'alert'
 ## 06-18-2018 @ 15:19:04 - 1.0.-1 - dscudiero - Initial load
 ## 06-18-2018 @ 15:32:23 - 1.0.-1 - dscudiero - Change the name of the transactional table
 ## 07-02-2018 @ 13:32:59 - 1.0.-1 - dscudiero - Add data checks for the 'currentRecord' records
+## 07-02-2018 @ 13:35:07 - 1.0.-1 - dscudiero - Popd after we get the git tabs
