@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.9.11" // -- dscudiero -- Thu 06/14/2018 @ 12:43:09
+wfLibVersion="1.9.13" // -- dscudiero -- Fri 06/29/2018 @ 15:43:02
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -214,6 +214,28 @@ Array.prototype.diff = function (a) {
         return a.indexOf(i) === -1;
     });
 };
+
+//======================================================================================================================
+// Returns the symmetric difference between two arrays
+// Usage:
+//		symmetricDfference(arr1, arr2)
+// Returns new array that contains elements in arr1 not in arr2 and elements in arr2 not in arr1
+//======================================================================================================================
+// 06-29-18 - dgs - Initial coding
+//======================================================================================================================
+function symmetricDfference(arr1, arr2) {
+ var newArr = [];
+
+  arr1.forEach(function(val){
+   if(arr2.indexOf(val) < 0) newArr.push(val);
+  });
+
+  arr2.forEach(function(val){
+   if(arr1.indexOf(val) < 0) newArr.push(val);
+  });
+
+  return newArr;
+}
 
 //======================================================================================================================
 // Add a text annotation to the workflow (as step)
@@ -481,8 +503,8 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 //
 //		_includeEcoSystemData 	Included data from the Eco system in the results
 //
-//		_ecoSystemCatDataType	How to interprete catalog references from the eco system, valid values are {"subj","dept"}, 
-//								default value is "subj"
+//		_ecoSystemCatDataType	How to interpret catalog references from the eco system, valid values are {"subj","dept"}, 
+//								default value is "dept"
 //
 //		_ecoSystemType 			If retrieving data from the eco system you may define which references types to use
 //								This is used to match against the type field in the echo system record, if not specified
@@ -494,7 +516,7 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 //								end of the generated steps.
 //								e.g. 	Related_ecoSystemTypeFyi:equiv
 //
-//		_ecoSystemInstances 	Comma seperated list of cim instance names where the eco system can be added 
+//		_ecoSystemInstances 	Comma separated list of cim instance names where the eco system can be added 
 //								(i.e. course based cim instances), defaults to 'courseadmin'
 //
 //
@@ -519,7 +541,7 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 //								data 	- The data value to map
 //								expects a string back.
 //
-//		_ignoreList				A comma seperated list of codes to ommit from the generated output
+//		_ignoreList				A comma separated list of codes to omit from the generated output
 //
 //=================================================================================================
 // Notes:
@@ -2685,3 +2707,4 @@ var wfLibLoaded=true;
 // 05-21-2018 @ 15:12:38 - 1.8.95 - dscudiero - Add wffuncsGetProposalMode
 // 06-14-2018 @ 10:12:35 - 1.8.98 - dscudiero - Tweaked messaging, added wfBreadCrumbs function
 // 06-14-2018 @ 12:43:51 - 1.9.11 - dscudiero - Add creaton of local copies of passed args to the Hello function
+// 07-02-2018 @ 13:32:02 - 1.9.13 - dscudiero - Update comments on related, added symmetricDifference function
