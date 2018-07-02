@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.9.29 # -- dscudiero -- Wed 05/16/2018 @ 16:00:35.48
+version="3.9.30" # -- dscudiero -- Fri 06/29/2018 @ 16:21:49
 #==================================================================================================
 TrapSigs 'on'
 myIncludes='DbLog Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel WriteChangelogEntry'
@@ -506,7 +506,7 @@ scriptDescription="Load Courseleaf Data"
 								rolesOut["$key"]="$newData"
 							elif [[ -z $oldData && -n $newData ]]; then
 								Info 0 1 "Found Role '$key' in the roles file, old data is null, using new data"
-								rolesOut["$key"]="$oldData"							
+								rolesOut["$key"]="$newData"							
 							fi
 							(( numModifiedRoles += 1 ))
 						fi
@@ -1127,3 +1127,4 @@ ignoreMissingPages=true
 ## 04-04-2018 @ 11:21:45 - 3.9.28 - dscudiero - Tweak logic for comparing old data to new data in roles loading
 ## 05-16-2018 @ 15:46:21 - 3.9.28 - dscudiero - Added activityLog logging
 ## 05-16-2018 @ 16:01:48 - 3.9.29 - dscudiero - Add jalot to logging
+## 07-02-2018 @ 13:32:38 - 3.9.30 - dscudiero - Fix bug setting data if old data is null and new data is not
