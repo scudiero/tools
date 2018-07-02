@@ -85,7 +85,7 @@ fi
 	SetFileExpansion
 	for rec in "${resultSet[@]}"; do dataRecs+=("$rec"); done
 	## Check the data
-	for rec in "${resultSet[@]}"; do
+	for rec in "${dataRecs[@]}"; do
 		recType="$(cut -f4 -d'|' <<< "$rec")"
 		if [[ $recType == 'currentRelease' ]]; then
 			## Check the value specified master the master repo
@@ -101,9 +101,7 @@ fi
 				for tag in $tags; do
 					[[ $tag == $option ]] && { found=true; break; }
 				done
-				if [[ $found != true ]]; then
-					Terminate "Specified value for 'currentRelease' ($option) in the transactional database is not a valid git tag\n\t\t$rec"
-				fi
+				[[ $found != true ]] && Terminate "Specified value for 'currentRelease' ($option) in the transactional database is not a valid git tag\n\t\t$rec"
 			fi
 		fi
 	done
@@ -116,7 +114,6 @@ fi
 
 ## Insert into warehouse table
 	for ((i=0; i<${#dataRecs[@]}; i++)); do
-
 		sqlStmt="insert into ${patchesTable}New ($fields) values("
 		data="${dataRecs[$i]}"; #data="${data#*|}"
 		#sqlStmt="${sqlStmt}null,\"${data//|/","}\")"
@@ -147,3 +144,4 @@ Goodbye 0 #'alert'
 ## 06-18-2018 @ 15:32:23 - 1.0.-1 - dscudiero - Change the name of the transactional table
 ## 07-02-2018 @ 13:32:59 - 1.0.-1 - dscudiero - Add data checks for the 'currentRecord' records
 ## 07-02-2018 @ 13:35:07 - 1.0.-1 - dscudiero - Popd after we get the git tabs
+## 07-02-2018 @ 14:09:18 - 1.0.-1 - dscudiero - Tweak messaging
