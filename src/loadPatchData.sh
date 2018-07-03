@@ -88,26 +88,25 @@ fi
 	for rec in "${dataRecs[@]}"; do
 		recType="$(cut -f4 -d'|' <<< "$rec")"
 		if [[ $recType == 'currentRelease' ]]; then
-dump 1 rec
 			## Check the value specified master the master repo
 			product="$(cut -f2 -d'|' <<< "$rec")"
-dump 1 -t product
 			[[ $product == 'cat' ]] && product='courseleaf'
+			[[ $product == 'pdf' ]] && product='pdfgen'
 			option="$(cut -f7 -d'|' <<< "$rec")"
-dump 1 -t option
 			if [[ $option != 'master' ]]; then
-				Pushd "$gitRepoRoot/${product}.git"
-				tags="$(ProtectedCall "git tag" | tr '\n' ' ')"
-dump 1 -t tags
-				Popd
-				## Loop through the tags to make sure the specified value is correct
-				found=false
-				for tag in $tags; do
-dump 1 -t2 tag
-					[[ $tag == $option ]] && { found=true; break; }
-				done
-dump 1 -t2 found
-				[[ $found != true ]] && Terminate "Specified value for 'currentRelease' ($option) in the transactional database is not a valid git tag\n\t\t$rec"
+				if [[ -d "$gitRepoRoot/${product}.git" ]]; then
+					Pushd "$gitRepoRoot/${product}.git"
+					tags="$(ProtectedCall "git tag" | tr '\n' ' ')"
+					Popd
+					## Loop through the tags to make sure the specified value is correct
+					found=false
+					for tag in $tags; do
+						[[ $tag == $option ]] && { found=true; break; }
+					done
+					[[ $found != true ]] && Terminate "Specified value for 'currentRelease' ($option) in the transactional database is not a valid git tag\n\t\t$rec"
+				else
+					Terminate "Could not locate git directory for product '$product' \n\t\t$rec"
+				fi
 			fi
 		fi
 	done
@@ -154,3 +153,4 @@ Goodbye 0 #'alert'
 ## 07-02-2018 @ 15:04:46 - 1.0.-1 - dscudiero - Added debug statements
 ## 07-02-2018 @ 16:18:12 - 1.0.-1 - dscudiero - Remove debug statements
 ## 07-03-2018 @ 07:04:00 - 1.0.-1 - dscudiero - Add debug statements
+## 07-03-2018 @ 09:10:02 - 1.0.-1 - dscudiero - Set directory for pdfgen, seperate message if cannot locate git directory
