@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.32" # -- dscudiero -- Fri 08/06/2018 @ 13:04:20
+version="2.2.33" # -- dscudiero -- Tue 07/03/2018 @ 08:17:18
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -237,7 +237,7 @@ case "$hostName" in
 
 		## Run programs/functions
 			#pgms=(updateDefaults loadPatchData CheckMonitorFiles SyncInternalDb SyncCourseleafCgis SyncSkeleton)
-			pgms=(updateDefaults loadPatchData SyncInternalDb)
+			pgms=(updateDefaults "loadPatchData -v1" SyncInternalDb)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -369,3 +369,4 @@ return 0
 ## 06-08-2018 @ 14:15:34 - 2.2.32 - dscudiero - Fix name of the database file
 ## 06-18-2018 @ 15:50:12 - 2.2.32 - dscudiero - Pull out refresh patches data, call loadPatchData script
 ## 06-26-2018 @ 15:22:39 - 2.2.32 - dscudiero - Remove references to SyncCourseleafCgis
+## 07-03-2018 @ 08:17:46 - 2.2.33 - dscudiero - Added verboseLevel on loadPatchData call
