@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.9.30" // -- dscudiero -- Tue 07/03/2018 @ 08:53:51
+wfLibVersion="1.9.38" // -- dscudiero -- Tue 07/03/2018 @ 11:57:02
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -1685,7 +1685,7 @@ wffuncs.AddSisStep = function(inval, wfrule, args) {
 //======================================================================================================================
 // 11/09/17 - dgs - Initial coding
 //======================================================================================================================
-wffuncs.NotifyAllApprovers = function(inval, wfrule, args, prevsteps) {
+wffuncs.NotifyAll = function(inval, wfrule, args, prevsteps) {
 	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
 	var options=wfrule.options;	options=options.substring(0, options.indexOf(';'));
 	if (! args.hasOwnProperty("prevsteps")) return false;
@@ -1700,10 +1700,15 @@ wffuncs.NotifyAllApprovers = function(inval, wfrule, args, prevsteps) {
 	ignore[getTCFValue("sisname")]=true;
 
 	//Process options
-	wfDump(2,["options;"+options]);
 	var unknownOpts=""
+	var approverOnly=false;
 	options.split(",").forEach(function(option) {
 		switch(option.toLowerCase()) {
+			case "approver":
+			case "approvers":
+			case "approval":
+		        approverOnly=true;
+		        break;
 		    case "fyiall":
 		        suffix=" fyiall";
 		        break;
@@ -1724,7 +1729,7 @@ wffuncs.NotifyAllApprovers = function(inval, wfrule, args, prevsteps) {
 	if (regex.test(inval))
 		suffix="";
 
-	wfDump(1,["suffix;"+suffix,"prevsteps;"+prevsteps.toSource(),"unknownOpts;"+unknownOpts]);
+	wfDump(2,["options;"+options,"suffix;"+suffix,"prevsteps;"+prevsteps.toSource(),"approverOnly;"+approverOnly,"unknownOpts;"+unknownOpts]);
 
 	//Initial Checks
 	try { InitialChecks(["wfrule"],args) }
@@ -1733,8 +1738,14 @@ wffuncs.NotifyAllApprovers = function(inval, wfrule, args, prevsteps) {
 	// Main
 		var regex=/\bfyi\b|\bfyiall\b/;					//Note that this is not a string, there are no quotes arround the value
 		prevsteps.forEach(function(step) {
-			if (! regex.test(step) && ! ignore[step])
+			wfDump(2,["step;"+step]);
+			if (ignore[step]) return;
+			if (approverOnly && regex.test(step)) return;
+			if (regex.test(step)) {
+				retArray.push(inval.replace(wfrule.regex,step));
+			} else {
 				retArray.push(inval.replace(wfrule.regex,step + suffix));
+			}
 		});
 
 	// Return results -- date
@@ -1743,8 +1754,7 @@ wffuncs.NotifyAllApprovers = function(inval, wfrule, args, prevsteps) {
 			return retArray;
 		}
 		return false;
-} //NotifyAllApprovers
-
+} //NotifyAll
 
 //=================================================================================================
 // Include step only if it is not the first step in the workflow
@@ -2709,3 +2719,4 @@ var wfLibLoaded=true;
 // 06-14-2018 @ 12:43:51 - 1.9.11 - dscudiero - Add creaton of local copies of passed args to the Hello function
 // 07-02-2018 @ 13:32:02 - 1.9.13 - dscudiero - Update comments on related, added symmetricDifference function
 // 07-03-2018 @ 09:58:47 - 1.9.30 - dscudiero - Cosmetic/minor change/Sync
+// 07-03-2018 @ 12:19:34 - 1.9.38 - dscudiero - Add option into notifyall to specify appovers on the call
