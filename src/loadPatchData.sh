@@ -90,12 +90,12 @@ fi
 		if [[ $recType == 'currentRelease' ]]; then
 			## Check the value specified master the master repo
 			product="$(cut -f2 -d'|' <<< "$rec")"
-			[[ $product == 'cat' ]] && product='courseleaf'
-			[[ $product == 'pdf' ]] && product='pdfgen'
+			sourceSpec="$(cut -f5 -d'|' <<< "$rec")"
+			[[ -n $sourceSpec ]] && gitDir="$sourceSpec" || gitDir="$product" 
 			option="$(cut -f7 -d'|' <<< "$rec")"
 			if [[ $option != 'master' ]]; then
-				if [[ -d "$gitRepoRoot/${product}.git" ]]; then
-					Pushd "$gitRepoRoot/${product}.git"
+				if [[ -d "$gitRepoRoot/${gitDir}.git" ]]; then
+					Pushd "$gitRepoRoot/${gitDir}.git"
 					tags="$(ProtectedCall "git tag" | tr '\n' ' ')"
 					Popd
 					## Loop through the tags to make sure the specified value is correct
@@ -105,7 +105,7 @@ fi
 					done
 					[[ $found != true ]] && Terminate "Specified value for 'currentRelease' ($option) in the transactional database is not a valid git tag\n\t\t$rec"
 				else
-					Terminate "Could not locate git directory for product '$product' \n\t\t$rec"
+					Terminate "Could not locate git directory '$gitDir'\n\t\t$rec"
 				fi
 			fi
 		fi
@@ -154,3 +154,4 @@ Goodbye 0 #'alert'
 ## 07-02-2018 @ 16:18:12 - 1.0.-1 - dscudiero - Remove debug statements
 ## 07-03-2018 @ 07:04:00 - 1.0.-1 - dscudiero - Add debug statements
 ## 07-03-2018 @ 09:10:02 - 1.0.-1 - dscudiero - Set directory for pdfgen, seperate message if cannot locate git directory
+## 07-03-2018 @ 09:17:08 - 1.0.-1 - dscudiero - Pull git directory name from the source spec field
