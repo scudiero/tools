@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.9.13" // -- dscudiero -- Fri 06/29/2018 @ 15:43:02
+wfLibVersion="1.9.30" // -- dscudiero -- Tue 07/03/2018 @ 08:53:51
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -722,7 +722,7 @@ wffuncs.Related = function(inval, wfrule, args) {
 		dataObj.ecoSystemCatDataType=ecoSystemCatDataType;
 		dataObj.formDataVars=formFieldVars;
 		dataObj.ignoreList=ignoreList;
-		var relatedData=GetRelated2(substitutionType,dataObj);
+		var relatedData=GetRelated(substitutionType,dataObj);
 
 	// Output the steps
 		var retArray=[], tokensDone=[];
@@ -812,8 +812,8 @@ wffuncs.Related = function(inval, wfrule, args) {
 // 10/16/17 - dgs - Fixed problem with setting default value for 'includeEcoSystemData' when GetRelated was called standalone
 // 11/08/17 - dgs - Added ignoreList to skip codes
 //==================================================================================================================
-GetRelated2 = function(type,data) {
-	var myName="GetRelated2"; var myDebugLevel=6; var myIndent="\t\t"; wfDebug(myDebugLevel,"\n" + myIndent +"*** In " + myName + " ***");
+GetRelated = function(type,data) {
+	var myName="GetRelated"; var myDebugLevel=4; var myIndent="\t"; wfDebug(myDebugLevel,"\n" + myIndent +"*** In " + myName + " ***");
 	wfDump(myDebugLevel,[myIndent +"type;"+type.toSource(),myIndent +"data;"+data.toSource()]);
 	type=type.toLowerCase();
 	var retArray=[];
@@ -828,7 +828,7 @@ GetRelated2 = function(type,data) {
 	//==================================================================================================================
 	// Build a ref object based on the passed in format code
 	//==================================================================================================================
-	GetRelated2.ParseRelatedData = function(dataObj,format,dataAttributeName) {
+	GetRelated.ParseRelatedData = function(dataObj,format,dataAttributeName) {
 		var ref={};
 		format=format.toLowerCase();
 		var data=eval("dataObj." + dataAttributeName);
@@ -863,7 +863,7 @@ GetRelated2 = function(type,data) {
 		        break;
 		} // switch
 		return ref;
-	} //GetRelated2.ParseRelatedData
+	} //GetRelated.ParseRelatedData
 	//==================================================================================================================
 
 	var refsArray=[], refsLookup={}, ref={}, formVar, formVarFormat, dataAttributeName;
@@ -925,7 +925,7 @@ GetRelated2 = function(type,data) {
 				if (tmpArray.length > 2)
 					dataAttributeName=tmpArray[2];
 
-				wfDebug(3,"\tProcessing form variable: '" + formVar + "'");
+				wfDebug(3,"\t*** " + myName + "Processing form variable: '" + formVar + "'");
 				wfDump(3,["\tformVarFormat;"+formVarFormat,"\tdataAttributeName;"+dataAttributeName])
 
 				// Get the tcf data -- cannot use getTCFValue since we want an full array back
@@ -938,7 +938,7 @@ GetRelated2 = function(type,data) {
 				wfDump(3,["\t" + formVar + ";"+tcfValue.toSource()])				
 				tcfValue.forEach(function(value) {
 					ref={};
-					ref=GetRelated2.ParseRelatedData(value,formVarFormat,dataAttributeName);
+					ref=GetRelated.ParseRelatedData(value,formVarFormat,dataAttributeName);
 					if (ref != {}) {
 						ref.source="formVar:" + formVar;
 						refsArray.push(ref);
@@ -955,7 +955,7 @@ GetRelated2 = function(type,data) {
 					eval ("tcaValue=tcadata."+formVar); // jshint ignore:line
 					tcaValue.forEach(function(value) {
 						ref={};
-						ref=GetRelated2.ParseRelatedData(value,formVarFormat,dataAttributeName);
+						ref=GetRelated.ParseRelatedData(value,formVarFormat,dataAttributeName);
 						if (ref != {}) {
 							ref.source="formVar:" + formVar;
 							refsArray.push(ref);
@@ -1062,7 +1062,7 @@ GetRelated2 = function(type,data) {
 				resultSet.forEach(function(result) {
 					if (result != "" && result.hasOwnProperty("dbData")) {
 						if (ignoreList.indexOf("," + result.dbData + ",") >= 0 ) {
-							wfDebug(myDebugLevel,myIndent + "result.dbData '" + result.dbData + "' is on the ignoreList, skipping");
+							wfDebug(3,myIndent + "result.dbData '" + result.dbData + "' is on the ignoreList, skipping");
 							return;
 						}
 						retToken={};
@@ -1074,17 +1074,17 @@ GetRelated2 = function(type,data) {
 					}
 				});
 			} else if (! refSkipped) {
-					wfDebug(myDebugLevel,myIndent + "*** " + myName + ": *Warning* -- no data returned from ref lookup")
+					wfDebug(3,myIndent + "\t*Warning* -- no data returned from ref " + ref.toSource() + " lookup")
 			} //(resultSet)
 		wfDebug(myDebugLevel,"");
 	}); //refsArray
 	if (retArray.length > 0) {
-		wfDebug(myDebugLevel,myIndent + "*** " + myName + ": Returning: " + retArray.toSource());
+		wfDebug(3,myIndent + "*** " + myName + ": Returning: " + retArray.toSource());
 	}
 
 	wfDebug(myDebugLevel,"")
 	return retArray;
-} //GetRelated2
+} //GetRelated
 
 //======================================================================================================================
 // Resolve a code from the cimlookup table
@@ -2664,8 +2664,8 @@ var wfLibLoaded=true;
 // 10-24-2017 @ 13.53.44 - ("1.8.27")  - dscudiero - Remove debug statements from getAttrVal
 // 10-25-2017 @ 16.44.52 - ("1.8.31")  - dscudiero - Updated GetAttrVal to look at the tcf/tca data first
 // 11-01-2017 @ 10.47.16 - ("1.8.32")  - dscudiero - Tweak output message formatting
-// 11-07-2017 @ 10.21.36 - ("1.8.33")  - dscudiero - Fix a problem in GetRelated2 not running if the proposal data for each type is null
-// 11-08-2017 @ 12.21.17 - ("1.8.33")  - dscudiero - Added ability to pass an 'ignoreList' into Related and GetRelated2
+// 11-07-2017 @ 10.21.36 - ("1.8.33")  - dscudiero - Fix a problem in GetRelated not running if the proposal data for each type is null
+// 11-08-2017 @ 12.21.17 - ("1.8.33")  - dscudiero - Added ability to pass an 'ignoreList' into Related and GetRelated
 // 11-09-2017 @ 14.16.09 - ("1.8.34")  - dscudiero - Added NotifyAllApprovers
 // 11-10-2017 @ 08.19.13 - ("1.8.35")  - dscudiero - Updated NotifyAllApprovers to make it a bit more general, allowing the selection of fyi/fyiall
 // 11-15-2017 @ 12.34.14 - ("1.8.37")  - dscudiero - Fix bug checking formatCode in ParseRelatedData
@@ -2679,7 +2679,7 @@ var wfLibLoaded=true;
 // 12-11-2017 @ 11.45.07 - ("1.8.47")  - dscudiero - Updated comments for checkchanged
 // 12-13-2017 @ 11.10.11 - ("1.8.48")  - dscudiero - Fix debug messages in lookupcode2 that were hard coded
 // 12-19-2017 @ 13.52.08 - ("1.8.54")  - dscudiero - Tweak messaging for NoWorkflow
-// 12-19-2017 @ 14.16.33 - ("1.8.55")  - dscudiero - Remove the exception in GetRelated2 if the proposal code is null
+// 12-19-2017 @ 14.16.33 - ("1.8.55")  - dscudiero - Remove the exception in GetRelated if the proposal code is null
 // 12-20-2017 @ 12.38.41 - ("1.8.56")  - dscudiero - Fixed problems in getEcoData when there is no proposalDepts data
 // 12-21-2017 @ 09.47.48 - ("1.8.58")  - dscudiero - Add a check for proposal mode in wffuncs.CheckChanged, skip if not EDIT
 // 12-22-2017 @ 07.17.53 - ("1.8.58")  - dscudiero - Added the 'checkfieldsvar' option to CheckChanged
@@ -2688,8 +2688,8 @@ var wfLibLoaded=true;
 // 02-05-2018 @ 09.47.00 - 1.8.66 - dscudiero - Tweaking messaging
 // 02-15-2018 @ 09.33.00 - 1.8.71 - dscudiero - Updated functions that write to 'doc' to not write if not in testworkflow step.
 // 03-16-2018 @ 10:28:05 - 1.8.78 - dscudiero - Change message prefix of the TODO messages to warning
-// 03-20-2018 @ 08:15:40 - 1.8.79 - dscudiero - Fix problem in GetRelated2 checking proposal data against related data, add ',' before and after strings to prevent false positives
-// 03-21-2018 @ 10:35:24 - 1.8.80 - dscudiero - Add additional case statements for the refType check in GetRelated2
+// 03-20-2018 @ 08:15:40 - 1.8.79 - dscudiero - Fix problem in GetRelated checking proposal data against related data, add ',' before and after strings to prevent false positives
+// 03-21-2018 @ 10:35:24 - 1.8.80 - dscudiero - Add additional case statements for the refType check in GetRelated
 // 03-28-2018 @ 12:38:47 - 1.8.81 - dscudiero - Tweaked debug messaging
 // 04-02-2018 @ 10:36:45 - 1.8.82 - dscudiero - Fix problem ub getWfAttr when not using the standard names, was pulling tca data using standard names
 // 04-03-2018 @ 16:30:07 - 1.8.83 - dscudiero - Fix a problem in CheckChanged if there is no tca data
@@ -2708,3 +2708,4 @@ var wfLibLoaded=true;
 // 06-14-2018 @ 10:12:35 - 1.8.98 - dscudiero - Tweaked messaging, added wfBreadCrumbs function
 // 06-14-2018 @ 12:43:51 - 1.9.11 - dscudiero - Add creaton of local copies of passed args to the Hello function
 // 07-02-2018 @ 13:32:02 - 1.9.13 - dscudiero - Update comments on related, added symmetricDifference function
+// 07-03-2018 @ 09:58:47 - 1.9.30 - dscudiero - Cosmetic/minor change/Sync
