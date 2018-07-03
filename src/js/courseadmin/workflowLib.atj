@@ -1,0 +1,2729 @@
+//======================================================================================================================
+wfLibVersion="1.9.59" // -- dscudiero -- Tue 07/03/2018 @ 14:00:52
+attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
+
+//======================================================================================================================
+// Common workflow functions and helper functions to support workflow
+//======================================================================================================================
+// 03/20/17 - dgs - Updated Related to use getTCFValue where appropriate
+//					Updated Related to not quit if college is not set unless substitution type is Col
+//					Updated other functions to use wfDebug and wfDump
+//					Added HasValue function
+// 04/26/17 - dgs - Added helper function CheckChanged back again
+// 05/01/17 - dgs - Added AttrIn function to accommodate allcodes sites
+// 05/08/17 - dgs - Added wfAttr function to handle attribute expansion in the world of allcodes
+//					- Added getTCAValue function like getTCFValue function
+// 05/09/17 - dgs - Re-factored/renamed wfAttr so it could be called from another function
+//					Re-factored Related to use GetAttrVal to retrieve the values for the proposal data (subject, department, college)
+// 05/10/17 - dgs - Re-factored CheckChanged, split into wffuncs.checkChanged and a local function CheckChanged
+// 05/11/17 - dgs - Updated GetAttrVal to recognize differences between requests ending in "s" and not
+//					Also changed argument passing to use an object
+//					wfCheckChanged - allowed different tcf variables based on the rule name on the call
+// 05/17/17 - dgs - Updated calls to GetAttrVal to add passing in the names of the form variables
+//					Fixed calls to GetAttrVal in Related
+// 05/24/17 - dgs - Re-factored Related to use wffuncs.subjFromCode, wffuncs.getDeppartments, and wffuncs.getCollege
+// 06/09/17 - dgs - Added mapping function call in GetAttrValue
+// 06/13/17 - dgs - Re-factored LookupCode to use getXXXX functions if CIM has allcodes
+// 06/23/17 - dgs - Added the ability to set the search/replacement string for Related (MIT)
+// 07/18/17 - dgs - Updated logic in getAttr function to properly process includeTCA directive
+// 07/19/17 - dgs - Numerous changes
+// 07/20/17 - dgs - Tweaked lookup logic in Related changed (resultSet.length === 0) to (resultSet[0] === "") since getXXX
+//					functions always return an object.
+// 05/27-17 - dgs - Added code for 'xxxxNOTin-' request types
+// 07/26-17 - dgs - Removed 'HasValue', replaced by 'CheckSetHasValue'
+// 07/27/17 - dgs - Updated wfDumpVars to dump subjects, departments, and colleges if no data passed in the wfrules.options
+//					Set wfAllcodes in each function that requires it since the tcfdata is not available to workflowFuncs
+// 08/03/17 - dgs - Moved in the common code from workflowFuncs
+// 08/07/17 - dgs - Added a check to make sure we are in courseadmin before using allcodes
+// 08/07/17 - dgs - Added CheckAcadLevel and GetAcadLevel
+// 08/09/17 - dgs - Added IsNew and IsDelete
+//					Added Array.prototype.compare
+// 08/16/17 - dgs - Tweaked formatting of the starting logic
+// 08/17/17 - dgs - Re-factored proposal state functions, added REACTIVATE state
+// 09/22/17 - dgs - Updated GetEcoSystemData to deal with proposalDepts that can be an array
+// 08/23/17 - dgs - Only display the debug messages from Related to the preview workflow if debug levels is >= 4
+// 				  - Added GetRelated function.
+// 08/25/17 - dgs - Re-factored Related to use the GetRelated function
+// 08/28/17 - dgs - Added 'TODO' step
+// 08/29/17 - dgs - GetRelated -- Remove duplicates when processing the final resultSet array
+// 08/30/17 - dgs - Updates GetAttr to allow for request to be passed in as an option
+// 09/01/17 - dgs - Related - Update code that detects if the related rule name was used 'bare' without any other qualifiers
+// 09/05/17 - dgs - Tweaked TODO to add prefix text and adjust spacing
+// 09/08/17 - dgs - Fixed bug where related was not editing out the reference data if it was in the proposal data for depts
+// 09/14/17 - dgs - Added wfSubjVarName, wfDeptVarName, wfColVarName globals set in workflow.cfg
+//					Updated GetAttrVal to use the above
+// 09/22/17 - dgs - Added NoWorkflow function
+// 10/02/17 - dgs - Fixed problem in GettAttrVal building the call string for the value mapper callback
+// 10/03/17 - dgs - Misc non-functional cosmetic changes
+// 10/06/17 - dgs - Fixed bug in GetRelated where if the lookup type was subject we were returning department data
+// 10/09/17 - dgs - Re-factored GetRelated and LookupValue, renamed to xxx2
+// 10/10/17 - dgs - Updated GetEcoSystemData to accept an array of codes and departments, renamed to xxx2
+// 10/12/17 - dgs - Updated Related, GetRelated, and GetEcoSystemData to streamline and allow passing of ecosystem path and types
+//					to GetEcoSystemData
+// 10/12/17 - dgs - Fix bug in wffuncs.CheckChanged detecting not mode if 'not' is at the beginning of the string
+// 10/16/17 - dgs - Fixed problem where 'getSubjects' function was returning the entire course code as returned by getAllcodes.
+// 10/16/17 - dgs - Fixed problem when gGetRelated was called standalone
+// 10/18/17 - dgs - Updated LookupCode
+// 10/19/17 - dgs - Updated getAttrVal to allow for instances where the 'college' is not the variable the client uses
+// 10/24/17 - dgs - Removed debug statements from getAttrVal
+// 10/25/17 - dgs - Updated getAttrVal to first check the tcf data and then if no data is found use the getxxx functions (UWPLATT)
+// 10/25/17 - dgs - Fixed an issue where GetEcoSystemData was not setting path variable
+// *** See 'Check in log' below ***
+//======================================================================================================================
+
+// Make sure wffucs is defined
+if (typeof wffuncs === "undefined")
+	var wffuncs={};
+
+// If this is the first time call then do the initialization
+if (typeof wfLibLoaded === "undefined") {
+	//Get the CIM instance name
+	var wfCimInstance=tcfdata.pagename[0].replace(/^\/([^\/]*)\/.*/, "/$1/");
+	wfCimInstance=wfCimInstance.replace(/\//g, "");
+
+	// Get/Set Global variables
+		var wfDebugLevel=0;
+		var wfNestLevel=0;
+		var	wfDebugEnvs='dev';
+		var	wfColVarName='college';
+		var	wfDeptVarName='department';
+		var	wfSubjVarName='subject';
+
+		var wfHost=getenv("HTTP_HOST").toLowerCase();
+		var wfAllcodes=false;
+		if (typeof wffuncs.getAllCodes === "function") {
+			if (wffuncs.getAllCodes(tcfdata) != '')
+				wfAllcodes=true;
+		}
+
+		if (tcfdata.wfDebugLevel && tcfdata.wfDebugLevel.length > 0)
+			wfDebugLevel=tcfdata.wfDebugLevel[0]
+		if (tcfdata.wfDebugEnvs && tcfdata.wfDebugEnvs.length > 0)
+			wfDebugEnvs=tcfdata.wfDebugEnvs[0]
+		if (tcfdata.wfColVarName && tcfdata.wfColVarName.length > 0)
+			wfColVarName=tcfdata.wfColVarName[0]
+		if (tcfdata.wfDeptVarName && tcfdata.wfDeptVarName.length > 0)
+			wfDeptVarName=tcfdata.wfDeptVarName[0]
+		if (tcfdata.wfSubjVarName && tcfdata.wfSubjVarName.length > 0)
+			wfSubjVarName=tcfdata.wfSubjVarName[0]
+
+	// If wfDebugLevel is set in the config file then set as global
+	var wfDebugLevel=0;
+	if (tcfdata.wfDebugLevel && tcfdata.wfDebugLevel.length > 0)
+		wfDebugLevel=tcfdata.wfDebugLevel[0]
+	wfDebugEnvs='dev';
+	if (tcfdata.wfDebugEnvs && tcfdata.wfDebugEnvs.length > 0)
+		wfDebugEnvs=tcfdata.wfDebugEnvs[0]
+
+	// Debug environment, print info
+	wfDebugEnvs="," + wfDebugEnvs + ",";
+	var wfEnvIsDev=false;
+	var wfEnv = "*unknown*";
+	if (wfHost.indexOf('.dev') > 0) {
+		var wfEnv  ="dev";
+		wfEnvIsDev=true;
+	} else if (wfHost.indexOf('-test') > 0) {
+		var wfEnv = "test";
+	} else if (wfHost.indexOf('-next') > 0) {
+		var wfEnv = "next";
+	}
+	// If in a debug environment then print out stuff
+		var wfInDebugEnv=false
+		if (wfDebugEnvs.indexOf("," + wfEnv + ",") >= 0) {
+			wfInDebugEnv=true;
+			var wfProposalMode='EDIT'
+			if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
+				wfProposalMode='NEW'
+			if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
+				wfProposalMode='DELETE'
+			if ( wfDebugLevel > 0 ) {
+				var d = new Date();
+				print_debug("\n\n\n\n\n\n\n\n")
+				print_debug(Array(120).join("=") + "\n");
+				print_debug("== Loading workflowLib.atj (" + wfLibVersion + "), proposal mode is " + wfProposalMode + "\t\t\t" + d.toString() + "\n");
+				print_debug(Array(120).join("=") + "\n");
+			}
+		}
+		if (wfEnvIsDev) {
+			if (typeof wfDebug === 'function')
+				wfDebug(1,"\n*** Loading "+ wfLibName + ", version: " + wfLibVersion);
+		}
+
+} //(typeof wfLibLoaded === "undefined")
+
+//======================================================================================================================
+// COMMON FUNCTIONS
+//======================================================================================================================
+
+//======================================================================================================================
+// Return the step with "wfGetCimInstanceName" replaced with the cim instance name sans "admin" and with the first letter capitalized
+//======================================================================================================================
+wffuncs.wfGetCimInstanceName = function(inval, wfrule, args)  {
+	var me=wfHello(1,inval, wfrule, args); // me={ myName:"", myOpts:"", myRequest:"", myNotMode:false };
+	var wfCimInstance=tcfdata.pagename[0].replace(/^\/([^\/]*)\/.*/, "/$1/");
+	wfCimInstance=wfCimInstance.replace(/\//g, "");
+	wfCimInstance=wfCimInstance.replace("admin","");
+
+	wfCimInstance=wfCimInstance.charAt(0).toUpperCase() + wfCimInstance.slice(1);
+	wfDump(0,["\twfCimInstance;"+wfCimInstance]);
+	wfDebug(0,"*** returning: " + inval.replace(wfrule.ifregex,wfCimInstance));
+	return [inval.replace(wfrule.regex,wfCimInstance)];
+} //wffuncs.wfGetCimInstanceName
+
+//======================================================================================================================
+// Check to see if two arrays are the same
+// Usage:
+//		array1.compare(array2);
+// compares arra1 length to array2 length, if different then return false
+// compares each element in array1 to make sure it in array2, if all are there then return true, otherwise false
+//======================================================================================================================
+// 08-09-17 - dgs - Initial coding
+//======================================================================================================================
+Array.prototype.compare = function(array2) {
+	if (this.length != array2.length)
+		return false;
+	var array1=this.sort();
+	array2=array2.sort();
+	var allOf1In2=true;
+	for (var i = 0, l = array1.length; i < l; i++) {
+		var foundIn2=false;
+		for (var j = 0, l = array2.length; j < l; j++) {
+			if (array1[i] === array2[j]) {
+				foundIn2=true;
+				break;
+			}
+		}
+		if (! foundIn2) {
+			allOf1In2=false;
+			break;
+		}
+	}
+	return allOf1In2;
+}
+
+//======================================================================================================================
+// Returns the difference between two arrays
+// Usage:
+//		array1.diff(array2);
+// filters array1 based on array2, only return those elements of array1 NOT in array2.
+//======================================================================================================================
+// 11-20-17 - dgs - Initial coding
+//======================================================================================================================
+Array.prototype.diff = function (a) {
+    return this.filter(function (i) {
+        return a.indexOf(i) === -1;
+    });
+};
+
+//======================================================================================================================
+// Returns the symmetric difference between two arrays
+// Usage:
+//		symmetricDfference(arr1, arr2)
+// Returns new array that contains elements in arr1 not in arr2 and elements in arr2 not in arr1
+//======================================================================================================================
+// 06-29-18 - dgs - Initial coding
+//======================================================================================================================
+function symmetricDfference(arr1, arr2) {
+ var newArr = [];
+
+  arr1.forEach(function(val){
+   if(arr2.indexOf(val) < 0) newArr.push(val);
+  });
+
+  arr2.forEach(function(val){
+   if(arr1.indexOf(val) < 0) newArr.push(val);
+  });
+
+  return newArr;
+}
+
+//======================================================================================================================
+// Add a text annotation to the workflow (as step)
+// Usage:
+//		code the step as 'Annotate xxxx yyyy zzz'
+//======================================================================================================================
+// 12-05-17 - dgs - Initial coding
+//======================================================================================================================
+wffuncs.AnnotateWorkflow = function(inval, wfrule, args) {
+	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
+	var options=wfrule.options;	options=options.substring(0, options.indexOf(';'));
+	inval=inval.replace("Annotate",''); inval=inval.replace("annotate",'');
+	return [inval];
+} //wffuncs.AnnotateWorkflow
+
+//=======================================================================================================================
+// Check if proposal is in EDIT mode
+// 08/09/17 - dgs - Initial code
+// 08/17/17 - dgs - use ProposalState function
+//=======================================================================================================================
+wffuncs.IsNew = function(inval, wfrule) {
+	if (ProposalState() === 'NEW')
+		return [inval.replace(wfrule.ifregex,'')];
+	return false;
+}; //IsNew
+//=======================================================================================================================
+// Check if proposal is Not Delete
+// 12/16/16 - dgs - New
+// 08/17/17 - dgs - use ProposalState function
+//=======================================================================================================================
+wffuncs.IsNotNew = function(inval, wfrule) {
+	if (ProposalState() != 'NEW')
+		return [inval.replace(wfrule.ifregex,'')];
+	return false;
+}; //IsNotNew
+
+//=======================================================================================================================
+// Check if proposal is in EDIT mode
+// 02/26/15 - dgs - New
+// 11/02/16 - dgs - Streamlined
+// 08/17/17 - dgs - use ProposalState function
+//=======================================================================================================================
+wffuncs.IsEdit = function(inval, wfrule) {
+	if (ProposalState() === 'EDIT')
+		return [inval.replace(wfrule.ifregex,'')];
+	return false;
+}; //IsEdit
+//=======================================================================================================================
+// Check if proposal is not in EDIT mode
+// 02/26/15 - dgs - New
+// 11/02/16 - dgs - Streamlined
+// 08/17/17 - dgs - use ProposalState function
+//=======================================================================================================================
+wffuncs.IsNotEdit = function(inval, wfrule) {
+	if (ProposalState() != 'EDIT')
+		return [inval.replace(wfrule.ifregex,'')];
+	return false;
+}; //IsNotEdit
+
+//=======================================================================================================================
+// Check if proposal is in DELETE mode
+// 08/09/17 - dgs - Initial code
+// 08/17/17 - dgs - use ProposalState function
+//=======================================================================================================================
+wffuncs.IsDelete = function(inval, wfrule) {
+	if (ProposalState() === 'DELETE')
+		return [inval.replace(wfrule.ifregex,'')];
+	return false;
+}; //IsDelete
+//=======================================================================================================================
+// Check if proposal is not in DELETE mode
+// 08/09/17 - dgs - Initial code
+// 08/17/17 - dgs - use ProposalState function
+//=======================================================================================================================
+wffuncs.IsNotDelete = function(inval, wfrule) {
+	if (ProposalState() != 'DELETE')
+		return [inval.replace(wfrule.ifregex,'')];
+	return false;
+}; //IsNotDelete
+
+//=======================================================================================================================
+// Check if proposal is in REACTIVATE mode
+// 08/17/17 - dgs - Initial code
+//=======================================================================================================================
+wffuncs.IsReactivate = function(inval, wfrule) {
+	if (ProposalState() === 'REACTIVATE')
+		return [inval.replace(wfrule.ifregex,'')];
+	return false;
+}; //IsReactivate
+//=======================================================================================================================
+// Check if proposal is not in REACTIVATE mode
+// 08/17/17 - dgs - Initial code
+//=======================================================================================================================
+wffuncs.IsNotReactivate = function(inval, wfrule) {
+	if (ProposalState() != 'REACTIVATE')
+		return [inval.replace(wfrule.ifregex,'')];
+	return false;
+}; //IsNotReactivate
+
+//=======================================================================================================================
+// Return the proposal mode, to be called from a wfrule or wforder
+// 01/25/2017 - dgs - New
+// 08/17/2017 - dgs - Added Reactivate
+//=======================================================================================================================
+wffuncs.ProposalState = function(inval, wfrule, args) {
+	wfDebug(4,"\n*** In ProposalState ***, called as: '" + inval + "'");
+	var retVal=ProposalState();
+	retVal=inval.replace(wfrule.regex,retVal);
+	wfDebug(4,"\t*** Returning '" + retVal + "'\n")
+	return [retVal]
+}; //ProposalState
+
+//=======================================================================================================================
+// Return the current state of a proposal
+// 08/17/2017 - dgs - New
+//=======================================================================================================================
+ProposalState = function() {
+	var retVal='EDIT';
+	if (tcfdata.newrecord && tcfdata.newrecord.length) {
+		if (tcfdata.newrecord == 'true')
+			retVal='NEW';
+	}
+	if (tcfdata.deleterec && tcfdata.deleterec.length) {
+		if (tcfdata.deleterec == 'true')
+			retVal='DELETE';
+	}
+	if (tcfdata.reactivate && tcfdata.reactivate.length) {
+		if (tcfdata.reactivate == 'true')
+			retVal='REACTIVATE';
+	}
+	return retVal;
+}; //ProposalState
+
+//======================================================================================================================
+// Check the academic level of a course/program
+// Usage:
+//		wfUgRe:^[0-4]\d{2}\w{0,2}$
+//		wfGrRe:^[5-9]\d{2}\w{0,2}$
+//
+//		wfrules:isUndergraduate|function|checkAcadLevel|course_number,wfUgRe; //Proposal for an Undergraduate course
+//		wfrules:isGraduate|function|checkAcadLevel|course_number,wfGrRe; //Proposal for an Graduate course
+//		wfrules:isUndergraduateOrisGraduate|function|checkAcadLevel|course_number,wfUgRe;course_number,wfGrRe; //Proposal for an Undergraduate or Graduate course
+//
+// i.e.
+//		wfrules:isGraduate|function|checkAcadLevel|<variable to check>,<regular expression tcfdata variable name>
+//													[;<variable to check>,<regular expression tcfdata variable name>];
+//
+// looks up the value of 'tcfdata.<regular expression tcfdata variable name>' and uses that to build a regular expression
+// object to test against the value of 'tcfdata.<variable to check>'
+//
+// returns 'false' or the exited step name removing the conditional
+//
+//======================================================================================================================
+// 08-08-17 - dgs - Initial coding
+//======================================================================================================================
+wffuncs.CheckAcadLevel = function(inval, wfrule, args) {
+	var myName=wfrule.attrname;
+	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
+	var optionStr=wfrule.options; optionStr=optionStr.substring(0, optionStr.lastIndexOf(';')); options=optionStr.split(',')
+	var retArray=[];
+
+	var reqType=wfrule.searchfor.toLowerCase();
+	var notMode=reqType.indexOf('not')>=0;
+	if (notMode === false)
+		notMode=optionStr.toLowerCase().indexOf('notmode')>=0;
+	wfDebug(1,'\treqType = "'+reqType+'", notMode= "'+notMode+'", optionStr= "'+ optionStr + '"\n');
+
+	// Main
+ 		var allowStep=false;
+		optionStr.split(";").forEach(function(token) {
+			expression=token.split(",");
+			checkVal=getTCFValue(expression[0]);
+			reStr=getTCFValue(expression[1]);
+			if ( reStr.charAt(0) === '/')
+				reStr=reStr.substr(1, reStr.length-2)
+			var re = new RegExp(reStr, "i");
+			wfDump(1,["checkVal;"+checkVal,"reStr;"+reStr,"re;"+re.toSource()])
+			if (re.test(checkVal))
+				allowStep=true;
+		});
+
+	// Return results
+		if (notMode) allowStep=!allowStep;
+		if(allowStep) {
+			wfDebug(1,"\t*** Allowing step");
+			return [inval.replace(wfrule.ifregex,'')];
+		}
+		wfDebug(1,"\t*** Skipping step");
+		return false;
+
+} //CheckAcadLevel
+
+//======================================================================================================================
+// Return the academic level of a course/program
+// Usage:
+//		wfUgRe:^[0-4]\d{2}\w{0,2}$
+//		wfGrRe:^[5-8]\d{2}\w{0,2}$
+//		wfPrRe:^[9]\d{2}\w{0,2}$
+//
+//		wfrules:AcadLevel|function|GetAcadLevel|course_number,wfUgRe,UG,wfGrRe,GR,wfPrRe,PR; //Proposal for an Undergraduate course
+//
+// i.e.
+//		wfrules:AcadLevel|function|GetAcadLevel|<variable to check>,<regular expression tcfdata variable name><return string>,<regular expression tcfdata variable name><return string>;
+//
+// looks up the value of 'tcfdata.<regular expression tcfdata variable name>' and uses that to build a regular expression
+// object to test against the value of 'tcfdata.<variable to check>'
+//
+// <regular expression tcfdata variable name><return string> must be passed in as a tuple, as many as necessary may be specified.
+// returns the value passed into function as '<return string>' if regex is true, otherwise returns 'false'
+//
+//======================================================================================================================
+// 08-08-17 - dgs - Initial coding
+//======================================================================================================================
+wffuncs.GetAcadLevel = function(inval, wfrule, args) {
+	var myName=wfrule.attrname;
+	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
+	var optionStr=wfrule.options; optionStr=optionStr.substring(0, optionStr.indexOf(';')); options=optionStr.split(',')
+	var retArray=[];
+
+	var reqType=wfrule.searchfor.toLowerCase();
+	var notMode=reqType.indexOf('not')>=0;
+	if (notMode === false)
+		notMode=optionStr.toLowerCase().indexOf('notmode')>=0;
+	wfDebug(1,'\treqType = "'+reqType+'", notMode= "'+notMode+'", optionStr= "'+ optionStr + '"\n');
+
+	// Main
+ 		var allowStep=false;
+		checkVal=getTCFValue(options[0]);
+		options.shift();
+
+		while (options.length > 0) {
+			var reStr=getTCFValue(options[0]);
+			if ( reStr.charAt(0) === '/')
+				reStr=reStr.substr(1, reStr.length-2)
+			options.shift();
+			var retVal=options[0];
+			options.shift();
+			var re = new RegExp(reStr, "i");
+			if (re.test(checkVal)) {
+				allowStep=true;
+				break;
+			}
+		}
+
+	// Return results -- step
+		if (notMode) allowStep=!allowStep;
+		if(allowStep) {
+			wfDebug(1,"\t*** Returning: '" + retVal + "'" );
+			return [inval.replace(wfrule.regex,retVal)];
+		}
+		wfDebug(1,"\t*** Returning 'false'");
+		return false;
+
+} //GetAcadLevel
+
+//======================================================================================================================
+// Add related departments/colleges/schools to the workflow,
+// returned data is sorted by code and duplicates are removed.
+//======================================================================================================================
+//
+// Global switches/flags/data:
+//		_checkChanged 			Check to see if the proposal values for the substitution type have
+//								changed and if change detected then add original values to the output
+//								default: true
+//
+//		_includeEcoSystemData 	Included data from the Eco system in the results
+//
+//		_ecoSystemCatDataType	How to interpret catalog references from the eco system, valid values are {"subj","dept"}, 
+//								default value is "dept"
+//
+//		_ecoSystemType 			If retrieving data from the eco system you may define which references types to use
+//								This is used to match against the type field in the echo system record, if not specified
+//								all reference types are considered valid.
+//								e.g. 	Related_ecoSystemType:equiv
+//
+//		_ecoSystemDataFyi		If retrieving data from the eco system, should the steps be added as fyi steps.
+//								The value must be in the set {"fyi","fyiall"} and the token is tacked on to the
+//								end of the generated steps.
+//								e.g. 	Related_ecoSystemTypeFyi:equiv
+//
+//		_ecoSystemInstances 	Comma separated list of cim instance names where the eco system can be added 
+//								(i.e. course based cim instances), defaults to 'courseadmin'
+//
+//
+//		_formFieldVars			The form fields that contain 'related/crosslisted/associated/consultant' data.
+//								The formate is name[|format][|dataAttributeName] where :
+//								format is one item in the set {courseCode,colCode,deptCode,subjCode}, the default is 'code'
+//								dataAttributeName is the name of the object attribute that contains the data for the reference, default is 'data'
+//								May be repeated as necessary.
+//								e.g. 	Related_formFieldVars:crosslisted|code; 	//Applies to all Related wfrule
+//										Related_formFieldVars:slashlisted|code; 	//Applies to all Related wfrule
+//
+//		_codeVarName			The name of the form variable containing the 'code' data, defaults to 'code'
+//		_collegeVarName			The name of the form variable containing the 'college' data, defaults to 'college'
+//		_departmentVarName		The name of the form variable containing the 'department' data, defaults to 'department'
+//		_subjectVarName			The name of the form variable containing the 'subject' data, defaults to 'subject'
+//
+//		_searchString			The string to replace with the resolved values
+//
+//		_dataMapper				Then name of a function that will be used to map the normally returned data to a new
+//								value.  Is passed two arguments:
+//								type 	- The 'searchString', aka in the set {'Col','Dept','Subj'}
+//								data 	- The data value to map
+//								expects a string back.
+//
+//		_ignoreList				A comma separated list of codes to omit from the generated output
+//
+//=================================================================================================
+// Notes:
+//	1) 	Variables above can be specific to a wfrule or general across all 'Related' wfrules in the
+//		config file.  If you want specific values for each wfrule defined then precede the variable
+//		with the name of the rule.  I.e. if the wfrule name is 'RelatedAndCrosslistedDepts' then name
+//		the variable as 'RelatedAndCrosslistedDepts_<fieldName>',  E.g. 'RelatedAndCrosslistedDepts_formFieldVars'
+//		If you want the variable to apply to ALL defined rules the prefix the variable with the name
+//		of this function,  i.e.  'Related_<fieldName>',  E.g. 'Related_formFieldVars'//
+//
+//	2) The substitution type ("department","college","subject","school") is determined as follows
+//		1) 	It may be passed in on the rule definition.
+//			E.g. 'wfrules:RelatedCrosslistedSlashlistedDepts|function|Related|<substitutionType>;'
+//		2) 	If not passed in on the wfrule definition then the wfrule name is scanned for the
+//			the following strings and the substitution type is set as indicated:
+//			'dep'	= department
+//			'col'	= college
+//			'sub'	= subject
+//			'sch'	= school
+//
+//======================================================================================================================
+// Examples
+//======================================================================================================================
+// wfrules:RelatedCrosslistedSlashlistedDepts|function|Related|;
+// RelatedCrosslistedSlashlistedDepts:courseadmin,sectoradmin,outlineadmin
+// RelatedCrosslistedSlashlistedDepts_includeEcoSystemData:true
+// RelatedCrosslistedSlashlistedDepts_ecoSystemDataFyi:false
+// RelatedCrosslistedSlashlistedDepts_formFieldVars:crosslisted|courseCode|code
+// RelatedCrosslistedSlashlistedDepts_formFieldVars:slashlisted|courseCode|code
+// RelatedCrosslistedSlashlistedDepts_datamapper:WfDataMapper
+// RelatedCrosslistedSlashlistedDepts_ignoreList:<codes list>
+//
+// wfrules:RelatedCrosslistedSlashlistedCols|function|Related|;
+// RelatedCrosslistedSlashlistedCols:courseadmin,sectoradmin,outlineadmin
+// RelatedCrosslistedSlashlistedCols_includeEcoSystemData:true
+// RelatedCrosslistedSlashlistedCols_ecoSystemDataFyi:false
+// RelatedCrosslistedSlashlistedCols_formFieldVars:crosslisted|courseCode|code
+// RelatedCrosslistedSlashlistedCols_formFieldVars:slashlisted|courseCode|code
+// RelatedCrosslistedSlashlistedCols_datamapper:WfDataMapper
+// RelatedCrosslistedSlashlistedCols_ignoreList:<codes list>
+//
+// - OR  - (yields the same results)
+//
+// wfrules:RelatedCrosslistedSlashlistedDepts|function|Related|;
+// Related_ecoSystemInstances:courseadmin,sectoradmin,outlineadmin
+// Related_includeEcoSystemData:true
+// Related_ecoSystemCatDataType:subj
+// Related_ecoSystemDataFyi:fyi
+// Related_formFieldVars:crosslisted|courseCode|code
+// Related_formFieldVars:slashlisted|courseCode|code
+// Related_datamapper:WfDataMapper
+// Related_ignoreList:<codes list>
+//
+//======================================================================================================================
+// 11/15/16	- dgs -	Re-factored to allow for the specification of the core proposal variable names
+// 05/24/17 - dgs -	Re-factored to use wffuncs.subjFromCode, wffuncs.getDeppartments, and wffuncs.getCollege
+// 06/12/17 - dgs - Use LookupCode to get codes if the not courseadmin or not allcodes
+// 06/23/17 - dgs - Added the ability to set the search/replacement string for Related (MIT)
+// 07/18/17 - dgs - Updated lookup logic to fall back to calling the LookupCode function if the getXXX functions do not return data
+// 07/20/17 - dgs - Fix problem with when using the GetXXX functions -- needed to map the output to the expected output format
+// 08/23/17 - dgs - Only display the debug messages from Related to the preview workflow if debug levels is >= 4
+// 08/25/17 - dgs - Re-factored to use GetRelated
+// 09/01/17 - dgs - Update code that detects if the related wfrulename was used 'bare' without any other qualifiers
+// 10/12/17 - dgs - Re-factored to cleanup logic
+// 11/08/17 - dgs - Added ignoreList to skip codes
+//======================================================================================================================
+wffuncs.Related = function(inval, wfrule, args) {
+	var version='4.9.16'; var myName=wfrule.attrname
+	wfDebug(3,'\n*** In '+ myName + " (" + version + ") called as '" + args.context + " / " + wfrule.searchfor + "' ***");
+	wfDump(3,["Full Step text;"+inval]);
+
+	//==================================================================================================================
+	// Setup
+	//==================================================================================================================
+
+	// Determine mode (dept / college) based on the mapped name
+		var notifyMode=false;
+		var hasSchool=false;
+		var calledAs=wfrule.searchfor;
+		var reqType=calledAs.toLowerCase();
+		if (reqType.substr(reqType.length - 'notify'.length) == 'notify') {
+			notifyMode=true;
+		}
+		var substitutionType, tmpData;
+		var callOpts=wfrule.options.toLowerCase()
+		var tmpArray=callOpts.split(";");
+		callOpts=tmpArray[0];
+		if (callOpts.length === 0) {
+			if (reqType.indexOf("dep") >= 0) { substitutionType="dept";
+			} else if (reqType.indexOf("col") >= 0) { substitutionType="college";
+			} else if (reqType.indexOf("subj") >= 0) { substitutionType="subject";
+			} else if (reqType.indexOf("school") >= 0) { substitutionType="school";
+			} else { substitutionType="dept"
+			}
+		} else {
+			substitutionType=callOpts.toString()
+		}
+
+		if (substitutionType === "") {
+  			print_debug(3,"\n\n*** Error in '" + myName + "' function in " + wfLibName +
+  				" , invalid value for substitutionType ('" + substitutionType + "') *** \n\n");
+			return false;
+		}
+
+	wfDump(3,["calledAs;"+calledAs,"reqType;"+reqType,"notifyMode;"+notifyMode,"callOpts;"+callOpts,"substitutionType;"+substitutionType,"wfAllcodes;"+wfAllcodes]);
+
+	//Get the configuration/control data from the config file
+		// Get variables that are boolean
+			var checkChanged=getTCFValue(calledAs + "_checkChanged");
+			if (checkChanged === "") checkChanged=getTCFValue(myName + "_checkChanged");
+			if (checkChanged === "true") { checkChanged=true; } else { checkChanged=false; }
+
+			var includeEcoSystemData=getTCFValue(calledAs + "_includeEcoSystemData");
+			if (includeEcoSystemData === "") includeEcoSystemData=getTCFValue(myName + "_includeEcoSystemData");
+			if (includeEcoSystemData === "true") { includeEcoSystemData=true; } else { includeEcoSystemData=false; }
+
+			var ecoSystemDataFyi=getTCFValue(calledAs + "_ecoSystemDataFyi");
+			if (ecoSystemDataFyi === "") ecoSystemDataFyi=getTCFValue(myName + "_ecoSystemDataFyi");
+			if (ecoSystemDataFyi === "true") { ecoSystemDataFyi=true; } else { ecoSystemDataFyi=false; }
+
+		// Get variables that have data values
+			var ecoSystemInstances=getTCFValue(calledAs + "_ecoSystemInstances");
+			if (ecoSystemInstances === "") ecoSystemInstances=getTCFValue(myName + "_ecoSystemInstances");
+			if (ecoSystemInstances === "") ecoSystemInstances="courseadmin";
+
+			var ecoSystemDataTypes=getTCFValue(calledAs + "_ecoSystemDataTypes");
+			if (ecoSystemDataTypes === "") ecoSystemDataTypes=getTCFValue(myName + "_ecoSystemDataTypes");
+
+			var ecoSystemDataPaths=getTCFValue(calledAs + "_ecoSystemDataPaths");
+			if (ecoSystemDataPaths === "") ecoSystemDataPaths=getTCFValue(myName + "_ecoSystemDataPaths");
+
+			var ecoSystemCatDataType=getTCFValue(calledAs + "_ecoSystemCatDataType");
+			if (ecoSystemCatDataType === "") ecoSystemCatDataType=getTCFValue(myName + "_ecoSystemCatDataType");
+			if (ecoSystemCatDataType === "") ecoSystemCatDataType="dept";
+
+			var dataMapper=getTCFValue(calledAs + "_dataMapper");
+			if (dataMapper === "") dataMapper=getTCFValue(myName + "_dataMapper");
+
+			var ignoreList=getTCFValue(calledAs + "_ignoreList");
+			if (ignoreList === "") ignoreList=getTCFValue(myName + "_ignoreList");
+
+		// Get the form field variables data, parse off to an array if found
+			var formFieldVars=[];
+			formFieldVars=getTCFValue(calledAs + "_formFieldVars", { delimiter: "\n", retarray: true });
+			if (formFieldVars.length === 0 ) formFieldVars=getTCFValue(myName + "_formFieldVars", { delimiter: "\n", retarray: true });
+
+		// Set the substitution string
+			var searchString=getTCFValue(calledAs + "_searchString");
+			if (searchString === "") searchString=getTCFValue(myName + "_searchString");
+			if (searchString === "") {
+				if (substitutionType.substr(0,3) === 'col') {
+					searchString="Col"
+				} else if (substitutionType.substr(0,4) === 'subj') {
+					searchString="Subj"
+				} else {
+					searchString="Dept"
+				}
+			}
+
+		// Print debug info
+			wfDump(3,[
+					"\n\tcheckChanged;"+checkChanged,"includeEcoSystemData;"+includeEcoSystemData,"ecoSystemDataTypes;"+ecoSystemDataTypes,
+					"ecoSystemInstances;"+ecoSystemInstances,"ecoSystemDataPaths;"+ecoSystemDataPaths,"ecoSystemCatDataType;"+ecoSystemCatDataType,
+					"ecoSystemDataFyi;"+ecoSystemDataFyi,
+					"formFieldVars;"+formFieldVars.toSource(),
+					"searchString;"+searchString.toSource(),"dataMapper;"+dataMapper,
+					"ignoreList;"+ignoreList]);
+
+	//==================================================================================================================
+	// MAIN
+	//==================================================================================================================
+	// Get a list of the related departments
+		var dataObj={};
+		dataObj.includeEcoSystemData=includeEcoSystemData;
+		dataObj.ecoSystemInstances=ecoSystemInstances;
+		dataObj.ecoSystemDataTypes=ecoSystemDataTypes;
+		dataObj.ecoSystemDataPaths=ecoSystemDataPaths;
+		dataObj.ecoSystemCatDataType=ecoSystemCatDataType;
+		dataObj.formDataVars=formFieldVars;
+		dataObj.ignoreList=ignoreList;
+		var relatedData=GetRelated(substitutionType,dataObj);
+
+	// Output the steps
+		var retArray=[], tokensDone=[];
+
+	// Generate output the steps
+	if (relatedData.length) {
+		wfDebug(3,"\n\t*** " + myName + ": Returning Steps:");
+		relatedData.forEach(function(token) {
+			if (token === "") return;
+			if (token.data === "") { wfDebug(3,"\t\ttoken.data is empty, skipping token"); return; }
+			// Have we seen this one yet?
+			//if (!tokensDone[token.data]) {
+				// Do we have a full step name from the workflow or do we pull the step data from the config file
+				if (inval == wfrule.searchfor) {
+					if (typeof steps != 'undefined') {
+						// Get steps from the config file
+						steps.forEach(function(step) {
+							step=step.replace(searchString,token.data);
+							// Add fyi or fyiall if notify mode or if this is eco system reference and ecoSystemDataFyi is not null
+							if (ecoSystemDataFyi != '' && token.source.substr(0,3) === 'eco') {
+								if (step.indexOf("fyi") < 0) step=step + ' ' + ecoSystemDataFyi;
+							} else if (notifyMode) {
+								if (step.indexOf(' fyi') < 0) {
+									step=step + ' fyiall';
+								} else if (step.indexOf(' fyi') >= 0) {
+									step=step.replace(' fyi',' fyiall');
+								}
+							}
+							retArray.push(step.trim());
+							wfDebug(3,"\t\t" + retArray[retArray.length-1]);
+						});	//steps
+					} else {
+						wfDebug(0,"\t" + myName + ": *** Error *** 'Bare' call to " + myName + " and no steps were defined");
+					}
+				} else {
+					// We have a workflow step so substitute the data into the step name
+					step=inval
+					if (ecoSystemDataFyi != '' && token.source.substr(0,3) === 'eco') {
+						// If the step name does not contain the string 'fyi' and ecoSystemDataFyi is true then add the 'fyi'
+						if (step.indexOf("fyi") < 0 && ecoSystemDataFyi === 'true') step=step + ' fyi';
+					}
+					if (dataMapper != "" ) {
+						token.data=eval(dataMapper)(searchString,token.data)
+					}
+					retArray.push(step.replace(wfrule.regex,token.data).trim());
+					wfDebug(3,"\t\t" + retArray[retArray.length-1]);
+				}
+				tokensDone[token.data]=true;
+			//}
+		}); //outTokens
+	} else {
+		wfDebug(3,"\n\t*** No related data found, adding no steps")
+	}
+
+	// if debug envronent then add delimter lines to output
+	if (wfEnvIsDev && wfInDebugEnv && wfDebugLevel > 2) {
+		retArray.unshift("*** Start of  ' " + inval.toLowerCase().replace('optional','') + " ' output ***");
+		retArray.push("*** End of  ' " + inval.toLowerCase().replace('optional','') + " ' output ***");
+	}
+
+	return retArray
+}; //wffuncs.Related
+
+//==================================================================================================================
+// Return the proposal related information.
+// Usage:
+// 		GetRelated( {type: type, formDataVars: [fieldListArray], includeEcoSystem: includeEcoSystem, tcadata: tcadata, ignoreList: ignoreList})
+// Where
+//		type 				One in the set {"subjs","depts","cols"} -- the type of data to return.
+//		fieldListArray		An array that is the list of form field variables to examine.
+//
+//		includeEcoSystem	'true' to include data from the eco system, 'false' to skip eco system data.
+//							Only applies to courseadmin, defaults to 'false'
+//		ignoreList			S comma seperated list of codes to ignore.
+// Returns:
+// 		An array of objects of the form:
+//			{data: data, source: source}
+//	Where
+//		data 	The result data from the lookup of the source data, e.g. the department code
+//		source 	location<:variable>, location is 'eco' or 'formVar', if 'formVar' then the variable name is appended
+//				with a ':'seperator
+//	e.g.
+//		{data:"7", source:"formVar:equivalents"}
+//==================================================================================================================
+// 10/09/17 - dgs - Initial - Re-factored from GetRelated
+// 10/12/17 - dgs - Re-factored call to GetEcoSystemData to pass data object
+// 10/16/17 - dgs - Fixed problem with setting default value for 'includeEcoSystemData' when GetRelated was called standalone
+// 11/08/17 - dgs - Added ignoreList to skip codes
+//==================================================================================================================
+GetRelated = function(type,data) {
+	var myName="GetRelated"; var myDebugLevel=4; var myIndent="\t"; wfDebug(myDebugLevel,"\n" + myIndent +"*** In " + myName + " ***");
+	//wfDump(myDebugLevel,[myIndent +"type;"+type.toSource(),myIndent +"data;"+data.toSource()]);
+	wfDump(myDebugLevel,[myIndent +"type;"+type.toSource()]);
+	type=type.toLowerCase();
+	var retArray=[];
+
+	if (! data.hasOwnProperty("includeEcoSystem") && ! data.hasOwnProperty("formDataVars")) {
+		wfDebug(myDebugLevel,myIndent + myName + ": *Error* -- You must specify one of both of 'includeEcoSystem' or 'formFields'")
+		return false;
+	}
+
+	//==================================================================================================================
+	// Helper functions
+	//==================================================================================================================
+	// Build a ref object based on the passed in format code
+	//==================================================================================================================
+	GetRelated.ParseRelatedData = function(dataObj,format,dataAttributeName) {
+		var ref={};
+		format=format.toLowerCase();
+		var data=eval("dataObj." + dataAttributeName);
+
+		switch(format.toLowerCase()) {
+			case "course":
+		    case "coursecode":
+		        if (typeof wffuncs.subjFromCode == "function") {
+					ref.data=wffuncs.subjFromCode(data);
+		        } else {
+		        	ref.data=data.split( )[0];
+		        }
+				ref.data=ref.data.trim();
+				ref.format="subj";
+		        break;
+		    case "subject" :
+		    case "subjectcode" :
+		    case "subjcode" :
+				ref.data=data;
+				ref.format="subj";
+		        break;
+		    case "department":
+		    case "deptcode":
+				ref.data=data;
+				ref.format="dept";
+		        break;
+		    case "college":
+		    case "collegeCode":
+		    case "colcode":
+				ref.data=data;
+				ref.format="col";
+		        break;
+		} // switch
+		return ref;
+	} //GetRelated.ParseRelatedData
+	//==================================================================================================================
+
+	var refsArray=[], refsLookup={}, ref={}, formVar, formVarFormat, dataAttributeName;
+
+	// Get proposal data
+		try {
+			var proposalCode=getTCFValue("code");
+			proposalCodes=RemoveDupes([proposalCode].concat(getTCFValue("code", { delimiter: "\n", retarray: true , data: tcadata })));
+			var proposalCodesStr="";
+			if (proposalCodes.length > 0) proposalCodesStr="," + proposalCodes.join(",") + ",";
+
+			var proposalSubjs=getTCFValue(wfSubjVarName, { delimiter: "\n", retarray: true });
+			proposalSubjs=RemoveDupes(proposalSubjs.concat(getTCFValue(wfSubjVarName, { delimiter: "\n", retarray: true , data: tcadata })));
+			var proposalSubjsStr="";
+			if (proposalSubjs.length > 0) proposalSubjsStr="," + proposalSubjs.join(",") + ",";
+
+			var proposalDepts=getTCFValue(wfDeptVarName, { delimiter: "\n", retarray: true });
+			proposalDepts=RemoveDupes(proposalDepts.concat(getTCFValue(wfDeptVarName, { delimiter: "\n", retarray: true , data: tcadata })));
+			if (proposalDepts.length === 0) {
+				proposalDepts=GetAttrVal({request:"depts", options:"includetca", tcadata: tcadata});
+			}
+			var proposalDeptsStr="";
+			if (proposalDepts.length > 0) proposalDeptsStr="," + proposalDepts.join(",") + ",";
+
+			var proposalCols=getTCFValue(wfColVarName, { delimiter: "\n", retarray: true });
+			proposalCols=RemoveDupes(proposalCols.concat(getTCFValue(wfColVarName, { delimiter: "\n", retarray: true , data: tcadata })));
+			if (proposalCols.length === 0) {
+				proposalCols=GetAttrVal({request:"cols", options:"includetca", tcadata: tcadata});
+			}
+			var proposalColsStr="";
+			if (proposalCols.length > 0) proposalColsStr="," + proposalCols.join(",") + ",";
+		} //try
+		catch(err) { wfDebug(1,"\t*Error* -- " + myName + ": " + err + "\n"); return false; }
+
+	// Process the argument list
+		var includeEcoSystemData=false;
+		if (data.hasOwnProperty("includeEcoSystemData")) includeEcoSystemData=data.includeEcoSystemData;
+		var ecoSystemInstances=",courseadmin,";
+		if (data.hasOwnProperty("ecoSystemInstances")) ecoSystemInstances="," + data.ecoSystemInstances + ",";
+
+		var tcaData={}
+		if (data.hasOwnProperty("tcadata")) tcaData=data.tcadata;
+		var ignoreList="";
+		if (data.hasOwnProperty("ignoreList")) ignoreList="," + data.ignoreList + ",";
+
+		wfDump(myDebugLevel,[myIndent +"proposalCode;"+proposalCode,myIndent +"proposalCodes;"+proposalCodes,
+			myIndent +"proposalSubjs;"+proposalSubjs.toSource(),myIndent +"proposalDepts;"+proposalDepts.toSource(),
+			myIndent +"proposalCols;"+proposalCols.toSource(),myIndent +"includeEcoSystemData;"+includeEcoSystemData,
+			myIndent +"ignoreList;"+ignoreList.toSource()]);
+
+		data.formDataVars.forEach(function(formVarData) {
+				var tmpArray=formVarData.split('|');
+				formVar=tmpArray[0];
+				formVarFormat='courseCode'; // default value
+				dataAttributeName="data"; // default value
+				// Parse off formVar name and optional forVar format (i.e. formVarName|formVarFormat|dataAttributeName)
+				if (tmpArray.length > 1)
+					formVarFormat=tmpArray[1].toLowerCase();
+				if (tmpArray.length > 2)
+					dataAttributeName=tmpArray[2];
+
+				wfDebug(3,"\t*** " + myName + "Processing form variable: '" + formVar + "'");
+				wfDump(3,["\tformVarFormat;"+formVarFormat,"\tdataAttributeName;"+dataAttributeName])
+
+				// Get the tcf data -- cannot use getTCFValue since we want an full array back
+				var tcfValue=[];
+				if (typeof eval("tcfdata."+formVar) === "undefined" ) {
+					wfDebug(myDebugLevel,myIndent +"\t\t*** Variable " + formVar + " is not defined in the tcf file, skipping");
+					return;
+				}
+				eval ("tcfValue=tcfdata."+formVar); // jshint ignore:line
+				wfDump(3,["\t" + formVar + ";"+tcfValue.toSource()])				
+				tcfValue.forEach(function(value) {
+					ref={};
+					ref=GetRelated.ParseRelatedData(value,formVarFormat,dataAttributeName);
+					if (ref != {}) {
+						ref.source="formVar:" + formVar;
+						refsArray.push(ref);
+						//refsLookup[ref.data.toSource()]=refsArray.length-1;
+					}
+				}); //tcfValue
+				// Get the tca data -- cannot use getTCFValue since we want an full array back
+				if (tcaData != {}) {
+					var tcaValue=[];
+					if (typeof eval("tcadata."+formVar) === "undefined" ) {
+						wfDebug(myDebugLevel,myIndent +"\t\t*** Variable " + formVar + " is not defined in the tca file, skipping");
+						return;
+					}
+					eval ("tcaValue=tcadata."+formVar); // jshint ignore:line
+					tcaValue.forEach(function(value) {
+						ref={};
+						ref=GetRelated.ParseRelatedData(value,formVarFormat,dataAttributeName);
+						if (ref != {}) {
+							ref.source="formVar:" + formVar;
+							refsArray.push(ref);
+							//refsLookup[ref.data.toSource()]=refsArray.length-1;
+						}
+					}); //tcfValue
+				}
+
+			}); //data.formDataVars
+			wfDebug(myDebugLevel,myIndent +"\t\tFound " + refsArray.length + " references from the form field data");
+
+		// If includeEcoSystemData, then get data from the CourseLeaf eco system
+			if (includeEcoSystemData &&  ecoSystemInstances.indexOf("," + wfCimInstance + ",") >= 0) {
+				if (proposalDepts.length != 0 && proposalCodes.length != 0) {
+					var tempArray=(GetEcoSystemData(proposalCodes,proposalDepts,data))
+					if (tempArray.length > 0)
+						refsArray=refsArray.concat(tempArray);
+					wfDebug(myDebugLevel,myIndent +"\tFound " + tempArray.length + " references from the Eco system");
+				} else {
+					wfDebug(myDebugLevel,myIndent +"\t" + myName + " *Warning* -- Requested eco system data but proposalDepts is null, skipping eco system");
+				}
+			}
+
+	// Do we have anything to do?
+		if (refsArray.length <= 0) {
+			wfDebug(myDebugLevel,myIndent +"\t\t*** No references found in the data")
+			return false;
+		}
+		refsArray.forEach(function(ref) { wfDump(myDebugLevel,[myIndent +"\tref;'"+ref.toSource()]); }); wfDebug(myDebugLevel,"");
+
+	// map the related data to the requested data type (i.e. type), build an intmediate resultSet array to collect the data
+	wfDebug(myDebugLevel,myIndent +"\tProcessing refs...");
+	var checkArray=[];
+	refsArray.forEach(function(ref) {
+		wfDump(myDebugLevel,[myIndent +"\t\tref (" + myName + ");"+ref.toSource()]);
+		var sqlStmt='', resultSet=[];
+		var refSkipped=false;
+		switch (type.substr(0,3)) {
+			case "col": //Looking to return college values
+				switch (ref.format.substr(0,3)) {
+					case "col":
+						if (","+proposalColsStr+",".indexOf(","+ref.data+",") >= 0) {
+							wfDebug(myDebugLevel,myIndent +"\tskipping ref, code ("+ ref.data +") is in proposalColsStr ("+ proposalColsStr.toSource() +")");
+						} else {
+							retToken={}
+							retToken.dbData=ref.data;
+							retToken.source=ref.source;
+							resultSet.push(retToken);
+						}
+						break;
+					case "dep":
+						resultSet=LookupCode("colCode","deptCode",[ref.data],proposalCols);
+						break;
+					case "sub":
+						resultSet=LookupCode("colCode","subjCode",[ref.data],proposalCols);
+						break;
+				} // end switch (ref.format.substr(0,3))
+				break;
+			case "dep": //Looking to return department values
+				switch (ref.format.substr(0,3)) {
+					case "col":
+						resultSet=LookupCode("deptCode","colCode",[ref.data],proposalDepts);
+						break;
+					case "dep":
+						if (","+proposalDeptsStr+",".indexOf(","+ref.data+",") >= 0) {
+							wfDebug(myDebugLevel,myIndent +"\tskipping ref, code ("+ ref.data +") is in proposalDepts("+ proposalDepts.toSource() +")");
+						} else {
+							retToken={}
+							retToken.dbData=ref.data;
+							retToken.source=ref.source;
+							resultSet.push(retToken);
+						}
+						break
+					case "sub":
+						resultSet=LookupCode("deptCode","subjCode",[ref.data],proposalDepts);
+						break;
+					}
+				break;
+			case "sub": //Looking to return subject values
+				switch (ref.format.substr(0,3)) {
+					case "col":
+						resultSet=LookupCode("subjCode","colCode",[ref.data],proposalSubjs);
+						break;
+					case "dep":
+						resultSet=LookupCode("subjCode","deptCode",[ref.data],proposalSubjs);
+						break;
+					case "sub":
+						if (","+proposalSubjsStr+",".indexOf(","+ref.data+",") >= 0) {
+							wfDebug(myDebugLevel,myIndent +"\tskipping ref, code ("+ ref.data +") is in proposalSubjs("+ proposalSubjs.toSource() +")");
+						} else {
+							retToken={}
+							retToken.dbData=ref.data;
+							retToken.source=ref.source;
+							resultSet.push(retToken);
+						}
+						break;
+					} // end switch (ref.format.substr(0,3))
+				break;
+		} // end switch (type.substr(0,3))
+
+		// Process resultSet data (if any) to match the data expected by caller, i.e. just a simple array of tokens
+			if (resultSet.length > 0) {
+				//wfDump(5,["\t\tresultSet;"+resultSet.toSource()]);
+				resultSet.forEach(function(result) {
+					if (result != "" && result.hasOwnProperty("dbData")) {
+						if (ignoreList.indexOf("," + result.dbData + ",") >= 0 ) {
+							wfDebug(3,myIndent + "result.dbData '" + result.dbData + "' is on the ignoreList, skipping");
+							return;
+						}
+						retToken={};
+						retToken.data=result.dbData;
+						retToken.source=ref.source;
+						if (Object.keys(retToken).length != 0 && typeof checkArray[retToken.data] === 'undefined') {
+							retArray.push(retToken); checkArray[retToken.data]=true;
+						}
+					}
+				});
+			} else if (! refSkipped) {
+					wfDebug(3,myIndent + "\t*Warning* -- no data returned from ref " + ref.toSource() + " lookup")
+			} //(resultSet)
+		wfDebug(myDebugLevel,"");
+	}); //refsArray
+	if (retArray.length > 0) {
+		wfDebug(3,myIndent + "*** " + myName + ": Returning: " + retArray.toSource());
+	}
+
+	wfDebug(myDebugLevel,"")
+	return retArray;
+} //GetRelated
+
+//======================================================================================================================
+// Resolve a code from the cimlookup table
+// called like:
+// LoookupCode(lookupType,givenType,givenData[,exceptData])
+// Where:
+//		<lookupType>	- The type of data to lookup in the set {'college','department','subject'}
+// 		<givenType>		- The type of data provided for the query in the set {'college','department','subject'}
+// 		<givenData>		- The values array for the given data
+// 		<exceptData>	- optional, values array to exclude from the results
+//
+//	e.g.
+// LookupCode('colCode','subjectCode',['AHL'],['AS'])
+//		returns the college code(s) for subject 'AHL' unless the college code is 'AS'
+// LookupCode('colCode','subjectCode',['AHL','AAS'],['AS'])
+//		returns the college code(s) for subject 'AHL' or 'AAS' unless the college code is 'AS'
+//
+//======================================================================================================================
+// 10/09/16 - dgs - Initial, Re-factored from LookupCode
+//======================================================================================================================
+function LookupCode(lookupType,givenType,givenData,excludeData) {
+	var version='2.0.0'; var myName=arguments.callee.toString().match(/function ([^\(]+)/)[1];
+	var myDebugLevel=6; var myIndent="\t\t"; wfDebug(myDebugLevel,"\n" + myIndent + "*** In "+ myName + " (" + version +") ***")
+	wfDump(myDebugLevel,[myIndent + "lookupType;"+lookupType,myIndent + "givenType;"+givenType,myIndent + "givenData;"+givenData.toSource()]);
+	var excludeDataStr="";
+
+	//if (typeof excludeData != 'undefined') { 
+	if (excludeData instanceof Array) { 
+		excludeDataStr="," + excludeData.join(",") + ",";
+		wfDump(myDebugLevel,[myIndent + "excludeData;"+excludeData.toSource()]); 
+	}
+
+	if (givenData.length <= 0) {
+		wfDebug(myDebugLevel,myIndent + "\t*** No lookup data provided, returning false");
+		return false;
+	}
+
+	// Lookup type...
+	switch (lookupType.toLowerCase().substr(0,3)) {
+		case "col": //Lookup college codes
+			//Given type...
+			switch (givenType.toLowerCase().substr(0,3)) {
+				case "col": //Given college codes
+					wfDebug(myDebugLevel,myIndent + "*** lookup type and give data type the same, returning false");
+					return false;
+				break;
+				case "dep": //Given department codes, lookup colleges in cimlookup for the departments
+					sqlStmt="select distinct " + wfColVarName + " as dbData from cimlookup where " + wfDeptVarName + " in (\"" + givenData.join('","') + "\")"
+				break;
+				case "sub": //Given subject codes, lookup colleges in cimlookup by joining on the department field
+					sqlStmt="select distinct " + wfColVarName + " as dbData from cimlookup where " + wfDeptVarName + " in (select " + wfDeptVarName +
+							" from cimlookup where " + wfSubjVarName + " in (\"" + givenData.join('","') + "\"))";
+			} // (givenType.toLowerCase().substr(0,3)) switch
+			break
+		case "dep": //Lookup department codes
+			// Given type...
+			switch (givenType.toLowerCase().substr(0,3)) {
+				case "col": //Given college codes
+					sqlStmt="select distinct " + wfDeptVarName + " as dbData from cimlookup where " + wfColVarName + " in (\"" + givenData.join('","') + "\")"
+				break;
+				case "dep":
+					wfDebug(myDebugLevel,myIndent + "*** lookup type and give data type the same, returning false");
+					return false;
+				break;
+				case "sub": //Given subject codes, lookup colleges in cimlookup by joining on the department field
+					sqlStmt="select distinct " + wfDeptVarName + " as dbData from cimlookup where " + wfSubjVarName + " in (\"" + givenData.join('","') + "\")"
+			} // (givenType.toLowerCase().substr(0,3)) switch
+			break
+		case "sub": //Lookup subject codes
+			// Given type...
+			switch (givenType.toLowerCase().substr(0,3)) {
+				case "col": //Given college codes, lookup subject in cimlookup by joining on the department field
+					sqlStmt="select distinct " + wfSubjVarName + " as dbData from cimlookup where " + wfDeptVarName + " in (select " + wfDeptVarName +
+							" from cimlookup where " + wfColVarName + " in (\"" + givenData.join('","') + "\"))";
+				break;
+				case "dep": //Given department codes
+					sqlStmt="select distinct " + wfSubjVarName + " as dbData from cimlookup where " + wfDeptVarName + " in (\"" + givenData.join('","') + "\")"
+				break;
+				case "sub":
+					wfDebug(myDebugLevel,myIndent + "*** lookup type and give data type the same, returning false");
+					return false;
+			} // (givenType.toLowerCase().substr(0,3)) switch
+			break
+	} //End switch lookupType.toLowerCase().substr(0,3)
+
+	// Run the sql query
+	resultSet=dbquery(tcfdata.dbname[0],sqlStmt);
+	wfDump(myDebugLevel+1,[myIndent + "\tsqlStmt;"+sqlStmt,myIndent + "\tresultSet;"+resultSet.toSource()]);
+	if (resultSet.length <= 0) {
+		wfDebug(myDebugLevel,myIndent + "*** No data returned from sql query, returning false");
+		return false;
+	}
+
+	// Remove data as necessary
+	retArray=[];
+	resultSet.forEach(function(result) {
+		if (result.dbData === "") return;
+		if (excludeDataStr != "" && excludeDataStr.indexOf("," + result.dbData + ",") >= 0) {
+			wfDebug(myDebugLevel,myIndent + "*** " + myName + ": result (" + result.dbData + ") is on the excludeData list, Skipping");
+			return;
+		}
+		retArray.push(result);
+	});
+
+	// Return results -- date
+	if(retArray.length > 0) {
+		wfDebug(myDebugLevel,myIndent + "*** " + myName + ": Returning: " + retArray.toSource() + "\n");
+		return retArray;
+	}
+	return false;
+
+} // LookupCode
+
+//==================================================================================================
+// Return data from the eco system for this course
+// Called like 'GetEcoSystemData(proposalCodes,proposalDepts,ecoSystemTypeStr)'
+//	proposalCodes is an array of code values from the proposal
+//	proposalDepts is an array of department values from the proposal
+//	data is an object with the following attributes:
+//		types: This is an array of data to check against the 'type' field in the courseref table, if not
+//				specified then all types will be considered
+//		paths: This is an string that may contain tokens in the set {'course','program','catalog'}, if
+//				specified then only references of those paths will be included in the results, if not
+//				specified then all will be considered.
+//
+// Returns an array of reference objects, each reference object is of the form:
+// {ref:data ref:dept ref:format}
+// format is in {'subj','dept','path'}
+//==================================================================================================
+// 07/13/16 - dgs - Initial
+// 07/27/16 - dgs - Remove duplicates before returning data
+// 07/18/17 - dgs - Changed the printing of the refs to wfDump level 4
+// 09/22/17 - dgs - Deal with the fact that the proposal department code may be an array.
+// 10/10/17 - dgs - Updated to accept an array of codes and departments
+// 10/12/17 - dgs - Switch the'ecosystemtype' to be a data object to include the path and types data
+// 10/18/17 - dgs - Allow proposalDept to be null
+//==================================================================================================
+function GetEcoSystemData(proposalCodes,proposalDepts,data) {
+	var version="1.0.2";
+	myDebugLevel=5; myIndent="\t\t"
+	var myName="GetEcoSystemData"; wfDebug(myDebugLevel,myIndent + "*** In "+ myName + " (" + version + ") ***");
+	if (proposalCodes.length === 0) return false;
+	//wfDump(5,["\tproposalCodes;"+proposalCodes.toSource(),"\tproposalDepts;"+proposalDepts.toSource(),"\tdata;"+data.toSource()]);
+	wfDump(5,[myIndent + "proposalCodes;"+proposalCodes.toSource(),myIndent + "proposalDepts;"+proposalDepts.toSource()]);
+
+	// var proposalCodesStr="," + proposalCodes.join(",") + ",";
+
+	var deptsString="", proposalSubjs=[];
+	proposalCodes.forEach(function(code) {
+		proposalSubjs.push(code.split(' ')[0]);
+	});
+	if (proposalDepts instanceof Array) {
+		var excludeDepts=proposalDepts;
+	} else {
+		var excludeDepts=GetAttrVal({request:"depts", options:"includetca", tcadata: tcadata});
+		if (!excludeDepts) excludeDepts=[];
+	}
+	var types=[], paths=",course,program,catalog,", catType="subj";
+	if (data.hasOwnProperty("ecoSystemDataTypes")) types=data.ecoSystemDataTypes;
+	if (data.hasOwnProperty("ecoSystemDataPaths")) {
+		if (data.ecoSystemDataPaths !== "")
+			paths="," + data.ecoSystemDataPaths + ",";
+	}
+	if (data.hasOwnProperty("ecoSystemCatDataType")) {
+	if (data.ecoSystemCatDataType !== "")
+		catType=data.ecoSystemCatDataType;
+	}
+
+	wfDump(5,[myIndent + "proposalSubjs;"+proposalSubjs.toSource(),
+		myIndent + "types;"+types.toSource(),
+		myIndent + "paths;"+paths.toSource(),
+		myIndent + "catType;"+catType,
+		myIndent + "excludeDepts;"+excludeDepts.toSource()]);
+
+	var refsArray=[];
+	//Check for any cross references data for this course in the crossref table (eco system)
+		var sqlStmt="SELECT DISTINCT path,dept,type FROM courseref WHERE code in (\"" + proposalCodes.join('","') + 
+					"\") and dept not in (\"" + excludeDepts.join('","') + "\") and dept <> ''";
+		if (types.length > 0) sqlStmt=sqlStmt + " and type in in (\"" + types.join('","') + "\")";
+
+		wfDump(myDebugLevel+1,[myIndent + "\tsqlStmt;"+sqlStmt]);
+		var resultSet=dbquery("courseref",sqlStmt);
+		wfDump(myDebugLevel+1,[myIndent + "\tresultSet;"+resultSet.toSource()]);
+		var checkArray=[];
+		var proposalDeptsStr="";
+		if (!excludeDepts) proposalDeptsStr="," + proposalDepts.join(",") + ","; 
+		var proposalSubjsStr="," + proposalSubjs.join(",") + ",";
+		resultSet.forEach(function(result) {
+			var ref={};
+			if (result.path.substr(0,1) === "/" && paths.indexOf(",catalog,") >= 0) {
+				if (proposalDeptsStr.indexOf(result.dept) < 0) {
+					ref.source="eco-cat";
+					ref.data=result.dept;
+					ref.format=catType;
+					ref.type=result.type;
+				}
+			} else if (result.path.substr(0,12) === "programcode:" && paths.indexOf(",program,") >= 0) {
+				if (proposalDeptsStr.indexOf(result.dept) < 0) {
+					ref.source="eco-program";
+					ref.data=result.dept;
+					ref.format="dept";
+					ref.type=result.type;
+				}
+			} else if (result.path.substr(0,5) === "code:" && paths.indexOf(",course,") >= 0) {
+				if (proposalSubjsStr.indexOf(result.dept) < 0) {
+					ref.source="eco-course";
+					ref.data=result.dept;
+					ref.format="subj";
+					ref.type=result.type;
+				}
+			}
+			var key=ref.source+ref.data+ref.format+ref.type
+			if (Object.keys(ref).length != 0 && typeof checkArray[key] === "undefined") {
+				refsArray.push(ref); checkArray[key]=true;
+			}
+		}); //resultSet
+
+		wfDebug(myDebugLevel,myIndent + "*** " + myName + ": Found " + refsArray.length.toString() + " distinct references found from the Eco System")
+		wfDump(myDebugLevel,[myIndent + "refsArray;"+refsArray.toSource()]);
+
+	return refsArray;
+} //GetEcoSystemData
+
+//=======================================================================================================================
+//Adaptor for call to wfAttr from workflow
+// Usage:
+//		wfrules:Cols|function|wfAttr|includeTCA; //Substitutes current, previous, and crosslisted value(s) of 'College' from allcodes data
+//		wfrules:Depts|function|wfAttr|; //Substitutes current, previous, and crosslisted value(s) of 'Department' from allcodes data
+//		wfrules:Subjs|function|wfAttr|; //Substitutes current, previous, and crosslisted value(s) of 'Subject' from allcodes data
+//=======================================================================================================================
+// 05/08/2017 - RemoveDupesdgs - New
+//=======================================================================================================================
+wffuncs.wfAttr = function(inval, wfrule, args) {
+	var version='1.0.0'; var myName=wfrule.attrname;
+	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
+
+	var tmpArray=[], retArray=[];
+	tmpArray=GetAttrVal({ request: wfrule.searchfor.toLowerCase(), options: wfrule.options.substring(0,wfrule.options.indexOf(";")), tcadata: tcadata});
+
+	if (tmpArray.length > 0) {
+		wfDebug(3,"\t*** " + myName + ": Returning: ")
+		tmpArray.forEach(function(retVal) {
+			retArray.push(inval.replace(wfrule.regex,retVal));
+			wfDebug(3,"\t\t>"+retArray[retArray.length-1]+"<");
+		});
+		return retArray;
+	}
+	return false;
+}; //wffuncs.wfAttr
+
+//=======================================================================================================================
+// Retrieve attribute code values taking into account all codes and tcf/tca values.  Passed in a data
+// object of the form { request: reqType, options: options, tcadata: tcadata } where
+//
+// Usage:
+//		GetAttrVal( {request: wfrule.searchfor.toLowerCase(), options: wfrule.options.substring(0,wfrule.options.indexOf(";")), tcadata: tcadata})
+//	request is one in {'cols','col','depts','dept','subjs','subj'}
+//		If reqType ends in an "s" then do allcodes/tca expansion, otherwise just use the value from the proposal tcf
+// 	options is one or more in {'includeTCA', 'noMapValue'}
+// 		if options includes 'includeTCA' then you must also pass the tcadata object
+//		if options includes 'noMapValue' then the attribute will not be mapped through any existing mapping functions
+// e.g.
+// 		var cols=GetAttrVal({request:"cols", options:"includetca", tcadata: tcadata});
+//=======================================================================================================================
+// 05/08/17 - dgs - New
+// 05/09/17 - dgs - Switched to use getTCFValue for tca data
+// 05/11/17 - dgs - Added logic to look at request type and if it does not end in an "s" then return only the proposal
+//					tca data
+// 				  - Switched data passing to object
+// 05/17/17 - dgs - Updated calls to GetAttrVal to add passing in the names of the form variables
+// 06/09/17 - dgs - Added variable value mapping with the option to turn off.
+// 07/18/17 - dgs - Modifed includeTCA setting, if option include OR request type ends in 's' then include tca data
+// 07/26/17 - dgs - Always do the lookups for subjects, departments, and colleges regardless of request type
+// 08/30/17 - dgs - The target attribute 'request' (above) can be passed in as an option on the wfrule,e.g. 'wfrules:Divs|function|wfAttr|Cols'
+// 09/11/17 = dgs - Do not pull data from allcodes unless the cim instance is courseadmin
+// 09/14/17 - dgs 	- Use wfColVarName, wfDeptVarName, wfSubjVarName
+// 10/02/17 - dgs - Fixed problem with mapper callback function
+// 10/18/17 - dgs - Use LookupCode to resolve the department / college data if no other data is found
+// 10/19/17 - dgs - Fix bug if resultSet is not an array
+//=======================================================================================================================
+GetAttrVal = function(data) {
+	var myDebugLevel=5; myIndent="\t\t";
+	var version='1.0.0'; var myName="GetAttrVal"; wfDebug(myDebugLevel,myIndent + "*** In " + myName + " ***"); //wfDump(6,["\tdata;"+data.toSource()]);
+
+	var reqType=data.request;
+	var optionStr=data.options; 	if (optionStr === undefined) optionStr="";
+	optionStr=optionStr.toLowerCase();
+	var tcaData=data.tcadata; 		if (tcaData === undefined) tcaData="";
+
+	var subjVarName=data.subjVar; 	if (subjVarName === undefined || subjVarName === "") subjVarName=wfSubjVarName;
+	var deptVarName=data.deptVar; 	if (deptVarName === undefined || deptVarName === "") deptVarName=wfDeptVarName;
+	var colVarName=data.colVar; 	if (colVarName === undefined || colVarName === "") colVarName=wfColVarName;
+
+	var includeTCA=false;
+	if (optionStr.indexOf("includetca") >= 0 && typeof(tcaData) != "undefined" && tcaData)
+		var includeTCA=true;
+	if (reqType.slice(-1) === "s" && typeof(tcaData) != "undefined" && tcaData)
+		var includeTCA=true;
+	var mapValue=true;
+	if (optionStr.indexOf("nomapvalue") >= 0)
+		var mapValue=false;
+	var proposalOnly=false;
+	if (optionStr.indexOf("proposalonly") >= 0)
+		var proposalOnly=true;
+	if (optionStr.indexOf("type=") >= 0)
+		reqType=optionStr.split("=")[1];
+
+	wfDump(myDebugLevel+1,["\treqType;"+reqType,"\toptionStr;"+optionStr,"\ttcaData;"+tcaData,"\tsubjVarName;"+subjVarName,
+		"\tdeptVarName;"+deptVarName,"\tcolVarName;"+colVarName,"\twfAllcodes;"+wfAllcodes,"\tincludeTCA;"+includeTCA,
+		"\tmapValue;"+mapValue,"\twfAllcodes;"+wfAllcodes,"\twfCimInstance;"+wfCimInstance,"\tproposalOnly;"+proposalOnly]);
+
+	var subjects=[], departments=[], colleges=[];
+
+	// Look to see if we have tcfdata values for subjects, departments, colleges, if not the the lookup the values
+		subjects=getTCFValue(subjVarName, { delimiter: "\n", retarray: true });
+		if (includeTCA)
+			subjects=subjects.concat(getTCFValue(subjVarName, { data: tcaData, delimiter: "\n", retarray: true }));
+		wfDump(myDebugLevel+1,["\t" + subjVarName + " from tcfdata;"+subjects.toSource()])
+		if (subjects.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
+			subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
+		}
+
+		departments=getTCFValue(deptVarName, { delimiter: "\n", retarray: true });
+		if (includeTCA)
+			departments=departments.concat(getTCFValue(deptVarName, { data: tcaData, delimiter: "\n", retarray: true }));
+		if (departments.length === 0 && subjects.length > 0) {
+			resultSet=LookupCode("dept","subj",subjects);
+			if (resultSet.length > 0) {
+				resultSet.forEach(function(result) {
+					departments.push(result.dbData);
+				});
+			}
+		}
+		wfDump(myDebugLevel+1,[myIndent + deptVarName + " from tcfdata;"+departments.toSource()])
+		if (departments.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
+			departments=wffuncs.getDepartments(subjects);
+		}
+
+		colleges=getTCFValue(colVarName, { delimiter: "\n", retarray: true });
+		if (includeTCA)
+			colleges=colleges.concat(getTCFValue(colVarName, { data: tcaData, delimiter: "\n", retarray: true }));
+		if(colleges.length === 0 && subjects.length != 0) {
+			resultSet=LookupCode("cols","subj",subjects);
+			if (resultSet.length > 0) {
+				resultSet.forEach(function(result) {
+					colleges.push(result.dbData);
+				});
+			}
+		}
+		if(colleges.length === 0 && departments.length != 0) {
+			resultSet=LookupCode("cols","dept",departments);
+			if (resultSet.length > 0) {
+				resultSet.forEach(function(result) {
+					colleges.push(result.dbData);
+				});
+			}
+		}
+
+		wfDump(myDebugLevel+1,[myIndent + colVarName + " from tcfdata;"+colleges.toSource()])
+		if (colleges.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
+			colleges=wffuncs.getColleges(departments);
+		}
+
+	// return data based on how we were called
+		var retArray=[];
+		if (reqType.indexOf("col") >= 0 || optionStr.indexOf("col") >= 0) {
+			retArray=colleges.slice(0)
+		} else if (reqType.indexOf("dep") >= 0 || optionStr.indexOf("dep") >= 0) {
+			retArray=departments.slice(0)
+		} else if (reqType.indexOf("subj") >= 0 || optionStr.indexOf("subj") >= 0) {
+			retArray=subjects.slice(0)
+		}
+		retArray=RemoveDupes(retArray)
+
+	// If there is a 'Map' function for the attribute ('Map<attribute>'Val'), then call the function to map the name
+		if (mapValue) {
+			attrFunctionName=reqType;
+			if (attrFunctionName.substring(attrFunctionName.length-1,attrFunctionName.length) === "s") attrFunctionName=attrFunctionName.substring(0,attrFunctionName.length-1)
+			attrFunctionName="Map" + attrFunctionName.substring(0,1).toUpperCase() + attrFunctionName.substring(1).toLowerCase() + "Val";
+			if (! eval("typeof " + attrFunctionName) === "function")
+				attrFunctionName="Map" + attrFunctionName.substring(0,1).toUpperCase() + "s" + attrFunctionName.substring(1).toLowerCase() + "Val";
+			if (eval("typeof " + attrFunctionName) === "function") {
+				wfDebug(5,"\t\t\tFound an attribute 'Map' function: " + attrFunctionName);
+				for (var ii=0,  totII=retArray.length; ii < totII; ii++) {
+				 	eval("retArray[" + ii + "]=" + attrFunctionName + "('" + reqType + "','" + retArray[ii] + "')");
+				}
+			}
+		}
+
+	// If there is no value and we are in a debug environment then return a dummy variable
+		if (retArray.length <= 0 && wfEnvIsDev) {
+			if (reqType.indexOf("col") >= 0 || optionStr.indexOf("col") >= 0) {
+				retArray.push("DUMMY-COLLEGE");
+			} else if (reqType.indexOf("dep") >= 0 || optionStr.indexOf("dep") >= 0) {
+				retArray.push("DUMMY-DEPARETMENT");
+			} else if (reqType.indexOf("subj") >= 0 || optionStr.indexOf("subj") >= 0) {
+				retArray.push("DUMMY-SUBJECT");
+			}
+		}
+
+	// Return data
+		wfDebug(myDebugLevel,myIndent + "*** " + myName + ": Returning (" +  reqType.toUpperCase() + ") : " + retArray.toSource() + "<");
+		if (retArray.length > 0)
+			return retArray;
+
+		return false;
+}; //GetAttrVal
+
+//======================================================================================================================
+// Check to see if a proposal attribute is in a specified list of values
+// the attribute is determined by looking at the workflow rule name:
+//	contains 'subj'	then check subject value
+//	contains 'dept'	then check departments value
+//	contains 'col'	then check college value
+// e.g:
+//	wfrules:deptInCHEM_PHYS_CDS_SOAN|function|wfAttrIn|CHEM,PHYS,CDS,SOAN; //Department code in the set as indicated
+// Note: can also include the list of codes as '_' separated list in the conditional name as show above
+//======================================================================================================================
+// 05-01-17 - dgs - Initial coding -- gmu
+// 05/27-17 - dgs - Added code for 'xxxxNOTin-' requeste types
+// 07/27/17 - dgs - Tweaked debug output
+// 11/08/17 - dgs - Re-factored getting attribute data to use GetAttrVal, fixes problem if allcodes not set
+// 03/28/18 - dgs - Re-factored switching to '_' as the delimiter since '-' was causing problems in workflow management
+//					Renamed to wfAttrIn
+//======================================================================================================================
+wffuncs.wfAttrIn = function(inval, wfrule, args) {
+	var version='1.0.3'; var myName=wfrule.attrname;
+	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
+
+	// Standard initilization
+		var retArray=[];
+		var reqType=wfrule.searchfor.toLowerCase();
+		var notMode=reqType.indexOf("not")>0;
+
+		// Get the check list from the options if specified, otherwise parse from the stepname
+			var options=wfrule.options.substring(0,wfrule.options.indexOf(";"));
+			if (options.length > 0) {
+				checkList=options;
+			} else {
+				checkList=wfrule.searchfor.substring(reqType.indexOf("in")+1);
+				checkList=checkList.replace("_",',');
+			}
+			checkList="," + checkList + ",";
+
+		// Which attribute should we check, get standard values
+			var valsArray=[];
+			if (reqType.indexOf("col") >= 0) {
+				var valsArray=GetAttrVal({request:"cols", options:"includetca", tcadata: tcadata});
+			} else if (reqType.indexOf("dept") >= 0 || reqType.indexOf("department") >= 0) {
+				var valsArray=GetAttrVal({request:"depts", options:"includetca", tcadata: tcadata});
+			} else if (reqType.indexOf("subj") >= 0) {
+				var valsArray=GetAttrVal({request:"subjs", options:"includetca", tcadata: tcadata});
+			}
+
+		wfDump(1,["reqType;"+reqType,"checkList;"+checkList,"valsArray;"+valsArray.toSource()]);
+		
+	//Initial Checks
+	try {
+		if (checkList === ",,") throw("No checkList specified in options or stepname");
+		if (!valsArray || valsArray.length === 0) throw("Could not resolve 'valsArray' from the reqType (" + reqType + ")");
+		InitialChecks(["wfrule"],args)
+	} //try
+	catch(err) { wfDebug(1,"\t*Error* -- " + myName + ": " + err + "\n"); return false; }
+
+	// Main
+ 		var allowStep=false;
+ 		valsArray.forEach(function(token) {
+	 		//wfDump(1,["\ttoken;"+token]);
+			if (checkList.indexOf(","+token+",") >= 0) {
+				wfDebug(1,"\tFound '" + token + "' in checklist, allowing step");
+				allowStep=true;
+			}
+		});
+
+	// Return results
+		if (notMode) allowStep=!allowStep
+		if(allowStep) {
+			wfDebug(1,"\t*** Allowing step, notmode: " + notMode);
+			return [inval.replace(wfrule.ifregex,'')];
+		}
+		wfDebug(1,"\t*** Skipping step, notmode: " + notMode);
+		return false
+
+} //wffuncs.wfAttrIn
+
+
+//=================================================================================================
+// Return additional steps for all 'equiv' courses in courseref table
+//=================================================================================================
+wffuncs.AddSameAs = function(inval, wfrule, args) {
+	var myName=wfrule.attrname; wfDebug(3,'\n*** In '+ myName + " called as '" + wfrule.searchfor + ", Step: '" + inval +"' ***");
+
+	var retArray=[];
+	//Try block encapsulated main function
+	 try {
+		// Initial Checks
+			if(args && args.context && args.context != "wfrule")
+		 		throw "\t*** Failed rule type check";
+			if(!tcfdata.code || !tcfdata.code.length)
+		 		throw "\t*** Failed tcfdata.code is not null check";
+			if(!tcfdata.department || !tcfdata.department.length)
+		 		throw "\t*** Failed tcfdata.department is not null check";
+			if(!tcfdata.college || !tcfdata.college.length)
+		 		throw "\t*** Failed tcfdata.college is not null check";
+
+	 	// Main
+			var reqType=wfrule.searchfor.toLowerCase();
+
+			// Get proposal data
+				var parentCode=tcfdata.code[0];
+				var proposalSubj=tcfdata.subject[0].code;
+				var proposalDept=tcfdata.department[0].code;
+				var proposalCol=tcfdata.college[0].code;
+				wfDump(3,['reqType;'+reqType,'parentCode;'+parentCode,'proposalCol;'+proposalCol,'proposalDept;'+proposalDept]);
+
+			// Lookup the equiv course from coursref
+			var refSubj;
+			sqlStmt="SELECT DISTINCT path,dept FROM courseref WHERE code = ? AND dept <> ? AND dept <> '' and type = 'equiv'";
+			sqlParms=[parentCode,proposalDept];
+			resultSet1=dbquery("courseref",sqlStmt,sqlParms);
+			resultSet1.forEach(function(courserefResult) {
+				wfDebug(3,'\t Equiv result = >' + courserefResult.toSource() + '<\n')
+				refSubj=courserefResult.dept;
+				wfDump(3,['\trefSubj;'+refSubj]);
+				if (reqType.indexOf('depts') > 0) {
+					sqlStmt="SELECT DISTINCT department 'token' FROM cimlookup WHERE subject = ? AND department <> ? AND department <> ''";
+					sqlParms=[refSubj,proposalDept];
+				} else {
+					sqlStmt="SELECT DISTINCT college as 'token' FROM cimlookup WHERE subject = ? AND college <> ? AND college <> ''";
+					sqlParms=[refSubj,proposalCol];
+				}
+				//print_debug('\t\t sqlStmt = >' + sqlStmt + '<\n');
+				resultSet2=dbquery("cimcourses",sqlStmt,sqlParms);
+				resultSet2.forEach(function(cimlookupResult) {
+					wfDump(3,['cimlookupResult;'+cimlookupResult.toSource()]);
+					retArray.push(inval.replace(wfrule.regex,cimlookupResult.token))
+				}); //resultSet2
+			}); //resultSet1
+
+		// return steps if found or false if none added
+		if (retArray.length > 0) {
+			if (haveDebug) { retArray.forEach(function(step) { wfDebug(3,'\t Returning step:  >' + step + '<\n'); }); }
+			return retArray;
+		} else {
+			return false;
+		}
+
+	} //Try block
+	//Catch block for errors thrown in above try block
+	catch(err) { wfDebug(1,"\t*Error* -- " + myName + ": " + wfrule.attrname + ": " + err + "\n"); return false; }
+	return false;  // Should never get here
+} //wffuncs.AddSameAs
+
+//Set include SIS step on (true) or off (false) -- only applys to DEV env.
+//addSisEnvs:test,next
+//wfrules:SISsync|function|AddSisStep|
+//=========================================================================================================================
+// Pull the sisName value in the config file and replace that in the workflow, include in workflow if
+// not running.  Only add sissync step if current env is in 'tcfdata.addSisEnvs'
+// ??/??/2014 - dgs - New
+// 02/26/2015 - dgs - Re-factored to move sisname = '' warning earlier, add sisname to other messages
+// 01/25/2016 - dgs - Re-factored check env in addSisEnvs
+//=========================================================================================================================
+wffuncs.AddSisStep = function(inval, wfrule, args) {
+	// setup
+	var version='1.0.5';
+	var myName=wfrule.attrname; wfDebug(3,'\n*** In '+ myName + " called as '" + wfrule.searchfor + ", Step: '" + inval +"' ***");
+
+	// Check execution env
+	if(args && args.context && args.context != "wfrule")
+		return false;
+
+	// Get sisname from cimconfig.cfg
+	var sisName=getTCFValue("sisname");
+
+	if (sisName === '') {
+		var spaceing='&nbsp;&nbsp;&nbsp;&nbsp;';
+		print_doc(spaceing + '<strong>*Error* -- (' + myName + ') Default SIS name not set in cimconfig.cfg file.<br>' + spaceing + 'Please contact your CourseLeaf Administrator.</strong>');
+		wfDebug(3,'\t *Error* -- Default SIS name not set in cimconfig.cfg file.');
+		return false;
+	}
+
+	var addSisEnvs=getTCFValue("wfAddSisEnvs");
+	if (addSisEnvs === '')  {
+		wfDebug(3,"\t*Warning* -- tcfdata.addSisEnvs undefined, adding sis sync step");
+	} else if (addSisEnvs.indexOf(GetEnv().toString()) < 0) {
+		print_doc("&nbsp;&nbsp;&nbsp;<strong><em>*Warning*</strong> -- (" + myName + ") Not including SIS Sync step (" + tcfdata.sisname + ")");
+		print_doc("<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp" +
+			"env = " + GetEnv().toString() + " and wfAddSisEnvs = '" + addSisEnvs + "'" );
+		return false;
+	}
+
+	// Add SIS Sync Step
+	wfDebug(3,'\tAdding SIS Sync step: ' + sisName);
+	return sisName;
+
+}; //wffuncs.AddSisStep
+
+//======================================================================================================================
+// Notify all previous approvers in the workflow
+// The desired suffix (fyi/fyiall) can be passed as an option on the wfrule definition wfrule:....|<fyi/fyiall>
+// or can be coded on the workflow step name,e.g/ 'NotifyAllApprovers fyi'.  If not specified then the added modifier
+// will be 'fyiall'.
+//======================================================================================================================
+// 11/09/17 - dgs - Initial coding
+//======================================================================================================================
+wffuncs.NotifyAll = function(inval, wfrule, args, prevsteps) {
+	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
+	var options=wfrule.options;	options=options.substring(0, options.indexOf(';'));
+	if (! args.hasOwnProperty("prevsteps")) return false;
+	var prevsteps=args.prevsteps;
+	if (prevsteps.length === 0) return false;
+
+	var retArray=[];
+	var suffix=" fyiall";
+	var regex=/\bfyi\b|\bfyiall\b/;	//Note that this is not a string, there are no quotes arround the value
+	var ignore=[];
+	ignore["regen"]=true;
+	ignore[getTCFValue("sisname")]=true;
+
+	//Process options
+	var unknownOpts=""
+	var approverOnly=false;
+	options.split(",").forEach(function(option) {
+		switch(option.toLowerCase()) {
+			case "approver":
+			case "approvers":
+			case "approval":
+		        approverOnly=true;
+		        break;
+		    case "fyiall":
+		        suffix=" fyiall";
+		        break;
+		    case "fyi":
+		        suffix=" fyi";
+		        break;
+		    default:
+		    	if (unknownOpts.length) {
+		    		unknownOpts=unknownOpts + "," + option;
+		    	} else {
+		    		unknownOpts=option;
+		    	}
+		    	// break;
+		} // switch
+	});
+
+	// Does the step name contain fyi or fyiall, if yes then do not add suffix
+	if (regex.test(inval))
+		suffix="";
+
+	wfDump(2,["options;"+options,"suffix;"+suffix,"prevsteps;"+prevsteps.toSource(),"approverOnly;"+approverOnly,"unknownOpts;"+unknownOpts]);
+
+	//Initial Checks
+	try { InitialChecks(["wfrule"],args) }
+	catch(err) { wfDebug(1,"\t" + myName + ": " + err + "\n") ; return false; }
+
+	// Main
+		var regex=/\bfyi\b|\bfyiall\b/;					//Note that this is not a string, there are no quotes arround the value
+		prevsteps.forEach(function(step) {
+			wfDump(2,["step;"+step]);
+			if (ignore[step]) return;
+			if (approverOnly && regex.test(step)) return;
+			if (regex.test(step)) {
+				retArray.push(inval.replace(wfrule.regex,step));
+			} else {
+				retArray.push(inval.replace(wfrule.regex,step + suffix));
+			}
+		});
+
+	// Return results -- date
+		if(retArray.length > 0) {
+			wfDebug(1,"\t*** Returning " + retArray.toSource());
+			return retArray;
+		}
+		return false;
+} //NotifyAll
+
+//=================================================================================================
+// Include step only if it is not the first step in the workflow
+//=================================================================================================
+// 11-28-17 - dgs - Initial coding
+//=================================================================================================
+wffuncs.IsNotFirstStep = function(inval, wfrule, args) {
+	var myName=wfrule.attrname;
+	wfDebug(1,"\n*** In "+ myName + " called as '" + wfrule.searchfor + "', Step: '" + inval +"' ***");
+
+	var prevsteps=args.prevsteps;
+	if (! args.hasOwnProperty("prevsteps")) {
+		wfDebug(1,"\t*** Do not have any previous steps attribute in 'args', allowing step")
+		return [inval.replace(wfrule.regex,"")];
+	}
+	
+	if (prevsteps.length === 0) {
+		wfDebug(1,"\t*** This is the first step in workflow, skipping step")
+		return false;
+	}
+
+	wfDebug(1,"\t*** This is not the first step in workflow, allowing step")
+	return [inval.replace(wfrule.regex,"")]
+
+} //IsNotFirstStep
+
+
+//==================================================================================================
+//==================================================================================================
+// Common utilities
+//==================================================================================================
+//==================================================================================================
+
+
+//==================================================================================================
+// Check the proposal mode
+// 09/10/2015 - dgs - New
+//==================================================================================================
+wffuncs.CheckProposalMode = function(inval, wfrule, args) {
+	var version='1.0.5';
+	var myName=wfrule.attrname; wfDebug(3,'\n*** In '+ myName + "(" + version + ") called as '" + wfrule.searchfor + "' ***");
+	var reqType=wfrule.searchfor.toUpperCase();
+ 	var propMode = GetProposalMode();
+	//wfDump(['reqType;'+reqType,'propMode;'+propMode])
+
+	if (reqType.indexOf(propMode) >= 0) {
+		wfDebug(3,"\t*** Including step")
+		return [inval.replace(wfrule.ifregex,'')];
+	}
+
+	return false;
+
+}; //wffuncs.CheckProposalMode
+
+//=======================================================================================================================
+//Adapter for call to CheckChanged from workflow
+// Usage:
+//		wfrules:isMinorChange|function|CheckChanged|mode:only checkfields:<comma separated list of field>; // Minor change
+//	or
+//		<callName>_wfCheckChangedFields: <comma separated list of field>
+//		wfrules:isMinorChange|function|CheckChanged|mode:only
+//
+// mode in {"only","any"}
+//=======================================================================================================================
+// 05/08/17 - dgs - New
+// 10/12/17 - dgs - Fix bug detecting not mode if 'not' is at the beginning of the string
+//=======================================================================================================================
+wffuncs.CheckChanged = function(inval, wfrule, args) {
+	var version='1.0.0'; var myName=wfrule.attrname; wfDebug(3,"\n*** In wffuncs." + myName + "(" + version + ") called as " + wfrule.searchfor + " ***");
+	var calledAs=wfrule.searchfor;
+	var reqType=wfrule.searchfor.toLowerCase();
+	var notMode=false;
+	if (reqType.indexOf("not") >= 0) notMode=true;
+	var options=wfrule.options;
+	if (options.slice(-1) === ";") options=options.slice(0, -1);
+	wfDump(4,["reqType;"+reqType,"notMode;"+notMode,"options;"+options,"calledAs;"+calledAs]);
+	// Check Proposal mode, if not edit then return
+		if (GetProposalMode() != "EDIT") {
+			wfDebug(3,"Proposal mode (" + GetProposalMode() + ") is not EDIT");
+			return false;
+		}
+
+	// Parse the passed options
+		var mode="", checkFieldsStr="", unknownOpts="", checkFieldsVar="";
+		var tmpArray1=options.split(" ");
+		tmpArray1.forEach(function(text) {
+			tmpArray2=text.split(':');
+			if (tmpArray2.length <= 0) tmpArray2=text.split('=');
+			switch(tmpArray2[0].toLowerCase()) {
+			    case "mode":
+					if (tmpArray2[1].slice(-1) === ";") tmpArray2[1]=tmpArray2[1].slice(0, -1);
+			    	mode=tmpArray2[1];
+			        break;
+			    case "checkfields":
+					if (tmpArray2[1].slice(-1) === ";") tmpArray2[1]=tmpArray2[1].slice(0, -1);
+			        checkFieldsStr=tmpArray2[1];
+			        break;
+			    case "checkfieldsvar":
+					if (tmpArray2[1].slice(-1) === ";") tmpArray2[1]=tmpArray2[1].slice(0, -1);
+			        checkFieldsStr=getTCFValue(tmpArray2[1]);
+			        break;
+			    case "notmode":
+					if (tmpArray2[1].slice(-1) === ";") tmpArray2[1]=tmpArray2[1].slice(0, -1);
+			    	notMode=tmpArray2[1];
+			        break;
+			    default:
+			        unknownOpts=unknownOpts + text;
+			}
+		});
+
+
+	// If the checkfields were not passed in the options record then check the tcfdata for a variable called "wfCheckChangedFields" 
+	// or <calledAs>_wfCheckChangedFields
+
+		if (checkFieldsStr === "") {
+			var varName, varValue=[];
+			varName=calledAs + "_" + "wfCheckChangedFields"
+			varValue=getTCFValue(varName);
+			if (varValue === "") {
+				varName="wfCheckChangedFields"
+				varValue=getTCFValue(varName);
+			}
+			if (varValue != "" )
+				checkFieldsStr=varValue;
+		}
+		if (checkFieldsStr === "") {
+			wfDebug(3,"\t*Error* -- Call to wffuncs.CheckChanged and could not resolve the list of fields to check");
+			return false;
+		}
+		wfDump(3,["reqType;"+reqType,"mode;"+mode,"checkFields in;"+checkFieldsStr,"notMode;"+notMode,"unknownOpts;"+unknownOpts]);
+
+	// Call the real function to evaluate the data
+		var allowStep=CheckChanged({ mode: mode, checkFields: checkFieldsStr })
+
+	// Return results
+		if (notMode) { wfDebug(3,"\t\tNot mode is active, flipping allowStep value"); allowStep=!allowStep; }
+		if (allowStep) {
+			wfDebug(3,"\t*** Allowing step")
+			return [inval.replace(wfrule.ifregex,'')];
+		}
+		wfDebug(3,"\t*** Skipping step")
+		return false
+
+}; //wffuncs.wfAttr
+
+
+//=================================================================================================
+// Check a list of variables to see if they have changed from the tca data.  Passed in a data
+// object of the form { mode: mode, checkFields: checkFieldsStr } where
+//	mode: 		 is in the set {'only','any'}
+//					'only' 	- if only the listed variables have changed then true, otherwise false
+//					'any'	- if any of the listed variables have changed then true, otherwise false
+//	checkFields: is a comma separated list of variables to check
+// Returns true or false as above
+//=================================================================================================
+// 03-10-17 - dgs - 	Initial coding -- ???
+// 05/10/17 - dgs - 	Re-factored into a local module to be called by a wffuncs. module
+// 06/24/17 - dgs - 	Check to see if any non cycleattr fields changed, if not then short circuit
+//						the variable checks
+// 02/05/18 - dgs - Fixed bug where htmltext fields were being seen as changed because non-significant markup changes were 
+//					in the text.
+//=================================================================================================
+CheckChanged = function(data) {
+	var version='2.0.0'; wfDebug(3,"\t*** In CheckChanged ***");
+
+	// Main
+		var mode=data.mode;
+		var checkFieldsStr=data.checkFields;
+		var checkFields=checkFieldsStr.split(',');
+		checkFieldsStr="," + checkFieldsStr + ",";
+		wfDump(3,["\tmode;"+mode.toSource(),"\tcheckFieldsStr;"+checkFieldsStr.toSource(),"\tcheckFields;"+checkFields.toSource()]);
+		if (checkFields.length === 0) {
+			wfDebug(3,"\t*Error* -- No checkfields specified");
+			return false;
+		}
+	// Get the changed fields
+		var diffdata = {};
+		//tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata});
+		tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata, olddata: tcadata});
+
+	// create a hash table for the cycleattrs
+		var cycleattrsHash=[];
+		wfDebug(4,"\t\tcycleattrs:");
+		cycleattrs=getTCFValue("cycleattrs", { delimiter: "\n", retarray: true });
+		cycleattrs.forEach(function(attr) {
+			wfDebug(4,["\t\t\t" + attr]);
+			cycleattrsHash[attr]=true;
+		});
+
+	// loop through changed fields, if not in the cycleaddrs list then make an hash table entry for the field.
+		var changedHash={};
+		wfDebug(4,"\t\tChanged fields...")
+		for (var key in diffdata) {
+		    if (!diffdata.hasOwnProperty(key)) continue;
+			if (! cycleattrsHash[key]) {
+				wfDebug(4,["\t\t\t" + key]);
+	 			changedHash[key]=true;
+	 		}
+		}
+
+		if (Object.keys(changedHash).length === 0) {
+			wfDebug(3,"\t\t\tFound no fields changed (other than cycleattrs)");
+			var oneInList=false;
+			var allInList=false;
+		} else {
+			// Loop through the changed fields array
+			var allInList=true;
+			// if (numChanged > numCheck) allInList=false;
+			wfDebug(3,"\t\tChecking changed fields...")
+			// loop through the list of changed fields and make sure they are all in the checkfields list
+			for (var key in changedHash) {
+				var tcfDataStr=eval("tcfdata." + key + ".toSource()");
+				//Dump("\n\tkey",key); Dump("\t\ttcfdata." + key,tcfDataStr);
+				tcfDataStr=tcfDataStr.replace(/<\/?[^>]+>/g, "").replace(/\n/g, " ").replace(/&#160;/g, " ").replace(/\s+/g, "");
+				//Dump("tcfDataStr",tcfDataStr)
+				if (tcadata) {
+					var tcaDataStr=eval("tcadata." + key + ".toSource()");
+					//Dump("\n\tkey",key); Dump("\t\ttcadata." + key,tcaDataStr);
+					tcaDataStr=tcaDataStr.replace(/<\/?[^>]+>/g, "").replace(/\n/g, " ").replace(/&#160;/g, " ").replace(/\s+/g, "");					
+					//Dump("\ttcaDataStr",tcaDataStr);
+					if (tcfDataStr === tcaDataStr) {
+						wfDebug(0,"\t\t\tFound field '" + key + "' changed but tcf/tca text compare as equal")
+						delete changedHash[key];
+						continue;
+					}
+
+				}
+				// OK, absolute check of tcf and tca data proved not equal so check to see if the changed field is in the list
+				if (changedHash.hasOwnProperty(key)) {
+					if (checkFieldsStr.indexOf(","+key+",") < 0) {
+						wfDebug(3,"\t\t\t*** Found field '" + key + "' changed and not in the check list, setting allInList=false");
+						wfDump(4,["\t\t\ttcfDataStr;"+tcfDataStr]);
+						if (tcadata) wfDump(4,["\t\t\ttcaDataStr;"+tcaDataStr]);
+						allInList=false;
+					} else {
+						wfDebug(3,"\t\t\tFound field '" + key + "' changed and in the check list");
+					}
+				}
+			}
+			// loop through the check fields to see if any of them have changed
+			var oneInList=false;
+			checkFields.forEach(function(checkField) {
+				if (typeof changedHash[checkField] != "undefined") {
+					oneInList=true
+				}
+			});
+		}
+		wfDump(3,["\toneInList;"+ oneInList,"\tallInList;"+ allInList])
+
+	// return results based on mode
+		var allowStep=false;
+		//if (mode === 'only' && allInList === true && Object.keys(changedHash).length < checkFields.length)
+		if (mode === 'only' && allInList === true)
+			allowStep=true;
+		if (mode === 'any' && oneInList === true)
+			allowStep=true;
+		wfDump(3,["\t*** CheckChanged: allowStep;"+ allowStep])
+
+	return allowStep;
+
+} //CheckChanged
+
+///==================================================================================================
+// Initial Checks
+// Input is an array of variable names and the the std wffuncs 'args' variable.
+// Will check to make sure each element of the array is not undefined and has a non-null value
+// If the variable name is 'wforder' or 'wfrule' then it will check agains the 'args' data to make
+// verify the call type.
+// e.g. InitialChecks(["wforder","code","department"],args);
+//==================================================================================================
+InitialChecks = function(checkVars,args) {
+	wfDebug(4,"\t*** In InitialChecks ***");
+	var tcfData={};
+	//wfDump(4,['\targs;'+args.toSource()]);
+
+	for (var i=0,  tot=checkVars.length; i < tot; i++) {
+		var checkVar=checkVars[i];
+		//wfDump(4,["\tcheckVars[" + i + "];"+checkVar]);
+		if (checkVar === "wfrule" || checkVar === "wforder") {
+			if (args && args.context && args.context != checkVar)
+		 		throw "*** Failed rule type='" + args.context + "'' check";
+		 	wfDebug(4,"\t\targs.context value (" + args.context + ") is OK");
+		} else {
+			tcfData=eval('tcfdata.'+checkVar); // jshint ignore:line
+			//Dump('\t\ttcfData',tcfData);
+			if (typeof tcfData === "undefined")
+				throw "*** Failed 'InitialChecks', variable 'tcfdata."+ checkVar + "' is undefined";
+			if (tcfData == null)
+				throw "*** Failed 'InitialChecks', variable 'tcfdata."+ checkVar + "' is not null check(1)";
+			if (tcfData == "")
+				throw "*** Failed 'InitialChecks', variable 'tcfdata."+ checkVar + "' is not null check(2)";
+			wfDebug(4,"\t\t" + checkVar + " value (" + tcfData.toSource() + ") is OK");
+		}
+	} //for loop
+	return;
+} //InitialChecks
+
+//======================================================================================================================
+// Check to see if a set of field variables has a value
+// Usage:
+//		wfrules:isMinorChange|function|CheckSetHasValue|<comma seperatered list of field>;
+//	or
+//		<callName>_wfCheckChangedFields: <comma seperatered list of field>
+//		wfrules:isMinorChange|function|CheckSetHasValue|;
+//======================================================================================================================
+// 07-26-17 - dgs - Initial coding -- unc
+//======================================================================================================================
+wffuncs.CheckSetHasValue = function(inval, wfrule, args) {
+	var myName=wfrule.attrname; wfDebug(3,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
+	var calledAs=wfrule.searchfor;
+	var options=wfrule.options;	options=options.substring(0, options.indexOf(';')); if (options.slice(-1) === ";") options=options.slice(0, -1);
+	var retArray=[];
+
+	var reqType=wfrule.searchfor.toLowerCase();
+	var notMode=reqType.indexOf('not')>=0;
+	if (notMode === false) notMode=options.toLowerCase().indexOf('notmode')>=0;
+	wfDebug(3,'\treqType = "'+reqType+'", notMode= "'+notMode+'", options= "'+ options + '"\n');
+
+	var checkFieldsStr='';
+	if (options != '') checkFieldsStr=options;
+
+	//Initial Checks
+	try {
+		InitialChecks(['wfrule'],args)
+	} //try
+	catch(err) { print_debug('\t' + myName + ": " + err + "\n") ; return false; }
+
+	//Parse options and tcfdata values
+		// If the checkfields were not passed in the options record then check the tcfdata for a variable called "wfCheckFields"
+		// or '<calledAs>_wfCheckFields'
+			if (checkFieldsStr === "") {
+				var varName, varValue=[];
+				varName=calledAs + "_" + "wfCheckFields"
+				varValue=getTCFValue(varName);
+				if (varValue === "") {
+					varName="wfCheckFields"
+					varValue=getTCFValue(varName);
+				}
+				if (varValue != "" )
+					checkFieldsStr=varValue;
+			}
+			if (checkFieldsStr === "") {
+				wfDebug(3,"\t*Error* -- Could not resolve the list of fields to check");
+				return false;
+			}
+			wfDump(3,["checkFieldsStr;"+checkFieldsStr]);
+
+	// Main
+ 		var allowStep=false;
+ 		// Loop through the variable list and see if any of them have a value
+		checkFieldsStr.split(',').some(function (field) {
+			var fieldVal=getTCFValue(field);
+			if (fieldVal.trim() != '') {
+				wfDebug(3,"\tVariable '" + field + "' has a value")
+				allowStep=true;
+				return true;
+			}
+		});
+
+	// Return results -- step
+		if (notMode) allowStep=!allowStep
+		if(allowStep) {
+			wfDebug(3,'\t*** Allowing step')
+			return [inval.replace(wfrule.ifregex,'')];
+		}
+		wfDebug(3,'\t*** Skipping step')
+		return false;
+
+} //CheckSetHasValue
+
+// //======================================================================================================================
+// // Allow step only if one of the listed variables has a value
+// // first token of the wfrule.options string is either 'and' or 'or'
+// // use 'not' to inverse results
+// //======================================================================================================================
+// // 03-21-17 - dgs - Initial coding -- mit
+// //======================================================================================================================
+// wffuncs.HasValue = function(inval, wfrule, args) {
+// 	var myName=wfrule.attrname;
+// 	wfDebug(3,"\n*** In " + myName + " called as '" + wfrule.searchfor + "', Step: '" + inval + "' ***");
+
+// 	var reqType=wfrule.searchfor.toLowerCase();
+// 	var notMode=reqType.indexOf("not")>0;
+// 	wfDump(3,["reqType;"+reqType,"notMode;"+notMode]);
+
+// 	//Initial Checks
+// 	try {
+// 		InitialChecks(["wfrule"],args);
+// 	} //try
+// 	catch(err) { print_debug('\t' + myName + ": " + err + "\n") ; return false; }
+
+// 	// Main
+//  		var allowStep=false;
+// 		var tmpArray=wfrule.options.split(" "); // Get the cross references variable names from wfrule.options definition
+// 		tmpArray=tmpArray[0].split(",");
+// 		checkMode=tmpArray.shift();
+// 		wfDump(3,["checkMode;"+checkMode]);
+// 		tmpArray.forEach(function(field) {
+// 			wfDebug(3,"\tChecking form field: " + field);
+// 			eval("fieldData=tcfdata." + field);
+// 			wfDump(4,["\tfieldData:;"+fieldData.toSource()]);
+// 			if (!fieldData.length && checkMode === 'and') {
+// 				allowStep=false;
+// 				return;
+// 			}
+// 			else if (fieldData.length  && checkMode === 'or') {
+// 				allowStep=true;
+// 				return;
+// 			}
+// 			else if (fieldData.length  && checkMode === 'and') {
+// 				allowStep=true;
+// 			}
+// 		});
+
+// 	// Return results
+// 		if (notMode) allowStep=!allowStep
+// 		if(allowStep) {
+// 			wfDebug(3,"\t*** Allowing step")
+// 			return [inval.replace(wfrule.ifregex,'')];
+// 		}
+// 		wfDebug(3,"\t*** Skipping step")
+// 		return false
+// } //wffuncs.HasValue
+
+//==================================================================================================
+// Return the proposal mode
+// 02/26/2015 - dgs - New
+//==================================================================================================
+GetProposalMode = function() {
+	wfDebug(4,"\n*** In GetProposalMode ***");
+	var retVal='EDIT';
+	if (tcfdata.newrecord && tcfdata.newrecord.length) {
+		if (tcfdata.newrecord == 'true')
+			retVal='NEW';
+	}
+	if (tcfdata.deleterec && tcfdata.deleterec.length) {
+		if (tcfdata.deleterec == 'true')
+			retVal='DELETE';
+	}
+
+	wfDebug(4,"\t*** Proposal mode: " + retVal);
+	return retVal;
+
+}; //GetProposalMode
+
+wffuncs.GetProposalMode = function(inval,wfrule,args) {
+	return [inval.replace(wfrule.regex,GetProposalMode())]
+}; //wffuncs.GetProposalMode
+
+//==================================================================================================
+// Check execution environment, passed one argument 'env' that can hav values 'dev' or 'test'
+// compares execution url (host) against arg and if there is a match then returns true, otherwise
+// returns false
+//==================================================================================================
+EnvIs = function(env) {
+	var host=getenv("HTTP_HOST").toUpperCase() ;
+	if (env.toUpperCase() == 'DEV' && host.indexOf('.DEV') > 0)
+			return true;
+	if (env.toUpperCase() == 'TEST' && host.indexOf('-TEST.') > 0)
+			return true;
+	if (env.toUpperCase() == 'NEXT' && host.indexOf('-NEXT.') > 0)
+			return true;
+	return false;
+}; //EnvIs
+GetEnv = function(env) {
+	var host=getenv("HTTP_HOST").toLowerCase() ;
+	if (host.indexOf('.dev') > 0) {
+			return 'dev';
+	} else if (host.indexOf('-test') > 0) {
+			return 'test';
+	} else if (host.indexOf('-next') > 0) {
+			return 'next';
+	}
+	return '*unknown*';
+} //EnvIs
+
+//==================================================================================================
+// Formatted hello message from a function
+//==================================================================================================
+// 04/10/18 - dgs - Initial
+//==================================================================================================
+function wfHello(msgLevel,inval,wfrule,args){
+	returnObj={ myName:"", myOpts:"", myRequest:"", myNotMode:false };
+	if (wfNestLevel === 0) wfDebug(1,"");
+	
+	if (typeof inval != 'undefined') {
+		// Make a private copy of inval
+		var myJSON=JSON.stringify(inval);
+		returnObj.myInval=JSON.parse(myJSON);
+	}
+
+	if (typeof wfrule != 'undefined') {
+		returnObj.myName=wfrule.attrname;
+		text=" called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "'";
+		var options=wfrule.options;	options=options.substring(0, options.indexOf(';'));
+		returnObj.myOpts=options;
+		returnObj.myRequest=wfrule.searchfor.toLowerCase();
+		if (returnObj.myRequest.indexOf('not') >= 0 || options.toLowerCase().indexOf('notmode') >= 0)
+			returnObj.myNotMode=true;
+		
+		// Make a private copy of wfrule
+		var myJSON=JSON.stringify(wfrule);
+		var myWfrule=JSON.parse(myJSON);
+		myWfrule.regex=wfrule.regex;
+		myWfrule.ifregex=wfrule.ifregex;
+		returnObj.myWfrule=myWfrule;
+		
+	} else {
+		// Make a private copy of inval
+		returnObj.myName=inval;
+		var text="";
+	}
+
+	if (typeof args != 'undefined') {	
+		var myJSON=JSON.stringify(args);
+		returnObj.myArgs=JSON.parse(myJSON);
+	}
+
+	wfDebug(msgLevel,"*** Starting: " + returnObj.myName + text);
+	wfDump(msgLevel,["reqType;"+returnObj.myRequest,"options;"+returnObj.myOpts,"notMode;"+returnObj.myNotMode],";","horizontal quote");
+	return returnObj;
+}
+
+//======================================================================================================================
+// Write out a separator line in the debug file
+//======================================================================================================================
+// 06-14-18 - dgs - Initial coding
+//======================================================================================================================
+wffuncs.wfBreadCrumbs = function(inval, wfrule, args) {
+	var me=wfHello(99, inval, wfrule, args); // me={ myName:"", myOpts:"", myRequest:"", myNotMode:false };
+
+	if (me.myRequest == "start") 
+		wfDebug(1,"\n\n")
+	
+	wfDebug(1,Array(10).join("=") + " " + me.myRequest.toUpperCase() + " " + Array(110).join("="))
+
+	return false
+} //wffuncs.wfBreadCrumbs
+
+
+//==================================================================================================
+// Quick formatted print of a variable
+//==================================================================================================
+function Dump(varName,varValue) { print_debug(varName + " = " + varValue.toSource() + "\n"); } //Dump
+function dump(varName,varValue) { Dump(varName,varValue); }
+function Here(id) { print_debug('Here ' + id + '\n'); } //Here
+function here(id) { Here(id); }
+
+//==================================================================================================
+// Print a formatted debug message if current ennvironment is on the tcfdata.debugEnvs list.
+// Passed 3 arguments:
+// <msgLevel>	--	The level of the message, default is 0
+// string 		-- The text to print
+// mode 		-- The mode ('S' for screen, 'D' for wizdebug), default is 'D'
+//==================================================================================================
+// 07/22/16 - dgs - Initial
+// 08/30/16	- dgs - Added msglevel
+// 04/10/18 - dgs - Added indent level and global indention
+//==================================================================================================
+function wfDebug(msgLevel,text,mode,indentLevel){
+	// Should we run
+	if (typeof wfDebugEnvs === "undefined") return;
+	if (typeof wfDebugEnvs === "") return;
+	if (!wfInDebugEnv) return;
+
+	// Set variables if this is not a full call
+	if (typeof msgLevel != 'number') {
+		text=msgLevel;
+		msgLevel=0;
+	}
+	if (msgLevel > wfDebugLevel) return;
+
+	// set Mode
+		if (typeof mode === 'undefined') mode="D";
+		mode=mode.toUpperCase();
+
+	// Set indention
+		if (typeof indentLevel === 'undefined') indentLevel=wfNestLevel;
+		for (var i=0, tot=indentLevel; i < tot; i++) {
+		  text="\t" + text;
+		}
+
+	// Print message
+		if ( mode == 'D' || mode == 'B' )
+			print_debug(text + ' \n');
+		if ( mode == 'S' || mode == 'B' ) {
+			if (typeof workflow.intestworkflow === "undefined" || !workflow.intestworkflow) return false;
+			print_doc("&nbsp;&nbsp;&nbsp;" + text + ' <br>');
+		}
+	return;
+} //wfDebug
+
+//=================================================================================================
+// Formatted print an list of variables, is passed 3 arguments:
+// <msgLevel>		--	The level of the message, default is 0
+// [array]			-- 	Each element is of the form 'variableName<delimiter>variableValue'
+// <'delimiter'>	-- 	The delimiter char to seperate name from value, default is ';'
+//=================================================================================================
+// 07/22/16 -- dgs -- Initial
+// 08/30/16	-- dgs -- Added msglevel
+//==================================================================================================
+function wfDump(msgLevel,varList,delimiter,options){
+	// Shoud we run
+	if (typeof wfDebugEnvs === "undefined") return;
+	if (typeof wfDebugEnvs === "") return;
+	if (!wfInDebugEnv) return;
+
+	// Set variables if this is not a full call
+	if (typeof msgLevel != 'number') {
+		varList=msgLevel;
+		msgLevel=0
+	}
+	if (msgLevel > wfDebugLevel) return;
+
+	var showAsSource=false;
+	var horizontal=false;
+	var stringStart=">";
+	var stringEnd="<";
+	if (typeof varList != 'object') { print_debug("*Error* -- wfDump: invalid argument type\n"); return;}
+	if (typeof delimiter === 'undefined') delimiter=";"
+	if (typeof options != 'undefined') {
+		options=options.toLowerCase();
+		if (options.indexOf('source') >=0)
+			showAsSource=true;
+		if (options.indexOf('hor') >=0)
+			horizontal=true;
+		if (options.indexOf('quote') >=0) {
+			stringStart="'";
+			stringEnd="'";		}
+	}
+
+	var outString="";
+    varList.forEach(function(v) {
+    	var tokenArray=v.split(delimiter);
+    	var varName=tokenArray[0];
+    	if (showAsSource) {
+    		var varValue=tokenArray[1].toSource()
+    	} else {
+    		var varValue=stringStart + tokenArray[1] + stringEnd;
+    	}
+    	if (!horizontal) {
+    		wfDebug(msgLevel,"\t" + varName + " = " + varValue );
+    	} else {
+    		outString=outString + ", " + varName + " = " + varValue;
+    	}
+    });
+    if (horizontal) {
+    	outString=outString.substring(2);
+    	wfDebug(msgLevel,"\t" + outString);
+    }
+
+} //wfDump
+
+//==============================================================================================
+// Helper function to check to see if a variable has a value, if not then print a message and return false
+// e.g. if (! CheckForVal(tcfdata.rotation,'Course Rotation',ChangeTypeFirstRun)) { ChangeTypeFirstRun=false; return false; }
+//==============================================================================================
+function CheckForVal(varName,varValue) {
+	//print_debug('\tvarName = ' + varName + ', varValue =' + varValue + ',varValue.length  = ' + varValue.length + '\n');
+	if (!varValue || !varValue.length) {
+		if (typeof workflow.intestworkflow === "undefined" || !workflow.intestworkflow) return false;
+		print_doc('&nbsp;&nbsp;<strong>*WARNING*</strong> -- Data Field&nbsp;&nbsp;<em>\'' + varName + '\'</em>&nbsp;&nbsp;does not have a value, workflow calculation incomplete.<br>');
+		return false;
+	}
+	return true;
+} //CheckForVal
+
+//==================================================================================================
+// Helper function to remove duplicates from an array
+//==================================================================================================
+function RemoveDupes(arr,exclude,sort) {
+    var noDupes=[];
+	if (typeof exclude === 'undefined') { exclude = ''; }
+    exclude=' ' + exclude + ' ';
+    if (typeof sort != 'undefined')
+    	arr=arr.sort();
+
+    arr.forEach(function(value) {
+        if ( noDupes.indexOf(value) < 0 && exclude.indexOf(' '+value+' ') < 0 ) {
+            noDupes.push(value);
+        }
+    });
+    return noDupes;
+} //RemoveDupes
+
+//==================================================================================================
+// Helper function to output the list of fields that have changed
+// runs as a wforder directive
+// 12/17/2014 -- dgs -- Updated for new Debug / Dump syntax
+// 01/12/2015 -- dgs -- Tewaked the output format to the screen
+// 02/10/2015 -- dgs -- Exit if not running in dev
+//==================================================================================================
+if(typeof WhatsChangedFirstRun == "undefined") var WhatsChangedFirstRun = true;
+wffuncs.WhatsChanged = function(inval, wfrule, args) {
+	if (!WhatsChangedFirstRun) return false;
+	var myName=wfrule.attrname;
+	wfDebug(0,'\n*** In ' + myName + ' ***');
+
+	//Get a list of fields that have changed
+	var diffdata = {};
+	tcfview.compare(tcfdata.key[0], {addwarnings: false, retdata: diffdata});
+
+	if (!Object.keys(diffdata).length) {
+		wfDebug(0,'\tNo Changes found in form data','b');
+	} else {
+		wfDebug(0,'\t<strong><em>Changed Fields:</em></strong>','s');
+		wfDebug(0,'\tChanged Fields:','d');
+		for (var i in diffdata) {
+			wfDebug(0,'\t\t' + i.toString() + ' (' + eval('tcfdata.' + i + '.toSource()') + ')','d');  // jshint ignore:line
+			wfDebug(0,'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp' + i.toString(),'s');
+		}
+	}
+
+	WhatsChangedFirstRun = false;
+	return false;
+}; //wffuncs.WhatsChanged
+
+//==================================================================================================
+// Helper function to output tcfdata values in source() format
+// runs as a wforder directive
+// 		wfrules:wfDumpVars|function|wfDumpVars|
+// 		wforder:wfDumpVars cl_subject,other_depts,sponsors
+// 03/08/17 - dgs - New
+// 07/27/17 - dgs - Changed output format, if no variables specified then dump subjects, departments, 
+//					and colleges
+//==================================================================================================
+wffuncs.wfDumpVars = function(inval, wfrule, args) {
+	print_debug('\nwfDumpVars:\n')
+	if (wfrule.options != '') {
+		var varArray=wfrule.options.split(',');
+		varArray.forEach(function(a) {
+			tmpVal=eval(tmpVal='tcfdata.'+a)
+			Dump('\t'+a,tmpVal);
+		});
+		print_debug("\n")
+	} else {
+			Dump('\tgetAllCodes(tcfdata)',wffuncs.getAllCodes(tcfdata).toSource());
+
+			var subjects=[];
+			wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata)).forEach(function(subj) {
+				subjects.push(subj.split(" ")[0]);
+			});
+			Dump('\twffuncs.GetSubjects',subjects.toSource());
+
+			departments=wffuncs.getDepartments(subjects);
+			Dump('\twffuncs.getDepartments',departments.toSource());
+
+			colleges=wffuncs.getColleges(departments);
+			Dump('\twffuncs.getColleges',colleges.toSource());
+	}
+	return false;
+}; //wffuncs.wfDumpVars
+
+//======================================================================================================================
+// Split a string into equal sized substrings
+// returns array of strings
+//======================================================================================================================
+// 09-22-17 - dgs - Initial coding
+//======================================================================================================================
+function wfSplitString (string, size) {
+	var re = new RegExp('.{1,' + size + '}', 'g');
+	return string.match(re);
+} //wfSplitString
+
+//======================================================================================================================
+// Add a todo item to the workflow display
+// runs as a wfrule directive
+//		workflow step = 'TODO'
+// 		wfrules:TODO|function|TODO|<Message to display>; //Put a TODO message to the preview workflow screen
+//======================================================================================================================
+// 08-28-17 - dgs - Initial coding -
+// 09/05/17 - dgs - Added 'Workflow is not complete' prefex text and adjusted spacing
+// 02/15/18 - dgs - Updated to automatically parse the message string to fit in the preview workflow window
+// 05/15/18 - dgs - Implemented list format
+//======================================================================================================================
+wffuncs.TODO = function(inval, wfrule, args) {
+	//if (typeof workflow.intestworkflow === "undefined" || !workflow.intestworkflow) return false;
+
+	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
+	if (options === "" ) options = "Awaiting final client approval."
+	var msgPrefix="*Warning*"
+	var indent=""; for (var i=0,  tot=22; i < tot; i++) { indent = indent+"&nbsp;"; }
+
+	print_doc("<strong><em>" + msgPrefix + "</strong></em> -- Workflow is not yet complete:<br>")
+	tmpArray=options.split(":");
+	wfSplitString(tmpArray[0] + ":",90).forEach(function(text) {
+		print_doc(indent + text + "<br>")
+	});
+	if (tmpArray.length > 1) {
+		tmpArray=tmpArray[1].split(",")
+		tmpArray.forEach(function(text) {
+			print_doc(indent + "&nbsp;" + "&nbsp;" + "&nbsp;" + "&nbsp;-- " + text + "<br>")
+		});
+	}
+
+	print_doc(indent + 'Please contact your Courseleaf administrator for additional information.</strong><br>');
+
+	return false;
+} //wffuncs.TODO
+
+//======================================================================================================================
+// Add a step in workflow that checks to see if the proposal has been written out to disk, if not then display a 
+// warning message
+//		workflow step = 'CheckOnDisk'
+// 		wfrules:CheckOnDisk|function|CheckOnDisk|<Message to display>; //Put a TODO message to the preview workflow screen
+//======================================================================================================================
+// 12-22-17 - dgs - Initial coding -
+// 02/15/18 - dgs - Updated to automatically parse the message string to fit in the preview workflow window
+//======================================================================================================================
+wffuncs.CheckOnDisk = function(inval, wfrule, args) {
+	if (typeof workflow.intestworkflow === "undefined" || !workflow.intestworkflow) return false;
+
+	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
+	if (options === "" ) options = "The displayed workflow below may not fully reflect the final workflow.."
+
+	var indent=""; for (var i=0,  tot=15; i < tot; i++) { indent = indent+"&nbsp;"; }	
+
+	if (tcfdata.pagename[0].split("/")[2] === "index.html") {
+		print_debug("\nProposal is not on disk\n\n");
+		print_doc("<strong><em>*Note*</strong></em> -- The proposal has not yet been saved in CourseLeaf.<br>")
+		wfSplitString(options,96).forEach(function(text) {
+			print_doc(indent + text + "<br>")
+		});
+		print_doc(indent + 'Please contact your Courseleaf administrator for additional information.</strong><br>');
+	} else {
+		print_debug("\nProposal is on disk\n\n");
+	}
+	return false;
+} //wffuncs.CheckOnDisk
+
+//======================================================================================================================
+// There was insufficient data on the for to calculate workflow
+//======================================================================================================================
+// 09-22-17 - dgs - Initial coding
+// 02/15/18 - dgs - Updated to automatically parse the message string to fit in the preview workflow window
+//======================================================================================================================
+wffuncs.NoWorkflow = function(inval, wfrule, args) {
+	//if (typeof workflow.intestworkflow === "undefined" || !workflow.intestworkflow) return ["Administrator"];;
+
+	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
+	if (options === "" ) options = "Please complete the required form fields and try again."
+
+	var indent=""; for (var i=0,  tot=15; i < tot; i++) { indent = indent+"&nbsp;"; }	
+
+	print_doc("<strong><em>*Note*</strong></em> -- There is insufficient data in the proposal to calculate workflow.<br>")
+	wfSplitString(options,96).forEach(function(text) {
+		print_doc(indent + text + "<br>")
+	});
+	print_doc(indent + 'Please contact your Courseleaf administrator for additional information.</strong><br>');
+
+	return ["Administrator"];
+} //wffuncs.NoWorkflow
+
+//==================================================================================================
+// END
+//==================================================================================================
+// Loaded message
+var wfLibLoaded=true;
+
+//======================================================================================================================
+// Check in log
+//======================================================================================================================
+// Tue Mar 21 11:07:32 CDT 2017 - dscudiero - Added check in log comments
+// 03-24-2017 @ 07.37.00 - (wfrule.att - dscudiero - General syncing of dev to prod
+// 04-10-2017 @ 13.56.39 - (wfrule.att - dscudiero - Tweak messaging in the Related function
+// 04-11-2017 @ 11.42.51 - (wfrule.att - dscudiero - Fixed a problem in Related, tweaked debug output for lookupCode
+// 04-26-2017 @ 13.47.35 - (wfrule.att - dscudiero - Added CheckChanged helper function
+// 05-02-2017 @ 07.33.06 - (wfrule.att - dscudiero - add AttrIn function
+// 05-08-2017 @ 15.23.04 - (wfrule.att - dscudiero - Added wfAttr and getTCAValue functions
+// 05-09-2017 @ 11.01.37 - (wfrule.att - dscudiero - Switch to use getTCFValue to retrieve the tca data in getAttrVal
+// 05-11-2017 @ 14.56.12 - (wfrule.att - dscudiero - Tweaked data passing and arg parsing for wffuncs.CheckChanged
+// 05-17-2017 @ 10.51.49 - (wfrule.att - dscudiero - Updated GetAttrVal to accept the variable names as input, updated Related to fix problem calling GetAttrVal
+// 06-09-2017 @ 12.43.59 - (wfrule.att - dscudiero - Added callback to mapper functions in GetAttrValue
+// 06-13-2017 @ 14.05.05 - (wfrule.att - dscudiero - re-factor allcodes and related
+// 06-21-2017 @ 08.56.20 - (wfrule.att - dscudiero - Added additional usage notes to wffuncs.CheckChanged
+// 06-23-2017 @ 09.27.14 - (wfrule.att - dscudiero - Added ability to specify the search string to Related
+// 07-18-2017 @ 13.15.54 - (wfrule.att - dscudiero - Updates to getAttr function
+// 07-19-2017 @ 14.06.30 - (wfrule.att - dscudiero - General syncing of dev to prod
+// 07-20-2017 @ 08.56.52 - (		if)      - dscudiero - Additional fixes for lookups in related
+// 07-21-2017 @ 13.17.30 - (		if)      - dscudiero - Tweak lookup logic again
+// 07-25-2017 @ 10.56.25 - (		if)      - dscudiero - tweaked initialchecks debug info
+// 07-26-2017 @ 08.00.25 - (		if)      - dscudiero - 
+// 07-26-2017 @ 08.01.53 - (		if)      - dscudiero - Updated wffuncs.AttrIn
+// 07-26-2017 @ 16.07.21 - ("1.7.46")  - dscudiero - Tweak getAttr to always do lookups for all three objects regardless of request type
+// 07-27-2017 @ 16.47.05 - ("1.7.51")  - dscudiero - General syncing of dev to prod
+// 08-03-2017 @ 11.18.51 - ("1.7.53")  - dscudiero - Only add message steps in Related if env is in debugEnvs
+// 08-03-2017 @ 15.12.37 - ("1.7.55")  - dscudiero - Moved in the common code from workflowFuncs
+// 08-07-2017 @ 12.56.22 - ("1.7.56")  - dscudiero - Check to make sure we are in courseadmin before using allcodes
+// 08-08-2017 @ 10.54.50 - ("1.7.59")  - dscudiero - added AcadLevel functions
+// 08-09-2017 @ 14.42.59 - ("1.7.62")  - dscudiero - Added Array.compare
+// 08-17-2017 @ 15.57.15 - ("1.7.67")  - dscudiero - Re-factored the proposal state functions
+// 08-22-2017 @ 08.41.34 - ("1.7.68")  - dscudiero - Updated GeEcoSystemData to deal with multi value proposalDept data
+// 08-23-2017 @ 08.18.05 - ("1.7.70")  - dscudiero - Only include the debug messages from Related to the preview screen if debug level >= 4
+// 08-28-2017 @ 10.34.56 - ("1.7.73")  - dscudiero - Tweak the logic for products in support
+// 08-28-2017 @ 11.36.45 - ("1.7.74")  - dscudiero - Added TODO
+// 08-29-2017 @ 12.10.56 - ("1.7.75")  - dscudiero - Updated GetRelated to remove duplicates before returning data
+// 08-30-2017 @ 16.52.22 - ("1.7.76")  - dscudiero - Tweaked wfAttr / GetAttt to allow passing in the request type as a wfrule option
+// 09-01-2017 @ 13.45.06 - ("1.7.79")  - dscudiero - Update logic checking of steps has a value in Related
+// 09-05-2017 @ 08.27.57 - ("1.7.80")  - dscudiero - Tweaked TODO to add prefix text and adjust spacing
+// 09-08-2017 @ 08.07.59 - ("1.7.82")  - dscudiero - Fixed bug where related was not editing out the reference data if it was in the proposal data for depts
+// 09-14-2017 @ 10.08.42 - ("1.7.76")  - dscudiero - Added wfxxxxVarName processing for GetAttrVal
+// 09-20-2017 @ 15.31.40 - ("1.8.1")   - dscudiero - General syncing of dev to prod
+// 09-22-2017 @ 07.19.12 - ("1.8.2")   - dscudiero - Update the way we do wfAllCodes
+// 09-22-2017 @ 11.28.28 - ("1.8.4")   - dscudiero - Added NoWorkflow function
+// 09-25-2017 @ 15.42.23 - ("1.8.5")   - dscudiero - Added a message if in not mode
+// 09-29-2017 @ 12.57.06 - ("1.8.6")   - dscudiero - Fix problem setting wfAllcodes
+// 10-02-2017 @ 13.47.09 - ("1.8.8")   - dscudiero - General syncing of dev to prod
+// 10-04-2017 @ 13.28.38 - ("1.8.9")   - dscudiero - General syncing of dev to prod
+// 10-09-2017 @ 16.55.35 - ("1.8.11")  - dscudiero - Major refactoring of GetRelated and LookupCode
+// 10-12-2017 @ 08.54.10 - ("1.8.13")  - dscudiero - Updated Related, GetRelated, and GetEcoSystemData to streamline and allow passing of ecosystem path and types
+// 10-12-2017 @ 08.56.51 - ("1.8.14")  - dscudiero - sync
+// 10-12-2017 @ 14.22.08 - ("1.8.16")  - dscudiero - Fix problem with checkchanged when there is only one changed field and only one checkfield
+// 10-16-2017 @ 12.36.44 - ("1.8.17")  - dscudiero - Update how subjects is determined if allcodes
+// 10-17-2017 @ 14.07.27 - ("1.8.18")  - dscudiero - Fixed problem with setting default value for 'includeEcoSystemData' when GetRelated was called standalone
+// 10-18-2017 @ 10.50.17 - ("1.8.22")  - dscudiero - Many updates, check comments
+// 10-20-2017 @ 08.20.19 - ("1.8.26")  - dscudiero - Updates to getAttrVal to taken into account that the client may use a different variable for 'college'
+// 10-24-2017 @ 13.53.44 - ("1.8.27")  - dscudiero - Remove debug statements from getAttrVal
+// 10-25-2017 @ 16.44.52 - ("1.8.31")  - dscudiero - Updated GetAttrVal to look at the tcf/tca data first
+// 11-01-2017 @ 10.47.16 - ("1.8.32")  - dscudiero - Tweak output message formatting
+// 11-07-2017 @ 10.21.36 - ("1.8.33")  - dscudiero - Fix a problem in GetRelated not running if the proposal data for each type is null
+// 11-08-2017 @ 12.21.17 - ("1.8.33")  - dscudiero - Added ability to pass an 'ignoreList' into Related and GetRelated
+// 11-09-2017 @ 14.16.09 - ("1.8.34")  - dscudiero - Added NotifyAllApprovers
+// 11-10-2017 @ 08.19.13 - ("1.8.35")  - dscudiero - Updated NotifyAllApprovers to make it a bit more general, allowing the selection of fyi/fyiall
+// 11-15-2017 @ 12.34.14 - ("1.8.37")  - dscudiero - Fix bug checking formatCode in ParseRelatedData
+// 11-15-2017 @ 16.39.10 - ("1.8.38")  - dscudiero - Many small updates
+// 11-20-2017 @ 10.06.49 - ("1.8.39")  - dscudiero - Add array.diff prototype
+// 11-28-2017 @ 15.10.07 - ("1.8.40")  - dscudiero - Tweaked format of TODO output
+// 11-28-2017 @ 16.28.49 - ("1.8.41")  - dscudiero - Added 'IsNotFirstStep' function
+// 11-29-2017 @ 12.18.57 - ("1.8.43")  - dscudiero - Updated RemoveDupes to optionally sort the array instead of forcing the sort all the time
+// 12-05-2017 @ 11.06.22 - ("1.8.44")  - dscudiero - Added the Annotate function
+// 12-06-2017 @ 09.05.52 - ("1.8.46")  - dscudiero - tweaked formatting of TODO messaging
+// 12-11-2017 @ 11.45.07 - ("1.8.47")  - dscudiero - Updated comments for checkchanged
+// 12-13-2017 @ 11.10.11 - ("1.8.48")  - dscudiero - Fix debug messages in LookupCode that were hard coded
+// 12-19-2017 @ 13.52.08 - ("1.8.54")  - dscudiero - Tweak messaging for NoWorkflow
+// 12-19-2017 @ 14.16.33 - ("1.8.55")  - dscudiero - Remove the exception in GetRelated if the proposal code is null
+// 12-20-2017 @ 12.38.41 - ("1.8.56")  - dscudiero - Fixed problems in getEcoData when there is no proposalDepts data
+// 12-21-2017 @ 09.47.48 - ("1.8.58")  - dscudiero - Add a check for proposal mode in wffuncs.CheckChanged, skip if not EDIT
+// 12-22-2017 @ 07.17.53 - ("1.8.58")  - dscudiero - Added the 'checkfieldsvar' option to CheckChanged
+// 01-24-2018 @ 10.11.44 - 1.8.64 - dscudiero - Add ability to define how the catalog eco system data should be use, as subject codes or department codes
+// 02-05-2018 @ 09.34.27 - 1.8.65 - dscudiero - Fixed bug where htmltext fields were being seen as changed because non-significant markup changes were in the text.
+// 02-05-2018 @ 09.47.00 - 1.8.66 - dscudiero - Tweaking messaging
+// 02-15-2018 @ 09.33.00 - 1.8.71 - dscudiero - Updated functions that write to 'doc' to not write if not in testworkflow step.
+// 03-16-2018 @ 10:28:05 - 1.8.78 - dscudiero - Change message prefix of the TODO messages to warning
+// 03-20-2018 @ 08:15:40 - 1.8.79 - dscudiero - Fix problem in GetRelated checking proposal data against related data, add ',' before and after strings to prevent false positives
+// 03-21-2018 @ 10:35:24 - 1.8.80 - dscudiero - Add additional case statements for the refType check in GetRelated
+// 03-28-2018 @ 12:38:47 - 1.8.81 - dscudiero - Tweaked debug messaging
+// 04-02-2018 @ 10:36:45 - 1.8.82 - dscudiero - Fix problem ub getWfAttr when not using the standard names, was pulling tca data using standard names
+// 04-03-2018 @ 16:30:07 - 1.8.83 - dscudiero - Fix a problem in CheckChanged if there is no tca data
+// 04-04-2018 @ 15:38:12 - 1.8.84 - dscudiero - Fixed a strange problem where the sql queries were failing in lookup2 if the subject/department/college code happend to be 'data'
+// 04-05-2018 @ 16:33:10 - 1.8.85 - dscudiero - Fix issue in GetAttrVal caused when we changed the return attribute name from lookup2 to be dbData
+// 04-12-2018 @ 12:20:14 - 1.8.86 - dscudiero - Added wfHello, refactored wfDebug
+// 04-19-2018 @ 09:53:37 - 1.8.87 - dscudiero - Updated wfAttrIn to check for 'department' and not parse reqType on 'in' if options are passed
+// 04-19-2018 @ 11:02:16 - 1.8.88 - dscudiero - Tweak messaging
+// 04-26-2018 @ 08:34:58 - 1.8.89 - dscudiero - Fix problem in lookup2, changed data atribut from 'data' to 'dbData'
+// 05-07-2018 @ 08:10:37 - 1.8.90 - dscudiero - Fix bug in related expansion if type is college and data is college
+// 05-07-2018 @ 09:25:20 - 1.8.91 - dscudiero - Remove debug statements from CheckAcadLevel
+// 05-16-2018 @ 09:23:20 - 1.8.92 - dscudiero - Update TODO to allow formatting of a list of items
+// 05-17-2018 @ 08:48:51 - 1.8.93 - dscudiero - Allow messages from NoWorkflow
+// 05-21-2018 @ 12:31:04 - 1.8.94 - dscudiero - Added wfGetCimInstanceName
+// 05-21-2018 @ 15:12:38 - 1.8.95 - dscudiero - Add wffuncsGetProposalMode
+// 06-14-2018 @ 10:12:35 - 1.8.98 - dscudiero - Tweaked messaging, added wfBreadCrumbs function
+// 06-14-2018 @ 12:43:51 - 1.9.11 - dscudiero - Add creaton of local copies of passed args to the Hello function
+// 07-02-2018 @ 13:32:02 - 1.9.13 - dscudiero - Update comments on related, added symmetricDifference function
+// 07-03-2018 @ 09:58:47 - 1.9.30 - dscudiero - Cosmetic/minor change/Sync
+// 07-03-2018 @ 12:19:34 - 1.9.38 - dscudiero - Add option into notifyall to specify appovers on the call
