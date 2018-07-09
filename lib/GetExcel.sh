@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.1.6" # -- dscudiero -- Fri 03/23/2018 @ 11:54:56.77
+# version="2.1.8" # -- dscudiero -- Mon 07/09/2018 @ 16:11:32
 #=======================================================================================================================
 # Retrieve data from a Excel xlsx spreadsheet
 # Usage: GetExcel <workBook> <workSheet>
@@ -44,7 +44,8 @@ function GetExcel {
 	[[ -z $executeFile ]] && Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"
 
 	## Call the 'real' program to parse the spreadsheet
-		PYDIR="$TOOLSPATH/Python/linux/64/3.4.3.2"
+		#PYDIR="$TOOLSPATH/Python/linux/64/3.4.3.2"
+		PYDIR="$TOOLSPATH/Python/linux64/current"
 		export PYDIR="$PYDIR"
 		pathSave="$PATH"
 		export PATH="$PYDIR:$PATH"
@@ -96,3 +97,4 @@ export -f GetExcel
 ## 10-05-2017 @ 12.26.43 - ("2.1.0")   - dscudiero - Cosmetic/minor change
 ## 10-12-2017 @ 14.25.59 - ("2.1.1")   - dscudiero - Use readarray to build the resultSet array
 ## 10-31-2017 @ 10.57.27 - ("2.1.5")   - dscudiero - Cleanup includes list
+## 07-09-2018 @ 16:33:09 - 2.1.8 - dscudiero - Switch the python code directory
