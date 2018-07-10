@@ -13,10 +13,10 @@ import webbrowser
 import datetime
 import logging
 
-if version_info.major == '2':
-	import mysql.connector
-else:
-	import pymysql
+# if version_info.major == '2':
+# 	import mysql.connector
+# else:
+# 	import pymysql
 
 import tkinter as Tk
 
