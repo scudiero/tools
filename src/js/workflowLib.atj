@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.9.38" // -- dscudiero -- Tue 07/03/2018 @ 11:57:02
+wfLibVersion="1.9.49" // -- dscudiero -- Tue 07/10/2018 @ 08:52:20
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -828,11 +828,8 @@ GetRelated = function(type,data) {
 	//==================================================================================================================
 	// Build a ref object based on the passed in format code
 	//==================================================================================================================
-	GetRelated.ParseRelatedData = function(dataObj,format,dataAttributeName) {
+	GetRelated.ParseRelatedData = function(data,format) {
 		var ref={};
-		format=format.toLowerCase();
-		var data=eval("dataObj." + dataAttributeName);
-
 		switch(format.toLowerCase()) {
 			case "course":
 		    case "coursecode":
@@ -925,7 +922,7 @@ GetRelated = function(type,data) {
 				if (tmpArray.length > 2)
 					dataAttributeName=tmpArray[2];
 
-				wfDebug(3,"\t*** " + myName + "Processing form variable: '" + formVar + "'");
+				wfDebug(3,"\t*** " + myName + " Processing form variable: '" + formVar + "'");
 				wfDump(3,["\tformVarFormat;"+formVarFormat,"\tdataAttributeName;"+dataAttributeName])
 
 				// Get the tcf data -- cannot use getTCFValue since we want an full array back
@@ -934,36 +931,20 @@ GetRelated = function(type,data) {
 					wfDebug(myDebugLevel,myIndent +"\t\t*** Variable " + formVar + " is not defined in the tcf file, skipping");
 					return;
 				}
-				eval ("tcfValue=tcfdata."+formVar); // jshint ignore:line
-				wfDump(3,["\t" + formVar + ";"+tcfValue.toSource()])				
-				tcfValue.forEach(function(value) {
+				// Get the tcf and tca attribute values
+				var values=getTCFValue(formVar+"."+dataAttributeName, { delimiter: "\n", retarray: true });
+				values=RemoveDupes(values.concat(getTCFValue(formVar+"."+dataAttributeName, { delimiter: "\n", retarray: true , data: tcadata })));
+				wfDump(3,["\t" + formVar + " (tcf & tca);"+values.toSource()])				
+				values.forEach(function(value) {
 					ref={};
-					ref=GetRelated.ParseRelatedData(value,formVarFormat,dataAttributeName);
+					ref=GetRelated.ParseRelatedData(value,formVarFormat);
+					//wfDump(3,["\t\tref;"+ref.toSource()])				
 					if (ref != {}) {
 						ref.source="formVar:" + formVar;
 						refsArray.push(ref);
 						//refsLookup[ref.data.toSource()]=refsArray.length-1;
 					}
 				}); //tcfValue
-				// Get the tca data -- cannot use getTCFValue since we want an full array back
-				if (tcaData != {}) {
-					var tcaValue=[];
-					if (typeof eval("tcadata."+formVar) === "undefined" ) {
-						wfDebug(myDebugLevel,myIndent +"\t\t*** Variable " + formVar + " is not defined in the tca file, skipping");
-						return;
-					}
-					eval ("tcaValue=tcadata."+formVar); // jshint ignore:line
-					tcaValue.forEach(function(value) {
-						ref={};
-						ref=GetRelated.ParseRelatedData(value,formVarFormat,dataAttributeName);
-						if (ref != {}) {
-							ref.source="formVar:" + formVar;
-							refsArray.push(ref);
-							//refsLookup[ref.data.toSource()]=refsArray.length-1;
-						}
-					}); //tcfValue
-				}
-
 			}); //data.formDataVars
 			wfDebug(myDebugLevel,myIndent +"\t\tFound " + refsArray.length + " references from the form field data");
 
@@ -2720,3 +2701,4 @@ var wfLibLoaded=true;
 // 07-02-2018 @ 13:32:02 - 1.9.13 - dscudiero - Update comments on related, added symmetricDifference function
 // 07-03-2018 @ 09:58:47 - 1.9.30 - dscudiero - Cosmetic/minor change/Sync
 // 07-03-2018 @ 12:19:34 - 1.9.38 - dscudiero - Add option into notifyall to specify appovers on the call
+// 07-10-2018 @ 10:28:22 - 1.9.49 - dscudiero - Updated how related gets the data for the form variable
