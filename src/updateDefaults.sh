@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version="2.1.2" # -- dscudiero -- Mon 11/06/2018 @ 08:24:11
+version="2.1.3" # -- dscudiero -- Wed 07/11/2018 @ 12:04:46
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -64,7 +64,7 @@ if [[ -z $mode || $mode == 'servers' ]]; then
 		for server in $(ls /mnt | grep -v '^dev' | grep -v '^auth' | grep -v '\-test$'); do
 			[[ $(Contains ",$ignoreList," ",$server,") == true ]] && continue
 			ProtectedCall "cd /mnt/$server > /dev/null 2>&1"
-			[[ $(pwd) != /mnt/$server ]] && Here 1 && continue
+			[[ $(pwd) != /mnt/$server ]] && continue
 			newServers="$newServers,$server"
 		done
 		newServers=${newServers:1}
@@ -308,3 +308,4 @@ Goodbye 0;
 ## 06-08-2018 @ 14:51:26 - 2.0.99 - dscudiero - Add ignorelist to data assigined to the reports object
 ## 06-11-2018 @ 08:27:10 - 2.1.2 - dscudiero - Add mode processing and messages
 ## 06-18-2018 @ 09:00:15 - 2.1.2 - dscudiero - Comment out the script section
+## 07-11-2018 @ 12:06:47 - 2.1.3 - dscudiero - Remove debug statement
