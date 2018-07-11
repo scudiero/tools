@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.9.49" // -- dscudiero -- Tue 07/10/2018 @ 08:52:20
+wfLibVersion="1.9.54" // -- dscudiero -- Tue 07/10/2018 @ 12:10:40
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -2575,18 +2575,22 @@ wffuncs.CheckOnDisk = function(inval, wfrule, args) {
 wffuncs.NoWorkflow = function(inval, wfrule, args) {
 	//if (typeof workflow.intestworkflow === "undefined" || !workflow.intestworkflow) return ["Administrator"];;
 
+	var retArray=[];
 	var options=wfrule.options; var idx=options.indexOf(';'); if (idx >= 0 ) { options=options.substring(0, idx);}
-	if (options === "" ) options = "Please complete the required form fields and try again."
+	if (options === "" ) {
+		retArray.push("Administrator");
+	} else {
+		options.split(",").forEach(function(step) {
+			retArray.push(step);
+		});
+	}
 
 	var indent=""; for (var i=0,  tot=15; i < tot; i++) { indent = indent+"&nbsp;"; }	
-
-	print_doc("<strong><em>*Note*</strong></em> -- There is insufficient data in the proposal to calculate workflow.<br>")
-	wfSplitString(options,96).forEach(function(text) {
-		print_doc(indent + text + "<br>")
-	});
+	print_doc("<strong><em>*Warning*</strong></em> -- There is insufficient data in the proposal to calculate workflow.<br>")
+	print_doc(indent + "Please complete the required form fields and try again.<br>");
 	print_doc(indent + 'Please contact your Courseleaf administrator for additional information.</strong><br>');
 
-	return ["Administrator"];
+	return retArray;
 } //wffuncs.NoWorkflow
 
 //==================================================================================================
@@ -2702,3 +2706,4 @@ var wfLibLoaded=true;
 // 07-03-2018 @ 09:58:47 - 1.9.30 - dscudiero - Cosmetic/minor change/Sync
 // 07-03-2018 @ 12:19:34 - 1.9.38 - dscudiero - Add option into notifyall to specify appovers on the call
 // 07-10-2018 @ 10:28:22 - 1.9.49 - dscudiero - Updated how related gets the data for the form variable
+// 07-11-2018 @ 12:06:32 - 1.9.54 - dscudiero - Update noWorkflow to allow passing in the list of steps to add to the workflow
