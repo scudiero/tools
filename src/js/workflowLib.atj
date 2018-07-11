@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.9.55" // -- dscudiero -- Wed 07/11/2018 @ 15:08:01
+wfLibVersion="1.9.56" // -- dscudiero -- Wed 07/11/2018 @ 16:07:00
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -1778,7 +1778,7 @@ wffuncs.CheckProposalMode = function(inval, wfrule, args) {
 	var version='1.0.5';
 	var myName=wfrule.attrname; wfDebug(3,'\n*** In '+ myName + "(" + version + ") called as '" + wfrule.searchfor + "' ***");
 	var reqType=wfrule.searchfor.toUpperCase();
- 	var propMode = GetProposalMode();
+ 	var propMode = ProposalState();
 	//wfDump(['reqType;'+reqType,'propMode;'+propMode])
 
 	if (reqType.indexOf(propMode) >= 0) {
@@ -1813,8 +1813,8 @@ wffuncs.CheckChanged = function(inval, wfrule, args) {
 	if (options.slice(-1) === ";") options=options.slice(0, -1);
 	wfDump(4,["reqType;"+reqType,"notMode;"+notMode,"options;"+options,"calledAs;"+calledAs]);
 	// Check Proposal mode, if not edit then return
-		if (GetProposalMode() != "EDIT") {
-			wfDebug(3,"Proposal mode (" + GetProposalMode() + ") is not EDIT");
+		if (ProposalState() != "EDIT") {
+			wfDebug(3,"Proposal mode (" + ProposalState() + ") is not EDIT");
 			return false;
 		}
 
@@ -2164,25 +2164,8 @@ wffuncs.CheckSetHasValue = function(inval, wfrule, args) {
 // Return the proposal mode
 // 02/26/2015 - dgs - New
 //==================================================================================================
-GetProposalMode = function() {
-	wfDebug(4,"\n*** In GetProposalMode ***");
-	var retVal='EDIT';
-	if (tcfdata.newrecord && tcfdata.newrecord.length) {
-		if (tcfdata.newrecord == 'true')
-			retVal='NEW';
-	}
-	if (tcfdata.deleterec && tcfdata.deleterec.length) {
-		if (tcfdata.deleterec == 'true')
-			retVal='DELETE';
-	}
-
-	wfDebug(4,"\t*** Proposal mode: " + retVal);
-	return retVal;
-
-}; //GetProposalMode
-
 wffuncs.GetProposalMode = function(inval,wfrule,args) {
-	return [inval.replace(wfrule.regex,GetProposalMode())]
+	return [inval.replace(wfrule.regex,ProposalState())]
 }; //wffuncs.GetProposalMode
 
 //==================================================================================================
@@ -2707,4 +2690,4 @@ var wfLibLoaded=true;
 // 07-03-2018 @ 12:19:34 - 1.9.38 - dscudiero - Add option into notifyall to specify appovers on the call
 // 07-10-2018 @ 10:28:22 - 1.9.49 - dscudiero - Updated how related gets the data for the form variable
 // 07-11-2018 @ 12:06:32 - 1.9.54 - dscudiero - Update noWorkflow to allow passing in the list of steps to add to the workflow
-// 07-11-2018 @ 15:22:47 - 1.9.55 - dscudiero - Fix a problem with the isFirstStep function, switch ti ifregex
+// 07-11-2018 @ 16:17:11 - 1.9.56 - dscudiero - Remove getProposalMode
