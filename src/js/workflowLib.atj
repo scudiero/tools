@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.9.54" // -- dscudiero -- Tue 07/10/2018 @ 12:10:40
+wfLibVersion="1.9.55" // -- dscudiero -- Wed 07/11/2018 @ 15:08:01
 attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -1749,7 +1749,7 @@ wffuncs.IsNotFirstStep = function(inval, wfrule, args) {
 	var prevsteps=args.prevsteps;
 	if (! args.hasOwnProperty("prevsteps")) {
 		wfDebug(1,"\t*** Do not have any previous steps attribute in 'args', allowing step")
-		return [inval.replace(wfrule.regex,"")];
+		return [inval.replace(wfrule.ifregex,"")];
 	}
 	
 	if (prevsteps.length === 0) {
@@ -1758,7 +1758,7 @@ wffuncs.IsNotFirstStep = function(inval, wfrule, args) {
 	}
 
 	wfDebug(1,"\t*** This is not the first step in workflow, allowing step")
-	return [inval.replace(wfrule.regex,"")]
+	return [inval.replace(wfrule.ifregex,"")]
 
 } //IsNotFirstStep
 
@@ -2707,3 +2707,4 @@ var wfLibLoaded=true;
 // 07-03-2018 @ 12:19:34 - 1.9.38 - dscudiero - Add option into notifyall to specify appovers on the call
 // 07-10-2018 @ 10:28:22 - 1.9.49 - dscudiero - Updated how related gets the data for the form variable
 // 07-11-2018 @ 12:06:32 - 1.9.54 - dscudiero - Update noWorkflow to allow passing in the list of steps to add to the workflow
+// 07-11-2018 @ 15:22:47 - 1.9.55 - dscudiero - Fix a problem with the isFirstStep function, switch ti ifregex
