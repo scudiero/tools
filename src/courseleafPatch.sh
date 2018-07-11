@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="6.1.4" # -- dscudiero -- Mon 07/02/2018 @ 16:49:19
+version="6.1.6" # -- dscudiero -- Wed 07/11/2018 @ 08:13:05
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -26,7 +26,7 @@ cwdStart="$(pwd)"
 		myArgs+=("current|current|switch|current|source='current'|script|Update each product from the current released version")
 		myArgs+=("named|namedrelease|option|namedRelease|source='named'|script|Update the product from the specific named version (i.e. git tag)")
 		myArgs+=("tag|tag|option|namedRelease|source='named'|script|Update the product from the specific named version (i.e. git tag)")
-		#myArgs+=("branch|branch|option|branch|source='branch'|script|Update the product from the specific git brach (git branch)")
+		myArgs+=("branch|branch|option|branch|source='branch'|script|Update the product from the specific git brach (git branch)")
 		myArgs+=("master|master|switch|master|source='master'|script|Update each product from the current skeleton version (aka git tag 'master')")
 		myArgs+=("cgis|cgis|switch|products|appendShortName|script|Update the cgis")
 
@@ -456,7 +456,7 @@ for product in ${products//,/ }; do
 		[[ -n $sourceIn ]] && source="$sourceIn"
 		if [[ -z $source ]]; then
 			## Get the current and skeleton release version values
-				sqlStmt="select concat(sourceSpec,targetSpec,option) from $patchesTable where product=\"$product\" and recordType=\"currentRelease\""
+				sqlStmt="select concat(option) from $patchesTable where product=\"$product\" and recordType=\"currentRelease\""
 				RunSql $sqlStmt
 				[[ ${#resultSet[@]} -eq 0 || -z ${resultSet[0]} ]] && \
 					Terminate "Sorry, 'current' was requested as the source but could not lookup the version from the '$patchesTable' database."
@@ -470,16 +470,17 @@ for product in ${products//,/ }; do
 					\n^$(ColorK \'Master\')  to use the 'master' branch ($skeletonRelease)"
 				unset ans; Prompt ans "Source" "C,M" "C"
 			else
-				# Msg "^$(ColorK \'Current\') to use what development has designated as the 'current' release ($currentRelease) or, \
-				# 	\n^$(ColorK \'Named\')   to use a specific named release (selection) or, \
-				# 	\n^$(ColorK \'Branch\')  to use a specific git branch (selection), or \
-				# 	\n^$(ColorK \'Master\')  to use the 'master' branch ($skeletonRelease)"
-				# unset ans; Prompt ans "Which source ?" "Current,Named,Branch,Master" "Current"
 
 				Msg "^$(ColorK \'Current\') to use what development has designated as the 'current' release ($currentRelease) or, \
 					\n^$(ColorK \'Named\')   to use a specific named release (selection) or, \
+					\n^$(ColorK \'Branch\')  to use a specific git branch (selection), or \
 					\n^$(ColorK \'Master\')  to use the 'master' branch ($skeletonRelease)"
-				unset ans; Prompt ans "Which source ?" "Current,Named,Master" "Current"
+				unset ans; Prompt ans "Which source ?" "Current,Named,Branch,Master" "Current"
+
+				# Msg "^$(ColorK \'Current\') to use what development has designated as the 'current' release ($currentRelease) or, \
+				# 	\n^$(ColorK \'Named\')   to use a specific named release (selection) or, \
+				# 	\n^$(ColorK \'Master\')  to use the 'master' branch ($skeletonRelease)"
+				# unset ans; Prompt ans "Which source ?" "Current,Named,Master" "Current"
 			fi
 			ans="${ans:0:1}"
 			if [[ ${ans,,[a-z]} == 'n' ]]; then
@@ -1424,3 +1425,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-19-2018 @ 11:40:27 - 6.1.3 - dscudiero - Cosmetic/minor change/Sync
 ## 06-26-2018 @ 15:22:06 - 6.1.3 - dscudiero - Cosmetic/minor change/Sync
 ## 07-02-2018 @ 16:51:04 - 6.1.4 - dscudiero - Remove the 'branch' capability till i figure out how to do that
+## 07-11-2018 @ 08:18:30 - 6.1.6 - dscudiero - Fixed problem processing currentRelease
