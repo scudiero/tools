@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.2" # -- dscudiero -- Thu 07/12/2018 @ 09:31:57
+# version="1.0.3" # -- dscudiero -- Thu 07/12/2018 @ 09:42:34
 #===================================================================================================
 #===================================================================================================================
 # Use rsync to sychronize two directories
@@ -12,7 +12,6 @@
 # Copyright 2018 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-
 function RsyncCopy {
 	local source="$1"; shift || true
 	local target="$1"; shift || true
@@ -35,8 +34,8 @@ function RsyncCopy {
 	## Set rsync options
 		rsyncOpts='-rptcml' ## r=recursive, p=permissions, t=times, -c=checksums, m=ignoreImptyDirs, l=links
 		[[ $quiet != true ]] && rsyncOpts="${rsyncOpts}v"
-		[[ -n $backupDir ]] && rsyncOpts="${rsyncOpts}b --backup-dir=$backupDir"
 		[[ $informationOnlyMode == true || -n $DOIT ]] && rsyncOpts="${rsyncOpts}n" # n=dryRun
+		[[ -n $backupDir ]] && rsyncOpts="${rsyncOpts}b --backup-dir=$backupDir"
 		rsyncOpts="$rsyncOpts --include-from=$rsyncFilters"
 		dump rsyncOpts | Indent | Indent >> "$logFile"
 
@@ -93,3 +92,4 @@ export -f RsyncCopy
 ## 06-05-2018 @ 16:06:13 - 1.0.0 - dscudiero - Cosmetic/minor change/Sync
 ## 07-12-2018 @ 08:59:00 - 1.0.1 - dscudiero - Fix problem where no backup directory was specified and we were checing to see if the backupDir existed.
 ## 07-12-2018 @ 09:35:52 - 1.0.2 - dscudiero - If no backupDir was specified then make sure we do not pass backup options to rsync
+## 07-12-2018 @ 09:42:41 - 1.0.3 - dscudiero - Cosmetic/minor change/Sync
