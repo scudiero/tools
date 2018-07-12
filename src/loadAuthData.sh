@@ -83,6 +83,25 @@ else
 	whereClause="$auth2userTable.empKey=$employeeTable.employeekey"
 fi
 
+## Get a list of auth groups
+	if [[ -z $client || ${client,,[a-z]} == 'authgroups' ]]; then
+		Verbose 1 "\nBuilding the auth groups list..."
+		sqlStmt="select groupId,code from authgroups order by code"
+		RunSql $sqlStmt
+		unset authGroupsList; 
+		for rec in "${resultSet[@]}"; do authGroupsList="${authGroupsList},$rec"; done
+		authGroupsList="${authGroupsList:1}"
+		outFile="${authShadowDir}/authGroups"
+		[[ -f $outFile ]] && cp -fp "$outFile" "${outFile}.bak"
+		echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE AUTH TABLES IN THE DATA WAREHOUSE" > "${outFile}.new"
+		echo "$authGroupsList" >> "${outFile}.new"
+	 	rm -f "$outFile"
+	 	mv -f "${outFile}.new" "$outFile"
+		chmod 640 "$outFile"
+		chown "$userName:leepfrog" "$outFile"
+		[[ ${client,,[a-z]} == 'authgroups' ]] && Goodbye
+	fi	
+
 ## Get a list of users
 	Verbose 1 "\nBuilding the users list..."
 	sqlStmt="select distinct employeekey,substr(email,1,instr(email,'@')-1) from $auth2userTable,$employeeTable where $whereClause order by employeekey"
@@ -98,12 +117,11 @@ for userRec in "${userList[@]}"; do
 	outFile="${authShadowDir}/${user#*|}"
 	
 	## Get the list of groups this user is in
-		sqlStmt="select code from $authGroupTable where groupId in (select authKey from auth2user where empKey=$empKey)"
+		sqlStmt="select groupId,code from $authGroupTable where groupId in (select authKey from auth2user where empKey=$empKey)"
 		RunSql $sqlStmt
 		unset groupListStr
-		for result in "${resultSet[@]}"; do
-			[[ -z $groupListStr ]] && groupListStr="$result" || groupListStr="$groupListStr,$result"
-		done
+		for result in "${resultSet[@]}"; do groupListStr="$groupListStr,$result"; done
+		groupListStr="${groupListStr:1}"
 		[[ -z $groupListStr ]] && continue
 		Verbose 1 "^^Groups: ${groupListStr//,/, }"
 
@@ -135,9 +153,10 @@ for userRec in "${userList[@]}"; do
 		[[ ${#resultSet[@]} -eq 0 || ${resultSet[0]} == "" ]] && continue
 		unset scriptListStr
 		for result in "${resultSet[@]}"; do
+			scriptId="${result%%|*}"
 			result="${result#*|}"; result="${result%%|*}";
 			Verbose 1 "^^^$result"
-			scriptListStr="${scriptListStr},${result}"
+			scriptListStr="${scriptListStr},${scriptId}|${result}"
 		done
 		scriptListStr="${scriptListStr:1}"
 		scriptListStr="$(printf '%s\n' ${scriptListStr//,/ } | sort -u | tr "\n" ',')"
@@ -181,3 +200,6 @@ Goodbye 0 #'alert'
 ## 06-27-2018 @ 07:17:27 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
 ## 06-27-2018 @ 07:58:41 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
 ## 06-27-2018 @ 12:41:28 - 1.0.-1 - dscudiero - Update to include the unsrestricted scripts
+## 07-12-2018 @ 11:41:29 - 1.0.-1 - dscudiero - Add building the authGroups file
+## 07-12-2018 @ 12:26:26 - 1.0.-1 - dscudiero - Add groupIds to the users group list
+## 07-12-2018 @ 13:10:30 - 1.0.-1 - dscudiero - Update the UserScriptsStr to include the script id
