@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="6.1.6" # -- dscudiero -- Wed 07/11/2018 @ 08:13:05
+version="6.1.7" # -- dreed -- Wed 07/11/2018 @ 04:21:00
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -216,6 +216,8 @@ function processGitRecord {
 		sed -i s"/bare = true/bare = false/" "$tgtDir/${specTarget}/.git/config"
 		Msg "^Local repository created"
 	else
+		## Make sure git repository is up to date with origin
+		ProtectedCall "git fetch"
 		## See if there are any modifications to files in the local git repo
 		gitCmd="git status -s"
 		unset gitCmdOut; gitCmdOut=$(ProtectedCall "$gitCmd")
@@ -249,7 +251,7 @@ function processGitRecord {
 			Msg "Archiving ${#gitFilesUpdated[@]} files..."
 			for ((bCntr=0; bCntr<${#gitFilesUpdated[@]}; bCntr++)); do
 				srcFile="${tgtDir}${specTarget}/${gitFilesUpdated[$bCntr]}"
-				# [[ -r $srcFile ]] && backupFile "$srcFile" "${backupRootDir}"
+				[[ -r $srcFile ]] && backupFile "$srcFile" "${backupRootDir}"
 				Log "^$srcFile"
 			done
 		## Update local files from the git repo via checkout
@@ -277,7 +279,7 @@ function processGitRecord {
 function backupFile {
 	local file=$1; shift || true
 	local backupDir=$1
-
+	
 	## Check to see if we have processed this file already
 	if [[ ! ${backedupFiles["$file"]+abc} ]]; then
 		BackupCourseleafFile "$file" "$backupDir"
@@ -1426,3 +1428,4 @@ Goodbye 0 "$text1" "$text2"
 ## 06-26-2018 @ 15:22:06 - 6.1.3 - dscudiero - Cosmetic/minor change/Sync
 ## 07-02-2018 @ 16:51:04 - 6.1.4 - dscudiero - Remove the 'branch' capability till i figure out how to do that
 ## 07-11-2018 @ 08:18:30 - 6.1.6 - dscudiero - Fixed problem processing currentRelease
+## 07-11-2018 @ 04:21:00 - 6.1.7 - dreed - Added git fetch and fixed backup of files
