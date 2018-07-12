@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version="2.1.3" # -- dscudiero -- Wed 07/11/2018 @ 12:04:46
+version="2.1.4" # -- dscudiero -- Thu 07/12/2018 @ 11:05:22
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -238,7 +238,7 @@ fi
 if [[ -z $mode || $mode == 'reports' ]]; then
 	Verbose 1 "Updating reports information"
 	## Write out a file with reports information
-		outFile="$TOOLSPATH/auth/reports"
+		outFile="${authShadowDir}/reports"
 		[[ -f $outFile ]] && outFile="$outFile.new"
 		fields="keyId,name,shortDescription,type,header,sqlStmt,script,scriptArgs,ignoreList"
 		sqlStmt="select $fields from $reportsTable where active=\"Yes\" order by name"
@@ -252,8 +252,8 @@ if [[ -z $mode || $mode == 'reports' ]]; then
 		chmod 740 "${outFile%.*}"
 
 	## Set time stamp on the auth directory
-		touch "$TOOLSPATH/auth"
-fi
+		touch "${authShadowDir}"
+		fi
 
 
 Goodbye 0;
@@ -309,3 +309,4 @@ Goodbye 0;
 ## 06-11-2018 @ 08:27:10 - 2.1.2 - dscudiero - Add mode processing and messages
 ## 06-18-2018 @ 09:00:15 - 2.1.2 - dscudiero - Comment out the script section
 ## 07-11-2018 @ 12:06:47 - 2.1.3 - dscudiero - Remove debug statement
+## 07-12-2018 @ 11:06:10 - 2.1.4 - dscudiero - Switch the location of the auth directory
