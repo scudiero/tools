@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.58" # -- dscudiero -- Fri 06/15/2018 @ 07:52:18
+version="1.5.59" # -- dscudiero -- Thu 07/12/2018 @ 12:46:15
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -284,10 +284,11 @@ function CleanUp {
 
 	## Check to make sure we are authorized
 		if [[ $callPgmName != 'scripts' && $callPgmName != 'testsh' ]]; then
-			[[ $(Contains ",$UsersScriptsStr," ",$callPgmName,") != true ]] && \
-				{ echo; echo; Terminate "Sorry, you do not have authorization to run script '$callPgmName'. \
+			if [[ $(Contains ",$UsersScriptsStr," ",$callPgmName,") != true ]] && [[ $(Contains "$UsersScriptsStr," "|$callPgmName,") != true ]]; then
+				echo; echo; Terminate "Sorry, you do not have authorization to run script '$callPgmName'. \
 				You are in the following authorization groups: ${UsersAuthGroups//,/, }.  \
-				\n\t\t Please contact your supervisor or '$administrators' for additional information."; }
+				\n\t\t Please contact your supervisor or '$administrators' for additional information.";
+			fi
 		fi
 
 	## Check semaphore
@@ -531,3 +532,5 @@ function CleanUp {
 ## 06-18-2018 @ 08:12:39 - 1.5.58 - dscudiero - Refactor authorization checks
 ## 06-18-2018 @ 10:11:44 - 1.5.58 - dscudiero - Do not check auth if script being loaded is 'scripts'
 ## 06-27-2018 @ 14:08:15 - 1.5.58 - dscudiero - Do not check auth if script name is testsh
+## 07-12-2018 @ 12:47:36 - 1.5.59 - dscudiero - Update the script auth checking to allow for '|' delimited script names in UserScriptsStr
+## 07-12-2018 @ 13:01:13 - 1.5.59 - dscudiero - Update auth check to allow for '|' prefixed script names in the UserScriptsStr
