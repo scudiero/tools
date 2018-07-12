@@ -83,25 +83,6 @@ else
 	whereClause="$auth2userTable.empKey=$employeeTable.employeekey"
 fi
 
-## Get a list of auth groups
-	if [[ -z $client || ${client,,[a-z]} == 'authgroups' ]]; then
-		Verbose 1 "\nBuilding the auth groups list..."
-		sqlStmt="select groupId,code from authgroups order by code"
-		RunSql $sqlStmt
-		unset authGroupsList; 
-		for rec in "${resultSet[@]}"; do authGroupsList="${authGroupsList},$rec"; done
-		authGroupsList="${authGroupsList:1}"
-		outFile="${authShadowDir}/authGroups"
-		[[ -f $outFile ]] && cp -fp "$outFile" "${outFile}.bak"
-		echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE AUTH TABLES IN THE DATA WAREHOUSE" > "${outFile}.new"
-		echo "$authGroupsList" >> "${outFile}.new"
-	 	rm -f "$outFile"
-	 	mv -f "${outFile}.new" "$outFile"
-		chmod 640 "$outFile"
-		chown "$userName:leepfrog" "$outFile"
-		[[ ${client,,[a-z]} == 'authgroups' ]] && Goodbye
-	fi	
-
 ## Get a list of users
 	Verbose 1 "\nBuilding the users list..."
 	sqlStmt="select distinct employeekey,substr(email,1,instr(email,'@')-1) from $auth2userTable,$employeeTable where $whereClause order by employeekey"
@@ -204,3 +185,4 @@ Goodbye 0 #'alert'
 ## 07-12-2018 @ 12:26:26 - 1.0.-1 - dscudiero - Add groupIds to the users group list
 ## 07-12-2018 @ 13:10:30 - 1.0.-1 - dscudiero - Update the UserScriptsStr to include the script id
 ## 07-12-2018 @ 13:40:31 - 1.0.-1 - dscudiero - Add shortDescription to the script detals lines
+## 07-12-2018 @ 16:11:25 - 1.0.-1 - dscudiero - Remove building the authgroups file
