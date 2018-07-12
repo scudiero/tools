@@ -1,6 +1,6 @@
-## DO NOT AUTOVERSION
+## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.0" # -- dscudiero -- Thu 04/26/2018 @ 14:07:52.20
+# version="1.0.1" # -- dscudiero -- Thu 07/12/2018 @ 08:58:11
 #===================================================================================================
 #===================================================================================================================
 # Use rsync to sychronize two directories
@@ -30,7 +30,7 @@ function RsyncCopy {
 	[[ -f $rsyncErr ]] && rm -f "$rsyncErr"
 	[[ -f $tmpFile ]] && rm -f "$tmpFile"
 
-	[[ ! -d $backupDir && $backupDir != '/dev/null' ]] && $DOIT mkdir -p $backupDir
+	[[ $backupDir != '/dev/null' && ! -d $backupDir ]] && $DOIT mkdir -p $backupDir
 
 	## Set rsync options
 		rsyncOpts='-rptcmlb' ## r=recursive, p=permissions, t=times, -c=checksums, m=ignoreImptyDirs, l=links, b=backup
@@ -90,3 +90,4 @@ export -f RsyncCopy
 ## 06-01-2018 @ 09:34:03 - 1.0.0 - dscudiero - Add debug statements
 ## 06-05-2018 @ 15:23:25 - 1.0.0 - dscudiero - Tweaked rsync call amd default include statements
 ## 06-05-2018 @ 16:06:13 - 1.0.0 - dscudiero - Cosmetic/minor change/Sync
+## 07-12-2018 @ 08:59:00 - 1.0.1 - dscudiero - Fix problem where no backup directory was specified and we were checing to see if the backupDir existed.
