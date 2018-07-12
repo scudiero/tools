@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.22.78" # -- dscudiero -- Wed 13/06/2018 @ 10:17:29
+version="1.22.79" # -- dscudiero -- Thu 07/12/2018 @ 11:00:30
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -319,6 +319,36 @@ case "$hostName" in
 		 	Msg "^Building the 'WorkWith' client data file..."
 		 	FindExecutable loadWorkwithData -sh -run
 
+		 ## Check for git commits in the master tools repo
+			tmpFile=$(MkTmpFile)
+			range='1am'
+			me='David Scudiero'
+			pushd cd '/mnt/dev6/web/git/tools.git' &> /dev/null
+			git log --name-only --pretty=format:"%cn|%s" --since="$range" &> $tmpFile
+			readarray -t logRecs < "$tmpFile"
+			pod cd '/mnt/dev6/web/git/tools.git' &> /dev/null
+			rm -f "$tmpFile"
+			if [[ ${#logRecs[@]} -gt 0 ]]; then
+				found=false
+				for ((i=0; i<${#logRecs[@]}; i++)); do
+					[[ -z ${logRecs[$i]} ]] && continue
+					#echo -e "\nlogRecs[$i] = >${logRecs[$i]}<"
+					rec="${logRecs[$i]}"
+					committer="${rec%%|*}"
+					comment="${rec#*|}"
+					#dump -t committer comment
+					((i++))
+					if [[ $committer != "$me" ]]; then
+						echo -e "\n'${logRecs[$i]}' was committed by '$committer' -- $comment" >> "$tmpFile"
+						found=true
+					fi
+				done
+				if [[ $found == true ]]; then
+					mutt -s "Found commits to tools.get that were not made by me" -- dscudiero@leepfrog.com < $tmpFile
+					rm -f "$tmpFile"
+				fi
+			fi
+
 		;; ## mojave
 
 	*) ## build7
@@ -482,3 +512,4 @@ return 0
 ## 06-14-2018 @ 17:02:02 - 1.22.78 - dscudiero - Add loadAuthData to the list of programs to run on mojave
 ## 06-18-2018 @ 09:43:46 - 1.22.78 - dscudiero - Pull load workwith data code out and call the loadWorkwithData script
 ## 06-26-2018 @ 15:23:12 - 1.22.78 - dscudiero - Comment out code to update the courseleafDataTable
+## 07-12-2018 @ 11:00:59 - 1.22.79 - dscudiero - Add checking of the master tool repo for commits
