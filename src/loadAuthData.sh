@@ -134,7 +134,7 @@ for userRec in "${userList[@]}"; do
 		# 1) Scripts authorized to a group that the user is a member of (auth2user, auth2script)
 		# 2) Scripts where the user has specifically been granted access to (user2scripts)
 		# 2) Unrestricted scripts
-		sqlStmt="select distinct keyId,name,description,showInScripts from $scriptsTable where (keyId in \
+		sqlStmt="select distinct keyId,name,description,shortDescription,showInScripts from $scriptsTable where (keyId in \
 		((select scriptKey from auth2script where groupKey in \
 		(select authKey from auth2user where empKey in \
 		(select employeekey from employee where substr(email,1,instr(email,'@')-1)=\"$user\"))))\
@@ -203,3 +203,4 @@ Goodbye 0 #'alert'
 ## 07-12-2018 @ 11:41:29 - 1.0.-1 - dscudiero - Add building the authGroups file
 ## 07-12-2018 @ 12:26:26 - 1.0.-1 - dscudiero - Add groupIds to the users group list
 ## 07-12-2018 @ 13:10:30 - 1.0.-1 - dscudiero - Update the UserScriptsStr to include the script id
+## 07-12-2018 @ 13:40:31 - 1.0.-1 - dscudiero - Add shortDescription to the script detals lines
