@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version="4.4.2" # -- dscudiero -- Thu 07/12/2018 @ 15:11:12
+version="4.4.3" # -- dscudiero -- Thu 07/12/2018 @ 15:53:21
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql StringFunctions ProtectedCall FindExecutable PushPop"
@@ -142,7 +142,24 @@ if [[ -z $client ]]; then
 	rm -f "$outFile"
 	mv -f "${outFile}.new" "$outFile"
 	chmod 640 "$outFile"
-	chown "$userName:leepfrog" "$outFile"	
+	chown "$userName:leepfrog" "$outFile"
+
+## Get a list of auth groups
+	Msg "^Building the auth groups list..."
+	sqlStmt="select groupId,code,name from authgroups order by code"
+	RunSql $sqlStmt
+	unset authGroupsList; 
+	for rec in "${resultSet[@]}"; do authGroupsList="${authGroupsList},$rec"; done
+	authGroupsList="${authGroupsList:1}"
+		outFile="$(dirname "$workwithDataFile")/authGroups"
+	[[ -f $outFile ]] && cp -fp "$outFile" "${outFile}.bak"
+	echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE AUTH TABLES IN THE DATA WAREHOUSE" > "${outFile}.new"
+	echo "$authGroupsList" >> "${outFile}.new"
+ 	rm -f "$outFile"
+ 	mv -f "${outFile}.new" "$outFile"
+	chmod 640 "$outFile"
+	chown "$userName:leepfrog" "$outFile"
+
 fi
 
 Msg "^...Done"
@@ -158,3 +175,4 @@ Goodbye 0 'alert'
 ## 05-29-2018 @ 11:51:56 - 4.3.127 - dscudiero - Print out breadcrumbs is not batch
 ## 07-12-2018 @ 14:37:49 - 4.4.1 - dscudiero - Add building the employeeData file
 ## 07-12-2018 @ 15:11:25 - 4.4.2 - dscudiero - Add building the scripts data file
+## 07-12-2018 @ 16:11:10 - 4.4.3 - dscudiero - Add building the authgroups file
