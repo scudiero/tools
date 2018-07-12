@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version="4.4.1" # -- dscudiero -- Thu 07/12/2018 @ 14:37:25
+version="4.4.2" # -- dscudiero -- Thu 07/12/2018 @ 15:11:12
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql StringFunctions ProtectedCall FindExecutable PushPop"
@@ -129,6 +129,20 @@ if [[ -z $client ]]; then
 	mv -f "${outFile}.new" "$outFile"
 	chmod 640 "$outFile"
 	chown "$userName:leepfrog" "$outFile"
+
+	Msg "^Building the 'WorkWith' scripts data file..."
+	outFile="$(dirname "$workwithDataFile")/scriptsData"
+	[[ -f $outFile ]] && cp -fp "$outFile" "${outFile}.bak"
+	SetFileExpansion 'off'
+	sqlStmt="select keyId,name,shortDescription from $scriptsTable where active!=\"No\" order by name"
+	RunSql $sqlStmt
+	for ((i=0; i<${#resultSet[@]}; i++)); do
+		echo "${resultSet[$i]}" >> "${outFile}.new"
+	done
+	rm -f "$outFile"
+	mv -f "${outFile}.new" "$outFile"
+	chmod 640 "$outFile"
+	chown "$userName:leepfrog" "$outFile"	
 fi
 
 Msg "^...Done"
@@ -143,3 +157,4 @@ Goodbye 0 'alert'
 ## 05-29-2018 @ 11:31:17 - 4.3.126 - dscudiero - Add productsInSupport
 ## 05-29-2018 @ 11:51:56 - 4.3.127 - dscudiero - Print out breadcrumbs is not batch
 ## 07-12-2018 @ 14:37:49 - 4.4.1 - dscudiero - Add building the employeeData file
+## 07-12-2018 @ 15:11:25 - 4.4.2 - dscudiero - Add building the scripts data file
