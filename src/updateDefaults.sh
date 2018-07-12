@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version="2.1.4" # -- dscudiero -- Thu 07/12/2018 @ 11:05:22
+version="2.1.5" # -- dscudiero -- Thu 07/12/2018 @ 12:25:04
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -235,25 +235,25 @@ fi
 # 		done
 # fi
 
-if [[ -z $mode || $mode == 'reports' ]]; then
-	Verbose 1 "Updating reports information"
-	## Write out a file with reports information
-		outFile="${authShadowDir}/reports"
-		[[ -f $outFile ]] && outFile="$outFile.new"
-		fields="keyId,name,shortDescription,type,header,sqlStmt,script,scriptArgs,ignoreList"
-		sqlStmt="select $fields from $reportsTable where active=\"Yes\" order by name"
-		RunSql $sqlStmt
-		for ((i=0; i<${#resultSet[@]}; i++)); do
-			result="${resultSet[$i]}"
-			echo "$result" >> "$outFile" 
-		done
-		[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
-		chgrp leepfrog "${outFile%.*}"
-		chmod 740 "${outFile%.*}"
+# if [[ -z $mode || $mode == 'reports' ]]; then
+# 	Verbose 1 "Updating reports information"
+# 	## Write out a file with reports information
+# 		outFile="${authShadowDir}/reports"
+# 		[[ -f $outFile ]] && outFile="$outFile.new"
+# 		fields="keyId,name,shortDescription,type,header,sqlStmt,script,scriptArgs,ignoreList"
+# 		sqlStmt="select $fields from $reportsTable where active=\"Yes\" order by name"
+# 		RunSql $sqlStmt
+# 		for ((i=0; i<${#resultSet[@]}; i++)); do
+# 			result="${resultSet[$i]}"
+# 			echo "$result" >> "$outFile" 
+# 		done
+# 		[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
+# 		chgrp leepfrog "${outFile%.*}"
+# 		chmod 740 "${outFile%.*}"
 
-	## Set time stamp on the auth directory
-		touch "${authShadowDir}"
-		fi
+# 	## Set time stamp on the auth directory
+# 		touch "${authShadowDir}"
+# 		fi
 
 
 Goodbye 0;
@@ -310,3 +310,5 @@ Goodbye 0;
 ## 06-18-2018 @ 09:00:15 - 2.1.2 - dscudiero - Comment out the script section
 ## 07-11-2018 @ 12:06:47 - 2.1.3 - dscudiero - Remove debug statement
 ## 07-12-2018 @ 11:06:10 - 2.1.4 - dscudiero - Switch the location of the auth directory
+## 07-12-2018 @ 12:25:26 - 2.1.5 - dscudiero - Comment out the reports auth code
+## 07-12-2018 @ 13:01:38 - 2.1.5 - dscudiero - Comment out the 'reports auth' section
