@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.22.79" # -- dscudiero -- Thu 07/12/2018 @ 11:00:30
+version="1.22.81" # -- dscudiero -- Fri 07/13/2018 @ 06:34:54
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -316,17 +316,18 @@ case "$hostName" in
 			fi
 			
 		 ## Create the data dump for the workwith tool
-		 	Msg "^Building the 'WorkWith' client data file..."
+		 	Msg "\nBuilding the 'WorkWith' client data file..."
 		 	FindExecutable loadWorkwithData -sh -run
 
 		 ## Check for git commits in the master tools repo
+		 	Msg "\nChecking tools git repo for commits..."
 			tmpFile=$(MkTmpFile)
 			range='1am'
 			me='David Scudiero'
 			pushd cd '/mnt/dev6/web/git/tools.git' &> /dev/null
 			git log --name-only --pretty=format:"%cn|%s" --since="$range" &> $tmpFile
 			readarray -t logRecs < "$tmpFile"
-			pod cd '/mnt/dev6/web/git/tools.git' &> /dev/null
+			popd cd '/mnt/dev6/web/git/tools.git' &> /dev/null
 			rm -f "$tmpFile"
 			if [[ ${#logRecs[@]} -gt 0 ]]; then
 				found=false
@@ -513,3 +514,4 @@ return 0
 ## 06-18-2018 @ 09:43:46 - 1.22.78 - dscudiero - Pull load workwith data code out and call the loadWorkwithData script
 ## 06-26-2018 @ 15:23:12 - 1.22.78 - dscudiero - Comment out code to update the courseleafDataTable
 ## 07-12-2018 @ 11:00:59 - 1.22.79 - dscudiero - Add checking of the master tool repo for commits
+## 07-13-2018 @ 06:35:15 - 1.22.81 - dscudiero - Add messaging
