@@ -109,7 +109,7 @@ for userRec in "${userList[@]}"; do
 	## Write out initial records to the outFile
 		[[ -f $outFile ]] && cp -fp "$outFile" "${outFile}.bak"
 		echo "## DO NOT EDIT VALUES IN THIS FILE, THE FILE IS AUTOMATICALLY GENERATED ($(date)) FROM THE AUTH TABLES IN THE DATA WAREHOUSE" > "${outFile}.new"
-		echo "$groupListStr" >> "${outFile}.new"
+		echo "groups:$groupListStr" >> "${outFile}.new"
 	
 	## Get the list of scripts this user has access to, add them to the file
 		# 1) Scripts authorized to a group that the user is a member of (auth2user, auth2script)
@@ -141,7 +141,7 @@ for userRec in "${userList[@]}"; do
 		done
 		scriptListStr="${scriptListStr:1}"
 		scriptListStr="$(printf '%s\n' ${scriptListStr//,/ } | sort -u | tr "\n" ',')"
-		echo "${scriptListStr:0:${#scriptListStr}-1}" >> "${outFile}.new"
+		echo "scripts:${scriptListStr:0:${#scriptListStr}-1}" >> "${outFile}.new"
 		## Write out the script detail information
 		[[ ${#resultSet[@]} -eq 0 || ${resultSet[0]} == "" ]] && continue
 		for result in "${resultSet[@]}"; do
@@ -186,3 +186,4 @@ Goodbye 0 #'alert'
 ## 07-12-2018 @ 13:10:30 - 1.0.-1 - dscudiero - Update the UserScriptsStr to include the script id
 ## 07-12-2018 @ 13:40:31 - 1.0.-1 - dscudiero - Add shortDescription to the script detals lines
 ## 07-12-2018 @ 16:11:25 - 1.0.-1 - dscudiero - Remove building the authgroups file
+## 07-13-2018 @ 09:13:26 - 1.0.-1 - dscudiero - Add the group: and script: prefixes to the output data
