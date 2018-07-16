@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.2.4" # -- dscudiero -- Wed 13/06/2018 @ 10:31:09
+# version="2.2.5" # -- dscudiero -- Mon 07/16/2018 @ 11:18:43
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -186,7 +186,7 @@ function Init {
 				Warning "You are asking to update/overlay the $(ColorW $(Upper $checkProdEnv)) environment."
 				if [[ ${clientData["${client}.productsInSupport"]+abc} && -n ${clientData["${client}.productsInSupport"]} ]]; then
 					## If client has products in support and the user is not in the support group then quit
-					[[ $(Contains ",$UsersAuthGroups," ',groups:13|support,') != true ]] && \
+					[[ $(Contains ",$UsersAuthGroups," ',13|support,') != true ]] && \
 		 				Terminate "The client has products in support (${clientData["${client}.productsInSupport"]}), please contact the support person assigned to this client to update the '$env' site"
 					Info 0 1 "FYI, the client has the following products in production: '${clientData["${client}.productsInSupport"]}'"
 				fi
@@ -381,3 +381,5 @@ export -f Init
 ## 06-12-2018 @ 07:03:32 - 2.2.2 - dscudiero - Add products in support check back in
 ## 06-13-2018 @ 10:33:12 - 2.2.4 - dscudiero - Do not check productsInSupport if null
 ## 06-27-2018 @ 12:13:17 - 2.2.4 - dscudiero - Comment out the version= line
+## 07-16-2018 @ 11:29:24 - 2.2.5 - dscudiero - Update auth to take into account that the auth groups are now prefixed by the groupId
+## 07-16-2018 @ 12:38:44 - 2.2.5 - dscudiero - When checking to see if the user is in the support group, add the groupid
