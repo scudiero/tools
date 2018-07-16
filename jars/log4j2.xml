@@ -1,0 +1,14 @@
+<Appenders>
+    <RollingFile name="RollingFileAppender" fileName="c:\app.log"
+      filePattern="logs/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
+        <PatternLayout>
+            <Pattern>%d [%t] %p %c - %m%n</Pattern>
+        </PatternLayout>
+        <Policies>
+            <OnStartupTriggeringPolicy />
+            <TimeBasedTriggeringPolicy />
+            <SizeBasedTriggeringPolicy size="50 MB" />
+        </Policies>
+        <DefaultRolloverStrategy max="20" />
+    </RollingFile>
+</Appenders>
