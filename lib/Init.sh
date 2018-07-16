@@ -186,7 +186,7 @@ function Init {
 				Warning "You are asking to update/overlay the $(ColorW $(Upper $checkProdEnv)) environment."
 				if [[ ${clientData["${client}.productsInSupport"]+abc} && -n ${clientData["${client}.productsInSupport"]} ]]; then
 					## If client has products in support and the user is not in the support group then quit
-					[[ $(Contains ",$UsersAuthGroups," ',support,') != true ]] && \
+					[[ $(Contains ",$UsersAuthGroups," ',groups:6|support,') != true ]] && \
 		 				Terminate "The client has products in support (${clientData["${client}.productsInSupport"]}), please contact the support person assigned to this client to update the '$env' site"
 					Info 0 1 "FYI, the client has the following products in production: '${clientData["${client}.productsInSupport"]}'"
 				fi
