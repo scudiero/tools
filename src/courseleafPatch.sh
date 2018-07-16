@@ -1180,10 +1180,10 @@ done
 
 ## Write out a changelog entry updates
 	if [[ ${#backedupFiles[@]} -gt 0 ]]; then
-		changeLogRecs+=("\tFiles edited:")
+		changeLogRecs+=("Files edited:")
 		for mapCtr in "${!backedupFiles[@]}"; do
-			data="$(ParseCourseleafFile "$file")"
-			changeLogRecs+=("\t\t${data##* }")
+			data="$(ParseCourseleafFile $mapCtr)"
+			changeLogRecs+=("${data##* }")
 		done;
 	fi
 	WriteChangelogEntry 'changeLogRecs' "$tgtDir/changelog.txt"
