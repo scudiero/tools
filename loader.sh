@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.59" # -- dscudiero -- Thu 07/12/2018 @ 12:46:15
+version="1.5.60" # -- dscudiero -- Mon 07/16/2018 @ 11:18:31
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -270,7 +270,9 @@ function CleanUp {
 				unset UsersScripts UsersScriptsStr
 				readarray -t tmpArray < "${authShadowDir}/${userName}"
 				UsersAuthGroups="${tmpArray[1]}"
+				UsersAuthGroups="${UsersAuthGroups/groups:}"
 				UsersScriptsStr="${tmpArray[2]}"
+				UsersScriptsStr="${UsersScriptsStr/scripts:}"
 				for ((i=3; i<${#tmpArray[@]}; i++)); do
 					str="${tmpArray[$i]}"; str="${str//[$'\t\r\n']}"
 					UsersScripts+=("$str")
@@ -278,6 +280,7 @@ function CleanUp {
 			else
 				UsersAuthGroups='none'
 			fi
+
 		fi
 		# Dump UsersAuthGroups UsersScriptsStr
 		# for ((xx=0; xx<${#UsersScripts[@]}; xx++)); do echo "UsersScripts[$xx] = >${UsersScripts[$xx]}<"; done
@@ -534,3 +537,5 @@ function CleanUp {
 ## 06-27-2018 @ 14:08:15 - 1.5.58 - dscudiero - Do not check auth if script name is testsh
 ## 07-12-2018 @ 12:47:36 - 1.5.59 - dscudiero - Update the script auth checking to allow for '|' delimited script names in UserScriptsStr
 ## 07-12-2018 @ 13:01:13 - 1.5.59 - dscudiero - Update auth check to allow for '|' prefixed script names in the UserScriptsStr
+## 07-16-2018 @ 11:28:49 - 1.5.60 - dscudiero - Strip off the type prefix strings on UsersAuthGroups and UsersScriptsStr
+## 07-16-2018 @ 12:36:47 - 1.5.60 - dscudiero - Strip off the type prefix strings on UsersAuthGroups and UsersScriptsStr
