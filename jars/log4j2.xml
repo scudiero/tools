@@ -1,14 +1,40 @@
-<Appenders>
-    <RollingFile name="RollingFileAppender" fileName="c:\app.log"
-      filePattern="logs/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
-        <PatternLayout>
-            <Pattern>%d [%t] %p %c - %m%n</Pattern>
-        </PatternLayout>
-        <Policies>
-            <OnStartupTriggeringPolicy />
-            <TimeBasedTriggeringPolicy />
-            <SizeBasedTriggeringPolicy size="50 MB" />
-        </Policies>
-        <DefaultRolloverStrategy max="20" />
-    </RollingFile>
-</Appenders>
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info" name="MyApp" packages="">
+  <Appenders>
+    <File name="traceFile" fileName="${env:USERPROFILE}\loadCourseleafData\trace.log">
+      <PatternLayout>
+        <Pattern>%d %p [%t] %m%n</Pattern>
+      </PatternLayout>
+    </File>
+    <File name="debugFile" fileName="${env:USERPROFILE}\loadCourseleafData\debug.log">
+      <PatternLayout>
+        <Pattern>%d %p [%t] %m%n</Pattern>
+      </PatternLayout>
+    </File>
+    <File name="infoFile" fileName="${env:USERPROFILE}\loadCourseleafData\info.log">
+      <PatternLayout>
+        <Pattern>%d %p [%t] %m%n</Pattern>
+      </PatternLayout>
+    </File>
+    <File name="warnFile" fileName="${env:USERPROFILE}\loadCourseleafData\warn.log">
+      <PatternLayout>
+        <Pattern>%d %p [%t] %m%n</Pattern>
+      </PatternLayout>
+    </File>
+    <File name="errorFile" fileName="${env:USERPROFILE}\loadCourseleafData\error.log">
+      <PatternLayout>
+        <Pattern>%d %p [%t] %m%n</Pattern>
+      </PatternLayout>
+    </File>
+  </Appenders>
+
+  <Loggers>
+    <Root level=${env:LOG_LEVEL}>
+      <AppenderRef ref="traceFile" level="TRACE"/>
+      <AppenderRef ref="debugFile" level="DEBUG"/>
+      <AppenderRef ref="infoFile" level="INFO"/>
+      <AppenderRef ref="warnFile" level="WARN"/>
+      <AppenderRef ref="errorFile" level="ERROR"/>
+    </Root>
+  </Loggers>
+</Configuration>
