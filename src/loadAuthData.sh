@@ -83,10 +83,19 @@ else
 	whereClause="$auth2userTable.empKey=$employeeTable.employeekey"
 fi
 
+
 ## Get a list of users
 	Verbose 1 "\nBuilding the users list..."
 	sqlStmt="select distinct employeekey,substr(email,1,instr(email,'@')-1) from $auth2userTable,$employeeTable where $whereClause order by employeekey"
 	RunSql $sqlStmt
+	if [[ ${#resultSet[@]} -eq 0 || ${resultSet[0]} == "" ]]; then
+		## Get the employeeId
+		Terminate "User '$client' has not auth data"
+		sqlStmt="select distinct employeekey from $employeeTable where substr(email,1,instr(email,'@')-1) = \"$client\"" 
+		RunSql $sqlStmt
+		employeekey="${resultSet[0]}"
+		dump employeekey
+	fi
 	unset userList; for rec in "${resultSet[@]}"; do userList+=("$rec"); done
 
 ## Loop through the user list
@@ -187,3 +196,4 @@ Goodbye 0 #'alert'
 ## 07-12-2018 @ 13:40:31 - 1.0.-1 - dscudiero - Add shortDescription to the script detals lines
 ## 07-12-2018 @ 16:11:25 - 1.0.-1 - dscudiero - Remove building the authgroups file
 ## 07-13-2018 @ 09:13:26 - 1.0.-1 - dscudiero - Add the group: and script: prefixes to the output data
+## 07-16-2018 @ 13:46:44 - 1.0.-1 - dscudiero - Put a check in to makesure the user has auth records before we continue
