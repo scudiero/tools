@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version="2.0.70" # -- dscudiero -- Fri 06/15/2018 @ 09:13:42
+version="2.0.71" # -- dscudiero -- Tue 07/17/2018 @ 08:26:29
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors FindExecutable SelectMenu ProtectedCall Pause"
@@ -171,7 +171,12 @@ scriptNameIn="$client"
 			[[ ${#menuItems[@]} -eq 0 ]] && BuildMenuArray
 			ProtectedCall "clear"
 			Msg
-			[[ -n $UsersAuthGroups ]] && Info 0 1 "Your authorization groups are $(sed 's/,/, /g' <<< \"$UsersAuthGroups\")"
+			if [[ -n $UsersAuthGroups ]]; then
+				for group in ${UsersAuthGroups//,/ }; do outStr="${outStr}, ${group#*|}"; done
+			else
+				outStr="  none"
+			fi
+			Info 0 1 "Your authorization groups are: ${outStr:2}"
 			Msg "\n^Please specify the $(ColorM '(ordinal)') number of the $itemType you wish to run, 'x' to quit."
 			Msg
 			#[[ $mode == 'scripts' && $client != '' ]] && clientStr=" (client: '$client')" || unset clientStr
@@ -211,3 +216,4 @@ Goodbye 0
 ## 06-18-2018 @ 10:51:28 - 2.0.70 - dscudiero - Filter out the scripts wint showInScripts = No
 ## 06-18-2018 @ 16:14:35 - 2.0.70 - dscudiero - Check if we can run the selected script
 ## 06-18-2018 @ 16:16:53 - 2.0.70 - dscudiero - Cosmetic/minor change/Sync
+## Tue Jul 17 08:33:28 CDT 2018 - dscudiero - -m Tweak the display of the users groups
