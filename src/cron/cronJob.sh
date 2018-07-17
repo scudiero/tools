@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.36 # -- dscudiero -- Wed 05/23/2018 @ 12:47:49.13
+version="2.1.37" # -- dscudiero -- Tue 07/17/2018 @ 07:13:37
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -57,6 +57,8 @@ originalArgStr="$*"
 	executeFile=$(FindExecutable "$callScriptName" '-cron')
 	echo -e "\t-- $hostName - Starting $callScriptName from '$executeFile', Args: $scriptArgs $callScriptArgs" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	echo -e "\n$(date) -- Calling script '$callScriptName':\n\t$executeFile $callScriptArgs\n" > "$logFile"
+	data="$(dropbox -q list)"; data="${data##* }"
+	[[ $data != 'leepfrogBackup' ]] && { set +eE ; trap - ERR; exit -1; }
 
 	myNameSave="$myName"; myPathSave="$myPath"
 	myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
@@ -162,3 +164,4 @@ exit 0
 ## 04-24-2018 @ 11:22:59 - 2.1.35 - dscudiero - Comment out useDEV
 ## 05-23-2018 @ 12:48:04 - 2.1.36 - dscudiero - Add our java to the PATH
 ## 06-05-2018 @ 07:28:04 - 2.1.36 - dscudiero - Change the logic to detect errors
+## 07-17-2018 @ 07:14:33 - 2.1.37 - dscudiero - Add checks
