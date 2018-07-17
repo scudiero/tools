@@ -30,11 +30,11 @@
 
   <Loggers>
     <Root level="info">
-      <AppenderRef> ref="traceFile" level="trace" </AppenderRef>
-      <AppenderRef> ref="debugFile" level="debug" </AppenderRef>
-      <AppenderRef> ref="infoFile" level="info" </AppenderRef>
-      <AppenderRef> ref="warnFile" level="warn" </AppenderRef>
-      <AppenderRef> ref="errorFile" level="error" </AppenderRef>
+      <AppenderRef ref="traceFile" level="TRACE"/>
+      <AppenderRef ref="debugFile" level="DEBUG"/>
+      <AppenderRef ref="infoFile" level="INFO"/>
+      <AppenderRef ref="warnFile" level="WARN"/>
+      <AppenderRef ref="errorFile" level="ERROR"/>
     </Root>
   </Loggers>
 </Configuration>
