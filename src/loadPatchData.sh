@@ -85,7 +85,6 @@ fi
 	SetFileExpansion
 	for rec in "${resultSet[@]}"; do dataRecs+=("$rec"); done
 	## Check the data
-Here 0
 	for rec in "${dataRecs[@]}"; do
 		recType="$(cut -f4 -d'|' <<< "$rec")"
 		if [[ $recType == 'currentRelease' ]]; then
@@ -104,15 +103,13 @@ Here 0
 					for tag in $tags; do
 						[[ $tag == $option ]] && { found=true; break; }
 					done
-					[[ $found != true ]] && Here 1 && Terminate "Specified value for 'currentRelease' ($option) in the transactional database is not a valid git tag\n\t\t$rec"
+					[[ $found != true ]] && Terminate "Specified value for 'currentRelease' ($option) in the transactional database is not a valid git tag\n\t\t$rec"
 				else
-Here 2
 					Terminate "Could not locate git directory '$gitDir'\n\t\t$rec"
 				fi
 			fi
 		fi
 	done
-Here 3
 ## Data is good, Make a copy of the warehouse table
 	sqlStmt="drop table if exists ${patchesTable}New"
 	RunSql $sqlStmt
@@ -159,3 +156,4 @@ Goodbye 0 #'alert'
 ## 07-03-2018 @ 09:17:08 - 1.0.-1 - dscudiero - Pull git directory name from the source spec field
 ## 07-18-2018 @ 09:22:43 - 1.0.-1 - dscudiero - Add debug statements
 ## 07-18-2018 @ 09:46:57 - 1.0.-1 - dscudiero - Additional debug
+## 07-18-2018 @ 11:46:27 - 1.0.-1 - dscudiero - Removed debug code
