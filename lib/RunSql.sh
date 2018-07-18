@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.28" # -- dscudiero -- Tue 05/22/2018 @ 12:25:36.79
+# version="1.0.29" # -- dscudiero -- Wed 07/18/2018 @ 12:01:29
 #===================================================================================================
 # Run a statement
 # [sqlFile] sql
@@ -56,7 +56,7 @@ function RunSql {
 	 		if [[ ${resultSet[0]} =~ .*\*Error\**. || ${resultSet[0]} =~ .*Exception*. ]]; then
 	 			Error "Error encountered in '$FUNCNAME' processing '${dbType^^[a-z]}' call, messages follow:"
 				for ((i=0; i<${#resultSet[@]}; i++)); do
-					Msg "^${resultSet[$i]}"
+					echo "     ${resultSet[$i]}"
 				done
 	 			Terminate "Error encountered in '$FUNCNAME' processing '${dbType^^[a-z]}' call"
 	 		fi
@@ -81,3 +81,4 @@ export -f RunSql
 ## 04-18-2018 @ 09:38:01 - 1.0.9 - dscudiero - Use the TOOLSDEVPATH variable
 ## 04-19-2018 @ 08:11:01 - 1.0.10 - dscudiero - Tweak statement setting jar file if useDev
 ## 05-22-2018 @ 14:07:39 - 1.0.28 - dscudiero - Fix problem with information only mode
+## 07-18-2018 @ 12:02:48 - 1.0.29 - dscudiero - Switch to use echo vs Msg for errors
