@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.35" # -- dscudiero -- Mon 07/09/2018 @ 14:09:15
+version="2.2.36" # -- dscudiero -- Wed 07/18/2018 @ 09:47:19
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -241,9 +241,9 @@ case "$hostName" in
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
-				TrapSigs 'off'
+				#TrapSigs 'off'
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
-				TrapSigs 'on'
+				#TrapSigs 'on'
 				Semaphore 'waiton' "$pgmName" 'true'
 				Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
@@ -372,3 +372,4 @@ return 0
 ## 07-03-2018 @ 08:17:46 - 2.2.33 - dscudiero - Added verboseLevel on loadPatchData call
 ## 07-03-2018 @ 10:26:14 - 2.2.34 - dscudiero - Remove verbose from loadPatchData call
 ## 07-09-2018 @ 14:09:38 - 2.2.35 - dscudiero - Only run backupData for dscudiero
+## 07-18-2018 @ 09:48:02 - 2.2.36 - dscudiero - Comment out the turning  off of TrapSigs arround the pgms calls
