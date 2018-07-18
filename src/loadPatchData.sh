@@ -85,6 +85,7 @@ fi
 	SetFileExpansion
 	for rec in "${resultSet[@]}"; do dataRecs+=("$rec"); done
 	## Check the data
+Here 0
 	for rec in "${dataRecs[@]}"; do
 		recType="$(cut -f4 -d'|' <<< "$rec")"
 		if [[ $recType == 'currentRelease' ]]; then
@@ -105,13 +106,14 @@ fi
 					done
 					[[ $found != true ]] && Terminate "Specified value for 'currentRelease' ($option) in the transactional database is not a valid git tag\n\t\t$rec"
 				else
+Here 1
 					Terminate "Could not locate git directory '$gitDir'\n\t\t$rec"
 				fi
 			fi
 		fi
 	done
-
-## Data is good, Make a copy of the warehouse table 
+Here 2
+## Data is good, Make a copy of the warehouse table
 	sqlStmt="drop table if exists ${patchesTable}New"
 	RunSql $sqlStmt
 	sqlStmt="create table ${patchesTable}New like ${patchesTable}"
@@ -155,3 +157,4 @@ Goodbye 0 #'alert'
 ## 07-03-2018 @ 07:04:00 - 1.0.-1 - dscudiero - Add debug statements
 ## 07-03-2018 @ 09:10:02 - 1.0.-1 - dscudiero - Set directory for pdfgen, seperate message if cannot locate git directory
 ## 07-03-2018 @ 09:17:08 - 1.0.-1 - dscudiero - Pull git directory name from the source spec field
+## 07-18-2018 @ 09:22:43 - 1.0.-1 - dscudiero - Add debug statements
