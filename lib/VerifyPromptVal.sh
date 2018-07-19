@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.10" # -- dscudiero -- Wed 13/06/2018 @ 13:48:18
+# version="2.1.11" # -- dscudiero -- Thu 07/19/2018 @ 08:34:23
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -8,7 +8,7 @@
 # All rights reserved
 #===================================================================================================
 function VerifyPromptVal {
-	myIncludes="RunSql StartRemoteSession PushPop"
+	myIncludes="RunSql StartRemoteSession PushPop ProtectedCall"
 	Import "$myIncludes"
 
 	local i
@@ -314,3 +314,4 @@ export -f VerifyPromptVal
 ## 06-13-2018 @ 13:50:15 - 2.1.10 - dscudiero - Added code to set client pvt data if the client does not have a dev site
 ## 06-19-2018 @ 12:28:38 - 2.1.10 - dscudiero - Fix bug finding the pvt site if there is no dev site
 ## 06-27-2018 @ 12:13:44 - 2.1.10 - dscudiero - Comment out the version= line
+## 07-19-2018 @ 08:35:05 - 2.1.11 - dscudiero - Add ProtectedCall to imports list
