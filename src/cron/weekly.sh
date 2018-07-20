@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version=2.1.48 # -- dscudiero -- Mon 05/14/2018 @  8:26:26.40
+version="2.1.49" # -- dscudiero -- Fri 07/20/2018 @ 09:05:09
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -51,6 +51,26 @@ case "$hostName" in
 				Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
 
+		## Check to see if we have received workflow specifications for any scheduled meetings
+			tmpFile=$(mkTmpFile)
+			ifs="$IFS"; IFS=$'\r'; while read line; do
+				[[ ${line:0:1} == '#' ]] && continue
+				client="${line%% *}"; line="${line#* }"
+				csm="${line%% *}"; line="${line#* }"
+				date="${line%% *}"; line="${line#* }"
+				dump 1 -n client csm date line
+				if [[ ! -d "$HOME/clientData/${client,,[a,z]}" ]]; then
+					echo "" > $tmpFile
+					echo "*** Warning ***" >> "$tmpFile"
+					echo "A meeting, '$line', has been scheduled with $client on ${date}." >> "$tmpFile"
+					echo "No workflow specifications have been received for this client." >> "$tmpFile"
+					echo "Specifications must be received at least 5 business days before the client meeting." >> "$tmpFile"
+					echo "Should specifications not be provided, said meeting will be canceled on the Monday of the week that the meeting was scheduled" >> "$tmpFile"
+					mutt -s "Workflow meeting scheduled with $client without specs" -- ${csm}@leepfrog.com < $tmpFile;
+					mutt -s "Workflow meeting scheduled with $client without specs" -- dscudiero@leepfrog.com < $tmpFile;
+				fi
+			done < "$HOME/clientData/meetings.txt"
+
 			;;
 	build7)
 		## Run programs/functions
@@ -99,3 +119,4 @@ return 0
 ## 04-30-2018 @ 07:12:55 - 2.1.46 - dscudiero - Add toolsManager to toolsUsage report
 ## 05-07-2018 @ 10:32:07 - 2.1.47 - dscudiero - Fix syntax error, missing ) line 23
 ## 05-14-2018 @ 08:31:34 - 2.1.48 - dscudiero - Dont send out timeZone and toolsUsage reports
+## 07-20-2018 @ 09:05:48 - 2.1.49 - dscudiero - Add code to check that we have recieved workflow specs for any scheduled meetings
