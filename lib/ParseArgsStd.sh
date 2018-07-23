@@ -1,6 +1,6 @@
 ## xO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.98" # -- dscudiero -- Mon 07/23/2018 @ 07:45:19
+# version="3.0.99" # -- dscudiero -- Mon 07/23/2018 @ 08:40:53
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -81,7 +81,7 @@ function ParseArgsStd {
 								unset optionVal
 								for ((argCntr2=$argCntr+1; argCntr2<=$#; argCntr2++)); do
 									eval "nextToken=\"${!argCntr2}\""
-									if [[ ${nextToken:0:1} != '-' ]]; then
+									if [[ ${nextToken:0:1} != '-' && $argCntr2 -ne $# ]]; then
 										dump 3 -t2 nextToken
 										optionVal="$optionVal $nextToken"
 									else
@@ -159,3 +159,4 @@ export -f ParseArgsStd
 ## 06-08-2018 @ 09:34:47 - 3.0.74 - dscudiero - Report on any unknow arguments
 ## 06-27-2018 @ 12:13:23 - 3.0.74 - dscudiero - Comment out the version= line
 ## 07-23-2018 @ 07:47:20 - 3.0.98 - dscudiero - Re-factore how 'option' arguments are parsed
+## 07-23-2018 @ 08:41:57 - 3.0.99 - dscudiero - Fixed problem if the hast argument in the parse string is an option type
