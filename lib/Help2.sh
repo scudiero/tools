@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version=3.0.5 # -- dscudiero -- Fri 03/23/2018 @ 16:51:21.13
+# version="3.0.6" # -- dscudiero -- Mon 07/23/2018 @ 15:29:58
 #===================================================================================================
 # Display script help -- passed an array of argument definitinons, see ParseArg function
 #===================================================================================================
@@ -30,17 +30,17 @@ function Help2 {
 	[[ $updatesClData == 'Yes' ]] && Warning "This script updates client side data"
 	echo
 
-	sqlStmt="select restrictToUsers,restrictToGroups from $scriptsTable where name=\"$myName\""
-	RunSql $sqlStmt
-	if [[ -n ${resultSet[0]} ]]; then
-		result="${resultSet[0]}"
-		restrictToUsers=${result%%|*}
-		restrictToGroups=${result##*|}
-		[[ $restrictToUsers != 'NULL' ]] && Info "This script is restricted to users: $restrictToUsers"
-		[[ $restrictToGroups != 'NULL' ]] && Info "This script is restricted to groups: $restrictToGroups"
-		[[ $restrictToUsers == 'NULL' && $restrictToGroups == 'NULL' ]] && Info "This script is not restricted"
-		echo
-	fi
+	# sqlStmt="select restrictToUsers,restrictToGroups from $scriptsTable where name=\"$myName\""
+	# RunSql $sqlStmt
+	# if [[ -n ${resultSet[0]} ]]; then
+	# 	result="${resultSet[0]}"
+	# 	restrictToUsers=${result%%|*}
+	# 	restrictToGroups=${result##*|}
+	# 	[[ $restrictToUsers != 'NULL' ]] && Info "This script is restricted to users: $restrictToUsers"
+	# 	[[ $restrictToGroups != 'NULL' ]] && Info "This script is restricted to groups: $restrictToGroups"
+	# 	[[ $restrictToUsers == 'NULL' && $restrictToGroups == 'NULL' ]] && Info "This script is not restricted"
+	# 	echo
+	# fi
 
 	[[ $(Contains ",$myHelpSet," ",client,") == true ]] && hasClient=true && tempStr="$tempStr [client]"
 	tempStr="$tempStr [OPTIONS]"
@@ -226,3 +226,4 @@ export -f Help2
 ## 03-22-2018 @ 13:42:17 - 3.0.4 - dscudiero - Updated for Msg/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 16:52:17 - 3.0.5 - dscudiero - Msg3 -> Msg
 ## 04-23-2018 @ 09:39:12 - 3.0.5 - dscudiero - Cosmetic/minor change/Sync
+## 07-23-2018 @ 15:30:26 - 3.0.6 - dscudiero - Comment out the restricteduser stuff
