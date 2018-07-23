@@ -1,6 +1,6 @@
 ## xO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.74" # -- dscudiero -- Fri 08/06/2018 @ 09:34:24
+# version="3.0.98" # -- dscudiero -- Mon 07/23/2018 @ 07:45:19
 #===================================================================================================
 ## Standard argument parsing
 #===================================================================================================
@@ -15,7 +15,7 @@ function ParseArgsStd {
 	Import "RunSql StringFunctions Msg"
 	local argDefCntr arg argType found tmpStr tmpEnv tmpArg argShortName argLongName scriptVar scriptCmd tmpCntr nextToken
 
-	#verboseLevel=3
+#verboseLevel=3
 
 	## Make sure we have the argdefs data loaded
 		if [[ ${#argDefs} -eq 0 ]]; then
@@ -78,34 +78,38 @@ function ParseArgsStd {
 								[[ -n $scriptVar ]] && { eval "$scriptVar=${arg:2}"; }
 								;;
 						option)
-								let tmpCntr=$argCntr+1
-								eval "nextToken=\"${!tmpCntr}\""
-								if [[ ${nextToken:0:1} != '-' ]]; then
-									local consumedNext=false
-									if [[ -n $scriptCmd && ${scriptCmd,,[a-z]} != 'null' ]]; then
-										if [[ $scriptCmd == 'appendShortName' ]]; then
-											[[ -z ${!scriptVar} ]] && eval "$scriptVar=\"$argShortName\"" || eval "$scriptVar=\"${!scriptVar},$argShortName\""
-										elif [[ $scriptCmd == 'appendLongName' ]]; then
-											[[ -z ${!scriptVar} ]] && eval "$scriptVar=\"$nextToken\"" || eval "$scriptVar=\"${!scriptVar},$nextToken\""
-											consumedNext=true
-										elif [[ $scriptCmd == 'expandEnv' ]]; then
-											found=false
-											for tmpEnv in ${courseleafDevEnvs//,/ } ${courseleafProdEnvs//,/ }; do
-												[[ $tmpEnv =~ ^${nextToken} ]] && { found=true; break; }
-											done
-											[[ $found == true ]] && { eval "$scriptVar=\"$tmpEnv\""; consumedNext=true; }
-										else
-											 eval "$scriptCmd"
-										fi
+								unset optionVal
+								for ((argCntr2=$argCntr+1; argCntr2<=$#; argCntr2++)); do
+									eval "nextToken=\"${!argCntr2}\""
+									if [[ ${nextToken:0:1} != '-' ]]; then
+										dump 3 -t2 nextToken
+										optionVal="$optionVal $nextToken"
+									else
+										optionVal="${optionVal:1}"
+										let argCntr=$argCntr2-1
+										break
 									fi
-									if [[ -n $scriptVar && $consumedNext != true ]]; then
-										(( argCntr++))
-										eval "$scriptVar=\"${!argCntr}\""
+								done
+								dump 3 -t optionVal
+								if [[ -n $scriptCmd && ${scriptCmd,,[a-z]} != 'null' ]]; then
+									if [[ $scriptCmd == 'appendShortName' ]]; then
+										[[ -z ${!scriptVar} ]] && eval "$scriptVar=\"$argShortName\"" || eval "$scriptVar=\"${!scriptVar},$argShortName\""
+									elif [[ $scriptCmd == 'appendLongName' ]]; then
+										[[ -z ${!scriptVar} ]] && eval "$scriptVar=\"$optionVal\"" || eval "$scriptVar=\"${!scriptVar},$optionVal\""
+									elif [[ $scriptCmd == 'expandEnv' ]]; then
+										found=false
+										for tmpEnv in ${courseleafDevEnvs//,/ } ${courseleafProdEnvs//,/ }; do
+											[[ $tmpEnv =~ ^${optionVal} ]] && { found=true; break; }
+										done
+										[[ $found == true ]] && { eval "$scriptVar=\"$tmpEnv\""; }
+									else
+										 eval "$scriptCmd"
 									fi
+								else
+									eval "$scriptVar=\"$optionVal\""
 								fi
 								;;
 					esac
-					[[ $consumedNext == true ]] && (( argCntr++ ))
 				else
 					[[ -z $client && ${arg:0:1} != '-' ]] && { client="$arg"; continue; }
 				    unknowArgs="$unknowArgs,$arg"
@@ -154,3 +158,4 @@ export -f ParseArgsStd
 ## 05-25-2018 @ 08:01:30 - 3.0.70 - dscudiero - Fid problem processing expandEnv type arguments
 ## 06-08-2018 @ 09:34:47 - 3.0.74 - dscudiero - Report on any unknow arguments
 ## 06-27-2018 @ 12:13:23 - 3.0.74 - dscudiero - Comment out the version= line
+## 07-23-2018 @ 07:47:20 - 3.0.98 - dscudiero - Re-factore how 'option' arguments are parsed
