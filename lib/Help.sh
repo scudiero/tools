@@ -28,17 +28,17 @@ function Help {
 	[[ $updatesClData == 'Yes' ]] && Warning "This script updates client side data"
 	echo
 
-	sqlStmt="select restrictToUsers,restrictToGroups from $scriptsTable where name=\"$myName\""
-	RunSql $sqlStmt
-	if [[ -n ${resultSet[0]} ]]; then
-		result="${resultSet[0]}"
-		restrictToUsers=${result%%|*}
-		restrictToGroups=${result##*|}
-		[[ $restrictToUsers != 'NULL' ]] && Info "This script is restricted to users: $restrictToUsers"
-		[[ $restrictToGroups != 'NULL' ]] && Info "This script is restricted to groups: $restrictToGroups"
-		[[ $restrictToUsers == 'NULL' && $restrictToGroups == 'NULL' ]] && Info "This script is not restricted"
-		echo
-	fi
+	# sqlStmt="select restrictToUsers,restrictToGroups from $scriptsTable where name=\"$myName\""
+	# RunSql $sqlStmt
+	# if [[ -n ${resultSet[0]} ]]; then
+	# 	result="${resultSet[0]}"
+	# 	restrictToUsers=${result%%|*}
+	# 	restrictToGroups=${result##*|}
+	# 	[[ $restrictToUsers != 'NULL' ]] && Info "This script is restricted to users: $restrictToUsers"
+	# 	[[ $restrictToGroups != 'NULL' ]] && Info "This script is restricted to groups: $restrictToGroups"
+	# 	[[ $restrictToUsers == 'NULL' && $restrictToGroups == 'NULL' ]] && Info "This script is not restricted"
+	# 	echo
+	# fi
 
 
 	[[ $(Contains ",$myHelpSet," ",client,") == true ]] && hasClient=true && tempStr="$tempStr [client]"
@@ -230,3 +230,4 @@ export -f Help
 ## 03-19-2018 @ 10:43:25 - 2.1.-1 - dscudiero - Change the way we display the java dependencies
 ## 03-22-2018 @ 13:42:12 - 2.1.-1 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 04-23-2018 @ 09:38:49 - 2.1.-1 - dscudiero - Cosmetic/minor change/Sync
+## 07-23-2018 @ 15:29:07 - 2.1.-1 - dscudiero - Comment out the restricted to user code
