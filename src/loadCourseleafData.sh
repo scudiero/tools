@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="3.9.30" # -- dscudiero -- Fri 06/29/2018 @ 16:21:49
+version="3.9.39" # -- dscudiero -- Mon 07/23/2018 @ 08:33:31
 #==================================================================================================
 TrapSigs 'on'
 myIncludes='DbLog Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel WriteChangelogEntry'
@@ -33,9 +33,9 @@ scriptDescription="Load Courseleaf Data"
 		myArgs+=("noignore|noignoremissingPages|switch||ignoreMissingPages=false|script|Do not ignore missing catalog pages")
 		myArgs+=("uin|uinmap|switch|uinMap||script|Map role data UIDs to UINs even if the uses UIN flag is not set on the client record")
 		myArgs+=("nouin|nouinmap|switch||uinMap=false|script|Do not map role data UIDs to UINs")
-		myArgs+=("user|users|switch|processUserData||script|Load user data")
-		myArgs+=("role|role|switch|processRoleData||script|Load role data")
-		myArgs+=("page|page|switch|processPageData||script|Load catalog page data")
+		myArgs+=("usersSheet|users|option|usersSheet||script|The 'users' worksheet name")
+		myArgs+=("rolesSheet|roles|option|rolesSheet||script|The 'roles' worksheet name")
+		myArgs+=("pagesSheet|pages|option|pagesSheet||script|The 'pages' worksheet name")
 		myArgs+=("comment|comment|option|comment||script|Comment for the action")
 		return 0
 	}
@@ -744,14 +744,20 @@ Hello
 echo "Getting defaults..."
 GetDefaultsData $myName
 echo "Parsing arguments..."
+dump originalArgStr
 ParseArgsStd $originalArgStr
+
+[[ -n $usersSheet ]] && processUserData=true
+[[ -n $rolesSheet ]] && processRoleData=true
+[[ -n $pagesSheet ]] && processPageData=true
+
 [[ $allItems == true ]] && processUserData=true && processRoleData=true && processPageData=true
 [[ $product != '' ]] && product=$(Lower $product)
 
 [[ $hostName == 'build7' ]] && notifyThreshold=50 || notifyThreshold=100
 displayGoodbyeSummaryMessages=true
-Init 'getClient getEnv getDirs checkEnvs checkProdEnv addPvt'
-dump -1 processUserData processRoleData processPageData informationOnlyMode ignoreMissingPages
+Init 'getClient getEnv getDirs checkEnvs checkProdEnv'
+dump -1 client envs workbookFile processUserData usersSheet processRoleData rolesSheet processPageData pagesSheet informationOnlyMode ignoreMissingPages -p
 
 ## Find out if this client uses UINs
 	if [[ $uinMap == true ]]; then
@@ -815,11 +821,10 @@ dump -1 processUserData processRoleData processPageData informationOnlyMode igno
 	Msg "^Parsing workbook..."
 	GetExcel -wb "$workbookFile" -ws 'GetSheets'
 	IFS='|' read -ra sheets <<< "${resultSet[0]}"
-	unset usersSheet rolesSheet pagesSheet
 	for sheet in "${sheets[@]}"; do
-		[[ $(Contains "${sheet,,[a-z]}" 'user') == true ]] && usersSheet="$sheet"
-		[[ $(Contains "${sheet,,[a-z]}" 'role') == true ]] && rolesSheet="$sheet"
-		[[ $(Contains "${sheet,,[a-z]}" 'workflow') == true ]] && pagesSheet="$sheet"
+		[[ -z $usersSheet && $(Contains "${sheet,,[a-z]}" 'user') == true ]] && usersSheet="$sheet"
+		[[ -z $rolesSheet && $(Contains "${sheet,,[a-z]}" 'role') == true ]] && rolesSheet="$sheet"
+		[[ -z $pagesSheet && $(Contains "${sheet,,[a-z]}" 'workflow') == true ]] && pagesSheet="$sheet"
 	done
 
 [[ $processUserData == true || $processRoleData == true || $processPageData == true ]] && dataArgSpecified=true || dataArgSpecified=false
@@ -1128,3 +1133,4 @@ ignoreMissingPages=true
 ## 05-16-2018 @ 15:46:21 - 3.9.28 - dscudiero - Added activityLog logging
 ## 05-16-2018 @ 16:01:48 - 3.9.29 - dscudiero - Add jalot to logging
 ## 07-02-2018 @ 13:32:38 - 3.9.30 - dscudiero - Fix bug setting data if old data is null and new data is not
+## 07-23-2018 @ 08:45:56 - 3.9.39 - dscudiero - Change -pages -users and -roles to option type arguments
