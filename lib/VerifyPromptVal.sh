@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.11" # -- dscudiero -- Thu 07/19/2018 @ 08:34:23
+# version="2.1.17" # -- dscudiero -- Mon 07/23/2018 @ 08:08:14
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -87,7 +87,7 @@ function VerifyPromptVal {
 						clientData["${response}.pvt.cims"]="${clientData["${response}.${clonedFrom}.cims"]}"
 					fi
 					clientData["${response}.pvt.siteDir"]="$pvtDir"
-					envs="$envs,pvt"
+					[[ -n $pvtDir || $addPvt == true ]] && envs="$envs,pvt"
 				else
 					## Search for pvt dir
 					for server in ${devServers//,/ }; do
@@ -103,7 +103,7 @@ function VerifyPromptVal {
 							clientData["${response}.pvt.cims"]="${clientData["${response}.${clonedFrom}.cims"]}"
 						fi
 						clientData["${response}.pvt.siteDir"]="$pvtDir"
-						envs="$envs,pvt"
+						[[ -n $pvtDir || $addPvt == true ]] && envs="$envs,pvt"
 					fi
 				fi
 				clientData["${response}.host"]="$host"
@@ -200,7 +200,7 @@ function VerifyPromptVal {
 					[[ $ans == 'y' ]] && foundAll=true
 				fi
 			fi
-			[[ $foundAll == false ]] && verifyMsg=$(Error "Value of '$response' not valid for '$promptVar', valid values in {${validateList// /, }} (1)")
+			[[ $foundAll == false ]] && verifyMsg=$(Error "Value of '$(ColorE "$response")' not valid for '$promptVar', valid values in {${validateList// /, }} (1)")
 		fi
 		[[ -z $verifyMsg ]] && verifyMsg=true
 	fi ## Product(s)
@@ -258,7 +258,7 @@ function VerifyPromptVal {
 					[[ $answer == $checkStr ]] && PopSettings && verifyMsg=true && SetFileExpansion && return 0
 				done
 			fi
-			verifyMsg=$(Error "Value of '$response' not valid for '$promptVar', valid values in {$validateListString} (2)")
+			verifyMsg=$(Error "Value of '$(ColorE "$response")' not valid for '$promptVar', valid values in {$validateListString} (2)")
 		fi
 		processedRequest=true
 	fi ## Everything else
@@ -315,3 +315,4 @@ export -f VerifyPromptVal
 ## 06-19-2018 @ 12:28:38 - 2.1.10 - dscudiero - Fix bug finding the pvt site if there is no dev site
 ## 06-27-2018 @ 12:13:44 - 2.1.10 - dscudiero - Comment out the version= line
 ## 07-19-2018 @ 08:35:05 - 2.1.11 - dscudiero - Add ProtectedCall to imports list
+## 07-23-2018 @ 08:10:13 - 2.1.17 - dscudiero - Add pvt to the envs prompt if there is a pvtDir or addPvt was specified
