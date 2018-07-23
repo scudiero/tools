@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.1.49" # -- dscudiero -- Fri 07/20/2018 @ 09:05:09
+version="2.1.50" # -- dscudiero -- Mon 07/23/2018 @ 07:41:07
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -60,12 +60,13 @@ case "$hostName" in
 				date="${line%% *}"; line="${line#* }"
 				dump 1 -n client csm date line
 				if [[ ! -d "$HOME/clientData/${client,,[a,z]}" ]]; then
-					echo "" > $tmpFile
-					echo "*** Warning ***" >> "$tmpFile"
+					echo "*** Warning ***" > "$tmpFile"
 					echo "A meeting, '$line', has been scheduled with $client on ${date}." >> "$tmpFile"
 					echo "No workflow specifications have been received for this client." >> "$tmpFile"
 					echo "Specifications must be received at least 5 business days before the client meeting." >> "$tmpFile"
 					echo "Should specifications not be provided, said meeting will be canceled on the Monday of the week that the meeting was scheduled" >> "$tmpFile"
+					echo "" >> "$tmpFile"
+					echo "Note: This is an automated emailing, no need to reply" >> "$tmpFile"
 					mutt -s "Workflow meeting scheduled with $client without specs" -- ${csm}@leepfrog.com < $tmpFile;
 					mutt -s "Workflow meeting scheduled with $client without specs" -- dscudiero@leepfrog.com < $tmpFile;
 				fi
@@ -120,3 +121,4 @@ return 0
 ## 05-07-2018 @ 10:32:07 - 2.1.47 - dscudiero - Fix syntax error, missing ) line 23
 ## 05-14-2018 @ 08:31:34 - 2.1.48 - dscudiero - Dont send out timeZone and toolsUsage reports
 ## 07-20-2018 @ 09:05:48 - 2.1.49 - dscudiero - Add code to check that we have recieved workflow specs for any scheduled meetings
+## 07-23-2018 @ 07:41:32 - 2.1.50 - dscudiero - Tweak workflow specs message formate
