@@ -1,11 +1,19 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="2.1.8" # -- dscudiero -- Mon 07/09/2018 @ 16:11:32
+# version="2.1.9" # -- dscudiero -- Tue 07/24/2018 @ 10:31:41
 #=======================================================================================================================
 # Retrieve data from a Excel xlsx spreadsheet
 # Usage: GetExcel <workBook> <workSheet>
 # Returns data as standard out
+#
+# time ( GetExcel -wb "$excelFile" -ws 'GetSheets'
+# echo "\${#resultSet[@]} = '${#resultSet[@]}'"
+# for ((xx=0; xx<${#resultSet[@]}; xx++)); do
+# 	echo "resultSet[$xx] = >${resultSet[$xx]}<"
+# done
+# )
+#
 #=======================================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -98,3 +106,4 @@ export -f GetExcel
 ## 10-12-2017 @ 14.25.59 - ("2.1.1")   - dscudiero - Use readarray to build the resultSet array
 ## 10-31-2017 @ 10.57.27 - ("2.1.5")   - dscudiero - Cleanup includes list
 ## 07-09-2018 @ 16:33:09 - 2.1.8 - dscudiero - Switch the python code directory
+## 07-24-2018 @ 10:32:16 - 2.1.9 - dscudiero - Add example
