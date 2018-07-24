@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.0.1" # -- dscudiero -- Fri 04/27/2018 @  9:11:39.39
+# version="1.0.2" # -- dscudiero -- Tue 07/24/2018 @ 10:31:08
 #=======================================================================================================================
 # Retrieve data from a Excel xlsx spreadsheet
 #==================================================================================================================================
@@ -16,6 +16,15 @@
 # 	-f | --cellFormat <format> -- optional, the format to apply to the cell
 # 	-v  | -verboseLevel <level> -- optional, defaults to 0
 # Returns data as standard out
+#
+# excelFile="$HOME/tools/workbooks/courseleafPatchControlNew.xlsx"
+# time ( ExcelUtilities -wb "$excelFile" -ws 'sheets'
+# echo "\${#resultSet[@]} = '${#resultSet[@]}'"
+# for ((xx=0; xx<${#resultSet[@]}; xx++)); do
+# 	echo "resultSet[$xx] = >${resultSet[$xx]}<"
+# done
+# )
+#
 #=======================================================================================================================
 # Copyright 2018 David Scudiero -- all rights reserved.
 #=======================================================================================================================
@@ -57,3 +66,4 @@ export -f ExcelUtilities
 #=======================================================================================================================
 ## 04-26-2018 @ 14:10:24 - 1.0.0 - dscudiero - Turn on auto numbering
 ## 04-27-2018 @ 09:21:02 - 1.0.1 - dscudiero - Fix name
+## 07-24-2018 @ 10:32:07 - 1.0.2 - dscudiero - Add example
