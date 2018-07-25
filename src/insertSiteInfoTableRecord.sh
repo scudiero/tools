@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version=1.1.148 # -- dscudiero -- Fri 04/20/2018 @  8:02:34.99
+version="1.2.2" # -- dscudiero -- Wed 07/25/2018 @ 11:15:31
 #==================================================================================================
 TrapSigs 'on'
 
@@ -162,10 +162,9 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 			sqlStmt="update $useSiteInfoTable set $setStr where siteId=\"$siteId\""
 			RunSql $sqlStmt
 			return 0
+	else
+		unset archives
 	fi #[[ $env = 'preview' || $env = 'public' ]]
-
-## NOT [[ $env = 'preview' || $env = 'public' ]]
-	archives=NULL
 
 ## Get CIMS
 	unset cimStr cims
@@ -175,7 +174,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 
 ## Get the cimVer
 	clverFile="$siteDir/web/courseleaf/cim/clver.txt"
-	cimVer=NULL
+	unset cimVer
 	if [[ -r $clverFile ]]; then
 		cimVer=$(cat $clverFile);
 		cimVer=$(cut -d":" -f2 <<< $cimVer | tr -d '\040\011\012\015');
@@ -186,7 +185,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 ## Get the catVer
 	clverFile="$siteDir/web/courseleaf/clver.txt"
 	defaultTcfFile="$siteDir/web/courseleaf/default.tcf"
-	catVer=NULL
+	unset catVer
 	if [[ -r $clverFile ]]; then
 		catVer=$(cat $clverFile);
 		catVer=$(cut -d":" -f2 <<< $catVer | tr -d '\040\011\012\015');
@@ -200,7 +199,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 
 ## Get the clssVer
 	clverFile="$siteDir/web/wen/clver.txt"
-	clssVer=NULL
+	unset clssVer
 	if [[ -r $clverFile ]]; then
 		clssVer=$(cat $clverFile);
 		clssVer=$(cut -d":" -f2 <<< $clssVer | tr -d '\040\011\012\015');
@@ -219,7 +218,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 	dump -2 -t courseleafCgiVer
 
 ## Get the reportsVer
-	reportsVer=NULL
+	unset reportsVer
 	checkFile="$siteDir/web/courseleaf/localsteps/reports.js"
 	if [[ -r "$checkFile" ]]; then
 		reportsVer="$(ProtectedCall "grep -s -m 1 'version:' $checkFile")"
@@ -231,7 +230,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 	dump -2 -t reportsVer
 
 	## Get daily.sh versions
-		dailyshVer=NULL
+		unset dailyshVer
 		checkFile="$siteDir/bin/daily.sh"
 		if [[ -r $checkFile ]]; then
 			grepStr=$(ProtectedCall "grep '## Nightly cron job for client' $checkFile")
@@ -248,7 +247,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 		dump -2 -t dailyshVer
 
 ## Get the edition variable
-	catEdition=NULL
+	unset catEdition
 	checkFile="$siteDir/web/courseleaf/localsteps/default.tcf"
 	if [[ -f $checkFile ]]; then
 		catEdition=$(cut -d":" -f2 <<< $(ProtectedCall "grep '^edition:' $checkFile") | tr -d '\040\011\012\015');
@@ -257,8 +256,8 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 	dump -2 -t catEdition
 
 ## Get the publishing
-	publishTarget=NULL
-	if [[ "$env" = 'next' || "$env" = 'curr' ]]; then
+	unset publishTarget
+	if [[  "$env" = 'test' || "$env" = 'next' || "$env" = 'curr' ]]; then
 		checkFile="$siteDir/courseleaf.cfg"
 		if [[ -f $checkFile ]]; then
 			mapfileProd=$(ProtectedCall "grep '^mapfile:production|' $checkFile");
@@ -272,7 +271,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 	dump -2 -t publishTarget
 
 ## See if site has degree works tools enabled
-	degreeWorks=NULL
+	unset degreeWorks
 	if [[ "$env" != 'preview' && "$env" != 'public' ]]; then
 		checkFile="$siteDir/web/courseleaf/index.tcf"
 		if [[ -f $checkFile ]]; then
@@ -416,3 +415,4 @@ return 0
 ## 03-22-2018 @ 14:06:41 - 1.1.146 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 16:18:51 - 1.1.147 - dscudiero - D
 ## 04-20-2018 @ 08:03:23 - 1.1.148 - dscudiero - Only grep files if they are readable
+## 07-25-2018 @ 11:18:02 - 1.2.2 - dscudiero - Set courseleaf data to "" instead of null if data not found for the site
