@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version="1.2.2" # -- dscudiero -- Wed 07/25/2018 @ 11:15:31
+version="1.2.3" # -- dscudiero -- Wed 07/25/2018 @ 11:31:21
 #==================================================================================================
 TrapSigs 'on'
 
@@ -115,8 +115,8 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 	dump -2 -t googletype
 
 ## Preview or Public -- Parse archives and write out a short record
+	unset archives archiveDir
 	if [[ $env == 'preview' || $env == 'public' ]]; then
-		unset archives archiveDir
 		#Check to see if the curr or next sites have archive path set, if the do then lookup archive directories
 		for checkEnv in next curr; do
 			unset archiveRoot archiveDir
@@ -152,10 +152,10 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 					cd $cwd
 				fi
 			fi
-			[[ $archives != '' ]] && break
+			[[ -n $archives ]] && break
 		done;
 		## Check to see what archives are active
-			[[ -z $archives ]] && archives=NULL || archives="\"$archives\""
+			archives="\"$archives\""
 			dump -2 archives
 		## Write out the record
 			setStr="url=$url,archives=$archives,googleType=$googleType"
@@ -163,8 +163,9 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 			RunSql $sqlStmt
 			return 0
 	else
-		unset archives
+		archives="\"$archives\""
 	fi #[[ $env = 'preview' || $env = 'public' ]]
+	archives="\"$archives\""
 
 ## Get CIMS
 	unset cimStr cims
@@ -416,3 +417,4 @@ return 0
 ## 03-23-2018 @ 16:18:51 - 1.1.147 - dscudiero - D
 ## 04-20-2018 @ 08:03:23 - 1.1.148 - dscudiero - Only grep files if they are readable
 ## 07-25-2018 @ 11:18:02 - 1.2.2 - dscudiero - Set courseleaf data to "" instead of null if data not found for the site
+## 07-26-2018 @ 06:51:39 - 1.2.3 - dscudiero - Do not store empty values as null, switch to ""
