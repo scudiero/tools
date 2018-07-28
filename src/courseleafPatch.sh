@@ -242,8 +242,17 @@ function processGitRecord {
 	fi
 
 	## Get the list of files that will change with the checkout
-	gitCmd="git diff --name-only $gitTag"
-	unset gitCmdOut; gitCmdOut=$(ProtectedCall "$gitCmd")
+	## Determine whether we are targeting a tag or a branch
+	## If we are targeting a branch, compare against origin for diff
+	## If we are targeting a tag, compare against local for diff
+	unset gitBranchCount; gitBranchCount=$(git show-ref "refs/heads/$gitTag" | wc -l)
+	if [[ $gitBranchCount > 0 ]]; then
+		gitCmd="git diff --name-only origin/$gitTag"
+	else
+		gitCmd="git diff --name-only $gitTag"
+	fi
+	unset gitCmdOut; gitCmdOut=$(ProtectedCall $gitCmd)
+	
 	## Do we have anything to update?
 	if [[ -n $gitCmdOut ]]; then
 		readarray -t gitFilesUpdated <<< "${gitCmdOut}"
@@ -260,7 +269,15 @@ function processGitRecord {
 			ProtectedCall "$gitCmd" | Indent
 			[[ $verboseLevel -eq 0 ]] && gitCmd="git checkout --force --quiet $gitTag &> /dev/null" || gitCmd="git checkout --force $gitTag"
 			ProtectedCall "$gitCmd" | Indent;
-			## If we are going to generate a patch package then write the changed files to the staging directory
+		## If we are on a branch, perform a git pull
+		## TODO A reset will not remove any conflicting added files as the reset is done
+		## to the already checked out hash. To remove conflicts on a pull, fully remove any added files
+		## reported by the preceding git diff
+			if [[ $gitBranchCount > 0 ]]; then
+				gitCmd="git pull --quiet";
+				ProtectedCall "$gitCmd" | Indent;
+			fi
+		## If we are going to generate a patch package then write the changed files to the staging directory
 			if [[ $buildPatchPackage == true ]]; then 
 				for ((bCntr=0; bCntr<${#gitFilesUpdated[@]}; bCntr++)); do
 					Msg L "\n\t\t$repoName.git ($gitTag) -- ${specTarget}/${gitFilesUpdated[$bCntr]}"
