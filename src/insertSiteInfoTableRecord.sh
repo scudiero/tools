@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version="1.2.3" # -- dscudiero -- Wed 07/25/2018 @ 11:31:21
+version="1.2.4" # -- dscudiero -- Mon 07/30/2018 @ 07:56:08
 #==================================================================================================
 TrapSigs 'on'
 
@@ -194,7 +194,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 		catVer=$(ProtectedCall "grep '^clver:' $defaultTcfFile");
 		catVer=$(cut -d":" -f2 <<< $catVer | tr -d '\040\011\012\015');
 	fi
-	[[ -z $catVer ]] && catVer=NULL
+	#[[ -z $catVer ]] && catVer=NULL
 	[[ $catVer != 'NULL' ]] && catVer=\""$catVer"\"
 	dump -2 -t catVer
 
@@ -210,7 +210,8 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 	dump -2 -t clssVer
 
 ## Get the cgiVersion
-	courseleafCgiVer=NULL
+	unset courseleafCgiVer
+	#courseleafCgiVer=NULL
 	cgiFile="$siteDir/web/courseleaf/courseleaf.cgi"
 	if [[ -x "$cgiFile" ]]; then
 		courseleafCgiVer="$($cgiFile -v  2> /dev/null | cut -d" " -f3)"
@@ -225,7 +226,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 		reportsVer="$(ProtectedCall "grep -s -m 1 'version:' $checkFile")"
 		reportsVer=${reportsVer##*: }
 		reportsVer=$(CleanString "$reportsVer")
-		[[ -z $reportsVer ]] && reportsVer=NULL
+		#[[ -z $reportsVer ]] && reportsVer=NULL
 	fi
 	[[ $reportsVer != 'NULL' ]] && reportsVer=\""$reportsVer"\"
 	dump -2 -t reportsVer
@@ -418,3 +419,4 @@ return 0
 ## 04-20-2018 @ 08:03:23 - 1.1.148 - dscudiero - Only grep files if they are readable
 ## 07-25-2018 @ 11:18:02 - 1.2.2 - dscudiero - Set courseleaf data to "" instead of null if data not found for the site
 ## 07-26-2018 @ 06:51:39 - 1.2.3 - dscudiero - Do not store empty values as null, switch to ""
+## 07-30-2018 @ 07:57:21 - 1.2.4 - dscudiero - Fix more issues setting values to NULL messing up courseleaf dbQUery
