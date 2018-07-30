@@ -214,6 +214,8 @@ function processGitRecord {
 		[[ -f ".${srcGitFile}ignore" ]] && cp -fp ".${srcGitFile}ignore" '.'
 		## Make the local git repo a real worktree, need to hack the config file since our git is so down level.  Need this for git diff to work
 		sed -i s"/bare = true/bare = false/" "$tgtDir/${specTarget}/.git/config"
+		## Make sure git repository is up to date with origin
+		ProtectedCall "git fetch"
 		Msg "^Local repository created"
 	else
 		## Make sure git repository is up to date with origin
