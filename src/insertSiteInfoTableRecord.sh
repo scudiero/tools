@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version="1.2.4" # -- dscudiero -- Mon 07/30/2018 @ 07:56:08
+version="1.2.5" # -- dscudiero -- Mon 08/06/2018 @ 07:52:24
 #==================================================================================================
 TrapSigs 'on'
 
@@ -420,3 +420,4 @@ return 0
 ## 07-25-2018 @ 11:18:02 - 1.2.2 - dscudiero - Set courseleaf data to "" instead of null if data not found for the site
 ## 07-26-2018 @ 06:51:39 - 1.2.3 - dscudiero - Do not store empty values as null, switch to ""
 ## 07-30-2018 @ 07:57:21 - 1.2.4 - dscudiero - Fix more issues setting values to NULL messing up courseleaf dbQUery
+## 08-06-2018 @ 07:54:20 - 1.2.5 - dscudiero - Cosmetic/minor change/Sync
