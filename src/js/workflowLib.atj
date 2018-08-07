@@ -1,6 +1,6 @@
 //======================================================================================================================
-wfLibVersion="1.9.56" // -- dscudiero -- Wed 07/11/2018 @ 16:07:00
-attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
+wfLibVersion="1.9.58" // -- dscudiero -- Tue 08/07/2018 @ 16:20:45
+//attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
 // Common workflow functions and helper functions to support workflow
@@ -1450,7 +1450,7 @@ GetAttrVal = function(data) {
 		}
 
 	// If there is no value and we are in a debug environment then return a dummy variable
-		if (retArray.length <= 0 && wfEnvIsDev) {
+		if (retArray.length <= 0 && wfEnvIsDev && wfDebugLevel > 0) {
 			if (reqType.indexOf("col") >= 0 || optionStr.indexOf("col") >= 0) {
 				retArray.push("DUMMY-COLLEGE");
 			} else if (reqType.indexOf("dep") >= 0 || optionStr.indexOf("dep") >= 0) {
@@ -2691,3 +2691,4 @@ var wfLibLoaded=true;
 // 07-10-2018 @ 10:28:22 - 1.9.49 - dscudiero - Updated how related gets the data for the form variable
 // 07-11-2018 @ 12:06:32 - 1.9.54 - dscudiero - Update noWorkflow to allow passing in the list of steps to add to the workflow
 // 07-11-2018 @ 16:17:11 - 1.9.56 - dscudiero - Remove getProposalMode
+// 08-07-2018 @ 16:23:02 - 1.9.58 - dscudiero - Do not substitute 'DUMMY-xxx' values unless wfdebuglevel > 0
