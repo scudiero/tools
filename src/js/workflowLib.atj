@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.9.58" // -- dscudiero -- Tue 08/07/2018 @ 16:20:45
+wfLibVersion="1.9.59" // -- dscudiero -- Wed 08/08/2018 @ 10:05:37
 //attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -1380,6 +1380,7 @@ GetAttrVal = function(data) {
 		wfDump(5,["\t" + subjVarName + " from tcfdata;"+subjects.toSource()])
 		if (subjects.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
+			wfDebug(5,"\t'subjects' from wffuncs.getSubjects: '" + subjects + "'");
 		}
 
 		departments=getTCFValue(deptVarName, { delimiter: "\n", retarray: true });
@@ -1396,6 +1397,7 @@ GetAttrVal = function(data) {
 		wfDump(5,["\t" + deptVarName + " from tcfdata;"+departments.toSource()])
 		if (departments.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			departments=wffuncs.getDepartments(subjects);
+			wfDebug(5,"\t'departments' from wffuncs.getDepartments: '" + departments + "'");
 		}
 
 		colleges=getTCFValue(colVarName, { delimiter: "\n", retarray: true });
@@ -1421,6 +1423,7 @@ GetAttrVal = function(data) {
 		wfDump(5,["\t" + colVarName + " from tcfdata;"+colleges.toSource()])
 		if (colleges.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			colleges=wffuncs.getColleges(departments);
+			wfDebug(5,"\t'colleges' from wffuncs.getColleges: '" + colleges + "'");
 		}
 
 	// return data based on how we were called
@@ -2692,3 +2695,4 @@ var wfLibLoaded=true;
 // 07-11-2018 @ 12:06:32 - 1.9.54 - dscudiero - Update noWorkflow to allow passing in the list of steps to add to the workflow
 // 07-11-2018 @ 16:17:11 - 1.9.56 - dscudiero - Remove getProposalMode
 // 08-07-2018 @ 16:23:02 - 1.9.58 - dscudiero - Do not substitute 'DUMMY-xxx' values unless wfdebuglevel > 0
+// 08-08-2018 @ 11:05:49 - 1.9.59 - dscudiero - Add debug statements to GetAttrVal
