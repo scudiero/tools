@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.36" # -- dscudiero -- Wed 07/18/2018 @ 09:47:19
+version="2.2.37" # -- dscudiero -- Fri 08/10/2018 @ 12:16:32
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -257,9 +257,9 @@ case "$hostName" in
 				# 	Msg "...syncCourseleafGitRepos done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 				# fi
 				if [[ $(date "+%H") == 22 && $userName == 'dscudiero' ]]; then 
-					Msg "\n$(date +"%m/%d@%H:%M") - Running backupData ..."
-					TrapSigs 'off'; FindExecutable -sh -uselocal -run backupData; TrapSigs 'on'
-					Msg "...backupData done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+					# Msg "\n$(date +"%m/%d@%H:%M") - Running backupData ..."
+					# TrapSigs 'off'; FindExecutable -sh -uselocal -run backupData; TrapSigs 'on'
+					# Msg "...backupData done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 					## Remove all hourly log files older than 24 hrs
 					pushd "$(dirname "$logFile")" >& /dev/null
 					find . -mtime +0 -exec rm -f '{}' \;
@@ -373,3 +373,4 @@ return 0
 ## 07-03-2018 @ 10:26:14 - 2.2.34 - dscudiero - Remove verbose from loadPatchData call
 ## 07-09-2018 @ 14:09:38 - 2.2.35 - dscudiero - Only run backupData for dscudiero
 ## 07-18-2018 @ 09:48:02 - 2.2.36 - dscudiero - Comment out the turning  off of TrapSigs arround the pgms calls
+## 08-10-2018 @ 12:17:05 - 2.2.37 - dscudiero - Comment out the backupData call
