@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.44" # -- dscudiero -- Thu 05/10/2018 @ 16:40:26.04
+# version="1.0.53" # -- dscudiero -- Mon 08/13/2018 @ 13:29:11
 #===================================================================================================
 # Various data manipulation functions for courseleaf things
 #===================================================================================================
@@ -8,41 +8,67 @@
 # All rights reserved
 #===================================================================================================
 
+
+#===================================================================================================
+# Return the file/directory pointed to by a mapfile entry in courseleaf.cfg
+# Usage: ParseMapFile <siteDir> <mapFileKey>
+# Returns: (stdout) fully qualified file or directory name, null string if no mapfile key found
+#===================================================================================================
+function ParseMapFile {
+	Import "ProtectedCall"
+
+	local siteDir="$1"; shift
+	local mapFileKey="$1"; shift || true
+
+	local retVal
+	grepStr=$(ProtectedCall "grep \"^mapfile:$mapFileKey\" \"$siteDir/courseleaf.cfg\"")
+	if [[ -n $grepStr ]]; then
+		local tmpStr="${grepStr##*|}"
+		pushd "$siteDir/web/courseleaf" &> /dev/null
+		cd "$tmpStr"
+		retVal="$(pwd)"
+		popd &> /dev/null
+	fi
+	echo "$retVal"
+	return 0
+}
+export -f ParseMapFile
+
 #===================================================================================================
 # Return the product version string
 # Usage: GetProductVersion <product> <siteDir>
 # Returns: (stdout) productVersion, null string if no version data found
 #===================================================================================================
-	function GetProductVersion {
-		local product=$1
-		local siteDir=$2
-		local verFile prodVer
+function GetProductVersion {
+	local product=$1
+	local siteDir=$2
+	local verFile prodVer
 
-		case "$product" in
-			cat|courseleaf)
-				verFile="$siteDir/web/courseleaf/clver.txt"						## A normal siteDir
-				[[ ! -r $verFile ]] && verFile="$siteDir/courseleaf/clver.txt"	## a git repo shadow
+	case "$product" in
+		cat|courseleaf)
+			verFile="$siteDir/web/courseleaf/clver.txt"						## A normal siteDir
+			[[ ! -r $verFile ]] && verFile="$siteDir/courseleaf/clver.txt"	## a git repo shadow
+			if [[ -r $verFile ]]; then
+				prodVer=$(cut -d":" -f2 <<< $(cat $verFile))
+			else
+				verFile=$siteDir/web/courseleaf/default.tcf 				## look in the /courseleaf/default.tcf file
 				if [[ -r $verFile ]]; then
-					prodVer=$(cut -d":" -f2 <<< $(cat $verFile))
-				else
-					verFile=$siteDir/web/courseleaf/default.tcf 				## look in the /courseleaf/default.tcf file
-					if [[ -r $verFile ]]; then
-						prodVer=$(ProtectedCall "grep '^clver:' $verFile");
-						prodVer=$(cut -d":" -f2 <<< $prodVer);
-					fi
+					prodVer=$(ProtectedCall "grep '^clver:' $verFile");
+					prodVer=$(cut -d":" -f2 <<< $prodVer);
 				fi
-				;;
-			cim)
-				verFile="$siteDir/web/courseleaf/cim/clver.txt"				## A normal siteDir
-				[[ ! -r $verFile ]] && verFile="$siteDir/cim/clver.txt" 	## a git repo shadow
-				[[ -r $verFile ]] && prodVer=$(cut -d":" -f2 <<< $(cat $verFile))
-				;;
-		esac
-		prodVer=${prodVer%% *} ; prodVer=${prodVer%%rc*}
+			fi
+			;;
+		cim)
+			verFile="$siteDir/web/courseleaf/cim/clver.txt"				## A normal siteDir
+			[[ ! -r $verFile ]] && verFile="$siteDir/cim/clver.txt" 	## a git repo shadow
+			[[ -r $verFile ]] && prodVer=$(cut -d":" -f2 <<< $(cat $verFile))
+			;;
+	esac
+	prodVer=${prodVer%% *} ; prodVer=${prodVer%%rc*}
 
-		echo "$prodVer"
-		return 0
-	} #GetProductVersion
+	echo "$prodVer"
+	return 0
+} #GetProductVersion
 export -f GetProductVersion
 
 #===================================================================================================
@@ -612,3 +638,4 @@ export -f GetCims
 ## 05-03-2018 @ 14:27:56 - 1.0.35 - dscudiero - Allow 'courseleaf' as a product
 ## 05-07-2018 @ 14:24:27 - 1.0.43 - dscudiero - Cosmetic/minor change/Sync
 ## 05-10-2018 @ 16:40:44 - 1.0.44 - dscudiero - Remove debug statements
+## 08-13-2018 @ 13:35:48 - 1.0.53 - dscudiero - Add the ParseMapFile function
