@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.13.79" # -- dscudiero -- Wed 13/06/2018 @ 13:52:03
+version="4.13.83" # -- dscudiero -- Tue 08/14/2018 @ 07:18:00
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -421,6 +421,12 @@ dump -1 skipCim skipCat skipClss skipAlso
 	[[ -f $rsyncFilters ]] && rm $rsyncFilters
 
 if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
+	# Find the localsteps directory
+	unset localstepsDir
+	localstepsDir=$(ParseMapFile "$siteDir" 'localsteps')
+	[[ -z $localstepsDir ]] && localstepsDir="$siteDir/web/courseleaf/localsteps"
+	[[ ! -d $localstepsDir ]] && Terminate "Could not locate the localsteps directory ('$localstepsDir')"
+
 	# Turn off publishing
 		Msg "\nTurn off Publishing..."
 		editFile="$tgtDir/$progDir.cfg"
@@ -433,17 +439,20 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 
 	# Turn off remote authenticaton
 		Msg "Turn off Authentication..."
-		$DOIT sed -i s'_^authuser:true_//authuser:true_' $tgtDir/$progDir.cfg
-		for file in default.tcf localsteps/default.tcf; do
-			$DOIT sed -i s'_^authuser:true_//authuser:true_' $tgtDir/web/$progDir/$file
-			$DOIT sed -i s'_^casurl:_//casurl:_' $tgtDir/web/$progDir/$file
-			$DOIT sed -i s'_^loginurl:_//loginurl:_' $tgtDir/web/$progDir/$file
-			$DOIT sed -i s'_^logouturl:_//logouturl:_' $tgtDir/web/$progDir/$file
-		done
+		$DOIT sed -i s'_^authuser:true_//authuser:true_' "$tgtDir/$progDir.cfg"
+		$DOIT sed -i s'_^authuser:true_//authuser:true_' "$tgtDir/web/$progDir/default.tcf"
+		$DOIT sed -i s'_^casurl:_//casurl:_' "$tgtDir/web/$progDir/default.tcf"
+		$DOIT sed -i s'_^loginurl:_//loginurl:_' "$tgtDir/web/$progDir/default.tcf"
+		$DOIT sed -i s'_^logouturl:_//logouturl:_' "$tgtDir/web/$progDir/default.tcf"
+
+		$DOIT sed -i s'_^authuser:true_//authuser:true_' "$localstepsDir/default.tcf"
+		$DOIT sed -i s'_^casurl:_//casurl:_' "$localstepsDir/default.tcf"
+		$DOIT sed -i s'_^loginurl:_//loginurl:_' "$localstepsDir/default.tcf"
+		$DOIT sed -i s'_^logouturl:_//logouturl:_' "$localstepsDir/default.tcf"
 
 	# Turn off PDF generation
 		Msg "Turn off PDF generation..."
-		$DOIT sed -i s'_^pdfeverypage:true$_//pdfeverypage:true_' $tgtDir/web/$progDir/localsteps/default.tcf
+		$DOIT sed -i s'_^pdfeverypage:true$_//pdfeverypage:true_' $localstepsDir/default.tcf
 
 	# leepfrog user account
 		Msg "Adding user-ids to $progDir.cfg file..."
@@ -457,7 +466,7 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 
 	# Set nexturl so wf emails point to local instance
 		Msg "Changing 'nexturl' to point to local instance..."
-		editFile="$tgtDir/web/courseleaf/localsteps/default.tcf"
+		editFile="$localstepsDir/default.tcf"
 		clientToken=$(cut -d'/' -f5 <<< $tgtDir)
 		toStr="nexturl:https://$clientToken.$(cut -d '/' -f3 <<< $tgtDir).leepfrog.com"
 		unset grepStr; grepStr=$(ProtectedCall "grep "^$toStr" $editFile")
@@ -477,7 +486,7 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 			if [[ -d $tgtDir/web/admin/wfemail ]]; then
 				editFile=$tgtDir/web/admin/wfemail/index.tcf
 			else
-				editFile=$tgtDir/web/$progDir/localsteps/default.tcf
+				editFile=$localstepsDir/default.tcf
 			fi
 			toStr="wfemail_testaddress:$email"
 			unset fromStr; fromStr=$(ProtectedCall "grep ^'wfemail_testaddress:' $editFile")
@@ -705,3 +714,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 06-01-2018 @ 11:00:32 - 4.13.78 - dscudiero - Use the clientData hash to get the client data
 ## 06-13-2018 @ 13:52:33 - 4.13.79 - dscudiero - Cosmetic/minor change/Sync
 ## 06-27-2018 @ 15:21:16 - 4.13.79 - dscudiero - Cleaned up logic that examines the products string
+## 08-14-2018 @ 07:25:38 - 4.13.83 - dscudiero - Update tocheck if there is a localsteps mapfile record in courseleaf.cfg
