@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.32" # -- dscudiero -- Tue 05/22/2018 @  8:38:46.87
+# version="2.0.39" # -- dscudiero -- Wed 08/15/2018 @ 11:58:37
 #===================================================================================================
 ## Make sure the user really wants to do this
 ## If the first argument is 'loop' then loop back to self if user responds with 'n'
@@ -39,9 +39,10 @@ function VerifyContinue {
 				[[ ${argL:0:7} == 'warning' ]] && Msg "^$(ColorW "${tmpStr}")${argVal}" || Msg "^$(ColorK "${tmpStr}")${argVal}" 
 			fi
 		done
-
-		[[ $testMode == true ]] && Msg "^$(ColorE "*** Running in Test Mode ***")"
-		[[ $informationOnlyMode == true ]] && Msg "^$(ColorE "*** Information only mode, no data will be modified ***")"
+		[[ $testMode == true || $informationOnlyMode == true || -n "$DOIT" ]] && echo
+		[[ $testMode == true ]] && Warning 0 1 "*** Running in Test Mode ***"
+		[[ $informationOnlyMode == true ]] && Warning 0 1 "*** Information only mode, no data will be modified ***"
+		[[ -n "$DOIT" ]] && Warning 0 1 "The 'DOIT' flag is turned off, changes not committed"
 	fi
 
 	if [[ $verify == true && $quiet != true && $go != true ]]; then
@@ -84,3 +85,4 @@ export -f VerifyContinue
 ## 05-08-2018 @ 13:27:21 - 2.0.28 - dscudiero - Remove the 'Auto process all items message
 ## 05-22-2018 @ 08:39:47 - 2.0.32 - dscudiero - Add displaying array values vertically
 ## 06-19-2018 @ 11:19:41 - 2.0.32 - dscudiero - Add formatting for title lines and align elements with leading tabs
+## 08-15-2018 @ 11:59:17 - 2.0.39 - dscudiero - Add additional messaging if data will not be committed
