@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.13.83" # -- dscudiero -- Tue 08/14/2018 @ 07:18:00
+version="4.13.89" # -- dscudiero -- Wed 08/15/2018 @ 12:36:34
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -245,7 +245,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 
 #==================================================================================================
 ## See if there are any additional directories the user wants to skip
-if [[ $verify == true && $fullCopy != true ]]; then
+if [[ $verify == true && $fullCopy != true && -z $products ]]; then
 	echo
 	unset ans; Prompt ans "Do you wish to specify which file sets to EXCLUDE" 'No Yes' 'No'; ans=${ans:0:1}; ans=${ans,,[a-z]}
 	if [[ $ans == 'y' ]]; then
@@ -423,9 +423,9 @@ dump -1 skipCim skipCat skipClss skipAlso
 if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 	# Find the localsteps directory
 	unset localstepsDir
-	localstepsDir=$(ParseMapFile "$siteDir" 'localsteps')
-	[[ -z $localstepsDir ]] && localstepsDir="$siteDir/web/courseleaf/localsteps"
-	[[ ! -d $localstepsDir ]] && Terminate "Could not locate the localsteps directory ('$localstepsDir')"
+	localstepsDir=$(ParseMapFile "$tgtDir" 'localsteps')
+	[[ -z $localstepsDir ]] && localstepsDir="$tgtDir/web/courseleaf/localsteps"
+	[[ ! -d $localstepsDir && -z $DOIT ]] && Terminate "Could not locate the localsteps directory ('$localstepsDir')"
 
 	# Turn off publishing
 		Msg "\nTurn off Publishing..."
@@ -439,30 +439,34 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 
 	# Turn off remote authenticaton
 		Msg "Turn off Authentication..."
-		$DOIT sed -i s'_^authuser:true_//authuser:true_' "$tgtDir/$progDir.cfg"
-		$DOIT sed -i s'_^authuser:true_//authuser:true_' "$tgtDir/web/$progDir/default.tcf"
-		$DOIT sed -i s'_^casurl:_//casurl:_' "$tgtDir/web/$progDir/default.tcf"
-		$DOIT sed -i s'_^loginurl:_//loginurl:_' "$tgtDir/web/$progDir/default.tcf"
-		$DOIT sed -i s'_^logouturl:_//logouturl:_' "$tgtDir/web/$progDir/default.tcf"
+		editFile="$tgtDir/$progDir.cfg"
+		$DOIT sed -i s'_^authuser:true_//authuser:true_' "$editFile"
+		editFile="$tgtDir/web/$progDir/default.tcf"
+		$DOIT sed -i s'_^authuser:true_//authuser:true_' "$editFile"
+		$DOIT sed -i s'_^casurl:_//casurl:_' "$editFile"
+		$DOIT sed -i s'_^loginurl:_//loginurl:_' "$editFile"
+		$DOIT sed -i s'_^logouturl:_//logouturl:_' "$editFile"
 
-		$DOIT sed -i s'_^authuser:true_//authuser:true_' "$localstepsDir/default.tcf"
-		$DOIT sed -i s'_^casurl:_//casurl:_' "$localstepsDir/default.tcf"
-		$DOIT sed -i s'_^loginurl:_//loginurl:_' "$localstepsDir/default.tcf"
-		$DOIT sed -i s'_^logouturl:_//logouturl:_' "$localstepsDir/default.tcf"
+		editFile="$localstepsDir/default.tcf"
+		$DOIT sed -i s'_^authuser:true_//authuser:true_' "$editFile"
+		$DOIT sed -i s'_^casurl:_//casurl:_' "$editFile"
+		$DOIT sed -i s'_^loginurl:_//loginurl:_' "$editFile"
+		$DOIT sed -i s'_^logouturl:_//logouturl:_' "$editFile"
 
 	# Turn off PDF generation
 		Msg "Turn off PDF generation..."
-		$DOIT sed -i s'_^pdfeverypage:true$_//pdfeverypage:true_' $localstepsDir/default.tcf
+		$DOIT sed -i s'_^pdfeverypage:true$_//pdfeverypage:true_' "$editFile"
 
 	# leepfrog user account
 		Msg "Adding user-ids to $progDir.cfg file..."
-		$DOIT echo "user:$leepfrogUserId|$leepfrogPw||admin" >> $tgtDir/$progDir.cfg
+		editFile="$tgtDir/$progDir.cfg"
+		$DOIT echo "user:$leepfrogUserId|$leepfrogPw||admin" >> "$editFile"
 		Msg "^'$leepfrogUserId' added as an admin with pw: '<normal pw>'"
-		$DOIT echo "user:test|test||" >> $tgtDir/$progDir.cfg
+		$DOIT echo "user:test|test||" >> "$editFile"
 		Msg "^'test' added as a normal user with pw: 'test'"
-		[[ $tmpStr != 'luc20' ]] && $DOIT echo "user:$client|$client||admin" >> $tgtDir/$progDir.cfg
-		$DOIT echo "user:$client|$client||admin" >> $tgtDir/$progDir.cfg
-		[[ -n $forUser ]] && $DOIT echo "user:$userAccount|$userPassword||admin" >> $tgtDir/$progDir.cfg
+		[[ $tmpStr != 'luc20' ]] && $DOIT echo "user:$client|$client||admin" >> "$editFile"
+		$DOIT echo "user:$client|$client||admin" >> "$editFile"
+		[[ -n $forUser ]] && $DOIT echo "user:$userAccount|$userPassword||admin" >> "$editFile"
 
 	# Set nexturl so wf emails point to local instance
 		Msg "Changing 'nexturl' to point to local instance..."
@@ -557,7 +561,7 @@ fi
 	fi
 
 ## If we have cims and copying from test or next and lock is on then comment out workflow mgmt records on the console
-	if [[ $srcEnv == 'next' || $srcEnv == 'test' ]] && [[ -n $lockWorkflows ]]; then
+	if [[ $srcEnv == 'next' || $srcEnv == 'test' ]] && [[ -n $lockWorkflows ]] && [[ $userName == 'dscudiero' ]]; then
 		Warning "Disabling workflow modifications in the '${srcEnv^^[a-z]}' environment"
 		editFile="$srcDir/web/courseleaf/index.tcf"
 		for cim in $(tr ',' ' ' <<< "$lockWorkflows"); do
@@ -715,3 +719,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 06-13-2018 @ 13:52:33 - 4.13.79 - dscudiero - Cosmetic/minor change/Sync
 ## 06-27-2018 @ 15:21:16 - 4.13.79 - dscudiero - Cleaned up logic that examines the products string
 ## 08-14-2018 @ 07:25:38 - 4.13.83 - dscudiero - Update tocheck if there is a localsteps mapfile record in courseleaf.cfg
+## 08-15-2018 @ 13:29:23 - 4.13.89 - dscudiero - Updated code that updates localsteps/default.tcf
