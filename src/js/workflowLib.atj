@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.9.59" // -- dscudiero -- Wed 08/08/2018 @ 10:05:37
+wfLibVersion="1.9.67" // -- dscudiero -- Thu 08/16/2018 @ 16:40:33
 //attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -1380,7 +1380,8 @@ GetAttrVal = function(data) {
 		wfDump(5,["\t" + subjVarName + " from tcfdata;"+subjects.toSource()])
 		if (subjects.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			subjects=wffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));
-			wfDebug(5,"\t'subjects' from wffuncs.getSubjects: '" + subjects + "'");
+			wfDump(5,["\t allCodes from wffuncs.getAllCodes(tcfdata));"+wffuncs.getAllCodes(tcfdata).toSource()])
+			wfDump(5,["\t" + subjVarName + " from wwffuncs.getSubjects(wffuncs.getAllCodes(tcfdata));"+subjects.toSource()])
 		}
 
 		departments=getTCFValue(deptVarName, { delimiter: "\n", retarray: true });
@@ -1389,6 +1390,7 @@ GetAttrVal = function(data) {
 		if (departments.length === 0 && subjects.length > 0) {
 			resultSet=LookupCode2("dept","subj",subjects);
 			if (resultSet.length > 0) {
+				wfDump(5,"\t\tresultSet d/s",resultSet.toSource());
 				resultSet.forEach(function(result) {
 					departments.push(result.dbData);
 				});
@@ -1397,7 +1399,7 @@ GetAttrVal = function(data) {
 		wfDump(5,["\t" + deptVarName + " from tcfdata;"+departments.toSource()])
 		if (departments.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			departments=wffuncs.getDepartments(subjects);
-			wfDebug(5,"\t'departments' from wffuncs.getDepartments: '" + departments + "'");
+			wfDump(5,["\t" + deptVarName + " from wffuncs.getDepartments;"+departments.toSource()])
 		}
 
 		colleges=getTCFValue(colVarName, { delimiter: "\n", retarray: true });
@@ -1406,6 +1408,7 @@ GetAttrVal = function(data) {
 		if(colleges.length === 0 && subjects.length != 0) {
 			resultSet=LookupCode2("cols","subj",subjects);
 			if (resultSet.length > 0) {
+				wfDump(5,"\t\tresultSet c/s",resultSet.toSource());
 				resultSet.forEach(function(result) {
 					colleges.push(result.dbData);
 				});
@@ -1414,16 +1417,17 @@ GetAttrVal = function(data) {
 		if(colleges.length === 0 && departments.length != 0) {
 			resultSet=LookupCode2("cols","dept",departments);
 			if (resultSet.length > 0) {
+				wfDump(5,"\t\tresultSet c/d",resultSet.toSource());
 				resultSet.forEach(function(result) {
 					colleges.push(result.dbData);
 				});
 			}
 		}
 
-		wfDump(5,["\t" + colVarName + " from tcfdata;"+colleges.toSource()])
+		wfDump(5,["\n\t" + colVarName + " from tcfdata;"+colleges.toSource()])
 		if (colleges.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			colleges=wffuncs.getColleges(departments);
-			wfDebug(5,"\t'colleges' from wffuncs.getColleges: '" + colleges + "'");
+			wfDump(5,["\t" + colVarName + " from wffuncs.getColleges(" + departments.toSource() + ");"+colleges.toSource()])
 		}
 
 	// return data based on how we were called
@@ -1453,7 +1457,7 @@ GetAttrVal = function(data) {
 		}
 
 	// If there is no value and we are in a debug environment then return a dummy variable
-		if (retArray.length <= 0 && wfEnvIsDev && wfDebugLevel > 0) {
+		if (retArray.length <= 0 && wfEnvIsDev) {
 			if (reqType.indexOf("col") >= 0 || optionStr.indexOf("col") >= 0) {
 				retArray.push("DUMMY-COLLEGE");
 			} else if (reqType.indexOf("dep") >= 0 || optionStr.indexOf("dep") >= 0) {
@@ -2694,5 +2698,4 @@ var wfLibLoaded=true;
 // 07-10-2018 @ 10:28:22 - 1.9.49 - dscudiero - Updated how related gets the data for the form variable
 // 07-11-2018 @ 12:06:32 - 1.9.54 - dscudiero - Update noWorkflow to allow passing in the list of steps to add to the workflow
 // 07-11-2018 @ 16:17:11 - 1.9.56 - dscudiero - Remove getProposalMode
-// 08-07-2018 @ 16:23:02 - 1.9.58 - dscudiero - Do not substitute 'DUMMY-xxx' values unless wfdebuglevel > 0
-// 08-08-2018 @ 11:05:49 - 1.9.59 - dscudiero - Add debug statements to GetAttrVal
+// 08-16-2018 @ 16:41:06 - 1.9.67 - dscudiero - Add additional debug statements
