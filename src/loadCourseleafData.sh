@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="3.9.40" # -- dscudiero -- Mon 07/23/2018 @ 16:20:10
+version="3.9.42" # -- dscudiero -- Tue 08/21/2018 @ 14:38:32
 #==================================================================================================
 TrapSigs 'on'
 myIncludes='DbLog Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel WriteChangelogEntry'
@@ -224,6 +224,7 @@ ignoreMissingPages=true
 #==================================================================================================
 # Main
 #==================================================================================================
+Main() {
 ## Process spreadsheet
 	## Get the email domain suffix from the site cfg file
 	grepStr=$(ProtectedCall "grep '^emailsuffix:' $siteDir/courseleaf.cfg")
@@ -237,14 +238,14 @@ ignoreMissingPages=true
 	## Get process the sheets as directed
 		if [[ $processUserData == true ]]; then
 			[[ -z $usersSheet ]] && Terminate "Could not locate a 'Users' worksheet in the workbook."
-			ProcessUserData "$usersSheet"
+			ProcessUserRecords "$usersSheet"
 			processedUserData=true
 		fi
 
 		if [[ $processRoleData == true ]]; then
 			[[ -z $rolesSheet ]] && Terminate "Could not locate a 'Roles' worksheet in the workbook."
 			[[ $processUserData != true && -z numUsersfromDb ]] && GetUsersDataFromDB
-			ProcessRoleData "$rolesSheet"
+			ProcessRoleRecords "$rolesSheet"
 			processedRoleData=true
 		fi
 
@@ -345,6 +346,7 @@ ignoreMissingPages=true
 	fi
 
 	[[ -x $HOME/bin/logit ]] && $HOME/bin/logit -cl "${client:--}" -e "${env:--}" -ca 'workflow' -j "$jalot" "$myName - Loaded workflow data"
+}
 
 #==================================================================================================
 # FUNCTIONS
@@ -629,7 +631,7 @@ ignoreMissingPages=true
 	#==================================================================================================
 	# Process USER records
 	#==================================================================================================
-	function ProcessUserData {
+	function ProcessUserRecords {
 		local workbookSheet="$1"
 		local uin
 
@@ -746,12 +748,12 @@ ignoreMissingPages=true
 			echo
 
 		return 0
-	} #ProcessUserData
+	} #ProcessUserRecords
 
 	#==================================================================================================
 	# Process ROLE records
 	#==================================================================================================
-	function ProcessRoleData {
+	function ProcessRoleRecords {
 		local workbookSheet="$1"
 		Msg "Parsing the 'roles' data from the '$workbookSheet' worksheet ..."
 		## Get the role data from the spreadsheet
@@ -906,7 +908,7 @@ ignoreMissingPages=true
 			fi
 			echo
 		return 0
-	} #ProcessRoleData
+	} #ProcessRoleRecords
 
 	#==================================================================================================
 	# Process WORKFLOW records
@@ -1138,3 +1140,4 @@ Goodbye 0 'alert' "$client/$env"
 ## 07-02-2018 @ 13:32:38 - 3.9.30 - dscudiero - Fix bug setting data if old data is null and new data is not
 ## 07-23-2018 @ 08:45:56 - 3.9.39 - dscudiero - Change -pages -users and -roles to option type arguments
 ## 07-24-2018 @ 15:26:26 - 3.9.40 - dscudiero - Change script stucture
+## 08-21-2018 @ 14:55:00 - 3.9.42 - dscudiero - Re-factored to use Main() structure
