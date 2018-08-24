@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.9.67" // -- dscudiero -- Thu 08/16/2018 @ 16:40:33
+wfLibVersion="1.9.75" // -- dscudiero -- Fri 08/24/2018 @ 13:05:27
 //attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -1424,7 +1424,7 @@ GetAttrVal = function(data) {
 			}
 		}
 
-		wfDump(5,["\n\t" + colVarName + " from tcfdata;"+colleges.toSource()])
+		wfDump(5,["\t" + colVarName + " from tcfdata;"+colleges.toSource()])
 		if (colleges.length === 0 && ! proposalOnly && wfAllcodes && wfCimInstance === "courseadmin") {
 			colleges=wffuncs.getColleges(departments);
 			wfDump(5,["\t" + colVarName + " from wffuncs.getColleges(" + departments.toSource() + ");"+colleges.toSource()])
@@ -1432,11 +1432,11 @@ GetAttrVal = function(data) {
 
 	// return data based on how we were called
 		var retArray=[];
-		if (reqType.indexOf("col") >= 0 || optionStr.indexOf("col") >= 0) {
+		if (reqType.indexOf("col") >= 0) {
 			retArray=colleges.slice(0)
-		} else if (reqType.indexOf("dep") >= 0 || optionStr.indexOf("dep") >= 0) {
+		} else if (reqType.indexOf("dep") >= 0) {
 			retArray=departments.slice(0)
-		} else if (reqType.indexOf("subj") >= 0 || optionStr.indexOf("subj") >= 0) {
+		} else if (reqType.indexOf("subj") >= 0) {
 			retArray=subjects.slice(0)
 		}
 		retArray=RemoveDupes(retArray)
@@ -2699,3 +2699,4 @@ var wfLibLoaded=true;
 // 07-11-2018 @ 12:06:32 - 1.9.54 - dscudiero - Update noWorkflow to allow passing in the list of steps to add to the workflow
 // 07-11-2018 @ 16:17:11 - 1.9.56 - dscudiero - Remove getProposalMode
 // 08-16-2018 @ 16:41:06 - 1.9.67 - dscudiero - Add additional debug statements
+// 08-24-2018 @ 14:18:24 - 1.9.75 - dscudiero - Tweak the logic in getAttrVal to ignore text in the option data
