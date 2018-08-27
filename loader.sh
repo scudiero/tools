@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.61" # -- dscudiero -- Mon 08/27/2018 @ 07:47:48
+version="1.5.62" # -- dscudiero -- Mon 08/27/2018 @ 07:50:21
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -76,8 +76,11 @@ function CleanUp {
 	userName=$(/usr/bin/logname 2>&1)
 	[[ -z $userName && -n $LOGNAME ]] && userName=$LOGNAME
 	[[ $userName == 'dscudiero' ]] && userName=$LOGNAME
-	grepStr="$(ProtectedCall "getent group leepfrog | grep $userName")"
-	[[ -z $grepStr ]] && Terminate "Sorry, your userid '$userName' is not in the unix group: 'leepfrog', please contact the unix system adminestrators"
+	grepStr="$(getent group leepfrog | grep $userName)"
+	if [[ -z $grepStr ]]; then
+		echo -e "\nSorry, your userid '$userName' is not in the Unix group: 'leepfrog', please contact the Unix system administrators"
+		exit -1
+	fi
 
 ## Set tmpRoot directory
 	tmpRoot=/tmp/$LOGNAME
@@ -542,3 +545,4 @@ function CleanUp {
 ## 07-16-2018 @ 11:28:49 - 1.5.60 - dscudiero - Strip off the type prefix strings on UsersAuthGroups and UsersScriptsStr
 ## 07-16-2018 @ 12:36:47 - 1.5.60 - dscudiero - Strip off the type prefix strings on UsersAuthGroups and UsersScriptsStr
 ## 08-27-2018 @ 07:48:14 - 1.5.61 - dscudiero - Put in a check to make sure the user is in the leepfrog group
+## 08-27-2018 @ 07:50:42 - 1.5.62 - dscudiero - Cosmetic/minor change/Sync
