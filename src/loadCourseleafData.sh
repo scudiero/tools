@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="3.9.42" # -- dscudiero -- Tue 08/21/2018 @ 14:38:32
+version="3.9.45" # -- dscudiero -- Wed 08/29/2018 @ 16:32:17
 #==================================================================================================
 TrapSigs 'on'
 myIncludes='DbLog Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel WriteChangelogEntry'
@@ -782,7 +782,7 @@ Main() {
 			done
 			numRolesfromSpreadsheet=${#rolesFromSpreadsheet[@]}
 			Msg "^Retrieved $numRolesfromSpreadsheet records from the '$workbookSheet' sheet"
-			if [[ $verboseLevel -ge 1 ]]; then Msg "\trolesfromSpreadsheet:"; for i in "${!rolesFromSpreadsheet[@]}"; do printf "\t\t[$i] = >${rolesFromSpreadsheet[$i]}<\n"; done; fi
+			if [[ $verboseLevel -ge 1 ]]; then Msg "\troles from worksheet:"; for i in "${!rolesFromSpreadsheet[@]}"; do printf "\t\t[$i] = >${rolesFromSpreadsheet[$i]}<\n"; done; fi
 
 		## Merge the spreadsheet data and the file data
 			GetRolesDataFromFile #Also sets rolesOut
@@ -797,9 +797,12 @@ Main() {
 			sTime=$(date "+%s")
 			for key in "${!rolesFromSpreadsheet[@]}"; do
 				tmpStr="${rolesFromSpreadsheet["$key"]}"
-				memberData=${tmpStr%%|*}; key=${key%%.*}; tmpStr=${tmpStr#*|};
+				#memberData=${tmpStr%%|*}; key=${key%%.*}; tmpStr=${tmpStr#*|};
+				memberData=${tmpStr%%|*}; tmpStr=${tmpStr#*|};
 				IFS=',' read -r -a memberDataArray <<< "$memberData"
-				emailData=${tmpStr%%|*}; key=${key%%.*}; tmpStr=${tmpStr#*|};
+				#emailData=${tmpStr%%|*}; key=${key%%.*}; tmpStr=${tmpStr#*|};
+				emailData=${tmpStr%%|*}; tmpStr=${tmpStr#*|};
+
 				IFS=',' read -r -a emailDataArray <<< "$emailData"
 				## Compare the member list data to the email data, if all of the emails match the 'normal' pattern
 				## of userid@emailsuffix then clear out the emailData
@@ -1141,3 +1144,4 @@ Goodbye 0 'alert' "$client/$env"
 ## 07-23-2018 @ 08:45:56 - 3.9.39 - dscudiero - Change -pages -users and -roles to option type arguments
 ## 07-24-2018 @ 15:26:26 - 3.9.40 - dscudiero - Change script stucture
 ## 08-21-2018 @ 14:55:00 - 3.9.42 - dscudiero - Re-factored to use Main() structure
+## 08-29-2018 @ 16:33:21 - 3.9.45 - dscudiero - Fix a problem loading roles that contain '.' getting parsed incorectly
