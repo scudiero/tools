@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="6.1.7" # -- dreed -- Wed 07/11/2018 @ 04:21:00
+version="6.1.8" # -- dreed -- Thu 08/30/2018 @ 11:31:00
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes='ExcelUtilities CourseleafUtilities RsyncCopy SelectMenuNew GitUtilities Alert ProtectedCall'
@@ -189,6 +189,17 @@ function AdditionalCatalogPrompts {
 	return 0
 } #AdditionalCatalogPrompts
 
+# Return the origin of a target clskel repository
+# Usage getClskelGitOrigin <target directory>
+function getClskelGitOrigin {
+	local clskelTarget="$1"; shift || true
+	## Take care modifying this block of code as it requires executing a command
+	## in the clskel directory
+	Pushd "${clskelTarget}"
+	echo $(git remote -v | awk '/^origin[[:blank:]].*\(fetch\)$/ { print $2 }')
+	Popd
+}
+
 #=======================================================================================================================
 # Process a git patch record
 # Usage processGitRecord <git repo name> <target directory> <git tag name>
@@ -204,6 +215,11 @@ function processGitRecord {
 	local checkRepoStatus gitCmd tmpCntr gitCmdOut gitFilesUpdated bCntr srcFile backupFile packageFile
 	Dump 1 repoName specTarget gitTag branch -p
 
+	## Ensure the specTarget dir exists
+	if [[ ! -d "${tgtDir}/${specTarget}" ]]; then
+		Msg "Creating Directory: ${specTarget}"
+		mkdir "${tgtDir}/${specTarget}";
+	fi
 	Pushd "$tgtDir/${specTarget}"
 	## Check to see if we have a .git directory for this directory, if not then copy from the skeleton
 	if [[ ! -d $tgtDir/${specTarget}/.git ]]; then
@@ -218,6 +234,12 @@ function processGitRecord {
 		ProtectedCall "git fetch"
 		Msg "^Local repository created"
 	else
+		## Ensure git repository origin is set correctly
+		unset gitOrigin; gitOrigin=$(getClskelGitOrigin "${skeletonRoot}/release${specTarget}")
+		Msg "Setting ${specTarget} origin to ${gitOrigin}"
+		gitCmd="git remote set-url origin ${gitOrigin}"
+		unset gitCmdOut; gitCmdOut=$(ProtectedCall "$gitCmd")
+
 		## Make sure git repository is up to date with origin
 		ProtectedCall "git fetch"
 		## See if there are any modifications to files in the local git repo
