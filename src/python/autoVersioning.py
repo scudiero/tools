@@ -88,7 +88,7 @@ if verbosity > 0:
 	Msg("fileExt = '" + fileExt + "'")
 	Msg("verbosity = '" + str(verbosity) + "'\n")
 
-validExtensions=["sh","py","tcf","cfg","atj"]
+validExtensions=["sh","py","tcf","cfg","atj","rjs"]
 okToRun = False
 for ext in validExtensions:
 	if fileExt == ext: 
@@ -177,3 +177,4 @@ else:
 ## 06-27-2018 @ 15:52:01 - 2.1.4 - dscudiero - Fix problem of stripping off leading comment char if it is there on the version record
 ## 08-31-2018 @ 16:02:47 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
 ## 08-31-2018 @ 16:05:54 - 2.1.4 - dscudiero - Add rjs and atj
+## 08-31-2018 @ 16:07:04 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
