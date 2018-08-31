@@ -108,7 +108,7 @@ if okToRun:
 	if fileName == "workflowLib" and fileExt == "atj":
 		verStr="wfLibVersion"
 		commentChar="//"
-	elif fileExt == "tcf" or fileExt == "cfg" or fileExt == "atj":
+	elif fileExt == "tcf" or fileExt == "cfg":
 		assignmentDelim=":"
 		commentChar=""
 	if verbosity > 0:
@@ -172,3 +172,4 @@ else:
 ## 06-14-2018 @ 12:44:11 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
 ## 06-14-2018 @ 14:30:16 - 2.1.4 - dscudiero - Add messaging
 ## 06-27-2018 @ 15:52:01 - 2.1.4 - dscudiero - Fix problem of stripping off leading comment char if it is there on the version record
+## 08-31-2018 @ 16:02:47 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
