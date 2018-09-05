@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.56" # -- dscudiero -- Tue 12/19/2017 @ 16:45:33.74
+# version="2.0.61" # -- dscudiero -- Wed 09/05/2018 @ 15:46:07
 #===================================================================================================
 # Set Directories based on the current hostName name and school name
 # Sets globals: devDir, nextDir, previewDir, publicDir, upgradeDir
@@ -12,6 +12,7 @@
 function SetSiteDirs {
 	[[ -z $client ]] && Terminate "SetSiteDirs: No value for client"
 	#Import "$standardInteractiveIncludes $myIncludes"
+	Dump client
 
 	local mode server env envDirName found foundAll checkEnv
 	mode="$1"; shift || true; [[ $mode == 'set' ]] && mode='setDefault'
@@ -26,8 +27,8 @@ function SetSiteDirs {
 			dump -3 -t server
 			[[ ! -d "/mnt/$server/web/$client" && ! -d "/mnt/$server/web/$client-$userName" ]] && continue
 			for env in ${courseleafDevEnvs//,/ }; do
-				dump -3 -t2 env
 				envDirName="${env}Dir"
+				dump -3 -t2 env envDirName
 				if [[ -z ${!envDirName} ]]; then
  					[[ $env == 'pvt' ]] && eval $envDirName="/mnt/$server/web/$client-$userName" || eval $envDirName="/mnt/$server/web/$client"
 				fi
@@ -43,11 +44,13 @@ function SetSiteDirs {
 			dump -3 -t server
 			[[ ! -d "/mnt/$server/$client-test" && ! -d "/mnt/$server/$client" ]] && continue
 			for env in ${courseleafProdEnvs//,/ }; do
-				dump -3 -t2  env
 				envDirName="${env}Dir"
+				dump -3 -t2 env envDirName
 				if [[ -z ${!envDirName} ]]; then
  					[[ $env == 'test' ]] && eval $envDirName="/mnt/$server/$client-$env/$env" || eval $envDirName="/mnt/$server/$client/$env"
 				fi
+				dump -3 -t2 $envDirName
+				echo "\${!envDirName} = '${!envDirName}'"
 				[[ $mode != 'setDefault'  && ! -d ${!envDirName} ]] && unset $envDirName && foundAll=false
 			done
 			[[ $foundAll == true ]] && break
@@ -85,3 +88,4 @@ export -f SetSiteDirs
 ## 12-06-2017 @ 09.05.30 - ("2.0.53")  - dscudiero - Add debug statements
 ## 12-06-2017 @ 10.01.51 - ("2.0.54")  - dscudiero - Switch debug statements to level 3
 ## 12-19-2017 @ 16.45.51 - ("2.0.56")  - dscudiero - Tweak debug outout
+## 09-05-2018 @ 15:53:42 - 2.0.61 - dscudiero - Add debug
