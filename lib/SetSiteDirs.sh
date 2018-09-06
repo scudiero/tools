@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.61" # -- dscudiero -- Wed 09/05/2018 @ 15:46:07
+# version="2.0.62" # -- dscudiero -- Thu 09/06/2018 @ 08:10:33
 #===================================================================================================
 # Set Directories based on the current hostName name and school name
 # Sets globals: devDir, nextDir, previewDir, publicDir, upgradeDir
@@ -50,7 +50,6 @@ function SetSiteDirs {
  					[[ $env == 'test' ]] && eval $envDirName="/mnt/$server/$client-$env/$env" || eval $envDirName="/mnt/$server/$client/$env"
 				fi
 				dump -3 -t2 $envDirName
-				echo "\${!envDirName} = '${!envDirName}'"
 				[[ $mode != 'setDefault'  && ! -d ${!envDirName} ]] && unset $envDirName && foundAll=false
 			done
 			[[ $foundAll == true ]] && break
@@ -89,3 +88,4 @@ export -f SetSiteDirs
 ## 12-06-2017 @ 10.01.51 - ("2.0.54")  - dscudiero - Switch debug statements to level 3
 ## 12-19-2017 @ 16.45.51 - ("2.0.56")  - dscudiero - Tweak debug outout
 ## 09-05-2018 @ 15:53:42 - 2.0.61 - dscudiero - Add debug
+## 09-06-2018 @ 08:10:46 - 2.0.62 - dscudiero - Remove debug code
