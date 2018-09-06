@@ -1,0 +1,111 @@
+
+//%pragma format=text/html
+//============================================================================================================
+// version="1.0.62" // -- dscudiero -- Thu 09/06/2018 @ 10:32:05
+//============================================================================================================
+//
+//	Retrieve session data from various sources and return as an object, object attributes are:
+//		String page 				- The courseleaf page url where the step is executing
+//		String userId 				- The login id of the current user
+//		String IP 					- The IP address of the host where the client web session is running
+// 		String reqArgs 				- The request arguments
+// 		String courseleafEnv		- The Environment of the courseleaf site (e.g. {"curr", "next", "test", "dev", "pvt"})
+//		String courseleafCgiVer 	- The courseleaf.cgi version
+//		String courseleafCIMVer 	- The CIM version
+//		String courseleafCATVer 	- The CAT / courseleaf version
+//		String courseleafCLSSVer 	- The CLSS version
+//		
+//	Usage 
+// 		getMetaData()
+//  Returns
+//		object with attributes above
+//
+//============================================================================================================
+getMetaData = function() {
+	let debug=false;
+	//============================================================================================================
+	// Helper Functions
+	//============================================================================================================
+	function Msg(text) { if (!debug) return; print_doc("<p>" + text + "<</p>"); }
+	function Dump(varName,varValue) { Msg(varName + " = " + varValue.toSource()); }
+	function Here(id) { print_doc("<p>Here " + id + "</p>"); }
+
+	//============================================================================================================
+	// Main
+	//============================================================================================================
+	Msg("<doctype html>\n<html>\n<head>\n<p>*** In getMetaData.rjs ***</p>\n")
+
+	retObj={};
+
+	// Server data
+		var unameData=uname();
+		retObj.sysName = unameData.sysname.toLowerCase();
+		retObj.sysRelease = unameData.release;
+		retObj.sysNode = unameData.nodename;
+		
+		var serverHostName = "???";
+		var userIP = "???";
+
+	// Courseleaf data
+		if (unameData.nodename.indexOf("dev") === 0 ) {
+			retObj.client = unameData.cwd.split("/")[4];
+			retObj.env = "dev";
+		} else {
+			retObj.client = unameData.cwd.split("/")[3];
+			retObj.env = unameData.cwd.split("/")[4];
+		}
+		retObj.server = unameData.nodename.split(".")[0];
+
+	// Request data
+		retObj.page = "";
+		if (typeof tcfdata != "undefined") 
+			retObj.page = tcfdata.pagename[0];
+
+	// User name
+		retObj.userName = "";
+		if (typeof tcfdata != "undefined")  {
+			retObj.userName = tcfdata.user_name[0];
+		} else {
+			var userName = getenv("REMOTE_USER");
+			if (userName != "" )
+				retObj.userName = userName
+
+			var userName = getenv("AUTH_USER");
+			if (userName != "" )
+				retObj.userName = userName
+		}
+
+	// Courseleaf CGI version
+		retObj.cgiVer = "";
+		if (typeof(getpwversion) != "undefined")
+			retObj.cgiVer = getpwversion()/split(" ")[2];
+	// Courseleaf version
+		retObj.clVer = "";
+		var fh = fopen("/courseleaf/clver.txt");
+		if(fh != -1)
+			retObj.clVer=fgets(fh);
+	// CIM version
+		retObj.cimVer="";
+		var fh = fopen("/courseleaf/cim/clver.txt");
+		if(fh != -1)
+			retObj.cimVer=fgets(fh);
+	// CLSS version
+		retObj.clssVer="";
+		var fh = fopen("/courseleaf/wen/clver.txt");
+		if(fh != -1)
+			retObj.clssVer==fgets(fh);
+
+	//============================================================================================================
+	// Done, return the object
+	//============================================================================================================
+	Msg("\n" + retObj.toSource() + "\n</html>\n</head>\n");
+	return retObj;
+
+} // getMetaData
+//============================================================================================================
+
+// (function () {
+// 		return getMetaData();
+// })();
+
+//print_doc("getMetaData() = >" + getMetaData().toSource() + "<");
