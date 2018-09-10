@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version="2.1.5" # -- dscudiero -- Thu 07/12/2018 @ 12:25:04
+version="2.1.7" # -- dscudiero -- Mon 09/10/2018 @ 16:09:52
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -44,7 +44,7 @@ if [[ -z $mode || $mode == 'servers' ]]; then
 			ProtectedCall "cd /mnt/$server > /dev/null 2>&1"
 			[[ $(pwd) != /mnt/$server ]] && continue
 			[[ $hostName == 'build7' && $server == 'dev6' ]] && continue
-			newServers="$newServers,$server"
+			[[ -z "$(ls -A /mnt/$server)" ]] && newServers="$newServers,$server"
 		done
 		newServers=${newServers:1}
 		Verbose 1 "devServers = '$newServers'"
@@ -65,7 +65,7 @@ if [[ -z $mode || $mode == 'servers' ]]; then
 			[[ $(Contains ",$ignoreList," ",$server,") == true ]] && continue
 			ProtectedCall "cd /mnt/$server > /dev/null 2>&1"
 			[[ $(pwd) != /mnt/$server ]] && continue
-			newServers="$newServers,$server"
+			[[ -z "$(ls -A /mnt/$server)" ]] && newServers="$newServers,$server"
 		done
 		newServers=${newServers:1}
 		Verbose 1 "prodServers = '$newServers'"
