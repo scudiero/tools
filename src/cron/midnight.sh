@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.22.81" # -- dscudiero -- Fri 07/13/2018 @ 06:34:54
+version="1.22.82" # -- dscudiero -- Mon 09/10/2018 @ 15:59:08
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -241,8 +241,8 @@ case "$hostName" in
 			Msg "...done"
 
 		## Run programs/functions
-			pgms=(loadAuthData buildClientInfoTable buildSiteInfoTable BuildEmployeeTable buildQaStatusTable checkCgiPermissions)
-			pgms+=(checkPublishSettings updateDefaults "cleanDev -daemon")
+			pgms=(checkPublishSettings updateDefaults "cleanDev -daemon" loadAuthData buildClientInfoTable buildSiteInfoTable)
+			pgms+=(BuildEmployeeTable buildQaStatusTable checkCgiPermissions)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -515,3 +515,4 @@ return 0
 ## 06-26-2018 @ 15:23:12 - 1.22.78 - dscudiero - Comment out code to update the courseleafDataTable
 ## 07-12-2018 @ 11:00:59 - 1.22.79 - dscudiero - Add checking of the master tool repo for commits
 ## 07-13-2018 @ 06:35:15 - 1.22.81 - dscudiero - Add messaging
+## 09-10-2018 @ 16:00:15 - 1.22.82 - dscudiero - Change the order of programs, run updateData first
