@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.62" # -- dscudiero -- Thu 09/06/2018 @ 08:10:33
+# version="2.0.63" # -- dscudiero -- Mon 09/10/2018 @ 08:09:11
 #===================================================================================================
 # Set Directories based on the current hostName name and school name
 # Sets globals: devDir, nextDir, previewDir, publicDir, upgradeDir
@@ -12,7 +12,6 @@
 function SetSiteDirs {
 	[[ -z $client ]] && Terminate "SetSiteDirs: No value for client"
 	#Import "$standardInteractiveIncludes $myIncludes"
-	Dump client
 
 	local mode server env envDirName found foundAll checkEnv
 	mode="$1"; shift || true; [[ $mode == 'set' ]] && mode='setDefault'
@@ -89,3 +88,4 @@ export -f SetSiteDirs
 ## 12-19-2017 @ 16.45.51 - ("2.0.56")  - dscudiero - Tweak debug outout
 ## 09-05-2018 @ 15:53:42 - 2.0.61 - dscudiero - Add debug
 ## 09-06-2018 @ 08:10:46 - 2.0.62 - dscudiero - Remove debug code
+## 09-10-2018 @ 08:09:36 - 2.0.63 - dscudiero - Remove debug statement
