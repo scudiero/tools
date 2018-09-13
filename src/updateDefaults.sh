@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version="2.1.7" # -- dscudiero -- Mon 09/10/2018 @ 16:09:52
+version="2.1.8" # -- dscudiero -- Thu 09/13/2018 @ 09:43:20
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -40,11 +40,8 @@ if [[ -z $mode || $mode == 'servers' ]]; then
 	## DEV servers
 		unset newServers
 		for server in $(ls /mnt | grep '^dev' | grep -v '\-test$'); do
-			[[ $(Contains ",$ignoreList," ",$server,") == true ]] && continue
-			ProtectedCall "cd /mnt/$server > /dev/null 2>&1"
-			[[ $(pwd) != /mnt/$server ]] && continue
-			[[ $hostName == 'build7' && $server == 'dev6' ]] && continue
-			[[ -z "$(ls -A /mnt/$server)" ]] && newServers="$newServers,$server"
+			[[ $(Contains ",$ignoreList," ",$server,") == true ]] || [[ ! -r /mnt/$server ]] || [[ -z "$(ls -A /mnt/$server)" ]] && continue
+			newServers="$newServers,$server"
 		done
 		newServers=${newServers:1}
 		Verbose 1 "devServers = '$newServers'"
@@ -62,13 +59,11 @@ if [[ -z $mode || $mode == 'servers' ]]; then
 	## PROD servers
 		unset newServers
 		for server in $(ls /mnt | grep -v '^dev' | grep -v '^auth' | grep -v '\-test$'); do
-			[[ $(Contains ",$ignoreList," ",$server,") == true ]] && continue
-			ProtectedCall "cd /mnt/$server > /dev/null 2>&1"
-			[[ $(pwd) != /mnt/$server ]] && continue
-			[[ -z "$(ls -A /mnt/$server)" ]] && newServers="$newServers,$server"
+			[[ $(Contains ",$ignoreList," ",$server,") == true ]] || [[ ! -r /mnt/$server ]] || [[ -z "$(ls -A /mnt/$server)" ]] && continue
+			newServers="$newServers,$server"
 		done
 		newServers=${newServers:1}
-		Verbose 1 "prodServers = '$newServers'"
+		Verbose 1 "prod newServers = '$newServers'"
 		## Check to see if record exists
 			sqlStmt="select count(*) from defaults where name=\"prodServers\" and host=\"$hostName\" and os=\"linux\""
 			RunSql $sqlStmt; count=${resultSet[0]}
@@ -312,3 +307,4 @@ Goodbye 0;
 ## 07-12-2018 @ 11:06:10 - 2.1.4 - dscudiero - Switch the location of the auth directory
 ## 07-12-2018 @ 12:25:26 - 2.1.5 - dscudiero - Comment out the reports auth code
 ## 07-12-2018 @ 13:01:38 - 2.1.5 - dscudiero - Comment out the 'reports auth' section
+## 09-13-2018 @ 09:46:31 - 2.1.8 - dscudiero - Update/fix the logic that finds viatable 'servers'
