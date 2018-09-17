@@ -7,6 +7,11 @@
 wfLibName="/locallibs/workflowLib.atj"
 %import %progdir%/locallibs/workflowLib.atj:atj;
 //======================================================================================================================
+wffuncs.AnnotateWorkflow = function(inval, wfrule, args) {
+	inval=inval.replace("Annotate",''); inval=inval.replace("annotate",'');
+	return [inval];
+} //wffuncs.AnnotateWorkflow
+//======================================================================================================================
 
 /*
 //======================================================================================================================
