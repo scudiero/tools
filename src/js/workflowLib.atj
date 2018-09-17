@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.9.75" // -- dscudiero -- Fri 08/24/2018 @ 13:05:27
+wfLibVersion="1.9.78" // -- dscudiero -- Fri 09/14/2018 @ 13:38:30
 //attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -241,13 +241,21 @@ function symmetricDfference(arr1, arr2) {
 // Add a text annotation to the workflow (as step)
 // Usage:
 //		code the step as 'Annotate xxxx yyyy zzz'
+//		workflow:standard|START,Annotate Esig {"Col College Curriculum Rep"; "Col Dean"; "Col Dept Faculty Peer"; "Dept Chair"},END
 //======================================================================================================================
 // 12-05-17 - dgs - Initial coding
+// 09-14-18 - dgs - Do variable substitutions
 //======================================================================================================================
 wffuncs.AnnotateWorkflow = function(inval, wfrule, args) {
-	var myName=wfrule.attrname; wfDebug(1,"\n*** In " + myName + " called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "' ***");
-	var options=wfrule.options;	options=options.substring(0, options.indexOf(';'));
-	inval=inval.replace("Annotate",''); inval=inval.replace("annotate",'');
+	var proposalCols=GetAttrVal({request:"cols", options:"includetca", tcadata: tcadata});
+	var proposalDepts=GetAttrVal({request:"depts", options:"includetca", tcadata: tcadata});
+	var proposalSubjs=getTCFValue("subject");
+
+	inval = inval.replace("Annotate",'').replace("annotate",'')
+	inval = inval.replace(new RegExp("\wCol\w", 'g'), proposalCols);
+	inval = inval.replace(new RegExp("\wDept\w", 'g'), proposalDepts);
+	inval = inval.replace(new RegExp("\wSubj\w", 'g'), proposalSubjs);
+
 	return [inval];
 } //wffuncs.AnnotateWorkflow
 
@@ -2700,3 +2708,4 @@ var wfLibLoaded=true;
 // 07-11-2018 @ 16:17:11 - 1.9.56 - dscudiero - Remove getProposalMode
 // 08-16-2018 @ 16:41:06 - 1.9.67 - dscudiero - Add additional debug statements
 // 08-24-2018 @ 14:18:24 - 1.9.75 - dscudiero - Tweak the logic in getAttrVal to ignore text in the option data
+// 09-17-2018 @ 08:07:32 - 1.9.78 - dscudiero - Updated annotate to do replacements
