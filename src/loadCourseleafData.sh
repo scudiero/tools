@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="3.9.51" # -- dscudiero -- Mon 09/17/2018 @ 08:10:53
+version="3.9.52" # -- dscudiero -- Mon 09/17/2018 @ 08:12:28
 #==================================================================================================
 TrapSigs 'on'
 myIncludes='DbLog Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel WriteChangelogEntry'
@@ -19,25 +19,6 @@ scriptDescription="Load Courseleaf Data"
 ## Copyright ©2014 David Scudiero -- all rights reserved.
 ## 06-17-15 -- 	dgs - Initial coding
 #==================================================================================================
-	#==============================================================================================
-	# parse script specific arguments
-	#==============================================================================================
-	function loadCourseleafData-ParseArgsStd  {
-		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
-		myArgs+=("w|workbookfile|option|workbookFile||script|The fully qualified spreadsheet file name")
-		myArgs+=("f|file|option|workbookFile||script|The fully qualified spreadsheet file name")
-		myArgs+=("skipnulls|skipnulls|switch|skipNulls||script|If a data field is null then do not write out that data to the page")
-		myArgs+=("ignore|ignoremissingPages|switch|ignoreMissingPages||script|Ignore missing catalog pages")
-		myArgs+=("noignore|noignoremissingPages|switch||ignoreMissingPages=false|script|Do not ignore missing catalog pages")
-		myArgs+=("uin|uinmap|switch|uinMap||script|Map role data UIDs to UINs even if the uses UIN flag is not set on the client record")
-		myArgs+=("nouin|nouinmap|switch||uinMap=false|script|Do not map role data UIDs to UINs")
-		myArgs+=("usersSheet|users|option|usersSheet||script|The 'users' worksheet name")
-		myArgs+=("rolesSheet|roles|option|rolesSheet||script|The 'roles' worksheet name")
-		myArgs+=("pagesSheet|pages|option|pagesSheet||script|The 'pages' worksheet name")
-		myArgs+=("comment|comment|option|comment||script|Comment for the action")
-		return 0
-	}
-
 
 #==================================================================================================
 # Declare local variables and constants
@@ -1172,3 +1153,4 @@ Goodbye 0 'alert' "$client/$env"
 ## 08-29-2018 @ 16:33:21 - 3.9.45 - dscudiero - Fix a problem loading roles that contain '.' getting parsed incorectly
 ## 09-17-2018 @ 08:07:54 - 3.9.50 - dscudiero - Move initialiazion code inside the main function
 ## 09-17-2018 @ 08:12:06 - 3.9.51 - dscudiero - Re-structure initialization into it's own function
+## 09-17-2018 @ 08:13:21 - 3.9.52 - dscudiero - 1
