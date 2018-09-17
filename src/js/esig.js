@@ -3,6 +3,8 @@
 Make sure the following is in the showrec
 %?isesig?%         <input type="button" id="esig_btn" class="btn btn-green b_medium esig" value="Approve" />
 
+The eSig function should be doing the replacement, no replacement happens on the return value from the function, similar to how normal wffuncs do the replacement in the function and the return value isn’t replaced.
+
 TYPE 1 -- single step esigs:
 	workflow.cfg / cimconfig.cfg
 		esiglist:DistribDesignation|DDApprove$|function|getDDEsig					<--- NO TRAILING ';'
