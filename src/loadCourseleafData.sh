@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="3.9.45" # -- dscudiero -- Wed 08/29/2018 @ 16:32:17
+version="3.9.50" # -- dscudiero -- Mon 09/17/2018 @ 08:03:14
 #==================================================================================================
 TrapSigs 'on'
 myIncludes='DbLog Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel WriteChangelogEntry'
@@ -19,6 +19,25 @@ scriptDescription="Load Courseleaf Data"
 ## Copyright ©2014 David Scudiero -- all rights reserved.
 ## 06-17-15 -- 	dgs - Initial coding
 #==================================================================================================
+	#==============================================================================================
+	# parse script specific arguments
+	#==============================================================================================
+	function loadCourseleafData-ParseArgsStd  {
+		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+		myArgs+=("w|workbookfile|option|workbookFile||script|The fully qualified spreadsheet file name")
+		myArgs+=("f|file|option|workbookFile||script|The fully qualified spreadsheet file name")
+		myArgs+=("skipnulls|skipnulls|switch|skipNulls||script|If a data field is null then do not write out that data to the page")
+		myArgs+=("ignore|ignoremissingPages|switch|ignoreMissingPages||script|Ignore missing catalog pages")
+		myArgs+=("noignore|noignoremissingPages|switch||ignoreMissingPages=false|script|Do not ignore missing catalog pages")
+		myArgs+=("uin|uinmap|switch|uinMap||script|Map role data UIDs to UINs even if the uses UIN flag is not set on the client record")
+		myArgs+=("nouin|nouinmap|switch||uinMap=false|script|Do not map role data UIDs to UINs")
+		myArgs+=("usersSheet|users|option|usersSheet||script|The 'users' worksheet name")
+		myArgs+=("rolesSheet|roles|option|rolesSheet||script|The 'roles' worksheet name")
+		myArgs+=("pagesSheet|pages|option|pagesSheet||script|The 'pages' worksheet name")
+		myArgs+=("comment|comment|option|comment||script|Comment for the action")
+		return 0
+	}
+
 
 #==================================================================================================
 # Declare local variables and constants
@@ -41,312 +60,311 @@ declare -A membersErrors
 #headerRowIndicator='*** Please do NOT change column headings, please do NOT add any columns, both will prevent the data from being loaded ***'
 headerRowIndicator='***'
 tmpFile=$(MkTmpFile)
-
-#==================================================================================================
-# Standard arg parsing and initialization
-#==================================================================================================
-Hello
-echo "Getting defaults..."
-GetDefaultsData $myName
-echo "Parsing arguments..."
-dump originalArgStr
-ParseArgsStd $originalArgStr
-
-[[ -n $usersSheet ]] && processUserData=true
-[[ -n $rolesSheet ]] && processRoleData=true
-[[ -n $pagesSheet ]] && processPageData=true
-
-[[ $allItems == true ]] && processUserData=true && processRoleData=true && processPageData=true
-[[ $product != '' ]] && product=$(Lower $product)
-
-[[ $hostName == 'build7' ]] && notifyThreshold=50 || notifyThreshold=100
-displayGoodbyeSummaryMessages=true
-Init 'getClient getEnv getDirs checkEnvs checkProdEnv'
-dump -1 client envs workbookFile processUserData usersSheet processRoleData rolesSheet processPageData pagesSheet informationOnlyMode ignoreMissingPages -p
-
-## Find out if this client uses UINs
-	if [[ $uinMap == true ]]; then
-		useUINs=true
-	else
-		sqlStmt="select usesUINs from $clientInfoTable where name=\"$client\""
-		RunSql $sqlStmt
-		if [[ ${#resultSet[@]} -ne 0 ]]; then
-			result="${resultSet[0]}"
-			[[ $result == 'Y' ]] && useUINs=true && echo
-		fi
-	fi
-
-## Get workflow file
-	tmpWorkbookFile=false
-	unset workbookFileIn workbookSearchDir
-	if [[ $workbookFile == '' ]]; then
-		[[ $verify != true ]] && Terminate "^No value specified for workbook file and verify is off"
-		## Search for XLSx files in clientData and implimentation folders
-		if [[ -d "$localClientWorkFolder/$client" ]]; then
-			workbookSearchDir="$localClientWorkFolder/$client"
-		else
-			## Find out if user wants to load cat data or cim data
-			Prompt product 'Are you loading CAT or CIM data' 'cat cim' 'cat';
-			product=$(Upper $product)
-			implimentationRoot="/steamboat/leepfrog/docs/Clients/$client/Implementation"
-			if   [[ -d "$implimentationRoot/Attachments/$product/Workflow" ]]; then workbookSearchDir="$implimentationRoot/Attachments/$product/Workflow"
-			elif [[ -d "$implimentationRoot/Attachments/$product" ]]; then workbookSearchDir="$implimentationRoot/Attachments/$product"
-			elif [[ -d "$implimentationRoot/$product/Workflow" ]]; then workbookSearchDir="$implimentationRoot/$product/Workflow"
-			elif [[ -d "$implimentationRoot/$product" ]]; then workbookSearchDir="$implimentationRoot/$product"
-			fi
-		fi
-		if [[ $workbookSearchDir != '' ]]; then
-			SelectFile $workbookSearchDir 'workbookFile' '*.xls*' "\nPlease specify the $(ColorK '(ordinal)') number of the Excel workbook you wish to load data from:\
-				\n(*/.xls* files found in '$(ColorK $workbookSearchDir)')\n(sorted ordered newest to oldest)\n\n"
-			workbookFile="$workbookSearchDir/$workbookFile"
-		fi
-	else
-		[[ ${workbookFile:0:1} != '/' ]] && workbookFile=$localClientWorkFolder/$client/$workbookFile
-		lenStr=${#workbookFile}
-		[[ ${workbookFile:lenStr-5:4} != '.xls' ]] && workbookFile=$workbookFile.xlsx
-	fi
-	[[ -f "$tmpDataFile" ]] && rm -f "$tmpDataFile"
-
-	[[ $workbookFile == "" ]] && echo
-	Prompt workbookFile 'Please specify the full path to the workbook file' '*file*'
-
-	## If the workbook file name contains blanks then copy to temp and use that one.
-		tmpWorkbookFile=false
-		if [[ $(Contains "$workbookFile" ' ') == true ]]; then
-			cp -fp "$workbookFile" /tmp/$userName.$myName.workbookFile
-			tmpWorkbookFile=true
-			workbookFileIn="$workbookFile"
-			workbookFile=/tmp/$userName.$myName.workbookFile
-		fi
-		[[ ! -r $workbookFile ]] && Terminate "Could not locate file: '$workbookFile'"
-
-	echo
-
-## Get the list of sheets in the workbook
-	Msg "^Parsing workbook..."
-	GetExcel -wb "$workbookFile" -ws 'GetSheets'
-	IFS='|' read -ra sheets <<< "${resultSet[0]}"
-	for sheet in "${sheets[@]}"; do
-		[[ -z $usersSheet && $(Contains "${sheet,,[a-z]}" 'user') == true ]] && usersSheet="$sheet"
-		[[ -z $rolesSheet && $(Contains "${sheet,,[a-z]}" 'role') == true ]] && rolesSheet="$sheet"
-		[[ -z $pagesSheet && $(Contains "${sheet,,[a-z]}" 'workflow') == true ]] && pagesSheet="$sheet"
-	done
-
-[[ $processUserData == true || $processRoleData == true || $processPageData == true ]] && dataArgSpecified=true || dataArgSpecified=false
-dump -1 processUserData processRoleData processPageData dataArgSpecified usersSheet rolesSheet pagesSheet
-## What data should we load
-	if [[ $dataArgSpecified != true ]]; then
-		if [[ $verify == true && $processUserData != true && -n $usersSheet ]]; then
-			unset ans; Prompt ans "Found a 'user' data worksheet ($usersSheet), do you wish to process that data" 'Yes No All'; ans=$(Lower ${ans:0:1})
-			[[ $ans == 'y' ]] && processUserData=true
-			[[ $ans == 'a' ]] && processUserData=true && processRoleData=true && processPageData=true
-		fi
-
-		if [[ $verify == true && $processRoleData != true && -n $rolesSheet ]]; then
-			unset ans; Prompt ans "Found a 'roles' data worksheet ($rolesSheet), do you wish to process that data" 'Yes No All'; ans=$(Lower ${ans:0:1})
-			[[ $ans == 'y' ]] && processRoleData=true
-			[[ $ans == 'a' ]] && processUserData=true && processRoleData=true && processPageData=true
-		fi
-
-		if [[ $verify == true && $processPageData != true && -n $pagesSheet ]]; then
-			unset ans; Prompt ans "Found a 'catalog page data' worksheet ($pagesSheet), do you wish to process that data" 'Yes No All'; ans=$(Lower ${ans:0:1})
-			[[ $ans == 'y' ]] && processPageData=true
-			[[ $ans == 'a' ]] && processUserData=true && processRoleData=true && processPageData=true
-		fi
-	else
-		[[ $processUserData == true && -z $usersSheet ]] && Terminate "Sorry, you specified '-users' on the command line but could not locate a 'Users' worksheet."
-		[[ $processRoleData == true && -z $rolesSheet ]] && Terminate "Sorry, you specified '-roles' on the command line but could not locate a 'Roles' worksheet."
-		[[ $processPageData == true && -z $pagesSheet ]] && Terminate "Sorry, you specified '-pages' on the command line but could not locate a 'Workflow' worksheet."
-	fi
-
-	# ## If we are processing page data and role data see if the user page has uin mapping information
-	# if [[ $verify == true && $processPageData == true ]] && [[ $processPageData == true || $processRoleData == true ]]; then
-	# 	GetExcel -wb "$workbookFile" -ws 'GetSheets'
-	# 	IFS='|' read -ra sheets <<< "${resultSet[0]}"
-	# fi
-
-
-## Do we have anything to do
-	[[ $processUserData != true && $processRoleData != true && $processPageData != true ]] && Terminate "No load actions are avaiable given the data provided"
-
-## Additional parms for page data
-skipNulls=true
-ignoreMissingPages=true
-
-	if [[ $processPageData == true ]]; then
-		if [[ $skipNulls == '' ]]; then
-			if [[ $verify == true ]]; then
-				unset ans; Prompt ans 'Do you wish to clear page values if the input cell data is empty' 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
-				[[ $ans == 'y' ]] && skipNulls=false || skipNulls=true
-			fi
-		fi
-		if [[ $ignoreMissingPages == '' ]]; then
-			if [[ $verify == true ]]; then
-				unset ans; Prompt ans 'Do you wish to ignore nonexistent pages' 'No Yes' 'No'; ans=$(Lower ${ans:0:1})
-				[[ $ans == 'y' ]] && ignoreMissingPages=true || ignoreMissingPages=false
-			fi
-		fi
-	fi
-
-## set default values
-	[[ $ignoreMissingPages == '' ]] && ignoreMissingPages=false
-	[[ $skipNulls == '' ]] && skipNulls=false
-
-## Set output file
-	outFile="$(GetOutputFile "$client" "$env" "$product")"
-
-## Verify processing
-	[[ $processUserData == false && $processRoleData == false && $processPageData == false ]] && echo && Terminate "No actions requested, please review help text"
-
-## If this is next or curr then get a task number
-	if [[ $env == 'next' || $env == 'curr' ]]; then
-		Init 'getJalot'
-	fi
-
-	verifyArgs+=("Client:$client")
-	verifyArgs+=("Env:$(TitleCase $env) ($siteDir)")
-	[[ $tmpWorkbookFile == true ]] && verifyArgs+=("Input File:'$workbookFileIn' as '$workbookFile'") || verifyArgs+=("Input File:'$workbookFile'")
-	#verifyArgs+=("Input workbook:'$workbookFileIn'")	
-	[[ $processUserData == true ]] && verifyArgs+=("Process user sheet:$usersSheet")
-	[[ $processRoleData == true ]] && verifyArgs+=("Process role sheet:$rolesSheet")
-	[[ $processPageData == true ]] && verifyArgs+=("Process page sheet:$pagesSheet")
-	verifyArgs+=("Skip null values:$skipNulls")
-	verifyArgs+=("Ignore missing pages:$ignoreMissingPages")
-	verifyArgs+=("Map UIDs to UINs:$useUINs")
-	[[ -n $jalot ]] && verifyArgs+=("Jalot:$comment")
-
-	VerifyContinue "You are asking to update CourseLeaf data"
-
-	dump -1 client env siteDir processUserData processRoleData processPageData skipNulls useUINs
-	myData="Client: '$client', Env: '$env', product: '$product', skipNulls: '$skipNulls', ignoreMissingPages: '$ignoreMissingPages', File: '$workbookFile' "
-	[[ $logInDb != false && $myLogRecordIdx != "" ]] && dbLog 'data' $myLogRecordIdx "$myData"
-
 #==================================================================================================
 # Main
 #==================================================================================================
 Main() {
-## Process spreadsheet
-	## Get the email domain suffix from the site cfg file
-	grepStr=$(ProtectedCall "grep '^emailsuffix:' $siteDir/courseleaf.cfg")
-	[[ -n $grepStr ]] && emailsuffix="${grepStr#*:}" || unset emailsuffix
+	#==================================================================================================
+	# Standard arg parsing and initialization
+	#==================================================================================================
+	Hello
+	echo "Getting defaults..."
+	GetDefaultsData $myName
+	echo "Parsing arguments..."
+	dump originalArgStr
+	ParseArgsStd $originalArgStr
 
-	[[ $client == 'internal' ]] && courseleafProgDir='pagewiz' || courseleafProgDir='courseleaf'
-	echo
-	rolesFile=$siteDir/web/$courseleafProgDir/roles.tcf
+	[[ -n $usersSheet ]] && processUserData=true
+	[[ -n $rolesSheet ]] && processRoleData=true
+	[[ -n $pagesSheet ]] && processPageData=true
 
-	dump -1 processUserData processRoleData processedPageData sheets
-	## Get process the sheets as directed
-		if [[ $processUserData == true ]]; then
-			[[ -z $usersSheet ]] && Terminate "Could not locate a 'Users' worksheet in the workbook."
-			ProcessUserRecords "$usersSheet"
-			processedUserData=true
+	[[ $allItems == true ]] && processUserData=true && processRoleData=true && processPageData=true
+	[[ $product != '' ]] && product=$(Lower $product)
+
+	[[ $hostName == 'build7' ]] && notifyThreshold=50 || notifyThreshold=100
+	displayGoodbyeSummaryMessages=true
+	Init 'getClient getEnv getDirs checkEnvs checkProdEnv'
+	dump -1 client envs workbookFile processUserData usersSheet processRoleData rolesSheet processPageData pagesSheet informationOnlyMode ignoreMissingPages -p
+
+	## Find out if this client uses UINs
+		if [[ $uinMap == true ]]; then
+			useUINs=true
+		else
+			sqlStmt="select usesUINs from $clientInfoTable where name=\"$client\""
+			RunSql $sqlStmt
+			if [[ ${#resultSet[@]} -ne 0 ]]; then
+				result="${resultSet[0]}"
+				[[ $result == 'Y' ]] && useUINs=true && echo
+			fi
 		fi
 
-		if [[ $processRoleData == true ]]; then
-			[[ -z $rolesSheet ]] && Terminate "Could not locate a 'Roles' worksheet in the workbook."
-			[[ $processUserData != true && -z numUsersfromDb ]] && GetUsersDataFromDB
-			ProcessRoleRecords "$rolesSheet"
-			processedRoleData=true
+	## Get workflow file
+		tmpWorkbookFile=false
+		unset workbookFileIn workbookSearchDir
+		if [[ $workbookFile == '' ]]; then
+			[[ $verify != true ]] && Terminate "^No value specified for workbook file and verify is off"
+			## Search for XLSx files in clientData and implimentation folders
+			if [[ -d "$localClientWorkFolder/$client" ]]; then
+				workbookSearchDir="$localClientWorkFolder/$client"
+			else
+				## Find out if user wants to load cat data or cim data
+				Prompt product 'Are you loading CAT or CIM data' 'cat cim' 'cat';
+				product=$(Upper $product)
+				implimentationRoot="/steamboat/leepfrog/docs/Clients/$client/Implementation"
+				if   [[ -d "$implimentationRoot/Attachments/$product/Workflow" ]]; then workbookSearchDir="$implimentationRoot/Attachments/$product/Workflow"
+				elif [[ -d "$implimentationRoot/Attachments/$product" ]]; then workbookSearchDir="$implimentationRoot/Attachments/$product"
+				elif [[ -d "$implimentationRoot/$product/Workflow" ]]; then workbookSearchDir="$implimentationRoot/$product/Workflow"
+				elif [[ -d "$implimentationRoot/$product" ]]; then workbookSearchDir="$implimentationRoot/$product"
+				fi
+			fi
+			if [[ $workbookSearchDir != '' ]]; then
+				SelectFile $workbookSearchDir 'workbookFile' '*.xls*' "\nPlease specify the $(ColorK '(ordinal)') number of the Excel workbook you wish to load data from:\
+					\n(*/.xls* files found in '$(ColorK $workbookSearchDir)')\n(sorted ordered newest to oldest)\n\n"
+				workbookFile="$workbookSearchDir/$workbookFile"
+			fi
+		else
+			[[ ${workbookFile:0:1} != '/' ]] && workbookFile=$localClientWorkFolder/$client/$workbookFile
+			lenStr=${#workbookFile}
+			[[ ${workbookFile:lenStr-5:4} != '.xls' ]] && workbookFile=$workbookFile.xlsx
 		fi
+		[[ -f "$tmpDataFile" ]] && rm -f "$tmpDataFile"
+
+		[[ $workbookFile == "" ]] && echo
+		Prompt workbookFile 'Please specify the full path to the workbook file' '*file*'
+
+		## If the workbook file name contains blanks then copy to temp and use that one.
+			tmpWorkbookFile=false
+			if [[ $(Contains "$workbookFile" ' ') == true ]]; then
+				cp -fp "$workbookFile" /tmp/$userName.$myName.workbookFile
+				tmpWorkbookFile=true
+				workbookFileIn="$workbookFile"
+				workbookFile=/tmp/$userName.$myName.workbookFile
+			fi
+			[[ ! -r $workbookFile ]] && Terminate "Could not locate file: '$workbookFile'"
+
+		echo
+
+	## Get the list of sheets in the workbook
+		Msg "^Parsing workbook..."
+		GetExcel -wb "$workbookFile" -ws 'GetSheets'
+		IFS='|' read -ra sheets <<< "${resultSet[0]}"
+		for sheet in "${sheets[@]}"; do
+			[[ -z $usersSheet && $(Contains "${sheet,,[a-z]}" 'user') == true ]] && usersSheet="$sheet"
+			[[ -z $rolesSheet && $(Contains "${sheet,,[a-z]}" 'role') == true ]] && rolesSheet="$sheet"
+			[[ -z $pagesSheet && $(Contains "${sheet,,[a-z]}" 'workflow') == true ]] && pagesSheet="$sheet"
+		done
+
+	[[ $processUserData == true || $processRoleData == true || $processPageData == true ]] && dataArgSpecified=true || dataArgSpecified=false
+	dump -1 processUserData processRoleData processPageData dataArgSpecified usersSheet rolesSheet pagesSheet
+	## What data should we load
+		if [[ $dataArgSpecified != true ]]; then
+			if [[ $verify == true && $processUserData != true && -n $usersSheet ]]; then
+				unset ans; Prompt ans "Found a 'user' data worksheet ($usersSheet), do you wish to process that data" 'Yes No All'; ans=$(Lower ${ans:0:1})
+				[[ $ans == 'y' ]] && processUserData=true
+				[[ $ans == 'a' ]] && processUserData=true && processRoleData=true && processPageData=true
+			fi
+
+			if [[ $verify == true && $processRoleData != true && -n $rolesSheet ]]; then
+				unset ans; Prompt ans "Found a 'roles' data worksheet ($rolesSheet), do you wish to process that data" 'Yes No All'; ans=$(Lower ${ans:0:1})
+				[[ $ans == 'y' ]] && processRoleData=true
+				[[ $ans == 'a' ]] && processUserData=true && processRoleData=true && processPageData=true
+			fi
+
+			if [[ $verify == true && $processPageData != true && -n $pagesSheet ]]; then
+				unset ans; Prompt ans "Found a 'catalog page data' worksheet ($pagesSheet), do you wish to process that data" 'Yes No All'; ans=$(Lower ${ans:0:1})
+				[[ $ans == 'y' ]] && processPageData=true
+				[[ $ans == 'a' ]] && processUserData=true && processRoleData=true && processPageData=true
+			fi
+		else
+			[[ $processUserData == true && -z $usersSheet ]] && Terminate "Sorry, you specified '-users' on the command line but could not locate a 'Users' worksheet."
+			[[ $processRoleData == true && -z $rolesSheet ]] && Terminate "Sorry, you specified '-roles' on the command line but could not locate a 'Roles' worksheet."
+			[[ $processPageData == true && -z $pagesSheet ]] && Terminate "Sorry, you specified '-pages' on the command line but could not locate a 'Workflow' worksheet."
+		fi
+
+		# ## If we are processing page data and role data see if the user page has uin mapping information
+		# if [[ $verify == true && $processPageData == true ]] && [[ $processPageData == true || $processRoleData == true ]]; then
+		# 	GetExcel -wb "$workbookFile" -ws 'GetSheets'
+		# 	IFS='|' read -ra sheets <<< "${resultSet[0]}"
+		# fi
+
+
+	## Do we have anything to do
+		[[ $processUserData != true && $processRoleData != true && $processPageData != true ]] && Terminate "No load actions are avaiable given the data provided"
+
+	## Additional parms for page data
+	skipNulls=true
+	ignoreMissingPages=true
 
 		if [[ $processPageData == true ]]; then
-			[[ -z $pagesSheet ]] && Terminate "Could not locate a 'Page data' worksheet in the workbook."
-			[[ $processUserData != true  && -z numUsersfromDb ]] && GetUsersDataFromDB
-			[[ $processRoleData != true ]] && GetRolesDataFromFile && rolesOut=${rolesFromFile[@]}
-			GetWorkflowDataFromFile
-			ProcessCatalogPageData "$pagesSheet"
-			processedPageData=true
+			if [[ $skipNulls == '' ]]; then
+				if [[ $verify == true ]]; then
+					unset ans; Prompt ans 'Do you wish to clear page values if the input cell data is empty' 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
+					[[ $ans == 'y' ]] && skipNulls=false || skipNulls=true
+				fi
+			fi
+			if [[ $ignoreMissingPages == '' ]]; then
+				if [[ $verify == true ]]; then
+					unset ans; Prompt ans 'Do you wish to ignore nonexistent pages' 'No Yes' 'No'; ans=$(Lower ${ans:0:1})
+					[[ $ans == 'y' ]] && ignoreMissingPages=true || ignoreMissingPages=false
+				fi
+			fi
 		fi
 
-## Processing summary
-	unset changeLogLines
-	echo
-	PrintBanner "Processing Summary"
-	[[ $informationOnlyMode == true ]] && echo "" && Msg ">>> The Information Only flag was set, no data has been updated <<<" && echo
+	## set default values
+		[[ $ignoreMissingPages == '' ]] && ignoreMissingPages=false
+		[[ $skipNulls == '' ]] && skipNulls=false
 
-	if [[ $processedUserData == true ]]; then
-		Msg "User data:"
-		Msg "^Retrieved $numUsersfromDb records from the clusers database"
-		Msg "^Retrieved $numUsersfromSpreadsheet records from $workbookFileIn"
-		string="Added $numNewUsers new users"
-		[[ $informationOnlyMode == true ]] && string="$string $(ColorK "(Information Only flag was set)")"
-		Msg "^$string"
-		[[ $numNewUsers -gt 0 ]] && changeLogLines+=("$string")
-		string="Modified $numModifiedUsers existing users"
-		[[ $informationOnlyMode == true ]] && string="$string $(ColorK "(Information Only flag was set)")"
-		Msg "^$string"
-		[[ $numModifiedUsers -gt 0 ]] && changeLogLines+=("$string")
-	fi
+	## Set output file
+		outFile="$(GetOutputFile "$client" "$env" "$product")"
 
-	[[ $processedUserData == true ]] && echo
-	if [[ $processedRoleData == true ]]; then
-		Msg "Role data:"
-		Msg "^Retrieved $numRolesFromFile records from the roles.tcf file"
-		Msg "^Retrieved $numRolesfromSpreadsheet records from $workbookFileIn"
+	## Verify processing
+		[[ $processUserData == false && $processRoleData == false && $processPageData == false ]] && echo && Terminate "No actions requested, please review help text"
 
-		string="Added $numNewRoles new roles"
-		[[ $informationOnlyMode != true ]] && string="Added $numNewRoles new roles" || string="Would have add $numNewRoles new roles"
-		Msg "^$string"
-		[[ $numNewRoles -gt 0 ]] && changeLogLines+=("$string")
+	## If this is next or curr then get a task number
+		if [[ $env == 'next' || $env == 'curr' ]]; then
+			Init 'getJalot'
+		fi
 
-		[[ $informationOnlyMode != true ]] && string="Modified $numModifiedRoles existing roles" || string="Would have modified $numModifiedRoles existing roles"
-		Msg "^$string"
-		[[ $numModifiedRoles -gt 0 ]] && changeLogLines+=("$string")
+		verifyArgs+=("Client:$client")
+		verifyArgs+=("Env:$(TitleCase $env) ($siteDir)")
+		[[ $tmpWorkbookFile == true ]] && verifyArgs+=("Input File:'$workbookFileIn' as '$workbookFile'") || verifyArgs+=("Input File:'$workbookFile'")
+		#verifyArgs+=("Input workbook:'$workbookFileIn'")	
+		[[ $processUserData == true ]] && verifyArgs+=("Process user sheet:$usersSheet")
+		[[ $processRoleData == true ]] && verifyArgs+=("Process role sheet:$rolesSheet")
+		[[ $processPageData == true ]] && verifyArgs+=("Process page sheet:$pagesSheet")
+		verifyArgs+=("Skip null values:$skipNulls")
+		verifyArgs+=("Ignore missing pages:$ignoreMissingPages")
+		verifyArgs+=("Map UIDs to UINs:$useUINs")
+		[[ -n $jalot ]] && verifyArgs+=("Jalot:$comment")
 
-		string="Mapped $numRoleMembersMappedToUIN role members from UID to UIN"
-		[[ $numRoleMembersMappedToUIN -gt 0 ]] && Msg "^$string" && changeLogLines+=("$string")
+		VerifyContinue "You are asking to update CourseLeaf data"
 
-		string="Found $numRoleMembersNotProvisoned role members not in user provisioning"
-		[[ $numRoleMembersNotProvisoned -gt 0 ]] && Msg "^$string" && changeLogLines+=("$string")
-	fi
+		dump -1 client env siteDir processUserData processRoleData processPageData skipNulls useUINs
+		myData="Client: '$client', Env: '$env', product: '$product', skipNulls: '$skipNulls', ignoreMissingPages: '$ignoreMissingPages', File: '$workbookFile' "
+		[[ $logInDb != false && $myLogRecordIdx != "" ]] && dbLog 'data' $myLogRecordIdx "$myData"
 
-	[[ $processedUserData == true || $processedRoleData == true ]] && echo
-	if [[ $processedPageData == true ]]; then
-		Msg "Page data:"
-		Msg "^Retrieved $numWorkflowDataFromSpreadsheet records from $workbookFileIn"
+	## Process spreadsheet
+		## Get the email domain suffix from the site cfg file
+		grepStr=$(ProtectedCall "grep '^emailsuffix:' $siteDir/courseleaf.cfg")
+		[[ -n $grepStr ]] && emailsuffix="${grepStr#*:}" || unset emailsuffix
 
-		[[ $informationOnlyMode != true ]] && string="Updated $numPagesUpdated pages" || string="Would have updated $numPagesUpdated pages"
-		Msg "^$string"
-		[[ $numPagesUpdated -gt 0 ]] && changeLogLines+=("$string")
+		[[ $client == 'internal' ]] && courseleafProgDir='pagewiz' || courseleafProgDir='courseleaf'
+		echo
+		rolesFile=$siteDir/web/$courseleafProgDir/roles.tcf
 
-		string="Mapped $numMembersMappedToUIN role members from UID to UIN"
-		[[ $numMembersMappedToUIN -gt 0 ]] && Msg "^$string" && changeLogLines+=("$string")
+		dump -1 processUserData processRoleData processedPageData sheets
+		## Get process the sheets as directed
+			if [[ $processUserData == true ]]; then
+				[[ -z $usersSheet ]] && Terminate "Could not locate a 'Users' worksheet in the workbook."
+				ProcessUserRecords "$usersSheet"
+				processedUserData=true
+			fi
 
-		string="$numPagesNotFound pages not found"
-		[[ $numPagesNotFound -gt 0 ]] && Msg "^$string" && changeLogLines+=("$string")
+			if [[ $processRoleData == true ]]; then
+				[[ -z $rolesSheet ]] && Terminate "Could not locate a 'Roles' worksheet in the workbook."
+				[[ $processUserData != true && -z numUsersfromDb ]] && GetUsersDataFromDB
+				ProcessRoleRecords "$rolesSheet"
+				processedRoleData=true
+			fi
 
-		string="Pages had errors in their owner/workflow data, see below for detailed information"
-		[[ ${#membersErrors[@]} -gt 0 ]] && Msg "^$string" && changeLogLines+=("$string")
+			if [[ $processPageData == true ]]; then
+				[[ -z $pagesSheet ]] && Terminate "Could not locate a 'Page data' worksheet in the workbook."
+				[[ $processUserData != true  && -z numUsersfromDb ]] && GetUsersDataFromDB
+				[[ $processRoleData != true ]] && GetRolesDataFromFile && rolesOut=${rolesFromFile[@]}
+				GetWorkflowDataFromFile
+				ProcessCatalogPageData "$pagesSheet"
+				processedPageData=true
+			fi
 
-		## Member lookup errors
+	## Processing summary
+		unset changeLogLines
+		echo
+		PrintBanner "Processing Summary"
+		[[ $informationOnlyMode == true ]] && echo "" && Msg ">>> The Information Only flag was set, no data has been updated <<<" && echo
 
-		if [[ ${#membersErrors[@]} -gt 0 ]]; then
-			echo
-			Warning 0 1 "Found page owner or workflow data without a defined userid or role:"
-			for key in "${!membersErrors[@]}"; do
-				Msg "^$(ColorW "*Warning*") -- Workflow/Owner member: '$key' not defined and used on the following pages:"
-				tmpStr="${membersErrors["$key"]}"
-				IFSsave=$IFS; IFS='|' read -a pages <<< "${membersErrors["$key"]}"; IFS=$IFSsave
-				for page in "${pages[@]}"; do
-					Msg "^^'$page'"
-				done
+		if [[ $processedUserData == true ]]; then
+			Msg "User data:"
+			Msg "^Retrieved $numUsersfromDb records from the clusers database"
+			Msg "^Retrieved $numUsersfromSpreadsheet records from $workbookFileIn"
+			string="Added $numNewUsers new users"
+			[[ $informationOnlyMode == true ]] && string="$string $(ColorK "(Information Only flag was set)")"
+			Msg "^$string"
+			[[ $numNewUsers -gt 0 ]] && changeLogLines+=("$string")
+			string="Modified $numModifiedUsers existing users"
+			[[ $informationOnlyMode == true ]] && string="$string $(ColorK "(Information Only flag was set)")"
+			Msg "^$string"
+			[[ $numModifiedUsers -gt 0 ]] && changeLogLines+=("$string")
+		fi
+
+		[[ $processedUserData == true ]] && echo
+		if [[ $processedRoleData == true ]]; then
+			Msg "Role data:"
+			Msg "^Retrieved $numRolesFromFile records from the roles.tcf file"
+			Msg "^Retrieved $numRolesfromSpreadsheet records from $workbookFileIn"
+
+			string="Added $numNewRoles new roles"
+			[[ $informationOnlyMode != true ]] && string="Added $numNewRoles new roles" || string="Would have add $numNewRoles new roles"
+			Msg "^$string"
+			[[ $numNewRoles -gt 0 ]] && changeLogLines+=("$string")
+
+			[[ $informationOnlyMode != true ]] && string="Modified $numModifiedRoles existing roles" || string="Would have modified $numModifiedRoles existing roles"
+			Msg "^$string"
+			[[ $numModifiedRoles -gt 0 ]] && changeLogLines+=("$string")
+
+			string="Mapped $numRoleMembersMappedToUIN role members from UID to UIN"
+			[[ $numRoleMembersMappedToUIN -gt 0 ]] && Msg "^$string" && changeLogLines+=("$string")
+
+			string="Found $numRoleMembersNotProvisoned role members not in user provisioning"
+			[[ $numRoleMembersNotProvisoned -gt 0 ]] && Msg "^$string" && changeLogLines+=("$string")
+		fi
+
+		[[ $processedUserData == true || $processedRoleData == true ]] && echo
+		if [[ $processedPageData == true ]]; then
+			Msg "Page data:"
+			Msg "^Retrieved $numWorkflowDataFromSpreadsheet records from $workbookFileIn"
+
+			[[ $informationOnlyMode != true ]] && string="Updated $numPagesUpdated pages" || string="Would have updated $numPagesUpdated pages"
+			Msg "^$string"
+			[[ $numPagesUpdated -gt 0 ]] && changeLogLines+=("$string")
+
+			string="Mapped $numMembersMappedToUIN role members from UID to UIN"
+			[[ $numMembersMappedToUIN -gt 0 ]] && Msg "^$string" && changeLogLines+=("$string")
+
+			string="$numPagesNotFound pages not found"
+			[[ $numPagesNotFound -gt 0 ]] && Msg "^$string" && changeLogLines+=("$string")
+
+			string="Pages had errors in their owner/workflow data, see below for detailed information"
+			[[ ${#membersErrors[@]} -gt 0 ]] && Msg "^$string" && changeLogLines+=("$string")
+
+			## Member lookup errors
+
+			if [[ ${#membersErrors[@]} -gt 0 ]]; then
 				echo
-			done
+				Warning 0 1 "Found page owner or workflow data without a defined userid or role:"
+				for key in "${!membersErrors[@]}"; do
+					Msg "^$(ColorW "*Warning*") -- Workflow/Owner member: '$key' not defined and used on the following pages:"
+					tmpStr="${membersErrors["$key"]}"
+					IFSsave=$IFS; IFS='|' read -a pages <<< "${membersErrors["$key"]}"; IFS=$IFSsave
+					for page in "${pages[@]}"; do
+						Msg "^^'$page'"
+					done
+					echo
+				done
+			fi
 		fi
-	fi
 
-	## Write out change log entries
-	if [[ $informationOnlyMode != true ]]; then
-		[[ $comment == true ]] && changeLogLines+=("$comment")
-		changeLogLines=("Data updated from '$workbookFileIn':")
-		[[ $processedUserData == true ]] && changeLogLines+=("User data")
-		[[ $processedRoleData == true ]] && changeLogLines+=("Role data")
-		[[ $processedPageData == true ]] && changeLogLines+=("Page data")
-		WriteChangelogEntry 'changeLogLines' "$siteDir/changelog.txt"
-	fi
+		## Write out change log entries
+		if [[ $informationOnlyMode != true ]]; then
+			[[ $comment == true ]] && changeLogLines+=("$comment")
+			changeLogLines=("Data updated from '$workbookFileIn':")
+			[[ $processedUserData == true ]] && changeLogLines+=("User data")
+			[[ $processedRoleData == true ]] && changeLogLines+=("Role data")
+			[[ $processedPageData == true ]] && changeLogLines+=("Page data")
+			WriteChangelogEntry 'changeLogLines' "$siteDir/changelog.txt"
+		fi
 
-	[[ -x $HOME/bin/logit ]] && $HOME/bin/logit -cl "${client:--}" -e "${env:--}" -ca 'workflow' -j "$jalot" "$myName - Loaded workflow data"
-}
+		[[ -x $HOME/bin/logit ]] && $HOME/bin/logit -cl "${client:--}" -e "${env:--}" -ca 'workflow' -j "$jalot" "$myName - Loaded workflow data"
+} #main
 
 #==================================================================================================
 # FUNCTIONS
@@ -563,6 +581,7 @@ Main() {
 				Info 0 1 "Could not locate the header row indicator in the '$sheetName' worksheet, using the first row as the header data"
 				headerRow="${resultSet[0]}"
 				resultSet=("${resultSet[@]:1}")
+				Dump 1 headerRow
 			fi
 			headerRow="$(Lower "$headerRow")"
 
@@ -1145,3 +1164,4 @@ Goodbye 0 'alert' "$client/$env"
 ## 07-24-2018 @ 15:26:26 - 3.9.40 - dscudiero - Change script stucture
 ## 08-21-2018 @ 14:55:00 - 3.9.42 - dscudiero - Re-factored to use Main() structure
 ## 08-29-2018 @ 16:33:21 - 3.9.45 - dscudiero - Fix a problem loading roles that contain '.' getting parsed incorectly
+## 09-17-2018 @ 08:07:54 - 3.9.50 - dscudiero - Move initialiazion code inside the main function
