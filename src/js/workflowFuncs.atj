@@ -4,30 +4,8 @@
 // 10/25/17 - dgs - Initial - 
 //======================================================================================================================
 // Import the common setup and functions library
-// wfLibName="/locallibs/workflowLib.atj"
-// %import %progdir%/locallibs/workflowLib.atj:atj;
-//======================================================================================================================
-//======================================================================================================================
-// Add a text annotation to the workflow (as step)
-// Usage:
-//		code the step as 'Annotate xxxx yyyy zzz'
-//		workflow:standard|START,Annotate Esig {"Col College Curriculum Rep"; "Col Dean"; "Col Dept Faculty Peer"; "Dept Chair"},END
-//======================================================================================================================
-// 12-05-17 - dgs - Initial coding
-// 09-14-18 - dgs - Do variable substitutions
-//======================================================================================================================
-wffuncs.AnnotateWorkflow = function(inval, wfrule, args) {
-	var proposalCols=GetAttrVal({request:"cols", options:"includetca", tcadata: tcadata});
-	var proposalDepts=GetAttrVal({request:"depts", options:"includetca", tcadata: tcadata});
-	var proposalSubjs=getTCFValue("subject");
-
-	inval = inval.replace("Annotate",'').replace("annotate",'')
-	inval = inval.replace(new RegExp("\wCol\w", 'g'), proposalCols);
-	inval = inval.replace(new RegExp("\wDept\w", 'g'), proposalDepts);
-	inval = inval.replace(new RegExp("\wSubj\w", 'g'), proposalSubjs);
-
-	return [inval];
-} //wffuncs.AnnotateWorkflow
+wfLibName="/locallibs/workflowLib.atj"
+%import %progdir%/locallibs/workflowLib.atj:atj;
 //======================================================================================================================
 
 /*
@@ -68,16 +46,3 @@ wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 
 } //xxxxxxxx
 */
-
-//======================================================================================================================
-// Check in log
-//======================================================================================================================
-// 08-03-2017 @ 15.12.23 - (34.05)     - dscudiero - moved out the common code to workflowLib
-// 08-08-2017 @ 10.54.18 - (13.67)     - dscudiero - Refactored to import mapper functioins
-// 08-08-2017 @ 12.13.17 - (59.80)     - dscudiero - removed import of mapper functions file, moved to the workflowFuncs file
-// 09-11-2017 @ 15.52.09 - (10.62)     - dscudiero - General syncing of dev to prod
-// 09-25-2017 @ 15.42.14 - (57.02)     - dscudiero - Added a message if in not mode
-// 10-04-2017 @ 07.46.52 - (31.96)     - dscudiero - Tweeaked catch statement to use wfDebug
-// 10-25-2017 @ 09.40.56 - (13.59)     - dscudiero - Reformatted comments
-// 11-10-2017 @ 12.37.57 - (18.91)     - dscudiero - Cleanup on setting the options variable
-// 11-27-2017 @ 09.38.44 - (11.22)     - dscudiero - Added a include statement for util.atj
