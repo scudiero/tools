@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="3.9.52" # -- dscudiero -- Mon 09/17/2018 @ 08:12:28
+version="3.9.53" # -- dscudiero -- Wed 09/26/2018 @ 13:39:45
 #==================================================================================================
 TrapSigs 'on'
 myIncludes='DbLog Prompt SelectFile VerifyContinue InitializeInterpreterRuntime GetExcel WriteChangelogEntry'
@@ -434,7 +434,7 @@ Main() {
 			dump -1 client env siteDir processUserData processRoleData processPageData skipNulls useUINs
 			myData="Client: '$client', Env: '$env', product: '$product', skipNulls: '$skipNulls', ignoreMissingPages: '$ignoreMissingPages', File: '$workbookFile' "
 			[[ $logInDb != false && $myLogRecordIdx != "" ]] && dbLog 'data' $myLogRecordIdx "$myData"
-
+		return 0
 	}
 
 
@@ -1154,3 +1154,4 @@ Goodbye 0 'alert' "$client/$env"
 ## 09-17-2018 @ 08:07:54 - 3.9.50 - dscudiero - Move initialiazion code inside the main function
 ## 09-17-2018 @ 08:12:06 - 3.9.51 - dscudiero - Re-structure initialization into it's own function
 ## 09-17-2018 @ 08:13:21 - 3.9.52 - dscudiero - 1
+## 09-26-2018 @ 14:10:50 - 3.9.53 - dscudiero - Force a return code of 0 from Initialize
