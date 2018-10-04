@@ -387,6 +387,75 @@ attributes.forEach(function(attr) {
 		wfDebug(2,"\t\tCould not find role: "+ proposalDept + " DUS")
 	}
 
+
+//======================================================================================================================
+// Check to see if two arrays are the same
+// Usage:
+//		array1.compare(array2);
+// compares arra1 length to array2 length, if different then return false
+// compares each element in array1 to make sure it in array2, if all are there then return true, otherwise false
+//======================================================================================================================
+// 08-09-17 - dgs - Initial coding
+//======================================================================================================================
+Array.prototype.compare = function(array2) {
+	if (this.length != array2.length)
+		return false;
+	var array1=this.sort();
+	array2=array2.sort();
+	var allOf1In2=true;
+	for (var i = 0, l = array1.length; i < l; i++) {
+		var foundIn2=false;
+		for (var j = 0, l = array2.length; j < l; j++) {
+			if (array1[i] === array2[j]) {
+				foundIn2=true;
+				break;
+			}
+		}
+		if (! foundIn2) {
+			allOf1In2=false;
+			break;
+		}
+	}
+	return allOf1In2;
+}
+
+//======================================================================================================================
+// Returns the difference between two arrays
+// Usage:
+//		array1.diff(array2);
+// filters array1 based on array2, only return those elements of array1 NOT in array2.
+//======================================================================================================================
+// 11-20-17 - dgs - Initial coding
+//======================================================================================================================
+Array.prototype.diff = function (a) {
+    return this.filter(function (i) {
+        return a.indexOf(i) === -1;
+    });
+};
+
+//======================================================================================================================
+// Returns the symmetric difference between two arrays
+// Usage:
+//		symmetricDfference(arr1, arr2)
+// Returns new array that contains elements in arr1 not in arr2 and elements in arr2 not in arr1
+//======================================================================================================================
+// 06-29-18 - dgs - Initial coding
+//======================================================================================================================
+function symmetricDfference(arr1, arr2) {
+ var newArr = [];
+
+  arr1.forEach(function(val){
+   if(arr2.indexOf(val) < 0) newArr.push(val);
+  });
+
+  arr2.forEach(function(val){
+   if(arr1.indexOf(val) < 0) newArr.push(val);
+  });
+
+  return newArr;
+}
+
+
 //=================================================================================================
 // Check-in log
 // 04-03-2017 @ 10.54.45 - dscudiero - Add new info for regex
