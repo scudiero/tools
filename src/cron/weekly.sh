@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.1.50" # -- dscudiero -- Mon 07/23/2018 @ 07:41:07
+version="2.1.51" # -- dscudiero -- Mon 10/15/2018 @ 11:10:22
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -27,8 +27,8 @@ scriptArgs="$* -noBanners"
 case "$hostName" in
 	mojave)
 		## Run Reports
-			reports=("publishing -email \"froggersupport\"")
-			reports+=("qaWaiting -email \"${qaTeam},${qaManager},dscudiero\"")
+			#reports=("publishing -email \"froggersupport\"")
+			#reports+=("qaWaiting -email \"${qaTeam},${qaManager},dscudiero\"")
 			#reports+=("toolsUsage -email \"${toolsManager},dscudiero\"")
 
 			for ((i=0; i<${#reports[@]}; i++)); do
@@ -122,3 +122,4 @@ return 0
 ## 05-14-2018 @ 08:31:34 - 2.1.48 - dscudiero - Dont send out timeZone and toolsUsage reports
 ## 07-20-2018 @ 09:05:48 - 2.1.49 - dscudiero - Add code to check that we have recieved workflow specs for any scheduled meetings
 ## 07-23-2018 @ 07:41:32 - 2.1.50 - dscudiero - Tweak workflow specs message formate
+## 10-15-2018 @ 11:11:06 - 2.1.51 - dscudiero - Turn off the reports
