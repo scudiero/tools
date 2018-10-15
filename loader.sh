@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.62" # -- dscudiero -- Mon 08/27/2018 @ 07:50:21
+version="1.5.63" # -- dscudiero -- Mon 10/15/2018 @ 11:09:00
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -44,6 +44,8 @@ function CleanUp {
 			 	Warning "The log file could not be located:\n^$logFile"
 			fi
 		fi
+		[[ -f "$(dirname "$logFile")/script" ]] && rm -f "$(dirname "$logFile")/script"
+
 	## Cleanup semaphore and dblogging
 		[[ -n $semaphoreId ]] && Semaphore 'clear' $semaphoreId
 		[[ $logInDb != false && -n $myLogRecordIdx ]] && ProcessLogger 'End' $myLogRecordIdx
@@ -546,3 +548,4 @@ function CleanUp {
 ## 07-16-2018 @ 12:36:47 - 1.5.60 - dscudiero - Strip off the type prefix strings on UsersAuthGroups and UsersScriptsStr
 ## 08-27-2018 @ 07:48:14 - 1.5.61 - dscudiero - Put in a check to make sure the user is in the leepfrog group
 ## 08-27-2018 @ 07:50:42 - 1.5.62 - dscudiero - Cosmetic/minor change/Sync
+## 10-15-2018 @ 11:09:31 - 1.5.63 - dscudiero - Make sure that there is not a script file in the Logs directory on exit
