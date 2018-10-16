@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.65" # -- dscudiero -- Thu 05/31/2018 @  7:23:52.82
+# version="1.0.66" # -- dscudiero -- Tue 10/16/2018 @ 09:30:34
 #===================================================================================================
 # Usage: Msg <msgType> <msgLevel> <msgIndent> msgText
 # 	msgType: [N,I,W,E,T]
@@ -75,7 +75,9 @@ function Msg {
 			echo -e "$msgText"
 		fi
 		#[[ -n $logFile && -w $logFile ]] && echo -e "$msgText" >> "$logFile"&
-		[[ $msgType == 't' ]] && Goodbye 3
+		if [[ $msgType == 't' ]]; then
+			[[ $(type -t Goodbye) == 'function' ]] && Goodbye 3 || exit 3
+		fi
 
 	return 0
 }
@@ -126,3 +128,4 @@ export -f Msg Info Note Warning Error Terminate Verbose Quick Log
 ## 05-03-2018 @ 15:41:32 - 1.0.60 - dscudiero - Remove the 'l' processing record from the case statement
 ## 05-03-2018 @ 16:30:04 - 1.0.61 - dscudiero - Cosmetic/minor change/Sync
 ## 05-31-2018 @ 09:22:03 - 1.0.65 - dscudiero - Added 'P' (Prompt) message type
+## 10-16-2018 @ 09:32:00 - 1.0.66 - dscudiero - If terminate then check if the Goodbye function exists before calling
