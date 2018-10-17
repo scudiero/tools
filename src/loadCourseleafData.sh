@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="4.0.0" # -- dscudiero -- Wed 10/17/2018 @ 08:09:34
+version="4.0.1" # -- dscudiero -- Wed 10/17/2018 @ 08:14:20
 #=======================================================================================================================
 
 function Main {
@@ -80,8 +80,6 @@ function Usage {
 
 #=======================================================================================================================
 function Initialization {
-	USELOCAL=true;
-	#source "$TOOLSPATH/lib/Import.sh";
 	Import "Colors Msg Dump Here MkTmpFile Hello FindExecutable ProtectedCall CourseleafUtilities"
 
 	skipNulls=false;
@@ -185,3 +183,4 @@ exit
 ## Check-in log
 #=======================================================================================================================
 ## 10-17-2018 @ 08:10:22 - 4.0.0 - dscudiero - Completely refactored to work with workwith tool
+## 10-17-2018 @ 08:14:28 - 4.0.1 - dscudiero - Cosmetic/minor change/Sync
