@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="4.0.1" # -- dscudiero -- Wed 10/17/2018 @ 08:14:20
+version="4.0.2" # -- dscudiero -- Wed 10/17/2018 @ 14:44:34
 #=======================================================================================================================
 
 function Main {
@@ -24,7 +24,7 @@ function Main {
 	fi
 
 	numPagesUpdated=0
-	pushd "$siteDir/web/courseleaf" >2 /dev/null
+	pushd "$siteDir/web/courseleaf" &> /dev/null
 
 	numRecs=$(wc -l "$dataFile"); numRecs="${numRecs%% *}"
 	notifyThreshold=$(($numRecs / 6))
@@ -65,7 +65,7 @@ function Main {
 	done < "$dataFile"
 
 	Msg "^Processed $numRecs out of $numRecs\n\nDone\n"
-	popd >2 /dev/null
+	popd &> /dev/null
 
 	return 0
 } ## Main
@@ -184,3 +184,4 @@ exit
 #=======================================================================================================================
 ## 10-17-2018 @ 08:10:22 - 4.0.0 - dscudiero - Completely refactored to work with workwith tool
 ## 10-17-2018 @ 08:14:28 - 4.0.1 - dscudiero - Cosmetic/minor change/Sync
+## 10-17-2018 @ 14:44:53 - 4.0.2 - dscudiero - Fix bug with stderr redirection from pushd/popd
