@@ -44,5 +44,5 @@ wffuncs.xxxxxxxx = function(inval, wfrule, args) {
 		return false;
 
 
-} //xxxxxxxx
+} //wffuncs.xxxxxxxx
 */
