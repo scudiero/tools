@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.9.81" // -- dscudiero -- Fri 10/19/2018 @ 08:48:07
+wfLibVersion="1.9.89" // -- dscudiero -- Mon 10/22/2018 @ 08:01:46
 //attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -376,6 +376,18 @@ ProposalState = function() {
 	}
 	return retVal;
 }; //ProposalState
+
+//==================================================================================================
+// Return the proposal mode
+// 02/26/2015 - dgs - New
+//==================================================================================================
+wffuncs.GetProposalMode = function(inval,wfrule,args) {
+	return [inval.replace(wfrule.regex,ProposalState())]
+}; //wffuncs.GetProposalMode
+GetProposalMode = function() {
+	return ProposalState();
+}; //wffuncs.GetProposalMode
+
 
 //======================================================================================================================
 // Check the academic level of a course/program
@@ -2176,14 +2188,6 @@ wffuncs.CheckSetHasValue = function(inval, wfrule, args) {
 // } //wffuncs.HasValue
 
 //==================================================================================================
-// Return the proposal mode
-// 02/26/2015 - dgs - New
-//==================================================================================================
-wffuncs.GetProposalMode = function(inval,wfrule,args) {
-	return [inval.replace(wfrule.regex,ProposalState())]
-}; //wffuncs.GetProposalMode
-
-//==================================================================================================
 // Check execution environment, passed one argument 'env' that can hav values 'dev' or 'test'
 // compares execution url (host) against arg and if there is a match then returns true, otherwise
 // returns false
@@ -2711,3 +2715,4 @@ var wfLibLoaded=true;
 // 09-17-2018 @ 08:07:32 - 1.9.78 - dscudiero - Updated annotate to do replacements
 // 09-26-2018 @ 14:10:35 - 1.9.79 - dscudiero - Comment out the section that returns  'DUMMY's for col, dept, and subj of no data found
 // 10-19-2018 @ 08:52:00 - 1.9.81 - dscudiero - Fix bug printing debug data in Lookup2
+// 10-22-2018 @ 09:17:40 - 1.9.89 - dscudiero - Fix problems wint GetProposalMode function
