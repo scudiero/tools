@@ -1,13 +1,16 @@
 //======================================================================================================
 // ??/??/17-- dgs -- initial
-// version:1.0.2 // -- dscudiero -- Wed 04/12/2017 @  7:32:06.11
+//  version:"1.0.4"  -- dscudiero -- Mon 10/22/2018 @ 12:11:16
 //======================================================================================================
 localsteps:Miscellaneous Workflow Management|groups|workflow|attributes=todo[ToDo Item],fyi[FYI Only],fyiall[FYI All],optional[If Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
+
 
 template:custom
 pageflags:autoapprove
 
 workflow:standard|START,END
+
+//workflow:standard|START,College: Col,Department: Dept,Subject: Subj,Request Type: RequestType,END
 
 //======================================================================================================================
 // Check in log
