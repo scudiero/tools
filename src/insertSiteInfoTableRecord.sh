@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version="1.2.5" # -- dscudiero -- Mon 08/06/2018 @ 07:52:24
+version="1.2.7" # -- dscudiero -- Tue 10/23/2018 @ 09:53:45
 #==================================================================================================
 TrapSigs 'on'
 
@@ -46,9 +46,14 @@ originalArgStr="$*"
 share=$(cut -d '/' -f3 <<< $siteDir)
 client=$(cut -d' ' -f1 <<< $(ParseCourseleafFile "$siteDir"))
 
-shareType='prod'; suffix='/'; env=${siteDir##*/}
-[[ ${share:0:3} == 'dev' ]] && shareType='dev' && suffix='/web/' && env='dev'
-dump 2 -n -t siteDir share shareType client env clientId
+if [[ ${share:0:3} == 'dev' ]]; then
+	shareType='dev' && suffix='/web/' && env='dev'
+	siteDirWindows='\\\\'${share}'\\web\\'${client}
+else 
+	shareType='prod'; suffix='/'; env=${siteDir##*/}
+	siteDirWindows='\\\\'${share}'\\'${client}'\\'${env}
+fi
+dump 2 -n -t siteDir siteDirWindows shareType share client env clientId
 
 ## Which table to use
 	useSiteInfoTable="$siteInfoTable"
@@ -337,8 +342,8 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 
 ## Create the sites table record
 	setStr="catver=$catVer,cimver=$cimVer,clssVer=$clssVer,courseleafCgiVer=$courseleafCgiVer,reportsVer=$reportsVer,dailyshVer=$dailyshVer"
-	setStr="$setStr,CIMs=$cimStr,url=$url,internalUrl=$internalUrl,siteDir=\"$siteDir\",archives=$archives,googleType=$googleType"
-	setStr="$setStr,CATedition=$catEdition,publishing=$publishTarget,degreeWorks=$degreeWorks"
+	setStr="$setStr,CIMs=$cimStr,url=$url,internalUrl=$internalUrl,siteDir=\"$siteDir\",siteDirWindows=\"$siteDirWindows\",archives=$archives"
+	setStr="$setStr,archives=$archives,googleType=$googleType,CATedition=$catEdition,publishing=$publishTarget,degreeWorks=$degreeWorks"
 	sqlStmt="update $useSiteInfoTable set $setStr where siteId=\"$siteId\""
 	[[ $verboseLevel -gt 0 ]] && echo && echo "setStr = >$setStr<" && echo && echo "sqlStmt = >$sqlStmt<" && echo
 	RunSql $sqlStmt
@@ -421,3 +426,4 @@ return 0
 ## 07-26-2018 @ 06:51:39 - 1.2.3 - dscudiero - Do not store empty values as null, switch to ""
 ## 07-30-2018 @ 07:57:21 - 1.2.4 - dscudiero - Fix more issues setting values to NULL messing up courseleaf dbQUery
 ## 08-06-2018 @ 07:54:20 - 1.2.5 - dscudiero - Cosmetic/minor change/Sync
+## 10-23-2018 @ 12:37:05 - 1.2.7 - dscudiero - Added siteDirWindows
