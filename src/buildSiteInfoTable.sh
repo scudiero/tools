@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version="4.4.4" # -- dscudiero -- Wed 09/05/2018 @ 15:54:14
+version="4.4.5" # -- dscudiero -- Tue 10/23/2018 @ 12:36:43
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql StringFunctions ProtectedCall FindExecutable PushPop"
@@ -122,7 +122,7 @@ fi
 				(( clientCntr+=1 ))
 				client="$clientCode"
 				clientId=${dbClients[$client]}
-				[[ $batchMode != true ]] && Msg "Processing: $client (Id: $clientId) (~$clientCntr/$numClients)..."
+				[[ $batchMode != true ]] && Msg "Processing: $client (Id: $clientId) ($clientCntr/$numClients)..."
 				## Get the envDirs, make sure we have some
 				for env in ${envList//,/ }; do unset ${env}Dir ; done
 				SetSiteDirs
@@ -248,3 +248,4 @@ Goodbye 0 'alert'
 ## 03-26-2018 @ 12:51:29 - 4.3.127 - dscudiero - Misc cleanup
 ## 04-12-2018 @ 12:18:40 - 4.3.128 - dscudiero - Remove debug
 ## 09-05-2018 @ 15:54:24 - 4.4.4 - dscudiero - Tweak messaging
+## 10-23-2018 @ 12:36:53 - 4.4.5 - dscudiero - Cosmetic/minor change/Sync
