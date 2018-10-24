@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.22.82" # -- dscudiero -- Mon 09/10/2018 @ 15:59:08
+version="1.22.83" # -- dscudiero -- Wed 10/24/2018 @ 10:26:24
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -242,7 +242,7 @@ case "$hostName" in
 
 		## Run programs/functions
 			pgms=(checkPublishSettings updateDefaults "cleanDev -daemon" loadAuthData buildClientInfoTable buildSiteInfoTable)
-			pgms+=(BuildEmployeeTable buildQaStatusTable checkCgiPermissions)
+			pgms+=(BuildEmployeeTable buildQaStatusTable checkCgiPermissions loadMilestonesData)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -516,3 +516,4 @@ return 0
 ## 07-12-2018 @ 11:00:59 - 1.22.79 - dscudiero - Add checking of the master tool repo for commits
 ## 07-13-2018 @ 06:35:15 - 1.22.81 - dscudiero - Add messaging
 ## 09-10-2018 @ 16:00:15 - 1.22.82 - dscudiero - Change the order of programs, run updateData first
+## 10-24-2018 @ 10:26:54 - 1.22.83 - dscudiero - Add call to loadMilestonesData
