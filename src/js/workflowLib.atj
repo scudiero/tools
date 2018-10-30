@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.10.6" // -- dscudiero -- Fri 10/26/2018 @ 10:09:03
+wfLibVersion="1.10.9" // -- dscudiero -- Fri 10/26/2018 @ 11:33:26
 //attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -2457,15 +2457,19 @@ wffuncs.WhatsChanged = function(inval, wfrule, args) {
 // 07/27/17 - dgs - Changed output format, if no variables specified then dump subjects, departments, 
 //					and colleges
 //==================================================================================================
+wfDumpValuesFirst=true;
 wffuncs.wfDumpVars = function(inval, wfrule, args) {
+	if (!wfDumpValuesFirst) return false;
 	print_debug('\nwfDumpVars:\n')
 	if (wfrule.options != '') {
 		var varArray=wfrule.options.split(',');
 		varArray.forEach(function(a) {
 			tmpVal=eval(tmpVal='tcfdata.'+a)
 			Dump('\t'+a,tmpVal);
+			print_doc("<p>" + a + " = >" + tmpVal.toSource() + "<</p>")
 		});
 		print_debug("\n")
+		wfDumpValuesFirst=false;
 	} else {
 			Dump('\tgetAllCodes(tcfdata)',wffuncs.getAllCodes(tcfdata).toSource());
 
@@ -2710,3 +2714,4 @@ var wfLibLoaded=true;
 // 10-19-2018 @ 08:52:00 - 1.9.81 - dscudiero - Fix bug printing debug data in Lookup2
 // 10-22-2018 @ 09:17:40 - 1.9.89 - dscudiero - Fix problems wint GetProposalMode function
 // 10-26-2018 @ 10:16:03 - 1.10.6 - dscudiero - Added 'noMapValue' to the wfAttr calls
+// 10-30-2018 @ 15:43:38 - 1.10.9 - dscudiero - Change format of the wfDumpValues putout
