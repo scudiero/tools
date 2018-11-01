@@ -1,6 +1,6 @@
 #!/bin/bash
 #===================================================================================================
-version=1.2.34 # -- dscudiero -- Fri 03/23/2018 @ 16:35:50.09
+version="1.2.40" # -- dscudiero -- Thu 11/01/2018 @ 14:26:44
 #===================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall PushPop"
@@ -48,7 +48,6 @@ function NewScript {
 		if [[ -h $TOOLSPATH/bin/$linkFile ]]; then
 			unset ans; Prompt ans "Found a pre-existing file '$TOOLSPATH/bin/$linkFile, do you wish to overwrite" 'Yes No' 'No'; ans=$(Lower ${ans:0:1})
 			[[ $ans == 'n' ]] && doCopy=false
-			Msg $T "found pre-existing link file '$TOOLSPATH/bin/$linkFile'"
 		fi
 	## Copy file from prototype
 		if [[ $doCopy == true ]]; then
@@ -63,8 +62,8 @@ function NewScript {
 		if [[ ! -f $linkFile ]]; then
 			cwd="$(pwd)";
 			cd $TOOLSPATH/bin ;
-			ln -s "../dispatcher.sh" "$linkFile"
-			ln -s "./$linkFile" "${linkFile,,[a-z]}"
+			[[ ! -f "$linkFile" ]] && ln -s "../dispatcher.sh" "$linkFile"
+			[[ ! -f "${linkFile,,[a-z]}" ]] && ln -s "./$linkFile" "${linkFile,,[a-z]}"
 			Msg "^File '$file' -- created '$linkFile' symbolic link in '$TOOLSPATH/bin' to '$TOOLSPATH/src/dispatcher'"
 			cd "$cwd"
 		fi
@@ -76,19 +75,13 @@ function NewScript {
 			local name execName desc supported restrictToUsers restrictToGroups ignoreList allowList emailAddrs scriptData1 scriptData2 semaphore active
 			Prompt name "\tScript Name" "$(echo $file | cut -d'.' -f1),*any*" "$(echo $file | cut -d'.' -f1)"
 			name="\"$name\""
-			Prompt 'execName' "\tExec Name" '*optional*'
-			[[ $execName != '' ]] && execName="\"$exec\"" || execName=NULL
-			Prompt 'libs' "\tUses Libs" '*optional*'
-			[[ $libs != '' ]] && libs="\"$libs\"" || libs=NULL
-			Prompt desc "\tShort Description" '*any*'
+			Prompt desc "\tDescription" '*any*'
 			desc="\"$desc\""
-			Prompt supported "\tSupported" 'Yes No' 'Yes'
-			supported="\"$supported\""
-			Prompt restrictToUsers "\tRestrict to Users" '*optional*'
-			[[ $restrictToUsers != '' ]] && restrictToUsers="\"$restrictToUsers\"" || restrictToUsers=NULL
-			Prompt restrictToGroups "\tRestrict to Groups" '*optional*'
-			[[ $restrictToGroups != '' ]] && restrictToGroups="\"$restrictToGroups\"" || restrictToGroups=NULL
+			Prompt shortDesc "\tShort Description (20 chars)" '*any*'
+			[[ ${#shortDesc} -gt 20} ]] && Terminate "too long"
 
+			shortDesc="\"$shortDesc\""
+			
 			unset ans; Prompt ans "Do you wish to set script data" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1})
 			ignoreList=NULL; allowList=NULL; emailAddrs=NULL; scriptData1=NULL; scriptData2=NULL; scriptData3=NULL; scriptData4=NULL; scriptData5=NULL
 			if [[ $ans == 'y' ]]; then
@@ -130,8 +123,9 @@ function NewScript {
 			Prompt showInScripts "\tShow in scripts" 'Yes No' 'No'
 			[[ -n $showInScripts ]] && showInScripts="\"$showInScripts\"" || showInScripts=NULL
 
-			values="NULL,$name,$desc,NULL,\"$userName\",$supported,\"$osName\",NULL,$restrictToUsers,$restrictToGroups,$execName,$libs"
-			values="${values},NULL,$ignoreList,$allowList,$emailAddrs,$scriptData1,$scriptData2,$scriptData3,$scriptData4,$scriptData5,$semaphore,NULL,$updatesClData,$active,$showInScripts,\"$(date +%s)\",NULL"
+			values="NULL,$name,$desc,$shortDesc,\"$userName\",$emailAddrs,$ignoreList,$allowList"
+			values="${values},$scriptData1,$scriptData2,$scriptData3,$scriptData4,$scriptData5"
+			values="${values},$semaphore,NULL,$updatesClData,$showInScripts,$active"
 			sqlStmt="insert into $scriptsTable values($values)"
 			#echo 'sqlStmt = >'$sqlStmt'<'
 			RunSql $sqlStmt
@@ -413,3 +407,4 @@ Msg; Msg "$objType object created"
 ## 03-23-2018 @ 15:35:17 - 1.2.33 - dscudiero - D
 ## 03-23-2018 @ 16:36:24 - 1.2.34 - dscudiero - Remove vba and monitorifilw
 ## 06-14-2018 @ 14:29:30 - 1.2.34 - dscudiero - Fix problem creating new scripts
+## 11-01-2018 @ 14:27:11 - 1.2.40 - dscudiero - Fix bug writing out the scripts table entry
