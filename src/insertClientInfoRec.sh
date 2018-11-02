@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.4.0" # -- dscudiero -- Fri 11/02/2018 @ 16:15:01
+version="2.4.1" # -- dscudiero -- Fri 11/02/2018 @ 16:39:47
 #===================================================================================================
 TrapSigs 'on'
 
@@ -195,7 +195,7 @@ Dump -1 -n client
 
 ## insert the clientContactRoles records
 	## Clean up current records
-	sqlStmt="delete from $clientRolesTable"
+	sqlStmt="delete from $clientRolesTable where clientId=$clientId"
 	RunSql $sqlStmt
 
 	## Get the clientroles data from the transactional database
@@ -283,3 +283,4 @@ return 0
 ## 11-07-2017 @ 15.18.35 - (2.3.148)   - dscudiero - More generalized the additional data from contacts table support
 ## 03-22-2018 @ 14:06:35 - 2.3.151 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 11-02-2018 @ 16:15:34 - 2.4.0 - dscudiero - Add code to load the clientContactRoles table
+## 11-02-2018 @ 16:40:27 - 2.4.1 - dscudiero - Cosmetic/minor change/Sync
