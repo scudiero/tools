@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.4.2" # -- dscudiero -- Mon 11/05/2018 @ 07:43:56
+version="2.4.4" # -- dscudiero -- Mon 11/05/2018 @ 13:13:53
 #===================================================================================================
 TrapSigs 'on'
 
@@ -137,24 +137,27 @@ Dump -1 -n client
 		done
 	fi
 
-## Get the Rep data from the transactional db
-	Verbose 1 "^^Getting reps data"
-	reps="catsup,cimsup,catcsm,cimcsm,clsscsm,salesrep,cateditor,catdev,cimdev,clssdev,trainer,pilotrep"
-	for rep in $(tr ',' ' '<<< $reps); do unset $rep; done
-	fields="LOWER(clientroles.role),employees.db_firstname || ' ' || employees.db_lastname || '/' || employees.db_email"
-	dbs="clientroles,employees"
-	whereClause="clientroles.role <> '' and clientroles.employeekey=employees.db_employeekey and clientroles.clientkey=$idx"
-	sqlStmt="select $fields from $dbs where $whereClause"
-	RunSql "$contactsSqliteFile" $sqlStmt
-	if [[ ${#resultSet[@]} -gt 0 ]]; then
-		for ((cntr=0; cntr<${#resultSet[@]}; cntr++)); do
-			[[ $verboseLevel -gt 1 ]] && echo -e "\tresultSet[$cntr] = >${resultSet[$cntr]}<"
-			repName="${resultSet[$cntr]%%|*}"
-			repVal="${resultSet[$cntr]##*|}"
-			Dump -2 -t2 repName repVal
-			eval $repName=\"$repVal\"
-		done
-	fi
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# ## Get the Rep data from the transactional db
+# 	Verbose 1 "^^Getting reps data"
+# 	reps="catsup,cimsup,catcsm,cimcsm,clsscsm,salesrep,cateditor,catdev,cimdev,clssdev,trainer,pilotrep"
+# 	for rep in $(tr ',' ' '<<< $reps); do unset $rep; done
+# 	fields="LOWER(clientroles.role),employees.db_firstname || ' ' || employees.db_lastname || '/' || employees.db_email"
+# 	dbs="clientroles,employees"
+# 	whereClause="clientroles.role <> '' and clientroles.employeekey=employees.db_employeekey and clientroles.clientkey=$idx"
+# 	sqlStmt="select $fields from $dbs where $whereClause"
+# 	RunSql "$contactsSqliteFile" $sqlStmt
+# 	if [[ ${#resultSet[@]} -gt 0 ]]; then
+# 		for ((cntr=0; cntr<${#resultSet[@]}; cntr++)); do
+# 			[[ $verboseLevel -gt 1 ]] && echo -e "\tresultSet[$cntr] = >${resultSet[$cntr]}<"
+# 			repName="${resultSet[$cntr]%%|*}"
+# 			repVal="${resultSet[$cntr]##*|}"
+# 			Dump -2 -t2 repName repVal
+# 			eval $repName=\"$repVal\"
+# 		done
+# 	fi
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
 
 ## Build insert record
 	Verbose 1 "^^Building sql statement"
@@ -246,3 +249,4 @@ return 0
 ## 11-02-2018 @ 16:15:34 - 2.4.0 - dscudiero - Add code to load the clientContactRoles table
 ## 11-02-2018 @ 16:40:27 - 2.4.1 - dscudiero - Cosmetic/minor change/Sync
 ## 11-05-2018 @ 07:44:50 - 2.4.2 - dscudiero - Remove buildClientRoles code
+## 11-05-2018 @ 13:13:59 - 2.4.4 - dscudiero - Cosmetic/minor change/Sync
