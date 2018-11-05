@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.22.83" # -- dscudiero -- Wed 10/24/2018 @ 10:26:24
+version="1.22.84" # -- dscudiero -- Mon 11/05/2018 @ 07:43:46
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -241,7 +241,7 @@ case "$hostName" in
 			Msg "...done"
 
 		## Run programs/functions
-			pgms=(checkPublishSettings updateDefaults "cleanDev -daemon" loadAuthData buildClientInfoTable buildSiteInfoTable)
+			pgms=(checkPublishSettings updateDefaults "cleanDev -daemon" loadAuthData buildClientInfoTable buildSiteInfoTable loadClientRoles)
 			pgms+=(BuildEmployeeTable buildQaStatusTable checkCgiPermissions loadMilestonesData)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
@@ -517,3 +517,4 @@ return 0
 ## 07-13-2018 @ 06:35:15 - 1.22.81 - dscudiero - Add messaging
 ## 09-10-2018 @ 16:00:15 - 1.22.82 - dscudiero - Change the order of programs, run updateData first
 ## 10-24-2018 @ 10:26:54 - 1.22.83 - dscudiero - Add call to loadMilestonesData
+## 11-05-2018 @ 07:44:34 - 1.22.84 - dscudiero - Add call to buildClientRoles
