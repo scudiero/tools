@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.0.30" # -- dscudiero -- Mon 11/05/2018 @ 07:48:25
+version="1.0.33" # -- dscudiero -- Mon 11/05/2018 @ 12:15:24
 #=======================================================================================================================
 #= Description #========================================================================================================
 #
@@ -27,20 +27,18 @@ Main() {
 		sqlStmt="select idx,name from $clientInfoTable where name = \"$client\""
 	else
 		sqlStmt="truncate $clientRolesTable"
+		$DOIT RunSql $sqlStmt
 		sqlStmt="select idx,name from $clientInfoTable order by idx"
 	fi
 	RunSql $sqlStmt
 	clients=(${resultSet[*]})
 
 	for ((j=0; j<${#clients[@]}; j++)); do
-		clientData="${clients[$j]}"
-		clientId="${clientData%%|*}"; clientData="${clientData#*|}"
-		clientName="${clientData%%|*}"; clientData="${clientData#*|}"
-		Verbose 1 1 "\n$clientName"
-		# ## Cleanup current records
-		# sqlStmt="delete from $clientRolesTable where clientId=$clientId"
-		# RunSql $sqlStmt
-
+		clientRec="${clients[$j]}"
+		clientId="${clientRec%%|*}"; 
+		clientName="${clientRec##*|}";
+		Verbose 1 1 "\n$clientId / $clientName"
+		
 		## Get the clientroles data from the transactional database
 		sqlStmt="select clientKey,employeeKey,role from clientroles where clientKey=\"$clientId\""
 		RunSql "$contactsSqliteFile" $sqlStmt
@@ -71,7 +69,7 @@ Main() {
 					values="$clientId,\"internal\",$employeeKey,NULL,\"$role\",$userid,$firstName,$lastName,$email,now()"
 					Verbose 1 2 "$values"
 					sqlStmt="insert into $clientRolesTable values($values)"
-					RunSql $sqlStmt
+					$DOIT RunSql $sqlStmt
 				fi
 			done ## clientRoles
 		fi		
@@ -115,3 +113,4 @@ Goodbye 0 #'alert'
 ## 11-02-2018 @ 16:39:26 - 1.0.26 - dscudiero - Load the clientContactsRole table
 ## 11-05-2018 @ 07:45:16 - 1.0.29 - dscudiero - Add check for employeeKey not null before inserting record
 ## 11-05-2018 @ 07:48:40 - 1.0.30 - dscudiero - Truncate table if running on all clients
+## 11-05-2018 @ 12:18:40 - 1.0.33 - dscudiero - Remove dependency on the clientData hash table
