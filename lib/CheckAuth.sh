@@ -2,7 +2,7 @@
 
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.73" # -- dscudiero -- Fri 05/25/2018 @ 15:01:07.66
+# version="2.0.93" # -- dscudiero -- Mon 11/05/2018 @ 09:59:53
 #===================================================================================================
 # Check to see if the logged user can run this script
 # Returns true if user is authorized, otherwise it returns a message
@@ -12,40 +12,67 @@
 # All rights reserved
 #===================================================================================================
 function CheckAuth {
-	Import 'RunSql'
-	local sqlStmt author restrictToGroup restrictGroups
-	local scriptName=${1-$myName}
+	## Do we have the auth data loaded to memory
+	if [[ -z $UsersScriptsStr || -z $UsersScripts || -z UsersScripts ]]; then
+			## Get the employeeKey for this user
+		sqlStmt="select employeekey from $employeeTable where userid=\"$userName\""
+		RunSql $sqlStmt
+		employeeKey="${resultSet[0]}"
+		Verbose 1 "^^EmployeeKey: $employeeKey"
 
-	[[ -z $UsersAuthGroups && -r "$TOOLSPATH/auth/$userName" ]] && UsersAuthGroups=$(cat "$TOOLSPATH/auth/$userName")
-	[[ -z $UsersAuthGroups ]] && UsersAuthGroups='none' 
+		## Get the list of groups this user is in
+		sqlStmt="select groupId,code from $authGroupTable where groupId in (select authKey from auth2user where 
+				empKey=$employeeKey)"
+		RunSql $sqlStmt
+		unset groupListStr UsersAuthGroups
+		for result in "${resultSet[@]}"; do groupListStr="$groupListStr,$result"; done
+		groupListStr="${groupListStr:1}"
+		[[ -z $groupListStr ]] && continue
+		UsersAuthGroups="${groupListStr//,/, }"
+		Verbose 1 "^^Groups: $UsersAuthGroups"
 
-	## If this is the author the let them run
-		if [[ ${ScriptsAuthData["${scriptName}.author"]+abc} ]]; then
-			[[ ${ScriptsAuthData["${scriptName}.author"]} == $userName ]] && { echo true; return 0; }
+		## Get the list of scripts this user has access to, add them to the file
+		# 1) Scripts authorized to a group that the user is a member of (auth2user, auth2script)
+		# 2) Scripts where the user has specifically been granted access to (user2scripts)
+		# 3) Unrestricted scripts
+		sqlStmt="select distinct keyId,name,description,shortDescription,showInScripts from $scriptsTable where (keyId in \
+		((select scriptKey from auth2script where groupKey in \
+		(select authKey from auth2user where empKey in \
+		(select employeekey from employee where substr(email,1,instr(email,'@')-1)=\"$userName\"))))\
+		or \
+		(keyId in (select scriptKey from user2script where empKey in \
+		(select employeekey from employee where substr(email,1,instr(email,'@')-1)=\"$userName\")))) \
+		or \
+		(keyId not in (select scriptKey from auth2script) and keyId not in  (select scriptKey from user2script))
+		and \
+		name not in (\"loader\",\"dispatcher\")
+		order by name"
+		RunSql $sqlStmt
+
+		## Generate a comma separated list of script names
+		Verbose 2 "^^Found ${#resultSet[@]} script records..."
+		[[ ${#resultSet[@]} -eq 0 || ${resultSet[0]} == "" ]] && continue
+		unset UsersScriptsStr UsersScripts
+		for result in "${resultSet[@]}"; do
+			scriptId="${result%%|*}"; result="${result#*|}"; 
+			Verbose 2 "^^^$result"
+			UsersScripts+=("${scriptId}|${result}")
+			UsersScriptsStr="$UsersScriptsStr,${scriptId}|${result%%|*}"
+		done
+		UsersScriptsStr="${UsersScriptsStr:1}"
+	fi
+	
+	## Check to make sure we are authorized
+		local scriptName=${1-$myName}
+		if [[ $scriptName != 'scripts' && $scriptName != 'testsh' ]]; then
+			if [[ $(Contains ",$UsersScriptsStr," ",$scriptName,") != true ]] && [[ $(Contains "$UsersScriptsStr," "|$scriptName,") != true ]]; then
+				unset grpPrtStr; for group in $UsersAuthGroups; do grpPrtStr="$grpPrtStr ${group##*|}"; done
+				echo; echo; Terminate "Sorry, you do not have authorization to run script '$scriptName'. \
+				You are in the following authorization groups: \n\t\t\t${grpPrtStr}.  \
+				\n\t\t Please contact your supervisor or '$administrators' for additional information.";
+			fi
 		fi
 
-	## If there is restrictToUsers data then check
-		if [[ ${ScriptsAuthData["${scriptName}.restrictToUsers"]+abc} ]]; then
-			for restrictToUser in ${restrictToUsers//,/ }; do
-				[[ $restrictToUser == $userName ]] && { echo true; return 0; }
-			done
-		fi
-
-	## If there is restrictToGroups data then check
-		if [[ ${ScriptsAuthData["${scriptName}.restrictToGroups"]+abc} ]]; then
-			restrictToGroups="${ScriptsAuthData["${scriptName}.restrictToGroups"]}"
-			for group in ${UsersAuthGroups//,/ }; do
-				for restrictToGroup in ${restrictToGroups//,/ }; do
-					[[ $restrictToGroup == $group ]] && { echo true; return 0; }
-				done
-			done
-		else 
-			echo true
-			return 0
-		fi
-
-	## User is not authorized
-	echo -e "\nSorry, you do not have permissions to run '$scriptName', the script is restricted to groups: '${restrictToGroups//,/, }'.\nFYI, you are in these groups: '${UsersAuthGroups//,/, }'"
 	return 0
 
 } #CheckAuth
@@ -75,3 +102,4 @@ export -f CheckAuth
 ## 05-10-2018 @ 11:04:10 - 2.0.49 - dscudiero - Turn on the author check again
 ## 05-25-2018 @ 11:41:36 - 2.0.69 - dscudiero - Re-factor to use the ScriptAuthData hash
 ## 05-25-2018 @ 15:02:04 - 2.0.73 - dscudiero - Fix problem with false positives if there is no restricttogroup data
+## 11-05-2018 @ 10:14:08 - 2.0.93 - dscudiero - Switch to use the database and new auth structures
