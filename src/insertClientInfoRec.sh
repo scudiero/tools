@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.4.1" # -- dscudiero -- Fri 11/02/2018 @ 16:39:47
+version="2.4.2" # -- dscudiero -- Mon 11/05/2018 @ 07:43:56
 #===================================================================================================
 TrapSigs 'on'
 
@@ -193,45 +193,6 @@ Dump -1 -n client
 		dump 2 -n wFields -n insertVals
 		[[ $DOIT != '' || $informationOnlyMode == true ]] && Dump sqlStmt || RunSql $sqlStmt
 
-## insert the clientContactRoles records
-	## Clean up current records
-	sqlStmt="delete from $clientRolesTable where clientId=$clientId"
-	RunSql $sqlStmt
-
-	## Get the clientroles data from the transactional database
-	sqlStmt="select clientKey,employeeKey,role from clientroles where clientKey=\"$clientId\""
-	RunSql "$contactsSqliteFile" $sqlStmt
-	clientRolesData=(${resultSet[*]})
-	if [[ ${#clientRolesData[@]} -gt 0 ]]; then
-		for ((i=0; i<${#clientRolesData[@]}; i++)); do
-			result="${clientRolesData[$i]}"
-			dump 2 result
-			clientId="${result%%|*}"; result="${result#*|}"
-			employeeKey="${result%%|*}"; result="${result#*|}"
-			role="${result%%|*}"; result="${result#*|}"
-			dump 2 -t clientId employeeKey role
-			## Get employee info
-			userid=NULL; firstName=NULL; lastName=NULL; email=NULL
-			sqlStmt="select substr(email,1,instr(email,'@')-1),firstName,lastName,email from $employeeTable where employeeKey=\"$employeeKey\""
-			RunSql $sqlStmt
-			if [[ ${#resultSet[@]} -gt 0 ]]; then
-				result="${resultSet[0]}"
-				dump 2 -t result
-				userid="\"${result%%|*}\""; result="${result#*|}"
-				firstName="\"${result%%|*}\""; result="${result#*|}"
-				lastName="\"${result%%|*}\""; result="${result#*|}"
-				email="\"${result%%|*}\""; result="${result#*|}"
-				dump 2 -t2 clientId firstName lastName email
-			fi
-			## Build insert record
-			values="$clientId,\"internal\",$employeeKey,NULL,\"$role\",$userid,$firstName,$lastName,$email,now()"
-			Verbose 1 1 "$values"
-			sqlStmt="insert into $clientRolesTable values($values)"
-			RunSql $sqlStmt
-		done
-	fi
-
-
 #===================================================================================================
 # Done
 #===================================================================================================
@@ -284,3 +245,4 @@ return 0
 ## 03-22-2018 @ 14:06:35 - 2.3.151 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 11-02-2018 @ 16:15:34 - 2.4.0 - dscudiero - Add code to load the clientContactRoles table
 ## 11-02-2018 @ 16:40:27 - 2.4.1 - dscudiero - Cosmetic/minor change/Sync
+## 11-05-2018 @ 07:44:50 - 2.4.2 - dscudiero - Remove buildClientRoles code
