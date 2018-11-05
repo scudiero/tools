@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version="2.1.8" # -- dscudiero -- Thu 09/13/2018 @ 09:43:20
+version="2.1.9" # -- dscudiero -- Mon 11/05/2018 @ 10:19:27
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -185,72 +185,6 @@ if [[ -z $mode || $mode == 'defaults' ]]; then
 		touch "$TOOLSDEFAULTSPATH"
 fi
 
-# if [[ -z $mode || $mode == 'scripts' ]]; then
-# 	Verbose 1 "Updating scripts data"
-# 	## Write out a file with script information for the scripts that do not have restrictions
-# 		fields="keyId,name,shortDescription"
-# 		whereClause="showInScripts = \"Yes\" and active=\"Yes\""
-# 		sqlStmt="select $fields from $scriptsTable where $whereClause and restrictToGroups is null order by name"
-# 		RunSql $sqlStmt
-# 		outFile="$TOOLSPATH/auth/common"
-# 		[[ -f $outFile ]] && outFile="$outFile.new"
-# 		for ((i=0; i<${#resultSet[@]}; i++)); do
-# 			result="${resultSet[$i]}"
-# 			echo "$result" >> "$outFile"
-# 		done
-# 		[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
-# 		chgrp leepfrog "${outFile%.*}"
-# 		chmod 740 "${outFile%.*}"
-
-# 	## Get a list of groups used in restrictToGroups fields
-# 		declare -A groupHash 
-# 		sqlStmt="select restrictToGroups from $scriptsTable where restrictToGroups is not null"
-# 		RunSql $sqlStmt
-# 		for ((i=0; i<${#resultSet[@]}; i++)); do
-# 			result="${resultSet[$i]}"
-# 			for group in ${result//,/ }; do
-# 				[[ ${groupHash["$group"]+abc} ]] && continue
-# 				groupHash["$group"]=true
-# 			done
-# 		done
-
-# 	## Write out a file with script information for the scripts that have restrictions
-# 		for key in "${!groupHash[@]}"; do
-# 			outFile="$TOOLSPATH/auth/$key"
-# 			[[ -f $outFile ]] && outFile="$outFile.new"
-# 			sqlStmt="select $fields from $scriptsTable where $whereClause and restrictToGroups like \"%$key%\" order by name"
-# 			RunSql $sqlStmt
-# 			for ((i=0; i<${#resultSet[@]}; i++)); do
-# 				result="${resultSet[$i]}"
-# 				echo "$result" >> "$outFile" 
-# 			done
-# 			[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
-# 			chgrp leepfrog "${outFile%.*}"
-# 			chmod 740 "${outFile%.*}"
-# 		done
-# fi
-
-# if [[ -z $mode || $mode == 'reports' ]]; then
-# 	Verbose 1 "Updating reports information"
-# 	## Write out a file with reports information
-# 		outFile="${authShadowDir}/reports"
-# 		[[ -f $outFile ]] && outFile="$outFile.new"
-# 		fields="keyId,name,shortDescription,type,header,sqlStmt,script,scriptArgs,ignoreList"
-# 		sqlStmt="select $fields from $reportsTable where active=\"Yes\" order by name"
-# 		RunSql $sqlStmt
-# 		for ((i=0; i<${#resultSet[@]}; i++)); do
-# 			result="${resultSet[$i]}"
-# 			echo "$result" >> "$outFile" 
-# 		done
-# 		[[ -f "$outFile" ]] && mv -f "$outFile" "${outFile%.*}"
-# 		chgrp leepfrog "${outFile%.*}"
-# 		chmod 740 "${outFile%.*}"
-
-# 	## Set time stamp on the auth directory
-# 		touch "${authShadowDir}"
-# 		fi
-
-
 Goodbye 0;
 #==================================================================================================
 # Change Log
@@ -308,3 +242,4 @@ Goodbye 0;
 ## 07-12-2018 @ 12:25:26 - 2.1.5 - dscudiero - Comment out the reports auth code
 ## 07-12-2018 @ 13:01:38 - 2.1.5 - dscudiero - Comment out the 'reports auth' section
 ## 09-13-2018 @ 09:46:31 - 2.1.8 - dscudiero - Update/fix the logic that finds viatable 'servers'
+## 11-05-2018 @ 10:27:22 - 2.1.9 - dscudiero - Cosmetic/minor change/Sync
