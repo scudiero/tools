@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.0.29" # -- dscudiero -- Mon 11/05/2018 @ 07:37:12
+version="1.0.30" # -- dscudiero -- Mon 11/05/2018 @ 07:48:25
 #=======================================================================================================================
 #= Description #========================================================================================================
 #
@@ -23,8 +23,12 @@ Main() {
 	GetDefaultsData -f $myName
 	ParseArgsStd $originalArgStr
 
-	sqlStmt="select idx,name from $clientInfoTable order by idx"
-	[[ -n $client ]] && sqlStmt="select idx,name from $clientInfoTable where name = \"$client\""
+	if [[ -n $client ]]; then
+		sqlStmt="select idx,name from $clientInfoTable where name = \"$client\""
+	else
+		sqlStmt="truncate $clientRolesTable"
+		sqlStmt="select idx,name from $clientInfoTable order by idx"
+	fi
 	RunSql $sqlStmt
 	clients=(${resultSet[*]})
 
@@ -33,9 +37,9 @@ Main() {
 		clientId="${clientData%%|*}"; clientData="${clientData#*|}"
 		clientName="${clientData%%|*}"; clientData="${clientData#*|}"
 		Verbose 1 1 "\n$clientName"
-		## Cleanup current records
-		sqlStmt="delete from $clientRolesTable where clientId=$clientId"
-		RunSql $sqlStmt
+		# ## Cleanup current records
+		# sqlStmt="delete from $clientRolesTable where clientId=$clientId"
+		# RunSql $sqlStmt
 
 		## Get the clientroles data from the transactional database
 		sqlStmt="select clientKey,employeeKey,role from clientroles where clientKey=\"$clientId\""
@@ -110,3 +114,4 @@ Goodbye 0 #'alert'
 #============================================================================================================================================
 ## 11-02-2018 @ 16:39:26 - 1.0.26 - dscudiero - Load the clientContactsRole table
 ## 11-05-2018 @ 07:45:16 - 1.0.29 - dscudiero - Add check for employeeKey not null before inserting record
+## 11-05-2018 @ 07:48:40 - 1.0.30 - dscudiero - Truncate table if running on all clients
