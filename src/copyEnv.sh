@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.13.89" # -- dscudiero -- Wed 08/15/2018 @ 12:36:34
+version="4.14.4" # -- dscudiero -- Mon 11/05/2018 @ 12:07:07
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -157,6 +157,7 @@ dump 1 -n client envs product products fullCopy overlay suffix email skipCat ski
 		progDir='pagewiz'
 	else
 		Init 'getClient'
+		Here 71
 		if [[ $noCheck == true ]]; then
 			GetSiteDirNoCheck $client "For the $(ColorK 'Source'), do you want to work with '$client's development or production env"
 			srcEnv="$env"; srcDir="$siteDir"; unset env
@@ -183,8 +184,12 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 			clientHosting="${clientData["${client}.hosting"]}"
 			[[ $clientHosting != 'leepfrog' ]] && Terminate 'Copying of remotely hosted sites is not supported at this time'
 		else
-			Terminate "Could not retrieve data for client ($client), env ($env) from the clientData hash table"
-		fi	
+			sqlStmt="select distinct $siteInfoTable.host from $clientInfoTable,$siteInfoTable \
+					 where $clientInfoTable.name = \"$client\" and $clientInfoTable.name = $siteInfoTable.name and hosting = \"leepfrog\""
+			RunSql $sqlStmt
+			[[ ${#resultSet} -eq 0 ]] && Terminate "Could not retrieve data for client ($client), env ($env) from the clientData hash table"
+			clientHost="${resultSet[0]}"
+		fi
 		if [[ $clientHost != $hostName ]]; then
 			Msg "^Copying remote directory on '$clientHost', you will be prompted for your password on that server."
 			srcDir="ssh $userName@$clientHost.leepfrog.com:$srcDir"
@@ -195,7 +200,7 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 		clientHost=$hostName
 		clientRhel=$myRhel
 	fi
-	dump -2 -t srcDir devDir pvtDir remoteCopy
+	dump -2 -t srcDir devDir pvtDir remoteCopy -p
 
 	if [[ -n $overrideTarget ]]; then
 		[[ ${overrideTarget:(-1)} == '/' ]] && overrideTarget="${overrideTarget:0:${#overrideTarget}-1}"
@@ -720,3 +725,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 06-27-2018 @ 15:21:16 - 4.13.79 - dscudiero - Cleaned up logic that examines the products string
 ## 08-14-2018 @ 07:25:38 - 4.13.83 - dscudiero - Update tocheck if there is a localsteps mapfile record in courseleaf.cfg
 ## 08-15-2018 @ 13:29:23 - 4.13.89 - dscudiero - Updated code that updates localsteps/default.tcf
+## 11-05-2018 @ 12:18:12 - 4.14.4 - dscudiero - Remove dependency on the clientData hash table
