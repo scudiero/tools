@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.0.26" # -- dscudiero -- Fri 11/02/2018 @ 16:38:37
+version="1.0.29" # -- dscudiero -- Mon 11/05/2018 @ 07:37:12
 #=======================================================================================================================
 #= Description #========================================================================================================
 #
@@ -24,6 +24,7 @@ Main() {
 	ParseArgsStd $originalArgStr
 
 	sqlStmt="select idx,name from $clientInfoTable order by idx"
+	[[ -n $client ]] && sqlStmt="select idx,name from $clientInfoTable where name = \"$client\""
 	RunSql $sqlStmt
 	clients=(${resultSet[*]})
 
@@ -62,10 +63,12 @@ Main() {
 					dump 2 -t2 clientId firstName lastName email
 				fi
 				## Create insert record
-				values="$clientId,\"internal\",$employeeKey,NULL,\"$role\",$userid,$firstName,$lastName,$email,now()"
-				Verbose 1 2 "$values"
-				sqlStmt="insert into $clientRolesTable values($values)"
-				RunSql $sqlStmt
+				if [[ -n $employeeKey ]]; then
+					values="$clientId,\"internal\",$employeeKey,NULL,\"$role\",$userid,$firstName,$lastName,$email,now()"
+					Verbose 1 2 "$values"
+					sqlStmt="insert into $clientRolesTable values($values)"
+					RunSql $sqlStmt
+				fi
 			done ## clientRoles
 		fi		
 	done ## clients
@@ -89,21 +92,6 @@ return 0
 	}
 
 	function loadClientRoles-Help  {
-		helpSet='client,env' # can also include any of {env,src,tgt,prod,cim,cat,clss}, 'script' and 'common' automatically addeed
-		[[ $1 == 'setVarsOnly' ]] && return 0
-
-		[[ -z $* ]] && return 0
-		echo -e "This script can be used to copy workflow related files from one environment to another."
-		echo -e "\nThe actions performed are:"
-		bullet=1; echo -e "\t$bullet) Action 1"
-		(( bullet++ )); echo -e "\t$bullet) Action 2"
-		echo -e "\nTarget site data files potentially modified:"
-		echo -e "\tfile 1"
-		echo -e "\tfile 2"
-# or
-# 		if [[ -n "$someArrayVariable" ]]; then
-# 			for file in $(tr ',' ' ' <<< $someArrayVariable); do echo -e "\t\t- $file"; done
-# 		fi
 		return 0
 	}
 
@@ -121,3 +109,4 @@ Goodbye 0 #'alert'
 ## Check-in log
 #============================================================================================================================================
 ## 11-02-2018 @ 16:39:26 - 1.0.26 - dscudiero - Load the clientContactsRole table
+## 11-05-2018 @ 07:45:16 - 1.0.29 - dscudiero - Add check for employeeKey not null before inserting record
