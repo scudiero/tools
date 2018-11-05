@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.63" # -- dscudiero -- Mon 10/15/2018 @ 11:09:00
+version="1.5.83" # -- dscudiero -- Mon 11/05/2018 @ 09:23:39
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -261,55 +261,29 @@ function CleanUp {
 		callPgmName=$(cut -d'.' -f1 <<< $callPgmName)
 	fi ## [[ ${callPgmName:0:1} == '\' ]]
 
-	## Check to make sure we can run
-		checkMsg=$(CheckRun $callPgmName)
-		if [[ -n $checkMsg && $checkMsg != true ]]; then
-			if [[ $(Contains ",$administrators," ",$userName,") == true ]]; then
-				echo; echo; Warning "$checkMsg"; echo; Alert 2;
-			else
-				[[ $callPgmName != 'testsh' ]] && { echo; echo; Terminate "$checkMsg"; }
-			fi
+## Check to make sure we can run
+	checkMsg=$(CheckRun $callPgmName)
+	if [[ -n $checkMsg && $checkMsg != true ]]; then
+		if [[ $(Contains ",$administrators," ",$userName,") == true ]]; then
+			echo; echo; Warning "$checkMsg"; echo; Alert 2;
+		else
+			[[ $callPgmName != 'testsh' ]] && { echo; echo; Terminate "$checkMsg"; }
 		fi
+	fi
 
-	## Cache users auth groups and scripts list
-		if [[ -z $UsersAuthGroups ]]; then
-			if [[ -r "${authShadowDir}/${userName}" ]]; then
-				unset UsersScripts UsersScriptsStr
-				readarray -t tmpArray < "${authShadowDir}/${userName}"
-				UsersAuthGroups="${tmpArray[1]}"
-				UsersAuthGroups="${UsersAuthGroups/groups:}"
-				UsersScriptsStr="${tmpArray[2]}"
-				UsersScriptsStr="${UsersScriptsStr/scripts:}"
-				for ((i=3; i<${#tmpArray[@]}; i++)); do
-					str="${tmpArray[$i]}"; str="${str//[$'\t\r\n']}"
-					UsersScripts+=("$str")
-				done
-			else
-				UsersAuthGroups='none'
-			fi
+## Check Auth
+	CheckAuth "$callPgmName"
+	# dump UsersAuthGroups UsersScriptsStr;
+	# echo "UsersScripts:"; for ((xx=0; xx<${#UsersScripts[@]}; xx++)); do echo -e "\tUsersScripts[$xx] = >${UsersScripts[$xx]}<"; done;
+	
+## Check semaphore
+	[[ $(Contains ",$setSemaphoreList," ",$callPgmName," ) == true ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
 
-		fi
-		# Dump UsersAuthGroups UsersScriptsStr
-		# for ((xx=0; xx<${#UsersScripts[@]}; xx++)); do echo "UsersScripts[$xx] = >${UsersScripts[$xx]}<"; done
+## Resolve the executable file"
+	[[ -z $executeFile ]] && executeFile=$(FindExecutable "$callPgmName")
+	[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
+	# prtStatus ", find file"; sTime=$(date "+
 
-	## Check to make sure we are authorized
-		if [[ $callPgmName != 'scripts' && $callPgmName != 'testsh' ]]; then
-			if [[ $(Contains ",$UsersScriptsStr," ",$callPgmName,") != true ]] && [[ $(Contains "$UsersScriptsStr," "|$callPgmName,") != true ]]; then
-				echo; echo; Terminate "Sorry, you do not have authorization to run script '$callPgmName'. \
-				You are in the following authorization groups: ${UsersAuthGroups//,/, }.  \
-				\n\t\t Please contact your supervisor or '$administrators' for additional information.";
-			fi
-		fi
-
-	## Check semaphore
-		[[ $(Contains ",$setSemaphoreList," ",$callPgmName," ) == true ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
-
-	## Resolve the executable file"
-		[[ -z $executeFile ]] && executeFile=$(FindExecutable "$callPgmName")
-		[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
-		# prtStatus ", find file"; sTime=$(date "+%s")
-		#fastDump callPgmName executeFile -p
-		
 ## Call the script
 	## Initialize the log file
 		logFile=/dev/null
@@ -549,3 +523,4 @@ function CleanUp {
 ## 08-27-2018 @ 07:48:14 - 1.5.61 - dscudiero - Put in a check to make sure the user is in the leepfrog group
 ## 08-27-2018 @ 07:50:42 - 1.5.62 - dscudiero - Cosmetic/minor change/Sync
 ## 10-15-2018 @ 11:09:31 - 1.5.63 - dscudiero - Make sure that there is not a script file in the Logs directory on exit
+## 11-05-2018 @ 10:14:25 - 1.5.83 - dscudiero - Switch to use CheckAuth module
