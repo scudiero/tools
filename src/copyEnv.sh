@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.14.4" # -- dscudiero -- Mon 11/05/2018 @ 12:07:07
+version="4.14.5" # -- dscudiero -- Mon 11/05/2018 @ 14:30:03
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -157,7 +157,6 @@ dump 1 -n client envs product products fullCopy overlay suffix email skipCat ski
 		progDir='pagewiz'
 	else
 		Init 'getClient'
-		Here 71
 		if [[ $noCheck == true ]]; then
 			GetSiteDirNoCheck $client "For the $(ColorK 'Source'), do you want to work with '$client's development or production env"
 			srcEnv="$env"; srcDir="$siteDir"; unset env
@@ -726,3 +725,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 08-14-2018 @ 07:25:38 - 4.13.83 - dscudiero - Update tocheck if there is a localsteps mapfile record in courseleaf.cfg
 ## 08-15-2018 @ 13:29:23 - 4.13.89 - dscudiero - Updated code that updates localsteps/default.tcf
 ## 11-05-2018 @ 12:18:12 - 4.14.4 - dscudiero - Remove dependency on the clientData hash table
+## 11-05-2018 @ 14:45:26 - 4.14.5 - dscudiero - Removed debug statement
