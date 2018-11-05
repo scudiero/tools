@@ -28,10 +28,6 @@ scriptDescription=""
 	}
 
 	function loadAuthData-Help  {
-		helpSet='client,env' # can also include any of {env,src,tgt,prod,cim,cat,clss}, 'script' and 'common' automatically addeed
-		[[ $1 == 'setVarsOnly' ]] && return 0
-		[[ -z $* ]] && return 0
-		echo -e "This script can be used to refresh the tools 'auth' data shadow ($authShadowDir) from the database data."
 		return 0
 	}
 
@@ -123,3 +119,4 @@ Goodbye 0 #'alert'
 #============================================================================================================================================
 ## Check-in log
 #============================================================================================================================================
+## 11-05-2018 @ 10:27:18 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
