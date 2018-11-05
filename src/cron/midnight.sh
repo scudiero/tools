@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.22.86" # -- dscudiero -- Mon 11/05/2018 @ 10:21:39
+version="1.22.87" # -- dscudiero -- Mon 11/05/2018 @ 10:41:33
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -315,8 +315,8 @@ case "$hostName" in
 			fi
 			
 		 ## Create the data dump for the workwith tool
-		 	# Msg "\nBuilding the 'WorkWith' client data file..."
-		 	# FindExecutable loadWorkwithData -sh -run
+		 	Msg "\nBuilding the 'WorkWith' client data file..."
+		 	FindExecutable loadWorkwithData -sh -run
 
 		 ## Check for git commits in the master tools repo
 		 	Msg "\nChecking tools git repo for commits..."
@@ -519,3 +519,4 @@ return 0
 ## 11-05-2018 @ 07:44:34 - 1.22.84 - dscudiero - Add call to buildClientRoles
 ## 11-05-2018 @ 09:25:12 - 1.22.85 - dscudiero - Fix bug setting useridl in buildEmployeeTable
 ## 11-05-2018 @ 10:27:08 - 1.22.86 - dscudiero - Remove loadAuthData
+## 11-05-2018 @ 10:41:55 - 1.22.87 - dscudiero - Put back loading of workwith shadow data
