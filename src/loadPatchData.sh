@@ -28,10 +28,6 @@ scriptDescription=""
 	}
 
 	function loadPatchData-Help  {
-		helpSet='client,env' # can also include any of {env,src,tgt,prod,cim,cat,clss}, 'script' and 'common' automatically addeed
-		[[ $1 == 'setVarsOnly' ]] && return 0
-		[[ -z $* ]] && return 0
-		echo -e "This script can be used to refresh the tools 'auth' data shadow ($authShadowDir) from the database data."
 		return 0
 	}
 
@@ -157,3 +153,4 @@ Goodbye 0 #'alert'
 ## 07-18-2018 @ 09:22:43 - 1.0.-1 - dscudiero - Add debug statements
 ## 07-18-2018 @ 09:46:57 - 1.0.-1 - dscudiero - Additional debug
 ## 07-18-2018 @ 11:46:27 - 1.0.-1 - dscudiero - Removed debug code
+## 11-05-2018 @ 10:27:14 - 1.0.-1 - dscudiero - Cosmetic/minor change/Sync
