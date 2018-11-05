@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.22.85" # -- dscudiero -- Mon 11/05/2018 @ 08:16:21
+version="1.22.86" # -- dscudiero -- Mon 11/05/2018 @ 10:21:39
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -240,7 +240,7 @@ case "$hostName" in
 			Msg "...done"
 
 		## Run programs/functions
-			pgms=(checkPublishSettings updateDefaults "cleanDev -daemon" loadAuthData buildClientInfoTable buildSiteInfoTable loadClientRoles)
+			pgms=(checkPublishSettings updateDefaults "cleanDev -daemon" buildClientInfoTable buildSiteInfoTable loadClientRoles)
 			pgms+=(BuildEmployeeTable buildQaStatusTable checkCgiPermissions loadMilestonesData)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
@@ -315,8 +315,8 @@ case "$hostName" in
 			fi
 			
 		 ## Create the data dump for the workwith tool
-		 	Msg "\nBuilding the 'WorkWith' client data file..."
-		 	FindExecutable loadWorkwithData -sh -run
+		 	# Msg "\nBuilding the 'WorkWith' client data file..."
+		 	# FindExecutable loadWorkwithData -sh -run
 
 		 ## Check for git commits in the master tools repo
 		 	Msg "\nChecking tools git repo for commits..."
@@ -518,3 +518,4 @@ return 0
 ## 10-24-2018 @ 10:26:54 - 1.22.83 - dscudiero - Add call to loadMilestonesData
 ## 11-05-2018 @ 07:44:34 - 1.22.84 - dscudiero - Add call to buildClientRoles
 ## 11-05-2018 @ 09:25:12 - 1.22.85 - dscudiero - Fix bug setting useridl in buildEmployeeTable
+## 11-05-2018 @ 10:27:08 - 1.22.86 - dscudiero - Remove loadAuthData
