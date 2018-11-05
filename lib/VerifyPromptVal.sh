@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.17" # -- dscudiero -- Mon 07/23/2018 @ 08:08:14
+# version="2.1.18" # -- dscudiero -- Mon 11/05/2018 @ 14:26:15
 #===================================================================================================
 # Verify result value
 #===================================================================================================
@@ -8,7 +8,7 @@
 # All rights reserved
 #===================================================================================================
 function VerifyPromptVal {
-	myIncludes="RunSql StartRemoteSession PushPop ProtectedCall"
+	myIncludes="RunSql StartRemoteSession PushPop ProtectedCall SetClientDataObject"
 	Import "$myIncludes"
 
 	local i
@@ -42,75 +42,77 @@ function VerifyPromptVal {
 			response=${response:0:$lenResponse-1}
 			checkClient=false
 		else
-			## Load the clientData hash from the client data file
-			## utoledo|University of Toledo|leepfrog|cat,cati,cim|
-			## 	curr-build7/mesaverde#NULL;dev-build7/dev7#courseadmin,miscadmin,programadmin;
-			## 	next-build7/mesaverde#NULL;test-build7/mesaverde#courseadmin,miscadmin,programadmin
-			local grepStr="$(ProtectedCall "grep \"^${response}|\" $workwithDataFile")"
-			if [[ -n $grepStr ]]; then
-				local dataStr="${grepStr%|*}";
-				clientData["${response}.code"]="${dataStr%%|*}"; dataStr="${dataStr#*|}"
-				clientData["${response}.longName"]="${dataStr%%|*}"; dataStr="${dataStr#*|}"
-				clientData["${response}.hosting"]="${dataStr%%|*}"; dataStr="${dataStr#*|}"
-				clientData["${response}.products"]="${dataStr%%|*}"; dataStr="${dataStr#*|}"
-				clientData["${response}.productsInSupport"]="${dataStr%%|*}"; dataStr="${dataStr#*|}"
-				local envsStr="${grepStr##*|}" envStr prevEnvsStr envs clientDataKeys
+			SetClientDataObject $client
 
-				while [[ true ]]; do
-					local envStr="${envsStr%%;*}"; envsStr="${envsStr#*;}"
-					local env="${envStr%%-*}"; envStr="${envStr#*-}"
-					local envs="$envs,$env"
-					local host="${envStr%%/*}"; envStr="${envStr#*/}"
-					clientData["${response}.${env}.host"]="$host"
-					envStr="${envStr/\#/|}"
-					local server="${envStr%%|*}"; envStr="${envStr#*|}"
-					clientData["${response}.${env}.server"]="$server"
-					local cims="$envStr"; [[ $cims == 'NULL' ]] && unset cims
-					clientData["${response}.${env}.cims"]="$cims"
-					[[ $env == test ]] && clientData["${response}.${env}.siteDir"]="/mnt/$server/${response}-test/$env" || \
-											clientData["${response}.${env}.siteDir"]="/mnt/$server/$response/$env"
-					[[ ! -d ${clientData["${response}.${env}.siteDir"]} ]] && unset clientData["${response}.${env}.siteDir"]
-					[[ $envsStr == $prevEnvsStr ]] && break || prevEnvsStr="$envsStr"
 
-				done
-				## Do we have a pvt site, use dev info if we have it
-				unset pvtDir
-				if [[ ${clientData["${response}.dev.host"]} == $hostName && ${clientData["${response}.dev.server"]+abc} ]]; then
-					[[ -d /mnt/${clientData["${response}.dev.server"]}/web/${response}-${userName} ]] && 
-						pvtDir="/mnt/${clientData["${response}.dev.server"]}/web/${response}-${userName}"
+			# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+			# local grepStr="$(ProtectedCall "grep \"^${response}|\" $workwithDataFile")"
+			# if [[ -n $grepStr ]]; then
+			# 	local dataStr="${grepStr%|*}";
+			# 	clientData["${response}.code"]="${dataStr%%|*}"; dataStr="${dataStr#*|}"
+			# 	clientData["${response}.longName"]="${dataStr%%|*}"; dataStr="${dataStr#*|}"
+			# 	clientData["${response}.hosting"]="${dataStr%%|*}"; dataStr="${dataStr#*|}"
+			# 	clientData["${response}.products"]="${dataStr%%|*}"; dataStr="${dataStr#*|}"
+			# 	clientData["${response}.productsInSupport"]="${dataStr%%|*}"; dataStr="${dataStr#*|}"
+			# 	local envsStr="${grepStr##*|}" envStr prevEnvsStr envs clientDataKeys
 
-					clientData["${response}.pvt.host"]="${clientData["${client}.dev.host"]}"
-					clientData["${response}.pvt.server"]="${clientData["${client}.dev.server"]}"
-					if [[ -r "$pvtDir/.clonedFrom" ]]; then 
-						clonedFrom="$(cat "$pvtDir/.clonedFrom")"
-						clientData["${response}.pvt.clonedFrom"]="$clonedFrom"
-						clientData["${response}.pvt.cims"]="${clientData["${response}.${clonedFrom}.cims"]}"
-					fi
-					clientData["${response}.pvt.siteDir"]="$pvtDir"
-					[[ -n $pvtDir || $addPvt == true ]] && envs="$envs,pvt"
-				else
-					## Search for pvt dir
-					for server in ${devServers//,/ }; do
-						dump -3 -t server
-						[[ -d "/mnt/$server/web/$response-$userName" ]] && { pvtDir="/mnt/$server/web/$response-$userName"; break; }
-					done
-					if [[ -n $pvtDir ]]; then
-						clientData["${response}.pvt.host"]="$hostName"
-						clientData["${response}.pvt.server"]="$server"
-						if [[ -r "$pvtDir/.clonedFrom" ]]; then 
-							clonedFrom="$(cat "$pvtDir/.clonedFrom")"
-							clientData["${response}.pvt.clonedFrom"]="$clonedFrom"
-							clientData["${response}.pvt.cims"]="${clientData["${response}.${clonedFrom}.cims"]}"
-						fi
-						clientData["${response}.pvt.siteDir"]="$pvtDir"
-						[[ -n $pvtDir || $addPvt == true ]] && envs="$envs,pvt"
-					fi
-				fi
-				clientData["${response}.host"]="$host"
-				clientData["${response}.envs"]="${envs:1}"
-			else
-				verifyMsg="$(Error "Client value of '$response' not found in '$workwithDataFile'")"
-			fi
+			# 	while [[ true ]]; do
+			# 		local envStr="${envsStr%%;*}"; envsStr="${envsStr#*;}"
+			# 		local env="${envStr%%-*}"; envStr="${envStr#*-}"
+			# 		local envs="$envs,$env"
+			# 		local host="${envStr%%/*}"; envStr="${envStr#*/}"
+			# 		clientData["${response}.${env}.host"]="$host"
+			# 		envStr="${envStr/\#/|}"
+			# 		local server="${envStr%%|*}"; envStr="${envStr#*|}"
+			# 		clientData["${response}.${env}.server"]="$server"
+			# 		local cims="$envStr"; [[ $cims == 'NULL' ]] && unset cims
+			# 		clientData["${response}.${env}.cims"]="$cims"
+			# 		[[ $env == test ]] && clientData["${response}.${env}.siteDir"]="/mnt/$server/${response}-test/$env" || \
+			# 								clientData["${response}.${env}.siteDir"]="/mnt/$server/$response/$env"
+			# 		[[ ! -d ${clientData["${response}.${env}.siteDir"]} ]] && unset clientData["${response}.${env}.siteDir"]
+			# 		[[ $envsStr == $prevEnvsStr ]] && break || prevEnvsStr="$envsStr"
+			# 	done
+			# 	## Do we have a pvt site, use dev info if we have it
+			# 	unset pvtDir
+			# 	if [[ ${clientData["${response}.dev.host"]} == $hostName && ${clientData["${response}.dev.server"]+abc} ]]; then
+			# 		[[ -d /mnt/${clientData["${response}.dev.server"]}/web/${response}-${userName} ]] && 
+			# 			pvtDir="/mnt/${clientData["${response}.dev.server"]}/web/${response}-${userName}"
+
+			# 		clientData["${response}.pvt.host"]="${clientData["${client}.dev.host"]}"
+			# 		clientData["${response}.pvt.server"]="${clientData["${client}.dev.server"]}"
+			# 		if [[ -r "$pvtDir/.clonedFrom" ]]; then 
+			# 			clonedFrom="$(cat "$pvtDir/.clonedFrom")"
+			# 			clientData["${response}.pvt.clonedFrom"]="$clonedFrom"
+			# 			clientData["${response}.pvt.cims"]="${clientData["${response}.${clonedFrom}.cims"]}"
+			# 		fi
+			# 		clientData["${response}.pvt.siteDir"]="$pvtDir"
+			# 		[[ -n $pvtDir || $addPvt == true ]] && envs="$envs,pvt"
+			# 	else
+			# 		## Search for pvt dir
+			# 		for server in ${devServers//,/ }; do
+			# 			dump -3 -t server
+			# 			[[ -d "/mnt/$server/web/$response-$userName" ]] && { pvtDir="/mnt/$server/web/$response-$userName"; break; }
+			# 		done
+			# 		if [[ -n $pvtDir ]]; then
+			# 			clientData["${response}.pvt.host"]="$hostName"
+			# 			clientData["${response}.pvt.server"]="$server"
+			# 			if [[ -r "$pvtDir/.clonedFrom" ]]; then 
+			# 				clonedFrom="$(cat "$pvtDir/.clonedFrom")"
+			# 				clientData["${response}.pvt.clonedFrom"]="$clonedFrom"
+			# 				clientData["${response}.pvt.cims"]="${clientData["${response}.${clonedFrom}.cims"]}"
+			# 			fi
+			# 			clientData["${response}.pvt.siteDir"]="$pvtDir"
+			# 			[[ -n $pvtDir || $addPvt == true ]] && envs="$envs,pvt"
+			# 		fi
+			# 	fi
+			# 	clientData["${response}.host"]="$host"
+			# 	clientData["${response}.envs"]="${envs:1}"
+			# else
+			# 	verifyMsg="$(Error "Client value of '$response' not found in '$workwithDataFile'")"
+			# fi
+			# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+
 			## OK found client, now make sure it is valid for the current host
 			if [[ $verifyMsg == "" ]]; then
 				if [[ $anyClient != 'true' ]]; then
@@ -316,3 +318,4 @@ export -f VerifyPromptVal
 ## 06-27-2018 @ 12:13:44 - 2.1.10 - dscudiero - Comment out the version= line
 ## 07-19-2018 @ 08:35:05 - 2.1.11 - dscudiero - Add ProtectedCall to imports list
 ## 07-23-2018 @ 08:10:13 - 2.1.17 - dscudiero - Add pvt to the envs prompt if there is a pvtDir or addPvt was specified
+## 11-05-2018 @ 14:45:12 - 2.1.18 - dscudiero - Switch to use SetClientDataObject function
