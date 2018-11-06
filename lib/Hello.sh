@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.52" # -- dscudiero -- Tue 04/17/2018 @ 16:33:40.77
+# version="2.0.56" # -- dscudiero -- Tue 11/06/2018 @ 07:41:06
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -9,9 +9,8 @@
 #===================================================================================================
 
 function Hello {
-	myIncludes="StringFunctions"
+	myIncludes="StringFunctions RunSql"
 	Import "$standardIncludes $myIncludes"
-
 
 	[[ $quiet == true || $noHeaders == true || $secondaryMessagesOnly == true ]] && return 0
 	[[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
@@ -29,6 +28,11 @@ function Hello {
 
 	[[ "$version" = "" ]] && version=1.0.0
 	Msg "${myName} ($version) -- Date: $(date +"%a") $(date +"%m-%d-%Y @ %H.%M.%S")"
+
+	local sqlStmt="select supported from $scriptsTable where name = \"$myName\""
+	RunSql $sqlStmt
+	[[ -z ${resultSet[0]} ]] && Warning "This script is not supported, results are not guaranteed to not be as expected"	
+
 	[[ $noBanners != true && "$myDescription" != "" ]] && Msg && Msg "$myDescription"
 	[[ $checkName != $userName ]] && userStr="Real user $checkName, Tools user: $userName" || userStr="Tools user: $userName"
 	[[ $noBanners != true ]] && Msg "$userStr, Host: $hostName, Database: $warehouseDb, PID: $$, PPID: $PPID"
@@ -82,3 +86,4 @@ export -f Hello
 ## 11-09-2017 @ 11.09.05 - ("2.0.46")  - dscudiero - Added a runing from local message
 ## 03-23-2018 @ 16:47:59 - 2.0.51 - dscudiero - Msg3 -> Msg
 ## 04-18-2018 @ 09:35:01 - 2.0.52 - dscudiero - Added USEDEV message
+## 11-06-2018 @ 07:42:00 - 2.0.56 - dscudiero - Add not supported message
