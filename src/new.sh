@@ -1,6 +1,6 @@
 #!/bin/bash
 #===================================================================================================
-version="1.2.40" # -- dscudiero -- Thu 11/01/2018 @ 14:26:44
+version="1.2.41" # -- dscudiero -- Tue 11/06/2018 @ 07:43:25
 #===================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall PushPop"
@@ -123,7 +123,7 @@ function NewScript {
 			Prompt showInScripts "\tShow in scripts" 'Yes No' 'No'
 			[[ -n $showInScripts ]] && showInScripts="\"$showInScripts\"" || showInScripts=NULL
 
-			values="NULL,$name,$desc,$shortDesc,\"$userName\",$emailAddrs,$ignoreList,$allowList"
+			values="NULL,$name,$desc,$shortDesc,\"$userName\",NULL,$emailAddrs,$ignoreList,$allowList"
 			values="${values},$scriptData1,$scriptData2,$scriptData3,$scriptData4,$scriptData5"
 			values="${values},$semaphore,NULL,$updatesClData,$showInScripts,$active"
 			sqlStmt="insert into $scriptsTable values($values)"
@@ -408,3 +408,4 @@ Msg; Msg "$objType object created"
 ## 03-23-2018 @ 16:36:24 - 1.2.34 - dscudiero - Remove vba and monitorifilw
 ## 06-14-2018 @ 14:29:30 - 1.2.34 - dscudiero - Fix problem creating new scripts
 ## 11-01-2018 @ 14:27:11 - 1.2.40 - dscudiero - Fix bug writing out the scripts table entry
+## 11-06-2018 @ 07:43:42 - 1.2.41 - dscudiero - Fix sql insert statement to include supported
