@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.14.5" # -- dscudiero -- Mon 11/05/2018 @ 14:30:03
+version="4.14.6" # -- dscudiero -- Tue 11/06/2018 @ 07:51:11
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -190,9 +190,10 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 			clientHost="${resultSet[0]}"
 		fi
 		if [[ $clientHost != $hostName ]]; then
-			Msg "^Copying remote directory on '$clientHost', you will be prompted for your password on that server."
-			srcDir="ssh $userName@$clientHost.leepfrog.com:$srcDir"
-			remoteCopy=true
+			Terminate "The client specified, '$client', is hosted on '$clientHost'.  Please start a session on that host and try again."
+			# Msg "^Copying remote directory on '$clientHost', you will be prompted for your password on that server."
+			# srcDir="ssh $userName@$clientHost.leepfrog.com:$srcDir"
+			# remoteCopy=true
 		fi
 		dump -2 -t clientHost clientShare clientRhel srcDir
 	else
@@ -726,3 +727,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 08-15-2018 @ 13:29:23 - 4.13.89 - dscudiero - Updated code that updates localsteps/default.tcf
 ## 11-05-2018 @ 12:18:12 - 4.14.4 - dscudiero - Remove dependency on the clientData hash table
 ## 11-05-2018 @ 14:45:26 - 4.14.5 - dscudiero - Removed debug statement
+## 11-06-2018 @ 07:51:54 - 4.14.6 - dscudiero - Terminate if client is not hosted on the current host
