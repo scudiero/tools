@@ -19,7 +19,7 @@ function GetDefaultsData {
 	## other parameters as below
 	while [[ $# -gt 0 ]]; do
 	    [[ $1 =~ ^-m|--mode$ ]] && { mode="'$2'"; shift 2; continue; }
-	    # [[ $1 =~ ^-f|--fromFiles$ ]] && { mode='fromFiles'; shift 1; continue; }
+	    [[ $1 =~ ^-f|--fromFiles$ ]] && { mode='fromFiles'; shift 1; continue; }
 	    [[ $1 =~ ^-d|--Db$ ]] && { mode='fromDb'; shift 1; continue; }
 	    [[ $1 =~ ^-r|--reports$ ]] && { table='reports'; shift 2; continue; }
 	    [[ $1 =~ ^-s|--scripts$ ]] && { table='scripts'; shift 2; continue; }
@@ -111,3 +111,4 @@ export -f GetDefaultsData
 ## 10-02-2017 @ 14.22.28 - ("2.1.-1")  - dscudiero - Change default to -fromFile
 ## 03-22-2018 @ 13:42:08 - 2.1.-1 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 11-07-2018 @ 15:12:12 - 2.1.-1 - dscudiero - Cosmetic/minor change/Sync
+## 11-07-2018 @ 15:18:47 - 2.1.-1 - dscudiero - Cosmetic/minor change/Sync
