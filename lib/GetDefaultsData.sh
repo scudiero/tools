@@ -9,7 +9,7 @@
 #===================================================================================================
 function GetDefaultsData {
 	## Defaults ====================================================================================
-	local mode='fromFiles'
+	local mode
 	local table='scripts'
 	local scripts; unset scripts
 
@@ -19,7 +19,7 @@ function GetDefaultsData {
 	## other parameters as below
 	while [[ $# -gt 0 ]]; do
 	    [[ $1 =~ ^-m|--mode$ ]] && { mode="'$2'"; shift 2; continue; }
-	    [[ $1 =~ ^-f|--fromFiles$ ]] && { mode='fromFiles'; shift 1; continue; }
+	    # [[ $1 =~ ^-f|--fromFiles$ ]] && { mode='fromFiles'; shift 1; continue; }
 	    [[ $1 =~ ^-d|--Db$ ]] && { mode='fromDb'; shift 1; continue; }
 	    [[ $1 =~ ^-r|--reports$ ]] && { table='reports'; shift 2; continue; }
 	    [[ $1 =~ ^-s|--scripts$ ]] && { table='scripts'; shift 2; continue; }
@@ -30,16 +30,16 @@ function GetDefaultsData {
 
 	## MAIN ========================================================================================
 	## If mode is fromFiles then just source the defaults files from the shadows
-	if [[ $mode == 'fromFiles' ]]; then
-		[[ -f "$TOOLSDEFAULTSPATH/common" ]] && source "$TOOLSDEFAULTSPATH/common"
-		[[ -f "$TOOLSDEFAULTSPATH/$hostName" ]] && source "$TOOLSDEFAULTSPATH/$hostName"
-		if [[ -n $scripts ]]; then
-			for scriptName in $scripts; do
-				[[ -f "$TOOLSDEFAULTSPATH/$scriptName" ]] && source "$TOOLSDEFAULTSPATH/$scriptName"
-			done
-		fi
-		return 0
-	fi
+	# if [[ $mode == 'fromFiles' ]]; then
+	# 	[[ -f "$TOOLSDEFAULTSPATH/common" ]] && source "$TOOLSDEFAULTSPATH/common"
+	# 	[[ -f "$TOOLSDEFAULTSPATH/$hostName" ]] && source "$TOOLSDEFAULTSPATH/$hostName"
+	# 	if [[ -n $scripts ]]; then
+	# 		for scriptName in $scripts; do
+	# 			[[ -f "$TOOLSDEFAULTSPATH/$scriptName" ]] && source "$TOOLSDEFAULTSPATH/$scriptName"
+	# 		done
+	# 	fi
+	# 	return 0
+	# fi
 
 	## Pull the data from the Db
 	Import "RunSql"
@@ -73,7 +73,7 @@ function GetDefaultsData {
 	## If scriptname was passed in then get script specific data from the script record in the scripts database
 		if [[ -n $scriptName ]]; then
 			if [[ $table == $scriptsTable ]]; then
-				fields='scriptData1,scriptData2,scriptData3,scriptData4,scriptData5,ignoreList,allowList,emailAddrs,updatesClData'
+				fields='scriptData1,scriptData2,scriptData3,scriptData4,scriptData5,ignoreList,allowList,emailAddrs'
 			else
 				fields='ignoreList,allowList'
 			fi
@@ -110,3 +110,4 @@ export -f GetDefaultsData
 ## 10-02-2017 @ 13.07.54 - ("2.1.-1")  - dscudiero - General syncing of dev to prod
 ## 10-02-2017 @ 14.22.28 - ("2.1.-1")  - dscudiero - Change default to -fromFile
 ## 03-22-2018 @ 13:42:08 - 2.1.-1 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 11-07-2018 @ 15:12:12 - 2.1.-1 - dscudiero - Cosmetic/minor change/Sync
