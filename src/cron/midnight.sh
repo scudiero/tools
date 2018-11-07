@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.22.87" # -- dscudiero -- Mon 11/05/2018 @ 10:41:33
+version="1.22.88" # -- dscudiero -- Wed 11/07/2018 @ 08:17:22
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -97,7 +97,7 @@ function BuildEmployeeTable {
 			RunSql $sqlStmt
 
 	### Get the transactonal values, loop through them and  write out the warehouse record
-		sqlStmt="select $transactionalColumns from employees where db_isactive in (\"Y\",\"L\") order by db_employeekey"
+		sqlStmt="select $transactionalColumns from employees order by db_employeekey"
 		RunSql "$contactsSqliteFile" $sqlStmt
 		for resultRec in "${resultSet[@]}"; do
 			fieldCntr=1; unset valuesString userid
@@ -520,3 +520,4 @@ return 0
 ## 11-05-2018 @ 09:25:12 - 1.22.85 - dscudiero - Fix bug setting useridl in buildEmployeeTable
 ## 11-05-2018 @ 10:27:08 - 1.22.86 - dscudiero - Remove loadAuthData
 ## 11-05-2018 @ 10:41:55 - 1.22.87 - dscudiero - Put back loading of workwith shadow data
+## 11-07-2018 @ 09:23:12 - 1.22.88 - dscudiero - Update buildEmployeeTable to pull in all employee records,not just active
