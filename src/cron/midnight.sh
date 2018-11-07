@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.22.90" # -- dscudiero -- Wed 11/07/2018 @ 13:52:16
+version="1.22.91" # -- dscudiero -- Wed 11/07/2018 @ 14:25:17
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -326,8 +326,8 @@ case "$hostName" in
 			fi
 			
 		 ## Create the data dump for the workwith tool
-		 	Msg "\nBuilding the 'WorkWith' client data file..."
-		 	FindExecutable loadWorkwithData -sh -run
+		 	# Msg "\nBuilding the 'WorkWith' client data file..."
+		 	# FindExecutable loadWorkwithData -sh -run
 
 		 ## Check for git commits in the master tools repo
 		 	Msg "\nChecking tools git repo for commits..."
@@ -533,3 +533,4 @@ return 0
 ## 11-05-2018 @ 10:41:55 - 1.22.87 - dscudiero - Put back loading of workwith shadow data
 ## 11-07-2018 @ 09:23:12 - 1.22.88 - dscudiero - Update buildEmployeeTable to pull in all employee records,not just active
 ## 11-07-2018 @ 13:52:33 - 1.22.90 - dscudiero - Add auth table cleanup code
+## 11-07-2018 @ 14:34:09 - 1.22.91 - dscudiero - Comment out building the workwith files
