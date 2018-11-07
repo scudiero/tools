@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.83" # -- dscudiero -- Mon 11/05/2018 @ 09:23:39
+version="1.5.84" # -- dscudiero -- Wed 11/07/2018 @ 14:29:09
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -208,7 +208,7 @@ function CleanUp {
 
 ## Load tools defaults value
 	defaultsLoaded=false
-	GetDefaultsData "$myName" -fromFiles
+	GetDefaultsData "$myName" #-fromFiles
 
 ## Set forking limit
 	maxForkedProcesses=$maxForkedProcessesPrime
@@ -524,3 +524,4 @@ function CleanUp {
 ## 08-27-2018 @ 07:50:42 - 1.5.62 - dscudiero - Cosmetic/minor change/Sync
 ## 10-15-2018 @ 11:09:31 - 1.5.63 - dscudiero - Make sure that there is not a script file in the Logs directory on exit
 ## 11-05-2018 @ 10:14:25 - 1.5.83 - dscudiero - Switch to use CheckAuth module
+## 11-07-2018 @ 14:33:47 - 1.5.84 - dscudiero - Remove -fromFiles from GetDefaultsData call
