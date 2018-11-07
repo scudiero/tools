@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version="2.0.71" # -- dscudiero -- Tue 07/17/2018 @ 08:26:29
+version="2.0.72" # -- dscudiero -- Wed 11/07/2018 @ 14:31:52
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors FindExecutable SelectMenu ProtectedCall Pause"
@@ -146,7 +146,7 @@ declare -A scriptsHash
 ## parse arguments
 #=======================================================================================================================
 helpSet='script,client'
-GetDefaultsData $myName -fromFiles
+GetDefaultsData $myName #-fromFiles
 ParseArgsStd $originalArgStr
 scriptArgs="$unknowArgs"
 Hello
@@ -217,3 +217,4 @@ Goodbye 0
 ## 06-18-2018 @ 16:14:35 - 2.0.70 - dscudiero - Check if we can run the selected script
 ## 06-18-2018 @ 16:16:53 - 2.0.70 - dscudiero - Cosmetic/minor change/Sync
 ## Tue Jul 17 08:33:28 CDT 2018 - dscudiero - -m Tweak the display of the users groups
+## 11-07-2018 @ 14:34:14 - 2.0.72 - dscudiero - Remove -fromFiles from GetDefaultsData call
