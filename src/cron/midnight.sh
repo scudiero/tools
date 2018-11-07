@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.22.88" # -- dscudiero -- Wed 11/07/2018 @ 08:17:22
+version="1.22.90" # -- dscudiero -- Wed 11/07/2018 @ 13:52:16
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -251,6 +251,17 @@ case "$hostName" in
 				Semaphore 'waiton' "$pgmName" 'true'
 				Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
+
+		## Clean out dead entries from the 'auth' tables
+			sqlStmt="delete from $auth2userTable where $auth2userTable.empKey not in (select employeeKey from $employeeTable where isactive = \"Y\")";
+			RunSql $sqlStmt
+			sqlStmt="delete from $auth2userTable where $auth2userTable.authKey not in (select groupId from $authGroupTable)"
+			RunSql $sqlStmt
+			sqlStmt="delete from $auth2scriptTable where $auth2scriptTable.scriptKey not in (select keyId from $scriptsTable)"
+			RunSql $sqlStmt
+			sqlStmt="delete from $auth2scriptTable where $auth2scriptTable.groupKey not in (select groupId from $authGroupTable)"
+			RunSql $sqlStmt
+
 
 		## Rebuild the internal site pages 
 			Msg "\nRebuilding Internal pages"
@@ -521,3 +532,4 @@ return 0
 ## 11-05-2018 @ 10:27:08 - 1.22.86 - dscudiero - Remove loadAuthData
 ## 11-05-2018 @ 10:41:55 - 1.22.87 - dscudiero - Put back loading of workwith shadow data
 ## 11-07-2018 @ 09:23:12 - 1.22.88 - dscudiero - Update buildEmployeeTable to pull in all employee records,not just active
+## 11-07-2018 @ 13:52:33 - 1.22.90 - dscudiero - Add auth table cleanup code
