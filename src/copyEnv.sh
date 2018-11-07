@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.14.6" # -- dscudiero -- Tue 11/06/2018 @ 07:51:11
+version="4.14.7" # -- dscudiero -- Wed 11/07/2018 @ 14:31:48
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -116,7 +116,7 @@ lockWorkflow=false
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-GetDefaultsData "$myName" -fromFiles
+GetDefaultsData "$myName" #-fromFiles
 ParseArgsStd $originalArgStr
 Hello
 
@@ -728,3 +728,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 11-05-2018 @ 12:18:12 - 4.14.4 - dscudiero - Remove dependency on the clientData hash table
 ## 11-05-2018 @ 14:45:26 - 4.14.5 - dscudiero - Removed debug statement
 ## 11-06-2018 @ 07:51:54 - 4.14.6 - dscudiero - Terminate if client is not hosted on the current host
+## 11-07-2018 @ 14:33:53 - 4.14.7 - dscudiero - Remove -fromFiles from GetDefaultsData call
