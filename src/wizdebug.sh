@@ -1,9 +1,9 @@
 #!/bin/bash
 #==================================================================================================
-version=2.6.68 # -- dscudiero -- Fri 03/23/2018 @ 14:42:16.54
+version="2.6.79" # -- dscudiero -- Thu 11/08/2018 @ 11:57:14
 #==================================================================================================
 TrapSigs 'on'
-myIncludes="GetCourseleafPgm PrintBanner"
+myIncludes="GetCourseleafPgm PrintBanner PushPop"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -18,10 +18,23 @@ scriptDescription="Monitor the log messages (courseleaf/wizdebug.out) for a Cour
 # 07-17-15 --	dgs - Migrated to framework 5
 #==================================================================================================
 
+#=======================================================================================================================
+# Standard call back functions
+#=======================================================================================================================
+function wizdebug-ParseArgsStd  {
+	myArgs+=("ribbit|ribbitDebug|switch|ribbitDebug||script|Display the wizdebug file from the ribbit folder")
+	myArgs+=("site|siteDir|option|siteDir||script|The fully qualified site directory root")
+	return 0
+}
+function testsh-Goodbye  {
+	Popd
+	SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
+	return 0
+}
+
 #==================================================================================================
 # Declare local variables and constants
 #==================================================================================================
-unset client env srcEnv tgtEnv srcDir tgtDir siteDir pvtDir devDir testDir currDir previewDir publicDir
 
 #==================================================================================================
 # Standard arg parsing and initialization
@@ -32,12 +45,18 @@ GetDefaultsData $myName
 ParseArgsStd $originalArgStr
 
 Init 'getClient getEnv getDirs checkEnvs noPreview noPublic'
+dump -1 client env envs siteDir fastinit
 
 #===================================================================================================
 #= Main
 #===================================================================================================
 courseLeafDir=$(GetCourseleafPgm "$siteDir" | cut -d' ' -f2)
 debugFile="$courseLeafDir/wizdebug.out"
+if [[ $ribbitDebug == true ]]; then 
+	Pushd "$courseLeafDir"
+	cd "../ribbit"
+	debugFile="$(pwd)/wizdebug.out"
+fi
 [[ ! -f "$debugFile" ]] && Msg && Terminate "Could not locate wizdebug.out file:\n\t$debugFile"
 
 [[ $batchMode != true && $noClear != true && $TERM != 'dumb' ]] && clear
@@ -69,3 +88,4 @@ Goodbye 0
 ## 03-22-2018 @ 12:36:35 - 2.6.66 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-22-2018 @ 13:25:51 - 2.6.67 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:36:31 - 2.6.68 - dscudiero - D
+## 11-08-2018 @ 12:02:01 - 2.6.79 - dscudiero - Add coding for fastInit
