@@ -14,27 +14,35 @@ wfSubRule:Depts|SELECT substr(code,5) as code,name,access FROM codedesc WHERE se
 // Setup rules for non-controlling entities, steps give for each
 Related_dataMapper:WfDataMapper
 
-
 //=================================================================================================
 // Set the department code by looking up the 'groupname' field in the 'codedesc' table
 //=================================================================================================
-// 07-19-17 - dgs - Initial coding -- UIC
+// 11-09-18 - dgs - Initial coding
 //=================================================================================================
-WfDataMapper = function(type,data) {
-	var myName="WfDataMapper"; wfDebug(5,"\n\t\t*** In " + myName + " ***");
+WfDataMapper = function(type, data) {
+	var myName="MapDeptVal"; wfDebug(5,"\n\t\t*** In " + myName + " ***");
 	wfDump(5,["\t\ttype;"+type,"\t\tdata;"+data])
 	var retVal="";
-
 	// Main
-	if (type.toLowerCase() === 'dept')
-		retVal=MapDeptVal(data);
-
-	if (retVal === "")
-		retVal=data;
+		switch(type.toLowerCase()) {
+			case "dept":
+				var sqlStmt="select groupname from codedesc where setname='department' and code=? and groupname <> \"\"";
+				var sqlParms=[data];
+				var resultSet=dbquery(tcfdata.dbname[0],sqlStmt,sqlParms);
+				if (resultSet.length) {
+					wfDump(6,["\t\tresultSet;"+resultSet.toSource()]);
+					retVal=resultSet[0].groupname;
+					wfDebug(5,"\t\t*** " + myName + ": Data '" + data + "' mapped to: '" + retVal + "'")
+				} else {
+					retVal=data;
+				}		
+				break;
+			default:
+			retVal=data;
+		}
 
 	// Return results
-	wfDebug(4,"\t\t*** " + myName + ": Data '" + data + "' mapped to: '" + retVal + "'")
-	return retVal;
+		return retVal;
 
 } //WfDataMapper//
 
