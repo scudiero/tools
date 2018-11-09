@@ -1,10 +1,10 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version=2.10.78 # -- dscudiero -- Wed 05/16/2018 @ 16:00:32.13
+version="2.11.0" # -- dscudiero -- Fri 11/09/2018 @ 14:39:03
 #====================================================================================================
 TrapSigs 'on'
-myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi"
+myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi SetSiteDirs"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -27,6 +27,8 @@ scriptDescription="Copy workflow files"
 		myArgs+=("comment|comment|option|comment||script|Comment describing the reason for the update")
 		myArgs+=("roles|roles|switch|roles||script|Also copy the '/courseleaf/roles.tcf' file")
 		myArgs+=("users|users|switch|users||script|Also copy the '/db/clusers.sqlite' file")
+		myArgs+=("cims|cimstr|option|cimStr||script|Comma separated list of cims to copy")
+		myArgs+=("sitedir|sitedir|option|siteDir||script|The absolute path to the site root directory")
 	}
 
 	function copyWorkflow-Goodbye  {
@@ -323,10 +325,31 @@ GetDefaultsData $myName
 
 ParseArgsStd $originalArgStr
 [[ -n $unknowArgs ]] && cimStr="$unknowArgs"
+if [[ $verify == false && -z $tgtEnv && -n $srcEnv ]]; then
+	SetSiteDirs
+	if [[ $srcEnv == 'pvt' ]]; then
+		srcDir="$pvtDir"
+		tgtEnv='test'
+		tgtDir="$testDir"
+	elif [[ $srcEnv == 'dev' ]]; then
+		srcDir="$devDir"
+		tgtEnv='test'
+		tgtDir="$testDir"
+	elif [[ $srcEnv == 'test' ]]; then
+		srcDir="$testDir"
+		tgtEnv='next'
+		tgtDir="$nextDir"
+	elif [[ $srcEnv == 'next' ]]; then
+		srcDir="$nextDir"
+		tgtEnv='pvt'
+		tgtDir="$pvtDir"
+	fi
+fi
+dump -1 -n client env envs srcEnv srcDir tgtEnv tgtDir cimStr fastinit -p
 
 # Initialize instance variables
 	Init 'getClient getSrcEnv getTgtEnv getDirs checkEnvs getCims'
-	dump -1 client env srcEnv srcDir tgtEnv tgtDir cimStr
+	dump -1 client env envs srcEnv srcDir tgtEnv tgtDir cimStr
 
 # If target is NEXT checks
 	if [[ $tgtEnv == 'next' ]]; then
@@ -390,6 +413,7 @@ for cim in ${cimStr//,/ }; do
 done
 
 ## Verify continue
+	verify=true
 	unset verifyArgs
 	verifyArgs+=("Client:$client")
 	verifyArgs+=("Source Env:$(TitleCase $srcEnv) ($srcDir)")
@@ -733,3 +757,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 04-04-2018 @ 07:17:42 - 2.10.76 - dscudiero - Fix problem not prompting for jalot task number if target is test
 ## 05-16-2018 @ 15:45:31 - 2.10.77 - dscudiero - Added activityLog logging
 ## 05-16-2018 @ 16:01:27 - 2.10.78 - dscudiero - Add jalot to local logging
+## 11-09-2018 @ 14:39:45 - 2.11.0 - dscudiero - Add special logic for fastInit when called from workwith
