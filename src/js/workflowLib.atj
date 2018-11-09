@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.10.9" // -- dscudiero -- Fri 10/26/2018 @ 11:33:26
+wfLibVersion="1.10.10" // -- dscudiero -- Fri 11/09/2018 @ 09:25:20
 //attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -1468,11 +1468,14 @@ GetAttrVal = function(data) {
 
 	// If there is a 'Map' function for the attribute ('Map<attribute>'Val'), then call the function to map the name
 		if (mapValue) {
-			attrFunctionName=reqType.trim();
-			if (attrFunctionName.substring(attrFunctionName.length-1,attrFunctionName.length) === "s") attrFunctionName=attrFunctionName.substring(0,attrFunctionName.length-1);
-			attrFunctionName="Map" + attrFunctionName.substring(0,1).toUpperCase() + attrFunctionName.substring(1).toLowerCase() + "Val";
-			if (! eval("typeof " + attrFunctionName) === "function")
-				attrFunctionName="Map" + attrFunctionName.substring(0,1).toUpperCase() + "s" + attrFunctionName.substring(1).toLowerCase() + "Val";
+			attrFunctionName="WfDataMapper";
+			if (eval("typeof " + attrFunctionName) != "function") { 
+				attrFunctionName=reqType.trim();
+				if (attrFunctionName.substring(attrFunctionName.length-1,attrFunctionName.length) === "s") attrFunctionName=attrFunctionName.substring(0,attrFunctionName.length-1);
+				attrFunctionName="Map" + attrFunctionName.substring(0,1).toUpperCase() + attrFunctionName.substring(1).toLowerCase() + "Val";
+				if (! eval("typeof " + attrFunctionName) === "function")
+					attrFunctionName="Map" + attrFunctionName.substring(0,1).toUpperCase() + "s" + attrFunctionName.substring(1).toLowerCase() + "Val";		
+			}
 			if (eval("typeof " + attrFunctionName) === "function") {
 				wfDebug(5,"\t\t\tFound an attribute 'Map' function: " + attrFunctionName);
 				for (var ii=0,  totII=retArray.length; ii < totII; ii++) {
@@ -2714,4 +2717,4 @@ var wfLibLoaded=true;
 // 10-19-2018 @ 08:52:00 - 1.9.81 - dscudiero - Fix bug printing debug data in Lookup2
 // 10-22-2018 @ 09:17:40 - 1.9.89 - dscudiero - Fix problems wint GetProposalMode function
 // 10-26-2018 @ 10:16:03 - 1.10.6 - dscudiero - Added 'noMapValue' to the wfAttr calls
-// 10-30-2018 @ 15:43:38 - 1.10.9 - dscudiero - Change format of the wfDumpValues putout
+// 11-09-2018 @ 11:41:21 - 1.10.10 - dscudiero - Add calling WfMapper in getAttr
