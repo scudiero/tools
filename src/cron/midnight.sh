@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.22.91" # -- dscudiero -- Wed 11/07/2018 @ 14:25:17
+version="1.22.92" # -- dscudiero -- Mon 11/12/2018 @ 07:21:50
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -240,8 +240,8 @@ case "$hostName" in
 			Msg "...done"
 
 		## Run programs/functions
-			pgms=(checkPublishSettings updateDefaults "cleanDev -daemon" buildClientInfoTable buildSiteInfoTable loadClientRoles)
-			pgms+=(BuildEmployeeTable buildQaStatusTable checkCgiPermissions loadMilestonesData)
+			pgms=(updateDefaults "cleanDev -daemon" buildClientInfoTable buildSiteInfoTable loadClientRoles)
+			pgms+=(BuildEmployeeTable loadMilestonesData)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -379,7 +379,7 @@ case "$hostName" in
 		# 	fi
 
 		## Run programs/functions
-			pgms=(buildSiteInfoTable checkCgiPermissions checkPublishSettings "cleanDev -daemon")
+			pgms=(buildSiteInfoTable "cleanDev -daemon")
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -534,3 +534,4 @@ return 0
 ## 11-07-2018 @ 09:23:12 - 1.22.88 - dscudiero - Update buildEmployeeTable to pull in all employee records,not just active
 ## 11-07-2018 @ 13:52:33 - 1.22.90 - dscudiero - Add auth table cleanup code
 ## 11-07-2018 @ 14:34:09 - 1.22.91 - dscudiero - Comment out building the workwith files
+## 11-12-2018 @ 08:02:52 - 1.22.92 - dscudiero - Removed checks
