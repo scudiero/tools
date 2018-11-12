@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.1.51" # -- dscudiero -- Mon 10/15/2018 @ 11:10:22
+version="2.1.52" # -- dscudiero -- Mon 11/12/2018 @ 07:21:54
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -40,7 +40,7 @@ case "$hostName" in
 			done
 
 		## Run programs/functions
-			pgms=(checkForPrivateDevSites weeklyRollup)
+			pgms=("checkForPrivateDevSites $userName" weeklyRollup)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -75,7 +75,7 @@ case "$hostName" in
 			;;
 	build7)
 		## Run programs/functions
-			pgms=(checkForPrivateDevSites)
+			pgms=("checkForPrivateDevSites $userName")
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -123,3 +123,4 @@ return 0
 ## 07-20-2018 @ 09:05:48 - 2.1.49 - dscudiero - Add code to check that we have recieved workflow specs for any scheduled meetings
 ## 07-23-2018 @ 07:41:32 - 2.1.50 - dscudiero - Tweak workflow specs message formate
 ## 10-15-2018 @ 11:11:06 - 2.1.51 - dscudiero - Turn off the reports
+## 11-12-2018 @ 08:03:14 - 2.1.52 - dscudiero - Remove checks
