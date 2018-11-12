@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.10.10" // -- dscudiero -- Fri 11/09/2018 @ 09:25:20
+wfLibVersion="1.10.12" // -- dscudiero -- Mon 11/12/2018 @ 08:16:32
 //attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -335,13 +335,33 @@ wffuncs.IsReactivate = function(inval, wfrule) {
 }; //IsReactivate
 //=======================================================================================================================
 // Check if proposal is not in REACTIVATE mode
-// 08/17/17 - dgs - Initial code
+// 11/12/18 - dgs - Initial code
 //=======================================================================================================================
 wffuncs.IsNotReactivate = function(inval, wfrule) {
 	if (ProposalState() != 'REACTIVATE')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsNotReactivate
+
+//=======================================================================================================================
+// Check if proposal is in INACTIVATE mode
+// 11/12/18 - dgs - Initial code
+//=======================================================================================================================
+wffuncs.IsInactivate = function(inval, wfrule) {
+	if (ProposalState() === 'INACTIVATE')
+		return [inval.replace(wfrule.ifregex,'')];
+	return false;
+}; //IsInactivate
+
+//=======================================================================================================================
+// Check if proposal is not in INACTIVATE mode
+// 11/12/1 - dgs - Initial code
+//=======================================================================================================================
+wffuncs.IsNotInactivate = function(inval, wfrule) {
+	if (ProposalState() != 'INACTIVATE')
+		return [inval.replace(wfrule.ifregex,'')];
+	return false;
+}; //IsNotInactivate
 
 //=======================================================================================================================
 // Return the proposal mode, to be called from a wfrule or wforder
@@ -362,18 +382,15 @@ wffuncs.ProposalState = function(inval, wfrule, args) {
 //=======================================================================================================================
 ProposalState = function() {
 	var retVal='EDIT';
-	if (tcfdata.newrecord && tcfdata.newrecord.length) {
-		if (tcfdata.newrecord == 'true')
+	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord == 'true')
 			retVal='NEW';
-	}
-	if (tcfdata.deleterec && tcfdata.deleterec.length) {
-		if (tcfdata.deleterec == 'true')
-			retVal='DELETE';
-	}
-	if (tcfdata.reactivate && tcfdata.reactivate.length) {
-		if (tcfdata.reactivate == 'true')
+	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec == 'true')
+			retVal='DELETE'; 
+	if (tcfdata.reactivate && tcfdata.reactivate.length && tcfdata.reactivate == 'true')
 			retVal='REACTIVATE';
-	}
+	if (tcfdata.inactivate && tcfdata.inactivate.length && tcfdata.inactivate == 'true')
+		retVal='INREACTIVATE';
+	
 	return retVal;
 }; //ProposalState
 
@@ -2718,3 +2735,4 @@ var wfLibLoaded=true;
 // 10-22-2018 @ 09:17:40 - 1.9.89 - dscudiero - Fix problems wint GetProposalMode function
 // 10-26-2018 @ 10:16:03 - 1.10.6 - dscudiero - Added 'noMapValue' to the wfAttr calls
 // 11-09-2018 @ 11:41:21 - 1.10.10 - dscudiero - Add calling WfMapper in getAttr
+// 11-12-2018 @ 11:46:21 - 1.10.12 - dscudiero - Cosmetic/minor change/Sync
