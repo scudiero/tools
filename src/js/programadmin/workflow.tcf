@@ -9,10 +9,10 @@ pageflags:autoapprove
 
 workflow:standard|WfStatus,Depts Chair,Cols Dean,Curriculum Committee fyiall,Curriculum Committee Chair,Registrar
 
-//workflow:standard|START,Workflow Library: wfLibVersion,College: Col,Department: Dept,Academic level: AcadLevel,Proposal State: ProposalState,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is New] isNew,[Is not New] isNotNew,[Is Edit/Change] isEdit,[Is not Edit/Change] isNotEdit,[Is Delete] isDelete,[Is not Delete] isNotDelete,[Is Inactivate] isInactivate,[Is Reactivate] isReactivate,END
+//workflow:standard|START,College: 'Col',Department: 'Dept',Academic level: 'AcadLevel',Proposal State: ProposalState,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is New] isNew,[Is not New] isNotNew,[Is Edit/Change] isEdit,[Is not Edit/Change] isNotEdit,[Is Delete] isDelete,[Is not Delete] isNotDelete,[Is Inactivate] isInactivate,[Is Reactivate] isReactivate,END
 
 //======================================================================================================================
-// version:1.0.20 // -- dscudiero -- Tue 05/29/2018 @ 13:29:02.47
+//  version:"1.0.22"  -- dscudiero -- Mon 11/12/2018 @ 08:02:21
 //======================================================================================================================
 // Check in log
 //======================================================================================================================
