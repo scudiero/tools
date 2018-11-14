@@ -53,8 +53,8 @@ int main(int argc, char *argv[]) {
 	argDefs.push_back(ArgDef("hh", "helpextended", "switch", "", "Help2 -extended; Goodbye 0;"));
 	argDefs.push_back(ArgDef("h", "help", "switch", "", "Help2; Goodbye 0;"));
 	argDefs.push_back(ArgDef("envs", "environments", "option", "", "Help2 -extended; Goodbye 0;"));
-	argDefs.push_back(ArgDef("src", "srcenv", "option", "srcEnv", ""));
-	argDefs.push_back(ArgDef("tgt", "tgtenv", "option", "tgtEnv", ""));
+	argDefs.push_back(ArgDef("src", "srcenv", "option", "srcEnv", "mapToEnv"));
+	argDefs.push_back(ArgDef("tgt", "tgtenv", "option", "tgtEnv", "mapToEnv"));
 	argDefs.push_back(ArgDef("prod", "products", "option", "products", ""));
 	argDefs.push_back(ArgDef("cimc", "courseadmin", "switch", "cimStr", "appendLong"));
 	argDefs.push_back(ArgDef("cimp", "programadmin", "switch", "cimStr", "appendLong"));
@@ -81,14 +81,14 @@ int main(int argc, char *argv[]) {
 	argDefs.push_back(ArgDef("fast", "fastinit", "switch", "fastInit", ""));
 	argDefs.push_back(ArgDef("info", "informationonlymode", "informationOnlyMode", "fork", ""));
 	argDefs.push_back(ArgDef("for", "foruser", "option", "forUser", ""));
-	argDefs.push_back(ArgDef("pub", "public", "option", "envs", "appendLong"));
-	argDefs.push_back(ArgDef("pre", "preview", "option", "envs", "appendLong"));
-	argDefs.push_back(ArgDef("pri", "prior", "option", "envs", "appendLong"));
-	argDefs.push_back(ArgDef("c", "curr", "option", "envs", "appendLong"));
-	argDefs.push_back(ArgDef("n", "next", "option", "envs", "appendLong"));
-	argDefs.push_back(ArgDef("t", "test", "option", "envs", "appendLong"));
-	argDefs.push_back(ArgDef("d", "dev", "option", "envs", "appendLong"));
-	argDefs.push_back(ArgDef("p", "pvt", "option", "envs", "appendLong"));
+	argDefs.push_back(ArgDef("pub", "public", "switch", "envs", "appendLong"));
+	argDefs.push_back(ArgDef("pre", "preview", "switch", "envs", "appendLong"));
+	argDefs.push_back(ArgDef("pri", "prior", "switch", "envs", "appendLong"));
+	argDefs.push_back(ArgDef("c", "curr", "switch", "envs", "appendLong"));
+	argDefs.push_back(ArgDef("n", "next", "switch", "envs", "appendLong"));
+	argDefs.push_back(ArgDef("t", "test", "switch", "envs", "appendLong"));
+	argDefs.push_back(ArgDef("d", "dev", "switch", "envs", "appendLong"));
+	argDefs.push_back(ArgDef("p", "pvt", "switch", "envs", "appendLong"));
 	argDefs.push_back(ArgDef("e", "email", "option", "email", ""));
 	argDefs.push_back(ArgDef("v", "verbose", "counter", "verboseLevel", ""));
 	argDefs.push_back(ArgDef("j", "jalot", "option", "jalot", ""));
@@ -122,9 +122,12 @@ int main(int argc, char *argv[]) {
 				if (type == "switch") {
 					if (scriptCmd != "") {
 						if (scriptCmd == "appendLong") {
-							std::cout << scriptVar + "=\"$" + scriptVar + " " + longName + "\"\n";
+							// std::cout << scriptVar + "=\"$" + scriptVar + " " + longName + "\"\n";
+							std::cout << " [[ -z $" + scriptVar + " ]] && " + scriptVar + "=\"" + longName + "\"" + 
+										 " || " + scriptVar + "=\"$" + scriptVar + " " + longName + "\"\n";
 						} else if (scriptCmd == "appendShort") {
-							std::cout << scriptVar + "=\"$" + scriptVar + " " + shortName + "\"\n";
+							std::cout << " [[ -z $" + scriptVar + " ]] && " + scriptVar + "=\"" + shortName + "\"" + 
+										 " || " + scriptVar + "=\"$" + scriptVar + " " + shortName + "\"\n";
 						} else {
 							std::cout << scriptCmd;
 						}
@@ -134,6 +137,27 @@ int main(int argc, char *argv[]) {
 				} else if (type == "option") {
 					i++;
 					arg = argv[i];
+					if (scriptCmd != "") {
+						if (scriptCmd == "mapToEnv") {
+							if (arg == "c") {
+								arg = "curr";
+							} else if (arg == "n") {
+								arg = "next";
+							} else if (arg == "t") {
+								arg = "test";
+							} else if (arg == "d") {
+								arg = "dev";
+							} else if (arg == "p") {
+								arg = "pvt";
+							} else if (arg == "pub") {
+								arg = "public";
+							} else if (arg == "pri") {
+								arg = "prior";
+							} else if (arg == "pre") {
+								arg = "preview";
+							}
+						}
+					}
 					std::cout << scriptVar + "=\"" + arg + "\"\n";
 				} else if (type == "counter") {
 					std::cout << scriptVar + "=\"" + arg.substr(arg.length()-1) + "\"\n";
@@ -144,8 +168,10 @@ int main(int argc, char *argv[]) {
 		if (!foundArg)
 			unknownArgs = unknownArgs + " " + argv[i];
 	} // args
+
 	if (unknownArgs != "")
 		std::cout << "unknownArgs=\"" + unknownArgs.substr(1) + "\"\n";
 
 	return 0;
 } // main
+// 11-14-2018 @ 10:42:55 - 1.0.9 - dscudiero - Add expansion of env variable
