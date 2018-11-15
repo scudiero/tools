@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.10.12" // -- dscudiero -- Mon 11/12/2018 @ 08:16:32
+wfLibVersion="1.10.20" // -- dscudiero -- Wed 11/14/2018 @ 15:28:20
 //attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -2235,7 +2235,7 @@ GetEnv = function(env) {
 function wfHello(msgLevel,inval,wfrule,args){
 	returnObj={ myName:"", myOpts:"", myRequest:"", myNotMode:false };
 	if (wfNestLevel === 0) wfDebug(1,"");
-	
+
 	if (typeof inval != 'undefined') {
 		// Make a private copy of inval
 		var myJSON=JSON.stringify(inval);
@@ -2245,7 +2245,9 @@ function wfHello(msgLevel,inval,wfrule,args){
 	if (typeof wfrule != 'undefined') {
 		returnObj.myName=wfrule.attrname;
 		text=" called as '" + args.context + "/" + wfrule.searchfor + "', Step: '" + inval + "'";
-		var options=wfrule.options;	options=options.substring(0, options.indexOf(';'));
+		var options=wfrule.options;	
+		if (options === ";") options = "";
+		if (options.indexOf(';') > 0) options=options.substring(0, options.indexOf(';'));
 		returnObj.myOpts=options;
 		returnObj.myRequest=wfrule.searchfor.toLowerCase();
 		if (returnObj.myRequest.indexOf('not') >= 0 || options.toLowerCase().indexOf('notmode') >= 0)
@@ -2736,3 +2738,4 @@ var wfLibLoaded=true;
 // 10-26-2018 @ 10:16:03 - 1.10.6 - dscudiero - Added 'noMapValue' to the wfAttr calls
 // 11-09-2018 @ 11:41:21 - 1.10.10 - dscudiero - Add calling WfMapper in getAttr
 // 11-12-2018 @ 11:46:21 - 1.10.12 - dscudiero - Cosmetic/minor change/Sync
+// 11-15-2018 @ 09:35:57 - 1.10.20 - dscudiero - Updated options processing in hello
