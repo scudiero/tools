@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.10.20" // -- dscudiero -- Wed 11/14/2018 @ 15:28:20
+wfLibVersion="1.10.22" // -- dscudiero -- Fri 11/16/2018 @ 08:00:25
 //attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -265,7 +265,7 @@ wffuncs.AnnotateWorkflow = function(inval, wfrule, args) {
 // 08/17/17 - dgs - use ProposalState function
 //=======================================================================================================================
 wffuncs.IsNew = function(inval, wfrule) {
-	if (ProposalState() === 'NEW')
+	if (ProposalState().toLowerCase() === 'new')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsNew
@@ -275,7 +275,7 @@ wffuncs.IsNew = function(inval, wfrule) {
 // 08/17/17 - dgs - use ProposalState function
 //=======================================================================================================================
 wffuncs.IsNotNew = function(inval, wfrule) {
-	if (ProposalState() != 'NEW')
+	if (ProposalState().toLowerCase()!= 'new')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsNotNew
@@ -287,7 +287,7 @@ wffuncs.IsNotNew = function(inval, wfrule) {
 // 08/17/17 - dgs - use ProposalState function
 //=======================================================================================================================
 wffuncs.IsEdit = function(inval, wfrule) {
-	if (ProposalState() === 'EDIT')
+	if (ProposalState().toLowerCase() === 'edit')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsEdit
@@ -298,7 +298,7 @@ wffuncs.IsEdit = function(inval, wfrule) {
 // 08/17/17 - dgs - use ProposalState function
 //=======================================================================================================================
 wffuncs.IsNotEdit = function(inval, wfrule) {
-	if (ProposalState() != 'EDIT')
+	if (ProposalState().toLowerCase() != 'edit')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsNotEdit
@@ -309,7 +309,7 @@ wffuncs.IsNotEdit = function(inval, wfrule) {
 // 08/17/17 - dgs - use ProposalState function
 //=======================================================================================================================
 wffuncs.IsDelete = function(inval, wfrule) {
-	if (ProposalState() === 'DELETE')
+	if (ProposalState().toLowerCase() === 'delete')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsDelete
@@ -319,7 +319,7 @@ wffuncs.IsDelete = function(inval, wfrule) {
 // 08/17/17 - dgs - use ProposalState function
 //=======================================================================================================================
 wffuncs.IsNotDelete = function(inval, wfrule) {
-	if (ProposalState() != 'DELETE')
+	if (ProposalState().toLowerCase() != 'delete')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsNotDelete
@@ -329,7 +329,7 @@ wffuncs.IsNotDelete = function(inval, wfrule) {
 // 08/17/17 - dgs - Initial code
 //=======================================================================================================================
 wffuncs.IsReactivate = function(inval, wfrule) {
-	if (ProposalState() === 'REACTIVATE')
+	if (ProposalState().toLowerCase() === 'reactivate')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsReactivate
@@ -338,7 +338,7 @@ wffuncs.IsReactivate = function(inval, wfrule) {
 // 11/12/18 - dgs - Initial code
 //=======================================================================================================================
 wffuncs.IsNotReactivate = function(inval, wfrule) {
-	if (ProposalState() != 'REACTIVATE')
+	if (ProposalState().toLowerCase() != 'reactivate')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsNotReactivate
@@ -348,7 +348,7 @@ wffuncs.IsNotReactivate = function(inval, wfrule) {
 // 11/12/18 - dgs - Initial code
 //=======================================================================================================================
 wffuncs.IsInactivate = function(inval, wfrule) {
-	if (ProposalState() === 'INACTIVATE')
+	if (ProposalState().toLowerCase() === 'inactivate')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsInactivate
@@ -358,7 +358,7 @@ wffuncs.IsInactivate = function(inval, wfrule) {
 // 11/12/1 - dgs - Initial code
 //=======================================================================================================================
 wffuncs.IsNotInactivate = function(inval, wfrule) {
-	if (ProposalState() != 'INACTIVATE')
+	if (ProposalState().toLowerCase() != 'inactivate')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsNotInactivate
@@ -381,15 +381,15 @@ wffuncs.ProposalState = function(inval, wfrule, args) {
 // 08/17/2017 - dgs - New
 //=======================================================================================================================
 ProposalState = function() {
-	var retVal='EDIT';
+	var retVal='Edit';
 	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord == 'true')
-			retVal='NEW';
+			retVal='New';
 	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec == 'true')
-			retVal='DELETE'; 
+			retVal='Delete'; 
 	if (tcfdata.reactivate && tcfdata.reactivate.length && tcfdata.reactivate == 'true')
-			retVal='REACTIVATE';
+			retVal='Reactivate';
 	if (tcfdata.inactivate && tcfdata.inactivate.length && tcfdata.inactivate == 'true')
-		retVal='INREACTIVATE';
+		retVal='Inactivate';
 	
 	return retVal;
 }; //ProposalState
@@ -2739,3 +2739,4 @@ var wfLibLoaded=true;
 // 11-09-2018 @ 11:41:21 - 1.10.10 - dscudiero - Add calling WfMapper in getAttr
 // 11-12-2018 @ 11:46:21 - 1.10.12 - dscudiero - Cosmetic/minor change/Sync
 // 11-15-2018 @ 09:35:57 - 1.10.20 - dscudiero - Updated options processing in hello
+// 11-16-2018 @ 09:13:20 - 1.10.22 - dscudiero - Changed returned string from ProposalState
