@@ -30,16 +30,16 @@ function GetDefaultsData {
 
 	## MAIN ========================================================================================
 	## If mode is fromFiles then just source the defaults files from the shadows
-	# if [[ $mode == 'fromFiles' ]]; then
-	# 	[[ -f "$TOOLSDEFAULTSPATH/common" ]] && source "$TOOLSDEFAULTSPATH/common"
-	# 	[[ -f "$TOOLSDEFAULTSPATH/$hostName" ]] && source "$TOOLSDEFAULTSPATH/$hostName"
-	# 	if [[ -n $scripts ]]; then
-	# 		for scriptName in $scripts; do
-	# 			[[ -f "$TOOLSDEFAULTSPATH/$scriptName" ]] && source "$TOOLSDEFAULTSPATH/$scriptName"
-	# 		done
-	# 	fi
-	# 	return 0
-	# fi
+	if [[ $mode == 'fromFiles' ]]; then
+		[[ -f "$TOOLSDEFAULTSPATH/common" ]] && source "$TOOLSDEFAULTSPATH/common"
+		[[ -f "$TOOLSDEFAULTSPATH/$hostName" ]] && source "$TOOLSDEFAULTSPATH/$hostName"
+		if [[ -n $scripts ]]; then
+			for scriptName in $scripts; do
+				[[ -f "$TOOLSDEFAULTSPATH/$scriptName" ]] && source "$TOOLSDEFAULTSPATH/$scriptName"
+			done
+		fi
+		return 0
+	fi
 
 	## Pull the data from the Db
 	Import "RunSql"
@@ -112,3 +112,4 @@ export -f GetDefaultsData
 ## 03-22-2018 @ 13:42:08 - 2.1.-1 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 11-07-2018 @ 15:12:12 - 2.1.-1 - dscudiero - Cosmetic/minor change/Sync
 ## 11-07-2018 @ 15:18:47 - 2.1.-1 - dscudiero - Cosmetic/minor change/Sync
+## 11-16-2018 @ 09:51:52 - 2.1.-1 - dscudiero - Turn on from files again
