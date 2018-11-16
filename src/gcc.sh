@@ -24,9 +24,9 @@ cppLibs="$HOME/tools/lib/cpp"
 	[[ ! -r $moduleFile ]] && echo -e "Error, could not locate module file '$moduleFile' in '$cppSrc'" && exit -3
 
 	# $compiler -o "../../../bin/$module" $includedStr $moduleFile -L /usr/lib64/mysql -l mysqlclient -std=gnu++0x 
-	$compiler -o "../../../bin/$module" $includedStr $moduleFile
+	$compiler -o "../../../bin/${module%%.*}" $includedStr $moduleFile
 	rc=$?
-	echo -e "\t$module compiled, rc=$rc"
+	[[ $rc -eq 0 ]] && echo -e "\t$module compiled --> ../../../bin/${module%%.*}" || echo -e "\t$module compiled, rc=$rc"
 	popd &> /dev/null
 
 ## Done
