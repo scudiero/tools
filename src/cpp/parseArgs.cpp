@@ -8,7 +8,8 @@
 #include <fstream>		// Filesystem utility library
 #include <cstdlib>		// Standard library
 #include <stdlib.h>
-#include <list> 
+#include <list>
+#include <vector>
 #include <iterator>
 #include <boost/algorithm/string.hpp> 
 
@@ -95,6 +96,41 @@ int main(int argc, char *argv[]) {
 	argDefs.push_back(ArgDef("f", "file", "option", "file", ""));
 	argDefs.push_back(ArgDef("-uselocal", "useLocal", "switch", "useLocal", ""));
 
+	// Are there any script specific arguments, if found then add to the argDefs arraylist
+    if (char* myArgsPtr = std::getenv("myArgs")) {
+		char str[4096];
+		strncpy(str,myArgsPtr,sizeof(str));
+		char *line;
+		char *token;
+		char buf[4096];
+		for (line = strtok (str, ";"); line != NULL;
+		     line = strtok (line + strlen (line) + 1, ";")) {
+			strncpy (buf, line, sizeof (buf));
+		   	// printf ("Line: %s\n", buf);
+		   	string argDevStr="";
+		   	int cntr=1;
+		   	string shortName="", longName="", type="", scriptVar="", scriptCmd="";
+		  	for (token = strtok (buf, "|"); token != NULL;
+		   		token = strtok (token + strlen (token) + 1, "|")) {
+		      	// printf ("\tToken: %s\n", token);
+		      	if (cntr == 1) {
+		      		shortName = token;
+		      		boost::algorithm::to_lower(shortName);
+		      	} else if (cntr == 2) {
+		      		longName = token;
+		      	} else if (cntr == 3) {
+		      		type = token;
+		      	} else if (cntr == 4) {
+		      		scriptVar = token;
+		      	} else {
+		      		scriptCmd = token;
+		      	}
+		     	cntr++;
+		    }
+		    argDefs.push_front(ArgDef(shortName, longName, type, scriptVar, scriptCmd));
+		}
+    }
+
 	//=================================================================================================================
 	// Loop through the arguments
 	string unknownArgs="";
@@ -112,9 +148,10 @@ int main(int argc, char *argv[]) {
 		bool foundArg=false;
 	    std::list<ArgDef>::iterator it;
 		for (it = argDefs.begin(); it != argDefs.end(); ++it) {
+			// std::cout << "\t" + it->toString() + "\n";
 			string shortName = it->shortName;
 			if (arg.substr(0,shortName.length()) == shortName) {
-				// std::cout << "\t" + it->toString() + "\n";
+				// std::cout << "\t Found match for: " + it->toString() + "\n";
 				foundArg=true;
 				string longName = it->longName;
 				string type = it->type;
@@ -174,6 +211,8 @@ int main(int argc, char *argv[]) {
 		std::cout << "unknownArgs=\"" + unknownArgs.substr(1) + "\"\n";
 
 	return 0;
+
 } // main
 // 11-14-2018 @ 10:42:55 - 1.0.9 - dscudiero - Add expansion of env variable
 // 11-16-2018 @ 09:12:00 - 1.0.9 - dscudiero - Added -useLocal
+// 11-16-2018 @ 15:15:20 - 1.0.9 - dscudiero - Add ability to specify script specific arguments
