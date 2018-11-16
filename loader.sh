@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.6.3" # -- dscudiero -- Fri 11/16/2018 @ 09:51:01
+version="1.6.4" # -- dscudiero -- Fri 11/16/2018 @ 09:53:18
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -142,7 +142,7 @@ function CleanUp {
 	fi
 	#fastDump callPgmName loaderArgs
 
-	prtStatus "ParseArgs"
+	prtStatus "Loader: ParseArgs"
 	sTime=$(date "+%s")
 
 #==================================================================================================
@@ -534,3 +534,4 @@ function CleanUp {
 ## 11-05-2018 @ 10:14:25 - 1.5.83 - dscudiero - Switch to use CheckAuth module
 ## 11-07-2018 @ 14:33:47 - 1.5.84 - dscudiero - Remove -fromFiles from GetDefaultsData call
 ## 11-16-2018 @ 09:52:04 - 1.6.3 - dscudiero - Add breadcrumbs
+## 11-16-2018 @ 09:54:43 - 1.6.4 - dscudiero - Cosmetic/minor change/Sync
