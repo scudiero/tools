@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.84" # -- dscudiero -- Wed 11/07/2018 @ 14:29:09
+version="1.6.3" # -- dscudiero -- Fri 11/16/2018 @ 09:51:01
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -13,16 +13,16 @@ myName='loader'
 #==================================================================================================
 # Local Functions
 #==================================================================================================
-	# function prtStatus {
-	# 	return 0
-	# 	[[ $batchMode == true || $userName != 'dscudiero' ]] && return 0
-	# 	[[ $batchMode == true ]] && return 0
-	# 	local elapTime=$(( $(date "+%s") - $sTime ))
-	# 	[[ $elapTime -eq 0 ]] && elapTime=1
-	# 	statusLine="${statusLine}${1}: ${elapTime}s"
-	# 	>&3 echo -n -e "${statusLine}\r"
-	# 	return 0
-	# }
+	function prtStatus {
+		# [[ $batchMode == true || $userName != 'dscudiero' ]] && return 0
+		[[ $batchMode == true ]] && return 0
+		[[ -z $sTime ]] && sTime=$(date "+%s")
+		local elapTime=$(( $(date "+%s") - $sTime ))
+		[[ $elapTime -eq 0 ]] && elapTime=1
+		statusLine="${statusLine}${1}: ${elapTime}s"
+		>&3 echo -n -e "${statusLine}\r"
+		return 0;
+	}
 
 #==================================================================================================
 # Process the exit from the sourced script
@@ -142,8 +142,8 @@ function CleanUp {
 	fi
 	#fastDump callPgmName loaderArgs
 
-# prtStatus "parse args"
-# sTime=$(date "+%s")
+	prtStatus "ParseArgs"
+	sTime=$(date "+%s")
 
 #==================================================================================================
 # MAIN
@@ -200,15 +200,19 @@ function CleanUp {
 
 ## Import things we need to continue
 	source "$TOOLSPATH/lib/Import.sh"
-	# sTime=$(date "+%s")
+	sTime=$(date "+%s")
 	Import "$loaderIncludes"
-	# prtStatus ", imports"
-	# sTime=$(date "+%s")
+	prtStatus ", Imports"
+	sTime=$(date "+%s")
 	SetFileExpansion
 
 ## Load tools defaults value
-	defaultsLoaded=false
-	GetDefaultsData "$myName" #-fromFiles
+	if [[ ToolsDefaultsLoaded != true ]]; then
+		GetDefaultsData "$myName" -fromFiles
+		prtStatus ", GetDefaults"
+		sTime=$(date "+%s")
+		ToolsDefaultsLoaded=true
+	fi
 
 ## Set forking limit
 	maxForkedProcesses=$maxForkedProcessesPrime
@@ -250,8 +254,8 @@ function CleanUp {
 ## If sourced then just return
 	[[ $viaCron == true ]] && return 0
 
-	# prtStatus ", customizations"
-	# sTime=$(date "+%s")
+	prtStatus ", Customizations"
+	sTime=$(date "+%s")
 
 ## Resolve the script file to run
 	## Were we passed in a fully qualified file name
@@ -270,19 +274,23 @@ function CleanUp {
 			[[ $callPgmName != 'testsh' ]] && { echo; echo; Terminate "$checkMsg"; }
 		fi
 	fi
+	prtStatus ", CheckRun"
+	sTime=$(date "+%s")	
 
 ## Check Auth
 	CheckAuth "$callPgmName"
 	# dump UsersAuthGroups UsersScriptsStr;
 	# echo "UsersScripts:"; for ((xx=0; xx<${#UsersScripts[@]}; xx++)); do echo -e "\tUsersScripts[$xx] = >${UsersScripts[$xx]}<"; done;
-	
+	prtStatus ", CheckAuth"
+	sTime=$(date "+%s")	
+
 ## Check semaphore
 	[[ $(Contains ",$setSemaphoreList," ",$callPgmName," ) == true ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
 
 ## Resolve the executable file"
 	[[ -z $executeFile ]] && executeFile=$(FindExecutable "$callPgmName")
 	[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
-	# prtStatus ", find file"; sTime=$(date "+
+	prtStatus ", FindExec"; sTime=$(date "+%s")
 
 ## Call the script
 	## Initialize the log file
@@ -304,14 +312,14 @@ function CleanUp {
 			Msg >> $logFile
 		fi
 
-	# prtStatus ", logFile" sTime=$(date "+%s")
+	prtStatus ", LogFile" sTime=$(date "+%s")
 	## Call program function
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
 		declare -A clientData
 		## Strip off first token if it is $myName
 		[[ $loaderArgs == $myName ]] && unset loaderArgs || loaderArgs="${loaderArgs#$myName }"
-		# prtStatus ", calling"
+		prtStatus ", Calling"; echo
 		[[ $batchMode != true && $myQuiet != true ]] && echo
 		TrapSigs 'off'
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
@@ -525,3 +533,4 @@ function CleanUp {
 ## 10-15-2018 @ 11:09:31 - 1.5.63 - dscudiero - Make sure that there is not a script file in the Logs directory on exit
 ## 11-05-2018 @ 10:14:25 - 1.5.83 - dscudiero - Switch to use CheckAuth module
 ## 11-07-2018 @ 14:33:47 - 1.5.84 - dscudiero - Remove -fromFiles from GetDefaultsData call
+## 11-16-2018 @ 09:52:04 - 1.6.3 - dscudiero - Add breadcrumbs
