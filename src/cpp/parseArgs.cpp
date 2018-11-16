@@ -93,6 +93,7 @@ int main(int argc, char *argv[]) {
 	argDefs.push_back(ArgDef("v", "verbose", "counter", "verboseLevel", ""));
 	argDefs.push_back(ArgDef("j", "jalot", "option", "jalot", ""));
 	argDefs.push_back(ArgDef("f", "file", "option", "file", ""));
+	argDefs.push_back(ArgDef("-uselocal", "useLocal", "switch", "useLocal", ""));
 
 	//=================================================================================================================
 	// Loop through the arguments
@@ -123,10 +124,10 @@ int main(int argc, char *argv[]) {
 					if (scriptCmd != "") {
 						if (scriptCmd == "appendLong") {
 							// std::cout << scriptVar + "=\"$" + scriptVar + " " + longName + "\"\n";
-							std::cout << " [[ -z $" + scriptVar + " ]] && " + scriptVar + "=\"" + longName + "\"" + 
+							std::cout << "[[ -z $" + scriptVar + " ]] && " + scriptVar + "=\"" + longName + "\"" + 
 										 " || " + scriptVar + "=\"$" + scriptVar + " " + longName + "\"\n";
 						} else if (scriptCmd == "appendShort") {
-							std::cout << " [[ -z $" + scriptVar + " ]] && " + scriptVar + "=\"" + shortName + "\"" + 
+							std::cout << "[[ -z $" + scriptVar + " ]] && " + scriptVar + "=\"" + shortName + "\"" + 
 										 " || " + scriptVar + "=\"$" + scriptVar + " " + shortName + "\"\n";
 						} else {
 							std::cout << scriptCmd;
@@ -175,3 +176,4 @@ int main(int argc, char *argv[]) {
 	return 0;
 } // main
 // 11-14-2018 @ 10:42:55 - 1.0.9 - dscudiero - Add expansion of env variable
+// 11-16-2018 @ 09:12:00 - 1.0.9 - dscudiero - Added -useLocal
