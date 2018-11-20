@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version="2.11.0" # -- dscudiero -- Fri 11/09/2018 @ 14:39:03
+version="2.11.1" # -- dscudiero -- Tue 11/20/2018 @ 09:41:24
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi SetSiteDirs"
@@ -590,23 +590,23 @@ Msg
 				fi
 			fi
 
-			## Make sure that we have active workflow management on the console
-			for cim in $(tr ',' ' ' <<< "$cimStr"); do
-				unset grepStr; grepStr=$(ProtectedCall "grep '^navlinks:CIM|Course Workflow Management|workflow^/$cim/workflow.html' "$editFile"")
-				if [[ -z $grepStr ]]; then
-					unset grepStr; grepStr=$(ProtectedCall "grep '^//navlinks:CIM|Course Workflow Management|workflow^/$cim/workflow.html' "$editFile"")
-					if [[ -n $grepStr ]]; then
-						fromStr="$grepStr"
-						toStr="${grepStr:2}"
-						Msg "^Activating Workflow Management for '$cim'"
-						$DOIT sed -i s"_^${fromStr}_${toStr}_" $editFile
-						updatedFile=true
-					else
-						Warning "Could not locate a 'workflow management' record for '$cim' in \n^'$editFile'"
-					fi
-				fi
-			done
-			[[ $updatedFile == true ]] && RunCourseLeafCgi "$tgtDir" "-r /courseleaf/index.tcf"
+			# ## Make sure that we have active workflow management on the console
+			# for cim in $(tr ',' ' ' <<< "$cimStr"); do
+			# 	unset grepStr; grepStr=$(ProtectedCall "grep '^navlinks:CIM|Course Workflow Management|workflow^/$cim/workflow.html' "$editFile"")
+			# 	if [[ -z $grepStr ]]; then
+			# 		unset grepStr; grepStr=$(ProtectedCall "grep '^//navlinks:CIM|Course Workflow Management|workflow^/$cim/workflow.html' "$editFile"")
+			# 		if [[ -n $grepStr ]]; then
+			# 			fromStr="$grepStr"
+			# 			toStr="${grepStr:2}"
+			# 			Msg "^Activating Workflow Management for '$cim'"
+			# 			$DOIT sed -i s"_^${fromStr}_${toStr}_" $editFile
+			# 			updatedFile=true
+			# 		else
+			# 			Warning "Could not locate a 'workflow management' record for '$cim' in \n^'$editFile'"
+			# 		fi
+			# 	fi
+			# done
+			# [[ $updatedFile == true ]] && RunCourseLeafCgi "$tgtDir" "-r /courseleaf/index.tcf"
 		fi
 	else
 		## Nothing to do
@@ -758,3 +758,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 05-16-2018 @ 15:45:31 - 2.10.77 - dscudiero - Added activityLog logging
 ## 05-16-2018 @ 16:01:27 - 2.10.78 - dscudiero - Add jalot to local logging
 ## 11-09-2018 @ 14:39:45 - 2.11.0 - dscudiero - Add special logic for fastInit when called from workwith
+## 11-20-2018 @ 09:42:05 - 2.11.1 - dscudiero - Comment out the code checkign of there is a console listing for workflow management
