@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.10.22" // -- dscudiero -- Fri 11/16/2018 @ 08:00:25
+wfLibVersion="1.10.25" // -- dscudiero -- Mon 11/19/2018 @ 16:05:24
 //attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -371,6 +371,9 @@ wffuncs.IsNotInactivate = function(inval, wfrule) {
 wffuncs.ProposalState = function(inval, wfrule, args) {
 	wfDebug(4,"\n*** In ProposalState ***, called as: '" + inval + "'");
 	var retVal=ProposalState();
+	if (args && args.context && args.context == "wforder")
+		reVal=retval.substring(0,1).toUpperCase() + retVal.substring(1).toLowerCase();
+
 	retVal=inval.replace(wfrule.regex,retVal);
 	wfDebug(4,"\t*** Returning '" + retVal + "'\n")
 	return [retVal]
@@ -381,15 +384,15 @@ wffuncs.ProposalState = function(inval, wfrule, args) {
 // 08/17/2017 - dgs - New
 //=======================================================================================================================
 ProposalState = function() {
-	var retVal='Edit';
+	var retVal='EDIT';
 	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord == 'true')
-			retVal='New';
+			retVal='NEW';
 	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec == 'true')
-			retVal='Delete'; 
+			retVal='DELETE'; 
 	if (tcfdata.reactivate && tcfdata.reactivate.length && tcfdata.reactivate == 'true')
-			retVal='Reactivate';
+			retVal='REACTIVATE';
 	if (tcfdata.inactivate && tcfdata.inactivate.length && tcfdata.inactivate == 'true')
-		retVal='Inactivate';
+		retVal='INACTIVATE';
 	
 	return retVal;
 }; //ProposalState
@@ -2740,3 +2743,4 @@ var wfLibLoaded=true;
 // 11-12-2018 @ 11:46:21 - 1.10.12 - dscudiero - Cosmetic/minor change/Sync
 // 11-15-2018 @ 09:35:57 - 1.10.20 - dscudiero - Updated options processing in hello
 // 11-16-2018 @ 09:13:20 - 1.10.22 - dscudiero - Changed returned string from ProposalState
+// 11-20-2018 @ 09:42:26 - 1.10.25 - dscudiero - Regress changes to ProposalState
