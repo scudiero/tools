@@ -88,7 +88,7 @@ if verbosity > 0:
 	Msg("fileExt = '" + fileExt + "'")
 	Msg("verbosity = '" + str(verbosity) + "'\n")
 
-validExtensions=["sh","py","tcf","cfg","atj","rjs"]
+validExtensions=["sh","py","tcf","cfg","atj","rjs","cpp"]
 okToRun = False
 for ext in validExtensions:
 	if fileExt == ext: 
@@ -108,7 +108,7 @@ if okToRun:
 	if fileName == "workflowLib" and fileExt == "atj":
 		verStr="wfLibVersion"
 		commentChar="//"
-	elif fileExt == "atj" or fileExt == "rjs":
+	elif fileExt == "atj" or fileExt == "rjs" or fileExt == "cpp":
 		assignmentDelim="="
 		commentChar="//"
 	elif fileExt == "tcf" or fileExt == "cfg":
@@ -178,3 +178,4 @@ else:
 ## 08-31-2018 @ 16:02:47 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
 ## 08-31-2018 @ 16:05:54 - 2.1.4 - dscudiero - Add rjs and atj
 ## 08-31-2018 @ 16:07:04 - 2.1.4 - dscudiero - Cosmetic/minor change/Sync
+## 11-30-2018 @ 09:34:40 - 2.1.4 - dscudiero - Added cpp
