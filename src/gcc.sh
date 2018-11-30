@@ -8,6 +8,10 @@ cppSrc="$HOME/tools/src/cpp"
 cppLibs="$HOME/tools/lib/cpp"
 outputDir="$HOME/bin"
 
+myRhel=$(cat /etc/redhat-release | cut -d" " -f3)
+[[ $myRhel == 'release' ]] && myRhel=$(cat /etc/redhat-release | cut -d" " -f4)
+cSuffix="-rhel${myRhel:0:1}"
+
 ## Set the includes string
 	includedStr="-I /usr/include/mysql"
 	unset libs
@@ -24,12 +28,13 @@ outputDir="$HOME/bin"
 	[[ -r ./${module}.cpp ]] && moduleFile="${module}.cpp" || moduleFile="${module}"
 	[[ ! -r $moduleFile ]] && echo -e "Error, could not locate module file '$moduleFile' in '$cppSrc'" && exit -3
 
-	compilerArgs="-o $outputDir/$module $includedStr $moduleFile -L /usr/lib64/mysql -l mysqlclient -std=gnu++0x"
+	compilerArgs="-o $outputDir/${module}${cSuffix} $includedStr $moduleFile -L /usr/lib64/mysql -l mysqlclient -std=gnu++0x"
 	# compilerArgs="-o $outputDir/$module $includedStr $moduleFile -L /usr/lib64/mysql -l mysqlclient"
-	echo $compiler $compilerArgs 
+	# echo $compiler $compilerArgs 
+	echo
 	$compiler $compilerArgs
 	rc=$?
-	[[ $rc -eq 0 ]] && echo -e "\t$module compiled --> ../../../bin/${module%%.*}" || echo -e "\t$module compiled, rc=$rc"
+	[[ $rc -eq 0 ]] && echo -e "\t$module compiled --> ../../../bin/${module%%.*}${cSuffix}" || echo -e "\t$module compiled, rc=$rc"
 	popd &> /dev/null
 
 ## Done
