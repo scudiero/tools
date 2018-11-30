@@ -13,7 +13,7 @@ excelUtils='excelUtils'
 administrators="dscudiero"
 setSemaphoreList='buildSiteInfoTable,buildClientInfoTable'
 
-loaderIncludes='Here Dump Pause Msg Semaphore FindExecutable PadChar CheckRun CheckAuth SignalHandeler'
+loaderIncludes='CallC Here Dump Pause Msg Semaphore FindExecutable PadChar CheckRun CheckAuth SignalHandeler'
 loaderIncludes="$loaderIncludes TrapSigs RunSql SetFileExpansion GetDefaultsData Colors Goodbye Alert"
 
 standardIncludes='ParseArgsStd Hello DbLog Init Goodbye Quit Help Help2 MkTmpFile'
