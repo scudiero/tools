@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.0.0" // -- dscudiero -- Fri 11/30/2018 @ 10:35:05
+// version="1.0.0" // -- dscudiero -- Fri 11/30/2018 @ 14:14:07
 //==================================================================================================
 // tools -- Check if the user is authorized to run a particular script
 // Usage toolsAuthCheck scriptName <options>
@@ -59,7 +59,7 @@ int main(int argc, char *argv[], char **envVarPtr) {
 		bool foundScriptInAuth2script=false;
 
 	// Parse arguments
-		char* myName = argv[0];
+		string myName = argv[0];
 		for(int i=1; i < argc; i++) {
 			string arg = argv[i];
 			string argl = arg; boost::algorithm::to_lower(argl);
@@ -71,6 +71,7 @@ int main(int argc, char *argv[], char **envVarPtr) {
 		    		debug=true;
 			}
 		}
+		if (debug) std::cout << "Starting " + myName + "'\n";
 		if (debug) std::cout << "\t scriptName = '" + scriptName +"'\n";
 		if (scriptName == "") return 0;  // script not registered so allow execution
 
@@ -109,6 +110,7 @@ int main(int argc, char *argv[], char **envVarPtr) {
             unsigned int numFields;
 
 			// Get scriptKey
+				if (debug) std::cout << "Retrieving scriptKey for '" + scriptName + "'\n";
 				sqlStmt="select keyId from scripts where name=\"" + scriptName + "\"";
 				mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
 				if (mysqlStatus)
@@ -119,12 +121,13 @@ int main(int argc, char *argv[], char **envVarPtr) {
 				if (mysqlResult) {
 					scriptKey = mysql_fetch_row(mysqlResult)[0];
 				} else {
-					std::cout << "Could not retrieve auth groups, sql = '\n" + sqlStmt +"'\n";
+					std::cout << "Could not retrieve scriptKey, sql = '\n" + sqlStmt +"'\n";
 				   	return -1;
 				}
 				if (debug) std::cout << "\t scriptKey = '" + scriptKey +"'\n";
 
 			// Get employeeKey
+				if (debug) std::cout << "Retrieving employeekey for '" + userName + "'\n";
 				sqlStmt="select employeekey from employee where userid=\"" + userName + "\"";
 				mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
 				if (mysqlStatus)
@@ -135,12 +138,13 @@ int main(int argc, char *argv[], char **envVarPtr) {
 				if (mysqlResult) {
 					employeeKey = mysql_fetch_row(mysqlResult)[0];
 				} else {
-					std::cout << "Could not retrieve auth groups, sql = '\n" + sqlStmt +"'\n";
+					std::cout << "Could not retrieve employeeKey, sql = '\n" + sqlStmt +"'\n";
 				   	return -1;
 				}
 				if (debug) std::cout << "\t employeeKey = '" + employeeKey +"'\n";
 
 			// Get the auth groups this user is in
+				if (debug) std::cout << "Retrieving auth groups for '" + userName + "/" + employeeKey + "'\n";
 				list <string> usersAuthGroups;
 				sqlStmt="select authKey from auth2user where empKey=" + employeeKey;
 				mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
@@ -166,6 +170,7 @@ int main(int argc, char *argv[], char **envVarPtr) {
 				if (debug) printf("\t foundUserInAuth2user = %d\n", foundUserInAuth2user);
 
 			// Check to see if the script is in the user2Script table for this user
+				if (debug) std::cout << "Retrieving user2Script data\n";
 				sqlStmt="select empkey from user2script where scriptKey=" + scriptKey;
 				mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
 				if (mysqlStatus)
@@ -189,6 +194,7 @@ int main(int argc, char *argv[], char **envVarPtr) {
 				if (debug) printf("\t foundScriptInUser2script = %d\n", foundScriptInUser2script);
 
 			// Check to see if the script is in the auth2Script table
+				if (debug) std::cout << "Retrieving auth2Script data\n";
 				sqlStmt="select groupKey from auth2script where scriptKey=" + scriptKey;
 				mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
 				if (mysqlStatus)
@@ -240,3 +246,4 @@ int main(int argc, char *argv[], char **envVarPtr) {
 // 11-30-2018 @ 10:25:13 - 1.0.1 - dscudiero - Cosmetic/minor change/Sync
 // 11-30-2018 @ 10:32:53 - 1.0.0 - dscudiero - Cosmetic/minor change/Sync
 // 11-30-2018 @ 10:35:13 - 1.0.0 - dscudiero - Cosmetic/minor change/Sync
+// 11-30-2018 @ 14:38:26 - 1.0.0 - dscudiero - Cosmetic/minor change/Sync
