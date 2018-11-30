@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.0.1" // -- dscudiero -- Fri 11/30/2018 @ 09:44:49
+// version="1.0.2" // -- dscudiero -- Fri 11/30/2018 @ 09:46:33
 //==================================================================================================
 // tools -- Check if the user is authorized to run a particular script
 // Usage toolsAuthCheck scriptName <options>
@@ -232,3 +232,4 @@ int main(int argc, char *argv[], char **envVarPtr) {
 	 return 0;
 } // main
 // 11-30-2018 @ 09:45:36 - 1.0.1 - dscudiero - Testing
+// 11-30-2018 @ 09:46:46 - 1.0.2 - dscudiero - Cosmetic/minor change/Sync
