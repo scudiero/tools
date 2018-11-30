@@ -6,6 +6,7 @@ module=$1; shift
 compiler='/usr/bin/g++'
 cppSrc="$HOME/tools/src/cpp"
 cppLibs="$HOME/tools/lib/cpp"
+outputDir="$HOME/bin"
 
 ## Set the includes string
 	includedStr="-I /usr/include/mysql"
@@ -23,11 +24,18 @@ cppLibs="$HOME/tools/lib/cpp"
 	[[ -r ./${module}.cpp ]] && moduleFile="${module}.cpp" || moduleFile="${module}"
 	[[ ! -r $moduleFile ]] && echo -e "Error, could not locate module file '$moduleFile' in '$cppSrc'" && exit -3
 
-	# $compiler -o "../../../bin/$module" $includedStr $moduleFile -L /usr/lib64/mysql -l mysqlclient -std=gnu++0x 
-	$compiler -o "../../../bin/${module%%.*}" $includedStr $moduleFile
+	compilerArgs="-o $outputDir/$module $includedStr $moduleFile -L /usr/lib64/mysql -l mysqlclient -std=gnu++0x"
+	# compilerArgs="-o $outputDir/$module $includedStr $moduleFile -L /usr/lib64/mysql -l mysqlclient"
+	echo $compiler $compilerArgs 
+	$compiler $compilerArgs
 	rc=$?
 	[[ $rc -eq 0 ]] && echo -e "\t$module compiled --> ../../../bin/${module%%.*}" || echo -e "\t$module compiled, rc=$rc"
 	popd &> /dev/null
 
 ## Done
-exit 0
+exit $rc
+
+
+#$compiler -o "../../../bin/$module" $includedStr $moduleFile -L /usr/lib64/mysql -l mysqlclient -std=gnu++0x 
+#$compiler -o "../../../bin/${module%%.*}" $includedStr $moduleFile
+#/usr/bin/g++ -o ../../../bin/testcpp -I /usr/include/mysql -L /usr/lib64/mysql -l mysqlclient ./tools/src/cpp/testcpp.cpp
