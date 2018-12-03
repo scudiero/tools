@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.6.14" # -- dscudiero -- Fri 11/30/2018 @ 14:19:27
+version="1.6.15" # -- dscudiero -- Mon 12/03/2018 @ 08:37:50
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -532,3 +532,4 @@ function CleanUp {
 ## 11-16-2018 @ 09:52:04 - 1.6.3 - dscudiero - Add breadcrumbs
 ## 11-16-2018 @ 09:54:43 - 1.6.4 - dscudiero - Cosmetic/minor change/Sync
 ## 12-03-2018 @ 07:41:11 - 1.6.14 - dscudiero - Fix call to toolsAuthCheck to be rhel specific
+## 12-03-2018 @ 08:39:55 - 1.6.15 - dscudiero - Comment out the calls to prtStatus
