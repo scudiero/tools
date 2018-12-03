@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.14.7" # -- dscudiero -- Wed 11/07/2018 @ 14:31:48
+version="4.14.9" # -- dscudiero -- Fri 11/30/2018 @ 15:19:31
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -100,6 +100,24 @@ scriptDescription="Create a cloned private dev site"
 	}
 
 #==================================================================================================
+# Script specific argument definitions for parseArgs
+#==================================================================================================
+myArgs="overl|overlay|switch|overlay|;"
+myArgs+="refre|refresh|switch|refresh|;"
+myArgs+="overr|overrideTarget|option|overrideTarget|;"
+myArgs+="full|fullcopy|switch|fullCopy|;"
+myArgs+="suffix|suffix|option|suffix|;"
+myArgs+="skipca|skipcat|switch|skipCat|;"
+myArgs+="skipci|skipcim|skipCim|scriptVar3|;"
+myArgs+="skipcl|skipclss|switch|skipClss|;"
+myArgs+="skipwe|skipwen|switch|skipClss|;"
+myArgs+="skipal|skipalso|switch|skipAlso|;"
+myArgs+="debug|debug|switch|startWizdebug|;"
+myArgs+="lock|lock|switch|lockWorkflows|;"
+myArgs+="as|asSite|option|asSite|;"
+export myArgs="$myArgs"
+
+#==================================================================================================
 # Declare local variables and constants
 #==================================================================================================
 rsyncFilters=$(mkTmpFile 'rsyncFilters')
@@ -117,7 +135,8 @@ lockWorkflow=false
 # Standard arg parsing and initialization
 #==================================================================================================
 GetDefaultsData "$myName" #-fromFiles
-ParseArgsStd $originalArgStr
+# ParseArgsStd $originalArgStr
+source <(CallC parseArgs $originalArgStr); client="${unknownArgs%% *}"; unknownArgs="${unknownArgs##* }"
 Hello
 
 [[ -n $envs && -z $srcEnv ]] && srcEnv="$env"
@@ -729,3 +748,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 11-05-2018 @ 14:45:26 - 4.14.5 - dscudiero - Removed debug statement
 ## 11-06-2018 @ 07:51:54 - 4.14.6 - dscudiero - Terminate if client is not hosted on the current host
 ## 11-07-2018 @ 14:33:53 - 4.14.7 - dscudiero - Remove -fromFiles from GetDefaultsData call
+## 12-03-2018 @ 07:53:04 - 4.14.9 - dscudiero - Update to use the new argument parser
