@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version="2.0.72" # -- dscudiero -- Wed 11/07/2018 @ 14:31:52
+version="2.0.78" # -- dscudiero -- Fri 11/30/2018 @ 15:06:11
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors FindExecutable SelectMenu ProtectedCall Pause"
@@ -34,6 +34,18 @@ scriptDescription="Script dispatcher"
 				header="$header|${columns[$i-1]}"
 			done;
 			header="${header:1}"
+			Msg "Retrieving script list..."
+			sqlStmt="select keyId,name,description,showInScripts from scripts where (keyId in"
+			sqlStmt+=" (select scriptKey from auth2script where groupKey in (select authKey from auth2user where empKey=31))"
+			sqlStmt+=" or"
+			sqlStmt+=" (keyId in (select scriptKey from user2script where empKey=31))"
+			sqlStmt+=" or"
+			sqlStmt+=" (keyId not in (select scriptKey from auth2script) and keyId not in (select scriptKey from user2script))"
+			sqlStmt+=" and"
+			sqlStmt+=" name not in (\"loader\",\"dispatcher\")"
+			sqlStmt+=" ) order by name"
+			RunSql $sqlStmt
+			for rec in "${resultSet[@]}"; do UsersScripts+=("$rec"); done
 
 			## Find the max widths of each column for SelectMenu
 			menuItems=();
@@ -147,7 +159,8 @@ declare -A scriptsHash
 #=======================================================================================================================
 helpSet='script,client'
 GetDefaultsData $myName #-fromFiles
-ParseArgsStd $originalArgStr
+# ParseArgsStd $originalArgStr
+source <(CallC parseArgs $originalArgStr); client="${unknownArgs%% *}"; unknownArgs="${unknownArgs##* }"
 scriptArgs="$unknowArgs"
 Hello
 
@@ -218,3 +231,4 @@ Goodbye 0
 ## 06-18-2018 @ 16:16:53 - 2.0.70 - dscudiero - Cosmetic/minor change/Sync
 ## Tue Jul 17 08:33:28 CDT 2018 - dscudiero - -m Tweak the display of the users groups
 ## 11-07-2018 @ 14:34:14 - 2.0.72 - dscudiero - Remove -fromFiles from GetDefaultsData call
+## 12-03-2018 @ 07:52:35 - 2.0.78 - dscudiero - Pull logic to determin the script list into the script script
