@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version="2.0.78" # -- dscudiero -- Fri 11/30/2018 @ 15:06:11
+version="2.0.79" # -- dscudiero -- Mon 12/03/2018 @ 10:29:40
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors FindExecutable SelectMenu ProtectedCall Pause"
@@ -184,14 +184,14 @@ scriptNameIn="$client"
 			[[ ${#menuItems[@]} -eq 0 ]] && BuildMenuArray
 			ProtectedCall "clear"
 			Msg
-			if [[ -n $UsersAuthGroups ]]; then
-				for group in ${UsersAuthGroups//,/ }; do outStr="${outStr}, ${group#*|}"; done
-			else
-				outStr="  none"
-			fi
-			Info 0 1 "Your authorization groups are: ${outStr:2}"
-			Msg "\n^Please specify the $(ColorM '(ordinal)') number of the $itemType you wish to run, 'x' to quit."
-			Msg
+			# if [[ -n $UsersAuthGroups ]]; then
+			# 	for group in ${UsersAuthGroups//,/ }; do outStr="${outStr}, ${group#*|}"; done
+			# else
+			# 	outStr="  none"
+			# fi
+			# Info 0 1 "Your authorization groups are: ${outStr:2}"
+			# Msg "\n^Please specify the $(ColorM '(ordinal)') number of the $itemType you wish to run, 'x' to quit."
+			# Msg
 			#[[ $mode == 'scripts' && $client != '' ]] && clientStr=" (client: '$client')" || unset clientStr
 			SelectMenu -fast -ordinalInData 'menuItems' 'scriptName'
 			[[ -z $scriptName ]] && Goodbye 'x'
@@ -232,3 +232,4 @@ Goodbye 0
 ## Tue Jul 17 08:33:28 CDT 2018 - dscudiero - -m Tweak the display of the users groups
 ## 11-07-2018 @ 14:34:14 - 2.0.72 - dscudiero - Remove -fromFiles from GetDefaultsData call
 ## 12-03-2018 @ 07:52:35 - 2.0.78 - dscudiero - Pull logic to determin the script list into the script script
+## 12-03-2018 @ 10:31:02 - 2.0.79 - dscudiero - Comment out the display of the users auth groups
