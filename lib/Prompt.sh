@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.85" # -- dscudiero -- Fri 08/06/2018 @ 08:51:18
+# version="2.1.86" # -- dscudiero -- Mon 12/03/2018 @ 11:46:34
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue] [autoTimeoutTimer]
@@ -23,6 +23,7 @@ function Prompt {
 	declare timerPrompt=${1:-"Timed prompt, please press enter to provide a response, otherwise processing will continue in"}; shift || true
 	[[ ${promptText:0:1} == '^' ]] && timerPrompt="^$timerPrompt"
 	declare timerInterruptPrompt=${1:-"$promptText"}; shift || true
+	[[ ${validateList:0:1} == ',' ]] && validateList="${validateList:1}"
 	declare validateListString="${validateList// /,}"
 	validateListString=${validateListString%%/*}
 	[[ ${validateListString:$((${#validateListString}-1)):1} == ',' ]] && validateListString="${validateListString:0:$((${#validateListString}-1))}"
@@ -209,3 +210,4 @@ export -f Prompt
 ## 06-08-2018 @ 08:52:55 - 2.1.85 - dscudiero - Fix bug where we were bugging out early for 'client/nocheck'
 ## 06-27-2018 @ 12:13:32 - 2.1.85 - dscudiero - Comment out the version= line
 ## 06-27-2018 @ 15:20:41 - 2.1.85 - dscudiero - Fix a problem with the prompt text being overwritted for timed promptes
+## 12-03-2018 @ 11:55:06 - 2.1.86 - dscudiero - Remove any leading commas from the validation list
