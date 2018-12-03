@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.6.4" # -- dscudiero -- Fri 11/16/2018 @ 09:53:18
+version="1.6.14" # -- dscudiero -- Fri 11/30/2018 @ 14:19:27
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -14,8 +14,7 @@ myName='loader'
 # Local Functions
 #==================================================================================================
 	function prtStatus {
-		# [[ $batchMode == true || $userName != 'dscudiero' ]] && return 0
-		[[ $batchMode == true ]] && return 0
+		[[ $batchMode == true || $userName != 'dscudiero' ]] && return 0
 		[[ -z $sTime ]] && sTime=$(date "+%s")
 		local elapTime=$(( $(date "+%s") - $sTime ))
 		[[ $elapTime -eq 0 ]] && elapTime=1
@@ -140,10 +139,8 @@ function CleanUp {
 		callPgmName=$(cut -d' ' -f1 <<< $loaderArgs)
 		[[ $callPgmName == $loaderArgs ]] && unset loaderArgs || loaderArgs=$(cut -d' ' -f2- <<< $loaderArgs)
 	fi
-	#fastDump callPgmName loaderArgs
-
-	prtStatus "Loader: ParseArgs"
-	sTime=$(date "+%s")
+	# fastDump callPgmName loaderArgs
+	# prtStatus "Loader: ParseArgs"; sTime=$(date "+%s")
 
 #==================================================================================================
 # MAIN
@@ -183,6 +180,7 @@ function CleanUp {
 
 	myRhel=$(cat /etc/redhat-release | cut -d" " -f3)
 	[[ $myRhel == 'release' ]] && myRhel=$(cat /etc/redhat-release | cut -d" " -f4)
+
 	## set default values for common variables
 		if [[ $myName != 'bashShell' ]]; then
 			trueVars="verify traceLog trapExceptions logInDb allowAlerts waitOnForkedProcess defaultValueUseNotes"
@@ -200,17 +198,15 @@ function CleanUp {
 
 ## Import things we need to continue
 	source "$TOOLSPATH/lib/Import.sh"
-	sTime=$(date "+%s")
+	# sTime=$(date "+%s")
 	Import "$loaderIncludes"
-	prtStatus ", Imports"
-	sTime=$(date "+%s")
+	# prtStatus ", Imports"; sTime=$(date "+%s")
 	SetFileExpansion
 
 ## Load tools defaults value
 	if [[ ToolsDefaultsLoaded != true ]]; then
 		GetDefaultsData "$myName" -fromFiles
-		prtStatus ", GetDefaults"
-		sTime=$(date "+%s")
+		# prtStatus ", GetDefaults"; sTime=$(date "+%s")
 		ToolsDefaultsLoaded=true
 	fi
 
@@ -254,8 +250,7 @@ function CleanUp {
 ## If sourced then just return
 	[[ $viaCron == true ]] && return 0
 
-	prtStatus ", Customizations"
-	sTime=$(date "+%s")
+	# prtStatus ", Customizations"; sTime=$(date "+%s")
 
 ## Resolve the script file to run
 	## Were we passed in a fully qualified file name
@@ -274,15 +269,16 @@ function CleanUp {
 			[[ $callPgmName != 'testsh' ]] && { echo; echo; Terminate "$checkMsg"; }
 		fi
 	fi
-	prtStatus ", CheckRun"
-	sTime=$(date "+%s")	
+	# prtStatus ", CheckRun"; sTime=$(date "+%s")	
 
 ## Check Auth
-	CheckAuth "$callPgmName"
-	# dump UsersAuthGroups UsersScriptsStr;
-	# echo "UsersScripts:"; for ((xx=0; xx<${#UsersScripts[@]}; xx++)); do echo -e "\tUsersScripts[$xx] = >${UsersScripts[$xx]}<"; done;
-	prtStatus ", CheckAuth"
-	sTime=$(date "+%s")	
+	CallC toolsAuthCheck "$callPgmName"; rc=$?
+	[[ $rc -ne 0 ]] && exit -1
+
+	# CheckAuth "$callPgmName"
+	# # dump UsersAuthGroups UsersScriptsStr;
+	# # echo "UsersScripts:"; for ((xx=0; xx<${#UsersScripts[@]}; xx++)); do echo -e "\tUsersScripts[$xx] = >${UsersScripts[$xx]}<"; done;
+	# prtStatus ", CheckAuth"; sTime=$(date "+%s")	
 
 ## Check semaphore
 	[[ $(Contains ",$setSemaphoreList," ",$callPgmName," ) == true ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
@@ -290,7 +286,7 @@ function CleanUp {
 ## Resolve the executable file"
 	[[ -z $executeFile ]] && executeFile=$(FindExecutable "$callPgmName")
 	[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
-	prtStatus ", FindExec"; sTime=$(date "+%s")
+	# prtStatus ", FindExec"; sTime=$(date "+%s")
 
 ## Call the script
 	## Initialize the log file
@@ -312,14 +308,14 @@ function CleanUp {
 			Msg >> $logFile
 		fi
 
-	prtStatus ", LogFile" sTime=$(date "+%s")
+	# prtStatus ", LogFile"; sTime=$(date "+%s")
 	## Call program function
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
 		declare -A clientData
 		## Strip off first token if it is $myName
 		[[ $loaderArgs == $myName ]] && unset loaderArgs || loaderArgs="${loaderArgs#$myName }"
-		prtStatus ", Calling"; echo
+		# prtStatus ", Calling"; echo
 		[[ $batchMode != true && $myQuiet != true ]] && echo
 		TrapSigs 'off'
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
@@ -535,3 +531,4 @@ function CleanUp {
 ## 11-07-2018 @ 14:33:47 - 1.5.84 - dscudiero - Remove -fromFiles from GetDefaultsData call
 ## 11-16-2018 @ 09:52:04 - 1.6.3 - dscudiero - Add breadcrumbs
 ## 11-16-2018 @ 09:54:43 - 1.6.4 - dscudiero - Cosmetic/minor change/Sync
+## 12-03-2018 @ 07:41:11 - 1.6.14 - dscudiero - Fix call to toolsAuthCheck to be rhel specific
