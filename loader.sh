@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.6.15" # -- dscudiero -- Mon 12/03/2018 @ 08:37:50
+version="1.6.16" # -- dscudiero -- Mon 12/03/2018 @ 09:39:44
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -294,6 +294,7 @@ function CleanUp {
 		if [[ $noLog != true ]]; then
 			logFile=$logsRoot$callPgmName/$userName--$backupSuffix.log
 			if [[ ! -d $(dirname $logFile) ]]; then
+				[[ -f $(dirname $logFile) ]] && rm -f "$(dirname $logFile)"
 				mkdir -p "$(dirname $logFile)"
 				chown -R "$userName:leepfrog" "$(dirname $logFile)"
 				chmod -R 775 "$(dirname $logFile)"
@@ -533,3 +534,4 @@ function CleanUp {
 ## 11-16-2018 @ 09:54:43 - 1.6.4 - dscudiero - Cosmetic/minor change/Sync
 ## 12-03-2018 @ 07:41:11 - 1.6.14 - dscudiero - Fix call to toolsAuthCheck to be rhel specific
 ## 12-03-2018 @ 08:39:55 - 1.6.15 - dscudiero - Comment out the calls to prtStatus
+## 12-03-2018 @ 09:41:02 - 1.6.16 - dscudiero - Put in a fixx for the script is a file in the logs directory problem
