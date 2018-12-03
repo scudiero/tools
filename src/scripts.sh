@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version="2.0.79" # -- dscudiero -- Mon 12/03/2018 @ 10:29:40
+version="2.1.1" # -- dscudiero -- Mon 12/03/2018 @ 11:37:43
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors FindExecutable SelectMenu ProtectedCall Pause"
@@ -183,7 +183,7 @@ scriptNameIn="$client"
 			unset scriptName
 			[[ ${#menuItems[@]} -eq 0 ]] && BuildMenuArray
 			ProtectedCall "clear"
-			Msg
+			Msg; Msg;
 			# if [[ -n $UsersAuthGroups ]]; then
 			# 	for group in ${UsersAuthGroups//,/ }; do outStr="${outStr}, ${group#*|}"; done
 			# else
@@ -203,15 +203,15 @@ scriptNameIn="$client"
 		fi
 		[[ $scriptName == 'REFRESHLIST' ]] && continue
 
-		## Get additional arguments
-			unset userArgs;
-			if [[ $menuDisplayed == true ]]; then
-				Msg
-				Msg "^Please 'Enter' to optionally specify parameters to be passed to '$(ColorM $scriptName)'"
-				unset userArgs; Prompt userArgs "^Please specify parameters to be passed to '$(ColorM $scriptName)'" '*optional*' '' '3'
-				[[ -n $userArgs ]] && scriptArgs="$userArgs $scriptArgs"
-				echo
-			fi
+		# ## Get additional arguments
+		# 	unset userArgs;
+		# 	if [[ $menuDisplayed == true ]]; then
+		# 		Msg
+		# 		Msg "^Please 'Enter' to optionally specify parameters to be passed to '$(ColorM $scriptName)'"
+		# 		unset userArgs; Prompt userArgs "^Please specify parameters to be passed to '$(ColorM $scriptName)'" '*optional*' '' '3'
+		# 		[[ -n $userArgs ]] && scriptArgs="$userArgs $scriptArgs"
+		# 		echo
+		# 	fi
 		## Call function to fulfill the request
 			runScript "$scriptName" "$scriptArgs" ; rc=$?
 			[[ $menuDisplayed == true ]] && { Msg; Pause "Please press enter to go back to 'scripts'"; }
@@ -233,3 +233,4 @@ Goodbye 0
 ## 11-07-2018 @ 14:34:14 - 2.0.72 - dscudiero - Remove -fromFiles from GetDefaultsData call
 ## 12-03-2018 @ 07:52:35 - 2.0.78 - dscudiero - Pull logic to determin the script list into the script script
 ## 12-03-2018 @ 10:31:02 - 2.0.79 - dscudiero - Comment out the display of the users auth groups
+## 12-03-2018 @ 11:55:24 - 2.1.1 - dscudiero - Comment out the additional arguments question
