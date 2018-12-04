@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.0.0" // -- dscudiero -- Fri 11/30/2018 @ 14:14:07
+// version="1.0.2" // -- dscudiero -- Tue 12/04/2018 @ 09:23:01
 //==================================================================================================
 // tools -- Check if the user is authorized to run a particular script
 // Usage toolsAuthCheck scriptName <options>
@@ -17,6 +17,7 @@
 #include <mysql.h>
 #include <boost/algorithm/string.hpp> 
 
+//==================================================================================================
 class FFError {
 public:
     std::string Label;
@@ -28,6 +29,7 @@ public:
 
 using namespace std;
 
+//==================================================================================================
 std::string exec(const char* cmd) {
     std::array<char, 128> buffer;
     std::string result;
@@ -38,6 +40,14 @@ std::string exec(const char* cmd) {
     }
     return result;
 }
+
+//==================================================================================================
+// Utilities
+//==================================================================================================
+void Here(string where, bool debug) { if (debug) std::cout << "Here: " + where + "\n"; return; }
+void Here(int where, bool debug) { if (debug) printf("Here: %d\n", where); return; }
+void Dump(string var, string val, bool debug) { if (debug) printf("%s = '%s'\n", var,val); return; }
+void Dump(string var, int val, bool debug) { if (debug) printf("%s = '%d'\n", var,val); return; }
 
 // //=================================================================================================================
 int main(int argc, char *argv[], char **envVarPtr) {
@@ -237,13 +247,5 @@ int main(int argc, char *argv[], char **envVarPtr) {
 
 	 return 0;
 } // main
-// 11-30-2018 @ 09:45:36 - 1.0.1 - dscudiero - Testing
-// 11-30-2018 @ 09:46:46 - 1.0.2 - dscudiero - Cosmetic/minor change/Sync
-// 11-30-2018 @ 09:47:27 - 1.0.3 - dscudiero - Cosmetic/minor change/Sync
-// 11-30-2018 @ 09:49:17 - 1.0.4 - dscudiero - Cosmetic/minor change/Sync
-// 11-30-2018 @ 10:15:07 - 1.0.5 - dscudiero - Cosmetic/minor change/Sync
-// 11-30-2018 @ 10:22:03 - 1.0.0 - dscudiero - Cosmetic/minor change/Sync
-// 11-30-2018 @ 10:25:13 - 1.0.1 - dscudiero - Cosmetic/minor change/Sync
-// 11-30-2018 @ 10:32:53 - 1.0.0 - dscudiero - Cosmetic/minor change/Sync
-// 11-30-2018 @ 10:35:13 - 1.0.0 - dscudiero - Cosmetic/minor change/Sync
-// 11-30-2018 @ 14:38:26 - 1.0.0 - dscudiero - Cosmetic/minor change/Sync
+// 11-30-2018 @ 09:45:36 - 1.0.1 - dscudiero - Initial
+// 12-04-2018 @ 11:40:50 - 1.0.2 - dscudiero - Add utility functions
