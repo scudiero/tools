@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.40" # -- dscudiero -- Tue 12/04/2018 @ 08:35:25
+version="1.5.40" # -- dscudiero -- Tue 12/04/2018 @ 08:42:04
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -32,7 +32,7 @@ function fastDump {
 			[[ ${token,,[a-z]} == 'uselocal' ]] && { useLocal=true; dispatcherArgs=${dispatcherArgs/--$token/}; }
 			[[ ${token,,[a-z]} == 'usedev' ]] && { useDev=true; dispatcherArgs=${dispatcherArgs/--$token/}; }
 			[[ ${token,,[a-z]} == 'pauseatexit' || $token == 'pauseonexit' ]] && { export PAUSEATEXIT=true; dispatcherArgs=${dispatcherArgs/--$token/}; }
-			[[ ${token,,[a-z]} == 'debug' ]] && { export DEBUG=true; dispatcherArgs=${dispatcherArgs/--$token/}; verboseLevel=3}
+			[[ ${token,,[a-z]} == 'debug' ]] && { export DEBUG=true; dispatcherArgs=${dispatcherArgs/--$token/}; }
 		fi
 	done
 	fastDump dispatcherArgs viaCron useLocal useDev PAUSEATEXIT; 
@@ -159,4 +159,4 @@ exit
 ## 04-20-2018 @ 16:00:51 - 1.5.35 - dscudiero - Add --debug option
 ## 05-10-2018 @ 14:59:31 - 1.5.36 - dscudiero - Comment out fastdump
 ## 05-24-2018 @ 08:49:37 - 1.5.39 - dscudiero - Remove code that edits out the loadPgm name ~ 109
-## 12-04-2018 @ 08:36:45 - 1.5.40 - dscudiero - Set verboseLevel if --debug
+## 12-04-2018 @ 08:42:27 - 1.5.40 - dscudiero - Regress last change
