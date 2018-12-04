@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.0.9" // -- dscudiero -- Fri 05/25/2018 @ 12:41:06.53
+// version="1.1.0" // -- dscudiero -- Tue 12/04/2018 @ 09:21:37
 //==================================================================================================
 #include <iostream>		// IO utility library
 #include <string>		// String utility library
@@ -11,8 +11,17 @@
 #include <list>
 #include <vector>
 #include <iterator>
+#include <mysql.h>
 #include <boost/algorithm/string.hpp> 
 
+class FFError {
+public:
+    std::string Label;
+    FFError() { Label = (char *)"Generic Error";}
+    FFError(char *message ) {Label = message;}
+    ~FFError() { }
+    inline const char* GetMessage  (void)   {return Label.c_str();}
+};
 using namespace std;
 using std::cout;
 using std::getenv;
@@ -36,67 +45,108 @@ ArgDef::ArgDef (string a, string b, string c, string d, string e) {
 	shortName = a; longName = b; type = c; scriptVar = d; scriptCmd = e;
 }
 
-// //=================================================================================================================
+//==================================================================================================
+// Utilities
+//==================================================================================================
+void Here(string where, bool debug) { if (debug) std::cout << "Here: " + where + "\n"; return; }
+void Here(int where, bool debug) { if (debug) printf("Here: %d\n", where); return; }
+void Dump(string var, string val, bool debug) { if (debug) printf("%s = '%s'\n", var,val); return; }
+void Dump(string var, int val, bool debug) { if (debug) printf("%s = '%d'\n", var,val); return; }
+
+//==================================================================================================
 int main(int argc, char *argv[]) {
-	string myName=argv[0];
+	// Constants
+		string dbHost="mdb1-host.inside.leepfrog.com";
+		string dbName="courseleafdatawarehouse";
+		string dbUser="leepfrogRead";
+		string dbPw="v721-!PP9b";
 
-	// Get an environment variable
-    // if (const char* env_p = std::getenv("PATH"))
-    //     std::cout << "Your PATH is: " << env_p << '\n';
-	// Set an environment variable
-	// setenv("TESTVAR", "12345", true);
+	// Program variables
+		bool debug=false;
+		string sqlStmt="";
+		string scriptName="";
+		list <ArgDef> argDefs;
 
-	//=================================================================================================================
-	// Load the argument definitions array
-	//                      (shortName, longName, type, scriptVar, scriptCmd)
-	//=================================================================================================================
-	list <ArgDef> argDefs;
-	argDefs.push_back(ArgDef("hh", "helpextended", "switch", "", "Help2 -extended; Goodbye 0;"));
-	argDefs.push_back(ArgDef("h", "help", "switch", "", "Help2; Goodbye 0;"));
-	argDefs.push_back(ArgDef("envs", "environments", "option", "", "Help2 -extended; Goodbye 0;"));
-	argDefs.push_back(ArgDef("src", "srcenv", "option", "srcEnv", "mapToEnv"));
-	argDefs.push_back(ArgDef("tgt", "tgtenv", "option", "tgtEnv", "mapToEnv"));
-	argDefs.push_back(ArgDef("prod", "products", "option", "products", ""));
-	argDefs.push_back(ArgDef("cimc", "courseadmin", "switch", "cimStr", "appendLong"));
-	argDefs.push_back(ArgDef("cimp", "programadmin", "switch", "cimStr", "appendLong"));
-	argDefs.push_back(ArgDef("cimm", "miscadmin", "switch", "cimStr", "appendLong"));
-	argDefs.push_back(ArgDef("all", "allitems", "switch", "allItems", ""));
-	argDefs.push_back(ArgDef("cat", "catalog", "switch", "products", "appendLong"));
-	argDefs.push_back(ArgDef("cim", "cim", "switch", "products", "appendLong"));
-	argDefs.push_back(ArgDef("clss", "clss", "switch", "products", "appendLong"));
-	argDefs.push_back(ArgDef("ignore", "ignorelist", "option", "ignoreList", ""));
-	argDefs.push_back(ArgDef("testm", "testmode", "switch", "testMode", ""));
-	argDefs.push_back(ArgDef("batch", "batchmode", "switch", "batchMode", ""));
-	argDefs.push_back(ArgDef("nob", "nobanners", "switch", "noBanners", ""));
-	argDefs.push_back(ArgDef("noe", "noemails", "switch", "noEmails", ""));
-	argDefs.push_back(ArgDef("nol", "nolog", "switch", "noLog", ""));
-	argDefs.push_back(ArgDef("non", "nonews", "switch", "noNews", ""));
-	argDefs.push_back(ArgDef("nop", "noprompt", "switch", "", "verify=false;"));
-	argDefs.push_back(ArgDef("now", "nowarn", "switch", "noWarn", ""));
-	argDefs.push_back(ArgDef("nocl", "noclear", "switch", "noClear", ""));
-	argDefs.push_back(ArgDef("noch", "nocheck", "switch", "noCheck", ""));
-	argDefs.push_back(ArgDef("q", "quiet", "switch", "quiet", ""));
-	argDefs.push_back(ArgDef("x", "experimentalmode", "switch", "", "DOIT='echo';"));
-	argDefs.push_back(ArgDef("force", "force", "switch", "force", ""));
-	argDefs.push_back(ArgDef("fork", "fork", "switch", "fork", ""));
-	argDefs.push_back(ArgDef("fast", "fastinit", "switch", "fastInit", ""));
-	argDefs.push_back(ArgDef("info", "informationonlymode", "informationOnlyMode", "fork", ""));
-	argDefs.push_back(ArgDef("for", "foruser", "option", "forUser", ""));
-	argDefs.push_back(ArgDef("pub", "public", "switch", "envs", "appendLong"));
-	argDefs.push_back(ArgDef("pre", "preview", "switch", "envs", "appendLong"));
-	argDefs.push_back(ArgDef("pri", "prior", "switch", "envs", "appendLong"));
-	argDefs.push_back(ArgDef("c", "curr", "switch", "envs", "appendLong"));
-	argDefs.push_back(ArgDef("n", "next", "switch", "envs", "appendLong"));
-	argDefs.push_back(ArgDef("t", "test", "switch", "envs", "appendLong"));
-	argDefs.push_back(ArgDef("d", "dev", "switch", "envs", "appendLong"));
-	argDefs.push_back(ArgDef("p", "pvt", "switch", "envs", "appendLong"));
-	argDefs.push_back(ArgDef("e", "email", "option", "email", ""));
-	argDefs.push_back(ArgDef("v", "verbose", "counter", "verboseLevel", ""));
-	argDefs.push_back(ArgDef("j", "jalot", "option", "jalot", ""));
-	argDefs.push_back(ArgDef("f", "file", "option", "file", ""));
-	argDefs.push_back(ArgDef("-uselocal", "useLocal", "switch", "useLocal", ""));
+	// Parse arguments
+		string myName = argv[0];
+		for(int i=1; i < argc; i++) {
+			string arg = argv[i];
+			string argl = arg; boost::algorithm::to_lower(argl);
+			if (arg.substr(0,1) != "-") {
+				scriptName = arg;
+				continue;
+			} else {
+				if (argl == "-d")
+		    		debug=true;
+			}
+		}
+		if (debug) std::cout << "Starting " + myName + "'\n";
+		if (debug) std::cout << "\t scriptName = '" + scriptName +"'\n";
 
+    //==============================================================================================
+	// Connect to the database to get the standard argDefs
+    //==============================================================================================
+		MYSQL *MySQLConRet;
+		MYSQL *MySQLConnection = NULL;
+		MySQLConnection = mysql_init( NULL );
+		try {
+
+			MySQLConRet = mysql_real_connect(MySQLConnection, dbHost.c_str(), dbUser.c_str(), dbPw.c_str(), dbName.c_str(), 3306, NULL, 0);
+			if ( MySQLConRet == NULL )
+            	throw FFError( (char*) mysql_error(MySQLConnection) );
+            if (debug) {
+	            printf("\t MySQL Connection Info: %s \n", mysql_get_host_info(MySQLConnection));
+		        printf("\t MySQL Client Info: %s \n", mysql_get_client_info());
+		        printf("\t MySQL Server Info: %s \n", mysql_get_server_info(MySQLConnection));
+		   	}
+
+	    	int mysqlStatus = 0;
+    		MYSQL_RES *mysqlResult = NULL;
+			MYSQL_ROW mysqlRow;
+			MYSQL_FIELD *mysqlFields;
+            my_ulonglong numRows;
+            unsigned int numFields;
+
+			// Get the standard argdefs from the database
+				if (debug) std::cout << "Retrieving argDefs ...\n";
+				sqlStmt="select shortName, longName, type, scriptVariable, scriptCommand from argdefs where status=\"active\" order by seqOrder";
+				mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
+				if (mysqlStatus)
+				    throw FFError( (char*)mysql_error(MySQLConnection) );
+				else
+				    mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
+
+				string shortName="", longName="", type="", scriptVar="", scriptCmd="";
+				if (mysqlResult) {
+		            numRows = mysql_num_rows(mysqlResult);
+					if (numRows > 0) {
+						while(mysqlRow = mysql_fetch_row(mysqlResult)) {
+							shortName="", longName="", type="", scriptVar="", scriptCmd="";
+							shortName =  mysqlRow[0];
+							longName =  mysqlRow[1];
+							type =  mysqlRow[2];
+							scriptVar =  mysqlRow[3];
+							if (mysqlRow[4] != NULL) scriptCmd =  mysqlRow[4];
+
+							if (debug) printf("\t shortName: '%s', \t longName: '%s', \t type: '%s', \t scriptVar: '%s', \t scriptCmd: '%s'\n", 
+												shortName.c_str(),longName.c_str(),type.c_str(),scriptVar.c_str(),scriptCmd.c_str());
+
+							argDefs.push_back(ArgDef(shortName, longName, type, scriptVar, scriptCmd));
+						}
+					}
+				} else {
+					std::cout << "Could not retrieve auth groups, sql = '\n" + sqlStmt +"'\n";
+				   	return -1;
+				}
+		// database connection failed
+		} catch ( FFError e ) {
+        	printf("%s\n",e.Label.c_str());
+        	return 1;
+    	}
+
+    //==============================================================================================
 	// Are there any script specific arguments, if found then add to the argDefs arraylist
+	//==============================================================================================
     if (char* myArgsPtr = std::getenv("myArgs")) {
 		char str[4096];
 		strncpy(str,myArgsPtr,sizeof(str));
@@ -131,8 +181,9 @@ int main(int argc, char *argv[]) {
 		}
     }
 
-	//=================================================================================================================
+    //==============================================================================================
 	// Loop through the arguments
+    //==============================================================================================
 	string unknownArgs="";
 	for(int i=1; i < argc; i++) {
 		string arg = argv[i];
@@ -159,11 +210,13 @@ int main(int argc, char *argv[]) {
 				string scriptCmd = it->scriptCmd;
 				if (type == "switch") {
 					if (scriptCmd != "") {
-						if (scriptCmd == "appendLong") {
+						string scriptCmdL=scriptCmd;
+						boost::algorithm::to_lower(scriptCmdL);
+						if (scriptCmdL == "appendlongname") {
 							// std::cout << scriptVar + "=\"$" + scriptVar + " " + longName + "\"\n";
 							std::cout << "[[ -z $" + scriptVar + " ]] && " + scriptVar + "=\"" + longName + "\"" + 
 										 " || " + scriptVar + "=\"$" + scriptVar + " " + longName + "\"\n";
-						} else if (scriptCmd == "appendShort") {
+						} else if (scriptCmdL == "appendshortname") {
 							std::cout << "[[ -z $" + scriptVar + " ]] && " + scriptVar + "=\"" + shortName + "\"" + 
 										 " || " + scriptVar + "=\"$" + scriptVar + " " + shortName + "\"\n";
 						} else {
@@ -176,7 +229,9 @@ int main(int argc, char *argv[]) {
 					i++;
 					arg = argv[i];
 					if (scriptCmd != "") {
-						if (scriptCmd == "mapToEnv") {
+						string scriptCmdL=scriptCmd;
+						boost::algorithm::to_lower(scriptCmdL);
+						if (scriptCmdL == "maptoenv") {
 							if (arg == "c") {
 								arg = "curr";
 							} else if (arg == "n") {
@@ -216,3 +271,4 @@ int main(int argc, char *argv[]) {
 // 11-14-2018 @ 10:42:55 - 1.0.9 - dscudiero - Add expansion of env variable
 // 11-16-2018 @ 09:12:00 - 1.0.9 - dscudiero - Added -useLocal
 // 11-16-2018 @ 15:15:20 - 1.0.9 - dscudiero - Add ability to specify script specific arguments
+// 12-04-2018 @ 11:40:28 - 1.1.0 - dscudiero - Switch to read the default arguments from the data warehouse
