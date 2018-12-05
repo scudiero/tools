@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.14.9" # -- dscudiero -- Fri 11/30/2018 @ 15:19:31
+version="4.14.10" # -- dscudiero -- Tue 12/04/2018 @ 11:43:36
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -41,22 +41,22 @@ scriptDescription="Create a cloned private dev site"
 #==================================================================================================
 # Standard call back functions
 #==================================================================================================
-	function copyEnv-ParseArgsStd {
-		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
-		myArgs+=('overl|overlay|switch|overlay||script|Overlay/Replace any existing target directories')
-		myArgs+=('refre|refresh|switch|refresh||script|Refresh any existing target directories')
-		myArgs+=('overr|overrideTarget|option|overrideTarget||script|Override the default target location, full file spec to where the site root should be located. e.g. /mnt/dev7/web')
-		myArgs+=('full|fullcopy|switch|fullCopy||script|Do a full copy, including all log and request files')
-		myArgs+=('suffix|suffix|option|suffix||script|Suffix text to be append to the resultant site name, e.g. -lu')
-		myArgs+=('skipca|skipcat|switch|skipCat||script|Skip clients CAT directories, i.e. web directories not in the skeleton')
-		myArgs+=('skipci|skipcim|switch|skipCim||script|Skip CIM and CIM instance files')
-		myArgs+=('skipcl|skipclss|switch|skipClss||script|Skip CLSS/WEN instance files')
-		myArgs+=('skipwe|skipwen|switch|skipClss||script|Skip CLSS/WEN instance files')
-		myArgs+=('skipal|skipalso|switch|skipClss||script|Additional directories and or files to ignore| comma separated list')
-		myArgs+=('debug|debug|switch|startWizdebug||script|Automatically start a wizDebug session after the copy')
-		myArgs+=('lock|lock|option|lockWorkflows||script|Lock the specified workflow(s) in the source environment')
-		myArgs+=('as|asSite|option|asSite||script|The name to give the new site, i.e. tgtDir-asSite')
-	}
+	# function copyEnv-ParseArgsStd {
+	# 	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+	# 	myArgs+=('overl|overlay|switch|overlay||script|Overlay/Replace any existing target directories')
+	# 	myArgs+=('refre|refresh|switch|refresh||script|Refresh any existing target directories')
+	# 	myArgs+=('overr|overrideTarget|option|overrideTarget||script|Override the default target location, full file spec to where the site root should be located. e.g. /mnt/dev7/web')
+	# 	myArgs+=('full|fullcopy|switch|fullCopy||script|Do a full copy, including all log and request files')
+	# 	myArgs+=('suffix|suffix|option|suffix||script|Suffix text to be append to the resultant site name, e.g. -lu')
+	# 	myArgs+=('skipca|skipcat|switch|skipCat||script|Skip clients CAT directories, i.e. web directories not in the skeleton')
+	# 	myArgs+=('skipci|skipcim|switch|skipCim||script|Skip CIM and CIM instance files')
+	# 	myArgs+=('skipcl|skipclss|switch|skipClss||script|Skip CLSS/WEN instance files')
+	# 	myArgs+=('skipwe|skipwen|switch|skipClss||script|Skip CLSS/WEN instance files')
+	# 	myArgs+=('skipal|skipalso|switch|skipClss||script|Additional directories and or files to ignore| comma separated list')
+	# 	myArgs+=('debug|debug|switch|startWizdebug||script|Automatically start a wizDebug session after the copy')
+	# 	myArgs+=('lock|lock|option|lockWorkflows||script|Lock the specified workflow(s) in the source environment')
+	# 	myArgs+=('as|asSite|option|asSite||script|The name to give the new site, i.e. tgtDir-asSite')
+	# }
 
 	function copyEnv-Goodbye {
 		SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
@@ -749,3 +749,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 11-06-2018 @ 07:51:54 - 4.14.6 - dscudiero - Terminate if client is not hosted on the current host
 ## 11-07-2018 @ 14:33:53 - 4.14.7 - dscudiero - Remove -fromFiles from GetDefaultsData call
 ## 12-03-2018 @ 07:53:04 - 4.14.9 - dscudiero - Update to use the new argument parser
+## 12-05-2018 @ 12:44:16 - 4.14.10 - dscudiero - Comment out the parsargstd call back function
