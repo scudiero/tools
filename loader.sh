@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.6.16" # -- dscudiero -- Mon 12/03/2018 @ 09:39:44
+version="1.6.18" # -- dscudiero -- Thu 12/06/2018 @ 13:29:58
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -205,7 +205,8 @@ function CleanUp {
 
 ## Load tools defaults value
 	if [[ ToolsDefaultsLoaded != true ]]; then
-		GetDefaultsData "$myName" -fromFiles
+		# GetDefaultsData "$myName" -fromFiles
+		source <(CallC toolsSetDefaults);
 		# prtStatus ", GetDefaults"; sTime=$(date "+%s")
 		ToolsDefaultsLoaded=true
 	fi
@@ -535,3 +536,4 @@ function CleanUp {
 ## 12-03-2018 @ 07:41:11 - 1.6.14 - dscudiero - Fix call to toolsAuthCheck to be rhel specific
 ## 12-03-2018 @ 08:39:55 - 1.6.15 - dscudiero - Comment out the calls to prtStatus
 ## 12-03-2018 @ 09:41:02 - 1.6.16 - dscudiero - Put in a fixx for the script is a file in the logs directory problem
+## 12-06-2018 @ 14:30:02 - 1.6.18 - dscudiero - Updated to use toolsSetDefaults
