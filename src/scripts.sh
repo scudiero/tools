@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version="2.1.1" # -- dscudiero -- Mon 12/03/2018 @ 11:37:43
+version="2.1.2" # -- dscudiero -- Thu 12/06/2018 @ 13:29:52
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors FindExecutable SelectMenu ProtectedCall Pause"
@@ -158,7 +158,8 @@ declare -A scriptsHash
 ## parse arguments
 #=======================================================================================================================
 helpSet='script,client'
-GetDefaultsData $myName #-fromFiles
+# GetDefaultsData $myName #-fromFiles
+source <(CallC toolsSetDefaults $myName);
 # ParseArgsStd $originalArgStr
 source <(CallC parseArgs $originalArgStr); client="${unknownArgs%% *}"; unknownArgs="${unknownArgs##* }"
 scriptArgs="$unknowArgs"
@@ -234,3 +235,4 @@ Goodbye 0
 ## 12-03-2018 @ 07:52:35 - 2.0.78 - dscudiero - Pull logic to determin the script list into the script script
 ## 12-03-2018 @ 10:31:02 - 2.0.79 - dscudiero - Comment out the display of the users auth groups
 ## 12-03-2018 @ 11:55:24 - 2.1.1 - dscudiero - Comment out the additional arguments question
+## 12-07-2018 @ 07:24:08 - 2.1.2 - dscudiero - Switch to use toolsSetDefaults module
