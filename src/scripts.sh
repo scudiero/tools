@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version="2.1.3" # -- dscudiero -- Fri 12/07/2018 @ 10:15:54
+version="2.1.4" # -- dscudiero -- Fri 12/07/2018 @ 10:31:39
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors FindExecutable SelectMenu ProtectedCall Pause"
@@ -160,6 +160,7 @@ declare -A scriptsHash
 #=======================================================================================================================
 helpSet='script,client'
 # GetDefaultsData $myName #-fromFiles
+CallC toolsSetDefaults $myName
 source <(CallC toolsSetDefaults $myName);
 # ParseArgsStd $originalArgStr
 source <(CallC parseArgs $originalArgStr); client="${unknownArgs%% *}"; unknownArgs="${unknownArgs##* }"
@@ -238,3 +239,4 @@ Goodbye 0
 ## 12-03-2018 @ 11:55:24 - 2.1.1 - dscudiero - Comment out the additional arguments question
 ## 12-07-2018 @ 07:24:08 - 2.1.2 - dscudiero - Switch to use toolsSetDefaults module
 ## 12-07-2018 @ 10:18:26 - 2.1.3 - dscudiero - Add dump of sqlStmt
+## 12-07-2018 @ 10:32:00 - 2.1.4 - dscudiero - Add debug stuff
