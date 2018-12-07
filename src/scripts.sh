@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version="2.1.2" # -- dscudiero -- Thu 12/06/2018 @ 13:29:52
+version="2.1.3" # -- dscudiero -- Fri 12/07/2018 @ 10:15:54
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors FindExecutable SelectMenu ProtectedCall Pause"
@@ -44,6 +44,7 @@ scriptDescription="Script dispatcher"
 			sqlStmt+=" and"
 			sqlStmt+=" name not in (\"loader\",\"dispatcher\")"
 			sqlStmt+=" ) order by name"
+			dump 2 -n sqlStmt -n
 			RunSql $sqlStmt
 			for rec in "${resultSet[@]}"; do UsersScripts+=("$rec"); done
 
@@ -236,3 +237,4 @@ Goodbye 0
 ## 12-03-2018 @ 10:31:02 - 2.0.79 - dscudiero - Comment out the display of the users auth groups
 ## 12-03-2018 @ 11:55:24 - 2.1.1 - dscudiero - Comment out the additional arguments question
 ## 12-07-2018 @ 07:24:08 - 2.1.2 - dscudiero - Switch to use toolsSetDefaults module
+## 12-07-2018 @ 10:18:26 - 2.1.3 - dscudiero - Add dump of sqlStmt
