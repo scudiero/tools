@@ -1,16 +1,67 @@
 //======================================================================================================================
-//  version:"2.0.3"  -- dscudiero -- Mon 11/12/2018 @ 08:21:41
+//  version:"2.0.4"  -- dscudiero -- Fri 12/07/2018 @ 09:58:13
 //======================================================================================================================
 // ??/??/18 - dgs - initial - ??
 //======================================================================================================================
-localsteps:Course Workflow Management|groups|workflow|attributes=isUndergraduate[Is Undergraduate],isGraduate[Is Graduate],isGenEd[Is General Education],isNew[New Course],isNotNew[Not New],isEdit[Course Change],isNotEdit[Not Course Change],isDelete[Course Delete],isNotDelete[Not Course Delete],isNotFirstStep[Is not the first step],fyi[FYI Only],fyiall[FYI All],todo[ToDo Item],optional[If Role Exists];buttonlabel=Save;lookuptypes=user,role,workflow;memberlabel=Step;
+localsteps:Course Workflow Management|
+	groups|
+	workflow|
+	attributes=
+	isUndergraduate[Is Undergraduate],
+	isGraduate[Is Graduate],
+	isGenEd[Is General Education],
+	isNew[New Course],
+	isNotNew[Not New],
+	isEdit[Course Change],
+	isNotEdit[Not Course Change],
+	isDelete[Course Delete],
+	isNotDelete[Not Course Delete],
+	isNotFirstStep[Is not the first step],
+	fyi[FYI Only],
+	fyiall[FYI All],
+	todo[ToDo Item],
+	optional[If Role Exists];
+	buttonlabel=Save;
+	lookuptypes=user,
+	role,
+	workflow;
+	memberlabel=Step;
+
+
 
 template:custom
 pageflags:autoapprove
 
-workflow:standard|Dept Chair,Col Dean,Curriculum Committee fyiall,Curriculum Committee Chair,Registrar,
 
-//workflow:standard|START,College: Col,Department: Dept,Subject: Subj,Academic level: AcadLevel,Proposal State: ProposalState,[Is Undergraduate] isUndergraduate,[Is Graduate] isGraduate,[Is General Education] isGenEd,[Is New] isNew,[Is not New] isNotNew,[Is Edit/Change] isEdit,[Is not Edit/Change] isNotEdit,[Is Delete] isDelete,[Is not Delete] isNotDelete,[Is Inactivate] isInactivate,[Is not Inactivate] isNotInactivate,[Is Reactivate] isReactivate,[Is not Reactivate] isNotReactivate,END
+workflow:standard|
+	Dept Chair,
+	Col Dean,
+	Curriculum Committee fyiall,
+	Curriculum Committee Chair,
+	Registrar,
+
+
+//workflow:standard|
+	START,
+	College: Col,
+	Department: Dept,
+	Subject: Subj,
+	Academic level: AcadLevel,
+	Proposal State: ProposalState,
+	[Is Undergraduate] isUndergraduate,
+	[Is Graduate] isGraduate,
+	[Is General Education] isGenEd,
+	[Is New] isNew,
+	[Is not New] isNotNew,
+	[Is Edit/Change] isEdit,
+	[Is not Edit/Change] isNotEdit,
+	[Is Delete] isDelete,
+	[Is not Delete] isNotDelete,
+	[Is Inactivate] isInactivate,
+	[Is not Inactivate] isNotInactivate,
+	[Is Reactivate] isReactivate,
+	[Is not Reactivate] isNotReactivate,
+	END
 
 //======================================================================================================================
 // version:1.0.20 // -- dscudiero -- Tue 05/29/2018 @ 13:28:33.70
@@ -24,7 +75,9 @@ workflow:standard|Dept Chair,Col Dean,Curriculum Committee fyiall,Curriculum Com
 // 08-28-2017 @ 11.45.36 - (52.17)     - dscudiero - Add TODO step
 // 08-31-2017 @ 09.55.48 - (52.17)     - dscudiero -
 // 08-31-2017 @ 09.56.02 - (52.17)     - dscudiero - General syncing of dev to prod
-// 08-31-2017 @ 11.16.47 - (42.73)     - dscudiero - Added undergraduat, graduate, and gened to the default setup
+// 08-31-2017 @ 11.16.47 - (42.73)     - dscudiero - Added undergraduat,
+	 graduate,
+	 and gened to the default setup
 // 09-11-2017 @ 15.51.58 - (17.58)     - dscudiero - General syncing of dev to prod
 // 10-25-2017 @ 09.37.59 - (34.05)     - dscudiero - Reformatted comments
 // 11-08-2017 @ 11.20.51 - (32.44)     - dscudiero - Added Proposal State to the debug workflow
