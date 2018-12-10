@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.10.25" // -- dscudiero -- Mon 11/19/2018 @ 16:05:24
+wfLibVersion="1.10.42" // -- dscudiero -- Mon 12/10/2018 @ 08:43:46
 //attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -393,7 +393,7 @@ ProposalState = function() {
 			retVal='REACTIVATE';
 	if (tcfdata.inactivate && tcfdata.inactivate.length && tcfdata.inactivate == 'true')
 		retVal='INACTIVATE';
-	
+
 	return retVal;
 }; //ProposalState
 
@@ -520,11 +520,17 @@ wffuncs.GetAcadLevel = function(inval, wfrule, args) {
 			}
 		}
 
-	// Return results -- step
+	// Return results --
 		if (notMode) allowStep=!allowStep;
 		if(allowStep) {
-			wfDebug(1,"\t*** Returning: '" + retVal + "'" );
-			return [inval.replace(wfrule.regex,retVal)];
+			wfDebug(1,["\tretVal;"+retVal]);
+			if (args.context === "wforder") {
+				retArray.push(inval.replace(wfrule.regex,retVal));
+			} else {
+				retArray.push(inval.replace(wfrule.ifregex,retVal));
+			}
+			wfDebug(1,"\t*** Returning: '" + retArray.toSource() + "'" );
+			return retArray;
 		}
 		wfDebug(1,"\t*** Returning 'false'");
 		return false;
@@ -2745,3 +2751,4 @@ var wfLibLoaded=true;
 // 11-16-2018 @ 09:13:20 - 1.10.22 - dscudiero - Changed returned string from ProposalState
 // 11-20-2018 @ 09:42:26 - 1.10.25 - dscudiero - Regress changes to ProposalState
 // 12-04-2018 @ 11:41:58 - 1.10.25 - dscudiero - Fix issue in the ProposalState function
+// 12-10-2018 @ 10:39:58 - 1.10.42 - dscudiero - Fixed GetAcadLevel
