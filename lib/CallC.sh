@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.38" # -- dscudiero -- Mon 12/10/2018 @ 14:31:52
+# version="1.0.39" # -- dscudiero -- Tue 12/11/2018 @ 08:51:37
 #===================================================================================================
 #===================================================================================================
 # Copyright 2018 David Scudiero -- all rights reserved.
@@ -12,8 +12,7 @@ function CallC {
 	[[ $myRhel == 'release' ]] && myRhel=$(cat /etc/redhat-release | cut -d" " -f4)
 
 	## Call pgm, check local first
-	local previousTrapERR=$(trap -p ERR | cut -d ' ' -f3-)
-	trap - ERR
+	# local previousTrapERR=$(trap -p ERR | cut -d ' ' -f3-); trap - ERR
 	if [[ -x $HOME/bin/${module}-rhel${myRhel:0:1} && $USELOCAL == true ]]; then
 		eval $HOME/bin/${module}-rhel${myRhel:0:1} $*
 	elif [[ -x $TOOLSPATH/bin/${module}-rhel${myRhel:0:1} ]]; then
@@ -22,7 +21,7 @@ function CallC {
 		eval ${module}-rhel${myRhel:0:1} $*
 	fi
 	rc=$?
-	[[ -n $previousTrapERR ]] && eval "trap $previousTrapERR"
+	# [[ -n $previousTrapERR ]] && eval "trap $previousTrapERR"
 	return $rc
 	
 } #CallC
@@ -36,3 +35,4 @@ export -f CallC
 ## 12-07-2018 @ 07:23:33 - 1.0.13 - dscudiero - Check for local bin first
 ## 12-10-2018 @ 10:37:39 - 1.0.14 - dscudiero - Change the way we export data to the program to call
 ## 12-11-2018 @ 08:49:56 - 1.0.38 - dscudiero - Add local tp variable declaraions, turn off error trapping
+## 12-11-2018 @ 10:22:17 - 1.0.39 - dscudiero - Comment out error trapping
