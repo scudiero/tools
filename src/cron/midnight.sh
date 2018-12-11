@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.22.92" # -- dscudiero -- Mon 11/12/2018 @ 07:21:50
+version="1.22.93" # -- dscudiero -- Tue 12/11/2018 @ 11:18:08
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -334,7 +334,7 @@ case "$hostName" in
 			tmpFile=$(MkTmpFile)
 			range='1am'
 			me='David Scudiero'
-			pushd cd '/mnt/dev6/web/git/tools.git' &> /dev/null
+			pushd '/mnt/dev6/web/git/tools.git' &> /dev/null
 			git log --name-only --pretty=format:"%cn|%s" --since="$range" &> $tmpFile
 			readarray -t logRecs < "$tmpFile"
 			popd cd '/mnt/dev6/web/git/tools.git' &> /dev/null
@@ -535,3 +535,4 @@ return 0
 ## 11-07-2018 @ 13:52:33 - 1.22.90 - dscudiero - Add auth table cleanup code
 ## 11-07-2018 @ 14:34:09 - 1.22.91 - dscudiero - Comment out building the workwith files
 ## 11-12-2018 @ 08:02:52 - 1.22.92 - dscudiero - Removed checks
+## 12-11-2018 @ 11:19:03 - 1.22.93 - dscudiero - Fix syntax error in pushd statement
