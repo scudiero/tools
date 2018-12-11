@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.0.2" // -- dscudiero -- Tue 12/04/2018 @ 09:23:01
+// version="1.0.5" // -- dscudiero -- Tue 12/11/2018 @ 13:18:00
 //==================================================================================================
 // tools -- Check if the user is authorized to run a particular script
 // Usage toolsAuthCheck scriptName <options>
@@ -44,12 +44,16 @@ std::string exec(const char* cmd) {
 //==================================================================================================
 // Utilities
 //==================================================================================================
-void Here(string where, bool debug) { if (debug) std::cout << "Here: " + where + "\n"; return; }
-void Here(int where, bool debug) { if (debug) printf("Here: %d\n", where); return; }
-void Dump(string var, string val, bool debug) { if (debug) printf("%s = '%s'\n", var,val); return; }
-void Dump(string var, int val, bool debug) { if (debug) printf("%s = '%d'\n", var,val); return; }
+void here(string where, bool debug) { if (debug) std::cout << "Here: " + where + "\n"; return; }
+void here(string where) { std::cout << "Here: " + where + "\n"; return; }
+void here(int where, bool debug) { if (debug) printf("Here: %d\n", where); return; }
+void here(int where) { printf("Here: %d\n", where); return; }
+void dump(string var, string val, bool debug) { if (debug) printf("%s = '%s'\n", var.c_str(),val.c_str()); return; }
+void dump(string var, string val) { printf("%s = '%s'\n", var.c_str(),val.c_str()); return; }
+void dump(string var, int val, bool debug) { if (debug) printf("%s = '%d'\n", var.c_str(),val); return; }
+void dump(string var, int val) { printf("%s = '%d'\n", var.c_str(),val); return; }
 
-// //=================================================================================================================
+//=================================================================================================================
 int main(int argc, char *argv[], char **envVarPtr) {
 
 	// Constants
@@ -249,3 +253,4 @@ int main(int argc, char *argv[], char **envVarPtr) {
 } // main
 // 11-30-2018 @ 09:45:36 - 1.0.1 - dscudiero - Initial
 // 12-04-2018 @ 11:40:50 - 1.0.2 - dscudiero - Add utility functions
+// 12-11-2018 @ 14:58:04 - 1.0.5 - dscudiero - Cosmetic/minor change/Sync
