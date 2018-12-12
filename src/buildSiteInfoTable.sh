@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version="4.4.6" # -- dscudiero -- Wed 12/12/2018 @ 07:32:19
+version="4.4.7" # -- dscudiero -- Wed 12/12/2018 @ 10:11:17
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql StringFunctions ProtectedCall FindExecutable PushPop"
@@ -91,6 +91,7 @@ fi
 		declare -A dbClients
 		sqlStmt="select clientcode,clientkey from clients where is_active = \"Y\""
 		[[ $client != '' ]] && sqlStmt="$sqlStmt and clientcode=\"$client\"";
+		dump -1 sqlStmt
 		RunSql "$contactsSqliteFile" "$sqlStmt"
 		[[ ${#resultSet[@]} -eq 0 ]] && Terminate "No records returned from clientcode query from:\n^$contactsSqliteFile\n^$sqlStmt"
 		for result in ${resultSet[@]}; do
@@ -250,3 +251,4 @@ Goodbye 0 'alert'
 ## 09-05-2018 @ 15:54:24 - 4.4.4 - dscudiero - Tweak messaging
 ## 10-23-2018 @ 12:36:53 - 4.4.5 - dscudiero - Cosmetic/minor change/Sync
 ## 12-12-2018 @ 07:32:38 - 4.4.6 - dscudiero - Add dump of prodServers
+## 12-12-2018 @ 12:16:46 - 4.4.7 - dscudiero - Added debug stuff
