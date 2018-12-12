@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version="4.4.5" # -- dscudiero -- Tue 10/23/2018 @ 12:36:43
+version="4.4.6" # -- dscudiero -- Wed 12/12/2018 @ 07:32:19
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql StringFunctions ProtectedCall FindExecutable PushPop"
@@ -98,11 +98,11 @@ fi
 		done
 
 	## Get the list of actual directories pulling only those in a production server share
+		dump -1 prodServers
 		SetFileExpansion 'on'
 		if [[ -z $client ]]; then
 			clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | sort | grep "${prodServers//,/\|}"))
 		else
-			#clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 -not -name '*-test' 2> /dev/null | grep "${prodServers//,/\|}" | grep $client || true))
 			clientDirs+=($(find /mnt/* -maxdepth 1 -mindepth 1 2> /dev/null | grep "${prodServers//,/\|}" | grep $client || true))
 		fi
 		SetFileExpansion
@@ -249,3 +249,4 @@ Goodbye 0 'alert'
 ## 04-12-2018 @ 12:18:40 - 4.3.128 - dscudiero - Remove debug
 ## 09-05-2018 @ 15:54:24 - 4.4.4 - dscudiero - Tweak messaging
 ## 10-23-2018 @ 12:36:53 - 4.4.5 - dscudiero - Cosmetic/minor change/Sync
+## 12-12-2018 @ 07:32:38 - 4.4.6 - dscudiero - Add dump of prodServers
