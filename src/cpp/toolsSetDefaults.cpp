@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.0.0" // -- dscudiero -- Thu 12/06/2018 @ 13:21:07
+// version="1.0.2" // -- dscudiero -- Wed 12/12/2018 @ 07:47:07
 //==================================================================================================
 #include <stdlib.h>
 #include <string>		// String utility library
@@ -53,7 +53,7 @@ std::string env(const char *name) {
 //=================================================================================================================
 int main(int argc, char *argv[]) {
 
-	// Constants
+	// Data warehouse constants
 		string dbHost="mdb1-host.inside.leepfrog.com";
 		string dbName="courseleafdatawarehouse";
 		string dbUser="leepfrogRead";
@@ -84,15 +84,11 @@ int main(int argc, char *argv[]) {
 				}
 			}
 		}
-		// Get hostname
-
-
 		if (debug) std::cout << "Starting " + myName + "'\n";
 		if (debug) std::cout << "\tscriptName = '" + scriptName + "'\n";
 		if (debug) std::cout << "\thostName = '" + hostName + "'\n";
 		if (debug) printf("\tverboseLevel = %d\n",verboseLevel);
 		
-
     //==============================================================================================
 	// Connect to the database to get the standard argDefs
     //==============================================================================================
@@ -225,3 +221,4 @@ int main(int argc, char *argv[]) {
 
 	return 0;
 } // main
+// 12-12-2018 @ 12:17:11 - 1.0.2 - dscudiero - Cosmetic/minor change/Sync
