@@ -13,7 +13,7 @@ myRhel=$(cat /etc/redhat-release | cut -d" " -f3)
 cSuffix="-rhel${myRhel:0:1}"
 
 ## Set the includes string
-	includedStr="-I /usr/include/mysql"
+	includedStr="-I $cppLibs -I /usr/include/mysql"
 	unset libs
 	pushd "$cppLibs" &> /dev/null
 	libs=$(find . -maxdepth 1 -type l -printf ",%f"); #len=${#libs}
