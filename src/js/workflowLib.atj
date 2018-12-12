@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.10.42" // -- dscudiero -- Mon 12/10/2018 @ 08:43:46
+wfLibVersion="1.10.60" // -- dscudiero -- Wed 12/12/2018 @ 11:07:26
 //attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -89,6 +89,12 @@ if (typeof wfLibLoaded === "undefined") {
 		var	wfDeptVarName='department';
 		var	wfSubjVarName='subject';
 
+		var wfProposalModeNewName='NEW';
+		var wfProposalModeEditName='EDIT';
+		var wfProposalModeDeleteName='DELETE';
+		var wfProposalModeInactivateName='INACTIVATE';
+		var wfProposalModeReactivatetName='REACTIVATE';
+
 		var wfHost=getenv("HTTP_HOST").toLowerCase();
 		var wfAllcodes=false;
 		if (typeof wffuncs.getAllCodes === "function") {
@@ -96,58 +102,18 @@ if (typeof wfLibLoaded === "undefined") {
 				wfAllcodes=true;
 		}
 
-		if (tcfdata.wfDebugLevel && tcfdata.wfDebugLevel.length > 0)
-			wfDebugLevel=tcfdata.wfDebugLevel[0]
-		if (tcfdata.wfDebugEnvs && tcfdata.wfDebugEnvs.length > 0)
-			wfDebugEnvs=tcfdata.wfDebugEnvs[0]
-		if (tcfdata.wfColVarName && tcfdata.wfColVarName.length > 0)
-			wfColVarName=tcfdata.wfColVarName[0]
-		if (tcfdata.wfDeptVarName && tcfdata.wfDeptVarName.length > 0)
-			wfDeptVarName=tcfdata.wfDeptVarName[0]
-		if (tcfdata.wfSubjVarName && tcfdata.wfSubjVarName.length > 0)
-			wfSubjVarName=tcfdata.wfSubjVarName[0]
+	// Check if we have any override values assigned in the cfg file
+		if (getTCFValue("wfProposalModeNewName") != "") wfProposalModeNewName=getTCFValue("wfProposalModeNewName");
+		if (getTCFValue("wfProposalModeEditName") != "") wfProposalModeEditName=getTCFValue("wfProposalModeEditName");
+		if (getTCFValue("wfProposalModeDeleteName") != "") wfProposalModeDeleteName=getTCFValue("wfProposalModeDeleteName");
+		if (getTCFValue("wfProposalModeInactivateName") != "") wfProposalModeInactivateName=getTCFValue("wfProposalModeInactivateName");
+		if (getTCFValue("wfProposalModeReactivatetName") != "") wfProposalModeReactivatetName=getTCFValue("wfProposalModeReactivatetName");
 
-	// If wfDebugLevel is set in the config file then set as global
-	var wfDebugLevel=0;
-	if (tcfdata.wfDebugLevel && tcfdata.wfDebugLevel.length > 0)
-		wfDebugLevel=tcfdata.wfDebugLevel[0]
-	wfDebugEnvs='dev';
-	if (tcfdata.wfDebugEnvs && tcfdata.wfDebugEnvs.length > 0)
-		wfDebugEnvs=tcfdata.wfDebugEnvs[0]
-
-	// Debug environment, print info
-	wfDebugEnvs="," + wfDebugEnvs + ",";
-	var wfEnvIsDev=false;
-	var wfEnv = "*unknown*";
-	if (wfHost.indexOf('.dev') > 0) {
-		var wfEnv  ="dev";
-		wfEnvIsDev=true;
-	} else if (wfHost.indexOf('-test') > 0) {
-		var wfEnv = "test";
-	} else if (wfHost.indexOf('-next') > 0) {
-		var wfEnv = "next";
-	}
-	// If in a debug environment then print out stuff
-		var wfInDebugEnv=false
-		if (wfDebugEnvs.indexOf("," + wfEnv + ",") >= 0) {
-			wfInDebugEnv=true;
-			var wfProposalMode='EDIT'
-			if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord[0] == 'true')
-				wfProposalMode='NEW'
-			if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec[0] == 'true')
-				wfProposalMode='DELETE'
-			if ( wfDebugLevel > 0 ) {
-				var d = new Date();
-				print_debug("\n\n\n\n\n\n\n\n")
-				print_debug(Array(120).join("=") + "\n");
-				print_debug("== Loading workflowLib.atj (" + wfLibVersion + "), proposal mode is " + wfProposalMode + "\t\t\t" + d.toString() + "\n");
-				print_debug(Array(120).join("=") + "\n");
-			}
-		}
-		if (wfEnvIsDev) {
-			if (typeof wfDebug === 'function')
-				wfDebug(1,"\n*** Loading "+ wfLibName + ", version: " + wfLibVersion);
-		}
+		if (getTCFValue("wfDebugLevel") != "") wfDebugLevel=getTCFValue("wfDebugLevel");
+		if (getTCFValue("wfDebugEnvs") != "") wfDebugEnvs=getTCFValue("wfDebugEnvs");
+		if (getTCFValue("wfColVarName") != "") wfColVarName=getTCFValue("wfColVarName");
+		if (getTCFValue("wfDeptVarName") != "") wfDeptVarName=getTCFValue("wfDeptVarName");
+		if (getTCFValue("wfSubjVarName") != "") wfSubjVarName=getTCFValue("wfSubjVarName");
 
 } //(typeof wfLibLoaded === "undefined")
 
@@ -262,20 +228,20 @@ wffuncs.AnnotateWorkflow = function(inval, wfrule, args) {
 //=======================================================================================================================
 // Check if proposal is in EDIT mode
 // 08/09/17 - dgs - Initial code
-// 08/17/17 - dgs - use ProposalState function
+// 08/17/17 - dgs - use WfProposalState function
 //=======================================================================================================================
 wffuncs.IsNew = function(inval, wfrule) {
-	if (ProposalState().toLowerCase() === 'new')
+	if (WfProposalState().toLowerCase() === 'new')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsNew
 //=======================================================================================================================
 // Check if proposal is Not Delete
 // 12/16/16 - dgs - New
-// 08/17/17 - dgs - use ProposalState function
+// 08/17/17 - dgs - use WfProposalState function
 //=======================================================================================================================
 wffuncs.IsNotNew = function(inval, wfrule) {
-	if (ProposalState().toLowerCase()!= 'new')
+	if (WfProposalState().toLowerCase()!= 'new')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsNotNew
@@ -284,10 +250,10 @@ wffuncs.IsNotNew = function(inval, wfrule) {
 // Check if proposal is in EDIT mode
 // 02/26/15 - dgs - New
 // 11/02/16 - dgs - Streamlined
-// 08/17/17 - dgs - use ProposalState function
+// 08/17/17 - dgs - use WfProposalState function
 //=======================================================================================================================
 wffuncs.IsEdit = function(inval, wfrule) {
-	if (ProposalState().toLowerCase() === 'edit')
+	if (WfProposalState().toLowerCase() === 'edit')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsEdit
@@ -295,10 +261,10 @@ wffuncs.IsEdit = function(inval, wfrule) {
 // Check if proposal is not in EDIT mode
 // 02/26/15 - dgs - New
 // 11/02/16 - dgs - Streamlined
-// 08/17/17 - dgs - use ProposalState function
+// 08/17/17 - dgs - use WfProposalState function
 //=======================================================================================================================
 wffuncs.IsNotEdit = function(inval, wfrule) {
-	if (ProposalState().toLowerCase() != 'edit')
+	if (WfProposalState().toLowerCase() != 'edit')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsNotEdit
@@ -306,20 +272,20 @@ wffuncs.IsNotEdit = function(inval, wfrule) {
 //=======================================================================================================================
 // Check if proposal is in DELETE mode
 // 08/09/17 - dgs - Initial code
-// 08/17/17 - dgs - use ProposalState function
+// 08/17/17 - dgs - use WfProposalState function
 //=======================================================================================================================
 wffuncs.IsDelete = function(inval, wfrule) {
-	if (ProposalState().toLowerCase() === 'delete')
+	if (WfProposalState().toLowerCase() === 'delete')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsDelete
 //=======================================================================================================================
 // Check if proposal is not in DELETE mode
 // 08/09/17 - dgs - Initial code
-// 08/17/17 - dgs - use ProposalState function
+// 08/17/17 - dgs - use WfProposalState function
 //=======================================================================================================================
 wffuncs.IsNotDelete = function(inval, wfrule) {
-	if (ProposalState().toLowerCase() != 'delete')
+	if (WfProposalState().toLowerCase() != 'delete')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsNotDelete
@@ -329,7 +295,7 @@ wffuncs.IsNotDelete = function(inval, wfrule) {
 // 08/17/17 - dgs - Initial code
 //=======================================================================================================================
 wffuncs.IsReactivate = function(inval, wfrule) {
-	if (ProposalState().toLowerCase() === 'reactivate')
+	if (WfProposalState().toLowerCase() === 'reactivate')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsReactivate
@@ -338,7 +304,7 @@ wffuncs.IsReactivate = function(inval, wfrule) {
 // 11/12/18 - dgs - Initial code
 //=======================================================================================================================
 wffuncs.IsNotReactivate = function(inval, wfrule) {
-	if (ProposalState().toLowerCase() != 'reactivate')
+	if (WfProposalState().toLowerCase() != 'reactivate')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsNotReactivate
@@ -348,7 +314,7 @@ wffuncs.IsNotReactivate = function(inval, wfrule) {
 // 11/12/18 - dgs - Initial code
 //=======================================================================================================================
 wffuncs.IsInactivate = function(inval, wfrule) {
-	if (ProposalState().toLowerCase() === 'inactivate')
+	if (WfProposalState().toLowerCase() === 'inactivate')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsInactivate
@@ -358,7 +324,7 @@ wffuncs.IsInactivate = function(inval, wfrule) {
 // 11/12/1 - dgs - Initial code
 //=======================================================================================================================
 wffuncs.IsNotInactivate = function(inval, wfrule) {
-	if (ProposalState().toLowerCase() != 'inactivate')
+	if (WfProposalState().toLowerCase() != 'inactivate')
 		return [inval.replace(wfrule.ifregex,'')];
 	return false;
 }; //IsNotInactivate
@@ -368,44 +334,45 @@ wffuncs.IsNotInactivate = function(inval, wfrule) {
 // 01/25/2017 - dgs - New
 // 08/17/2017 - dgs - Added Reactivate
 //=======================================================================================================================
-wffuncs.ProposalState = function(inval, wfrule, args) {
-	wfDebug(4,"\n*** In ProposalState ***, called as: '" + inval + "'");
-	var retVal=ProposalState();
+wffuncs.WfProposalState = function(inval, wfrule, args) {
+	wfDebug(0,"\n*** In WfProposalState ***, called as: '" + inval + "'");
+	var retVal=WfProposalState();
+dump("retVal",retVal);
 	if (args && args.context && args.context == "wforder")
 		retVal=retVal.substring(0,1).toUpperCase() + retVal.substring(1).toLowerCase();
 
 	retVal=inval.replace(wfrule.regex,retVal);
 	wfDebug(4,"\t*** Returning '" + retVal + "'\n")
 	return [retVal]
-}; //ProposalState
+}; //WfProposalState
 
 //=======================================================================================================================
 // Return the current state of a proposal
 // 08/17/2017 - dgs - New
 //=======================================================================================================================
-ProposalState = function() {
-	var retVal='EDIT';
+WfProposalState = function() {
+	var retVal=wfProposalModeEditName;
 	if (tcfdata.newrecord && tcfdata.newrecord.length && tcfdata.newrecord == 'true')
-			retVal='NEW';
+			retVal=wfProposalModeNewName;
 	if (tcfdata.deleterec && tcfdata.deleterec.length && tcfdata.deleterec == 'true')
-			retVal='DELETE'; 
+			retVal=wfProposalModeDeleteName; 
 	if (tcfdata.reactivate && tcfdata.reactivate.length && tcfdata.reactivate == 'true')
-			retVal='REACTIVATE';
+			retVal=wfProposalModeReactivateName;
 	if (tcfdata.inactivate && tcfdata.inactivate.length && tcfdata.inactivate == 'true')
-		retVal='INACTIVATE';
+		retVal=wfProposalModeInactivateName;
 
 	return retVal;
-}; //ProposalState
+}; //WfProposalState
 
 //==================================================================================================
 // Return the proposal mode
 // 02/26/2015 - dgs - New
 //==================================================================================================
 wffuncs.GetProposalMode = function(inval,wfrule,args) {
-	return [inval.replace(wfrule.regex,ProposalState())]
+	return [inval.replace(wfrule.regex,WfProposalState())]
 }; //wffuncs.GetProposalMode
 GetProposalMode = function() {
-	return ProposalState();
+	return WfProposalState();
 }; //wffuncs.GetProposalMode
 
 
@@ -1827,7 +1794,7 @@ wffuncs.CheckProposalMode = function(inval, wfrule, args) {
 	var version='1.0.5';
 	var myName=wfrule.attrname; wfDebug(3,'\n*** In '+ myName + "(" + version + ") called as '" + wfrule.searchfor + "' ***");
 	var reqType=wfrule.searchfor.toUpperCase();
- 	var propMode = ProposalState();
+ 	var propMode = WfProposalState();
 	//wfDump(['reqType;'+reqType,'propMode;'+propMode])
 
 	if (reqType.indexOf(propMode) >= 0) {
@@ -1862,8 +1829,8 @@ wffuncs.CheckChanged = function(inval, wfrule, args) {
 	if (options.slice(-1) === ";") options=options.slice(0, -1);
 	wfDump(4,["reqType;"+reqType,"notMode;"+notMode,"options;"+options,"calledAs;"+calledAs]);
 	// Check Proposal mode, if not edit then return
-		if (ProposalState() != "EDIT") {
-			wfDebug(3,"Proposal mode (" + ProposalState() + ") is not EDIT");
+		if (WfProposalState() != "EDIT") {
+			wfDebug(3,"Proposal mode (" + WfProposalState() + ") is not EDIT");
 			return false;
 		}
 
@@ -2628,6 +2595,32 @@ wffuncs.NoWorkflow = function(inval, wfrule, args) {
 //==================================================================================================
 // Loaded message
 var wfLibLoaded=true;
+// If in a debug environment then print out stuff
+	wfDebugEnvs="," + wfDebugEnvs + ",";
+	var wfEnvIsDev=false;
+	var wfEnv = "*unknown*";
+	if (wfHost.indexOf('.dev') > 0) {
+		var wfEnv  ="dev";
+		wfEnvIsDev=true;
+	} else if (wfHost.indexOf('-test') > 0) {
+		var wfEnv = "test";
+	} else if (wfHost.indexOf('-next') > 0) {
+		var wfEnv = "next";
+	}
+
+	var wfInDebugEnv=false
+	if (wfDebugEnvs.indexOf("," + wfEnv + ",") >= 0) {
+		wfInDebugEnv=true;
+		if ( wfDebugLevel > 0 ) {
+			wfDebug(1,"\n*** Loading "+ wfLibName + ", version: " + wfLibVersion);
+			var d = new Date();
+			print_debug("\n\n\n\n\n\n\n\n")
+			print_debug(Array(120).join("=") + "\n");
+			print_debug("== Loading workflowLib.atj (" + wfLibVersion + "), proposal mode is " + 
+						WfProposalState() + "\t\t\t" + d.toString() + "\n");
+			print_debug(Array(120).join("=") + "\n");
+		}
+	}
 
 //======================================================================================================================
 // Check in log
@@ -2748,7 +2741,7 @@ var wfLibLoaded=true;
 // 11-09-2018 @ 11:41:21 - 1.10.10 - dscudiero - Add calling WfMapper in getAttr
 // 11-12-2018 @ 11:46:21 - 1.10.12 - dscudiero - Cosmetic/minor change/Sync
 // 11-15-2018 @ 09:35:57 - 1.10.20 - dscudiero - Updated options processing in hello
-// 11-16-2018 @ 09:13:20 - 1.10.22 - dscudiero - Changed returned string from ProposalState
-// 11-20-2018 @ 09:42:26 - 1.10.25 - dscudiero - Regress changes to ProposalState
-// 12-04-2018 @ 11:41:58 - 1.10.25 - dscudiero - Fix issue in the ProposalState function
-// 12-10-2018 @ 10:39:58 - 1.10.42 - dscudiero - Fixed GetAcadLevel
+// 11-16-2018 @ 09:13:20 - 1.10.22 - dscudiero - Changed returned string from WfProposalState
+// 11-20-2018 @ 09:42:26 - 1.10.25 - dscudiero - Regress changes to WfProposalState
+// 12-04-2018 @ 11:41:58 - 1.10.25 - dscudiero - Fix issue in the WfProposalState function
+// 12-12-2018 @ 12:18:21 - 1.10.60 - dscudiero - Updated initialization, allow overried of proposal state values
