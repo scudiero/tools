@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.22.93" # -- dscudiero -- Tue 12/11/2018 @ 11:18:08
+version="1.22.94" # -- dscudiero -- Wed 12/12/2018 @ 07:18:43
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -240,7 +240,7 @@ case "$hostName" in
 			Msg "...done"
 
 		## Run programs/functions
-			pgms=(updateDefaults "cleanDev -daemon" buildClientInfoTable buildSiteInfoTable loadClientRoles)
+			pgms=(updateDefaults "cleanDev -daemon" "buildClientInfoTable -v1" "buildSiteInfoTable -v1" loadClientRoles)
 			pgms+=(BuildEmployeeTable loadMilestonesData)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
@@ -379,7 +379,7 @@ case "$hostName" in
 		# 	fi
 
 		## Run programs/functions
-			pgms=(buildSiteInfoTable "cleanDev -daemon")
+			pgms=("buildSiteInfoTable -v1" "cleanDev -daemon")
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -536,3 +536,4 @@ return 0
 ## 11-07-2018 @ 14:34:09 - 1.22.91 - dscudiero - Comment out building the workwith files
 ## 11-12-2018 @ 08:02:52 - 1.22.92 - dscudiero - Removed checks
 ## 12-11-2018 @ 11:19:03 - 1.22.93 - dscudiero - Fix syntax error in pushd statement
+## 12-12-2018 @ 07:21:13 - 1.22.94 - dscudiero - Add verbose to build client and site tables
