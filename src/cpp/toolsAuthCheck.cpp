@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.0.5" // -- dscudiero -- Tue 12/11/2018 @ 13:18:00
+// version="1.0.6" // -- dscudiero -- Wed 12/12/2018 @ 07:49:06
 //==================================================================================================
 // tools -- Check if the user is authorized to run a particular script
 // Usage toolsAuthCheck scriptName <options>
@@ -56,7 +56,7 @@ void dump(string var, int val) { printf("%s = '%d'\n", var.c_str(),val); return;
 //=================================================================================================================
 int main(int argc, char *argv[], char **envVarPtr) {
 
-	// Constants
+	// Data warehouse constants
 		string dbHost="mdb1-host.inside.leepfrog.com";
 		string dbName="courseleafdatawarehouse";
 		string dbUser="leepfrogRead";
@@ -115,13 +115,18 @@ int main(int argc, char *argv[], char **envVarPtr) {
 		        printf("\t MySQL Client Info: %s \n", mysql_get_client_info());
 		        printf("\t MySQL Server Info: %s \n", mysql_get_server_info(MySQLConnection));
 		   	}
+		// database connection failed
+		} catch ( FFError e ) {
+        	printf("%s\n",e.Label.c_str());
+        	return 1;
+    	}
 
-	    	int mysqlStatus = 0;
-    		MYSQL_RES *mysqlResult = NULL;
-			MYSQL_ROW mysqlRow;
-			MYSQL_FIELD *mysqlFields;
-            my_ulonglong numRows;
-            unsigned int numFields;
+    	int mysqlStatus = 0;
+		MYSQL_RES *mysqlResult = NULL;
+		MYSQL_ROW mysqlRow;
+		MYSQL_FIELD *mysqlFields;
+        my_ulonglong numRows;
+        unsigned int numFields;
 
 			// Get scriptKey
 				if (debug) std::cout << "Retrieving scriptKey for '" + scriptName + "'\n";
@@ -254,3 +259,4 @@ int main(int argc, char *argv[], char **envVarPtr) {
 // 11-30-2018 @ 09:45:36 - 1.0.1 - dscudiero - Initial
 // 12-04-2018 @ 11:40:50 - 1.0.2 - dscudiero - Add utility functions
 // 12-11-2018 @ 14:58:04 - 1.0.5 - dscudiero - Cosmetic/minor change/Sync
+// 12-12-2018 @ 12:17:04 - 1.0.6 - dscudiero - Cosmetic/minor change/Sync
