@@ -17,7 +17,7 @@ loaderIncludes='CallC Here Dump Pause Msg Semaphore FindExecutable PadChar Check
 loaderIncludes="$loaderIncludes TrapSigs RunSql SetFileExpansion GetDefaultsData Colors Goodbye Alert"
 
 standardIncludes='ParseArgsStd Hello DbLog Init Goodbye Quit Help Help2 MkTmpFile'
-standardInteractiveIncludes="$standardIncludes Prompt VerifyContinue"
+standardInteractiveIncludes="$standardIncludes PromptNew Prompt VerifyContinue"
 
 #unset classpath
 #classpath+=("WorkWith.jar")
