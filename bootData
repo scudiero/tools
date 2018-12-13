@@ -14,7 +14,7 @@ administrators="dscudiero"
 setSemaphoreList='buildSiteInfoTable,buildClientInfoTable'
 
 loaderIncludes='CallC Here Dump Pause Msg Semaphore FindExecutable PadChar CheckRun CheckAuth SignalHandeler'
-loaderIncludes="$loaderIncludes TrapSigs RunSql SetFileExpansion GetDefaultsData Colors Goodbye Alert"
+loaderIncludes="$loaderIncludes TrapSigs RunSql SetFileExpansion SetDefaults ParseArgs GetDefaultsData Colors Goodbye Alert"
 
 standardIncludes='ParseArgsStd Hello DbLog Init Goodbye Quit Help Help2 MkTmpFile'
 standardInteractiveIncludes="$standardIncludes PromptNew Prompt VerifyContinue"
