@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.4.44" // -- dscudiero -- Fri 12/14/2018 @ 14:55:57
+// version="1.5.1" // -- dscudiero -- Fri 12/14/2018 @ 15:53:04
 //==================================================================================================
 #include <stdlib.h>
 #include <unistd.h>
@@ -115,10 +115,16 @@ int main(int argc, char *argv[]) {
 				if (varNameL == "env" || varNameL == "envs" || varNameL == "srcenv" || varNameL == "tgtenv") {
 					if (env("client") != "") {
 						// Get valid envs from data warehouse
-						sqlStmt="select distinct env from " + siteInfoTable 
-								+ " where (name=\"" + env("client") + "\" or name like \"" + env("client") + "-test%\")" 
+						// sqlStmt="select distinct env from " + siteInfoTable 
+						// 		+ " where (name=\"" + env("client") + "\" or name like \"" + env("client") + "-test%\")" 
+						// 		+ " and env not in (\"" + env("srcEnv") + "\",\"" + env("tgtEnv") + "\")"
+						// 		+ "order by env";
+						sqlStmt="select distinct ifnull(env,'') from " + siteInfoTable 
+								+ " where (name=\"" + env("client") + "\" or name=\"" + env("client") + "-test\")" 
 								+ " and env not in (\"" + env("srcEnv") + "\",\"" + env("tgtEnv") + "\")"
-								+ "order by env";
+								+ " order by env";
+						// dump("sqlStmt",sqlStmt);
+
 						mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
 						if (mysqlStatus)
 						    throw FFError( (char*)mysql_error(MySQLConnection) );
@@ -137,12 +143,13 @@ int main(int argc, char *argv[]) {
 								validValues += "," + tmpStr;
 							}
 						} else {
-							errorMsg = "*Error* -- Asking for an 'env' type value and client (" + ans + ") has no site records, terminating";
+							errorMsg = "*Error* -- Prompting for an 'env(s)' value and client (" + ans 
+										+ ") has no site records, terminating";
 							throw std::runtime_error(errorMsg);
 							return -1;						
 						}
 					} else {
-						errorMsg = "*Error* -- Asking for an 'env' type value and 'client' is null, terminating";
+						errorMsg = "*Error* -- Prompting for an 'env(s)' value and 'client' has no value, terminating";
 						throw std::runtime_error(errorMsg);
 						return -1;						
 					}
@@ -150,7 +157,7 @@ int main(int argc, char *argv[]) {
 					if (env("client") != "") {
 						allowAbbrev=false;
 						// Get valid envs from data warehouse
-						sqlStmt="select products from " + clientInfoTable + " where name=\"" + env("client") + "\"";
+						sqlStmt="select ifnull(products,'') from " + clientInfoTable + " where name=\"" + env("client") + "\"";
 						mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
 						if (mysqlStatus)
 						    throw FFError( (char*)mysql_error(MySQLConnection) );
@@ -160,12 +167,13 @@ int main(int argc, char *argv[]) {
 							mysqlRow = mysql_fetch_row(mysqlResult);
 							validValues = mysqlRow[0];
 						} else {
-							errorMsg = "*Error* -- Asking for an 'product' type value and client (" + ans + ") has no client records, terminating";
+							errorMsg = "*Error* -- Prompting for an 'product(s)' and client (" + ans 
+										+ ") has no 'products' data in the data warehouse, terminating";
 							throw std::runtime_error(errorMsg);
 							return -1;						
 						}
 					} else {
-						errorMsg = "*Error* -- Asking for an 'env' type value and 'client' has no value, terminating";
+						errorMsg = "*Error* -- Prompting for an 'product(s)' and 'client' has no value, terminating";
 						throw std::runtime_error(errorMsg);
 						return -1;						
 					}
@@ -173,10 +181,10 @@ int main(int argc, char *argv[]) {
 					if (env("client") != "" && (env("env") != "" || env("srcEnv") != "" || env("tgtEnv") != "")) {
 						// allowAbbrev=false;
 						// Get valid cuns from data warehouse
-						sqlStmt="select cims from " + siteInfoTable 
-								+ " where (name=\"" + env("client") + "\" or name like \"" + env("client") + "-test%\")" 
-								+ " and env = \"" + env("env") + "\"";
-						// dump("sqlStmt",sqlStmt);
+						sqlStmt="select ifnull(cims,'') from " + siteInfoTable 
+								+ " where (name=\"" + env("client") + "\" or name=\"" + env("client") + "-test\")" 
+								+ " and env=\"" + env("env") + "\"";
+						//dump("sqlStmt",sqlStmt);
 						mysqlStatus = mysql_query(MySQLConnection, sqlStmt.c_str());
 						if (mysqlStatus)
 					    	throw FFError( (char*)mysql_error(MySQLConnection) );
@@ -186,12 +194,13 @@ int main(int argc, char *argv[]) {
 							mysqlRow = mysql_fetch_row(mysqlResult);
 							validValues = mysqlRow[0];
 						} else {
-							errorMsg = "*Error* -- Asking for an 'cim' type value and client (" + ans + ") has no site records, terminating";
+							errorMsg = "*Error* -- Prompting for 'cim(s)' type value and client (" + env("client") 
+										+ ") has no 'cims' data in the data warehouse, terminating";
 							throw std::runtime_error(errorMsg);
 							return -1;						
 						}						
 					} else {
-						errorMsg = "*Error* -- Asking for an 'cim' type value and either 'client' or 'env' has no value, terminating";
+						errorMsg = "*Error* -- Prompting for an 'cim(s)' and either 'client' or 'env' has no value, terminating";
 						throw std::runtime_error(errorMsg);
 						return -1;					
 					}
@@ -239,14 +248,15 @@ int main(int argc, char *argv[]) {
 			// client
 			if (varNameL == "client") {
 				// Check client value against data warehouse 
-				sqlStmt="select idx from " + clientInfoTable + ","+ siteInfoTable 
+				sqlStmt="select ifnull(idx,'') from " + clientInfoTable + ","+ siteInfoTable 
 						+ " where " + clientInfoTable + ".name=" + siteInfoTable + ".name"
 						+ " and " + siteInfoTable + ".host=\"" + hostName + "\""
 						+ " and " + clientInfoTable + ".name=\"" + ansl + "\"";
+						
 				mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
 				if (mysqlStatus)
 				    throw FFError( (char*)mysql_error(MySQLConnection) );
-				else {
+
 				    mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
 					numRows = mysql_num_rows(mysqlResult);
 					if (numRows > 0) {
@@ -254,7 +264,7 @@ int main(int argc, char *argv[]) {
 					} else {
 						errorMsg = "*Error* -- Client value specified (" + ans + ") not valid on this host, please try again";
 					}
-				}
+
 			} else {
 				if (validValues != "") {
 					string validValuesl=validValues; transform(validValuesl.begin(), validValuesl.end(), validValuesl.begin(), ::tolower);			
@@ -351,4 +361,4 @@ int main(int argc, char *argv[]) {
 	return 0;
 } // main
 // 12-13-2018 @ 16:33:06 - 1.3.93 - dscudiero - Added yes/no shortcut question type
-// 12-14-2018 @ 14:57:22 - 1.4.44 - dscudiero - Cosmetic/minor change/Sync
+// 12-14-2018 @ 15:59:24 - 1.5.1 - dscudiero - Fix problem with exceptions when null results are returned from the db querys
