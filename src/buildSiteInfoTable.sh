@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version="4.4.7" # -- dscudiero -- Wed 12/12/2018 @ 10:11:17
+version="4.4.11" # -- dscudiero -- Fri 12/14/2018 @ 11:58:53
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql StringFunctions ProtectedCall FindExecutable PushPop"
@@ -117,21 +117,24 @@ fi
 	## Loop through actual clientDirs
 		declare -A foundCodes ## Has table to keep track of 'seen' client codes (because we can have xxx and xxx-test)
 		for clientDir in ${clientDirs[@]}; do
+dump -n clientDir
 			clientCode="$(basename $clientDir)"; clientCode="${clientCode//-test/}"
+dump -t clientCode
 			foundCodes["$clientCode"]=true
 			if [[ ${dbClients[$clientCode]+abc} ]]; then
 				(( clientCntr+=1 ))
 				client="$clientCode"
 				clientId=${dbClients[$client]}
+dump -t -t client clientId
 				[[ $batchMode != true ]] && Msg "Processing: $client (Id: $clientId) ($clientCntr/$numClients)..."
 				## Get the envDirs, make sure we have some
 				for env in ${envList//,/ }; do unset ${env}Dir ; done
 				SetSiteDirs
 				## Loop through the environments, processing any that are not null
-				for env in ${courseleafProdEnvs//,/ } ${courseleafDevEnvs//,/ }; do
+				for env in ${envList//,/ }; do
 					[[ $env == 'pvt' ]] && continue
 					token="${env}Dir" ; envDir="${!token}"
-					#Dump -t env envDir
+Dump -t -t -t env -t envDir
 					[[ -z $envDir || ! -d $envDir ]] && continue
 					[[ ${foundCodes[${clientCode}.${env}]+abc} ]] && continue  ## have we seen this client code before, if yes then skip
 					Verbose 1 2 "Processing env: $env"
@@ -252,3 +255,4 @@ Goodbye 0 'alert'
 ## 10-23-2018 @ 12:36:53 - 4.4.5 - dscudiero - Cosmetic/minor change/Sync
 ## 12-12-2018 @ 07:32:38 - 4.4.6 - dscudiero - Add dump of prodServers
 ## 12-12-2018 @ 12:16:46 - 4.4.7 - dscudiero - Added debug stuff
+## 12-14-2018 @ 11:59:07 - 4.4.11 - dscudiero - Add debug
