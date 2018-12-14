@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.4.25" // -- dscudiero -- Fri 12/14/2018 @ 13:47:52
+// version="1.4.44" // -- dscudiero -- Fri 12/14/2018 @ 14:55:57
 //==================================================================================================
 #include <stdlib.h>
 #include <unistd.h>
@@ -122,26 +122,24 @@ int main(int argc, char *argv[]) {
 						mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
 						if (mysqlStatus)
 						    throw FFError( (char*)mysql_error(MySQLConnection) );
-						else {
-						    mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
-							numRows = mysql_num_rows(mysqlResult);
-							if (numRows > 0) {
-								list <string> validEnvs;
-								while(mysqlRow = mysql_fetch_row(mysqlResult)) {
-									validEnvs.push_front(mysqlRow[0]);
-								}
-								std::list<string>::iterator it;
-								validValues="pvt";
-								if (defaultValue == "") defaultValue = "pvt";
-								for (it = validEnvs.begin(); it != validEnvs.end(); ++it) {
-									string tmpStr = it->c_str();
-									validValues += "," + tmpStr;
-								}
-							} else {
-								errorMsg = "*Error* -- Asking for an 'env' type value and client (" + ans + ") has no site records, terminating";
-								throw std::runtime_error(errorMsg);
-								return -1;						
+					    mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
+						numRows = mysql_num_rows(mysqlResult);
+						if (numRows > 0) {
+							list <string> validEnvs;
+							while(mysqlRow = mysql_fetch_row(mysqlResult)) {
+								validEnvs.push_front(mysqlRow[0]);
 							}
+							std::list<string>::iterator it;
+							validValues="pvt";
+							if (defaultValue == "") defaultValue = "pvt";
+							for (it = validEnvs.begin(); it != validEnvs.end(); ++it) {
+								string tmpStr = it->c_str();
+								validValues += "," + tmpStr;
+							}
+						} else {
+							errorMsg = "*Error* -- Asking for an 'env' type value and client (" + ans + ") has no site records, terminating";
+							throw std::runtime_error(errorMsg);
+							return -1;						
 						}
 					} else {
 						errorMsg = "*Error* -- Asking for an 'env' type value and 'client' is null, terminating";
@@ -156,17 +154,15 @@ int main(int argc, char *argv[]) {
 						mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
 						if (mysqlStatus)
 						    throw FFError( (char*)mysql_error(MySQLConnection) );
-						else {
-						    mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
-							numRows = mysql_num_rows(mysqlResult);
-							if (numRows > 0) {
-								mysqlRow = mysql_fetch_row(mysqlResult);
-								validValues = mysqlRow[0];
-							} else {
-								errorMsg = "*Error* -- Asking for an 'product' type value and client (" + ans + ") has no client records, terminating";
-								throw std::runtime_error(errorMsg);
-								return -1;						
-							}
+					    mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
+						numRows = mysql_num_rows(mysqlResult);
+						if (numRows > 0) {
+							mysqlRow = mysql_fetch_row(mysqlResult);
+							validValues = mysqlRow[0];
+						} else {
+							errorMsg = "*Error* -- Asking for an 'product' type value and client (" + ans + ") has no client records, terminating";
+							throw std::runtime_error(errorMsg);
+							return -1;						
 						}
 					} else {
 						errorMsg = "*Error* -- Asking for an 'env' type value and 'client' has no value, terminating";
@@ -180,20 +176,19 @@ int main(int argc, char *argv[]) {
 						sqlStmt="select cims from " + siteInfoTable 
 								+ " where (name=\"" + env("client") + "\" or name like \"" + env("client") + "-test%\")" 
 								+ " and env = \"" + env("env") + "\"";
-						mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
+						// dump("sqlStmt",sqlStmt);
+						mysqlStatus = mysql_query(MySQLConnection, sqlStmt.c_str());
 						if (mysqlStatus)
-						    throw FFError( (char*)mysql_error(MySQLConnection) );
-						else {
-						    mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
-							numRows = mysql_num_rows(mysqlResult);
-							if (numRows > 0) {
-								mysqlRow = mysql_fetch_row(mysqlResult);
-								validValues = mysqlRow[0];
-							} else {
-								errorMsg = "*Error* -- Asking for an 'cim' type value and client (" + ans + ") has no site records, terminating";
-								throw std::runtime_error(errorMsg);
-								return -1;						
-							}
+					    	throw FFError( (char*)mysql_error(MySQLConnection) );
+					    mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
+						numRows = mysql_num_rows(mysqlResult);
+						if (numRows > 0) {
+							mysqlRow = mysql_fetch_row(mysqlResult);
+							validValues = mysqlRow[0];
+						} else {
+							errorMsg = "*Error* -- Asking for an 'cim' type value and client (" + ans + ") has no site records, terminating";
+							throw std::runtime_error(errorMsg);
+							return -1;						
 						}						
 					} else {
 						errorMsg = "*Error* -- Asking for an 'cim' type value and either 'client' or 'env' has no value, terminating";
@@ -306,7 +301,6 @@ int main(int argc, char *argv[]) {
 						}
 						// Loop through the answers array and check each value
 						ans="";
-						dump("ansArray.size()",ansArray.size());
 						bool allOk=false;
 						for(int i = 0; i < ansArray.size() ; i++) {
 							valueOk=false;
@@ -357,5 +351,4 @@ int main(int argc, char *argv[]) {
 	return 0;
 } // main
 // 12-13-2018 @ 16:33:06 - 1.3.93 - dscudiero - Added yes/no shortcut question type
-// 12-14-2018 @ 13:47:12 - 1.4.24 - dscudiero - Add cims variable
-// 12-14-2018 @ 13:48:24 - 1.4.25 - dscudiero - Cosmetic/minor change/Sync
+// 12-14-2018 @ 14:57:22 - 1.4.44 - dscudiero - Cosmetic/minor change/Sync
