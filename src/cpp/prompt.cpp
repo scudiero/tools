@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.3.93" // -- dscudiero -- Thu 12/13/2018 @ 16:32:19
+// version="1.4.24" // -- dscudiero -- Fri 12/14/2018 @ 13:41:00
 //==================================================================================================
 #include <stdlib.h>
 #include <unistd.h>
@@ -92,7 +92,8 @@ int main(int argc, char *argv[]) {
 		// If prompting for data base type varName then connect to the warehouse
 		//==============================================================================================================
 		if (varNameL == "client" || varNameL == "env" || varNameL == "envs" || varNameL == "srcenv" 
-			|| varNameL == "tgtenv" || varNameL == "product" || varNameL == "products") 
+			|| varNameL == "tgtenv" || varNameL == "product" || varNameL == "products" 
+			|| varNameL == "cim" || varNameL == "cims" ) 
 		{
 			MySQLConnection = mysql_init( NULL );
 			try {
@@ -111,56 +112,96 @@ int main(int argc, char *argv[]) {
 	    	}
 
 	    	// Set validValues from data warehouse
-			if (varNameL == "env" || varNameL == "envs" || varNameL == "srcenv" || varNameL == "tgtenv") {
-				// Get valid envs from data warehouse
-				sqlStmt="select distinct env from " + siteInfoTable 
-						+ " where (name=\"" + env("client") + "\" or name like \"" + env("client") + "-test%\")" 
-						+ " and env not in (\"" + env("srcEnv") + "\",\"" + env("tgtEnv") + "\")"
-						+ "order by env";
-				mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
-				if (mysqlStatus)
-				    throw FFError( (char*)mysql_error(MySQLConnection) );
-				else {
-				    mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
-					numRows = mysql_num_rows(mysqlResult);
-					if (numRows > 0) {
-						list <string> validEnvs;
-						while(mysqlRow = mysql_fetch_row(mysqlResult)) {
-							validEnvs.push_front(mysqlRow[0]);
-						}
-						std::list<string>::iterator it;
-						validValues="pvt";
-						if (defaultValue == "") defaultValue = "pvt";
-						for (it = validEnvs.begin(); it != validEnvs.end(); ++it) {
-							string tmpStr = it->c_str();
-							validValues += "," + tmpStr;
+				if (varNameL == "env" || varNameL == "envs" || varNameL == "srcenv" || varNameL == "tgtenv") {
+					if (env("client") != "") {
+						// Get valid envs from data warehouse
+						sqlStmt="select distinct env from " + siteInfoTable 
+								+ " where (name=\"" + env("client") + "\" or name like \"" + env("client") + "-test%\")" 
+								+ " and env not in (\"" + env("srcEnv") + "\",\"" + env("tgtEnv") + "\")"
+								+ "order by env";
+						mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
+						if (mysqlStatus)
+						    throw FFError( (char*)mysql_error(MySQLConnection) );
+						else {
+						    mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
+							numRows = mysql_num_rows(mysqlResult);
+							if (numRows > 0) {
+								list <string> validEnvs;
+								while(mysqlRow = mysql_fetch_row(mysqlResult)) {
+									validEnvs.push_front(mysqlRow[0]);
+								}
+								std::list<string>::iterator it;
+								validValues="pvt";
+								if (defaultValue == "") defaultValue = "pvt";
+								for (it = validEnvs.begin(); it != validEnvs.end(); ++it) {
+									string tmpStr = it->c_str();
+									validValues += "," + tmpStr;
+								}
+							} else {
+								errorMsg = "*Error* -- Asking for an 'env' type value and client (" + ans + ") has no site records, terminating";
+								throw std::runtime_error(errorMsg);
+								return -1;						
+							}
 						}
 					} else {
-						errorMsg = "*Error* -- Asking for an 'env' type value and client (" + ans + ") has no site records, terminating";
+						errorMsg = "*Error* -- Asking for an 'env' type value and 'client' is null, terminating";
 						throw std::runtime_error(errorMsg);
 						return -1;						
 					}
-				}
-			} else if (varNameL == "product" || varNameL == "products") {
-				allowAbbrev=false;
-				// Get valid envs from data warehouse
-				sqlStmt="select products from " + clientInfoTable + " where name=\"" + env("client") + "\"";
-				mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
-				if (mysqlStatus)
-				    throw FFError( (char*)mysql_error(MySQLConnection) );
-				else {
-				    mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
-					numRows = mysql_num_rows(mysqlResult);
-					if (numRows > 0) {
-						mysqlRow = mysql_fetch_row(mysqlResult);
-						validValues = mysqlRow[0];
+				} else if (varNameL == "product" || varNameL == "products") {
+					if (env("client") != "") {
+						allowAbbrev=false;
+						// Get valid envs from data warehouse
+						sqlStmt="select products from " + clientInfoTable + " where name=\"" + env("client") + "\"";
+						mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
+						if (mysqlStatus)
+						    throw FFError( (char*)mysql_error(MySQLConnection) );
+						else {
+						    mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
+							numRows = mysql_num_rows(mysqlResult);
+							if (numRows > 0) {
+								mysqlRow = mysql_fetch_row(mysqlResult);
+								validValues = mysqlRow[0];
+							} else {
+								errorMsg = "*Error* -- Asking for an 'product' type value and client (" + ans + ") has no client records, terminating";
+								throw std::runtime_error(errorMsg);
+								return -1;						
+							}
+						}
 					} else {
-						errorMsg = "*Error* -- Asking for an 'product' type value and client (" + ans + ") has no client records, terminating";
+						errorMsg = "*Error* -- Asking for an 'env' type value and 'client' has no value, terminating";
 						throw std::runtime_error(errorMsg);
 						return -1;						
 					}
+				} else if (varNameL == "cim" || varNameL == "cims") {
+					if (env("client") != "" && (env("env") != "" || env("srcEnv") != "" || env("tgtEnv") != "")) {
+						// allowAbbrev=false;
+						// Get valid cuns from data warehouse
+						sqlStmt="select cims from " + siteInfoTable 
+								+ " where (name=\"" + env("client") + "\" or name like \"" + env("client") + "-test%\")" 
+								+ " and env = \"" + env("env") + "\"";
+						mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
+						if (mysqlStatus)
+						    throw FFError( (char*)mysql_error(MySQLConnection) );
+						else {
+						    mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
+							numRows = mysql_num_rows(mysqlResult);
+							if (numRows > 0) {
+								mysqlRow = mysql_fetch_row(mysqlResult);
+								validValues = mysqlRow[0];
+							} else {
+								errorMsg = "*Error* -- Asking for an 'cim' type value and client (" + ans + ") has no site records, terminating";
+								throw std::runtime_error(errorMsg);
+								return -1;						
+							}
+						}						
+					} else {
+						errorMsg = "*Error* -- Asking for an 'cim' type value and either 'client' or 'env' has no value, terminating";
+						throw std::runtime_error(errorMsg);
+						return -1;					
+					}
+	
 				}
-			}
 		} // client, env, or prod
 
 		//==============================================================================================================
@@ -255,22 +296,38 @@ int main(int argc, char *argv[]) {
 								errorMsg = "*Error* -- Invalid value specified, expecting a alpha numeric, please try again";
 						   }
 					} else {
-						std::vector<std::string> splittedStrings = split(validValuesl, ',');
-						for(int i = 0; i < splittedStrings.size() ; i++) {
-							string tmpStr=splittedStrings[i];
-							if (allowAbbrev) {
-								if (tmpStr.substr(0,ansl.size()) == ansl) {
-									ans=tmpStr;
-									valueOk=true;
-									break;
-								}								
-							} else {
-								if (tmpStr == ansl) {
-									ans=tmpStr;
-									valueOk=true;
-									break;
+						std::vector<std::string> valuesArray = split(validValuesl, ',');
+						// parse the answer into an array parsing on ','  --  ie allow multiple answers if 'varName' ends with an 's'
+						std::vector<std::string> ansArray;
+						if (varNameL.substr(varNameL.length()-1,1) == "s") {
+							ansArray = split(ansl, ',');
+						} else {
+							ansArray.push_back(ans);
+						}
+						// Loop through the answers array and check each value
+						ans="";
+						dump("ansArray.size()",ansArray.size());
+						bool allOk=false;
+						for(int i = 0; i < ansArray.size() ; i++) {
+							valueOk=false;
+							// Loop through the valid values array
+							for(int j = 0; j < valuesArray.size() ; j++) {
+								string tmpStr=valuesArray[j];
+								if (allowAbbrev) {
+									if (tmpStr.substr(0,ansArray[i].size()) == ansArray[i]) {
+										ans = ans + "," +tmpStr;
+										valueOk=true;
+										break;
+									}								
+								} else {
+									if (tmpStr == ansl) {
+										ans = ans + "," +tmpStr;;
+										valueOk=true;
+										break;
+									}
 								}
 							}
+							if (!valueOk) break;
 						}
 					}
 				} else {
@@ -292,6 +349,7 @@ int main(int argc, char *argv[]) {
 		if (!prompt && ans == "") {
 			std::cout << "    *Warning* -- Requesting value for '" + varName + "' but -noPrompt is active\n" << std::endl;
 		} else {
+			if (ans.substr(0,1) == ",") ans=ans.substr(1,ans.length()-1);
     		string tmpStr=varName + "=\"" + ans + "\"\n";
     		write(3, tmpStr.c_str(), tmpStr.size());
     	}
@@ -299,3 +357,4 @@ int main(int argc, char *argv[]) {
 	return 0;
 } // main
 // 12-13-2018 @ 16:33:06 - 1.3.93 - dscudiero - Added yes/no shortcut question type
+// 12-14-2018 @ 13:47:12 - 1.4.24 - dscudiero - Add cims variable
