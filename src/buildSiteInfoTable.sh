@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version="4.4.11" # -- dscudiero -- Fri 12/14/2018 @ 11:58:53
+version="4.4.12" # -- dscudiero -- Mon 12/17/2018 @ 07:50:02
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql StringFunctions ProtectedCall FindExecutable PushPop"
@@ -129,7 +129,9 @@ dump -t -t client clientId
 				[[ $batchMode != true ]] && Msg "Processing: $client (Id: $clientId) ($clientCntr/$numClients)..."
 				## Get the envDirs, make sure we have some
 				for env in ${envList//,/ }; do unset ${env}Dir ; done
+verboseLevel=3
 				SetSiteDirs
+verboseLevel=1
 				## Loop through the environments, processing any that are not null
 				for env in ${envList//,/ }; do
 					[[ $env == 'pvt' ]] && continue
@@ -256,3 +258,4 @@ Goodbye 0 'alert'
 ## 12-12-2018 @ 07:32:38 - 4.4.6 - dscudiero - Add dump of prodServers
 ## 12-12-2018 @ 12:16:46 - 4.4.7 - dscudiero - Added debug stuff
 ## 12-14-2018 @ 11:59:07 - 4.4.11 - dscudiero - Add debug
+## 12-17-2018 @ 07:50:22 - 4.4.12 - dscudiero - Add debug statements
