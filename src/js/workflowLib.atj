@@ -1,5 +1,5 @@
 //======================================================================================================================
-wfLibVersion="1.10.61" // -- dscudiero -- Fri 12/14/2018 @ 11:42:17
+wfLibVersion="1.10.61" // -- dscudiero -- Mon 12/17/2018 @ 10:57:24
 //attr_write("wfLibVersion", wfLibVersion, {savetcf:false});
 
 //======================================================================================================================
@@ -131,8 +131,8 @@ wffuncs.wfGetCimInstanceName = function(inval, wfrule, args)  {
 	wfCimInstance=wfCimInstance.replace("admin","");
 
 	wfCimInstance=wfCimInstance.charAt(0).toUpperCase() + wfCimInstance.slice(1);
-	wfDump(0,["\twfCimInstance;"+wfCimInstance]);
-	wfDebug(0,"*** returning: " + inval.replace(wfrule.ifregex,wfCimInstance));
+	wfDump(1,["\twfCimInstance;"+wfCimInstance]);
+	wfDebug(1,"*** returning: " + inval.replace(wfrule.ifregex,wfCimInstance));
 	return [inval.replace(wfrule.regex,wfCimInstance)];
 } //wffuncs.wfGetCimInstanceName
 
@@ -337,7 +337,6 @@ wffuncs.IsNotInactivate = function(inval, wfrule) {
 wffuncs.WfProposalState = function(inval, wfrule, args) {
 	wfDebug(0,"\n*** In WfProposalState ***, called as: '" + inval + "'");
 	var retVal=WfProposalState();
-dump("retVal",retVal);
 	if (args && args.context && args.context == "wforder")
 		retVal=retVal.substring(0,1).toUpperCase() + retVal.substring(1).toLowerCase();
 
@@ -1826,8 +1825,6 @@ wffuncs.CheckChanged = function(inval, wfrule, args) {
 	var notMode=false;
 	if (reqType.indexOf("not") >= 0) notMode=true;
 	var options=wfrule.options;
-	var tmpArray=options.split(";");
-	options=tmpArray[0];
 	if (options.slice(-1) === ";") options=options.slice(0, -1);
 	wfDump(4,["reqType;"+reqType,"notMode;"+notMode,"options;"+options,"calledAs;"+calledAs]);
 	// Check Proposal mode, if not edit then return
@@ -1840,10 +1837,8 @@ wffuncs.CheckChanged = function(inval, wfrule, args) {
 		var mode="", checkFieldsStr="", unknownOpts="", checkFieldsVar="";
 		var tmpArray1=options.split(" ");
 		tmpArray1.forEach(function(text) {
-			tmpArray2=text.split("=");
-			if (tmpArray2.length <= 0) 
-				tmpArray2=text.split(":");
-
+			tmpArray2=text.split(':');
+			if (tmpArray2.length <= 0) tmpArray2=text.split('=');
 			switch(tmpArray2[0].toLowerCase()) {
 			    case "mode":
 					if (tmpArray2[1].slice(-1) === ";") tmpArray2[1]=tmpArray2[1].slice(0, -1);
@@ -2749,4 +2744,4 @@ var wfLibLoaded=true;
 // 11-20-2018 @ 09:42:26 - 1.10.25 - dscudiero - Regress changes to WfProposalState
 // 12-04-2018 @ 11:41:58 - 1.10.25 - dscudiero - Fix issue in the WfProposalState function
 // 12-12-2018 @ 12:18:21 - 1.10.60 - dscudiero - Updated initialization, allow overried of proposal state values
-// 12-14-2018 @ 11:59:33 - 1.10.61 - dscudiero - Tweak CheckChanged string parsing
+// 12-17-2018 @ 16:36:38 - 1.10.61 - dscudiero - Remove debug line
