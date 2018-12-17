@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.39" # -- dscudiero -- Tue 12/11/2018 @ 08:51:37
+# version="1.0.40" # -- dscudiero -- Mon 12/17/2018 @ 07:51:37
 #===================================================================================================
 #===================================================================================================
 # Copyright 2018 David Scudiero -- all rights reserved.
@@ -13,6 +13,7 @@ function CallC {
 
 	## Call pgm, check local first
 	# local previousTrapERR=$(trap -p ERR | cut -d ' ' -f3-); trap - ERR
+	export verboseLevel=$verboseLevel
 	if [[ -x $HOME/bin/${module}-rhel${myRhel:0:1} && $USELOCAL == true ]]; then
 		eval $HOME/bin/${module}-rhel${myRhel:0:1} $*
 	elif [[ -x $TOOLSPATH/bin/${module}-rhel${myRhel:0:1} ]]; then
@@ -36,3 +37,4 @@ export -f CallC
 ## 12-10-2018 @ 10:37:39 - 1.0.14 - dscudiero - Change the way we export data to the program to call
 ## 12-11-2018 @ 08:49:56 - 1.0.38 - dscudiero - Add local tp variable declaraions, turn off error trapping
 ## 12-11-2018 @ 10:22:17 - 1.0.39 - dscudiero - Comment out error trapping
+## 12-17-2018 @ 07:51:57 - 1.0.40 - dscudiero - Add exporting of verboseLevel so it is avaiable to the c program
