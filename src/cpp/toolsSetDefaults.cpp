@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.0.2" // -- dscudiero -- Wed 12/12/2018 @ 07:47:07
+// version="1.0.3" // -- dscudiero -- Tue 12/18/2018 @ 15:24:59
 //==================================================================================================
 #include <stdlib.h>
 #include <string>		// String utility library
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
 		string dbPw="v721-!PP9b";
 
 	// Program variables
-		bool debug=false;
+		bool debug=true;
 		string scriptName="";
 		string hostName=env("HOSTNAME");
 		vector <string> tmpArray;
@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
             unsigned int numFields;
 			// Get the tools level defaults
 				if (debug) std::cout << "Retrieving tools defaults data...";
-				string sqlStmt="select name,value from defaults where host=\"" + hostName + "\" or host is null and status = \"A\""; 
+				string sqlStmt="select name,value from defaults where host=\"" + hostName + "\" or host is null and status = \"A\" order by name"; 
 				mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
 				if (mysqlStatus)
 				    throw FFError( (char*)mysql_error(MySQLConnection) );
@@ -222,3 +222,4 @@ int main(int argc, char *argv[]) {
 	return 0;
 } // main
 // 12-12-2018 @ 12:17:11 - 1.0.2 - dscudiero - Cosmetic/minor change/Sync
+// 12-18-2018 @ 15:28:20 - 1.0.3 - dscudiero - Cosmetic/minor change/Sync
