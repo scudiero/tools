@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.0.3" // -- dscudiero -- Tue 12/18/2018 @ 15:24:59
+// version="1.0.4" // -- dscudiero -- Tue 12/18/2018 @ 16:19:20
 //==================================================================================================
 #include <stdlib.h>
 #include <string>		// String utility library
@@ -63,6 +63,7 @@ int main(int argc, char *argv[]) {
 		bool debug=true;
 		string scriptName="";
 		string hostName=env("HOSTNAME");
+if (debug) std::cout << "\tscriptName = '" + scriptName + "'\n";
 		vector <string> tmpArray;
 		boost::split(tmpArray, hostName, boost::is_any_of("."));
 		hostName=tmpArray[0];
@@ -223,3 +224,4 @@ int main(int argc, char *argv[]) {
 } // main
 // 12-12-2018 @ 12:17:11 - 1.0.2 - dscudiero - Cosmetic/minor change/Sync
 // 12-18-2018 @ 15:28:20 - 1.0.3 - dscudiero - Cosmetic/minor change/Sync
+// 12-18-2018 @ 16:20:10 - 1.0.4 - dscudiero - Cosmetic/minor change/Sync
