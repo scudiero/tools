@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.5" # -- dscudiero -- Tue 12/18/2018 @ 16:18:32
+# version="1.0.6" # -- dscudiero -- Tue 12/18/2018 @ 17:01:42
 #===================================================================================================
 # Load tools defaults from the database using the C program
 #===================================================================================================
@@ -10,16 +10,16 @@
 SetDefaults() {
 
 	Import CallC MkTmpFile Msg
-	local tmpFile=$(mkTmpFile)
-
-	echo "HOSTNAME = '$HOSTNAME'"
-	CallC toolsSetDefaults $* > "$tmpFile"
-	echo "$tmpFile"
-	cat "$tmpFile"
-	echo
-	source "$tmpFile"
 	
-	# source <(CallC toolsSetDefaults);
+	# local tmpFile=$(mkTmpFile)
+	# echo "HOSTNAME = '$HOSTNAME'"
+	# CallC toolsSetDefaults $* > "$tmpFile"
+	# echo "$tmpFile"
+	# cat "$tmpFile"
+	# echo
+	# source "$tmpFile"
+	
+	source <(CallC toolsSetDefaults);
 	ToolsDefaultsLoaded=true
 	return 0;
 }
@@ -31,3 +31,4 @@ export -f SetDefaults
 ## 12-18-2018 @ 14:30:34 - 1.0.3 - dscudiero - Add debug statements
 ## 12-18-2018 @ 15:28:10 - 1.0.4 - dscudiero - Cosmetic/minor change/Sync
 ## 12-18-2018 @ 16:18:50 - 1.0.5 - dscudiero - Cosmetic/minor change/Sync
+## 12-18-2018 @ 17:02:44 - 1.0.6 - dscudiero - Comment out debug statements
