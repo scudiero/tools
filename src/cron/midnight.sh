@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.22.95" # -- dscudiero -- Tue 12/18/2018 @ 07:22:47
+version="1.22.96" # -- dscudiero -- Tue 12/18/2018 @ 17:02:18
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -189,7 +189,7 @@ function BuildEmployeeTable {
 #=======================================================================================================================
 # GetDefaultsData $myName
 # ParseArgsStd $originalArgStr
-source <(CallC toolsSetDefaults $myName);
+SetDefaults
 ParseArgs $originalArgStr
 scriptArgs="$* -noBanners"
 logInDb=false
@@ -540,3 +540,4 @@ return 0
 ## 12-11-2018 @ 11:19:03 - 1.22.93 - dscudiero - Fix syntax error in pushd statement
 ## 12-12-2018 @ 07:21:13 - 1.22.94 - dscudiero - Add verbose to build client and site tables
 ## 12-18-2018 @ 07:24:28 - 1.22.95 - dscudiero - Update setting of defaults to use the new toolsSetDefaults module
+## 12-18-2018 @ 17:03:46 - 1.22.96 - dscudiero - Comment out debug statements
