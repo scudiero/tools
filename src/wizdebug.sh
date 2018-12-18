@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version="2.6.79" # -- dscudiero -- Thu 11/08/2018 @ 11:57:14
+version="2.6.80" # -- dscudiero -- Tue 12/18/2018 @ 08:39:53
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetCourseleafPgm PrintBanner PushPop"
@@ -41,7 +41,7 @@ function testsh-Goodbye  {
 #==================================================================================================
 Hello
 helpSet='script,client,env'
-GetDefaultsData $myName
+SetDefaults $myName
 ParseArgsStd $originalArgStr
 
 Init 'getClient getEnv getDirs checkEnvs noPreview noPublic'
@@ -89,3 +89,4 @@ Goodbye 0
 ## 03-22-2018 @ 13:25:51 - 2.6.67 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:36:31 - 2.6.68 - dscudiero - D
 ## 11-08-2018 @ 12:02:01 - 2.6.79 - dscudiero - Add coding for fastInit
+## 12-18-2018 @ 08:40:02 - 2.6.80 - dscudiero - Cosmetic/minor change/Sync
