@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.14.11" # -- dscudiero -- Thu 12/06/2018 @ 13:28:51
+version="4.14.12" # -- dscudiero -- Tue 12/18/2018 @ 08:14:04
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
@@ -137,8 +137,9 @@ lockWorkflow=false
 # GetDefaultsData "$myName" #-fromFiles
 source <(CallC toolsSetDefaults $myName);
 # ParseArgsStd $originalArgStr
-source <(CallC parseArgs $originalArgStr); client="${unknownArgs%% *}"; unknownArgs="${unknownArgs##* }"
-Hello
+ParseArgs $originalArgStr
+Hello	
+
 
 [[ -n $envs && -z $srcEnv ]] && srcEnv="$env"
 [[ $allItems == true || $fullCopy == true ]] && overlay=false
@@ -752,3 +753,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 12-03-2018 @ 07:53:04 - 4.14.9 - dscudiero - Update to use the new argument parser
 ## 12-05-2018 @ 12:44:16 - 4.14.10 - dscudiero - Comment out the parsargstd call back function
 ## 12-07-2018 @ 07:24:00 - 4.14.11 - dscudiero - Switch to use toolsSetDefaults module
+## 12-18-2018 @ 08:38:23 - 4.14.12 - dscudiero - Switch to use ParseArgs function
