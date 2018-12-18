@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.37" # -- dscudiero -- Fri 08/10/2018 @ 12:16:32
+version="2.2.38" # -- dscudiero -- Tue 12/18/2018 @ 07:19:06
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -20,9 +20,10 @@ originalArgStr="$*"
 #=======================================================================================================================
 # Standard argument parsing and initialization
 #=======================================================================================================================
-GetDefaultsData $myName
-ParseArgsStd $originalArgStr
+source <(CallC toolsSetDefaults $myName);
+ParseArgs $originalArgStr
 scriptArgs="$*"
+dump prodServers devServers hostName
 
 #=======================================================================================================================
 # local functions
@@ -374,3 +375,4 @@ return 0
 ## 07-09-2018 @ 14:09:38 - 2.2.35 - dscudiero - Only run backupData for dscudiero
 ## 07-18-2018 @ 09:48:02 - 2.2.36 - dscudiero - Comment out the turning  off of TrapSigs arround the pgms calls
 ## 08-10-2018 @ 12:17:05 - 2.2.37 - dscudiero - Comment out the backupData call
+## 12-18-2018 @ 07:19:47 - 2.2.38 - dscudiero - Update setting of defaults to use the new toolsSetDefaults module
