@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.39" # -- dscudiero -- Tue 12/18/2018 @ 14:26:53
+version="2.2.40" # -- dscudiero -- Tue 12/18/2018 @ 15:27:59
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -25,7 +25,7 @@ echo
 echo "HOSTNAME = '$HOSTNAME'");
 echo
 
-SetDefaults
+SetDefaults -v3
 ParseArgs $originalArgStr
 scriptArgs="$*"
 dump prodServers devServers hostName
@@ -382,3 +382,4 @@ return 0
 ## 08-10-2018 @ 12:17:05 - 2.2.37 - dscudiero - Comment out the backupData call
 ## 12-18-2018 @ 07:19:47 - 2.2.38 - dscudiero - Update setting of defaults to use the new toolsSetDefaults module
 ## 12-18-2018 @ 14:27:02 - 2.2.39 - dscudiero - Add debug
+## 12-18-2018 @ 15:28:26 - 2.2.40 - dscudiero - Cosmetic/minor change/Sync
