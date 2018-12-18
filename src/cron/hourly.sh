@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.38" # -- dscudiero -- Tue 12/18/2018 @ 07:19:06
+version="2.2.39" # -- dscudiero -- Tue 12/18/2018 @ 14:26:53
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -20,7 +20,12 @@ originalArgStr="$*"
 #=======================================================================================================================
 # Standard argument parsing and initialization
 #=======================================================================================================================
-source <(CallC toolsSetDefaults $myName);
+
+echo
+echo "HOSTNAME = '$HOSTNAME'");
+echo
+
+SetDefaults
 ParseArgs $originalArgStr
 scriptArgs="$*"
 dump prodServers devServers hostName
@@ -376,3 +381,4 @@ return 0
 ## 07-18-2018 @ 09:48:02 - 2.2.36 - dscudiero - Comment out the turning  off of TrapSigs arround the pgms calls
 ## 08-10-2018 @ 12:17:05 - 2.2.37 - dscudiero - Comment out the backupData call
 ## 12-18-2018 @ 07:19:47 - 2.2.38 - dscudiero - Update setting of defaults to use the new toolsSetDefaults module
+## 12-18-2018 @ 14:27:02 - 2.2.39 - dscudiero - Add debug
