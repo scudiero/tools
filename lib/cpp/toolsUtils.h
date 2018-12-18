@@ -43,6 +43,20 @@ std::vector<std::string> split(std::string strToSplit, char delimeter) {
 };
 
 //==================================================================================================
+// Run a system command and grab stdout into a variable
+//==================================================================================================
+std::string exec(const char* cmd) {
+    std::array<char, 128> buffer;
+    std::string result;
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+    if (!pipe) throw std::runtime_error("popen() failed!");
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != NULL) {
+        result += buffer.data();
+    }
+    return result;
+}
+
+//==================================================================================================
 // Error processing for mysql connect errors
 //==================================================================================================
 class FFError {
@@ -99,9 +113,6 @@ std::string dbPw="v721-!PP9b";
 std::string clientInfoTable="clients";
 std::string siteInfoTable="sites";
 std::string scriptsTable="scripts";
-
-std::vector<std::string> splittedStrings=split(env("HOSTNAME"), '.');
-std::string hostName=splittedStrings[0];
 
 MYSQL *MySQLConRet;
 MYSQL *MySQLConnection = NULL;
