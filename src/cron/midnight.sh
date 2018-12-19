@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.22.96" # -- dscudiero -- Tue 12/18/2018 @ 17:02:18
+version="1.22.97" # -- dscudiero -- Wed 12/19/2018 @ 07:16:56
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -242,7 +242,7 @@ case "$hostName" in
 			Msg "...done"
 
 		## Run programs/functions
-			pgms=(updateDefaults "cleanDev -daemon" "buildClientInfoTable -v1" "buildSiteInfoTable -v1" loadClientRoles)
+			pgms=(updateDefaults "cleanDev -daemon" "buildClientInfoTable" "buildSiteInfoTable" loadClientRoles)
 			pgms+=(BuildEmployeeTable loadMilestonesData)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
@@ -381,7 +381,7 @@ case "$hostName" in
 		# 	fi
 
 		## Run programs/functions
-			pgms=("buildSiteInfoTable -v1" "cleanDev -daemon")
+			pgms=("buildSiteInfoTable" "cleanDev -daemon")
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -541,3 +541,4 @@ return 0
 ## 12-12-2018 @ 07:21:13 - 1.22.94 - dscudiero - Add verbose to build client and site tables
 ## 12-18-2018 @ 07:24:28 - 1.22.95 - dscudiero - Update setting of defaults to use the new toolsSetDefaults module
 ## 12-18-2018 @ 17:03:46 - 1.22.96 - dscudiero - Comment out debug statements
+## 12-19-2018 @ 07:17:41 - 1.22.97 - dscudiero - Remove -v1 from the call to build site/clients table
