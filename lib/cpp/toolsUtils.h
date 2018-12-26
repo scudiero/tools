@@ -20,6 +20,15 @@ void dump(std::string var, int val, bool debug) { if (debug) printf("%s = '%d'\n
 void Dump(std::string var, int val) { printf("%s = '%d'\n", var.c_str(),val); return; }
 void dump(std::string var, int val) { printf("%s = '%d'\n", var.c_str(),val); return; }
 
+void Dump(int msgLevel, std::string var, std::string val, int verboseLevel) { 
+    if (msgLevel <= verboseLevel) printf("%s = '%s'\n", var.c_str(),val.c_str()); return; }
+void dump(int msgLevel, std::string var, std::string val, int verboseLevel) { 
+    if (msgLevel <= verboseLevel) printf("%s = '%s'\n", var.c_str(),val.c_str()); return; }
+
+
+void Debug(int msgLevel, std::string msg, int verboseLevel) { if (msgLevel <= verboseLevel) printf("%s\n", msg.c_str()); return; }
+void debug(int msgLevel, std::string msg, int verboseLevel) { if (msgLevel <= verboseLevel) printf("%s\n", msg.c_str()); return; }
+
 //==================================================================================================
 // Get an environment variable taking into account the variable may not be defined
 //==================================================================================================
@@ -113,6 +122,7 @@ std::string dbPw="v721-!PP9b";
 std::string clientInfoTable="clients";
 std::string siteInfoTable="sites";
 std::string scriptsTable="scripts";
+std::string defaultsTable="defaults";
 
 MYSQL *MySQLConRet;
 MYSQL *MySQLConnection = NULL;
@@ -123,3 +133,25 @@ MYSQL_FIELD *mysqlFields;
 int mysqlStatus = 0;
 my_ulonglong numRows;
 unsigned int numFields;
+
+//==================================================================================================
+// Return the OS 
+//==================================================================================================
+std::string getOsName()
+{
+    #ifdef _WIN32
+    return "Windows 32-bit";
+    #elif _WIN64
+    return "Windows 64-bit";
+    #elif __unix || __unix__
+    return "Unix";
+    #elif __APPLE__ || __MACH__
+    return "Mac OSX";
+    #elif __linux__
+    return "Linux";
+    #elif __FreeBSD__
+    return "FreeBSD";
+    #else
+    return "Other";
+    #endif
+}
