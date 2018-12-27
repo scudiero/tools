@@ -1,10 +1,10 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.14.12" # -- dscudiero -- Tue 12/18/2018 @ 08:14:04
+version="4.14.14" # -- dscudiero -- Thu 12/27/2018 @ 07:21:09
 #==================================================================================================
 TrapSigs 'on'
-myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions"
+myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions SetSiteDirsNew"
 Import "$standardInteractiveIncludes $myIncludes"
 [[ $1 == $myName ]] && shift
 originalArgStr="$*"
@@ -134,12 +134,9 @@ lockWorkflow=false
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-# GetDefaultsData "$myName" #-fromFiles
-source <(CallC toolsSetDefaults $myName);
-# ParseArgsStd $originalArgStr
+SetDefaults
 ParseArgs $originalArgStr
 Hello	
-
 
 [[ -n $envs && -z $srcEnv ]] && srcEnv="$env"
 [[ $allItems == true || $fullCopy == true ]] && overlay=false
@@ -178,6 +175,7 @@ dump 1 -n client envs product products fullCopy overlay suffix email skipCat ski
 		progDir='pagewiz'
 	else
 		Init 'getClient'
+		
 		if [[ $noCheck == true ]]; then
 			GetSiteDirNoCheck $client "For the $(ColorK 'Source'), do you want to work with '$client's development or production env"
 			srcEnv="$env"; srcDir="$siteDir"; unset env
@@ -754,3 +752,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 12-05-2018 @ 12:44:16 - 4.14.10 - dscudiero - Comment out the parsargstd call back function
 ## 12-07-2018 @ 07:24:00 - 4.14.11 - dscudiero - Switch to use toolsSetDefaults module
 ## 12-18-2018 @ 08:38:23 - 4.14.12 - dscudiero - Switch to use ParseArgs function
+## 12-27-2018 @ 07:22:00 - 4.14.14 - dscudiero - Switch to use the SetDefaults function
