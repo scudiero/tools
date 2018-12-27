@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.56" # -- dscudiero -- Tue 11/06/2018 @ 07:41:06
+# version="2.0.57" # -- dscudiero -- Wed 12/26/2018 @ 12:44:35
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -53,8 +53,8 @@ function Hello {
 			ProcessLogger 'Update' $myLogRecordIdx 'argString' "$originalArgStr"
 		fi
 
-	## Display script and tools news
-		DisplayNews
+	# ## Display script and tools news
+	# 	DisplayNews
 
 	## If verbose level is 99 then show everything
 		[[ $verboseLevel -eq 99 ]] && set -v
@@ -87,3 +87,4 @@ export -f Hello
 ## 03-23-2018 @ 16:47:59 - 2.0.51 - dscudiero - Msg3 -> Msg
 ## 04-18-2018 @ 09:35:01 - 2.0.52 - dscudiero - Added USEDEV message
 ## 11-06-2018 @ 07:42:00 - 2.0.56 - dscudiero - Add not supported message
+## 12-27-2018 @ 07:21:29 - 2.0.57 - dscudiero - Comment out displaying news
