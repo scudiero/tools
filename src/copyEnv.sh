@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.14.14" # -- dscudiero -- Thu 12/27/2018 @ 07:21:09
+version="4.14.23" # -- dscudiero -- Fri 12/28/2018 @ 08:21:58
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions SetSiteDirsNew"
@@ -134,9 +134,9 @@ lockWorkflow=false
 #==================================================================================================
 # Standard arg parsing and initialization
 #==================================================================================================
-SetDefaults
+SetDefaults $myName
 ParseArgs $originalArgStr
-Hello	
+Hello
 
 [[ -n $envs && -z $srcEnv ]] && srcEnv="$env"
 [[ $allItems == true || $fullCopy == true ]] && overlay=false
@@ -410,14 +410,14 @@ dump -1 skipCim skipCat skipClss skipAlso
 #==================================================================================================
 #==================================================================================================
 # Do the copy using rsync, including or excluding dirs as required
-	if [[ -f $rsyncFilters ]]; then rm $rsyncFilters; fi
+	if [[ -f $rsyncFilters ]]; then echo > $rsyncFilters; fi
 	## Build rsync control file of excluded items
-		SetFileExpansion 'off'
-		for token in $(tr ',' ' ' <<< $ignoreList); do
-			[[ -d $srcDir/$token && ${token: -1} != / ]] && token="${token}/"
-			echo "- ${token}" >> $rsyncFilters
-		done
-		SetFileExpansion
+	SetFileExpansion 'off'
+	for token in $(tr ',' ' ' <<< $ignoreList); do
+		[[ -d $srcDir/$token && ${token: -1} != / ]] && token="${token}/"
+		echo "- ${token}" >> $rsyncFilters
+	done
+	SetFileExpansion
 
 	[[ $remoteCopy != true ]] && cd $srcDir
 	[[ -z $DOIT ]] && listOnly='' || listOnly='--list-only'
@@ -441,7 +441,6 @@ dump -1 skipCim skipCat skipClss skipAlso
 	cat "$rsyncFilters" >> "$logFile"
 	Indent ++; rsync $rsyncOpts $srcDir/ $tgtDir | Indent; Indent --
 	eval "trap $previousTrapERR"
-
 	[[ -f $rsyncFilters ]] && rm $rsyncFilters
 
 if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
@@ -753,3 +752,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 12-07-2018 @ 07:24:00 - 4.14.11 - dscudiero - Switch to use toolsSetDefaults module
 ## 12-18-2018 @ 08:38:23 - 4.14.12 - dscudiero - Switch to use ParseArgs function
 ## 12-27-2018 @ 07:22:00 - 4.14.14 - dscudiero - Switch to use the SetDefaults function
+## 12-28-2018 @ 08:23:06 - 4.14.23 - dscudiero - Pass scriptname to SetDefaults
