@@ -1,4 +1,0 @@
-//Define which variables are substituted -- used by getCimRoles script
-wfSubRule:Col|SELECT code,name FROM codedesc WHERE setname="college" and rank >= 0 order by code
-wfSubRule:Dept|SELECT code,name FROM codedesc WHERE setname="department" and rank >= 0 order by code
-wfSubRule:Subj|SELECT code,name FROM codedesc WHERE setname="subject" and rank >= 0 order by code
