@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version="1.2.7" # -- dscudiero -- Tue 10/23/2018 @ 09:53:45
+version="1.2.8" # -- dscudiero -- Tue 01/15/2019 @ 07:26:38
 #==================================================================================================
 TrapSigs 'on'
 
@@ -108,6 +108,8 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 		internalUrl=NULL
 	fi
 	dump -1 -t url internalUrl
+	[[ ${url:0:1} == '*' || ${internalUrl:0:1} == '*' ]] && Terminate "Lookup of url from '$clientInfoTable' failed, \
+																		\n\t\tclientId = '$clientId', siteId = '$siteId'"
 
 ## See if the site has google search installed
 	unset googleType
@@ -427,3 +429,4 @@ return 0
 ## 07-30-2018 @ 07:57:21 - 1.2.4 - dscudiero - Fix more issues setting values to NULL messing up courseleaf dbQUery
 ## 08-06-2018 @ 07:54:20 - 1.2.5 - dscudiero - Cosmetic/minor change/Sync
 ## 10-23-2018 @ 12:37:05 - 1.2.7 - dscudiero - Added siteDirWindows
+## 01-15-2019 @ 07:27:17 - 1.2.8 - dscudiero - Add a check to make sure the URL values are valid, if not then terminate
