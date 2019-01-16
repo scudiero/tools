@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version="1.0.19" # -- dscudiero -- Wed 01/16/2019 @ 14:34:47
+version="1.0.20" # -- dscudiero -- Wed 01/16/2019 @ 14:42:49
 #==================================================================================================
 #= Description +===================================================================================
 #
@@ -28,7 +28,7 @@ scriptDescription=""
 	}
 
 	function addCourseleafLogEntry-Help {
-		helpSet='client,env' # can also include any of {env,cim,cat,clss}, 'script' and 'common' automatically addeed
+		helpSet='client,env' # can also include any of {env,cim,cat,clss}, 'script' and 'common' automatically added
 		[[ $1 == 'setVarsOnly' ]] && return 0
 
 		[[ -z $* ]] && return 0
@@ -125,3 +125,4 @@ Goodbye 0 #'alert'
 ## 01-16-2019 @ 14:02:31 - 1.0.14 - dscudiero - Texting 1 2 3
 ## 01-16-2019 @ 14:09:33 - 1.0.15 - dscudiero - This is a test
 ## 01-16-2019 @ 14:10:52 - 1.0.17 - dscudiero - This is a test
+## Wed Jan 16 14:45:24 CST 2019 - dscudiero - -m testing 1 2 3 4
