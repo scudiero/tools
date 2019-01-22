@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version="1.2.8" # -- dscudiero -- Tue 01/15/2019 @ 07:26:38
+version="1.2.10" # -- dscudiero -- Tue 01/22/2019 @ 10:31:24
 #==================================================================================================
 TrapSigs 'on'
 
@@ -108,8 +108,8 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 		internalUrl=NULL
 	fi
 	dump -1 -t url internalUrl
-	[[ ${url:0:1} == '*' || ${internalUrl:0:1} == '*' ]] && Terminate "Lookup of url from '$clientInfoTable' failed, \
-																		\n\t\tclientId = '$clientId', siteId = '$siteId'"
+	[[ $(Contains "*Error* "$url) -gt 0 || $(Contains "*Error* "$internalUrl) -gt 0 ]] && \
+				Terminate "Lookup of url from '$clientInfoTable' failed, \n\n\t\tclientId = '$clientId', siteId = '$siteId'"
 
 ## See if the site has google search installed
 	unset googleType
@@ -238,22 +238,32 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 	[[ $reportsVer != 'NULL' ]] && reportsVer=\""$reportsVer"\"
 	dump -2 -t reportsVer
 
-	## Get daily.sh versions
-		unset dailyshVer
-		checkFile="$siteDir/bin/daily.sh"
-		if [[ -r $checkFile ]]; then
-			grepStr=$(ProtectedCall "grep '## Nightly cron job for client' $checkFile")
-			if [[ -n $grepStr ]]; then
-				dailyshVer=$(ProtectedCall "grep 'version=' $checkFile")
-				dailyshVer=${dailyshVer##*=} ; dailyshVer=${dailyshVer%% *}
-			else
-				dailyshVer='Old'
-			fi
+## Get daily.sh versions
+	unset dailyshVer
+	checkFile="$siteDir/bin/daily.sh"
+	if [[ -r $checkFile ]]; then
+		grepStr=$(ProtectedCall "grep '## Nightly cron job for client' $checkFile")
+		if [[ -n $grepStr ]]; then
+			dailyshVer=$(ProtectedCall "grep 'version=' $checkFile")
+			dailyshVer=${dailyshVer##*=} ; dailyshVer=${dailyshVer%% *}
 		else
-			dailyshVer='None'
+			dailyshVer='Old'
 		fi
-		[[ $dailyshVer != 'NULL' ]] && dailyshVer=\"$dailyshVer\"
-		dump -2 -t dailyshVer
+	else
+		dailyshVer='None'
+	fi
+	[[ $dailyshVer != 'NULL' ]] && dailyshVer=\"$dailyshVer\"
+	dump -2 -t dailyshVer
+
+## Get the workflowLib version
+	unset wfLibVersion
+	if [[ -d "$siteDir/web/courseleaf/locallibs" && -f "$siteDir/web/courseleaf/locallibs/workflowLib.atj" ]]; then
+		grepStr=$(ProtectedCall "grep wfLibVersion= \"$siteDir/web/courseleaf/locallibs/workflowLib.atj"\")
+		dump grepStr
+		wfLibVersion="${grepStr##*=\"}"; wfLibVersion="${wfLibVersion%%\"*}"
+		dump wfLibVersion
+	fi
+	[[ $wfLibVersion != 'NULL' ]] && wfLibVersion=\"$wfLibVersion\"
 
 ## Get the edition variable
 	unset catEdition
@@ -343,7 +353,8 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 	fi
 
 ## Create the sites table record
-	setStr="catver=$catVer,cimver=$cimVer,clssVer=$clssVer,courseleafCgiVer=$courseleafCgiVer,reportsVer=$reportsVer,dailyshVer=$dailyshVer"
+	setStr="catver=$catVer,cimver=$cimVer,clssVer=$clssVer,courseleafCgiVer=$courseleafCgiVer,reportsVer=$reportsVer"
+	setStr="$setStr,dailyshVer=$dailyshVer,wfLibVersion=$wfLibVersion"
 	setStr="$setStr,CIMs=$cimStr,url=$url,internalUrl=$internalUrl,siteDir=\"$siteDir\",siteDirWindows=\"$siteDirWindows\",archives=$archives"
 	setStr="$setStr,archives=$archives,googleType=$googleType,CATedition=$catEdition,publishing=$publishTarget,degreeWorks=$degreeWorks"
 	sqlStmt="update $useSiteInfoTable set $setStr where siteId=\"$siteId\""
@@ -430,3 +441,4 @@ return 0
 ## 08-06-2018 @ 07:54:20 - 1.2.5 - dscudiero - Cosmetic/minor change/Sync
 ## 10-23-2018 @ 12:37:05 - 1.2.7 - dscudiero - Added siteDirWindows
 ## 01-15-2019 @ 07:27:17 - 1.2.8 - dscudiero - Add a check to make sure the URL values are valid, if not then terminate
+## 01-22-2019 @ 11:11:29 - 1.2.10 - dscudiero - Add wfLibVersion, tweak logic to detect bad urls
