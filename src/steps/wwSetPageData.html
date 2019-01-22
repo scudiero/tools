@@ -1,0 +1,67 @@
+%spidercode%
+//============================================================================================================
+//Set page data = we are passed a key and a valuelist. We do a attr_write of the data to the key
+//e.g.
+// http://davetest.dev6.leepfrog.com/courseleaf/courseleaf.cgi?page=/&step=setPageData&key=owner&value=Fred,Barney,Wilma,Betty
+//============================================================================================================
+// Function wrapper
+(function davetest() {
+
+//============================================================================================================
+//Variable Declares
+//============================================================================================================
+var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
+var debug=true;
+var version="1.0"
+
+//============================================================================================================
+//Parse Arguments
+//============================================================================================================
+	var argStr = getenv("QUERY_STRING");
+	if(argStr.indexOf("page=") >= 0)
+		var page = argStr.replace(/.*page=([^\&]*)\&?.*$/i, "$1")
+	if(argStr.indexOf("step=") >= 0)
+		var step = argStr.replace(/.*step=([^\&]*)\&?.*$/i, "$1")
+	if(argStr.indexOf("key=") >= 0)
+		var key = argStr.replace(/.*key=([^\&]*)\&?.*$/i, "$1")
+	if(argStr.indexOf("value=") >= 0)
+		var value = argStr.replace(/.*value=([^\&]*)\&?.*$/i, "$1")
+	if(argStr.indexOf("parms=") >= 0)
+		var parms = argStr.replace(/.*parms=([^\&]*)\&?.*$/i, "$1")
+
+	Dump(['page','key','value']);
+
+//============================================================================================================
+//# Main
+//============================================================================================================
+
+// Set the key to the value 
+	if (key == undefined) {
+		print_debug("*Error* -- No value specified for 'key' <br>")
+	}
+
+	if (value != undefined) {
+		valArray = value.split(",");
+		attr_write(key,valArray,{savetcf: true});
+	}
+
+	return;
+
+//============================================================================================================
+// Subs
+//============================================================================================================
+
+//============================================================================================================
+function Dump(varNameArray){
+	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
+	if (! debug) {return}
+	varNameArray.forEach(function(token) {
+		text = "\t" + token + '\t= >' + eval(token) + '<\n'
+		print_debug(text)
+	});	
+}
+
+//============================================================================================================
+//Close function wrapper
+})();
+%spidercode%
