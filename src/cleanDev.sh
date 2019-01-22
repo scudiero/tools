@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version=3.5.54 # -- dscudiero -- Fri 03/23/2018 @ 14:41:26.97
+version="3.5.55" # -- dscudiero -- Tue 01/22/2019 @ 11:51:25
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall StringFunctions PushPop"
@@ -257,7 +257,8 @@ while [ true == true ]; do
 	for site in ${sites[@]}; do
 		[[ $site == '' ]] && Msg "No sites found or all sites have been processed" && Goodbye 0
 		echo; Msg  "You are asking to process site: '$site', are you sure?"
-		unset ans; Prompt ans " " "$validActions"; requestType=$(Lower ${ans:0:2})
+		if [[ $userName == 'dscudiero' ]] && defaultVal='W' || unset defaultVal
+		unset ans; Prompt ans " " "$validActions" "$defaultVal"; requestType=$(Lower ${ans:0:2})
 		ProcessRequest "$requestType" "$site"
 	done
 done
@@ -319,3 +320,4 @@ Goodbye 0
 ## 12-08-2017 @ 07.34.16 - (3.5.52)    - dscudiero - Replace 'Call' with FindExecutable -run
 ## 03-22-2018 @ 14:06:02 - 3.5.53 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 03-23-2018 @ 15:32:40 - 3.5.54 - dscudiero - D
+## 01-22-2019 @ 11:53:42 - 3.5.55 - dscudiero - If its me then make workflow the default ans
