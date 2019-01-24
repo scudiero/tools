@@ -59,8 +59,7 @@ function Dump(varNameArray){
 	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
 	if (! debug) {return}
 	varNameArray.forEach(function(token) {
-		text = "\t" + token + '\t= >' + eval(token) + '<\n'
-		print_debug(text)
+		print_debug(token + " = >" + eval(token) + "<\n")
 	});	
 }
 
