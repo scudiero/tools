@@ -1,12 +1,12 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.1.51" # -- dscudiero -- Tue 12/18/2018 @ 07:27:01
+version="2.1.53" # -- dscudiero -- Wed 01/23/2019 @ 10:29:22
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes="SetSiteDirs ProtectedCall"
+myIncludes="SetSiteDirs ProtectedCall StringFunctions"
 Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -26,6 +26,15 @@ function EscrowSite {
  	Msg "The following sites have been escrowed, the escrow files can be found at \n^'$courseleafEscrowedSitesDir'" >> $tmpFile
 
  	for client in $(tr ',' ' ' <<< $clientList); do
+ 		## Parse off the encryption key
+ 		if ($(Contains "$token" '/') == true ); then
+	 		client="${token%%/*}"
+	 		encryptionKey="${token##*/}"
+	 	else 
+	 		client="$token"
+	 		unset encryptionKey
+	 	fi
+
 		Msg "^Processing client: $client" >> $tmpFile
 		SetSiteDirs
 		cd $(dirname $nextDir)
@@ -46,7 +55,10 @@ function EscrowSite {
 		rc=$?; [[ $rc -ne 0 ]] && Terminate "Process returned a non-zero return code ($rc), Please review messages"
 		chgrp leepfrog $tarFile
 		chmod 660 $tarFile
+		[[ -n encryptionKey ]] && gpg $gpgOpts --passphrase "$encryptionKey" -c "$tarFile"
+
 		Msg "^^Escrow file generated at: $tarFile" >> $tmpFile
+		[[ -n encryptionKey ]] && Msg "^^^Encrypted file: ${tarFile}.gpg" >> $tmpFile
 	done
 
 	## Send emails
@@ -103,19 +115,20 @@ ParseArgs $originalArgStr
 scriptArgs="$*"
 sendMail=true
 
+gpgOpts="--yes --batch --symmetric -z 9 --require-secmem --cipher-algo AES256"
+gpgOpts="$gpgOpts --s2k-cipher-algo AES256 --s2k-digest-algo SHA512 --s2k-mode 3 --s2k-count 65000000"
+gpgOpts="$gpgOpts --compress-algo BZIP2"
+
 #==================================================================================================
 # Main
 #==================================================================================================
 case "$hostName" in
 	mojave)
-			[[ -n $mojaveEscrowClients ]] && EscrowSite "$mojaveEscrowClients"
-			RollupProcessLog
-			;;
-	build5)
-			[[ -n $build5EscrowClients ]] && EscrowSite "$build5EscrowClients"
+			[[ -n $escrowClients ]] && EscrowSite "$escrowClients"
+			# RollupProcessLog
 			;;
 	build7)
-			[[ -n $build7EscrowClients ]] && EscrowSite "$build7EscrowClients"
+			[[ -n $escrowClients ]] && EscrowSite "$escrowClients"
 			;;
 esac
 
@@ -142,3 +155,4 @@ return 0
 ## 03-23-2018 @ 15:34:16 - 2.1.49 - dscudiero - D
 ## 03-23-2018 @ 16:18:45 - 2.1.50 - dscudiero - D
 ## 12-18-2018 @ 07:28:09 - 2.1.51 - dscudiero - Update setting of defaults to use the new toolsSetDefaults module
+## 01-24-2019 @ 12:50:22 - 2.1.53 - dscudiero - Add encryption code
