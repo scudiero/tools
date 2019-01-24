@@ -23,9 +23,9 @@ var version="1.0"
 	if(argStr.indexOf("page=") >= 0)
 		var page = argStr.replace(/.*page=([^\&]*)\&?.*$/i, "$1")
 	if(argStr.indexOf("owners=") >= 0)
-		var owners = argStr.replace(/.*key=([^\&]*)\&?.*$/i, "$1")
+		var owners = argStr.replace(/.*owners=([^\&]*)\&?.*$/i, "$1")
 	if(argStr.indexOf("workflows=") >= 0)
-		var workflows = argStr.replace(/.*value=([^\&]*)\&?.*$/i, "$1")
+		var workflows = argStr.replace(/.*workflows=([^\&]*)\&?.*$/i, "$1")
 
 	Dump(['page','owners','workflows']);
 
