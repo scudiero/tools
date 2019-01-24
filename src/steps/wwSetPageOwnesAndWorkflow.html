@@ -1,0 +1,70 @@
+%spidercode%
+//============================================================================================================
+//Set page data = we are passed an owners value and/or a workflows value and we do a attr_write of the data to page
+//e.g.
+// http://davetest.dev6.leepfrog.com/courseleaf/courseleaf.cgi?page=/&step=setPageData&owner=<owners>&workflows=<workflows>
+// http://davetest.dev6.leepfrog.com/courseleaf/courseleaf.cgi?page=/&step=setPageData&owner=fred,barney&workflows=role1,role2
+//============================================================================================================
+// Function wrapper
+(function davetest() {
+
+//============================================================================================================
+//Variable Declares
+//============================================================================================================
+var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
+var debug=true;
+var version="1.0"
+
+//============================================================================================================
+//Parse Arguments
+//============================================================================================================
+	var argStr = getenv("QUERY_STRING");
+
+	if(argStr.indexOf("page=") >= 0)
+		var page = argStr.replace(/.*page=([^\&]*)\&?.*$/i, "$1")
+	if(argStr.indexOf("owners=") >= 0)
+		var owners = argStr.replace(/.*key=([^\&]*)\&?.*$/i, "$1")
+	if(argStr.indexOf("workflows=") >= 0)
+		var workflows = argStr.replace(/.*value=([^\&]*)\&?.*$/i, "$1")
+
+	Dump(['page','owners','workflows']);
+
+//============================================================================================================
+//# Main
+//============================================================================================================
+
+// Set the key to the value 
+	if (page == undefined && (owners == undefined || workflows == undefined)) {
+		print_debug("*Error* -- invalid step call")
+	}
+
+	if (owners != undefined) {
+		valArray = owners.split(",");
+		attr_write("owner",valArray,{savetcf: true});
+	}
+
+	if (workflows != undefined) {
+		valArray = workflows.split(",");
+		attr_write("mustsignoff",valArray,{savetcf: true});
+	}
+
+return;
+
+//============================================================================================================
+// Subs
+//============================================================================================================
+
+//============================================================================================================
+function Dump(varNameArray){
+	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
+	if (! debug) {return}
+	varNameArray.forEach(function(token) {
+		text = "\t" + token + '\t= >' + eval(token) + '<\n'
+		print_debug(text)
+	});	
+}
+
+//============================================================================================================
+//Close function wrapper
+})();
+%spidercode%
