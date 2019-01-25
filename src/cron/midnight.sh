@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.22.97" # -- dscudiero -- Wed 12/19/2018 @ 07:16:56
+version="1.22.98" # -- dscudiero -- Fri 01/25/2019 @ 12:52:34
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -116,69 +116,6 @@ function BuildEmployeeTable {
 		done
 	return 0
 } #BuildEmployeeTable
-
-# #=======================================================================================================================
-# function BuildCourseleafDataTable {
-# 	## Clean out the existing data
-# 	sqlStmt="truncate $courseleafDataTable"
-# 	RunSql $sqlStmt
-
-# 	## Get Courseleaf component versions
-# 		components=($(find $gitRepoShadow -maxdepth 1 -mindepth 1 -type d -printf "%f "))
-# 		for component in "${components[@]}"; do
-# 			dirs=($(ls -t $gitRepoShadow/$component | ProtectedCall "grep -v master"))
-# 			[[ ${#dirs[@]} -gt 0 ]] && latest=${dirs[0]} || latest='master'
-# 			dump -1 component latest
-# 			sqlStmt="insert into $courseleafDataTable values(NULL,\"$component\",NULL,\"$latest\",NOW(),\"$userName\")"
-# 			RunSql $sqlStmt
-# 		done
-
-# 	## Get Courseleaf Reports versions
-# 		cwd=$(pwd)
-# 		cd "$courseleafReportsRoot"
-# 		SetFileExpansion 'on';
-# 		local reportsVersions=$(ls -d -t * 2> /dev/null | cut -d $'\n' -f1);
-# 		cd $courseleafReportsRoot/$reportsVersions
-# 		reportsVersions=$(ls -d -t * 2> /dev/null | cut -d $'\n' -f1);
-# 		reportsVersions=$(cut -d'.' -f1-3 <<< $reportsVersions)
-# 		SetFileExpansion
-# 		dump -1 reportsVersions
-# 		sqlStmt="insert into $courseleafDataTable values(NULL,\"reports\",NULL,\"$reportsVersions\",NOW(),\"$userName\")"
-# 		[[ -n $reportsVersions ]] && RunSql $sqlStmt
-# 		cd "$cwd"
-
-# 	## Get daily.sh versions
-# 		dailyshVer=$(ProtectedCall "grep 'version=' $skeletonRoot/release/bin/daily.sh")
-# 		dailyshVer=${dailyshVer##*=} ; dailyshVer=${dailyshVer%% *}
-# 		dump -1 dailyshVer
-# 		sqlStmt="insert into $courseleafDataTable values(NULL,\"daily.sh\",NULL,\"$dailyshVer\",NOW(),\"$userName\")"
-# 		[[ -n $dailyshVer ]] && RunSql $sqlStmt
-
-# 	## Get Courseleaf cgi versions
-# 		cwd=$(pwd)
-# 		cd $cgisRoot
-# 		for rhelDir in $(ls | grep '^rhel[0-9]$'); do
-# 			dirs=($(ls -c ./$rhelDir | ProtectedCall "grep -v prev_ver"))
-# 			[[ ${#dirs[@]} -gt 0 ]] && latest=${dirs[0]} || latest='master'
-# 			if [[ $latest != 'master' ]]; then
-# 				cd $rhelDir/$latest
-# 				[[ -r ./courseleaf.log ]] && cgiVer=$(cat courseleaf.log | cut -d'|' -f5) || cgiVer=$latest
-# 				cd $cgisRoot
-# 			else
-# 				cgiVer=$latest
-# 			fi
-# 			dump -1 rhelDir cgiVer
-# 			sqlStmt="insert into $courseleafDataTable values(NULL,\"courseleaf.cgi\",\"$rhelDir\",\"$cgiVer\",NOW(),\"$userName\")"
-# 			RunSql $sqlStmt
-# 		done
-
-# 	## Rebuild the page
-# 		cwd=$(pwd)
-# 		cd /mnt/internal/site/stage/web/pagewiz
-# 		$DOIT ./pagewiz.cgi -r /support/courseleafData
-# 		cd $cwd
-# 	return 0
-# } #BuildCourseleafDataTable
 
 #=======================================================================================================================
 # Declare local variables and constants
@@ -542,3 +479,4 @@ return 0
 ## 12-18-2018 @ 07:24:28 - 1.22.95 - dscudiero - Update setting of defaults to use the new toolsSetDefaults module
 ## 12-18-2018 @ 17:03:46 - 1.22.96 - dscudiero - Comment out debug statements
 ## 12-19-2018 @ 07:17:41 - 1.22.97 - dscudiero - Remove -v1 from the call to build site/clients table
+## 01-25-2019 @ 13:03:27 - 1.22.98 - dscudiero - Remove dead code
