@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version="4.4.13" # -- dscudiero -- Tue 12/18/2018 @ 07:23:54
+version="4.4.14" # -- dscudiero -- Fri 01/25/2019 @ 13:02:07
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql StringFunctions ProtectedCall FindExecutable PushPop"
@@ -117,26 +117,20 @@ fi
 	## Loop through actual clientDirs
 		declare -A foundCodes ## Has table to keep track of 'seen' client codes (because we can have xxx and xxx-test)
 		for clientDir in ${clientDirs[@]}; do
-dump -n clientDir
 			clientCode="$(basename $clientDir)"; clientCode="${clientCode//-test/}"
-dump -t clientCode
 			foundCodes["$clientCode"]=true
 			if [[ ${dbClients[$clientCode]+abc} ]]; then
 				(( clientCntr+=1 ))
 				client="$clientCode"
 				clientId=${dbClients[$client]}
-dump -t -t client clientId
 				[[ $batchMode != true ]] && Msg "Processing: $client (Id: $clientId) ($clientCntr/$numClients)..."
 				## Get the envDirs, make sure we have some
 				for env in ${envList//,/ }; do unset ${env}Dir ; done
-verboseLevel=3
 				SetSiteDirs
-verboseLevel=1
 				## Loop through the environments, processing any that are not null
 				for env in ${envList//,/ }; do
 					[[ $env == 'pvt' ]] && continue
 					token="${env}Dir" ; envDir="${!token}"
-Dump -t -t -t env -t envDir
 					[[ -z $envDir || ! -d $envDir ]] && continue
 					[[ ${foundCodes[${clientCode}.${env}]+abc} ]] && continue  ## have we seen this client code before, if yes then skip
 					Verbose 1 2 "Processing env: $env"
@@ -260,3 +254,4 @@ Goodbye 0 'alert'
 ## 12-14-2018 @ 11:59:07 - 4.4.11 - dscudiero - Add debug
 ## 12-17-2018 @ 07:50:22 - 4.4.12 - dscudiero - Add debug statements
 ## 12-18-2018 @ 07:24:05 - 4.4.13 - dscudiero - Source <(CallC toolsSetDefaults $myName);
+## 01-25-2019 @ 13:03:17 - 4.4.14 - dscudiero - Remove debug statements
