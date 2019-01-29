@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.0" # -- dscudiero -- Thu 12/13/2018 @ 16:03:40
+# version="1.0.1" # -- dscudiero -- Tue 01/29/2019 @ 09:56:09
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue]
@@ -19,7 +19,7 @@ PromptNew() {
 
 	local promptArgs=" -prompt "
 
-	[[ $verify == false ]] && { Warning "Requesting value for '$variable' but '-noPrompt' is active"; return 0; }
+	[[ $verify == false ]] && { Warning "($FUNCNAME) Requesting value for '$variable' but '-noPrompt' is active"; return 0; }
 
 	[[ -n $promptStr ]] && promptArgs+="\"$promptStr\"" || { promptArgs+="\"Please specify the value to use for '$var'\""; validVals='*any*'; }
 	[[ -n $validVals ]] && promptArgs+=" -valid \"$validVals\""
@@ -44,4 +44,4 @@ export -f PromptNew
 
 #===================================================================================================
 # Check-in Log
-#===================================================================================================
+#===================================================================================================## 01-29-2019 @ 11:27:39 - 1.0.1 - dscudiero - Added function name to messages
