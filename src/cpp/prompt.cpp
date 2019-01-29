@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.5.1" // -- dscudiero -- Fri 12/14/2018 @ 15:53:04
+// version="1.5.23" // -- dscudiero -- Tue 01/29/2019 @ 11:26:00
 //==================================================================================================
 #include <stdlib.h>
 #include <unistd.h>
@@ -21,10 +21,6 @@ using namespace std;
 
 //=================================================================================================================
 // Prompt varName -p "promptText" -v "validValues" -d "defaultValue"
-//
-//
-//
-//
 //=================================================================================================================
 int main(int argc, char *argv[]) {
 
@@ -39,6 +35,10 @@ int main(int argc, char *argv[]) {
 		bool prompt=true;
 		if (env("verify") != "true") prompt=false;
 		bool allowAbbrev=true;
+
+		int verboseLevel=0;
+		if (env("verboseLevel") != "")
+			verboseLevel=atoi(env("verboseLevel").c_str());
 		
 	// Parse arguments
 		string myName = argv[0];
@@ -88,6 +88,11 @@ int main(int argc, char *argv[]) {
 		ans=env(varName.c_str());
 		string varNameL = varName; transform(varNameL.begin(), varNameL.end(), varNameL.begin(), ::tolower);
 
+		std::string hostName = exec("/bin/hostname");
+		hostName.erase(std::remove(hostName.begin(), hostName.end(), '\n'), hostName.end());
+		std::vector<std::string> splittedStrings=split(hostName, '.');
+		hostName=splittedStrings[0];
+
 		//==============================================================================================================
 		// If prompting for data base type varName then connect to the warehouse
 		//==============================================================================================================
@@ -100,7 +105,7 @@ int main(int argc, char *argv[]) {
 				MySQLConRet = mysql_real_connect(MySQLConnection, dbHost.c_str(), dbUser.c_str(), dbPw.c_str(), dbName.c_str(), 3306, NULL, 0);
 				if ( MySQLConRet == NULL )
 	            	throw FFError( (char*) mysql_error(MySQLConnection) );
-	            if (debug) {
+	            if (debug && verboseLevel > 1) {
 		            printf("\t MySQL Connection Info: %s \n", mysql_get_host_info(MySQLConnection));
 			        printf("\t MySQL Client Info: %s \n", mysql_get_client_info());
 			        printf("\t MySQL Server Info: %s \n", mysql_get_server_info(MySQLConnection));
@@ -119,6 +124,57 @@ int main(int argc, char *argv[]) {
 						// 		+ " where (name=\"" + env("client") + "\" or name like \"" + env("client") + "-test%\")" 
 						// 		+ " and env not in (\"" + env("srcEnv") + "\",\"" + env("tgtEnv") + "\")"
 						// 		+ "order by env";
+
+						// Check to see if we have a pvt site. if so add to valid values
+						if ((varNameL == "env" || varNameL == "envs" || varNameL == "srcenv")) {
+							// Get the dev servers
+								// std::string hostName = exec("/bin/hostname");
+								// hostName.erase(std::remove(hostName.begin(), hostName.end(), '\n'), hostName.end());
+								// std::vector<std::string> splittedStrings=split(hostName, '.');
+								// hostName=splittedStrings[0];
+								sqlStmt = "select value from " + defaultsTable + " where name =\"devServers\" and host=\"" + hostName + "\"";
+						    	Dump(2,"\tsqlStmt",sqlStmt,verboseLevel);
+
+								mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
+								if (mysqlStatus)
+								    throw FFError( (char*)mysql_error(MySQLConnection) );
+								else
+								    mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
+
+								string devServers="";
+								if (mysqlResult) {
+							            numRows = mysql_num_rows(mysqlResult);
+										if (numRows > 0) {
+											mysqlRow = mysql_fetch_row(mysqlResult);
+											devServers=mysqlRow[0];
+										}
+								} else {
+									std::cout << "Could not retrieve devServers, sql = '\n" + sqlStmt +"'\n";
+								   	return -1;
+								}
+						    	Dump(2,"\tdevServers",devServers,verboseLevel);
+
+							if (devServers != "") {
+								string userName = exec("/usr/bin/logname");
+								userName.erase(std::remove(userName.begin(), userName.end(), '\n'), userName.end());
+								std::vector<std::string> splittedStrings=split(devServers, ',');
+								for(int i = 0; i < splittedStrings.size() ; i++) {
+									string server = splittedStrings[i];
+									string dir="//mnt/" + server + "/web/" + env("client") + "-" + userName;
+									Dump(2,"\t\tdir",dir,verboseLevel);
+									struct stat statbuf; 
+									if (stat(dir.c_str(), &statbuf) != -1) {
+									   if (S_ISDIR(statbuf.st_mode)) {
+											validValues="pvt";
+									   }
+									}
+								}	
+							}
+						} else {
+							validValues="pvt";
+						}
+
+						// Get the envs from the warehouse, add to valid values
 						sqlStmt="select distinct ifnull(env,'') from " + siteInfoTable 
 								+ " where (name=\"" + env("client") + "\" or name=\"" + env("client") + "-test\")" 
 								+ " and env not in (\"" + env("srcEnv") + "\",\"" + env("tgtEnv") + "\")"
@@ -136,12 +192,12 @@ int main(int argc, char *argv[]) {
 								validEnvs.push_front(mysqlRow[0]);
 							}
 							std::list<string>::iterator it;
-							validValues="pvt";
 							if (defaultValue == "") defaultValue = "pvt";
 							for (it = validEnvs.begin(); it != validEnvs.end(); ++it) {
 								string tmpStr = it->c_str();
 								validValues += "," + tmpStr;
 							}
+						if (validValues.substr(0,1) == ",") validValues = validValues.substr(1);
 						} else {
 							errorMsg = "*Error* -- Prompting for an 'env(s)' value and client (" + ans 
 										+ ") has no site records, terminating";
@@ -362,3 +418,4 @@ int main(int argc, char *argv[]) {
 } // main
 // 12-13-2018 @ 16:33:06 - 1.3.93 - dscudiero - Added yes/no shortcut question type
 // 12-14-2018 @ 15:59:24 - 1.5.1 - dscudiero - Fix problem with exceptions when null results are returned from the db querys
+// 01-29-2019 @ 11:28:00 - 1.5.23 - dscudiero - Added proper handeling of pvt sites
