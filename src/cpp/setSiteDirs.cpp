@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.5.87" // -- dscudiero -- Wed 12/26/2018 @ 12:23:24
+// version="1.5.88" // -- dscudiero -- Tue 01/29/2019 @ 09:41:17
 //==================================================================================================
 #include <stdlib.h>
 #include <unistd.h>
@@ -85,8 +85,7 @@ int main(int argc, char *argv[]) {
 			mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
 			if (mysqlStatus)
 			    throw FFError( (char*)mysql_error(MySQLConnection) );
-			else
-			    mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
+			mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
 
 			if (mysqlResult) {
 		            numRows = mysql_num_rows(mysqlResult);
@@ -154,4 +153,4 @@ int main(int argc, char *argv[]) {
 } // main
 //=================================================================================================================
 // Check-in log
-//=================================================================================================================
+//=================================================================================================================// 01-29-2019 @ 11:28:24 - 1.5.88 - dscudiero - Remove extra '{'
