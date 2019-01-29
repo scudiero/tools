@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.5.23" // -- dscudiero -- Tue 01/29/2019 @ 11:26:00
+// version="1.5.24" // -- dscudiero -- Tue 01/29/2019 @ 13:49:58
 //==================================================================================================
 #include <stdlib.h>
 #include <unistd.h>
@@ -236,7 +236,13 @@ int main(int argc, char *argv[]) {
 				} else if (varNameL == "cim" || varNameL == "cims") {
 					if (env("client") != "" && (env("env") != "" || env("srcEnv") != "" || env("tgtEnv") != "")) {
 						// allowAbbrev=false;
-						// Get valid cuns from data warehouse
+//TODO
+						// If this is the pvt env then read the .clonedfrom file to get the environment to use in the lookup
+						if (env("env") == "pvt") {
+
+						}
+
+						// Get valid cims from data warehouse
 						sqlStmt="select ifnull(cims,'') from " + siteInfoTable 
 								+ " where (name=\"" + env("client") + "\" or name=\"" + env("client") + "-test\")" 
 								+ " and env=\"" + env("env") + "\"";
@@ -419,3 +425,4 @@ int main(int argc, char *argv[]) {
 // 12-13-2018 @ 16:33:06 - 1.3.93 - dscudiero - Added yes/no shortcut question type
 // 12-14-2018 @ 15:59:24 - 1.5.1 - dscudiero - Fix problem with exceptions when null results are returned from the db querys
 // 01-29-2019 @ 11:28:00 - 1.5.23 - dscudiero - Added proper handeling of pvt sites
+// 01-29-2019 @ 14:35:31 - 1.5.24 - dscudiero - M
