@@ -1,6 +1,6 @@
 #!/bin/bash
 #===================================================================================================
-version="1.2.68" # -- dscudiero -- Tue 01/29/2019 @ 12:56:06
+version="1.2.84" # -- dscudiero -- Tue 01/29/2019 @ 14:35:12
 #===================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall PushPop SetSiteDirsNew MkTmpFile"
@@ -355,15 +355,17 @@ function NewWf {
 
 	## Get the client name, make sure it does not exist
 	# DOIT="echo"
-	# export client="njit"
-	# export env="test"
+	export client="njit"
+	export env="pvt"
 	# export cims="courseadmin,programadmin"
 	PromptNew client "What client do you wish to work with?"
 	PromptNew env "What environment do you wish to work with?"
-	PromptNew cims "What cim(s) do you wish to initialize the workflow?"
-
 	SetSiteDirsNew $client -v${verboseLevel}
 	eval "siteDir=\"\$${env}Dir\""
+	if [[ $env == "pvt" ]]; then
+		export env="$(cat $siteDir/.clonedFrom)"
+	fi
+	PromptNew cims "What cim(s) do you wish to initialize the workflow?"
 
 	## Verify user wants to continue
 	unset verifyArgs
@@ -392,42 +394,46 @@ function NewWf {
 			srcFile="$sourceRoot/$file"
 			tgtFile="$siteDir/web/$cim/$file"
 			[[ -f "$tgtFile" ]] && $DOIT mv "$tgtFile" "${tgtFile}.bak"
-			$DOIT cp -fv "$srcFile" "$tgtFile"
+			$DOIT cp -f "$srcFile" "$tgtFile" | Indent
 		done
 		for file in "${sourceInstanceFiles[@]}"; do
 			srcFile="$sourceRoot/$cim/$file"
 			tgtFile="$siteDir/web/$cim/$file"
 			[[ -f "$tgtFile" ]] && $DOIT mv "$tgtFile" "${tgtFile}.bak"
-			$DOIT cp -fv "$srcFile" "$tgtFile"
+			$DOIT cp -f "$srcFile" "$tgtFile" | Indent
 		done
 
 		## Add include of the workflow.cfg file at the end of the cimconfig.cfg file
 		tgtFile="$siteDir/web/$cim/cimconfig.cfg"
-		unset grepStr; grepStr="$(ProtectedCall grep%import %pagebasedir%/workflow.cfg $tgtFile)"
-		if [[ -n $grepStr ]]; then
-			$DOIT '' >> $tgtFile
-			$DOIT '//*** START WORKFLOW ELEMENTS ***//' >> $tgtFile
-			$DOIT '//wfcomments: -- dgs - Moved to workflow.cfg' >> $tgtFile
-			$DOIT '%import %pagebasedir%/workflow.cfg' >> $tgtFile
-			$DOIT '//*** END WORKFLOW ELEMENTS ***//' >> $tgtFile
-			$DOIT '' >> $tgtFile
+		unset grepStr; grepStr="$(ProtectedCall grep \"%import %pagebasedir%/workflow.cfg\" "$tgtFile")"
+		if [[ -z $grepStr ]]; then
+			cp -f "$tgtFile" "${tgtFile}.bak"
+			echo '' >> $tgtFile
+			echo '//*** START WORKFLOW ELEMENTS ***//' >> $tgtFile
+			echo '//wfcomments: -- dgs - Moved to workflow.cfg' >> $tgtFile
+			echo '%import %pagebasedir%/workflow.cfg' >> $tgtFile
+			echo '//*** END WORKFLOW ELEMENTS ***//' >> $tgtFile
+			echo '' >> $tgtFile
 		fi
 		## Add include of the workflowFuncs.atj file at the end of the custom.atj file
 		tgtFile="$siteDir/web/$cim/custom.atj"
-		unset grepStr; grepStr="$(ProtectedCall %import /$cim/workflowFuncs.atj:atj% $tgtFile)"
-		if [[ -n $grepStr ]]; then
-			$DOIT '' >> $tgtFile
-			$DOIT '//*** Include the workflow functions custom to this client **//' >> $tgtFile
-			$DOIT "%import /$cim/workflowFuncs.atj:atj%" >> $tgtFile
-			$DOIT '' >> $tgtFile
+		unset grepStr; grepStr="$(ProtectedCall grep \"%import /$cim/workflowFuncs.atj:atj%\" "$tgtFile")"
+		if [[ -z $grepStr ]]; then
+			cp -f "$tgtFile" "${tgtFile}.bak"
+			echo '' >> $tgtFile
+			echo '//*** Include the workflow functions custom to this client **//' >> $tgtFile
+			echo "%import /$cim/workflowFuncs.atj:atj%" >> $tgtFile
+			echo '' >> $tgtFile
 		fi		
 	done
 
 	## Non-instance specific files
-	srcFile="${sourceRoot}/workflow.cfg"
-	tgtFile="${siteDir}/web/courseleaf/locallibs/workflow.cfg"
+	srcFile="${sourceRoot}/workflowLib.atj"
+	[[ ! -d "${siteDir}/web/courseleaf/locallibs" ]] && mkdir "${siteDir}/web/courseleaf/locallibs"
+	tgtFile="${siteDir}/web/courseleaf/locallibs/workflowLib.atj"
 	[[ -f "$tgtFile" ]] && $DOIT mv "$tgtFile" "${tgtFile}.bak"
-	$DOIT cp -fv "$srcFile" "$tgtFile"
+
+	$DOIT cp -f "$srcFile" "$tgtFile"
 	return 0
 }
 
@@ -500,3 +506,4 @@ Msg; Msg "$objType object created"
 ## 11-01-2018 @ 14:27:11 - 1.2.40 - dscudiero - Fix bug writing out the scripts table entry
 ## 11-06-2018 @ 07:43:42 - 1.2.41 - dscudiero - Fix sql insert statement to include supported
 ## 01-29-2019 @ 12:56:30 - 1.2.68 - dscudiero - Added new workflow
+## 01-29-2019 @ 14:35:56 - 1.2.84 - dscudiero - Updated messsaging
