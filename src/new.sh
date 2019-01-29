@@ -1,9 +1,9 @@
 #!/bin/bash
 #===================================================================================================
-version="1.2.41" # -- dscudiero -- Tue 11/06/2018 @ 07:43:25
+version="1.2.68" # -- dscudiero -- Tue 01/29/2019 @ 12:56:06
 #===================================================================================================
 TrapSigs 'on'
-myIncludes="ProtectedCall PushPop"
+myIncludes="ProtectedCall PushPop SetSiteDirsNew MkTmpFile"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -341,12 +341,102 @@ function NewClient {
 		done
 }
 
+#===================================================================================================
+function NewWf {
+	local client=$1
+	local siteDir grepStr
+	local sourceRoot="$HOME/workflowJs"
+	local sourceRootFiles=("workflowFuncs.atj")
+
+	local sourceInstanceFiles=("workflow.cfg")
+	sourceInstanceFiles+=("workflow.tcf")
+	
+	local sourceGlobalFiles=("/web/courseleaf/locallibs/workflow.cfg")
+
+	## Get the client name, make sure it does not exist
+	# DOIT="echo"
+	# export client="njit"
+	# export env="test"
+	# export cims="courseadmin,programadmin"
+	PromptNew client "What client do you wish to work with?"
+	PromptNew env "What environment do you wish to work with?"
+	PromptNew cims "What cim(s) do you wish to initialize the workflow?"
+
+	SetSiteDirsNew $client -v${verboseLevel}
+	eval "siteDir=\"\$${env}Dir\""
+
+	## Verify user wants to continue
+	unset verifyArgs
+	verifyArgs+=("Client:$client")
+	verifyArgs+=("Env:$(TitleCase $env)")
+	verifyArgs+=("CIMs:$cims")
+	verifyArgs+=("siteDir:$siteDir")
+	verifyContinueDefault='Yes'
+	VerifyContinue "You are asking to initialize CIM instances for"
+
+	## Check to see if our local repo is down level from the master
+	Pushd "$sourceRoot"
+	tmpFile="$(MkTmpFile)"
+	{ git fetch --dry-run; } > $tmpFile
+	if [[ $(cut -d ' ' -f 1 <<< $(wc -l $tmpFile)) -gt 0 ]]; then
+		echo -e "\nThe local repository is down level from the master:"
+		cat "$tmpFile"
+		Terminate "The local repository is down level from the master"
+	fi
+	Popd "$sourceRoot"
+
+	## Loop through the cims copying/editing the files
+	for cim in ${cims//","/ }; do
+		Msg "^Processing: $cim..."
+		for file in "${sourceRootFiles[@]}"; do
+			srcFile="$sourceRoot/$file"
+			tgtFile="$siteDir/web/$cim/$file"
+			[[ -f "$tgtFile" ]] && $DOIT mv "$tgtFile" "${tgtFile}.bak"
+			$DOIT cp -fv "$srcFile" "$tgtFile"
+		done
+		for file in "${sourceInstanceFiles[@]}"; do
+			srcFile="$sourceRoot/$cim/$file"
+			tgtFile="$siteDir/web/$cim/$file"
+			[[ -f "$tgtFile" ]] && $DOIT mv "$tgtFile" "${tgtFile}.bak"
+			$DOIT cp -fv "$srcFile" "$tgtFile"
+		done
+
+		## Add include of the workflow.cfg file at the end of the cimconfig.cfg file
+		tgtFile="$siteDir/web/$cim/cimconfig.cfg"
+		unset grepStr; grepStr="$(ProtectedCall grep%import %pagebasedir%/workflow.cfg $tgtFile)"
+		if [[ -n $grepStr ]]; then
+			$DOIT '' >> $tgtFile
+			$DOIT '//*** START WORKFLOW ELEMENTS ***//' >> $tgtFile
+			$DOIT '//wfcomments: -- dgs - Moved to workflow.cfg' >> $tgtFile
+			$DOIT '%import %pagebasedir%/workflow.cfg' >> $tgtFile
+			$DOIT '//*** END WORKFLOW ELEMENTS ***//' >> $tgtFile
+			$DOIT '' >> $tgtFile
+		fi
+		## Add include of the workflowFuncs.atj file at the end of the custom.atj file
+		tgtFile="$siteDir/web/$cim/custom.atj"
+		unset grepStr; grepStr="$(ProtectedCall %import /$cim/workflowFuncs.atj:atj% $tgtFile)"
+		if [[ -n $grepStr ]]; then
+			$DOIT '' >> $tgtFile
+			$DOIT '//*** Include the workflow functions custom to this client **//' >> $tgtFile
+			$DOIT "%import /$cim/workflowFuncs.atj:atj%" >> $tgtFile
+			$DOIT '' >> $tgtFile
+		fi		
+	done
+
+	## Non-instance specific files
+	srcFile="${sourceRoot}/workflow.cfg"
+	tgtFile="${siteDir}/web/courseleaf/locallibs/workflow.cfg"
+	[[ -f "$tgtFile" ]] && $DOIT mv "$tgtFile" "${tgtFile}.bak"
+	$DOIT cp -fv "$srcFile" "$tgtFile"
+	return 0
+}
+
 
 #==================================================================================================
 # MAIN
 #==================================================================================================
 # validTypes='script patch report newsItem default monitorFile vba client'
-validTypes='script patch report newsItem default client'
+validTypes='script patch report newsItem default client wf'
 GetDefaultsData $myName
 ParseArgsStd $originalArgStr
 Hello
@@ -409,3 +499,4 @@ Msg; Msg "$objType object created"
 ## 06-14-2018 @ 14:29:30 - 1.2.34 - dscudiero - Fix problem creating new scripts
 ## 11-01-2018 @ 14:27:11 - 1.2.40 - dscudiero - Fix bug writing out the scripts table entry
 ## 11-06-2018 @ 07:43:42 - 1.2.41 - dscudiero - Fix sql insert statement to include supported
+## 01-29-2019 @ 12:56:30 - 1.2.68 - dscudiero - Added new workflow
