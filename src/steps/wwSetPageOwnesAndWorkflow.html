@@ -12,7 +12,7 @@
 //Variable Declares
 //============================================================================================================
 var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
-var debug=true;
+var debug=false;
 var version="1.0"
 
 //============================================================================================================
@@ -39,13 +39,15 @@ var version="1.0"
 	}
 
 	if (owners != undefined) {
-		owners=owners.replace("%20"," ");
+		owners=owners.replace(/%20/g," ");
+		Dump(['owners']);
 		valArray = owners.split(",");
 		attr_write("owner",valArray,{savetcf: true});
 	}
 
 	if (workflows != undefined) {
-		workflows=workflows.replace("%20"," ");
+		workflows=workflows.replace(/%20/g," ");
+		Dump(['workflows']);
 		valArray = workflows.split(",");
 		attr_write("mustsignoff",valArray,{savetcf: true});
 	}
