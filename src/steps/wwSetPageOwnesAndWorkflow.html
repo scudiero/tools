@@ -39,11 +39,13 @@ var version="1.0"
 	}
 
 	if (owners != undefined) {
+		owners=owners.replace("%20"," ");
 		valArray = owners.split(",");
 		attr_write("owner",valArray,{savetcf: true});
 	}
 
 	if (workflows != undefined) {
+		workflows=workflows.replace("%20"," ");
 		valArray = workflows.split(",");
 		attr_write("mustsignoff",valArray,{savetcf: true});
 	}
