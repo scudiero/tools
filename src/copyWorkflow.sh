@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version="2.11.1" # -- dscudiero -- Tue 11/20/2018 @ 09:41:24
+version="2.11.2" # -- dscudiero -- Wed 01/30/2019 @ 11:18:59
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi SetSiteDirs"
@@ -329,8 +329,8 @@ if [[ $verify == false && -z $tgtEnv && -n $srcEnv ]]; then
 	SetSiteDirs
 	if [[ $srcEnv == 'pvt' ]]; then
 		srcDir="$pvtDir"
-		tgtEnv='test'
-		tgtDir="$testDir"
+		tgtEnv='dev'
+		[[ -d "$devDir" ]] && tgtDir="$devDir" || Terminate "Sorry, attempting to copy from a pvt site and the dev site does not exists."
 	elif [[ $srcEnv == 'dev' ]]; then
 		srcDir="$devDir"
 		tgtEnv='test'
@@ -759,3 +759,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 05-16-2018 @ 16:01:27 - 2.10.78 - dscudiero - Add jalot to local logging
 ## 11-09-2018 @ 14:39:45 - 2.11.0 - dscudiero - Add special logic for fastInit when called from workwith
 ## 11-20-2018 @ 09:42:05 - 2.11.1 - dscudiero - Comment out the code checkign of there is a console listing for workflow management
+## 01-30-2019 @ 11:19:30 - 2.11.2 - dscudiero - Change default target from a pvt site to dev
