@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.42" # -- dscudiero -- Thu 01/31/2019 @ 08:12:28
+version="2.2.44" # -- dscudiero -- Thu 01/31/2019 @ 10:08:58
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -267,16 +267,16 @@ case "$hostName" in
 					popd >& /dev/null
 				fi
 			fi
-
-		 ## Check for git commits in the master git repos
+		 ## Check for git commits in the master tools repo
 		 	repos="tools workflowJs"
+		 	repos="tools"
 		 	for repo in $repos; do
 		 		Msg "\nChecking $repo git repo for commits..."
 				tmpFile=$(MkTmpFile)
 				range='1am'
 				me='David Scudiero'
 				Pushd "/mnt/dev6/web/git/$repo.git"
-				git log --name-only --pretty=format:"%cn|%s" --since="$range" &> $tmpFile
+				git log --name-only --pretty=format:"%cn|%s|%cd" --since="$range" &> $tmpFile
 				readarray -t logRecs < "$tmpFile"
 				Popd
 				rm -f "$tmpFile"
@@ -284,17 +284,18 @@ case "$hostName" in
 					found=false
 					for ((i=0; i<${#logRecs[@]}; i++)); do
 						[[ -z ${logRecs[$i]} ]] && continue
-						[[ $verboseLevel -gt 0 ]] && echo -e "\n\tlogRecs[$i] = >${logRecs[$i]}<"
+						# [[ $verboseLevel -gt 0 ]] && echo -e "\n\tlogRecs[$i] = >${logRecs[$i]}<"
 						rec="${logRecs[$i]}"
-						committer="${rec%%|*}"
-						comment="${rec#*|}"
+						committer="${rec%%|*}"; rec="${rec#*|}"
+						comment="${rec%%|*}"; rec="${rec#*|}"
+						commitTime="${rec%%|*}"
 						let i=$i+1
 						file="${logRecs[$i]}"
-						dump -1 -t2 file committer comment
-						if [[ $committer != "$me" ]]; then
-							Msg "^'$file' was committed by '$committer' -- $comment" | tee -a "$tmpFile"
+						dump -1 -n -t2 file committer comment commitTime
+						# if [[ $committer != "$me" ]]; then
+							Msg "\n^'$file' was committed by '$committer' at $commitTime \n\t-- $comment" | tee -a "$tmpFile"
 							found=true
-						fi
+						# fi
 					done
 					if [[ $found == true ]]; then
 						mutt -s "Found commits to $repo.git that were not made by me" -- dscudiero@leepfrog.com < $tmpFile
@@ -414,3 +415,4 @@ return 0
 ## 12-18-2018 @ 14:27:02 - 2.2.39 - dscudiero - Add debug
 ## 12-18-2018 @ 15:28:26 - 2.2.40 - dscudiero - Cosmetic/minor change/Sync
 ## 12-18-2018 @ 17:03:41 - 2.2.41 - dscudiero - Comment out debug statements
+## 01-31-2019 @ 10:09:54 - 2.2.44 - dscudiero - Added checking workflowJs for committs
