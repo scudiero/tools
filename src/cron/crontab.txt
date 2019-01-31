@@ -16,15 +16,17 @@ cronJob=/steamboat/leepfrog/docs/tools/src/cron/cronJob.sh
 # | 	| 		| 						| 					|				|
 # V 	V		V						V					V				V
 #==================================================================================================
-#*/2		*		*						*					* 				$cronJob testCron
-  0		2-22	*						*					*	 			$cronJob hourly -noHeaders
-  0		0		*						*					*	 			$cronJob midnight
+  0		*		*						*					*	 			$cronJob hourly -noHeaders
+  0		0		*						*					*	 			$cronJob nightly
   0		22		*						*					0 				$cronJob weekly
   0		0		1						*					*				$cronJob monthly
-# 0 	22 		1-7						* 					1 				$cronJob firstMonday
-# 0 	22 		23-27					*					1				$cronJob lastMonday
   0 	0		30						6,9					* 				$cronJob quarterly
   0 	0		31						3,12				* 				$cronJob quarterly
+#==================================================================================================
+#*/2	*		*						*					* 				$cronJob testCron
+# 0		2-22	*						*					*	 			$cronJob hourly -noHeaders
+# 0 	22 		1-7						* 					1 				$cronJob firstMonday
+# 0 	22 		23-27					*					1				$cronJob lastMonday
 # 0 	0		31						12					* 				$cronJob yearly
 #==================================================================================================
   0		22		*						*					*	 			$HOME/bin/backupData
