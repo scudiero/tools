@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.41" # -- dscudiero -- Tue 12/18/2018 @ 17:01:08
+version="2.2.42" # -- dscudiero -- Thu 01/31/2019 @ 08:12:28
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -267,6 +267,41 @@ case "$hostName" in
 					popd >& /dev/null
 				fi
 			fi
+
+		 ## Check for git commits in the master git repos
+		 	repos="tools workflowJs"
+		 	for repo in $repos; do
+		 		Msg "\nChecking $repo git repo for commits..."
+				tmpFile=$(MkTmpFile)
+				range='1am'
+				me='David Scudiero'
+				Pushd "/mnt/dev6/web/git/$repo.git"
+				git log --name-only --pretty=format:"%cn|%s" --since="$range" &> $tmpFile
+				readarray -t logRecs < "$tmpFile"
+				Popd
+				rm -f "$tmpFile"
+				if [[ ${#logRecs[@]} -gt 0 ]]; then
+					found=false
+					for ((i=0; i<${#logRecs[@]}; i++)); do
+						[[ -z ${logRecs[$i]} ]] && continue
+						[[ $verboseLevel -gt 0 ]] && echo -e "\n\tlogRecs[$i] = >${logRecs[$i]}<"
+						rec="${logRecs[$i]}"
+						committer="${rec%%|*}"
+						comment="${rec#*|}"
+						let i=$i+1
+						file="${logRecs[$i]}"
+						dump -1 -t2 file committer comment
+						if [[ $committer != "$me" ]]; then
+							Msg "^'$file' was committed by '$committer' -- $comment" | tee -a "$tmpFile"
+							found=true
+						fi
+					done
+					if [[ $found == true ]]; then
+						mutt -s "Found commits to $repo.git that were not made by me" -- dscudiero@leepfrog.com < $tmpFile
+						rm -f "$tmpFile"
+					fi
+				fi
+		 	done
 		;;
 	*)
 		# sleep 60 ## Wait for perfTest on Mojave to set its semaphore
