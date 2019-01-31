@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.22.98" # -- dscudiero -- Fri 01/25/2019 @ 12:52:34
+version="1.22.99" # -- dscudiero -- Thu 01/31/2019 @ 08:34:25
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -263,41 +263,6 @@ case "$hostName" in
 				done < "$TOOLSPATH/src/cron/serverMove.txt"
 				IFS="$ifs"
 			fi
-			
-		 ## Create the data dump for the workwith tool
-		 	# Msg "\nBuilding the 'WorkWith' client data file..."
-		 	# FindExecutable loadWorkwithData -sh -run
-
-		 ## Check for git commits in the master tools repo
-		 	Msg "\nChecking tools git repo for commits..."
-			tmpFile=$(MkTmpFile)
-			range='1am'
-			me='David Scudiero'
-			pushd '/mnt/dev6/web/git/tools.git' &> /dev/null
-			git log --name-only --pretty=format:"%cn|%s" --since="$range" &> $tmpFile
-			readarray -t logRecs < "$tmpFile"
-			popd cd '/mnt/dev6/web/git/tools.git' &> /dev/null
-			rm -f "$tmpFile"
-			if [[ ${#logRecs[@]} -gt 0 ]]; then
-				found=false
-				for ((i=0; i<${#logRecs[@]}; i++)); do
-					[[ -z ${logRecs[$i]} ]] && continue
-					#echo -e "\nlogRecs[$i] = >${logRecs[$i]}<"
-					rec="${logRecs[$i]}"
-					committer="${rec%%|*}"
-					comment="${rec#*|}"
-					#dump -t committer comment
-					((i++))
-					if [[ $committer != "$me" ]]; then
-						echo -e "\n'${logRecs[$i]}' was committed by '$committer' -- $comment" >> "$tmpFile"
-						found=true
-					fi
-				done
-				if [[ $found == true ]]; then
-					mutt -s "Found commits to tools.get that were not made by me" -- dscudiero@leepfrog.com < $tmpFile
-					rm -f "$tmpFile"
-				fi
-			fi
 
 		;; ## mojave
 
@@ -480,3 +445,4 @@ return 0
 ## 12-18-2018 @ 17:03:46 - 1.22.96 - dscudiero - Comment out debug statements
 ## 12-19-2018 @ 07:17:41 - 1.22.97 - dscudiero - Remove -v1 from the call to build site/clients table
 ## 01-25-2019 @ 13:03:27 - 1.22.98 - dscudiero - Remove dead code
+## 01-31-2019 @ 10:10:31 - 1.22.99 - dscudiero - Moved git commit checkign to hourly
