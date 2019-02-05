@@ -1,6 +1,6 @@
 #!/bin/bash
 #===================================================================================================
-version="1.2.84" # -- dscudiero -- Tue 01/29/2019 @ 14:35:12
+version="1.2.85" # -- dscudiero -- Tue 02/05/2019 @ 08:02:08
 #===================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall PushPop SetSiteDirsNew MkTmpFile"
@@ -354,9 +354,6 @@ function NewWf {
 	local sourceGlobalFiles=("/web/courseleaf/locallibs/workflow.cfg")
 
 	## Get the client name, make sure it does not exist
-	# DOIT="echo"
-	export client="njit"
-	export env="pvt"
 	# export cims="courseadmin,programadmin"
 	PromptNew client "What client do you wish to work with?"
 	PromptNew env "What environment do you wish to work with?"
@@ -507,3 +504,4 @@ Msg; Msg "$objType object created"
 ## 11-06-2018 @ 07:43:42 - 1.2.41 - dscudiero - Fix sql insert statement to include supported
 ## 01-29-2019 @ 12:56:30 - 1.2.68 - dscudiero - Added new workflow
 ## 01-29-2019 @ 14:35:56 - 1.2.84 - dscudiero - Updated messsaging
+## 02-05-2019 @ 08:02:29 - 1.2.85 - dscudiero - Remove debug statements
