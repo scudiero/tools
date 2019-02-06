@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.1.53" # -- dscudiero -- Tue 12/18/2018 @ 07:27:13
+version="2.1.54" # -- dscudiero -- Wed 02/06/2019 @ 13:31:00
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -50,28 +50,6 @@ case "$hostName" in
 				Semaphore 'waiton' "$pgmName" 'true'
 				Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
-
-		## Check to see if we have received workflow specifications for any scheduled meetings
-			tmpFile=$(mkTmpFile)
-			ifs="$IFS"; IFS=$'\r'; while read line; do
-				[[ ${line:0:1} == '#' ]] && continue
-				client="${line%% *}"; line="${line#* }"
-				csm="${line%% *}"; line="${line#* }"
-				date="${line%% *}"; line="${line#* }"
-				dump 1 -n client csm date line
-				if [[ ! -d "$HOME/clientData/${client,,[a,z]}" ]]; then
-					echo "*** Warning ***" > "$tmpFile"
-					echo "A meeting, '$line', has been scheduled with $client on ${date}." >> "$tmpFile"
-					echo "No workflow specifications have been received for this client." >> "$tmpFile"
-					echo "Specifications must be received at least 5 business days before the client meeting." >> "$tmpFile"
-					echo "Should specifications not be provided, said meeting will be canceled on the Monday of the week that the meeting was scheduled" >> "$tmpFile"
-					echo "" >> "$tmpFile"
-					echo "Note: This is an automated emailing, no need to reply" >> "$tmpFile"
-					mutt -s "Workflow meeting scheduled with $client without specs" -- ${csm}@leepfrog.com < $tmpFile;
-					mutt -s "Workflow meeting scheduled with $client without specs" -- dscudiero@leepfrog.com < $tmpFile;
-				fi
-			done < "$HOME/clientData/meetings.txt"
-
 			;;
 	build7)
 		## Run programs/functions
@@ -125,3 +103,4 @@ return 0
 ## 10-15-2018 @ 11:11:06 - 2.1.51 - dscudiero - Turn off the reports
 ## 11-12-2018 @ 08:03:14 - 2.1.52 - dscudiero - Remove checks
 ## 12-18-2018 @ 07:28:13 - 2.1.53 - dscudiero - Update setting of defaults to use the new toolsSetDefaults module
+## 02-06-2019 @ 13:31:53 - 2.1.54 - dscudiero - -
