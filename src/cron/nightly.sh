@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.22.99" # -- dscudiero -- Thu 01/31/2019 @ 08:34:25
+version="1.23.0" # -- dscudiero -- Wed 02/06/2019 @ 13:30:40
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -201,7 +201,6 @@ case "$hostName" in
 			sqlStmt="delete from $auth2scriptTable where $auth2scriptTable.groupKey not in (select groupId from $authGroupTable)"
 			RunSql $sqlStmt
 
-
 		## Rebuild the internal site pages 
 			Msg "\nRebuilding Internal pages"
 			RunCourseLeafCgi "$stageInternal" "-r /clients"
@@ -217,6 +216,29 @@ case "$hostName" in
 			# 	Semaphore 'waiton' "$reportName" 'true'
 			# 	Msg "...$reportName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			# done
+
+		## Check to see if we have received workflow specifications for any scheduled meetings
+			if [[ $(date +"%u")%2 -eq 1 ]]; then ## On odd numbered days (monday = 1)
+				tmpFile=$(mkTmpFile)
+				ifs="$IFS"; IFS=$'\r'; while read line; do
+					[[ ${line:0:1} == '#' ]] && continue
+					client="${line%% *}"; line="${line#* }"
+					csm="${line%% *}"; line="${line#* }"
+					date="${line%% *}"; line="${line#* }"
+					dump 1 -n client csm date line
+					if [[ ! -d "$HOME/clientData/${client,,[a,z]}" ]]; then
+						echo "*** Warning ***" > "$tmpFile"
+						echo "A meeting, '$line', has been scheduled with $client on ${date}." >> "$tmpFile"
+						echo "No workflow specifications have been received for this client." >> "$tmpFile"
+						echo "Specifications must be received at least 5 business days before the client meeting." >> "$tmpFile"
+						echo "Should specifications not be provided, said meeting will be canceled on the Monday of the week that the meeting was scheduled" >> "$tmpFile"
+						echo "" >> "$tmpFile"
+						echo "Note: This is an automated emailing, no need to reply" >> "$tmpFile"
+						mutt -s "Workflow meeting scheduled with $client without specs" -- ${csm}@leepfrog.com < $tmpFile;
+						mutt -s "Workflow meeting scheduled with $client without specs" -- dscudiero@leepfrog.com < $tmpFile;
+					fi
+				done < "$HOME/clientData/meetings.txt"
+			fi
 
 		## On the last day of the month roll-up the log files
 		  	if [[ $(date +"%d") == $(date -d "$(date +"%m")/1 + 1 month - 1 day" "+%d") ]]; then
@@ -446,3 +468,4 @@ return 0
 ## 12-19-2018 @ 07:17:41 - 1.22.97 - dscudiero - Remove -v1 from the call to build site/clients table
 ## 01-25-2019 @ 13:03:27 - 1.22.98 - dscudiero - Remove dead code
 ## 01-31-2019 @ 10:10:31 - 1.22.99 - dscudiero - Moved git commit checkign to hourly
+## 02-06-2019 @ 13:31:40 - 1.23.0 - dscudiero - Move workflow meeting messages to daily
