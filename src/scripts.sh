@@ -1,7 +1,7 @@
 ##  #!/bin/bash
 #XO NOT AUTOVERSION
 #==================================================================================================
-version="2.1.5" # -- dscudiero -- Fri 12/07/2018 @ 10:39:39
+version="2.1.14" # -- dscudiero -- Thu 02/07/2019 @ 12:09:55
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="RunSql Colors FindExecutable SelectMenu ProtectedCall Pause"
@@ -176,8 +176,20 @@ scriptNameIn="$client"
 	## Check to see if we have TOOLSPATH/bin in the path, if not added it
 	unset pathSave
 	menuItems=()
-	grepStr=$(ProtectedCall "env | grep '^PATH=' 2> /dev/null")
-	[[ $(Contains "$grepStr" "$TOOLSPATH/bin") != true ]] && pathSave="$PATH" && export PATH="$PATH:$TOOLSPATH/bin"
+	unset grepStr; grepStr=$(ProtectedCall "env | grep \"^PATH=.*$TOOLSPATH/bin.*\" 2> /dev/null")
+	if [[ -z $grepStr ]]; then
+		pathSave="$PATH"
+		export PATH="$PATH:$TOOLSPATH/bin"
+		Note 0 1 "'$TOOLSPATH' was not on your PATH, adding it."
+		Prompt ans "^Do you wish to add an alias to your .bashrc file to make it easier to run 'scripts' in the future" "Yes,No";
+		ans=${ans,,[a-z]} ans=${ans:0:1};
+		if [[ $ans == 'y' ]]; then
+			echo "export TOOLSPATH=\"/steamboat/leepfrog/docs/tools\" ## Added by' '$myName' on $(date)" >> "$HOME/.bashrc"
+			echo "alias scripts=\"$TOOLSPATH/bin/scripts\" ## Added by' '$myName' on $(date)" >> "$HOME/.bashrc"
+			Info 0 1 "In the future you will able to start 'scripts' by just typing 'scripts' on the command line and pressing 'enter'\n"
+		fi	
+	fi
+
 	loop=true
 	while [[ $loop == true ]]; do
 		if [[ -z $scriptNameIn
@@ -240,3 +252,4 @@ Goodbye 0
 ## 12-07-2018 @ 10:18:26 - 2.1.3 - dscudiero - Add dump of sqlStmt
 ## 12-07-2018 @ 10:32:00 - 2.1.4 - dscudiero - Add debug stuff
 ## 12-07-2018 @ 10:39:56 - 2.1.5 - dscudiero - Remove debug stuff
+## 02-07-2019 @ 12:11:24 - 2.1.14 - dscudiero - Update the code that automatically adds the scripts alias to the users .bashrc file
