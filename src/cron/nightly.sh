@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.0" # -- dscudiero -- Wed 02/06/2019 @ 13:30:40
+version="1.23.1" # -- dscudiero -- Thu 02/07/2019 @ 07:44:33
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -218,15 +218,19 @@ case "$hostName" in
 			# done
 
 		## Check to see if we have received workflow specifications for any scheduled meetings
-			if [[ $(date +"%u")%2 -eq 1 ]]; then ## On odd numbered days (monday = 1)
+			let evenOdd=$(date +"%u")%2
+			if [[ $evenOdd -eq 1 ]]; then ## On odd numbered days (Mon, Wed, Fri, Sun)
+echo "Running meeting.txt notifications...."
 				tmpFile=$(mkTmpFile)
 				ifs="$IFS"; IFS=$'\r'; while read line; do
+echo "line = '$line'"
 					[[ ${line:0:1} == '#' ]] && continue
 					client="${line%% *}"; line="${line#* }"
 					csm="${line%% *}"; line="${line#* }"
 					date="${line%% *}"; line="${line#* }"
-					dump 1 -n client csm date line
-					if [[ ! -d "$HOME/clientData/${client,,[a,z]}" ]]; then
+
+dump -t client csm date
+					# if [[ ! -d "$HOME/clientData/${client,,[a,z]}" ]]; then
 						echo "*** Warning ***" > "$tmpFile"
 						echo "A meeting, '$line', has been scheduled with $client on ${date}." >> "$tmpFile"
 						echo "No workflow specifications have been received for this client." >> "$tmpFile"
@@ -236,7 +240,7 @@ case "$hostName" in
 						echo "Note: This is an automated emailing, no need to reply" >> "$tmpFile"
 						mutt -s "Workflow meeting scheduled with $client without specs" -- ${csm}@leepfrog.com < $tmpFile;
 						mutt -s "Workflow meeting scheduled with $client without specs" -- dscudiero@leepfrog.com < $tmpFile;
-					fi
+					# fi
 				done < "$HOME/clientData/meetings.txt"
 			fi
 
@@ -469,3 +473,4 @@ return 0
 ## 01-25-2019 @ 13:03:27 - 1.22.98 - dscudiero - Remove dead code
 ## 01-31-2019 @ 10:10:31 - 1.22.99 - dscudiero - Moved git commit checkign to hourly
 ## 02-06-2019 @ 13:31:40 - 1.23.0 - dscudiero - Move workflow meeting messages to daily
+## 02-07-2019 @ 07:45:09 - 1.23.1 - dscudiero - Tweak logic to determin when to run the meeting.txt code
