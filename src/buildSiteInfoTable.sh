@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-version="4.4.14" # -- dscudiero -- Fri 01/25/2019 @ 13:02:07
+version="4.4.15" # -- dscudiero -- Thu 02/07/2019 @ 07:35:32
 #=======================================================================================================================
 TrapSigs 'on'
 myIncludes="SetSiteDirs SetFileExpansion RunSql StringFunctions ProtectedCall FindExecutable PushPop"
@@ -156,12 +156,12 @@ fi
 	Msg
 	Msg "Processed $siteCntr Courseleaf site directories"
 	Msg
-	sqlStmt="select count(*) from $useSiteInfoTable where host=\"$hostName\"";
-	RunSql "$sqlStmt"
-	if [[ ${resultSet[0]} -eq 0 ]]; then
-		Error "No records were inserted into in the ${warehouseDb}.${useSiteInfoTable} table on host '$hostName'"
-		sendMail=true
-	fi
+	# sqlStmt="select count(*) from $useSiteInfoTable where host=\"$hostName\"";
+	# RunSql "$sqlStmt"
+	# if [[ ${resultSet[0]} -eq 0 ]]; then
+	# 	Error "No records were inserted into in the ${warehouseDb}.${useSiteInfoTable} table on host '$hostName'"
+	# 	sendMail=true
+	# fi
 
 #=======================================================================================================================
 ## Bye-bye
@@ -255,3 +255,4 @@ Goodbye 0 'alert'
 ## 12-17-2018 @ 07:50:22 - 4.4.12 - dscudiero - Add debug statements
 ## 12-18-2018 @ 07:24:05 - 4.4.13 - dscudiero - Source <(CallC toolsSetDefaults $myName);
 ## 01-25-2019 @ 13:03:17 - 4.4.14 - dscudiero - Remove debug statements
+## 02-07-2019 @ 07:37:07 - 4.4.15 - dscudiero - Remove database count check
