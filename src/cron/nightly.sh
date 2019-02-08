@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.1" # -- dscudiero -- Thu 02/07/2019 @ 07:44:33
+version="1.23.2" # -- dscudiero -- Fri 02/08/2019 @ 09:07:44
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -155,8 +155,8 @@ case "$hostName" in
 			Semaphore 'clear' $mySemaphoreId
 			Msg "...done"
 
-		## If this is the first day of the month then truncate the sites table to reset the siteId counter
-			if [[ $(date "+%d") = '01' ]]; then
+		## If this is Sunday then truncate the sites table to reset the siteId counter
+			if [[ $(date "+%u") -eq 7 ]]; then
 				sqlStmt="truncate $siteInfoTable"
 				RunSql $sqlStmt
 			fi
@@ -220,16 +220,13 @@ case "$hostName" in
 		## Check to see if we have received workflow specifications for any scheduled meetings
 			let evenOdd=$(date +"%u")%2
 			if [[ $evenOdd -eq 1 ]]; then ## On odd numbered days (Mon, Wed, Fri, Sun)
-echo "Running meeting.txt notifications...."
 				tmpFile=$(mkTmpFile)
 				ifs="$IFS"; IFS=$'\r'; while read line; do
-echo "line = '$line'"
 					[[ ${line:0:1} == '#' ]] && continue
 					client="${line%% *}"; line="${line#* }"
 					csm="${line%% *}"; line="${line#* }"
 					date="${line%% *}"; line="${line#* }"
 
-dump -t client csm date
 					# if [[ ! -d "$HOME/clientData/${client,,[a,z]}" ]]; then
 						echo "*** Warning ***" > "$tmpFile"
 						echo "A meeting, '$line', has been scheduled with $client on ${date}." >> "$tmpFile"
@@ -341,7 +338,7 @@ return 0
 ## Thu Dec 29 15:48:03 CST 2016 - dscudiero - eweerer
 ## Thu Dec 29 15:57:42 CST 2016 - dscudiero - Switch to use RunMySql
 ## Tue Jan  3 07:24:32 CST 2017 - dscudiero - fix problem creating employee table
-## Wed Jan  4 07:24:06 CST 2017 - dscudiero - ake out debug statements, modify call to perfTest
+## Wed Jan  4 07:24:06 CST 2017 - dscudiero - Take out debug statements, modify call to perfTest
 ## Wed Jan  4 16:47:34 CST 2017 - dscudiero - Updated BuildCourseleafData table to reflect the cgi versions including the patch level
 ## Thu Jan  5 07:59:27 CST 2017 - dscudiero - Fixed syntax error introduced on last commit
 ## Thu Jan  5 14:50:01 CST 2017 - dscudiero - Switch to use RunSql
@@ -474,3 +471,4 @@ return 0
 ## 01-31-2019 @ 10:10:31 - 1.22.99 - dscudiero - Moved git commit checkign to hourly
 ## 02-06-2019 @ 13:31:40 - 1.23.0 - dscudiero - Move workflow meeting messages to daily
 ## 02-07-2019 @ 07:45:09 - 1.23.1 - dscudiero - Tweak logic to determin when to run the meeting.txt code
+## 02-08-2019 @ 09:08:29 - 1.23.2 - dscudiero - Truncate sites every sunday, remove misc debug statements
