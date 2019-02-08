@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version="1.2.10" # -- dscudiero -- Tue 01/22/2019 @ 10:31:24
+version="1.2.11" # -- dscudiero -- Fri 02/08/2019 @ 07:11:34
 #==================================================================================================
 TrapSigs 'on'
 
@@ -259,9 +259,7 @@ Verbose 1 "^$myName -- $env ($siteDir) --> ${warehouseDb}.${useSiteInfoTable}"
 	unset wfLibVersion
 	if [[ -d "$siteDir/web/courseleaf/locallibs" && -f "$siteDir/web/courseleaf/locallibs/workflowLib.atj" ]]; then
 		grepStr=$(ProtectedCall "grep wfLibVersion= \"$siteDir/web/courseleaf/locallibs/workflowLib.atj"\")
-		dump grepStr
 		wfLibVersion="${grepStr##*=\"}"; wfLibVersion="${wfLibVersion%%\"*}"
-		dump wfLibVersion
 	fi
 	[[ $wfLibVersion != 'NULL' ]] && wfLibVersion=\"$wfLibVersion\"
 
@@ -442,3 +440,4 @@ return 0
 ## 10-23-2018 @ 12:37:05 - 1.2.7 - dscudiero - Added siteDirWindows
 ## 01-15-2019 @ 07:27:17 - 1.2.8 - dscudiero - Add a check to make sure the URL values are valid, if not then terminate
 ## 01-22-2019 @ 11:11:29 - 1.2.10 - dscudiero - Add wfLibVersion, tweak logic to detect bad urls
+## 02-08-2019 @ 08:59:53 - 1.2.11 - dscudiero - Add/Remove debug statements
