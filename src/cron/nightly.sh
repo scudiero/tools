@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.3" # -- dscudiero -- Wed 02/13/2019 @ 07:25:46
+version="1.23.4" # -- dscudiero -- Wed 02/13/2019 @ 07:29:01
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -230,7 +230,7 @@ case "$hostName" in
 					# if [[ ! -d "$HOME/clientData/${client,,[a,z]}" ]]; then
 						echo "*** Warning ***" > "$tmpFile"
 						echo "A meeting, '$line', has been scheduled with $client on ${date}." >> "$tmpFile"
-						echo "No workflow specifications have been received for this client." >> "$tmpFile"
+						echo "No workflow specifications have been received for this client so an audit and initial workflow has not been completed." >> "$tmpFile"
 						echo "Specifications must be received at least 5 business days before the client meeting." >> "$tmpFile"
 						echo "Should specifications not be provided, said meeting will be canceled on the Monday of the week that the meeting was scheduled" >> "$tmpFile"
 						echo "" >> "$tmpFile"
@@ -472,3 +472,4 @@ return 0
 ## 02-07-2019 @ 07:45:09 - 1.23.1 - dscudiero - Tweak logic to determin when to run the meeting.txt code
 ## 02-08-2019 @ 09:08:29 - 1.23.2 - dscudiero - Truncate sites every sunday, remove misc debug statements
 ## 02-13-2019 @ 07:26:36 - 1.23.3 - dscudiero - Change meeting check to send out a single email with multiple addressee's
+## 02-13-2019 @ 09:02:16 - 1.23.4 - dscudiero - Tweak messaging in sending meeting.txt emails
