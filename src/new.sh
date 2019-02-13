@@ -1,6 +1,6 @@
 #!/bin/bash
 #===================================================================================================
-version="1.2.85" # -- dscudiero -- Tue 02/05/2019 @ 08:02:08
+version="1.2.86" # -- dscudiero -- Wed 02/13/2019 @ 09:15:39
 #===================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall PushPop SetSiteDirsNew MkTmpFile"
@@ -347,6 +347,7 @@ function NewWf {
 	local siteDir grepStr
 	local sourceRoot="$HOME/workflowJs"
 	local sourceRootFiles=("workflowFuncs.atj")
+	local sourceRootFiles=("wfTest.xml")
 
 	local sourceInstanceFiles=("workflow.cfg")
 	sourceInstanceFiles+=("workflow.tcf")
@@ -505,3 +506,4 @@ Msg; Msg "$objType object created"
 ## 01-29-2019 @ 12:56:30 - 1.2.68 - dscudiero - Added new workflow
 ## 01-29-2019 @ 14:35:56 - 1.2.84 - dscudiero - Updated messsaging
 ## 02-05-2019 @ 08:02:29 - 1.2.85 - dscudiero - Remove debug statements
+## 02-13-2019 @ 09:15:57 - 1.2.86 - dscudiero - Add wfTest.xml to the list of source files
