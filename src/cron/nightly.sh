@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.2" # -- dscudiero -- Fri 02/08/2019 @ 09:07:44
+version="1.23.3" # -- dscudiero -- Wed 02/13/2019 @ 07:25:46
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -235,8 +235,7 @@ case "$hostName" in
 						echo "Should specifications not be provided, said meeting will be canceled on the Monday of the week that the meeting was scheduled" >> "$tmpFile"
 						echo "" >> "$tmpFile"
 						echo "Note: This is an automated emailing, no need to reply" >> "$tmpFile"
-						mutt -s "Workflow meeting scheduled with $client without specs" -- ${csm}@leepfrog.com < $tmpFile;
-						mutt -s "Workflow meeting scheduled with $client without specs" -- dscudiero@leepfrog.com < $tmpFile;
+						mutt -s "Workflow meeting scheduled with $client without specs" -- ${csm}@leepfrog.com,dscudiero@leepfrog.com < $tmpFile;
 					# fi
 				done < "$HOME/clientData/meetings.txt"
 			fi
@@ -472,3 +471,4 @@ return 0
 ## 02-06-2019 @ 13:31:40 - 1.23.0 - dscudiero - Move workflow meeting messages to daily
 ## 02-07-2019 @ 07:45:09 - 1.23.1 - dscudiero - Tweak logic to determin when to run the meeting.txt code
 ## 02-08-2019 @ 09:08:29 - 1.23.2 - dscudiero - Truncate sites every sunday, remove misc debug statements
+## 02-13-2019 @ 07:26:36 - 1.23.3 - dscudiero - Change meeting check to send out a single email with multiple addressee's
