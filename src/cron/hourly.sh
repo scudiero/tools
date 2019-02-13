@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.44" # -- dscudiero -- Thu 01/31/2019 @ 10:08:58
+version="2.2.46" # -- dscudiero -- Wed 02/13/2019 @ 12:40:18
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -303,6 +303,10 @@ case "$hostName" in
 					fi
 				fi
 		 	done
+
+		## If there is a 'daveHourly' script the run it
+			[[ -x $HOME/bin/daveHourly ]] && $HOME/bin/daveHourly
+
 		;;
 	*)
 		# sleep 60 ## Wait for perfTest on Mojave to set its semaphore
@@ -416,3 +420,4 @@ return 0
 ## 12-18-2018 @ 15:28:26 - 2.2.40 - dscudiero - Cosmetic/minor change/Sync
 ## 12-18-2018 @ 17:03:41 - 2.2.41 - dscudiero - Comment out debug statements
 ## 01-31-2019 @ 10:09:54 - 2.2.44 - dscudiero - Added checking workflowJs for committs
+## 02-13-2019 @ 12:41:11 - 2.2.46 - dscudiero - Add a call to daveHourly
