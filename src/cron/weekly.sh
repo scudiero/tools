@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.1.54" # -- dscudiero -- Wed 02/06/2019 @ 13:31:00
+version="2.1.55" # -- dscudiero -- Thu 02/14/2019 @ 12:28:55
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -40,7 +40,8 @@ case "$hostName" in
 			done
 
 		## Run programs/functions
-			pgms=("checkForPrivateDevSites $userName" weeklyRollup)
+			# pgms=("checkForPrivateDevSites $userName" weeklyRollup)
+			pgms=(weeklyRollup)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -53,7 +54,7 @@ case "$hostName" in
 			;;
 	build7)
 		## Run programs/functions
-			pgms=("checkForPrivateDevSites $userName")
+			# pgms=("checkForPrivateDevSites $userName")
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -104,3 +105,4 @@ return 0
 ## 11-12-2018 @ 08:03:14 - 2.1.52 - dscudiero - Remove checks
 ## 12-18-2018 @ 07:28:13 - 2.1.53 - dscudiero - Update setting of defaults to use the new toolsSetDefaults module
 ## 02-06-2019 @ 13:31:53 - 2.1.54 - dscudiero - -
+## 02-14-2019 @ 12:31:26 - 2.1.55 - dscudiero - Comment out call to checkForPrivateDevSites
