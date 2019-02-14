@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.46" # -- dscudiero -- Wed 02/13/2019 @ 12:40:18
+version="2.2.47" # -- dscudiero -- Thu 02/14/2019 @ 12:30:40
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -322,7 +322,7 @@ case "$hostName" in
 		# 	fi
 		# fi
 		## Run programs/functions
-			pgms=(CheckMonitorFiles)
+			# pgms=(CheckMonitorFiles)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -421,3 +421,4 @@ return 0
 ## 12-18-2018 @ 17:03:41 - 2.2.41 - dscudiero - Comment out debug statements
 ## 01-31-2019 @ 10:09:54 - 2.2.44 - dscudiero - Added checking workflowJs for committs
 ## 02-13-2019 @ 12:41:11 - 2.2.46 - dscudiero - Add a call to daveHourly
+## 02-14-2019 @ 12:31:02 - 2.2.47 - dscudiero - Comment out the checkmonitorfiles call
