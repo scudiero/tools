@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.0.40" # -- dscudiero -- Wed 10/24/2018 @ 10:17:29
+version="1.0.41" # -- dscudiero -- Fri 02/15/2019 @ 09:22:49
 #=======================================================================================================================
 #= Description #========================================================================================================
 #
@@ -12,8 +12,14 @@ originalArgStr="$*"
 scriptDescription=""
 
 function Main() {
-	## Truncate the existing data
-	sqlStmt="truncate $milestonesInfoTable"
+
+	table="$milestonesInfoTable"
+	workTable="${table}Work"
+
+	## Create a working table
+	sqlStmt="drop table if exists $workTable"
+	RunSql $sqlStmt
+	sqlStmt="create table $workTable like $table"
 	RunSql $sqlStmt
 	
 	Verbose 1 "^Getting transactional field names"
@@ -85,9 +91,23 @@ function Main() {
 				dump -1 -t rank name label date complete
 			## build and insert the record
 				values="$values,\"$rank\",\"$name\",\"$label\",\"$date\",\"$complete\""
-				sqlStmt="insert into $milestonesInfoTable values($values)"
+				sqlStmt="insert into $workTable values($values)"
 				RunSql $sqlStmt
 		done
+
+	## If all is OK, then swap the working table and real table
+			sqlStmt="select count(*) from $workTable"
+			RunSql $sqlStmt
+			if [[ ${resultSet[0]} -ne 0 ]]; then
+				sqlStmt="drop table if exists ${table}"
+				RunSql $sqlStmt
+				sqlStmt="rename table $workTable to $table"
+				RunSql $sqlStmt
+			else
+				Error "'$workTable' table is empty"
+				sqlStmt="drop table if exists  $workTable"
+				RunSql $sqlStmt
+			fi	
 
 	return 0
 } ## Main
@@ -121,3 +141,4 @@ Goodbye 0 #'alert'
 #============================================================================================================================================
 ## Check-in log
 #============================================================================================================================================
+## 02-15-2019 @ 09:24:23 - 1.0.41 - dscudiero - Update to do load to a working table and the swap at the end
