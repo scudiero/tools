@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.47" # -- dscudiero -- Thu 02/14/2019 @ 12:30:40
+version="2.2.48" # -- dscudiero -- Fri 02/15/2019 @ 09:23:21
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -238,7 +238,7 @@ case "$hostName" in
 
 		## Run programs/functions
 			#pgms=(updateDefaults loadPatchData CheckMonitorFiles SyncInternalDb SyncCourseleafCgis SyncSkeleton)
-			pgms=(updateDefaults loadPatchData SyncInternalDb)
+			pgms=(updateDefaults loadPatchData loadMilestonesData SyncInternalDb)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -422,3 +422,4 @@ return 0
 ## 01-31-2019 @ 10:09:54 - 2.2.44 - dscudiero - Added checking workflowJs for committs
 ## 02-13-2019 @ 12:41:11 - 2.2.46 - dscudiero - Add a call to daveHourly
 ## 02-14-2019 @ 12:31:02 - 2.2.47 - dscudiero - Comment out the checkmonitorfiles call
+## 02-15-2019 @ 09:23:54 - 2.2.48 - dscudiero - Add call to loadMilestonesData
