@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.4" # -- dscudiero -- Wed 02/13/2019 @ 07:29:01
+version="1.23.5" # -- dscudiero -- Fri 02/15/2019 @ 07:34:45
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -202,7 +202,7 @@ case "$hostName" in
 			RunSql $sqlStmt
 
 		## Rebuild the internal site pages 
-			Msg "\nRebuilding Internal pages"
+			Msg "\nRebuilding Internal pages..."
 			RunCourseLeafCgi "$stageInternal" "-r /clients"
 			RunCourseLeafCgi "$stageInternal" "-r /support/tools"
 			RunCourseLeafCgi "$stageInternal" "-r /support/qa"
@@ -220,6 +220,7 @@ case "$hostName" in
 		## Check to see if we have received workflow specifications for any scheduled meetings
 			let evenOdd=$(date +"%u")%2
 			if [[ $evenOdd -eq 1 ]]; then ## On odd numbered days (Mon, Wed, Fri, Sun)
+				Msg "\nChecking meetings.txt..."
 				tmpFile=$(mkTmpFile)
 				ifs="$IFS"; IFS=$'\r'; while read line; do
 					[[ ${line:0:1} == '#' ]] && continue
@@ -242,6 +243,7 @@ case "$hostName" in
 
 		## On the last day of the month roll-up the log files
 		  	if [[ $(date +"%d") == $(date -d "$(date +"%m")/1 + 1 month - 1 day" "+%d") ]]; then
+		  		Msg "\nRolling up the log files..."
 		  		Msg "\n$(date +"%m/%d@%H:%M") - Rolling up monthly log files"; sTime=$(date "+%s")
 				pushd $TOOLSPATH/Logs >& /dev/null
 				SetFileExpansion 'on'
@@ -274,6 +276,7 @@ case "$hostName" in
 
 		## Process server move updates
 			if [[ -r $TOOLSPATH/src/cron/serverMove.txt ]]; then
+				Msg "\nProcessing server moves..."
 				ifs="$IFS"; IFS=$'\r'; while read line; do
 					[[ ${line:0:1} == '#' ]] && continue
 					share="${line%% *}"; line="${line#* }"
@@ -473,3 +476,4 @@ return 0
 ## 02-08-2019 @ 09:08:29 - 1.23.2 - dscudiero - Truncate sites every sunday, remove misc debug statements
 ## 02-13-2019 @ 07:26:36 - 1.23.3 - dscudiero - Change meeting check to send out a single email with multiple addressee's
 ## 02-13-2019 @ 09:02:16 - 1.23.4 - dscudiero - Tweak messaging in sending meeting.txt emails
+## 02-15-2019 @ 07:35:27 - 1.23.5 - dscudiero - Add messaging
