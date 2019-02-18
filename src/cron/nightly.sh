@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.5" # -- dscudiero -- Fri 02/15/2019 @ 07:34:45
+version="1.23.7" # -- dscudiero -- Mon 02/18/2019 @ 08:22:09
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -288,6 +288,7 @@ case "$hostName" in
 				done < "$TOOLSPATH/src/cron/serverMove.txt"
 				IFS="$ifs"
 			fi
+			Msg "\nDone"
 
 		;; ## mojave
 
@@ -477,3 +478,4 @@ return 0
 ## 02-13-2019 @ 07:26:36 - 1.23.3 - dscudiero - Change meeting check to send out a single email with multiple addressee's
 ## 02-13-2019 @ 09:02:16 - 1.23.4 - dscudiero - Tweak messaging in sending meeting.txt emails
 ## 02-15-2019 @ 07:35:27 - 1.23.5 - dscudiero - Add messaging
+## 02-18-2019 @ 08:22:28 - 1.23.7 - dscudiero - Add/Remove debug statements
