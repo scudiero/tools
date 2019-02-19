@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.14.23" # -- dscudiero -- Fri 12/28/2018 @ 08:21:58
+version="4.14.26" # -- dscudiero -- Tue 02/19/2019 @ 12:35:59
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions SetSiteDirsNew"
@@ -203,7 +203,8 @@ dump -1 ignoreList mustHaveDirs mustHaveFiles
 			[[ $clientHosting != 'leepfrog' ]] && Terminate 'Copying of remotely hosted sites is not supported at this time'
 		else
 			sqlStmt="select distinct $siteInfoTable.host from $clientInfoTable,$siteInfoTable \
-					 where $clientInfoTable.name = \"$client\" and $clientInfoTable.name = $siteInfoTable.name and hosting = \"leepfrog\""
+					 where $clientInfoTable.name = \"$client\" and $clientInfoTable.name = $siteInfoTable.name"
+					 # where $clientInfoTable.name = \"$client\" and $clientInfoTable.name = $siteInfoTable.name and hosting = \"leepfrog\""
 			RunSql $sqlStmt
 			[[ ${#resultSet} -eq 0 ]] && Terminate "Could not retrieve data for client ($client), env ($env) from the clientData hash table"
 			clientHost="${resultSet[0]}"
@@ -753,3 +754,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 12-18-2018 @ 08:38:23 - 4.14.12 - dscudiero - Switch to use ParseArgs function
 ## 12-27-2018 @ 07:22:00 - 4.14.14 - dscudiero - Switch to use the SetDefaults function
 ## 12-28-2018 @ 08:23:06 - 4.14.23 - dscudiero - Pass scriptname to SetDefaults
+## 02-19-2019 @ 13:02:26 - 4.14.26 - dscudiero - Comment out the checks to prevent processing remote clients
