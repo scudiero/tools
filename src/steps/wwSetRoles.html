@@ -1,0 +1,60 @@
+%spidercode%
+//============================================================================================================
+//Set page data = we are passed an owners value and/or a workflows value and we do a attr_write of the data to page
+//e.g.
+// http://davetest.dev6.leepfrog.com/courseleaf/courseleaf.cgi?page=/&step=setPageData&owner=<owners>&workflows=<workflows>
+// http://davetest.dev6.leepfrog.com/courseleaf/courseleaf.cgi?page=/&step=setPageData&owner=fred,barney&workflows=role1,role2
+//============================================================================================================
+// Function wrapper
+(function davetest() {
+
+//============================================================================================================
+//Variable Declares
+//============================================================================================================
+var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
+var debug=false;
+var version="1.0"
+
+//============================================================================================================
+//Parse Arguments
+//============================================================================================================
+	var argStr = getenv("QUERY_STRING");
+
+	if(argStr.indexOf("role=") >= 0)
+		var role = argStr.replace(/.*page=([^\&]*)\&?.*$/i, "$1")
+
+	Dump(['role']);
+
+//============================================================================================================
+//# Main
+//============================================================================================================
+
+// Set the key to the value 
+	if (role == undefined) {
+		print_debug("*Error* -- invalid step call")
+	} else {
+		role=role.replace(/%20/g," ");
+		Dump(['role']);
+		// valArray = owners.split(",");
+		attr_write("role",role,{savetcf: true});
+	}
+
+return;
+
+//============================================================================================================
+// Subs
+//============================================================================================================
+
+//============================================================================================================
+function Dump(varNameArray){
+	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
+	if (! debug) {return}
+	varNameArray.forEach(function(token) {
+		print_debug(token + " = >" + eval(token) + "<\n")
+	});	
+}
+
+//============================================================================================================
+//Close function wrapper
+})();
+%spidercode%
