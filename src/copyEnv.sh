@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.14.26" # -- dscudiero -- Tue 02/19/2019 @ 12:35:59
+version="4.14.27" # -- dscudiero -- Fri 02/22/2019 @ 08:02:33
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions SetSiteDirsNew"
@@ -548,11 +548,10 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 		if [[ $tgtEnv == 'pvt' ]]; then
 			$DOIT rm -f $tgtDir/.clonedFrom-* > /dev/null 2>&1
 			$DOIT echo $env > $tgtDir/.clonedFrom
+			echo
+			Info "To act on private dev sites within the 'scripts' family of scripts you should specify 'pvt' as the environment name."
+			Info "Remember you can use the 'cleanDev' script to easily remove private dev sites."
 		fi
-
-	echo
-	Info "To act on private dev sites within the 'scripts' family of scripts you should specify 'pvt' as the environment name."
-	Info "Remember you can use the 'cleanDev' script to easily remove private dev sites."
 else
 	echo
 	Warning "Target of copy is '$tgtEnv', you should manually check the publishing settings in $progDir.cfg"
@@ -755,3 +754,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 12-27-2018 @ 07:22:00 - 4.14.14 - dscudiero - Switch to use the SetDefaults function
 ## 12-28-2018 @ 08:23:06 - 4.14.23 - dscudiero - Pass scriptname to SetDefaults
 ## 02-19-2019 @ 13:02:26 - 4.14.26 - dscudiero - Comment out the checks to prevent processing remote clients
+## 02-22-2019 @ 08:02:54 - 4.14.27 - dscudiero - Tweak messaging
