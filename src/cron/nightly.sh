@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.7" # -- dscudiero -- Mon 02/18/2019 @ 08:22:09
+version="1.23.8" # -- dscudiero -- Fri 02/22/2019 @ 07:33:54
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -241,6 +241,7 @@ case "$hostName" in
 				done < "$HOME/clientData/meetings.txt"
 			fi
 
+Here 1
 		## On the last day of the month roll-up the log files
 		  	if [[ $(date +"%d") == $(date -d "$(date +"%m")/1 + 1 month - 1 day" "+%d") ]]; then
 		  		Msg "\nRolling up the log files..."
@@ -252,8 +253,24 @@ case "$hostName" in
 				popd  >& /dev/null
 				Msg "... done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 		  	fi
-
+Here 2
+		## Process server move updates
+			if [[ -r $TOOLSPATH/src/cron/serverMove.txt ]]; then
+				Msg "\nProcessing server moves..."
+				ifs="$IFS"; IFS=$'\r'; while read line; do
+					[[ ${line:0:1} == '#' ]] && continue
+					share="${line%% *}"; line="${line#* }"
+					oldHost="${line%% *}"; line="${line#* }"
+					newHost="$line"
+					Msg "Processing server move update in '$siteInfoTable': '$share' --> '$newHost'"
+					sqlStmt="update $siteInfoTable set host='$newHost' where share = '$share' and host='$oldHost'"
+					RunSql $sqlStmt
+				done < "$TOOLSPATH/src/cron/serverMove.txt"
+				IFS="$ifs"
+			fi
+Here 3
 		 ## Check that all things ran properly, otherwise revert the databases
+		 	Msg "\nCleanup..."
 			Semaphore 'waiton' "buildClientInfoTable"
 			Semaphore 'waiton' "buildSiteInfoTable"
 			errorDetected=false
@@ -273,22 +290,8 @@ case "$hostName" in
 				fi
 			done
 			[[ $errorDetected == true ]] && Terminate 'One or more of the database load procedures failed, please review messages'
-
-		## Process server move updates
-			if [[ -r $TOOLSPATH/src/cron/serverMove.txt ]]; then
-				Msg "\nProcessing server moves..."
-				ifs="$IFS"; IFS=$'\r'; while read line; do
-					[[ ${line:0:1} == '#' ]] && continue
-					share="${line%% *}"; line="${line#* }"
-					oldHost="${line%% *}"; line="${line#* }"
-					newHost="$line"
-					Msg "Processing server move update in '$siteInfoTable': '$share' --> '$newHost'"
-					sqlStmt="update $siteInfoTable set host='$newHost' where share = '$share' and host='$oldHost'"
-					RunSql $sqlStmt
-				done < "$TOOLSPATH/src/cron/serverMove.txt"
-				IFS="$ifs"
-			fi
-			Msg "\nDone"
+			
+		Msg "\nDone"
 
 		;; ## mojave
 
@@ -479,3 +482,4 @@ return 0
 ## 02-13-2019 @ 09:02:16 - 1.23.4 - dscudiero - Tweak messaging in sending meeting.txt emails
 ## 02-15-2019 @ 07:35:27 - 1.23.5 - dscudiero - Add messaging
 ## 02-18-2019 @ 08:22:28 - 1.23.7 - dscudiero - Add/Remove debug statements
+## 02-22-2019 @ 07:34:25 - 1.23.8 - dscudiero - Add/Remove debug statements
