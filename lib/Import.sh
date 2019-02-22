@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.1.23" # -- dscudiero -- Tue 04/17/2018 @ 16:51:56.44
+# version="1.1.24" # -- dscudiero -- Fri 02/22/2019 @ 07:56:17
 #===================================================================================================
 # Import need functions into the runtime environment
 #===================================================================================================
@@ -42,7 +42,7 @@ function Import {
 				break
 			fi
 		done
-		[[ $found != true ]] && echo -e "\n*** Error, Import function, cannot locate '$includeName' *** \n"
+		[[ $found != true ]] && echo -e "\n*** Error, Import function, cannot locate '$includeName', called from $caller *** \n"
 	done
 	[[ ${SCRIPTINCLUDES:0:1} == ',' ]] && SCRIPTINCLUDES="${SCRIPTINCLUDES:1}"
 	return 0
@@ -61,3 +61,4 @@ export -f Import
 ## 03-29-2018 @ 08:38:56 - 1.1.22 - dscudiero - Change debug message levels
 ## 04-18-2018 @ 09:35:18 - 1.1.23 - dscudiero - Added TOOLSDEVPATH
 ## 06-27-2018 @ 14:07:59 - 1.1.23 - dscudiero - Do not print out the import name if it has already been imported
+## 02-22-2019 @ 07:58:05 - 1.1.24 - dscudiero - Tweak messaging
