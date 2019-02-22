@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.48" # -- dscudiero -- Fri 02/15/2019 @ 09:23:21
+version="2.2.49" # -- dscudiero -- Fri 02/22/2019 @ 07:36:07
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -305,7 +305,7 @@ case "$hostName" in
 		 	done
 
 		## If there is a 'daveHourly' script the run it
-			[[ -x $HOME/bin/daveHourly ]] && $HOME/bin/daveHourly
+			[[ -x $HOME/bin/daveHourly ]] && $HOME/bin/daveHourly "batch"
 
 		;;
 	*)
@@ -423,3 +423,4 @@ return 0
 ## 02-13-2019 @ 12:41:11 - 2.2.46 - dscudiero - Add a call to daveHourly
 ## 02-14-2019 @ 12:31:02 - 2.2.47 - dscudiero - Comment out the checkmonitorfiles call
 ## 02-15-2019 @ 09:23:54 - 2.2.48 - dscudiero - Add call to loadMilestonesData
+## 02-22-2019 @ 07:52:19 - 2.2.49 - dscudiero - Add 'batch' option to daveHourly call
