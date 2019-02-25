@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.8" # -- dscudiero -- Fri 02/22/2019 @ 07:33:54
+version="1.23.9" # -- dscudiero -- Mon 02/25/2019 @ 07:44:46
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -241,7 +241,6 @@ case "$hostName" in
 				done < "$HOME/clientData/meetings.txt"
 			fi
 
-Here 1
 		## On the last day of the month roll-up the log files
 		  	if [[ $(date +"%d") == $(date -d "$(date +"%m")/1 + 1 month - 1 day" "+%d") ]]; then
 		  		Msg "\nRolling up the log files..."
@@ -253,7 +252,7 @@ Here 1
 				popd  >& /dev/null
 				Msg "... done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 		  	fi
-Here 2
+
 		## Process server move updates
 			if [[ -r $TOOLSPATH/src/cron/serverMove.txt ]]; then
 				Msg "\nProcessing server moves..."
@@ -268,7 +267,6 @@ Here 2
 				done < "$TOOLSPATH/src/cron/serverMove.txt"
 				IFS="$ifs"
 			fi
-Here 3
 		 ## Check that all things ran properly, otherwise revert the databases
 		 	Msg "\nCleanup..."
 			Semaphore 'waiton' "buildClientInfoTable"
@@ -483,3 +481,4 @@ return 0
 ## 02-15-2019 @ 07:35:27 - 1.23.5 - dscudiero - Add messaging
 ## 02-18-2019 @ 08:22:28 - 1.23.7 - dscudiero - Add/Remove debug statements
 ## 02-22-2019 @ 07:34:25 - 1.23.8 - dscudiero - Add/Remove debug statements
+## 02-25-2019 @ 07:44:54 - 1.23.9 - dscudiero - Add/Remove debug statements
