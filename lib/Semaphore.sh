@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.27" # -- dscudiero -- Mon 02/25/2019 @ 07:43:28
+# version="2.0.28" # -- dscudiero -- Mon 02/25/2019 @ 07:48:39
 #===================================================================================================
 # Process semaphores
 # Semaphore <mode> <key/name> <sleeptime>
@@ -14,8 +14,8 @@
 # All rights reserved
 #===================================================================================================
 function Semaphore {
-	local myIncludes="StringFunctions RunSql"
-	Import "$myIncludes"
+	Import "StringFunctions"
+	Import "RunSql"
 
 	local mode=${1:-'check'}
 	mode=$(Lower $mode)
@@ -116,3 +116,4 @@ export -f CheckSemaphore
 ## 10-20-2017 @ 12.42.16 - ("2.0.25")  - dscudiero - Add StringFunctions to the included list
 ## 03-22-2018 @ 13:16:48 - 2.0.26 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
 ## 02-25-2019 @ 07:43:43 - 2.0.27 - dscudiero - M
+## 02-25-2019 @ 07:48:46 - 2.0.28 - dscudiero - M
