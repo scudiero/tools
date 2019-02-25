@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.26" # -- dscudiero -- Thu 03/22/2018 @ 13:11:08.01
+# version="2.0.27" # -- dscudiero -- Mon 02/25/2019 @ 07:43:28
 #===================================================================================================
 # Process semaphores
 # Semaphore <mode> <key/name> <sleeptime>
@@ -14,7 +14,7 @@
 # All rights reserved
 #===================================================================================================
 function Semaphore {
-	myIncludes="StringFunctions RunSql"
+	local myIncludes="StringFunctions RunSql"
 	Import "$myIncludes"
 
 	local mode=${1:-'check'}
@@ -115,3 +115,4 @@ export -f CheckSemaphore
 ## Tue Feb 14 10:47:30 CST 2017 - dscudiero - Added time out counter for waiton action
 ## 10-20-2017 @ 12.42.16 - ("2.0.25")  - dscudiero - Add StringFunctions to the included list
 ## 03-22-2018 @ 13:16:48 - 2.0.26 - dscudiero - Updated for Msg3/Msg, RunSql2/RunSql, ParseArgStd/ParseArgStd2
+## 02-25-2019 @ 07:43:43 - 2.0.27 - dscudiero - M
