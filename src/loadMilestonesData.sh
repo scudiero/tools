@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.0.41" # -- dscudiero -- Fri 02/15/2019 @ 09:22:49
+version="1.0.57" # -- dscudiero -- Wed 02/27/2019 @ 11:20:37
 #=======================================================================================================================
 #= Description #========================================================================================================
 #
@@ -22,15 +22,17 @@ function Main() {
 	sqlStmt="create table $workTable like $table"
 	RunSql $sqlStmt
 	
-	Verbose 1 "^Getting transactional field names"
 	## snapshot table
+		Verbose 1 "^Getting transactional field names..."
 		SetFileExpansion 'off'
 		sqlStmt="select * from sqlite_master where type=\"table\" and name=\"snapshots\""
 		RunSql "$milestoneTransactionalDb" $sqlStmt
 		SetFileExpansion
 		[[ ${#resultSet[@]} -le 0 ]] && Terminate "Could not retrieve 'snapshots' table definition data from '$milestoneTransactionalDb'"
 		unset tmFields
-		tData="${resultSet[0]#*(}"; tData="${tData%)*}" 
+		tData="${resultSet[0]}";
+		tData="${tData#*(}"; #(
+		tData="${tData%)*}"; #
 		ifsSave="$IFS"; IFS=',' read -ra tmpArray <<< "$tData"
 		for token in "${tmpArray[@]}"; do
 			[[ ${token:0:1} == ' ' ]] && token="${token:1}"
@@ -39,13 +41,17 @@ function Main() {
 		tsFields=${tsFields:1}
 		numtsFields=${#tmpArray[@]}
 		IFS="$ifsSave"; unset tmpArray
+		dump 1 -t2 "numtsFields tsFields"
+
 	## Get the snapshot data
+		Verbose 1 "^Getting the snapshot data..."
 		sqlStmt="select $tsFields from snapshots"
 		RunSql "$milestoneTransactionalDb" $sqlStmt
-		[[ ${#resultSet[@]} -le 0 ]] && Terminate "Could not retrieve 'snapshots' data from '$milestoneTransactionalDb'" 
+		[[ ${#resultSet[@]} -le 0 || ${resultSet[0]} == "" ]] && Terminate "Could not retrieve 'snapshots' data from '$milestoneTransactionalDb'" 
 		Verbose 1 "^^Found ${#resultSet[@]} snapshot records"
 		for result in "${resultSet[@]}"; do
-			snapshotsHash["${result%%|*}"]="$result"
+			key="${result%%|*}"
+			snapshotsHash["$key"]="$result"
 		done
 
 	## milestone table
@@ -112,29 +118,24 @@ function Main() {
 	return 0
 } ## Main
 
-	#=======================================================================================================================
-	# Initialization
-	#=======================================================================================================================
-	function Initialization {
-		myIncludes="WriteChangelogEntry"
-		Import "$standardInteractiveIncludes $myIncludes"
+#=======================================================================================================================
+# Initialization
+#=======================================================================================================================
+function Initialization {
+	myIncludes="WriteChangelogEntry"
+	Import "$standardInteractiveIncludes $myIncludes"
 
-		tmpFile=$(mkTmpFile)
-		GetDefaultsData -f $myName
+	tmpFile=$(mkTmpFile)
+	GetDefaultsData -f $myName
+	ParseArgs $*
 
-		## Parse defaults fast
-		while [[ $# -gt 0 ]]; do
-		    [[ $1 =~ ^-v.$ ]] && { verboseLevel=${1:2}; }
-		    shift 1 || true
-		done
-
-		return 0
-	} ## Initialization
+	return 0
+} ## Initialization
 
 #============================================================================================================================================
 declare -A snapshotsHash
 declare -A milestoneHash
-Initialization "#@"
+Initialization "$@"
 Main "$@"
 Goodbye 0 #'alert'
 
@@ -142,3 +143,4 @@ Goodbye 0 #'alert'
 ## Check-in log
 #============================================================================================================================================
 ## 02-15-2019 @ 09:24:23 - 1.0.41 - dscudiero - Update to do load to a working table and the swap at the end
+## 02-27-2019 @ 11:21:42 - 1.0.57 - dscudiero - Add/Remove debug statements
