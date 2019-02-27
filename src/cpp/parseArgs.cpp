@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.1.0" // -- dscudiero -- Tue 12/04/2018 @ 09:21:37
+// version="1.1.5" // -- dscudiero -- Wed 02/27/2019 @ 11:04:35
 //==================================================================================================
 #include <iostream>		// IO utility library
 #include <string>		// String utility library
@@ -50,8 +50,8 @@ ArgDef::ArgDef (string a, string b, string c, string d, string e) {
 //==================================================================================================
 void Here(string where, bool debug) { if (debug) std::cout << "Here: " + where + "\n"; return; }
 void Here(int where, bool debug) { if (debug) printf("Here: %d\n", where); return; }
-void Dump(string var, string val, bool debug) { if (debug) printf("%s = '%s'\n", var,val); return; }
-void Dump(string var, int val, bool debug) { if (debug) printf("%s = '%d'\n", var,val); return; }
+// void Dump(string var, string val, bool debug) { if (debug) printf("%s = '%s'\n", var,val); return; }
+// void Dump(string var, int val, bool debug) { if (debug) printf("%s = '%d'\n", var,val); return; }
 
 //==================================================================================================
 int main(int argc, char *argv[]) {
@@ -72,11 +72,11 @@ int main(int argc, char *argv[]) {
 		for(int i=1; i < argc; i++) {
 			string arg = argv[i];
 			string argl = arg; boost::algorithm::to_lower(argl);
-			if (arg.substr(0,1) != "-") {
+			if (arg.substr(0,2) != "--") {
 				scriptName = arg;
 				continue;
 			} else {
-				if (argl == "-d")
+				if (argl == "--d")
 		    		debug=true;
 			}
 		}
@@ -148,6 +148,7 @@ int main(int argc, char *argv[]) {
 	// Are there any script specific arguments, if found then add to the argDefs arraylist
 	//==============================================================================================
     if (char* myArgsPtr = std::getenv("myArgs")) {
+    	if (debug) std::cout << "Retrieving script specific arguments ...\n";
 		char str[4096];
 		strncpy(str,myArgsPtr,sizeof(str));
 		char *line;
@@ -178,15 +179,21 @@ int main(int argc, char *argv[]) {
 		     	cntr++;
 		    }
 		    argDefs.push_front(ArgDef(shortName, longName, type, scriptVar, scriptCmd));
+			if (debug) printf("\t shortName: '%s', \t longName: '%s', \t type: '%s', \t scriptVar: '%s', \t scriptCmd: '%s'\n", 
+							shortName.c_str(),longName.c_str(),type.c_str(),scriptVar.c_str(),scriptCmd.c_str());
 		}
     }
 
     //==============================================================================================
 	// Loop through the arguments
     //==============================================================================================
+    if (debug) std::cout << "Looping through arguments ...\n";
 	string unknownArgs="";
 	for(int i=1; i < argc; i++) {
 		string arg = argv[i];
+		if (arg.substr(0,2) == "--") {
+			continue;
+		}
 		if (arg.substr(0,1) != "-") {
 			unknownArgs = unknownArgs + " " + argv[i];
 			continue;
@@ -194,7 +201,7 @@ int main(int argc, char *argv[]) {
 		arg=arg.substr(1);
 		boost::algorithm::to_lower(arg);
 
-		// cout << "Processing argument: " + arg + "\n";
+		if (debug) cout << "\tProcessing argument: " + arg + "\n";
 		// Loop through all of the argument definitions
 		bool foundArg=false;
 	    std::list<ArgDef>::iterator it;
@@ -272,3 +279,4 @@ int main(int argc, char *argv[]) {
 // 11-16-2018 @ 09:12:00 - 1.0.9 - dscudiero - Added -useLocal
 // 11-16-2018 @ 15:15:20 - 1.0.9 - dscudiero - Add ability to specify script specific arguments
 // 12-04-2018 @ 11:40:28 - 1.1.0 - dscudiero - Switch to read the default arguments from the data warehouse
+// 02-27-2019 @ 11:05:58 - 1.1.5 - dscudiero - Tweak messaging
