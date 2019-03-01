@@ -1,43 +1,89 @@
+
 %spidercode%
 //============================================================================================================
-//Set page data = we are passed an owners value and/or a workflows value and we do a attr_write of the data to page
+//============================================================================================================
+//Set roles data = we are passed a string of one or or roles (separated with a ';') in the form 
+//	'<roleName>|<memberList>|<roleEmail>'
 //e.g.
-// http://davetest.dev6.leepfrog.com/courseleaf/courseleaf.cgi?page=/&step=setPageData&owner=<owners>&workflows=<workflows>
-// http://davetest.dev6.leepfrog.com/courseleaf/courseleaf.cgi?page=/&step=setPageData&owner=fred,barney&workflows=role1,role2
+//	http://davetest.dev6.leepfrog.com/courseleaf/courseleaf.cgi?page=/courseleaf/roles.tcf&step=wwSetRoles&roles=<role1Str>[;<role2Str>;...]
 //============================================================================================================
 // Function wrapper
-(function davetest() {
+(function () {
 
 //============================================================================================================
 //Variable Declares
 //============================================================================================================
-var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
+var myName="wwSetRoles";
 var debug=false;
 var version="1.0"
 
 //============================================================================================================
 //Parse Arguments
 //============================================================================================================
-	var argStr = getenv("QUERY_STRING");
-
-	if(argStr.indexOf("role=") >= 0)
-		var role = argStr.replace(/.*page=([^\&]*)\&?.*$/i, "$1")
-
-	Dump(['role']);
+var argStr = getenv("QUERY_STRING");
+dump(["argStr"])
+if(argStr.indexOf("roles=") >= 0)
+	var argRoles = argStr.replace(/.*roles=([^\&]*)\&?.*$/i, "$1")
+if(argStr.indexOf("debug=") >= 0)
+	var debug = argStr.replace(/.*debug=([^\&]*)\&?.*$/i, "$1")
 
 //============================================================================================================
 //# Main
 //============================================================================================================
+// Process the arguments
+if (debug) print_debug("\n" + myName + " Starting" +"\n")
+if (argRoles == undefined) {
+		print_debug("\n*Error* -- invalid step call, no roles specified\n\t" + argRoles + "\n\n")
+} else {
+	var roles=[];
+	var argRoles=argRoles.replace(/%20/g," ").split(";");
+	if (debug) print_debug("\targRoles = " + argRoles.toSource() + "\n");
+	argRoles.forEach(function(token) {
+		var tmpArray = token.split("|");
+		var role = {name:tmpArray[0], members:"", email:""} 
+		if (tmpArray.length >= 2) {
+			role.members = tmpArray[1];
+		}
+		if (tmpArray.length === 3) {
+			role.email = tmpArray[2];
+		}
+		if (debug) print_debug("\t\trole = " + role.toSource() + "\n");
+		roles.push(role);
+	});
 
-// Set the key to the value 
-	if (role == undefined) {
-		print_debug("*Error* -- invalid step call")
-	} else {
-		role=role.replace(/%20/g," ");
-		Dump(['role']);
-		// valArray = owners.split(",");
-		attr_write("role",role,{savetcf: true});
-	}
+	// Get the currently defined roles into a roles hash
+		var rolesHash=[];
+		tcfdata.role.forEach(function(token) {
+			rolesHash[token.name] = token;
+		});
+
+	// Loop through the input roles and update the rolesHas as necessary
+		var writeTcf = false;
+		roles.forEach(function(role) {
+			if (typeof rolesHash[role.name] == "undefined") {
+				if (debug) print_debug("\t(" + myName + ") Adding role '" + role.name + "'\n");
+				rolesHash[role.name] = role;
+				writeTcf = true;
+			} else {
+				if (rolesHash[role.name].members != role.members || rolesHash[role.name].email != role.email) {
+					if (debug) print_debug("\t(" + myName + ") Updating role '" + role.name + "'\n");
+					rolesHash[role.name] = role;
+					writeTcf = true;
+				}
+			}
+		});
+
+	// If data was changed then update the roles.tcf file
+		if (debug) print_debug("\twriteTcf = " + writeTcf + "\n");
+		if (writeTcf) {
+			if (debug) print_debug("\t*** (" + myName + ") Writing out roles.tcf data...\n");
+			rolesOut=[];
+			for (var key in rolesHash) {
+				rolesOut.push(rolesHash[key]);
+			}
+			attr_write("role",rolesOut,{savetcf: true});
+		}
+}
 
 return;
 
@@ -46,7 +92,7 @@ return;
 //============================================================================================================
 
 //============================================================================================================
-function Dump(varNameArray){
+function dump(varNameArray){
 	var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
 	if (! debug) {return}
 	varNameArray.forEach(function(token) {
