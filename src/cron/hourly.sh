@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.52" # -- dscudiero -- Mon 03/04/2019 @ 13:20:22
+version="2.2.53" # -- dscudiero -- Mon 03/04/2019 @ 14:11:36
 
 echo "HERE HERE HERE HERE"
 
@@ -15,7 +15,7 @@ echo "HERE HERE HERE HERE"
 # 09-05-17 - dgs - Added '--ignore-date' to rsyc options in SyncSkeleton
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes='GetPW ProtectedCall CalcElapsed'
+myIncludes='GetPW ProtectedCall CalcElapsed PushPop'
 Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -435,3 +435,4 @@ return 0
 ## 03-04-2019 @ 09:48:18 - 2.2.50 - dscudiero - Add/Remove debug statements
 ## 03-04-2019 @ 10:09:53 - 2.2.51 - dscudiero - Add/Remove debug statements
 ## 03-04-2019 @ 13:20:33 - 2.2.52 - dscudiero - Add/Remove debug statements
+## 03-04-2019 @ 14:15:35 - 2.2.53 - dscudiero - Add PushPop to the includes list
