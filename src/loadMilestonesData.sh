@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.0.57" # -- dscudiero -- Wed 02/27/2019 @ 11:20:37
+version="1.0.58" # -- dscudiero -- Mon 03/04/2019 @ 07:29:02
 #=======================================================================================================================
 #= Description #========================================================================================================
 #
@@ -28,7 +28,7 @@ function Main() {
 		sqlStmt="select * from sqlite_master where type=\"table\" and name=\"snapshots\""
 		RunSql "$milestoneTransactionalDb" $sqlStmt
 		SetFileExpansion
-		[[ ${#resultSet[@]} -le 0 ]] && Terminate "Could not retrieve 'snapshots' table definition data from '$milestoneTransactionalDb'"
+		[[ ${#resultSet[@]} -le 0 ]] && { Warning "Could not retrieve 'snapshots' table definition data from '$milestoneTransactionalDb'"; Goodbye; }
 		unset tmFields
 		tData="${resultSet[0]}";
 		tData="${tData#*(}"; #(
@@ -47,7 +47,7 @@ function Main() {
 		Verbose 1 "^Getting the snapshot data..."
 		sqlStmt="select $tsFields from snapshots"
 		RunSql "$milestoneTransactionalDb" $sqlStmt
-		[[ ${#resultSet[@]} -le 0 || ${resultSet[0]} == "" ]] && Terminate "Could not retrieve 'snapshots' data from '$milestoneTransactionalDb'" 
+		[[ ${#resultSet[@]} -le 0 || ${resultSet[0]} == "" ]] && { Warning "Could not retrieve 'snapshots' data from '$milestoneTransactionalDb'"; Goodbye; }
 		Verbose 1 "^^Found ${#resultSet[@]} snapshot records"
 		for result in "${resultSet[@]}"; do
 			key="${result%%|*}"
@@ -59,7 +59,7 @@ function Main() {
 		sqlStmt="select * from sqlite_master where type=\"table\" and name=\"milestone\""
 		RunSql "$milestoneTransactionalDb" $sqlStmt
 		SetFileExpansion
-		[[ ${#resultSet[@]} -le 0 ]] && Terminate "Could not retrieve 'milestone' table definition data from '$milestoneTransactionalDb'"
+		[[ ${#resultSet[@]} -le 0 ]] && { Warning "Could not retrieve 'milestone' table definition data from '$milestoneTransactionalDb'"; Goodbye; }
 		unset tmFields
 		tData="${resultSet[0]#*(}"; tData="${tData%)*}" 
 		ifsSave="$IFS"; IFS=',' read -ra tmpArray <<< "$tData"
@@ -73,7 +73,7 @@ function Main() {
 	## Get the milestone data
 		sqlStmt="select $tmFields from milestone"
 		RunSql "$milestoneTransactionalDb" $sqlStmt
-		[[ ${#resultSet[@]} -le 0 ]] && Terminate "Could not retrieve milestone data from '$milestoneTransactionalDb'"
+		[[ ${#resultSet[@]} -le 0 ]] && { Warning "Could not retrieve milestone data from '$milestoneTransactionalDb'"; Goodbye; }
 		Verbose 1 "^^Found ${#resultSet[@]} milestone records"
 		## Loop through milestones
 		for result in "${resultSet[@]}"; do
@@ -144,3 +144,4 @@ Goodbye 0 #'alert'
 #============================================================================================================================================
 ## 02-15-2019 @ 09:24:23 - 1.0.41 - dscudiero - Update to do load to a working table and the swap at the end
 ## 02-27-2019 @ 11:21:42 - 1.0.57 - dscudiero - Add/Remove debug statements
+## 03-04-2019 @ 07:29:32 - 1.0.58 - dscudiero - Change Termiate messages to warnings
