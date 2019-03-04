@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.1.38" # -- dscudiero -- Mon 03/04/2019 @ 13:42:06
+version="2.1.39" # -- dscudiero -- Mon 03/04/2019 @ 13:45:20
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -54,14 +54,15 @@ originalArgStr="$*"
 #=======================================================================================================================
 ## Run the executable(s)
 	#export USEDEV=true
+echo "callScriptName = '$callScriptName'"
 	executeFile=$(FindExecutable "$callScriptName" '-cron')
+echo "executeFile = '$executeFile'"
 	echo -e "\t-- $hostName - Starting $callScriptName from '$executeFile', Args: $scriptArgs $callScriptArgs" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	echo -e "\n$(date) -- Calling script '$callScriptName':\n\t$executeFile $callScriptArgs\n" > "$logFile"
 	data="$(dropbox -q list)"; data="${data##* }"
 	[[ $data != 'leepfrogBackup' ]] && { set +eE ; trap - ERR; exit -1; }
 
 	myNameSave="$myName"; myPathSave="$myPath"
-echo "executeFile = '$executeFile'"
 	myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 	myPath="$(dirname $executeFile)"
 	source $executeFile $scriptArgs $callScriptArgs >> "$logFile"  2>&1
@@ -167,3 +168,4 @@ exit 0
 ## 06-05-2018 @ 07:28:04 - 2.1.36 - dscudiero - Change the logic to detect errors
 ## 07-17-2018 @ 07:14:33 - 2.1.37 - dscudiero - Add checks
 ## 03-04-2019 @ 13:42:14 - 2.1.38 - dscudiero - Add/Remove debug statements
+## 03-04-2019 @ 13:45:27 - 2.1.39 - dscudiero - Add/Remove debug statements
