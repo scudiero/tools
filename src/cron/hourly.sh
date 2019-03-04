@@ -1,9 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.53" # -- dscudiero -- Mon 03/04/2019 @ 14:11:36
-
-echo "HERE HERE HERE HERE"
+version="2.2.55" # -- dscudiero -- Mon 03/04/2019 @ 15:23:03
 
 #=======================================================================================================================
 # Run every hour from cron
@@ -231,7 +229,6 @@ function SyncSkeleton {
 #=======================================================================================================================
 case "$hostName" in
 	mojave)
-Here 0
 
 		## Run perftest on even numberd hours
 		# if [[ $(( $(date +"%-H") % 2 )) -eq 0 ]]; then
@@ -253,7 +250,6 @@ Here 0
 				Semaphore 'waiton' "$pgmName" 'true'
 				Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
-Here 1
 
 			if [[ $(date "+%H") == 12 || $(date "+%H") == 22 ]]; then
 				# Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
@@ -273,7 +269,6 @@ Here 1
 					popd >& /dev/null
 				fi
 			fi
-Here 2
 		 ## Check for git commits in the master tools repo
 		 	repos="tools workflowJs"
 		 	repos="tools"
@@ -299,10 +294,10 @@ Here 2
 						let i=$i+1
 						file="${logRecs[$i]}"
 						dump -1 -n -t2 file committer comment commitTime
-						# if [[ $committer != "$me" ]]; then
+						if [[ $committer != "$me" ]]; then
 							Msg "\n^'$file' was committed by '$committer' at $commitTime \n\t-- $comment" | tee -a "$tmpFile"
 							found=true
-						# fi
+						fi
 					done
 					if [[ $found == true ]]; then
 						mutt -s "Found commits to $repo.git that were not made by me" -- dscudiero@leepfrog.com < $tmpFile
@@ -310,10 +305,8 @@ Here 2
 					fi
 				fi
 		 	done
-Here 3
 		## If there is a 'daveHourly' script the run it
-			[[ -x $HOME/bin/daveHourly ]] && { Here 3a; $HOME/bin/daveHourly; } #"batch"
-Here 4
+			[[ -x $HOME/bin/daveHourly ]] && $HOME/bin/daveHourly "batch"
 
 		;;
 	*)
@@ -436,3 +429,4 @@ return 0
 ## 03-04-2019 @ 10:09:53 - 2.2.51 - dscudiero - Add/Remove debug statements
 ## 03-04-2019 @ 13:20:33 - 2.2.52 - dscudiero - Add/Remove debug statements
 ## 03-04-2019 @ 14:15:35 - 2.2.53 - dscudiero - Add PushPop to the includes list
+## 03-04-2019 @ 15:23:44 - 2.2.55 - dscudiero - Add/Remove debug statements
