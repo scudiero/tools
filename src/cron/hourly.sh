@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.50" # -- dscudiero -- Mon 03/04/2019 @ 09:48:08
+version="2.2.51" # -- dscudiero -- Mon 03/04/2019 @ 10:09:40
 #=======================================================================================================================
 # Run every hour from cron
 #=======================================================================================================================
@@ -228,6 +228,8 @@ function SyncSkeleton {
 #=======================================================================================================================
 case "$hostName" in
 	mojave)
+Here 0
+
 		## Run perftest on even numberd hours
 		# if [[ $(( $(date +"%-H") % 2 )) -eq 0 ]]; then
 		# 	## Make sure we have a sites table before running perfTest
@@ -248,6 +250,7 @@ case "$hostName" in
 				Semaphore 'waiton' "$pgmName" 'true'
 				Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
+Here 1
 
 			if [[ $(date "+%H") == 12 || $(date "+%H") == 22 ]]; then
 				# Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
@@ -267,6 +270,7 @@ case "$hostName" in
 					popd >& /dev/null
 				fi
 			fi
+Here 2
 		 ## Check for git commits in the master tools repo
 		 	repos="tools workflowJs"
 		 	repos="tools"
@@ -303,11 +307,10 @@ case "$hostName" in
 					fi
 				fi
 		 	done
-
+Here 3
 		## If there is a 'daveHourly' script the run it
-			Here 0
-			[[ -x $HOME/bin/daveHourly ]] && $HOME/bin/daveHourly #"batch"
-			Here 1
+			[[ -x $HOME/bin/daveHourly ]] && { Here 3a; $HOME/bin/daveHourly; } #"batch"
+Here 4
 
 		;;
 	*)
@@ -427,3 +430,4 @@ return 0
 ## 02-15-2019 @ 09:23:54 - 2.2.48 - dscudiero - Add call to loadMilestonesData
 ## 02-22-2019 @ 07:52:19 - 2.2.49 - dscudiero - Add 'batch' option to daveHourly call
 ## 03-04-2019 @ 09:48:18 - 2.2.50 - dscudiero - Add/Remove debug statements
+## 03-04-2019 @ 10:09:53 - 2.2.51 - dscudiero - Add/Remove debug statements
