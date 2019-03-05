@@ -755,3 +755,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 12-28-2018 @ 08:23:06 - 4.14.23 - dscudiero - Pass scriptname to SetDefaults
 ## 02-19-2019 @ 13:02:26 - 4.14.26 - dscudiero - Comment out the checks to prevent processing remote clients
 ## 02-22-2019 @ 08:02:54 - 4.14.27 - dscudiero - Tweak messaging
+## 03-05-2019 @ 16:04:42 - 4.14.27 - dscudiero - 
