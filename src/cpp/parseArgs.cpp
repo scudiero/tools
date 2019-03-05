@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.1.5" // -- dscudiero -- Wed 02/27/2019 @ 11:04:35
+// version="1.1.6" // -- dscudiero -- Tue 03/05/2019 @ 16:00:27
 //==================================================================================================
 #include <iostream>		// IO utility library
 #include <string>		// String utility library
@@ -227,7 +227,7 @@ int main(int argc, char *argv[]) {
 							std::cout << "[[ -z $" + scriptVar + " ]] && " + scriptVar + "=\"" + shortName + "\"" + 
 										 " || " + scriptVar + "=\"$" + scriptVar + " " + shortName + "\"\n";
 						} else {
-							std::cout << scriptCmd;
+							std::cout << scriptCmd + "\n";
 						}
 					} else {
 						std::cout << scriptVar + "=true\n";
@@ -280,3 +280,4 @@ int main(int argc, char *argv[]) {
 // 11-16-2018 @ 15:15:20 - 1.0.9 - dscudiero - Add ability to specify script specific arguments
 // 12-04-2018 @ 11:40:28 - 1.1.0 - dscudiero - Switch to read the default arguments from the data warehouse
 // 02-27-2019 @ 11:05:58 - 1.1.5 - dscudiero - Tweak messaging
+// 03-05-2019 @ 16:03:55 - 1.1.6 - dscudiero - Fix problem when emmiting argument that has a script command
