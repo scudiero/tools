@@ -1,0 +1,176 @@
+%spidercode%
+
+	//============================================================================================================
+	// Version: 1.0.0
+	//============================================================================================================
+	// Examine the milestones data and check for any milestones that are going to be due in 'age' days or less
+	// (see 'age' variable).  If any are found due then the csm for that project is emailed with an alert that 
+	// there are items due.
+	//============================================================================================================
+
+(function () {
+
+	//============================================================================================================
+	//Variable Declares
+	//============================================================================================================
+	var debug=false;
+	var age=5;
+
+	//============================================================================================================
+	//Parse Arguments
+	//============================================================================================================
+	var argStr = getenv("QUERY_STRING");
+	if(argStr.indexOf("debug=") >= 0)
+		debug = argStr.replace(/.*debug=([^\&]*)\&?.*$/i, "$1");
+	if(argStr.indexOf("age=") >= 0)
+		age = argStr.replace(/.*age=([^\&]*)\&?.*$/i, "$1");
+
+	//============================================================================================================
+	//MAIN
+	//============================================================================================================
+	// Get the milestone data from the transactional database that are due in 'age' days or less
+		var db = "milestones";
+		var sqlStmt="select client,project,label,date,rank,round(julianday(date))-round(julianday('now')) as days2due"
+			    	+ " from snapshots,milestone"
+					+ " where milestone.key = snapshots.key and snapshots.archived is null"
+					+ " and snapshots.client <> '' and milestone.complete <> 'true' and snapshots.archived is null"
+					+ " and round(julianday(date))-round(julianday('now')) <= " + age
+					+ " order by client, rank, date"
+		var resultSet = dbquery(db,sqlStmt);
+		if (debug) print_debug("\nsqlStmt 0 = " + sqlStmt+ "\n");
+		if (debug) print_debug("resultSet (milestones)" + resultSet.toSource() + "\n\n")
+
+		// Create a hash table for emailing data
+		var emailListHash = [];
+		var emailListHashKeys = [];
+
+		// Loop through results and look up the csm for the project
+		if (resultSet.length > 0) {
+			resultSet.forEach(function(result) {
+				if (debug) print_debug("result (milestones)" + result.toSource() + "\n");
+				// Get the csm for this client/project
+				var role = "csm";
+				switch (result.project.toLowerCase()) {
+					case "cat":
+					case "cat-project":
+						role="CAT" + role; 
+					break;
+					case "cim-courses":
+						role="CIMC" + role;
+					break;
+					case "cim-programs":
+						role="CIMP" + role;; 
+					break;
+					case "clss": 
+						role="CLSS" + role;
+					break;
+				}
+
+				var sqlStmt="select employees.db_firstname,employees.db_lastname,employees.db_email"
+						+ " from employees,clientroles,clients"
+						+ " where clients.clientcode = \"" + result.client + "\""
+						+ " and clientroles.clientkey = clients.clientkey"
+						+ " and clientroles.role = \"" + role + "\""
+						+ " and employees.db_employeekey = clientroles.employeekey"
+				var resultSet2 = dbquery("contacts",sqlStmt);
+				if (debug) print_debug("\nsqlStmt 1 = " + sqlStmt+ "\n\n");
+				if (debug) print_debug("\nresultSet2 (contacts) 1" + resultSet2.toSource() + "\n");
+				
+				// Add/update a hash entry for this CSM key 
+				var key=null;
+				resultSet2.forEach(function(result2) {
+					// if (debug) print_doc("&nbsp;&nbsp;&nbsp;result2 = " + result2.toSource() + "<br>\n");
+					key = result2.db_firstname + " " + result2.db_lastname + "/" + result2.db_email;
+					if (emailListHash[key] == undefined) {
+						var tmpArray=[]; tmpArray.push(result);
+						emailListHash[key] = tmpArray;
+						emailListHashKeys.push(key);
+					} else {
+						var tmpArray=emailListHash[key];
+						var tmpArray2=[];
+						tmpArray.forEach(function(token) {
+							tmpArray2.push(token);
+						});
+						tmpArray2.push(result);
+						emailListHash[key] = tmpArray2;
+					}
+					if (debug) print_debug("\temailListHash["+key+"] = " + emailListHash[key].toSource() + "\n");
+				}); //resultSet2.forEach (contacts)
+			}); //resultSet.forEach (milestones records)
+		} //(resultSet.length > 0)
+
+	//Loop through the hash and send the emails
+		if (emailListHashKeys.length > 0 ) {
+			// Setup sendnow data object
+			var url = "http://sendnow.leepfrog.com/sendnow.cgi?project=courseleaf";
+			var postData = {
+				message: "custom.msg",
+				project: "cleaf",
+				batch: "clProject",
+				subject: "CL project milestones overdue or due in " + age + " or less",
+				editoremail: "noaddress@mailbb.leepfrog.com",
+				fromname: "CL project milestones daemon",
+				site: "Internal",
+				pin: md5base64("customdj@7wx")
+			};
+
+			emailListHashKeys.forEach(function(key) {
+				var tmpArray=[]; 
+				if (debug) print_debug("key = " + key + "\n");
+				if (debug) print_debug("\temailListHash[" + key + "] = " + emailListHash[key].toSource() + "\n");
+				tmpArray=key.split("/");
+				if (debug) {
+					postData.email = "dscudiero@leepfrog.com";
+				} else {
+					postData.email = key.split("/")[1];
+				}				
+				postData.fname = key.split("/")[0].split(" ")[0];
+				postData.lname = key.split("/")[0].split(" ")[1];
+
+				var bodyText="";
+				bodyText ="\nThe following milestones for clients that you manage are overdue or have pending completions in " + age + " days:\n";
+				bodyText += "(negative number indicates past due)\n\n";
+				tmpArray=[]; tmpArray.push(emailListHash[key]);
+				tmpArray.forEach(function(milestones) {
+					if (debug) print_debug("\n\tmilestones = " + milestones.toSource() + "\n");
+					milestones.forEach(function(milestone) {
+						//milestone = ({client:"wisc", project:"cim-courses", label:"UAT Complete", date:"2018-11-03", rank:"7", days2due:"-3.0"})
+						if (debug) print_debug("\t\tmilestone = " + milestone.toSource() + "\n");
+						bodyText += "       " + milestone.client + " / " + milestone.project + "  --  "
+									+ milestone.label + ", days to due: " + milestone.days2due.replace(".0","") + "\n";
+					}); //milestones.forEach
+				}); //tmpArray.forEach
+
+				// Send out email
+				postData.body = bodyText;
+				if (debug) var email = "dscudiero@leepfrog.com";
+				dump(debug,"postData",postData); 
+				var results = http_get(url, { postdata: postData });
+				if (results.indexOf("Accepted") < 0 ) print_debug("\n" + results + postData.toSource().replace(/,/g,",\n\t"));
+			}); //emailListHashKeys.forEach	
+
+		} //emailListHashKeys.length > 0 
+
+	return;
+
+
+	//============================================================================================================
+	// Subs
+	//============================================================================================================
+
+	//============================================================================================================
+	function dump(varName,varValue){
+		if (! debug) {return}
+		text=varName + ' = >' + varValue + '<\n'
+		print_debug(text)
+	}
+
+	//============================================================================================================
+	function Here(id) {
+		print_debug('Here ' + id + '\n');
+	}
+
+//============================================================================================================
+//Close function wrapper
+})();
+%spidercode%
