@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.55" # -- dscudiero -- Mon 03/04/2019 @ 15:23:03
+version="2.2.56" # -- dscudiero -- Tue 03/05/2019 @ 07:40:45
 
 #=======================================================================================================================
 # Run every hour from cron
@@ -251,27 +251,20 @@ case "$hostName" in
 				Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
 
-			if [[ $(date "+%H") == 12 || $(date "+%H") == 22 ]]; then
-				# Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."
-				# TrapSigs 'off'
-				# if [[ $(date "+%H") == 12 ]]; then 
-				# 	Msg "\n$(date +"%m/%d@%H:%M") - Running syncCourseleafGitRepos master..."
-				# 	TrapSigs 'off'; FindExecutable -sh -run syncCourseleafGitRepos master; TrapSigs 'on'
-				# 	Msg "...syncCourseleafGitRepos done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
-				# fi
-				if [[ $(date "+%H") == 22 && $userName == 'dscudiero' ]]; then 
-					# Msg "\n$(date +"%m/%d@%H:%M") - Running backupData ..."
-					# TrapSigs 'off'; FindExecutable -sh -uselocal -run backupData; TrapSigs 'on'
-					# Msg "...backupData done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
-					## Remove all hourly log files older than 24 hrs
-					pushd "$(dirname "$logFile")" >& /dev/null
-					find . -mtime +0 -exec rm -f '{}' \;
-					popd >& /dev/null
-				fi
-			fi
-		 ## Check for git commits in the master tools repo
+			# if [[ $(date "+%H") == 12 || $(date "+%H") == 22 ]]; then
+			# 	if [[ $(date "+%H") == 22 && $userName == 'dscudiero' ]]; then 
+			# 		# Msg "\n$(date +"%m/%d@%H:%M") - Running backupData ..."
+			# 		# TrapSigs 'off'; FindExecutable -sh -uselocal -run backupData; TrapSigs 'on'
+			# 		# Msg "...backupData done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+			# 		## Remove all hourly log files older than 24 hrs
+			# 		pushd "$(dirname "$logFile")" >& /dev/null
+			# 		find . -mtime +0 -exec rm -f '{}' \;
+			# 		popd >& /dev/null
+			# 	fi
+			# fi
+
+		 ## Check for git commits in the master tools/workflowJs repos
 		 	repos="tools workflowJs"
-		 	repos="tools"
 		 	for repo in $repos; do
 		 		Msg "\nChecking $repo git repo for commits..."
 				tmpFile=$(MkTmpFile)
@@ -305,6 +298,7 @@ case "$hostName" in
 					fi
 				fi
 		 	done
+		 	
 		## If there is a 'daveHourly' script the run it
 			[[ -x $HOME/bin/daveHourly ]] && $HOME/bin/daveHourly "batch"
 
@@ -430,3 +424,4 @@ return 0
 ## 03-04-2019 @ 13:20:33 - 2.2.52 - dscudiero - Add/Remove debug statements
 ## 03-04-2019 @ 14:15:35 - 2.2.53 - dscudiero - Add PushPop to the includes list
 ## 03-04-2019 @ 15:23:44 - 2.2.55 - dscudiero - Add/Remove debug statements
+## 03-05-2019 @ 07:40:54 - 2.2.56 - dscudiero - M
