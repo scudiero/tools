@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.9" # -- dscudiero -- Mon 02/25/2019 @ 07:44:46
+version="1.23.11" # -- dscudiero -- Tue 03/05/2019 @ 15:20:03
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -191,6 +191,21 @@ case "$hostName" in
 				Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			done
 
+		# ## Run courseleaf steps
+		# 	internalUser="dscudiero"
+		# 	internalPw="xxxxxxxxxx"
+		# 	tmpFile1=$(mkTmpFile)
+		# 	internalUrl="https://${internalUser}:${internalPw}@stage-internal.leepfrog.com/ribbit"
+		# 	pgms=("getMilestones.rjs &output=check")
+		# 	for ((i=0; i<${#pgms[@]}; i++)); do
+		# 		pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
+		# 		Msg "\n$(date +"%m/%d@%H:%M") - Running '$pgmName $pgmArgs'..."; sTime=$(date "+%s")
+		# 		curl -s "$internalUrl/?page=${pgmName}${pgmArgs}" > "$tmpFile1"
+		# 		# cat "$tmpFile1"
+		# 		Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+		# 	done
+		# 	rm -f "$tmpFile1"
+
 		## Clean out dead entries from the 'auth' tables
 			sqlStmt="delete from $auth2userTable where $auth2userTable.empKey not in (select employeeKey from $employeeTable where isactive = \"Y\")";
 			RunSql $sqlStmt
@@ -267,6 +282,7 @@ case "$hostName" in
 				done < "$TOOLSPATH/src/cron/serverMove.txt"
 				IFS="$ifs"
 			fi
+
 		 ## Check that all things ran properly, otherwise revert the databases
 		 	Msg "\nCleanup..."
 			Semaphore 'waiton' "buildClientInfoTable"
@@ -482,3 +498,4 @@ return 0
 ## 02-18-2019 @ 08:22:28 - 1.23.7 - dscudiero - Add/Remove debug statements
 ## 02-22-2019 @ 07:34:25 - 1.23.8 - dscudiero - Add/Remove debug statements
 ## 02-25-2019 @ 07:44:54 - 1.23.9 - dscudiero - Add/Remove debug statements
+## 03-05-2019 @ 15:22:08 - 1.23.11 - dscudiero - Comment out the courseleaf steps stuff
