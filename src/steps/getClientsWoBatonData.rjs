@@ -1,0 +1,86 @@
+%pragma format=html
+//==================================================================================================
+// https://internal.leepfrog.com/ribbit/?page=getClientsWoBatonData.rjs
+//==================================================================================================
+// version="1.0.2" // -- dscudiero -- Thu 02/14/2019 @ 12:52:00
+//==================================================================================================
+// 10/29/18 - dgs - Generate a html report of all clients that do not have any baton data 
+//==================================================================================================
+
+//==================================================================================================
+// Write out a html client table
+//==================================================================================================
+writeTable = function(client, dataLines) {
+	// Start table
+	print_doc("<h3>Client: " + client.toUpperCase() + "</h3>\n");
+	print_doc("\n\t<table>\n");
+	print_doc("\t\t<tr> <th align=\"left\">Project</th>" 
+		+ " <th align=\"left\">Milestone</th> <th align=\"left\">Last Mod Date</th>"
+		+ " <th align=\"left\">Status</th> </tr>\n");
+
+	// Data rows
+	dataLines.forEach(function(dataLine) {
+		if (dataLine.complete === "true") { 
+				dataLine.complete = "Completed";
+		} else {
+				dataLine.complete = "Active";
+		}
+		print_doc("\t\t<tr>" 
+			+ " <td>" + dataLine.project + "</td>"
+			+ " <td>" + dataLine.label + "</td>"
+			+ " <td>" + dataLine.date + "</td>"
+			+ " <td>" + dataLine.complete + "</td>"
+			+ " </tr>\n");	
+	});
+
+	// Close table
+	print_doc("\t</table>\n");
+	print_doc("\t<br />\n");
+}
+
+//==================================================================================================
+// MAIN
+//	Generate a html report of all clients that do not have any baton data 
+//==================================================================================================
+// Setup html page
+print_doc("\n<!DOCTYPE html>")
+print_doc("<html>\n");
+print_doc("<body>\n");
+print_doc("\t<h2>Courseleaf sites that do not have any Baton data in milestones.snapshots</h2>\n");
+print_doc("\t<p>" +  Date() + "</p>\n");
+
+print_doc("\n\t<table>\n");
+print_doc("\t\t<tr> <th align=\"left\">Client</th> <th align=\"left\">clientCode</th> </tr>\n");
+
+// Get a list of clients that have baton data from the transactional database
+var batonClientStr="";
+var db = "milestones";
+var sqlStmt="select distinct client from snapshots order by client"
+var resultSet = dbquery(db,sqlStmt);
+if (resultSet.length > 0) {
+	resultSet.forEach(function(result) {
+		batonClientStr = batonClientStr + ",\"" + result.client + "\"";
+	});
+	batonClientStr = batonClientStr.substring(1);
+}
+print_debug("\batonClientStr= " + batonClientStr + "\n")
+
+// Get a list of clients from the contacts transactional database
+var batonClientStr="";
+var db = "contacts";
+var sqlStmt="select distinct clientcode, name from clients where clientcode not in (" + batonClientStr + ")" 
+			+ " and classification in (\"C\",\"CC\",\"U\") order by clientcode"
+var resultSet = dbquery(db,sqlStmt);
+if (resultSet.length > 0) {
+	resultSet.forEach(function(result) {
+		print_debug("result = " + result.toSource() + "\n");
+		print_doc("\t\t<tr>" 
+			+ " <td>" + result.name + "</td>"
+			+ " <td>" + result.clientcode + "</td>"
+			+ " </tr>\n");
+	});
+}
+
+// Close html page
+print_doc("\n\t</body>\n");
+print_doc("</html>\n");
