@@ -4,7 +4,7 @@
 // https://internal.leepfrog.com/ribbit/?page=getMilestones.rjs&output=all
 // https://internal.leepfrog.com/ribbit/?page=getMilestones.rjs&output=alert
 //==================================================================================================
-// version="1.0.19" // -- dscudiero -- Thu 02/07/2019 @ 15:54:17
+// version="1.0.20" // -- dscudiero -- Wed 03/06/2019 @ 10:45:00
 //==================================================================================================
 // Generate a baton summary report see MAIN below
 //==================================================================================================
@@ -148,137 +148,136 @@ htmlReport = function(output, db, deltaDays, debug) {
 	return;
 }
 
-//==================================================================================================
-// alert -- Send emails to the project csms for late/pending milestones
-//==================================================================================================
-alert = function(db, deltaDays, debug) {
-	myName="getMilestones.rjs(alert)"
-	// Get the milestone data from the transactional database
-		var sqlStmt="select client,project,label,date,rank,round(julianday(date))-round(julianday('now')) as days2due"
-			    	+ " from snapshots,milestone"
-					+ " where milestone.key = snapshots.key and snapshots.archived is null"
-					+ " and snapshots.client <> '' and milestone.complete <> 'true' and snapshots.archived is null"
-					+ " and round(julianday(date))-round(julianday('now')) <= " + deltaDays
-					+ " order by client, rank, date"
-		var resultSet = dbquery(db,sqlStmt);
-		// if (debug) print_doc("<br>sqlStmt 0 = " + sqlStmt+ "<br>\n");
-		// if (debug) print_doc("resultSet (milestones)" + resultSet.toSource() + "<br><br>\n")
+// //==================================================================================================
+// // alert -- Send emails to the project csms for late/pending milestones
+// //==================================================================================================
+// alert = function(db, deltaDays, debug) {
+// 	myName="getMilestones.rjs(alert)"
+// 	// Get the milestone data from the transactional database
+// 		var sqlStmt="select client,project,label,date,rank,round(julianday(date))-round(julianday('now')) as days2due"
+// 			    	+ " from snapshots,milestone"
+// 					+ " where milestone.key = snapshots.key and snapshots.archived is null"
+// 					+ " and snapshots.client <> '' and milestone.complete <> 'true' and snapshots.archived is null"
+// 					+ " and round(julianday(date))-round(julianday('now')) <= " + deltaDays
+// 					+ " order by client, rank, date"
+// 		var resultSet = dbquery(db,sqlStmt);
+// 		// if (debug) print_doc("<br>sqlStmt 0 = " + sqlStmt+ "<br>\n");
+// 		// if (debug) print_doc("resultSet (milestones)" + resultSet.toSource() + "<br><br>\n")
 
-		// Add results table to page
-		var emailListHash = [];
-		var emailListHashKeys = [];
+// 		// Add results table to page
+// 		var emailListHash = [];
+// 		var emailListHashKeys = [];
 
-		if (resultSet.length > 0) {
-			resultSet.forEach(function(result) {
-				// if (debug) print_doc("<br>result (milestones)" + result.toSource() + "<br>\n");
-				// Get the csm for this client/project
-				var role = "csm";
-				switch (result.project.toLowerCase()) {
-					case "cat":
-						role="CAT" + role; 
-					break;
-					case "cim-courses":
-						role="CIMC" + role;
-					break;
-					case "cim-programs":
-						role="CIMP" + role;; 
-					break;
-					case "clss": 
-						role="CLSS" + role;
-					break;
-				}
+// 		if (resultSet.length > 0) {
+// 			resultSet.forEach(function(result) {
+// 				// if (debug) print_doc("<br>result (milestones)" + result.toSource() + "<br>\n");
+// 				// Get the csm for this client/project
+// 				var role = "csm";
+// 				switch (result.project.toLowerCase()) {
+// 					case "cat":
+// 						role="CAT" + role; 
+// 					break;
+// 					case "cim-courses":
+// 						role="CIMC" + role;
+// 					break;
+// 					case "cim-programs":
+// 						role="CIMP" + role;; 
+// 					break;
+// 					case "clss": 
+// 						role="CLSS" + role;
+// 					break;
+// 				}
 
-				var sqlStmt="select employees.db_firstname,employees.db_lastname,employees.db_email"
-						+ " from employees,clientroles,clients"
-						+ " where clients.clientcode = \"" + result.client + "\""
-						+ " and clientroles.clientkey = clients.clientkey"
-						+ " and clientroles.role = \"" + role + "\""
-						+ " and employees.db_employeekey = clientroles.employeekey"
-				var resultSet2 = dbquery("contacts",sqlStmt);
-				// if (debug) print_doc("<br>sqlStmt 1 = " + sqlStmt+ "<br>\n");
-				// if (debug) print_doc("resultSet (contacts) 1" + resultSet2.toSource() + "<br>\n");
+// 				var sqlStmt="select employees.db_firstname,employees.db_lastname,employees.db_email"
+// 						+ " from employees,clientroles,clients"
+// 						+ " where clients.clientcode = \"" + result.client + "\""
+// 						+ " and clientroles.clientkey = clients.clientkey"
+// 						+ " and clientroles.role = \"" + role + "\""
+// 						+ " and employees.db_employeekey = clientroles.employeekey"
+// 				var resultSet2 = dbquery("contacts",sqlStmt);
+// 				// if (debug) print_doc("<br>sqlStmt 1 = " + sqlStmt+ "<br>\n");
+// 				// if (debug) print_doc("resultSet (contacts) 1" + resultSet2.toSource() + "<br>\n");
 				
-				// Add/update a hash entry for this CSM key 
-				var key=null;
-				resultSet2.forEach(function(result2) {
-					// if (debug) print_doc("&nbsp;&nbsp;&nbsp;result2 = " + result2.toSource() + "<br>\n");
-					key = result2.db_firstname + " " + result2.db_lastname + "/" + result2.db_email;
-					if (emailListHash[key] == undefined) {
-						var tmpArray=[]; tmpArray.push(result);
-						emailListHash[key] = tmpArray;
-						emailListHashKeys.push(key);
-					} else {
-						var tmpArray=emailListHash[key];
-						var tmpArray2=[];
-						tmpArray.forEach(function(token) {
-							tmpArray2.push(token);
-						});
-						tmpArray2.push(result);
-						emailListHash[key] = tmpArray2;
-					}
-					// if (debug) print_doc("&nbsp;&nbsp;&nbsp; emailListHash["+key+"] = " + emailListHash[key].toSource() + "<br>\n");
-				}); //resultSet2.forEach
-			}); //resultSet.forEach
-		} //(resultSet.length > 0)
+// 				// Add/update a hash entry for this CSM key 
+// 				var key=null;
+// 				resultSet2.forEach(function(result2) {
+// 					// if (debug) print_doc("&nbsp;&nbsp;&nbsp;result2 = " + result2.toSource() + "<br>\n");
+// 					key = result2.db_firstname + " " + result2.db_lastname + "/" + result2.db_email;
+// 					if (emailListHash[key] == undefined) {
+// 						var tmpArray=[]; tmpArray.push(result);
+// 						emailListHash[key] = tmpArray;
+// 						emailListHashKeys.push(key);
+// 					} else {
+// 						var tmpArray=emailListHash[key];
+// 						var tmpArray2=[];
+// 						tmpArray.forEach(function(token) {
+// 							tmpArray2.push(token);
+// 						});
+// 						tmpArray2.push(result);
+// 						emailListHash[key] = tmpArray2;
+// 					}
+// 					// if (debug) print_doc("&nbsp;&nbsp;&nbsp; emailListHash["+key+"] = " + emailListHash[key].toSource() + "<br>\n");
+// 				}); //resultSet2.forEach
+// 			}); //resultSet.forEach
+// 		} //(resultSet.length > 0)
 
-	//Loop through the hash and send the emails
-		if (emailListHashKeys.length > 0 ) {
-			// Setup sendnow data object
-			var url = "http://sendnow.leepfrog.com/sendnow.cgi?project=courseleaf";
-			var postData = {
-				message: "custom.msg",
-				project: "cleaf",
-				batch: "clProject",
-				subject: "CL project milestones overdue or due in " + deltaDays + " or less",
-				editoremail: "noaddress@mailbb.leepfrog.com",
-				fromname: "CL project milestones daemon",
-				site: "Internal",
-				pin: md5base64("customdj@7wx")
-			};
+// 	//Loop through the hash and send the emails
+// 		if (emailListHashKeys.length > 0 ) {
+// 			// Setup sendnow data object
+// 			var url = "http://sendnow.leepfrog.com/sendnow.cgi?project=courseleaf";
+// 			var postData = {
+// 				message: "custom.msg",
+// 				project: "cleaf",
+// 				batch: "clProject",
+// 				subject: "CL project milestones overdue or due in " + deltaDays + " or less",
+// 				editoremail: "noaddress@mailbb.leepfrog.com",
+// 				fromname: "CL project milestones daemon",
+// 				site: "Internal",
+// 				pin: md5base64("customdj@7wx")
+// 			};
 
-			if (debug) print_doc("<br><br><br>")
-			emailListHashKeys.forEach(function(key) {
-				var tmpArray=[]; 
-				if (debug) print_doc("<br>key = " + key + "<br>\n");
-				if (debug) print_doc("&nbsp;&nbsp;&nbsp; emailListHash[" + key + "] = " + emailListHash[key].toSource() + "<br>\n");
-				tmpArray=key.split("/");
-				if (debug) {
-					postData.email = "dscudiero@leepfrog.com";
-				} else {
-					postData.email = key.split("/")[1];
-				}				
-				postData.fname = key.split("/")[0].split(" ")[0];
-				postData.lname = key.split("/")[0].split(" ")[1];
+// 			if (debug) print_doc("<br><br><br>")
+// 			emailListHashKeys.forEach(function(key) {
+// 				var tmpArray=[]; 
+// 				if (debug) print_doc("<br>key = " + key + "<br>\n");
+// 				if (debug) print_doc("&nbsp;&nbsp;&nbsp; emailListHash[" + key + "] = " + emailListHash[key].toSource() + "<br>\n");
+// 				tmpArray=key.split("/");
+// 				if (debug) {
+// 					postData.email = "dscudiero@leepfrog.com";
+// 				} else {
+// 					postData.email = key.split("/")[1];
+// 				}				
+// 				postData.fname = key.split("/")[0].split(" ")[0];
+// 				postData.lname = key.split("/")[0].split(" ")[1];
 
-				var bodyText="";
-				bodyText ="\nThe following milestones for clients that you manage are overdue or have pending completions in " + deltaDays + " days:\n";
-				bodyText += "(negative number indicates past due)\n\n";
-				tmpArray=[]; tmpArray.push(emailListHash[key]);
-				tmpArray.forEach(function(milestones) {
-					if (debug) print_doc("\n&nbsp;&nbsp;&nbsp; milestones = " + milestones.toSource() + "<br>\n");
-					milestones.forEach(function(milestone) {
-						//milestone = ({client:"wisc", project:"cim-courses", label:"UAT Complete", date:"2018-11-03", rank:"7", days2due:"-3.0"})
-						if (debug) print_doc("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; milestone = " + milestone.toSource() + "<br>\n");
-						bodyText += "       " + milestone.client + " / " + milestone.project + "  --  " + 
-									milestone.label + ", days to due: " + milestone.days2due.replace(".0","") + "\n";
-					}); //milestones.forEach
-				}); //tmpArray.forEach
+// 				var bodyText="";
+// 				bodyText ="\nThe following milestones for clients that you manage are overdue or have pending completions in " + deltaDays + " days:\n";
+// 				bodyText += "(negative number indicates past due)\n\n";
+// 				tmpArray=[]; tmpArray.push(emailListHash[key]);
+// 				tmpArray.forEach(function(milestones) {
+// 					if (debug) print_doc("\n&nbsp;&nbsp;&nbsp; milestones = " + milestones.toSource() + "<br>\n");
+// 					milestones.forEach(function(milestone) {
+// 						//milestone = ({client:"wisc", project:"cim-courses", label:"UAT Complete", date:"2018-11-03", rank:"7", days2due:"-3.0"})
+// 						if (debug) print_doc("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; milestone = " + milestone.toSource() + "<br>\n");
+// 						bodyText += "       " + milestone.client + " / " + milestone.project + "  --  " + 
+// 									milestone.label + ", days to due: " + milestone.days2due.replace(".0","") + "\n";
+// 					}); //milestones.forEach
+// 				}); //tmpArray.forEach
 
-				// Send out email
-				postData.body = bodyText;
-				if (debug) var email = "dscudiero@leepfrog.com";
-				dump(debug,"postData",postData); 
-				var results = http_get(url, { postdata: postData });
-				if (results.indexOf("Accepted") < 0 ) print_debug("\n" + results + postData.toSource().replace(/,/g,",\n\t"));
-			}); //emailListHashKeys.forEach	
+// 				// Send out email
+// 				postData.body = bodyText;
+// 				if (debug) var email = "dscudiero@leepfrog.com";
+// 				dump(debug,"postData",postData); 
+// 				var results = http_get(url, { postdata: postData });
+// 				if (results.indexOf("Accepted") < 0 ) print_debug("\n" + results + postData.toSource().replace(/,/g,",\n\t"));
+// 			}); //emailListHashKeys.forEach	
 
-		} else {
-			if (debug) print_doc("\n" + myName + ": No miletone records found pending due or overdue\n");
-		}
+// 		} else {
+// 			if (debug) print_doc("\n" + myName + ": No miletone records found pending due or overdue\n");
+// 		}
 
-
-	return;
-} //alert
+// 	return;
+// } //alert
 
 //==================================================================================================
 // MAIN
@@ -287,7 +286,7 @@ alert = function(db, deltaDays, debug) {
 //	output 	- 'All' - return data for all clients regardless of milestone completions
 //			- 'Active' - return data for only clients that have incomplete milestones, this is the
 //						 default if output is not specified.
-//			- 'Alerts' - Process all milestones and send an email to the responsible CSM for milestones
+//			- 'Alert' - Process all milestones and send an email to the responsible CSM for milestones
 //						 That are going to come due in 'deltaDays' days
 //==================================================================================================
 var debug=true;
@@ -307,8 +306,8 @@ switch(output.toLowerCase()) {
 	case "active":
 		htmlReport(output, db, deltaDays, debug);
 		break;
-	case "alert":
-		alert(db, deltaDays, debug);
-		break;
+	// case "alert":
+	// 	alert(db, deltaDays, debug);
+	// 	break;
 } 
 
