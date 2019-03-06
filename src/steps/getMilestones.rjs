@@ -4,7 +4,7 @@
 // https://internal.leepfrog.com/ribbit/?page=getMilestones.rjs&output=all
 // https://internal.leepfrog.com/ribbit/?page=getMilestones.rjs&output=alert
 //==================================================================================================
-// version="1.0.20" // -- dscudiero -- Wed 03/06/2019 @ 10:45:00
+// version="1.0.21" // -- dscudiero -- Wed 03/06/2019 @ 10:59:56
 //==================================================================================================
 // Generate a baton summary report see MAIN below
 //==================================================================================================
@@ -87,7 +87,7 @@ daysBetween = function(date1, date2) {
   var difference_ms = date2_ms - date1_ms;
     
   // Convert back to days and return
-  return Math.round(difference_ms/one_day); 
+  return Math.ceil(difference_ms/one_day); 
 }
 
 //==================================================================================================
