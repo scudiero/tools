@@ -1,10 +1,11 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version="2.11.2" # -- dscudiero -- Wed 01/30/2019 @ 11:18:59
+version="2.11.15" # -- dscudiero -- Wed 03/06/2019 @ 08:29:37
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi SetSiteDirs"
+myIncludes="$myIncludes SetSiteDirsNew"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -325,31 +326,16 @@ GetDefaultsData $myName
 
 ParseArgsStd $originalArgStr
 [[ -n $unknowArgs ]] && cimStr="$unknowArgs"
-if [[ $verify == false && -z $tgtEnv && -n $srcEnv ]]; then
-	SetSiteDirs
-	if [[ $srcEnv == 'pvt' ]]; then
-		srcDir="$pvtDir"
-		tgtEnv='dev'
-		[[ -d "$devDir" ]] && tgtDir="$devDir" || Terminate "Sorry, attempting to copy from a pvt site and the dev site does not exists."
-	elif [[ $srcEnv == 'dev' ]]; then
-		srcDir="$devDir"
-		tgtEnv='test'
-		tgtDir="$testDir"
-	elif [[ $srcEnv == 'test' ]]; then
-		srcDir="$testDir"
-		tgtEnv='next'
-		tgtDir="$nextDir"
-	elif [[ $srcEnv == 'next' ]]; then
-		srcDir="$nextDir"
-		tgtEnv='pvt'
-		tgtDir="$pvtDir"
-	fi
-fi
-dump -1 -n client env envs srcEnv srcDir tgtEnv tgtDir cimStr fastinit -p
 
 # Initialize instance variables
-	Init 'getClient getSrcEnv getTgtEnv getDirs checkEnvs getCims'
-	dump -1 client env envs srcEnv srcDir tgtEnv tgtDir cimStr
+	if [[ $fastInit == true ]]; then
+		SetSiteDirsNew $client
+		tmpStr="${srcEnv}Dir"; srcDir="${!tmpStr}"
+		tmpStr="${tgtEnv}Dir"; tgtDir="${!tmpStr}"
+	else
+		Init 'getClient getSrcEnv getTgtEnv getDirs checkEnvs getCims'
+	fi
+	dump -1 client env envs srcEnv srcDir tgtEnv tgtDir cimStr -p
 
 # If target is NEXT checks
 	if [[ $tgtEnv == 'next' ]]; then
@@ -760,3 +746,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 11-09-2018 @ 14:39:45 - 2.11.0 - dscudiero - Add special logic for fastInit when called from workwith
 ## 11-20-2018 @ 09:42:05 - 2.11.1 - dscudiero - Comment out the code checkign of there is a console listing for workflow management
 ## 01-30-2019 @ 11:19:30 - 2.11.2 - dscudiero - Change default target from a pvt site to dev
+## 03-06-2019 @ 08:40:00 - 2.11.15 - dscudiero - Re-factor how initialization is done for fastInit
