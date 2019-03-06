@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.5.93" // -- dscudiero -- Wed 03/06/2019 @ 08:12:23
+// version="1.5.94" // -- dscudiero -- Wed 03/06/2019 @ 08:27:15
 //==================================================================================================
 #include <stdlib.h>
 #include <unistd.h>
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
 				std::vector<std::string> splittedStrings=split(devServers, ',');
 				for(int i = 0; i < splittedStrings.size() ; i++) {
 					string server = splittedStrings[i];
-					string dir="//mnt/" + server + "/web/" + client + "-" + userName;
+					string dir="/mnt/" + server + "/web/" + client + "-" + userName;
 					struct stat statbuf; 
 					if (stat(dir.c_str(), &statbuf) != -1) {
 					   if (S_ISDIR(statbuf.st_mode)) {
@@ -161,3 +161,4 @@ int main(int argc, char *argv[]) {
 // Check-in log
 //=================================================================================================================// 01-29-2019 @ 11:28:24 - 1.5.88 - dscudiero - Remove extra '{'
 // 03-06-2019 @ 08:13:18 - 1.5.93 - dscudiero - Add/Remove debug statements
+// 03-06-2019 @ 08:28:23 - 1.5.94 - dscudiero - Removed extrea '/' leading the pvtDir setting
