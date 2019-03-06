@@ -1,0 +1,59 @@
+%pragma format=text/json
+var output = { success:false };
+var db = "milestones";
+
+if (http.milestones) {
+   var data;
+   try { 
+      data = JSON.parse(http.milestones);
+      print_debug("db = '" + db.toSource() + "'\n")
+		if (!dbexec(db, "begin"))
+			throw "Cannot begin: " + dberr(db);
+		if (!dbexec(db, "update snapshots set archived = 'Y' " +
+				"where client = ? and project = ? and modtime != ?",
+				[data.client, data.project, data.modtime])) {
+			throw "Cannot archive old snapshots: " + dberr(db);
+		}
+		var res = dbexec(db,
+				"insert into snapshots ( client, project, modtime ) " +
+					"values ( ?, ?, ? )",
+				[data.client, data.project, data.modtime]);
+		var key;
+		if (res) {
+			key = +res.lastinsertid;
+		} else {
+			res = dbexec(db,
+				"update snapshots set archived = null " +
+					"where client = ? and project = ? and modtime = ?",
+				[data.client, data.project, data.modtime]);
+			if (!res || res.sqlcount != 1)
+				throw "Cannot update snapshot: " + JSON.stringify(res);
+			// May already have a snapshot on this date
+			res = dbquery(db,
+				"select key from snapshots " +
+					"where client = ? and project = ? and modtime = ?",
+				[data.client, data.project, data.modtime]);
+			if (!res || !res.length)
+				throw "Cannot insert snapshot: " + dberr(db);
+			key = +res[0].key;
+			if (!dbexec(db, "delete from milestone where key = ?", [+key]))
+				throw "Cannot clean out old entries: " + dberr(db);
+		}
+		for (var milestone in data.milestones) {
+			var curr = data.milestones[milestone];
+			if (!dbexec(db,
+					"insert into milestone ( key, name, label, date, complete ) " +
+						"values (?, ?, ?, ?, ?)", 
+					[key, milestone, curr.label, curr.date, curr.complete])) {
+				throw "Cannot insert milestone: " + dberr(db);
+			}
+		}
+		dbexec(db, "commit");
+      output.success = true;
+   } catch(whynot) {
+      output.error = whynot; 
+   }    
+} else {
+   output.error = "No milestones received";
+}
+print_doc(JSON.stringify(output));
