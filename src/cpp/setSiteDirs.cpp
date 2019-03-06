@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.5.88" // -- dscudiero -- Tue 01/29/2019 @ 09:41:17
+// version="1.5.93" // -- dscudiero -- Wed 03/06/2019 @ 08:12:23
 //==================================================================================================
 #include <stdlib.h>
 #include <unistd.h>
@@ -86,14 +86,20 @@ int main(int argc, char *argv[]) {
 			if (mysqlStatus)
 			    throw FFError( (char*)mysql_error(MySQLConnection) );
 			mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
-
 			if (mysqlResult) {
 		            numRows = mysql_num_rows(mysqlResult);
 					if (numRows > 0) {
 						while(mysqlRow = mysql_fetch_row(mysqlResult)) {
+							// Debug(2,"\t\tmysqlRow.length: " + mysqlRow.length().c_str(), verboseLevel);
 				    		string env = mysqlRow[0];
 				    		string siteDir = mysqlRow[1];
+
+				    		Debug(2,"\t\tenv: " + env, verboseLevel);
+				    		Debug(2,"\t\tsiteDir: " + siteDir, verboseLevel);
+
 	 						string tmpStr = env + "Dir=\"" + siteDir + "\"\n";
+	 						Debug(2,"\t\ttmpStr: " + tmpStr, verboseLevel);
+
 			     			write(3, tmpStr.c_str(), tmpStr.size());
 						}
 					}
@@ -154,3 +160,4 @@ int main(int argc, char *argv[]) {
 //=================================================================================================================
 // Check-in log
 //=================================================================================================================// 01-29-2019 @ 11:28:24 - 1.5.88 - dscudiero - Remove extra '{'
+// 03-06-2019 @ 08:13:18 - 1.5.93 - dscudiero - Add/Remove debug statements
