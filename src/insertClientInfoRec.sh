@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.4.4" # -- dscudiero -- Mon 11/05/2018 @ 13:13:53
+version="2.4.5" # -- dscudiero -- Fri 03/08/2019 @ 13:28:27
 #===================================================================================================
 TrapSigs 'on'
 
@@ -137,6 +137,49 @@ Dump -1 -n client
 		done
 	fi
 
+## Get the URL data from the transactional db
+	Verbose 1 "^^Getting url data"
+	envs="dev,qa,test,next,curr,prior,preview,public"
+	for env in $(tr ',' ' '<<< $envs); do unset ${env}url ${env}internalurl; done
+	sqlStmt="select type,domain,internal from clientsites where clientkey=$idx"
+	RunSql "$contactsSqliteFile" $sqlStmt
+	if [[ ${#resultSet[@]} -gt 0 ]]; then
+		for ((cntr=0; cntr<${#resultSet[@]}; cntr++)); do
+			result="${resultSet[$cntr]}"
+			env="${result%%|*}"; env="${env//-/_}"; result="${result#*|}"
+			domain="${result%%|*}"; result="${result#*|}"
+			Dump -2 -t2 env domain result
+			[[ $result == 'Y' ]] && eval ${env}internalurl="${domain// /}" || eval ${env}url="${domain// /}" 
+		done
+	fi
+
+## Get the projects status
+	Verbose 1 "^^Getting projects data"
+	declare -A projectsHash
+	sqlStmt="select distinct project,completestatus from $milestonesInfoTable where client = \"$client\"order by project,completestatus"
+	RunSql $sqlStmt
+	if [[ ${#resultSet[@]} -gt 0 && -n ${resultSet[0]} ]]; then
+		for result in "${resultSet[@]}"; do
+			project="${result%%|*}"; result="${result#*|}"
+			status="${result%%|*}"; result="${result#*|}"
+			# dump client project status
+			if [[ ! ${projectsHash["$project"]+abc} ]]; then
+				projectsHash["$project"]="$status"
+			else 
+				[[ $status == 'false' ]] && projectsHash["$project"]=false;
+			fi
+		done
+		## Set variables for subsequest database insert
+		for mapCtr in "${!projectsHash[@]}"; do
+			# echo -e "\tkey: '$mapCtr', value: '${projectsHash[$mapCtr]}'";
+			[[ $mapCtr == 'cat-project' ]] && catProjectStatus="${projectsHash[$mapCtr]}"
+			[[ $mapCtr == 'cim-courses' ]] && cimCoursesProjectStatus="${projectsHash[$mapCtr]}"
+			[[ $mapCtr == 'cim-programs' ]] && cimProgramsProjectStatus="${projectsHash[$mapCtr]}"
+			[[ $mapCtr == 'clss-project' ]] && clssProjectStatus="${projectsHash[$mapCtr]}"
+		done;
+	fi
+	dump -1 -t catProjectStatus cimCoursesProjectStatus cimProgramsProjectStatus clssProjectStatus
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # ## Get the Rep data from the transactional db
 # 	Verbose 1 "^^Getting reps data"
@@ -174,6 +217,8 @@ Dump -1 -n client
 		if [[ $field == 'recordstatus' ]]; 	then [[ $fieldVal == 'Y' ]] && fieldVal="\"A\"" || fieldVal="\"D\""
 		elif [[ $field == 'createdby' ]]; 	then fieldVal="\"$userName\""
 		elif [[ $field == 'createdon' ]]; 	then fieldVal='NOW()'
+		elif [[ $field == 'updatedby' ]]; 	then fieldVal="\"$userName\""
+		elif [[ $field == 'updatedon' ]]; 	then fieldVal='NOW()'
 		elif [[ $(Trim $fieldVal) == '' ]]; then fieldVal='NULL'
 		else
 			[[ ${fieldType:0:1} == 'v' ]] && fieldVal="\"$fieldVal\""
@@ -250,3 +295,4 @@ return 0
 ## 11-02-2018 @ 16:40:27 - 2.4.1 - dscudiero - Cosmetic/minor change/Sync
 ## 11-05-2018 @ 07:44:50 - 2.4.2 - dscudiero - Remove buildClientRoles code
 ## 11-05-2018 @ 13:13:59 - 2.4.4 - dscudiero - Cosmetic/minor change/Sync
+## 03-08-2019 @ 13:29:20 - 2.4.5 - dscudiero - Add etl for project statuses
