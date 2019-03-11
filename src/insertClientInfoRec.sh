@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.4.8" # -- dscudiero -- Fri 03/08/2019 @ 13:47:07
+version="2.4.9" # -- dscudiero -- Mon 03/11/2019 @ 08:33:18
 #===================================================================================================
 TrapSigs 'on'
 
@@ -157,7 +157,7 @@ Dump -1 -n client
 	unset catprojectstatus cimcoursesprojectstatus cimprogramsprojectstatus clssprojectstatus
 	Verbose 1 "^^Getting projects data"
 	declare -A projectsHash
-	sqlStmt="select distinct project,completestatus from $milestonesInfoTable where client = \"$client\"order by project,completestatus"
+	sqlStmt="select distinct project,complete from $milestonesInfoTable where client = \"$client\"order by project,complete"
 	RunSql $sqlStmt
 	if [[ ${#resultSet[@]} -gt 0 && -n ${resultSet[0]} ]]; then
 		for result in "${resultSet[@]}"; do
@@ -306,3 +306,4 @@ return 0
 ## 11-05-2018 @ 13:13:59 - 2.4.4 - dscudiero - Cosmetic/minor change/Sync
 ## 03-08-2019 @ 13:29:20 - 2.4.5 - dscudiero - Add etl for project statuses
 ## 03-11-2019 @ 07:55:44 - 2.4.8 - dscudiero - Add ETL for project statutses
+## 03-11-2019 @ 08:33:56 - 2.4.9 - dscudiero - Change sql query for project status to reflect change in table column defs
