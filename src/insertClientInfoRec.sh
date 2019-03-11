@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="2.4.5" # -- dscudiero -- Fri 03/08/2019 @ 13:28:27
+version="2.4.8" # -- dscudiero -- Fri 03/08/2019 @ 13:47:07
 #===================================================================================================
 TrapSigs 'on'
 
@@ -154,6 +154,7 @@ Dump -1 -n client
 	fi
 
 ## Get the projects status
+	unset catprojectstatus cimcoursesprojectstatus cimprogramsprojectstatus clssprojectstatus
 	Verbose 1 "^^Getting projects data"
 	declare -A projectsHash
 	sqlStmt="select distinct project,completestatus from $milestonesInfoTable where client = \"$client\"order by project,completestatus"
@@ -172,13 +173,21 @@ Dump -1 -n client
 		## Set variables for subsequest database insert
 		for mapCtr in "${!projectsHash[@]}"; do
 			# echo -e "\tkey: '$mapCtr', value: '${projectsHash[$mapCtr]}'";
-			[[ $mapCtr == 'cat-project' ]] && catProjectStatus="${projectsHash[$mapCtr]}"
-			[[ $mapCtr == 'cim-courses' ]] && cimCoursesProjectStatus="${projectsHash[$mapCtr]}"
-			[[ $mapCtr == 'cim-programs' ]] && cimProgramsProjectStatus="${projectsHash[$mapCtr]}"
-			[[ $mapCtr == 'clss-project' ]] && clssProjectStatus="${projectsHash[$mapCtr]}"
+			if [[ $mapCtr == 'cat-project' ]]; then
+				[[ ${projectsHash[$mapCtr]} == "true" ]] && catprojectstatus="C" || catprojectstatus="A" 
+			fi
+			if [[ $mapCtr == 'cim-courses' ]]; then
+				[[ ${projectsHash[$mapCtr]} == "true" ]] && cimcoursesprojectstatus="C" || cimcoursesprojectstatus="A" 
+			fi
+			if [[ $mapCtr == 'cim-programs' ]]; then
+				[[ ${projectsHash[$mapCtr]} == "true" ]] && cimprogramsprojectstatus="C" || cimprogramsprojectstatus="A" 
+			fi
+			if [[ $mapCtr == 'clss-project' ]]; then
+				[[ ${projectsHash[$mapCtr]} == "true" ]] && clssprojectstatus="C" || clssprojectstatus="A" 
+			fi
 		done;
 	fi
-	dump -1 -t catProjectStatus cimCoursesProjectStatus cimProgramsProjectStatus clssProjectStatus
+	dump -1 -t catprojectstatus cimcoursesprojectstatus cimprogramsprojectstatus clssprojectstatus
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # ## Get the Rep data from the transactional db
@@ -296,3 +305,4 @@ return 0
 ## 11-05-2018 @ 07:44:50 - 2.4.2 - dscudiero - Remove buildClientRoles code
 ## 11-05-2018 @ 13:13:59 - 2.4.4 - dscudiero - Cosmetic/minor change/Sync
 ## 03-08-2019 @ 13:29:20 - 2.4.5 - dscudiero - Add etl for project statuses
+## 03-11-2019 @ 07:55:44 - 2.4.8 - dscudiero - Add ETL for project statutses
