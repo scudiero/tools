@@ -14,7 +14,7 @@
 //Variable Declares
 //============================================================================================================
 var myName="wwSetRoles";
-var debug=true;
+var debug=false;
 var version="1.0"
 
 //============================================================================================================
@@ -47,39 +47,43 @@ if (argRoles == undefined) {
 		if (tmpArray.length === 3) {
 			role.email = tmpArray[2];
 		}
-		if (debug) print_debug("\t\trole = " + role.toSource() + "\n");
+		if (debug) print_debug("\targ role = " + role.toSource() + "\n");
 		roles.push(role);
 	});
 
 	// Get the currently defined roles into a roles hash
-		var rolesHash=[];
+		var tcfData=[];
+		if (debug) print_debug("\n");
 		tcfdata.role.forEach(function(token) {
-			rolesHash[token.name] = token;
+			tcfData[token.name] = token;
+			if (debug) print_debug("\t(" + myName + ") tcfData[" + token.name + "] '" + tcfData[token.name].toSource() + "'\n");
 		});
+		if (debug) print_debug("\n");
 
 	// Loop through the input roles and update the rolesHas as necessary
 		var writeTcf = false;
 		roles.forEach(function(role) {
-			if (typeof rolesHash[role.name] == "undefined") {
+			if (typeof tcfData[role.name] == "undefined") {
 				if (debug) print_debug("\t(" + myName + ") Adding role '" + role.name + "'\n");
-				rolesHash[role.name] = role;
+				tcfData[role.name] = role;
 				writeTcf = true;
 			} else {
-				if (rolesHash[role.name].members != role.members || rolesHash[role.name].email != role.email) {
+				if (tcfData[role.name].members != role.members || tcfData[role.name].email != role.email) {
 					if (debug) print_debug("\t(" + myName + ") Updating role '" + role.name + "'\n");
-					rolesHash[role.name] = role;
+					tcfData[role.name] = role;
 					writeTcf = true;
 				}
 			}
 		});
+		if (debug) print_debug("\n");
 
 	// If data was changed then update the roles.tcf file
 		if (debug) print_debug("\twriteTcf = " + writeTcf + "\n");
 		if (writeTcf) {
 			if (debug) print_debug("\t*** (" + myName + ") Writing out roles.tcf data...\n");
 			rolesOut=[];
-			for (var key in rolesHash) {
-				rolesOut.push(rolesHash[key]);
+			for (var key in tcfData) {
+				rolesOut.push(tcfData[key]);
 			}
 			attr_write("role",rolesOut,{savetcf: true});
 		}
