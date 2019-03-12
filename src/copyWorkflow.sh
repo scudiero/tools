@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version="2.11.15" # -- dscudiero -- Wed 03/06/2019 @ 08:29:37
+version="2.11.18" # -- dscudiero -- Tue 03/12/2019 @ 15:36:34
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi SetSiteDirs"
@@ -229,7 +229,7 @@ function CheckFilesForCopy {
 					toStr="wfDebugLevel:0"
 					$DOIT sed -i s"_^${fromStr}_${toStr}_" $srcFile
 				fi
-				for searchStr in skiploadsync:true wfrules:wfDumpVars wforder:wfDumpVars wfrules:WhatsChanged wforder:WhatsChanged ; do
+				for searchStr in skiploadsync:true wforder:wfDumpVars wfrules:WhatsChanged wforder:WhatsChanged ; do
 					unset grepStr; grepStr=$(ProtectedCall "grep ^$searchStr $srcFile")
 					if [[ -n $grepStr ]]; then
 						fromStr="$grepStr"
@@ -747,3 +747,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 11-20-2018 @ 09:42:05 - 2.11.1 - dscudiero - Comment out the code checkign of there is a console listing for workflow management
 ## 01-30-2019 @ 11:19:30 - 2.11.2 - dscudiero - Change default target from a pvt site to dev
 ## 03-06-2019 @ 08:40:00 - 2.11.15 - dscudiero - Re-factor how initialization is done for fastInit
+## 03-12-2019 @ 15:37:27 - 2.11.18 - dscudiero - Fix problem putting the workflow.cfg file when commenting out the wfDump wfrule
