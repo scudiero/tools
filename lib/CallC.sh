@@ -38,3 +38,4 @@ export -f CallC
 ## 12-11-2018 @ 08:49:56 - 1.0.38 - dscudiero - Add local tp variable declaraions, turn off error trapping
 ## 12-11-2018 @ 10:22:17 - 1.0.39 - dscudiero - Comment out error trapping
 ## 12-17-2018 @ 07:51:57 - 1.0.40 - dscudiero - Add exporting of verboseLevel so it is avaiable to the c program
+## 03-13-2019 @ 15:07:29 - 1.0.40 - dscudiero - 
