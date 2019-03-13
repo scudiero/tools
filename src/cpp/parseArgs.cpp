@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.1.6" // -- dscudiero -- Tue 03/05/2019 @ 16:00:27
+// version="1.1.15" // -- dscudiero -- Wed 03/13/2019 @ 15:05:53
 //==================================================================================================
 #include <iostream>		// IO utility library
 #include <string>		// String utility library
@@ -239,23 +239,29 @@ int main(int argc, char *argv[]) {
 						string scriptCmdL=scriptCmd;
 						boost::algorithm::to_lower(scriptCmdL);
 						if (scriptCmdL == "maptoenv") {
-							if (arg == "c") {
-								arg = "curr";
-							} else if (arg == "n") {
-								arg = "next";
-							} else if (arg == "t") {
-								arg = "test";
-							} else if (arg == "d") {
-								arg = "dev";
-							} else if (arg == "p") {
-								arg = "pvt";
-							} else if (arg == "pub") {
-								arg = "public";
-							} else if (arg == "pri") {
-								arg = "prior";
-							} else if (arg == "pre") {
-								arg = "preview";
+							i--;
+							arg = argv[i];
+							if (arg == "-c" || arg == "-curr") {
+								std::cout << "env=\"curr\"\n";
+							} else if (arg == "-n" || arg == "-next") {
+								std::cout << "env=\"next\"\n";
+							} else if (arg == "-t" || arg == "-test") {
+								std::cout << "env=\"test\"\n";
+							} else if (arg == "-a" || arg == "-alt") {
+								std::cout << "env=\"alt\"\n";
+							} else if (arg == "-d" || arg == "-dev") {
+								std::cout << "env=\"dev\"\n";
+							} else if (arg == "-p" || arg == "-pvt") {
+								std::cout << "env=\"pvt\"\n";
+							} else if (arg == "-pub" || arg == "-public") {
+								std::cout << "env=\"public\"\n";
+							} else if (arg == "-pri" || arg == "-prior") {
+								std::cout << "env=\"prior\"\n";
+							} else if (arg == "-pre" || arg == "-preview") {
+								std::cout << "env=\"preview\"\n";
 							}
+							i++;
+							arg = argv[i];
 						}
 					}
 					std::cout << scriptVar + "=\"" + arg + "\"\n";
@@ -282,3 +288,4 @@ int main(int argc, char *argv[]) {
 // 02-27-2019 @ 11:05:58 - 1.1.5 - dscudiero - Tweak messaging
 // 03-05-2019 @ 16:03:55 - 1.1.6 - dscudiero - Fix problem when emmiting argument that has a script command
 // 03-12-2019 @ 08:33:21 - 1.1.6 - dscudiero - 
+// 03-13-2019 @ 15:07:50 - 1.1.15 - dscudiero - Add special processing for mapToEnv
