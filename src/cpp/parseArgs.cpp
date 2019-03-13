@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.1.15" // -- dscudiero -- Wed 03/13/2019 @ 15:05:53
+// version="1.1.17" // -- dscudiero -- Wed 03/13/2019 @ 15:09:01
 //==================================================================================================
 #include <iostream>		// IO utility library
 #include <string>		// String utility library
@@ -289,3 +289,4 @@ int main(int argc, char *argv[]) {
 // 03-05-2019 @ 16:03:55 - 1.1.6 - dscudiero - Fix problem when emmiting argument that has a script command
 // 03-12-2019 @ 08:33:21 - 1.1.6 - dscudiero - 
 // 03-13-2019 @ 15:07:50 - 1.1.15 - dscudiero - Add special processing for mapToEnv
+// 03-13-2019 @ 15:09:22 - 1.1.17 - dscudiero - Update the rhel6 version
