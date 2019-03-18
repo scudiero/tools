@@ -1,12 +1,12 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.11" # -- dscudiero -- Tue 03/05/2019 @ 15:20:03
+version="1.23.12" # -- dscudiero -- Mon 03/18/2019 @ 15:02:09
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes="RunCourseLeafCgi GetCourseleafPgm Semaphore ProtectedCall StringFunctions CalcElapsed"
+myIncludes="RunCourseLeafCgi GetCourseleafPgm Semaphore ProtectedCall StringFunctions CalcElapsed PushPop"
 Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*";
@@ -307,6 +307,12 @@ case "$hostName" in
 			
 		Msg "\nDone"
 
+		## sync the jalot data warehouse tables
+			Pushd "/mnt/internal/site/stage/web/pagewiz"
+			time ./pagewiz.cgi jalotWarhouseETL /
+			Popd
+
+
 		;; ## mojave
 
 	*) ## build7
@@ -499,3 +505,4 @@ return 0
 ## 02-22-2019 @ 07:34:25 - 1.23.8 - dscudiero - Add/Remove debug statements
 ## 02-25-2019 @ 07:44:54 - 1.23.9 - dscudiero - Add/Remove debug statements
 ## 03-05-2019 @ 15:22:08 - 1.23.11 - dscudiero - Comment out the courseleaf steps stuff
+## 03-18-2019 @ 15:02:38 - 1.23.12 - dscudiero - Add jalot data warehouse table sync
