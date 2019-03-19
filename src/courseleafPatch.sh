@@ -293,12 +293,13 @@ function processGitRecord {
 			ProtectedCall "$gitCmd" | Indent
 			[[ $verboseLevel -eq 0 ]] && gitCmd="git checkout --force --quiet $gitTag &> /dev/null" || gitCmd="git checkout --force $gitTag"
 			ProtectedCall "$gitCmd" | Indent;
-		## If we are on a branch, perform a git pull
-		## TODO A reset will not remove any conflicting added files as the reset is done
-		## to the already checked out hash. To remove conflicts on a pull, fully remove any added files
-		## reported by the preceding git diff
+		## If we are on a branch, perform a git pull 
 			if [[ $gitBranchCount > 0 ]]; then
-				gitCmd="git pull --quiet";
+				## This is the equivalent of a pull but with the added benefit
+				## of "--force" which isn't available on a pull command
+				## This ensures that any conflicting added files do not block the pull
+				## from being successful and replaces the conflicting files with the git version
+				gitCmd="git reset --quiet --hard origin/$gitTag";
 				ProtectedCall "$gitCmd" | Indent;
 			fi
 		## If we are going to generate a patch package then write the changed files to the staging directory
