@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.12" # -- dscudiero -- Mon 03/18/2019 @ 15:02:09
+version="1.23.13" # -- dscudiero -- Tue 03/19/2019 @ 10:44:46
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -308,6 +308,7 @@ case "$hostName" in
 		Msg "\nDone"
 
 		## sync the jalot data warehouse tables
+			Msg "\nSyncing the jalot data warehouse tables..."
 			Pushd "/mnt/internal/site/stage/web/pagewiz"
 			time ./pagewiz.cgi jalotWarhouseETL /
 			Popd
@@ -506,3 +507,4 @@ return 0
 ## 02-25-2019 @ 07:44:54 - 1.23.9 - dscudiero - Add/Remove debug statements
 ## 03-05-2019 @ 15:22:08 - 1.23.11 - dscudiero - Comment out the courseleaf steps stuff
 ## 03-18-2019 @ 15:02:38 - 1.23.12 - dscudiero - Add jalot data warehouse table sync
+## 03-19-2019 @ 10:45:14 - 1.23.13 - dscudiero - Tweak messaging
