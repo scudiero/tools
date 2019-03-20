@@ -1,0 +1,377 @@
+
+//==============================================================================================
+// // version="1.0.69" // -- dscudiero -- Tue 03/19/2019 @ 11:56:48
+//==============================================================================================
+//Globals
+var jalotMasterUser="acct13830-gestalt";
+var jalotCertKey="supportjalot";
+var jalotCert="";
+var jalotUrl = "https://jalot.com/raccxml.cgi";
+var jalotStyles = "jalotTasksStyle.html";
+var jalotInternalUrl = "https://stage-internal.leepfrog.com/ribbit"
+// var jalotInternalUrl = "https://dscudiero.dev6.leepfrog.com/ribbit"
+
+var jalotStyleRed="style=\"color:red\"";
+var jalotStyleGreen="style=\"color:green\"";
+
+var dbr = "warehouse";
+var dbrw = "warehouseUpdt";
+
+//==============================================================================================
+// Get the jalot tasklists information, returns a hash table where the key is the jalot tasklist 
+// topicId and the hash data is the tasklisk object
+//==============================================================================================
+function getTasklists(jalotUser) {
+	let debug = false;
+	// print_debug("\nHERE getTasklists HERE getTasklists HERE\n");
+	
+	// Get the jalot certificate from the certs file, key = 'supportjalot'
+		if (jalotCert === "" ) jalotCert = getCert(jalotCertKey);
+
+	// URLs to call jalot, user jalotMasterUser ('acct13830-gestalt') is the userid that is used buy clients to respond as/to 'Clint Review'
+		let topics_get = "db=jalot&user=" + jalotMasterUser + "/F1iO" 
+							+ "&listtopics=private";
+		// let topics_get = "db=jalot&user=acct13667-gestalt/geRb&listtopics=todo";
+
+	// Get the 'topics' (taskslists) from jalot
+		let topics_xml = http_get(jalotUrl + "?" + topics_get,
+			{headers:["Cookie: raccauth=\"" + encodeURIComponent(jalotCert) + "\""]});
+		let taskLists = [];
+		// print_debug(topics_xml)
+
+	// Loop through the xml document building a hash table of taslkist ID/topics
+		for (let xml = new docXML(topics_xml); xml.good(); xml = xml.nextNode()) {
+			if (xml.getNode() == "error") {
+				dump("tasks_xml",nodeToObject(xml),true)
+				print_doc("<br>*Error* (http_get) -- " + nodeToObject(xml).message + "<br>&nbsp;&nbsp;&nbsp;" + topics_get + "<br>");
+				return false;
+			} else if (xml.getNode() == 'topic') {
+				taskLists[xml.getAttribute("topicid")] = nodeToObject(xml);
+				taskLists[xml.getAttribute("topicid")].topicid = xml.getAttribute("topicid");
+			}
+		}
+
+	// Build a sorted hash table
+		let sortedTasklists = {};
+		Object.keys(taskLists).sort().forEach(function(key) {
+			sortedTasklists[key] = taskLists[key];		
+		});
+
+	return sortedTasklists
+} //getTasklists
+
+
+
+//==============================================================================================
+// Get the jalot task data returns a hash table where the key is the <abbreviated tasklistname>.<task.idInTasklist>
+// e.g "Leepfrog.113".  The data is the 'tweaked' task object:
+// {
+//==============================================================================================
+function getTasks(jalotUser,flags) {
+
+	// print_debug("\nHERE getTasks HERE getTasks HERE\n");
+	let debug = false;
+
+	if (jalotUser) dump("jalotUser",jalotUser,debug);
+	if (flags) dump("flags",flags,debug);
+
+	// Get the task meta data from jalot
+		//let tasks_get = "db=jalot&user=" + jalotMasterUser + "/F1iO&listtopics=flags%3Anoclosed";
+		let tasks_get = "db=jalot&user=" + jalotMasterUser + "/F1iO" 
+						+ "&listtopics=flags%3A" + flags;
+
+		if (jalotCert === "" ) jalotCert = getCert(jalotCertKey);
+
+		let tasks_xml = http_get(jalotUrl + "?" + tasks_get, 
+			{headers:["Cookie: raccauth=\"" + encodeURIComponent(jalotCert) + "\""]});
+
+		// loop through the xml pulling out the topics stanza
+		let userTasks = [];
+		for (let xml = new docXML(tasks_xml); xml.good(); xml = xml.nextNode()) {
+			if (xml.getNode() == "error") {
+				dump("tasks_xml",tasks_xml,true)
+				print_doc("<br>*Error* -- " + tasks_xml + "<br><br>");
+				return false;
+			} else if (xml.getNode() == "topic") {
+				let task = nodeToObject(xml);
+				task.topicid = xml.getAttribute("topicid");
+				
+				tmpStr = task.name;
+				task.name = RegExp.rightContext;
+				task.important = (RegExp.$1 == "1");
+				task.name = tmpStr;
+
+				let tmpArray=task.desc.split(" ");
+				task.idInTasklist=tmpArray[3];
+
+				// interrogate the flags and set deferred status
+				if (task.flags && task.flags.match('deferred')) {
+					task.deferred = true;
+					if (! task.deferuntil) {
+						task.deferuntil = 'Indefinitely';
+					}
+				}
+				else {
+					task.deferred = false;
+				}
+				// set the owner array = [<owner jalot id>, <owner gestalt id>, <owner name>]
+				let ownerparts = task.owner.split("/");
+				if(ownerparts[2] == "(hidden)")	{
+					ownerparts[2] = ownerparts[1];
+				}
+				task.owner=ownerparts;
+				// set the initiator array = [<owner jalot id>, <owner gestalt id>, <owner name>]
+				let initiatorparts = task.startedby.split("/");
+				if(initiatorparts[2] == "(hidden)")	{
+					initiatorparts[2] = initiatorparts[1];
+				}
+				task.initiator=initiatorparts;
+				task.startedOnEpoch = (new Date(task.startedon)).getTime();
+				task.lastNotePostedEpoch = (new Date(task.lastnoteposted)).getTime();
+
+				// calculate the number of days/hours the task has been open
+				let currtime = new Date();
+				task.elapSecondsFromOpen = Math.round((currtime.getTime() - task.startedOnEpoch));
+				task.elapHoursFromOpen = Math.round(task.elapSecondsFromOpen / 1000 / 60 / 60);
+				task.elapSecondsFromUpdate = Math.round((currtime.getTime() - task.lastNotePostedEpoch));
+				task.elapHoursFromUpdate = Math.round(task.elapSecondsFromUpdate / 1000 / 60 / 60);
+
+				task.tasklist=task.parenttopic.replace(/\/.*/, "");
+
+				dump("task",task,debug);
+				if (!jalotUser || (task.owner[0] == jalotUser || task.initiator[0] == jalotUser)) {
+					// Do we have an entry for this tasklist in the data warehouse, if yes then get the actual tasklist name sans '- Courseleaf'
+					let key = task.parenttopic.replace(/\/.*/, "") + "." + task.topicid
+					let table = "jalotTasklists";
+					let sqlStmt = "select name from " + table + " where taskListId = \"" + task.parenttopic.replace(/\/.*/, "") + "\""
+					let warehouseData = dbquery(dbr, sqlStmt);
+					if (warehouseData.length != 0)
+						key = warehouseData[0].name.replace(/  *-? *CourseLeaf/, "") + "." + task.topicid;
+					userTasks[key] = task;
+				}
+			}
+		}
+
+	return userTasks;} // getTasks
+
+
+
+//==============================================================================================
+// Get the jalot task's notes returns a object as follows:
+// Returns an hash of note objects.  The hash key is the note number and each note object is of the form:
+// {
+// 		date:noteDate
+// 		owner:noteOwner
+// 		subject:noteSubject
+// 		text:noteText
+// }
+//==============================================================================================
+function getTaskNotes(taskId) {
+	let debug = false;
+	// print_debug("\nHERE getTaskDetails HERE getTaskDetails HERE\n");
+	
+	dump("taskId",taskId,debug);
+	//==============================================================================================
+	let curTime = new Date();
+	let taskNotes_get="db=jalot" +
+					  "&user=" + jalotMasterUser + "/F1iO" +
+					  "&topic=" + taskId +
+					  "&readnotes=info,last10000,joined,listfiles=" + taskId +
+					  "&reqid=" + curTime.getTime();
+
+	if (jalotCert === "" ) jalotCert = getCert(jalotCertKey);
+	let taskNotesXml = http_get(jalotUrl + "?" + taskNotes_get, {headers:["Cookie: raccauth=\"" + encodeURIComponent(jalotCert) + "\""]});
+
+	let notes=[];
+	for (let xml = new docXML(taskNotesXml); xml.good(); xml = xml.nextNode()) {
+		if (xml.getNode() === "note") {
+				let note = nodeToObject(xml);
+				let noteNum = xml.getAttribute("noteno");
+				let noteDate = note.date;
+				let noteOwner = note["formal-name"].split("/");
+				let noteSubject = note.subject;
+				let noteText = note.body;
+				notes[noteNum] = {date:noteDate, owner:noteOwner, subject:noteSubject, text:noteText};
+		}
+	}
+	let retData = notes;
+	dump("retData",retData,debug);
+	return retData;
+} // getTaskNotes
+
+
+
+//==============================================================================================
+// Get the jalot task details returns a object as follows:
+//	{
+//		title:title
+// 		taskList:taskList
+//		date:origionationDate
+//		owner:owner
+// 		firstNote:firstNote
+// 		lastNote:lastNote
+// 		lastNotePosted:lastNotePosted 
+// 		originator:originator
+// 		description:description
+// 		lastNote:lastNote
+// 		flags:flags
+// 		notes:notes
+// }
+// where notes a hash table where the key is the note number and the data is an object of the form:
+// {
+// 		date:noteDate
+// 		owner:noteOwner
+// 		subject:noteSubject
+// 		text:noteText
+// }
+// and 'originator' and 'noteOwner' is an array of [<jalotId>,<userId>, <First><Last>]
+//==============================================================================================
+function getTaskDetails(topicid) {
+	let debug = false;
+	// print_debug("\nHERE getTaskDetails HERE getTaskDetails HERE\n");
+	
+	dump("topicid",topicid,debug,"doc");
+	//==============================================================================================
+	let curTime = new Date();
+	let taskNotes_get="db=jalot" +
+					  "&user=" + jalotMasterUser + "/F1iO" +
+					  "&topic=" + topicid +
+					  "&readnotes=info,last10000,joined,listfiles=" + topicid +
+					  "&reqid=" + curTime.getTime();
+	dump("<br>taskNotes_get",taskNotes_get,debug,"doc");
+
+	if (jalotCert === "" ) jalotCert = getCert(jalotCertKey);
+	dump("<br>jalotCert",jalotCert,debug,"doc");
+
+	let taskNotesXml = http_get(jalotUrl + "?" + taskNotes_get, {headers:["Cookie: raccauth=\"" + encodeURIComponent(jalotCert) + "\""]});	
+	if (debug) print_doc("<br>taskNotesXml:<br> " + taskNotesXml + "<br>");
+
+	let notes=[];
+	let retData="";
+	for (let xml = new docXML(taskNotesXml); xml.good(); xml = xml.nextNode()) {
+		dump("<br>xml",xml,debug,"doc");
+		dump("<br>xml.getNode()",xml.getNode(),debug,"doc");
+		switch(xml.getNode()) {
+			case "topic":
+				//print_doc("<br><br> HERE topic HERE topic HERE<br>")
+				var topic = nodeToObject(xml);
+				var title = topic.name;
+				var taskList = topic.desc;
+				var owner = topic.owner.split("/");
+				var firstNote = topic.firstnote;
+				var lastNote = topic.lastnote;
+				var lastNotePosted = topic.lastnoteposted;
+				var flags = topic.flags;
+			  break;
+			case "topicinfo":
+				//print_doc("<br><br> HERE topicinfo HERE topicinfo HERE<br>")
+				var topicinfo = nodeToObject(xml);
+				var originator = topicinfo["formal-name"].split("/");
+				var origionationDate = topicinfo.date;
+				var description = topicinfo.body;
+			  break;
+			  case "note":
+				//print_doc("<br><br> HERE note HERE note HERE<br>")
+				var note = nodeToObject(xml);
+				var noteNum = xml.getAttribute("noteno");
+				var noteDate = note.date;
+				var noteOwner = note["formal-name"].split("/");
+				var noteSubject = note.subject;
+				var noteText = note.body;
+				notes[noteNum] = {date:noteDate, owner:noteOwner, subject:noteSubject, text:noteText};
+			  break;
+		}
+	}
+	if (typeof title != "undefined")
+		retData = {title:title, taskList:taskList, date:origionationDate, owner:owner, firstNote:firstNote, lastNote:lastNote, lastNotePosted:lastNotePosted,  			originator:originator, description:description, lastNote:lastNote, flags:flags, notes:notes};
+
+	dump("<br>retData",retData,debug,"doc");
+	return retData;
+} // getTaskDetails
+
+
+//==============================================================================================
+// Get the jalot certificate from the certs file, if key not passed will use 'supportjalot'
+// returns cert string
+//==============================================================================================
+function getCert(key) {
+	if (key.typeof === undefined)
+		key=jalotCertKey;
+
+	let tmpStr;
+	let certs = fopen("/certs/index.tcf");
+	let auth = null;
+	while (tmpStr = fgets(certs), !feof(certs)) {
+		if (/^supportjalot:/.test(tmpStr)) {
+			auth = RegExp.rightContext;
+			break;
+		}
+	}
+	if (!auth) {
+		print_debug("\n*Error* (getCert) -- No Jalot support credentials found\n");
+	}
+	return auth;
+} //getCert
+
+//==============================================================================================
+// Pull off the next child node from an xml document, return as an object
+//==============================================================================================
+function nodeToObject(xml) {
+	let retObj = {};
+	for (let walker=xml.firstChild(); walker.good();
+			walker = walker.nextSibling()) {
+		retObj[walker.getNode()] = walker.getText();
+	}
+	return retObj;
+} //nodeToObject
+
+//==============================================================================================
+function dump(variable,value,debug,where) {
+	if (typeof debug === "undefined") debug=true;
+	if (typeof where === "undefined") where="log";
+	if (typeof value === "undefined") value="undefined";
+
+	if (debug) {
+		if (where === "doc") {
+			print_doc(variable + " = " + value.toSource() + "<br>\n");
+		} else {
+			print_debug("\t" + variable + " = >" + value.toSource() + "<\n");
+		}
+	}
+	return;
+} //dump
+
+
+//==============================================================================================
+function here(id,debug,where) {
+	if (typeof debug === undefined) debug=false;
+	if (typeof where === undefined) where="log";
+	if (debug) {
+		let tmpStr="HERE " + id + " HERE " + id + " HERE " + id + " HERE ";
+		if (where === "doc") {
+			print_doc(tmpStr + "<br>\n");
+		} else {
+			print_debug(tmpStr + "\n");
+		}
+	}
+	return;
+} //here
+
+//==============================================================================================
+function padZero(param) {
+	if (param < 10)
+		return '0' + param;
+	return param;
+} //padZero
+
+//==============================================================================================
+function twoDigits(d) {
+    if(0 <= d && d < 10) return "0" + d.toString();
+    if(-10 < d && d < 0) return "-0" + (-1*d).toString();
+    return d.toString();
+}
+
+//==============================================================================================
+Date.prototype.toMysqlFormat = function() {
+    return this.getUTCFullYear() + "-" + twoDigits(1 + this.getUTCMonth()) + "-" + twoDigits(this.getUTCDate()) + " " + twoDigits(this.getUTCHours()) + ":" + twoDigits(this.getUTCMinutes()) + ":" + twoDigits(this.getUTCSeconds());
+};
