@@ -26,7 +26,7 @@ if (http.debug)
 	let currtime = new Date();
 
 	let db = "warehouse";
-	if (debug) print_debug("\n*** " + myName + ".rjs starting, userid = '" + userid + "' ***\n");
+	if (debug) print_debug("\n*** " + myName + ".rjs starting, csmUserId = '" + csmUserId + "' ***\n");
 
 	// Get the list of sites for this user that have active projects
 	// let fields = "clientId, clients.name as client, " 
@@ -56,7 +56,12 @@ if (http.debug)
 	print_filetodoc("milestonesStyle.html");
 	let title="Scheduled milestones by date / client";
 	print_doc("<title>" + title + "</title>");
-	print_doc("<h1>" + title + " for: " + csmUserId + "</h1>");
+
+	// get the csm's proper name
+	sqlStmt="select firstName, lastName from employee where userid=\"" + csmUserId + "\"";
+	let resultSet2 = dbquery(db,sqlStmt);
+
+	print_doc("<h1>" + title + " for: " + resultSet2[0].firstName + " " + resultSet2[0].lastName + " (" + csmUserId + ")</h1>");
 	print_doc("<em>" + currtime.toString() + "</em><br><br>\n");
 
 	// Loop through the clients
