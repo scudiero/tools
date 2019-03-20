@@ -1,0 +1,58 @@
+//==============================================================================================
+// Sychronize the data warhouse jalot tables with jalot live
+//==============================================================================================
+%import jalotLib.atj
+
+//==============================================================================================
+// Parse the passed arguments
+//==============================================================================================
+var debug = true;
+if (http.debug)
+	debug = http.debug;
+
+(function() {
+
+	// Get the taskLists
+	taskLists=getTasklists();
+	var dbr = "warehouse";
+	var dbrw = "warehouseUpdt";
+	var table = "jalotTasklists";
+
+	for (var key in taskLists) {
+		// print_debug("\ntaskLists[" + key + "] = '" + taskLists[key].toSource() + "\n");
+		var tmpDate = new Date(taskLists[key].lastnoteposted).toMysqlFormat();
+		// See if the record already exists
+		var sqlStmt = "select count(*) from " + table + " where topicid = \"" + key + "\""
+		var warehouseData = dbquery(dbr, sqlStmt);
+		if (warehouseData[0]["count(*)"] == 0) {
+			print_debug("\nDo insert -- " + taskLists[key].name + "\n")
+			values = key + ",\"" + taskLists[key].name + "\",\"" + taskLists[key].desc + "\",\"" + taskLists[key].firstnote + "\",\""
+					+ taskLists[key].lastnote + "\",\"" + taskLists[key].maxnote + "\",\"" + tmpDate + "\",\""
+					+ taskLists[key].internalid + "\",\"" + taskLists[key].owner +"\"";
+			var sqlStmt = "insert into jalotTasklists values(" + values + ");"
+			if (debug) print_debug("\t" + sqlStmt + "\n")
+			// warehouseData = dbquery(dbrw, sqlStmt);
+		} else {
+			print_debug("\nDo update -- " + taskLists[key].name + "\n")
+			updateStr = "name=\"" + taskLists[key].name + "\", desc=\"" + taskLists[key].desc
+			+ "\", firstNote=\"" + taskLists[key].firstnote + "\", lastNote=\"" + taskLists[key].lastnote 
+			+ "\", maxNote=\"" + taskLists[key].maxnote + "\", lastNotePosted=\"" + tmpDate
+			+ "\", internalId=\"" + taskLists[key].internalid + "\", owner=\"" + taskLists[key].owner + "\"";
+			sqlStmt = "update jalotTasklists set " + updateStr + " where topicid=\"" + key + "\"";
+			if (debug) print_debug("\t" + sqlStmt + "\n")
+			// warehouseData = dbquery(dbrw, sqlStmt);
+		}
+	}
+
+	// Get the tasks
+	tasks=getTasks();
+	if (debug) {
+		print_debug("\ntasks hash:\n")	
+		for (var key in tasks) {
+			print_debug("\ntasks[" + key + "] = '" + tasks[key].toSource() + "\n")
+		}
+	}
+
+	return;
+})();
+
