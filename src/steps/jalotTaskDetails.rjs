@@ -1,0 +1,153 @@
+%pragma format=html
+
+//==============================================================================================
+// Build an html page that lists the task details for a give jalot task.  The task to retrieve data
+// for is passed in as 'topic' on the url call, e.g. 
+//		https://dscudiero.dev6.leepfrog.com/ribbit/?page=jalotTaskDetails.rjs&topic=100071038
+//==============================================================================================
+var debug = false;
+%import jalotLib.atj
+//
+// Parse off the jalot topicId from the passed parameters
+var topicid="";
+if (http.topic) {
+	topicid = http.topic;
+} else if (http.topicid) {
+	topicid = http.topicid;
+}
+
+if (!topicid) {
+	print_doc("*Error* (jalotTaskDetails) -- Script called without a topicid, stopping");
+	print_debug("*Error* (jalotTaskDetails) -- Script called without a topicid, stopping");
+} else {
+	dump("topicid",topicid,debug,"doc");
+	(function(topicid) {
+		taskDetails = getTaskDetails(topicid);
+		if (taskDetails) {
+			var currtime = new Date();
+			// Output the page html
+			// Initialize the page
+				print_filetodoc(jalotStyles);
+				print_doc("\n<meta http-equiv=\"refresh\" content=\"60\" />\n");
+				print_doc("<strong " +  jalotStyleRed + " >" + currtime.toString() + "</strong>\n");
+				print_doc("<hr>\n");
+			// Write out task data
+				print_doc("<H2>Task: " + taskDetails.title + "<br>&nbsp;&nbsp;&nbsp;(#" 
+					+ taskDetails.taskList.replace("Replies to post ","") + ")</H2>\n");
+				print_doc("<table>\n");
+				print_doc("<tr>\n");
+				print_doc("<td>\n");print_doc("Created by");print_doc("</td>\n");
+				print_doc("<td>\n");print_doc(taskDetails.originator[2]);print_doc("</td>\n");
+				print_doc("</tr>\n");
+				print_doc("<tr>\n");
+				print_doc("<td>\n");print_doc("Creation date");print_doc("</td>\n");
+				var tmpDate = new Date(taskDetails.date);
+				print_doc("<td>\n");print_doc(tmpDate.toString());print_doc("</td>\n");
+
+				print_doc("<tr>\n");
+				print_doc("<td>\n");print_doc("&nbsp;&nbsp;&nbsp;Elapsed time/date");print_doc("</td>\n");
+				// show elapsed from open in form YY MM DD or HH
+				var elapHoursFromOpen = Math.round((currtime.getTime() - tmpDate.getTime()) / 1000 / 60 / 60);
+				print_doc("<td>\n"); 
+				if (elapHoursFromOpen > 24) {
+						var elapsedDays = elapHoursFromOpen / 24;
+						print_doc(padZero(Math.round(elapsedDays/365)) + " "); 
+						print_doc(padZero(Math.round((elapsedDays%365)/30)) + " "); 
+						print_doc(padZero(Math.round((elapsedDays%365)%30)) + " "); 
+						print_doc(" (YY MM DD)\n"); 
+				} else {
+					print_doc(elapHoursFromOpen + " hrs\n");
+				}
+				print_doc("</td>\n");
+				print_doc("</tr>\n");
+				print_doc("<tr>\n");
+				print_doc("<td>"); print_doc("Assigned to"); print_doc("</td>\n");
+				print_doc("<td>"); print_doc(taskDetails.owner[2]); print_doc("</td>\n");
+				print_doc("</tr>\n");
+
+				print_doc("<tr><td>&nbsp;</td></tr>\n");
+				print_doc("<tr>\n");
+				print_doc("<td>"); print_doc("Last updated by"); print_doc("</td>\n");
+				print_doc("<td>"); print_doc(taskDetails.originator[2]); print_doc("</td>\n");
+				print_doc("<tr>\n");
+				var tmpDate = new Date(taskDetails.lastNotePosted);
+				print_doc("<td>\n");print_doc("Last updated date");print_doc("</td>\n");
+				print_doc("<td>\n");print_doc(tmpDate.toString());print_doc("</td>\n");
+				print_doc("</tr>\n");
+
+				print_doc("<tr>\n");
+				print_doc("<td>\n");print_doc("&nbsp;&nbsp;&nbsp;Elapsed time/date");print_doc("</td>\n");
+				// show elapsed from open in form YY MM DD or HH
+				var elapHoursFromOpen = Math.round((currtime.getTime() - tmpDate.getTime()) / 1000 / 60 / 60);
+				print_doc("<td>\n"); 
+				if (elapHoursFromOpen > 24) {
+						var elapsedDays = elapHoursFromOpen / 24;
+						print_doc(padZero(Math.round(elapsedDays/365)) + " "); 
+						print_doc(padZero(Math.round((elapsedDays%365)/30)) + " "); 
+						print_doc(padZero(Math.round((elapsedDays%365)%30)) + " "); 
+						print_doc(" (YY MM DD)\n"); 
+				} else {
+					print_doc(elapHoursFromOpen + " hrs\n");
+				}
+				print_doc("</td>\n");
+				print_doc("</tr>\n");
+
+				if (taskDetails.flags.match('deferred'))
+					print_doc("<tr><td>Status</td><td>Deferred</td></tr>\n");
+
+				print_doc("</table>\n");
+				print_doc("<hr>\n");
+
+				print_doc("<h3>Description:");print_doc("</h3>\n");
+				print_doc(taskDetails.description + "\n");
+				print_doc("<hr>\n");
+
+				print_doc("<h3>Notes:");print_doc("</h3>\n");
+				// Loop through the notes hash
+				print_doc("<table>\n");
+				for (var i=taskDetails.firstNote,  tot=taskDetails.lastNote; i <= tot; i++) {
+					var note = taskDetails.notes[i];
+					var tmpDate = new Date(note.date);
+					print_doc("<tr><th colspan=2 align=\"left\"> Note #" + i + "</th></tr>\n"); 
+					print_doc("<tr>\n"); 
+					print_doc("<td>"); print_doc(note.owner[2]) + print_doc("</td>\n");
+					print_doc("<td>"); print_doc(tmpDate.toString()) + print_doc("</td>\n");
+					print_doc("</tr>\n");
+					print_doc("<tr><td colspan=2>" + note.subject + "</td></tr>\n");
+					print_doc("<tr><td colspan=2>" + note.text + "</td></tr>\n");
+					print_doc("<tr><td>&nbsp;</td></tr>\n")
+				}
+				print_doc("</table>\n");
+				print_doc("<hr>\n");
+				print_doc("<em>(" + topicid + ")</em>" + "<br>" + currtime.toString() + "\n");
+
+		} else {
+				// d="*Error* (jalotTaskDetails) -- No data returned from 'getTaskDetails' for topicid '" + topicid + "', stopping";
+				// print_doc("alert(d)\n");
+				print_debug("*Error* (jalotTaskDetails) -- No data returned from 'getTaskDetails' for topicid '" + topicid + "', stopping");
+		}
+
+
+		// // Add text areas
+		// 	print_doc("<script>\n");
+		// 	print_doc("function processRequest(action) {\n");
+		// 	print_doc("  var jcommentText = document.getElementById(\"jComment\").value\n");
+		// 	print_doc("  var jcommentText = jcommentText.replace(\" \",\"%20\")\n");
+		// 	print_doc("  var jcommentText = jcommentText.replace(\" \",\"%20\")\n");
+		// 	print_doc("}\n");
+		// 	print_doc("</script>\n");
+
+		// 	print_doc("<div class=\"formfield\">"); 
+		// 	print_doc("<textarea id=\"jComment\" name=\"jalotComment\" rows=\"8\" cols=\"80\"></textarea>"); 
+		// 	print_doc("<br>\n"); print_doc("<br>\n");
+		// 	print_doc("<button onclick=\"processRequest(\"comment\")\">Add Note/Comment</button>\n");
+		// 	print_doc("&nbsp;&nbsp;&nbsp;<button onclick=\"processRequest(\"comment, close\")\">Add Note/Comment and Close</button>\n");
+		// 	print_doc("&nbsp;&nbsp;&nbsp;<button onclick=\"processRequest(\"comment, reassign\")\">Add Note/Comment and Reassign</button>\n");
+		// 	print_doc("<br>\n"); print_doc("<br>\n");
+		// 	print_doc("</div>");
+
+		// close the page
+			print_doc("</body>\n");
+
+	})(topicid);
+}
