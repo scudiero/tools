@@ -1,0 +1,204 @@
+%pragma format=html
+
+//==============================================================================================
+// Build an html page that lists the jalot tasks assiged to or created by a given user.  The 
+// userid is passed in as 'user' on the url call, e.g. 
+//		https://dscudiero.dev6.leepfrog.com/ribbit/?page=jalotTasks&user=acct13667-gestalt
+//
+// The user id is the long form jalot user id, e.g. 'acct13667-gestalt'
+//==============================================================================================
+var debug = false;
+%import jalotLib.atj
+
+if (http.debug)
+	debug = http.debug;
+
+// Parse off the user account from the passed parameters
+var me="";
+if (http.user)
+	me = http.user;
+
+if (!me) {
+	print_doc("*Error* (jalotTasks) -- Script called without a user, stopping");
+	print_debug("*Error* (jalotTasks) -- Script called without a user, stopping");
+} else {
+	(function(me) {
+		var currtime = new Date();
+		var taskLists=[];
+		var tasks=[]; 
+		// Get the tasklists
+		taskLists=getTasklists();
+		if (debug) {
+			print_debug("\ntaskLists hash:\n")	
+			for (let key in taskLists) {
+				print_debug("\ttaskLists[" + key + "] = '" + taskLists[key].toSource() + "\n")
+			}
+		}
+
+		// Get the tasks
+		tasks=getTasks(me,"noclosed");
+		if (debug) {
+			print_debug("\ntasks hash:\n")	
+			for (let key in tasks) {
+				print_debug("\ntasks[" + key + "] = '" + tasks[key].toSource() + "\n")
+			}
+		}
+
+		let tasksAssignedToMe = false;
+		let tasksWrittenByMe = false;
+		let meRealName = "";
+		// Build a sorted hash table sorted by topic
+			let userTasksByTopic = {};
+			Object.keys(tasks).sort().forEach(function(key) {
+				userTasksByTopic[key] = tasks[key];
+				if (tasks[key].owner[0] == me) {
+					tasksAssignedToMe = true;
+					if (meRealName === "")
+						meRealName = tasks[key].owner[2];
+				}
+				if (tasks[key].initiator[0] == me) {
+					tasksWrittenByMe = true;
+					if (meRealName === "")
+						meRealName = tasks[key].initiator[2];
+				}			
+			});
+
+		// Output the page html
+			// Initialize the page
+				print_filetodoc(jalotStyles);
+				print_doc("<title>" + meRealName + " Jalot Tasks</title>");
+				print_doc("<meta http-equiv=\"refresh\" content=\"60\" />");
+
+			// Loop through the users tasks and write out tasks assigned to me
+				if (tasksAssignedToMe) {
+					for (let key in userTasksByTopic) {
+						let task = userTasksByTopic[key];
+						if (task.owner[0] == me) {
+							print_doc("<H2>Tasks assigned to " +  meRealName + "</H2>\n");
+							print_doc("<table id=tasks>\n");
+							emitTH("Initiator");
+							for (let key in userTasksByTopic) {
+								let task = userTasksByTopic[key];
+								if (task.owner[0] == me)
+									emitRow(task,"I");
+							}
+							print_doc("</table>\n");
+							break;
+						}
+					}
+				} else {
+					print_doc("<H2>At the moment there are no Tasks assigned to " +  meRealName + "</H2>\n");
+				}		
+
+			// Loop through the users tasks and write out tasks initiated by me
+				if (tasksWrittenByMe) {
+					print_doc("<H2>Tasks initiated by " +  meRealName + "</H2>\n");
+					print_doc("<table id=tasks>\n");
+					emitTH("Assigned to");
+					for (let key in userTasksByTopic) {
+						let task = userTasksByTopic[key];
+						if (task.initiator[0] == me) {
+							emitRow(task,"O");
+						}
+					}
+					print_doc("</table>\n");
+				}		
+
+			// close the page
+				print_doc("<br><em>" + currtime.toString() + "</em><br>\n");
+				print_doc("</body>\n");
+				print_doc("</html>\n");
+
+		//==============================================================================================
+		function emitTH(who) {
+			print_doc("<tr>\n");
+			print_doc("<th align=\"center\">\n"); print_doc("\n"); print_doc("</th>\n");
+			print_doc("<th align=\"left\">\n"); print_doc("\n"); print_doc("</th>\n");
+			print_doc("<th align=\"left\">\n"); print_doc("\n"); print_doc("</th>\n");
+			print_doc("<th align=\"left\">\n"); print_doc("\n"); print_doc("</th>\n");
+			print_doc("<th align=\"center\" colspan=2>\n"); print_doc("Opened\n"); print_doc("</th>\n");
+			print_doc("<th align=\"center\" colspan=2>\n"); print_doc("Last Updated\n"); print_doc("</th>\n");
+			// print_doc("<th align=\"center\">\n"); print_doc("Elapsed from\n"); print_doc("</th>\n");
+			// print_doc("<th align=\"center\">\n"); print_doc("Elapsed from\n"); print_doc("</th>\n");
+			print_doc("<th align=\"center\">\n"); print_doc("\n"); print_doc("</th>\n");
+			print_doc("</tr>\n");
+			print_doc("<tr>\n");
+			print_doc("<th align=\"center\">\n"); print_doc("Task\n"); print_doc("</th>\n");
+			print_doc("<th align=\"left\">\n"); print_doc("Task List\n"); print_doc("</th>\n");
+			print_doc("<th align=\"center\">\n"); print_doc("Title\n"); print_doc("</th>\n");
+			print_doc("<th align=\"center\">\n"); print_doc(who + "\n"); print_doc("</th>\n");
+			print_doc("<th align=\"center\">\n"); print_doc("Date\n"); print_doc("</th>\n");
+			print_doc("<th align=\"center\">\n"); print_doc("Elapsed\n"); print_doc("</th>\n");
+			print_doc("<th align=\"center\">\n"); print_doc("Date\n"); print_doc("</th>\n");
+			print_doc("<th align=\"center\">\n"); print_doc("Elapsed\n"); print_doc("</th>\n");
+			print_doc("<th align=\"center\">\n"); print_doc("Deferred\n"); print_doc("</th>\n");
+			print_doc("</tr>\n");
+		}
+
+		//==============================================================================================
+		function emitRow(task,which) {
+			print_doc("<tr>\n");
+			print_doc("<td align=\"center\">")
+			print_doc("<a href=\"#\" data-toggle=\"tooltip\" data-placement=\"right\" title=\"" + task.topicid + "\">" + task.idInTasklist + "</a>");
+			print_doc("</td>\n");
+
+			let tasklistName = taskLists[task.parenttopic.split("/")[0]].name.replace(/  *-? *CourseLeaf/, "")
+			print_doc("<td align=\"left\">\n"); print_doc(tasklistName + "\n"); print_doc("</td>\n");
+
+			print_doc("<td align=\"left\">\n"); 
+			style = "";
+			if (task.name.substring(1,2) === "1" || task.name.substring(1,2) === "2")
+				style="style=\"color:red\"";
+
+			print_doc("<a href=\"" + jalotInternalUrl + "/?page=jalotTaskDetails&topic=" 
+				+ task.topicid + "\" target=\"_blank\"" + style + ">" + task.name + "</a>\n"); 
+
+			print_doc("</td>\n");
+			if (which === "I") {
+				print_doc("<td align=\"left\">\n"); print_doc(task.initiator[2] + "\n"); print_doc("</td>\n");
+			} else {
+				print_doc("<td align=\"left\">\n"); print_doc(task.owner[2] + "\n"); print_doc("</td>\n");
+			}
+
+			// open date converted to mm/dd/yy
+			let d1 = new Date(task.startedOnEpoch);
+			let openedOn=padZero(d1.getMonth()+1) + "/" + padZero(d1.getDate()) + "/" + padZero(d1.getFullYear().toString().substring(2,4));
+			print_doc("<td align=\"center\">\n"); print_doc(openedOn + "\n"); print_doc("</td>\n");
+			// elapsed time from open in form 'DD MM YY' or 'HH hrs'
+			print_doc("<td align=\"center\">\n");
+			if (task.elapHoursFromOpen > 24) {
+					let elapsedDays = task.elapHoursFromOpen / 24;
+					print_doc(padZero(Math.round(elapsedDays / 365)) + " "); 
+					print_doc(padZero(Math.round((elapsedDays %365) / 30)) + " "); 
+					print_doc(padZero(Math.round((elapsedDays % 365) % 30)) + "\n"); 
+			} else {
+				print_doc(task.elapHoursFromOpen + " hrs\n");
+			}
+			print_doc("</td>\n");
+
+			// last updated date converted to mm/dd/yy
+			let d2 = new Date(task.lastNotePostedEpoch);
+			let updatedOn=padZero(d2.getMonth()+1) + "/" + padZero(d2.getDate()) + "/" + padZero(d2.getFullYear().toString().substring(2,4));
+			print_doc("<td align=\"center\">\n"); print_doc(updatedOn + "\n"); print_doc("</td>\n");
+			// elapsed time from last update in form 'DD MM YY' or 'HH hrs'
+			print_doc("<td align=\"center\">\n"); 
+			if (task.elapHoursFromUpdate > 24) {
+					let elapsedDays = task.elapHoursFromUpdate / 24;
+					print_doc(padZero(Math.round(elapsedDays / 365)) + " "); 
+					print_doc(padZero(Math.round((elapsedDays %365) / 30)) + " "); 
+					print_doc(padZero(Math.round((elapsedDays % 365) % 30)) + "\n"); 
+			} else {
+				print_doc(task.elapHoursFromUpdate + " hrs\n");
+			}
+			print_doc("</td>\n");
+
+			let deferred="-";
+			if (task.deferred)
+				deferred=task.deferred;
+			print_doc("<td align=\"center\">\n"); print_doc(deferred + "\n"); print_doc("</td>\n");
+			print_doc("</tr>\n");
+			return;
+		}
+	})(me);
+}
+
