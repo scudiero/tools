@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.13" # -- dscudiero -- Tue 03/19/2019 @ 10:44:46
+version="1.23.14" # -- dscudiero -- Wed 03/20/2019 @ 08:45:15
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -305,7 +305,7 @@ case "$hostName" in
 			done
 			[[ $errorDetected == true ]] && Terminate 'One or more of the database load procedures failed, please review messages'
 			
-		Msg "\nDone"
+			Msg "\n...Cleanup done"
 
 		## sync the jalot data warehouse tables
 			Msg "\nSyncing the jalot data warehouse tables..."
@@ -508,3 +508,4 @@ return 0
 ## 03-05-2019 @ 15:22:08 - 1.23.11 - dscudiero - Comment out the courseleaf steps stuff
 ## 03-18-2019 @ 15:02:38 - 1.23.12 - dscudiero - Add jalot data warehouse table sync
 ## 03-19-2019 @ 10:45:14 - 1.23.13 - dscudiero - Tweak messaging
+## 03-20-2019 @ 08:46:13 - 1.23.14 - dscudiero - Tweak messaging
