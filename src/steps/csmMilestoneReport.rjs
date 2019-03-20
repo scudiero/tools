@@ -1,0 +1,134 @@
+%pragma format=html
+//==============================================================================================
+//
+//==============================================================================================
+function DumpDoc(variable,value) { print_doc(variable + " = " + value + "<br>"); return; }
+function Dump(variable,value) { print_debug(variable + " = " + value + "\n"); return; }
+function dump(variable,value) { Dump(variable,value); return; }
+function Here(value) { print_debug("HERE " + value + " HERE " + value + " HERE " + value + " HERE " + value + "\n"); return; }
+function here(value) { Here(value); return; }
+
+var myName = "csmMilestoneReport";
+var csmUserid="";
+if (http.userid != undefined) {
+	csmUserId=http.userid;
+} else {
+	print_doc("*Error* (" + myName + ") -- Script called without a user (&userid=xxx), stopping<br>&nbsp;&nbsp;&nbsp;&nbsp;" + http.toSource() );
+	print_debug("*Error* (" + myName + ") -- Script called without a user (&userid=xxx), stopping\n\t" + http.toSource());
+}
+
+var debug = false;
+if (http.debug)
+	debug = http.debug;
+
+(function() {
+
+	let currtime = new Date();
+
+	let db = "warehouse";
+	if (debug) print_debug("\n*** " + myName + ".rjs starting, userid = '" + userid + "' ***\n");
+
+	// Get the list of sites for this user that have active projects
+	// let fields = "clientId, clients.name as client, " 
+	// 			+ " employee.employeekey, employee.userid, milestones.key, milestones.date, milestones.project, milestones.label";
+
+	// let tables = "clients, clientContactRoles, employee, milestones";
+
+	// let where = " employeeId in (select employeekey from employee where userid=\"" + csmUserId + "\")"
+	// 			+ " and milestones.snapshotArchived = \"N\""
+	// 			+ " and ("
+	// 			+ " (clients.catProjectStatus = \"A\" and lower(role) =\"catcsm\")"
+	// 			+ " or (clients.cimCoursesProjectStatus = \"A\" and (lower(role) = \"cimccsm\" or lower(role) = \"cimcsm\"))"
+	// 			+ " or (clients.cimProgramsProjectStatus = \"A\" and (lower(role) = \"cimccsm\" or lower(role) = \"cimcsm\"))"
+	// 			+ " or (clients.clssProjectStatus = \"A\" and lower(role) = \"clsscsm\")"
+	// 			+ " )"
+	// 			+ " and clients.idx = clientId and clientContactRoles.employeeId = employee.employeekey and milestones.client = clients.name";
+
+	let fields = "client, date, project, label, csmUserid, updatedOn";
+	let tables = "milestones";
+	let where = "milestones.csmUserid=\"" + csmUserId + "\" and snapshotArchived = \"N\"";
+	let sqlStmt="select distinct " + fields + " from " + tables + " where " + where + " order by date, name;"
+	if (debug) dump("\n sqlStmt",sqlStmt); print_debug("\n"); 
+	let resultSet = dbquery(db,sqlStmt);
+	// resultSet.forEach(function(result) { dump("result",result.toSource()); });
+
+	// Initialize the page
+	print_filetodoc("milestonesStyle.html");
+	let title="Scheduled milestones by date / client";
+	print_doc("<title>" + title + "</title>");
+	print_doc("<h1>" + title + " for: " + csmUserId + "</h1>");
+	print_doc("<em>" + currtime.toString() + "</em><br><br>\n");
+
+	// Loop through the clients
+	if (resultSet.length > 0) {
+		print_doc("<em>Note: report based on data is from the data warehouse that was last updated approx. " + resultSet[0].updatedOn + "</em><br><br>\n");
+		// Get the list of clients
+		let clients=[], clientsKeys=[];
+		resultSet.forEach(function(result) { 
+			if (typeof clients[result.client] === "undefined") {
+				clients[result.client] = true; 
+				clientsKeys.push(result.client);
+			}
+		});
+		clientsKeys=clientsKeys.sort();
+		if (debug) dump("clientsKeys",clientsKeys.toSource())
+
+		// Loop through the data and build a hash of client/milestone data by date
+		let mileStones=[];
+		resultSet.forEach(function(result) {
+			let tmpStr=result.project.replace("-project","").replace("cim-","").toUpperCase();
+			tmpStr=tmpStr + " / " + result.label;
+			let tmpObj={client:result.client, milestone:tmpStr};
+			let tmpArray=[];
+			if (typeof mileStones[result.date] != "undefined")
+				tmpArray=mileStones[result.date];
+			tmpArray.push(tmpObj);
+			mileStones[result.date]=tmpArray;
+		});
+
+		// Initialize the table
+		print_doc("<table id=milestones>\n");
+		// print_doc("<thead>\n");
+		print_doc("<tr>\n");
+		print_doc("<th>Date</th>\n");
+		clientsKeys.forEach(function(client) { print_doc("<th>" + client + "</th>\n"); });
+		print_doc("<tr>\n");
+		// print_doc("</thead>\n");
+		// print_doc("<tbody>\n");
+
+		// Add data rows
+		let dateOld="";
+		for (var key in mileStones) {
+			if (debug) dump("\n Date:",key);
+			mileStones[key].forEach(function(dataObj) {
+				if (debug) dump("\t dataObj",dataObj.toSource())
+				if (key != dateOld) {
+					print_doc("<tr>\n");
+					print_doc("<td>" + key + "</td>\n");
+					dateOld=key;
+				} else {
+					print_doc("<td></td>\n");
+				}
+				// Add the client milestones data
+				clientsKeys.forEach(function(client) { 
+					if (dataObj.client === client) {
+						print_doc("<td>" + dataObj.milestone + "</td>\n");
+					} else {
+						print_doc("<td></td>\n");
+					}
+				});
+				print_doc("</tr>\n");
+			});
+		}
+
+		// close table
+		// print_doc("</tbody>\n");
+		print_doc("</table>\n");
+	} else {
+		print_doc("Sorry, no active milestone data found for user")
+	}
+
+	print_doc("</body>\n");
+
+})(); // Call the function we just defined
+
