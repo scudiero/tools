@@ -1,0 +1,223 @@
+
+%import /ribbit/jalotLib.atj:atj%
+%spidercode%
+print_debug("\nHERE 0 HERE 0 HERE\n");
+//==============================================================================================
+// Synchronize the data warehouse jalot tables with jalot live
+//==============================================================================================
+//==============================================================================================
+// Parse the passed arguments
+//==============================================================================================
+var debug = false;
+var quiet = false;
+
+(function() {
+
+	let myName = "jalotWarehouseETL"
+	if (!quiet) print_debug("\n*** " + myName + " -- Starting ***\n");
+
+	//==============================================================================================
+	// taskLists
+	//==============================================================================================
+	let table = "jalotTasklists";
+	if (!quiet) print_debug("\tProcessing tasklists --> '" + table + "'...\n");
+	if (!quiet) print_debug("\t\tRetrieving taskslist data from jalot...\n");
+	let taskLists=getTasklists();
+	if (!quiet) print_debug("\t\t...Back from jalot\n");
+	let insertCnt=0, updateCnt=0;
+	for (let key in taskLists) {
+		// print_debug("\ntaskLists[" + key + "] = '" + taskLists[tasksKey].toSource() + "\n");
+		let jalotDataEpoch = (new Date(taskLists[tasksKey].lastnoteposted)).getTime();
+
+		if (typeof taskLists[tasksKey].desc === "undefined") taskLists[tasksKey].desc = "";
+
+		// See if the record already exists
+		let sqlStmt = "select lastNotePostedEpoch from " + table + " where taskListId = \"" + key + "\""
+		let warehouseData = dbquery(dbr, sqlStmt);
+		dump("name",taskLists[tasksKey].name,debug);
+		if (warehouseData.length === 0) {
+			if (!quiet) print_debug("\t\tDo insert -- " + taskLists[tasksKey].name + "\n")
+			values = key 
+					+ ",\"" + taskLists[tasksKey].name.replace(/"/g, '\\\"').replace(/'/g, "\\\'")
+					+ "\",\"" + taskLists[tasksKey].desc.replace(/"/g, '\\\"').replace(/'/g, "\\\'")
+					+ "\",\"" + taskLists[tasksKey].firstnote
+					+ "\",\"" + taskLists[tasksKey].lastnote
+					+ "\",\"" + taskLists[tasksKey].maxnote
+					+ "\",\"" + taskLists[tasksKey].lastnoteposted
+					+ "\",\"" + jalotDataEpoch
+					+ "\",\"" + taskLists[tasksKey].internalid
+					+ "\",\"" + taskLists[tasksKey].owner
+					+ "\",now()";
+			let sqlStmt = "insert into " + table + " values(" + values + ");"
+			dump("\tsqlStmt",sqlStmt,debug)
+			warehouseData = dbquery(dbrw, sqlStmt);
+			insertCnt++;
+		} else {
+			if (jalotDataEpoch > warehouseData[0].lastNotePostedEpoch) {
+				if (!quiet) print_debug("\t\tDo update -- " + taskLists[tasksKey].name + "\n")
+				updateStr = "name=\"" + taskLists[tasksKey].name.replace(/"/g, '\\\"').replace(/'/g, "\\\'")
+							+ "\", description=\"" + taskLists[tasksKey].desc.replace(/"/g, '\\\"').replace(/'/g, "\\\'")
+							+ "\", firstNote=\"" + taskLists[tasksKey].firstnote 
+							+ "\", lastNote=\"" + taskLists[tasksKey].lastnote 
+							+ "\", maxNote=\"" + taskLists[tasksKey].maxnote 
+							+ "\", lastNotePosted=\"" + taskLists[tasksKey].lastnoteposted 
+							+ "\", lastNotePostedEpoch=\"" + jalotDataEpoch
+							+ "\", internalId=\"" + taskLists[tasksKey].internalid 
+							+ "\", owner=\"" + taskLists[tasksKey].owner 
+							+ "\", updatedOn=now()";
+				sqlStmt = "update " + table + " set " + updateStr + " where taskListId=\"" + key + "\"";
+				dump("\tsqlStmt",sqlStmt,debug)
+				warehouseData = dbquery(dbrw, sqlStmt);
+				updateCnt++;	
+			} else {
+				if (!quiet) print_debug("\t\tWould have done an update but 'lastNotePosted' not changed -- " + taskLists[tasksKey].name + "\n")
+			}
+		}
+		// if (insertCnt > 9 || updateCnt > 9) break
+	} //(let key in taskLists)
+	if (!quiet) print_debug("\n\ttaskLists -- inserted: " + insertCnt + ", updated: " + updateCnt + "\n");
+
+	//==============================================================================================
+	// tasks
+	//==============================================================================================
+	let table = "jalotTasks";
+	if (!quiet) print_debug("\n\tProcessing tasks --> '" + table + "'\n");
+	if (!quiet) print_debug("\t\tRetrieving tasks from jalot...\n");
+	let tasks=getTasks();
+	if (!quiet) print_debug("\t\t...Back from jalot\n");
+	let insertCnt=0, updateCnt=0;
+	for (let tasksKey in tasks) {
+		if (!quiet) print_debug("\t\tRetrieving task data: '" + tasks[tasksKey].name + "' (" + tasksKey + ")\n");
+		// print_debug("\ntasks[" + tasksKey + "] = '" + tasks[tasksKey].toSource() + "\n\n")
+		taskId = tasksKey;
+		let tmpArray = tasksKey.split(".");
+		if (tmpArray.length > 1) taskId=tmpArray[1];
+		// dump("\t taskId",taskId,debug);
+		// dump("\t tasks[tasksKey].tasklist",tasks[tasksKey].tasklist,debug);
+		// dump("\t tasks[tasksKey].name",tasks[tasksKey].name,debug);
+		// dump("\t tasks[tasksKey].desc ",tasks[tasksKey].desc,debug);
+		// dump("\t tasks[tasksKey].firstnote",tasks[tasksKey].firstnote,debug);
+		// dump("\t tasks[tasksKey].lastnote",tasks[tasksKey].lastnote,debug);
+		// dump("\t tasks[tasksKey].maxnote",tasks[tasksKey].maxnote,debug);
+		// dump("\t tasks[tasksKey].lastnoteposted",tasks[tasksKey].lastnoteposted,debug);
+		// dump("\t tasks[tasksKey].lastNotePostedEpoch",tasks[tasksKey].lastNotePostedEpoch,debug);
+		// dump("\t tasks[tasksKey].flags",tasks[tasksKey].flags,debug);
+		// dump("\t tasks[tasksKey].todo",tasks[tasksKey].todo,debug);
+		// dump("\t tasks[tasksKey].owner",tasks[tasksKey].owner,debug);
+		// dump("\t tasks[tasksKey].startedon",tasks[tasksKey].startedon,debug);
+		// dump("\t tasks[tasksKey].startedOnEpoch",tasks[tasksKey].startedOnEpoch,debug);
+		// dump("\t tasks[tasksKey].startedby",tasks[tasksKey].startedby,debug);
+		// dump("\t tasks[tasksKey].idInTasklist",tasks[tasksKey].idInTasklist,debug);
+		// dump("\t tasks[tasksKey].elapSecondsFromOpen",tasks[tasksKey].elapSecondsFromOpen,debug);
+		// dump("\t tasks[tasksKey].elapHoursFromOpen",tasks[tasksKey].elapHoursFromOpen,debug);
+		// dump("\t tasks[tasksKey].elapSecondsFromUpdate",tasks[tasksKey].elapSecondsFromUpdate,debug);
+		// dump("\t tasks[tasksKey].elapHoursFromUpdate",tasks[tasksKey].elapHoursFromUpdate,debug);
+
+		if (typeof tasks[tasksKey].flags === "undefined") tasks[tasksKey].flags = ""
+
+		// Get the task notes
+		if (!quiet) print_debug("\t\t\tRetrieving task notes for jalot task...\n");
+		let notes=getTaskNotes(taskId);
+		if (!quiet) print_debug("\t\t\tfound "  + notes.length + " notes\n");
+
+		// See if the record already exists
+		let sqlStmt = "select lastNotePostedEpoch,lastNote from " + table + " where taskId = \"" + taskId + "\""
+		let warehouseData = dbquery(dbr, sqlStmt);
+		if (warehouseData.length === 0) {
+				if (!quiet) print_debug("\t\tDo insert -- " + tasks[tasksKey].name + "\n");
+				values = taskId 
+					+ ",\"" + tasks[tasksKey].tasklist
+					+ "\",\"" + tasks[tasksKey].name.replace(/"/g, '\\\"').replace(/'/g, "\\\'")
+					+ "\",\"" + tasks[tasksKey].desc.replace(/"/g, '\\\"').replace(/'/g, "\\\'")
+					+ "\",\"" + tasks[tasksKey].firstnote
+					+ "\",\"" + tasks[tasksKey].lastnote
+					+ "\",\"" + tasks[tasksKey].maxnote
+					+ "\",\"" + tasks[tasksKey].lastnoteposted
+					+ "\",\"" + tasks[tasksKey].lastNotePostedEpoch
+					+ "\",\"" + tasks[tasksKey].flags
+					+ "\",\"" + tasks[tasksKey].todo
+					+ "\",\"" + tasks[tasksKey].owner
+					+ "\",\"" + tasks[tasksKey].startedon
+					+ "\",\"" + tasks[tasksKey].startedOnEpoch
+					+ "\",\"" + tasks[tasksKey].startedby 
+					+ "\",\"" + tasks[tasksKey].idInTasklist
+					+ "\",\"" + tasks[tasksKey].elapSecondsFromOpen
+					+ "\",\"" + tasks[tasksKey].elapHoursFromOpen
+					+ "\",\"" + tasks[tasksKey].elapSecondsFromUpdate
+					+ "\",\"" + tasks[tasksKey].elapHoursFromUpdate
+					+ "\",now()";
+			let sqlStmt = "insert into " + table + " values(" + values + ");";
+			dump("\tsqlStmt",sqlStmt,debug);
+			warehouseData = dbquery(dbrw, sqlStmt);
+			insertCnt++;
+			// insert the notes 
+			if (notes.length > 0) {
+				for (let notesKey in notes) {
+					let noteDateEpoch = (new Date(notes[notesKey].date)).getTime();
+					values = notesKey + "," +  taskId + "," 
+							+ "\"" + notes[notesKey].date
+							+ "\",\"" + noteDateEpoch
+							+ "\",\"" + notes[notesKey].owner
+							+ "\",\"" + notes[notesKey].subject.replace(/"/g, '\\\"').replace(/'/g, "\\\'")
+							+ "\",\"" + notes[notesKey].text.replace(/"/g, '\\\"').replace(/'/g, "\\\'")
+							+ "\",now()";
+					sqlStmt = "insert into jalotNotes values(" + values + ");";
+					dump("\tsqlStmt",sqlStmt,debug);
+					warehouseData = dbquery(dbrw, sqlStmt);
+				}
+			} 
+		} else {
+			if (tasks[tasksKey].lastNotePostedEpoch > warehouseData[0].lastNotePostedEpoch) {
+				if (!quiet) print_debug("\t\tDo update -- " + tasks[tasksKey].name + "\n")
+				updateStr = "taskListId=\"" + tasks[tasksKey].tasklist 
+							+ "\", name=\"" + tasks[tasksKey].name.replace(/"/g, '\\\"').replace(/'/g, "\\\'")
+							+ "\", description=\"" + tasks[tasksKey].desc.replace(/"/g, '\\\"').replace(/'/g, "\\\'")
+							+ "\", firstNote=\"" + tasks[tasksKey].firstnote 
+							+ "\", lastNote=\"" + tasks[tasksKey].lastnote 
+							+ "\", maxNote=\"" + tasks[tasksKey].maxnote
+							+ "\", lastNotePosted=\"" + tasks[tasksKey].lastnoteposted
+							+ "\", lastNotePostedEpoch=\"" + tasks[tasksKey].lastNotePostedEpoch
+							+ "\", flags=\"" + tasks[tasksKey].flags
+							+ "\", todo=\"" + tasks[tasksKey].todo
+							+ "\", owner=\"" + tasks[tasksKey].owner 
+							+ "\", startedOn=\"" + tasks[tasksKey].startedon
+							+ "\", startedOnEpoch=\"" + tasks[tasksKey].startedOnEpoch
+							+ "\", startedBy=\"" + tasks[tasksKey].startedby
+							+ "\", idInTasklist=\"" + tasks[tasksKey].idInTasklist
+							+ "\", elapSecondsFromOpen=\"" + tasks[tasksKey].elapSecondsFromOpen
+							+ "\", elapHoursFromOpen=\"" + tasks[tasksKey].elapHoursFromOpen
+							+ "\", elapSecondsFromUpdate=\"" + tasks[tasksKey].elapSecondsFromUpdate 
+							+ "\", elapHoursFromUpdate=\"" + tasks[tasksKey].elapHoursFromUpdate
+							+ "\", updatedOn=now()";
+				sqlStmt = "update jalotTasklists set " + updateStr + " where taskId=\"" + taskId + "\"";
+				dump("\tsqlStmt",sqlStmt,debug);
+				// warehouseData = dbquery(dbrw, sqlStmt);
+				updateCnt++;
+				if (warehouseData[0].lastNote < tasks[tasksKey].lastnote) {
+					for (let notesKey in notes) {
+						if (notesKey <= tasks[tasksKey].lastnote) continue
+						let noteDateEpoch = (new Date(notes[tasksKey].date)).getTime();
+						values = notesKey + "," +  taskId + "," 
+								+ "\"" + notes[notesKey].date
+								+ "\",\"" + noteDateEpoch
+								+ "\",\"" + notes[notesKey].owner
+								+ "\",\"" + notes[notesKey].subject.replace(/"/g, '\\\"').replace(/'/g, "\\\'")
+								+ "\",\"" + notes[notesKey].text.replace(/"/g, '\\\"').replace(/'/g, "\\\'")
+								+ "\",now()";
+						sqlStmt = "insert into jalotNotes values(" + values + ");";
+						dump("\tsqlStmt",sqlStmt,debug);
+						warehouseData = dbquery(dbrw, sqlStmt);
+					}
+				}
+			} else {
+				if (!quiet) print_debug("\t\tWould do an update but 'lastnoteposted' not changed -- " + tasks[tasksKey].name + "\n")
+			}
+		}
+	} //(let key in tasks)
+	if (!quiet) print_debug("\n\ttasks -- inserted: " + insertCnt + ", updated: " + updateCnt + "\n");
+
+
+	return;
+})();
+%spidercode%
+
