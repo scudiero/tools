@@ -25,7 +25,7 @@ var quiet = false;
 	let taskLists=getTasklists();
 	if (!quiet) print_debug("\t\t...Back from jalot\n");
 	let insertCnt=0, updateCnt=0;
-	for (let key in taskLists) {
+	for (let tasksKey in taskLists) {
 		// print_debug("\ntaskLists[" + key + "] = '" + taskLists[tasksKey].toSource() + "\n");
 		let jalotDataEpoch = (new Date(taskLists[tasksKey].lastnoteposted)).getTime();
 
@@ -37,7 +37,7 @@ var quiet = false;
 		dump("name",taskLists[tasksKey].name,debug);
 		if (warehouseData.length === 0) {
 			if (!quiet) print_debug("\t\tDo insert -- " + taskLists[tasksKey].name + "\n")
-			values = key 
+			values = tasksKey 
 					+ ",\"" + taskLists[tasksKey].name.replace(/"/g, '\\\"').replace(/'/g, "\\\'")
 					+ "\",\"" + taskLists[tasksKey].desc.replace(/"/g, '\\\"').replace(/'/g, "\\\'")
 					+ "\",\"" + taskLists[tasksKey].firstnote
@@ -65,7 +65,7 @@ var quiet = false;
 							+ "\", internalId=\"" + taskLists[tasksKey].internalid 
 							+ "\", owner=\"" + taskLists[tasksKey].owner 
 							+ "\", updatedOn=now()";
-				sqlStmt = "update " + table + " set " + updateStr + " where taskListId=\"" + key + "\"";
+				sqlStmt = "update " + table + " set " + updateStr + " where taskListId=\"" + tasksKey + "\"";
 				dump("\tsqlStmt",sqlStmt,debug)
 				warehouseData = dbquery(dbrw, sqlStmt);
 				updateCnt++;	
