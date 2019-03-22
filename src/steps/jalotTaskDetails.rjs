@@ -33,7 +33,7 @@ if (!topicid) {
 				print_doc("<hr>\n");
 			// Write out task data
 				print_doc("<H2>Task: " + taskDetails.title + "<br>&nbsp;&nbsp;&nbsp;(#" 
-					+ taskDetails.parentTopic.split("/")[0] + " in " + taskDetails.taskList + ")" + "</H2>\n");
+					+ taskDetails.parentTopic.split("/")[1] + " in " + taskDetails.taskList + ")" + "</H2>\n");
 				print_doc("<table>\n");
 				print_doc("<tr>\n");
 				print_doc("<td>\n");print_doc("Created by");print_doc("</td>\n");
