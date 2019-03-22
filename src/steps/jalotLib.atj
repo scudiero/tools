@@ -1,6 +1,6 @@
 
 //==============================================================================================
-// // version="1.1.31" // -- dscudiero -- Fri 03/22/2019 @ 13:30:29
+// // version="1.1.42" // -- dscudiero -- Fri 03/22/2019 @ 16:13:43
 //==============================================================================================
 //Globals
 var jalotMasterUser="acct13830-gestalt";
@@ -356,6 +356,20 @@ function strToHtml(string) {
 }
 
 //==============================================================================================
+// Convert milliseconds to a string 'YY MM DD'
+//==============================================================================================
+function epochToYYMMDD(epoch) {
+	let elapHoursFromOpen = Math.floor(epoch / 1000 / 60 / 60);
+	let elapsedDays = elapHoursFromOpen/24;
+	let years=Math.floor(elapsedDays/365);
+	elapsedDays=elapsedDays-(years*365);
+	let months=Math.floor(elapsedDays/30);
+	elapsedDays=Math.floor(elapsedDays-(months*30));
+	return padZero(years) + " " + padZero(months) + " " + padZero(elapsedDays);
+	return
+}
+
+//==============================================================================================
 // Get the jalot certificate from the certs file, if key not passed will use 'supportjalot'
 // returns cert string
 //==============================================================================================
@@ -440,4 +454,4 @@ function twoDigits(d) {
 Date.prototype.toMysqlFormat = function() {
     return this.getUTCFullYear() + "-" + twoDigits(1 + this.getUTCMonth()) + "-" + twoDigits(this.getUTCDate()) + " " + twoDigits(this.getUTCHours()) + ":" + twoDigits(this.getUTCMinutes()) + ":" + twoDigits(this.getUTCSeconds());
 };
-// 03-22-2019 @ 13:34:56 - 1.1.31 - dscudiero - Switch to used different xml parsing function
+// 03-22-2019 @ 16:42:09 - 1.1.42 - dscudiero - Add a function to build a formatted string for elapsed time
