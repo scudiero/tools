@@ -128,9 +128,9 @@ if (!me) {
 			print_doc("<th align=\"center\">\n"); print_doc("Title\n"); print_doc("</th>\n");
 			print_doc("<th align=\"center\">\n"); print_doc(who + "\n"); print_doc("</th>\n");
 			print_doc("<th align=\"center\">\n"); print_doc("Date\n"); print_doc("</th>\n");
-			print_doc("<th align=\"center\">\n"); print_doc("Elapsed\n"); print_doc("</th>\n");
+			print_doc("<th align=\"center\">\n"); print_doc("Elapsed<br><em>(YY MM DD)</em>\n"); print_doc("</th>\n");
 			print_doc("<th align=\"center\">\n"); print_doc("Date\n"); print_doc("</th>\n");
-			print_doc("<th align=\"center\">\n"); print_doc("Elapsed\n"); print_doc("</th>\n");
+			print_doc("<th align=\"center\">\n"); print_doc("Elapsed<br><em>(YY MM DD)</em>\n"); print_doc("</th>\n");
 			print_doc("<th align=\"center\">\n"); print_doc("Deferred\n"); print_doc("</th>\n");
 			print_doc("</tr>\n");
 		}
@@ -164,13 +164,10 @@ if (!me) {
 			let d1 = new Date(task.startedOnEpoch);
 			let openedOn=padZero(d1.getMonth()+1) + "/" + padZero(d1.getDate()) + "/" + padZero(d1.getFullYear().toString().substring(2,4));
 			print_doc("<td align=\"center\">\n"); print_doc(openedOn + "\n"); print_doc("</td>\n");
-			// elapsed time from open in form 'DD MM YY' or 'HH hrs'
 			print_doc("<td align=\"center\">\n");
+			// elapsed time from open in form 'DD MM YY' or 'HH hrs'
 			if (task.elapHoursFromOpen > 24) {
-					let elapsedDays = task.elapHoursFromOpen / 24;
-					print_doc(padZero(Math.round(elapsedDays / 365)) + " "); 
-					print_doc(padZero(Math.round((elapsedDays %365) / 30)) + " "); 
-					print_doc(padZero(Math.round((elapsedDays % 365) % 30)) + "\n"); 
+					print_doc(epochToYYMMDD(task.elapSecondsFromOpen) + "\n"); 
 			} else {
 				print_doc(task.elapHoursFromOpen + " hrs\n");
 			}
@@ -183,10 +180,7 @@ if (!me) {
 			// elapsed time from last update in form 'DD MM YY' or 'HH hrs'
 			print_doc("<td align=\"center\">\n"); 
 			if (task.elapHoursFromUpdate > 24) {
-					let elapsedDays = task.elapHoursFromUpdate / 24;
-					print_doc(padZero(Math.round(elapsedDays / 365)) + " "); 
-					print_doc(padZero(Math.round((elapsedDays %365) / 30)) + " "); 
-					print_doc(padZero(Math.round((elapsedDays % 365) % 30)) + "\n"); 
+				print_doc(epochToYYMMDD(task.elapSecondsFromUpdate) + "\n");  
 			} else {
 				print_doc(task.elapHoursFromUpdate + " hrs\n");
 			}
