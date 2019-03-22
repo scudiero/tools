@@ -1,6 +1,6 @@
 
 //==============================================================================================
-// // version="1.0.69" // -- dscudiero -- Tue 03/19/2019 @ 11:56:48
+// // version="1.1.31" // -- dscudiero -- Fri 03/22/2019 @ 13:30:29
 //==============================================================================================
 //Globals
 var jalotMasterUser="acct13830-gestalt";
@@ -8,8 +8,8 @@ var jalotCertKey="supportjalot";
 var jalotCert="";
 var jalotUrl = "https://jalot.com/raccxml.cgi";
 var jalotStyles = "jalotTasksStyle.html";
-var jalotInternalUrl = "https://stage-internal.leepfrog.com/ribbit"
-// var jalotInternalUrl = "https://dscudiero.dev6.leepfrog.com/ribbit"
+// var jalotInternalUrl = "https://stage-internal.leepfrog.com/ribbit"
+var jalotInternalUrl = "https://internal-dscudiero.dev6.leepfrog.com/ribbit"
 
 var jalotStyleRed="style=\"color:red\"";
 var jalotStyleGreen="style=\"color:green\"";
@@ -40,7 +40,7 @@ function getTasklists(jalotUser) {
 		// print_debug(topics_xml)
 
 	// Loop through the xml document building a hash table of taslkist ID/topics
-		for (let xml = new docXML(topics_xml); xml.good(); xml = xml.nextNode()) {
+		for (let xml = new docXML(topics_xml, {condensewhitespace: false}); xml.good(); xml = xml.nextNode()) {
 			if (xml.getNode() == "error") {
 				dump("tasks_xml",nodeToObject(xml),true)
 				print_doc("<br>*Error* (http_get) -- " + nodeToObject(xml).message + "<br>&nbsp;&nbsp;&nbsp;" + topics_get + "<br>");
@@ -87,7 +87,7 @@ function getTasks(jalotUser,flags) {
 
 		// loop through the xml pulling out the topics stanza
 		let userTasks = [];
-		for (let xml = new docXML(tasks_xml); xml.good(); xml = xml.nextNode()) {
+		for (let xml = new docXML(tasks_xml, {condensewhitespace: false}); xml.good(); xml = xml.nextNode()) {
 			if (xml.getNode() == "error") {
 				dump("tasks_xml",tasks_xml,true)
 				print_doc("<br>*Error* -- " + tasks_xml + "<br><br>");
@@ -145,7 +145,7 @@ function getTasks(jalotUser,flags) {
 					let table = "jalotTasklists";
 					let sqlStmt = "select name from " + table + " where taskListId = \"" + task.parenttopic.replace(/\/.*/, "") + "\""
 					let warehouseData = dbquery(dbr, sqlStmt);
-					if (warehouseData.length != 0)
+					if (warehouseData != null)
 						key = warehouseData[0].name.replace(/  *-? *CourseLeaf/, "") + "." + task.topicid;
 					userTasks[key] = task;
 				}
@@ -181,20 +181,32 @@ function getTaskNotes(taskId) {
 
 	if (jalotCert === "" ) jalotCert = getCert(jalotCertKey);
 	let taskNotesXml = http_get(jalotUrl + "?" + taskNotes_get, {headers:["Cookie: raccauth=\"" + encodeURIComponent(jalotCert) + "\""]});
+	
+	// Parse the xml into an object
+	let xml = new docXML(taskNotesXml, {condensewhitespace: false});
+	let tmpObj = xmlNode2Object(xml);
+	let raccdata = tmpObj.raccdata;
+	let notes = raccdata.notes;
 
-	let notes=[];
-	for (let xml = new docXML(taskNotesXml); xml.good(); xml = xml.nextNode()) {
-		if (xml.getNode() === "note") {
-				let note = nodeToObject(xml);
-				let noteNum = xml.getAttribute("noteno");
-				let noteDate = note.date;
-				let noteOwner = note["formal-name"].split("/");
-				let noteSubject = note.subject;
-				let noteText = note.body;
-				notes[noteNum] = {date:noteDate, owner:noteOwner, subject:noteSubject, text:noteText};
-		}
-	}
-	let retData = notes;
+	let notes2=[];
+	notes.forEach(function(note) {
+		notes2[note.noteno] = {owner:note.data["formal-name"], date:note.data.date, text:note.data.body};
+	})
+
+	// for (let xml = new docXML(taskNotesXml, {condensewhitespace: false}); xml.good(); xml = xml.nextNode()) {
+	// 	if (xml.getNode() === "note") {
+	// 			let note = nodeToObject(xml);
+	// 			let noteNum = xml.getAttribute("noteno");
+	// 			let noteDate = note.date;
+	// 			let noteOwner = note["formal-name"].split("/");
+	// 			let noteSubject = note.subject;
+	// 			let noteText = note.body;
+	// 			notes[noteNum] = {date:noteDate, owner:noteOwner, subject:noteSubject, text:noteText};
+	// 	}
+	// }
+	// let retData = notes;
+	
+	let retData = notes2;
 	dump("retData",retData,debug);
 	return retData;
 } // getTaskNotes
@@ -246,49 +258,102 @@ function getTaskDetails(topicid) {
 	let taskNotesXml = http_get(jalotUrl + "?" + taskNotes_get, {headers:["Cookie: raccauth=\"" + encodeURIComponent(jalotCert) + "\""]});	
 	if (debug) print_doc("<br>taskNotesXml:<br> " + taskNotesXml + "<br>");
 
-	let notes=[];
 	let retData="";
-	for (let xml = new docXML(taskNotesXml); xml.good(); xml = xml.nextNode()) {
-		dump("<br>xml",xml,debug,"doc");
-		dump("<br>xml.getNode()",xml.getNode(),debug,"doc");
-		switch(xml.getNode()) {
-			case "topic":
-				//print_doc("<br><br> HERE topic HERE topic HERE<br>")
-				var topic = nodeToObject(xml);
-				var title = topic.name;
-				var taskList = topic.desc;
-				var owner = topic.owner.split("/");
-				var firstNote = topic.firstnote;
-				var lastNote = topic.lastnote;
-				var lastNotePosted = topic.lastnoteposted;
-				var flags = topic.flags;
-			  break;
-			case "topicinfo":
-				//print_doc("<br><br> HERE topicinfo HERE topicinfo HERE<br>")
-				var topicinfo = nodeToObject(xml);
-				var originator = topicinfo["formal-name"].split("/");
-				var origionationDate = topicinfo.date;
-				var description = topicinfo.body;
-			  break;
-			  case "note":
-				//print_doc("<br><br> HERE note HERE note HERE<br>")
-				var note = nodeToObject(xml);
-				var noteNum = xml.getAttribute("noteno");
-				var noteDate = note.date;
-				var noteOwner = note["formal-name"].split("/");
-				var noteSubject = note.subject;
-				var noteText = note.body;
-				notes[noteNum] = {date:noteDate, owner:noteOwner, subject:noteSubject, text:noteText};
-			  break;
-		}
-	}
-	if (typeof title != "undefined")
-		retData = {title:title, taskList:taskList, date:origionationDate, owner:owner, firstNote:firstNote, lastNote:lastNote, lastNotePosted:lastNotePosted,  			originator:originator, description:description, lastNote:lastNote, flags:flags, notes:notes};
+	// Parse the xml into an object
+	let xml = new docXML(taskNotesXml, {condensewhitespace: false});
+	let tmpObj = xmlNode2Object(xml);
+	let raccdata = tmpObj.raccdata;
+	let notes = raccdata.notes;
+	let note = raccdata.note;
+
+	tmpObj=raccdata[topicid];
+	let name = tmpObj.name;
+	let desc = tmpObj.desc;
+	let firstNote = tmpObj.firstnote;
+	let lastNote = tmpObj.lastnote;
+	let maxNote = tmpObj.maxnote;
+	let lastNotePosted = tmpObj.lastnoteposted;
+	let todo = tmpObj.todo;
+	let owner = tmpObj.owner;
+	let parentTopic = tmpObj.parenttopic;
+	let flags = tmpObj.flags;
+
+	let from = raccdata.topicinfo.from;
+	let formalName = raccdata.topicinfo["formal-name"];
+	let date = raccdata.topicinfo.date;
+	let subject = raccdata.topicinfo.subject;
+	let body = raccdata.topicinfo.body;
+
+	// convert the notes data to a hash for easier processing
+	let notes2=[];
+	notes.forEach(function(note) {
+		notes2[note.noteno] = {formalName:note.data["formal-name"], date:note.data.date, text:note.data.body};
+	})
+
+	dump("name",name,true)
+	dump("desc",desc,true)
+	dump("note",note,true)
+	dump("firstNote",firstNote,true)
+	dump("lastNote",lastNote,true)
+	dump("maxNote",maxNote,true)
+	dump("lastNotePosted",lastNotePosted,true)
+	dump("todo",todo,true)
+	dump("owner",owner,true)
+	dump("parentTopic",parentTopic,true)
+	dump("flags",flags,true)
+	dump("from",from,true)
+	dump("formalName",formalName,true)
+	dump("date",date,true)
+	dump("subject",subject,true)
+	dump("body",body,true)
+
+	if (typeof name != "undefined")
+		retData = {title:name, taskList:desc.replace(/.*topic /,""), parentTopic:parentTopic, date:date, owner:owner,
+					firstNote:firstNote, lastNote:lastNote, lastNotePosted:lastNotePosted, originator:formalName,
+					description:body, flags:flags, notes:notes2};
 
 	dump("<br>retData",retData,debug,"doc");
 	return retData;
 } // getTaskDetails
 
+
+//==============================================================================================
+// parse an xml document
+//==============================================================================================
+function xmlNode2Object(xml) {
+	const ret = {};
+	if (xml.good()) {
+		const users = []
+		const notes = []
+		for (;xml.good(); xml = xml.nextSibling()) {
+			const marker = xml.getNode()
+			const topicid = xml.getAttribute('topicid')
+			const ref = xml.firstChild()
+			// logPretty('marker', marker)
+			if (marker == 'user') users.push(xml.getText())
+			if (marker == 'note')	notes.push({
+				topic: xml.getAttribute('topic'),
+				noteno: xml.getAttribute('noteno'),
+				data: xmlNode2Object(ref)
+			})
+			if (ref.good() && (ref.nextSibling().good() || ref.firstChild().good())) {
+				ret[topicid || marker] = xmlNode2Object(ref)
+			} else {
+				ret[marker] = xml.getText()
+			}
+		}
+		if (users.length) ret.users = users
+		if (notes.length) ret.notes = notes
+	}
+	return ret
+}
+
+//==============================================================================================
+// Convert a string with formatting chars to html
+//==============================================================================================
+function strToHtml(string) {
+	return string.replace(/\n/g,"<br>").replace(/\t/g,"&nbsp;&nbsp;&nbsp;") 
+}
 
 //==============================================================================================
 // Get the jalot certificate from the certs file, if key not passed will use 'supportjalot'
@@ -375,3 +440,4 @@ function twoDigits(d) {
 Date.prototype.toMysqlFormat = function() {
     return this.getUTCFullYear() + "-" + twoDigits(1 + this.getUTCMonth()) + "-" + twoDigits(this.getUTCDate()) + " " + twoDigits(this.getUTCHours()) + ":" + twoDigits(this.getUTCMinutes()) + ":" + twoDigits(this.getUTCSeconds());
 };
+// 03-22-2019 @ 13:34:56 - 1.1.31 - dscudiero - Switch to used different xml parsing function
