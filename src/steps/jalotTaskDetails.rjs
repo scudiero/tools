@@ -28,16 +28,16 @@ if (!topicid) {
 			// Output the page html
 			// Initialize the page
 				print_filetodoc(jalotStyles);
-				print_doc("\n<meta http-equiv=\"refresh\" content=\"60\" />\n");
+				// print_doc("\n<meta http-equiv=\"refresh\" content=\"60\" />\n");
 				print_doc("<strong " +  jalotStyleRed + " >" + currtime.toString() + "</strong>\n");
 				print_doc("<hr>\n");
 			// Write out task data
 				print_doc("<H2>Task: " + taskDetails.title + "<br>&nbsp;&nbsp;&nbsp;(#" 
-					+ taskDetails.taskList.replace("Replies to post ","") + ")</H2>\n");
+					+ taskDetails.parentTopic.split("/")[0] + " in " + taskDetails.taskList + ")" + "</H2>\n");
 				print_doc("<table>\n");
 				print_doc("<tr>\n");
 				print_doc("<td>\n");print_doc("Created by");print_doc("</td>\n");
-				print_doc("<td>\n");print_doc(taskDetails.originator[2]);print_doc("</td>\n");
+				print_doc("<td>\n");print_doc(taskDetails.originator.split("/")[2]);print_doc("</td>\n");
 				print_doc("</tr>\n");
 				print_doc("<tr>\n");
 				print_doc("<td>\n");print_doc("Creation date");print_doc("</td>\n");
@@ -62,13 +62,14 @@ if (!topicid) {
 				print_doc("</tr>\n");
 				print_doc("<tr>\n");
 				print_doc("<td>"); print_doc("Assigned to"); print_doc("</td>\n");
-				print_doc("<td>"); print_doc(taskDetails.owner[2]); print_doc("</td>\n");
+				print_doc("<td>"); print_doc(taskDetails.owner.split("/")[2]); print_doc("</td>\n");
 				print_doc("</tr>\n");
 
 				print_doc("<tr><td>&nbsp;</td></tr>\n");
 				print_doc("<tr>\n");
+				let tmpNote = taskDetails.notes[taskDetails.lastNote];
 				print_doc("<td>"); print_doc("Last updated by"); print_doc("</td>\n");
-				print_doc("<td>"); print_doc(taskDetails.originator[2]); print_doc("</td>\n");
+				print_doc("<td>"); print_doc(tmpNote.formalName.split("/")[2]); print_doc("</td>\n");
 				print_doc("<tr>\n");
 				var tmpDate = new Date(taskDetails.lastNotePosted);
 				print_doc("<td>\n");print_doc("Last updated date");print_doc("</td>\n");
@@ -99,8 +100,8 @@ if (!topicid) {
 				print_doc("<hr>\n");
 
 				print_doc("<h3>Description:");print_doc("</h3>\n");
-				print_doc(taskDetails.description + "\n");
-				print_doc("<hr>\n");
+				print_doc(strToHtml(taskDetails.description) + "\n");
+				print_doc("<br><hr>\n");
 
 				print_doc("<h3>Notes:");print_doc("</h3>\n");
 				// Loop through the notes hash
@@ -110,11 +111,11 @@ if (!topicid) {
 					var tmpDate = new Date(note.date);
 					print_doc("<tr><th colspan=2 align=\"left\"> Note #" + i + "</th></tr>\n"); 
 					print_doc("<tr>\n"); 
-					print_doc("<td>"); print_doc(note.owner[2]) + print_doc("</td>\n");
+					print_doc("<td>"); print_doc(note.formalName.split("/")[2]) + print_doc("</td>\n");
 					print_doc("<td>"); print_doc(tmpDate.toString()) + print_doc("</td>\n");
 					print_doc("</tr>\n");
-					print_doc("<tr><td colspan=2>" + note.subject + "</td></tr>\n");
-					print_doc("<tr><td colspan=2>" + note.text + "</td></tr>\n");
+					// print_doc("<tr><td colspan=2>" + note.subject + "</td></tr>\n");
+					print_doc("<tr><td colspan=2>" + strToHtml(note.text.replace("\nis new owner of task"," is new owner of task")) + "</td></tr>\n");
 					print_doc("<tr><td>&nbsp;</td></tr>\n")
 				}
 				print_doc("</table>\n");
@@ -126,7 +127,6 @@ if (!topicid) {
 				// print_doc("alert(d)\n");
 				print_debug("*Error* (jalotTaskDetails) -- No data returned from 'getTaskDetails' for topicid '" + topicid + "', stopping");
 		}
-
 
 		// // Add text areas
 		// 	print_doc("<script>\n");
