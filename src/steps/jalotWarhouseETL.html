@@ -147,7 +147,7 @@ var quiet = false;
 					+ "\",now()";
 			let sqlStmt = "insert into " + table + " values(" + values + ");";
 			dump("\tsqlStmt",sqlStmt,debug);
-			warehouseData = dbquery(dbrw, sqlStmt);
+			let resultSet = dbquery(dbrw, sqlStmt);
 			insertCnt++;
 			// insert the notes 
 			if (notes.length > 0) {
@@ -160,9 +160,9 @@ var quiet = false;
 							+ "\",\"" + notes[notesKey].subject.replace(/"/g, '\\\"').replace(/'/g, "\\\'")
 							+ "\",\"" + notes[notesKey].text.replace(/"/g, '\\\"').replace(/'/g, "\\\'")
 							+ "\",now()";
-					sqlStmt = "insert into jalotNotes values(" + values + ");";
+					let sqlStmt = "insert into jalotNotes values(" + values + ");";
 					dump("\tsqlStmt",sqlStmt,debug);
-					warehouseData = dbquery(dbrw, sqlStmt);
+					let resultSet = dbquery(dbrw, sqlStmt);
 				}
 			} 
 		} else {
@@ -188,9 +188,9 @@ var quiet = false;
 							+ "\", elapSecondsFromUpdate=\"" + tasks[tasksKey].elapSecondsFromUpdate 
 							+ "\", elapHoursFromUpdate=\"" + tasks[tasksKey].elapHoursFromUpdate
 							+ "\", updatedOn=now()";
-				sqlStmt = "update jalotTasklists set " + updateStr + " where taskId=\"" + taskId + "\"";
+				let sqlStmt = "update jalotTasklists set " + updateStr + " where taskId=\"" + taskId + "\"";
 				dump("\tsqlStmt",sqlStmt,debug);
-				// warehouseData = dbquery(dbrw, sqlStmt);
+				let resultSet = dbquery(dbrw, sqlStmt);
 				updateCnt++;
 				if (warehouseData[0].lastNote < tasks[tasksKey].lastnote) {
 					for (let notesKey in notes) {
@@ -203,9 +203,9 @@ var quiet = false;
 								+ "\",\"" + notes[notesKey].subject.replace(/"/g, '\\\"').replace(/'/g, "\\\'")
 								+ "\",\"" + notes[notesKey].text.replace(/"/g, '\\\"').replace(/'/g, "\\\'")
 								+ "\",now()";
-						sqlStmt = "insert into jalotNotes values(" + values + ");";
+						let sqlStmt = "insert into jalotNotes values(" + values + ");";
 						dump("\tsqlStmt",sqlStmt,debug);
-						warehouseData = dbquery(dbrw, sqlStmt);
+						let resultSet = dbquery(dbrw, sqlStmt);
 					}
 				}
 			} else {
