@@ -29,7 +29,7 @@ if (http.debug)
 	if (debug) print_debug("\n*** " + myName + ".rjs starting, csmUserId = '" + csmUserId + "' ***\n");
 
 	// Get the list of sites for this user that have active projects
-	let fields = "client, date, project, label, csmUserid, updatedOn";
+	let fields = "client, date, project, label, complete, csmUserid, updatedOn";
 	let tables = "milestones";
 	let where = "milestones.csmUserid=\"" + csmUserId + "\" and snapshotArchived = \"N\"";
 	let sqlStmt="select distinct " + fields + " from " + tables + " where " + where + " order by date, name;"
@@ -117,11 +117,23 @@ if (http.debug)
 		clientsKeys=clientsKeys.sort();
 		if (debug) dump("clientsKeys",clientsKeys.toSource())
 
+		var addRedNote=false, addGreenNote=false, addBlueNote=false;
 		// Loop through the data and build a hash of client/milestone data by date
 		let mileStones=[];
 		resultSet.forEach(function(result) {
 			let tmpStr=result.project.replace("-project","").replace("cim-","").toUpperCase();
 			tmpStr=tmpStr + " / " + result.label;
+			if (result.complete === "true") {
+				tmpStr = "<font color=\"green\">" + tmpStr + "</font>";
+				addGreenNote = true
+			} else {
+				let milestoneEpoch = (new Date(result.date)).getTime();
+				if (milestoneEpoch < currtime) {
+					tmpStr = "<font color=\"red\">" + tmpStr + "</font>";
+					addRedNote = true;
+				}
+			}
+
 			let tmpObj={client:result.client, milestone:tmpStr};
 			let tmpArray=[];
 			if (typeof mileStones[result.date] != "undefined")
@@ -172,6 +184,8 @@ if (http.debug)
 		// close table
 		print_doc("</tbody>\n");
 		print_doc("</table>\n");
+		if (addGreenNote) print_doc("<br> Note: Items in <font color=\"green\"><em>green</em></font> are completed items\n");
+		if (addRedNote) print_doc("<br> Note: Items in <font color=\"red\"><em>red</em></font> are over due.</small>\n");
 	} else {
 		print_doc("Sorry, no active milestone data found for user")
 	}
