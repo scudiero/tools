@@ -29,21 +29,6 @@ if (http.debug)
 	if (debug) print_debug("\n*** " + myName + ".rjs starting, csmUserId = '" + csmUserId + "' ***\n");
 
 	// Get the list of sites for this user that have active projects
-	// let fields = "clientId, clients.name as client, " 
-	// 			+ " employee.employeekey, employee.userid, milestones.key, milestones.date, milestones.project, milestones.label";
-
-	// let tables = "clients, clientContactRoles, employee, milestones";
-
-	// let where = " employeeId in (select employeekey from employee where userid=\"" + csmUserId + "\")"
-	// 			+ " and milestones.snapshotArchived = \"N\""
-	// 			+ " and ("
-	// 			+ " (clients.catProjectStatus = \"A\" and lower(role) =\"catcsm\")"
-	// 			+ " or (clients.cimCoursesProjectStatus = \"A\" and (lower(role) = \"cimccsm\" or lower(role) = \"cimcsm\"))"
-	// 			+ " or (clients.cimProgramsProjectStatus = \"A\" and (lower(role) = \"cimccsm\" or lower(role) = \"cimcsm\"))"
-	// 			+ " or (clients.clssProjectStatus = \"A\" and lower(role) = \"clsscsm\")"
-	// 			+ " )"
-	// 			+ " and clients.idx = clientId and clientContactRoles.employeeId = employee.employeekey and milestones.client = clients.name";
-
 	let fields = "client, date, project, label, csmUserid, updatedOn";
 	let tables = "milestones";
 	let where = "milestones.csmUserid=\"" + csmUserId + "\" and snapshotArchived = \"N\"";
@@ -53,7 +38,59 @@ if (http.debug)
 	// resultSet.forEach(function(result) { dump("result",result.toSource()); });
 
 	// Initialize the page
-	print_filetodoc("milestonesStyle.html");
+	// print_filetodoc("milestonesStyle2.html");
+	print_doc("<!doctype html> \n");
+	print_doc("<!-- <html xml:lang=\"en\" lang=\"en\" dir=\"ltr\"> --> \n");
+	print_doc("<head> \n");
+	// print_doc("      <!-- <meta http-equiv="refresh" content="60" /> --> \n");
+
+	// Add my table styles
+	print_doc("<style> \n");
+	print_doc("#milestones { \n");
+	print_doc("  font-family: \"Trebuchet MS\", Arial, Helvetica, sans-serif; \n");
+	print_doc("  border-collapse: collapse; \n");
+	print_doc("  width: 100%; \n");
+	print_doc("} \n");
+	print_doc("#milestones tr:nth-child(even) { \n");
+	print_doc("		background-color: #f2f2f2; \n");
+	print_doc("} \n");
+	print_doc("table { \n");
+	print_doc(" max-width:98%; \n");
+	// print_doc("	table-layout:fixed; \n");
+	print_doc("	margin:auto; \n");
+	print_doc("} \n");
+	print_doc("th { \n");
+	print_doc("	padding:5px 10px; \n");
+	print_doc("	border:1px solid #000; \n");
+	print_doc("	background-color: #A6343A; \n");
+	print_doc("	color: white; \n");
+	print_doc("} \n")
+	print_doc("td { \n");
+	print_doc("	padding:5px 10px; \n");
+	print_doc("	border:1px solid #ddd; \n");
+	print_doc("} \n")
+
+	// print_doc("thead, tfoot { \n");
+	// print_doc("	background:#f9f9f9; \n");
+	// print_doc("	display:table; \n");
+	// print_doc("	width:100%; \n");
+	// print_doc("	width:calc(100% - 18px); \n");
+	// print_doc("} \n");
+	// print_doc("tbody { \n");
+	// print_doc("	height:800px; \n");
+	// print_doc("	overflow:auto; \n");
+	// print_doc("	overflow-x:hidden; \n");
+	// print_doc("	display:block; \n");
+	// print_doc("	width:100%; \n");
+	// print_doc("} \n");
+	// print_doc("tbody tr { \n");
+	// print_doc("	display:table; \n");
+	// print_doc("	width:100%; \n");
+	// print_doc("	table-layout:fixed; \n");
+	// print_doc("} \n")
+	;
+	print_doc("</style> \n");
+
 	let title="Scheduled milestones by date / client";
 	print_doc("<title>" + title + "</title>");
 
@@ -63,6 +100,8 @@ if (http.debug)
 
 	print_doc("<h1>" + title + " for: " + resultSet2[0].firstName + " " + resultSet2[0].lastName + " (" + csmUserId + ")</h1>");
 	print_doc("<em>" + currtime.toString() + "</em><br><br>\n");
+	print_doc("</head> \n");
+	print_doc("<body> \n");
 
 	// Loop through the clients
 	if (resultSet.length > 0) {
@@ -93,13 +132,13 @@ if (http.debug)
 
 		// Initialize the table
 		print_doc("<table id=milestones>\n");
-		// print_doc("<thead>\n");
+		print_doc("<thead>\n");
 		print_doc("<tr>\n");
 		print_doc("<th>Date</th>\n");
-		clientsKeys.forEach(function(client) { print_doc("<th>" + client + "</th>\n"); });
+		clientsKeys.forEach(function(client) { print_doc("<th>" + client.toLowerCase() + "</th>\n"); });
 		print_doc("<tr>\n");
-		// print_doc("</thead>\n");
-		// print_doc("<tbody>\n");
+		print_doc("</thead>\n");
+		print_doc("<tbody>\n");
 
 		// Add data rows
 		let dateOld="";
@@ -127,7 +166,7 @@ if (http.debug)
 		}
 
 		// close table
-		// print_doc("</tbody>\n");
+		print_doc("</tbody>\n");
 		print_doc("</table>\n");
 	} else {
 		print_doc("Sorry, no active milestone data found for user")
