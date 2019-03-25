@@ -1,7 +1,6 @@
 
 %import /ribbit/jalotLib.atj:atj%
 %spidercode%
-print_debug("\nHERE 0 HERE 0 HERE\n");
 //==============================================================================================
 // Synchronize the data warehouse jalot tables with jalot live
 //==============================================================================================
@@ -32,7 +31,7 @@ var quiet = false;
 		if (typeof taskLists[tasksKey].desc === "undefined") taskLists[tasksKey].desc = "";
 
 		// See if the record already exists
-		let sqlStmt = "select lastNotePostedEpoch from " + table + " where taskListId = \"" + key + "\""
+		let sqlStmt = "select lastNotePostedEpoch from " + table + " where taskListId = \"" + tasksKey + "\""
 		let warehouseData = dbquery(dbr, sqlStmt);
 		dump("name",taskLists[tasksKey].name,debug);
 		if (warehouseData.length === 0) {
@@ -74,7 +73,7 @@ var quiet = false;
 			}
 		}
 		// if (insertCnt > 9 || updateCnt > 9) break
-	} //(let key in taskLists)
+	} //(let tasksKey in taskLists)
 	if (!quiet) print_debug("\n\ttaskLists -- inserted: " + insertCnt + ", updated: " + updateCnt + "\n");
 
 	//==============================================================================================
@@ -213,7 +212,7 @@ var quiet = false;
 				if (!quiet) print_debug("\t\tWould do an update but 'lastnoteposted' not changed -- " + tasks[tasksKey].name + "\n")
 			}
 		}
-	} //(let key in tasks)
+	} //(let tasksKey in tasks)
 	if (!quiet) print_debug("\n\ttasks -- inserted: " + insertCnt + ", updated: " + updateCnt + "\n");
 
 
