@@ -188,7 +188,7 @@ var quiet = false;
 							+ "\", elapSecondsFromUpdate=\"" + tasks[tasksKey].elapSecondsFromUpdate 
 							+ "\", elapHoursFromUpdate=\"" + tasks[tasksKey].elapHoursFromUpdate
 							+ "\", updatedOn=now()";
-				let sqlStmt = "update jalotTasklists set " + updateStr + " where taskId=\"" + taskId + "\"";
+				let sqlStmt = "update " + table + " set " + updateStr + " where taskId=\"" + taskId + "\"";
 				dump("\tsqlStmt",sqlStmt,debug);
 				let resultSet = dbquery(dbrw, sqlStmt);
 				updateCnt++;
