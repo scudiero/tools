@@ -1,6 +1,6 @@
 
 //==============================================================================================
-// // version="1.1.42" // -- dscudiero -- Fri 03/22/2019 @ 16:13:43
+// // version="1.1.45" // -- dscudiero -- Mon 03/25/2019 @ 07:50:59
 //==============================================================================================
 //Globals
 var jalotMasterUser="acct13830-gestalt";
@@ -145,7 +145,7 @@ function getTasks(jalotUser,flags) {
 					let table = "jalotTasklists";
 					let sqlStmt = "select name from " + table + " where taskListId = \"" + task.parenttopic.replace(/\/.*/, "") + "\""
 					let warehouseData = dbquery(dbr, sqlStmt);
-					if (warehouseData != null)
+					if (warehouseData != null && warehouseData.length >0)
 						key = warehouseData[0].name.replace(/  *-? *CourseLeaf/, "") + "." + task.topicid;
 					userTasks[key] = task;
 				}
@@ -454,4 +454,4 @@ function twoDigits(d) {
 Date.prototype.toMysqlFormat = function() {
     return this.getUTCFullYear() + "-" + twoDigits(1 + this.getUTCMonth()) + "-" + twoDigits(this.getUTCDate()) + " " + twoDigits(this.getUTCHours()) + ":" + twoDigits(this.getUTCMinutes()) + ":" + twoDigits(this.getUTCSeconds());
 };
-// 03-22-2019 @ 16:42:09 - 1.1.42 - dscudiero - Add a function to build a formatted string for elapsed time
+// 03-25-2019 @ 07:54:07 - 1.1.45 - dscudiero - Fix problem when warehouseData has zero length
