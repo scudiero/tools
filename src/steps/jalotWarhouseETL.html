@@ -195,7 +195,7 @@ var quiet = false;
 				if (warehouseData[0].lastNote < tasks[tasksKey].lastnote) {
 					for (let notesKey in notes) {
 						if (notesKey <= tasks[tasksKey].lastnote) continue
-						let noteDateEpoch = (new Date(notes[tasksKey].date)).getTime();
+						let noteDateEpoch = (new Date(notes[notesKey].date)).getTime();
 						values = notesKey + "," +  taskId + "," 
 								+ "\"" + notes[notesKey].date
 								+ "\",\"" + noteDateEpoch
