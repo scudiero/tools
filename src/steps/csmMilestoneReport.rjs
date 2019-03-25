@@ -70,25 +70,25 @@ if (http.debug)
 	print_doc("	border:1px solid #ddd; \n");
 	print_doc("} \n")
 
-	// print_doc("thead, tfoot { \n");
-	// print_doc("	background:#f9f9f9; \n");
-	// print_doc("	display:table; \n");
-	// print_doc("	width:100%; \n");
-	// print_doc("	width:calc(100% - 18px); \n");
-	// print_doc("} \n");
-	// print_doc("tbody { \n");
-	// print_doc("	height:800px; \n");
-	// print_doc("	overflow:auto; \n");
-	// print_doc("	overflow-x:hidden; \n");
-	// print_doc("	display:block; \n");
-	// print_doc("	width:100%; \n");
-	// print_doc("} \n");
-	// print_doc("tbody tr { \n");
-	// print_doc("	display:table; \n");
-	// print_doc("	width:100%; \n");
-	// print_doc("	table-layout:fixed; \n");
-	// print_doc("} \n")
-	;
+	print_doc("thead, tfoot { \n");
+	print_doc("	background:#f9f9f9; \n");
+	print_doc("	display:table; \n");
+	print_doc("	width:100%; \n");
+	print_doc("	width:calc(100% - 18px); \n");
+	print_doc("} \n");
+	print_doc("tbody { \n");
+	print_doc("	height:800px; \n");
+	print_doc("	overflow:auto; \n");
+	print_doc("	overflow-x:hidden; \n");
+	print_doc("	display:block; \n");
+	print_doc("	width:100%; \n");
+	print_doc("} \n");
+	print_doc("tbody tr { \n");
+	print_doc("	display:table; \n");
+	print_doc("	width:100%; \n");
+	print_doc("	table-layout:fixed; \n");
+	print_doc("} \n");
+
 	print_doc("</style> \n");
 
 	let title="Scheduled milestones by date / client";
@@ -134,11 +134,15 @@ if (http.debug)
 		print_doc("<table id=milestones>\n");
 		print_doc("<thead>\n");
 		print_doc("<tr>\n");
-		print_doc("<th>Date</th>\n");
-		clientsKeys.forEach(function(client) { print_doc("<th>" + client.toLowerCase() + "</th>\n"); });
+		print_doc("<th width=\"6%\">Date</th>\n");
+		let numClients=Object.keys(clientsKeys).length
+		let colWidth = Math.floor(94 / numClients);
+
+		clientsKeys.forEach(function(client) { print_doc("<th width=\"" + colWidth + "%\" >" + client.toLowerCase() + "</th>\n"); numClients++; });
 		print_doc("<tr>\n");
 		print_doc("</thead>\n");
 		print_doc("<tbody>\n");
+
 
 		// Add data rows
 		let dateOld="";
@@ -148,17 +152,17 @@ if (http.debug)
 				if (debug) dump("\t dataObj",dataObj.toSource())
 				if (key != dateOld) {
 					print_doc("<tr>\n");
-					print_doc("<td>" + key + "</td>\n");
+					print_doc("<td width=\"6%\" >" + key + "</td>\n");
 					dateOld=key;
 				} else {
-					print_doc("<td></td>\n");
+					print_doc("<td width=\"6%\" ></td>\n");
 				}
 				// Add the client milestones data
 				clientsKeys.forEach(function(client) { 
 					if (dataObj.client === client) {
-						print_doc("<td>" + dataObj.milestone + "</td>\n");
+						print_doc("<td width=\"" + colWidth + "%\" >" + dataObj.milestone + "</td>\n");
 					} else {
-						print_doc("<td></td>\n");
+						print_doc("<td width=\"" + colWidth + "%\" ></td>\n");
 					}
 				});
 				print_doc("</tr>\n");
