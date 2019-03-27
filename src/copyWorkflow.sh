@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version="2.11.19" # -- dscudiero -- Fri 03/22/2019 @ 10:27:29
+version="2.11.22" # -- dscudiero -- Wed 03/27/2019 @ 13:46:16
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi SetSiteDirs"
@@ -253,7 +253,7 @@ function CheckFilesForCopy {
 			if [[ $(Contains "$cpyFile" 'workflow.tcf') == true ]]; then
 				unset grepStr; grepStr=$(ProtectedCall "grep ^workflow\:.\*\|START, $srcFile")
 				if [[ ${grepStr:0:1} != '#' ]]; then
-					[[ -n $grepStr && [[ $tgtEnv == 'test' || $tgtEnv == 'next' ]] ]] && Terminate "Source 'workflow.tcf' file contained an active DEBUG workflow definition"
+					[[ -n $grepStr ]] && [[ $tgtEnv == 'test' || $tgtEnv == 'next' ]] && Terminate "Source 'workflow.tcf' file contained an active DEBUG workflow definition"
 					[[ -n $grepStr && $tgtEnv == 'test' ]] && Warning 0 1 "Source 'workflow.tcf' file contained an 'TODO' step in the workflow definitions"
 					unset grepStr; grepStr=$(ProtectedCall "grep '^workflow:standard|START' $srcFile")
 					if [[ -n $grepStr ]]; then
@@ -525,7 +525,7 @@ Msg
 		[[ $ans != 'y' ]] && Warning "No files have been updated" && Goodbye 1
 	else
 		Msg
-		unset ans defVals; Prompt ans "Do you wish to update to the '$tgtEnv' site" 'Yes No' 'Yes'; ans=$(Lower ${ans:0:1});
+		unset ans defVals; Prompt ans "Do you wish to update to the '$tgtEnv' site" 'Yes No'; ans=$(Lower ${ans:0:1});
 	fi
 
 	if [[ ${#copyFileList[@]} -gt 0 ]]; then
@@ -760,3 +760,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 03-06-2019 @ 08:40:00 - 2.11.15 - dscudiero - Re-factor how initialization is done for fastInit
 ## 03-12-2019 @ 15:37:27 - 2.11.18 - dscudiero - Fix problem putting the workflow.cfg file when commenting out the wfDump wfrule
 ## 03-22-2019 @ 10:27:59 - 2.11.19 - dscudiero - Put in a check to make sure that we are not pushing a workflow.tcf file with an active debug workflow
+## 03-27-2019 @ 13:46:45 - 2.11.22 - dscudiero - Remove the default answer for the last do you wish to copy questios
