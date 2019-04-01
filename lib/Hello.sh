@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.57" # -- dscudiero -- Wed 12/26/2018 @ 12:44:35
+# version="2.0.59" # -- dscudiero -- Mon 04/01/2019 @ 11:05:57
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -31,7 +31,7 @@ function Hello {
 
 	local sqlStmt="select supported from $scriptsTable where name = \"$myName\""
 	RunSql $sqlStmt
-	[[ -z ${resultSet[0]} ]] && Warning "This script is not supported, results are not guaranteed to not be as expected"	
+	[[ -z ${resultSet[0]} && $batchMode != true ]] && Warning "This script is no longer supported"	
 
 	[[ $noBanners != true && "$myDescription" != "" ]] && Msg && Msg "$myDescription"
 	[[ $checkName != $userName ]] && userStr="Real user $checkName, Tools user: $userName" || userStr="Tools user: $userName"
@@ -88,3 +88,4 @@ export -f Hello
 ## 04-18-2018 @ 09:35:01 - 2.0.52 - dscudiero - Added USEDEV message
 ## 11-06-2018 @ 07:42:00 - 2.0.56 - dscudiero - Add not supported message
 ## 12-27-2018 @ 07:21:29 - 2.0.57 - dscudiero - Comment out displaying news
+## 04-01-2019 @ 11:06:11 - 2.0.59 - dscudiero - Tweak messaging
