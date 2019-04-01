@@ -23,9 +23,9 @@ var version="1.1"
 	if(argStr.indexOf("page=") >= 0)
 		var page = argStr.replace(/.*page=([^\&]*)\&?.*$/i, "$1");
 	if(argStr.indexOf("owners=") >= 0)
-		var owners = argStr.replace(/.*owners=([^\&]*)\&?.*$/i, "$1").replace(/%26/g," ");
+		var owners = argStr.replace(/.*owners=([^\&]*)\&?.*$/i, "$1").replace(/%26/g,"&");
 	if(argStr.indexOf("workflows=") >= 0)
-		var workflows = argStr.replace(/.*workflows=([^\&]*)\&?.*$/i, "$1").replace(/%26/g," ");
+		var workflows = argStr.replace(/.*workflows=([^\&]*)\&?.*$/i, "$1").replace(/%26/g,"&");
 
 	Dump(['page','owners','workflows']);
 
