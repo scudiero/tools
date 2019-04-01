@@ -13,7 +13,7 @@
 //============================================================================================================
 var myName=arguments.callee.toString(); myName=myName.substr('function '.length); myName=myName.substr(0, myName.indexOf('('));
 var debug=false;
-var version="1.0"
+var version="1.1"
 
 //============================================================================================================
 //Parse Arguments
@@ -21,11 +21,11 @@ var version="1.0"
 	var argStr = getenv("QUERY_STRING");
 
 	if(argStr.indexOf("page=") >= 0)
-		var page = argStr.replace(/.*page=([^\&]*)\&?.*$/i, "$1")
+		var page = argStr.replace(/.*page=([^\&]*)\&?.*$/i, "$1");
 	if(argStr.indexOf("owners=") >= 0)
-		var owners = argStr.replace(/.*owners=([^\&]*)\&?.*$/i, "$1")
+		var owners = argStr.replace(/.*owners=([^\&]*)\&?.*$/i, "$1").replace(/%26/g," ");
 	if(argStr.indexOf("workflows=") >= 0)
-		var workflows = argStr.replace(/.*workflows=([^\&]*)\&?.*$/i, "$1")
+		var workflows = argStr.replace(/.*workflows=([^\&]*)\&?.*$/i, "$1").replace(/%26/g," ");
 
 	Dump(['page','owners','workflows']);
 
