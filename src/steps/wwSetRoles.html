@@ -31,7 +31,7 @@ if(argStr.indexOf("debug=") >= 0)
 //# Main
 //============================================================================================================
 // Process the arguments
-if (debug) print_debug("\n" + myName + " Starting" +"\n")
+if (debug) print_debug("\n\n" + myName + " Starting" +"\n")
 if (argRoles == undefined) {
 		print_debug("\n*Error* -- invalid step call, no roles specified\n\t" + argRoles + "\n\n")
 } else {
@@ -53,7 +53,7 @@ if (argRoles == undefined) {
 
 	// Get the currently defined roles into a roles hash
 		var tcfData=[];
-		if (debug) print_debug("\n");
+		if (debug) print_debug("\n(" + myName + ") Roles before run:");
 		tcfdata.role.forEach(function(token) {
 			tcfData[token.name] = token;
 			if (debug) print_debug("\t(" + myName + ") tcfData[" + token.name + "] '" + tcfData[token.name].toSource() + "'\n");
@@ -63,13 +63,14 @@ if (argRoles == undefined) {
 	// Loop through the input roles and update the rolesHas as necessary
 		var writeTcf = false;
 		roles.forEach(function(role) {
+			if (debug) print_debug("\t(" + myName + ") roleIn '" + role.name + "'\n");
 			if (typeof tcfData[role.name] == "undefined") {
-				if (debug) print_debug("\t(" + myName + ") Adding role '" + role.name + "'\n");
+				if (debug) print_debug("\t\t(" + myName + ") Adding role '" + role.name + "'\n");
 				tcfData[role.name] = role;
 				writeTcf = true;
 			} else {
 				if (tcfData[role.name].members != role.members || tcfData[role.name].email != role.email) {
-					if (debug) print_debug("\t(" + myName + ") Updating role '" + role.name + "'\n");
+					if (debug) print_debug("\t\t(" + myName + ") Updating role '" + role.name + "'\n");
 					tcfData[role.name] = role;
 					writeTcf = true;
 				}
