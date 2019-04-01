@@ -15,7 +15,7 @@
 //============================================================================================================
 var myName="wwSetRoles";
 var debug=false;
-var version="1.0"
+var version="1.1"
 
 //============================================================================================================
 //Parse Arguments
@@ -36,7 +36,7 @@ if (argRoles == undefined) {
 		print_debug("\n*Error* -- invalid step call, no roles specified\n\t" + argRoles + "\n\n")
 } else {
 	var roles=[];
-	var argRoles=argRoles.replace(/%20/g," ").split(";");
+	var argRoles=argRoles.replace(/%20/g," ").replace(/%26/g," ").split(";");
 	if (debug) print_debug("\targRoles = " + argRoles.toSource() + "\n");
 	argRoles.forEach(function(token) {
 		var tmpArray = token.split("|");
