@@ -23,9 +23,9 @@ var version="1.1"
 	if(argStr.indexOf("page=") >= 0)
 		var page = argStr.replace(/.*page=([^\&]*)\&?.*$/i, "$1");
 	if(argStr.indexOf("owners=") >= 0)
-		var owners = argStr.replace(/.*owners=([^\&]*)\&?.*$/i, "$1").replace(/%26/g,"&");
+		var owners = argStr.replace(/.*owners=([^\&]*)\&?.*$/i, "$1");
 	if(argStr.indexOf("workflows=") >= 0)
-		var workflows = argStr.replace(/.*workflows=([^\&]*)\&?.*$/i, "$1").replace(/%26/g,"&");
+		var workflows = argStr.replace(/.*workflows=([^\&]*)\&?.*$/i, "$1");
 
 	Dump(['page','owners','workflows']);
 
@@ -39,14 +39,14 @@ var version="1.1"
 	}
 
 	if (owners != undefined) {
-		owners=owners.replace(/%20/g," ");
+		owners=owners.replace(/%20/g," ").replace(/%26/g,"&");
 		Dump(['owners']);
 		valArray = owners.split(",");
 		attr_write("owner",valArray,{savetcf: true});
 	}
 
 	if (workflows != undefined) {
-		workflows=workflows.replace(/%20/g," ");
+		workflows=workflows.replace(/%20/g," ").replace(/%26/g,"&");
 		Dump(['workflows']);
 		valArray = workflows.split(",");
 		attr_write("mustsignoff",valArray,{savetcf: true});
