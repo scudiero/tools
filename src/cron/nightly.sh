@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.14" # -- dscudiero -- Wed 03/20/2019 @ 08:45:15
+version="1.23.15" # -- dscudiero -- Wed 04/03/2019 @ 08:10:31
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -308,6 +308,7 @@ case "$hostName" in
 			Msg "\n...Cleanup done"
 
 		## sync the jalot data warehouse tables
+			export QUERY_STRING="debug=false, quiet=false"
 			Msg "\nSyncing the jalot data warehouse tables..."
 			Pushd "/mnt/internal/site/stage/web/pagewiz"
 			time ./pagewiz.cgi jalotWarhouseETL /
@@ -509,3 +510,4 @@ return 0
 ## 03-18-2019 @ 15:02:38 - 1.23.12 - dscudiero - Add jalot data warehouse table sync
 ## 03-19-2019 @ 10:45:14 - 1.23.13 - dscudiero - Tweak messaging
 ## 03-20-2019 @ 08:46:13 - 1.23.14 - dscudiero - Tweak messaging
+## 04-03-2019 @ 15:00:24 - 1.23.15 - dscudiero - Add/Remove debug statements
