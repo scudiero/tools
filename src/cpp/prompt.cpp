@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.5.24" // -- dscudiero -- Tue 01/29/2019 @ 13:49:58
+// version="1.5.26" // -- dscudiero -- Fri 04/05/2019 @ 11:54:22
 //==================================================================================================
 #include <stdlib.h>
 #include <unistd.h>
@@ -238,9 +238,8 @@ int main(int argc, char *argv[]) {
 						// allowAbbrev=false;
 //TODO
 						// If this is the pvt env then read the .clonedfrom file to get the environment to use in the lookup
-						if (env("env") == "pvt") {
-
-						}
+						// if (env("env") == "pvt" || env("env") == "alt") {
+						// }
 
 						// Get valid cims from data warehouse
 						sqlStmt="select ifnull(cims,'') from " + siteInfoTable 
@@ -426,3 +425,4 @@ int main(int argc, char *argv[]) {
 // 12-14-2018 @ 15:59:24 - 1.5.1 - dscudiero - Fix problem with exceptions when null results are returned from the db querys
 // 01-29-2019 @ 11:28:00 - 1.5.23 - dscudiero - Added proper handeling of pvt sites
 // 01-29-2019 @ 14:35:31 - 1.5.24 - dscudiero - M
+// 04-05-2019 @ 11:55:05 - 1.5.26 - dscudiero - Add/Remove debug statements
