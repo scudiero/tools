@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.1.17" // -- dscudiero -- Wed 03/13/2019 @ 15:09:01
+// version="1.1.18" // -- dscudiero -- Fri 04/05/2019 @ 11:46:16
 //==================================================================================================
 #include <iostream>		// IO utility library
 #include <string>		// String utility library
@@ -238,6 +238,31 @@ int main(int argc, char *argv[]) {
 					if (scriptCmd != "") {
 						string scriptCmdL=scriptCmd;
 						boost::algorithm::to_lower(scriptCmdL);
+						if (scriptCmdL == "expandenv") {
+							i--;
+							arg = argv[i];
+							if (arg == "c" || arg == "curr") {
+								std::cout << "env=\"curr\"\n";
+							} else if (arg == "n" || arg == "next") {
+								std::cout << "env=\"next\"\n";
+							} else if (arg == "t" || arg == "test") {
+								std::cout << "env=\"test\"\n";
+							} else if (arg == "a" || arg == "alt") {
+								std::cout << "env=\"alt\"\n";
+							} else if (arg == "d" || arg == "dev") {
+								std::cout << "env=\"dev\"\n";
+							} else if (arg == "p" || arg == "pvt") {
+								std::cout << "env=\"pvt\"\n";
+							} else if (arg == "pub" || arg == "public") {
+								std::cout << "env=\"public\"\n";
+							} else if (arg == "pri" || arg == "prior") {
+								std::cout << "env=\"prior\"\n";
+							} else if (arg == "pre" || arg == "preview") {
+								std::cout << "env=\"preview\"\n";
+							}
+							i++;
+							arg = argv[i];
+						}
 						if (scriptCmdL == "maptoenv") {
 							i--;
 							arg = argv[i];
@@ -290,3 +315,4 @@ int main(int argc, char *argv[]) {
 // 03-12-2019 @ 08:33:21 - 1.1.6 - dscudiero - 
 // 03-13-2019 @ 15:07:50 - 1.1.15 - dscudiero - Add special processing for mapToEnv
 // 03-13-2019 @ 15:09:22 - 1.1.17 - dscudiero - Update the rhel6 version
+// 04-05-2019 @ 11:52:12 - 1.1.18 - dscudiero - Add the expandEnv directive
