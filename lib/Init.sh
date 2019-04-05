@@ -383,3 +383,4 @@ export -f Init
 ## 06-27-2018 @ 12:13:17 - 2.2.4 - dscudiero - Comment out the version= line
 ## 07-16-2018 @ 11:29:24 - 2.2.5 - dscudiero - Update auth to take into account that the auth groups are now prefixed by the groupId
 ## 07-16-2018 @ 12:38:44 - 2.2.5 - dscudiero - When checking to see if the user is in the support group, add the groupid
+## 04-05-2019 @ 11:57:19 - 2.2.5 - dscudiero - 
