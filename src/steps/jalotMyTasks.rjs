@@ -211,7 +211,11 @@ if (!me) {
 						tmpStr=elapArray[2] + " days";
 					}
 				}
-				print_doc("<td align=\"center\"" + jalotStyleRed + ">\n");
+				if (task.deferred) {
+					print_doc("<td align=\"center\" >\n");
+				} else {
+					print_doc("<td align=\"center\"" + jalotStyleRed + ">\n");
+				}
 				print_doc(tmpStr + "\n");
 			} else {
 				print_doc("<td align=\"center\">\n"); 
