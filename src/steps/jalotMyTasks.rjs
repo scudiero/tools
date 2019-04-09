@@ -118,19 +118,17 @@ if (!me) {
 			print_doc("<th align=\"left\">\n"); print_doc("\n"); print_doc("</th>\n");
 			print_doc("<th align=\"center\" colspan=2>\n"); print_doc("Opened\n"); print_doc("</th>\n");
 			print_doc("<th align=\"center\" colspan=2>\n"); print_doc("Last Updated\n"); print_doc("</th>\n");
-			// print_doc("<th align=\"center\">\n"); print_doc("Elapsed from\n"); print_doc("</th>\n");
-			// print_doc("<th align=\"center\">\n"); print_doc("Elapsed from\n"); print_doc("</th>\n");
 			print_doc("<th align=\"center\">\n"); print_doc("\n"); print_doc("</th>\n");
 			print_doc("</tr>\n");
 			print_doc("<tr>\n");
 			print_doc("<th align=\"center\">\n"); print_doc("Task\n"); print_doc("</th>\n");
 			print_doc("<th align=\"left\">\n"); print_doc("Task List\n"); print_doc("</th>\n");
-			print_doc("<th align=\"center\">\n"); print_doc("Title\n"); print_doc("</th>\n");
-			print_doc("<th align=\"center\">\n"); print_doc(who + "\n"); print_doc("</th>\n");
+			print_doc("<th align=\"left\">\n"); print_doc("Title\n"); print_doc("</th>\n");
+			print_doc("<th align=\"left\">\n"); print_doc(who + "\n"); print_doc("</th>\n");
 			print_doc("<th align=\"center\">\n"); print_doc("Date\n"); print_doc("</th>\n");
-			print_doc("<th align=\"center\">\n"); print_doc("Elapsed<br><em>(YY MM DD)</em>\n"); print_doc("</th>\n");
+			print_doc("<th align=\"center\">\n"); print_doc("Elapsed\n"); print_doc("</th>\n");
 			print_doc("<th align=\"center\">\n"); print_doc("Date\n"); print_doc("</th>\n");
-			print_doc("<th align=\"center\">\n"); print_doc("Elapsed<br><em>(YY MM DD)</em>\n"); print_doc("</th>\n");
+			print_doc("<th align=\"center\">\n"); print_doc("Elapsed\n"); print_doc("</th>\n");
 			print_doc("<th align=\"center\">\n"); print_doc("Deferred\n"); print_doc("</th>\n");
 			print_doc("</tr>\n");
 		}
@@ -167,7 +165,24 @@ if (!me) {
 			print_doc("<td align=\"center\">\n");
 			// elapsed time from open in form 'DD MM YY' or 'HH hrs'
 			if (task.elapHoursFromOpen > 24) {
-					print_doc(epochToYYMMDD(task.elapSecondsFromOpen) + "\n"); 
+				let elapArray=epochToYYMMDD(task.elapSecondsFromOpen);
+				let tmpStr="";
+				if (elapArray[0] != 0) tmpStr=elapArray[0] + " yrs";
+				if (elapArray[1] != 0) {
+					if (tmpStr != "") {
+						tmpStr=tmpStr + ", " + elapArray[1] + " mths";
+					} else {
+						tmpStr=elapArray[1] + " mths";
+					}
+				}
+				if (elapArray[2] != 0) {
+					if (tmpStr != "") {
+						tmpStr=tmpStr + ", " + elapArray[2] + " days";
+					} else {
+						tmpStr=elapArray[2] + " days";
+					}
+				}
+				print_doc(tmpStr + "\n"); 
 			} else {
 				print_doc(task.elapHoursFromOpen + " hrs\n");
 			}
@@ -178,10 +193,28 @@ if (!me) {
 			let updatedOn=padZero(d2.getMonth()+1) + "/" + padZero(d2.getDate()) + "/" + padZero(d2.getFullYear().toString().substring(2,4));
 			print_doc("<td align=\"center\">\n"); print_doc(updatedOn + "\n"); print_doc("</td>\n");
 			// elapsed time from last update in form 'DD MM YY' or 'HH hrs'
-			print_doc("<td align=\"center\">\n"); 
 			if (task.elapHoursFromUpdate > 24) {
-				print_doc(epochToYYMMDD(task.elapSecondsFromUpdate) + "\n");  
+				let elapArray=epochToYYMMDD(task.elapSecondsFromUpdate);
+				let tmpStr="";
+				if (elapArray[0] != 0) tmpStr=elapArray[0] + " yrs";
+				if (elapArray[1] != 0) {
+					if (tmpStr != "") {
+						tmpStr=tmpStr + ", " + elapArray[1] + " mths";
+					} else {
+						tmpStr=elapArray[1] + " mths";
+					}
+				}				
+				if (elapArray[2] != 0) {
+					if (tmpStr != "") {
+						tmpStr=tmpStr + ", " + elapArray[2] + " days";
+					} else {
+						tmpStr=elapArray[2] + " days";
+					}
+				}
+				print_doc("<td align=\"center\"" + jalotStyleRed + ">\n");
+				print_doc(tmpStr + "\n");
 			} else {
+				print_doc("<td align=\"center\">\n"); 
 				print_doc(task.elapHoursFromUpdate + " hrs\n");
 			}
 			print_doc("</td>\n");
