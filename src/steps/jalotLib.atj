@@ -1,6 +1,6 @@
 
 //==============================================================================================
-// // version="1.1.47" // -- dscudiero -- Mon 03/25/2019 @ 09:12:07
+// // version="1.1.51" // -- dscudiero -- Tue 04/09/2019 @ 07:23:25
 //==============================================================================================
 //Globals
 var jalotMasterUser="acct13830-gestalt";
@@ -185,7 +185,8 @@ function getTaskNotes(taskId) {
 	let xml = new docXML(taskNotesXml, {condensewhitespace: false});
 	let tmpObj = xmlNode2Object(xml);
 	let raccdata = tmpObj.raccdata;
-	let notes = raccdata.notes;
+	let notes = [];
+	if (tmpObj.raccdata && tmpObj.raccdata.length > 0) notes = raccdata.notes;
 
 	let notes2=[];
 	notes.forEach(function(note) {
@@ -364,8 +365,7 @@ function epochToYYMMDD(epoch) {
 	elapsedDays=elapsedDays-(years*365);
 	let months=Math.floor(elapsedDays/30);
 	elapsedDays=Math.floor(elapsedDays-(months*30));
-	return padZero(years) + " " + padZero(months) + " " + padZero(elapsedDays);
-	return
+	return [years, months, elapsedDays];
 }
 
 //==============================================================================================
@@ -453,4 +453,4 @@ function twoDigits(d) {
 Date.prototype.toMysqlFormat = function() {
     return this.getUTCFullYear() + "-" + twoDigits(1 + this.getUTCMonth()) + "-" + twoDigits(this.getUTCDate()) + " " + twoDigits(this.getUTCHours()) + ":" + twoDigits(this.getUTCMinutes()) + ":" + twoDigits(this.getUTCSeconds());
 };
-// 03-25-2019 @ 11:15:05 - 1.1.47 - dscudiero - Add subject to notes data
+// 04-09-2019 @ 07:51:05 - 1.1.51 - dscudiero - Tweaked output of converting elap seconds to yy mm dd
