@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.45" # -- dscudiero -- Fri 04/20/2018 @  7:55:17.12
+# version="2.0.62" # -- dscudiero -- Tue 04/09/2019 @ 09:42:13
 #===================================================================================================
 # Get CIMs
 #===================================================================================================
@@ -42,16 +42,25 @@ function GetCims {
 
 	[[ ! -d $siteDir/web ]] && { unset cims cimStr; return 0; }
 	Pushd "$siteDir/web"
-	cimDirsStr=$(ProtectedCall "find -mindepth 2 -maxdepth 2 -type f -name cimconfig.cfg -printf '%h\n' | sort")
+	# cimDirsStr=$(ProtectedCall "find -mindepth 2 -maxdepth 2 -type f -name cimconfig.cfg -printf '%h\n' | sort")
+
+	SetFileExpansion 'on'
+	cimDirsStr="$(ls -d */ | grep "admin")"; cimDirsStr="${cimDirsStr//[$'\t\r\n']}"; cimDirsStr="${cimDirsStr//\// }"
+	SetFileExpansion
 	unset cimDirs
 	[[ $cimDirsStr != '' ]] && readarray -t cimDirs <<< "${cimDirsStr}"
 	#echo;echo "Array '$cimDirs':"; for ((jj=0; jj<${#cimDirs[@]}; jj++)); do echo -e "\t cimDirs[$jj] = >${cimDirs[$jj]}<"; done
-	[[ -f ./cim/cimconfig.cfg ]] && cimDirs+=('./cim')
+	# [[ -f ./cim/cimconfig.cfg ]] && cimDirs+=('./cim')
+	[[ -f ./cim/cimconfig.cfg ]] && cimDirsStr+='cim'
 	Popd
 
-	for ((jj=0; jj<${#cimDirs[@]}; jj++)); do
-		dir="${cimDirs[$jj]}"; dir=${dir:2}
-		[[ $(Contains "$dir" ".old") == true || $(Contains "$dir" ".bak") == true || $(Contains "$dir" " - Copy") == true  || $(Contains "$dir" "_") == true ]] && continue
+	# for ((jj=0; jj<${#cimDirs[@]}; jj++)); do
+	# 	dir="${cimDirs[$jj]}"; #dir=${dir:2}
+	for dir in $cimDirsStr; do
+		[[ $dir == "admin" || $(Contains "$dir" ".old") == true || $(Contains "$dir" ".bak") == true \
+			|| $(Contains "$dir" " - Copy") == true  || $(Contains "$dir" "_") == true ]] && continue
+		dump 3 -t dir
+		[[ ! -f $siteDir/web/$dir/cimconfig.cfg ]] && continue	
 		[[ $onlyWithTestFile == true && ! -f $siteDir/web/$dir/wfTest.xml ]] && continue
 		if [[ $verify == true && $getAllCims != true ]]; then
 			unset ans
@@ -105,3 +114,4 @@ export -f GetCims
 ## 12-11-2017 @ 16.26.50 - ("2.0.43")  - dscudiero - Filter out cim imstances with '_' in the name
 ## 12-14-2017 @ 15.46.53 - ("2.0.44")  - dscudiero - Only set siteDir if it is null on parg parsing
 ## 04-20-2018 @ 07:56:12 - 2.0.45 - dscudiero - Do not terminate if we cannot find the passed in siteDir, just return nothing.
+## 04-09-2019 @ 09:43:17 - 2.0.62 - dscudiero - \nSwitch from using find to using ls to get the list of potential cim directories
