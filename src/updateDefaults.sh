@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version="2.1.13" # -- dscudiero -- Wed 04/10/2019 @ 09:47:18
+version="2.1.14" # -- dscudiero -- Wed 04/10/2019 @ 09:50:34
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall"
@@ -247,3 +247,4 @@ Goodbye 0;
 ## 11-16-2018 @ 09:52:26 - 2.1.11 - dscudiero - Turn on loading defaults files again
 ## 12-11-2018 @ 15:07:11 - 2.1.12 - dscudiero - Comment out building the defaults files
 ## 04-10-2019 @ 09:47:45 - 2.1.13 - dscudiero - \ntesting line 1\ntesting line 2\ntesting line 3
+## 04-10-2019 @ 09:50:57 - 2.1.14 - dscudiero -  %n testing line 1 %n line 2 %n line 3
