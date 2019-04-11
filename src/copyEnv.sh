@@ -1,14 +1,14 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.14.27" # -- dscudiero -- Fri 02/22/2019 @ 08:02:33
+version="4.14.43" # -- dscudiero -- Thu 04/11/2019 @ 08:07:22
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions SetSiteDirsNew"
 Import "$standardInteractiveIncludes $myIncludes"
 [[ $1 == $myName ]] && shift
 originalArgStr="$*"
-scriptDescription="Create a cloned private dev site"
+scriptDescription="Copy a CourseLeaf site from one env to another"
 
 #==================================================================================================
 # Make a copy of the next environment in a dev site (a new developer named site or overlay real dev site)
@@ -115,6 +115,7 @@ myArgs+="skipal|skipalso|switch|skipAlso|;"
 myArgs+="debug|debug|switch|startWizdebug|;"
 myArgs+="lock|lock|switch|lockWorkflows|;"
 myArgs+="as|asSite|option|asSite|;"
+myArgs+="rsync|rsyncSrcDir|option|rsyncSrcDir|;"
 export myArgs="$myArgs"
 
 #==================================================================================================
@@ -149,7 +150,7 @@ if [[ -n $products ]]; then
 	[[ $(Contains "$products" 'cim') == true ]] && skipCim=false
 	[[ $(Contains "$products" 'clss') == true ]] && skipClss=false
 fi
-dump 1 -n client envs product products fullCopy overlay suffix email skipCat skipCim skipClss skipAlso -p
+dump 2 -n client env envs product products fullCopy overlay suffix email skipCat skipCim skipClss skipAlso srcEnv tgtEnv rsyncSrcDir -p
 
 ## Resolve data based on passed in client, handle special cases
 	tmpStr="${client:0:5}"; tmpStr=${tmpStr,,[a-z]}
@@ -181,11 +182,18 @@ dump 1 -n client envs product products fullCopy overlay suffix email skipCat ski
 			srcEnv="$env"; srcDir="$siteDir"; unset env
 			Init 'getTgtEnv getDirs addPvt'
 		else
-			Init 'getSrcEnv getTgtEnv getDirs addPvt'
-			env="$srcEnv"
+			if [[ -z $rsyncSrcDir ]]; then 
+				Init 'getSrcEnv getTgtEnv getDirs addPvt'
+				env="$srcEnv"
+			else
+				[[ ${rsyncSrcDir:0:2} == "//" ]] && srcDir="/mnt/${rsyncSrcDir:2}"
+				tgtEnv="pvt"
+				SetSiteDirsNew $client
+				tgtDir=$pvtDir
+			fi
 		fi
 	fi
-	dump -1 client env srcEnv srcDir tgtEnv tgtDir -p
+	dump -1 client env srcEnv srcDir tgtEnv tgtDir rsyncSrcDir -p
 
 ignoreList=$(sed "s/<progDir>/$progDir/g" <<< $ignoreList)
 mustHaveDirs=$(sed "s/<progDir>/$progDir/g" <<< $(cut -d":" -f2 <<< $scriptData1))
@@ -365,9 +373,14 @@ dump -1 skipCim skipCat skipClss skipAlso
 
 #==================================================================================================
 ## Make sure the user really wants to do this
+[[ -n $rsyncSrcDir ]] && unset noPrompt
 	unset verifyArgs
 	verifyArgs+=("Client:$client")
-	verifyArgs+=("Source Env:$(TitleCase $srcEnv)   $(ColorV "($srcDir)")")
+	if [[ -n $rsyncSrcDir ]]; then
+		verifyArgs+=("Source Env:$(TitleCase $srcEnv)   $(ColorI "($srcDir)")")
+	else
+		verifyArgs+=("Source Env:$(TitleCase $srcEnv)   $(ColorV "($srcDir)")")
+	fi
 	verifyArgs+=("Target Env:$(TitleCase $tgtEnv)   $(ColorV "($tgtDir)")")
 	tmpStr=$(sed "s/,/\n\t\t /g" <<< $ignoreList)
 	[[ -n $forUser ]] && verifyArgs+=("For User:$forUser")
@@ -547,7 +560,7 @@ if [[ $tgtEnv == 'pvt' || $tgtEnv == 'dev' ]]; then
 	## touch clone data and source file in root
 		if [[ $tgtEnv == 'pvt' ]]; then
 			$DOIT rm -f $tgtDir/.clonedFrom-* > /dev/null 2>&1
-			$DOIT echo $env > $tgtDir/.clonedFrom
+			$DOIT echo $srcEnv > $tgtDir/.clonedFrom
 			echo
 			Info "To act on private dev sites within the 'scripts' family of scripts you should specify 'pvt' as the environment name."
 			Info "Remember you can use the 'cleanDev' script to easily remove private dev sites."
@@ -756,3 +769,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 02-19-2019 @ 13:02:26 - 4.14.26 - dscudiero - Comment out the checks to prevent processing remote clients
 ## 02-22-2019 @ 08:02:54 - 4.14.27 - dscudiero - Tweak messaging
 ## 03-05-2019 @ 16:04:42 - 4.14.27 - dscudiero - 
+## 04-11-2019 @ 08:08:14 - 4.14.43 - dscudiero -  Change the color of the source directory if using a passed in rsyncSrcDir
