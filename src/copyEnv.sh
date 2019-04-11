@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.14.43" # -- dscudiero -- Thu 04/11/2019 @ 08:07:22
+version="4.14.44" # -- dscudiero -- Thu 04/11/2019 @ 08:12:54
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions SetSiteDirsNew"
@@ -377,7 +377,7 @@ dump -1 skipCim skipCat skipClss skipAlso
 	unset verifyArgs
 	verifyArgs+=("Client:$client")
 	if [[ -n $rsyncSrcDir ]]; then
-		verifyArgs+=("Source Env:$(TitleCase $srcEnv)   $(ColorI "($srcDir)")")
+		verifyArgs+=("Source Env:N/A   $(ColorI "($srcDir)")")
 	else
 		verifyArgs+=("Source Env:$(TitleCase $srcEnv)   $(ColorV "($srcDir)")")
 	fi
@@ -770,3 +770,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 02-22-2019 @ 08:02:54 - 4.14.27 - dscudiero - Tweak messaging
 ## 03-05-2019 @ 16:04:42 - 4.14.27 - dscudiero - 
 ## 04-11-2019 @ 08:08:14 - 4.14.43 - dscudiero -  Change the color of the source directory if using a passed in rsyncSrcDir
+## 04-11-2019 @ 08:13:04 - 4.14.44 - dscudiero - Tweak messaging
