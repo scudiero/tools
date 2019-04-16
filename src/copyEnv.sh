@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.14.44" # -- dscudiero -- Thu 04/11/2019 @ 08:12:54
+version="4.14.48" # -- dscudiero -- Tue 04/16/2019 @ 13:58:40
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions SetSiteDirsNew"
@@ -150,7 +150,7 @@ if [[ -n $products ]]; then
 	[[ $(Contains "$products" 'cim') == true ]] && skipCim=false
 	[[ $(Contains "$products" 'clss') == true ]] && skipClss=false
 fi
-dump 2 -n client env envs product products fullCopy overlay suffix email skipCat skipCim skipClss skipAlso srcEnv tgtEnv rsyncSrcDir -p
+dump 2 -n client env envs product products fullCopy overlay suffix email skipCat skipCim skipClss skipAlso srcEnv tgtEnv rsyncSrcDir altEnv -p
 
 ## Resolve data based on passed in client, handle special cases
 	tmpStr="${client:0:5}"; tmpStr=${tmpStr,,[a-z]}
@@ -182,8 +182,13 @@ dump 2 -n client env envs product products fullCopy overlay suffix email skipCat
 			srcEnv="$env"; srcDir="$siteDir"; unset env
 			Init 'getTgtEnv getDirs addPvt'
 		else
-			if [[ -z $rsyncSrcDir ]]; then 
-				Init 'getSrcEnv getTgtEnv getDirs addPvt'
+			if [[ -z $rsyncSrcDir ]]; then
+				if [[ $srcEnv == "alt" ]]; then
+					srcDir="$altEnv"
+					Init 'getTgtEnv getDirs'
+				else
+					Init 'getSrcEnv getTgtEnv getDirs addPvt'
+				fi
 				env="$srcEnv"
 			else
 				[[ ${rsyncSrcDir:0:2} == "//" ]] && srcDir="/mnt/${rsyncSrcDir:2}"
@@ -193,7 +198,7 @@ dump 2 -n client env envs product products fullCopy overlay suffix email skipCat
 			fi
 		fi
 	fi
-	dump -1 client env srcEnv srcDir tgtEnv tgtDir rsyncSrcDir -p
+dump 1 client env srcEnv srcDir tgtEnv tgtDir rsyncSrcDir -p
 
 ignoreList=$(sed "s/<progDir>/$progDir/g" <<< $ignoreList)
 mustHaveDirs=$(sed "s/<progDir>/$progDir/g" <<< $(cut -d":" -f2 <<< $scriptData1))
@@ -771,3 +776,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 03-05-2019 @ 16:04:42 - 4.14.27 - dscudiero - 
 ## 04-11-2019 @ 08:08:14 - 4.14.43 - dscudiero -  Change the color of the source directory if using a passed in rsyncSrcDir
 ## 04-11-2019 @ 08:13:04 - 4.14.44 - dscudiero - Tweak messaging
+## 04-16-2019 @ 14:45:25 - 4.14.48 - dscudiero -  Add code to deal with alt directories as the source directory
