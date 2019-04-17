@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version="2.11.22" # -- dscudiero -- Wed 03/27/2019 @ 13:46:16
+version="2.11.38" # -- dscudiero -- Wed 04/17/2019 @ 10:13:33
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi SetSiteDirs"
@@ -335,18 +335,24 @@ GetDefaultsData $myName
 [[ $verbose == true ]] && verboseArg='-v' || unset verboseArg
 [[ $env != '' ]] && srcEnv=$env
 
-ParseArgsStd $originalArgStr
+ParseArgs $originalArgStr
 [[ -n $unknowArgs ]] && cimStr="$unknowArgs"
+
+[[ $srcEnv == "alt" ]] && srcDir="$altEnv"
 
 # Initialize instance variables
 	if [[ $fastInit == true ]]; then
+Here 3
 		SetSiteDirsNew $client
 		tmpStr="${srcEnv}Dir"; srcDir="${!tmpStr}"
 		tmpStr="${tgtEnv}Dir"; tgtDir="${!tmpStr}"
+		[[ $srcEnv == "alt" ]] && srcDir="$altEnv"
 	else
+Here 5
 		Init 'getClient getSrcEnv getTgtEnv getDirs checkEnvs getCims'
 	fi
-	dump -1 client env envs srcEnv srcDir tgtEnv tgtDir cimStr -p
+
+dump  client env envs srcEnv srcDir tgtEnv tgtDir cimStr altEnv -p
 
 # If target is NEXT checks
 	if [[ $tgtEnv == 'next' ]]; then
@@ -761,3 +767,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 03-12-2019 @ 15:37:27 - 2.11.18 - dscudiero - Fix problem putting the workflow.cfg file when commenting out the wfDump wfrule
 ## 03-22-2019 @ 10:27:59 - 2.11.19 - dscudiero - Put in a check to make sure that we are not pushing a workflow.tcf file with an active debug workflow
 ## 03-27-2019 @ 13:46:45 - 2.11.22 - dscudiero - Remove the default answer for the last do you wish to copy questios
+## 04-17-2019 @ 10:32:31 - 2.11.38 - dscudiero -  Switched to the new c++ argument parser Added code if altEnv is passed
