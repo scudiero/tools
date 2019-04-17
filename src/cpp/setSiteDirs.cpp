@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.5.94" // -- dscudiero -- Wed 03/06/2019 @ 08:27:15
+// version="1.6.14" // -- dscudiero -- Wed 04/17/2019 @ 10:06:55
 //==================================================================================================
 #include <stdlib.h>
 #include <unistd.h>
@@ -57,9 +57,9 @@ int main(int argc, char *argv[]) {
 
 		string sqlStmt="";
 		if (getOsName() == "Unix") {
-			sqlStmt = "select env,siteDir from " + siteInfoTable + " where name=\"" + client + "\" || name=\"" + client + "-test\"";
+			sqlStmt = "select env,siteDir from " + siteInfoTable + " where (name=\"" + client + "\" or name=\"" + client + "-test\") and siteDir is not null";
 		} else {
-			sqlStmt = "select env,siteDirWindows from " + siteInfoTable + " where name=\"" + client + "\" || name=\"" + client + "-test\"";
+			sqlStmt = "select env,siteDirWindows from " + siteInfoTable + " where (name=\"" + client + "\" or name=\"" + client + "-test\") and siteDir is not null";
 		}
 
 		// Connect to the database
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 	    	}
 	    // Run Query
 	    	string siteDir="";
-	    	Dump(2,"\tsqlStmt",sqlStmt,verboseLevel);
+	    	Dump(2,"\tsqlStmt 1",sqlStmt,verboseLevel);
 			mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
 			if (mysqlStatus)
 			    throw FFError( (char*)mysql_error(MySQLConnection) );
@@ -99,7 +99,6 @@ int main(int argc, char *argv[]) {
 
 	 						string tmpStr = env + "Dir=\"" + siteDir + "\"\n";
 	 						Debug(2,"\t\ttmpStr: " + tmpStr, verboseLevel);
-
 			     			write(3, tmpStr.c_str(), tmpStr.size());
 						}
 					}
@@ -115,27 +114,37 @@ int main(int argc, char *argv[]) {
 				hostName.erase(std::remove(hostName.begin(), hostName.end(), '\n'), hostName.end());
 				std::vector<std::string> splittedStrings=split(hostName, '.');
 				hostName=splittedStrings[0];
-				sqlStmt = "select value from " + defaultsTable + " where name =\"devServers\" and host=\"" + hostName + "\"";
-		    	Dump(2,"\tsqlStmt",sqlStmt,verboseLevel);
 
-				mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
-				if (mysqlStatus)
-				    throw FFError( (char*)mysql_error(MySQLConnection) );
-				else
-				    mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
-
+				// Can't seem to run second sql query so just set the devServer string based on the host name
 				string devServers="";
-				if (mysqlResult) {
-			            numRows = mysql_num_rows(mysqlResult);
-						if (numRows > 0) {
-							mysqlRow = mysql_fetch_row(mysqlResult);
-							devServers=mysqlRow[0];
-						}
-				} else {
-					std::cout << "Could not retrieve devServers, sql = '\n" + sqlStmt +"'\n";
-				   	return -1;
+				if (hostName == "build7") {
+					devServers="dev7,dev6";
+				} else if (hostName == "mojave") {
+					devServers="dev6,dev11";
 				}
-		    	Dump(2,"\tdevServers",devServers,verboseLevel);
+
+				// sqlStmt = "select value from " + defaultsTable + " where name =\"devServers\" and host=\"" + hostName + "\"";
+		  		// Dump(2,"\tsqlStmt 2",sqlStmt,verboseLevel);
+				// mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
+				// if (mysqlStatus) {
+				//     throw FFError( (char*)mysql_error(MySQLConnection) );
+				//     return -1;
+				// } else {
+				//     mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
+				// }
+
+				// string devServers="";
+				// if (mysqlResult) {
+				//      numRows = mysql_num_rows(mysqlResult);
+				// 		if (numRows > 0) {
+				// 			mysqlRow = mysql_fetch_row(mysqlResult);
+				// 			devServers=mysqlRow[0];
+				// 		}
+				// } else {
+				// 	std::cout << "Could not retrieve devServers, sqlStmt = \n\t" + sqlStmt +"\n";
+				//    	return -1;
+				// }
+		  		// Dump(2,"\tdevServers",devServers,verboseLevel);
 
 			if (devServers != "") {
 				string userName = exec("/usr/bin/logname");
@@ -144,6 +153,7 @@ int main(int argc, char *argv[]) {
 				for(int i = 0; i < splittedStrings.size() ; i++) {
 					string server = splittedStrings[i];
 					string dir="/mnt/" + server + "/web/" + client + "-" + userName;
+		    		Dump(2,"\tdir",dir,verboseLevel);
 					struct stat statbuf; 
 					if (stat(dir.c_str(), &statbuf) != -1) {
 					   if (S_ISDIR(statbuf.st_mode)) {
@@ -162,3 +172,4 @@ int main(int argc, char *argv[]) {
 //=================================================================================================================// 01-29-2019 @ 11:28:24 - 1.5.88 - dscudiero - Remove extra '{'
 // 03-06-2019 @ 08:13:18 - 1.5.93 - dscudiero - Add/Remove debug statements
 // 03-06-2019 @ 08:28:23 - 1.5.94 - dscudiero - Removed extrea '/' leading the pvtDir setting
+// 04-17-2019 @ 10:10:03 - 1.6.14 - dscudiero -  Fix to the code that finds the pvt directory, removed the sql query for devServers, seems like you can only do a single query in a program.
