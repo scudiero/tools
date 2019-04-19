@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version="2.11.38" # -- dscudiero -- Wed 04/17/2019 @ 10:13:33
+version="2.11.52" # -- dscudiero -- Fri 04/19/2019 @ 10:53:07
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi SetSiteDirs"
@@ -336,23 +336,32 @@ GetDefaultsData $myName
 [[ $env != '' ]] && srcEnv=$env
 
 ParseArgs $originalArgStr
+dump unknowArgs
+
 [[ -n $unknowArgs ]] && cimStr="$unknowArgs"
 
-[[ $srcEnv == "alt" ]] && srcDir="$altEnv"
+[[ $srcEnv == 'alt' ]] && srcDir="$altEnv"
+[[ $tgtEnv == 'p' ]] && tgtEnv='pvt'
+[[ $tgtEnv == 't' ]] && tgtEnv='test'
+[[ $tgtEnv == 'n' ]] && tgtEnv='next'
 
 # Initialize instance variables
 	if [[ $fastInit == true ]]; then
-Here 3
-		SetSiteDirsNew $client
-		tmpStr="${srcEnv}Dir"; srcDir="${!tmpStr}"
-		tmpStr="${tgtEnv}Dir"; tgtDir="${!tmpStr}"
+		if [[ -n $fromDir && -n $toDir ]]; then
+			srcEnv="N/A"
+			srcDir="$fromDir"
+			tgtEnv="N/A"
+			tgtDir="$toDir"
+		else
+			SetSiteDirsNew $client
+			tmpStr="${srcEnv}Dir"; srcDir="${!tmpStr}"
+			tmpStr="${tgtEnv}Dir"; tgtDir="${!tmpStr}"
+		fi
 		[[ $srcEnv == "alt" ]] && srcDir="$altEnv"
 	else
-Here 5
 		Init 'getClient getSrcEnv getTgtEnv getDirs checkEnvs getCims'
 	fi
-
-dump  client env envs srcEnv srcDir tgtEnv tgtDir cimStr altEnv -p
+	dump -1 client env envs srcEnv srcDir tgtEnv tgtDir cimStr -p
 
 # If target is NEXT checks
 	if [[ $tgtEnv == 'next' ]]; then
@@ -374,7 +383,6 @@ dump  client env envs srcEnv srcDir tgtEnv tgtDir cimStr altEnv -p
 			[[ $ans == 'y' ]] && refreshSystem=true || refreshSystem=false
 		fi		
 	fi
-
 ## If pvtDir exists and src is not pvt make sure that this is what the user really wants to to
 	# if [[ -d "$pvtDir" && $srcEnv != 'pvt' && $tgtEnv != 'pvt' ]]; then
 	# 	verify=true
@@ -399,7 +407,6 @@ dump  client env envs srcEnv srcDir tgtEnv tgtDir cimStr altEnv -p
 		unset ans; Prompt ans "Do you wish to continue" "Yes No" "No"; ans="$(Lower ${ans:0:1})"
 		[[ $ans != 'y' ]] && Terminate "Stopping"
 	fi
-
 ## check the courseleaf revision levels in the workflow.tcf file
 for cim in ${cimStr//,/ }; do
 	srcFile="$srcDir/web/$cim/workflow.tcf"
@@ -768,3 +775,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 03-22-2019 @ 10:27:59 - 2.11.19 - dscudiero - Put in a check to make sure that we are not pushing a workflow.tcf file with an active debug workflow
 ## 03-27-2019 @ 13:46:45 - 2.11.22 - dscudiero - Remove the default answer for the last do you wish to copy questios
 ## 04-17-2019 @ 10:32:31 - 2.11.38 - dscudiero -  Switched to the new c++ argument parser Added code if altEnv is passed
+## 04-19-2019 @ 10:57:24 - 2.11.52 - dscudiero -  Add process of fromDir and toDir allowing for adhoc source and target sites
