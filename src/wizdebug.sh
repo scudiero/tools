@@ -1,6 +1,6 @@
 #!/bin/bash
 #==================================================================================================
-version="2.6.80" # -- dscudiero -- Tue 12/18/2018 @ 08:39:53
+version="2.6.85" # -- dscudiero -- Fri 04/19/2019 @ 14:45:02
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetCourseleafPgm PrintBanner PushPop"
@@ -18,14 +18,17 @@ scriptDescription="Monitor the log messages (courseleaf/wizdebug.out) for a Cour
 # 07-17-15 --	dgs - Migrated to framework 5
 #==================================================================================================
 
+myArgs="site|siteDir|option|siteDir|;"
+export myArgs="$myArgs"
+
 #=======================================================================================================================
 # Standard call back functions
 #=======================================================================================================================
-function wizdebug-ParseArgsStd  {
-	myArgs+=("ribbit|ribbitDebug|switch|ribbitDebug||script|Display the wizdebug file from the ribbit folder")
-	myArgs+=("site|siteDir|option|siteDir||script|The fully qualified site directory root")
-	return 0
-}
+# function wizdebug-ParseArgsStd  {
+# 	myArgs+=("ribbit|ribbitDebug|switch|ribbitDebug||script|Display the wizdebug file from the ribbit folder")
+# 	myArgs+=("site|siteDir|option|siteDir||script|The fully qualified site directory root")
+# 	return 0
+# }
 function testsh-Goodbye  {
 	Popd
 	SetFileExpansion 'on' ; rm -rf $tmpRoot/${myName}* >& /dev/null ; SetFileExpansion
@@ -42,10 +45,12 @@ function testsh-Goodbye  {
 Hello
 helpSet='script,client,env'
 SetDefaults $myName
-ParseArgsStd $originalArgStr
+ParseArgs $originalArgStr
 
-Init 'getClient getEnv getDirs checkEnvs noPreview noPublic'
-dump -1 client env envs siteDir fastinit
+if [[ -z $siteDir ]]; then
+	Init 'getClient getEnv getDirs checkEnvs noPreview noPublic'
+fi
+dump -1 client env envs siteDir fastinit -p
 
 #===================================================================================================
 #= Main
@@ -90,3 +95,4 @@ Goodbye 0
 ## 03-23-2018 @ 15:36:31 - 2.6.68 - dscudiero - D
 ## 11-08-2018 @ 12:02:01 - 2.6.79 - dscudiero - Add coding for fastInit
 ## 12-18-2018 @ 08:40:02 - 2.6.80 - dscudiero - Cosmetic/minor change/Sync
+## 04-19-2019 @ 14:45:44 - 2.6.85 - dscudiero -  Switch to the C++ argument parser
