@@ -1,9 +1,9 @@
 #!/bin/bash
 #===================================================================================================
-version="1.2.86" # -- dscudiero -- Wed 02/13/2019 @ 09:15:39
+version="1.2.98" # -- dscudiero -- Fri 04/19/2019 @ 09:06:25
 #===================================================================================================
 TrapSigs 'on'
-myIncludes="ProtectedCall PushPop SetSiteDirsNew MkTmpFile"
+myIncludes="ProtectedCall PushPop SetSiteDirsNew MkTmpFile PromptNew"
 Import "$standardInteractiveIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -239,6 +239,52 @@ function NewDefault {
 }
 
 #===================================================================================================
+function NewArgdef {
+	local shortName longName type scriptVariable scriptCommand scriptCommand helpText status
+	longName="$1"
+
+	# Prompt 'longName' "Argument longName" '*any*'
+	longName="\"$longName\""
+	
+	shift || true; shortName="$1"
+	PromptNew 'shortName' "Argument shortName" '*any*'
+	shortName="\"$shortName\""
+
+	shift || true; type="$1"
+	PromptNew 'type' "Argument type" 'switch,option,counter'
+	type="\"$type\""
+
+	shift || true; scriptVariable="$1"
+	PromptNew 'scriptVariable' "Argument scriptVariable" '*any*' "$longName"
+	scriptVariable="\"$scriptVariable\""
+
+	shift || true; scriptCommand="$1"
+	PromptNew 'scriptCommand' "Argument scriptCommand" '*any*'
+	scriptCommand="\"$scriptCommand\""
+
+	shift || true; helpGroup="$1"
+	PromptNew 'helpGroup' "Argument helpGroup" 'cim,prod,script,srcEnv,tgtEnv,envs,common' 'script'
+	helpGroup="\"$helpGroup\""
+
+	shift || true; helpText="$1"
+	PromptNew 'helpText' "Argument helpText" '*any*'
+	helpText="\"$helpText\""
+
+	shift || true; status="$1"
+	PromptNew 'status' "Argument status" 'active,inactive' 'active'
+	status="\"$status\""
+
+	sqlStmt="select max(seqORder) from argdefs;"
+	RunSql $sqlStmt
+	lastSeq=${resultSet[0]}
+	let seqNum="$lastSeq + 10"
+
+	sqlStmt="insert into argdefs values(NULL,$seqNum,$shortName,$longName,$type,$scriptVariable,$scriptCommand,$helpGroup,$helpText,$status)"
+dump sqlStmt
+	RunSql $sqlStmt
+}
+
+#===================================================================================================
 function NewMonitorFile {
 	local file userList
 	Prompt 'file' "File name" '*file*'
@@ -440,7 +486,7 @@ function NewWf {
 # MAIN
 #==================================================================================================
 # validTypes='script patch report newsItem default monitorFile vba client'
-validTypes='script patch report newsItem default client wf'
+validTypes='script patch report newsItem default client wf arg argdef'
 GetDefaultsData $myName
 ParseArgsStd $originalArgStr
 Hello
@@ -448,18 +494,20 @@ Hello
 [[ -n "$1" && ${1:0:1} != '-' ]] && objName="$1" && shift || true
 
 Prompt objType "Please specify the object type" "$validTypes"; objType=$(TitleCase $objType)
+[[ $(Lower $objType) == 'arg' || $(Lower $objType) == 'argdef' ]] && objType='Argdef'
 [[ $(Lower $objType) == 'script' ]] && objType='Script'
 [[ $(Lower ${objType:0:4}) == 'news' ]] && objType='NewsItem'
 [[ $(Lower ${objType:0:1}) == 'v' ]] && objType='Vba'
 
-[[ $objType == 'Script' || $objType == 'NewsItem' || $objType == 'Vba' ]] && Prompt objName "Please specify the name of the new $objType obj" '*any*'
+[[ $objType == 'Script' || $objType == 'NewsItem' || $objType == 'Vba' || $objType == 'Argdef' ]] && \
+		Prompt objName "Please specify the name of the new $objType obj" '*any*'
 #[[ $objType == 'vba' ]] && Prompt objName "Please specify the name of the new $objType obj" '*optional*'
 
 ## Call functon to build the object
 [[ $(type -t New$objType) != 'function' ]] && Msg $T "Invalid object typo specified"
 Msg
 [[ $objName != '' ]] && Msg "Creating a new $objType object with name '$objName'" || Msg "Creating a new $objType object"
-New$objType $objName
+New$objType $objName $*
 Msg; Msg "$objType object created"
 
 #==================================================================================================
@@ -507,3 +555,4 @@ Msg; Msg "$objType object created"
 ## 01-29-2019 @ 14:35:56 - 1.2.84 - dscudiero - Updated messsaging
 ## 02-05-2019 @ 08:02:29 - 1.2.85 - dscudiero - Remove debug statements
 ## 02-13-2019 @ 09:15:57 - 1.2.86 - dscudiero - Add wfTest.xml to the list of source files
+## 04-19-2019 @ 10:02:33 - 1.2.98 - dscudiero -  Added Argdef type
