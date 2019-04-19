@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.1.23" // -- dscudiero -- Tue 04/16/2019 @ 15:00:12
+// version="1.1.29" // -- dscudiero -- Fri 04/19/2019 @ 09:57:32
 //==================================================================================================
 #include <iostream>		// IO utility library
 #include <string>		// String utility library
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
 				scriptName = arg;
 				continue;
 			} else {
-				if (argl == "--d")
+				if (argl.substr(0,3) == "--d")
 		    		debug=true;
 			}
 		}
@@ -201,20 +201,25 @@ int main(int argc, char *argv[]) {
 		arg=arg.substr(1);
 		boost::algorithm::to_lower(arg);
 
-		if (debug) cout << "\tProcessing argument: " + arg + "\n";
+		if (debug) cout << "\tProcessing argument: >" + arg + "<\n";
 		// Loop through all of the argument definitions
 		bool foundArg=false;
 	    std::list<ArgDef>::iterator it;
 		for (it = argDefs.begin(); it != argDefs.end(); ++it) {
-			// std::cout << "\t" + it->toString() + "\n";
+			// if (debug) std::cout << "\t\t" + it->toString() + "\n";
 			string shortName = it->shortName;
 			if (arg.substr(0,shortName.length()) == shortName) {
-				// std::cout << "\t Found match for: " + it->toString() + "\n";
+				if (debug) std::cout << "\t\t *** Found match for: " + it->toString() + "\n";
 				foundArg=true;
 				string longName = it->longName;
 				string type = it->type;
 				string scriptVar = it->scriptVar;
 				string scriptCmd = it->scriptCmd;
+				if (debug) std::cout << "\t\t\t longName = >" + longName + "<\n";
+				if (debug) std::cout << "\t\t\t type = >" + type + "<\n";
+				if (debug) std::cout << "\t\t\t scriptVar = >" + scriptVar + "<\n";
+				if (debug) std::cout << "\t\t\t scriptCmd = >" + scriptCmd + "<\n";
+
 				if (type == "switch") {
 					if (scriptCmd != "") {
 						string scriptCmdL=scriptCmd;
@@ -269,6 +274,8 @@ int main(int argc, char *argv[]) {
 							arg = argv[i];
 						}
 						std::cout << scriptVar + "=\"" + arg + "\"\n";
+					} else {
+						std::cout << scriptVar + "=\"" + arg + "\"\n";
 					}
 				} else if (type == "counter") {
 					std::cout << scriptVar + "=\"" + arg.substr(arg.length()-1) + "\"\n";
@@ -297,3 +304,4 @@ int main(int argc, char *argv[]) {
 // 03-13-2019 @ 15:09:22 - 1.1.17 - dscudiero - Update the rhel6 version
 // 04-05-2019 @ 11:52:12 - 1.1.18 - dscudiero - Add the expandEnv directive
 // 04-16-2019 @ 15:05:25 - 1.1.23 - dscudiero -  Add mapToEnv processing
+// 04-19-2019 @ 10:02:11 - 1.1.29 - dscudiero -  Fix problem parsing option arguments that do not have a scriptCommand defined
