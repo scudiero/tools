@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.14.48" # -- dscudiero -- Tue 04/16/2019 @ 13:58:40
+version="4.14.55" # -- dscudiero -- Wed 04/24/2019 @ 11:48:35
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions SetSiteDirsNew"
@@ -193,8 +193,8 @@ dump 2 -n client env envs product products fullCopy overlay suffix email skipCat
 			else
 				[[ ${rsyncSrcDir:0:2} == "//" ]] && srcDir="/mnt/${rsyncSrcDir:2}"
 				tgtEnv="pvt"
-				SetSiteDirsNew $client
-				tgtDir=$pvtDir
+				SetSiteDirs 'setDefault'
+				tgtDir="$pvtDir"
 			fi
 		fi
 	fi
@@ -777,3 +777,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 04-11-2019 @ 08:08:14 - 4.14.43 - dscudiero -  Change the color of the source directory if using a passed in rsyncSrcDir
 ## 04-11-2019 @ 08:13:04 - 4.14.44 - dscudiero - Tweak messaging
 ## 04-16-2019 @ 14:45:25 - 4.14.48 - dscudiero -  Add code to deal with alt directories as the source directory
+## 04-25-2019 @ 15:45:49 - 4.14.55 - dscudiero -  Force setting of the targetDir, switch back to origional SetSiteDirs
