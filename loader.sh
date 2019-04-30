@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.6.27" # -- dscudiero -- Tue 12/18/2018 @ 08:36:49
+version="1.6.29" # -- dscudiero -- Tue 04/30/2019 @ 12:06:16
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -268,7 +268,8 @@ function CleanUp {
 	# prtStatus ", CheckRun"; sTime=$(date "+%s")	
 
 ## Check Auth
-	CallC toolsAuthCheck "$callPgmName"; rc=$?
+	rc=0
+	[[ $callPgmName != "courseleafPatch" ]] && CallC toolsAuthCheck "$callPgmName"; rc=$?
 	[[ $rc -ne 0 ]] && exit -1
 
 	# CheckAuth "$callPgmName"
@@ -533,3 +534,4 @@ function CleanUp {
 ## 12-03-2018 @ 09:41:02 - 1.6.16 - dscudiero - Put in a fixx for the script is a file in the logs directory problem
 ## 12-06-2018 @ 14:30:02 - 1.6.18 - dscudiero - Updated to use toolsSetDefaults
 ## 12-18-2018 @ 08:37:35 - 1.6.27 - dscudiero - Switch to use SetDefaults function
+## 04-30-2019 @ 12:07:52 - 1.6.29 - dscudiero -  Do not do auth check for courseleafPatch
