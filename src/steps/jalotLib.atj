@@ -1,6 +1,6 @@
 
 //==============================================================================================
-// // version="1.1.51" // -- dscudiero -- Tue 04/09/2019 @ 07:23:25
+// // version="1.1.56" // -- dscudiero -- Wed 05/01/2019 @ 16:24:43
 //==============================================================================================
 //Globals
 var jalotMasterUser="acct13830-gestalt";
@@ -8,8 +8,8 @@ var jalotCertKey="supportjalot";
 var jalotCert="";
 var jalotUrl = "https://jalot.com/raccxml.cgi";
 var jalotStyles = "jalotTasksStyle.html";
-// var jalotInternalUrl = "https://stage-internal.leepfrog.com/ribbit"
-var jalotInternalUrl = "https://internal-dscudiero.dev6.leepfrog.com/ribbit"
+var jalotInternalUrl = "https://stage-internal.leepfrog.com/ribbit"
+// var jalotInternalUrl = "https://internal-dscudiero.dev6.leepfrog.com/ribbit"
 
 var jalotStyleRed="style=\"color:red\"";
 var jalotStyleGreen="style=\"color:green\"";
@@ -168,7 +168,7 @@ function getTasks(jalotUser,flags) {
 //==============================================================================================
 function getTaskNotes(taskId) {
 	let debug = false;
-	// print_debug("\nHERE getTaskDetails HERE getTaskDetails HERE\n");
+	// print_debug("\nHERE getTaskNotes HERE getTaskDetails HERE\n");
 	dump("taskId",taskId,debug);
 	//==============================================================================================
 	let curTime = new Date();
@@ -240,8 +240,8 @@ function getTaskNotes(taskId) {
 //==============================================================================================
 function getTaskDetails(topicid) {
 	let debug = false;
-	// print_debug("\nHERE getTaskDetails HERE getTaskDetails HERE\n");
-	
+	// print_debug("\nHERE getTaskDetails HERE get/TaskDetails HERE\n");	
+
 	dump("topicid",topicid,debug,"doc");
 	//==============================================================================================
 	let curTime = new Date();
@@ -290,22 +290,22 @@ function getTaskDetails(topicid) {
 		notes2[note.noteno] = {subject:note.data.subject, formalName:note.data["formal-name"], date:note.data.date, text:note.data.body};
 	})
 
-	dump("name",name,true)
-	dump("desc",desc,true)
-	dump("note",note,true)
-	dump("firstNote",firstNote,true)
-	dump("lastNote",lastNote,true)
-	dump("maxNote",maxNote,true)
-	dump("lastNotePosted",lastNotePosted,true)
-	dump("todo",todo,true)
-	dump("owner",owner,true)
-	dump("parentTopic",parentTopic,true)
-	dump("flags",flags,true)
-	dump("from",from,true)
-	dump("formalName",formalName,true)
-	dump("date",date,true)
-	dump("subject",subject,true)
-	dump("body",body,true)
+	dump("name",name,debug)
+	dump("desc",desc,debug)
+	dump("note",note,debug)
+	dump("firstNote",firstNote,debug)
+	dump("lastNote",lastNote,debug)
+	dump("maxNote",maxNote,debug)
+	dump("lastNotePosted",lastNotePosted,debug)
+	dump("todo",todo,debug)
+	dump("owner",owner,debug)
+	dump("parentTopic",parentTopic,debug)
+	dump("flags",flags,debug)
+	dump("from",from,debug)
+	dump("formalName",formalName,debug)
+	dump("date",date,debug)
+	dump("subject",subject,debug)
+	dump("body",body,debug)
 
 	if (typeof name != "undefined")
 		retData = {title:name, taskList:desc.replace(/.*topic /,""), parentTopic:parentTopic, date:date, owner:owner,
@@ -453,4 +453,4 @@ function twoDigits(d) {
 Date.prototype.toMysqlFormat = function() {
     return this.getUTCFullYear() + "-" + twoDigits(1 + this.getUTCMonth()) + "-" + twoDigits(this.getUTCDate()) + " " + twoDigits(this.getUTCHours()) + ":" + twoDigits(this.getUTCMinutes()) + ":" + twoDigits(this.getUTCSeconds());
 };
-// 04-09-2019 @ 07:51:05 - 1.1.51 - dscudiero - Tweaked output of converting elap seconds to yy mm dd
+// 05-01-2019 @ 16:31:24 - 1.1.56 - dscudiero - Add/Remove debug statements
