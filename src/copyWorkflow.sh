@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #====================================================================================================
-version="2.11.52" # -- dscudiero -- Fri 04/19/2019 @ 10:53:07
+version="2.11.53" # -- dscudiero -- Wed 05/01/2019 @ 16:04:55
 #====================================================================================================
 TrapSigs 'on'
 myIncludes="StringFunctions ProtectedCall WriteChangelogEntry BackupCourseleafFile ParseCourseleafFile RunCourseLeafCgi SetSiteDirs"
@@ -336,7 +336,6 @@ GetDefaultsData $myName
 [[ $env != '' ]] && srcEnv=$env
 
 ParseArgs $originalArgStr
-dump unknowArgs
 
 [[ -n $unknowArgs ]] && cimStr="$unknowArgs"
 
@@ -776,3 +775,4 @@ Goodbye 0 "$(ColorK $(Upper $client/$srcEnv)) to $(ColorK $(Upper $client/$tgtEn
 ## 03-27-2019 @ 13:46:45 - 2.11.22 - dscudiero - Remove the default answer for the last do you wish to copy questios
 ## 04-17-2019 @ 10:32:31 - 2.11.38 - dscudiero -  Switched to the new c++ argument parser Added code if altEnv is passed
 ## 04-19-2019 @ 10:57:24 - 2.11.52 - dscudiero -  Add process of fromDir and toDir allowing for adhoc source and target sites
+## 05-01-2019 @ 16:31:03 - 2.11.53 - dscudiero - Add/Remove debug statements
