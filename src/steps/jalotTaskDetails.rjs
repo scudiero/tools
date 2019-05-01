@@ -103,10 +103,11 @@ if (!topicid) {
 				print_doc(strToHtml(taskDetails.description) + "\n");
 				print_doc("<br><hr>\n");
 
-				print_doc("<h3>Notes:");print_doc("</h3>\n");
+				print_doc("<h3>Notes <em>(newest to oldest)</em>:");print_doc("</h3>\n");
 				// Loop through the notes hash
 				print_doc("<table>\n");
-				for (var i=taskDetails.firstNote,  tot=taskDetails.lastNote; i <= tot; i++) {
+				// for (var i=taskDetails.firstNote,  tot=taskDetails.lastNote; i <= tot; i++) {
+				for (var i=taskDetails.lastNote; i >0; i--) {
 					var note = taskDetails.notes[i];
 					var tmpDate = new Date(note.date);
 					print_doc("<tr><th colspan=2 align=\"left\"> Note #" + i + "</th></tr>\n"); 
