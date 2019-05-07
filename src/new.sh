@@ -1,6 +1,6 @@
 #!/bin/bash
 #===================================================================================================
-version="1.2.98" # -- dscudiero -- Fri 04/19/2019 @ 09:06:25
+version="1.2.99" # -- dscudiero -- Tue 05/07/2019 @ 15:33:27
 #===================================================================================================
 TrapSigs 'on'
 myIncludes="ProtectedCall PushPop SetSiteDirsNew MkTmpFile PromptNew"
@@ -229,7 +229,7 @@ function NewDefault {
 	name="\"$name\""
 	Prompt 'value' "Value" '*any*'
 	value="\"$value\""
-	Prompt 'os' "Please enter which OS's the value applies to" 'linux,MSWin32,any' 'any'
+	Prompt 'os' "Please enter which OS's the value applies to" 'linux,windows,any' 'any'
 	[[ $os == any ]] && os=NULL || os="\"$os\""
 	Prompt 'host' "Please enter which Hosts's the value applies to" 'build5,build7,mojave,any' 'any' ; host=$(Lower $host)
 	[[ $host == any ]] && host=NULL || host="\"$host\""
@@ -556,3 +556,4 @@ Msg; Msg "$objType object created"
 ## 02-05-2019 @ 08:02:29 - 1.2.85 - dscudiero - Remove debug statements
 ## 02-13-2019 @ 09:15:57 - 1.2.86 - dscudiero - Add wfTest.xml to the list of source files
 ## 04-19-2019 @ 10:02:33 - 1.2.98 - dscudiero -  Added Argdef type
+## 05-07-2019 @ 15:33:54 - 1.2.99 - dscudiero -  Changed MSWin32 to windows for defaults
