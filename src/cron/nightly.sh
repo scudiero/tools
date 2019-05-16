@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.15" # -- dscudiero -- Wed 04/03/2019 @ 08:10:31
+version="1.23.16" # -- dscudiero -- Thu 05/16/2019 @ 07:24:15
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -53,7 +53,7 @@ function CheckClientCount {
 		tCount=${resultSet[0]}
 	fi
 	## Get number of clients in warehouse
-	sqlStmt="select count(*) from $clientInfoTable where recordstatus=\"A\""
+	sqlStmt="select count(*) from $clientInfoTable where recordStatus in (\"A\",\"Y\")"
 	RunSql $sqlStmt
 	if [[ ${#resultSet[@]} -le 0 ]]; then
 		Terminate "Could not retrieve clients count data from '$warehouseDb.$clientInfoTable'"
@@ -511,3 +511,4 @@ return 0
 ## 03-19-2019 @ 10:45:14 - 1.23.13 - dscudiero - Tweak messaging
 ## 03-20-2019 @ 08:46:13 - 1.23.14 - dscudiero - Tweak messaging
 ## 04-03-2019 @ 15:00:24 - 1.23.15 - dscudiero - Add/Remove debug statements
+## 05-16-2019 @ 07:26:58 - 1.23.16 - dscudiero -  -
