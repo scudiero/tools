@@ -51,7 +51,7 @@ cd $HOME/tools/java
 javac ${module}.java
 
 set -f
-sqlStmt="select * from clients where recordStatus=\"A\""
+sqlStmt="select * from clients where recordStatus in (\"A\",\"Y\")"
 #sqlStmt="truncate semaphore"
 java $module $sqlStmt
 
