@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.0" # -- dscudiero -- Mon 11/05/2018 @ 14:37:38
+# version="1.0.1" # -- dscudiero -- Thu 05/16/2019 @ 07:22:56
 #===================================================================================================
 # Copyright 2018 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -12,7 +12,7 @@ function SetClientDataObject {
 	client="$1"
 	local client env envs result i sqlStmt pvtDir clonedFrom
 	## Set primary client data
-	sqlStmt="select longName,hosting,products,productsInSupport from $clientInfoTable where name=\"$client\" and recordStatus=\"A\""
+	sqlStmt="select longName,hosting,products,productsInSupport from $clientInfoTable where name=\"$client\" and recordStatus in (\"A\",\"Y\")"
 	RunSql $sqlStmt
 	if [[ -n ${resultSet[0]} ]]; then
 		result="${resultSet[0]}"
@@ -72,4 +72,4 @@ export -f Alert
 
 #===================================================================================================
 # Checkin Log
-#===================================================================================================
+#===================================================================================================## 05-16-2019 @ 07:26:48 - 1.0.1 - dscudiero -  update recordstatus check to include 'Y'
