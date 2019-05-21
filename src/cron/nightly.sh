@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.16" # -- dscudiero -- Thu 05/16/2019 @ 07:24:15
+version="1.23.18" # -- dscudiero -- Mon 05/20/2019 @ 08:40:02
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -20,102 +20,102 @@ originalArgStr="$*";
 #=======================================================================================================================
 
 #=======================================================================================================================
-function CleanToolsBin {
-	Verbose -3 "*** $FUNCNAME -- Starting ***"
+# function CleanToolsBin {
+# 	Verbose -3 "*** $FUNCNAME -- Starting ***"
 
-	## Setup lower case 'aliases' for the TOOLSPATH/bin commands, remove any links in bin that do not have a source in src
-	Msg; Msg "Processing $TOOLSPATH/bin..."
-	ignoreFiles=",scripts,reports,"
-	cwd=$(pwd)
-	cd $TOOLSPATH/bin
-	files=$(find . -mindepth 1 -maxdepth 1 -type l -printf "%f ")
-	for file in $files; do
-		[[ $(Contains "$ignoreFiles" "$file") == true ]] && continue
-		[[ ! -f $TOOLSPATH/src/${file}.sh && ! -f $TOOLSPATH/src/${file}.py && ! -f $TOOLSPATH/src/${file}.pl ]] && Warning "Removing: $file" && rm ../src/$file && continue
-		[[ $file != $(Lower "$file") ]] && Msg "^Makeing link: $(Lower "$file")" && ln -s ./$file ./$(Lower "$file")
-	done
-	cd "$cwd"
+# 	## Setup lower case 'aliases' for the TOOLSPATH/bin commands, remove any links in bin that do not have a source in src
+# 	Msg; Msg "Processing $TOOLSPATH/bin..."
+# 	ignoreFiles=",scripts,reports,"
+# 	cwd=$(pwd)
+# 	cd $TOOLSPATH/bin
+# 	files=$(find . -mindepth 1 -maxdepth 1 -type l -printf "%f ")
+# 	for file in $files; do
+# 		[[ $(Contains "$ignoreFiles" "$file") == true ]] && continue
+# 		[[ ! -f $TOOLSPATH/src/${file}.sh && ! -f $TOOLSPATH/src/${file}.py && ! -f $TOOLSPATH/src/${file}.pl ]] && Warning "Removing: $file" && rm ../src/$file && continue
+# 		[[ $file != $(Lower "$file") ]] && Msg "^Makeing link: $(Lower "$file")" && ln -s ./$file ./$(Lower "$file")
+# 	done
+# 	cd "$cwd"
 
-	Verbose -3 "*** $FUNCNAME -- Completed ***"
-	return 0
-} #CleanToolsBin
-
-#=======================================================================================================================
-function CheckClientCount {
-	Verbose -3 "*** $FUNCNAME -- Starting ***"
-	## Get number of clients in transactional
-	SetFileExpansion 'off'
-	sqlStmt="select count(*) from clients where is_active=\"Y\""
-	RunSql "$contactsSqliteFile" $sqlStmt
-	if [[ ${#resultSet[@]} -le 0 ]]; then
-		Terminate "Could not retrieve clients data from '$contactsSqliteFile'"
-	else
-		tCount=${resultSet[0]}
-	fi
-	## Get number of clients in warehouse
-	sqlStmt="select count(*) from $clientInfoTable where recordStatus in (\"A\",\"Y\")"
-	RunSql $sqlStmt
-	if [[ ${#resultSet[@]} -le 0 ]]; then
-		Terminate "Could not retrieve clients count data from '$warehouseDb.$clientInfoTable'"
-	else
-		wCount=${resultSet[0]}
-	fi
-	## Get number of clients on the ignore list
-	sqlStmt="select ignoreList from $scriptsTable where name=\"buildClientInfoTable\""
-	RunSql $sqlStmt
-	if [[ ${#resultSet[@]} -le 0 ]]; then
-		Terminate "Could not retrieve clients count data from '$warehouseDb.$clientInfoTable'"
-	else
-		let numIgnore=$(grep -o "," <<< "${resultSet[0]}r" | wc -l)+1
-		let tCount=$tCount-$numIgnore
-	fi
-	SetFileExpansion
-	if [[ $tCount -gt $wCount ]]; then
-		Msg "$FUNCNAME: New clients found in the transactional clients table, running 'clientList' report..."
-		echo true
-	else
-		echo false
-	fi
-	return 0
-} #CheckClientCount
+# 	Verbose -3 "*** $FUNCNAME -- Completed ***"
+# 	return 0
+# } #CleanToolsBin
 
 #=======================================================================================================================
-function BuildEmployeeTable {
-	### Get the list of columns in the transactional employees table
-		sqlStmt="pragma table_info(employees)"
-		RunSql "$contactsSqliteFile" $sqlStmt
-		unset transactionalFields transactionalColumns
-		for resultRec in "${resultSet[@]}"; do
-			transactionalColumns="$transactionalColumns,$(cut -d'|' -f2 <<< $resultRec)"
-			transactionalFields="$transactionalFields,$(cut -d'|' -f2 <<< $resultRec)|$(cut -d'|' -f3 <<< $resultRec)"
-		done
-		transactionalColumns=${transactionalColumns:1}
-		transactionalFields=${transactionalFields:1}
+# function CheckClientCount {
+# 	Verbose -3 "*** $FUNCNAME -- Starting ***"
+# 	## Get number of clients in transactional
+# 	SetFileExpansion 'off'
+# 	sqlStmt="select count(*) from clients where is_active=\"Y\""
+# 	RunSql "$contactsSqliteFile" $sqlStmt
+# 	if [[ ${#resultSet[@]} -le 0 ]]; then
+# 		Terminate "Could not retrieve clients data from '$contactsSqliteFile'"
+# 	else
+# 		tCount=${resultSet[0]}
+# 	fi
+# 	## Get number of clients in warehouse
+# 	sqlStmt="select count(*) from $clientInfoTable where recordStatus in (\"A\",\"Y\")"
+# 	RunSql $sqlStmt
+# 	if [[ ${#resultSet[@]} -le 0 ]]; then
+# 		Terminate "Could not retrieve clients count data from '$warehouseDb.$clientInfoTable'"
+# 	else
+# 		wCount=${resultSet[0]}
+# 	fi
+# 	## Get number of clients on the ignore list
+# 	sqlStmt="select ignoreList from $scriptsTable where name=\"buildClientInfoTable\""
+# 	RunSql $sqlStmt
+# 	if [[ ${#resultSet[@]} -le 0 ]]; then
+# 		Terminate "Could not retrieve clients count data from '$warehouseDb.$clientInfoTable'"
+# 	else
+# 		let numIgnore=$(grep -o "," <<< "${resultSet[0]}r" | wc -l)+1
+# 		let tCount=$tCount-$numIgnore
+# 	fi
+# 	SetFileExpansion
+# 	if [[ $tCount -gt $wCount ]]; then
+# 		Msg "$FUNCNAME: New clients found in the transactional clients table, running 'clientList' report..."
+# 		echo true
+# 	else
+# 		echo false
+# 	fi
+# 	return 0
+# } #CheckClientCount
 
-	### Clear out the employee table
-			sqlStmt="truncate ${employeeTable}"
-			RunSql $sqlStmt
+#=======================================================================================================================
+# function BuildEmployeeTable {
+# 	### Get the list of columns in the transactional employees table
+# 		sqlStmt="pragma table_info(employees)"
+# 		RunSql "$contactsSqliteFile" $sqlStmt
+# 		unset transactionalFields transactionalColumns
+# 		for resultRec in "${resultSet[@]}"; do
+# 			transactionalColumns="$transactionalColumns,$(cut -d'|' -f2 <<< $resultRec)"
+# 			transactionalFields="$transactionalFields,$(cut -d'|' -f2 <<< $resultRec)|$(cut -d'|' -f3 <<< $resultRec)"
+# 		done
+# 		transactionalColumns=${transactionalColumns:1}
+# 		transactionalFields=${transactionalFields:1}
 
-	### Get the transactonal values, loop through them and  write out the warehouse record
-		sqlStmt="select $transactionalColumns from employees order by db_employeekey"
-		RunSql "$contactsSqliteFile" $sqlStmt
-		for resultRec in "${resultSet[@]}"; do
-			fieldCntr=1; unset valuesString userid
-			for field in $(tr ',' ' ' <<< $transactionalFields); do
-				column=$(cut -d'|' -f1 <<< $field)
-				columnType=$(cut -d'|' -f2 <<< $field)
-				eval "unset $column"
-				eval "$column=\"$(cut -d '|' -f $fieldCntr <<< $resultRec)\""
-				[[ $column == 'db_email' ]] &&{ eval "userid=\"${!column}\""; userid="${userid%%@*}"; }
-				[[ $columnType == 'INTEGER' ]] && valuesString="$valuesString,${!column}" || valuesString="$valuesString,\"${!column}\""
-				(( fieldCntr += 1 ))
-			done
-			valuesString="${valuesString:1},\"$userid\""
-			sqlStmt="insert into ${employeeTable} values($valuesString)"
-			RunSql $sqlStmt
-		done
-	return 0
-} #BuildEmployeeTable
+# 	### Clear out the employee table
+# 			sqlStmt="truncate ${employeeTable}"
+# 			RunSql $sqlStmt
+
+# 	### Get the transactonal values, loop through them and  write out the warehouse record
+# 		sqlStmt="select $transactionalColumns from employees order by db_employeekey"
+# 		RunSql "$contactsSqliteFile" $sqlStmt
+# 		for resultRec in "${resultSet[@]}"; do
+# 			fieldCntr=1; unset valuesString userid
+# 			for field in $(tr ',' ' ' <<< $transactionalFields); do
+# 				column=$(cut -d'|' -f1 <<< $field)
+# 				columnType=$(cut -d'|' -f2 <<< $field)
+# 				eval "unset $column"
+# 				eval "$column=\"$(cut -d '|' -f $fieldCntr <<< $resultRec)\""
+# 				[[ $column == 'db_email' ]] &&{ eval "userid=\"${!column}\""; userid="${userid%%@*}"; }
+# 				[[ $columnType == 'INTEGER' ]] && valuesString="$valuesString,${!column}" || valuesString="$valuesString,\"${!column}\""
+# 				(( fieldCntr += 1 ))
+# 			done
+# 			valuesString="${valuesString:1},\"$userid\""
+# 			sqlStmt="insert into ${employeeTable} values($valuesString)"
+# 			RunSql $sqlStmt
+# 		done
+# 	return 0
+# } #BuildEmployeeTable
 
 #=======================================================================================================================
 # Declare local variables and constants
@@ -136,30 +136,30 @@ logInDb=false
 #=======================================================================================================================
 case "$hostName" in
 	mojave)
-		## Processing that we want to completed before any cron tasks on other systems have started
-			Msg; Msg "Backing up database tables in $warehouseDb..."
-			mySemaphoreId=$(Semaphore 'set' $myName)
-			## Backup database tables
-			for table in $clientInfoTable $siteInfoTable $siteAdminsTable $employeeTable ; do
-				Msg "^$table..."
-				sqlStmt="drop table if exists ${table}Bak"
-				RunSql $sqlStmt
-				sqlStmt="create table ${table}Bak like ${table}"
-				RunSql $sqlStmt
-				SetFileExpansion 'off'
-				sqlStmt="insert ${table}Bak select * from ${table}"
-				RunSql $sqlStmt
-				SetFileExpansion
-			done
-			echo
-			Semaphore 'clear' $mySemaphoreId
-			Msg "...done"
+		# ## Processing that we want to completed before any cron tasks on other systems have started
+		# 	Msg; Msg "Backing up database tables in $warehouseDb..."
+		# 	mySemaphoreId=$(Semaphore 'set' $myName)
+		# 	## Backup database tables
+		# 	for table in $clientInfoTable $siteInfoTable $siteAdminsTable $employeeTable ; do
+		# 		Msg "^$table..."
+		# 		sqlStmt="drop table if exists ${table}Bak"
+		# 		RunSql $sqlStmt
+		# 		sqlStmt="create table ${table}Bak like ${table}"
+		# 		RunSql $sqlStmt
+		# 		SetFileExpansion 'off'
+		# 		sqlStmt="insert ${table}Bak select * from ${table}"
+		# 		RunSql $sqlStmt
+		# 		SetFileExpansion
+		# 	done
+		# 	echo
+		# 	Semaphore 'clear' $mySemaphoreId
+		# 	Msg "...done"
 
-		## If this is Sunday then truncate the sites table to reset the siteId counter
-			if [[ $(date "+%u") -eq 7 ]]; then
-				sqlStmt="truncate $siteInfoTable"
-				RunSql $sqlStmt
-			fi
+		# ## If this is Sunday then truncate the sites table to reset the siteId counter
+		# 	if [[ $(date "+%u") -eq 7 ]]; then
+		# 		sqlStmt="truncate $siteInfoTable"
+		# 		RunSql $sqlStmt
+		# 	fi
 
 		## Performance test
 			# ## Make sure we have a sites table before running perfTest
@@ -172,15 +172,16 @@ case "$hostName" in
 			# 	Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 			# fi
 
-		## Copy the contacts db from internal
-			Msg "\nCopying contacts.sqlite files to $contactsSqliteFile..."
-			cp $clientsTransactionalDb/contacts.sqlite $contactsSqliteFile
-			touch $(dirname $contactsSqliteFile)/contacts.syncDate
-			Msg "...done"
+		# ## Copy the contacts db from internal
+		# 	Msg "\nCopying contacts.sqlite files to $contactsSqliteFile..."
+		# 	cp $clientsTransactionalDb/contacts.sqlite $contactsSqliteFile
+		# 	touch $(dirname $contactsSqliteFile)/contacts.syncDate
+		# 	Msg "...done"
 
 		## Run programs/functions
-			pgms=(updateDefaults "cleanDev -daemon" "buildClientInfoTable" "buildSiteInfoTable" loadClientRoles)
-			pgms+=(BuildEmployeeTable loadMilestonesData)
+			pgms=(updateDefaults "cleanDev -daemon")
+			# pgms=(updateDefaults "cleanDev -daemon" "buildClientInfoTable" "buildSiteInfoTable" loadClientRoles)
+			# pgms+=(BuildEmployeeTable loadMilestonesData)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -268,44 +269,44 @@ case "$hostName" in
 				Msg "... done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
 		  	fi
 
-		## Process server move updates
-			if [[ -r $TOOLSPATH/src/cron/serverMove.txt ]]; then
-				Msg "\nProcessing server moves..."
-				ifs="$IFS"; IFS=$'\r'; while read line; do
-					[[ ${line:0:1} == '#' ]] && continue
-					share="${line%% *}"; line="${line#* }"
-					oldHost="${line%% *}"; line="${line#* }"
-					newHost="$line"
-					Msg "Processing server move update in '$siteInfoTable': '$share' --> '$newHost'"
-					sqlStmt="update $siteInfoTable set host='$newHost' where share = '$share' and host='$oldHost'"
-					RunSql $sqlStmt
-				done < "$TOOLSPATH/src/cron/serverMove.txt"
-				IFS="$ifs"
-			fi
+		# ## Process server move updates
+		# 	if [[ -r $TOOLSPATH/src/cron/serverMove.txt ]]; then
+		# 		Msg "\nProcessing server moves..."
+		# 		ifs="$IFS"; IFS=$'\r'; while read line; do
+		# 			[[ ${line:0:1} == '#' ]] && continue
+		# 			share="${line%% *}"; line="${line#* }"
+		# 			oldHost="${line%% *}"; line="${line#* }"
+		# 			newHost="$line"
+		# 			Msg "Processing server move update in '$siteInfoTable': '$share' --> '$newHost'"
+		# 			sqlStmt="update $siteInfoTable set host='$newHost' where share = '$share' and host='$oldHost'"
+		# 			RunSql $sqlStmt
+		# 		done < "$TOOLSPATH/src/cron/serverMove.txt"
+		# 		IFS="$ifs"
+		# 	fi
 
-		 ## Check that all things ran properly, otherwise revert the databases
-		 	Msg "\nCleanup..."
-			Semaphore 'waiton' "buildClientInfoTable"
-			Semaphore 'waiton' "buildSiteInfoTable"
-			errorDetected=false
-			for table in $clientInfoTable $siteInfoTable $siteAdminsTable $employeeTable; do
-				sqlStmt="select count(*) from $table"
-				RunSql $sqlStmt
-				if [[ ${resultSet[0]} -eq 0 ]]; then
-					Error "'$table' table is empty, reverting to original"
-					errorDetected=true
-					sqlStmt="drop table if exists ${table}"
-					RunSql $sqlStmt
-					sqlStmt="rename table ${table}Bak to ${table}"
-					RunSql $sqlStmt
-				# else
-				# 	sqlStmt="drop table if exists  ${table}Bak"
-				# 	RunSql $sqlStmt
-				fi
-			done
-			[[ $errorDetected == true ]] && Terminate 'One or more of the database load procedures failed, please review messages'
+		 # ## Check that all things ran properly, otherwise revert the databases
+		 # 	Msg "\nCleanup..."
+			# Semaphore 'waiton' "buildClientInfoTable"
+			# Semaphore 'waiton' "buildSiteInfoTable"
+			# errorDetected=false
+			# for table in $clientInfoTable $siteInfoTable $siteAdminsTable $employeeTable; do
+			# 	sqlStmt="select count(*) from $table"
+			# 	RunSql $sqlStmt
+			# 	if [[ ${resultSet[0]} -eq 0 ]]; then
+			# 		Error "'$table' table is empty, reverting to original"
+			# 		errorDetected=true
+			# 		sqlStmt="drop table if exists ${table}"
+			# 		RunSql $sqlStmt
+			# 		sqlStmt="rename table ${table}Bak to ${table}"
+			# 		RunSql $sqlStmt
+			# 	# else
+			# 	# 	sqlStmt="drop table if exists  ${table}Bak"
+			# 	# 	RunSql $sqlStmt
+			# 	fi
+			# done
+			# [[ $errorDetected == true ]] && Terminate 'One or more of the database load procedures failed, please review messages'
 			
-			Msg "\n...Cleanup done"
+			# Msg "\n...Cleanup done"
 
 		## sync the jalot data warehouse tables
 			export QUERY_STRING="debug=false, quiet=false"
@@ -318,10 +319,10 @@ case "$hostName" in
 		;; ## mojave
 
 	*) ## build7
-		## Wait until processing is release by the master process on mojave
-			Msg "Waiting on '$myName'..."
-			Semaphore 'waiton' "$myName"
-			Msg "^'$myName' completed, continuing..."
+		# ## Wait until processing is release by the master process on mojave
+		# 	Msg "Waiting on '$myName'..."
+		# 	Semaphore 'waiton' "$myName"
+		# 	Msg "^'$myName' completed, continuing..."
 
 		# ## Wait for the perftest process on mojave to complete
 		# 	## Make sure we have a sites table before running perfTest
@@ -334,7 +335,8 @@ case "$hostName" in
 		# 	fi
 
 		## Run programs/functions
-			pgms=("buildSiteInfoTable" "cleanDev -daemon")
+			pgms=("cleanDev -daemon")
+			# pgms=("buildSiteInfoTable" "cleanDev -daemon")
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -512,3 +514,4 @@ return 0
 ## 03-20-2019 @ 08:46:13 - 1.23.14 - dscudiero - Tweak messaging
 ## 04-03-2019 @ 15:00:24 - 1.23.15 - dscudiero - Add/Remove debug statements
 ## 05-16-2019 @ 07:26:58 - 1.23.16 - dscudiero -  -
+## 05-21-2019 @ 06:59:48 - 1.23.18 - dscudiero -  Remove data warehouse etl stuff
