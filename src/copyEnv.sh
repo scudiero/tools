@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.14.56" # -- dscudiero -- Tue 05/07/2019 @ 06:49:23
+version="4.14.57" # -- dscudiero -- Thu 05/23/2019 @ 13:20:13
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions SetSiteDirsNew"
@@ -630,6 +630,7 @@ if [[ $startWizdebug == true ]]; then
 	echo -e "$colorKey"
 	PrintBanner "tail wizdebug.out, Ctrl-C to stop"
 	echo -e "$colorDefault"
+	Alert 3
 	tail -n 15 -f wizdebug.out
 fi
 
@@ -788,3 +789,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 04-16-2019 @ 14:45:25 - 4.14.48 - dscudiero -  Add code to deal with alt directories as the source directory
 ## 04-25-2019 @ 15:45:49 - 4.14.55 - dscudiero -  Force setting of the targetDir, switch back to origional SetSiteDirs
 ## 05-07-2019 @ 06:51:15 - 4.14.56 - dscudiero -  Fix problem with the debug option going to the wrong env
+## 05-23-2019 @ 13:20:35 - 4.14.57 - dscudiero -  Add alert if -debug option was specified
