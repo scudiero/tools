@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.56" # -- dscudiero -- Tue 03/05/2019 @ 07:40:45
+version="2.2.57" # -- dscudiero -- Thu 05/23/2019 @ 14:46:50
 
 #=======================================================================================================================
 # Run every hour from cron
@@ -318,15 +318,15 @@ case "$hostName" in
 		# fi
 		## Run programs/functions
 			# pgms=(CheckMonitorFiles)
-			for ((i=0; i<${#pgms[@]}; i++)); do
-				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
-				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
-				TrapSigs 'off'
-				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
-				TrapSigs 'on'
-				Semaphore 'waiton' "$pgmName" 'true'
-				Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
-			done
+			# for ((i=0; i<${#pgms[@]}; i++)); do
+			# 	pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
+			# 	Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
+			# 	TrapSigs 'off'
+			# 	[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
+			# 	TrapSigs 'on'
+			# 	Semaphore 'waiton' "$pgmName" 'true'
+			# 	Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+			# done
 		;;
 esac
 
@@ -425,3 +425,4 @@ return 0
 ## 03-04-2019 @ 14:15:35 - 2.2.53 - dscudiero - Add PushPop to the includes list
 ## 03-04-2019 @ 15:23:44 - 2.2.55 - dscudiero - Add/Remove debug statements
 ## 03-05-2019 @ 07:40:54 - 2.2.56 - dscudiero - M
+## 05-23-2019 @ 14:47:09 - 2.2.57 - dscudiero -  Comment out unused code
