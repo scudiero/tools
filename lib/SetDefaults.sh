@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.7" # -- dscudiero -- Fri 12/28/2018 @ 08:21:00
+# version="1.0.12" # -- dscudiero -- Fri 05/24/2019 @ 13:57:33
 #===================================================================================================
 # Load tools defaults from the database using the C program
 #===================================================================================================
@@ -8,17 +8,6 @@
 # All rights reserved
 #===================================================================================================
 SetDefaults() {
-
-	Import CallC MkTmpFile Msg
-	
-	# local tmpFile=$(mkTmpFile)
-	# echo "HOSTNAME = '$HOSTNAME'"
-	# CallC toolsSetDefaults $* > "$tmpFile"
-	# echo "$tmpFile"
-	# cat "$tmpFile"
-	# echo
-	# source "$tmpFile"
-	
 	source <(CallC toolsSetDefaults $*);
 	ToolsDefaultsLoaded=true
 	return 0;
@@ -34,3 +23,4 @@ export -f SetDefaults
 ## 12-18-2018 @ 17:02:44 - 1.0.6 - dscudiero - Comment out debug statements
 ## 12-28-2018 @ 08:22:32 - 1.0.7 - dscudiero - Pass arguments to the c++ module
 ## 05-24-2019 @ 13:10:24 - 1.0.7 - dscudiero - 
+## 05-24-2019 @ 13:59:48 - 1.0.12 - dscudiero -  remove dead code
