@@ -33,3 +33,4 @@ export -f SetDefaults
 ## 12-18-2018 @ 16:18:50 - 1.0.5 - dscudiero - Cosmetic/minor change/Sync
 ## 12-18-2018 @ 17:02:44 - 1.0.6 - dscudiero - Comment out debug statements
 ## 12-28-2018 @ 08:22:32 - 1.0.7 - dscudiero - Pass arguments to the c++ module
+## 05-24-2019 @ 13:10:24 - 1.0.7 - dscudiero - 
