@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.0.14" // -- dscudiero -- Tue 12/18/2018 @ 17:00:03
+// version="1.0.24" // -- dscudiero -- Fri 05/24/2019 @ 11:50:34
 //==================================================================================================
 #include <stdlib.h>
 #include <string>		// String utility library
@@ -120,7 +120,10 @@ int main(int argc, char *argv[]) {
             unsigned int numFields;
 			// Get the tools level defaults
 				if (verboseLevel > 0) std::cout << "Retrieving tools defaults data...";
-				string sqlStmt="select name,value from defaults where host=\"" + hostName + "\" or host is null and status = \"A\" order by name"; 
+				string sqlStmt="select name,value from defaults where ("
+								" (os=\"linux\" and host=\"mojave\") or (os=\"linux\" and host is null)"
+								" and status = \"A\") order by name";
+				dump("sqlStmt",sqlStmt,debug);
 				mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
 				if (mysqlStatus)
 				    throw FFError( (char*)mysql_error(MySQLConnection) );
@@ -231,3 +234,4 @@ int main(int argc, char *argv[]) {
 // 12-18-2018 @ 15:28:20 - 1.0.3 - dscudiero - Cosmetic/minor change/Sync
 // 12-18-2018 @ 16:20:10 - 1.0.4 - dscudiero - Cosmetic/minor change/Sync
 // 12-18-2018 @ 17:03:34 - 1.0.14 - dscudiero - Re-factor getting the hostName
+// 05-24-2019 @ 11:51:50 - 1.0.24 - dscudiero -  Fix sql query to handle multiple OS variables
