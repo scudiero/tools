@@ -536,3 +536,4 @@ function CleanUp {
 ## 12-18-2018 @ 08:37:35 - 1.6.27 - dscudiero - Switch to use SetDefaults function
 ## 04-30-2019 @ 12:07:52 - 1.6.29 - dscudiero -  Do not do auth check for courseleafPatch
 ## 04-30-2019 @ 12:33:58 - 1.6.30 - dscudiero - 
+## 05-24-2019 @ 14:00:04 - 1.6.30 - dscudiero - 
