@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.59" # -- dscudiero -- Fri 05/24/2019 @ 12:05:48
+version="2.2.60" # -- dscudiero -- Fri 05/24/2019 @ 13:10:09
 
 #=======================================================================================================================
 # Run every hour from cron
@@ -316,17 +316,17 @@ case "$hostName" in
 		# 		FindExecutable -sh -run perfTest summary
 		# 	fi
 		# fi
-		## Run programs/functions
-			# pgms=(CheckMonitorFiles)
-			# for ((i=0; i<${#pgms[@]}; i++)); do
-			# 	pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
-			# 	Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
-			# 	TrapSigs 'off'
-			# 	[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
-			# 	TrapSigs 'on'
-			# 	Semaphore 'waiton' "$pgmName" 'true'
-			# 	Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
-			# done
+		# Run programs/functions
+			pgms=(updateDefaults)
+			for ((i=0; i<${#pgms[@]}; i++)); do
+				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
+				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
+				TrapSigs 'off'
+				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
+				TrapSigs 'on'
+				Semaphore 'waiton' "$pgmName" 'true'
+				Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+			done
 		;;
 esac
 
@@ -427,3 +427,4 @@ return 0
 ## 03-05-2019 @ 07:40:54 - 2.2.56 - dscudiero - M
 ## 05-23-2019 @ 14:47:09 - 2.2.57 - dscudiero -  Comment out unused code
 ## 05-24-2019 @ 12:07:23 - 2.2.59 - dscudiero -  Comment out SyncInternalDb
+## 05-24-2019 @ 13:10:46 - 2.2.60 - dscudiero -  Add updateDefaults running on build7
