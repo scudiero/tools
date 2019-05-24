@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.57" # -- dscudiero -- Thu 05/23/2019 @ 14:46:50
+version="2.2.59" # -- dscudiero -- Fri 05/24/2019 @ 12:05:48
 
 #=======================================================================================================================
 # Run every hour from cron
@@ -29,19 +29,19 @@ dump prodServers devServers hostName
 #=======================================================================================================================
 # local functions
 #=======================================================================================================================
-# Synchronize the internal database shadow with master
-function SyncInternalDb {
-	srcDir=$clientsTransactionalDb
-	tgtDir=$internalContactsDbShadow
-	SetFileExpansion 'on'
-	rsync -aq $srcDir/* $tgtDir > /dev/null 2>&1
-	chmod 770 $tgtDir
-	chmod 770 $tgtDir/*
-	touch $tgtDir/.syncDate
-	cwd=$(pwd); cd $tgtDir; chgrp -R leepfrog *; chgrp leepfrog .*; cd "$cwd"
-	SetFileExpansion
-	return 0
-}
+# # Synchronize the internal database shadow with master
+# function SyncInternalDb {
+# 	srcDir=$clientsTransactionalDb
+# 	tgtDir=$internalContactsDbShadow
+# 	SetFileExpansion 'on'
+# 	rsync -aq $srcDir/* $tgtDir > /dev/null 2>&1
+# 	chmod 770 $tgtDir
+# 	chmod 770 $tgtDir/*
+# 	touch $tgtDir/.syncDate
+# 	cwd=$(pwd); cd $tgtDir; chgrp -R leepfrog *; chgrp leepfrog .*; cd "$cwd"
+# 	SetFileExpansion
+# 	return 0
+# }
 
 #=======================================================================================================================
 # Synchronize the courseleaf cgi's  shadow with master
@@ -57,35 +57,35 @@ function SyncInternalDb {
 # 	return 0
 # }
 
-#=======================================================================================================================
-# Synchronize the skeleton shadow with master
-function SyncSkeleton {
-	srcDir=/mnt/dev6/web/_skeleton
-	#srcDir=/steamboat/leepfrog/clskel
-	tgtDir=$skeletonRoot
+# #=======================================================================================================================
+# # Synchronize the skeleton shadow with master
+# function SyncSkeleton {
+# 	srcDir=/mnt/dev6/web/_skeleton
+# 	#srcDir=/steamboat/leepfrog/clskel
+# 	tgtDir=$skeletonRoot
 
-	chmod 770 $tgtDir
-	## Build exculde file
-		rsyncFilters=/tmp/$userName.rsyncFilters.txt
-		if [[ -f $rsyncFilters ]]; then rm $rsyncFilters; fi
-		printf "%s\n" '- /attic/' >> $rsyncFilters
-		printf "%s\n" '- /requestlog*' >> $rsyncFilters
-		printf "%s\n" '- *.bak' >> $rsyncFilters
-		printf "%s\n" '- *.old' >> $rsyncFilters
+# 	chmod 770 $tgtDir
+# 	## Build exculde file
+# 		rsyncFilters=/tmp/$userName.rsyncFilters.txt
+# 		if [[ -f $rsyncFilters ]]; then rm $rsyncFilters; fi
+# 		printf "%s\n" '- /attic/' >> $rsyncFilters
+# 		printf "%s\n" '- /requestlog*' >> $rsyncFilters
+# 		printf "%s\n" '- *.bak' >> $rsyncFilters
+# 		printf "%s\n" '- *.old' >> $rsyncFilters
 
-	## sychronize master with shadow
-		rsyncOpts="-av --prune-empty-dirs $listOnly --include-from --ignore-date $rsyncFilters"
-		rsync $rsyncOpts $srcDir/ $tgtDir > /dev/null 2>&1
-		chmod 750 $tgtDir
-		touch $tgtDir/.syncDate
-		if [[ -f $rsyncFilters ]]; then rm $rsyncFilters; fi
-		SetFileExpansion 'on'
-		cwd=$(pwd); cd $tgtDir; chgrp -R leepfrog *; chgrp leepfrog .*; cd "$cwd"
-		SetFileExpansion
+# 	## sychronize master with shadow
+# 		rsyncOpts="-av --prune-empty-dirs $listOnly --include-from --ignore-date $rsyncFilters"
+# 		rsync $rsyncOpts $srcDir/ $tgtDir > /dev/null 2>&1
+# 		chmod 750 $tgtDir
+# 		touch $tgtDir/.syncDate
+# 		if [[ -f $rsyncFilters ]]; then rm $rsyncFilters; fi
+# 		SetFileExpansion 'on'
+# 		cwd=$(pwd); cd $tgtDir; chgrp -R leepfrog *; chgrp leepfrog .*; cd "$cwd"
+# 		SetFileExpansion
 
-	[[ -f "$tmpFile" ]] && rm "$tmpFile"
-	return 0
-} #SyncSkeleton
+# 	[[ -f "$tmpFile" ]] && rm "$tmpFile"
+# 	return 0
+# } #SyncSkeleton
 
 # #=======================================================================================================================
 # # Check Monitored files for changes
@@ -240,7 +240,7 @@ case "$hostName" in
 
 		## Run programs/functions
 			#pgms=(updateDefaults loadPatchData CheckMonitorFiles SyncInternalDb SyncCourseleafCgis SyncSkeleton)
-			pgms=(updateDefaults loadPatchData loadMilestonesData SyncInternalDb)
+			pgms=(updateDefaults loadPatchData)
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -426,3 +426,4 @@ return 0
 ## 03-04-2019 @ 15:23:44 - 2.2.55 - dscudiero - Add/Remove debug statements
 ## 03-05-2019 @ 07:40:54 - 2.2.56 - dscudiero - M
 ## 05-23-2019 @ 14:47:09 - 2.2.57 - dscudiero -  Comment out unused code
+## 05-24-2019 @ 12:07:23 - 2.2.59 - dscudiero -  Comment out SyncInternalDb
