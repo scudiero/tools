@@ -1,3 +1,3 @@
-/archive/
-*.tar
-boost_*
+*
+!.gitignore
+!toolsUtils.h
