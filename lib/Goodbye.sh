@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.1.27" # -- dscudiero -- Wed 13/06/2018 @ 13:33:53
+# version="2.1.28" # -- dscudiero -- Fri 05/31/2019 @ 13:52:39
 #===================================================================================================
 # Common script exit
 # args:
@@ -142,7 +142,7 @@ function Goodbye {
 	if [[ $PAUSEATEXIT == true && $exitCode != 'x' && $exitCode != 'quiet' ]]; then
 		Msg "$colorKey"
 		Msg '*******************************************************************************'
-		Msg '*** Remote script excution has complete, please press enter to close window ***'
+		Msg '*** Remote script execution has complete, please press enter to close window ***'
 		Msg '*******************************************************************************'
 		Msg "$colorDefault"
 		Alert 3
