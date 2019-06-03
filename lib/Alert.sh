@@ -11,6 +11,7 @@
 #===================================================================================================
 
 function Alert {
+	Import StringFunctions
 	[[ $batchMode == true || $quiet == true ]] && return 0
 	local numAlerts=$1; shift || true
 	if [[ $numAlerts != '' && $(IsNumeric $numAlerts) == false ]]; then
@@ -37,3 +38,4 @@ export -f Alert
 #===================================================================================================
 
 ## Wed Jan  4 13:52:47 CST 2017 - dscudiero - General syncing of dev to prod
+## 06-03-2019 @ 08:05:04 - 2.0.5 - dscudiero -  Add import of StringFunctions
