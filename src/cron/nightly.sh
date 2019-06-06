@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.18" # -- dscudiero -- Mon 05/20/2019 @ 08:40:02
+version="1.23.19" # -- dscudiero -- Thu 06/06/2019 @ 11:35:00
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -315,6 +315,11 @@ case "$hostName" in
 			time ./pagewiz.cgi jalotWarhouseETL /
 			Popd
 
+		## Send out clproject emails
+			export QUERY_STRING="debug=true, age=5, testaddr=dscudiero@leepfrog.com"
+			cd "/mnt/internal/site/stage/web/pagewiz"
+			./pagewiz.cgi checkMilestones /
+
 
 		;; ## mojave
 
@@ -515,3 +520,4 @@ return 0
 ## 04-03-2019 @ 15:00:24 - 1.23.15 - dscudiero - Add/Remove debug statements
 ## 05-16-2019 @ 07:26:58 - 1.23.16 - dscudiero -  -
 ## 05-21-2019 @ 06:59:48 - 1.23.18 - dscudiero -  Remove data warehouse etl stuff
+## 06-06-2019 @ 11:35:33 - 1.23.19 - dscudiero -  add call tp checkMilestones step
