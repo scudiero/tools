@@ -1,11 +1,16 @@
 %spidercode%
 
 	//============================================================================================================
-	// Version: 1.0.0
+	// Version: 1.0.1
 	//============================================================================================================
 	// Examine the milestones data and check for any milestones that are going to be due in 'age' days or less
 	// (see 'age' variable).  If any are found due then the csm for that project is emailed with an alert that 
 	// there are items due.
+	// 
+	// export QUERY_STRING="debug=true, age=5, testaddr=dscudiero@leepfrog.com"
+	// cd "/mnt/internal/site/stage/web/pagewiz"
+	// ./pagewiz.cgi checkMilestones /
+	// 
 	//============================================================================================================
 
 (function () {
@@ -15,15 +20,22 @@
 	//============================================================================================================
 	var debug=false;
 	var age=5;
+	var testAddr="dscudiero@leepfrog.com"
 
 	//============================================================================================================
 	//Parse Arguments
 	//============================================================================================================
 	var argStr = getenv("QUERY_STRING");
 	if(argStr.indexOf("debug=") >= 0)
-		debug = argStr.replace(/.*debug=([^\&]*)\&?.*$/i, "$1");
+		debug = argStr.substring(argStr.indexOf("debug=")+"debug=".length).split(" ")[0].replace(",","");
+
 	if(argStr.indexOf("age=") >= 0)
-		age = argStr.replace(/.*age=([^\&]*)\&?.*$/i, "$1");
+		age = argStr.substring(argStr.indexOf("age=")+"age=".length).split(" ")[0].replace(",","");
+
+	if(argStr.indexOf("testaddr=") >= 0)
+		testAddr = argStr.substring(argStr.indexOf("testaddr=")+"testaddr=".length).split(" ")[0].replace(",","");
+
+	if (debug) print_debug("age = " + age + "\ntestAddr = " + testAddr + "\n");
 
 	//============================================================================================================
 	//MAIN
@@ -49,57 +61,58 @@
 			resultSet.forEach(function(result) {
 				if (debug) print_debug("result (milestones)" + result.toSource() + "\n");
 				// Get the csm for this client/project
-				var role = "csm";
+				var roleStr = "";
 				switch (result.project.toLowerCase()) {
 					case "cat":
-					case "cat-project":
-						role="CAT" + role; 
-					break;
-					case "cim-courses":
-						role="CIMC" + role;
-					break;
-					case "cim-programs":
-						role="CIMP" + role;; 
-					break;
 					case "clss": 
-						role="CLSS" + role;
+					case "cat-project":
+					case "clss-project":
+						roleStr='"' + result.project.replace("-project","") + 'csm","csm"';
 					break;
+					default:
+						if (result.project.toLowerCase().substring(0,4) === "cim-") {
+							var instance=result.project.toLowerCase().substring(4);
+							roleStr='"cim' + instance.substring(0,1) + 'csm","csm"';
+						}
 				}
 
 				var sqlStmt="select employees.db_firstname,employees.db_lastname,employees.db_email"
 						+ " from employees,clientroles,clients"
 						+ " where clients.clientcode = \"" + result.client + "\""
 						+ " and clientroles.clientkey = clients.clientkey"
-						+ " and clientroles.role = \"" + role + "\""
+						+ " and lower(clientroles.role) in (" + roleStr + ")"
 						+ " and employees.db_employeekey = clientroles.employeekey"
+						+ " order by clientroles.role";
 				var resultSet2 = dbquery("contacts",sqlStmt);
 				if (debug) print_debug("\nsqlStmt 1 = " + sqlStmt+ "\n\n");
 				if (debug) print_debug("\nresultSet2 (contacts) 1" + resultSet2.toSource() + "\n");
 				
-				// Add/update a hash entry for this CSM key 
+				// Add/update a hash entry for this CSM key
 				var key=null;
-				resultSet2.forEach(function(result2) {
-					// if (debug) print_doc("&nbsp;&nbsp;&nbsp;result2 = " + result2.toSource() + "<br>\n");
-					key = result2.db_firstname + " " + result2.db_lastname + "/" + result2.db_email;
-					if (emailListHash[key] == undefined) {
-						var tmpArray=[]; tmpArray.push(result);
-						emailListHash[key] = tmpArray;
-						emailListHashKeys.push(key);
-					} else {
-						var tmpArray=emailListHash[key];
-						var tmpArray2=[];
-						tmpArray.forEach(function(token) {
-							tmpArray2.push(token);
-						});
-						tmpArray2.push(result);
-						emailListHash[key] = tmpArray2;
-					}
-					if (debug) print_debug("\temailListHash["+key+"] = " + emailListHash[key].toSource() + "\n");
-				}); //resultSet2.forEach (contacts)
+				// resultSet2.forEach(function(result2) {
+					if (resultSet2.length > 0) {
+						var result2 = resultSet2[0];  // Take the first one
+						key = result2.db_firstname + " " + result2.db_lastname + "/" + result2.db_email;
+						if (emailListHash[key] == undefined) {
+							var tmpArray=[]; tmpArray.push(result);
+							emailListHash[key] = tmpArray;
+							emailListHashKeys.push(key);
+						} else {
+							var tmpArray=emailListHash[key];
+							var tmpArray2=[];
+							tmpArray.forEach(function(token) {
+								tmpArray2.push(token);
+							});
+							tmpArray2.push(result);
+							emailListHash[key] = tmpArray2;
+						}
+						if (debug) print_debug("\temailListHash["+key+"] = " + emailListHash[key].toSource() + "\n");
+					} //(resultSet2.length > 0) 
+				// }); //resultSet2.forEach (contacts)
 			}); //resultSet.forEach (milestones records)
 		} //(resultSet.length > 0)
 
-	//Loop through the hash and send the emails
+	//Loop through the hash and send the emails, one per csm
 		if (emailListHashKeys.length > 0 ) {
 			// Setup sendnow data object
 			var url = "http://sendnow.leepfrog.com/sendnow.cgi?project=courseleaf";
@@ -107,7 +120,7 @@
 				message: "custom.msg",
 				project: "cleaf",
 				batch: "clProject",
-				subject: "CL project milestones overdue or due in " + age + " or less",
+				subject: "CL project milestones overdue or due in " + age + " days or less",
 				editoremail: "noaddress@mailbb.leepfrog.com",
 				fromname: "CL project milestones daemon",
 				site: "Internal",
@@ -120,7 +133,7 @@
 				if (debug) print_debug("\temailListHash[" + key + "] = " + emailListHash[key].toSource() + "\n");
 				tmpArray=key.split("/");
 				if (debug) {
-					postData.email = "dscudiero@leepfrog.com";
+					postData.email = testAddr;
 				} else {
 					postData.email = key.split("/")[1];
 				}				
@@ -140,35 +153,19 @@
 									+ milestone.label + ", days to due: " + milestone.days2due.replace(".0","") + "\n";
 					}); //milestones.forEach
 				}); //tmpArray.forEach
+				var d = new Date()
+				bodyText += "\nThis is an automated email, please do not reply to this email.\n" + d + "\n";
 
 				// Send out email
 				postData.body = bodyText;
-				if (debug) var email = "dscudiero@leepfrog.com";
-				dump(debug,"postData",postData); 
+				if (debug) print_debug("\npostData = " + postData.toSource() + "\n");
 				var results = http_get(url, { postdata: postData });
+				if (debug) print_debug("\nresults = " + results.toSource() + "\n");
 				if (results.indexOf("Accepted") < 0 ) print_debug("\n" + results + postData.toSource().replace(/,/g,",\n\t"));
 			}); //emailListHashKeys.forEach	
-
 		} //emailListHashKeys.length > 0 
 
 	return;
-
-
-	//============================================================================================================
-	// Subs
-	//============================================================================================================
-
-	//============================================================================================================
-	function dump(varName,varValue){
-		if (! debug) {return}
-		text=varName + ' = >' + varValue + '<\n'
-		print_debug(text)
-	}
-
-	//============================================================================================================
-	function Here(id) {
-		print_debug('Here ' + id + '\n');
-	}
 
 //============================================================================================================
 //Close function wrapper
