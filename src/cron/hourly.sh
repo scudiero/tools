@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.61" # -- dscudiero -- Wed 06/05/2019 @ 16:16:53
+version="2.2.61" # -- dscudiero -- Thu 06/06/2019 @ 07:33:16
 
 #=======================================================================================================================
 # Run every hour from cron
@@ -17,8 +17,6 @@ myIncludes='GetPW ProtectedCall CalcElapsed PushPop'
 Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*"
-echo "HERE 1 HERE 1 HERE 1 HERE"
-echo "$hostName"
 
 #=======================================================================================================================
 # Standard argument parsing and initialization
@@ -231,7 +229,6 @@ dump prodServers devServers hostName
 #=======================================================================================================================
 case "$hostName" in
 	mojave)
-echo "HERE 2 HERE 2 HERE 2 HERE"
 
 		## Run perftest on even numberd hours
 		# if [[ $(( $(date +"%-H") % 2 )) -eq 0 ]]; then
@@ -245,7 +242,6 @@ echo "HERE 2 HERE 2 HERE 2 HERE"
 			#pgms=(updateDefaults loadPatchData CheckMonitorFiles SyncInternalDb SyncCourseleafCgis SyncSkeleton)
 			pgms=(updateDefaults loadPatchData)
 			for ((i=0; i<${#pgms[@]}; i++)); do
-echo "\${pgms[$i]} = ${pgms[$i]}"
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
 				#TrapSigs 'off'
@@ -432,4 +428,3 @@ return 0
 ## 05-23-2019 @ 14:47:09 - 2.2.57 - dscudiero -  Comment out unused code
 ## 05-24-2019 @ 12:07:23 - 2.2.59 - dscudiero -  Comment out SyncInternalDb
 ## 05-24-2019 @ 13:10:46 - 2.2.60 - dscudiero -  Add updateDefaults running on build7
-## 06-05-2019 @ 16:17:12 - 2.2.61 - dscudiero -  3 debug
