@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.61" # -- dscudiero -- Thu 06/06/2019 @ 07:33:16
+version="2.2.62" # -- dscudiero -- Thu 06/06/2019 @ 08:15:19
 
 #=======================================================================================================================
 # Run every hour from cron
@@ -287,7 +287,7 @@ case "$hostName" in
 						let i=$i+1
 						file="${logRecs[$i]}"
 						dump -1 -n -t2 file committer comment commitTime
-						if [[ $committer != "$me" ]]; then
+						if [[ $committer != "$me" && $committer != "dscudiero" ]]; then
 							Msg "\n^'$file' was committed by '$committer' at $commitTime \n\t-- $comment" | tee -a "$tmpFile"
 							found=true
 						fi
