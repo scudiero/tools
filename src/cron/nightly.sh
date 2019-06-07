@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.19" # -- dscudiero -- Thu 06/06/2019 @ 11:35:00
+version="1.23.20" # -- dscudiero -- Fri 06/07/2019 @ 07:18:49
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -246,7 +246,7 @@ case "$hostName" in
 
 					# if [[ ! -d "$HOME/clientData/${client,,[a,z]}" ]]; then
 						echo "*** Warning ***" > "$tmpFile"
-						echo "A meeting, '$line', has been scheduled with $client on ${date}." >> "$tmpFile"
+						echo "A workflow client review meeting, '$line', has been scheduled with $client on ${date}." >> "$tmpFile"
 						echo "No workflow specifications have been received for this client so an audit and initial workflow has not been completed." >> "$tmpFile"
 						echo "Specifications must be received at least 5 business days before the client meeting." >> "$tmpFile"
 						echo "Should specifications not be provided, said meeting will be canceled on the Monday of the week that the meeting was scheduled" >> "$tmpFile"
