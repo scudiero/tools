@@ -41,3 +41,4 @@ export -f SetFileExpansion
 ## 10-27-2017 @ 14.51.19 - ("2.0.19")  - dscudiero - Cosmetic/minor change
 ## 10-27-2017 @ 16.54.24 - ("2.0.29")  - dscudiero - Add StringFunctions to import list
 ## 05-24-2019 @ 13:59:56 - 2.0.30 - dscudiero - 
+## 06-07-2019 @ 09:46:04 - 2.0.30 - dscudiero - 
