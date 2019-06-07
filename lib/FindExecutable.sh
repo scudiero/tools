@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.57" # -- dscudiero -- Wed 05/23/2018 @ 10:01:14.71
+# version="1.2.58" # -- dscudiero -- Fri 06/07/2019 @ 14:27:26
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -48,6 +48,7 @@ function FindExecutable {
 	if [[ $mode == 'lib' ]]; then
  		searchDirs="$TOOLSPATH/lib"
 		[[ $useDev == true && -n $TOOLSDEVPATH && -d "$TOOLSDEVPATH/lib" ]] && searchDirs="$TOOLSDEVPATH/lib $searchDirs"
+		[[ $useLocal == true && -d "$HOME/toolsNew/lib" ]] && searchDirs="$HOME/toolsNew/lib $searchDirs"
 		[[ $useLocal == true && -d "$HOME/tools/lib" ]] && searchDirs="$HOME/tools/lib $searchDirs"
 		searchTokens="bash:sh cpp:cpp"
 	else
@@ -126,3 +127,4 @@ export -f FindExecutable
 ## 06-18-2018 @ 16:03:11 - 1.2.57 - dscudiero - Check if sript to run in soffline
 ## 06-18-2018 @ 16:05:56 - 1.2.57 - dscudiero - Cosmetic/minor change/Sync
 ## 06-18-2018 @ 16:14:21 - 1.2.57 - dscudiero - Remove debug statement
+## 06-07-2019 @ 14:27:45 - 1.2.58 - dscudiero -  Add toolsNew to the searchPath
