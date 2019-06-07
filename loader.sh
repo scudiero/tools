@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.6.30" # -- dscudiero -- Tue 04/30/2019 @ 12:33:46
+version="1.6.31" # -- dscudiero -- Fri 06/07/2019 @ 14:25:25
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -9,19 +9,6 @@ version="1.6.30" # -- dscudiero -- Tue 04/30/2019 @ 12:33:46
 loaderArgs="$*"
 myName='loader'
 [[ $(/usr/bin/logname 2>&1) == $me && $DEBUG == true ]] && echo -e "\n*** In $myName ($version)\n\t\$* = >$*<"
-
-#==================================================================================================
-# Local Functions
-#==================================================================================================
-	function prtStatus {
-		[[ $batchMode == true || $userName != 'dscudiero' ]] && return 0
-		[[ -z $sTime ]] && sTime=$(date "+%s")
-		local elapTime=$(( $(date "+%s") - $sTime ))
-		[[ $elapTime -eq 0 ]] && elapTime=1
-		statusLine="${statusLine}${1}: ${elapTime}s"
-		>&3 echo -n -e "${statusLine}\r"
-		return 0;
-	}
 
 #==================================================================================================
 # Process the exit from the sourced script
@@ -64,8 +51,6 @@ function CleanUp {
 # Initialize local variables
 #==================================================================================================
 [[ "${BASH_SOURCE[0]}" != "${0}" ]] && calledViaSource=true || calledViaSource=false
-# sTime=$(date "+%s")
-# statusLine="Loader ($version): "
 ## Initialize file descriptor 3 to be stdout unless redirected by caller
 	if [[ -t 0 ]]; then # Im running interactive
 		if { ! >&3; } 2> /dev/null; then exec 3<> /dev/tty ; fi
@@ -94,7 +79,6 @@ function CleanUp {
 ## Initial Checks
 	[[ -z $TOOLSPATH ]] && echo -e "\n*Error* -- The TOOLSPATH environment value has not been set, cannot continue\n" && exit -3
 
-	# sTime=$(date "+%s")
 	if [[ "$0" != "-bash" ]]; then
 		callPgmName=$(basename "$1")
 		shift
@@ -140,7 +124,6 @@ function CleanUp {
 		[[ $callPgmName == $loaderArgs ]] && unset loaderArgs || loaderArgs=$(cut -d' ' -f2- <<< $loaderArgs)
 	fi
 	# fastDump callPgmName loaderArgs
-	# prtStatus "Loader: ParseArgs"; sTime=$(date "+%s")
 
 #==================================================================================================
 # MAIN
@@ -148,19 +131,6 @@ function CleanUp {
 ## Add our Java to the front of the user's path
 	savePath="$PATH"
 	export PATH="$TOOLSPATH/java/bin:$PATH"
-
-# ## Set the CLASSPATH 
-# 	sTime=$(date "+%s")
-# 	saveClasspath="$CLASSPATH"
-# 	searchDirs="${TOOLSPATH}/jars"
-# 	[[ $useDev == true || $useLocal == true ]] && [[ -d "$HOME/tools/jars" ]] && searchDirs="$HOME/tools/jars $searchDirs "
-# 	unset CLASSPATH
-# 	for searchDir in $searchDirs; do
-# 		for classpath in ${classpath[@]}; do
-# 			[[ -f "${searchDir}/${classpath}" ]] && CLASSPATH="${CLASSPATH}:${searchDir}/${classpath}"
-# 		done
-# 	done
-# 	export CLASSPATH="$CLASSPATH"
 
 ## Initialize the runtime environment
 	TERM=${TERM:-dumb}
@@ -198,13 +168,11 @@ function CleanUp {
 
 ## Import things we need to continue
 	source "$TOOLSPATH/lib/Import.sh"
-	# sTime=$(date "+%s")
 	Import "$loaderIncludes"
-	# prtStatus ", Imports"; sTime=$(date "+%s")
 	SetFileExpansion
 
 ## Load tools defaults value
-	[[ ToolsDefaultsLoaded != true ]] && { SetDefaults; } # prtStatus ", GetDefaults"; sTime=$(date "+%s"); }
+	[[ ToolsDefaultsLoaded != true ]] && { SetDefaults; }
 
 ## Set forking limit
 	maxForkedProcesses=$maxForkedProcessesPrime
@@ -246,8 +214,6 @@ function CleanUp {
 ## If sourced then just return
 	[[ $viaCron == true ]] && return 0
 
-	# prtStatus ", Customizations"; sTime=$(date "+%s")
-
 ## Resolve the script file to run
 	## Were we passed in a fully qualified file name
 	if [[ ${callPgmName:0:1} == '/' ]]; then
@@ -265,17 +231,11 @@ function CleanUp {
 			[[ $callPgmName != 'testsh' ]] && { echo; echo; Terminate "$checkMsg"; }
 		fi
 	fi
-	# prtStatus ", CheckRun"; sTime=$(date "+%s")	
 
 ## Check Auth
 	rc=0
 	[[ $callPgmName != "courseleafPatch" ]] && { CallC toolsAuthCheck "$callPgmName"; rc=$?; }
 	[[ $rc -ne 0 ]] && exit -1
-
-	# CheckAuth "$callPgmName"
-	# # dump UsersAuthGroups UsersScriptsStr;
-	# # echo "UsersScripts:"; for ((xx=0; xx<${#UsersScripts[@]}; xx++)); do echo -e "\tUsersScripts[$xx] = >${UsersScripts[$xx]}<"; done;
-	# prtStatus ", CheckAuth"; sTime=$(date "+%s")	
 
 ## Check semaphore
 	[[ $(Contains ",$setSemaphoreList," ",$callPgmName," ) == true ]] && semaphoreId=$(CheckSemaphore "$callPgmName" "$waitOn")
@@ -283,7 +243,6 @@ function CleanUp {
 ## Resolve the executable file"
 	[[ -z $executeFile ]] && executeFile=$(FindExecutable "$callPgmName")
 	[[ -z $executeFile || ! -r $executeFile ]] && { echo; echo; Terminate "$myName.sh.$LINENO: Could not resolve the script source file:\n\t$executeFile"; }
-	# prtStatus ", FindExec"; sTime=$(date "+%s")
 
 ## Call the script
 	## Initialize the log file
@@ -306,14 +265,12 @@ function CleanUp {
 			Msg >> $logFile
 		fi
 
-	# prtStatus ", LogFile"; sTime=$(date "+%s")
 	## Call program function
 		myName="$(cut -d'.' -f1 <<< $(basename $executeFile))"
 		myPath="$(dirname $executeFile)"
 		declare -A clientData
 		## Strip off first token if it is $myName
 		[[ $loaderArgs == $myName ]] && unset loaderArgs || loaderArgs="${loaderArgs#$myName }"
-		# prtStatus ", Calling"; echo
 		[[ $batchMode != true && $myQuiet != true ]] && echo
 		TrapSigs 'off'
 		trap "CleanUp" EXIT ## Set trap to return here for cleanup
@@ -541,3 +498,4 @@ function CleanUp {
 ## 06-07-2019 @ 09:32:02 - 1.6.30 - dscudiero - 
 ## 06-07-2019 @ 09:46:21 - 1.6.30 - dscudiero - 
 ## Fri Jun  7 10:39:08 CDT 2019 - dscudiero - Sync
+## 06-07-2019 @ 14:25:40 - 1.6.31 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
