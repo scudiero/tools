@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.1.41" # -- dscudiero -- Mon 03/04/2019 @ 14:23:30
+version="2.1.42" # -- dscudiero -- Fri 06/07/2019 @ 10:02:32
 #=======================================================================================================================
 # Cron task initiator
 #=======================================================================================================================
@@ -54,7 +54,8 @@ originalArgStr="$*"
 #=======================================================================================================================
 ## Run the executable(s)
 	#export USEDEV=true
-	executeFile=$(FindExecutable "$callScriptName" '-cron -useLocal')
+	# executeFile=$(FindExecutable "$callScriptName" '-cron -useLocal')
+	executeFile=$(FindExecutable "$callScriptName" '-cron')
 	echo -e "\t-- $hostName - Starting $callScriptName from '$executeFile', Args: $scriptArgs $callScriptArgs" >> $TOOLSPATH/Logs/cronJobs/cronJobs.log
 	echo -e "\n$(date) -- Calling script '$callScriptName':\n\t$executeFile $callScriptArgs\n" > "$logFile"
 	data="$(dropbox -q list)"; data="${data##* }"
