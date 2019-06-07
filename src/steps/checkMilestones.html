@@ -20,7 +20,7 @@
 	//============================================================================================================
 	var debug=false;
 	var age=5;
-	var testAddr="dscudiero@leepfrog.com"
+	var testAddr="";
 
 	//============================================================================================================
 	//Parse Arguments
@@ -128,20 +128,22 @@
 			};
 
 			emailListHashKeys.forEach(function(key) {
+				var bodyText="";
 				var tmpArray=[]; 
 				if (debug) print_debug("key = " + key + "\n");
 				if (debug) print_debug("\temailListHash[" + key + "] = " + emailListHash[key].toSource() + "\n");
 				tmpArray=key.split("/");
+				postData.fname = key.split("/")[0].split(" ")[0];
+				postData.lname = key.split("/")[0].split(" ")[1];
 				if (debug) {
 					postData.email = testAddr;
+					bodyText="\nTestAddr is set, email would have been sent to: " + postData.fname + " " + postData.lname + " ("+ key.split("/")[1] + ")\n";
 				} else {
 					postData.email = key.split("/")[1];
 				}				
-				postData.fname = key.split("/")[0].split(" ")[0];
-				postData.lname = key.split("/")[0].split(" ")[1];
 
-				var bodyText="";
-				bodyText ="\nThe following milestones for clients that you manage are overdue or have pending completions in " + age + " days:\n";
+
+				bodyText +="\nThe following milestones for clients that you manage are overdue or have pending completions in " + age + " days:\n";
 				bodyText += "(negative number indicates past due)\n\n";
 				tmpArray=[]; tmpArray.push(emailListHash[key]);
 				tmpArray.forEach(function(milestones) {
