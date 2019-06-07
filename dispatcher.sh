@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #===================================================================================================
-version="1.5.40" # -- dscudiero -- Tue 12/04/2018 @ 08:42:04
+version="1.5.41" # -- dscudiero -- Fri 06/07/2019 @ 14:19:57
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -90,11 +90,12 @@ function fastDump {
 	loaderDir="$TOOLSPATH"
 	unset USEDEV USELOCAL
 	if [[ $useLocal == true || $useDev == true ]]; then
-		[[ $useLocal == true && $useDev == true ]] && unset useDev
 		if [[ $useDev == true && -r "$TOOLSDEVPATH" ]]; then
 			loaderDir="$TOOLSDEVPATH"
-		elif [[ $useLocal == true && -r $HOME/tools/loader.sh  ]]; then
+		elif [[ $useLocal == true && -r $HOME/tools/loader.sh ]]; then
 			loaderDir="$HOME/tools"
+		elif [[ $useLocal == true && -r $HOME/toolsNew/loader.sh ]]; then
+			loaderDir="$HOME/toolsNew"
 		fi
 		[[ -d "$loaderDir/lib" ]] && export TOOLSLIBPATH="$loaderDir/lib:$TOOLSLIBPATH"
 		[[ -d "$loaderDir/src" ]] && export TOOLSSRCPATH="$loaderDir/src:$TOOLSSRCPATH"
@@ -160,3 +161,4 @@ exit
 ## 05-10-2018 @ 14:59:31 - 1.5.36 - dscudiero - Comment out fastdump
 ## 05-24-2018 @ 08:49:37 - 1.5.39 - dscudiero - Remove code that edits out the loadPgm name ~ 109
 ## 12-04-2018 @ 08:42:27 - 1.5.40 - dscudiero - Regress last change
+## 06-07-2019 @ 14:21:34 - 1.5.41 - dscudiero -  Add toolsNew to the useLocal search list
