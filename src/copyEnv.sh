@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.14.57" # -- dscudiero -- Thu 05/23/2019 @ 13:20:13
+version="4.14.59" # -- dscudiero -- Tue 06/11/2019 @ 12:13:04
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions SetSiteDirsNew"
@@ -346,7 +346,7 @@ dump -1 skipCim skipCat skipClss skipAlso
 			[[ ${keepDirsHash["$dir"]+abc} ]] && continue
 			ignoreList="$ignoreList,$dir"
 		done
-		ignoreList="$ignoreList,/production-shared,/web/shared,/web/$progDir/production/"
+		ignoreList="$ignoreList,/production-shared,/web/shared,/web/$progDir/production/,/web/gallery"
 		SetFileExpansion
 	fi
 
@@ -365,6 +365,7 @@ dump -1 skipCim skipCat skipClss skipAlso
 		ignoreList="$ignoreList,/bin/clssimport-log-archive/"
 		ignoreList="$ignoreList,/web/$progDir/wen/"
 		ignoreList="$ignoreList,/web/wen/"
+		ignoreList="$ignoreList,/web/gallery"
 		SetFileExpansion
 	fi
 
@@ -790,3 +791,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 04-25-2019 @ 15:45:49 - 4.14.55 - dscudiero -  Force setting of the targetDir, switch back to origional SetSiteDirs
 ## 05-07-2019 @ 06:51:15 - 4.14.56 - dscudiero -  Fix problem with the debug option going to the wrong env
 ## 05-23-2019 @ 13:20:35 - 4.14.57 - dscudiero -  Add alert if -debug option was specified
+## 06-11-2019 @ 12:13:08 - 4.14.59 - dscudiero -  Added /web/gallery to the ignore list if skipCat = true
