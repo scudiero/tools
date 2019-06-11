@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.6.14" // -- dscudiero -- Wed 04/17/2019 @ 10:06:55
+// version="1.6.22" // -- dscudiero -- Tue 06/11/2019 @ 10:09:54
 //==================================================================================================
 #include <stdlib.h>
 #include <unistd.h>
@@ -13,9 +13,9 @@
 #include <sstream>
 #include <sys/stat.h>
 #include <mysql.h>
-#include <boost/algorithm/string.hpp>
+// #include <boost/algorithm/string.hpp>
 #include <toolsUtils.h>
-
+#include<bits/stdc++.h>
 
 using namespace std;
 
@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
 				    		Debug(2,"\t\tsiteDir: " + siteDir, verboseLevel);
 
 	 						string tmpStr = env + "Dir=\"" + siteDir + "\"\n";
-	 						Debug(2,"\t\ttmpStr: " + tmpStr, verboseLevel);
+	 						Debug(2,"\t\t\ttmpStr: " + tmpStr, verboseLevel);
 			     			write(3, tmpStr.c_str(), tmpStr.size());
 						}
 					}
@@ -109,11 +109,17 @@ int main(int argc, char *argv[]) {
 
 		// Check to see if we have a pvt site, only on unix
 		if (getOsName() == "Unix") {
+			Debug(2,"\t\tenv: pvt", verboseLevel);
 			// Get the dev servers
 				std::string hostName = exec("/bin/hostname");
 				hostName.erase(std::remove(hostName.begin(), hostName.end(), '\n'), hostName.end());
 				std::vector<std::string> splittedStrings=split(hostName, '.');
 				hostName=splittedStrings[0];
+
+				// secondary envs to check created by 'cpclsite'
+				std::vector <string> prodEnvsToCheck;
+				prodEnvsToCheck.push_back("test");
+				prodEnvsToCheck.push_back("next");
 
 				// Can't seem to run second sql query so just set the devServer string based on the host name
 				string devServers="";
@@ -123,45 +129,39 @@ int main(int argc, char *argv[]) {
 					devServers="dev6,dev11";
 				}
 
-				// sqlStmt = "select value from " + defaultsTable + " where name =\"devServers\" and host=\"" + hostName + "\"";
-		  		// Dump(2,"\tsqlStmt 2",sqlStmt,verboseLevel);
-				// mysqlStatus = mysql_query( MySQLConnection, sqlStmt.c_str());
-				// if (mysqlStatus) {
-				//     throw FFError( (char*)mysql_error(MySQLConnection) );
-				//     return -1;
-				// } else {
-				//     mysqlResult = mysql_store_result(MySQLConnection); // Get the Result Set
-				// }
-
-				// string devServers="";
-				// if (mysqlResult) {
-				//      numRows = mysql_num_rows(mysqlResult);
-				// 		if (numRows > 0) {
-				// 			mysqlRow = mysql_fetch_row(mysqlResult);
-				// 			devServers=mysqlRow[0];
-				// 		}
-				// } else {
-				// 	std::cout << "Could not retrieve devServers, sqlStmt = \n\t" + sqlStmt +"\n";
-				//    	return -1;
-				// }
-		  		// Dump(2,"\tdevServers",devServers,verboseLevel);
-
 			if (devServers != "") {
 				string userName = exec("/usr/bin/logname");
 				userName.erase(std::remove(userName.begin(), userName.end(), '\n'), userName.end());
 				std::vector<std::string> splittedStrings=split(devServers, ',');
 				for(int i = 0; i < splittedStrings.size() ; i++) {
 					string server = splittedStrings[i];
+					// Check for tools format pvt site
 					string dir="/mnt/" + server + "/web/" + client + "-" + userName;
-		    		Dump(2,"\tdir",dir,verboseLevel);
+		    		Dump(2,"\t\tdir",dir,verboseLevel);
 					struct stat statbuf; 
 					if (stat(dir.c_str(), &statbuf) != -1) {
 					   if (S_ISDIR(statbuf.st_mode)) {
 	 						string tmpStr = "pvtDir=\"" + dir + "\"\n";
+	 						Dump(2,"\t\t\ttmpStr",tmpStr,verboseLevel);
 			     			write(3, tmpStr.c_str(), tmpStr.size());
+			     			return 0;
 					   }
-					}
-				}	
+					}					
+					// Check for 'cplclsite' pvt site
+    				for (int j=0; j<prodEnvsToCheck.size(); j++) {
+    					string dir="/mnt/" + server + "/web/" + client + "-" + prodEnvsToCheck[j] + "-" + userName;
+		    			Dump(2,"\t\tdir",dir,verboseLevel);
+						struct stat statbuf; 
+						if (stat(dir.c_str(), &statbuf) != -1) {
+						   if (S_ISDIR(statbuf.st_mode)) {
+		 						string tmpStr = "pvtDir=\"" + dir + "\"\n";
+		 						Dump(2,"\t\t\ttmpStr",tmpStr,verboseLevel);
+				     			write(3, tmpStr.c_str(), tmpStr.size());
+				     			return 0;
+						   }
+						}
+    				}
+				}
 			}
 		} //(getOsName() == "Unix")
 
@@ -169,7 +169,9 @@ int main(int argc, char *argv[]) {
 } // main
 //=================================================================================================================
 // Check-in log
-//=================================================================================================================// 01-29-2019 @ 11:28:24 - 1.5.88 - dscudiero - Remove extra '{'
+//=================================================================================================================
+// 01-29-2019 @ 11:28:24 - 1.5.88 - dscudiero - Remove extra '{'
 // 03-06-2019 @ 08:13:18 - 1.5.93 - dscudiero - Add/Remove debug statements
 // 03-06-2019 @ 08:28:23 - 1.5.94 - dscudiero - Removed extrea '/' leading the pvtDir setting
 // 04-17-2019 @ 10:10:03 - 1.6.14 - dscudiero -  Fix to the code that finds the pvt directory, removed the sql query for devServers, seems like you can only do a single query in a program.
+// 06-11-2019 @ 10:15:05 - 1.6.22 - dscudiero -  Update the logic that searches for the pvt site to also look for cpclsite syntax pvt sites
