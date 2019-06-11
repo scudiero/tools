@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.21" # -- dscudiero -- Fri 06/07/2019 @ 07:30:36
+version="1.23.22" # -- dscudiero -- Tue 06/11/2019 @ 14:14:09
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -243,17 +243,30 @@ case "$hostName" in
 					client="${line%% *}"; line="${line#* }"
 					csm="${line%% *}"; line="${line#* }"
 					date="${line%% *}"; line="${line#* }"
-
-					# if [[ ! -d "$HOME/clientData/${client,,[a,z]}" ]]; then
-						echo "*** Warning ***" > "$tmpFile"
+					## Calculate the elapsed hours 
+					elap="$(CalcElapsed  $(date +"%s") $(date -d "$date" +"%s") )"
+					elaph="${elap%% *}"; elaph="${elaph//h/}";
+					## If less than 5 days (120 hrs) then error
+					echo "" > "$tmpFile"
+					if [[ $elaph -le 120 ]]; then
+						echo "*** ERROR ERROR ERROR ***" >> "$tmpFile"
 						echo "A workflow client review meeting, '$line', has been scheduled with $client on ${date}." >> "$tmpFile"
 						echo "No workflow specifications have been received for this client so an audit and initial workflow has not been completed." >> "$tmpFile"
 						echo "Specifications must be received at least 5 business days before the client meeting." >> "$tmpFile"
-						echo "Should specifications not be provided, said meeting will be canceled on the Monday of the week that the meeting was scheduled" >> "$tmpFile"
+						echo "This meeting will NOT be attended by the workflow team" >> "$tmpFile"
 						echo "" >> "$tmpFile"
 						echo "Note: This is an automated emailing, no need to reply" >> "$tmpFile"
-						mutt -s "Workflow meeting scheduled with $client without specs" -- ${csm}@leepfrog.com,dscudiero@leepfrog.com < $tmpFile;
-					# fi
+						mutt -s "*** ERROR *** workflow meeting with '%client' canceled" -- ${csm}@leepfrog.com,dscudiero@leepfrog.com < $tmpFile;
+					else
+						echo "*** WARNING ***" >> "$tmpFile"
+						echo "A workflow client review meeting, '$line', has been scheduled with $client on ${date}." >> "$tmpFile"
+						echo "No workflow specifications have been received for this client so an audit and initial workflow has not been completed." >> "$tmpFile"
+						echo "Specifications must be received at least 5 business days before the client meeting." >> "$tmpFile"
+						echo "This meeting will be canceled on the Monday of the week that the meeting was scheduled" >> "$tmpFile"
+						echo "" >> "$tmpFile"
+						echo "Note: This is an automated emailing, no need to reply" >> "$tmpFile"
+						mutt -s "*** WARNING *** A client workflow meeting scheduled with $client without specs" -- ${csm}@leepfrog.com,dscudiero@leepfrog.com < $tmpFile;
+					fi				
 				done < "$HOME/clientData/meetings.txt"
 			fi
 
@@ -522,3 +535,4 @@ return 0
 ## 05-16-2019 @ 07:26:58 - 1.23.16 - dscudiero -  -
 ## 05-21-2019 @ 06:59:48 - 1.23.18 - dscudiero -  Remove data warehouse etl stuff
 ## 06-06-2019 @ 11:35:33 - 1.23.19 - dscudiero -  add call tp checkMilestones step
+## 06-11-2019 @ 14:14:47 - 1.23.22 - dscudiero -  Update the meeting.txt checking to issue an error if within the 5 day window.
