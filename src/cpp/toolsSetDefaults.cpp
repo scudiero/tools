@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.0.36" // -- dscudiero -- Tue 06/11/2019 @ 16:29:02
+// version="1.0.37" // -- dscudiero -- Tue 06/11/2019 @ 16:33:49
 //==================================================================================================
 #include <stdlib.h>
 #include <string>		// String utility library
@@ -201,7 +201,7 @@ int main(int argc, char *argv[]) {
 										std::cout << allowList.substr(0,loc) + "=\"" + allowList.substr(loc+1) + "\"\n";
 									std::cout << "allowList=\"" + allowList + "\"\n";
 
-									if (mysqlRow[7] != NULL) emailAddrs = mysqlRow[6];
+									if (mysqlRow[7] != NULL) emailAddrs = mysqlRow[7];
 									dump("emailAddrs",emailAddrs,debug);
 									loc = emailAddrs.find(":",0);
 									if (loc > 0)
@@ -230,3 +230,4 @@ int main(int argc, char *argv[]) {
 // 05-24-2019 @ 11:58:28 - 1.0.25 - dscudiero -  Tweak sql query again to include rows that have os and host null
 // 05-24-2019 @ 13:55:37 - 1.0.26 - dscudiero -  change hard coded hostname to variable
 // 06-11-2019 @ 16:29:55 - 1.0.36 - dscudiero -  Fix bug parsing off emailAddrs
+// 06-11-2019 @ 16:34:24 - 1.0.37 - dscudiero -  Fix problem parsing emailAddrs
