@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.14.59" # -- dscudiero -- Tue 06/11/2019 @ 12:13:04
+version="4.14.64" # -- dscudiero -- Tue 06/11/2019 @ 14:51:27
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions SetSiteDirsNew"
@@ -346,7 +346,16 @@ dump -1 skipCim skipCat skipClss skipAlso
 			[[ ${keepDirsHash["$dir"]+abc} ]] && continue
 			ignoreList="$ignoreList,$dir"
 		done
-		ignoreList="$ignoreList,/production-shared,/web/shared,/web/$progDir/production/,/web/gallery"
+		ignoreList="$ignoreList,/production-shared"
+		ignoreList="$ignoreList,/web/shared"
+		ignoreList="$ignoreList,/web/$progDir/production/"
+		ignoreList="$ignoreList,/web/gallery"
+		ignoreList="$ignoreList,/db/tcfdb.sqlite"
+		ignoreList="$ignoreList,/web/$progDir/focussearch/"
+		ignoreList="$ignoreList,/web/$progDir/pdf/"
+		ignoreList="$ignoreList,/web/$progDir/pdftemp/"
+		ignoreList="$ignoreList,/web/$progDir/scribstart/"
+		ignoreList="$ignoreList,/web/wiztest/"
 		SetFileExpansion
 	fi
 
@@ -366,6 +375,12 @@ dump -1 skipCim skipCat skipClss skipAlso
 		ignoreList="$ignoreList,/web/$progDir/wen/"
 		ignoreList="$ignoreList,/web/wen/"
 		ignoreList="$ignoreList,/web/gallery"
+		ignoreList="$ignoreList,/db/tcfdb.sqlite"
+		ignoreList="$ignoreList,/web/$progDir/focussearch/"
+		ignoreList="$ignoreList,/web/$progDir/pdf/"
+		ignoreList="$ignoreList,/web/$progDir/pdftemp/"
+		ignoreList="$ignoreList,/web/$progDir/scribstart/"
+		ignoreList="$ignoreList,/web/wiztest/"
 		SetFileExpansion
 	fi
 
@@ -792,3 +807,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 05-07-2019 @ 06:51:15 - 4.14.56 - dscudiero -  Fix problem with the debug option going to the wrong env
 ## 05-23-2019 @ 13:20:35 - 4.14.57 - dscudiero -  Add alert if -debug option was specified
 ## 06-11-2019 @ 12:13:08 - 4.14.59 - dscudiero -  Added /web/gallery to the ignore list if skipCat = true
+## 06-11-2019 @ 14:53:04 - 4.14.64 - dscudiero -  Add additional items to the ignorelist for ignorecat and ignoreclss
