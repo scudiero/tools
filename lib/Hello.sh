@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.0.59" # -- dscudiero -- Mon 04/01/2019 @ 11:05:57
+# version="2.0.74" # -- dscudiero -- Wed 06/12/2019 @ 16:17:41
 #===================================================================================================
 # Common script start messaging
 #===================================================================================================
@@ -47,10 +47,17 @@ function Hello {
 	[[ $userName != $checkName ]] && Msg "$(ColorW "*** Running as user $userName ***")"
 
 	[[ $batchMode != true ]] && echo
+
 	## Log Start in process log database
 		if [[ $noLogInDb != true ]]; then
 			myLogRecordIdx=$(ProcessLogger 'Start' "$myName")
 			ProcessLogger 'Update' $myLogRecordIdx 'argString' "$originalArgStr"
+		fi
+
+	## If testMode then run local customizations
+		if [[ $testMode == true ]]; then
+			[[ $(Contains ",$administrators," ",$userName,") != true ]] && Terminate "Sorry, you do not have sufficient permissions to run this script in 'testMode'"
+			[[ $(type -t ${myName}-testMode) == 'function' ]] && { ${myName}-testMode; }
 		fi
 
 	# ## Display script and tools news
@@ -89,3 +96,4 @@ export -f Hello
 ## 11-06-2018 @ 07:42:00 - 2.0.56 - dscudiero - Add not supported message
 ## 12-27-2018 @ 07:21:29 - 2.0.57 - dscudiero - Comment out displaying news
 ## 04-01-2019 @ 11:06:11 - 2.0.59 - dscudiero - Tweak messaging
+## 06-12-2019 @ 16:21:05 - 2.0.74 - dscudiero -  Fix problem calling the testMode callback function
