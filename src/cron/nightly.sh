@@ -537,3 +537,4 @@ return 0
 ## 06-06-2019 @ 11:35:33 - 1.23.19 - dscudiero -  add call tp checkMilestones step
 ## 06-11-2019 @ 14:14:47 - 1.23.22 - dscudiero -  Update the meeting.txt checking to issue an error if within the 5 day window.
 ## 06-12-2019 @ 16:24:16 - 1.23.23 - dscudiero -  Add escrowSites call
+## 06-12-2019 @ 16:29:59 - 1.23.23 - dscudiero - 
