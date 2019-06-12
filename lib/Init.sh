@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="2.2.5" # -- dscudiero -- Mon 07/16/2018 @ 11:18:43
+# version="2.2.7" # -- dscudiero -- Wed 06/12/2019 @ 15:01:13
 #===================================================================================================
 # Standard initializations for Courseleaf Scripts
 # Parms:
@@ -305,9 +305,8 @@ function Init {
 	#===================================================================================================
 	## If testMode then run local customizations
 		if [[ $testMode == true ]]; then
-			[[ $(Contains ",$adminUsers," ",$userName,") != true ]] && Terminate "Sorry, you do not have sufficient permissions to run this script in 'testMode'"
-			[[ $(type -t testmode-$myName) == 'function' ]] && testMode-$myName
-			[[ $(type -t testmode-$myName) == 'function' ]] && testMode-$myName
+			[[ $(Contains ",$administrators," ",$userName,") != true ]] && Terminate "Sorry, you do not have sufficient permissions to run this script in 'testMode'"
+			[[ $(type -t ${myName}-testMode) == 'function' ]] && ${myName}-testMode
 		fi
 
 	PopSettings "$FUNCNAME"
@@ -384,3 +383,4 @@ export -f Init
 ## 07-16-2018 @ 11:29:24 - 2.2.5 - dscudiero - Update auth to take into account that the auth groups are now prefixed by the groupId
 ## 07-16-2018 @ 12:38:44 - 2.2.5 - dscudiero - When checking to see if the user is in the support group, add the groupid
 ## 04-05-2019 @ 11:57:19 - 2.2.5 - dscudiero - 
+## 06-12-2019 @ 16:21:33 - 2.2.7 - dscudiero -  Fix problem when calling the testMode callback function
