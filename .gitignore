@@ -2,8 +2,8 @@
 *
 !.gitignore
 !.gitattributes
-!/src/*
-!/lib/*
+!/src/
+!/lib/
 !bootData
 !dispatcher.sh
 !loader.sh
