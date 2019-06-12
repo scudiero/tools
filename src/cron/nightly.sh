@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.22" # -- dscudiero -- Tue 06/11/2019 @ 14:14:09
+version="1.23.23" # -- dscudiero -- Wed 06/12/2019 @ 16:23:51
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -354,7 +354,7 @@ case "$hostName" in
 		# 	fi
 
 		## Run programs/functions
-			pgms=("cleanDev -daemon")
+			pgms=("cleanDev -daemon" escrowSites)
 			# pgms=("buildSiteInfoTable" "cleanDev -daemon")
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
@@ -536,3 +536,4 @@ return 0
 ## 05-21-2019 @ 06:59:48 - 1.23.18 - dscudiero -  Remove data warehouse etl stuff
 ## 06-06-2019 @ 11:35:33 - 1.23.19 - dscudiero -  add call tp checkMilestones step
 ## 06-11-2019 @ 14:14:47 - 1.23.22 - dscudiero -  Update the meeting.txt checking to issue an error if within the 5 day window.
+## 06-12-2019 @ 16:24:16 - 1.23.23 - dscudiero -  Add escrowSites call
