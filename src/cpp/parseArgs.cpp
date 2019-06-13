@@ -305,3 +305,4 @@ int main(int argc, char *argv[]) {
 // 04-05-2019 @ 11:52:12 - 1.1.18 - dscudiero - Add the expandEnv directive
 // 04-16-2019 @ 15:05:25 - 1.1.23 - dscudiero -  Add mapToEnv processing
 // 04-19-2019 @ 10:02:11 - 1.1.29 - dscudiero -  Fix problem parsing option arguments that do not have a scriptCommand defined
+// 06-13-2019 @ 08:59:51 - 1.1.29 - dscudiero - 
