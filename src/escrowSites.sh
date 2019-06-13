@@ -1,29 +1,16 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.0.3" # -- dscudiero -- Thu 06/13/2019 @ 07:19:24
+version="1.0.32" # -- dscudiero -- Thu 06/13/2019 @ 09:45:19
+#=======================================================================================================================
+# Copyright 2019 David Scudiero -- all rights reserved.
+# All rights reserved
 #=======================================================================================================================
 #= Description #========================================================================================================
-# Excrow courseleaf sites
-#	1) Tar up the next, curr, test
-#	2) If a password was supplied with the client data the resultant tar file from #1 will be encrypted
-#	3) Notifications are sent out
-#
-# Usage: escrowSites -siteList <sitesList> -emailList <emailList>
-#	sitesList - A comma separated list of clientCodes[/password], if not supplied it will use the list defined in the defaults 
-#				data warehouse table for variable 'escrowClients'
-#	emailList - A comma separated list of email addresses, if not supplied it will use the list defined in the defaults 
-#				data warehouse table for variable 'escrowEmailAddrs'
-#
-# Script MUST be run on each host where sites are located
-#
-#	e.g. escrowSites -siteList "site1/passcode1,site2/passcpde2" -emailList "user@leepfrog.com,user2@leepfrog.com"
-#
+# Escrow courseleaf sites
+# See escrowSites -Help
 #=======================================================================================================================
 function Main {
-
-dump sendMail emailList -q
-
  	Msg > $tmpFile
  	Msg $(date) >> $tmpFile
  	Msg >> $tmpFile
@@ -102,7 +89,21 @@ function escrowSites-Goodbye  {
 }
 
 function escrowSites-Help  {
-	return 0
+	Msg "^Escrow courseleaf sites"
+	Msg "^	1) Tar up the next, curr, test"
+	Msg "^	2) If a password was supplied with the client data the an additional encrypted file will be created"
+	Msg "^	3) Notifications are sent out"
+	Msg
+	Msg "^- If 'siteList' is not supplied it will use the list defined in the"
+	Msg "^^data warehouse ($warehouseDbHost / $warehouseDbName)  'defaults' table for variable 'escrowClients'"
+	Msg "^^^i.e. '$escrowClients'"
+	Msg "^- If 'emailList' is not supplied it will use the list defined in the 'defaults'"
+	Msg "^^data warehouse ($warehouseDbHost / $warehouseDbName)  'defaults' table for variable 'escrowEmailAddrs'"
+	Msg "^^^i.e. '$escrowEmailAddrs'"
+	Msg
+	Msg "^*** The script MUST be run on the host where the sites are located"
+	Msg
+	Msg "^E.g. escrowSites -siteList \"site1/passcode1,site2/passcpde2\" -emailList \"user@leepfrog.com,user2@leepfrog.com\""
 }
 
 function escrowSites-testMode  { # or testMode-local
@@ -119,8 +120,8 @@ function Initialization {
 	# Standard arg parsing and initialization
 	#=======================================================================================================================
 	SetDefaults $myName
-	myArgs="clientList|clientList|option|clientList|;"
-	myArgs+="emailList|emailList|option|emailList|;"
+	myArgs="clientList|clientList|option|clientList|A comma separated list of clientCodes[/password];"
+	myArgs+="emailList|emailList|option|emailList|A comma separated list of email addresses;"
 	export myArgs="$myArgs"
 	ParseArgs $*
 
@@ -129,10 +130,15 @@ function Initialization {
 	[[ -z $sitesList ]] && Terminate "No sites were supplied on call"
 	sendMail=true
 
-	tmpFile=$(MkTmpFile $FUNCNAME)
+	tmpFile=$(MkTmpFile $myName)
 	tarDir="$courseleafEscrowedSitesDir"
+
 	SetFileExpansion -off
-	tarOpts="-uf -exclude *.git* -exclude *.gz -exclude *.bak -exclude *.old -exclude *Copy* -exclude RECOVERED-* -exclude RESTORED-*"
+	excludes="*.git* *.gz *.bak *.old *-Copy* RECOVERED-* RESTORED-* */attic"
+	tarOpts="-uf"
+	for exclude in $excludes; do
+		tarOpts="$tarOpts -exclude $exclude"
+	done
 	SetFileExpansion
 
 	gpgOpts="--yes --batch --symmetric -z 9 --require-secmem --cipher-algo AES256"
@@ -144,11 +150,17 @@ function Initialization {
 
 #============================================================================================================================================
 TrapSigs 'on'
-myIncludes="Hello SetSiteDirsNew PromptNew MkTmpFile PushPop SetFileExpansion"
+myIncludes="$standardInteractiveIncludes SetSiteDirsNew PushPop SetFileExpansion HelpNew"
 Import $myIncludes
 
 Initialization $*
 Hello
+
+if [[ $batchMode != true ]]; then
+	verifyMsg="You are asking to create escrow files for: '$sitesList'"
+	VerifyContinue "$verifyMsg"
+fi
+
 Main $ArgStrAfterInit
 
 Goodbye
@@ -157,3 +169,4 @@ Goodbye
 ## Check-in log
 #============================================================================================================================================
 ## 06-13-2019 @ 07:19:53 - 1.0.3 - dscudiero -  Add exclude items to the tar call
+## 06-13-2019 @ 09:48:59 - 1.0.32 - dscudiero -  Updated help module Adde -excludes to the tar call Added verify if not running in batch mode
