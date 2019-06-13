@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.20" # -- dscudiero -- Thu 06/13/2019 @ 08:59:07
+# version="3.0.21" # -- dscudiero -- Thu 06/13/2019 @ 09:04:40
 #===================================================================================================
 # Display script help -- passed an array of argument definitinons, see ParseArg function
 #===================================================================================================
@@ -52,9 +52,6 @@ function Help {
 				Msg "$text"
 			done
 			echo
-		else
-			[[ $(type -t $FUNCNAME-$myName) == 'function' ]] && $FUNCNAME-$myName
-			[[ $(type -t $myName-$FUNCNAME) == 'function' ]] && $myName-$FUNCNAME
 		fi
 		[[ $author != '' ]] && Msg "$(ColorK "Author:") $author"
 		[[ $supported != '' ]] && Msg "$(ColorK "Supported:") $supported"
@@ -234,4 +231,4 @@ export -f Help
 ## 07-23-2018 @ 15:30:26 - 3.0.6 - dscudiero - Comment out the restricteduser stuff
 ## 06-13-2019 @ 08:12:06 - 3.0.8 - dscudiero -  Export new name
 ## 06-13-2019 @ 08:17:50 - 3.0.9 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
-## 06-13-2019 @ 08:59:47 - 3.0.20 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
+## 06-13-2019 @ 09:05:10 - 3.0.21 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
