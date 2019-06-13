@@ -1,13 +1,13 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.8" # -- dscudiero -- Thu 06/13/2019 @ 08:11:40
+# version="3.0.9" # -- dscudiero -- Thu 06/13/2019 @ 08:17:32
 #===================================================================================================
 # Display script help -- passed an array of argument definitinons, see ParseArg function
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-function Help2 {
+function HelpNew {
 	mode="${1-normal}"
 
 	includes='StringFunctions Colors'
@@ -228,3 +228,4 @@ export -f HelpNew
 ## 04-23-2018 @ 09:39:12 - 3.0.5 - dscudiero - Cosmetic/minor change/Sync
 ## 07-23-2018 @ 15:30:26 - 3.0.6 - dscudiero - Comment out the restricteduser stuff
 ## 06-13-2019 @ 08:12:06 - 3.0.8 - dscudiero -  Export new name
+## 06-13-2019 @ 08:17:50 - 3.0.9 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
