@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.0.0" # -- dscudiero -- Wed 06/12/2019 @ 16:30:16
+version="1.0.3" # -- dscudiero -- Thu 06/13/2019 @ 07:19:24
 #=======================================================================================================================
 #= Description #========================================================================================================
 # Excrow courseleaf sites
@@ -21,6 +21,9 @@ version="1.0.0" # -- dscudiero -- Wed 06/12/2019 @ 16:30:16
 #
 #=======================================================================================================================
 function Main {
+
+dump sendMail emailList -q
+
  	Msg > $tmpFile
  	Msg $(date) >> $tmpFile
  	Msg >> $tmpFile
@@ -104,6 +107,7 @@ function escrowSites-Help  {
 
 function escrowSites-testMode  { # or testMode-local
 	tmpFile="/dev/tty"
+	emailList="dscudiero@leepfrog.com"
 	return 0
 }
 
@@ -120,16 +124,16 @@ function Initialization {
 	export myArgs="$myArgs"
 	ParseArgs $*
 
-	Hello
-
 	[[ -z $sitesList ]] && sitesList="$escrowClients"
 	[[ -z $emailList ]] && emailList="$escrowEmailAddrs"
 	[[ -z $sitesList ]] && Terminate "No sites were supplied on call"
+	sendMail=true
 
 	tmpFile=$(MkTmpFile $FUNCNAME)
 	tarDir="$courseleafEscrowedSitesDir"
-
-	tarOpts="-uf"
+	SetFileExpansion -off
+	tarOpts="-uf -exclude *.git* -exclude *.gz -exclude *.bak -exclude *.old -exclude *Copy* -exclude RECOVERED-* -exclude RESTORED-*"
+	SetFileExpansion
 
 	gpgOpts="--yes --batch --symmetric -z 9 --require-secmem --cipher-algo AES256"
 	gpgOpts="$gpgOpts --s2k-cipher-algo AES256 --s2k-digest-algo SHA512 --s2k-mode 3 --s2k-count 65000000"
@@ -140,10 +144,11 @@ function Initialization {
 
 #============================================================================================================================================
 TrapSigs 'on'
-myIncludes="Hello SetSiteDirsNew PromptNew MkTmpFile PushPop"
+myIncludes="Hello SetSiteDirsNew PromptNew MkTmpFile PushPop SetFileExpansion"
 Import $myIncludes
 
 Initialization $*
+Hello
 Main $ArgStrAfterInit
 
 Goodbye
@@ -151,3 +156,4 @@ Goodbye
 #============================================================================================================================================
 ## Check-in log
 #============================================================================================================================================
+## 06-13-2019 @ 07:19:53 - 1.0.3 - dscudiero -  Add exclude items to the tar call
