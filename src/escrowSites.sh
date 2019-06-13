@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.0.39" # -- dscudiero -- Thu 06/13/2019 @ 11:20:31
+version="1.0.40" # -- dscudiero -- Thu 06/13/2019 @ 11:27:20
 #=======================================================================================================================
 # Copyright 2019 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -18,7 +18,6 @@ function Main {
 
  	## Loop through the clients and tar up the entire site
 	for token in $(tr ',' ' ' <<< $sitesList); do
-		dump -n token
  		## Parse off the encryption key from the client token
  		if ($(Contains "$token" '/') == true ); then
 	 		client="${token%%/*}"
@@ -27,14 +26,13 @@ function Main {
 	 		client="$token"
 	 		unset encryptionKey
 	 	fi
-		dump -t client encryptionKey
 
 		Msg "^Processing client: $client" >> $tmpFile
 		SetSiteDirsNew "$client"
 		[[ ! -d $tarDir ]] && $DOIT mkdir $tarDir
 		tarFile=$tarDir/$client@$(date +"%m-%d-%Y").tar
 		[[ -f $tarFile ]] && rm -f $tarFile
-		dump -1 tarFile
+
 		## tar up the next and curr sites	
 		if [[ -d $nextDir ]]; then
 			Pushd $(dirname $nextDir)
@@ -178,3 +176,4 @@ Goodbye
 ## 06-13-2019 @ 09:56:07 - 1.0.37 - dscudiero -  Check execution environment
 ## 06-13-2019 @ 11:12:19 - 1.0.38 - dscudiero -  Add logging in the activity log
 ## 06-13-2019 @ 11:20:41 - 1.0.39 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
+## 06-13-2019 @ 11:27:31 - 1.0.40 - dscudiero - Add/Remove debug statements
