@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.6" # -- dscudiero -- Mon 07/23/2018 @ 15:29:58
+# version="3.0.8" # -- dscudiero -- Thu 06/13/2019 @ 08:11:40
 #===================================================================================================
 # Display script help -- passed an array of argument definitinons, see ParseArg function
 #===================================================================================================
@@ -207,8 +207,8 @@ function Help2 {
 	fi
 
 	return 0
-} # Help
-export -f Help2
+} # HelpNew
+export -f HelpNew
 
 #===================================================================================================
 # Check-in Log
@@ -227,3 +227,4 @@ export -f Help2
 ## 03-23-2018 @ 16:52:17 - 3.0.5 - dscudiero - Msg3 -> Msg
 ## 04-23-2018 @ 09:39:12 - 3.0.5 - dscudiero - Cosmetic/minor change/Sync
 ## 07-23-2018 @ 15:30:26 - 3.0.6 - dscudiero - Comment out the restricteduser stuff
+## 06-13-2019 @ 08:12:06 - 3.0.8 - dscudiero -  Export new name
