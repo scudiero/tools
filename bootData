@@ -16,7 +16,7 @@ setSemaphoreList='buildSiteInfoTable,buildClientInfoTable'
 loaderIncludes='CallC Here Dump Pause Msg Semaphore FindExecutable PadChar CheckRun CheckAuth SignalHandeler'
 loaderIncludes="$loaderIncludes TrapSigs RunSql SetFileExpansion SetDefaults ParseArgs GetDefaultsData Colors Goodbye Alert"
 
-standardIncludes='ParseArgsStd Hello DbLog Init Goodbye Quit Help Help2 MkTmpFile'
+standardIncludes='ParseArgsStd Hello DbLog Init Goodbye Quit Help MkTmpFile'
 standardInteractiveIncludes="$standardIncludes PromptNew Prompt VerifyContinue"
 
 #unset classpath
