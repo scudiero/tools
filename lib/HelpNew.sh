@@ -1,20 +1,17 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.9" # -- dscudiero -- Thu 06/13/2019 @ 08:17:32
+# version="3.0.20" # -- dscudiero -- Thu 06/13/2019 @ 08:59:07
 #===================================================================================================
 # Display script help -- passed an array of argument definitinons, see ParseArg function
 #===================================================================================================
 # Copyright 2016 David Scudiero -- all rights reserved.
 # All rights reserved
 #===================================================================================================
-function HelpNew {
+function Help {
 	mode="${1-normal}"
 
 	includes='StringFunctions Colors'
 	Import "$includes"
-
-	[[ $(type -t $FUNCNAME-$myName) == 'function' ]] && $FUNCNAME-$myName 'setVarsOnly'
-	[[ $(type -t $myName-$FUNCNAME) == 'function' ]] && $myName-$FUNCNAME 'setVarsOnly'
 
 	local argShortName shortNamePad argLongName longNamePad argType typePad argVar argCmd arghelpText tmpStr
 
@@ -75,9 +72,10 @@ function HelpNew {
 		#dump result maxWidthName maxWidthAbbr maxWidthType -q
 
 	## If we have a myArgs array then check the script defined arguments to set max lengths
-		if [[ ${#myArgs[@]} -gt 0 ]]; then
-			for ((i=0; i<${#myArgs[@]}; i++)); do
-				tmpStr="${myArgs[$i]}"
+		if [[ -n $myArgs ]]; then
+			IFS=';' read -ra myArgsArray <<< "$myArgs"
+			for ((i=0; i<${#myArgsArray[@]}; i++)); do
+				tmpStr="${myArgsArray[$i]}"
 				argShortName="${tmpStr%%|*}"; tmpStr=${tmpStr#*|}; [[ ${#argShortName} -gt $maxWidthAbbr ]] && maxWidthAbbr=${#argShortName}
 				argLongName="${tmpStr%%|*}"; tmpStr=${tmpStr#*|}; [[ ${#argLongName} -gt $maxWidthName ]] && maxWidthName=${#argLongName}
 				argType="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; [[ ${#argType} -gt $maxWidthType ]] && maxWidthType=${#argType}
@@ -104,12 +102,12 @@ function HelpNew {
 	local argHeader="$(ColorK "${argLongName}$(PadChar ' ' $longNamePad) (${argShortName})$(PadChar ' ' $shortNamePad) ${argType}$(PadChar ' ' $typePad) -- Description")"
 
 	#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
-	if [[ ${#myArgs[@]} -gt 0 ]]; then
+	if [[ -n $myArgs ]]; then
 		Msg "^$(ColorU "$(ColorK "Script specific options:")")"
 		Msg "^$argHeader"
 		#myArgs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
-		for ((i=0; i<${#myArgs[@]}; i++)); do
-			tmpStr="${myArgs[$i]}"
+		for ((i=0; i<${#myArgsArray[@]}; i++)); do
+			tmpStr="${myArgsArray[$i]}"
 			argShortName="${tmpStr%%|*}"; tmpStr=${tmpStr#*|}; let shortNamePad=$maxWidthAbbr-${#argShortName};
 			argLongName="${tmpStr%%|*}"; tmpStr=${tmpStr#*|}; let longNamePad=$maxWidthName-${#argLongName};
 			argType="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; let typePad=$maxWidthType-${#argType};
@@ -154,6 +152,13 @@ function HelpNew {
 		echo
 	fi
 
+	## Script specific help notes
+	if [[ $(type -t ${myName}-testMode) == 'function' ]]; then
+		echo
+		Msg "$(ColorK "Script Notes:")"
+		${myName}-Help
+	fi
+
 	## General help notes for all scripts
 	echo
 	Msg "$(ColorK "General Notes:")"
@@ -165,7 +170,7 @@ function HelpNew {
 	notesAlways+=("All options $(ColorB "must") be delimited from other options by at lease one blank character.")
 	notesAlways+=("Options are processed in the order given above, script specific options are parsed before common options.")
 	notesAlways+=("All options of the type 'switch' may be specified as -shortName, alternately they may be specified as --longName.  Regular expression matching is used.")
-	notesAlways+=("All options of the type 'option' require a value to be passed, i.e. -option value.\n^   If the value contains blanks/spaces, the argument value needs to be enclosed in single quotes which need to be escaped on the command line, e.g. -file \'This is a File Name\'.")
+	notesAlways+=("All options of the type 'option' require a value to be passed, i.e. -option value.\n^   If the option value contains blanks/spaces, the argument value needs to be enclosed in single quotes which need to be escaped on the command line,\n^   e.g. -file \'This is a File Name\'.")
 	notesAlways+=("Options listed in the 'Common tools scripts options' section may not apply this specific script.")
 	notesAlways+=("To get additional help information on what is used by this script you can use the -hh option.")
 
@@ -207,8 +212,8 @@ function HelpNew {
 	fi
 
 	return 0
-} # HelpNew
-export -f HelpNew
+} # Help
+export -f Help
 
 #===================================================================================================
 # Check-in Log
@@ -229,3 +234,4 @@ export -f HelpNew
 ## 07-23-2018 @ 15:30:26 - 3.0.6 - dscudiero - Comment out the restricteduser stuff
 ## 06-13-2019 @ 08:12:06 - 3.0.8 - dscudiero -  Export new name
 ## 06-13-2019 @ 08:17:50 - 3.0.9 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
+## 06-13-2019 @ 08:59:47 - 3.0.20 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
