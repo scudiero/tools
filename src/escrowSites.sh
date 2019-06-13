@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.0.32" # -- dscudiero -- Thu 06/13/2019 @ 09:45:19
+version="1.0.37" # -- dscudiero -- Thu 06/13/2019 @ 09:55:41
 #=======================================================================================================================
 # Copyright 2019 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -149,6 +149,7 @@ function Initialization {
 } ## Initialization
 
 #============================================================================================================================================
+[[ -z $TOOLSPATH ]] && { echo -e "\n\t*Error* -- Insufficient execution environment\n"; exit; }
 TrapSigs 'on'
 myIncludes="$standardInteractiveIncludes SetSiteDirsNew PushPop SetFileExpansion HelpNew"
 Import $myIncludes
@@ -170,3 +171,4 @@ Goodbye
 #============================================================================================================================================
 ## 06-13-2019 @ 07:19:53 - 1.0.3 - dscudiero -  Add exclude items to the tar call
 ## 06-13-2019 @ 09:48:59 - 1.0.32 - dscudiero -  Updated help module Adde -excludes to the tar call Added verify if not running in batch mode
+## 06-13-2019 @ 09:56:07 - 1.0.37 - dscudiero -  Check execution environment
