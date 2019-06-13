@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.0.38" # -- dscudiero -- Thu 06/13/2019 @ 11:11:54
+version="1.0.39" # -- dscudiero -- Thu 06/13/2019 @ 11:20:31
 #=======================================================================================================================
 # Copyright 2019 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -165,7 +165,7 @@ fi
 Main $ArgStrAfterInit
 
 ## Log in the activity log
-sqlStmt="insert into $activityLogTable values(NULL,\"$userName\",\"n/a\",\"n/a\",\"$myName\",\"${sitesList//,/, }\",NOW()";
+sqlStmt="insert into $activityLogTable values(NULL,\"$userName\",\"n/a\",\"n/a\",\"$myName\",\"${sitesList//,/, }\",NOW())";
 RunSql $sqlStmt
 
 Goodbye
@@ -177,3 +177,4 @@ Goodbye
 ## 06-13-2019 @ 09:48:59 - 1.0.32 - dscudiero -  Updated help module Adde -excludes to the tar call Added verify if not running in batch mode
 ## 06-13-2019 @ 09:56:07 - 1.0.37 - dscudiero -  Check execution environment
 ## 06-13-2019 @ 11:12:19 - 1.0.38 - dscudiero -  Add logging in the activity log
+## 06-13-2019 @ 11:20:41 - 1.0.39 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
