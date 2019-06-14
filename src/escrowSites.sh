@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.0.41" # -- dscudiero -- Thu 06/13/2019 @ 11:30:42
+version="1.0.48" # -- dscudiero -- Fri 06/14/2019 @ 07:05:52
 #=======================================================================================================================
 # Copyright 2019 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -32,6 +32,7 @@ function Main {
 		[[ ! -d $tarDir ]] && $DOIT mkdir $tarDir
 		tarFile=$tarDir/$client@$(date +"%m-%d-%Y").tar
 		[[ -f $tarFile ]] && rm -f $tarFile
+		dump -1 -t tarFile
 
 		## tar up the next and curr sites	
 		if [[ -d $nextDir ]]; then
@@ -44,7 +45,7 @@ function Main {
 			Msg "^^Tarring directories: $(echo $dirsToTar | tr ' ' ',')" >> $tmpFile
 			set +f
 			$DOIT tar $tarOpts $tarFile $dirsToTar; rc=$?
-			rc=$?; [[ $rc -ne 0 ]] && Terminate "Process returned a non-zero return code ($rc), Please review messages"
+			[[ $rc -ne 0 ]] && Terminate "Process returned a non-zero return code ($rc), Please review messages"
 		fi
 		## tar up the test site
 		if [[ -d $testDir ]]; then
@@ -130,19 +131,22 @@ function Initialization {
 
 	tmpFile=$(MkTmpFile $myName)
 	tarDir="$courseleafEscrowedSitesDir"
+	dump -1 -t sitesList emailList tmpFile tarDir
 
 	SetFileExpansion -off
 	excludes="*.git* *.gz *.bak *.old *-Copy* RECOVERED-* RESTORED-* */attic"
-	tarOpts="-uf"
 	for exclude in $excludes; do
-		tarOpts="$tarOpts -exclude $exclude"
+		tarOpts="$tarOpts --exclude $exclude"
 	done
+	tarOpts="$tarOpts -uf"
 	SetFileExpansion
 
 	gpgOpts="--yes --batch --symmetric -z 9 --require-secmem --cipher-algo AES256"
 	gpgOpts="$gpgOpts --s2k-cipher-algo AES256 --s2k-digest-algo SHA512 --s2k-mode 3 --s2k-count 65000000"
 	gpgOpts="$gpgOpts --compress-algo BZIP2"
 
+	dump -1 -t tarOpts gpgOpts
+	
 	return 0;
 } ## Initialization
 
@@ -178,3 +182,4 @@ Goodbye
 ## 06-13-2019 @ 11:20:41 - 1.0.39 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
 ## 06-13-2019 @ 11:27:31 - 1.0.40 - dscudiero - Add/Remove debug statements
 ## 06-13-2019 @ 11:30:52 - 1.0.41 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
+## 06-14-2019 @ 08:28:06 - 1.0.48 - dscudiero -  Fix up tar options
