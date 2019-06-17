@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.0.48" # -- dscudiero -- Fri 06/14/2019 @ 07:05:52
+version="1.0.49" # -- dscudiero -- Mon 06/17/2019 @ 07:11:03
 #=======================================================================================================================
 # Copyright 2019 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -167,10 +167,10 @@ fi
 Main $ArgStrAfterInit
 
 ## Log in the activity log
-sqlStmt="insert into $activityLogTable values(null,\"$userName\",null,null,\"$myName\",\"siteList:${sitesList//,/, }, emailList:${emailList//,/, }\",NOW())";
+sqlStmt="insert into $activityLogTable values(null,\"$userName\",null,null,\"$myName\",null,\"siteList:${sitesList//,/, }, emailList:${emailList//,/, }\",NOW())";
 RunSql $sqlStmt
 
-Goodbye
+Goodbye 0
 
 #============================================================================================================================================
 ## Check-in log
@@ -183,3 +183,4 @@ Goodbye
 ## 06-13-2019 @ 11:27:31 - 1.0.40 - dscudiero - Add/Remove debug statements
 ## 06-13-2019 @ 11:30:52 - 1.0.41 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
 ## 06-14-2019 @ 08:28:06 - 1.0.48 - dscudiero -  Fix up tar options
+## 06-17-2019 @ 07:11:45 - 1.0.49 - dscudiero -  Fix sql inserting into activityLog
