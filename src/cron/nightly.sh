@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.25" # -- dscudiero -- Tue 06/18/2019 @ 07:14:14
+version="1.23.25" # -- dscudiero -- Tue 06/18/2019 @ 07:33:04
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -124,9 +124,12 @@ originalArgStr="$*";
 #=======================================================================================================================
 # Standard argument parsing and initialization
 #=======================================================================================================================
-source <(CallC toolsSetDefaults $myName);
+# GetDefaultsData $myName
+# ParseArgsStd $originalArgStr
+SetDefaults
 ParseArgs $originalArgStr
 scriptArgs="$* -noBanners -batchMode"
+logInDb=false
 
 #=======================================================================================================================
 # Main
@@ -351,7 +354,7 @@ case "$hostName" in
 		# 	fi
 
 		## Run programs/functions
-			pgms=("cleanDev -daemon" escrowSites)
+			pgms=("cleanDev -daemon")
 			# pgms=("buildSiteInfoTable" "cleanDev -daemon")
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
@@ -536,4 +539,4 @@ return 0
 ## 06-12-2019 @ 16:24:16 - 1.23.23 - dscudiero -  Add escrowSites call
 ## 06-12-2019 @ 16:29:59 - 1.23.23 - dscudiero - 
 ## 06-13-2019 @ 09:48:06 - 1.23.24 - dscudiero -  Add -batchMode to all script calls
-## 06-18-2019 @ 07:14:26 - 1.23.25 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
+## 06-18-2019 @ 07:33:36 - 1.23.25 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
