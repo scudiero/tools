@@ -1,78 +1,15 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.1.53" # -- dscudiero -- Wed 01/23/2019 @ 10:29:22
+version="2.2.1" # -- dscudiero -- Tue 06/18/2019 @ 07:13:20
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes="SetSiteDirs ProtectedCall StringFunctions"
+myIncludes="ProtectedCall StringFunctions"
 Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*"
-
-#=======================================================================================================================
-# Declare local variables and constants
-#=======================================================================================================================
-function EscrowSite {
-	local clientList="$*"
-	[[ -z $clientList ]] && return 0
-	local tmpFile=$(MkTmpFile $FUNCNAME)
-	tarDir=$courseleafEscrowedSitesDir
-
- 	Msg > $tmpFile
- 	Msg $(date) >> $tmpFile
- 	Msg >> $tmpFile
- 	Msg "The following sites have been escrowed, the escrow files can be found at \n^'$courseleafEscrowedSitesDir'" >> $tmpFile
-
- 	for client in $(tr ',' ' ' <<< $clientList); do
- 		## Parse off the encryption key
- 		if ($(Contains "$token" '/') == true ); then
-	 		client="${token%%/*}"
-	 		encryptionKey="${token##*/}"
-	 	else 
-	 		client="$token"
-	 		unset encryptionKey
-	 	fi
-
-		Msg "^Processing client: $client" >> $tmpFile
-		SetSiteDirs
-		cd $(dirname $nextDir)
-		[[ ! -d $tarDir ]] && mkdir $tarDir
-		tarFile=$tarDir/$client@$(date +"%m-%d-%Y").tar.xz
-		[[ -f $tarFile ]] && rm -f $tarFile
-
-		Msg >> $tmpFile
-		unset dirsToTar
-		for env in test next curr public; do
-			[[ -d ./$env ]] && dirsToTar="$env $dirsToTar"
-		done
-		dirsToTar=$(Trim "$dirsToTar")
-		Msg "^^Tarring directories: $(echo $dirsToTar | tr ' ' ',')" >> $tmpFile
-
-		set +f
-		$DOIT tar -cJf $tarFile $dirsToTar; rc=$?
-		rc=$?; [[ $rc -ne 0 ]] && Terminate "Process returned a non-zero return code ($rc), Please review messages"
-		chgrp leepfrog $tarFile
-		chmod 660 $tarFile
-		[[ -n encryptionKey ]] && gpg $gpgOpts --passphrase "$encryptionKey" -c "$tarFile"
-
-		Msg "^^Escrow file generated at: $tarFile" >> $tmpFile
-		[[ -n encryptionKey ]] && Msg "^^^Encrypted file: ${tarFile}.gpg" >> $tmpFile
-	done
-
-	## Send emails
-		Msg >> $tmpFile
-		if [[ $sendMail == true ]]; then
-			Msg "\nEmails sent to: $escrowEmailAddrs\n" >> $tmpFile
-			for emailAddr in $(tr ',' ' ' <<< $escrowEmailAddrs); do
-				mail -s "$myName: Clients escrowed" $emailAddr < $tmpFile
-			done
-		fi
-
-	[[ -f "$tmpFile" ]] && rm "$tmpFile"
-	return 0
-} #EscrowSite
 
 function RollupProcessLog {
 	## Roll up the weeks processlog db table
@@ -112,23 +49,27 @@ function RollupProcessLog {
 #=======================================================================================================================
 source <(CallC toolsSetDefaults $myName);
 ParseArgs $originalArgStr
-scriptArgs="$*"
-sendMail=true
-
-gpgOpts="--yes --batch --symmetric -z 9 --require-secmem --cipher-algo AES256"
-gpgOpts="$gpgOpts --s2k-cipher-algo AES256 --s2k-digest-algo SHA512 --s2k-mode 3 --s2k-count 65000000"
-gpgOpts="$gpgOpts --compress-algo BZIP2"
+scriptArgs="$* -noBanners -batchMode"
 
 #==================================================================================================
 # Main
 #==================================================================================================
 case "$hostName" in
 	mojave)
-			[[ -n $escrowClients ]] && EscrowSite "$escrowClients"
-			# RollupProcessLog
+			RollupProcessLog
 			;;
 	build7)
-			[[ -n $escrowClients ]] && EscrowSite "$escrowClients"
+		## Run programs/functions
+			pgms=(escrowSites)
+			for ((i=0; i<${#pgms[@]}; i++)); do
+				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
+				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
+				TrapSigs 'off'
+				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
+				TrapSigs 'on'
+				Semaphore 'waiton' "$pgmName" 'true'
+				Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+			done
 			;;
 esac
 
@@ -156,3 +97,4 @@ return 0
 ## 03-23-2018 @ 16:18:45 - 2.1.50 - dscudiero - D
 ## 12-18-2018 @ 07:28:09 - 2.1.51 - dscudiero - Update setting of defaults to use the new toolsSetDefaults module
 ## 01-24-2019 @ 12:50:22 - 2.1.53 - dscudiero - Add encryption code
+## 06-18-2019 @ 07:14:32 - 2.2.1 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
