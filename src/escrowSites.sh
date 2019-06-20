@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.0.49" # -- dscudiero -- Mon 06/17/2019 @ 07:11:03
+version="1.0.74" # -- dscudiero -- Thu 06/20/2019 @ 16:37:54
 #=======================================================================================================================
 # Copyright 2019 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -17,7 +17,7 @@ function Main {
  	Msg "The following sites have been escrowed, the escrow files can be found at: \n^'$courseleafEscrowedSitesDir'" >> $tmpFile
 
  	## Loop through the clients and tar up the entire site
-	for token in $(tr ',' ' ' <<< $sitesList); do
+	for token in $(tr ',' ' ' <<< $clientList); do
  		## Parse off the encryption key from the client token
  		if ($(Contains "$token" '/') == true ); then
 	 		client="${token%%/*}"
@@ -119,19 +119,18 @@ function Initialization {
 	# Standard arg parsing and initialization
 	#=======================================================================================================================
 	SetDefaults $myName
-	myArgs="clientList|clientList|option|clientList|A comma separated list of clientCodes[/password];"
-	myArgs+="emailList|emailList|option|emailList|A comma separated list of email addresses;"
+	myArgs="clientList|clientList|option|clientList|A comma separated list of clientCode[/password], if password is supplied an gpg encrypted file will be generated.  Defaults to: '$escrowClients';"
+	myArgs+="emailList|emailList|option|emailList|A comma separated list of email addresses.  Defaults to: '$escrowEmailAddrs';"
+	myArgs+="outDir|outDir|option|outDir|The fully qualified path to the output directory.  Defaults to: '$courseleafEscrowedSitesDir';"
 	export myArgs="$myArgs"
 	ParseArgs $*
+	dump -1 -t clientList emailList outDir
 
-	[[ -z $sitesList ]] && sitesList="$escrowClients"
-	[[ -z $emailList ]] && emailList="$escrowEmailAddrs"
-	[[ -z $sitesList ]] && Terminate "No sites were supplied on call"
 	sendMail=true
 
 	tmpFile=$(MkTmpFile $myName)
-	tarDir="$courseleafEscrowedSitesDir"
-	dump -1 -t sitesList emailList tmpFile tarDir
+	[[ -n $outDir ]] && tarDir="$outDir" || tarDir="$courseleafEscrowedSitesDir"
+	dump -1 -t clientList emailList tmpFile tarDir
 
 	SetFileExpansion -off
 	excludes="*.git* *.gz *.bak *.old *-Copy* RECOVERED-* RESTORED-* */attic"
@@ -159,15 +158,31 @@ Import $myIncludes
 Initialization $*
 Hello
 
+# PromptNew clientList 'What client(s) do you wish to work with?'  '*any*'  "$escrowClients"
+# PromptNew outDir 'Where do you wish the generated tar/gpg files to be placed?' '*dir*' "$courseleafEscrowedSitesDir"
+# PromptNew emailList 'Who should be notified by email when processing is completed?' '*any*' "$userName@leepfrog.com"
+
+[[ -z $clientList ]] && clientList="$escrowClients"
+[[ -z $clientList ]] && Terminate "No sites were supplied on call"
+[[ ! -d $tarDir ]] && Terminate "Could not locate output directory: '$tarDir'"
+[[ -z $emailList ]] && emailList="$escrowEmailAddrs"
+
+## Check with the user to verify that we should continue
 if [[ $batchMode != true ]]; then
-	verifyMsg="You are asking to create escrow files for: '${sitesList//,/, }'"
-	VerifyContinue "$verifyMsg"
+	unset verifyArgs
+	verifyArgs+=("clientList:${clientList//,/, }")
+	verifyArgs+=("Output Directory:$tarDir")
+	[[ -n $emailList ]] && verifyArgs+=("Notification emails:$emailList")
+	verifyContinueDefault='Yes'
+	VerifyContinue "You are asking to create escrow files for"
+	tmpFile="/dev/tty"
 fi
 
+[[ -z $emailList ]] && Warning "No notify emails address were supplied on call, no completion notifications will be sent out"
 Main $ArgStrAfterInit
 
 ## Log in the activity log
-sqlStmt="insert into $activityLogTable values(null,\"$userName\",null,null,\"$myName\",null,\"siteList:${sitesList//,/, }, emailList:${emailList//,/, }\",NOW())";
+sqlStmt="insert into $activityLogTable values(null,\"$userName\",null,null,\"$myName\",null,\"clientList:${clientList//,/, }, emailList:${emailList//,/, }\",NOW())";
 RunSql $sqlStmt
 
 Goodbye 0
@@ -184,3 +199,4 @@ Goodbye 0
 ## 06-13-2019 @ 11:30:52 - 1.0.41 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
 ## 06-14-2019 @ 08:28:06 - 1.0.48 - dscudiero -  Fix up tar options
 ## 06-17-2019 @ 07:11:45 - 1.0.49 - dscudiero -  Fix sql inserting into activityLog
+## 06-20-2019 @ 16:38:59 - 1.0.74 - dscudiero -  Added abilty to specify the output directory on the call
