@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.5.32" // -- dscudiero -- Mon 06/24/2019 @ 09:32:42
+// version="1.5.33" // -- dscudiero -- Mon 06/24/2019 @ 09:54:26
 //==================================================================================================
 #include <stdlib.h>
 #include <unistd.h>
@@ -299,7 +299,7 @@ int main(int argc, char *argv[]) {
 					}
 				string ansl = ans; transform(ansl.begin(), ansl.end(), ansl.begin(), ::tolower);
 				if ( ansl == "x" || ansl == "exit") {
-					string tmpStr="Goodbye x";
+					string tmpStr="Goodbye x\n";
 					write(3, tmpStr.c_str(), tmpStr.size());
 					return 0;
 				}
@@ -430,3 +430,4 @@ int main(int argc, char *argv[]) {
 // 01-29-2019 @ 14:35:31 - 1.5.24 - dscudiero - M
 // 04-05-2019 @ 11:55:05 - 1.5.26 - dscudiero - Add/Remove debug statements
 // 06-24-2019 @ 09:44:57 - 1.5.32 - dscudiero - Add/Remove debug statements
+// 06-24-2019 @ 09:55:07 - 1.5.33 - dscudiero -  Append a new line char after 'Goodbye x'
