@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.27" # -- dscudiero -- Mon 06/24/2019 @ 10:25:34
+# version="3.0.28" # -- dscudiero -- Mon 06/24/2019 @ 10:26:58
 #===================================================================================================
 # Display script help -- passed an array of argument definitinons, see ParseArg function
 #===================================================================================================
@@ -9,7 +9,6 @@
 #===================================================================================================
 function Help {
 	mode="${1-normal}"
-echo " HERE 2 HERE 2 HERE 2 HERE "
 	includes='StringFunctions Colors'
 	Import "$includes"
 
@@ -235,3 +234,4 @@ export -f Help
 ## 06-13-2019 @ 08:17:50 - 3.0.9 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
 ## 06-13-2019 @ 09:05:10 - 3.0.21 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
 ## 06-24-2019 @ 10:26:36 - 3.0.27 - dscudiero -  Only show common tools options if some are defined
+## 06-24-2019 @ 10:27:38 - 3.0.28 - dscudiero - Add/Remove debug statements
