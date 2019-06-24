@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.2" # -- dscudiero -- Mon 06/24/2019 @ 10:02:20
+# version="1.0.3" # -- dscudiero -- Mon 06/24/2019 @ 10:06:03
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue]
@@ -36,7 +36,7 @@ PromptNew() {
 	CallC prompt $variable $promptArgs 3> "$tmpFile"; local rc=$?;
 	## OK, source the tmpFile if it has data (set return data)
 	local wcOut="$(wc -l "$tmpFile")"
-	[[ ${wcOut%% *} -gt 0 ]] && { echo 1; source <(cat "$tmpFile"); }
+	[[ ${wcOut%% *} -gt 0 ]] && { source <(cat "$tmpFile"); }
 	rm -f "$tmpFile"
 	return $rc
 } ## PromptNew
@@ -47,3 +47,4 @@ export -f PromptNew
 # Check-in Log
 #===================================================================================================## 01-29-2019 @ 11:27:39 - 1.0.1 - dscudiero - Added function name to messages
 ## 06-24-2019 @ 10:02:51 - 1.0.2 - dscudiero -  Streamline the parsing of the output of wc -l
+## 06-24-2019 @ 10:06:13 - 1.0.3 - dscudiero - Add/Remove debug statements
