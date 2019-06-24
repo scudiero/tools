@@ -1,7 +1,7 @@
 //==================================================================================================
 // XO NOT AUTOVERSION
 //==================================================================================================
-// version="1.5.26" // -- dscudiero -- Fri 04/05/2019 @ 11:54:22
+// version="1.5.32" // -- dscudiero -- Mon 06/24/2019 @ 09:32:42
 //==================================================================================================
 #include <stdlib.h>
 #include <unistd.h>
@@ -23,7 +23,6 @@ using namespace std;
 // Prompt varName -p "promptText" -v "validValues" -d "defaultValue"
 //=================================================================================================================
 int main(int argc, char *argv[]) {
-
 	// Program varNames
 		bool debug=false;
 		string varName="";
@@ -44,11 +43,13 @@ int main(int argc, char *argv[]) {
 		string myName = argv[0];
 		for(int i=1; i < argc; i++) {
 			string arg = argv[i];
+			if (debug) std::cout << "arg = '" + arg + "'\n";
 			if (arg.substr(0,1) != "-") {
 				varName=arg;
 			} else {
 				string argl = arg; 
 				transform(argl.begin(), argl.end(), argl.begin(), ::tolower);
+				if (debug) std::cout << "\targl = '" + argl + "'\n";
 				if (argl == "-debug") {
 				    debug=true;
 				} else if(argl == "-noprompt") {
@@ -328,9 +329,11 @@ int main(int argc, char *argv[]) {
 
 			} else {
 				if (validValues != "") {
-					string validValuesl=validValues; transform(validValuesl.begin(), validValuesl.end(), validValuesl.begin(), ::tolower);			
-					if (validValuesl == "*any*") {
-						valueOk=true;
+					string validValuesl=validValues; transform(validValuesl.begin(), validValuesl.end(), validValuesl.begin(), ::tolower);
+					if (validValuesl == "*optional*") {
+						valueOk=true;	
+					} else if (validValuesl == "*any*") {
+						if (ans != "") valueOk=true;
 					} else if (validValuesl == "*dir*") {
 						struct stat statbuf; 
 						if (stat(ans.c_str(), &statbuf) != -1) {
@@ -426,3 +429,4 @@ int main(int argc, char *argv[]) {
 // 01-29-2019 @ 11:28:00 - 1.5.23 - dscudiero - Added proper handeling of pvt sites
 // 01-29-2019 @ 14:35:31 - 1.5.24 - dscudiero - M
 // 04-05-2019 @ 11:55:05 - 1.5.26 - dscudiero - Add/Remove debug statements
+// 06-24-2019 @ 09:44:57 - 1.5.32 - dscudiero - Add/Remove debug statements
