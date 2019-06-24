@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.0.74" # -- dscudiero -- Thu 06/20/2019 @ 16:37:54
+version="1.0.91" # -- dscudiero -- Mon 06/24/2019 @ 10:19:27
 #=======================================================================================================================
 # Copyright 2019 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -69,7 +69,7 @@ function Main {
 
 	## Send out emails
 	Msg >> $tmpFile
-	if [[ $sendMail == true && -n $emailList ]]; then
+	if [[ -n $emailList ]]; then
 		Msg "\nEmails sent to: $emailList\n" >> $tmpFile
 		for emailAddr in $(tr ',' ' ' <<< $emailList); do
 			mail -s "$myName: Clients escrowed" $emailAddr < $tmpFile
@@ -118,15 +118,19 @@ function Initialization {
 	#=======================================================================================================================
 	# Standard arg parsing and initialization
 	#=======================================================================================================================
+	helpSet='client'
 	SetDefaults $myName
-	myArgs="clientList|clientList|option|clientList|A comma separated list of clientCode[/password], if password is supplied an gpg encrypted file will be generated.  Defaults to: '$escrowClients';"
-	myArgs+="emailList|emailList|option|emailList|A comma separated list of email addresses.  Defaults to: '$escrowEmailAddrs';"
-	myArgs+="outDir|outDir|option|outDir|The fully qualified path to the output directory.  Defaults to: '$courseleafEscrowedSitesDir';"
+	myArgs+="password|password|option|pqssword|A password to be used to generate a gpg encrypted file.;"
+	myArgs+="emailList|emailList|option|emailList|A comma separated list of email addresses.;"
+	myArgs+="outDir|outDir|option|outDir|The fully qualified path to the output directory.;"
 	export myArgs="$myArgs"
 	ParseArgs $*
-	dump -1 -t clientList emailList outDir
 
-	sendMail=true
+	PromptNew client 'What client do you wish to work with?'  'client'
+	PromptNew password 'Password for the encrypted file, if not specified no encrypted file will be created?' "*optional*"
+	PromptNew outDir 'Where do you wish the generated tar/gpg files to be placed?' '*dir*'
+	PromptNew emailList 'A comma separated list of email address to be notified by email when processing is completed?' '*any*'
+	dump -1 -t client password outDir emailList
 
 	tmpFile=$(MkTmpFile $myName)
 	[[ -n $outDir ]] && tarDir="$outDir" || tarDir="$courseleafEscrowedSitesDir"
@@ -155,17 +159,11 @@ TrapSigs 'on'
 myIncludes="$standardInteractiveIncludes SetSiteDirsNew PushPop SetFileExpansion HelpNew"
 Import $myIncludes
 
-Initialization $*
 Hello
+Initialization $*
 
-# PromptNew clientList 'What client(s) do you wish to work with?'  '*any*'  "$escrowClients"
-# PromptNew outDir 'Where do you wish the generated tar/gpg files to be placed?' '*dir*' "$courseleafEscrowedSitesDir"
-# PromptNew emailList 'Who should be notified by email when processing is completed?' '*any*' "$userName@leepfrog.com"
-
-[[ -z $clientList ]] && clientList="$escrowClients"
-[[ -z $clientList ]] && Terminate "No sites were supplied on call"
-[[ ! -d $tarDir ]] && Terminate "Could not locate output directory: '$tarDir'"
-[[ -z $emailList ]] && emailList="$escrowEmailAddrs"
+[[ -z $client ]] && Terminate "Sorry, a value must be specified for 'client'"
+[[ ! -d $tarDir ]] && Terminate "Sorry, Could not locate output directory: '$tarDir'"
 
 ## Check with the user to verify that we should continue
 if [[ $batchMode != true ]]; then
@@ -191,7 +189,7 @@ Goodbye 0
 ## Check-in log
 #============================================================================================================================================
 ## 06-13-2019 @ 07:19:53 - 1.0.3 - dscudiero -  Add exclude items to the tar call
-## 06-13-2019 @ 09:48:59 - 1.0.32 - dscudiero -  Updated help module Adde -excludes to the tar call Added verify if not running in batch mode
+## 06-13-2019 @ 09:48:59 - 1.0.32 - dscudiero -  Updated help module Added -excludes to the tar call Added verify if not running in batch mode
 ## 06-13-2019 @ 09:56:07 - 1.0.37 - dscudiero -  Check execution environment
 ## 06-13-2019 @ 11:12:19 - 1.0.38 - dscudiero -  Add logging in the activity log
 ## 06-13-2019 @ 11:20:41 - 1.0.39 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
@@ -199,4 +197,5 @@ Goodbye 0
 ## 06-13-2019 @ 11:30:52 - 1.0.41 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
 ## 06-14-2019 @ 08:28:06 - 1.0.48 - dscudiero -  Fix up tar options
 ## 06-17-2019 @ 07:11:45 - 1.0.49 - dscudiero -  Fix sql inserting into activityLog
-## 06-20-2019 @ 16:38:59 - 1.0.74 - dscudiero -  Added abilty to specify the output directory on the call
+## 06-20-2019 @ 16:38:59 - 1.0.74 - dscudiero -  Added ability to specify the output directory on the call
+## 06-24-2019 @ 10:27:27 - 1.0.91 - dscudiero -  Switch arguments to be a single client at a time
