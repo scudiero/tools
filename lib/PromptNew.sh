@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="1.0.1" # -- dscudiero -- Tue 01/29/2019 @ 09:56:09
+# version="1.0.2" # -- dscudiero -- Mon 06/24/2019 @ 10:02:20
 #===================================================================================================
 # Prompt user for a value
 # Usage: varName promptText [validationList] [defaultValue]
@@ -33,9 +33,10 @@ PromptNew() {
 		[[ -n ${!var} ]] && export $var="${!var}"
 	done
 	## Call the program trapping file descriptor #3
-	CallC prompt $variable $promptArgs 3> "$tmpFile"; rc=$?;
+	CallC prompt $variable $promptArgs 3> "$tmpFile"; local rc=$?;
 	## OK, source the tmpFile if it has data (set return data)
-	[[ $(cut -d' ' -f1 <<< $(wc -l "$tmpFile")) -gt 0 ]] && { source <(cat "$tmpFile"); }
+	local wcOut="$(wc -l "$tmpFile")"
+	[[ ${wcOut%% *} -gt 0 ]] && { echo 1; source <(cat "$tmpFile"); }
 	rm -f "$tmpFile"
 	return $rc
 } ## PromptNew
@@ -45,3 +46,4 @@ export -f PromptNew
 #===================================================================================================
 # Check-in Log
 #===================================================================================================## 01-29-2019 @ 11:27:39 - 1.0.1 - dscudiero - Added function name to messages
+## 06-24-2019 @ 10:02:51 - 1.0.2 - dscudiero -  Streamline the parsing of the output of wc -l
