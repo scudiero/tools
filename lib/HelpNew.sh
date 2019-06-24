@@ -1,6 +1,6 @@
 ## XO NOT AUTOVERSION
 #===================================================================================================
-# version="3.0.21" # -- dscudiero -- Thu 06/13/2019 @ 09:04:40
+# version="3.0.27" # -- dscudiero -- Mon 06/24/2019 @ 10:25:34
 #===================================================================================================
 # Display script help -- passed an array of argument definitinons, see ParseArg function
 #===================================================================================================
@@ -9,7 +9,7 @@
 #===================================================================================================
 function Help {
 	mode="${1-normal}"
-
+echo " HERE 2 HERE 2 HERE 2 HERE "
 	includes='StringFunctions Colors'
 	Import "$includes"
 
@@ -119,25 +119,27 @@ function Help {
 	fi
 
 	## Loop through the commn argument defs
-	Msg
-	Msg "^$(ColorU "$(ColorK "Common tools scripts options:")")"
-	Msg "^$argHeader"
-	[[ -n $validArgs ]] && validArgsLower="${validArgs,,[a-z]}"  ## Lower case
-	#argDefs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
-	for ((i=0; i<${#argDefs[@]}; i++)); do
-		tmpStr="${argDefs[$i]}"
-		argShortName="${tmpStr%%|*}"; tmpStr=${tmpStr#*|}; let shortNamePad=$maxWidthAbbr-${#argShortName};
-		argLongName="${tmpStr%%|*}"; tmpStr=${tmpStr#*|}; let longNamePad=$maxWidthName-${#argLongName};
-		[[ $validArgsLower != '' && $(Contains ",$validArgsLower," ",${argName,,[a-z]},") != true ]] && continue
-		argType="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; let typePad=$maxWidthType-${#argType};
-		argVar="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; [[ $argVar == 'NULL' ]] && unset argVar;
-		argCmd="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; [[ $argCmd == 'NULL' ]] && unset argCmd;
-		argHelpGrp="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; [[ $argHelpGrp == 'NULL' ]] && unset argHelpGrp;
-		arghelpText="${tmpStr%%|*}"; [[ $arghelpText == 'NULL' ]] && unset arghelpText;
-		#dump -t argShortName shortNamePad argLongName longNamePad argType argVar argCmd arghelpText
-		tmpStr="${argLongName}$(PadChar ' ' $longNamePad) (${argShortName})$(PadChar ' ' $shortNamePad) ${argType}$(PadChar ' ' $typePad) -- $arghelpText"
-		Msg "^$tmpStr"
-	done
+	if [[ ${#argDefs[@]} -gt 0 ]]; then
+		Msg
+		Msg "^$(ColorU "$(ColorK "Common tools scripts options:")")"
+		Msg "^$argHeader"
+		[[ -n $validArgs ]] && validArgsLower="${validArgs,,[a-z]}"  ## Lower case
+		#argDefs+=("shortToken|longToken|type|scriptVariableName|<command to run>|help group|help textHelp")
+		for ((i=0; i<${#argDefs[@]}; i++)); do
+			tmpStr="${argDefs[$i]}"
+			argShortName="${tmpStr%%|*}"; tmpStr=${tmpStr#*|}; let shortNamePad=$maxWidthAbbr-${#argShortName};
+			argLongName="${tmpStr%%|*}"; tmpStr=${tmpStr#*|}; let longNamePad=$maxWidthName-${#argLongName};
+			[[ $validArgsLower != '' && $(Contains ",$validArgsLower," ",${argName,,[a-z]},") != true ]] && continue
+			argType="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; let typePad=$maxWidthType-${#argType};
+			argVar="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; [[ $argVar == 'NULL' ]] && unset argVar;
+			argCmd="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; [[ $argCmd == 'NULL' ]] && unset argCmd;
+			argHelpGrp="${tmpStr%%|*}"; tmpStr="${tmpStr#*|}"; [[ $argHelpGrp == 'NULL' ]] && unset argHelpGrp;
+			arghelpText="${tmpStr%%|*}"; [[ $arghelpText == 'NULL' ]] && unset arghelpText;
+			#dump -t argShortName shortNamePad argLongName longNamePad argType argVar argCmd arghelpText
+			tmpStr="${argLongName}$(PadChar ' ' $longNamePad) (${argShortName})$(PadChar ' ' $shortNamePad) ${argType}$(PadChar ' ' $typePad) -- $arghelpText"
+			Msg "^$tmpStr"
+		done
+	fi
 
 	## print out script specific help notes
 	if [[ ${#helpNotes[@]} -gt 0 ]]; then
@@ -165,10 +167,10 @@ function Help {
 	# notesClient+=("A value of '?' may be specified for client to display a selection list of all clients.")
 
 	notesAlways+=("All options $(ColorB "must") be delimited from other options by at lease one blank character.")
-	notesAlways+=("Options are processed in the order given above, script specific options are parsed before common options.")
+	[[ ${#argDefs[@]} -gt 0 ]] && notesAlways+=("Options are processed in the order given above, script specific options are parsed before common options.")
 	notesAlways+=("All options of the type 'switch' may be specified as -shortName, alternately they may be specified as --longName.  Regular expression matching is used.")
 	notesAlways+=("All options of the type 'option' require a value to be passed, i.e. -option value.\n^   If the option value contains blanks/spaces, the argument value needs to be enclosed in single quotes which need to be escaped on the command line,\n^   e.g. -file \'This is a File Name\'.")
-	notesAlways+=("Options listed in the 'Common tools scripts options' section may not apply this specific script.")
+	[[ ${#argDefs[@]} -gt 0 ]] && notesAlways+=("Options listed in the 'Common tools scripts options' section may not necessarily apply this specific script.")
 	notesAlways+=("To get additional help information on what is used by this script you can use the -hh option.")
 
 	notes=("${notesAlways[@]}")
@@ -187,7 +189,7 @@ function Help {
 	if [[ -n $SCRIPTINCLUDES ]]; then
 		## Scripts
 		local token
-		Msg "$(ColorK "Tools library modules used by this script (via tools/lib):")"
+		Msg "$(ColorK "Tools library modules used by this script (located in $TOOLSPATH/lib):")"
 		for token in $(tr ',' ' ' <<< $SCRIPTINCLUDES); do
 			Msg "^$token"
 		done #| sort
@@ -232,3 +234,4 @@ export -f Help
 ## 06-13-2019 @ 08:12:06 - 3.0.8 - dscudiero -  Export new name
 ## 06-13-2019 @ 08:17:50 - 3.0.9 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
 ## 06-13-2019 @ 09:05:10 - 3.0.21 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
+## 06-24-2019 @ 10:26:36 - 3.0.27 - dscudiero -  Only show common tools options if some are defined
