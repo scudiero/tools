@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.0.91" # -- dscudiero -- Mon 06/24/2019 @ 10:19:27
+version="1.0.92" # -- dscudiero -- Tue 06/25/2019 @ 08:59:31
 #=======================================================================================================================
 # Copyright 2019 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -130,7 +130,8 @@ function Initialization {
 	PromptNew password 'Password for the encrypted file, if not specified no encrypted file will be created?' "*optional*"
 	PromptNew outDir 'Where do you wish the generated tar/gpg files to be placed?' '*dir*'
 	PromptNew emailList 'A comma separated list of email address to be notified by email when processing is completed?' '*any*'
-	dump -1 -t client password outDir emailList
+	[[ -n $password ]] && clientList="$client/$password" || clientList="$client"
+	dump -1 -t client password outDir emailList clientList
 
 	tmpFile=$(MkTmpFile $myName)
 	[[ -n $outDir ]] && tarDir="$outDir" || tarDir="$courseleafEscrowedSitesDir"
@@ -199,3 +200,4 @@ Goodbye 0
 ## 06-17-2019 @ 07:11:45 - 1.0.49 - dscudiero -  Fix sql inserting into activityLog
 ## 06-20-2019 @ 16:38:59 - 1.0.74 - dscudiero -  Added ability to specify the output directory on the call
 ## 06-24-2019 @ 10:27:27 - 1.0.91 - dscudiero -  Switch arguments to be a single client at a time
+## 06-25-2019 @ 08:59:58 - 1.0.92 - dscudiero -  Make sure that clientList is set before calling main
