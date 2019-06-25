@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.1" # -- dscudiero -- Tue 06/18/2019 @ 07:13:20
+version="2.2.2" # -- dscudiero -- Tue 06/25/2019 @ 08:46:26
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -60,7 +60,11 @@ case "$hostName" in
 			;;
 	build7)
 		## Run programs/functions
-			pgms=(escrowSites)
+			pgms=("\"escrowSites illinois -password illinois -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs\"")
+			pgms+=("\"escrowSites uis -password uis -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs\""))
+			pgms+=("\"escrowSites uic -password uic -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs\"")
+			pgms+=("\"escrowSites ewu -password ewu -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs\"")
+
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
@@ -98,3 +102,4 @@ return 0
 ## 12-18-2018 @ 07:28:09 - 2.1.51 - dscudiero - Update setting of defaults to use the new toolsSetDefaults module
 ## 01-24-2019 @ 12:50:22 - 2.1.53 - dscudiero - Add encryption code
 ## 06-18-2019 @ 07:14:32 - 2.2.1 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
+## 06-25-2019 @ 08:49:23 - 2.2.2 - dscudiero -  Updated how escrowSites is called
