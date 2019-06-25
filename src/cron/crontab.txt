@@ -20,8 +20,9 @@ cronJob=/steamboat/leepfrog/docs/tools/src/cron/cronJob.sh
   0		0		*						*					*	 			$cronJob nightly
   0		22		*						*					0 				$cronJob weekly
   0		0		1						*					*				$cronJob monthly
-  0 	0		30						6,9					* 				$cronJob quarterly
-  0 	0		31						3,12				* 				$cronJob quarterly
+#  0 	0		30						6,9					* 				$cronJob quarterly
+#  0 	0		31						3,12				* 				$cronJob quarterly
+  0		0		*						*					*	 			$cronJob quarterly
 #==================================================================================================
 #*/2	*		*						*					* 				$cronJob testCron
 # 0		2-22	*						*					*	 			$cronJob hourly -noHeaders
