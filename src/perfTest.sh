@@ -13,7 +13,7 @@ Import "$standardInteractiveIncludes $myIncludes"
 
 mode=${1-'test'}; shift || true
 count=${1-1000}; shift || true
-tmpFile="/tmp/$LOGNAME.perfTest.sh.out"
+tmpFile="/tmp/$LOGNAME.perftest.sh.out"
 [[ ${mode:0:1} == '-' ]] && mode="${mode:1}"
 #echo "mode = '$mode'"
 #Msg "$myName starting, mode=$mode, count=$count"
@@ -49,10 +49,10 @@ if [[ $mode == 'summary' ]]; then
         fi
 else
         ## Create initial record
-        sqlStmt="insert into perfTest values(NULL,\"$(cut -d'.' -f1 <<< $(hostname))\",\"$(date +'%m-%d-%y %H:%M')\",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)"
+        sqlStmt="insert into perftest values(NULL,\"$(cut -d'.' -f1 <<< $(hostname))\",\"$(date +'%m-%d-%y %H:%M')\",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)"
         RunSql $sqlStmt
         idx=${resultSet[0]}
-        [[ -z $idx ]] && Terminate "Could not insert record into the '$warehouseDb.perfTest' table"
+        [[ -z $idx ]] && Terminate "Could not insert record into the '$warehouseDb.perftest' table"
 
         ## Run test using local file systems
         unset localFSreal localFSuser localFSsys
@@ -79,14 +79,14 @@ else
                 time=$(cut -d' ' -f2 <<< $line)
                 timeM=${time%%m*} ; time=${time##*m} ; time=${time%s*}
                 sec=$(( timeM * 60 )) ; sec=$(( sec + ${time%%.*} )) ; sec="${sec}.${time##*.}"
-                sqlStmt="update perfTest set localFs$type=\"$sec\" where idx=$idx"
+                sqlStmt="update perftest set localFs$type=\"$sec\" where idx=$idx"
                 RunSql $sqlStmt
         done < $tmpFile;
 
         ## Run test using remote file systems
-        mkdir -p /steamboat/leepfrog/docs/tools/perfTest
+        mkdir -p /steamboat/leepfrog/docs/tools/perftest
         { time (
-                        cd /steamboat/leepfrog/docs/tools/perfTest
+                        cd /steamboat/leepfrog/docs/tools/perftest
                         [[ -d ./$(hostname) ]] && rm -rf ./$(hostname)
                         mkdir -p ./$(hostname)
                         cd ./$(hostname)
@@ -108,7 +108,7 @@ else
                 time=$(cut -d' ' -f2 <<< $line)
                 timeM=${time%%m*} ; time=${time##*m} ; time=${time%s*}
                 sec=$(( timeM * 60 )) ; sec=$(( sec + ${time%%.*} )) ; sec="${sec}.${time##*.}"
-                sqlStmt="update perfTest set remoteFs$type=\"$sec\" where idx=$idx"
+                sqlStmt="update perftest set remoteFs$type=\"$sec\" where idx=$idx"
                 RunSql $sqlStmt
         done < $tmpFile;
 
@@ -125,12 +125,12 @@ else
                 time=$(cut -d' ' -f2 <<< $line)
                 timeM=${time%%m*} ; time=${time##*m} ; time=${time%s*}
                 sec=$(( timeM * 60 )) ; sec=$(( sec + ${time%%.*} )) ; sec="${sec}.${time##*.}"
-                sqlStmt="update perfTest set dbread$type=\"$sec\" where idx=$idx"
+                sqlStmt="update perftest set dbread$type=\"$sec\" where idx=$idx"
                 RunSql $sqlStmt
         done < $tmpFile;
 
         ## Cleanup
-        [[ -f "/steamboat/leepfrog/docs/tools/perfTest" ]] && rm -rf "/steamboat/leepfrog/docs/tools/perfTest"
+        [[ -f "/steamboat/leepfrog/docs/tools/perftest" ]] && rm -rf "/steamboat/leepfrog/docs/tools/perftest"
         [[ -f "$tmpFile" ]] && rm -f "$tmpFile"
 fi
 #Msg "$myName done"
