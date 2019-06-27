@@ -429,3 +429,4 @@ return 0
 ## 05-24-2019 @ 12:07:23 - 2.2.59 - dscudiero -  Comment out SyncInternalDb
 ## 05-24-2019 @ 13:10:46 - 2.2.60 - dscudiero -  Add updateDefaults running on build7
 ## 06-25-2019 @ 11:25:00 - 2.2.66 - dscudiero -  activate perfTest
+## 06-27-2019 @ 08:15:45 - 2.2.66 - dscudiero - 
