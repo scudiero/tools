@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.67" # -- dscudiero -- Fri 06/28/2019 @ 07:15:19
+version="2.2.68" # -- dscudiero -- Fri 06/28/2019 @ 10:25:59
 
 #=======================================================================================================================
 # Run every hour from cron
@@ -263,6 +263,11 @@ case "$hostName" in
 			# 	fi
 			# fi
 
+
+    '' was committed by 'src/cron/nightly.sh' at src/cron/nightly.sh 
+	-- src/cron/nightly.sh
+
+
 		 ## Check for git commits in the master tools/workflowJs repos
 		 	repos="tools workflowJs"
 		 	for repo in $repos; do
@@ -282,6 +287,7 @@ case "$hostName" in
 						# [[ $verboseLevel -gt 0 ]] && echo -e "\n\tlogRecs[$i] = >${logRecs[$i]}<"
 						rec="${logRecs[$i]}"
 						committer="${rec%%|*}"; rec="${rec#*|}"
+						[[ $committer == $rec ]] && continue
 						comment="${rec%%|*}"; rec="${rec#*|}"
 						commitTime="${rec%%|*}"
 						let i=$i+1
@@ -430,3 +436,4 @@ return 0
 ## 05-24-2019 @ 13:10:46 - 2.2.60 - dscudiero -  Add updateDefaults running on build7
 ## 06-25-2019 @ 11:25:00 - 2.2.66 - dscudiero -  activate perfTest
 ## 06-27-2019 @ 08:15:45 - 2.2.66 - dscudiero - 
+## 06-28-2019 @ 10:26:46 - 2.2.68 - dscudiero -  Fix issue if two files were committed in the same commit
