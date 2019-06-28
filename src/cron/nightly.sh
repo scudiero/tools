@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.23.25" # -- dscudiero -- Tue 06/18/2019 @ 07:33:04
+version="1.23.26" # -- dscudiero -- Fri 06/28/2019 @ 07:15:23
 #=======================================================================================================================
 # Run nightly from cron
 #=======================================================================================================================
@@ -183,7 +183,7 @@ case "$hostName" in
 			# pgms=(updateDefaults "cleanDev -daemon" "buildClientInfoTable" "buildSiteInfoTable" loadClientRoles)
 			# pgms+=(BuildEmployeeTable loadMilestonesData)
 			for ((i=0; i<${#pgms[@]}; i++)); do
-				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
+				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm#* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
 				TrapSigs 'off'
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
@@ -357,7 +357,7 @@ case "$hostName" in
 			pgms=("cleanDev -daemon")
 			# pgms=("buildSiteInfoTable" "cleanDev -daemon")
 			for ((i=0; i<${#pgms[@]}; i++)); do
-				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
+				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm#* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
 				TrapSigs 'off'
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
