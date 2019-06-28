@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.1.55" # -- dscudiero -- Thu 02/14/2019 @ 12:28:55
+version="2.1.57" # -- dscudiero -- Fri 06/28/2019 @ 07:39:29
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -32,7 +32,7 @@ case "$hostName" in
 			#reports+=("toolsUsage -email \"${toolsManager},dscudiero\"")
 
 			for ((i=0; i<${#reports[@]}; i++)); do
-				report="${reports[$i]}"; reportName="${report%% *}"; reportArgs="${report##* }"; [[ $reportName == $reportArgs ]] && unset reportArgs
+				report="${reports[$i]}"; reportName="${report%% *}"; reportArgs="${report#* }"; [[ $reportName == $reportArgs ]] && unset reportArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $reportName $reportArgs..."; sTime=$(date "+%s")
 				TrapSigs 'off'; FindExecutable scriptsAndReports -sh -run reports $report -quiet $reportArgs $scriptArgs | Indent; TrapSigs 'on'
 				Semaphore 'waiton' "$reportName" 'true'
@@ -43,7 +43,7 @@ case "$hostName" in
 			# pgms=("checkForPrivateDevSites $userName" weeklyRollup)
 			pgms=(weeklyRollup)
 			for ((i=0; i<${#pgms[@]}; i++)); do
-				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
+				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm#* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
 				TrapSigs 'off'
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
@@ -56,7 +56,7 @@ case "$hostName" in
 		## Run programs/functions
 			# pgms=("checkForPrivateDevSites $userName")
 			for ((i=0; i<${#pgms[@]}; i++)); do
-				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
+				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm#* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
 				TrapSigs 'off'
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
@@ -106,3 +106,4 @@ return 0
 ## 12-18-2018 @ 07:28:13 - 2.1.53 - dscudiero - Update setting of defaults to use the new toolsSetDefaults module
 ## 02-06-2019 @ 13:31:53 - 2.1.54 - dscudiero - -
 ## 02-14-2019 @ 12:31:26 - 2.1.55 - dscudiero - Comment out call to checkForPrivateDevSites
+## 06-28-2019 @ 07:39:53 - 2.1.57 - dscudiero -  Fix bug parseing pgmArgs
