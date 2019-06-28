@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.3" # -- dscudiero -- Thu 06/27/2019 @ 08:20:04
+version="2.2.4" # -- dscudiero -- Fri 06/28/2019 @ 07:26:36
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -66,7 +66,7 @@ case "$hostName" in
 			pgms+=("\"escrowSites ewu -password ewu -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs\"")
 
 			for ((i=0; i<${#pgms[@]}; i++)); do
-				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm##* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
+				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm#* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
 				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
 				TrapSigs 'off'
 				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
@@ -104,3 +104,4 @@ return 0
 ## 06-18-2019 @ 07:14:32 - 2.2.1 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
 ## 06-25-2019 @ 08:49:23 - 2.2.2 - dscudiero -  Updated how escrowSites is called
 ## 06-27-2019 @ 08:20:27 - 2.2.3 - dscudiero -  Fix syntax error
+## 06-28-2019 @ 07:26:50 - 2.2.4 - dscudiero -  fix bug parsing pgmArgs
