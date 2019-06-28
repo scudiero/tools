@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.6" # -- dscudiero -- Fri 06/28/2019 @ 07:29:53
+version="2.2.7" # -- dscudiero -- Fri 06/28/2019 @ 07:43:44
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -56,25 +56,25 @@ scriptArgs="$* -noBanners -batchMode"
 #==================================================================================================
 case "$hostName" in
 	mojave)
-			RollupProcessLog
-			;;
+		# RollupProcessLog
+		;;
 	build7)
 		## Run programs/functions
-			pgms=(escrowSites "illinois -password illinois -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
-			pgms+=(escrowSites "uis -password uis -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
-			pgms+=(escrowSites "uic -password uic -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
-			pgms+=(escrowSites "ewu -password ewu -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
+		pgms=(escrowSites "illinois -password illinois -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
+		pgms+=(escrowSites "uis -password uis -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
+		pgms+=(escrowSites "uic -password uic -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
+		pgms+=(escrowSites "ewu -password ewu -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
 
-			for ((i=0; i<${#pgms[@]}; i++)); do
-				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm#* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
-				Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
-				TrapSigs 'off'
-				[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
-				TrapSigs 'on'
-				Semaphore 'waiton' "$pgmName" 'true'
-				Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
-			done
-			;;
+		for ((i=0; i<${#pgms[@]}; i++)); do
+			pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm#* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
+			Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
+			TrapSigs 'off'
+			[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
+			TrapSigs 'on'
+			Semaphore 'waiton' "$pgmName" 'true'
+			Msg "...$pgmName done -- $(date +"%m/%d@%H:%M") ($(CalcElapsed $sTime))"
+		done
+		;;
 esac
 
 #========================================================================================================================
@@ -106,3 +106,4 @@ return 0
 ## 06-27-2019 @ 08:20:27 - 2.2.3 - dscudiero -  Fix syntax error
 ## 06-28-2019 @ 07:26:50 - 2.2.4 - dscudiero -  fix bug parsing pgmArgs
 ## 06-28-2019 @ 07:30:16 - 2.2.6 - dscudiero -  Fix setting pgms array
+## 06-28-2019 @ 07:44:15 - 2.2.7 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
