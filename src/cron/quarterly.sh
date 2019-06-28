@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.4" # -- dscudiero -- Fri 06/28/2019 @ 07:26:36
+version="2.2.6" # -- dscudiero -- Fri 06/28/2019 @ 07:29:53
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -60,10 +60,10 @@ case "$hostName" in
 			;;
 	build7)
 		## Run programs/functions
-			pgms=("\"escrowSites illinois -password illinois -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs\"")
-			pgms+=("\"escrowSites uis -password uis -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs\"")
-			pgms+=("\"escrowSites uic -password uic -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs\"")
-			pgms+=("\"escrowSites ewu -password ewu -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs\"")
+			pgms=(escrowSites "illinois -password illinois -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
+			pgms+=(escrowSites "uis -password uis -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
+			pgms+=(escrowSites "uic -password uic -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
+			pgms+=(escrowSites "ewu -password ewu -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
 
 			for ((i=0; i<${#pgms[@]}; i++)); do
 				pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm#* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
@@ -105,3 +105,4 @@ return 0
 ## 06-25-2019 @ 08:49:23 - 2.2.2 - dscudiero -  Updated how escrowSites is called
 ## 06-27-2019 @ 08:20:27 - 2.2.3 - dscudiero -  Fix syntax error
 ## 06-28-2019 @ 07:26:50 - 2.2.4 - dscudiero -  fix bug parsing pgmArgs
+## 06-28-2019 @ 07:30:16 - 2.2.6 - dscudiero -  Fix setting pgms array
