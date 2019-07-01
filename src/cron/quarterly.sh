@@ -1,7 +1,7 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.7" # -- dscudiero -- Fri 06/28/2019 @ 07:43:44
+version="2.2.8" # -- dscudiero -- Mon 07/01/2019 @ 07:37:13
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
@@ -60,13 +60,19 @@ case "$hostName" in
 		;;
 	build7)
 		## Run programs/functions
-		pgms=(escrowSites "illinois -password illinois -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
-		pgms+=(escrowSites "uis -password uis -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
-		pgms+=(escrowSites "uic -password uic -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
-		pgms+=(escrowSites "ewu -password ewu -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
-
+		pgms=("escrowSites illinois -password illinois -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
+		pgms+=("escrowSites uis -password uis -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
+		pgms+=("escrowSites uic -password uic -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
+		pgms+=("escrowSites ewu -password ewu -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
+		
 		for ((i=0; i<${#pgms[@]}; i++)); do
-			pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm#* }"; [[ $pgmName == $pgmArgs ]] && unset pgmArgs
+			pgm="${pgms[$i]}"; 
+dump pgm
+			pgmName="${pgm%% *}"; 
+dump pgmName
+			pgmArgs="${pgm#* }"; 
+dump pgmArgs
+			[[ $pgmName == $pgmArgs ]] && unset pgmArgs
 			Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
 			TrapSigs 'off'
 			[[ ${pgm:0:1} == *[[:upper:]]* ]] && { $pgmName $pgmArgs | Indent; } || { FindExecutable $pgmName -sh -run $pgmArgs $scriptArgs | Indent; }
@@ -107,3 +113,4 @@ return 0
 ## 06-28-2019 @ 07:26:50 - 2.2.4 - dscudiero -  fix bug parsing pgmArgs
 ## 06-28-2019 @ 07:30:16 - 2.2.6 - dscudiero -  Fix setting pgms array
 ## 06-28-2019 @ 07:44:15 - 2.2.7 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
+## 07-01-2019 @ 07:37:45 - 2.2.8 - dscudiero -  Fix setting pgms array
