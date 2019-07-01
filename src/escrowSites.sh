@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.0.92" # -- dscudiero -- Tue 06/25/2019 @ 08:59:31
+version="1.1.0" # -- dscudiero -- Mon 07/01/2019 @ 15:38:03
 #=======================================================================================================================
 # Copyright 2019 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -14,7 +14,7 @@ function Main {
  	Msg > $tmpFile
  	Msg $(date) >> $tmpFile
  	Msg >> $tmpFile
- 	Msg "The following sites have been escrowed, the escrow files can be found at: \n^'$courseleafEscrowedSitesDir'" >> $tmpFile
+ 	Msg "The following sites have been escrowed, the escrow files can be found at: \n^'$outDir'" >> $tmpFile
 
  	## Loop through the clients and tar up the entire site
 	for token in $(tr ',' ' ' <<< $clientList); do
@@ -29,6 +29,7 @@ function Main {
 
 		Msg "^Processing client: $client" >> $tmpFile
 		SetSiteDirsNew "$client"
+
 		[[ ! -d $tarDir ]] && $DOIT mkdir $tarDir
 		tarFile=$tarDir/$client@$(date +"%m-%d-%Y").tar
 		[[ -f $tarFile ]] && rm -f $tarFile
@@ -46,6 +47,8 @@ function Main {
 			set +f
 			$DOIT tar $tarOpts $tarFile $dirsToTar; rc=$?
 			[[ $rc -ne 0 ]] && Terminate "Process returned a non-zero return code ($rc), Please review messages"
+		else
+			Warning "Could not locate next/curr directory, skipping"
 		fi
 		## tar up the test site
 		if [[ -d $testDir ]]; then
@@ -55,16 +58,22 @@ function Main {
 			set +f
 			$DOIT tar $tarOpts $tarFile $dirsToTar; rc=$?
 			rc=$?; [[ $rc -ne 0 ]] && Terminate "Process returned a non-zero return code ($rc), Please review messages"
+		else
+			Warning "Could not locate test directory, skipping"
 		fi
 		## Set file ownership / permissions
-		$DOIT chgrp leepfrog $tarFile
-		$DOIT chmod 660 $tarFile
+		if [[ -f $tarFile ]]; then
+			$DOIT chgrp leepfrog $tarFile
+			$DOIT chmod 660 $tarFile
 
-		## Encrypt the file if we have a password
-		[[ -n encryptionKey ]] && $DOIT gpg $gpgOpts --passphrase "$encryptionKey" -c "$tarFile"
+			## Encrypt the file if we have a password
+			[[ -n encryptionKey ]] && $DOIT gpg $gpgOpts --passphrase "$encryptionKey" -c "$tarFile"
 
-		Msg "^^Escrow file generated at: $tarFile" >> $tmpFile
-		[[ -n encryptionKey ]] && Msg "^^^Encrypted file: ${tarFile}.gpg" >> $tmpFile
+			Msg "^^Escrow file generated at: $tarFile" >> $tmpFile
+			[[ -n encryptionKey ]] && Msg "^^^Encrypted file: ${tarFile}.gpg" >> $tmpFile
+		else
+			Terminate "Sorry, tar file not generated for '$client'"
+		fi
 	done
 
 	## Send out emails
@@ -120,7 +129,7 @@ function Initialization {
 	#=======================================================================================================================
 	helpSet='client'
 	SetDefaults $myName
-	myArgs+="password|password|option|pqssword|A password to be used to generate a gpg encrypted file.;"
+	myArgs+="password|password|option|password|A password to be used to generate a gpg encrypted file.;"
 	myArgs+="emailList|emailList|option|emailList|A comma separated list of email addresses.;"
 	myArgs+="outDir|outDir|option|outDir|The fully qualified path to the output directory.;"
 	export myArgs="$myArgs"
@@ -135,6 +144,7 @@ function Initialization {
 
 	tmpFile=$(MkTmpFile $myName)
 	[[ -n $outDir ]] && tarDir="$outDir" || tarDir="$courseleafEscrowedSitesDir"
+	[[ ! -d $tarDir ]] && mkdir "$tarDir"
 	dump -1 -t clientList emailList tmpFile tarDir
 
 	SetFileExpansion -off
@@ -201,3 +211,4 @@ Goodbye 0
 ## 06-20-2019 @ 16:38:59 - 1.0.74 - dscudiero -  Added ability to specify the output directory on the call
 ## 06-24-2019 @ 10:27:27 - 1.0.91 - dscudiero -  Switch arguments to be a single client at a time
 ## 06-25-2019 @ 08:59:58 - 1.0.92 - dscudiero -  Make sure that clientList is set before calling main
+## 07-01-2019 @ 15:38:25 - 1.1.0 - dscudiero -  Check to make sure a tar file is generated
