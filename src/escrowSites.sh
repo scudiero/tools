@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.1.3" # -- dscudiero -- Mon 07/01/2019 @ 15:52:00
+version="1.1.5" # -- dscudiero -- Mon 07/01/2019 @ 15:59:39
 #=======================================================================================================================
 # Copyright 2019 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -129,9 +129,9 @@ function Initialization {
 	#=======================================================================================================================
 	helpSet='client'
 	SetDefaults $myName
-	myArgs+="password|password|option|password|A password to be used to generate a gpg encrypted file.;"
+	myArgs+="password|password|option|password|A password to be used to generate a gpg encrypted file. If script will not generate an encrypted file.;"
 	myArgs+="emailList|emailList|option|emailList|A comma separated list of email addresses.  If not provided, an email will be sent to the submitter.;"
-	myArgs+="outDir|outDir|option|outDir|The fully qualified path to the output directory.;"
+	myArgs+="outDir|outDir|option|outDir|The fully qualified path to the output directory. If not provided, output will be written to '$HOME/$myName/<client>';"
 	export myArgs="$myArgs"
 	ParseArgs $*
 
@@ -141,6 +141,7 @@ function Initialization {
 	PromptNew emailList 'A comma separated list of email address to be notified by email when processing is completed?' '*optional*'
 	[[ -n $password ]] && clientList="$client/$password" || clientList="$client"
 	[[ -z $emailList ]] && emailList="${userName}@leepfrog.com"
+	[[ -z $outDir ]] && outDir="$HOME/$myName"
 	dump -1 -t client password outDir emailList clientList
 
 	tmpFile=$(MkTmpFile $myName)
@@ -215,3 +216,4 @@ Goodbye 0
 ## 07-01-2019 @ 15:38:25 - 1.1.0 - dscudiero -  Check to make sure a tar file is generated
 ## 07-01-2019 @ 15:40:09 - 1.1.1 - dscudiero - Tweak messaging
 ## 07-01-2019 @ 15:52:43 - 1.1.3 - dscudiero -  Add defaulting for emailList
+## 07-01-2019 @ 16:00:02 - 1.1.5 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
