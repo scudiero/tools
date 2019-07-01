@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.1.1" # -- dscudiero -- Mon 07/01/2019 @ 15:40:00
+version="1.1.3" # -- dscudiero -- Mon 07/01/2019 @ 15:52:00
 #=======================================================================================================================
 # Copyright 2019 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -101,13 +101,13 @@ function escrowSites-Help  {
 	Msg "^	1) Tar up the next, curr, test"
 	Msg "^	2) If a password was supplied with the client data the an additional encrypted file will be created"
 	Msg "^	3) Notifications are sent out"
-	Msg
-	Msg "^- If 'siteList' is not supplied it will use the list defined in the"
-	Msg "^^data warehouse ($warehouseDbHost / $warehouseDbName)  'defaults' table for variable 'escrowClients'"
-	Msg "^^^i.e. '$escrowClients'"
-	Msg "^- If 'emailList' is not supplied it will use the list defined in the 'defaults'"
-	Msg "^^data warehouse ($warehouseDbHost / $warehouseDbName)  'defaults' table for variable 'escrowEmailAddrs'"
-	Msg "^^^i.e. '$escrowEmailAddrs'"
+	# Msg
+	# Msg "^- If 'siteList' is not supplied it will use the list defined in the"
+	# Msg "^^data warehouse ($warehouseDbHost / $warehouseDbName)  'defaults' table for variable 'escrowClients'"
+	# Msg "^^^i.e. '$escrowClients'"
+	# Msg "^- If 'emailList' is not supplied it will use the list defined in the 'defaults'"
+	# Msg "^^data warehouse ($warehouseDbHost / $warehouseDbName)  'defaults' table for variable 'escrowEmailAddrs'"
+	# Msg "^^^i.e. '$escrowEmailAddrs'"
 	Msg
 	Msg "^*** The script MUST be run on the Linux host (i.e. build7) where the sites are served from"
 	Msg
@@ -130,7 +130,7 @@ function Initialization {
 	helpSet='client'
 	SetDefaults $myName
 	myArgs+="password|password|option|password|A password to be used to generate a gpg encrypted file.;"
-	myArgs+="emailList|emailList|option|emailList|A comma separated list of email addresses.;"
+	myArgs+="emailList|emailList|option|emailList|A comma separated list of email addresses.  If not provided, an email will be sent to the submitter.;"
 	myArgs+="outDir|outDir|option|outDir|The fully qualified path to the output directory.;"
 	export myArgs="$myArgs"
 	ParseArgs $*
@@ -138,8 +138,9 @@ function Initialization {
 	PromptNew client 'What client do you wish to work with?'  'client'
 	PromptNew password 'Password for the encrypted file, if not specified no encrypted file will be created?' "*optional*"
 	PromptNew outDir 'Where do you wish the generated tar/gpg files to be placed?' '*dir*'
-	PromptNew emailList 'A comma separated list of email address to be notified by email when processing is completed?' '*any*'
+	PromptNew emailList 'A comma separated list of email address to be notified by email when processing is completed?' '*optional*'
 	[[ -n $password ]] && clientList="$client/$password" || clientList="$client"
+	[[ -z $emailList ]] && emailList="${userName}@leepfrog.com"
 	dump -1 -t client password outDir emailList clientList
 
 	tmpFile=$(MkTmpFile $myName)
@@ -190,9 +191,9 @@ fi
 [[ -z $emailList ]] && Warning "No notify emails address were supplied on call, no completion notifications will be sent out"
 Main $ArgStrAfterInit
 
-## Log in the activity log
-sqlStmt="insert into $activityLogTable values(null,\"$userName\",null,null,\"$myName\",null,\"clientList:${clientList//,/, }, emailList:${emailList//,/, }\",NOW())";
-RunSql $sqlStmt
+# ## Log in the activity log
+# sqlStmt="insert into $activityLogTable values(null,\"$userName\",null,null,\"$myName\",null,\"clientList:${clientList//,/, }, emailList:${emailList//,/, }\",NOW())";
+# RunSql $sqlStmt
 
 Goodbye 0
 
@@ -213,3 +214,4 @@ Goodbye 0
 ## 06-25-2019 @ 08:59:58 - 1.0.92 - dscudiero -  Make sure that clientList is set before calling main
 ## 07-01-2019 @ 15:38:25 - 1.1.0 - dscudiero -  Check to make sure a tar file is generated
 ## 07-01-2019 @ 15:40:09 - 1.1.1 - dscudiero - Tweak messaging
+## 07-01-2019 @ 15:52:43 - 1.1.3 - dscudiero -  Add defaulting for emailList
