@@ -1,7 +1,7 @@
 #!/bin/bash
 #XO NOT AUTOVERSION
 #=======================================================================================================================
-version="1.1.0" # -- dscudiero -- Mon 07/01/2019 @ 15:38:03
+version="1.1.1" # -- dscudiero -- Mon 07/01/2019 @ 15:40:00
 #=======================================================================================================================
 # Copyright 2019 David Scudiero -- all rights reserved.
 # All rights reserved
@@ -109,7 +109,7 @@ function escrowSites-Help  {
 	Msg "^^data warehouse ($warehouseDbHost / $warehouseDbName)  'defaults' table for variable 'escrowEmailAddrs'"
 	Msg "^^^i.e. '$escrowEmailAddrs'"
 	Msg
-	Msg "^*** The script MUST be run on the host where the sites are located"
+	Msg "^*** The script MUST be run on the Linux host (i.e. build7) where the sites are served from"
 	Msg
 	Msg "^E.g. escrowSites -siteList \"site1/passcode1,site2/passcpde2\" -emailList \"user@leepfrog.com,user2@leepfrog.com\""
 }
@@ -212,3 +212,4 @@ Goodbye 0
 ## 06-24-2019 @ 10:27:27 - 1.0.91 - dscudiero -  Switch arguments to be a single client at a time
 ## 06-25-2019 @ 08:59:58 - 1.0.92 - dscudiero -  Make sure that clientList is set before calling main
 ## 07-01-2019 @ 15:38:25 - 1.1.0 - dscudiero -  Check to make sure a tar file is generated
+## 07-01-2019 @ 15:40:09 - 1.1.1 - dscudiero - Tweak messaging
