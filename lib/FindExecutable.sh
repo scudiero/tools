@@ -1,7 +1,7 @@
 #!/bin/bash
 ## XO NOT AUTOVERSION
 #=======================================================================================================================
-# version="1.2.58" # -- dscudiero -- Fri 06/07/2019 @ 14:27:26
+# version="1.2.59" # -- dscudiero -- Fri 07/05/2019 @ 08:02:39
 #=======================================================================================================================
 # Find the execution file
 # Usage: FindExecutable "$callPgmName" "$extensions" "$libs"
@@ -32,7 +32,7 @@ function FindExecutable {
 	    [[ $1 =~ ^-cr|--cron$ ]] && { mode='cron'; searchRoot="${mode}"; shift 1 || true; continue; }
 	    [[ $1 =~ ^-j|--java$ ]] && { mode='java'; searchRoot="${mode}"; shift 1 || true; continue; }
 
-	    [[ $1 =~ ^-pa|--patch$ ]] && { mode='patch'; searchRoot="${mode}es"; shift 1 || true; continue; }
+	    [[ $1 =~ ^-patch|--patch$ ]] && { mode='patch'; searchRoot="${mode}es"; shift 1 || true; continue; }
 	    [[ $1 =~ ^-fe|--feature$ ]] && { mode='feature'; searchRoot="${mode}s"; shift 1 || true; continue; }
 	    [[ $1 =~ ^-st|--step$ ]] && { mode='step'; searchRoot="${mode}s"; shift 1 || true; continue; }
 	    [[ $1 =~ ^-re|--report$ ]] && { mode='report'; searchRoot="${mode}s"; shift 1 || true; continue; }
@@ -128,3 +128,4 @@ export -f FindExecutable
 ## 06-18-2018 @ 16:05:56 - 1.2.57 - dscudiero - Cosmetic/minor change/Sync
 ## 06-18-2018 @ 16:14:21 - 1.2.57 - dscudiero - Remove debug statement
 ## 06-07-2019 @ 14:27:45 - 1.2.58 - dscudiero -  Add toolsNew to the searchPath
+## 07-05-2019 @ 08:03:27 - 1.2.59 - dscudiero -  make the abbereviated flag for patch 'patch
