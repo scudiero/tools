@@ -1,12 +1,12 @@
 #=======================================================================================================================
 # XO NOT AUTOVERSION
 #=======================================================================================================================
-version="2.2.8" # -- dscudiero -- Mon 07/01/2019 @ 07:37:13
+version="2.2.10" # -- dscudiero -- Mon 07/08/2019 @ 07:08:28
 #=======================================================================================================================
 # Run every day at noon from cron
 #=======================================================================================================================
 TrapSigs 'on'
-myIncludes="ProtectedCall StringFunctions"
+myIncludes="ProtectedCall StringFunctions CalcElapsed"
 Import "$standardIncludes $myIncludes"
 
 originalArgStr="$*"
@@ -66,12 +66,7 @@ case "$hostName" in
 		pgms+=("escrowSites ewu -password ewu -outDir $courseleafEscrowedSitesDir -emaliList $escrowEmailAddrs")
 		
 		for ((i=0; i<${#pgms[@]}; i++)); do
-			pgm="${pgms[$i]}"; 
-dump pgm
-			pgmName="${pgm%% *}"; 
-dump pgmName
-			pgmArgs="${pgm#* }"; 
-dump pgmArgs
+			pgm="${pgms[$i]}"; pgmName="${pgm%% *}"; pgmArgs="${pgm#* }"; 
 			[[ $pgmName == $pgmArgs ]] && unset pgmArgs
 			Msg "\n$(date +"%m/%d@%H:%M") - Running $pgmName $pgmArgs..."; sTime=$(date "+%s")
 			TrapSigs 'off'
@@ -114,3 +109,4 @@ return 0
 ## 06-28-2019 @ 07:30:16 - 2.2.6 - dscudiero -  Fix setting pgms array
 ## 06-28-2019 @ 07:44:15 - 2.2.7 - dscudiero - Cosmetic / Miscellaneous cleanup / Sync
 ## 07-01-2019 @ 07:37:45 - 2.2.8 - dscudiero -  Fix setting pgms array
+## 07-08-2019 @ 07:08:39 - 2.2.10 - dscudiero - Add/Remove debug statements
