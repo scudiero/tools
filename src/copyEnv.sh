@@ -1,7 +1,7 @@
 #!/bin/bash
 # XO NOT AUTOVERSION
 #==================================================================================================
-version="4.14.64" # -- dscudiero -- Tue 06/11/2019 @ 14:51:27
+version="4.14.65" # -- dscudiero -- Tue 07/09/2019 @ 14:40:36
 #==================================================================================================
 TrapSigs 'on'
 myIncludes="GetSiteDirNoCheck ProtectedCall RunCourseLeafCgi PushPop GetCims StringFunctions SetSiteDirsNew"
@@ -644,7 +644,7 @@ if [[ $startWizdebug == true ]]; then
 	Pushd "$tgtDir/web/courseleaf"
 	clear
 	echo -e "$colorKey"
-	PrintBanner "tail wizdebug.out, Ctrl-C to stop"
+	PrintBanner "$client / $env  --  tail wizdebug.out, Ctrl-C to stop"
 	echo -e "$colorDefault"
 	Alert 3
 	tail -n 15 -f wizdebug.out
@@ -808,3 +808,4 @@ Goodbye 0 'alert' "$msgText clone from $(ColorK "${env^^[a-z]}")"
 ## 05-23-2019 @ 13:20:35 - 4.14.57 - dscudiero -  Add alert if -debug option was specified
 ## 06-11-2019 @ 12:13:08 - 4.14.59 - dscudiero -  Added /web/gallery to the ignore list if skipCat = true
 ## 06-11-2019 @ 14:53:04 - 4.14.64 - dscudiero -  Add additional items to the ignorelist for ignorecat and ignoreclss
+## 07-09-2019 @ 14:41:02 - 4.14.65 - dscudiero - Tweak messaging
